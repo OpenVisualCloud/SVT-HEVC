@@ -3,6 +3,39 @@
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
 
+/* The copyright in this software is being made available under the BSD
+* License, included below. This software may be subject to other third party
+* and contributor rights, including patent rights, and no such rights are
+* granted under this license.
+*
+* Copyright (c) 2010-2014, ITU/ISO/IEC
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
+*
+*  * Redistributions of source code must retain the above copyright notice,
+*    this list of conditions and the following disclaimer.
+*  * Redistributions in binary form must reproduce the above copyright notice,
+*    this list of conditions and the following disclaimer in the documentation
+*    and/or other materials provided with the distribution.
+*  * Neither the name of the ITU/ISO/IEC nor the names of its contributors may
+*    be used to endorse or promote products derived from this software without
+*    specific prior written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
+* BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+* THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 #include "EbPictureOperators_C.h"
 #include "EbUtility.h"
 
@@ -438,6 +471,172 @@ EB_EXTERN void FullDistortionKernelCbfZero_32bit(
 
     distortionResult[0] = predictionDistortion;
     distortionResult[1] = predictionDistortion;
+}
+
+
+/*******************************************
+* Compute8x8Satd
+*   returns 8x8 Sum of Absolute Transformed Differences
+*******************************************/
+EB_U64 Compute8x8Satd(
+    EB_S16 *diff)       // input parameter, diff samples Ptr
+{
+    EB_U64 satdBlock8x8 = 0;
+    EB_S16 m1[8][8], m2[8][8], m3[8][8];
+    EB_U32 i, j, jj;
+
+    // Horizontal
+    for (j = 0; j < 8; j++) {
+        jj = j << 3;
+        m2[j][0] = diff[jj] + diff[jj + 4];
+        m2[j][1] = diff[jj + 1] + diff[jj + 5];
+        m2[j][2] = diff[jj + 2] + diff[jj + 6];
+        m2[j][3] = diff[jj + 3] + diff[jj + 7];
+        m2[j][4] = diff[jj] - diff[jj + 4];
+        m2[j][5] = diff[jj + 1] - diff[jj + 5];
+        m2[j][6] = diff[jj + 2] - diff[jj + 6];
+        m2[j][7] = diff[jj + 3] - diff[jj + 7];
+
+        m1[j][0] = m2[j][0] + m2[j][2];
+        m1[j][1] = m2[j][1] + m2[j][3];
+        m1[j][2] = m2[j][0] - m2[j][2];
+        m1[j][3] = m2[j][1] - m2[j][3];
+        m1[j][4] = m2[j][4] + m2[j][6];
+        m1[j][5] = m2[j][5] + m2[j][7];
+        m1[j][6] = m2[j][4] - m2[j][6];
+        m1[j][7] = m2[j][5] - m2[j][7];
+
+        m2[j][0] = m1[j][0] + m1[j][1];
+        m2[j][1] = m1[j][0] - m1[j][1];
+        m2[j][2] = m1[j][2] + m1[j][3];
+        m2[j][3] = m1[j][2] - m1[j][3];
+        m2[j][4] = m1[j][4] + m1[j][5];
+        m2[j][5] = m1[j][4] - m1[j][5];
+        m2[j][6] = m1[j][6] + m1[j][7];
+        m2[j][7] = m1[j][6] - m1[j][7];
+    }
+
+    // Vertical
+    for (i = 0; i < 8; i++) {
+        m3[0][i] = m2[0][i] + m2[4][i];
+        m3[1][i] = m2[1][i] + m2[5][i];
+        m3[2][i] = m2[2][i] + m2[6][i];
+        m3[3][i] = m2[3][i] + m2[7][i];
+        m3[4][i] = m2[0][i] - m2[4][i];
+        m3[5][i] = m2[1][i] - m2[5][i];
+        m3[6][i] = m2[2][i] - m2[6][i];
+        m3[7][i] = m2[3][i] - m2[7][i];
+
+        m1[0][i] = m3[0][i] + m3[2][i];
+        m1[1][i] = m3[1][i] + m3[3][i];
+        m1[2][i] = m3[0][i] - m3[2][i];
+        m1[3][i] = m3[1][i] - m3[3][i];
+        m1[4][i] = m3[4][i] + m3[6][i];
+        m1[5][i] = m3[5][i] + m3[7][i];
+        m1[6][i] = m3[4][i] - m3[6][i];
+        m1[7][i] = m3[5][i] - m3[7][i];
+
+        m2[0][i] = m1[0][i] + m1[1][i];
+        m2[1][i] = m1[0][i] - m1[1][i];
+        m2[2][i] = m1[2][i] + m1[3][i];
+        m2[3][i] = m1[2][i] - m1[3][i];
+        m2[4][i] = m1[4][i] + m1[5][i];
+        m2[5][i] = m1[4][i] - m1[5][i];
+        m2[6][i] = m1[6][i] + m1[7][i];
+        m2[7][i] = m1[6][i] - m1[7][i];
+    }
+
+    for (i = 0; i < 8; i++) {
+        for (j = 0; j < 8; j++) {
+            satdBlock8x8 += (EB_U64)ABS(m2[i][j]);
+        }
+    }
+
+    satdBlock8x8 = ((satdBlock8x8 + 2) >> 2);
+
+    return satdBlock8x8;
+}
+
+
+
+EB_U64 Compute8x8Satd_U8(
+    EB_U8  *src,       // input parameter, diff samples Ptr
+    EB_U64 *dcValue,
+    EB_U32  srcStride)
+{
+    EB_U64 satdBlock8x8 = 0;
+    EB_S16 m1[8][8], m2[8][8], m3[8][8];
+    EB_U32 i, j;
+
+    // Horizontal
+    for (j = 0; j < 8; j++) {
+        m2[j][0] = src[j*srcStride] + src[j*srcStride + 4];
+        m2[j][1] = src[j*srcStride + 1] + src[j*srcStride + 5];
+        m2[j][2] = src[j*srcStride + 2] + src[j*srcStride + 6];
+        m2[j][3] = src[j*srcStride + 3] + src[j*srcStride + 7];
+        m2[j][4] = src[j*srcStride] - src[j*srcStride + 4];
+        m2[j][5] = src[j*srcStride + 1] - src[j*srcStride + 5];
+        m2[j][6] = src[j*srcStride + 2] - src[j*srcStride + 6];
+        m2[j][7] = src[j*srcStride + 3] - src[j*srcStride + 7];
+
+        m1[j][0] = m2[j][0] + m2[j][2];
+        m1[j][1] = m2[j][1] + m2[j][3];
+        m1[j][2] = m2[j][0] - m2[j][2];
+        m1[j][3] = m2[j][1] - m2[j][3];
+        m1[j][4] = m2[j][4] + m2[j][6];
+        m1[j][5] = m2[j][5] + m2[j][7];
+        m1[j][6] = m2[j][4] - m2[j][6];
+        m1[j][7] = m2[j][5] - m2[j][7];
+
+        m2[j][0] = m1[j][0] + m1[j][1];
+        m2[j][1] = m1[j][0] - m1[j][1];
+        m2[j][2] = m1[j][2] + m1[j][3];
+        m2[j][3] = m1[j][2] - m1[j][3];
+        m2[j][4] = m1[j][4] + m1[j][5];
+        m2[j][5] = m1[j][4] - m1[j][5];
+        m2[j][6] = m1[j][6] + m1[j][7];
+        m2[j][7] = m1[j][6] - m1[j][7];
+    }
+
+    // Vertical
+    for (i = 0; i < 8; i++) {
+        m3[0][i] = m2[0][i] + m2[4][i];
+        m3[1][i] = m2[1][i] + m2[5][i];
+        m3[2][i] = m2[2][i] + m2[6][i];
+        m3[3][i] = m2[3][i] + m2[7][i];
+        m3[4][i] = m2[0][i] - m2[4][i];
+        m3[5][i] = m2[1][i] - m2[5][i];
+        m3[6][i] = m2[2][i] - m2[6][i];
+        m3[7][i] = m2[3][i] - m2[7][i];
+
+        m1[0][i] = m3[0][i] + m3[2][i];
+        m1[1][i] = m3[1][i] + m3[3][i];
+        m1[2][i] = m3[0][i] - m3[2][i];
+        m1[3][i] = m3[1][i] - m3[3][i];
+        m1[4][i] = m3[4][i] + m3[6][i];
+        m1[5][i] = m3[5][i] + m3[7][i];
+        m1[6][i] = m3[4][i] - m3[6][i];
+        m1[7][i] = m3[5][i] - m3[7][i];
+
+        m2[0][i] = m1[0][i] + m1[1][i];
+        m2[1][i] = m1[0][i] - m1[1][i];
+        m2[2][i] = m1[2][i] + m1[3][i];
+        m2[3][i] = m1[2][i] - m1[3][i];
+        m2[4][i] = m1[4][i] + m1[5][i];
+        m2[5][i] = m1[4][i] - m1[5][i];
+        m2[6][i] = m1[6][i] + m1[7][i];
+        m2[7][i] = m1[6][i] - m1[7][i];
+    }
+
+    for (i = 0; i < 8; i++) {
+        for (j = 0; j < 8; j++) {
+            satdBlock8x8 += (EB_U64)ABS(m2[i][j]);
+        }
+    }
+
+    satdBlock8x8 = ((satdBlock8x8 + 2) >> 2);
+    *dcValue += m2[0][0];
+    return satdBlock8x8;
 }
 
 EB_U64 SpatialFullDistortionKernel(
