@@ -761,15 +761,12 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_HANDLETYPE hComponent)
      * Picture Control Set: Parent
      ************************************/
     EB_MALLOC(EbSystemResource_t**, encHandlePtr->pictureParentControlSetPoolPtrArray, sizeof(EbSystemResource_t*)  * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-    
-
     EB_MALLOC(EbFifo_t***, encHandlePtr->pictureParentControlSetPoolProducerFifoPtrDblArray, sizeof(EbSystemResource_t**) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
     	
 	// Updating the pictureControlSetPoolTotalCount based on the maximum look ahead distance
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
         maxLookAheadDistance    = MAX(maxLookAheadDistance, encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.lookAheadDistance);
-    }
-    
+    }   
     
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
     
@@ -811,7 +808,6 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_HANDLETYPE hComponent)
      * Picture Control Set: Child
      ************************************/
     EB_MALLOC(EbSystemResource_t**, encHandlePtr->pictureControlSetPoolPtrArray, sizeof(EbSystemResource_t*)  * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-    
     EB_MALLOC(EbFifo_t***, encHandlePtr->pictureControlSetPoolProducerFifoPtrDblArray, sizeof(EbSystemResource_t**) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
     
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
@@ -862,12 +858,10 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_HANDLETYPE hComponent)
      
     // Allocate Resource Arrays 
     EB_MALLOC(EbSystemResource_t**, encHandlePtr->referencePicturePoolPtrArray, sizeof(EbSystemResource_t*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-    	
     EB_MALLOC(EbSystemResource_t**, encHandlePtr->paReferencePicturePoolPtrArray, sizeof(EbSystemResource_t*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
         
     // Allocate Producer Fifo Arrays   
     EB_MALLOC(EbFifo_t***, encHandlePtr->referencePicturePoolProducerFifoPtrDblArray, sizeof(EbFifo_t**) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-    	
     EB_MALLOC(EbFifo_t***, encHandlePtr->paReferencePicturePoolProducerFifoPtrDblArray, sizeof(EbFifo_t**) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
     
     // Rate Control
@@ -901,11 +895,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_HANDLETYPE hComponent)
         if (is16bit){
             referencePictureBufferDescInitData.bitDepth  = EB_10BIT;
         }
-        
-
 
         EbReferenceObjectDescInitDataStructure.referencePictureDescInitData = referencePictureBufferDescInitData;
-
         
         // Reference Picture Buffers
         return_error = EbSystemResourceCtor(
@@ -918,7 +909,6 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_HANDLETYPE hComponent)
             EB_FALSE,
             EbReferenceObjectCtor,
             &(EbReferenceObjectDescInitDataStructure));
-       
 
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
@@ -1002,9 +992,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_HANDLETYPE hComponent)
     }
     // EB_BUFFERHEADERTYPE Output Stream    
     EB_MALLOC(EbSystemResource_t**, encHandlePtr->outputStreamBufferResourcePtrArray, sizeof(EbSystemResource_t*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-    
     EB_MALLOC(EbFifo_t***, encHandlePtr->outputStreamBufferProducerFifoPtrDblArray, sizeof(EbFifo_t**)          * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-    
     EB_MALLOC(EbFifo_t***, encHandlePtr->outputStreamBufferConsumerFifoPtrDblArray, sizeof(EbFifo_t**)          * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
     
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
@@ -2846,18 +2834,16 @@ EB_API EB_ERRORTYPE EbH265EncFillPacket(
     EB_U32                 instanceIndex     = 0; // hard-coded, determined from the port number
     EbObjectWrapper_t      *ebWrapperPtr;
 
-    if (pBuffer->nOutputPortIndex == EB_ENCODERSTREAMPORT) {
+    // Take the buffer and put it into our internal queue structure
+    EbGetEmptyObject(
+        (pEncCompData->outputStreamBufferProducerFifoPtrDblArray[instanceIndex])[0],
+        &ebWrapperPtr);
         
-        // Take the buffer and put it into our internal queue structure
-        EbGetEmptyObject(
-            (pEncCompData->outputStreamBufferProducerFifoPtrDblArray[instanceIndex])[0],
-            &ebWrapperPtr);
-        
-        ebWrapperPtr->objectPtr = (void*) pBuffer;
+    ebWrapperPtr->objectPtr = (void*) pBuffer;
 
-        EbPostFullObject(ebWrapperPtr);
-        
-    }
+    EbPostFullObject(ebWrapperPtr);
+
+
         
     return EB_ErrorNone;
 }            

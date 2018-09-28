@@ -433,7 +433,6 @@ EB_ERRORTYPE AllocateOutputBuffers(
 
         callbackData->streamBufferPool[bufferIndex]->nAllocLen = callbackData->outputStreamPortDefinition.nStride;
         callbackData->streamBufferPool[bufferIndex]->pAppPrivate = (EB_PTR)callbackData;
-        callbackData->streamBufferPool[bufferIndex]->nOutputPortIndex = EB_ENCODERSTREAMPORT;
     }
     return return_error;
 }
@@ -703,16 +702,7 @@ EB_ERRORTYPE encoderFillPacketDone(
     EB_ERRORTYPE   return_error = EB_ErrorNone;
     EbAppContext_t *callbackDataPtr = (EbAppContext_t*)pAppData;
 
-    // Configure the command
-    switch (pBuffer->nOutputPortIndex) {
-        case EB_ENCODERSTREAMPORT:
-            commandItem.command = APP_OutputStreamFillThisBuffer;
-            break;
-        default:
-            commandItem.command = APP_OutputStreamFillThisBuffer;
-            break;
-    }
-
+    commandItem.command = APP_OutputStreamFillThisBuffer;
     commandItem.headerPtr       = pBuffer;
     commandItem.instanceIndex   = callbackDataPtr->instanceIdx;
 

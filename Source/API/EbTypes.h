@@ -295,7 +295,6 @@ typedef enum APPPORTACTIVETYPE {
         EB_U32 nTickCount;
         EB_S64 nTimeStamp;
         EB_U32 nFlags;
-        EB_U32 nOutputPortIndex;
     } EB_BUFFERHEADERTYPE;
 
     typedef struct EB_PARAM_PORTDEFINITIONTYPE {

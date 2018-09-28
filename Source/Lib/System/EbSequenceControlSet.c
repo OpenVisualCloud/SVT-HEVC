@@ -151,11 +151,8 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
 
 	// Buffers:
 	sequenceControlSetPtr->inputOutputBufferFifoInitCount					    =	100; 
-	sequenceControlSetPtr->outputStreamBufferFifoInitCount			    =	sequenceControlSetPtr->pictureControlSetPoolInitCount;  
 	
-
-
-	sequenceControlSetPtr->maxDpbSize	= 0;
+    sequenceControlSetPtr->maxDpbSize	= 0;
     
     return EB_ErrorNone;
 }

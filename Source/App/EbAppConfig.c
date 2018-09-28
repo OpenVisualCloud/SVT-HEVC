@@ -235,9 +235,7 @@ static void SetInjectorFrameRate(const char *value, EbConfig_t *cfg) {
 }
 
 static void				SetinputOutputBufferFifoInitCount					(const char *value, EbConfig_t *cfg)  {cfg->inputOutputBufferFifoInitCount               = strtoul(value, NULL, 0);};        
-
 static void				SetLatencyMode                                  (const char *value, EbConfig_t *cfg)  {cfg->latencyMode               = (EB_U8)strtol(value, NULL, 0);};
-
 static void             SetAsmType                                      (const char *value, EbConfig_t *cfg)  { cfg->asmType = (EB_ASM)strtoul(value, NULL, 0); };
 static void             SetUseRoundRobinThreadAssignment                (const char *value, EbConfig_t *cfg) {cfg->useRoundRobinThreadAssignment   = (EB_BOOL)strtol(value, NULL, 0);}; 
 static void             SetTargetSocket                                 (const char *value, EbConfig_t *cfg)  { cfg->targetSocket = (EB_U8)strtoul(value, NULL, 0); };
@@ -467,13 +465,13 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->bufferingPeriodSEI                   = 0;
     configPtr->pictureTimingSEI                     = 0;
 
-	configPtr->bitRateReduction					= EB_TRUE;
-    configPtr->improveSharpness                 = EB_TRUE;
-    configPtr->registeredUserDataSeiFlag        = EB_FALSE;
-    configPtr->unregisteredUserDataSeiFlag      = EB_FALSE;
-    configPtr->recoveryPointSeiFlag             = EB_FALSE;
-    configPtr->enableTemporalId                 = 1;
-	configPtr->inputOutputBufferFifoInitCount					=   50;
+	configPtr->bitRateReduction					    = EB_TRUE;
+    configPtr->improveSharpness                     = EB_TRUE;
+    configPtr->registeredUserDataSeiFlag            = EB_FALSE;
+    configPtr->unregisteredUserDataSeiFlag          = EB_FALSE;
+    configPtr->recoveryPointSeiFlag                 = EB_FALSE;
+    configPtr->enableTemporalId                     = 1;
+	configPtr->inputOutputBufferFifoInitCount		=   50;
 
     // Annex A parameters
     configPtr->profile                          = 2;
@@ -998,7 +996,7 @@ EB_ERRORTYPE BuffersSettings(EbConfig_t   **configs, unsigned int numChannels/*,
                 configs[channelNumber]->inputOutputBufferFifoInitCount             = (EB_U32)(lowLatencyInput + configs[channelNumber]->lookAheadDistance) * numChannels;
 
     }
-
+    
 	return return_error;
 }
 //
