@@ -129,6 +129,7 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     // Initialize vui parameters
     return_error = EbVideoUsabilityInfoCtor(
         sequenceControlSetPtr->videoUsabilityInfoPtr);
+
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }

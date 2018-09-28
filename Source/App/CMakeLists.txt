@@ -28,7 +28,6 @@ add_executable (HevcEncoderApp
     EbAppFifo.c
     EbAppMain.c
     EbAppProcessCmd.c
-    EbAppSei.c
     EbTime.c
 )
 

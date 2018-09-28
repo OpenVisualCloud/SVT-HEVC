@@ -122,12 +122,10 @@
     <ClCompile Include="..\..\Source\App\EbAppFifo.c" />
     <ClCompile Include="..\..\Source\App\EbAppMain.c" />
     <ClCompile Include="..\..\Source\App\EbAppProcessCmd.c" />
-    <ClCompile Include="..\..\Source\App\EbAppSei.c" />
     <ClCompile Include="..\..\Source\App\EbTime.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\API\EbApi.h" />
-    <ClInclude Include="..\..\Source\API\EbApiSei.h" />
     <ClInclude Include="..\..\Source\API\EbBuild.h" />
     <ClInclude Include="..\..\Source\API\EbErrorCodes.h" />
     <ClInclude Include="..\..\Source\API\EbTime.h" />

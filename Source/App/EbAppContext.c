@@ -290,14 +290,6 @@ EB_ERRORTYPE CopyConfigurationParameters(
         callbackData->ebEncParameters.hmeLevel2SearchAreaInHeightArray[hmeRegionIndex] = config->hmeLevel2SearchAreaInHeightArray[hmeRegionIndex];
     }
 
-    // Video Usability Info
-    EB_APP_MALLOC(AppVideoUsabilityInfo_t*, callbackData->ebEncParameters.vuiPtr, sizeof(AppVideoUsabilityInfo_t), EB_N_PTR, EB_ErrorInsufficientResources);
-
-    // Initialize vui parameters
-    return_error = (EB_ERRORTYPE)EbAppVideoUsabilityInfoCtor(
-        callbackData->ebEncParameters.vuiPtr);
-    
-
     // Set the Parameters
     return_error = EbH265EncInitParameter(
                        callbackData->svtEncoderHandle,

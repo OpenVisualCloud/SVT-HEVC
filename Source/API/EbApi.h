@@ -158,7 +158,6 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
     EB_S32              injectorFrameRate;
     EB_U32              speedControlFlag;
-    AppVideoUsabilityInfo_t *vuiPtr;
     
     // ASM Type
     EB_ASM			    asmType;
