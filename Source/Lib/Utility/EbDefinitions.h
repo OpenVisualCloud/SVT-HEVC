@@ -10,6 +10,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#ifdef __GNUC__
+#define AVX512_FUNC_TARGET __attribute__(( target( "avx512f,avx512dq,avx512bw,avx512vl" ) ))
+#define AVX2_FUNC_TARGET   __attribute__(( target( "avx2" ) ))
+#else
+#define AVX512_FUNC_TARGET
+#define AVX2_FUNC_TARGET
+#endif // __GNUC__
 
 #ifdef	_MSC_VER
 #define FORCE_INLINE            __forceinline
@@ -27,6 +34,13 @@ extern "C" {
 #else
 #define FUNC_TABLE
 #endif
+
+
+// Reserved types for lib's internal use. Must be less than EB_EXT_TYPE_BASE
+#define       EB_TYPE_UNREG_USER_DATA_SEI    3
+#define       EB_TYPE_REG_USER_DATA_SEI      4
+#define       EB_TYPE_PIC_STRUCT             5             // It is a requirement (for the application) that if pictureStruct is present for 1 picture it shall be present for every picture
+
 
 /** The EB_SLICE type is used to describe the slice prediction type.
 */

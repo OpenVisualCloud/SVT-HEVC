@@ -9,6 +9,18 @@
 #include "EbTypes.h"
 #include "EbAppTypes.h"
 
+/** The APPCOMMANDTYPE type is used to by the Lib callbacks to signal to
+the App that a buffer is ready for reuse.
+*/
+typedef enum APPCOMMANDTYPE {
+    APP_NullCommand = 0,
+    APP_InputEmptyThisBuffer,
+    APP_OutputStreamFillThisBuffer,
+    APP_FeedBackIsComplete,
+    APP_ExitNoError,
+    APP_ExitError
+} APPCOMMANDTYPE;
+
 /***************************************
  * App Command Struct
  ***************************************/

@@ -631,11 +631,7 @@ EB_ERRORTYPE PreloadFramesIntoRam(
 * or to signal the encoding being done
 ***************************************/
 EB_ERRORTYPE encoderFeedbackComplete(
-    EB_HANDLETYPE     hComponent,     // Component Handle
-    EB_PTR            pAppData,       // Pointer to private data
-    EB_U32            nData1,         // Type defined by event
-    EB_U32            nData2,         // Type defined by event
-    EB_PTR            pEventData)     // Pointer to event data
+    EB_PTR            pAppData)     // Pointer to event data
 {
     EbAppContext_t *callbackDataPtr = (EbAppContext_t*)pAppData;
     AppCommandItem_t commandItem;
@@ -648,11 +644,6 @@ EB_ERRORTYPE encoderFeedbackComplete(
     commandItem.instanceIndex = callbackDataPtr->instanceIdx;
     AppCommandFifoPush(callbackDataPtr->fifoPtr, &commandItem);
 
-    (void)pEventData;
-    (void)hComponent;
-    (void)nData1;
-    (void)nData2;
-   
     return EB_ErrorNone;
 }
 
@@ -662,11 +653,8 @@ EB_ERRORTYPE encoderFeedbackComplete(
 * or to signal the encoding being done
 ***************************************/
 EB_ERRORTYPE encoderEventCb(
-    EB_HANDLETYPE     hComponent,     // Component Handle
     EB_PTR            pAppData,       // Pointer to private data
-    EB_U32            nData1,         // Type defined by event
-    EB_U32            nData2,         // Type defined by event
-    EB_PTR            pEventData)
+    EB_U32            nData1)         // Type defined by event
 {
     EbAppContext_t *callbackDataPtr = (EbAppContext_t*)pAppData;
     AppCommandItem_t commandItem;
@@ -679,10 +667,7 @@ EB_ERRORTYPE encoderEventCb(
     commandItem.instanceIndex = callbackDataPtr->instanceIdx;
     AppCommandFifoPush(callbackDataPtr->fifoPtr, &commandItem);
 
-    (void)pEventData;
-    (void)hComponent;
     (void)nData1;
-    (void)nData2;
 
     return EB_ErrorNone;
 }
@@ -691,17 +676,12 @@ EB_ERRORTYPE encoderEventCb(
 * Encoder Empty Buffer Done Callback
 ***************************************/
 EB_ERRORTYPE encoderSendPictureDone(
-    EB_HANDLETYPE          hComponent,
     EB_PTR                 pAppData,
     EB_BUFFERHEADERTYPE   *pBuffer)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
     EbAppContext_t *callbackDataPtr = (EbAppContext_t*)pAppData;
     AppCommandItem_t commandItem;
-
-    // Unused variable
-    hComponent = (EB_HANDLETYPE)0;
-    (void)hComponent;
 
     // Configure the command
     commandItem.command = APP_InputEmptyThisBuffer;
@@ -716,7 +696,6 @@ EB_ERRORTYPE encoderSendPictureDone(
 * Encoder Fill Buffer Done Callback
 ***************************************/
 EB_ERRORTYPE encoderFillPacketDone(
-    EB_HANDLETYPE           hComponent,
     EB_PTR                  pAppData,
     EB_BUFFERHEADERTYPE    *pBuffer)
 {
@@ -724,22 +703,18 @@ EB_ERRORTYPE encoderFillPacketDone(
     EB_ERRORTYPE   return_error = EB_ErrorNone;
     EbAppContext_t *callbackDataPtr = (EbAppContext_t*)pAppData;
 
-    // Unused variable
-    hComponent = (EB_HANDLETYPE)0;
-    (void)hComponent;
-
     // Configure the command
     switch (pBuffer->nOutputPortIndex) {
-    case EB_ENCODERSTREAMPORT:
-        commandItem.command = APP_OutputStreamFillThisBuffer;
-        break;
-    default:
-        commandItem.command = APP_OutputStreamFillThisBuffer;
-        break;
-
+        case EB_ENCODERSTREAMPORT:
+            commandItem.command = APP_OutputStreamFillThisBuffer;
+            break;
+        default:
+            commandItem.command = APP_OutputStreamFillThisBuffer;
+            break;
     }
-    commandItem.headerPtr = pBuffer;
-    commandItem.instanceIndex = callbackDataPtr->instanceIdx;
+
+    commandItem.headerPtr       = pBuffer;
+    commandItem.instanceIndex   = callbackDataPtr->instanceIdx;
 
     AppCommandFifoPush(callbackDataPtr->fifoPtr, &commandItem);
 

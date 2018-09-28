@@ -623,7 +623,6 @@ void* PacketizationKernel(void *inputPtr)
             // Output the Bitstream
             outputStreamPtr->pAppPrivate = queueEntryPtr->outMetaData;
             sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->callbackFunctions.FillPacketDone(
-                sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->handle,             // Encoder Handle
                 sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->appPrivateData,     // App Private Data Ptr
                 outputStreamPtr); 
             queueEntryPtr->outMetaData = (EbLinkedListNode *)EB_NULL;

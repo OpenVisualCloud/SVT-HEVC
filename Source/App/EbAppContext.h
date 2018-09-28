@@ -19,9 +19,8 @@ typedef struct EbAppContext_s {
     void                               *cmdSemaphoreHandle;
     void                               *inputSemaphoreHandle;
     void                               *streamSemaphoreHandle;
-    void                               *reconSemaphoreHandle;
-    EB_PARAM_PORTDEFINITIONTYPE        inputPortDefinition;
-    EB_PARAM_PORTDEFINITIONTYPE        outputStreamPortDefinition;
+    EB_PARAM_PORTDEFINITIONTYPE         inputPortDefinition;
+    EB_PARAM_PORTDEFINITIONTYPE         outputStreamPortDefinition;
     EB_H265_ENC_CONFIGURATION           ebEncParameters;
 
     // Local Contexts
@@ -52,7 +51,6 @@ typedef struct EbParentAppContext_s {
     void                               *cmdSemaphoreHandle;
     void                               *inputSemaphoreHandle;
     void                               *streamSemaphoreHandle;
-    void                               *reconSemaphoreHandle;
    
     // Buffer Fifo
     AppCommandFifo_t                    fifo;

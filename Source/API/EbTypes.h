@@ -28,17 +28,8 @@ extern "C" {
 #error OS not supported 
 #endif
 
-#ifdef __GNUC__
-#define AVX512_FUNC_TARGET __attribute__(( target( "avx512f,avx512dq,avx512bw,avx512vl" ) ))
-#define AVX2_FUNC_TARGET   __attribute__(( target( "avx2" ) ))
-#else
-#define AVX512_FUNC_TARGET
-#define AVX2_FUNC_TARGET
-#endif // __GNUC__
 
-#define EB_STRINGIZE( L )       #L
-#define EB_MAKESTRING( M, L )   M( L )
-#define EB_SRC_LINE_NUM         EB_MAKESTRING( EB_STRINGIZE, __LINE__ ) 
+
 #define EB_MIN(a,b)             (((a) < (b)) ? (a) : (b))
 
 #ifdef	_MSC_VER
@@ -46,7 +37,6 @@ extern "C" {
 #define NOINLINE                __declspec ( noinline ) 
 #define FORCE_INLINE            __forceinline
 #pragma warning( disable : 4068 ) // unknown pragma
-#define EB_MESSAGE(m)           ( __FILE__ "(" EB_SRC_LINE_NUM "): message: " m )
 
 #else // _MSC_VER
 
@@ -59,7 +49,6 @@ extern "C" {
 #endif // __cplusplus
 
 #define __popcnt                __builtin_popcount
-#define EB_MESSAGE(m)           __FILE__ "(" EB_SRC_LINE_NUM "): message: " m
 
 #endif // _MSC_VER
 
@@ -134,6 +123,24 @@ extern "C" {
 	typedef int64_t             EB_S64;
 
 #endif // _WIN32
+
+
+/** The APPEXITCONDITIONTYPE type is used to define the App main loop exit
+conditions.
+*/
+typedef enum APPEXITCONDITIONTYPE {
+    APP_ExitConditionNone = 0,
+    APP_ExitConditionFinished,
+    APP_ExitConditionError
+} APPEXITCONDITIONTYPE;
+
+/** The APPPORTACTIVETYPE type is used to define the state of output ports in
+the App.
+*/
+typedef enum APPPORTACTIVETYPE {
+    APP_PortActive = 0,
+    APP_PortInactive
+} APPPORTACTIVETYPE;
 
 	/** The EB_GOP type is used to describe the hierarchical coding structure of
 	Groups of Pictures (GOP) units.
@@ -226,7 +233,7 @@ extern "C" {
         EB_ErrorComponentNotFound                   = (EB_S32) 0x80001003,
         EB_ErrorInvalidComponent                    = (EB_S32) 0x80001004,
         EB_ErrorBadParameter                        = (EB_S32) 0x80001005,
-        EB_ErrorNotImplemented                      = (EB_S32)0x80001006,
+        EB_ErrorNotImplemented                      = (EB_S32) 0x80001006,
         EB_ErrorCreateThreadFailed                  = (EB_S32) 0x80002010,
         EB_ErrorThreadUnresponsive                  = (EB_S32) 0x80002011,
         EB_ErrorDestroyThreadFailed                 = (EB_S32) 0x80002012,
@@ -243,11 +250,7 @@ extern "C" {
 	/***************************************
 	* Generic linked list data structure for passing data into/out from the library
 	***************************************/
-	// Reserved types for lib's internal use. Must be less than EB_EXT_TYPE_BASE
-#define       EB_TYPE_UNREG_USER_DATA_SEI    3
-#define       EB_TYPE_REG_USER_DATA_SEI      4
-#define       EB_TYPE_PIC_STRUCT             5             // It is a requirement (for the application) that if pictureStruct is present for 1 picture it shall be present for every picture
-#define       EB_CONFIG_ON_FLY_PIC_QP        219
+    #define       EB_CONFIG_ON_FLY_PIC_QP        219
 
 	typedef int   EB_LINKED_LIST_TYPE;
 	typedef struct EbLinkedListNode
@@ -312,26 +315,17 @@ extern "C" {
     typedef struct EB_CALLBACKTYPE
     {
         EB_ERRORTYPE(*FeedbackComplete)(
-            EB_HANDLETYPE hComponent,
-            EB_PTR pAppData,
-            EB_U32 nData1,
-            EB_U32 nData2,
-            EB_PTR pEventData);
+            EB_PTR pAppData);
 
         EB_ERRORTYPE(*ErrorHandler)(
-            EB_HANDLETYPE hComponent,
             EB_PTR pAppData,
-            EB_U32 nData1,
-            EB_U32 nData2,
-            EB_PTR pEventData);
+            EB_U32 nData1);
 
         EB_ERRORTYPE(*SendPictureDone)(
-            EB_HANDLETYPE hComponent,
             EB_PTR pAppData,
             EB_BUFFERHEADERTYPE* pBuffer);
 
         EB_ERRORTYPE(*FillPacketDone)(
-            EB_HANDLETYPE hComponent,
             EB_PTR pAppData,
             EB_BUFFERHEADERTYPE* pBuffer);
 

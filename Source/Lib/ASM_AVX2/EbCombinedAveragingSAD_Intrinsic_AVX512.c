@@ -4,6 +4,7 @@
 */
 
 #include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbCombinedAveragingSAD_Intrinsic_AVX512.h"
 #ifdef _MSC_VER
 #include <intrin.h>

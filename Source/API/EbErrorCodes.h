@@ -14,19 +14,13 @@ extern "C" {
 #define   CHECK_REPORT_ERROR(cond, appCallbackPtr, errorCode)  if(!(cond))                                           \
                                                                 {                                                    \
                                                                     appCallbackPtr->callbackFunctions.ErrorHandler(  \
-                                                                        ((appCallbackPtr)->handle),                  \
                                                                         ((appCallbackPtr)->appPrivateData),          \
-                                                                        (errorCode),                                 \
-                                                                        (0),                                         \
-                                                                        ((appCallbackPtr)->appPrivateData));                                    \
+                                                                        errorCode);                                 \
                                                                 }
 
-#define   CHECK_REPORT_ERROR_NC(appCallbackPtr, errorCode)     appCallbackPtr->callbackFunctions.ErrorHandler(  \
-                                                                        ((appCallbackPtr)->handle),                  \
+#define   CHECK_REPORT_ERROR_NC(appCallbackPtr, errorCode)     appCallbackPtr->callbackFunctions.ErrorHandler(       \
                                                                         ((appCallbackPtr)->appPrivateData),          \
-                                                                        (errorCode),                                 \
-                                                                        (0),                                         \
-                                                                        ((appCallbackPtr)->appPrivateData));         \
+                                                                        errorCode);                                 
 
 
 typedef enum ENCODER_ERROR_CODES

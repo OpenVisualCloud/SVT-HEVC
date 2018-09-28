@@ -497,7 +497,7 @@ static EB_ERRORTYPE EbEncHandleCtor(
         EB_MALLOC(EbCallback_t*, encHandlePtr->appCallbackPtrArray[instanceIndex], sizeof(EbCallback_t), EB_N_PTR);
         
         encHandlePtr->appCallbackPtrArray[instanceIndex]->callbackFunctions.FeedbackComplete    = 0;
-        encHandlePtr->appCallbackPtrArray[instanceIndex]->callbackFunctions.ErrorHandler = 0;
+        encHandlePtr->appCallbackPtrArray[instanceIndex]->callbackFunctions.ErrorHandler        = 0;
         encHandlePtr->appCallbackPtrArray[instanceIndex]->callbackFunctions.SendPictureDone     = 0;
         encHandlePtr->appCallbackPtrArray[instanceIndex]->callbackFunctions.FillPacketDone      = 0;
         encHandlePtr->appCallbackPtrArray[instanceIndex]->appPrivateData                        = EB_NULL;
