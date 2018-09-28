@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="ASM_SSE2.vcxproj">
+      <Project>{07be8e70-320f-4d30-9e6a-40d1b6617ca7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="ASM_SSSE3.vcxproj">
+      <Project>{31f45eeb-03a1-4791-a447-e4b1604ef7d7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="C_DEFAULT.vcxproj">
+      <Project>{bcf4f738-a033-403c-a92f-fc5608eb85a3}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Source\Lib\ASM_SSE4_1\EbIntraPrediction16bit_Intrinsic_SSE4_1.c" />
+    <ClCompile Include="..\..\Source\Lib\ASM_SSE4_1\EbPictureOperators_Intrinsic_SSE4_1.c" />
+    <ClCompile Include="..\..\Source\Lib\ASM_SSE4_1\EbTransforms_Intrinsic_SSE4_1.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Source\Lib\ASM_SSE4_1\EbIntraPrediction_SSE4_1.h" />
+    <ClInclude Include="..\..\Source\Lib\ASM_SSE4_1\EbPictureOperators_SSE4_1.h" />
+    <ClInclude Include="..\..\Source\Lib\ASM_SSE4_1\EbTransforms_SSE4_1.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3895863F-31FB-43D1-B562-8B4C153DDB9B}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>ASM_SSE4</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCInstallDir)bin\vsyasm.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IntDir>$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../Source/API;../../Source/API/OpenMAX/IL;../../Source/Lib/Codec;../../Source/Lib/SRM;../../Source/Lib/PictureEnhancement;../../Source/Lib/System;../../Source/Lib/Utility;../../Source/Lib/ASM_SSE2/;../../Source/Lib/ASM_SSSE3/;../../Source/Lib/ASM_SSE4_1/</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>
+      </EnableEnhancedInstructionSet>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <AdditionalOptions>/DynamicBase /sdl %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../Source/API;../../Source/API/OpenMAX/IL;../../Source/Lib/Codec;../../Source/Lib/SRM;../../Source/Lib/PictureEnhancement;../../Source/Lib/System;../../Source/Lib/Utility;../../Source/Lib/ASM_SSE2/;../../Source/Lib/ASM_SSSE3/;../../Source/Lib/ASM_SSE4_1/</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>
+      </EnableEnhancedInstructionSet>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <AdditionalOptions>/DynamicBase /sdl %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCInstallDir)bin\vsyasm.targets" />
+  </ImportGroup>
+</Project>

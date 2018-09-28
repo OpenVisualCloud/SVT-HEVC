@@ -1,0 +1,20 @@
+# Copyright(c) 2018 Intel Corporation 
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+
+#====================== QP File ======================
+# QP values must be passed one per line matching the frames in display order.
+# If the number of frames > number of QPs, the application will loop to the beginning of the file
+# Values should be between 1 and 51 any values other than that will be clipped to that range
+
+23
+24
+25
+26
+23
+24
+25
+26
+27
+28
+29
+30
