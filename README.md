@@ -15,9 +15,9 @@ This encoder has been optimized to achieve excellent performance levels using 13
 
 SVT-HEVC Encoder also supports 2 modes:
 
--  A Subjectively optimized mode (Default with -tune 0)
+-  A Subjectively optimized mode (-tune 0)
 
--  An Objectively optimized mode for PSNR / SSIM / VMAF benchmarking (-tune 1)
+-  An Objectively optimized mode for PSNR / SSIM / VMAF benchmarking (-tune 1 (Default setting))
 
 The encoder can also run the ABR profile below on one Intel® Xeon-D™ D-2191:
 
