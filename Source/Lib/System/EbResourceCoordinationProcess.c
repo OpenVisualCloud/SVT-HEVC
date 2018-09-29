@@ -450,7 +450,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
             contextPtr->inputBufferFifoPtr,
             &ebInputWrapperPtr);
         ebInputPtr = (EB_BUFFERHEADERTYPE*) ebInputWrapperPtr->objectPtr;
-         
+     
         sequenceControlSetPtr       = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr;
 
         // Get source video bit depth
@@ -697,7 +697,9 @@ void* ResourceCoordinationKernel(void *inputPtr)
         // Picture Stats
         pictureControlSetPtr->pictureNumber                   = contextPtr->pictureNumberArray[instanceIndex]++;
 
-
+#if DEADLOCK_DEBUG
+        printf("POC %lld RESCOOR IN \n", pictureControlSetPtr->pictureNumber);
+#endif    
         // Set the picture structure: 0: progressive, 1: top, 2: bottom
         pictureControlSetPtr->pictStruct = sequenceControlSetPtr->interlacedVideo == EB_FALSE ? 
             PROGRESSIVE_PICT_STRUCT : 
@@ -735,9 +737,12 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
         // Post the finished Results Object
         EbPostFullObject(outputWrapperPtr);
-
+#if DEADLOCK_DEBUG
+        printf("POC %lld RESCOOR OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
         // Release the Input Buffer
         EbReleaseObject(ebInputWrapperPtr); 
+
     }
 
     return EB_NULL;

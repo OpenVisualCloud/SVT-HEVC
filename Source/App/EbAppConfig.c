@@ -994,7 +994,6 @@ EB_ERRORTYPE BuffersSettings(EbConfig_t   **configs, unsigned int numChannels/*,
                 configs[channelNumber]->inputOutputBufferFifoInitCount             = (normalLatencyInput  + configs[channelNumber]->lookAheadDistance) * numChannels;
         else
                 configs[channelNumber]->inputOutputBufferFifoInitCount             = (EB_U32)(lowLatencyInput + configs[channelNumber]->lookAheadDistance) * numChannels;
-
     }
     
 	return return_error;

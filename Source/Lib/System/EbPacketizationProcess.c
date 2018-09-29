@@ -101,7 +101,9 @@ void* PacketizationKernel(void *inputPtr)
         pictureControlSetPtr    = (PictureControlSet_t*)    entropyCodingResultsPtr->pictureControlSetWrapperPtr->objectPtr;
         sequenceControlSetPtr   = (SequenceControlSet_t*)   pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
         encodeContextPtr        = (EncodeContext_t*)        sequenceControlSetPtr->encodeContextPtr;
-
+#if DEADLOCK_DEBUG
+        printf("POC %lld PK IN \n", pictureControlSetPtr->pictureNumber);
+#endif
         //****************************************************
         // Input Entropy Results into Reordering Queue
         //****************************************************
@@ -644,7 +646,9 @@ void* PacketizationKernel(void *inputPtr)
  
 
         }
-      
+#if DEADLOCK_DEBUG
+        printf("POC %lld PK IN \n", pictureControlSetPtr->pictureNumber);
+#endif     
     }
 return EB_NULL;
 }

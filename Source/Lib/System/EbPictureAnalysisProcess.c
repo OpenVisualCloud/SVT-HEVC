@@ -4509,7 +4509,9 @@ void* PictureAnalysisKernel(void *inputPtr)
 		pictureControlSetPtr = (PictureParentControlSet_t*)inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;
 		sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 		inputPicturePtr = pictureControlSetPtr->enhancedPicturePtr;
-
+#if DEADLOCK_DEBUG
+        printf("POC %lld PA IN \n", pictureControlSetPtr->pictureNumber);
+#endif
 		paReferenceObject = (EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr;
 		inputPaddedPicturePtr = (EbPictureBufferDesc_t*)paReferenceObject->inputPaddedPicturePtr;
 		quarterDecimatedPicturePtr = (EbPictureBufferDesc_t*)paReferenceObject->quarterDecimatedPicturePtr;
@@ -4588,6 +4590,10 @@ void* PictureAnalysisKernel(void *inputPtr)
 
 		outputResultsPtr = (PictureAnalysisResults_t*)outputResultsWrapperPtr->objectPtr;
 		outputResultsPtr->pictureControlSetWrapperPtr = inputResultsPtr->pictureControlSetWrapperPtr;
+
+#if DEADLOCK_DEBUG
+        printf("POC %lld PA OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
 
 		// Release the Input Results
 		EbReleaseObject(inputResultsWrapperPtr);

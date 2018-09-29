@@ -845,6 +845,10 @@ void* PictureDecisionKernel(void *inputPtr)
         sequenceControlSetPtr   = (SequenceControlSet_t*)       pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
         encodeContextPtr        = (EncodeContext_t*)            sequenceControlSetPtr->encodeContextPtr;
 
+#if DEADLOCK_DEBUG
+        printf("POC %lld PD IN \n", pictureControlSetPtr->pictureNumber);
+#endif
+
         loopCount ++;
 
         // Input Picture Analysis Results into the Picture Decision Reordering Queue
@@ -1612,7 +1616,9 @@ void* PictureDecisionKernel(void *inputPtr)
             if(windowAvail == EB_FALSE  && framePasseThru == EB_FALSE)
                 break;
         }        
-        
+#if DEADLOCK_DEBUG
+        printf("POC %lld PD OUT \n", pictureControlSetPtr->pictureNumber);
+#endif        
         // Release the Input Results
         EbReleaseObject(inputResultsWrapperPtr);
     }

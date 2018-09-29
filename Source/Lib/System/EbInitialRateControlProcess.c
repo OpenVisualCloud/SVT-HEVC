@@ -924,7 +924,9 @@ void* InitialRateControlKernel(void *inputPtr)
 
 		inputResultsPtr = (MotionEstimationResults_t*)inputResultsWrapperPtr->objectPtr;
 		pictureControlSetPtr = (PictureParentControlSet_t*)inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;
-
+#if DEADLOCK_DEBUG
+        printf("POC %lld IRC IN \n", pictureControlSetPtr->pictureNumber);
+#endif
 		segmentIndex = inputResultsPtr->segmentIndex;
 
 		// Set the segment mask
@@ -1151,7 +1153,9 @@ void* InitialRateControlKernel(void *inputPtr)
 				}
 			}
 		}
-
+#if DEADLOCK_DEBUG
+        printf("POC %lld IRC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
 		// Release the Input Results
 		EbReleaseObject(inputResultsWrapperPtr);
 

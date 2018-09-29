@@ -3415,7 +3415,9 @@ void* EncDecKernel(void *inputPtr)
         segmentsPtr = pictureControlSetPtr->encDecSegmentCtrl;
         lastLcuFlag = EB_FALSE;
         is16bit = (EB_BOOL)(sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
-
+#if DEADLOCK_DEBUG
+        printf("POC %lld ENCDEC IN \n", pictureControlSetPtr->pictureNumber);
+#endif
         // LCU Constants
         lcuSize = (EB_U8)sequenceControlSetPtr->lcuSize;
         lcuSizeLog2 = (EB_U8)Log2f(lcuSize);
@@ -3781,6 +3783,10 @@ void* EncDecKernel(void *inputPtr)
             // we are trying to avoid making a such change in the APP (ideally an input buffer live count should be set in the APP (under EB_BUFFERHEADERTYPE data structure))
 
         }
+
+#if DEADLOCK_DEBUG
+        printf("POC %lld ENCDEC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
 
         // Send the Entropy Coder incremental updates as each LCU row becomes available
 
