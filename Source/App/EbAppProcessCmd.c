@@ -754,9 +754,9 @@ void ProcessOutputStreamBuffer(
 	// Update Output Port Activity State
 	*portState = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? APP_PortInactive : *portState;
 
-	//printf("\b\b\b\b\b\b\b\b\b%9d", ++frameCount);
+	printf("\b\b\b\b\b\b\b\b\b%9d", ++frameCount);
 
-    ++frameCount;
+    //++frameCount;
 	fflush(stdout);
 
 	// Queue the buffer again if the port is still active

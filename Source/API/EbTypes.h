@@ -28,7 +28,7 @@ extern "C" {
 #error OS not supported 
 #endif
 
-#define DEADLOCK_DEBUG 1
+#define DEADLOCK_DEBUG 0
 
 #define EB_MIN(a,b)             (((a) < (b)) ? (a) : (b))
 
