@@ -165,6 +165,9 @@ typedef enum APPPORTACTIVETYPE {
 #define INPUT_SIZE_1080p_TH				0x1AB3F0	// 1.75 Million
 #define INPUT_SIZE_4K_TH				0x29F630	// 2.75 Million   
 
+
+#define EB_NORMAL_LATENCY        0
+#define EB_LOW_LATENCY           1
 	/** The EB_BOOL type is intended to be used to represent a true or a false
 	value when passing parameters to and from the svt API.  The
 	EB_BOOL is a 32 bit quantity and is aligned on a 32 bit word boundary.

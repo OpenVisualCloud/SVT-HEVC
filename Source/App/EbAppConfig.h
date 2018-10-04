@@ -10,8 +10,7 @@
 
 #include "EbApi.h"
 
-#define EB_NORMAL_LATENCY        0
-#define EB_LOW_LATENCY           1
+
 
 #define MAX_CHANNEL_NUMBER      6
 #define MAX_NUM_TOKENS          200

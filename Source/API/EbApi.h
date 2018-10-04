@@ -81,6 +81,11 @@ typedef struct EB_H265_ENC_CONFIGURATION
     // Input Stride
     EB_U32             inputPictureStride; // Includes padding
 
+    EB_U32             sourceWidth;
+    EB_U32             sourceHeight;
+
+    EB_U8              latencyMode;
+
 
     // Interlaced Video 
     EB_BOOL             interlacedVideo;
@@ -193,7 +198,6 @@ EB_API EB_ERRORTYPE EbStopEncoder(
     EB_U32         instanceIndex);
 
 EB_API EB_ERRORTYPE EbH265EncInitParameter(
-    EB_HANDLETYPE          hComponent,
     EB_PTR                 pComponentParameterStructure);
 
 EB_API EB_ERRORTYPE EbH265EncSetParameter(

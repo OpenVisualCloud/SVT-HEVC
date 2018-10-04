@@ -1669,6 +1669,33 @@ EB_API EB_ERRORTYPE EbDeinitHandle(
     return return_error;
 }
 
+#define SCD_LAD 6
+#define INPUT_SIZE_4K_TH				0x29F630	// 2.75 Million  
+EB_U32 SetParentPcs(EB_H265_ENC_CONFIGURATION*   config)
+{
+
+    EB_U32 inputPic = 100;
+    EB_U32 fps = (EB_U32)((config->frameRate > 1000) ? config->frameRate >> 16 : config->frameRate);
+
+    fps = fps > 120 ? 120 : fps;
+    fps = fps < 24 ? 24 : fps;
+
+    EB_U32     lowLatencyInput = (config->encMode < 6 || config->speedControlFlag == 1) ? fps :
+        (config->encMode < 8) ? fps >> 1 : (EB_U32)((2 << config->hierarchicalLevels) + SCD_LAD);
+
+    EB_U32     normalLatencyInput = (fps * 3) >> 1;
+
+    if ((config->sourceWidth * config->sourceHeight) > INPUT_SIZE_4K_TH)
+        normalLatencyInput = (normalLatencyInput * 3) >> 1;
+
+    if (config->latencyMode == EB_NORMAL_LATENCY)
+        inputPic = (normalLatencyInput + config->lookAheadDistance);
+    else
+        inputPic = (EB_U32)(lowLatencyInput + config->lookAheadDistance);
+    
+    return inputPic;
+}
+
 void LoadDefaultBufferConfigurationSettings(
     SequenceControlSet_t       *sequenceControlSetPtr
 )
@@ -1679,7 +1706,7 @@ void LoadDefaultBufferConfigurationSettings(
     EB_U32 encDecSegH = ((sequenceControlSetPtr->maxInputLumaHeight + 32) / MAX_LCU_SIZE);
     EB_U32 encDecSegW = ((sequenceControlSetPtr->maxInputLumaWidth + 32) / MAX_LCU_SIZE);
 
-    EB_U32 inputPic = sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount - sequenceControlSetPtr->staticConfig.lookAheadDistance + 4; // scene change lookahead
+    EB_U32 inputPic = SetParentPcs(&sequenceControlSetPtr->staticConfig);
 
     unsigned int coreCount = GetNumCores();
 
@@ -1697,6 +1724,7 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->meSegmentColumnCountArray[3] = meSegW;
     sequenceControlSetPtr->meSegmentColumnCountArray[4] = meSegW;
     sequenceControlSetPtr->meSegmentColumnCountArray[5] = meSegW;
+
     // EncDec segments     
     sequenceControlSetPtr->encDecSegmentRowCountArray[0] = encDecSegH;
     sequenceControlSetPtr->encDecSegmentRowCountArray[1] = encDecSegH;
@@ -1923,17 +1951,22 @@ void SetDefaultConfigurationParameters(
     //Denoise
     sequenceControlSetPtr->enableDenoiseFlag = EB_TRUE;
 
-    //// Video Usability Info
-    //EB_APP_MALLOC(AppVideoUsabilityInfo_t*, callbackData->ebEncParameters.vuiPtr, sizeof(AppVideoUsabilityInfo_t), EB_N_PTR, EB_ErrorInsufficientResources);
-
-    //// Initialize vui parameters
-    //return_error = (EB_ERRORTYPE)EbAppVideoUsabilityInfoCtor(
-    //    callbackData->ebEncParameters.vuiPtr);
-
-    //EbAppVideoUsabilityInfoInit(sequenceControlSetPtr->videoUsabilityInfoPtr);
-
     return;
 }
+
+EB_U32 ComputeDefaultLookAhead(
+    EB_H265_ENC_CONFIGURATION*   config)
+{
+    EB_S32 lad = 0;
+    if (config->rateControlMode == 0)
+        lad = 17;
+    else
+        lad = config->intraPeriodLength;
+
+
+    return lad;
+}
+
 
 void CopyApiFromApp(
     SequenceControlSet_t       *sequenceControlSetPtr,
@@ -1942,9 +1975,10 @@ void CopyApiFromApp(
 
     EB_U32                  hmeRegionIndex = 0;
 
-    //EbVideoUsabilityInfoCopy(
-    //    sequenceControlSetPtr->videoUsabilityInfoPtr,
-    //    ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->vuiPtr);
+    sequenceControlSetPtr->maxInputLumaWidth = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceWidth;
+    sequenceControlSetPtr->maxInputLumaHeight = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceHeight;
+    sequenceControlSetPtr->staticConfig.inputPictureStride = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->inputPictureStride;
+
 
     sequenceControlSetPtr->chromaWidth = sequenceControlSetPtr->maxInputLumaWidth >> 1;
     sequenceControlSetPtr->chromaHeight = sequenceControlSetPtr->maxInputLumaHeight >> 1;
@@ -2095,8 +2129,9 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.tier = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tier;
     sequenceControlSetPtr->staticConfig.level = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->level;
 
-    sequenceControlSetPtr->staticConfig.injectorFrameRate = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->injectorFrameRate;
-    sequenceControlSetPtr->staticConfig.speedControlFlag = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->speedControlFlag;
+    sequenceControlSetPtr->staticConfig.injectorFrameRate   = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->injectorFrameRate;
+    sequenceControlSetPtr->staticConfig.speedControlFlag    = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->speedControlFlag;
+    sequenceControlSetPtr->staticConfig.latencyMode         = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->latencyMode;    
 
     // Buffers
     if (((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->inputOutputBufferFifoInitCount != 0)
@@ -2118,8 +2153,9 @@ void CopyApiFromApp(
         sequenceControlSetPtr->staticConfig.videoUsabilityInfo = 1;
     }
     
-    if (sequenceControlSetPtr->staticConfig.lookAheadDistance > sequenceControlSetPtr->staticConfig.framesToBeEncoded) {
-        sequenceControlSetPtr->staticConfig.lookAheadDistance = (EB_U32)sequenceControlSetPtr->staticConfig.framesToBeEncoded;
+
+    if (sequenceControlSetPtr->staticConfig.lookAheadDistance == (EB_U32)~0) {
+        sequenceControlSetPtr->staticConfig.lookAheadDistance = ComputeDefaultLookAhead(&sequenceControlSetPtr->staticConfig);
     }
 
     // Extract frame rate from Numerator and Denominator if not 0
@@ -2281,10 +2317,10 @@ static EB_ERRORTYPE VerifySettings(\
 		return_error = EB_ErrorBadParameter; 
     }	 
 
-    if (config->inputOutputBufferFifoInitCount < (EB_U32)((2 << config->hierarchicalLevels) + 5 + config->lookAheadDistance)) {
-        printf("Error Instance %u: inputOutputBufferFifoInitCount count is not large enough to start the encode\n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
-    }
+    //if (config->inputOutputBufferFifoInitCount < (EB_U32)((2 << config->hierarchicalLevels) + 5 + config->lookAheadDistance)) {
+    //    printf("Error Instance %u: inputOutputBufferFifoInitCount count is not large enough to start the encode\n", channelNumber + 1);
+    //    return_error = EB_ErrorBadParameter;
+    //}
     
     if (sequenceControlSetPtr->maxInputLumaWidth < 64) {
 		printf("Error instance %u: Source Width must be at least 64\n",channelNumber+1);
@@ -2316,11 +2352,6 @@ static EB_ERRORTYPE VerifySettings(\
 		printf("Error instance %u: Source Width must be less than 8192\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	} 
-
-    //if (sequenceControlSetPtr->maxInputLumaWidth % 8 != 0 && config->encoderBitDepth == 10) {
-    //    printf("Error instance %u: Source Width must a multiple of 8 for 10 bit video\n", channelNumber + 1);
-    //    return_error = EB_ErrorBadParameter;
-    //}
 
     if (sequenceControlSetPtr->maxInputLumaHeight > 4320) {
 		printf("Error instance %u: Source Height must be less than 4320\n",channelNumber+1);
@@ -2719,19 +2750,100 @@ static EB_ERRORTYPE VerifySettings(\
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265EncInitParameter(
-    EB_HANDLETYPE          hComponent,
     EB_PTR                 pComponentParameterStructure)
 {
-    EB_ERRORTYPE           return_error = EB_ErrorNone;
-    EB_COMPONENTTYPE      *h265EncComponent = (EB_COMPONENTTYPE*)hComponent;
-    EbEncHandle_t          *pEncCompData = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
-    EB_U32                  instanceIndex = 0;
+    EB_ERRORTYPE                  return_error = EB_ErrorNone;
+    EB_H265_ENC_CONFIGURATION*    configPtr = (EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure;
 
-    EB_PARAM_PORTDEFINITIONTYPE *portDefinitionPtr = (EB_PARAM_PORTDEFINITIONTYPE*)pComponentParameterStructure;
+    if (!configPtr) {
+        printf("The EB_H265_ENC_CONFIGURATION structure is empty! \n");
+        return EB_ErrorBadParameter;
+    }
 
-    pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaWidth = (EB_U16)portDefinitionPtr->nFrameWidth;
-    pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaHeight = (EB_U16)portDefinitionPtr->nFrameHeight;
-    pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.inputPictureStride = (EB_U16)portDefinitionPtr->nStride;
+    configPtr->frameRate = 60;
+    configPtr->frameRateNumerator = 0;
+    configPtr->frameRateDenominator = 0;
+    configPtr->encoderBitDepth = 8;
+    configPtr->compressedTenBitFormat = 0;
+    configPtr->sourceWidth = 0;
+    configPtr->sourceHeight = 0;
+    configPtr->inputPictureStride = 0;
+    configPtr->framesToBeEncoded = 0;
+
+
+    // Interlaced Video 
+    configPtr->interlacedVideo = EB_FALSE;
+    configPtr->qp = 32;
+    configPtr->useQpFile = EB_FALSE;
+    configPtr->sceneChangeDetection = 1;
+    configPtr->rateControlMode = 0;
+    configPtr->lookAheadDistance = 17;
+    configPtr->targetBitRate = 7000000;
+    configPtr->maxQpAllowed = 48;
+    configPtr->minQpAllowed = 10;
+    configPtr->baseLayerSwitchMode = 0;
+    configPtr->encMode  = 9;
+    configPtr->intraPeriodLength = -2;
+    configPtr->intraRefreshType = 1;
+    configPtr->hierarchicalLevels = 3;
+    configPtr->predStructure = EB_PRED_RANDOM_ACCESS;
+    configPtr->disableDlfFlag = EB_FALSE;
+    configPtr->enableSaoFlag = EB_TRUE;
+    configPtr->useDefaultMeHme = EB_TRUE;
+    configPtr->enableHmeFlag = EB_TRUE;
+    configPtr->enableHmeLevel0Flag = EB_TRUE;
+    configPtr->enableHmeLevel1Flag = EB_FALSE;
+    configPtr->enableHmeLevel2Flag = EB_FALSE;
+    configPtr->searchAreaWidth = 16;
+    configPtr->searchAreaHeight = 7;
+    configPtr->numberHmeSearchRegionInWidth = 2;
+    configPtr->numberHmeSearchRegionInHeight = 2;
+    configPtr->hmeLevel0TotalSearchAreaWidth = 64;
+    configPtr->hmeLevel0TotalSearchAreaHeight = 25;
+    configPtr->hmeLevel0SearchAreaInWidthArray[0] = 32;
+    configPtr->hmeLevel0SearchAreaInWidthArray[1] = 32;
+    configPtr->hmeLevel0SearchAreaInHeightArray[0] = 12;
+    configPtr->hmeLevel0SearchAreaInHeightArray[1] = 13;
+    configPtr->hmeLevel1SearchAreaInWidthArray[0] = 1;
+    configPtr->hmeLevel1SearchAreaInWidthArray[1] = 1;
+    configPtr->hmeLevel1SearchAreaInHeightArray[0] = 1;
+    configPtr->hmeLevel1SearchAreaInHeightArray[1] = 1;
+    configPtr->hmeLevel2SearchAreaInWidthArray[0] = 1;
+    configPtr->hmeLevel2SearchAreaInWidthArray[1] = 1;
+    configPtr->hmeLevel2SearchAreaInHeightArray[0] = 1;
+    configPtr->hmeLevel2SearchAreaInHeightArray[1] = 1;
+    configPtr->constrainedIntra = EB_FALSE;
+    configPtr->tune = 0;
+
+    // Thresholds
+    configPtr->videoUsabilityInfo = 0;
+    configPtr->highDynamicRangeInput = 0;
+    configPtr->accessUnitDelimiter = 0;
+    configPtr->bufferingPeriodSEI = 0;
+    configPtr->pictureTimingSEI = 0;
+
+    configPtr->bitRateReduction = EB_TRUE;
+    configPtr->improveSharpness = EB_TRUE;
+    configPtr->registeredUserDataSeiFlag = EB_FALSE;
+    configPtr->unregisteredUserDataSeiFlag = EB_FALSE;
+    configPtr->recoveryPointSeiFlag = EB_FALSE;
+    configPtr->enableTemporalId = 1;
+    configPtr->inputOutputBufferFifoInitCount = 50;
+
+    // Annex A parameters
+    configPtr->profile = 2;
+    configPtr->tier = 0;
+    configPtr->level = 0;
+
+    // Latency
+    configPtr->injectorFrameRate = 60 << 16;
+    configPtr->speedControlFlag = 0;
+    configPtr->latencyMode = EB_NORMAL_LATENCY;
+
+    // ASM Type
+    configPtr->asmType = ASM_AVX2; 
+    configPtr->useRoundRobinThreadAssignment = EB_FALSE;
+
 
     return return_error;
 }

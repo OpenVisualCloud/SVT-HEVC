@@ -210,11 +210,9 @@ EB_ERRORTYPE CopyConfigurationParameters(
 
     // Initialize Port Activity Flags
     callbackData->outputStreamPortActive = APP_PortActive;
-
-    callbackData->inputPortDefinition.nFrameWidth = config->sourceWidth;
-    callbackData->inputPortDefinition.nFrameHeight = config->sourceHeight;
-    callbackData->inputPortDefinition.nStride = config->inputPaddedWidth;
-
+    callbackData->ebEncParameters.sourceWidth = config->sourceWidth;
+    callbackData->ebEncParameters.sourceHeight = config->sourceHeight;
+    callbackData->ebEncParameters.inputPictureStride = config->inputPaddedWidth;
     callbackData->ebEncParameters.interlacedVideo = (EB_BOOL)config->interlacedVideo;
     callbackData->ebEncParameters.intraPeriodLength = config->intraPeriod;
     callbackData->ebEncParameters.intraRefreshType = config->intraRefreshType;
@@ -224,9 +222,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.frameRateDenominator = config->frameRateDenominator;
     callbackData->ebEncParameters.frameRateNumerator = config->frameRateNumerator;
 	callbackData->ebEncParameters.hierarchicalLevels = config->hierarchicalLevels;
-
 	callbackData->ebEncParameters.predStructure = (EB_PRED)config->predStructure;
-
     callbackData->ebEncParameters.sceneChangeDetection = config->sceneChangeDetection;
     callbackData->ebEncParameters.lookAheadDistance = config->lookAheadDistance;
     callbackData->ebEncParameters.framesToBeEncoded = config->framesToBeEncoded;
@@ -250,13 +246,10 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.hmeLevel0TotalSearchAreaWidth = config->hmeLevel0TotalSearchAreaWidth;
     callbackData->ebEncParameters.hmeLevel0TotalSearchAreaHeight = config->hmeLevel0TotalSearchAreaHeight;
     callbackData->ebEncParameters.constrainedIntra = (EB_BOOL)config->constrainedIntra;
-
     callbackData->ebEncParameters.tune = config->tune;
-
     callbackData->ebEncParameters.channelId = config->channelId;
     callbackData->ebEncParameters.activeChannelCount = config->activeChannelCount;
     callbackData->ebEncParameters.useRoundRobinThreadAssignment = (EB_BOOL)config->useRoundRobinThreadAssignment;
-
 	callbackData->ebEncParameters.bitRateReduction = (EB_U8)config->bitRateReduction;
 	callbackData->ebEncParameters.improveSharpness = (EB_U8)config->improveSharpness;
     callbackData->ebEncParameters.videoUsabilityInfo = config->videoUsabilityInfo;
@@ -289,11 +282,6 @@ EB_ERRORTYPE CopyConfigurationParameters(
         callbackData->ebEncParameters.hmeLevel1SearchAreaInHeightArray[hmeRegionIndex] = config->hmeLevel1SearchAreaInHeightArray[hmeRegionIndex];
         callbackData->ebEncParameters.hmeLevel2SearchAreaInHeightArray[hmeRegionIndex] = config->hmeLevel2SearchAreaInHeightArray[hmeRegionIndex];
     }
-
-    // Set the Parameters
-    return_error = EbH265EncInitParameter(
-                       callbackData->svtEncoderHandle,
-                       &callbackData->inputPortDefinition);
 
     return return_error;
 
@@ -440,17 +428,14 @@ EB_ERRORTYPE AllocateOutputBuffers(
 EB_ERRORTYPE PreloadFramesIntoRam(
     EbConfig_t				*config)
 {
-    EB_ERRORTYPE   return_error = EB_ErrorNone;
-    int processedFrameCount;
+    EB_ERRORTYPE    return_error = EB_ErrorNone;
+    int             processedFrameCount;
+    int             filledLen;
+    int             inputPaddedWidth = config->inputPaddedWidth;
+    int             inputPaddedHeight = config->inputPaddedHeight;
+    int             readSize;
+    unsigned char  *ebInputPtr;
 
-    int filledLen;
-
-
-    int inputPaddedWidth = config->inputPaddedWidth;
-    int inputPaddedHeight = config->inputPaddedHeight;
-
-    int readSize;
-    unsigned char *ebInputPtr;
     FILE *inputFile = config->inputFile;
 
     if (config->encoderBitDepth == 10 && config->compressedTenBitFormat == 1)
@@ -726,15 +711,26 @@ EB_ERRORTYPE InitEncoder(
     
     // Allocate a memory table hosting all allocated pointers
     AllocateMemoryTable(instanceIdx);
-    	
+    
+
+    ///********************** LIBRARY INIT [START] ******************////////
+
     // STEP 1: Call the library to construct a Component Handle
     return_error = EbInitHandle(&callbackData->svtEncoderHandle, callbackData, &encoderCallBacks);
 
     if (return_error != EB_ErrorNone) {
         return return_error;
     }
+
+    // STEP 2: Get the Default parameters from the library
+    return_error = EbH265EncInitParameter(
+        &callbackData->ebEncParameters);
     
-    // STEP 2: Copy all configuration parameters into the callback structure
+    if (return_error != EB_ErrorNone) {
+        return return_error;
+    }
+
+    // STEP 3: Copy all configuration parameters into the callback structure
     return_error = CopyConfigurationParameters(
                     config,
                     callbackData,
@@ -744,7 +740,7 @@ EB_ERRORTYPE InitEncoder(
         return return_error;
     }
     
-    // STEP 3: Send over all configuration parameters
+    // STEP 4: Send over all configuration parameters
     // Set the Parameters
     return_error = EbH265EncSetParameter(
                        callbackData->svtEncoderHandle,
@@ -754,7 +750,12 @@ EB_ERRORTYPE InitEncoder(
         return return_error;
     }
 
-    // STEP 4: Allocate input buffers carrying the yuv frames in
+    // STEP 5: Init Encoder
+    return_error = EbInitEncoder(callbackData->svtEncoderHandle);
+
+    ///********************** APPLICATION INIT [START] ******************////////
+
+    // STEP 6: Allocate input buffers carrying the yuv frames in
     return_error = AllocateInputBuffers(
         config,
         callbackData);
@@ -763,7 +764,7 @@ EB_ERRORTYPE InitEncoder(
         return return_error;
     }
 
-    // STEP 5: Allocate output buffers carrying the bitstream out
+    // STEP 7: Allocate output buffers carrying the bitstream out
     return_error = AllocateOutputBuffers(
         config,
         callbackData);
@@ -783,15 +784,11 @@ EB_ERRORTYPE InitEncoder(
         config->sequenceBuffer = 0;
     }
 
-    // STEP 8: Init Encoder
-    return_error = EbInitEncoder(callbackData->svtEncoderHandle);
-
     if (return_error != EB_ErrorNone) {
         return return_error;
     }
-
     
-    // STEP 9: Queue the Input Buffers to be populated 
+    // STEP 8: Queue the Input Buffers to be populated 
     for(bufferIndex=0; bufferIndex < callbackData->ebEncParameters.inputOutputBufferFifoInitCount; ++bufferIndex) {
 
         // Tag the input buffers with APP_InputEmptyThisBuffer for the library to empty them
@@ -810,6 +807,7 @@ EB_ERRORTYPE InitEncoder(
                            callbackData->streamBufferPool[bufferIndex]);
     }
 
+    ///********************** APPLICATION INIT [END] ******************////////
     
     return return_error;
 }
