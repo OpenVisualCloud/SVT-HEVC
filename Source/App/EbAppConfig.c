@@ -385,7 +385,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
 {
     configPtr->configFile                       = NULL;
     configPtr->inputFile                        = NULL;
-    configPtr->bitstreamFile                    = NULL;;
+    configPtr->bitstreamFile                    = NULL;
     configPtr->errorLogFile                     = stderr;
     configPtr->qpFile                           = NULL;
     

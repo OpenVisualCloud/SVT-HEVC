@@ -83,7 +83,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../../Source/API;../../Source/API/OpenMAX/IL;../../Source/Lib/SRM;../../Source/Lib/PictureEnhancement;../../Source/Lib/System;../../Source/Lib/Utility;../../Source/Lib/C_DEFAULT/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../Source/API;../../Source/Lib/SRM;../../Source/Lib/PictureEnhancement;../../Source/Lib/System;../../Source/Lib/Utility;../../Source/Lib/C_DEFAULT/</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>
       </EnableEnhancedInstructionSet>
       <CompileAs>CompileAsCpp</CompileAs>
@@ -105,7 +105,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../../Source/API;../../Source/API/OpenMAX/IL;../../Source/Lib/SRM;../../Source/Lib/PictureEnhancement;../../Source/Lib/System;../../Source/Lib/Utility;../../Source/Lib/C_DEFAULT/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../Source/API;../../Source/Lib/SRM;../../Source/Lib/PictureEnhancement;../../Source/Lib/System;../../Source/Lib/Utility;../../Source/Lib/C_DEFAULT/</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>
       </EnableEnhancedInstructionSet>
       <CompileAs>CompileAsCpp</CompileAs>
