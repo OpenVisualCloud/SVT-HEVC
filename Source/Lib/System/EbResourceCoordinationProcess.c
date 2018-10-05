@@ -408,7 +408,6 @@ EB_ERRORTYPE SignalDerivationPreAnalysisOq(
     return return_error;
 }
 
-
 /***************************************
  * ResourceCoordination Kernel
  ***************************************/
@@ -438,8 +437,10 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
     EB_BOOL                          is16BitInput;
 
-	EB_U32							 inputSize = 0;
-
+	EB_U32							inputSize = 0;
+#if CHKN_EOS
+	EbObjectWrapper_t               * prevPictureControlSetWrapperPtr = 0;
+#endif
     for(;;) {
 
         // Tie instanceIndex to zero for now...
@@ -630,7 +631,10 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
         pictureControlSetPtr->sequenceControlSetWrapperPtr    = contextPtr->sequenceControlSetActiveArray[instanceIndex];
         pictureControlSetPtr->inputPictureWrapperPtr          = inputPictureWrapperPtr;
+
+#if ! CHKN_EOS
         pictureControlSetPtr->endOfSequenceFlag               = endOfSequenceFlag;
+#endif
             
         // Set Picture Control Flags
         pictureControlSetPtr->idrFlag                         = sequenceControlSetPtr->encodeContextPtr->initialPicture;
@@ -730,14 +734,35 @@ void* ResourceCoordinationKernel(void *inputPtr)
         ((EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr)->inputPaddedPicturePtr->bufferY = inputPicturePtr->bufferY;
 
         // Get Empty Output Results Object
-        EbGetEmptyObject(
-            contextPtr->resourceCoordinationResultsOutputFifoPtr,
-            &outputWrapperPtr);
-        outputResultsPtr = (ResourceCoordinationResults_t*) outputWrapperPtr->objectPtr;
-        outputResultsPtr->pictureControlSetWrapperPtr     = pictureControlSetWrapperPtr;
+#if CHKN_EOS
+		if (pictureControlSetPtr->pictureNumber > 0)
+		{
+			((PictureParentControlSet_t       *)prevPictureControlSetWrapperPtr->objectPtr)->endOfSequenceFlag = endOfSequenceFlag;
 
-        // Post the finished Results Object
-        EbPostFullObject(outputWrapperPtr);
+			EbGetEmptyObject(
+				contextPtr->resourceCoordinationResultsOutputFifoPtr,
+				&outputWrapperPtr);
+			outputResultsPtr = (ResourceCoordinationResults_t*)outputWrapperPtr->objectPtr;
+			outputResultsPtr->pictureControlSetWrapperPtr = prevPictureControlSetWrapperPtr;
+
+			// Post the finished Results Object
+			EbPostFullObject(outputWrapperPtr);
+
+		}
+
+		prevPictureControlSetWrapperPtr = pictureControlSetWrapperPtr;
+#else
+			EbGetEmptyObject(
+				contextPtr->resourceCoordinationResultsOutputFifoPtr,
+				&outputWrapperPtr);
+			outputResultsPtr = (ResourceCoordinationResults_t*)outputWrapperPtr->objectPtr;
+			outputResultsPtr->pictureControlSetWrapperPtr = pictureControlSetWrapperPtr;
+
+			// Post the finished Results Object
+			EbPostFullObject(outputWrapperPtr);
+#endif
+
+
 #if DEADLOCK_DEBUG
         printf("POC %lld RESCOOR OUT \n", pictureControlSetPtr->pictureNumber);
 #endif

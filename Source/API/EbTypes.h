@@ -28,8 +28,8 @@ extern "C" {
 #error OS not supported 
 #endif
 
-#define DEADLOCK_DEBUG 0
-
+#define DEADLOCK_DEBUG  0
+#define CHKN_EOS        1
 #define EB_MIN(a,b)             (((a) < (b)) ? (a) : (b))
 
 #ifdef	_MSC_VER
