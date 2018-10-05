@@ -350,6 +350,8 @@ typedef struct PictureParentControlSet_s
 
     EB_BUFFERHEADERTYPE                  *ebInputPtr;
 
+    EbObjectWrapper_t                    *ebInputWrapperPtr;
+
     EB_SLICE                              sliceType;                                 
     NalUnitType                           nalUnit;
     EB_U8                                 predStructIndex;  

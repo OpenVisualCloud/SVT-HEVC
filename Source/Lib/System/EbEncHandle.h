@@ -158,8 +158,12 @@ typedef struct EbEncHandle_s
 /**************************************
  * EB_BUFFERHEADERTYPE Constructor
  **************************************/  
-extern EB_ERRORTYPE EbBufferHeaderCtor(
+extern EB_ERRORTYPE EbInputBufferHeaderCtor(
     EB_PTR *objectDblPtr, 
+    EB_PTR objectInitDataPtr);
+
+extern EB_ERRORTYPE EbOutputBufferHeaderCtor(
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
     
 #endif // EbEncHandle_h

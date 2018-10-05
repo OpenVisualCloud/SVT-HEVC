@@ -424,7 +424,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
     SequenceControlSet_t            *sequenceControlSetPtr;
 
     EbObjectWrapper_t               *ebInputWrapperPtr;
-    EB_BUFFERHEADERTYPE            *ebInputPtr;
+    EB_BUFFERHEADERTYPE             *ebInputPtr;
     EbObjectWrapper_t               *outputWrapperPtr;
     ResourceCoordinationResults_t   *outputResultsPtr;
 
@@ -438,7 +438,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
     EB_BOOL                          is16BitInput;
 
-	EB_U32							inputSize = 0;
+	EB_U32							 inputSize = 0;
 
     for(;;) {
 
@@ -623,7 +623,8 @@ void* ResourceCoordinationKernel(void *inputPtr)
 		inputPicturePtr->strideBitIncCb     = inputPicturePtr->strideCb;
 		inputPicturePtr->strideBitIncCr     = inputPicturePtr->strideCr;
         
-        pictureControlSetPtr->ebInputPtr = ebInputPtr;
+        pictureControlSetPtr->ebInputPtr    = ebInputPtr;
+        pictureControlSetPtr->ebInputWrapperPtr = ebInputWrapperPtr;
 
         endOfSequenceFlag = (ebInputPtr->nFlags & EB_BUFFERFLAG_EOS) ? EB_TRUE : EB_FALSE;
 
@@ -676,7 +677,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         }
 	    pictureControlSetPtr->fullLcuCount                    = 0;
 
-        if (ebInputPtr->pAppPrivate != EB_NULL) {
+        if (ebInputPtr->pAppPrivate != EB_NULL && ((EbLinkedListNode*)ebInputPtr->pAppPrivate)->type != EB_FALSE){
             EbLinkedListNode    *nodePtr = (EbLinkedListNode*)ebInputPtr->pAppPrivate;
             if (nodePtr->type == EB_CONFIG_ON_FLY_PIC_QP) {
                 pictureControlSetPtr->pictureQp = (EB_U8)*((EB_U32*)nodePtr->data);
@@ -741,7 +742,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         printf("POC %lld RESCOOR OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
         // Release the Input Buffer
-        EbReleaseObject(ebInputWrapperPtr); 
+        //EbReleaseObject(ebInputWrapperPtr); 
 
     }
 

@@ -4526,6 +4526,8 @@ void* PictureAnalysisKernel(void *inputPtr)
             sequenceControlSetPtr,
             pictureControlSetPtr);
 
+        EbReleaseObject(pictureControlSetPtr->ebInputWrapperPtr);
+
         sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->callbackFunctions.SendPictureDone(
             sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->appPrivateData,   // App Private Data Ptr
             pictureControlSetPtr->ebInputPtr);                                         // Bufferheader

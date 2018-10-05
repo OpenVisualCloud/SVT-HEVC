@@ -374,9 +374,6 @@ EB_ERRORTYPE AllocateInputBuffers(
         // Initialize Header
         callbackData->inputBufferPool[bufferIndex]->nSize                       = sizeof(EB_BUFFERHEADERTYPE);
 
-        callbackData->inputPortDefinition.nFrameWidth              = config->sourceWidth;
-        callbackData->inputPortDefinition.nFrameHeight             = config->sourceHeight;
-
         EB_APP_MALLOC(EB_U8*, callbackData->inputBufferPool[bufferIndex]->pBuffer, sizeof(EB_H265_ENC_INPUT), EB_N_PTR, EB_ErrorInsufficientResources);
 
         if (config->bufferedInput == -1) {
@@ -388,8 +385,7 @@ EB_ERRORTYPE AllocateInputBuffers(
         }
 
         // Assign the variables 
-        callbackData->inputBufferPool[bufferIndex]->nAllocLen               = callbackData->inputPortDefinition.nSize;
-        callbackData->inputBufferPool[bufferIndex]->pAppPrivate             = (EB_PTR)callbackData;
+        callbackData->inputBufferPool[bufferIndex]->pAppPrivate = NULL;// (EB_PTR)callbackData;
 
     }
 
@@ -711,10 +707,8 @@ EB_ERRORTYPE InitEncoder(
     
     // Allocate a memory table hosting all allocated pointers
     AllocateMemoryTable(instanceIdx);
-    
 
-    ///********************** LIBRARY INIT [START] ******************////////
-
+    ///************************* LIBRARY INIT [START] *********************///
     // STEP 1: Call the library to construct a Component Handle
     return_error = EbInitHandle(&callbackData->svtEncoderHandle, callbackData, &encoderCallBacks);
 
@@ -753,7 +747,9 @@ EB_ERRORTYPE InitEncoder(
     // STEP 5: Init Encoder
     return_error = EbInitEncoder(callbackData->svtEncoderHandle);
 
-    ///********************** APPLICATION INIT [START] ******************////////
+    ///************************* LIBRARY INIT [END] *********************///
+
+    ///********************** APPLICATION INIT [START] ******************///
 
     // STEP 6: Allocate input buffers carrying the yuv frames in
     return_error = AllocateInputBuffers(
