@@ -445,7 +445,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->unregisteredUserDataSeiFlag          = EB_FALSE;
     configPtr->recoveryPointSeiFlag                 = EB_FALSE;
     configPtr->enableTemporalId                     = 1;
-	configPtr->inputOutputBufferFifoInitCount		= 50;
+	configPtr->inputOutputBufferFifoInitCount		= 1;
 
     // Annex A parameters
     configPtr->profile                              = 2;

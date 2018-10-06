@@ -4528,9 +4528,9 @@ void* PictureAnalysisKernel(void *inputPtr)
 
         EbReleaseObject(pictureControlSetPtr->ebInputWrapperPtr);
 
-        sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->callbackFunctions.SendPictureDone(
-            sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->appPrivateData,   // App Private Data Ptr
-            pictureControlSetPtr->ebInputPtr);                                         // Bufferheader
+        //sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->callbackFunctions.SendPictureDone(
+        //    sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->appPrivateData,   // App Private Data Ptr
+        //    pictureControlSetPtr->ebInputPtr);                                         // Bufferheader
 
 		// Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
 		SetPictureParametersForStatisticsGathering(

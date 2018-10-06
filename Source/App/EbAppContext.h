@@ -39,12 +39,6 @@ typedef struct EbAppContext_s {
 	// Instance Index
 	EB_U8								instanceIdx;
 
-	// Buffer Fifo
-    AppCommandFifo_t                    *fifoPtr;
-
-    // End of sequence in the feedback flag
-    EB_BOOL                            feedBackIsComplete;
-
 } EbAppContext_t;
 
 typedef struct EbParentAppContext_s {
@@ -52,9 +46,6 @@ typedef struct EbParentAppContext_s {
     void                               *inputSemaphoreHandle;
     void                               *streamSemaphoreHandle;
    
-    // Buffer Fifo
-    AppCommandFifo_t                    fifo;
-
 	// Children Application CallBacks
 	EbAppContext_t					   *appCallBacks[MAX_CHANNEL_NUMBER];
 
@@ -69,8 +60,7 @@ typedef struct EbParentAppContext_s {
  * External Function
  ********************************/
 extern void EbAppContextCtor(EbAppContext_t *contextPtr);
-extern void EbParentAppContextCtor(EbAppContext_t **contextPtr, EbParentAppContext_t *parentContextPtr, EB_U32 numChannels, EB_U32 totalBuffersSize);
-extern void EbParentAppContextDtor(EbParentAppContext_t *parentContextPtr);
+extern void EbParentAppContextCtor(EbAppContext_t **contextPtr, EbParentAppContext_t *parentContextPtr, unsigned int numChannels);
 extern EB_ERRORTYPE InitEncoder(EbConfig_t *config, EbAppContext_t *callbackData, EB_U32 instanceIdx);
 extern EB_ERRORTYPE DeInitEncoder(EbAppContext_t *callbackDataPtr, EB_U32 instanceIndex, EB_ERRORTYPE   libExitError);
 extern EB_ERRORTYPE StartEncoder(EbAppContext_t *callbackDataPtr);

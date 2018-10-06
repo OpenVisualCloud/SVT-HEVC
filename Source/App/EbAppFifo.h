@@ -16,7 +16,6 @@ typedef enum APPCOMMANDTYPE {
     APP_NullCommand = 0,
     APP_InputEmptyThisBuffer,
     APP_OutputStreamFillThisBuffer,
-    APP_FeedBackIsComplete,
     APP_ExitNoError,
     APP_ExitError
 } APPCOMMANDTYPE;

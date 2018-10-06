@@ -28,6 +28,7 @@ extern "C" {
 #error OS not supported 
 #endif
 
+#define  CHKN_OMX  1
 #define DEADLOCK_DEBUG  0
 #define CHKN_EOS        1
 #define EB_MIN(a,b)             (((a) < (b)) ? (a) : (b))
@@ -316,7 +317,7 @@ typedef enum APPPORTACTIVETYPE {
 
     typedef struct EB_CALLBACKTYPE
     {
-        EB_ERRORTYPE(*FeedbackComplete)(
+       /* EB_ERRORTYPE(*FeedbackComplete)(
             EB_PTR pAppData);
 
         EB_ERRORTYPE(*ErrorHandler)(
@@ -329,7 +330,7 @@ typedef enum APPPORTACTIVETYPE {
 
         EB_ERRORTYPE(*FillPacketDone)(
             EB_PTR pAppData,
-            EB_BUFFERHEADERTYPE* pBuffer);
+            EB_BUFFERHEADERTYPE* pBuffer);*/
 
     } EB_CALLBACKTYPE;
 

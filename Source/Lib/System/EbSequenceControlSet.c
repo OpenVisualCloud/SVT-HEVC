@@ -150,7 +150,7 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
 		sequenceControlSetPtr);
 
 	// Buffers:
-	sequenceControlSetPtr->inputOutputBufferFifoInitCount					    =	100; 
+	sequenceControlSetPtr->inputOutputBufferFifoInitCount					    =	50; 
 	
     sequenceControlSetPtr->maxDpbSize	= 0;
     

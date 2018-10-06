@@ -82,7 +82,6 @@ void EbAppContextCtor(EbAppContext_t *contextPtr)
     contextPtr->inputContext.previousTimeSeconds    = 0;
     contextPtr->inputContext.measuredFrameRate      = 0;
 
-    contextPtr->feedBackIsComplete                  = EB_FALSE;
     return;
 }
 
@@ -91,29 +90,17 @@ void EbAppContextCtor(EbAppContext_t *contextPtr)
 * ParentAppContext Constructor 
 *  Allowing multi instance support
 ***********************************/
-void EbParentAppContextCtor(EbAppContext_t **contextPtr, EbParentAppContext_t *parentContextPtr, unsigned int numChannels, EB_U32 totalBuffersSize)
+void EbParentAppContextCtor(EbAppContext_t **contextPtr, EbParentAppContext_t *parentContextPtr, unsigned int numChannels)
 {
 
 	unsigned int count;
-	AppCommandFifoCtor(&parentContextPtr->fifo, totalBuffersSize);
 
 	for (count=0; count < numChannels; ++count){
 		parentContextPtr->appCallBacks[count]			= contextPtr[count];
-		parentContextPtr->appCallBacks[count]->fifoPtr	= &parentContextPtr->fifo;
 	}
 
 	parentContextPtr->numChannels = (EB_U8) numChannels;
     
-
-    return;
-}
-
-/***********************************
- * AppContext Destructor
- ***********************************/
-void EbParentAppContextDtor(EbParentAppContext_t *parentContextPtr)
-{
-    AppCommandFifoDtor(&parentContextPtr->fifo);
 
     return;
 }
@@ -605,94 +592,6 @@ EB_ERRORTYPE PreloadFramesIntoRam(
 * Functions Implementation
 ***************************************/
 
-/***************************************
-* Encoder Event Callback
-* This callback is used for error reporting
-* or to signal the encoding being done
-***************************************/
-EB_ERRORTYPE encoderFeedbackComplete(
-    EB_PTR            pAppData)     // Pointer to event data
-{
-    EbAppContext_t *callbackDataPtr = (EbAppContext_t*)pAppData;
-    AppCommandItem_t commandItem;
-
-    pAppData = (EB_PTR)0;
-
-    // Configure the command
-    commandItem.command = APP_FeedBackIsComplete;
-    commandItem.headerPtr = (EB_BUFFERHEADERTYPE*)EB_NULL;
-    commandItem.instanceIndex = callbackDataPtr->instanceIdx;
-    AppCommandFifoPush(callbackDataPtr->fifoPtr, &commandItem);
-
-    return EB_ErrorNone;
-}
-
-/***************************************
-* Encoder Event Callback
-* This callback is used for error reporting
-* or to signal the encoding being done
-***************************************/
-EB_ERRORTYPE encoderEventCb(
-    EB_PTR            pAppData,       // Pointer to private data
-    EB_U32            nData1)         // Type defined by event
-{
-    EbAppContext_t *callbackDataPtr = (EbAppContext_t*)pAppData;
-    AppCommandItem_t commandItem;
-
-    pAppData = (EB_PTR)0;
-
-    commandItem.command = APP_ExitError;
-    commandItem.errorCode = nData1;
-    commandItem.headerPtr = (EB_BUFFERHEADERTYPE*)EB_NULL;
-    commandItem.instanceIndex = callbackDataPtr->instanceIdx;
-    AppCommandFifoPush(callbackDataPtr->fifoPtr, &commandItem);
-
-    (void)nData1;
-
-    return EB_ErrorNone;
-}
-
-/***************************************
-* Encoder Empty Buffer Done Callback
-***************************************/
-EB_ERRORTYPE encoderSendPictureDone(
-    EB_PTR                 pAppData,
-    EB_BUFFERHEADERTYPE   *pBuffer)
-{
-    EB_ERRORTYPE   return_error = EB_ErrorNone;
-    EbAppContext_t *callbackDataPtr = (EbAppContext_t*)pAppData;
-    AppCommandItem_t commandItem;
-
-    // Configure the command
-    commandItem.command = APP_InputEmptyThisBuffer;
-    commandItem.headerPtr = pBuffer;
-    commandItem.instanceIndex = callbackDataPtr->instanceIdx;
-    AppCommandFifoPush(callbackDataPtr->fifoPtr, &commandItem);
-
-    return return_error;
-}
-
-/***************************************
-* Encoder Fill Buffer Done Callback
-***************************************/
-EB_ERRORTYPE encoderFillPacketDone(
-    EB_PTR                  pAppData,
-    EB_BUFFERHEADERTYPE    *pBuffer)
-{
-    AppCommandItem_t commandItem;
-    EB_ERRORTYPE   return_error = EB_ErrorNone;
-    EbAppContext_t *callbackDataPtr = (EbAppContext_t*)pAppData;
-
-    commandItem.command = APP_OutputStreamFillThisBuffer;
-    commandItem.headerPtr       = pBuffer;
-    commandItem.instanceIndex   = callbackDataPtr->instanceIdx;
-
-    AppCommandFifoPush(callbackDataPtr->fifoPtr, &commandItem);
-
-    return return_error;
-}
-
-
 /***********************************
  * Initialize Core & Component
  ***********************************/
@@ -701,16 +600,14 @@ EB_ERRORTYPE InitEncoder(
     EbAppContext_t			*callbackData,
 	EB_U32					instanceIdx)
 {
-    EB_CALLBACKTYPE     encoderCallBacks = {encoderFeedbackComplete, encoderEventCb, encoderSendPictureDone, encoderFillPacketDone};
     EB_ERRORTYPE        return_error = EB_ErrorNone;
-    unsigned int        bufferIndex;
     
     // Allocate a memory table hosting all allocated pointers
     AllocateMemoryTable(instanceIdx);
 
     ///************************* LIBRARY INIT [START] *********************///
     // STEP 1: Call the library to construct a Component Handle
-    return_error = EbInitHandle(&callbackData->svtEncoderHandle, callbackData, &encoderCallBacks);
+    return_error = EbInitHandle(&callbackData->svtEncoderHandle, callbackData);
 
     if (return_error != EB_ErrorNone) {
         return return_error;
@@ -784,25 +681,7 @@ EB_ERRORTYPE InitEncoder(
         return return_error;
     }
     
-    // STEP 8: Queue the Input Buffers to be populated 
-    for(bufferIndex=0; bufferIndex < callbackData->ebEncParameters.inputOutputBufferFifoInitCount; ++bufferIndex) {
-
-        // Tag the input buffers with APP_InputEmptyThisBuffer for the library to empty them
-        AppCommandItem_t commandItem;
-		commandItem.instanceIndex   = callbackData->instanceIdx;
-        commandItem.command         = APP_InputEmptyThisBuffer;
-        commandItem.headerPtr       = callbackData->inputBufferPool[bufferIndex];
-
-        AppCommandFifoPush(callbackData->fifoPtr, &commandItem);
-    }
-
-    // STEP 10:  Queue the Bitstream Buffers (link the library bitstream pointers to the newly created buffers)
-    for(bufferIndex=0; bufferIndex < callbackData->ebEncParameters.inputOutputBufferFifoInitCount; ++bufferIndex) {
-         return_error = EbH265EncFillPacket(
-                           callbackData->svtEncoderHandle,
-                           callbackData->streamBufferPool[bufferIndex]);
-    }
-
+  
     ///********************** APPLICATION INIT [END] ******************////////
     
     return return_error;

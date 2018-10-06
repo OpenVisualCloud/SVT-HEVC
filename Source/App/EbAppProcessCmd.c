@@ -25,13 +25,6 @@
 #define SIZE_OF_ONE_FRAME_IN_BYTES(width, height,is16bit) ( ( ((width)*(height)*3)>>1 )<<is16bit)
 extern volatile int keepRunning;
 
-/***************************************
- * Process Input Command
- ***************************************/
-
-
-
-
 /******************************************************
 * Copy fields from the stream to the input buffer
     Input   : stream
@@ -179,7 +172,6 @@ EB_S32 GetNextQpFromQpFile(
     return qp;
 }
 
-
 void ReadInputFrames(
     InputBitstreamContext_t     *contextPtr,
     EbConfig_t                  *config,
@@ -188,14 +180,10 @@ void ReadInputFrames(
 {
 
     EB_U64  readSize;
-
-
     EB_S64  inputPaddedWidth = config->inputPaddedWidth;
     EB_S64  inputPaddedHeight = config->inputPaddedHeight;
-
-
     FILE   *inputFile = config->inputFile;
-    EB_U8* ebInputPtr;
+    EB_U8  *ebInputPtr;
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
 
     EB_U64 frameSize = (EB_U64)((inputPaddedWidth*inputPaddedHeight * 3) / 2 + (inputPaddedWidth / 4 * inputPaddedHeight * 3) / 2);
@@ -614,13 +602,12 @@ void SendQpOnTheFly(
     return;
 }
 
-
 //************************************/
 // ProcessInputBuffer
 // Reads yuv frames from file and copy
 // them into the input buffer
 /************************************/
-void ProcessInputBuffer(
+APPEXITCONDITIONTYPE ProcessInputBuffer(
     InputBitstreamContext_t     *contextPtr,
     EbConfig_t                  *config,
     unsigned char                is16bit,
@@ -628,15 +615,14 @@ void ProcessInputBuffer(
     EB_COMPONENTTYPE           *componentHandle)
 {
 
-    EB_S64                           inputPaddedWidth           = config->inputPaddedWidth;
-    EB_S64                           inputPaddedHeight          = config->inputPaddedHeight; 
+    APPEXITCONDITIONTYPE    return_value = APP_ExitConditionNone;
 
-    EB_S64                           framesToBeEncoded          = config->framesToBeEncoded;
-
-	EB_U64                           frameSize                  = (EB_U64)((inputPaddedWidth*inputPaddedHeight * 3) / 2 + (inputPaddedWidth / 4 * inputPaddedHeight * 3) / 2);
-
-    EB_S64                           totalBytesToProcessCount;
-    EB_S64                           remainingByteCount;
+    EB_S64                  inputPaddedWidth           = config->inputPaddedWidth;
+    EB_S64                  inputPaddedHeight          = config->inputPaddedHeight; 
+    EB_S64                  framesToBeEncoded          = config->framesToBeEncoded;
+	EB_U64                  frameSize                  = (EB_U64)((inputPaddedWidth*inputPaddedHeight * 3) / 2 + (inputPaddedWidth / 4 * inputPaddedHeight * 3) / 2);
+    EB_S64                  totalBytesToProcessCount;
+    EB_S64                  remainingByteCount;
 
     if (config->injector && contextPtr->processedFrameCount)
     {
@@ -678,26 +664,50 @@ void ProcessInputBuffer(
         headerPtr->nOffset      = 0;
         headerPtr->nTimeStamp   = 0;
         headerPtr->nFlags       = 0;
-        headerPtr->nFlags      |= (contextPtr->processedFrameCount == (EB_U64)config->framesToBeEncoded) || config->stopEncoder ? EB_BUFFERFLAG_EOS : 0;
 
-        // Send empty this buffer command
+#if CHKN_EOS
+        headerPtr->nFlags = 0; 
+#else
+        headerPtr->nFlags |= (contextPtr->processedFrameCount == (EB_U64)config->framesToBeEncoded) || config->stopEncoder ? EB_BUFFERFLAG_EOS : 0;
+#endif
+
+        // Send the picture
         EbH265EncSendPicture((EB_HANDLETYPE) componentHandle, headerPtr);
+        
+        if ((contextPtr->processedFrameCount == (EB_U64)config->framesToBeEncoded) || config->stopEncoder) {
+
+            headerPtr->nAllocLen    = 0;
+            headerPtr->nFilledLen   = 0;
+            headerPtr->nTickCount   = 0;
+            headerPtr->pAppPrivate  = NULL;
+            headerPtr->nOffset      = 0;
+            headerPtr->nTimeStamp   = 0;
+            headerPtr->nFlags       = EB_BUFFERFLAG_EOS;
+            headerPtr->pBuffer      = NULL;
+
+            EbH265EncSendPicture((EB_HANDLETYPE)componentHandle, headerPtr);
+        
+        }
+
+        return_value = (headerPtr->nFlags == EB_BUFFERFLAG_EOS) ? APP_ExitConditionFinished : return_value;
+
     }
 
-    return;
+    return return_value;
 }
 
 #define LONG_ENCODE_FRAME_ENCODE    4000
 #define SPEED_MEASUREMENT_INTERVAL  2000
 #define START_STEADY_STATE          1000
 
-void ProcessOutputStreamBuffer(
+APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
 	EbConfig_t              *config,
     APPPORTACTIVETYPE       *portState,
     EB_BUFFERHEADERTYPE    *headerPtr,
 	EB_COMPONENTTYPE       *componentHandle
     )
 {
+    APPEXITCONDITIONTYPE    return_value = APP_ExitConditionNone;
 
     // Per channel variables
     FILE                 *streamFile      = config->bitstreamFile;
@@ -720,7 +730,9 @@ void ProcessOutputStreamBuffer(
     EB_U64                finishsTime     = 0;
     EB_U64                finishuTime     = 0;
     double                duration        = 0.0;
-	
+
+    // blocking call
+    EbH265GetPacket((EB_HANDLETYPE)componentHandle, headerPtr);
 
     ++(config->performanceContext.frameCount);
 	*totalLatency += (EB_U64)headerPtr->nTickCount;
@@ -753,16 +765,23 @@ void ProcessOutputStreamBuffer(
 
 	// Update Output Port Activity State
 	*portState = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? APP_PortInactive : *portState;
-
+    return_value = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? APP_ExitConditionFinished : APP_ExitConditionNone;
+#if DEADLOCK_DEBUG
+    ++frameCount;
+#else
+    //++frameCount;
 	printf("\b\b\b\b\b\b\b\b\b%9d", ++frameCount);
+#endif
 
     //++frameCount;
 	fflush(stdout);
 
 	// Queue the buffer again if the port is still active
 	if (*portState == APP_PortActive) {
+#if ! CHKN_OMX
         EbH265EncFillPacket((EB_HANDLETYPE)componentHandle, headerPtr);
-    }
+#endif 
+	}
     else {
         if ((config->framesToBeEncoded < SPEED_MEASUREMENT_INTERVAL) || (config->framesToBeEncoded - startFrame) < SPEED_MEASUREMENT_INTERVAL){
             config->performanceContext.averageSpeed = (config->performanceContext.frameCount - startFrame) / duration;
@@ -805,7 +824,7 @@ void ProcessOutputStreamBuffer(
         }
 	}
 
-	return;
+	return return_value;
 }
 /***************************************
  * Process Error Log
@@ -1380,74 +1399,52 @@ static void LogErrorOutput(
 /***************************************
  * App Process Commands
  ***************************************/
-APPEXITCONDITIONTYPE AppProcessCommands(
+APPEXITCONDITIONTYPE AppProcessInputCommands(
+    EbConfig_t             **configs,
+    EbParentAppContext_t   *appCallback,
+	APPEXITCONDITIONTYPE   *exitConditions)
+{
+    APPEXITCONDITIONTYPE    return_value = APP_ExitConditionFinished;
+    EB_U8                   instanceIdx = 0;
+    EB_BUFFERHEADERTYPE    *headerPtr = appCallback->appCallBacks[instanceIdx]->inputBufferPool[instanceIdx];
+
+    return_value = ProcessInputBuffer(
+        &appCallback->appCallBacks[instanceIdx]->inputContext,
+        configs[instanceIdx],
+        (unsigned char)(configs[instanceIdx]->encoderBitDepth>8),
+        headerPtr,
+        (EB_COMPONENTTYPE*)appCallback->appCallBacks[instanceIdx]->svtEncoderHandle);
+
+    exitConditions[instanceIdx]   = return_value;
+
+    return return_value;
+}
+
+
+APPEXITCONDITIONTYPE AppProcessOutputCommands(
     EbConfig_t             **configs,
     EbParentAppContext_t   *appCallback,
     EB_U64                 *encodingFinishTimesSeconds,
     EB_U64                 *encodingFinishTimesuSeconds,
-	APPEXITCONDITIONTYPE   *exitConditions)
+    APPEXITCONDITIONTYPE   *exitConditions)
 {
     APPEXITCONDITIONTYPE    return_value = APP_ExitConditionFinished;
-    AppCommandItem_t        command;
-    EB_U8                   instanceIdx;
-		
-    // Wait for Command to be available 
-    WaitForCommandPost(&appCallback->fifo);
-    
-    // Get Command (blocking function)
+    EB_U8                   instanceIdx = 0;
+    EB_BUFFERHEADERTYPE    *headerPtr = appCallback->appCallBacks[instanceIdx]->streamBufferPool[instanceIdx];
 
-    AppCommandFifoPop(&appCallback->fifo, &command);
-    instanceIdx     = command.instanceIndex;
 
-    // Switch on the Command
-    switch(command.command) {
-    case APP_InputEmptyThisBuffer:
-        ProcessInputBuffer(
-            &appCallback->appCallBacks[instanceIdx]->inputContext,
-            configs[instanceIdx],
-            (unsigned char)(configs[instanceIdx]->encoderBitDepth>8),
-            command.headerPtr,
-            (EB_COMPONENTTYPE*)appCallback->appCallBacks[instanceIdx]->svtEncoderHandle);
-        break;
+    return_value = ProcessOutputStreamBuffer(
+        configs[instanceIdx],
+        &appCallback->appCallBacks[instanceIdx]->outputStreamPortActive,
+        headerPtr,
+        (EB_COMPONENTTYPE*)appCallback->appCallBacks[instanceIdx]->svtEncoderHandle);
 
-    case APP_OutputStreamFillThisBuffer:
-        ProcessOutputStreamBuffer(
-			configs[instanceIdx],
-            &appCallback->appCallBacks[instanceIdx]->outputStreamPortActive,
-            command.headerPtr,
-			(EB_COMPONENTTYPE*)appCallback->appCallBacks[instanceIdx]->svtEncoderHandle);
+        exitConditions[instanceIdx] = return_value;
 
-        break;
-
-    case APP_FeedBackIsComplete:
-        appCallback->appCallBacks[instanceIdx]->feedBackIsComplete = EB_TRUE;
-        break;
-    case APP_ExitNoError:
-        return_value                = APP_ExitConditionFinished;
-        exitConditions[instanceIdx] = APP_ExitConditionFinished;
-        return  return_value;
-
-    case APP_ExitError:
-        LogErrorOutput(configs[instanceIdx]->errorLogFile,command.errorCode);
-        return_value                = APP_ExitConditionError;
-        exitConditions[instanceIdx] = APP_ExitConditionError;
-        return  return_value;
-
-    default:
-        printf("Error: Unrecognized command\n");
-        return_value                = APP_ExitConditionError;
-        exitConditions[instanceIdx] = APP_ExitConditionError;
-        return  return_value;
-    }
-
-    exitConditions[instanceIdx]   = ((appCallback->appCallBacks[instanceIdx]->outputStreamPortActive         ==     APP_PortInactive) &&
-                                    (appCallback->appCallBacks[instanceIdx]->feedBackIsComplete              ==     EB_TRUE)) ? 
-                                    return_value : APP_ExitConditionNone;
-
-    return_value    =   exitConditions[instanceIdx];
     if (return_value == APP_ExitConditionFinished) {
         FinishTime(&encodingFinishTimesSeconds[instanceIdx], &encodingFinishTimesuSeconds[instanceIdx]);
     }
 
     return return_value;
 }
+

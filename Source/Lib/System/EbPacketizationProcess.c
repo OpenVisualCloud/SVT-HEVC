@@ -621,18 +621,9 @@ void* PacketizationKernel(void *inputPtr)
                 &latency);
 
             outputStreamPtr->nTickCount = (EB_U32)latency;
-
-            // Output the Bitstream
             outputStreamPtr->pAppPrivate = queueEntryPtr->outMetaData;
-            sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->callbackFunctions.FillPacketDone(
-                sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->appPrivateData,     // App Private Data Ptr
-                outputStreamPtr); 
+			EbPostFullObject(outputStreamWrapperPtr);
             queueEntryPtr->outMetaData = (EbLinkedListNode *)EB_NULL;
-                               
-
-            // Release the Bitstream wrapper object
-            EbReleaseObject(outputStreamWrapperPtr);         
-               
 
             // Reset the Reorder Queue Entry
             queueEntryPtr->pictureNumber    += PACKETIZATION_REORDER_QUEUE_MAX_DEPTH;            
@@ -647,7 +638,7 @@ void* PacketizationKernel(void *inputPtr)
 
         }
 #if DEADLOCK_DEBUG
-        printf("POC %lld PK IN \n", pictureControlSetPtr->pictureNumber);
+        printf("POC %lld PK OUT \n", pictureControlSetPtr->pictureNumber);
 #endif     
     }
 return EB_NULL;

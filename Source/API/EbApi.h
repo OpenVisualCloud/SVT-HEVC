@@ -208,14 +208,13 @@ EB_API EB_ERRORTYPE EbH265EncSendPicture(
     EB_HANDLETYPE          hComponent,
     EB_BUFFERHEADERTYPE   *pBuffer);
 
-EB_API EB_ERRORTYPE EbH265EncFillPacket(
+EB_API EB_ERRORTYPE EbH265GetPacket(
     EB_HANDLETYPE          hComponent,
     EB_BUFFERHEADERTYPE   *pBuffer);
 
 EB_API EB_ERRORTYPE EbInitHandle(
     EB_HANDLETYPE* pHandle,
-    EB_PTR pAppData,
-    EB_CALLBACKTYPE* pCallBacks);
+    EB_PTR pAppData);
 
 EB_API EB_ERRORTYPE EbDeinitHandle(
     EB_HANDLETYPE hComponent);

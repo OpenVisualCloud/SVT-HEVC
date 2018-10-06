@@ -534,22 +534,19 @@ void* ResourceCoordinationKernel(void *inputPtr)
                 (SequenceControlSet_t*) contextPtr->sequenceControlSetActiveArray[instanceIndex]->objectPtr,
                 contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr);
 
-            // Disable releaseFlag of new SequenceControlSet
-            EbObjectReleaseDisable(
-                contextPtr->sequenceControlSetActiveArray[instanceIndex]);
-
-            if(previousSequenceControlSetWrapperPtr != EB_NULL) {
-
-                // Enable releaseFlag of old SequenceControlSet
-                EbObjectReleaseEnable(
-                    previousSequenceControlSetWrapperPtr);
-
-                // Check to see if previous SequenceControlSet is already inactive, if TRUE then release the SequenceControlSet
-                if(previousSequenceControlSetWrapperPtr->liveCount == 0) {
-                    EbReleaseObject(
-                        previousSequenceControlSetWrapperPtr);
-                }
-            }
+            //// Disable releaseFlag of new SequenceControlSet
+            //EbObjectReleaseDisable(
+            //    contextPtr->sequenceControlSetActiveArray[instanceIndex]);
+            //if(previousSequenceControlSetWrapperPtr != EB_NULL) {
+            //    // Enable releaseFlag of old SequenceControlSet
+            //    EbObjectReleaseEnable(
+            //        previousSequenceControlSetWrapperPtr);
+            //    // Check to see if previous SequenceControlSet is already inactive, if TRUE then release the SequenceControlSet
+            //    if(previousSequenceControlSetWrapperPtr->liveCount == 0) {
+            //        EbReleaseObject(
+            //            previousSequenceControlSetWrapperPtr);
+            //    }
+            //}
         }
         EbReleaseMutex(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->configMutex);
 
