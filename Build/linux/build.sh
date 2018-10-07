@@ -36,7 +36,7 @@ function debug {
 	cp App/HevcEncoderApp ../../../Bin/Debug/HevcEncoderApp
 		# Compile the Simple App
 	make HevcEncoderSimpleApp
-	cp App/HevcEncoderSimpleApp ../../../Bin/Debug/HevcEncoderSimpleApp
+	cp SimpleApp/HevcEncoderSimpleApp ../../../Bin/Debug/HevcEncoderSimpleApp
 	cd ..
 }
 
@@ -65,7 +65,7 @@ function release {
 	cp App/HevcEncoderApp ../../../Bin/Release/HevcEncoderApp
 	# Compile the Simple App
 	make HevcEncoderSimpleApp
-	cp App/HevcEncoderSimpleApp ../../../Bin/Release/HevcEncoderSimpleApp
+	cp SimpleApp/HevcEncoderSimpleApp ../../../Bin/Release/HevcEncoderSimpleApp
 	cd ..	
 }
 

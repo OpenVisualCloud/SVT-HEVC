@@ -89,6 +89,7 @@ enable_language(ASM_NASM)
 # Add Subdirectories
 add_subdirectory (Lib)
 add_subdirectory (App)
+add_subdirectory (SimpleApp)
 
 
 
