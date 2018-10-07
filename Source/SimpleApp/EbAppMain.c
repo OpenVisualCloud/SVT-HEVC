@@ -22,7 +22,13 @@
 #include "EbTime.h"
 #if !__linux
 #include <Windows.h>
+#else
+#include <pthread.h>
+#include <semaphore.h>
+#include <time.h>
+#include <errno.h>
 #endif
+
 
 
  /**********************************
