@@ -1702,7 +1702,7 @@ void LoadDefaultBufferConfigurationSettings(
     EB_U32 encDecSegH = ((sequenceControlSetPtr->maxInputLumaHeight + 32) / MAX_LCU_SIZE);
     EB_U32 encDecSegW = ((sequenceControlSetPtr->maxInputLumaWidth + 32) / MAX_LCU_SIZE);
 
-    EB_U32 inputPic = 180;// SetParentPcs(&sequenceControlSetPtr->staticConfig);
+    EB_U32 inputPic = SetParentPcs(&sequenceControlSetPtr->staticConfig);
 
     unsigned int coreCount = GetNumCores();
     sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount = coreCount + sequenceControlSetPtr->staticConfig.lookAheadDistance;
@@ -3217,20 +3217,6 @@ EB_ERRORTYPE EbInputBufferHeaderCtor(
 {
     EB_BUFFERHEADERTYPE* inputBuffer;
     EB_H265_ENC_CONFIGURATION   * config = (EB_H265_ENC_CONFIGURATION*)objectInitDataPtr;
-
-    const int tenBitPackedMode = (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
-
-    // Determine size of each plane
-    const size_t luma8bitSize =
-
-        config->sourceWidth    *
-        config->sourceHeight   *
-
-        (1 << tenBitPackedMode);
-
-    const size_t chroma8bitSize = luma8bitSize >> 2;
-    const size_t luma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? luma8bitSize : 0;
-    const size_t chroma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? chroma8bitSize : 0;
 
     EB_MALLOC(EB_BUFFERHEADERTYPE*, inputBuffer, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR);
     *objectDblPtr = (EB_PTR)inputBuffer;

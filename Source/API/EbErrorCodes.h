@@ -11,21 +11,10 @@ extern "C" {
 #endif // __cplusplus
 
 
-#define   CHECK_REPORT_ERROR(cond, appCallbackPtr, errorCode)  {}
+#define   CHECK_REPORT_ERROR(cond, appCallbackPtr, errorCode)  { (void)appCallbackPtr;  }
 
-#define   CHECK_REPORT_ERROR_NC(appCallbackPtr, errorCode)     {}                              
+#define   CHECK_REPORT_ERROR_NC(appCallbackPtr, errorCode)     { (void)appCallbackPtr;  }                              
 
-
-//#define   CHECK_REPORT_ERROR(cond, appCallbackPtr, errorCode)  if(!(cond))                                           \
-//                                                                {                                                    \
-//                                                                    appCallbackPtr->callbackFunctions.ErrorHandler(  \
-//                                                                        ((appCallbackPtr)->appPrivateData),          \
-//                                                                        errorCode);                                 \
-//                                                                }
-//
-//#define   CHECK_REPORT_ERROR_NC(appCallbackPtr, errorCode)     appCallbackPtr->callbackFunctions.ErrorHandler(       \
-//                                                                        ((appCallbackPtr)->appPrivateData),          \
-//                                                                        errorCode);       
 
 typedef enum ENCODER_ERROR_CODES
 {
