@@ -829,7 +829,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
 /***************************************
  * Process Error Log
  ***************************************/
-static void LogErrorOutput(
+void LogErrorOutput(
     FILE                    *errorLogFile,
     EB_U32                  errorCode)
 {

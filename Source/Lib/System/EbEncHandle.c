@@ -1975,8 +1975,10 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.sourceHeight = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceHeight;
     sequenceControlSetPtr->maxInputLumaWidth  = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceWidth;
     sequenceControlSetPtr->maxInputLumaHeight = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceHeight;
-    
-    sequenceControlSetPtr->staticConfig.inputPictureStride = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->inputPictureStride;
+    if (((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->inputPictureStride)
+        sequenceControlSetPtr->staticConfig.inputPictureStride = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->inputPictureStride;
+    else
+        sequenceControlSetPtr->staticConfig.inputPictureStride = sequenceControlSetPtr->maxInputLumaWidth;
 
 
     sequenceControlSetPtr->chromaWidth = sequenceControlSetPtr->maxInputLumaWidth >> 1;
@@ -2842,6 +2844,8 @@ EB_API EB_ERRORTYPE EbH265EncInitParameter(
     // ASM Type
     configPtr->asmType = ASM_AVX2; 
     configPtr->useRoundRobinThreadAssignment = EB_FALSE;
+    configPtr->channelId = 0;
+    configPtr->activeChannelCount = 1;
 
 
     return return_error;

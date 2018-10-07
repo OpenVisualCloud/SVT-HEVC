@@ -10,6 +10,8 @@
 
 #include "EbApi.h"
 
+
+
 #define MAX_CHANNEL_NUMBER      6
 #define MAX_NUM_TOKENS          200
 
@@ -22,27 +24,6 @@
 #define TOP_INPUT_PADDING 0
 #define BOTTOM_INPUT_PADDING 0
 
-
-typedef struct EbPerformanceContext_s {
-    
-       
-    /****************************************
-     * Computational Performance Data
-     ****************************************/
-    EB_U64                  totalLatency;
-	EB_U32                  maxLatency;
-
-    EB_U64                  startsTime; 
-    EB_U64                  startuTime;
-
-    EB_U64                  frameCount;
-
-    double                  averageSpeed;
-    double                  averageLatency;
-
-    EB_U64                  byteCount;
-
-}EbPerformanceContext_t;
    
 typedef struct EbConfig_s
 {        
@@ -206,11 +187,6 @@ typedef struct EbConfig_s
     ****************************************/
     EB_ASM					asmType;
 
-    /****************************************
-     * Computational Performance Data
-     ****************************************/
-    EbPerformanceContext_t  performanceContext;
-
     // Channel info
     EB_U32              channelId;
     EB_U32              activeChannelCount;
@@ -222,8 +198,5 @@ typedef struct EbConfig_s
 extern void EbConfigCtor(EbConfig_t *configPtr);
 extern void EbConfigDtor(EbConfig_t *configPtr);
 
-extern EB_ERRORTYPE	ReadCommandLine(int argc, char *const argv[], EbConfig_t **config, unsigned int  numChannels,	EB_ERRORTYPE *return_errors);
-extern unsigned int     GetHelp(int argc, char *const argv[]);
-extern unsigned int		GetNumberOfChannels(int argc, char *const argv[]);
 
 #endif //EbAppConfig_h

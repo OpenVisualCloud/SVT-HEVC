@@ -34,6 +34,7 @@ extern "C" {
 #else
 #define FUNC_TABLE
 #endif
+#define EB_MAX_TEMPORAL_LAYERS                  MAX_TEMPORAL_LAYERS
 
 
 // Reserved types for lib's internal use. Must be less than EB_EXT_TYPE_BASE

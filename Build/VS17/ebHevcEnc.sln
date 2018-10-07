@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2013 for Windows Desktop
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2042
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ebHevcEncApp", "ebHevcEncApp.vcxproj", "{2C65097A-DA7B-4941-A096-15C2E348994D}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -19,6 +19,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ASM_SSSE3", "ASM_SSSE3.vcxproj", "{31F45EEB-03A1-4791-A447-E4B1604EF7D7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ASM_SSE4", "ASM_SSE4.vcxproj", "{3895863F-31FB-43D1-B562-8B4C153DDB9B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ebHevcEncSimpleApp", "ebHevcEncSimpleApp.vcxproj", "{73FD1ADF-8578-448D-930F-42B49B6C99F7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,8 +56,15 @@ Global
 		{3895863F-31FB-43D1-B562-8B4C153DDB9B}.Debug|x64.Build.0 = Debug|x64
 		{3895863F-31FB-43D1-B562-8B4C153DDB9B}.Release|x64.ActiveCfg = Release|x64
 		{3895863F-31FB-43D1-B562-8B4C153DDB9B}.Release|x64.Build.0 = Release|x64
+		{73FD1ADF-8578-448D-930F-42B49B6C99F7}.Debug|x64.ActiveCfg = Debug|x64
+		{73FD1ADF-8578-448D-930F-42B49B6C99F7}.Debug|x64.Build.0 = Debug|x64
+		{73FD1ADF-8578-448D-930F-42B49B6C99F7}.Release|x64.ActiveCfg = Release|x64
+		{73FD1ADF-8578-448D-930F-42B49B6C99F7}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {94410BEC-C00C-4942-95E9-143C24D86130}
 	EndGlobalSection
 EndGlobal

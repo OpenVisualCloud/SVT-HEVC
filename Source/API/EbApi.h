@@ -13,9 +13,6 @@
 extern "C" {
 #endif // __cplusplus
 
-#define EB_IndexH265EncParam                    0x7F004000
-#define EB_IndexH265DynEncParam                 0x7F004001
-#define EB_MAX_TEMPORAL_LAYERS                  MAX_TEMPORAL_LAYERS
 #define EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT     2
 #define EB_HME_SEARCH_AREA_ROW_MAX_COUNT        2
 

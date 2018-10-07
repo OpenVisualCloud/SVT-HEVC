@@ -21,13 +21,9 @@ endif(${COMPILE_AS_CPP} EQUAL 1)
 
 
 # App Source Files
-add_executable (HevcEncoderApp 
-    EbAppConfig.c
+add_executable (HevcEncoderSimpleApp 
     EbAppContext.c
-    EbAppFifo.c
     EbAppMain.c
-    EbAppProcessCmd.c
-    EbTime.c
 )
 
 #********** SET COMPILE FLAGS************
@@ -35,12 +31,12 @@ add_executable (HevcEncoderApp
 if (UNIX)
 
 	# Configure the RPATH to allow relative runtime linking	
-	INSTALL(TARGETS HevcEncoderApp RUNTIME DESTINATION ".:\$ORIGIN/../lib:\$ORIGIN/")
+	INSTALL(TARGETS HevcEncoderSimpleApp RUNTIME DESTINATION ".:\$ORIGIN/../lib:\$ORIGIN/")
 
 
 
 	# Link the Encoder App
-	target_link_libraries (HevcEncoderApp
+	target_link_libraries (HevcEncoderSimpleApp
 		${PROJECT_SOURCE_DIR}/../Bin/${CMAKE_BUILD_TYPE}/libHevcEncoder.so
 		pthread rt
 		m)
@@ -49,7 +45,7 @@ if (UNIX)
 else()
 
 	# Link the Encoder App
-	target_link_libraries (HevcEncoderApp
+	target_link_libraries (HevcEncoderSimpleApp
 		${PROJECT_SOURCE_DIR}/../Bin/${CMAKE_BUILD_TYPE}/libHevcEncoder.dll)
 
 endif()
