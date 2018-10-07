@@ -7,7 +7,6 @@
 #define EBSEI_h
 
 #include "EbTypes.h"
-#include "EbApiSei.h"
 #include "EbDefinitions.h"
 #ifdef __cplusplus
 extern "C" {

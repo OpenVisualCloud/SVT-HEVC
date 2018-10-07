@@ -6,10 +6,8 @@
 #ifndef EbAppContext_h
 #define EbAppContext_h
 
-#include "EbAppTypes.h"
 #include "EbApi.h"
 #include "EbAppConfig.h"
-#include "EbAppFifo.h"
 
 /***************************************
 

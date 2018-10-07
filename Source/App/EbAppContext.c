@@ -12,7 +12,6 @@
 #include "EbTypes.h"
 #include "EbAppContext.h"
 #include "EbAppConfig.h"
-#include "EbApiSei.h"
 
 
 #define INPUT_SIZE_576p_TH				0x90000		// 0.58 Million   

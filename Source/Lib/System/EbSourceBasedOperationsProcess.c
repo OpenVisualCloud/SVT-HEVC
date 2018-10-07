@@ -17,7 +17,6 @@
 #include "EbPictureOperators.h"
 #include "EbMotionEstimationContext.h"
 #include "emmintrin.h"
-#include "EbApiSei.h"
 /**************************************
 * Macros
 **************************************/

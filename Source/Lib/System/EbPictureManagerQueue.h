@@ -11,7 +11,6 @@
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbPredictionStructure.h"
-#include "EbApiSei.h"
 
 #ifdef __cplusplus
 extern "C" {
