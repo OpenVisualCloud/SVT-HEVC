@@ -850,7 +850,7 @@ void UpdateHistogramQueueEntry(
 	HlRateControlHistogramEntry_t     *histogramQueueEntryPtr;
 	EB_S32                             histogramQueueEntryIndex;
 
-	EbBlockOnMutex(sequenceControlSetPtr->encodeContextPtr->rateTableUpdateMutex);
+	EbBlockOnMutex(sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueueMutex);
 
 	histogramQueueEntryIndex = (EB_S32)(pictureControlSetPtr->pictureNumber - encodeContextPtr->hlRateControlHistorgramQueue[encodeContextPtr->hlRateControlHistorgramQueueHeadIndex]->pictureNumber);
 	histogramQueueEntryIndex += encodeContextPtr->hlRateControlHistorgramQueueHeadIndex;
@@ -861,7 +861,7 @@ void UpdateHistogramQueueEntry(
 	histogramQueueEntryPtr->lifeCount += pictureControlSetPtr->historgramLifeCount;
 	histogramQueueEntryPtr->passedToHlrc = EB_TRUE;
 
-	EbReleaseMutex(sequenceControlSetPtr->encodeContextPtr->rateTableUpdateMutex);
+	EbReleaseMutex(sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueueMutex);
 
 	return;
 
