@@ -132,8 +132,6 @@
     <ClInclude Include="..\..\Source\API\EbTypes.h" />
     <ClInclude Include="..\..\Source\App\EbAppConfig.h" />
     <ClInclude Include="..\..\Source\App\EbAppContext.h" />
-    <ClInclude Include="..\..\Source\App\EbAppFifo.h" />
-    <ClInclude Include="..\..\Source\App\EbAppTypes.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Config\Sample.cfg" />

@@ -708,7 +708,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     )
 {
     APPEXITCONDITIONTYPE    return_value = APP_ExitConditionNone;
-
+    EB_ERRORTYPE            stream_status = EB_ErrorNone;
     // Per channel variables
     FILE                 *streamFile      = config->bitstreamFile;
     EB_U32               startFrame      = (config->framesToBeEncoded == 0 || config->framesToBeEncoded < LONG_ENCODE_FRAME_ENCODE || (SPEED_MEASUREMENT_INTERVAL < START_STEADY_STATE)) ? 0 : START_STEADY_STATE;
@@ -731,99 +731,96 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     EB_U64                finishuTime     = 0;
     double                duration        = 0.0;
 
-    // blocking call
-    EbH265GetPacket((EB_HANDLETYPE)componentHandle, headerPtr);
+    // non-blocking call
+    stream_status = EbH265GetPacket((EB_HANDLETYPE)componentHandle, headerPtr);
+    if (stream_status != EB_NoErrorEmptyQueue) {
+        ++(config->performanceContext.frameCount);
+        *totalLatency += (EB_U64)headerPtr->nTickCount;
+        *maxLatency = (headerPtr->nTickCount > *maxLatency) ? headerPtr->nTickCount : *maxLatency;
 
-    ++(config->performanceContext.frameCount);
-	*totalLatency += (EB_U64)headerPtr->nTickCount;
-	*maxLatency = (headerPtr->nTickCount > *maxLatency) ? headerPtr->nTickCount : *maxLatency;
+        // Reset counters for long encodes
+        if (config->performanceContext.frameCount - 1 == startFrame) {
+            StartTime(startsTime, startuTime);
+            *maxLatency = 0;
+            *totalLatency = 0;
+        }
+        if ((EB_U32)frameCount == allChannelsStartFrame && allChannelsStartFrame <= SPEED_MEASUREMENT_INTERVAL) {
+            StartTime(&allChannelsStartsTime, &allChannelsStartuTime);
+        }
 
-    // Reset counters for long encodes
-    if (config->performanceContext.frameCount - 1 == startFrame){
-		StartTime(startsTime, startuTime);
-		*maxLatency     = 0;
-		*totalLatency   = 0;
-	}
-    if ((EB_U32)frameCount == allChannelsStartFrame && allChannelsStartFrame <= SPEED_MEASUREMENT_INTERVAL){
-		StartTime(&allChannelsStartsTime, &allChannelsStartuTime);
-	}
-    
-    FinishTime(&finishsTime, &finishuTime);
+        FinishTime(&finishsTime, &finishuTime);
 
-    ComputeOverallElapsedTime(
-			    *startsTime,
-			    *startuTime,
-			    finishsTime,
-			    finishuTime,
-			    &duration);
+        ComputeOverallElapsedTime(
+            *startsTime,
+            *startuTime,
+            finishsTime,
+            finishuTime,
+            &duration);
 
-	// Write Stream Data to file
-	if (streamFile) {
-		fwrite(headerPtr->pBuffer + headerPtr->nOffset, 1, headerPtr->nFilledLen, streamFile);
-	}
-    config->performanceContext.byteCount += headerPtr->nFilledLen;
+        // Write Stream Data to file
+        if (streamFile) {
+            fwrite(headerPtr->pBuffer + headerPtr->nOffset, 1, headerPtr->nFilledLen, streamFile);
+        }
+        config->performanceContext.byteCount += headerPtr->nFilledLen;
 
-	// Update Output Port Activity State
-	*portState = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? APP_PortInactive : *portState;
-    return_value = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? APP_ExitConditionFinished : APP_ExitConditionNone;
+        // Update Output Port Activity State
+        *portState = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? APP_PortInactive : *portState;
+        return_value = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? APP_ExitConditionFinished : APP_ExitConditionNone;
 #if DEADLOCK_DEBUG
-    ++frameCount;
+        ++frameCount;
 #else
-    //++frameCount;
-	printf("\b\b\b\b\b\b\b\b\b%9d", ++frameCount);
+        //++frameCount;
+        printf("\b\b\b\b\b\b\b\b\b%9d", ++frameCount);
 #endif
 
-    //++frameCount;
-	fflush(stdout);
+        //++frameCount;
+        fflush(stdout);
 
-	// Queue the buffer again if the port is still active
-	if (*portState == APP_PortActive) {
+        // Queue the buffer again if the port is still active
+        if (*portState == APP_PortActive) {
 #if ! CHKN_OMX
-        EbH265EncFillPacket((EB_HANDLETYPE)componentHandle, headerPtr);
+            EbH265EncFillPacket((EB_HANDLETYPE)componentHandle, headerPtr);
 #endif 
-	}
-    else {
-        if ((config->framesToBeEncoded < SPEED_MEASUREMENT_INTERVAL) || (config->framesToBeEncoded - startFrame) < SPEED_MEASUREMENT_INTERVAL){
+        }
+        else {
+            if ((config->framesToBeEncoded < SPEED_MEASUREMENT_INTERVAL) || (config->framesToBeEncoded - startFrame) < SPEED_MEASUREMENT_INTERVAL) {
+                config->performanceContext.averageSpeed = (config->performanceContext.frameCount - startFrame) / duration;
+                config->performanceContext.averageLatency = config->performanceContext.totalLatency / (double)(config->performanceContext.frameCount - startFrame);
+            }
+        }
+
+
+        if ((((config->framesToBeEncoded != 0) && (config->framesToBeEncoded > SPEED_MEASUREMENT_INTERVAL))
+            && ((EB_S64)config->performanceContext.frameCount == (config->framesToBeEncoded - (EB_S32)startFrame)))) {
             config->performanceContext.averageSpeed = (config->performanceContext.frameCount - startFrame) / duration;
             config->performanceContext.averageLatency = config->performanceContext.totalLatency / (double)(config->performanceContext.frameCount - startFrame);
         }
-    }
 
+        if (!(frameCount % SPEED_MEASUREMENT_INTERVAL)) {
+            if (frameCount < (EB_S32)allChannelsStartFrame && (frameCount >= (EB_S32)LONG_ENCODE_FRAME_ENCODE) && (allChannelsStartFrame <= SPEED_MEASUREMENT_INTERVAL)) {
+                ComputeOverallElapsedTime(
+                    allChannelsStartsTime,
+                    allChannelsStartuTime,
+                    finishsTime,
+                    finishuTime,
+                    &duration);
 
-    if ((((config->framesToBeEncoded != 0) && (config->framesToBeEncoded > SPEED_MEASUREMENT_INTERVAL) )
-        && ((EB_S64)config->performanceContext.frameCount == (config->framesToBeEncoded - (EB_S32)startFrame)))){
-        config->performanceContext.averageSpeed = (config->performanceContext.frameCount - startFrame) / duration;
-        config->performanceContext.averageLatency = config->performanceContext.totalLatency / (double)(config->performanceContext.frameCount - startFrame);    
-    }
+                printf("\n");
+                printf("Average System Encoding Speed:        %.2f\n", (double)(frameCount - allChannelsStartFrame) / duration);
+            }
+            else {
+                ComputeOverallElapsedTime(
+                    *startsTime,
+                    *startuTime,
+                    finishsTime,
+                    finishuTime,
+                    &duration);
 
-	if (!(frameCount % SPEED_MEASUREMENT_INTERVAL)){
-        if (frameCount < (EB_S32)allChannelsStartFrame && (frameCount >= (EB_S32)LONG_ENCODE_FRAME_ENCODE) && (allChannelsStartFrame <= SPEED_MEASUREMENT_INTERVAL)) {
-            ComputeOverallElapsedTime(
-                allChannelsStartsTime,
-                allChannelsStartuTime,
-                finishsTime,
-                finishuTime,
-                &duration);
-
-            printf("\n");
-            printf("Average System Encoding Speed:        %.2f\n", (double)(frameCount - allChannelsStartFrame) / duration);
+                printf("\n");
+                printf("Average System Encoding Speed:        %.2f\n", (double)(frameCount - (EB_S32)startFrame) / duration);
+            }
         }
-        else {
-            ComputeOverallElapsedTime(
-                *startsTime,
-                *startuTime,
-                finishsTime,
-                finishuTime,
-                &duration);
-
-            printf("\n");
-            printf("Average System Encoding Speed:        %.2f\n", (double)(frameCount - (EB_S32)startFrame) / duration);
-        
-        
-        
-        }
-	}
-
+    }
 	return return_value;
 }
 /***************************************

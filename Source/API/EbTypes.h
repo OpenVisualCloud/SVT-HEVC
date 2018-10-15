@@ -28,7 +28,7 @@ extern "C" {
 #error OS not supported 
 #endif
 
-#define  CHKN_OMX  1
+#define CHKN_OMX        1
 #define DEADLOCK_DEBUG  0
 #define CHKN_EOS        1
 #define EB_MIN(a,b)             (((a) < (b)) ? (a) : (b))
@@ -66,7 +66,6 @@ extern "C" {
 #endif
 #endif
 
-#define	Log2f					          Log2f_SSE2
 
 #ifndef _RSIZE_T_DEFINED
 	typedef size_t rsize_t;
@@ -248,6 +247,7 @@ typedef enum APPPORTACTIVETYPE {
         EB_ErrorCreateMutexFailed                   = (EB_S32) 0x80002030,
         EB_ErrorMutexUnresponsive                   = (EB_S32) 0x80002031,
         EB_ErrorDestroyMutexFailed                  = (EB_S32) 0x80002032,
+        EB_NoErrorEmptyQueue                        = (EB_S32) 0x80002033,
         EB_ErrorMax                                 = 0x7FFFFFFF
     } EB_ERRORTYPE;
 

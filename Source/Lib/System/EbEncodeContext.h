@@ -151,8 +151,8 @@ typedef struct EncodeContext_s
 	// Dynamic GOP
 	EB_U32								 previousMiniGopHierarchicalLevels;
 
-	EbObjectWrapper_t              *previousPictureControlSetWrapperPtr;
-    EB_HANDLE						sharedReferenceMutex;
+	EbObjectWrapper_t                   *previousPictureControlSetWrapperPtr;
+    EB_HANDLE						     sharedReferenceMutex;
 
 
 } EncodeContext_t;

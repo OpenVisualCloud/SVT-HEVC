@@ -298,6 +298,25 @@ extern EB_ERRORTYPE EbGetFullObject(
     EbObjectWrapper_t **wrapperDblPtr);
 
 /*********************************************************************
+* EbSystemResourceGetFullObject
+*   Dequeues an full EbObjectWrapper from the SystemResource. This
+*   function does not block on the SystemResource fullFifo countingSemaphore.
+*   This function is write protected by the SystemResource fullFifo
+*   lockoutMutex.
+*
+*   resourcePtr
+*      Pointer to the SystemResource that provides the full
+*      EbObjectWrapper.
+*
+*   wrapperDblPtr
+*      Double pointer used to pass the pointer to the full
+*      EbObjectWrapper pointer.
+*********************************************************************/
+extern EB_ERRORTYPE EbGetFullObjectNonBlocking(
+    EbFifo_t   *fullFifoPtr,
+    EbObjectWrapper_t **wrapperDblPtr);
+
+/*********************************************************************
  * EbSystemResourceReleaseObject
  *   Queues an empty EbObjectWrapper to the SystemResource. This
  *   function posts the SystemResource emptyFifo countingSemaphore.

@@ -442,7 +442,7 @@ void* ReceiveBitstream(void* arg)
 void* SendPictures(void* arg)
 {
     EbParentAppContext_t         *parentAppCallBack = (EbParentAppContext_t *)arg;
-    unsigned int            instanceCount = 0;
+    unsigned int                  instanceCount = 0;
     // Input Loop Thread
     exitConditionInput = APP_ExitConditionNone;
     while (exitConditionInput == APP_ExitConditionNone) {

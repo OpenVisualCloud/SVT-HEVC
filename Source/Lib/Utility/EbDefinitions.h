@@ -53,6 +53,9 @@ extern "C" {
 #define IDR_SLICE       3
 #define INVALID_SLICE   0xFF
 
+#define	Log2f					          Log2f_SSE2
+extern EB_U32 Log2f(EB_U32 x);
+
 
 /** The EB_PICT_STRUCT type is used to describe the picture structure.
 */

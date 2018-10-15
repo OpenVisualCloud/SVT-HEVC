@@ -975,7 +975,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_HANDLETYPE hComponent)
     // EB_BUFFERHEADERTYPE Input
     return_error = EbSystemResourceCtor(
         &encHandlePtr->inputBufferResourcePtr,
-        5,// encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount,
+        2,// encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount,
         1,
         EB_ResourceCoordinationProcessInitCount,
         &encHandlePtr->inputBufferProducerFifoPtrArray,
@@ -1705,7 +1705,9 @@ void LoadDefaultBufferConfigurationSettings(
     EB_U32 inputPic = SetParentPcs(&sequenceControlSetPtr->staticConfig);
 
     unsigned int coreCount = GetNumCores();
-    sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount = coreCount + sequenceControlSetPtr->staticConfig.lookAheadDistance;
+
+    sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount = inputPic + sequenceControlSetPtr->staticConfig.lookAheadDistance + SCD_LAD;
+    
     // ME segments
     sequenceControlSetPtr->meSegmentRowCountArray[0] = meSegH;
     sequenceControlSetPtr->meSegmentRowCountArray[1] = meSegH;
@@ -1739,8 +1741,8 @@ void LoadDefaultBufferConfigurationSettings(
     //#====================== Data Structures and Picture Buffers ======================
     sequenceControlSetPtr->pictureControlSetPoolInitCount = inputPic;
     sequenceControlSetPtr->pictureControlSetPoolInitCountChild = MAX(4, coreCount / 6);
-    sequenceControlSetPtr->referencePictureBufferInitCount   = MAX((EB_U32)(inputPic >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
-    sequenceControlSetPtr->paReferencePictureBufferInitCount = MAX((EB_U32)(inputPic >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
+    sequenceControlSetPtr->referencePictureBufferInitCount   = MAX((EB_U32)(sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
+    sequenceControlSetPtr->paReferencePictureBufferInitCount = MAX((EB_U32)(sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
 
     //#====================== Inter process Fifos ======================
     sequenceControlSetPtr->resourceCoordinationFifoInitCount = 300;
@@ -1757,12 +1759,12 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->encDecFifoInitCount = 300;
 
     //#====================== Processes number ======================
-    sequenceControlSetPtr->pictureAnalysisProcessInitCount = 50;// MAX(15, coreCount / 6);
-    sequenceControlSetPtr->motionEstimationProcessInitCount         = 50;//MAX(20, coreCount / 3);
-    sequenceControlSetPtr->sourceBasedOperationsProcessInitCount    = MAX(3, coreCount / 12);
-    sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount = MAX(3, coreCount / 12);
-    sequenceControlSetPtr->encDecProcessInitCount = MAX(40, coreCount);
-    sequenceControlSetPtr->entropyCodingProcessInitCount = MAX(3, coreCount / 12);
+    sequenceControlSetPtr->pictureAnalysisProcessInitCount              = MAX(15, coreCount / 6);
+    sequenceControlSetPtr->motionEstimationProcessInitCount             = MAX(20, coreCount / 3);
+    sequenceControlSetPtr->sourceBasedOperationsProcessInitCount        = MAX(3, coreCount / 12);
+    sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount    = MAX(3, coreCount / 12);
+    sequenceControlSetPtr->encDecProcessInitCount                       = MAX(40, coreCount);
+    sequenceControlSetPtr->entropyCodingProcessInitCount                = MAX(3, coreCount / 12);
 
     printf("Number of cores available: %u\nNumber of PPCS %u\n", coreCount >> 1 , inputPic);
 
@@ -2133,15 +2135,7 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.injectorFrameRate   = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->injectorFrameRate;
     sequenceControlSetPtr->staticConfig.speedControlFlag    = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->speedControlFlag;
     sequenceControlSetPtr->staticConfig.latencyMode         = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->latencyMode;    
-
-    //// Buffers
-    //if (((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->inputOutputBufferFifoInitCount != 0)
-    //    sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->inputOutputBufferFifoInitCount;
-    //else
-    //    sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount = sequenceControlSetPtr->inputOutputBufferFifoInitCount;
-
     sequenceControlSetPtr->staticConfig.asmType = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->asmType;
-
     sequenceControlSetPtr->staticConfig.channelId = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->channelId;
     sequenceControlSetPtr->staticConfig.activeChannelCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->activeChannelCount;
     sequenceControlSetPtr->staticConfig.useRoundRobinThreadAssignment = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->useRoundRobinThreadAssignment;
@@ -2318,11 +2312,6 @@ static EB_ERRORTYPE VerifySettings(\
 		return_error = EB_ErrorBadParameter; 
     }	 
 
-    //if (config->inputOutputBufferFifoInitCount < (EB_U32)((2 << config->hierarchicalLevels) + 5 + config->lookAheadDistance)) {
-    //    printf("Error Instance %u: inputOutputBufferFifoInitCount count is not large enough to start the encode\n", channelNumber + 1);
-    //    return_error = EB_ErrorBadParameter;
-    //}
-    
     if (sequenceControlSetPtr->maxInputLumaWidth < 64) {
 		printf("Error instance %u: Source Width must be at least 64\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
@@ -3082,19 +3071,22 @@ EB_API EB_ERRORTYPE EbH265GetPacket(
     EB_COMPONENTTYPE      *h265EncComponent = (EB_COMPONENTTYPE*)hComponent;
     EbEncHandle_t          *pEncCompData = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
     EB_U32                 instanceIndex = 0; // hard-coded, determined from the port number
-    EbObjectWrapper_t      *ebWrapperPtr;
+    EbObjectWrapper_t      *ebWrapperPtr = NULL;
 
-
-    EbGetFullObject(
+    EbGetFullObjectNonBlocking(
         (pEncCompData->outputStreamBufferConsumerFifoPtrDblArray[instanceIndex])[0],
         &ebWrapperPtr);
 
-    CopyOutputBuffer(
-        pBuffer,
-        (EB_BUFFERHEADERTYPE*)ebWrapperPtr->objectPtr);
+    if (ebWrapperPtr) {
+        CopyOutputBuffer(
+            pBuffer,
+            (EB_BUFFERHEADERTYPE*)ebWrapperPtr->objectPtr);
 
-    EbReleaseObject((EbObjectWrapper_t  *)ebWrapperPtr);
-
+        EbReleaseObject((EbObjectWrapper_t  *)ebWrapperPtr);
+    }
+    else {
+        return EB_NoErrorEmptyQueue;
+    }
         
     return EB_ErrorNone;
 } 
