@@ -24,10 +24,10 @@
     <ClInclude Include="..\..\Source\API\EbTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\SimpleApp\EbAppConfig.h">
+    <ClInclude Include="..\..\Source\SimpleApp\EbSimpleAppConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\SimpleApp\EbAppContext.h">
+    <ClInclude Include="..\..\Source\SimpleApp\EbSimpleAppContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,10 +35,10 @@
     <None Include="..\..\Config\Sample.cfg" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\SimpleApp\EbAppContext.c">
+    <ClCompile Include="..\..\Source\SimpleApp\EbSimpleAppContext.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\SimpleApp\EbAppMain.c">
+    <ClCompile Include="..\..\Source\SimpleApp\EbSimpleAppMain.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

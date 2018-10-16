@@ -17,8 +17,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
-#include "EbAppConfig.h"
-#include "EbAppContext.h"
+#include "EbSimpleAppConfig.h"
+#include "EbSimpleAppContext.h"
 #include "EbTime.h"
 #if !__linux
 #include <Windows.h>
@@ -44,7 +44,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->sourceHeight = 0;
     configPtr->framesToBeEncoded = 0;
     configPtr->channelId = 0;
-    configPtr->stopEncoder = EB_FALSE;
+    configPtr->stopEncoder = 0;
 
     return;
 }
@@ -66,12 +66,6 @@ void EbConfigDtor(EbConfig_t *configPtr)
     }
 
     return;
-}
-
-volatile int keepRunning = 1; // to stop the encoder with a CTR+C signal
-void EventHandler(int dummy) {
-    (void)dummy;
-    keepRunning = 0;
 }
 
 APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
@@ -109,34 +103,34 @@ void ReadInputFrames(
     EB_BUFFERHEADERTYPE         *headerPtr)
 {
 
-    EB_U64  readSize;
-    EB_S64  inputPaddedWidth = config->inputPaddedWidth;
-    EB_S64  inputPaddedHeight = config->inputPaddedHeight;
+    unsigned __int64  readSize;
+    signed __int64  inputPaddedWidth = config->inputPaddedWidth;
+    signed __int64  inputPaddedHeight = config->inputPaddedHeight;
     FILE   *inputFile = config->inputFile;
-    EB_U8  *ebInputPtr;
+    unsigned __int8  *ebInputPtr;
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
 
     {
         if (is16bit == 0 || (is16bit == 1 && config->compressedTenBitFormat == 0)) {
 
-            readSize = (EB_U64)SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, is16bit);
+            readSize = (unsigned __int64)SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, is16bit);
 
             headerPtr->nFilledLen = 0;
 
             {
-                EB_U64 lumaReadSize = (EB_U64)inputPaddedWidth*inputPaddedHeight << is16bit;
+                unsigned __int64 lumaReadSize = (unsigned __int64)inputPaddedWidth*inputPaddedHeight << is16bit;
                 ebInputPtr = inputPtr->luma;
-                headerPtr->nFilledLen += (EB_U32)fread(ebInputPtr, 1, lumaReadSize, inputFile);
+                headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, lumaReadSize, inputFile);
                 ebInputPtr = inputPtr->cb;
-                headerPtr->nFilledLen += (EB_U32)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
+                headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
                 ebInputPtr = inputPtr->cr;
-                headerPtr->nFilledLen += (EB_U32)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
+                headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
                 inputPtr->luma = inputPtr->luma + ((config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING) << is16bit);
                 inputPtr->cb = inputPtr->cb + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)) << is16bit);
                 inputPtr->cr = inputPtr->cr + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)) << is16bit);
 
                  if (readSize != headerPtr->nFilledLen) {
-                    config->stopEncoder = EB_TRUE;
+                    config->stopEncoder = 1;
                  }
             }
         }
@@ -146,15 +140,15 @@ void ReadInputFrames(
             // Fill the buffer with a complete frame
             headerPtr->nFilledLen = 0;
 
-            EB_U64 lumaReadSize = (EB_U64)inputPaddedWidth*inputPaddedHeight;
-            EB_U64 nbitlumaReadSize = (EB_U64)(inputPaddedWidth / 4)*inputPaddedHeight;
+            unsigned __int64 lumaReadSize = (unsigned __int64)inputPaddedWidth*inputPaddedHeight;
+            unsigned __int64 nbitlumaReadSize = (unsigned __int64)(inputPaddedWidth / 4)*inputPaddedHeight;
 
             ebInputPtr = inputPtr->luma;
-            headerPtr->nFilledLen += (EB_U32)fread(ebInputPtr, 1, lumaReadSize, inputFile);
+            headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, lumaReadSize, inputFile);
             ebInputPtr = inputPtr->cb;
-            headerPtr->nFilledLen += (EB_U32)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
+            headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
             ebInputPtr = inputPtr->cr;
-            headerPtr->nFilledLen += (EB_U32)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
+            headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
 
             inputPtr->luma = inputPtr->luma + config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING;
             inputPtr->cb = inputPtr->cb + (config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1);
@@ -162,11 +156,11 @@ void ReadInputFrames(
 
 
             ebInputPtr = inputPtr->lumaExt;
-            headerPtr->nFilledLen += (EB_U32)fread(ebInputPtr, 1, nbitlumaReadSize, inputFile);
+            headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, nbitlumaReadSize, inputFile);
             ebInputPtr = inputPtr->cbExt;
-            headerPtr->nFilledLen += (EB_U32)fread(ebInputPtr, 1, nbitlumaReadSize >> 2, inputFile);
+            headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, nbitlumaReadSize >> 2, inputFile);
             ebInputPtr = inputPtr->crExt;
-            headerPtr->nFilledLen += (EB_U32)fread(ebInputPtr, 1, nbitlumaReadSize >> 2, inputFile);
+            headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, nbitlumaReadSize >> 2, inputFile);
 
             inputPtr->lumaExt = inputPtr->lumaExt + ((config->inputPaddedWidth >> 2)*TOP_INPUT_PADDING + (LEFT_INPUT_PADDING >> 2));
             inputPtr->cbExt = inputPtr->cbExt + (((config->inputPaddedWidth >> 1) >> 2)*(TOP_INPUT_PADDING >> 1) + ((LEFT_INPUT_PADDING >> 1) >> 2));
@@ -175,7 +169,7 @@ void ReadInputFrames(
             readSize = ((lumaReadSize * 3) >> 1) + ((nbitlumaReadSize * 3) >> 1);
 
             if (readSize != headerPtr->nFilledLen) {
-                config->stopEncoder = EB_TRUE;
+                config->stopEncoder = 1;
             }
 
         }
@@ -183,7 +177,7 @@ void ReadInputFrames(
     // If we reached the end of file, loop over again
     if (feof(inputFile) != 0) {
         //fseek(inputFile, 0, SEEK_SET);
-        config->stopEncoder = EB_TRUE;
+        config->stopEncoder = 1;
     }
 
     return;
@@ -198,15 +192,12 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
     EB_COMPONENTTYPE        *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
     APPEXITCONDITIONTYPE     return_value = APP_ExitConditionNone;
 
-    if (config->stopEncoder == EB_FALSE) {
+    if (config->stopEncoder == 0) {
         ReadInputFrames(
             config,
             is16bit,
             headerPtr);
-        if (keepRunning == 0 && !config->stopEncoder) {
-            config->stopEncoder = EB_TRUE;
-        }
-        if (config->stopEncoder == EB_FALSE) {
+        if (config->stopEncoder == 0) {
             // Fill in Buffers Header control data
             headerPtr->nOffset = 0;
             headerPtr->nTimeStamp = 0;
@@ -218,17 +209,17 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
             EbH265EncSendPicture((EB_HANDLETYPE)componentHandle, headerPtr);
         }
         else {
+            EB_BUFFERHEADERTYPE headerPtrLast;
+            headerPtrLast.nAllocLen = 0;
+            headerPtrLast.nFilledLen = 0;
+            headerPtrLast.nTickCount = 0;
+            headerPtrLast.pAppPrivate = NULL;
+            headerPtrLast.nOffset = 0;
+            headerPtrLast.nTimeStamp = 0;
+            headerPtrLast.nFlags = EB_BUFFERFLAG_EOS;
+            headerPtrLast.pBuffer = NULL;
 
-            headerPtr->nAllocLen = 0;
-            headerPtr->nFilledLen = 0;
-            headerPtr->nTickCount = 0;
-            headerPtr->pAppPrivate = NULL;
-            headerPtr->nOffset = 0;
-            headerPtr->nTimeStamp = 0;
-            headerPtr->nFlags = EB_BUFFERFLAG_EOS;
-            headerPtr->pBuffer = NULL;
-
-            EbH265EncSendPicture((EB_HANDLETYPE)componentHandle, headerPtr);
+            EbH265EncSendPicture((EB_HANDLETYPE)componentHandle, &headerPtrLast);
         }
         return_value = (headerPtr->nFlags == EB_BUFFERFLAG_EOS) ? APP_ExitConditionFinished : return_value;
     }
@@ -248,9 +239,7 @@ int main(int argc, char* argv[])
 
 
     EbAppContext_t         *appCallback;   // Instances App callback data
-
-    signal(SIGINT, EventHandler);
-
+    
     // Print Encoder Info
     printf("-------------------------------------\n");
     printf("SVT-HEVC Encoder Simple Sample Application v1.2.0\n");
@@ -295,7 +284,7 @@ int main(int argc, char* argv[])
             else
                 config->bitstreamFile = fout;
 
-            EB_U32 width = 0, height = 0;
+            unsigned __int32 width = 0, height = 0;
             
             width = strtoul(argv[3], NULL, 0);
             height = strtoul(argv[4], NULL, 0);
@@ -304,7 +293,7 @@ int main(int argc, char* argv[])
             config->inputPaddedWidth  = config->sourceWidth = width;
             config->inputPaddedHeight = config->sourceHeight = height;
 
-            EB_U32 bdepth = width = strtoul(argv[5], NULL, 0);
+            unsigned __int32 bdepth = width = strtoul(argv[5], NULL, 0);
             if ((bdepth != 8) && (bdepth != 10)) {printf("Invalid bit depth\n"); return_error = EB_ErrorBadParameter; }
             config->encoderBitDepth = bdepth;
         }
@@ -337,6 +326,7 @@ int main(int argc, char* argv[])
             return_error = DeInitEncoder(appCallback, 0, return_error);
 
             // Destruct the App memory variables
+            EbAppContextDtor(appCallback);
             EbConfigDtor(config);
             free(config);
             free(appCallback);

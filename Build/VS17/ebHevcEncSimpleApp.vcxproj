@@ -118,15 +118,15 @@
     <ClInclude Include="..\..\Source\API\EbApi.h" />
     <ClInclude Include="..\..\Source\API\EbBuild.h" />
     <ClInclude Include="..\..\Source\API\EbTypes.h" />
-    <ClInclude Include="..\..\Source\SimpleApp\EbAppConfig.h" />
-    <ClInclude Include="..\..\Source\SimpleApp\EbAppContext.h" />
+    <ClInclude Include="..\..\Source\SimpleApp\EbSimpleAppConfig.h" />
+    <ClInclude Include="..\..\Source\SimpleApp\EbSimpleAppContext.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Config\Sample.cfg" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\SimpleApp\EbAppContext.c" />
-    <ClCompile Include="..\..\Source\SimpleApp\EbAppMain.c" />
+    <ClCompile Include="..\..\Source\SimpleApp\EbSimpleAppContext.c" />
+    <ClCompile Include="..\..\Source\SimpleApp\EbSimpleAppMain.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
