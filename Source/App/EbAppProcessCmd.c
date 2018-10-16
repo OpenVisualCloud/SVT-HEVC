@@ -735,9 +735,6 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     // non-blocking call until all input frames are sent
     stream_status = EbH265GetPacket((EB_HANDLETYPE)componentHandle, headerPtr, picSendDone);
 
-    //if (stream_status == EB_NoErrorEmptyQueue && picSendDone == 1)
-    //    printf("notgood");
-
     if (stream_status != EB_NoErrorEmptyQueue) {
         ++(config->performanceContext.frameCount);
         *totalLatency += (EB_U64)headerPtr->nTickCount;

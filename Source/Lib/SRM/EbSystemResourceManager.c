@@ -74,9 +74,8 @@ static EB_ERRORTYPE EbFifoPopFront(
     // Update tail of BufferPool if the BufferPool is now empty
     fifoPtr->lastPtr = (fifoPtr->firstPtr == fifoPtr->lastPtr) ? (EbObjectWrapper_t*) EB_NULL: fifoPtr->lastPtr;
 
-    if (fifoPtr->firstPtr)
-        // Update head of BufferPool
-        fifoPtr->firstPtr = fifoPtr->firstPtr->nextPtr;
+    // Update head of BufferPool
+    fifoPtr->firstPtr = fifoPtr->firstPtr->nextPtr;
 
     return return_error;
 }
@@ -103,6 +102,20 @@ static EB_ERRORTYPE EbFifoPopFrontIfAvailable(
     }
 
     return return_error;
+}
+
+static int PeekFifo(
+    EbFifo_t            *fifoPtr,
+    EbObjectWrapper_t  **wrapperPtr)
+{
+
+    // Set wrapperPtr to head of BufferPool
+    if (fifoPtr->firstPtr == (EbObjectWrapper_t*)EB_NULL) {
+        return 0;
+    }
+    else {
+        return 1;
+    }
 }
 
 /**************************************
@@ -690,7 +703,7 @@ EB_ERRORTYPE EbGetFullObject(
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
-    // Queue the Fifo requesting the full fifo
+    // Queue the process requesting the full fifo
     EbReleaseProcess(fullFifoPtr);
 
     // Block on the counting Semaphore until an empty buffer is available
@@ -729,19 +742,26 @@ EB_ERRORTYPE EbGetFullObjectNonBlocking(
     EbObjectWrapper_t **wrapperDblPtr)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
-
+    int peekResult;
     // Queue the Fifo requesting the full fifo
     EbReleaseProcess(fullFifoPtr);
 
     // Acquire lockout Mutex
     EbBlockOnMutex(fullFifoPtr->lockoutMutex);
 
-    EbFifoPopFrontIfAvailable(
+    peekResult = PeekFifo(
         fullFifoPtr,
         wrapperDblPtr);
 
     // Release Mutex
     EbReleaseMutex(fullFifoPtr->lockoutMutex);
+
+    if (peekResult)
+        EbGetFullObject(
+            fullFifoPtr,
+            wrapperDblPtr);
+    else
+        *wrapperDblPtr = (EbObjectWrapper_t*)EB_NULL;
 
     return return_error;
 }
