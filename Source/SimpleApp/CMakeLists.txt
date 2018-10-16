@@ -22,8 +22,8 @@ endif(${COMPILE_AS_CPP} EQUAL 1)
 
 # App Source Files
 add_executable (HevcEncoderSimpleApp 
-    EbAppContext.c
-    EbAppMain.c
+    EbSimpleAppContext.c
+    EbSimpleAppMain.c
 )
 
 #********** SET COMPILE FLAGS************

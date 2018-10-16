@@ -419,7 +419,6 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
     PictureParentControlSet_t       *pictureControlSetPtr;
 
-    EbObjectWrapper_t               *previousSequenceControlSetWrapperPtr;
     SequenceControlSet_t            *sequenceControlSetPtr;
 
     EbObjectWrapper_t               *ebInputWrapperPtr;
@@ -518,12 +517,6 @@ void* ResourceCoordinationKernel(void *inputPtr)
                 vuiPtr->vuiNumUnitsInTick = 1<<16;
                     
             }
-
-
-
-            // Copy previous Active SequenceControlSetPtr to a place holder
-            previousSequenceControlSetWrapperPtr = contextPtr->sequenceControlSetActiveArray[instanceIndex];
-
             // Get empty SequenceControlSet [BLOCKING]
             EbGetEmptyObject(
                 contextPtr->sequenceControlSetEmptyFifoPtr,
@@ -534,19 +527,6 @@ void* ResourceCoordinationKernel(void *inputPtr)
                 (SequenceControlSet_t*) contextPtr->sequenceControlSetActiveArray[instanceIndex]->objectPtr,
                 contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr);
 
-            //// Disable releaseFlag of new SequenceControlSet
-            //EbObjectReleaseDisable(
-            //    contextPtr->sequenceControlSetActiveArray[instanceIndex]);
-            //if(previousSequenceControlSetWrapperPtr != EB_NULL) {
-            //    // Enable releaseFlag of old SequenceControlSet
-            //    EbObjectReleaseEnable(
-            //        previousSequenceControlSetWrapperPtr);
-            //    // Check to see if previous SequenceControlSet is already inactive, if TRUE then release the SequenceControlSet
-            //    if(previousSequenceControlSetWrapperPtr->liveCount == 0) {
-            //        EbReleaseObject(
-            //            previousSequenceControlSetWrapperPtr);
-            //    }
-            //}
         }
         EbReleaseMutex(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->configMutex);
 
