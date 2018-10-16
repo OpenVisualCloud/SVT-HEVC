@@ -76,17 +76,20 @@ void EventHandler(int dummy) {
 
 APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     EbConfig_t             *config,
-    EB_BUFFERHEADERTYPE    *headerPtr,
-    EB_COMPONENTTYPE       *componentHandle
+    EbAppContext_t         *appCallback,
+    unsigned char           picSendDone
 )
 {
+    EB_BUFFERHEADERTYPE    *headerPtr = appCallback->outputStreamBuffer;
+    EB_COMPONENTTYPE        *componentHandle = (EB_COMPONENTTYPE*)appCallback->svtEncoderHandle;
     APPEXITCONDITIONTYPE    return_value = APP_ExitConditionNone;
     EB_ERRORTYPE            stream_status = EB_ErrorNone;
     // System performance variables
     static int              frameCount = 0;
 
     // non-blocking call
-    stream_status = EbH265GetPacket((EB_HANDLETYPE)componentHandle, headerPtr);
+    stream_status = EbH265GetPacket((EB_HANDLETYPE)componentHandle, headerPtr, picSendDone);
+
     if (stream_status != EB_NoErrorEmptyQueue) {
         fwrite(headerPtr->pBuffer + headerPtr->nOffset, 1, headerPtr->nFilledLen, config->bitstreamFile);
 
@@ -188,11 +191,13 @@ void ReadInputFrames(
 
 APPEXITCONDITIONTYPE ProcessInputBuffer(
     EbConfig_t                  *config,
-    EB_BUFFERHEADERTYPE         *headerPtr,
-    EB_COMPONENTTYPE            *componentHandle)
+    EbAppContext_t              *appCallBack)
 {
-    unsigned char                is16bit = (unsigned char)(config->encoderBitDepth > 8);
-    APPEXITCONDITIONTYPE         return_value = APP_ExitConditionNone;
+    unsigned char            is16bit = (unsigned char)(config->encoderBitDepth > 8);
+    EB_BUFFERHEADERTYPE     *headerPtr = appCallBack->inputPictureBuffer; // needs to change for buffered input
+    EB_COMPONENTTYPE        *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
+    APPEXITCONDITIONTYPE     return_value = APP_ExitConditionNone;
+
     if (config->stopEncoder == EB_FALSE) {
         ReadInputFrames(
             config,
@@ -243,8 +248,6 @@ int main(int argc, char* argv[])
 
 
     EbAppContext_t         *appCallback;   // Instances App callback data
-//    EB_HANDLETYPE           outputStreamHandle; // receive thread
-    EB_HANDLETYPE           inputYuvHandle;     // send thread
 
     signal(SIGINT, EventHandler);
 
@@ -317,14 +320,11 @@ int main(int argc, char* argv[])
             printf("Encoding          ");
             fflush(stdout);
 
-            EB_BUFFERHEADERTYPE    *inputPtr = appCallback->inputPictureBuffer;
-            EB_BUFFERHEADERTYPE    *streamPtr = appCallback->outputStreamBuffer;
-
             // Input Loop Thread
             exitConditionInput = APP_ExitConditionNone;
             while (exitConditionInput == APP_ExitConditionNone) {
-                exitConditionInput = ProcessInputBuffer(config, inputPtr, (EB_COMPONENTTYPE*)appCallback->svtEncoderHandle);
-                exitConditionInput = ProcessOutputStreamBuffer(config, streamPtr, (EB_COMPONENTTYPE*)appCallback->svtEncoderHandle);
+                exitConditionInput = ProcessInputBuffer(config, appCallback);
+                exitConditionInput = ProcessOutputStreamBuffer(config, appCallback, (exitConditionInput == APP_ExitConditionNone ? 0 : 1));
             }
 
             EbStopEncoder(appCallback->svtEncoderHandle, 0);

@@ -176,7 +176,7 @@ void ReadInputFrames(
     InputBitstreamContext_t     *contextPtr,
     EbConfig_t                  *config,
     unsigned char                is16bit,
-    EB_BUFFERHEADERTYPE        *headerPtr)
+    EB_BUFFERHEADERTYPE         *headerPtr)
 {
 
     EB_U64  readSize;
@@ -608,13 +608,14 @@ void SendQpOnTheFly(
 // them into the input buffer
 /************************************/
 APPEXITCONDITIONTYPE ProcessInputBuffer(
-    InputBitstreamContext_t     *contextPtr,
-    EbConfig_t                  *config,
-    unsigned char                is16bit,
-    EB_BUFFERHEADERTYPE        *headerPtr,
-    EB_COMPONENTTYPE           *componentHandle)
+    EbConfig_t             *config,
+    EbAppContext_t         *appCallBack)
 {
-
+    InputBitstreamContext_t *contextPtr = &appCallBack->inputContext;
+    unsigned char            is16bit = (unsigned char)(config->encoderBitDepth > 8);
+    EB_BUFFERHEADERTYPE     *headerPtr = appCallBack->inputBufferPool[0]; // needs to change for buffered input
+    EB_COMPONENTTYPE        *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
+    
     APPEXITCONDITIONTYPE    return_value = APP_ExitConditionNone;
 
     EB_S64                  inputPaddedWidth           = config->inputPaddedWidth;
@@ -638,7 +639,6 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
 
     // If there are bytes left to encode, configure the header
     if (remainingByteCount != 0 && config->stopEncoder == EB_FALSE) {
-
         ReadInputFrames(
             contextPtr,
             config,
@@ -701,12 +701,13 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
 #define START_STEADY_STATE          1000
 
 APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
-	EbConfig_t              *config,
-    APPPORTACTIVETYPE       *portState,
-    EB_BUFFERHEADERTYPE    *headerPtr,
-	EB_COMPONENTTYPE       *componentHandle
-    )
+    EbConfig_t             *config,
+    EbAppContext_t         *appCallBack,
+    unsigned char           picSendDone)
 {
+    APPPORTACTIVETYPE       *portState = &appCallBack->outputStreamPortActive;
+    EB_BUFFERHEADERTYPE     *headerPtr = appCallBack->streamBufferPool[0]; // needs to change for buffered input
+    EB_COMPONENTTYPE        *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
     APPEXITCONDITIONTYPE    return_value = APP_ExitConditionNone;
     EB_ERRORTYPE            stream_status = EB_ErrorNone;
     // Per channel variables
@@ -731,8 +732,12 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     EB_U64                finishuTime     = 0;
     double                duration        = 0.0;
 
-    // non-blocking call
-    stream_status = EbH265GetPacket((EB_HANDLETYPE)componentHandle, headerPtr);
+    // non-blocking call until all input frames are sent
+    stream_status = EbH265GetPacket((EB_HANDLETYPE)componentHandle, headerPtr, picSendDone);
+
+    //if (stream_status == EB_NoErrorEmptyQueue && picSendDone == 1)
+    //    printf("notgood");
+
     if (stream_status != EB_NoErrorEmptyQueue) {
         ++(config->performanceContext.frameCount);
         *totalLatency += (EB_U64)headerPtr->nTickCount;
@@ -1393,55 +1398,3 @@ void LogErrorOutput(
 
     return;
 }
-/***************************************
- * App Process Commands
- ***************************************/
-APPEXITCONDITIONTYPE AppProcessInputCommands(
-    EbConfig_t             **configs,
-    EbParentAppContext_t   *appCallback,
-	APPEXITCONDITIONTYPE   *exitConditions)
-{
-    APPEXITCONDITIONTYPE    return_value = APP_ExitConditionFinished;
-    EB_U8                   instanceIdx = 0;
-    EB_BUFFERHEADERTYPE    *headerPtr = appCallback->appCallBacks[instanceIdx]->inputBufferPool[instanceIdx];
-
-    return_value = ProcessInputBuffer(
-        &appCallback->appCallBacks[instanceIdx]->inputContext,
-        configs[instanceIdx],
-        (unsigned char)(configs[instanceIdx]->encoderBitDepth>8),
-        headerPtr,
-        (EB_COMPONENTTYPE*)appCallback->appCallBacks[instanceIdx]->svtEncoderHandle);
-
-    exitConditions[instanceIdx]   = return_value;
-
-    return return_value;
-}
-
-
-APPEXITCONDITIONTYPE AppProcessOutputCommands(
-    EbConfig_t             **configs,
-    EbParentAppContext_t   *appCallback,
-    EB_U64                 *encodingFinishTimesSeconds,
-    EB_U64                 *encodingFinishTimesuSeconds,
-    APPEXITCONDITIONTYPE   *exitConditions)
-{
-    APPEXITCONDITIONTYPE    return_value = APP_ExitConditionFinished;
-    EB_U8                   instanceIdx = 0;
-    EB_BUFFERHEADERTYPE    *headerPtr = appCallback->appCallBacks[instanceIdx]->streamBufferPool[instanceIdx];
-
-
-    return_value = ProcessOutputStreamBuffer(
-        configs[instanceIdx],
-        &appCallback->appCallBacks[instanceIdx]->outputStreamPortActive,
-        headerPtr,
-        (EB_COMPONENTTYPE*)appCallback->appCallBacks[instanceIdx]->svtEncoderHandle);
-
-        exitConditions[instanceIdx] = return_value;
-
-    if (return_value == APP_ExitConditionFinished) {
-        FinishTime(&encodingFinishTimesSeconds[instanceIdx], &encodingFinishTimesuSeconds[instanceIdx]);
-    }
-
-    return return_value;
-}
-

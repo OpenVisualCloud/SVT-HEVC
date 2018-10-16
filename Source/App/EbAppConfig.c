@@ -832,27 +832,6 @@ int FindTokenMultipleInputs(
 
 	return return_error;
 }
-/******************************************************
-* Count the number of configuration files inputted 
-******************************************************/
-static int CountChannelsInput (
-	int         argc, 
-	char *const argv[])
-{
-	int return_error = -1;
-	unsigned int count = 0;
-	unsigned int argcMax = (unsigned int) argc;
-	while((argc > 0) && (return_error != 0)) {
-		return_error = EB_STRCMP(argv[--argc], "-c");
-		if (return_error == 0) {
-			while (((argc + count + 1) < argcMax) && (count < MAX_CHANNEL_NUMBER) && (argv[argc + count + 1][0] != '-')){
-				++count;
-			}
-			return count;
-		}
-	}
-	return -1;
-}
 
 unsigned int GetHelp(int argc, char *const argv[])
 {
@@ -871,9 +850,6 @@ unsigned int GetHelp(int argc, char *const argv[])
     else {
         return 0;
     }
-        
-
- 
 }
 
 /******************************************************
@@ -891,10 +867,6 @@ unsigned int GetNumberOfChannels(int argc, char *const argv[])
 			printf("Error: The number of channels has to be within the range [1,%u]\n",(unsigned int) MAX_CHANNEL_NUMBER);
 			return 0;		
 		}else{
-			if (channelNumber != (unsigned int) CountChannelsInput(argc,argv)){
-				printf("Error: The number of channels has to match the number of config files inputted\n");
-				return 0;
-			}
 			return channelNumber;
 		}
 	}

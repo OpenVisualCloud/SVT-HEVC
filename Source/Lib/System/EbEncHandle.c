@@ -2917,8 +2917,8 @@ EB_ERRORTYPE CopyFrameBuffer(
         (1 << tenBitPackedMode);
 
     const size_t chroma8bitSize = luma8bitSize >> 2;
-    const size_t luma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? luma8bitSize : 0;
-    const size_t chroma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? chroma8bitSize : 0;
+    const size_t luma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? (luma8bitSize >> 2) : 0;
+    const size_t chroma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? (luma10bitSize >> 2) : 0;
 
     // Determine  
     EB_H265_ENC_INPUT* inputPtr     = (EB_H265_ENC_INPUT*)src;
@@ -3065,7 +3065,8 @@ __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265GetPacket(
     EB_HANDLETYPE          hComponent,
-    EB_BUFFERHEADERTYPE   *pBuffer)
+    EB_BUFFERHEADERTYPE   *pBuffer,
+    unsigned char          picSendDone)
 {
 
     EB_COMPONENTTYPE      *h265EncComponent = (EB_COMPONENTTYPE*)hComponent;
@@ -3073,9 +3074,14 @@ EB_API EB_ERRORTYPE EbH265GetPacket(
     EB_U32                 instanceIndex = 0; // hard-coded, determined from the port number
     EbObjectWrapper_t      *ebWrapperPtr = NULL;
 
-    EbGetFullObjectNonBlocking(
-        (pEncCompData->outputStreamBufferConsumerFifoPtrDblArray[instanceIndex])[0],
-        &ebWrapperPtr);
+    if (picSendDone)
+        EbGetFullObject(
+            (pEncCompData->outputStreamBufferConsumerFifoPtrDblArray[instanceIndex])[0],
+            &ebWrapperPtr);
+    else
+        EbGetFullObjectNonBlocking(
+            (pEncCompData->outputStreamBufferConsumerFifoPtrDblArray[instanceIndex])[0],
+            &ebWrapperPtr);
 
     if (ebWrapperPtr) {
         CopyOutputBuffer(
@@ -3149,8 +3155,8 @@ EB_ERRORTYPE AllocateFrameBuffer(
         (1 << tenBitPackedMode);
 
     const size_t chroma8bitSize = luma8bitSize >> 2;
-    const size_t luma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? luma8bitSize : 0;
-    const size_t chroma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? chroma8bitSize : 0;
+    const size_t luma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? (luma8bitSize >> 2) : 0;
+    const size_t chroma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? (luma10bitSize >> 2) : 0;
 
     // Determine  
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)pBuffer;

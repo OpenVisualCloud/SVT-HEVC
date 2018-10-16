@@ -206,7 +206,8 @@ EB_API EB_ERRORTYPE EbH265EncSendPicture(
 
 EB_API EB_ERRORTYPE EbH265GetPacket(
     EB_HANDLETYPE          hComponent,
-    EB_BUFFERHEADERTYPE   *pBuffer);
+    EB_BUFFERHEADERTYPE   *pBuffer,
+    unsigned char          picSendDone);
 
 EB_API EB_ERRORTYPE EbInitHandle(
     EB_HANDLETYPE* pHandle,

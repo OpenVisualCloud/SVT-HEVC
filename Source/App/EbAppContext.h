@@ -39,26 +39,11 @@ typedef struct EbAppContext_s {
 
 } EbAppContext_t;
 
-typedef struct EbParentAppContext_s {
-    void                               *cmdSemaphoreHandle;
-    void                               *inputSemaphoreHandle;
-    void                               *streamSemaphoreHandle;
-   
-	// Children Application CallBacks
-	EbAppContext_t					   *appCallBacks[MAX_CHANNEL_NUMBER];
-
-	// Number of channels active 
-	EB_U8							    numChannels;
-
-} EbParentAppContext_t;
-
-
 
 /********************************
  * External Function
  ********************************/
 extern void EbAppContextCtor(EbAppContext_t *contextPtr);
-extern void EbParentAppContextCtor(EbAppContext_t **contextPtr, EbParentAppContext_t *parentContextPtr, unsigned int numChannels);
 extern EB_ERRORTYPE InitEncoder(EbConfig_t *config, EbAppContext_t *callbackData, EB_U32 instanceIdx);
 extern EB_ERRORTYPE DeInitEncoder(EbAppContext_t *callbackDataPtr, EB_U32 instanceIndex, EB_ERRORTYPE   libExitError);
 extern EB_ERRORTYPE StartEncoder(EbAppContext_t *callbackDataPtr);

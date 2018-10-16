@@ -85,25 +85,6 @@ void EbAppContextCtor(EbAppContext_t *contextPtr)
 }
 
 
-/***********************************
-* ParentAppContext Constructor 
-*  Allowing multi instance support
-***********************************/
-void EbParentAppContextCtor(EbAppContext_t **contextPtr, EbParentAppContext_t *parentContextPtr, unsigned int numChannels)
-{
-
-	unsigned int count;
-
-	for (count=0; count < numChannels; ++count){
-		parentContextPtr->appCallBacks[count]			= contextPtr[count];
-	}
-
-	parentContextPtr->numChannels = (EB_U8) numChannels;
-    
-
-    return;
-}
-
 /******************************************************
 * Copy fields from the stream to the input buffer
     Input   : stream

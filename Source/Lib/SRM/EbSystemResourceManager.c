@@ -74,8 +74,9 @@ static EB_ERRORTYPE EbFifoPopFront(
     // Update tail of BufferPool if the BufferPool is now empty
     fifoPtr->lastPtr = (fifoPtr->firstPtr == fifoPtr->lastPtr) ? (EbObjectWrapper_t*) EB_NULL: fifoPtr->lastPtr;
 
-    // Update head of BufferPool
-    fifoPtr->firstPtr = fifoPtr->firstPtr->nextPtr;
+    if (fifoPtr->firstPtr)
+        // Update head of BufferPool
+        fifoPtr->firstPtr = fifoPtr->firstPtr->nextPtr;
 
     return return_error;
 }

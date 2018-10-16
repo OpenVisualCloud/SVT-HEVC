@@ -29,120 +29,17 @@
 #include <time.h>
 #include <errno.h>
 #endif
-
- /****************************************
- * EbCreateThread
- ****************************************/
-EB_HANDLETYPE EbCreateThread(
-    void *threadFunction(void *),
-    void *threadContext)
-{
-    EB_HANDLETYPE threadHandle = NULL;
-
-#ifdef _WIN32
-
-    threadHandle = (EB_HANDLETYPE)CreateThread(
-        NULL,                           // default security attributes
-        0,                              // default stack size
-        (LPTHREAD_START_ROUTINE)threadFunction, // function to be tied to the new thread
-        threadContext,                  // context to be tied to the new thread
-        0,                              // thread active when created
-        NULL);                          // new thread ID
-
-#elif __linux__
-
-    pthread_attr_t attr;
-    struct sched_param param = {
-        .sched_priority = 99
-    };
-    pthread_attr_init(&attr);
-    pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
-    pthread_attr_setschedparam(&attr, &param);
-
-    pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
-
-    threadHandle = (pthread_t*)malloc(sizeof(pthread_t));
-    int ret = pthread_create(
-        (pthread_t*)threadHandle,      // Thread handle
-        &attr,                       // attributes
-        threadFunction,                 // function to be run by new thread
-        threadContext);
-
-    if (ret != 0)
-        if (ret == EPERM) {
-
-            pthread_cancel(*((pthread_t*)threadHandle));
-            pthread_join(*((pthread_t*)threadHandle), NULL);
-            free(threadHandle);
-
-            threadHandle = (pthread_t*)malloc(sizeof(pthread_t));
-
-            pthread_create(
-                (pthread_t*)threadHandle,      // Thread handle
-                (const pthread_attr_t*)EB_NULL,                        // attributes
-                threadFunction,                 // function to be run by new thread
-                threadContext);
-        }
-
-#endif // _WIN32
-
-    return threadHandle;
-}
-
-/****************************************
-* EbDestroyThread
-****************************************/
-EB_ERRORTYPE EbDestroyThread(
-    EB_HANDLETYPE threadHandle)
-{
-    EB_ERRORTYPE error_return = EB_ErrorNone;
-
-#ifdef _WIN32
-    error_return = TerminateThread((HANDLE)threadHandle, 0) ? EB_ErrorDestroyThreadFailed : EB_ErrorNone;
-#elif __linux__
-    error_return = pthread_cancel(*((pthread_t*)threadHandle)) ? EB_ErrorDestroyThreadFailed : EB_ErrorNone;
-    pthread_join(*((pthread_t*)threadHandle), NULL);
-    free(threadHandle);
-#endif // _WIN32
-
-    return error_return;
-}
-
-/****************************************
-* EbWaitThread
-****************************************/
-#if __linux
-__attribute__((visibility("default")))
-#endif
-EB_ERRORTYPE EbWaitThread(
-    EB_HANDLETYPE threadHandle)
-{
-    EB_ERRORTYPE error_return = EB_ErrorNone;
-
-#ifdef _WIN32
-    error_return = WaitForSingleObject((HANDLE)threadHandle, INFINITE) ? EB_ErrorThreadUnresponsive : EB_ErrorNone;
-#elif __linux__
-    pthread_join(*((pthread_t*)threadHandle), NULL);
-    free(threadHandle);
-#endif // _WIN32
-
-    return error_return;
-}
-
 /***************************************
  * External Functions
  ***************************************/
-extern APPEXITCONDITIONTYPE AppProcessInputCommands(
-    EbConfig_t **configs,
-    EbParentAppContext_t *appCallback,
-    APPEXITCONDITIONTYPE *exitConditions);
+extern APPEXITCONDITIONTYPE ProcessInputBuffer(
+    EbConfig_t             *config,
+    EbAppContext_t         *appCallBack);
 
-extern APPEXITCONDITIONTYPE AppProcessOutputCommands(
-    EbConfig_t          **configs,
-    EbParentAppContext_t *appCallback,
-    EB_U64               *encodingFinishTimesSeconds,
-    EB_U64               *encodingFinishTimesuSeconds,
-    APPEXITCONDITIONTYPE *exitConditions);
+extern APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
+    EbConfig_t             *config,
+    EbAppContext_t         *appCallBack,
+    unsigned char           picSendDone);
 
 volatile int keepRunning = 1;
 
@@ -165,42 +62,34 @@ void AssignAppThreadGroup(EB_U8 targetSocket) {
 #endif
 }
 
-void* ReceiveBitstream(void* arg);
-void* SendPictures(void* arg);
 
-// GLOBAL VARIABLES
-EB_ERRORTYPE            return_error = EB_ErrorNone;            // Error Handling
-APPEXITCONDITIONTYPE    exitCondition = APP_ExitConditionNone;    // Processing loop exit condition
-APPEXITCONDITIONTYPE    exitConditionOutput = APP_ExitConditionNone;    // Processing loop exit condition
-APPEXITCONDITIONTYPE    exitConditionInput = APP_ExitConditionNone;    // Processing loop exit condition
-
-EB_ERRORTYPE            return_errors[MAX_CHANNEL_NUMBER];          // Error Handling
-APPEXITCONDITIONTYPE    exitConditions[MAX_CHANNEL_NUMBER];          // Processing loop exit condition
-APPEXITCONDITIONTYPE    exitConditionsOutput[MAX_CHANNEL_NUMBER];         // Processing loop exit condition
-APPEXITCONDITIONTYPE    exitConditionsInput[MAX_CHANNEL_NUMBER];          // Processing loop exit condition
-
-
-EB_BOOL                 channelActive[MAX_CHANNEL_NUMBER];
-EB_BOOL                 channelActiveSendPictures[MAX_CHANNEL_NUMBER];
-
-EbConfig_t             *configs[MAX_CHANNEL_NUMBER];        // Encoder Configuration
-
-
-EB_U64                  encodingStartTimesSeconds[MAX_CHANNEL_NUMBER]; // Array holding start time of each instance
-EB_U64                  encodingFinishTimesSeconds[MAX_CHANNEL_NUMBER]; // Array holding finish time of each instance
-EB_U64                  encodingStartTimesuSeconds[MAX_CHANNEL_NUMBER]; // Array holding start time of each instance
-EB_U64                  encodingFinishTimesuSeconds[MAX_CHANNEL_NUMBER]; // Array holding finish time of each instance
-
-unsigned int            numChannels = 0;
 /***************************************
  * Encoder App Main
  ***************************************/
 int main(int argc, char* argv[])
 {
+    // GLOBAL VARIABLES
+    EB_ERRORTYPE            return_error = EB_ErrorNone;            // Error Handling
+    APPEXITCONDITIONTYPE    exitCondition = APP_ExitConditionNone;    // Processing loop exit condition
 
+    EB_ERRORTYPE            return_errors[MAX_CHANNEL_NUMBER];          // Error Handling
+    APPEXITCONDITIONTYPE    exitConditions[MAX_CHANNEL_NUMBER];          // Processing loop exit condition
+    APPEXITCONDITIONTYPE    exitConditionsOutput[MAX_CHANNEL_NUMBER];         // Processing loop exit condition
+    APPEXITCONDITIONTYPE    exitConditionsInput[MAX_CHANNEL_NUMBER];          // Processing loop exit condition
+
+
+    EB_BOOL                 channelActive[MAX_CHANNEL_NUMBER];
+
+    EbConfig_t             *configs[MAX_CHANNEL_NUMBER];        // Encoder Configuration
+    
+    EB_U64                  encodingStartTimesSeconds[MAX_CHANNEL_NUMBER]; // Array holding start time of each instance
+    EB_U64                  encodingFinishTimesSeconds[MAX_CHANNEL_NUMBER]; // Array holding finish time of each instance
+    EB_U64                  encodingStartTimesuSeconds[MAX_CHANNEL_NUMBER]; // Array holding start time of each instance
+    EB_U64                  encodingFinishTimesuSeconds[MAX_CHANNEL_NUMBER]; // Array holding finish time of each instance
+
+    unsigned int            numChannels = 0;
     unsigned int            instanceCount=0;
     EbAppContext_t         *appCallbacks[MAX_CHANNEL_NUMBER];   // Instances App callback data
-    EbParentAppContext_t   *parentAppCallBack = NULL;           // App callback context
     signal(SIGINT, EventHandler);
 
     // Print Encoder Info
@@ -248,24 +137,11 @@ int main(int argc, char* argv[])
             exitConditionsOutput[instanceCount] = APP_ExitConditionError;         // Processing loop exit condition
             exitConditionsInput[instanceCount] = APP_ExitConditionError;         // Processing loop exit condition
             channelActive[instanceCount] = EB_FALSE;
-            channelActiveSendPictures[instanceCount] = EB_FALSE;
-            
         }
 
         // Read all configuration files.
         return_error = ReadCommandLine(argc, argv, configs, numChannels, return_errors);
 
-        {
-            EB_U32 totalInputBuffersSize = 0; 
-            EB_U32 totalOutputBuffersSize = 0;
-
-            for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
-                totalInputBuffersSize += (configs[instanceCount]->inputOutputBufferFifoInitCount);
-                totalOutputBuffersSize += (configs[instanceCount]->inputOutputBufferFifoInitCount);
-            }
-            parentAppCallBack = (EbParentAppContext_t*)malloc(sizeof(EbParentAppContext_t));
-            EbParentAppContextCtor(appCallbacks, parentAppCallBack, numChannels);
-        }
         // Process any command line options, including the configuration file
 
         if (return_error == EB_ErrorNone) {
@@ -286,7 +162,6 @@ int main(int argc, char* argv[])
                 }
                 else {
                     channelActive[instanceCount] = EB_FALSE;
-                    channelActiveSendPictures[instanceCount] = EB_FALSE;
                 }
             }
             // Start the Encoder
@@ -300,7 +175,6 @@ int main(int argc, char* argv[])
                         exitConditionsOutput[instanceCount] = APP_ExitConditionNone;
                         exitConditionsInput[instanceCount]  = APP_ExitConditionNone;
                         channelActive[instanceCount]        = EB_TRUE;
-                        channelActiveSendPictures[instanceCount] = EB_TRUE;
                         StartTime(&encodingStartTimesSeconds[instanceCount], &encodingStartTimesuSeconds[instanceCount]);
                     }
                     else {
@@ -316,19 +190,32 @@ int main(int argc, char* argv[])
                 printf("Encoding          ");
                 fflush(stdout);
 
-                // encoder reveive
-                EB_HANDLETYPE outputStreamHandle;
-                EB_HANDLETYPE inputYuvHandle;
-
-                outputStreamHandle  = EbCreateThread(ReceiveBitstream,  (void*)(parentAppCallBack));
-                inputYuvHandle      = EbCreateThread(SendPictures,      (void*)(parentAppCallBack)); // one extra thread to be removed later
-
-                EbWaitThread (inputYuvHandle);
-                EbWaitThread (outputStreamHandle);
-
-                for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
-                    StopEncoder(appCallbacks[instanceCount]);
-                    exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsOutput[instanceCount] || exitConditionsInput[instanceCount]);
+                while (exitCondition == APP_ExitConditionNone) {
+                    exitCondition = APP_ExitConditionFinished;
+                    for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
+                        if (channelActive[instanceCount] == EB_TRUE) {
+                            if (exitConditionsInput[instanceCount] == APP_ExitConditionNone)
+                                exitConditionsInput[instanceCount] = ProcessInputBuffer(
+                                                                            configs[instanceCount],
+                                                                            appCallbacks[instanceCount]);
+                            if (exitConditionsOutput[instanceCount] == APP_ExitConditionNone)
+                                exitConditionsOutput[instanceCount] = ProcessOutputStreamBuffer(
+                                                                            configs[instanceCount],
+                                                                            appCallbacks[instanceCount],
+                                                                            exitConditionsInput[instanceCount] == APP_ExitConditionNone ? 0 : 1);
+                            if (exitConditionsOutput[instanceCount] != APP_ExitConditionNone && exitConditionsInput[instanceCount] != APP_ExitConditionNone) {
+                                channelActive[instanceCount] = EB_FALSE;
+                                FinishTime(&encodingFinishTimesSeconds[instanceCount], &encodingFinishTimesuSeconds[instanceCount]);
+                                StopEncoder(appCallbacks[instanceCount]);
+                                exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsOutput[instanceCount] || exitConditionsInput[instanceCount]);
+                            }
+                        }
+                    }
+                    // check if all channels are inactive
+                    for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
+                        if (channelActive[instanceCount] == EB_TRUE)
+                            exitCondition = APP_ExitConditionNone;
+                    }
                 }
 
                 for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
@@ -404,8 +291,8 @@ int main(int argc, char* argv[])
 
             // DeInit Encoder
             for (instanceCount = numChannels; instanceCount > 0; --instanceCount) {
-                return_errors[instanceCount - 1] = DeInitEncoder(appCallbacks[instanceCount - 1], instanceCount - 1, return_errors[instanceCount - 1]);
-
+                if (return_errors[instanceCount - 1] == EB_ErrorNone && exitConditions[instanceCount - 1] == APP_ExitConditionFinished)
+                    return_errors[instanceCount - 1] = DeInitEncoder(appCallbacks[instanceCount - 1], instanceCount - 1, return_errors[instanceCount - 1]);
             }
         }
         else {
@@ -417,39 +304,10 @@ int main(int argc, char* argv[])
             free(configs[instanceCount]);
             free(appCallbacks[instanceCount]);
         }
-        free(parentAppCallBack);
 
         printf("Encoder finished\n");
-
     }
 
     return (return_error == 0) ? 0 : 1;
 }
-void* ReceiveBitstream(void* arg)
-{
-    EbParentAppContext_t         *parentAppCallBack = (EbParentAppContext_t *)arg;
-    unsigned int                  instanceCount = 0;
-    // Input Loop Thread
-    exitConditionOutput = APP_ExitConditionNone;
-    while (exitConditionOutput == APP_ExitConditionNone) {
 
-        AppProcessOutputCommands(configs, parentAppCallBack, encodingFinishTimesSeconds, encodingFinishTimesuSeconds, exitConditionsOutput);
-        if (exitConditionsOutput[instanceCount] == APP_ExitConditionFinished)
-            break;
-    }
-    return NULL;
-}
-void* SendPictures(void* arg)
-{
-    EbParentAppContext_t         *parentAppCallBack = (EbParentAppContext_t *)arg;
-    unsigned int                  instanceCount = 0;
-    // Input Loop Thread
-    exitConditionInput = APP_ExitConditionNone;
-    while (exitConditionInput == APP_ExitConditionNone) {
-
-        AppProcessInputCommands(configs, parentAppCallBack, exitConditionsInput);
-        if (exitConditionsInput[instanceCount] == APP_ExitConditionFinished)
-            break;
-    }
-    return NULL;
-}
