@@ -4296,10 +4296,8 @@ void DecimateInputPicture(
 		sixteenthDecimatedPicturePtr->height,
 		sixteenthDecimatedPicturePtr->originX,
 		sixteenthDecimatedPicturePtr->originY);
-
-
 }
-
+#if !ONE_MEMCPY
 void CopyInputPicture(
     SequenceControlSet_t            *sequenceControlSetPtr,
     PictureParentControlSet_t       *pictureControlSetPtr
@@ -4466,7 +4464,7 @@ void CopyInputPicture(
 
     return;
 }
-
+#endif
 /************************************************
  * Picture Analysis Kernel
  * The Picture Analysis Process pads & decimates the input pictures.
@@ -4521,13 +4519,13 @@ void* PictureAnalysisKernel(void *inputPtr)
 		pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize;
 		pictureHeighInLcu = (sequenceControlSetPtr->lumaHeight + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize;
 		lcuTotalCount = pictureWidthInLcu * pictureHeighInLcu;
-        
+#if !ONE_MEMCPY        
         CopyInputPicture(
             sequenceControlSetPtr,
             pictureControlSetPtr);
 
         EbReleaseObject(pictureControlSetPtr->ebInputWrapperPtr);
-
+#endif
         //sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->callbackFunctions.SendPictureDone(
         //    sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->appPrivateData,   // App Private Data Ptr
         //    pictureControlSetPtr->ebInputPtr);                                         // Bufferheader
@@ -4540,7 +4538,6 @@ void* PictureAnalysisKernel(void *inputPtr)
 		PadPictureToMultipleOfMinCuSizeDimensions(
 			sequenceControlSetPtr,
 			inputPicturePtr);
-
 
 		// Pre processing operations performed on the input picture 
         PicturePreProcessingOperations(

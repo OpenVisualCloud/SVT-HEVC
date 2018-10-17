@@ -577,6 +577,16 @@ void* ResourceCoordinationKernel(void *inputPtr)
         inputPictureWrapperPtr  = 0;
         inputPicturePtr         = 0;
 
+#if ONE_MEMCPY 
+        // assign the input picture
+        pictureControlSetPtr->enhancedPicturePtr = (EbPictureBufferDesc_t*)ebInputPtr->pBuffer;
+        // start latency measure as soon as we copy input picture from buffer
+        pictureControlSetPtr->startTimeSeconds = 0;
+        pictureControlSetPtr->startTimeuSeconds = 0;
+
+        StartTime(&pictureControlSetPtr->startTimeSeconds, &pictureControlSetPtr->startTimeuSeconds);
+#endif
+
         inputPicturePtr = pictureControlSetPtr->enhancedPicturePtr;
 
         // Setup new input picture buffer

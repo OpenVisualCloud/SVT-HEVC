@@ -615,7 +615,7 @@ EB_ERRORTYPE PictureParentControlSetCtor(
 	if (initDataPtr->is16bit && initDataPtr->compressedTenBitFormat == 1){  
 		inputPictureBufferDescInitData.splitMode = EB_FALSE;  //do special allocation for 2bit data down below.		
 	}
-
+#if !ONE_MEMCPY 
     // Enhanced Picture Buffer
     return_error = EbPictureBufferDescCtor(
         (EB_PTR*) &(objectPtr->enhancedPicturePtr),
@@ -633,7 +633,7 @@ EB_ERRORTYPE PictureParentControlSetCtor(
 		EB_ALLIGN_MALLOC(EB_U8*, objectPtr->enhancedPicturePtr->bufferBitIncCr, sizeof(EB_U8) * (initDataPtr->pictureWidth / 8)*(initDataPtr->pictureHeight / 2), EB_A_PTR);
 
 	}
-
+#endif
     // GOP
     objectPtr->predStructIndex      = 0;
     objectPtr->pictureNumber        = 0;

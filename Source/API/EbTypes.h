@@ -31,6 +31,7 @@ extern "C" {
 #define CHKN_OMX        1
 #define DEADLOCK_DEBUG  0
 #define CHKN_EOS        1
+#define ONE_MEMCPY      1
 #define EB_MIN(a,b)             (((a) < (b)) ? (a) : (b))
 
 #ifdef	_MSC_VER
