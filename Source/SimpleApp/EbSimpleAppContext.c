@@ -16,8 +16,8 @@
 #define EB_OUTPUTSTREAMBUFFERSIZE_MACRO(ResolutionSize)                ((ResolutionSize) < (INPUT_SIZE_1080i_TH) ? 0x1E8480 : (ResolutionSize) < (INPUT_SIZE_1080p_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_4K_TH) ? 0x2DC6C0 : 0x2DC6C0  )   
 
 EB_ERRORTYPE AllocateFrameBuffer(
-    EbConfig_t				*config,
-    unsigned __int8         *pBuffer)
+    EbConfig_t        *config,
+    unsigned char     *pBuffer)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
 
@@ -93,7 +93,7 @@ EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config)
     contextPtr->inputPictureBuffer = (EB_BUFFERHEADERTYPE*)malloc(sizeof(EB_BUFFERHEADERTYPE));
     if (!contextPtr->inputPictureBuffer) return return_error;
 
-    contextPtr->inputPictureBuffer->pBuffer = (unsigned __int8*)malloc(sizeof(EB_H265_ENC_INPUT));
+    contextPtr->inputPictureBuffer->pBuffer = (unsigned char*)malloc(sizeof(EB_H265_ENC_INPUT));
     if (!contextPtr->inputPictureBuffer->pBuffer) return return_error;
 
     contextPtr->inputPictureBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
@@ -106,7 +106,7 @@ EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config)
     contextPtr->outputStreamBuffer = (EB_BUFFERHEADERTYPE*)malloc(sizeof(EB_BUFFERHEADERTYPE));
     if (!contextPtr->outputStreamBuffer) return return_error;
 
-    contextPtr->outputStreamBuffer->pBuffer = (unsigned __int8*)malloc(EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->sourceWidth*config->sourceHeight));
+    contextPtr->outputStreamBuffer->pBuffer = (unsigned char*)malloc(EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->sourceWidth*config->sourceHeight));
     if (!contextPtr->outputStreamBuffer->pBuffer) return return_error;
 
     contextPtr->outputStreamBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
@@ -142,12 +142,12 @@ void EbAppContextDtor(EbAppContext_t *contextPtr)
 EB_ERRORTYPE CopyConfigurationParameters(
     EbConfig_t				*config,
     EbAppContext_t			*callbackData,
-    unsigned __int32         instanceIdx)
+    unsigned int         instanceIdx)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
 
     // Assign Instance index to the library
-    callbackData->instanceIdx = (unsigned __int8)instanceIdx;
+    callbackData->instanceIdx = (unsigned char)instanceIdx;
 
     // Initialize Port Activity Flags
     callbackData->ebEncParameters.sourceWidth = config->sourceWidth;
@@ -163,7 +163,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
 EB_ERRORTYPE InitEncoder(
     EbConfig_t				*config,
     EbAppContext_t			*callbackData,
-    unsigned __int32        instanceIdx)
+    unsigned int        instanceIdx)
 {
     EB_ERRORTYPE        return_error = EB_ErrorNone;
     
@@ -197,7 +197,7 @@ EB_ERRORTYPE InitEncoder(
  ***********************************/
 EB_ERRORTYPE DeInitEncoder(
     EbAppContext_t *callbackDataPtr,
-    unsigned __int32 instanceIndex,
+    unsigned int instanceIndex,
     EB_ERRORTYPE   libExitError)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;

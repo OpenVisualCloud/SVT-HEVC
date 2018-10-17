@@ -25,7 +25,7 @@ typedef struct EbAppContext_s {
     EB_BUFFERHEADERTYPE                 *inputPictureBuffer;
     EB_BUFFERHEADERTYPE                 *outputStreamBuffer;
 
-    unsigned __int32 instanceIdx;
+    unsigned int instanceIdx;
 
 } EbAppContext_t;
 
@@ -35,8 +35,8 @@ typedef struct EbAppContext_s {
  ********************************/
 extern EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config);
 extern void EbAppContextDtor(EbAppContext_t *contextPtr);
-extern EB_ERRORTYPE InitEncoder(EbConfig_t *config, EbAppContext_t *callbackData, unsigned __int32 instanceIdx);
-extern EB_ERRORTYPE DeInitEncoder(EbAppContext_t *callbackDataPtr, unsigned __int32 instanceIndex, EB_ERRORTYPE   libExitError);
+extern EB_ERRORTYPE InitEncoder(EbConfig_t *config, EbAppContext_t *callbackData, unsigned int instanceIdx);
+extern EB_ERRORTYPE DeInitEncoder(EbAppContext_t *callbackDataPtr, unsigned int instanceIndex, EB_ERRORTYPE   libExitError);
 extern EB_ERRORTYPE StartEncoder(EbAppContext_t *callbackDataPtr);
 extern EB_ERRORTYPE StopEncoder(EbAppContext_t *callbackDataPtr);
 

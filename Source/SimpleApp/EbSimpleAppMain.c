@@ -103,28 +103,28 @@ void ReadInputFrames(
     EB_BUFFERHEADERTYPE         *headerPtr)
 {
 
-    unsigned __int64  readSize;
-    signed __int64  inputPaddedWidth = config->inputPaddedWidth;
-    signed __int64  inputPaddedHeight = config->inputPaddedHeight;
+    unsigned long  readSize;
+    signed long  inputPaddedWidth = config->inputPaddedWidth;
+    signed long  inputPaddedHeight = config->inputPaddedHeight;
     FILE   *inputFile = config->inputFile;
-    unsigned __int8  *ebInputPtr;
+    unsigned char  *ebInputPtr;
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
 
     {
         if (is16bit == 0 || (is16bit == 1 && config->compressedTenBitFormat == 0)) {
 
-            readSize = (unsigned __int64)SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, is16bit);
+            readSize = (unsigned long)SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, is16bit);
 
             headerPtr->nFilledLen = 0;
 
             {
-                unsigned __int64 lumaReadSize = (unsigned __int64)inputPaddedWidth*inputPaddedHeight << is16bit;
+                unsigned long lumaReadSize = (unsigned long)inputPaddedWidth*inputPaddedHeight << is16bit;
                 ebInputPtr = inputPtr->luma;
-                headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, lumaReadSize, inputFile);
+                headerPtr->nFilledLen += (unsigned int)fread(ebInputPtr, 1, lumaReadSize, inputFile);
                 ebInputPtr = inputPtr->cb;
-                headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
+                headerPtr->nFilledLen += (unsigned int)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
                 ebInputPtr = inputPtr->cr;
-                headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
+                headerPtr->nFilledLen += (unsigned int)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
                 inputPtr->luma = inputPtr->luma + ((config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING) << is16bit);
                 inputPtr->cb = inputPtr->cb + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)) << is16bit);
                 inputPtr->cr = inputPtr->cr + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)) << is16bit);
@@ -140,15 +140,15 @@ void ReadInputFrames(
             // Fill the buffer with a complete frame
             headerPtr->nFilledLen = 0;
 
-            unsigned __int64 lumaReadSize = (unsigned __int64)inputPaddedWidth*inputPaddedHeight;
-            unsigned __int64 nbitlumaReadSize = (unsigned __int64)(inputPaddedWidth / 4)*inputPaddedHeight;
+            unsigned long lumaReadSize = (unsigned long)inputPaddedWidth*inputPaddedHeight;
+            unsigned long nbitlumaReadSize = (unsigned long)(inputPaddedWidth / 4)*inputPaddedHeight;
 
             ebInputPtr = inputPtr->luma;
-            headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, lumaReadSize, inputFile);
+            headerPtr->nFilledLen += (unsigned int)fread(ebInputPtr, 1, lumaReadSize, inputFile);
             ebInputPtr = inputPtr->cb;
-            headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
+            headerPtr->nFilledLen += (unsigned int)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
             ebInputPtr = inputPtr->cr;
-            headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
+            headerPtr->nFilledLen += (unsigned int)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
 
             inputPtr->luma = inputPtr->luma + config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING;
             inputPtr->cb = inputPtr->cb + (config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1);
@@ -156,11 +156,11 @@ void ReadInputFrames(
 
 
             ebInputPtr = inputPtr->lumaExt;
-            headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, nbitlumaReadSize, inputFile);
+            headerPtr->nFilledLen += (unsigned int)fread(ebInputPtr, 1, nbitlumaReadSize, inputFile);
             ebInputPtr = inputPtr->cbExt;
-            headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, nbitlumaReadSize >> 2, inputFile);
+            headerPtr->nFilledLen += (unsigned int)fread(ebInputPtr, 1, nbitlumaReadSize >> 2, inputFile);
             ebInputPtr = inputPtr->crExt;
-            headerPtr->nFilledLen += (unsigned __int32)fread(ebInputPtr, 1, nbitlumaReadSize >> 2, inputFile);
+            headerPtr->nFilledLen += (unsigned int)fread(ebInputPtr, 1, nbitlumaReadSize >> 2, inputFile);
 
             inputPtr->lumaExt = inputPtr->lumaExt + ((config->inputPaddedWidth >> 2)*TOP_INPUT_PADDING + (LEFT_INPUT_PADDING >> 2));
             inputPtr->cbExt = inputPtr->cbExt + (((config->inputPaddedWidth >> 1) >> 2)*(TOP_INPUT_PADDING >> 1) + ((LEFT_INPUT_PADDING >> 1) >> 2));
@@ -284,7 +284,7 @@ int main(int argc, char* argv[])
             else
                 config->bitstreamFile = fout;
 
-            unsigned __int32 width = 0, height = 0;
+            unsigned int width = 0, height = 0;
             
             width = strtoul(argv[3], NULL, 0);
             height = strtoul(argv[4], NULL, 0);
@@ -293,7 +293,7 @@ int main(int argc, char* argv[])
             config->inputPaddedWidth  = config->sourceWidth = width;
             config->inputPaddedHeight = config->sourceHeight = height;
 
-            unsigned __int32 bdepth = width = strtoul(argv[5], NULL, 0);
+            unsigned int bdepth = width = strtoul(argv[5], NULL, 0);
             if ((bdepth != 8) && (bdepth != 10)) {printf("Invalid bit depth\n"); return_error = EB_ErrorBadParameter; }
             config->encoderBitDepth = bdepth;
         }
