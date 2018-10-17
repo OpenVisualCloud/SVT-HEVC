@@ -240,7 +240,7 @@ static EB_ERRORTYPE EbMuxingQueueCtor(
     EB_MALLOC(EbFifo_t**, queuePtr->processFifoPtrArray, sizeof(EbFifo_t*) * queuePtr->processTotalCount, EB_N_PTR);
 
     for(processIndex=0; processIndex < queuePtr->processTotalCount; ++processIndex) {
-        EB_MALLOC(EbFifo_t*, queuePtr->processFifoPtrArray[processIndex], sizeof(EbFifo_t) * queuePtr->processTotalCount, EB_N_PTR);
+        EB_MALLOC(EbFifo_t*, queuePtr->processFifoPtrArray[processIndex], sizeof(EbFifo_t), EB_N_PTR);
         return_error = EbFifoCtor(
             queuePtr->processFifoPtrArray[processIndex],
             0,
