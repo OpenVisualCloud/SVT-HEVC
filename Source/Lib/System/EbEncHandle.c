@@ -545,10 +545,9 @@ static EB_ERRORTYPE EbEncHandleCtor(
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbStartEncoder(
-    EB_HANDLETYPE  hComponent,
-    EB_U32         instanceIndex)
+    EB_COMPONENTTYPE  *h265EncComponent,
+    EB_U32            instanceIndex)
 {
-    EB_COMPONENTTYPE      *h265EncComponent = (EB_COMPONENTTYPE*)hComponent;
     EbEncHandle_t         *encHandlePtr     = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
     EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_U32 processIndex;
@@ -611,10 +610,9 @@ EB_API EB_ERRORTYPE EbStartEncoder(
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbStopEncoder(
-    EB_HANDLETYPE  hComponent,
-    EB_U32         instanceIndex)
+    EB_COMPONENTTYPE *h265EncComponent,
+    EB_U32            instanceIndex)
 {
-    EB_COMPONENTTYPE *h265EncComponent = (EB_COMPONENTTYPE*)hComponent;
     EbEncHandle_t *encHandlePtr        = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
     EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_U32 processIndex;
@@ -714,9 +712,8 @@ void EbSetThreadManagementParameters(EB_H265_ENC_CONFIGURATION   *configPtr){
 #if __linux
 __attribute__((visibility("default")))
 #endif
-EB_API EB_ERRORTYPE EbInitEncoder(EB_HANDLETYPE hComponent)
+EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
 {
-    EB_COMPONENTTYPE *h265EncComponent = (EB_COMPONENTTYPE*)hComponent;
     EbEncHandle_t *encHandlePtr = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
     EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_U32 instanceIndex;
@@ -1517,9 +1514,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_HANDLETYPE hComponent)
 #if __linux
 __attribute__((visibility("default")))
 #endif
-EB_API EB_ERRORTYPE EbDeinitEncoder(EB_HANDLETYPE hComponent)
+EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
 {
-    EB_COMPONENTTYPE *h265EncComponent = (EB_COMPONENTTYPE*)hComponent;
     EbEncHandle_t *encHandlePtr = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
     EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_S32              ptrIndex     = 0 ;
@@ -1595,7 +1591,7 @@ EB_API EB_ERRORTYPE EbH265EncSetCallbacks(
 __attribute__((visibility("default"))) 
 #endif
 EB_API EB_ERRORTYPE EbInitHandle(
-    EB_HANDLETYPE      *pHandle,               // Function to be called in the future for manipulating the component
+    EB_COMPONENTTYPE** pHandle,               // Function to be called in the future for manipulating the component
     EB_PTR              pAppData)              // Pointer passed back to the client during callbacks
             
 {
@@ -1614,8 +1610,8 @@ EB_API EB_ERRORTYPE EbInitHandle(
             return_error = EbH265EncSetCallbacks(*pHandle, pAppData);
 
         }else if (return_error == EB_ErrorInsufficientResources){
-            EbDeinitEncoder((EbEncHandle_t *)NULL);
-            *pHandle     = (EB_HANDLETYPE) NULL;
+            EbDeinitEncoder((EB_COMPONENTTYPE*)NULL);
+            *pHandle     = (EB_COMPONENTTYPE*) NULL;
         }else {
             return_error = EB_ErrorInvalidComponent;
         }
@@ -1631,10 +1627,9 @@ EB_API EB_ERRORTYPE EbInitHandle(
 /**********************************
  * Encoder Componenet DeInit
  **********************************/
-EB_ERRORTYPE EbH265EncComponentDeInit(EB_HANDLETYPE hComponent)
+EB_ERRORTYPE EbH265EncComponentDeInit(EB_COMPONENTTYPE  *h265EncComponent)
 {
     EB_ERRORTYPE       return_error        = EB_ErrorNone;
-    EB_COMPONENTTYPE  *h265EncComponent    = (EB_COMPONENTTYPE*) hComponent;
 
     if (h265EncComponent->pComponentPrivate) {
         free((EbEncHandle_t *)h265EncComponent->pComponentPrivate);
@@ -1653,14 +1648,14 @@ EB_ERRORTYPE EbH265EncComponentDeInit(EB_HANDLETYPE hComponent)
 __attribute__((visibility("default"))) 
 #endif
 EB_API EB_ERRORTYPE EbDeinitHandle(
-    EB_HANDLETYPE hComponent)
+    EB_COMPONENTTYPE  *h265EncComponent)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
-    if (hComponent) {
-        return_error = EbH265EncComponentDeInit(hComponent);
+    if (h265EncComponent) {
+        return_error = EbH265EncComponentDeInit(h265EncComponent);
 
-        free(hComponent);
+        free(h265EncComponent);
     }
     else {
         return_error = EB_ErrorInvalidComponent;
@@ -2738,124 +2733,16 @@ static EB_ERRORTYPE VerifySettings(\
 }
 
 /**********************************
-* Set Parameter
-**********************************/
-#if __linux
-__attribute__((visibility("default")))
-#endif
-EB_API EB_ERRORTYPE EbH265EncInitParameter(
-    EB_PTR                 pComponentParameterStructure)
-{
-    EB_ERRORTYPE                  return_error = EB_ErrorNone;
-    EB_H265_ENC_CONFIGURATION*    configPtr = (EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure;
-
-    if (!configPtr) {
-        printf("The EB_H265_ENC_CONFIGURATION structure is empty! \n");
-        return EB_ErrorBadParameter;
-    }
-
-    configPtr->frameRate = 60;
-    configPtr->frameRateNumerator = 0;
-    configPtr->frameRateDenominator = 0;
-    configPtr->encoderBitDepth = 8;
-    configPtr->compressedTenBitFormat = 0;
-    configPtr->sourceWidth = 0;
-    configPtr->sourceHeight = 0;
-    configPtr->inputPictureStride = 0;
-    configPtr->framesToBeEncoded = 0;
-
-
-    // Interlaced Video 
-    configPtr->interlacedVideo = EB_FALSE;
-    configPtr->qp = 32;
-    configPtr->useQpFile = EB_FALSE;
-    configPtr->sceneChangeDetection = 1;
-    configPtr->rateControlMode = 0;
-    configPtr->lookAheadDistance = 17;
-    configPtr->targetBitRate = 7000000;
-    configPtr->maxQpAllowed = 48;
-    configPtr->minQpAllowed = 10;
-    configPtr->baseLayerSwitchMode = 0;
-    configPtr->encMode  = 9;
-    configPtr->intraPeriodLength = -2;
-    configPtr->intraRefreshType = 1;
-    configPtr->hierarchicalLevels = 3;
-    configPtr->predStructure = EB_PRED_RANDOM_ACCESS;
-    configPtr->disableDlfFlag = EB_FALSE;
-    configPtr->enableSaoFlag = EB_TRUE;
-    configPtr->useDefaultMeHme = EB_TRUE;
-    configPtr->enableHmeFlag = EB_TRUE;
-    configPtr->enableHmeLevel0Flag = EB_TRUE;
-    configPtr->enableHmeLevel1Flag = EB_FALSE;
-    configPtr->enableHmeLevel2Flag = EB_FALSE;
-    configPtr->searchAreaWidth = 16;
-    configPtr->searchAreaHeight = 7;
-    configPtr->numberHmeSearchRegionInWidth = 2;
-    configPtr->numberHmeSearchRegionInHeight = 2;
-    configPtr->hmeLevel0TotalSearchAreaWidth = 64;
-    configPtr->hmeLevel0TotalSearchAreaHeight = 25;
-    configPtr->hmeLevel0SearchAreaInWidthArray[0] = 32;
-    configPtr->hmeLevel0SearchAreaInWidthArray[1] = 32;
-    configPtr->hmeLevel0SearchAreaInHeightArray[0] = 12;
-    configPtr->hmeLevel0SearchAreaInHeightArray[1] = 13;
-    configPtr->hmeLevel1SearchAreaInWidthArray[0] = 1;
-    configPtr->hmeLevel1SearchAreaInWidthArray[1] = 1;
-    configPtr->hmeLevel1SearchAreaInHeightArray[0] = 1;
-    configPtr->hmeLevel1SearchAreaInHeightArray[1] = 1;
-    configPtr->hmeLevel2SearchAreaInWidthArray[0] = 1;
-    configPtr->hmeLevel2SearchAreaInWidthArray[1] = 1;
-    configPtr->hmeLevel2SearchAreaInHeightArray[0] = 1;
-    configPtr->hmeLevel2SearchAreaInHeightArray[1] = 1;
-    configPtr->constrainedIntra = EB_FALSE;
-    configPtr->tune = 0;
-
-    // Thresholds
-    configPtr->videoUsabilityInfo = 0;
-    configPtr->highDynamicRangeInput = 0;
-    configPtr->accessUnitDelimiter = 0;
-    configPtr->bufferingPeriodSEI = 0;
-    configPtr->pictureTimingSEI = 0;
-
-    configPtr->bitRateReduction = EB_TRUE;
-    configPtr->improveSharpness = EB_TRUE;
-    configPtr->registeredUserDataSeiFlag = EB_FALSE;
-    configPtr->unregisteredUserDataSeiFlag = EB_FALSE;
-    configPtr->recoveryPointSeiFlag = EB_FALSE;
-    configPtr->enableTemporalId = 1;
-    configPtr->inputOutputBufferFifoInitCount = 50;
-
-    // Annex A parameters
-    configPtr->profile = 2;
-    configPtr->tier = 0;
-    configPtr->level = 0;
-
-    // Latency
-    configPtr->injectorFrameRate = 60 << 16;
-    configPtr->speedControlFlag = 0;
-    configPtr->latencyMode = EB_NORMAL_LATENCY;
-
-    // ASM Type
-    configPtr->asmType = ASM_AVX2; 
-    configPtr->useRoundRobinThreadAssignment = EB_FALSE;
-    configPtr->channelId = 0;
-    configPtr->activeChannelCount = 1;
-
-
-    return return_error;
-}
-
-/**********************************
  * Set Parameter
  **********************************/
 #if __linux
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265EncSetParameter(
-    EB_HANDLETYPE          hComponent,
-    EB_PTR                 pComponentParameterStructure)
+    EB_COMPONENTTYPE           *h265EncComponent,
+    EB_H265_ENC_CONFIGURATION  *pComponentParameterStructure)
 {
     EB_ERRORTYPE           return_error      = EB_ErrorNone;
-    EB_COMPONENTTYPE      *h265EncComponent  = (EB_COMPONENTTYPE*) hComponent;
     EbEncHandle_t          *pEncCompData      = (EbEncHandle_t*) h265EncComponent->pComponentPrivate;
     EB_U32                  instanceIndex     = 0;
 
@@ -3184,10 +3071,9 @@ void CopyInputBuffer(
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265EncSendPicture(
-    EB_HANDLETYPE          hComponent,
+    EB_COMPONENTTYPE      *h265EncComponent,
     EB_BUFFERHEADERTYPE   *pBuffer)
 {
-    EB_COMPONENTTYPE      *h265EncComponent  = (EB_COMPONENTTYPE*) hComponent;
     EbEncHandle_t          *encHandlePtr = (EbEncHandle_t*) h265EncComponent->pComponentPrivate;
     EbObjectWrapper_t      *ebWrapperPtr;
     
@@ -3238,12 +3124,11 @@ void CopyOutputBuffer(
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265GetPacket(
-    EB_HANDLETYPE          hComponent,
+    EB_COMPONENTTYPE      *h265EncComponent,
     EB_BUFFERHEADERTYPE   *pBuffer,
     unsigned char          picSendDone)
 {
 
-    EB_COMPONENTTYPE      *h265EncComponent = (EB_COMPONENTTYPE*)hComponent;
     EbEncHandle_t          *pEncCompData = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
     EB_U32                 instanceIndex = 0; // hard-coded, determined from the port number
     EbObjectWrapper_t      *ebWrapperPtr = NULL;

@@ -19,7 +19,7 @@ typedef struct EbAppContext_s {
     InputBitstreamContext_t             inputContext;
 
     // Component Handle
-    EB_HANDLETYPE                       svtEncoderHandle;
+    EB_COMPONENTTYPE*                   svtEncoderHandle;
 
     // Buffer Pools
     EB_BUFFERHEADERTYPE                 *inputPictureBuffer;

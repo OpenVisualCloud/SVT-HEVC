@@ -567,6 +567,108 @@ EB_ERRORTYPE PreloadFramesIntoRam(
     return return_error;
 }
 
+/**********************************
+* Set Parameter
+**********************************/
+EB_ERRORTYPE InitParameter(
+    EB_H265_ENC_CONFIGURATION*   configPtr)
+{
+    EB_ERRORTYPE                  return_error = EB_ErrorNone;
+
+    if (!configPtr) {
+        printf("The EB_H265_ENC_CONFIGURATION structure is empty! \n");
+        return EB_ErrorBadParameter;
+    }
+
+    configPtr->frameRate = 60;
+    configPtr->frameRateNumerator = 0;
+    configPtr->frameRateDenominator = 0;
+    configPtr->encoderBitDepth = 8;
+    configPtr->compressedTenBitFormat = 0;
+    configPtr->sourceWidth = 0;
+    configPtr->sourceHeight = 0;
+    configPtr->inputPictureStride = 0;
+    configPtr->framesToBeEncoded = 0;
+
+
+    // Interlaced Video 
+    configPtr->interlacedVideo = EB_FALSE;
+    configPtr->qp = 32;
+    configPtr->useQpFile = EB_FALSE;
+    configPtr->sceneChangeDetection = 1;
+    configPtr->rateControlMode = 0;
+    configPtr->lookAheadDistance = 17;
+    configPtr->targetBitRate = 7000000;
+    configPtr->maxQpAllowed = 48;
+    configPtr->minQpAllowed = 10;
+    configPtr->baseLayerSwitchMode = 0;
+    configPtr->encMode  = 9;
+    configPtr->intraPeriodLength = -2;
+    configPtr->intraRefreshType = 1;
+    configPtr->hierarchicalLevels = 3;
+    configPtr->predStructure = EB_PRED_RANDOM_ACCESS;
+    configPtr->disableDlfFlag = EB_FALSE;
+    configPtr->enableSaoFlag = EB_TRUE;
+    configPtr->useDefaultMeHme = EB_TRUE;
+    configPtr->enableHmeFlag = EB_TRUE;
+    configPtr->enableHmeLevel0Flag = EB_TRUE;
+    configPtr->enableHmeLevel1Flag = EB_FALSE;
+    configPtr->enableHmeLevel2Flag = EB_FALSE;
+    configPtr->searchAreaWidth = 16;
+    configPtr->searchAreaHeight = 7;
+    configPtr->numberHmeSearchRegionInWidth = 2;
+    configPtr->numberHmeSearchRegionInHeight = 2;
+    configPtr->hmeLevel0TotalSearchAreaWidth = 64;
+    configPtr->hmeLevel0TotalSearchAreaHeight = 25;
+    configPtr->hmeLevel0SearchAreaInWidthArray[0] = 32;
+    configPtr->hmeLevel0SearchAreaInWidthArray[1] = 32;
+    configPtr->hmeLevel0SearchAreaInHeightArray[0] = 12;
+    configPtr->hmeLevel0SearchAreaInHeightArray[1] = 13;
+    configPtr->hmeLevel1SearchAreaInWidthArray[0] = 1;
+    configPtr->hmeLevel1SearchAreaInWidthArray[1] = 1;
+    configPtr->hmeLevel1SearchAreaInHeightArray[0] = 1;
+    configPtr->hmeLevel1SearchAreaInHeightArray[1] = 1;
+    configPtr->hmeLevel2SearchAreaInWidthArray[0] = 1;
+    configPtr->hmeLevel2SearchAreaInWidthArray[1] = 1;
+    configPtr->hmeLevel2SearchAreaInHeightArray[0] = 1;
+    configPtr->hmeLevel2SearchAreaInHeightArray[1] = 1;
+    configPtr->constrainedIntra = EB_FALSE;
+    configPtr->tune = 0;
+
+    // Thresholds
+    configPtr->videoUsabilityInfo = 0;
+    configPtr->highDynamicRangeInput = 0;
+    configPtr->accessUnitDelimiter = 0;
+    configPtr->bufferingPeriodSEI = 0;
+    configPtr->pictureTimingSEI = 0;
+
+    configPtr->bitRateReduction = EB_TRUE;
+    configPtr->improveSharpness = EB_TRUE;
+    configPtr->registeredUserDataSeiFlag = EB_FALSE;
+    configPtr->unregisteredUserDataSeiFlag = EB_FALSE;
+    configPtr->recoveryPointSeiFlag = EB_FALSE;
+    configPtr->enableTemporalId = 1;
+    configPtr->inputOutputBufferFifoInitCount = 50;
+
+    // Annex A parameters
+    configPtr->profile = 2;
+    configPtr->tier = 0;
+    configPtr->level = 0;
+
+    // Latency
+    configPtr->injectorFrameRate = 60 << 16;
+    configPtr->speedControlFlag = 0;
+    configPtr->latencyMode = EB_NORMAL_LATENCY;
+
+    // ASM Type
+    configPtr->asmType = ASM_AVX2; 
+    configPtr->useRoundRobinThreadAssignment = EB_FALSE;
+    configPtr->channelId = 0;
+    configPtr->activeChannelCount = 1;
+
+
+    return return_error;
+}
 
 /***************************************
 * Functions Implementation
@@ -594,7 +696,7 @@ EB_ERRORTYPE InitEncoder(
     }
 
     // STEP 2: Get the Default parameters from the library
-    return_error = EbH265EncInitParameter(
+    return_error = InitParameter(
         &callbackData->ebEncParameters);
     
     if (return_error != EB_ErrorNone) {

@@ -672,7 +672,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
 #endif
 
         // Send the picture
-        EbH265EncSendPicture((EB_HANDLETYPE) componentHandle, headerPtr);
+        EbH265EncSendPicture(componentHandle, headerPtr);
         
         if ((contextPtr->processedFrameCount == (EB_U64)config->framesToBeEncoded) || config->stopEncoder) {
 
@@ -685,7 +685,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
             headerPtr->nFlags       = EB_BUFFERFLAG_EOS;
             headerPtr->pBuffer      = NULL;
 
-            EbH265EncSendPicture((EB_HANDLETYPE)componentHandle, headerPtr);
+            EbH265EncSendPicture(componentHandle, headerPtr);
         
         }
 
@@ -733,7 +733,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     double                duration        = 0.0;
 
     // non-blocking call until all input frames are sent
-    stream_status = EbH265GetPacket((EB_HANDLETYPE)componentHandle, headerPtr, picSendDone);
+    stream_status = EbH265GetPacket(componentHandle, headerPtr, picSendDone);
 
     if (stream_status != EB_NoErrorEmptyQueue) {
         ++(config->performanceContext.frameCount);

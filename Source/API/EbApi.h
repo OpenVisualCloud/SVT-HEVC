@@ -180,41 +180,38 @@ typedef struct EB_H265_ENC_CONFIGURATION
 #endif
 
 EB_API EB_ERRORTYPE EbInitEncoder(
-    EB_HANDLETYPE  hComponent);
+    EB_COMPONENTTYPE *h265EncComponent);
 
 EB_API EB_ERRORTYPE EbDeinitEncoder(
-    EB_HANDLETYPE  hComponent);
+    EB_COMPONENTTYPE *h265EncComponent);
 
 EB_API EB_ERRORTYPE EbStartEncoder(
-    EB_HANDLETYPE  hComponent,
-    EB_U32         instanceIndex);
+    EB_COMPONENTTYPE  *h265EncComponent,
+    EB_U32            instanceIndex);
 
 EB_API EB_ERRORTYPE EbStopEncoder(
-    EB_HANDLETYPE  hComponent,
-    EB_U32         instanceIndex);
-
-EB_API EB_ERRORTYPE EbH265EncInitParameter(
-    EB_PTR                 pComponentParameterStructure);
+    EB_COMPONENTTYPE *h265EncComponent,
+    EB_U32            instanceIndex);
 
 EB_API EB_ERRORTYPE EbH265EncSetParameter(
-    EB_HANDLETYPE          hComponent,
-    EB_PTR                 pComponentParameterStructure);
+    EB_COMPONENTTYPE           *h265EncComponent,
+    EB_H265_ENC_CONFIGURATION  *pComponentParameterStructure);
 
 EB_API EB_ERRORTYPE EbH265EncSendPicture(
-    EB_HANDLETYPE          hComponent,
+    EB_COMPONENTTYPE      *h265EncComponent,
     EB_BUFFERHEADERTYPE   *pBuffer);
 
 EB_API EB_ERRORTYPE EbH265GetPacket(
-    EB_HANDLETYPE          hComponent,
+    EB_COMPONENTTYPE      *h265EncComponent,
     EB_BUFFERHEADERTYPE   *pBuffer,
     unsigned char          picSendDone);
 
 EB_API EB_ERRORTYPE EbInitHandle(
-    EB_HANDLETYPE* pHandle,
+    EB_COMPONENTTYPE** pHandle,
     EB_PTR pAppData);
 
 EB_API EB_ERRORTYPE EbDeinitHandle(
-    EB_HANDLETYPE hComponent);
+    EB_COMPONENTTYPE  *h265EncComponent);
 
 #ifdef __cplusplus
 }

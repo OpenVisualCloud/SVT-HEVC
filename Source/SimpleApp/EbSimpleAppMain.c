@@ -82,7 +82,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     static int              frameCount = 0;
 
     // non-blocking call
-    stream_status = EbH265GetPacket((EB_HANDLETYPE)componentHandle, headerPtr, picSendDone);
+    stream_status = EbH265GetPacket(componentHandle, headerPtr, picSendDone);
 
     if (stream_status != EB_NoErrorEmptyQueue) {
         fwrite(headerPtr->pBuffer + headerPtr->nOffset, 1, headerPtr->nFilledLen, config->bitstreamFile);
@@ -206,7 +206,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
             headerPtr->nFlags = 0;
 
             // Send the picture
-            EbH265EncSendPicture((EB_HANDLETYPE)componentHandle, headerPtr);
+            EbH265EncSendPicture(componentHandle, headerPtr);
         }
         else {
             EB_BUFFERHEADERTYPE headerPtrLast;
@@ -219,7 +219,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
             headerPtrLast.nFlags = EB_BUFFERFLAG_EOS;
             headerPtrLast.pBuffer = NULL;
 
-            EbH265EncSendPicture((EB_HANDLETYPE)componentHandle, &headerPtrLast);
+            EbH265EncSendPicture(componentHandle, &headerPtrLast);
         }
         return_value = (headerPtr->nFlags == EB_BUFFERFLAG_EOS) ? APP_ExitConditionFinished : return_value;
     }

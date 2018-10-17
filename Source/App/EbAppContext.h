@@ -28,7 +28,7 @@ typedef struct EbAppContext_s {
     APPPORTACTIVETYPE                   outputStreamPortActive;
 
     // Component Handle
-    EB_HANDLETYPE                      svtEncoderHandle;
+    EB_COMPONENTTYPE*                   svtEncoderHandle;
 
     // Buffer Pools
     EB_BUFFERHEADERTYPE              **inputBufferPool;
