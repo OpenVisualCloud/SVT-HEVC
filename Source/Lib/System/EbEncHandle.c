@@ -367,6 +367,9 @@ void InitThreadManagmentParams(){
     return;
 #endif
 }
+void libSvtEncoderSendErrorExit(
+    EB_HANDLETYPE          hComponent,
+    EB_U32                 errorCode);
 
 /**********************************
  * Encoder Library Handle Constructor
@@ -496,8 +499,7 @@ static EB_ERRORTYPE EbEncHandleCtor(
 
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
         EB_MALLOC(EbCallback_t*, encHandlePtr->appCallbackPtrArray[instanceIndex], sizeof(EbCallback_t), EB_N_PTR);
-        
-        encHandlePtr->appCallbackPtrArray[instanceIndex]->appPrivateData                        = EB_NULL;
+        encHandlePtr->appCallbackPtrArray[instanceIndex]->ErrorHandler                          = libSvtEncoderSendErrorExit;
         encHandlePtr->appCallbackPtrArray[instanceIndex]->handle                                = ebHandlePtr;
     }
 
@@ -997,7 +999,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         return_error = EbSystemResourceCtor(
             &encHandlePtr->outputStreamBufferResourcePtrArray[instanceIndex],
             encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount,
-            EB_PacketizationProcessInitCount,
+            encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->totalProcessInitCount,// EB_PacketizationProcessInitCount,
             1,
             &encHandlePtr->outputStreamBufferProducerFifoPtrDblArray[instanceIndex],
             &encHandlePtr->outputStreamBufferConsumerFifoPtrDblArray[instanceIndex],
@@ -1559,31 +1561,8 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     }   
     return return_error;
 }
-
-/**********************************
- * Set Callbacks
- **********************************/
-#if __linux
-__attribute__((visibility("default")))
-#endif
-EB_API EB_ERRORTYPE EbH265EncSetCallbacks(
-    EB_HANDLETYPE          hComponent,
-    EB_PTR                 pAppData)
-{
-    EB_ERRORTYPE           return_error      = EB_ErrorNone;
-    EB_COMPONENTTYPE      *h265EncComponent  = (EB_COMPONENTTYPE*) hComponent;
-    EbEncHandle_t          *pEncCompData      = h265EncComponent ? (EbEncHandle_t*) h265EncComponent->pComponentPrivate : (EbEncHandle_t*) EB_NULL;
-    EB_U32                 instanceIndex     = 0; // hard-coded, determined from the port number
-    
-    if (pAppData == (EB_PTR) EB_NULL || h265EncComponent == (EB_COMPONENTTYPE*) EB_NULL){
-        return EB_ErrorInsufficientResources;
-    }
-    h265EncComponent->pApplicationPrivate                                                  = pAppData;
-    pEncCompData->appCallbackPtrArray[instanceIndex]->appPrivateData                       = pAppData;
-    
-    return return_error;
-}            
-
+EB_ERRORTYPE EbH265EncInitParameter(
+    EB_H265_ENC_CONFIGURATION * configPtr);
 /**********************************
  * GetHandle
  **********************************/
@@ -1605,9 +1584,7 @@ EB_API EB_ERRORTYPE EbInitHandle(
         return_error = InitH265EncoderHandle(*pHandle);
 
         if (return_error == EB_ErrorNone) {
-
-            // Register the Callbacks
-            return_error = EbH265EncSetCallbacks(*pHandle, pAppData);
+            ((EB_COMPONENTTYPE*)(*pHandle))->pApplicationPrivate = pAppData;
 
         }else if (return_error == EB_ErrorInsufficientResources){
             EbDeinitEncoder((EB_COMPONENTTYPE*)NULL);
@@ -1738,10 +1715,10 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->encDecSegmentColCountArray[5] = encDecSegW;
 
     //#====================== Data Structures and Picture Buffers ======================
-    sequenceControlSetPtr->pictureControlSetPoolInitCount = inputPic;
-    sequenceControlSetPtr->pictureControlSetPoolInitCountChild = MAX(4, coreCount / 6);
-    sequenceControlSetPtr->referencePictureBufferInitCount   = sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount;//MAX((EB_U32)(sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
-    sequenceControlSetPtr->paReferencePictureBufferInitCount = sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount;//MAX((EB_U32)(sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
+    sequenceControlSetPtr->pictureControlSetPoolInitCount       = inputPic;
+    sequenceControlSetPtr->pictureControlSetPoolInitCountChild  = MAX(4, coreCount / 6);
+    sequenceControlSetPtr->referencePictureBufferInitCount      = sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount;//MAX((EB_U32)(sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
+    sequenceControlSetPtr->paReferencePictureBufferInitCount    = sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount;//MAX((EB_U32)(sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
 
     //#====================== Inter process Fifos ======================
     sequenceControlSetPtr->resourceCoordinationFifoInitCount = 300;
@@ -1751,20 +1728,22 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->pictureDemuxFifoInitCount = 300;
     sequenceControlSetPtr->rateControlTasksFifoInitCount = 300;
     sequenceControlSetPtr->rateControlFifoInitCount = 301;
-    sequenceControlSetPtr->modeDecisionFifoInitCount = 100;
+    sequenceControlSetPtr->modeDecisionFifoInitCount = 300;
     sequenceControlSetPtr->modeDecisionConfigurationFifoInitCount = 300;
     sequenceControlSetPtr->motionEstimationFifoInitCount = 300;
     sequenceControlSetPtr->entropyCodingFifoInitCount = 300;
     sequenceControlSetPtr->encDecFifoInitCount = 300;
 
     //#====================== Processes number ======================
-    sequenceControlSetPtr->pictureAnalysisProcessInitCount              = MAX(15, coreCount / 6);
-    sequenceControlSetPtr->motionEstimationProcessInitCount             = MAX(20, coreCount / 3);
-    sequenceControlSetPtr->sourceBasedOperationsProcessInitCount        = MAX(3, coreCount / 12);
-    sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount    = MAX(3, coreCount / 12);
-    sequenceControlSetPtr->encDecProcessInitCount                       = MAX(40, coreCount);
-    sequenceControlSetPtr->entropyCodingProcessInitCount                = MAX(3, coreCount / 12);
+    sequenceControlSetPtr->totalProcessInitCount = 0;
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->pictureAnalysisProcessInitCount              = MAX(15, coreCount / 6);
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->motionEstimationProcessInitCount             = MAX(20, coreCount / 3);
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->sourceBasedOperationsProcessInitCount        = MAX(3, coreCount / 12);
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount    = MAX(3, coreCount / 12);
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->encDecProcessInitCount                       = MAX(40, coreCount);
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->entropyCodingProcessInitCount                = MAX(3, coreCount / 12);
 
+    sequenceControlSetPtr->totalProcessInitCount += 6;
     printf("Number of cores available: %u\nNumber of PPCS %u\n", coreCount >> 1 , inputPic);
 
     return;
@@ -2733,6 +2712,113 @@ static EB_ERRORTYPE VerifySettings(\
 }
 
 /**********************************
+ Set Parameter
+**********************************/
+#if __linux
+__attribute__((visibility("default")))
+#endif
+EB_ERRORTYPE EbH265EncInitParameter(
+    EB_H265_ENC_CONFIGURATION * configPtr)
+{
+    EB_ERRORTYPE                  return_error = EB_ErrorNone;
+
+    if (!configPtr) {
+        printf("The EB_H265_ENC_CONFIGURATION structure is empty! \n");
+        return EB_ErrorBadParameter;
+    }
+
+    configPtr->frameRate = 60;
+    configPtr->frameRateNumerator = 0;
+    configPtr->frameRateDenominator = 0;
+    configPtr->encoderBitDepth = 8;
+    configPtr->compressedTenBitFormat = 0;
+    configPtr->sourceWidth = 0;
+    configPtr->sourceHeight = 0;
+    configPtr->inputPictureStride = 0;
+    configPtr->framesToBeEncoded = 0;
+
+
+    // Interlaced Video 
+    configPtr->interlacedVideo = EB_FALSE;
+    configPtr->qp = 32;
+    configPtr->useQpFile = EB_FALSE;
+    configPtr->sceneChangeDetection = 1;
+    configPtr->rateControlMode = 0;
+    configPtr->lookAheadDistance = 17;
+    configPtr->targetBitRate = 7000000;
+    configPtr->maxQpAllowed = 48;
+    configPtr->minQpAllowed = 10;
+    configPtr->baseLayerSwitchMode = 0;
+    configPtr->encMode  = 9;
+    configPtr->intraPeriodLength = -2;
+    configPtr->intraRefreshType = 1;
+    configPtr->hierarchicalLevels = 3;
+    configPtr->predStructure = EB_PRED_RANDOM_ACCESS;
+    configPtr->disableDlfFlag = EB_FALSE;
+    configPtr->enableSaoFlag = EB_TRUE;
+    configPtr->useDefaultMeHme = EB_TRUE;
+    configPtr->enableHmeFlag = EB_TRUE;
+    configPtr->enableHmeLevel0Flag = EB_TRUE;
+    configPtr->enableHmeLevel1Flag = EB_FALSE;
+    configPtr->enableHmeLevel2Flag = EB_FALSE;
+    configPtr->searchAreaWidth = 16;
+    configPtr->searchAreaHeight = 7;
+    configPtr->numberHmeSearchRegionInWidth = 2;
+    configPtr->numberHmeSearchRegionInHeight = 2;
+    configPtr->hmeLevel0TotalSearchAreaWidth = 64;
+    configPtr->hmeLevel0TotalSearchAreaHeight = 25;
+    configPtr->hmeLevel0SearchAreaInWidthArray[0] = 32;
+    configPtr->hmeLevel0SearchAreaInWidthArray[1] = 32;
+    configPtr->hmeLevel0SearchAreaInHeightArray[0] = 12;
+    configPtr->hmeLevel0SearchAreaInHeightArray[1] = 13;
+    configPtr->hmeLevel1SearchAreaInWidthArray[0] = 1;
+    configPtr->hmeLevel1SearchAreaInWidthArray[1] = 1;
+    configPtr->hmeLevel1SearchAreaInHeightArray[0] = 1;
+    configPtr->hmeLevel1SearchAreaInHeightArray[1] = 1;
+    configPtr->hmeLevel2SearchAreaInWidthArray[0] = 1;
+    configPtr->hmeLevel2SearchAreaInWidthArray[1] = 1;
+    configPtr->hmeLevel2SearchAreaInHeightArray[0] = 1;
+    configPtr->hmeLevel2SearchAreaInHeightArray[1] = 1;
+    configPtr->constrainedIntra = EB_FALSE;
+    configPtr->tune = 0;
+
+    // Thresholds
+    configPtr->videoUsabilityInfo = 0;
+    configPtr->highDynamicRangeInput = 0;
+    configPtr->accessUnitDelimiter = 0;
+    configPtr->bufferingPeriodSEI = 0;
+    configPtr->pictureTimingSEI = 0;
+
+    configPtr->bitRateReduction = EB_TRUE;
+    configPtr->improveSharpness = EB_TRUE;
+    configPtr->registeredUserDataSeiFlag = EB_FALSE;
+    configPtr->unregisteredUserDataSeiFlag = EB_FALSE;
+    configPtr->recoveryPointSeiFlag = EB_FALSE;
+    configPtr->enableTemporalId = 1;
+    configPtr->inputOutputBufferFifoInitCount = 50;
+
+    // Annex A parameters
+    configPtr->profile = 2;
+    configPtr->tier = 0;
+    configPtr->level = 0;
+
+    // Latency
+    configPtr->injectorFrameRate = 60 << 16;
+    configPtr->speedControlFlag = 0;
+    configPtr->latencyMode = EB_NORMAL_LATENCY;
+
+    // ASM Type
+    configPtr->asmType = ASM_AVX2; 
+    configPtr->useRoundRobinThreadAssignment = EB_FALSE;
+    configPtr->channelId = 0;
+    configPtr->activeChannelCount = 1;
+
+
+    return return_error;
+}
+
+/**********************************
+
  * Set Parameter
  **********************************/
 #if __linux
@@ -3108,7 +3194,6 @@ void CopyOutputBuffer(
     dst->nTickCount    =     src->nTickCount;
     dst->nTimeStamp    =     src->nTimeStamp;
     dst->nFlags        =     src->nFlags;
-
     if (src->pBuffer)
         EB_MEMCPY(dst->pBuffer, src->pBuffer, src->nFilledLen);
     if (src->pAppPrivate)
@@ -3128,32 +3213,37 @@ EB_API EB_ERRORTYPE EbH265GetPacket(
     EB_BUFFERHEADERTYPE   *pBuffer,
     unsigned char          picSendDone)
 {
+    EB_ERRORTYPE           return_error = EB_ErrorNone;
 
     EbEncHandle_t          *pEncCompData = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
-    EB_U32                 instanceIndex = 0; // hard-coded, determined from the port number
     EbObjectWrapper_t      *ebWrapperPtr = NULL;
 
     if (picSendDone)
         EbGetFullObject(
-            (pEncCompData->outputStreamBufferConsumerFifoPtrDblArray[instanceIndex])[0],
+            (pEncCompData->outputStreamBufferConsumerFifoPtrDblArray[0])[0],
             &ebWrapperPtr);
     else
         EbGetFullObjectNonBlocking(
-            (pEncCompData->outputStreamBufferConsumerFifoPtrDblArray[instanceIndex])[0],
+            (pEncCompData->outputStreamBufferConsumerFifoPtrDblArray[0])[0],
             &ebWrapperPtr);
 
     if (ebWrapperPtr) {
+        
+        EB_BUFFERHEADERTYPE* objPtr = (EB_BUFFERHEADERTYPE*)ebWrapperPtr->objectPtr;
         CopyOutputBuffer(
             pBuffer,
-            (EB_BUFFERHEADERTYPE*)ebWrapperPtr->objectPtr);
-
+            objPtr);
+                
+        if (pBuffer->nFlags != EB_BUFFERFLAG_EOS && pBuffer->nFlags != 0) {
+            return_error = EB_ErrorMax;
+        }
         EbReleaseObject((EbObjectWrapper_t  *)ebWrapperPtr);
     }
     else {
-        return EB_NoErrorEmptyQueue;
+        return_error =  EB_NoErrorEmptyQueue;
     }
         
-    return EB_ErrorNone;
+    return return_error;
 } 
 
 void SwitchToRealTime()
@@ -3170,6 +3260,31 @@ void SwitchToRealTime()
         printf("\n[WARNING] For best speed performance, run with sudo privileges !\n\n");
 
 #endif
+}
+/**********************************
+* Encoder Error Handling
+**********************************/
+void libSvtEncoderSendErrorExit(
+    EB_HANDLETYPE          hComponent,
+    EB_U32                 errorCode)
+{
+    EB_COMPONENTTYPE      *h265EncComponent = (EB_COMPONENTTYPE*)hComponent;
+    EbEncHandle_t          *pEncCompData = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
+    EbObjectWrapper_t      *ebWrapperPtr = NULL;
+    EB_BUFFERHEADERTYPE    *outputPacket;
+
+    EbGetEmptyObject(
+        (pEncCompData->outputStreamBufferProducerFifoPtrDblArray[0])[0],
+        &ebWrapperPtr);
+
+    outputPacket = (EB_BUFFERHEADERTYPE*)ebWrapperPtr->objectPtr;
+
+    outputPacket->nSize     = 0;
+    outputPacket->nFlags    = errorCode;
+    outputPacket->pBuffer   = NULL;
+
+    EbPostFullObject(ebWrapperPtr);
+
 }
 
 /**********************************

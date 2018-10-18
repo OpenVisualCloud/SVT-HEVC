@@ -316,27 +316,7 @@ typedef enum APPPORTACTIVETYPE {
         EB_PTR pApplicationPrivate;
     } EB_COMPONENTTYPE;
 
-    typedef struct EB_CALLBACKTYPE
-    {
-       /* EB_ERRORTYPE(*FeedbackComplete)(
-            EB_PTR pAppData);
-
-        EB_ERRORTYPE(*ErrorHandler)(
-            EB_PTR pAppData,
-            EB_U32 nData1);
-
-        EB_ERRORTYPE(*SendPictureDone)(
-            EB_PTR pAppData,
-            EB_BUFFERHEADERTYPE* pBuffer);
-
-        EB_ERRORTYPE(*FillPacketDone)(
-            EB_PTR pAppData,
-            EB_BUFFERHEADERTYPE* pBuffer);*/
-
-    } EB_CALLBACKTYPE;
-
 #define EB_BUFFERFLAG_EOS 0x00000001 
-
 
 #define MAX_APP_NUM_PTR                             (0x186A0 << 2)             // Maximum number of pointers to be allocated for the app 
 

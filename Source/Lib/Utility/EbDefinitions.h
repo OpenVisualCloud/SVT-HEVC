@@ -393,10 +393,11 @@ typedef void(*EB_DTOR)(
 **************************************/
 typedef struct EbCallback_s
 {
-    EB_CALLBACKTYPE                        callbackFunctions;
     EB_PTR                                 appPrivateData;
     EB_PTR                                 handle;
-
+    void(*ErrorHandler)(
+        EB_PTR handle,
+        EB_U32 errorCode);
 } EbCallback_t;
 
 

@@ -2716,10 +2716,6 @@ void* RateControlKernel(void *inputPtr)
             }
 #endif
 
-            //if (totalNumberOfFbFrames == sequenceControlSetPtr->encodeContextPtr->terminatingPictureNumber){
-            //    sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->callbackFunctions.FeedbackComplete(
-            //        sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->appPrivateData);
-            //}
             totalNumberOfFbFrames++;
 
 			// Release the SequenceControlSet

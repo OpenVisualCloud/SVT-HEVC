@@ -84,7 +84,10 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     // non-blocking call
     stream_status = EbH265GetPacket(componentHandle, headerPtr, picSendDone);
 
-    if (stream_status != EB_NoErrorEmptyQueue) {
+    if (stream_status == EB_ErrorMax) {
+        printf("\nError while encoding, code 0x%x\n", headerPtr->nFlags);
+        return APP_ExitConditionError;
+    }else if (stream_status != EB_NoErrorEmptyQueue) {
         fwrite(headerPtr->pBuffer + headerPtr->nOffset, 1, headerPtr->nFilledLen, config->bitstreamFile);
 
         // Update Output Port Activity State
