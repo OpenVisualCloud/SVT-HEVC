@@ -185,14 +185,6 @@ EB_API EB_ERRORTYPE EbInitEncoder(
 EB_API EB_ERRORTYPE EbDeinitEncoder(
     EB_COMPONENTTYPE *h265EncComponent);
 
-EB_API EB_ERRORTYPE EbStartEncoder(
-    EB_COMPONENTTYPE  *h265EncComponent,
-    EB_U32            instanceIndex);
-
-EB_API EB_ERRORTYPE EbStopEncoder(
-    EB_COMPONENTTYPE *h265EncComponent,
-    EB_U32            instanceIndex);
-
 EB_API EB_ERRORTYPE EbH265EncSetParameter(
     EB_COMPONENTTYPE           *h265EncComponent,
     EB_H265_ENC_CONFIGURATION  *pComponentParameterStructure);

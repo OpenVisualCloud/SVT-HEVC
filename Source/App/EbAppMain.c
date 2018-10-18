@@ -169,7 +169,6 @@ int main(int argc, char* argv[])
 
                 for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
                     if (return_errors[instanceCount] == EB_ErrorNone) {
-                        return_errors[instanceCount] = StartEncoder(appCallbacks[instanceCount]);
                         return_error = (EB_ERRORTYPE)(return_error & return_errors[instanceCount]);
                         exitConditions[instanceCount]       = APP_ExitConditionNone;
                         exitConditionsOutput[instanceCount] = APP_ExitConditionNone;
@@ -207,7 +206,6 @@ int main(int argc, char* argv[])
                                 (exitConditionsOutput[instanceCount] == APP_ExitConditionError || exitConditionsInput[instanceCount] == APP_ExitConditionError)){
                                 channelActive[instanceCount] = EB_FALSE;
                                 FinishTime(&encodingFinishTimesSeconds[instanceCount], &encodingFinishTimesuSeconds[instanceCount]);
-                                StopEncoder(appCallbacks[instanceCount]);
                                 exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsOutput[instanceCount] || exitConditionsInput[instanceCount]);
                             }
                         }
@@ -293,7 +291,7 @@ int main(int argc, char* argv[])
             // DeInit Encoder
             for (instanceCount = numChannels; instanceCount > 0; --instanceCount) {
                 if (exitConditions[instanceCount - 1] == APP_ExitConditionNone && exitConditions[instanceCount - 1] == APP_ExitConditionFinished)
-                    return_errors[instanceCount - 1] = DeInitEncoder(appCallbacks[instanceCount - 1], instanceCount - 1, return_errors[instanceCount - 1]);
+                    return_errors[instanceCount - 1] = DeInitEncoder(appCallbacks[instanceCount - 1], instanceCount - 1);
             }
         }
         else {

@@ -100,54 +100,6 @@ EB_HANDLE EbCreateThread(
 
     return threadHandle;
 }
-
-/****************************************
- * EbStartThread
- ****************************************/
-EB_ERRORTYPE EbStartThread(
-    EB_HANDLE threadHandle)
-{
-    EB_ERRORTYPE error_return = EB_ErrorNone;
-
-    /* Note JMJ 9/6/2011
-        The thread Pause/Resume functionality is being removed.  The main reason is that
-        POSIX Threads (aka pthreads) does not support this functionality.  The destructor
-        and deinit code is safe as along as when EbDestropyThread is called on a thread,
-        the thread is immediately destroyed and its stack cleared.
-
-        The Encoder Start/Stop functionality, which previously used the thread Pause/Resume
-        functions could be implemented with mutex checks either at the head of the pipeline,
-        or throughout the code if a more responsive Pause is needed.
-    */
-
-#ifdef _WIN32
-    //error_return = ResumeThread((HANDLE) threadHandle) ? EB_ErrorThreadUnresponsive : EB_ErrorNone;
-#elif __linux__
-#endif // _WIN32
-
-    error_return = (threadHandle) ? EB_ErrorNone : EB_ErrorNullThread;
-
-    return error_return;
-}
-
-/****************************************
- * EbStopThread
- ****************************************/
-EB_ERRORTYPE EbStopThread(
-    EB_HANDLE threadHandle)
-{
-    EB_ERRORTYPE error_return = EB_ErrorNone;
-
-#ifdef _WIN32
-    //error_return = SuspendThread((HANDLE) threadHandle) ? EB_ErrorThreadUnresponsive : EB_ErrorNone;
-#elif __linux__
-#endif // _WIN32
-
-    error_return = (threadHandle) ? EB_ErrorNone : EB_ErrorNullThread;
-
-    return error_return;
-}
-
 /****************************************
  * EbDestroyThread
  ****************************************/

@@ -235,7 +235,6 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
 int main(int argc, char* argv[])
 {
     EB_ERRORTYPE            return_error = EB_ErrorNone;            // Error Handling
-    APPEXITCONDITIONTYPE    exitCondition = APP_ExitConditionNone;    // Processing loop exit condition
     APPEXITCONDITIONTYPE    exitConditionOutput = APP_ExitConditionNone;    // Processing loop exit condition
     APPEXITCONDITIONTYPE    exitConditionInput = APP_ExitConditionNone;    // Processing loop exit condition
     EbConfig_t             *config;        // Encoder Configuration
@@ -307,26 +306,22 @@ int main(int argc, char* argv[])
             EbAppContextCtor(appCallback,config);
             
             return_error = InitEncoder(config, appCallback, 0);
-            return_error = EbStartEncoder(appCallback->svtEncoderHandle, 0);
 
             printf("Encoding          ");
             fflush(stdout);
 
             // Input Loop Thread
-            exitConditionInput = APP_ExitConditionNone;
-            while (exitConditionInput == APP_ExitConditionNone) {
+            exitConditionOutput = APP_ExitConditionNone;
+            while (exitConditionOutput == APP_ExitConditionNone) {
                 exitConditionInput = ProcessInputBuffer(config, appCallback);
-                exitConditionInput = ProcessOutputStreamBuffer(config, appCallback, (exitConditionInput == APP_ExitConditionNone ? 0 : 1));
+                exitConditionOutput = ProcessOutputStreamBuffer(config, appCallback, (exitConditionInput == APP_ExitConditionNone ? 0 : 1));
             }
-
-            EbStopEncoder(appCallback->svtEncoderHandle, 0);
-            exitCondition = (APPEXITCONDITIONTYPE)(exitConditionOutput || exitConditionInput);
-
+            
             printf("\n");
             fflush(stdout);
 
             // DeInit Encoder
-            return_error = DeInitEncoder(appCallback, 0, return_error);
+            return_error = DeInitEncoder(appCallback, 0);
 
             // Destruct the App memory variables
             EbAppContextDtor(appCallback);
