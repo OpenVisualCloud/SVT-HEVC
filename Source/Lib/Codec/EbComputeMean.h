@@ -9,7 +9,7 @@
 #include "EbComputeMean_SSE2.h"
 #include "EbComputeMean_C.h"
 #include "EbCombinedAveragingSAD_Intrinsic_AVX2.h"
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 #ifdef __cplusplus
 extern "C" {

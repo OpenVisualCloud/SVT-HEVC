@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 EB_U64 ComputeSubMean8x8_SSE2_INTRIN(
 	EB_U8 *  inputSamples,      // input parameter, input samples Ptr

@@ -6,7 +6,7 @@
 #ifndef EbPictureManagerQueue_h
 #define EbPictureManagerQueue_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSei.h"
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"

@@ -15,7 +15,7 @@
 
 #include "EbMcp.h"
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbPictureBufferDesc.h"
 #include "EbPictureControlSet.h"
 

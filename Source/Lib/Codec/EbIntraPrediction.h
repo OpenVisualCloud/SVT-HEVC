@@ -12,7 +12,7 @@
 #include "EbIntraPrediction_SSE4_1.h"
 #include "EbIntraPrediction_AVX2.h"
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbUtility.h"
 #include "EbPictureBufferDesc.h"
 #include "EbPictureControlSet.h"

@@ -6,7 +6,7 @@
 #ifndef EbNeighborArrays_h
 #define EbNeighborArrays_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSyntaxElements.h"
 #include "EbMotionVectorUnit.h"
 #ifdef __cplusplus

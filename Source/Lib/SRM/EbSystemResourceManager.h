@@ -6,7 +6,6 @@
 #ifndef EbSystemResource_h
 #define EbSystemResource_h
 
-#include "EbTypes.h"
 #include "EbThreads.h"
 #include "EbDefinitions.h"
 

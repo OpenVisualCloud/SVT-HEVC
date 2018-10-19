@@ -6,7 +6,7 @@
 #ifndef EbPictureAnalysisResults_h
 #define EbPictureAnalysisResults_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 
 /**************************************

@@ -13,7 +13,7 @@
  * Universal Includes
  ****************************************/
 #include <stdlib.h>
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbThreads.h"
 
 /****************************************

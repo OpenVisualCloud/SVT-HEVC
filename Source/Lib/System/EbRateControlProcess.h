@@ -6,7 +6,7 @@
 #ifndef EbRateControl_h
 #define EbRateControl_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbApi.h"
 #include "EbPictureControlSet.h"

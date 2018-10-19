@@ -9,7 +9,7 @@
 #include "EbMcp_SSE2.h"
 #include "EbMcp_SSSE3.h"
 #include "EbMcp_AVX2.h"
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbUtility.h"
 #include "EbPictureBufferDesc.h"
 #include "EbPictureControlSet.h"

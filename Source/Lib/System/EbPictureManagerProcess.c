@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbUtility.h"
 #include "EbSystemResourceManager.h"
 #include "EbPictureControlSet.h"

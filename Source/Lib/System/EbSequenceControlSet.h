@@ -6,7 +6,7 @@
 #ifndef EbSequenceControlSet_h
 #define EbSequenceControlSet_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbThreads.h"
 #include "EbSystemResourceManager.h"
 #include "EbEncodeContext.h"

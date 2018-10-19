@@ -6,7 +6,7 @@
 #ifndef EbEncHandle_h
 #define EbEncHandle_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbApi.h"
 
 #include "EbPictureBufferDesc.h"

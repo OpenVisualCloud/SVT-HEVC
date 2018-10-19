@@ -6,7 +6,7 @@
 #ifndef EBAVCSTYLEMCP_SSSE3_H
 #define EBAVCSTYLEMCP_SSSE3_H
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 #ifdef __cplusplus
 extern "C" {

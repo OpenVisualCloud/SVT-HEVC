@@ -103,9 +103,9 @@ void ReadInputFrames(
     EB_BUFFERHEADERTYPE         *headerPtr)
 {
 
-    unsigned long  readSize;
-    signed long  inputPaddedWidth = config->inputPaddedWidth;
-    signed long  inputPaddedHeight = config->inputPaddedHeight;
+    unsigned long long  readSize;
+    signed long long  inputPaddedWidth = config->inputPaddedWidth;
+    signed long long  inputPaddedHeight = config->inputPaddedHeight;
     FILE   *inputFile = config->inputFile;
     unsigned char  *ebInputPtr;
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
@@ -113,12 +113,12 @@ void ReadInputFrames(
     {
         if (is16bit == 0 || (is16bit == 1 && config->compressedTenBitFormat == 0)) {
 
-            readSize = (unsigned long)SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, is16bit);
+            readSize = (unsigned long long)SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, is16bit);
 
             headerPtr->nFilledLen = 0;
 
             {
-                unsigned long lumaReadSize = (unsigned long)inputPaddedWidth*inputPaddedHeight << is16bit;
+                unsigned long long lumaReadSize = (unsigned long long)inputPaddedWidth*inputPaddedHeight << is16bit;
                 ebInputPtr = inputPtr->luma;
                 headerPtr->nFilledLen += (unsigned int)fread(ebInputPtr, 1, lumaReadSize, inputFile);
                 ebInputPtr = inputPtr->cb;
@@ -140,8 +140,8 @@ void ReadInputFrames(
             // Fill the buffer with a complete frame
             headerPtr->nFilledLen = 0;
 
-            unsigned long lumaReadSize = (unsigned long)inputPaddedWidth*inputPaddedHeight;
-            unsigned long nbitlumaReadSize = (unsigned long)(inputPaddedWidth / 4)*inputPaddedHeight;
+            unsigned long long lumaReadSize = (unsigned long long)inputPaddedWidth*inputPaddedHeight;
+            unsigned long long nbitlumaReadSize = (unsigned long long)(inputPaddedWidth / 4)*inputPaddedHeight;
 
             ebInputPtr = inputPtr->luma;
             headerPtr->nFilledLen += (unsigned int)fread(ebInputPtr, 1, lumaReadSize, inputFile);
@@ -202,7 +202,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
             headerPtr->nOffset = 0;
             headerPtr->nTimeStamp = 0;
             headerPtr->nFlags = 0;
-            headerPtr->pAppPrivate = (EB_PTR)EB_NULL;
+            headerPtr->pAppPrivate = NULL;
             headerPtr->nFlags = 0;
 
             // Send the picture

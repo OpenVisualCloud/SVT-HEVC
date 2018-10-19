@@ -3,7 +3,7 @@
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "emmintrin.h"
 #include "EbIntrinMacros16bit_SSE2.h"
 #include "EbIntraPrediction_SSE2.h"

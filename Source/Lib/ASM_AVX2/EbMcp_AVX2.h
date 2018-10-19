@@ -7,7 +7,6 @@
 #ifndef EBMCP_AVX2_H
 #define EBMCP_AVX2_H
 
-#include "EbTypes.h"
 #include "EbDefinitions.h"
 
 #define USE_PRE_COMPUTE             0

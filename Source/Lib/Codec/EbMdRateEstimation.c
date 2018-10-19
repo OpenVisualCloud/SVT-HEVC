@@ -5,7 +5,6 @@
 
 #include <stdlib.h>
 
-#include "EbTypes.h"
 #include "EbUtility.h"
 #include "EbMdRateEstimation.h"
 #include "EbDefinitions.h"

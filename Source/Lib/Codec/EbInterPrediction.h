@@ -6,7 +6,7 @@
 #ifndef EbInterPrediction_h
 #define EbInterPrediction_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 #include "EbPictureControlSet.h"
 #include "EbCodingUnit.h"

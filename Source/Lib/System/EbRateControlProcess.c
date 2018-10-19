@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbRateControlProcess.h"
 #include "EbSystemResourceManager.h"
 #include "EbSequenceControlSet.h"

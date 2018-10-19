@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 #include <immintrin.h>
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbPictureOperators_AVX2.h"
 
 #define _mm256_set_m128i(/* __m128i */ hi, /* __m128i */ lo) \

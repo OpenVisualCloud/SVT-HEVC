@@ -5,7 +5,7 @@
 
 
 #include "EbMcp_SSSE3.h"
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 #include "emmintrin.h"
 

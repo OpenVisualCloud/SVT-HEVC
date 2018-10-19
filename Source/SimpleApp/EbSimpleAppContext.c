@@ -9,7 +9,6 @@
 
 #include <stdlib.h>
 
-#include "EbTypes.h"
 #include "EbSimpleAppContext.h"
 #include "EbSimpleAppConfig.h"
 
@@ -111,7 +110,7 @@ EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config)
 
     contextPtr->outputStreamBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
     contextPtr->outputStreamBuffer->nAllocLen = EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->sourceWidth*config->sourceHeight);
-    contextPtr->outputStreamBuffer->pAppPrivate = (EB_PTR)contextPtr;
+    contextPtr->outputStreamBuffer->pAppPrivate = (void*)contextPtr;
 
     return return_error;
 }
@@ -183,9 +182,9 @@ EB_ERRORTYPE InitParameter(
 
 
     // Interlaced Video 
-    configPtr->interlacedVideo = EB_FALSE;
+    configPtr->interlacedVideo = 0;
     configPtr->qp = 32;
-    configPtr->useQpFile = EB_FALSE;
+    configPtr->useQpFile = 0;
     configPtr->sceneChangeDetection = 1;
     configPtr->rateControlMode = 0;
     configPtr->lookAheadDistance = 17;
@@ -197,14 +196,14 @@ EB_ERRORTYPE InitParameter(
     configPtr->intraPeriodLength = -2;
     configPtr->intraRefreshType = 1;
     configPtr->hierarchicalLevels = 3;
-    configPtr->predStructure = EB_PRED_RANDOM_ACCESS;
-    configPtr->disableDlfFlag = EB_FALSE;
-    configPtr->enableSaoFlag = EB_TRUE;
-    configPtr->useDefaultMeHme = EB_TRUE;
-    configPtr->enableHmeFlag = EB_TRUE;
-    configPtr->enableHmeLevel0Flag = EB_TRUE;
-    configPtr->enableHmeLevel1Flag = EB_FALSE;
-    configPtr->enableHmeLevel2Flag = EB_FALSE;
+    configPtr->predStructure = 2;
+    configPtr->disableDlfFlag = 0;
+    configPtr->enableSaoFlag = 1;
+    configPtr->useDefaultMeHme = 1;
+    configPtr->enableHmeFlag = 1;
+    configPtr->enableHmeLevel0Flag = 1;
+    configPtr->enableHmeLevel1Flag = 0;
+    configPtr->enableHmeLevel2Flag = 0;
     configPtr->searchAreaWidth = 16;
     configPtr->searchAreaHeight = 7;
     configPtr->numberHmeSearchRegionInWidth = 2;
@@ -223,7 +222,7 @@ EB_ERRORTYPE InitParameter(
     configPtr->hmeLevel2SearchAreaInWidthArray[1] = 1;
     configPtr->hmeLevel2SearchAreaInHeightArray[0] = 1;
     configPtr->hmeLevel2SearchAreaInHeightArray[1] = 1;
-    configPtr->constrainedIntra = EB_FALSE;
+    configPtr->constrainedIntra = 0;
     configPtr->tune = 0;
 
     // Thresholds
@@ -233,11 +232,11 @@ EB_ERRORTYPE InitParameter(
     configPtr->bufferingPeriodSEI = 0;
     configPtr->pictureTimingSEI = 0;
 
-    configPtr->bitRateReduction = EB_TRUE;
-    configPtr->improveSharpness = EB_TRUE;
-    configPtr->registeredUserDataSeiFlag = EB_FALSE;
-    configPtr->unregisteredUserDataSeiFlag = EB_FALSE;
-    configPtr->recoveryPointSeiFlag = EB_FALSE;
+    configPtr->bitRateReduction = 1;
+    configPtr->improveSharpness = 1;
+    configPtr->registeredUserDataSeiFlag = 0;
+    configPtr->unregisteredUserDataSeiFlag = 0;
+    configPtr->recoveryPointSeiFlag = 0;
     configPtr->enableTemporalId = 1;
     configPtr->inputOutputBufferFifoInitCount = 50;
 
@@ -253,7 +252,7 @@ EB_ERRORTYPE InitParameter(
 
     // ASM Type
     configPtr->asmType = ASM_AVX2; 
-    configPtr->useRoundRobinThreadAssignment = EB_FALSE;
+    configPtr->useRoundRobinThreadAssignment = 0;
     configPtr->channelId = 0;
     configPtr->activeChannelCount = 1;
 

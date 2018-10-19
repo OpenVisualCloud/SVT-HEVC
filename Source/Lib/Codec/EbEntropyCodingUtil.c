@@ -4,7 +4,7 @@
 */
 
 #include "EbEntropyCodingUtil.h"
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 #define ONE_BIT 32768
 

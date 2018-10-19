@@ -6,14 +6,14 @@
 
 #include "EbUtility.h"
 #ifdef _WIN32
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 //#if  (WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
 #include <time.h>
 //#endif
 #elif __linux__
 #include <stdio.h>
 #include <stdlib.h>
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 //#if   (LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
 #include <sys/time.h>
 #include <time.h>
@@ -486,7 +486,7 @@ void ComputeOverallElapsedTime(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U64
 #endif
 
 }
-void ComputeOverallElapsedTimeMs(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U64 Finishseconds, EB_U64 Finishuseconds, double *duration)
+void ComputeOverallElapsedTimeMs(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration)
 {
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     long   mtime, seconds, useconds;

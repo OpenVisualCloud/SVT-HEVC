@@ -6,7 +6,6 @@
 #ifndef EbResourceCoordination_h
 #define EbResourceCoordination_h
 
-#include "EbTypes.h"
 #include "EbSystemResourceManager.h"
 #include "EbDefinitions.h"
 #ifdef __cplusplus

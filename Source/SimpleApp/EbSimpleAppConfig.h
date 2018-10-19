@@ -10,7 +10,14 @@
 
 #include "EbApi.h"
 
-
+/** The APPEXITCONDITIONTYPE type is used to define the App main loop exit
+conditions.
+*/
+typedef enum APPEXITCONDITIONTYPE {
+    APP_ExitConditionNone = 0,
+    APP_ExitConditionFinished,
+    APP_ExitConditionError
+} APPEXITCONDITIONTYPE;
 
 #define MAX_CHANNEL_NUMBER      6
 #define MAX_NUM_TOKENS          200
@@ -40,10 +47,10 @@ typedef struct EbConfig_s
     
     unsigned char          useQpFile;
 
-    signed long            frameRate;
-    signed long            frameRateNumerator;
-    signed long            frameRateDenominator;
-    signed long            injectorFrameRate;
+    signed long long       frameRate;
+    signed long long       frameRateNumerator;
+    signed long long       frameRateDenominator;
+    signed long long       injectorFrameRate;
     unsigned int           injector;
     unsigned int           speedControlFlag;
     unsigned int           encoderBitDepth;
@@ -54,9 +61,9 @@ typedef struct EbConfig_s
     unsigned int           inputPaddedWidth;
     unsigned int           inputPaddedHeight;
 
-    signed long            framesToBeEncoded;
-    signed long            framesEncoded;
-    signed long            bufferedInput;
+    signed long long       framesToBeEncoded;
+    signed long long       framesEncoded;
+    signed long long       bufferedInput;
     unsigned char         **sequenceBuffer;
 
     unsigned char          latencyMode;
@@ -72,7 +79,7 @@ typedef struct EbConfig_s
      *****************************************/
     unsigned int         baseLayerSwitchMode;
     unsigned char        encMode;
-    signed long          intraPeriod;
+    signed long long     intraPeriod;
     unsigned int         intraRefreshType;
     unsigned int         hierarchicalLevels;
     unsigned int         predStructure;

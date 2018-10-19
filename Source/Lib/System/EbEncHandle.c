@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbApi.h"
 #include "EbThreads.h"
 #include "EbUtility.h"

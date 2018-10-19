@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "EbAppConfig.h"
+#include "EbApi.h"
 
 #ifdef _WIN32
 #else

@@ -6,7 +6,7 @@
 #ifndef EbEntropyCodingResults_h
 #define EbEntropyCodingResults_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #ifdef __cplusplus
 extern "C" {

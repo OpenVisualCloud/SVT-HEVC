@@ -3,7 +3,7 @@
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "smmintrin.h"
 
 EB_EXTERN void IntraModeDCLuma16bit_SSE4_1_INTRIN(

@@ -6,7 +6,6 @@
 #ifndef EbThreads_h
 #define EbThreads_h
 
-#include "EbTypes.h"
 #include "EbDefinitions.h"
 
 #ifdef _MSC_VER 

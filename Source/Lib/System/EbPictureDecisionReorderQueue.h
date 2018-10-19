@@ -6,7 +6,7 @@
 #ifndef EbPictureDecisionReorderQueue_h
 #define EbPictureDecisionReorderQueue_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 
 /************************************************

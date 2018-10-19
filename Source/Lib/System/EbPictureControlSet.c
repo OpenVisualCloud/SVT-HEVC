@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbPictureControlSet.h"
 #include "EbPictureBufferDesc.h"
 

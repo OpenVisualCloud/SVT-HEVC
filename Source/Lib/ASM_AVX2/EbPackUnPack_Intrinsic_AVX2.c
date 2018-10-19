@@ -6,7 +6,6 @@
 #include <immintrin.h>
 
 #include "EbPackUnPack_Intrinsic_AVX2.h"
-#include "EbTypes.h"
 #include "EbDefinitions.h"
 
 

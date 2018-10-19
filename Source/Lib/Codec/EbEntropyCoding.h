@@ -6,7 +6,7 @@
 #ifndef EbEntropyCoding_h
 #define EbEntropyCoding_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbEntropyCodingObject.h"
 #include "EbEntropyCodingUtil.h"
 

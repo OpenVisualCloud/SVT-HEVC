@@ -6,7 +6,7 @@
 #ifndef EbRateControlResults_h
 #define EbRateControlResults_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbPictureControlSet.h"
 #ifdef __cplusplus

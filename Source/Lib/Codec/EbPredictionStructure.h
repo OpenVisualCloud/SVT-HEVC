@@ -6,7 +6,7 @@
 #ifndef EbPredictionStructure_h
 #define EbPredictionStructure_h
 
-#include "EbTypes.h"
+#include "EbApi.h"
 #include "EbDefinitions.h"
 #ifdef __cplusplus
 extern "C" {

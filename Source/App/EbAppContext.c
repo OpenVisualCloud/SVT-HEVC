@@ -9,7 +9,6 @@
 
 #include <stdlib.h>
 
-#include "EbTypes.h"
 #include "EbAppContext.h"
 #include "EbAppConfig.h"
 
@@ -189,7 +188,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.frameRateDenominator = config->frameRateDenominator;
     callbackData->ebEncParameters.frameRateNumerator = config->frameRateNumerator;
 	callbackData->ebEncParameters.hierarchicalLevels = config->hierarchicalLevels;
-	callbackData->ebEncParameters.predStructure = (EB_PRED)config->predStructure;
+	callbackData->ebEncParameters.predStructure = (EB_U8)config->predStructure;
     callbackData->ebEncParameters.sceneChangeDetection = config->sceneChangeDetection;
     callbackData->ebEncParameters.lookAheadDistance = config->lookAheadDistance;
     callbackData->ebEncParameters.framesToBeEncoded = config->framesToBeEncoded;
@@ -606,7 +605,7 @@ EB_ERRORTYPE InitParameter(
     configPtr->intraPeriodLength = -2;
     configPtr->intraRefreshType = 1;
     configPtr->hierarchicalLevels = 3;
-    configPtr->predStructure = EB_PRED_RANDOM_ACCESS;
+    configPtr->predStructure = 2;
     configPtr->disableDlfFlag = EB_FALSE;
     configPtr->enableSaoFlag = EB_TRUE;
     configPtr->useDefaultMeHme = EB_TRUE;
@@ -779,7 +778,7 @@ EB_ERRORTYPE DeInitEncoder(
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_S32              ptrIndex        = 0;
-    EbMemoryMapEntry*   memoryEntry     = (EbMemoryMapEntry*)EB_NULL;
+    EbMemoryMapEntry*   memoryEntry     = (EbMemoryMapEntry*)0;
     
     if (((EB_COMPONENTTYPE*)(callbackDataPtr->svtEncoderHandle)) != NULL) {
         if (libExitError == EB_ErrorInsufficientResources) {
