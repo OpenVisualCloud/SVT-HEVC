@@ -115,7 +115,6 @@ In order to run the highest resolution supported by the encoder, at least 64GB o
 
 * __Build Instructions__
 	 -	cd Build/linux
-	 -	chmod +x build.sh
 	 -	./build.sh <release | debug> (if none specified, both release and debug will be built)
 
 * __Sample Binaries location__
