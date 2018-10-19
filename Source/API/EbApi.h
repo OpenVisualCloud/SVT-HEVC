@@ -6,11 +6,20 @@
 #ifndef EbApi_h
 #define EbApi_h
 
-#include "EbTypes.h"
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+
+#include "EbBuild.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
+    
+#define CHKN_OMX        1
+#define DEADLOCK_DEBUG  0
+#define CHKN_EOS        1
+#define ONE_MEMCPY      1
 
 #define EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT     2
 #define EB_HME_SEARCH_AREA_ROW_MAX_COUNT        2
@@ -18,20 +27,104 @@ extern "C" {
 /********************************
 * Defines
 ********************************/
-#define EB_ENCODERINPUTPORT                     0
-#define EB_ENCODERSTREAMPORT                    1
-#define EB_ENCODERPORTCOUNT                     4 
-
     
+#define INPUT_SIZE_576p_TH				0x90000		// 0.58 Million   
+#define INPUT_SIZE_1080i_TH				0xB71B0		// 0.75 Million
+#define INPUT_SIZE_1080p_TH				0x1AB3F0	// 1.75 Million
+#define INPUT_SIZE_4K_TH				0x29F630	// 2.75 Million   
+
+#define EB_NORMAL_LATENCY        0
+    
+/** Assembly Types
+*/
+typedef enum EB_ASM {
+	ASM_NON_AVX2,
+	ASM_AVX2,
+	ASM_TYPE_TOTAL,
+	ASM_AVX512,
+	ASM_TYPE_INVALID = ~0
+} EB_ASM;
+    
+/***************************************
+* Generic linked list data structure for passing data into/out from the library
+***************************************/
+#define       EB_CONFIG_ON_FLY_PIC_QP        219
+
+typedef int   EB_LINKED_LIST_TYPE;
+typedef struct EbLinkedListNode
+{
+	void*                     app;                       // points to an application object this node is associated
+	// with. this is an opaque pointer to the encoder lib, but
+	// releaseCbFncPtr may need to access it.
+	EB_LINKED_LIST_TYPE       type;                      // type of data pointed by "data" member variable
+	unsigned int                    size;                      // size of (data)
+	unsigned char                   passthrough;               // whether this is passthrough data from application
+	void(*releaseCbFncPtr)(struct EbLinkedListNode*); // callback to be executed by encoder when picture reaches end of pipeline, or
+	// when aborting. However, at end of pipeline encoder shall
+	// NOT invoke this callback if passthrough is TRUE (but
+	// still needs to do so when aborting)
+	void                     *data;                      // pointer to application's data
+	struct EbLinkedListNode  *next;                      // pointer to next node (null when last)
+
+} EbLinkedListNode;
+
+typedef struct EB_BUFFERHEADERTYPE
+{
+    unsigned int nSize;
+    unsigned char* pBuffer;
+    unsigned int nAllocLen;
+    unsigned int nFilledLen;
+    unsigned int nOffset;
+    void* pAppPrivate;
+    unsigned int nTickCount;
+    signed long long nTimeStamp;
+    unsigned int nFlags;
+} EB_BUFFERHEADERTYPE;
+
+typedef struct EB_COMPONENTTYPE
+{
+    unsigned int nSize;
+    void* pComponentPrivate;
+    void* pApplicationPrivate;
+} EB_COMPONENTTYPE;
+    
+typedef enum EB_ERRORTYPE
+{
+    EB_ErrorNone = 0,
+    EB_ErrorInsufficientResources               = (signed int) 0x80001000,
+    EB_ErrorUndefined                           = (signed int) 0x80001001,
+    EB_ErrorComponentNotFound                   = (signed int) 0x80001003,
+    EB_ErrorInvalidComponent                    = (signed int) 0x80001004,
+    EB_ErrorBadParameter                        = (signed int) 0x80001005,
+    EB_ErrorNotImplemented                      = (signed int) 0x80001006,
+    EB_ErrorCreateThreadFailed                  = (signed int) 0x80002010,
+    EB_ErrorThreadUnresponsive                  = (signed int) 0x80002011,
+    EB_ErrorDestroyThreadFailed                 = (signed int) 0x80002012,
+    EB_ErrorNullThread                          = (signed int) 0x80002013,
+    EB_ErrorCreateSemaphoreFailed               = (signed int) 0x80002020,
+    EB_ErrorSemaphoreUnresponsive               = (signed int) 0x80002021,
+    EB_ErrorDestroySemaphoreFailed              = (signed int) 0x80002022,
+    EB_ErrorCreateMutexFailed                   = (signed int) 0x80002030,
+    EB_ErrorMutexUnresponsive                   = (signed int) 0x80002031,
+    EB_ErrorDestroyMutexFailed                  = (signed int) 0x80002032,
+    EB_NoErrorEmptyQueue                        = (signed int) 0x80002033,
+    EB_ErrorMax                                 = 0x7FFFFFFF
+} EB_ERRORTYPE;
+
+#define EB_BUFFERFLAG_EOS 0x00000001 
+
+// Display Total Memory at the end of the memory allocations
+#define DISPLAY_MEMORY                                  0
+
 /***************************************
 * Input Bitstream Context
 ***************************************/
 typedef struct InputBitstreamContext_s {
 
-    EB_U64  processedByteCount;
-    EB_U64  processedFrameCount;
+    unsigned long long  processedByteCount;
+    unsigned long long  processedFrameCount;
 
-    EB_S64  previousTimeSeconds;
+    signed long long  previousTimeSeconds;
     double  measuredFrameRate;
 
 } InputBitstreamContext_t;
@@ -59,106 +152,106 @@ typedef struct EB_H265_ENC_CONFIGURATION
     // Define the settings
 
     // Channel info
-    EB_U32              channelId;
-    EB_U32              activeChannelCount;
-    EB_BOOL             useRoundRobinThreadAssignment;
+    unsigned int              channelId;
+    unsigned int              activeChannelCount;
+    unsigned char             useRoundRobinThreadAssignment;
     
     // GOP Structure
-    EB_S32              intraPeriodLength;
-    EB_U32              intraRefreshType;
+    signed int              intraPeriodLength;
+    unsigned int              intraRefreshType;
 
-    EB_PRED             predStructure;
-    EB_U32              baseLayerSwitchMode;
-    EB_U8               encMode;
+    unsigned char               predStructure;
+    unsigned int              baseLayerSwitchMode;
+    unsigned char               encMode;
 
-    EB_U32              hierarchicalLevels;
+    unsigned int              hierarchicalLevels;
 
 
     // Input Stride
-    EB_U32             inputPictureStride; // Includes padding
+    unsigned int             inputPictureStride; // Includes padding
 
-    EB_U32             sourceWidth;
-    EB_U32             sourceHeight;
+    unsigned int             sourceWidth;
+    unsigned int             sourceHeight;
 
-    EB_U8              latencyMode;
+    unsigned char              latencyMode;
 
 
     // Interlaced Video 
-    EB_BOOL             interlacedVideo;
+    unsigned char             interlacedVideo;
         
     // Quantization
-    EB_U32              qp;
-    EB_BOOL             useQpFile;
+    unsigned int              qp;
+    unsigned char             useQpFile;
 
     // Deblock Filter
-    EB_BOOL             disableDlfFlag;
+    unsigned char             disableDlfFlag;
     
     // SAO
-    EB_BOOL             enableSaoFlag;
+    unsigned char             enableSaoFlag;
 
     // ME Tools
-    EB_BOOL             useDefaultMeHme; 
-    EB_BOOL             enableHmeFlag;
-    EB_BOOL             enableHmeLevel0Flag;
-    EB_BOOL             enableHmeLevel1Flag;
-    EB_BOOL             enableHmeLevel2Flag;
+    unsigned char             useDefaultMeHme; 
+    unsigned char             enableHmeFlag;
+    unsigned char             enableHmeLevel0Flag;
+    unsigned char             enableHmeLevel1Flag;
+    unsigned char             enableHmeLevel2Flag;
 
     // ME Parameters
-    EB_U32              searchAreaWidth;
-    EB_U32              searchAreaHeight;
+    unsigned int              searchAreaWidth;
+    unsigned int              searchAreaHeight;
 
     // HME Parameters
-    EB_U32              numberHmeSearchRegionInWidth;
-    EB_U32              numberHmeSearchRegionInHeight;
-    EB_U32              hmeLevel0TotalSearchAreaWidth;
-    EB_U32              hmeLevel0TotalSearchAreaHeight;
-    EB_U32              hmeLevel0SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    EB_U32              hmeLevel0SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    EB_U32              hmeLevel1SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    EB_U32              hmeLevel1SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    EB_U32              hmeLevel2SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    EB_U32              hmeLevel2SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+    unsigned int              numberHmeSearchRegionInWidth;
+    unsigned int              numberHmeSearchRegionInHeight;
+    unsigned int              hmeLevel0TotalSearchAreaWidth;
+    unsigned int              hmeLevel0TotalSearchAreaHeight;
+    unsigned int              hmeLevel0SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
+    unsigned int              hmeLevel0SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+    unsigned int              hmeLevel1SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
+    unsigned int              hmeLevel1SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+    unsigned int              hmeLevel2SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
+    unsigned int              hmeLevel2SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
 
     // MD Parameters
-    EB_BOOL             constrainedIntra;
+    unsigned char             constrainedIntra;
 
     // Rate Control
-    EB_U32              frameRate;
-    EB_S32              frameRateNumerator;
-    EB_S32              frameRateDenominator;
-    EB_U32              encoderBitDepth;
-    EB_U32              compressedTenBitFormat;
-    EB_U32              rateControlMode;
-    EB_U32              sceneChangeDetection;
-    EB_U32              lookAheadDistance;
-    EB_U64              framesToBeEncoded;
-    EB_U32              targetBitRate;
-    EB_U32              maxQpAllowed;
-    EB_U32              minQpAllowed;
+    unsigned int              frameRate;
+    signed int              frameRateNumerator;
+    signed int              frameRateDenominator;
+    unsigned int              encoderBitDepth;
+    unsigned int              compressedTenBitFormat;
+    unsigned int              rateControlMode;
+    unsigned int              sceneChangeDetection;
+    unsigned int              lookAheadDistance;
+    unsigned long long        framesToBeEncoded;
+    unsigned int              targetBitRate;
+    unsigned int              maxQpAllowed;
+    unsigned int              minQpAllowed;
 
-    EB_U8               tune;
+    unsigned char               tune;
 
-	EB_BOOL				bitRateReduction;
+	unsigned char				bitRateReduction;
     // Tresholds
-    EB_BOOL             improveSharpness;
-    EB_U32              videoUsabilityInfo;
-    EB_U32              highDynamicRangeInput;
-    EB_U32              accessUnitDelimiter;
-    EB_U32              bufferingPeriodSEI;
-    EB_U32              pictureTimingSEI;
-    EB_U32              registeredUserDataSeiFlag;
-    EB_U32              unregisteredUserDataSeiFlag;
-    EB_U32              recoveryPointSeiFlag;
-    EB_U32              enableTemporalId;
-    EB_U32              profile;
-    EB_U32              tier;
-    EB_U32              level;
+    unsigned char             improveSharpness;
+    unsigned int              videoUsabilityInfo;
+    unsigned int              highDynamicRangeInput;
+    unsigned int              accessUnitDelimiter;
+    unsigned int              bufferingPeriodSEI;
+    unsigned int              pictureTimingSEI;
+    unsigned int              registeredUserDataSeiFlag;
+    unsigned int              unregisteredUserDataSeiFlag;
+    unsigned int              recoveryPointSeiFlag;
+    unsigned int              enableTemporalId;
+    unsigned int              profile;
+    unsigned int              tier;
+    unsigned int              level;
 
 	// Buffer Configuration
-    EB_U32				inputOutputBufferFifoInitCount;              // add check for minimum 
+    unsigned int				inputOutputBufferFifoInitCount;              // add check for minimum 
 
-    EB_S32              injectorFrameRate;
-    EB_U32              speedControlFlag;
+    signed int              injectorFrameRate;
+    unsigned int              speedControlFlag;
     
     // ASM Type
     EB_ASM			    asmType;
@@ -185,6 +278,14 @@ EB_API EB_ERRORTYPE EbInitEncoder(
 EB_API EB_ERRORTYPE EbDeinitEncoder(
     EB_COMPONENTTYPE *h265EncComponent);
 
+EB_API EB_ERRORTYPE EbStartEncoder(
+    EB_COMPONENTTYPE  *h265EncComponent,
+    unsigned int            instanceIndex);
+
+EB_API EB_ERRORTYPE EbStopEncoder(
+    EB_COMPONENTTYPE *h265EncComponent,
+    unsigned int            instanceIndex);
+
 EB_API EB_ERRORTYPE EbH265EncSetParameter(
     EB_COMPONENTTYPE           *h265EncComponent,
     EB_H265_ENC_CONFIGURATION  *pComponentParameterStructure);
@@ -200,7 +301,7 @@ EB_API EB_ERRORTYPE EbH265GetPacket(
 
 EB_API EB_ERRORTYPE EbInitHandle(
     EB_COMPONENTTYPE** pHandle,
-    EB_PTR pAppData);
+    void* pAppData);
 
 EB_API EB_ERRORTYPE EbDeinitHandle(
     EB_COMPONENTTYPE  *h265EncComponent);
