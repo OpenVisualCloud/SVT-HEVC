@@ -1319,15 +1319,15 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
 
         // Reset counters for long encodes
         if (config->performanceContext.frameCount - 1 == startFrame) {
-            StartTime(startsTime, startuTime);
+            StartTime((unsigned long long*)startsTime, (unsigned long long*)startuTime);
             *maxLatency = 0;
             *totalLatency = 0;
         }
         if ((EB_U32)frameCount == allChannelsStartFrame && allChannelsStartFrame <= SPEED_MEASUREMENT_INTERVAL) {
-            StartTime(&allChannelsStartsTime, &allChannelsStartuTime);
+            StartTime((unsigned long long*)&allChannelsStartsTime, (unsigned long long*)&allChannelsStartuTime);
         }
 
-        FinishTime(&finishsTime, &finishuTime);
+        FinishTime((unsigned long long*)&finishsTime, (unsigned long long*)&finishuTime);
 
         ComputeOverallElapsedTime(
             *startsTime,

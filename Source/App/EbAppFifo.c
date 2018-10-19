@@ -1,5 +1,6 @@
 
 #include "EbApi.h"
+#include "EbAppConfig.h"
 
 /* SAFE STRING LIBRARY */
 
@@ -57,16 +58,6 @@
 #ifndef sldebug_printf
 #define sldebug_printf(...)
 #endif
-
-#ifndef _RSIZE_T_DEFINED
-typedef size_t rsize_t;
-#define _RSIZE_T_DEFINED
-#endif  /* _RSIZE_T_DEFINED */
-
-#ifndef _ERRNO_T_DEFINED
-#define _ERRNO_T_DEFINED
-typedef int errno_t;
-#endif  /* _ERRNO_T_DEFINED */
 
 /*
 * Function used by the libraries to invoke the registered

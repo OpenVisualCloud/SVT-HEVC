@@ -124,7 +124,7 @@ void EbInjector(unsigned long long processedFrameCount, unsigned int injectorFra
         firstTime = 1;
 
 #if __linux__
-        StartTime(&startTimesSeconds, &startTimesuSeconds);  
+        StartTime((unsigned long long*)&startTimesSeconds, (unsigned long long*)&startTimesuSeconds);
 #elif _WIN32
         QueryPerformanceFrequency(&counterFreq);
         QueryPerformanceCounter(&startCount);
@@ -134,7 +134,7 @@ void EbInjector(unsigned long long processedFrameCount, unsigned int injectorFra
     {
 
 #if __linux__
-        FinishTime(&currentTimesSeconds, &currentTimesuSeconds);  
+        FinishTime((unsigned long long*)&currentTimesSeconds, (unsigned long long*)&currentTimesuSeconds);
         ComputeOverallElapsedTime(startTimesSeconds, startTimesuSeconds, currentTimesSeconds, currentTimesuSeconds, &elapsedTime);
 #elif _WIN32
         QueryPerformanceCounter(&nowCount);

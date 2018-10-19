@@ -4313,7 +4313,7 @@ void CopyInputPicture(
     pictureControlSetPtr->startTimeSeconds = 0;
     pictureControlSetPtr->startTimeuSeconds = 0;
 
-    StartTime(&pictureControlSetPtr->startTimeSeconds, &pictureControlSetPtr->startTimeuSeconds);
+    StartTime((unsigned long long*)&pictureControlSetPtr->startTimeSeconds, (unsigned long long*)&pictureControlSetPtr->startTimeuSeconds);
 
 
     // Need to include for Interlacing on the fly with pictureScanType = 1

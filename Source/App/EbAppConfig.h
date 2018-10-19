@@ -39,6 +39,16 @@ typedef __int64 off64_t;
 #endif
 #endif
 
+#ifndef _RSIZE_T_DEFINED
+typedef size_t rsize_t;
+#define _RSIZE_T_DEFINED
+#endif  /* _RSIZE_T_DEFINED */
+
+#ifndef _ERRNO_T_DEFINED
+#define _ERRNO_T_DEFINED
+typedef int errno_t;
+#endif  /* _ERRNO_T_DEFINED */
+
 /** The APPEXITCONDITIONTYPE type is used to define the App main loop exit
 conditions.
 */

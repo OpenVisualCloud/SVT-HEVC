@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
                         exitConditionsOutput[instanceCount] = APP_ExitConditionNone;
                         exitConditionsInput[instanceCount]  = APP_ExitConditionNone;
                         channelActive[instanceCount]        = EB_TRUE;
-                        StartTime(&encodingStartTimesSeconds[instanceCount], &encodingStartTimesuSeconds[instanceCount]);
+                        StartTime((unsigned long long*)&encodingStartTimesSeconds[instanceCount], (unsigned long long*)&encodingStartTimesuSeconds[instanceCount]);
                     }
                     else {
                         exitConditions[instanceCount]       = APP_ExitConditionError;
@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
                             if ((exitConditionsOutput[instanceCount] != APP_ExitConditionNone && exitConditionsInput[instanceCount] != APP_ExitConditionNone)||
                                 (exitConditionsOutput[instanceCount] == APP_ExitConditionError || exitConditionsInput[instanceCount] == APP_ExitConditionError)){
                                 channelActive[instanceCount] = EB_FALSE;
-                                FinishTime(&encodingFinishTimesSeconds[instanceCount], &encodingFinishTimesuSeconds[instanceCount]);
+                                FinishTime((unsigned long long*)&encodingFinishTimesSeconds[instanceCount], (unsigned long long*)&encodingFinishTimesuSeconds[instanceCount]);
                                 exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsOutput[instanceCount] || exitConditionsInput[instanceCount]);
                             }
                         }
