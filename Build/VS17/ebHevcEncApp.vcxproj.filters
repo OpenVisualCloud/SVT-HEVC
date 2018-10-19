@@ -44,12 +44,6 @@
     <ClInclude Include="..\..\Source\API\EbApi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\API\EbBuild.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\API\EbTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\API\EbErrorCodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>

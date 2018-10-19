@@ -11,8 +11,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Source\API\EbBuild.h" />
-    <ClInclude Include="..\..\Source\API\EbTypes.h" />
     <ClInclude Include="..\..\Source\Lib\C_DEFAULT\EbAvcStyleMcp_C.h" />
     <ClInclude Include="..\..\Source\Lib\C_DEFAULT\EbComputeMean_C.h" />
     <ClInclude Include="..\..\Source\Lib\C_DEFAULT\EbComputeSAD_C.h" />
@@ -51,7 +49,6 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -94,7 +91,6 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>

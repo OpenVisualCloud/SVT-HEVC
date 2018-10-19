@@ -14,12 +14,8 @@
 /***************************************
  * Includes
  ***************************************/
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include "EbSimpleAppConfig.h"
 #include "EbSimpleAppContext.h"
-#include "EbTime.h"
+#include "EbApi.h"
 #if !__linux
 #include <Windows.h>
 #else
@@ -29,12 +25,27 @@
 #include <errno.h>
 #endif
 
+/** The APPEXITCONDITIONTYPE type is used to define the App main loop exit
+conditions.
+*/
+typedef enum APPEXITCONDITIONTYPE {
+    APP_ExitConditionNone = 0,
+    APP_ExitConditionFinished,
+    APP_ExitConditionError
+} APPEXITCONDITIONTYPE;
 
-
+/****************************************
+* Padding
+****************************************/
+#define LEFT_INPUT_PADDING 0
+#define RIGHT_INPUT_PADDING 0
+#define TOP_INPUT_PADDING 0
+#define BOTTOM_INPUT_PADDING 0
+   
  /**********************************
  * Constructor
  **********************************/
-void EbConfigCtor(EbConfig_t *configPtr)
+static void EbConfigCtor(EbConfig_t *configPtr)
 {
     configPtr->inputFile = NULL;
     configPtr->bitstreamFile = NULL;;
@@ -52,7 +63,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
 /**********************************
 * Destructor
 **********************************/
-void EbConfigDtor(EbConfig_t *configPtr)
+static void EbConfigDtor(EbConfig_t *configPtr)
 {
 
     if (configPtr->inputFile) {
@@ -238,8 +249,6 @@ int main(int argc, char* argv[])
     APPEXITCONDITIONTYPE    exitConditionOutput = APP_ExitConditionNone;    // Processing loop exit condition
     APPEXITCONDITIONTYPE    exitConditionInput = APP_ExitConditionNone;    // Processing loop exit condition
     EbConfig_t             *config;        // Encoder Configuration
-
-
     EbAppContext_t         *appCallback;   // Instances App callback data
     
     // Print Encoder Info
@@ -332,11 +341,8 @@ int main(int argc, char* argv[])
         else {
             printf("Error in configuration, could not begin encoding! ... \n");
         }
-
-   }
-        printf("Encoder finished\n");
-
-    
+    }
+    printf("Encoder finished\n");
 
     return (return_error == 0) ? 0 : 1;
 }

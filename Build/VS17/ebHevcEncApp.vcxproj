@@ -126,10 +126,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\API\EbApi.h" />
-    <ClInclude Include="..\..\Source\API\EbBuild.h" />
     <ClInclude Include="..\..\Source\API\EbErrorCodes.h" />
     <ClInclude Include="..\..\Source\API\EbTime.h" />
-    <ClInclude Include="..\..\Source\API\EbTypes.h" />
     <ClInclude Include="..\..\Source\App\EbAppConfig.h" />
     <ClInclude Include="..\..\Source\App\EbAppContext.h" />
   </ItemGroup>

@@ -380,7 +380,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->framesToBeEncoded                    = 0;
     configPtr->bufferedInput                        = -1;
     configPtr->sequenceBuffer                       = 0;
-    configPtr->latencyMode                          = EB_NORMAL_LATENCY;
+    configPtr->latencyMode                          = 0;
     
     // Interlaced Video 
     configPtr->interlacedVideo                      = EB_FALSE;

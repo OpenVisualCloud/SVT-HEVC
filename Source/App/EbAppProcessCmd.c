@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "EbTypes.h"
 #include "EbAppContext.h"
 #include "EbAppConfig.h"
 #include "EbErrorCodes.h"
@@ -691,7 +690,7 @@ EB_S32 GetNextQpFromQpFile(
     EB_S32 qp = 0;
     EB_U32 readsize = 0, eof = 0;
     EB_APP_MALLOC(EB_U8*, line, 8, EB_N_PTR, EB_ErrorInsufficientResources);
-    EB_MEMSET(line,0,8);
+    memset(line,0,8);
     readsize = (EB_U32)fread(line, 1, 2, config->qpFile);
 
     if (readsize == 0) {

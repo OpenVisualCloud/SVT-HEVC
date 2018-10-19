@@ -10,8 +10,11 @@
 #include <stdlib.h>
 
 #include "EbSimpleAppContext.h"
-#include "EbSimpleAppConfig.h"
 
+#define INPUT_SIZE_576p_TH				0x90000		// 0.58 Million   
+#define INPUT_SIZE_1080i_TH				0xB71B0		// 0.75 Million
+#define INPUT_SIZE_1080p_TH				0x1AB3F0	// 1.75 Million
+#define INPUT_SIZE_4K_TH				0x29F630	// 2.75 Million  
 #define EB_OUTPUTSTREAMBUFFERSIZE_MACRO(ResolutionSize)                ((ResolutionSize) < (INPUT_SIZE_1080i_TH) ? 0x1E8480 : (ResolutionSize) < (INPUT_SIZE_1080p_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_4K_TH) ? 0x2DC6C0 : 0x2DC6C0  )   
 
 EB_ERRORTYPE AllocateFrameBuffer(
@@ -157,109 +160,6 @@ EB_ERRORTYPE CopyConfigurationParameters(
 
 }
 
-/**********************************
-* Set Parameter
-**********************************/
-EB_ERRORTYPE InitParameter(
-    EB_H265_ENC_CONFIGURATION*   configPtr)
-{
-    EB_ERRORTYPE                  return_error = EB_ErrorNone;
-
-    if (!configPtr) {
-        printf("The EB_H265_ENC_CONFIGURATION structure is empty! \n");
-        return EB_ErrorBadParameter;
-    }
-
-    configPtr->frameRate = 60;
-    configPtr->frameRateNumerator = 0;
-    configPtr->frameRateDenominator = 0;
-    configPtr->encoderBitDepth = 8;
-    configPtr->compressedTenBitFormat = 0;
-    configPtr->sourceWidth = 0;
-    configPtr->sourceHeight = 0;
-    configPtr->inputPictureStride = 0;
-    configPtr->framesToBeEncoded = 0;
-
-
-    // Interlaced Video 
-    configPtr->interlacedVideo = 0;
-    configPtr->qp = 32;
-    configPtr->useQpFile = 0;
-    configPtr->sceneChangeDetection = 1;
-    configPtr->rateControlMode = 0;
-    configPtr->lookAheadDistance = 17;
-    configPtr->targetBitRate = 7000000;
-    configPtr->maxQpAllowed = 48;
-    configPtr->minQpAllowed = 10;
-    configPtr->baseLayerSwitchMode = 0;
-    configPtr->encMode  = 9;
-    configPtr->intraPeriodLength = -2;
-    configPtr->intraRefreshType = 1;
-    configPtr->hierarchicalLevels = 3;
-    configPtr->predStructure = 2;
-    configPtr->disableDlfFlag = 0;
-    configPtr->enableSaoFlag = 1;
-    configPtr->useDefaultMeHme = 1;
-    configPtr->enableHmeFlag = 1;
-    configPtr->enableHmeLevel0Flag = 1;
-    configPtr->enableHmeLevel1Flag = 0;
-    configPtr->enableHmeLevel2Flag = 0;
-    configPtr->searchAreaWidth = 16;
-    configPtr->searchAreaHeight = 7;
-    configPtr->numberHmeSearchRegionInWidth = 2;
-    configPtr->numberHmeSearchRegionInHeight = 2;
-    configPtr->hmeLevel0TotalSearchAreaWidth = 64;
-    configPtr->hmeLevel0TotalSearchAreaHeight = 25;
-    configPtr->hmeLevel0SearchAreaInWidthArray[0] = 32;
-    configPtr->hmeLevel0SearchAreaInWidthArray[1] = 32;
-    configPtr->hmeLevel0SearchAreaInHeightArray[0] = 12;
-    configPtr->hmeLevel0SearchAreaInHeightArray[1] = 13;
-    configPtr->hmeLevel1SearchAreaInWidthArray[0] = 1;
-    configPtr->hmeLevel1SearchAreaInWidthArray[1] = 1;
-    configPtr->hmeLevel1SearchAreaInHeightArray[0] = 1;
-    configPtr->hmeLevel1SearchAreaInHeightArray[1] = 1;
-    configPtr->hmeLevel2SearchAreaInWidthArray[0] = 1;
-    configPtr->hmeLevel2SearchAreaInWidthArray[1] = 1;
-    configPtr->hmeLevel2SearchAreaInHeightArray[0] = 1;
-    configPtr->hmeLevel2SearchAreaInHeightArray[1] = 1;
-    configPtr->constrainedIntra = 0;
-    configPtr->tune = 0;
-
-    // Thresholds
-    configPtr->videoUsabilityInfo = 0;
-    configPtr->highDynamicRangeInput = 0;
-    configPtr->accessUnitDelimiter = 0;
-    configPtr->bufferingPeriodSEI = 0;
-    configPtr->pictureTimingSEI = 0;
-
-    configPtr->bitRateReduction = 1;
-    configPtr->improveSharpness = 1;
-    configPtr->registeredUserDataSeiFlag = 0;
-    configPtr->unregisteredUserDataSeiFlag = 0;
-    configPtr->recoveryPointSeiFlag = 0;
-    configPtr->enableTemporalId = 1;
-    configPtr->inputOutputBufferFifoInitCount = 50;
-
-    // Annex A parameters
-    configPtr->profile = 2;
-    configPtr->tier = 0;
-    configPtr->level = 0;
-
-    // Latency
-    configPtr->injectorFrameRate = 60 << 16;
-    configPtr->speedControlFlag = 0;
-    configPtr->latencyMode = EB_NORMAL_LATENCY;
-
-    // ASM Type
-    configPtr->asmType = ASM_AVX2; 
-    configPtr->useRoundRobinThreadAssignment = 0;
-    configPtr->channelId = 0;
-    configPtr->activeChannelCount = 1;
-
-
-    return return_error;
-}
-
 /***********************************
  * Initialize Core & Component
  ***********************************/
@@ -272,13 +172,8 @@ EB_ERRORTYPE InitEncoder(
     
     ///************************* LIBRARY INIT [START] *********************///
     // STEP 1: Call the library to construct a Component Handle
-    return_error = EbInitHandle(&callbackData->svtEncoderHandle, callbackData);
+    return_error = EbInitHandle(&callbackData->svtEncoderHandle, callbackData, &callbackData->ebEncParameters);
     if (return_error != EB_ErrorNone) {return return_error;}
-
-    // STEP 2: Get the Default parameters from the library
-    return_error = InitParameter(
-        &callbackData->ebEncParameters);
-    if (return_error != EB_ErrorNone) { return return_error; }
 
     // STEP 3: Copy all configuration parameters into the callback structure
     return_error = CopyConfigurationParameters(config,callbackData,instanceIdx);
@@ -300,7 +195,7 @@ EB_ERRORTYPE InitEncoder(
  ***********************************/
 EB_ERRORTYPE DeInitEncoder(
     EbAppContext_t *callbackDataPtr,
-    EB_U32          instanceIndex)
+    unsigned int    instanceIndex)
 {
     (void)instanceIndex;
     EB_ERRORTYPE return_error = EB_ErrorNone;

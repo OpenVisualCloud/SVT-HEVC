@@ -18,15 +18,6 @@
     <ClInclude Include="..\..\Source\API\EbApi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\API\EbBuild.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\API\EbTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\SimpleApp\EbSimpleAppConfig.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\SimpleApp\EbSimpleAppContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>

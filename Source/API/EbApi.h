@@ -10,8 +10,6 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "EbBuild.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -23,17 +21,24 @@ extern "C" {
 
 #define EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT     2
 #define EB_HME_SEARCH_AREA_ROW_MAX_COUNT        2
+    
+#ifdef _WIN32
+#ifdef __EB_EXPORTS
+#define EB_API __declspec(dllexport)
+#else
+#define EB_API __declspec(dllimport)
+#endif
+#else
+#ifdef __EB_EXPORTS
+#define EB_API
+#else
+#define EB_API extern
+#endif
+#endif
 
 /********************************
 * Defines
 ********************************/
-    
-#define INPUT_SIZE_576p_TH				0x90000		// 0.58 Million   
-#define INPUT_SIZE_1080i_TH				0xB71B0		// 0.75 Million
-#define INPUT_SIZE_1080p_TH				0x1AB3F0	// 1.75 Million
-#define INPUT_SIZE_4K_TH				0x29F630	// 2.75 Million   
-
-#define EB_NORMAL_LATENCY        0
     
 /** Assembly Types
 */
@@ -93,15 +98,9 @@ typedef enum EB_ERRORTYPE
     EB_ErrorNone = 0,
     EB_ErrorInsufficientResources               = (signed int) 0x80001000,
     EB_ErrorUndefined                           = (signed int) 0x80001001,
-    EB_ErrorComponentNotFound                   = (signed int) 0x80001003,
     EB_ErrorInvalidComponent                    = (signed int) 0x80001004,
     EB_ErrorBadParameter                        = (signed int) 0x80001005,
-    EB_ErrorNotImplemented                      = (signed int) 0x80001006,
-    EB_ErrorCreateThreadFailed                  = (signed int) 0x80002010,
-    EB_ErrorThreadUnresponsive                  = (signed int) 0x80002011,
     EB_ErrorDestroyThreadFailed                 = (signed int) 0x80002012,
-    EB_ErrorNullThread                          = (signed int) 0x80002013,
-    EB_ErrorCreateSemaphoreFailed               = (signed int) 0x80002020,
     EB_ErrorSemaphoreUnresponsive               = (signed int) 0x80002021,
     EB_ErrorDestroySemaphoreFailed              = (signed int) 0x80002022,
     EB_ErrorCreateMutexFailed                   = (signed int) 0x80002030,
@@ -128,6 +127,7 @@ typedef struct InputBitstreamContext_s {
     double  measuredFrameRate;
 
 } InputBitstreamContext_t;
+
 // For 8-bit and 10-bit packed inputs, the luma, cb, and cr fields should be used
 //   for the three input picture planes.  However, for 10-bit unpacked planes the
 //   lumaExt, cbExt, and crExt fields should be used hold the extra 2-bits of 
@@ -258,33 +258,11 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
 } EB_H265_ENC_CONFIGURATION;
 
-#ifdef _WIN32
-#ifdef __EB_EXPORTS
-#define EB_API __declspec(dllexport)
-#else
-#define EB_API __declspec(dllimport)
-#endif
-#else
-#ifdef __EB_EXPORTS
-#define EB_API
-#else
-#define EB_API extern
-#endif
-#endif
-
 EB_API EB_ERRORTYPE EbInitEncoder(
     EB_COMPONENTTYPE *h265EncComponent);
 
 EB_API EB_ERRORTYPE EbDeinitEncoder(
     EB_COMPONENTTYPE *h265EncComponent);
-
-EB_API EB_ERRORTYPE EbStartEncoder(
-    EB_COMPONENTTYPE  *h265EncComponent,
-    unsigned int            instanceIndex);
-
-EB_API EB_ERRORTYPE EbStopEncoder(
-    EB_COMPONENTTYPE *h265EncComponent,
-    unsigned int            instanceIndex);
 
 EB_API EB_ERRORTYPE EbH265EncSetParameter(
     EB_COMPONENTTYPE           *h265EncComponent,
@@ -301,7 +279,8 @@ EB_API EB_ERRORTYPE EbH265GetPacket(
 
 EB_API EB_ERRORTYPE EbInitHandle(
     EB_COMPONENTTYPE** pHandle,
-    void* pAppData);
+    void* pAppData,
+    EB_H265_ENC_CONFIGURATION  *configPtr);
 
 EB_API EB_ERRORTYPE EbDeinitHandle(
     EB_COMPONENTTYPE  *h265EncComponent);

@@ -116,9 +116,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\API\EbApi.h" />
-    <ClInclude Include="..\..\Source\API\EbBuild.h" />
-    <ClInclude Include="..\..\Source\API\EbTypes.h" />
-    <ClInclude Include="..\..\Source\SimpleApp\EbSimpleAppConfig.h" />
     <ClInclude Include="..\..\Source\SimpleApp\EbSimpleAppContext.h" />
   </ItemGroup>
   <ItemGroup>

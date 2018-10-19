@@ -1430,8 +1430,10 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     }   
     return return_error;
 }
+
 EB_ERRORTYPE EbH265EncInitParameter(
     EB_H265_ENC_CONFIGURATION * configPtr);
+
 /**********************************
  * GetHandle
  **********************************/
@@ -1440,7 +1442,8 @@ __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbInitHandle(
     EB_COMPONENTTYPE** pHandle,               // Function to be called in the future for manipulating the component
-    EB_PTR              pAppData)              // Pointer passed back to the client during callbacks
+    void*              pAppData,
+    EB_H265_ENC_CONFIGURATION  *configPtr)              // Pointer passed back to the client during callbacks
             
 {
     EB_ERRORTYPE           return_error = EB_ErrorNone;
@@ -1466,6 +1469,7 @@ EB_API EB_ERRORTYPE EbInitHandle(
         printf("Error: Component Struct Malloc Failed\n");
         return_error = EB_ErrorInsufficientResources;
     }
+    return_error = EbH265EncInitParameter(configPtr);
 
     return return_error;
 }
@@ -1529,7 +1533,7 @@ EB_U32 SetParentPcs(EB_H265_ENC_CONFIGURATION*   config)
     if ((config->sourceWidth * config->sourceHeight) > INPUT_SIZE_4K_TH)
         normalLatencyInput = (normalLatencyInput * 3) >> 1;
 
-    if (config->latencyMode == EB_NORMAL_LATENCY)
+    if (config->latencyMode == 0)
         inputPic = (normalLatencyInput /*+ config->lookAheadDistance*/);
     else
         inputPic = (EB_U32)(lowLatencyInput /*+ config->lookAheadDistance*/);
@@ -2674,7 +2678,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     // Latency
     configPtr->injectorFrameRate = 60 << 16;
     configPtr->speedControlFlag = 0;
-    configPtr->latencyMode = EB_NORMAL_LATENCY;
+    configPtr->latencyMode = 0;
 
     // ASM Type
     configPtr->asmType = ASM_AVX2; 

@@ -19,9 +19,21 @@
 typedef __int64 off64_t;
 #define fseeko64 _fseeki64
 #define ftello64 _ftelli64
+// Windows Compiler
+#pragma warning( disable : 4127 )
+#pragma warning( disable : 4201 )
+#pragma warning( disable : 4702 )
+#pragma warning( disable : 4456 )  
+#pragma warning( disable : 4457 )
+#pragma warning( disable : 4459 )
+#pragma warning( disable : 4334 ) 
+
 #elif _WIN32 // MinGW
 #else 
     // *Note -- fseeko and ftello are already defined for linux
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#pragma GCC diagnostic ignored "-Wuninitialized"
+#pragma GCC diagnostic ignored "-Wunused-function"
 #ifndef __cplusplus
 #define __USE_LARGEFILE
 #endif

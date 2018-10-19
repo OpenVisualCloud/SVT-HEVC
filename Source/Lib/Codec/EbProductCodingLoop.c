@@ -5951,7 +5951,7 @@ EB_EXTERN EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
 
                     EB_U8 leafIndex = leafIndexArray[leafCount];
 
-                    EB_U8 neighborLeafIndex;
+                    EB_U8 neighborLeafIndex = 0;
 
                     CodingUnit_t * const cuPtr = contextPtr->cuPtr = lcuPtr->codedLeafArrayPtr[leafIndex];
                     const CodedUnitStats_t *cuStatsPtr = contextPtr->cuStats = GetCodedUnitStats(leafIndex);

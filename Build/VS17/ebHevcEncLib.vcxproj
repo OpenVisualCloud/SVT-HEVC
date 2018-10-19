@@ -12,8 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\API\EbApi.h" />
-    <ClInclude Include="..\..\Source\API\EbBuild.h" />
-    <ClInclude Include="..\..\Source\API\EbTypes.h" />
     <ClInclude Include="..\..\Source\Lib\Codec\EbAdaptiveMotionVectorPrediction.h" />
     <ClInclude Include="..\..\Source\Lib\Codec\EbAvailability.h" />
     <ClInclude Include="..\..\Source\Lib\Codec\EbAvcStyleMcp.h" />

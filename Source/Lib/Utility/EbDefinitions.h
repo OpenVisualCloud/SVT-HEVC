@@ -10,6 +10,29 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifdef __cplusplus
+#define EB_EXTERN extern "C"
+#else
+#define EB_EXTERN
+#endif // __cplusplus
+
+#ifdef _MSC_VER
+// Windows Compiler
+#pragma warning( disable : 4127 )
+#pragma warning( disable : 4201 )
+#pragma warning( disable : 4702 )
+#pragma warning( disable : 4456 )  
+#pragma warning( disable : 4457 )
+#pragma warning( disable : 4459 )
+#pragma warning( disable : 4334 )
+#elif __INTEL_COMPILER
+#else
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#pragma GCC diagnostic ignored "-Wuninitialized"
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif 
+
 #ifdef __GNUC__
 #define AVX512_FUNC_TARGET __attribute__(( target( "avx512f,avx512dq,avx512bw,avx512vl" ) ))
 #define AVX2_FUNC_TARGET   __attribute__(( target( "avx2" ) ))
@@ -51,6 +74,10 @@ extern "C" {
 #endif
 #endif
 
+#define INPUT_SIZE_576p_TH				0x90000		// 0.58 Million   
+#define INPUT_SIZE_1080i_TH				0xB71B0		// 0.75 Million
+#define INPUT_SIZE_1080p_TH				0x1AB3F0	// 1.75 Million
+#define INPUT_SIZE_4K_TH				0x29F630	// 2.75 Million   
 
 #define EB_INPUT_RESOLUTION             EB_U8
 #define INPUT_SIZE_576p_RANGE_OR_LOWER	 0

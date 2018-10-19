@@ -5,7 +5,7 @@
 #ifndef EbModeDecisionSegments_h
 #define EbModeDecisionSegments_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 /**************************************
  * Mode Decision Segments
