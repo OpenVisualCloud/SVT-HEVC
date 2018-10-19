@@ -300,16 +300,12 @@ EB_ERRORTYPE InitEncoder(
  ***********************************/
 EB_ERRORTYPE DeInitEncoder(
     EbAppContext_t *callbackDataPtr,
-    unsigned int instanceIndex,
-    EB_ERRORTYPE   libExitError)
+    EB_U32          instanceIndex)
 {
-    EB_ERRORTYPE return_error = EB_ErrorNone;
     (void)instanceIndex;
+    EB_ERRORTYPE return_error = EB_ErrorNone;
 
     if (((EB_COMPONENTTYPE*)(callbackDataPtr->svtEncoderHandle)) != NULL) {
-        if (libExitError == EB_ErrorInsufficientResources)
-            return_error = EbStopEncoder(callbackDataPtr->svtEncoderHandle, 0);
-        else 
             return_error = EbDeinitEncoder(callbackDataPtr->svtEncoderHandle);
     }
 

@@ -169,7 +169,6 @@ int main(int argc, char* argv[])
 
                 for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
                     if (return_errors[instanceCount] == EB_ErrorNone) {
-                        return_errors[instanceCount] = StartEncoder(appCallbacks[instanceCount]);
                         return_error = (EB_ERRORTYPE)(return_error & return_errors[instanceCount]);
                         exitConditions[instanceCount]       = APP_ExitConditionNone;
                         exitConditionsOutput[instanceCount] = APP_ExitConditionNone;
@@ -203,10 +202,10 @@ int main(int argc, char* argv[])
                                                                             configs[instanceCount],
                                                                             appCallbacks[instanceCount],
                                                                             exitConditionsInput[instanceCount] == APP_ExitConditionNone ? 0 : 1);
-                            if (exitConditionsOutput[instanceCount] != APP_ExitConditionNone && exitConditionsInput[instanceCount] != APP_ExitConditionNone) {
+                            if ((exitConditionsOutput[instanceCount] != APP_ExitConditionNone && exitConditionsInput[instanceCount] != APP_ExitConditionNone)||
+                                (exitConditionsOutput[instanceCount] == APP_ExitConditionError || exitConditionsInput[instanceCount] == APP_ExitConditionError)){
                                 channelActive[instanceCount] = EB_FALSE;
                                 FinishTime(&encodingFinishTimesSeconds[instanceCount], &encodingFinishTimesuSeconds[instanceCount]);
-                                StopEncoder(appCallbacks[instanceCount]);
                                 exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsOutput[instanceCount] || exitConditionsInput[instanceCount]);
                             }
                         }
@@ -219,7 +218,7 @@ int main(int argc, char* argv[])
                 }
 
                 for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
-                    if (exitConditions[instanceCount] != APP_ExitConditionError) {
+                    if (exitConditions[instanceCount] == APP_ExitConditionNone) {
                         double frameRate;
 
                         if ((configs[instanceCount]->frameRateNumerator != 0 && configs[instanceCount]->frameRateDenominator != 0) || configs[instanceCount]->frameRate != 0) {
@@ -256,7 +255,7 @@ int main(int argc, char* argv[])
                 fflush(stdout);
             }
             for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
-                if (return_errors[instanceCount] == EB_ErrorNone && exitConditions[instanceCount] == APP_ExitConditionFinished) {
+                if (exitConditions[instanceCount] == APP_ExitConditionNone && exitConditions[instanceCount] == APP_ExitConditionFinished) {
 
                     if (configs[instanceCount]->stopEncoder == EB_FALSE) {
                         // Interlaced Video
@@ -291,8 +290,8 @@ int main(int argc, char* argv[])
 
             // DeInit Encoder
             for (instanceCount = numChannels; instanceCount > 0; --instanceCount) {
-                if (return_errors[instanceCount - 1] == EB_ErrorNone && exitConditions[instanceCount - 1] == APP_ExitConditionFinished)
-                    return_errors[instanceCount - 1] = DeInitEncoder(appCallbacks[instanceCount - 1], instanceCount - 1, return_errors[instanceCount - 1]);
+                if (exitConditions[instanceCount - 1] == APP_ExitConditionNone && exitConditions[instanceCount - 1] == APP_ExitConditionFinished)
+                    return_errors[instanceCount - 1] = DeInitEncoder(appCallbacks[instanceCount - 1], instanceCount - 1);
             }
         }
         else {

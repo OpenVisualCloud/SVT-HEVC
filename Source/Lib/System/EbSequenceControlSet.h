@@ -162,6 +162,8 @@ typedef struct SequenceControlSet_s
     EB_U32						encDecProcessInitCount;
     EB_U32						entropyCodingProcessInitCount;
 
+    EB_U32						totalProcessInitCount;
+
 	LcuParams_t                *lcuParamsArray;
     EB_U8 						pictureWidthInLcu;
 	EB_U8 						pictureHeightInLcu;

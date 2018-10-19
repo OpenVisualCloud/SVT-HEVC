@@ -773,20 +773,14 @@ EB_ERRORTYPE InitEncoder(
  ***********************************/
 EB_ERRORTYPE DeInitEncoder(
     EbAppContext_t *callbackDataPtr,
-    EB_U32          instanceIndex,
-    EB_ERRORTYPE   libExitError)
+    EB_U32          instanceIndex)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_S32              ptrIndex        = 0;
     EbMemoryMapEntry*   memoryEntry     = (EbMemoryMapEntry*)0;
     
     if (((EB_COMPONENTTYPE*)(callbackDataPtr->svtEncoderHandle)) != NULL) {
-        if (libExitError == EB_ErrorInsufficientResources) {
-            return_error = EbStopEncoder(callbackDataPtr->svtEncoderHandle, 0);
-        }
-        else {
             return_error = EbDeinitEncoder(callbackDataPtr->svtEncoderHandle);
-        }
     }
 
     // Destruct the buffer memory pool
@@ -810,33 +804,6 @@ EB_ERRORTYPE DeInitEncoder(
 
     // Destruct the component
     EbDeinitHandle(callbackDataPtr->svtEncoderHandle);
-
-    return return_error;
-}
-
-/***********************************
- * Start the Encoder Component
- ***********************************/
-EB_ERRORTYPE StartEncoder(
-    EbAppContext_t  *callbackDataPtr)
-{
-    EB_ERRORTYPE return_error = EB_ErrorNone;
-
-    return_error = EbStartEncoder(
-        callbackDataPtr->svtEncoderHandle, 0);
-
-    return return_error;
-}
-
-/***********************************
- * Stop the Encoder Component
- ***********************************/
-EB_ERRORTYPE StopEncoder(
-    EbAppContext_t  *callbackDataPtr)
-{
-    EB_ERRORTYPE return_error = EB_ErrorNone;
-
-    return_error = EbStopEncoder(callbackDataPtr->svtEncoderHandle, 0);
 
     return return_error;
 }

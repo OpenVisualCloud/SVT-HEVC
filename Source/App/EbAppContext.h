@@ -45,8 +45,6 @@ typedef struct EbAppContext_s {
  ********************************/
 extern void EbAppContextCtor(EbAppContext_t *contextPtr);
 extern EB_ERRORTYPE InitEncoder(EbConfig_t *config, EbAppContext_t *callbackData, EB_U32 instanceIdx);
-extern EB_ERRORTYPE DeInitEncoder(EbAppContext_t *callbackDataPtr, EB_U32 instanceIndex, EB_ERRORTYPE   libExitError);
-extern EB_ERRORTYPE StartEncoder(EbAppContext_t *callbackDataPtr);
-extern EB_ERRORTYPE StopEncoder(EbAppContext_t *callbackDataPtr);
+extern EB_ERRORTYPE DeInitEncoder(EbAppContext_t *callbackDataPtr, EB_U32 instanceIndex);
 
 #endif // EbAppContext_h

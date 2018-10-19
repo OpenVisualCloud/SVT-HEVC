@@ -581,9 +581,6 @@ void* PictureManagerKernel(void *inputPtr)
                         
                     // Increment the currentInputPoc is the case of POC rollover    
                     currentInputPoc = encodeContextPtr->currentInputPoc;
-                    //currentInputPoc += ((currentInputPoc < refPoc) && (inputEntryPtr->list0Ptr->referenceList[refIdx] > 0)) ?
-                    //    (1 << entrySequenceControlSetPtr->bitsForPictureOrderCount) :
-                    //    0;  
                                                 
                     availabilityFlag =
                         (availabilityFlag == EB_FALSE)          ? EB_FALSE  :   // Don't update if already False 
