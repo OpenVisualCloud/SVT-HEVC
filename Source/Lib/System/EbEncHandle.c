@@ -1545,11 +1545,13 @@ void LoadDefaultBufferConfigurationSettings(
     SequenceControlSet_t       *sequenceControlSetPtr
 )
 {
-    EB_U32 meSegH = (((sequenceControlSetPtr->maxInputLumaHeight + 32) / MAX_LCU_SIZE) < 6) ? 1 : 6;
-    EB_U32 meSegW = (((sequenceControlSetPtr->maxInputLumaWidth + 32) / MAX_LCU_SIZE) < 10) ? 1 : 10;
+
 
     EB_U32 encDecSegH = ((sequenceControlSetPtr->maxInputLumaHeight + 32) / MAX_LCU_SIZE);
     EB_U32 encDecSegW = ((sequenceControlSetPtr->maxInputLumaWidth + 32) / MAX_LCU_SIZE);
+
+    EB_U32 meSegH     = encDecSegH ;
+    EB_U32 meSegW     = encDecSegW ;
 
     EB_U32 inputPic = SetParentPcs(&sequenceControlSetPtr->staticConfig);
 
@@ -1616,7 +1618,7 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->encDecProcessInitCount                       = MAX(40, coreCount);
     sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->entropyCodingProcessInitCount                = MAX(3, coreCount / 12);
 
-    sequenceControlSetPtr->totalProcessInitCount += 6;
+    sequenceControlSetPtr->totalProcessInitCount += 6; // single processes count
     printf("Number of cores available: %u\nNumber of PPCS %u\n", coreCount >> 1 , inputPic);
 
     return;
@@ -1816,35 +1818,10 @@ EB_U32 ComputeDefaultLookAhead(
     return lad;
 }
 
+void SetParamBasedOnInput(
+    SequenceControlSet_t       *sequenceControlSetPtr)
 
-void CopyApiFromApp(
-    SequenceControlSet_t       *sequenceControlSetPtr,
-    EB_H265_ENC_CONFIGURATION* pComponentParameterStructure
-) {
-
-    EB_U32                  hmeRegionIndex = 0;
-
-    sequenceControlSetPtr->staticConfig.sourceWidth  = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceWidth;
-    sequenceControlSetPtr->staticConfig.sourceHeight = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceHeight;
-    sequenceControlSetPtr->maxInputLumaWidth  = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceWidth;
-    sequenceControlSetPtr->maxInputLumaHeight = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceHeight;
-    if (((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->inputPictureStride)
-        sequenceControlSetPtr->staticConfig.inputPictureStride = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->inputPictureStride;
-    else
-        sequenceControlSetPtr->staticConfig.inputPictureStride = sequenceControlSetPtr->maxInputLumaWidth;
-
-
-    sequenceControlSetPtr->chromaWidth = sequenceControlSetPtr->maxInputLumaWidth >> 1;
-    sequenceControlSetPtr->chromaHeight = sequenceControlSetPtr->maxInputLumaHeight >> 1;
-
-    // Configure the padding
-    sequenceControlSetPtr->leftPadding = MAX_LCU_SIZE + 4;
-    sequenceControlSetPtr->topPadding = MAX_LCU_SIZE + 4;
-    sequenceControlSetPtr->rightPadding = ((sequenceControlSetPtr->maxInputLumaWidth    & (MIN_CU_SIZE - 1)) ? MIN_CU_SIZE - (sequenceControlSetPtr->maxInputLumaWidth & (MIN_CU_SIZE - 1)) : 0) + MAX_LCU_SIZE + 4;
-    sequenceControlSetPtr->botPadding = ((sequenceControlSetPtr->maxInputLumaHeight   & (MIN_CU_SIZE - 1)) ? (MIN_CU_SIZE - (sequenceControlSetPtr->maxInputLumaHeight & (MIN_CU_SIZE - 1))) : 0) + MAX_LCU_SIZE + 4;
-
-    // Interlaced Video
-    sequenceControlSetPtr->staticConfig.interlacedVideo = sequenceControlSetPtr->interlacedVideo = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->interlacedVideo;
+{
     if (sequenceControlSetPtr->interlacedVideo == EB_FALSE) {
 
         sequenceControlSetPtr->generalFrameOnlyConstraintFlag = 0;
@@ -1872,7 +1849,6 @@ void CopyApiFromApp(
 
         sequenceControlSetPtr->maxInputPadRight = 0;
     }
-
     if (sequenceControlSetPtr->maxInputLumaHeight % MIN_CU_SIZE) {
 
         sequenceControlSetPtr->maxInputPadBottom = MIN_CU_SIZE - (sequenceControlSetPtr->maxInputLumaHeight % MIN_CU_SIZE);
@@ -1882,6 +1858,37 @@ void CopyApiFromApp(
     else {
         sequenceControlSetPtr->maxInputPadBottom = 0;
     }
+
+    // Configure the padding
+    sequenceControlSetPtr->leftPadding = MAX_LCU_SIZE + 4;
+    sequenceControlSetPtr->topPadding = MAX_LCU_SIZE + 4;
+    sequenceControlSetPtr->rightPadding = ((sequenceControlSetPtr->maxInputLumaWidth    & (MIN_CU_SIZE - 1)) ? MIN_CU_SIZE - (sequenceControlSetPtr->maxInputLumaWidth & (MIN_CU_SIZE - 1)) : 0) + MAX_LCU_SIZE + 4;
+    sequenceControlSetPtr->botPadding = ((sequenceControlSetPtr->maxInputLumaHeight   & (MIN_CU_SIZE - 1)) ? (MIN_CU_SIZE - (sequenceControlSetPtr->maxInputLumaHeight & (MIN_CU_SIZE - 1))) : 0) + MAX_LCU_SIZE + 4;
+    sequenceControlSetPtr->chromaWidth = sequenceControlSetPtr->maxInputLumaWidth >> 1;
+    sequenceControlSetPtr->chromaHeight = sequenceControlSetPtr->maxInputLumaHeight >> 1;
+
+
+}
+
+void CopyApiFromApp(
+    SequenceControlSet_t       *sequenceControlSetPtr,
+    EB_H265_ENC_CONFIGURATION* pComponentParameterStructure
+) {
+
+    EB_U32                  hmeRegionIndex = 0;
+
+    sequenceControlSetPtr->staticConfig.sourceWidth  = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceWidth;
+    sequenceControlSetPtr->staticConfig.sourceHeight = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceHeight;
+    sequenceControlSetPtr->maxInputLumaWidth  = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceWidth;
+    sequenceControlSetPtr->maxInputLumaHeight = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceHeight;
+    if (((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->inputPictureStride)
+        sequenceControlSetPtr->staticConfig.inputPictureStride = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->inputPictureStride;
+    else
+        sequenceControlSetPtr->staticConfig.inputPictureStride = sequenceControlSetPtr->maxInputLumaWidth;
+
+
+    // Interlaced Video
+    sequenceControlSetPtr->staticConfig.interlacedVideo = sequenceControlSetPtr->interlacedVideo = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->interlacedVideo;
 
     // Coding Structure
     sequenceControlSetPtr->staticConfig.intraPeriodLength = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->intraPeriodLength;
@@ -2721,6 +2728,9 @@ EB_API EB_ERRORTYPE EbH265EncSetParameter(
     if (return_error == EB_ErrorBadParameter) {
         return EB_ErrorBadParameter;
     }
+
+    SetParamBasedOnInput(
+        pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr);
 
     // Initialize the Prediction Structure Group
     return_error = (EB_ERRORTYPE)PredictionStructureGroupCtor(

@@ -930,10 +930,11 @@ void* InitialRateControlKernel(void *inputPtr)
 		segmentIndex = inputResultsPtr->segmentIndex;
 
 		// Set the segment mask
-		SEGMENT_COMPLETION_MASK_SET(pictureControlSetPtr->meSegmentsCompletionMask, segmentIndex);
-
+		//SEGMENT_COMPLETION_MASK_SET(pictureControlSetPtr->meSegmentsCompletionMask, segmentIndex);
+        pictureControlSetPtr->meSegmentsCompletionMask++;
 		// If the picture is complete, proceed
-		if (SEGMENT_COMPLETION_MASK_TEST(pictureControlSetPtr->meSegmentsCompletionMask, pictureControlSetPtr->meSegmentsTotalCount)) {
+		//if (SEGMENT_COMPLETION_MASK_TEST(pictureControlSetPtr->meSegmentsCompletionMask, pictureControlSetPtr->meSegmentsTotalCount)) {
+        if (pictureControlSetPtr->meSegmentsCompletionMask == pictureControlSetPtr->meSegmentsTotalCount) {
 			sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 			encodeContextPtr = (EncodeContext_t*)sequenceControlSetPtr->encodeContextPtr;
 
