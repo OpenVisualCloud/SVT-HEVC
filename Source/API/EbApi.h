@@ -84,6 +84,8 @@ typedef struct EB_BUFFERHEADERTYPE
     unsigned int nTickCount;
     signed long long nTimeStamp;
     unsigned int nFlags;
+    unsigned int qpValue;
+    unsigned int sliceType;
 } EB_BUFFERHEADERTYPE;
 
 typedef struct EB_COMPONENTTYPE

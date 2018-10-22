@@ -3008,6 +3008,7 @@ void CopyInputBuffer(
     dst->nTickCount = src->nTickCount;
     dst->nTimeStamp = src->nTimeStamp;
     dst->nSize      = src->nSize;
+    dst->qpValue    = src->qpValue;
 
     // Copy the picture buffer
     if(src->pBuffer != NULL)
@@ -3017,20 +3018,6 @@ void CopyInputBuffer(
         CopyFrameBuffer(sequenceControlSet, dst->pBuffer, src->pBuffer);
 #endif
     
-    // copy the additional parameters if needed
-    if (src->pAppPrivate != NULL) {
-        EbLinkedListNode* dst_node = ((EbLinkedListNode*)dst->pAppPrivate);
-        EbLinkedListNode* src_node = ((EbLinkedListNode*)src->pAppPrivate);
-
-        dst_node->type = src_node->type;
-        dst_node->size = src_node->size;
-        dst_node->passthrough = src_node->passthrough;
-        dst_node->next = src_node->next;
-        dst_node->releaseCbFncPtr = src_node->releaseCbFncPtr;
-
-        EB_MEMCPY(dst_node->data, src_node->data, src_node->size);
-    }
-
 }
 
 /**********************************

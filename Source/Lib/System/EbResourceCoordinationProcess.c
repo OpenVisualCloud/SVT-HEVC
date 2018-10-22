@@ -12,6 +12,7 @@
 #include "EbSequenceControlSet.h"
 #include "EbPictureBufferDesc.h"
 #include "EbDefinitions.h"
+#include "EbErrorCodes.h"
 
 #include "EbResourceCoordinationProcess.h"
 
@@ -668,21 +669,14 @@ void* ResourceCoordinationKernel(void *inputPtr)
         }
 	    pictureControlSetPtr->fullLcuCount                    = 0;
 
-        if (ebInputPtr->pAppPrivate != EB_NULL && ((EbLinkedListNode*)ebInputPtr->pAppPrivate)->type != EB_FALSE){
-            EbLinkedListNode    *nodePtr = (EbLinkedListNode*)ebInputPtr->pAppPrivate;
-            if (nodePtr->type == EB_CONFIG_ON_FLY_PIC_QP) {
-                pictureControlSetPtr->pictureQp = (EB_U8)*((EB_U32*)nodePtr->data);
-                if (pictureControlSetPtr->pictureQp == 0) {
-                    pictureControlSetPtr->qpOnTheFly = EB_FALSE;
-                    pictureControlSetPtr->pictureQp = (EB_U8)sequenceControlSetPtr->qp;                    
-                }
-                else {
-                    pictureControlSetPtr->qpOnTheFly = EB_TRUE;                    
-                }
-            }
+        if (sequenceControlSetPtr->staticConfig.useQpFile == 1){
+            pictureControlSetPtr->qpOnTheFly = EB_TRUE;
+            if (ebInputPtr->qpValue < 0 || ebInputPtr->qpValue > 51)
+                CHECK_REPORT_ERROR_NC(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->appCallbackPtr, EB_ENC_RES_COORD_InvalidQP);
+            pictureControlSetPtr->pictureQp = (EB_U8)ebInputPtr->qpValue;
         }
         else {
-            // Quantization
+            pictureControlSetPtr->qpOnTheFly = EB_FALSE;
             pictureControlSetPtr->pictureQp = (EB_U8)sequenceControlSetPtr->qp;
         }
 

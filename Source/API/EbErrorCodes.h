@@ -223,6 +223,8 @@ typedef enum ENCODER_ERROR_CODES
     EB_ENC_RES_COORD_SubPictureFlagNotActive    = 0x2104,
     EB_ENC_RES_COORD_InputPictureNotEnoughRightPadding = 0x2105,
     EB_ENC_RES_COORD_InputPictureNotEnoughBottomPadding = 0x2106,
+    EB_ENC_RES_COORD_InvalidQP = 0x2108,
+    EB_ENC_RES_COORD_InvalidSliceType = 0x2109,
 
     //EB_ENC_PD_ERRORS                  = 0x2100,
     EB_ENC_PD_ERROR1                    = 0x2100,

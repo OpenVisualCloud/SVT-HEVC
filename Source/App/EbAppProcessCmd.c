@@ -582,6 +582,15 @@ void LogErrorOutput(
     case EB_ENC_RESS_COOR_ERRORS1:
         fprintf(errorLogFile, "Error: ResourceCoordinationProcess: The received input data should be equal to the buffer size - only complete frame transfer is supported\n");
         break;
+
+    case EB_ENC_RES_COORD_InvalidQP:
+        fprintf(errorLogFile, "Error: ResourceCoordinationProcess: The QP value in the QP file is invalid\n");
+        break;
+
+    case EB_ENC_RES_COORD_InvalidSliceType:
+        fprintf(errorLogFile, "Error: ResourceCoordinationProcess: Slice Type Invalid\n");
+        break;
+
         // picture decision Errors
     case EB_ENC_PD_ERROR8:
         fprintf(errorLogFile, "Error: PictureDecisionProcess: Picture Decision Reorder Queue overflow\n");
@@ -1108,26 +1117,9 @@ void SendQpOnTheFly(
     EB_BUFFERHEADERTYPE        *headerPtr)
 {
     {
-
-        EbLinkedListNode *nodePtr = (EbLinkedListNode*)headerPtr->pAppPrivate;
-        EbLinkedListNode *picQp;
-        EB_U32          *qpPtr;
+        EB_U32           qpPtr;
         EB_S32           tmpQp = 0;
-        EB_ERRORTYPE     returnError = EB_ErrorNone;
 
-        EB_APP_MALLOC_NR(EbLinkedListNode*, picQp, sizeof(EbLinkedListNode), EB_N_PTR, returnError);
-
-        if (returnError != EB_ErrorNone || !picQp) {
-            printf("Malloc has failed due to insuffucient resources");
-            return;
-        }
-
-        EB_APP_MALLOC_NR(EB_U32*, qpPtr, sizeof(EB_U32), EB_N_PTR, returnError);
-
-        if (returnError != EB_ErrorNone || !qpPtr) {
-            printf("Malloc has failed due to insuffucient resources");
-            return;
-        }
         do {
             // get next qp
             tmpQp = GetNextQpFromQpFile(config);
@@ -1152,22 +1144,9 @@ void SendQpOnTheFly(
             printf("\nWarning: QP File did not contain any valid QPs");
         }
 
-        *qpPtr = CLIP3(0, 51, tmpQp);
+        qpPtr = CLIP3(0, 51, tmpQp);
 
-        // Append the regularINodePtr and terminate the linked-list
-        if (nodePtr) {
-            nodePtr->next = picQp;
-        }
-        else {
-            nodePtr = picQp;
-            headerPtr->pAppPrivate = nodePtr;
-        }
-        picQp->next = NULL;
-        picQp->type = EB_CONFIG_ON_FLY_PIC_QP;
-        picQp->data = qpPtr;
-        picQp->passthrough = EB_FALSE;
-        picQp->size = sizeof(EB_U32);
-        picQp->releaseCbFncPtr = NULL;
+        headerPtr->qpValue = qpPtr;
     }
     return;
 }
