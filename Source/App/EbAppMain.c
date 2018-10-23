@@ -29,6 +29,11 @@
 #include <time.h>
 #include <errno.h>
 #endif
+
+#ifdef _MSC_VER
+#include <io.h>     /* _setmode() */
+#include <fcntl.h>  /* _O_BINARY */
+#endif
 /***************************************
  * External Functions
  ***************************************/
@@ -68,6 +73,10 @@ void AssignAppThreadGroup(EB_U8 targetSocket) {
  ***************************************/
 int main(int argc, char* argv[])
 {
+#ifdef _MSC_VER
+    _setmode(_fileno(stdin), _O_BINARY);
+    _setmode(_fileno(stdout), _O_BINARY);
+#endif
     // GLOBAL VARIABLES
     EB_ERRORTYPE            return_error = EB_ErrorNone;            // Error Handling
     APPEXITCONDITIONTYPE    exitCondition = APP_ExitConditionNone;    // Processing loop exit condition
