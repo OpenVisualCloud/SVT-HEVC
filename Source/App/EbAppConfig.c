@@ -1353,6 +1353,7 @@ EB_ERRORTYPE ReadCommandLine(
             printf(" %s ", cmd_copy[cmd_copy_index]);
         }
         printf("\n\n");
+        return_error = EB_ErrorBadParameter;
     }
 
     if (return_error == EB_ErrorNone){
