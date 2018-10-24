@@ -1197,6 +1197,7 @@ EB_ERRORTYPE ReadCommandLine(
             printf(" %s ", cmd_copy[cmd_copy_index]);
         }
         printf("\n\n");
+        return_error = EB_ErrorBadParameter;
     }
 
     for (index = 0; index < MAX_CHANNEL_NUMBER; ++index){
