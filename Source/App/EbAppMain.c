@@ -131,6 +131,8 @@ int main(int argc, char* argv[])
         // Initialize config
         for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
             configs[instanceCount] = (EbConfig_t*)malloc(sizeof(EbConfig_t));
+            if (!configs[instanceCount])
+                return EB_ErrorInsufficientResources;
             EbConfigCtor(configs[instanceCount]);
             return_errors[instanceCount] = EB_ErrorNone;
         }
@@ -138,6 +140,8 @@ int main(int argc, char* argv[])
         // Initialize appCallback
         for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
             appCallbacks[instanceCount] = (EbAppContext_t*)malloc(sizeof(EbAppContext_t));
+            if (!appCallbacks[instanceCount])
+                return EB_ErrorInsufficientResources;
             EbAppContextCtor(appCallbacks[instanceCount]);
         }
 
@@ -305,12 +309,15 @@ int main(int argc, char* argv[])
         }
         else {
             printf("Error in configuration, could not begin encoding! ... \n");
+            printf("Run %s -help for a list of options\n", argv[0]);
         }
         // Destruct the App memory variables
         for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
             EbConfigDtor(configs[instanceCount]);
-            free(configs[instanceCount]);
-            free(appCallbacks[instanceCount]);
+            if (configs[instanceCount])
+                free(configs[instanceCount]);
+            if (appCallbacks[instanceCount])
+                free(appCallbacks[instanceCount]);
         }
 
         printf("Encoder finished\n");
