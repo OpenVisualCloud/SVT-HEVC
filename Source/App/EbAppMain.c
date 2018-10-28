@@ -305,6 +305,7 @@ int main(int argc, char* argv[])
         }
         else {
             printf("Error in configuration, could not begin encoding! ... \n");
+            printf("Run %s -help for a list of options\n", argv[0]);
         }
         // Destruct the App memory variables
         for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
