@@ -143,6 +143,10 @@ typedef struct EB_H265_ENC_INPUT
     unsigned char *cbExt;
     unsigned char *crExt;
 
+    unsigned int   yStride;
+    unsigned int   crStride;
+    unsigned int   cbStride;
+
     // Local Contexts
     InputBitstreamContext_t             inputContext;
 } EB_H265_ENC_INPUT;
@@ -168,9 +172,6 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
     unsigned int              hierarchicalLevels;
 
-
-    // Input Stride
-    unsigned int             inputPictureStride; // Includes padding
 
     unsigned int             sourceWidth;
     unsigned int             sourceHeight;

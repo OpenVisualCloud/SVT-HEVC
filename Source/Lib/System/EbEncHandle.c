@@ -1545,13 +1545,11 @@ void LoadDefaultBufferConfigurationSettings(
     SequenceControlSet_t       *sequenceControlSetPtr
 )
 {
-
-
     EB_U32 encDecSegH = ((sequenceControlSetPtr->maxInputLumaHeight + 32) / MAX_LCU_SIZE);
     EB_U32 encDecSegW = ((sequenceControlSetPtr->maxInputLumaWidth + 32) / MAX_LCU_SIZE);
 
-    EB_U32 meSegH     = encDecSegH ;
-    EB_U32 meSegW     = encDecSegW ;
+    EB_U32 meSegH = (((sequenceControlSetPtr->maxInputLumaHeight + 32) / MAX_LCU_SIZE) < 6) ? 1 : 6;
+    EB_U32 meSegW = (((sequenceControlSetPtr->maxInputLumaWidth + 32) / MAX_LCU_SIZE) < 10) ? 1 : 10;
 
     EB_U32 inputPic = SetParentPcs(&sequenceControlSetPtr->staticConfig);
 
@@ -1881,11 +1879,6 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.sourceHeight = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceHeight;
     sequenceControlSetPtr->maxInputLumaWidth  = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceWidth;
     sequenceControlSetPtr->maxInputLumaHeight = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceHeight;
-    if (((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->inputPictureStride)
-        sequenceControlSetPtr->staticConfig.inputPictureStride = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->inputPictureStride;
-    else
-        sequenceControlSetPtr->staticConfig.inputPictureStride = sequenceControlSetPtr->maxInputLumaWidth;
-
 
     // Interlaced Video
     sequenceControlSetPtr->staticConfig.interlacedVideo = sequenceControlSetPtr->interlacedVideo = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->interlacedVideo;
@@ -2614,7 +2607,6 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->compressedTenBitFormat = 0;
     configPtr->sourceWidth = 0;
     configPtr->sourceHeight = 0;
-    configPtr->inputPictureStride = 0;
     configPtr->framesToBeEncoded = 0;
 
 
@@ -2843,9 +2835,6 @@ EB_ERRORTYPE CopyFrameBuffer(
     EB_U16                           inputRowIndex;
     EB_BOOL                          is16BitInput = (EB_BOOL)(config->encoderBitDepth > EB_8BIT);
 
-
-
-
     // Need to include for Interlacing on the fly with pictureScanType = 1
 
     if (!is16BitInput) {
@@ -2858,8 +2847,9 @@ EB_ERRORTYPE CopyFrameBuffer(
         EB_U16                           chromaWidth = (lumaWidth >> 1) << is16BitInput;
         EB_U16                           lumaHeight = (EB_U16)(inputPicturePtr->height - sequenceControlSetPtr->maxInputPadBottom);
 
-        EB_U16                           sourceLumaStride = (EB_U16)(sequenceControlSetPtr->staticConfig.inputPictureStride);
-        EB_U16                           sourceChromaStride = (sourceLumaStride >> 1);
+        EB_U16                           sourceLumaStride = (EB_U16)(inputPtr->yStride);
+        EB_U16                           sourceCrStride   = (EB_U16)(inputPtr->crStride);
+        EB_U16                           sourceCbStride   = (EB_U16)(inputPtr->cbStride);
 
         //EB_U16                           lumaHeight  = inputPicturePtr->maxHeight;
         // Y
@@ -2873,14 +2863,14 @@ EB_ERRORTYPE CopyFrameBuffer(
         // U
         for (inputRowIndex = 0; inputRowIndex < lumaHeight >> 1; inputRowIndex++) {
             EB_MEMCPY((inputPicturePtr->bufferCb + chromaBufferOffset + chromaStride * inputRowIndex),
-                (inputPtr->cb + (sourceChromaStride*inputRowIndex)),
+                (inputPtr->cb + (sourceCbStride*inputRowIndex)),
                 chromaWidth);
         }
 
         // V
         for (inputRowIndex = 0; inputRowIndex < lumaHeight >> 1; inputRowIndex++) {
             EB_MEMCPY((inputPicturePtr->bufferCr + chromaBufferOffset + chromaStride * inputRowIndex),
-                (inputPtr->cr + (sourceChromaStride*inputRowIndex)),
+                (inputPtr->cr + (sourceCrStride*inputRowIndex)),
                 chromaWidth);
         }
 
@@ -2896,8 +2886,9 @@ EB_ERRORTYPE CopyFrameBuffer(
             EB_U16  chromaWidth = (lumaWidth >> 1);
             EB_U16  lumaHeight = (EB_U16)(inputPicturePtr->height - sequenceControlSetPtr->maxInputPadBottom);
 
-            EB_U16 sourceLumaStride = (EB_U16)(sequenceControlSetPtr->staticConfig.inputPictureStride);
-            EB_U16 sourceChromaStride = (sourceLumaStride >> 1);
+            EB_U16 sourceLumaStride = (EB_U16)(inputPtr->yStride);
+            EB_U16 sourceCrStride   = (EB_U16)(inputPtr->crStride);
+            EB_U16 sourceCbStride   = (EB_U16)(inputPtr->cbStride);
 
             // Y 8bit
             for (inputRowIndex = 0; inputRowIndex < lumaHeight; inputRowIndex++) {
@@ -2912,7 +2903,7 @@ EB_ERRORTYPE CopyFrameBuffer(
             for (inputRowIndex = 0; inputRowIndex < lumaHeight >> 1; inputRowIndex++) {
 
                 EB_MEMCPY((inputPicturePtr->bufferCb + chromaBufferOffset + chromaStride * inputRowIndex),
-                    (inputPtr->cb + (sourceChromaStride*inputRowIndex)),
+                    (inputPtr->cb + (sourceCbStride*inputRowIndex)),
                     chromaWidth);
 
             }
@@ -2921,7 +2912,7 @@ EB_ERRORTYPE CopyFrameBuffer(
             for (inputRowIndex = 0; inputRowIndex < lumaHeight >> 1; inputRowIndex++) {
 
                 EB_MEMCPY((inputPicturePtr->bufferCr + chromaBufferOffset + chromaStride * inputRowIndex),
-                    (inputPtr->cr + (sourceChromaStride*inputRowIndex)),
+                    (inputPtr->cr + (sourceCrStride*inputRowIndex)),
                     chromaWidth);
 
             }
@@ -2958,8 +2949,9 @@ EB_ERRORTYPE CopyFrameBuffer(
         EB_U16 chromaWidth = (lumaWidth >> 1);
         EB_U16 lumaHeight = (EB_U16)(inputPicturePtr->height - sequenceControlSetPtr->maxInputPadBottom);
 
-        EB_U16 sourceLumaStride = (EB_U16)(sequenceControlSetPtr->staticConfig.inputPictureStride);
-        EB_U16 sourceChromaStride = (sourceLumaStride >> 1);
+        EB_U16 sourceLumaStride = (EB_U16)(inputPtr->yStride);
+        EB_U16 sourceCrStride = (EB_U16)(inputPtr->crStride);
+        EB_U16 sourceCbStride = (EB_U16)(inputPtr->cbStride);
 
         UnPack2D(
             (EB_U16*)(inputPtr->luma + lumaOffset),
@@ -2973,7 +2965,7 @@ EB_ERRORTYPE CopyFrameBuffer(
 
         UnPack2D(
             (EB_U16*)(inputPtr->cb + chromaOffset),
-            sourceChromaStride,
+            sourceCbStride,
             inputPicturePtr->bufferCb + chromaBufferOffset,
             inputPicturePtr->strideCb,
             inputPicturePtr->bufferBitIncCb + chromaBufferOffset,
@@ -2983,7 +2975,7 @@ EB_ERRORTYPE CopyFrameBuffer(
 
         UnPack2D(
             (EB_U16*)(inputPtr->cr + chromaOffset),
-            sourceChromaStride,
+            sourceCrStride,
             inputPicturePtr->bufferCr + chromaBufferOffset,
             inputPicturePtr->strideCr,
             inputPicturePtr->bufferBitIncCr + chromaBufferOffset,

@@ -178,7 +178,6 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->outputStreamPortActive = APP_PortActive;
     callbackData->ebEncParameters.sourceWidth = config->sourceWidth;
     callbackData->ebEncParameters.sourceHeight = config->sourceHeight;
-    callbackData->ebEncParameters.inputPictureStride = config->inputPaddedWidth;
     callbackData->ebEncParameters.interlacedVideo = (EB_BOOL)config->interlacedVideo;
     callbackData->ebEncParameters.intraPeriodLength = config->intraPeriod;
     callbackData->ebEncParameters.intraRefreshType = config->intraRefreshType;
@@ -255,8 +254,8 @@ EB_ERRORTYPE CopyConfigurationParameters(
 
 
 EB_ERRORTYPE AllocateFrameBuffer(
-    EbConfig_t				*config,
-    EB_U8      			*pBuffer)
+    EbConfig_t          *config,
+    EB_U8               *pBuffer)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
 
@@ -276,7 +275,9 @@ EB_ERRORTYPE AllocateFrameBuffer(
 
     // Determine  
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)pBuffer;
-
+    inputPtr->yStride = config->inputPaddedWidth;
+    inputPtr->crStride = config->inputPaddedWidth >> 1;
+    inputPtr->cbStride = config->inputPaddedWidth >> 1;
     if (luma8bitSize) {
         EB_APP_MALLOC(unsigned char*, inputPtr->luma, luma8bitSize, EB_N_PTR, EB_ErrorInsufficientResources);
     }

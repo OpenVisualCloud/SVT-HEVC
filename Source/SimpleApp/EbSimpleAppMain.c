@@ -118,12 +118,14 @@ void ReadInputFrames(
 {
 
     unsigned long long  readSize;
-    signed long long  inputPaddedWidth = config->inputPaddedWidth;
-    signed long long  inputPaddedHeight = config->inputPaddedHeight;
+    unsigned int  inputPaddedWidth = config->inputPaddedWidth;
+    unsigned int  inputPaddedHeight = config->inputPaddedHeight;
     FILE   *inputFile = config->inputFile;
     unsigned char  *ebInputPtr;
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
-
+    inputPtr->yStride  = inputPaddedWidth;
+    inputPtr->cbStride = inputPaddedWidth >> 1;
+    inputPtr->crStride = inputPaddedWidth >> 1;
     {
         if (is16bit == 0 || (is16bit == 1 && config->compressedTenBitFormat == 0)) {
 
@@ -211,6 +213,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
             config,
             is16bit,
             headerPtr);
+
         if (config->stopEncoder == 0) {
             // Fill in Buffers Header control data
             headerPtr->nOffset = 0;

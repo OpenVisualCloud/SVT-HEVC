@@ -622,7 +622,7 @@ void ProcessInputFieldStandardMode(
     unsigned char             is16bit) {
 
 
-    EB_S64  inputPaddedWidth = config->inputPaddedWidth;
+    EB_S64  inputPaddedWidth  = config->inputPaddedWidth;
     EB_S64  inputPaddedHeight = config->inputPaddedHeight;
 
     EB_U64  sourceLumaRowSize = (EB_U64)(inputPaddedWidth << is16bit);
@@ -759,14 +759,16 @@ void ReadInputFrames(
 {
 
     EB_U64  readSize;
-    EB_S64  inputPaddedWidth = config->inputPaddedWidth;
-    EB_S64  inputPaddedHeight = config->inputPaddedHeight;
+    EB_U32  inputPaddedWidth = config->inputPaddedWidth;
+    EB_U32  inputPaddedHeight = config->inputPaddedHeight;
     FILE   *inputFile = config->inputFile;
     EB_U8  *ebInputPtr;
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
 
     EB_U64 frameSize = (EB_U64)((inputPaddedWidth*inputPaddedHeight * 3) / 2 + (inputPaddedWidth / 4 * inputPaddedHeight * 3) / 2);
-
+    inputPtr->yStride  = inputPaddedWidth;
+    inputPtr->crStride = inputPaddedWidth >> 1;
+    inputPtr->cbStride = inputPaddedWidth >> 1;
 
     if (config->bufferedInput == -1) {
 
@@ -819,8 +821,8 @@ void ReadInputFrames(
                 ebInputPtr = inputPtr->cr;
                 headerPtr->nFilledLen += (EB_U32)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
                 inputPtr->luma = inputPtr->luma + ((config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING) << is16bit);
-                inputPtr->cb = inputPtr->cb + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)) << is16bit);
-                inputPtr->cr = inputPtr->cr + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)) << is16bit);
+                inputPtr->cb   = inputPtr->cb + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)) << is16bit);
+                inputPtr->cr   = inputPtr->cr + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)) << is16bit);
 
 
                 if (readSize != headerPtr->nFilledLen) {
@@ -1040,6 +1042,9 @@ void ReadInputFrames(
             const size_t chroma2bitSize = luma2bitSize >> 2;
 
             EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
+            inputPtr->yStride = config->inputPaddedWidth;
+            inputPtr->crStride = config->inputPaddedWidth >> 1;
+            inputPtr->cbStride = config->inputPaddedWidth >> 1;
 
             inputPtr->luma = config->sequenceBuffer[contextPtr->processedFrameCount % config->bufferedInput];
             inputPtr->cb = config->sequenceBuffer[contextPtr->processedFrameCount % config->bufferedInput] + luma8bitSize;
@@ -1078,6 +1083,10 @@ void ReadInputFrames(
             const size_t chroma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? chroma8bitSize : 0;
 
             EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
+
+            inputPtr->yStride = config->inputPaddedWidth;
+            inputPtr->crStride = config->inputPaddedWidth >> 1;
+            inputPtr->cbStride = config->inputPaddedWidth >> 1;
 
             inputPtr->luma = config->sequenceBuffer[contextPtr->processedFrameCount % config->bufferedInput];
             inputPtr->cb = config->sequenceBuffer[contextPtr->processedFrameCount % config->bufferedInput] + luma8bitSize;
