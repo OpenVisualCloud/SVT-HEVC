@@ -116,7 +116,7 @@
  **********************************/
 static void SetCfgInputFile                     (const char *value, EbConfig_t *cfg) 
 {
-    if (cfg->inputFile){ if (cfg->inputFile == stdin) cfg->inputFile = (FILE*)NULL; else fclose(cfg->inputFile); }cfg->inputFile = fopen(value, "rb");
+    if (cfg->inputFile && cfg->inputFile != stdin) fclose(cfg->inputFile); if (!strcmp(value, "stdin")) cfg->inputFile = stdin; else cfg->inputFile = fopen(value, "rb");
 };
 static void SetCfgStreamFile                    (const char *value, EbConfig_t *cfg) 
 {
@@ -495,7 +495,7 @@ void EbConfigDtor(EbConfig_t *configPtr)
     }
 
     if (configPtr->inputFile) {
-        fclose(configPtr->inputFile);
+        if (configPtr->inputFile != stdin) fclose(configPtr->inputFile);
         configPtr->inputFile = (FILE *) NULL;
     }
 
@@ -1197,6 +1197,7 @@ EB_ERRORTYPE ReadCommandLine(
             printf(" %s ", cmd_copy[cmd_copy_index]);
         }
         printf("\n\n");
+        return_error = EB_ErrorBadParameter;
     }
 
     for (index = 0; index < MAX_CHANNEL_NUMBER; ++index){

@@ -29,6 +29,11 @@
 #include <time.h>
 #include <errno.h>
 #endif
+
+#ifdef _MSC_VER
+#include <io.h>     /* _setmode() */
+#include <fcntl.h>  /* _O_BINARY */
+#endif
 /***************************************
  * External Functions
  ***************************************/
@@ -68,6 +73,10 @@ void AssignAppThreadGroup(EB_U8 targetSocket) {
  ***************************************/
 int main(int argc, char* argv[])
 {
+#ifdef _MSC_VER
+    _setmode(_fileno(stdin), _O_BINARY);
+    _setmode(_fileno(stdout), _O_BINARY);
+#endif
     // GLOBAL VARIABLES
     EB_ERRORTYPE            return_error = EB_ErrorNone;            // Error Handling
     APPEXITCONDITIONTYPE    exitCondition = APP_ExitConditionNone;    // Processing loop exit condition
@@ -122,6 +131,8 @@ int main(int argc, char* argv[])
         // Initialize config
         for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
             configs[instanceCount] = (EbConfig_t*)malloc(sizeof(EbConfig_t));
+            if (!configs[instanceCount])
+                return EB_ErrorInsufficientResources;
             EbConfigCtor(configs[instanceCount]);
             return_errors[instanceCount] = EB_ErrorNone;
         }
@@ -129,6 +140,8 @@ int main(int argc, char* argv[])
         // Initialize appCallback
         for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
             appCallbacks[instanceCount] = (EbAppContext_t*)malloc(sizeof(EbAppContext_t));
+            if (!appCallbacks[instanceCount])
+                return EB_ErrorInsufficientResources;
             EbAppContextCtor(appCallbacks[instanceCount]);
         }
 
@@ -296,12 +309,15 @@ int main(int argc, char* argv[])
         }
         else {
             printf("Error in configuration, could not begin encoding! ... \n");
+            printf("Run %s -help for a list of options\n", argv[0]);
         }
         // Destruct the App memory variables
         for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
             EbConfigDtor(configs[instanceCount]);
-            free(configs[instanceCount]);
-            free(appCallbacks[instanceCount]);
+            if (configs[instanceCount])
+                free(configs[instanceCount]);
+            if (appCallbacks[instanceCount])
+                free(appCallbacks[instanceCount]);
         }
 
         printf("Encoder finished\n");
