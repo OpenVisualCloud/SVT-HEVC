@@ -1,4 +1,4 @@
-
+﻿
 # Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder)
 
 The Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder) is an HEVC-compliant encoder library core that achieves excellent density-quality tradeoffs, and is highly optimized for Intel® Xeon™ Scalable Processor and Xeon™ D processors.
@@ -105,6 +105,7 @@ In order to run the highest resolution supported by the encoder, at least 64GB o
 	-	On any of the Windows* Operating Systems listed in the OS requirements section, install Visual Studio 2017
 	-	Once the installation is complete, copy the binaries to a location making sure that both the sample application “ebHevcEncApp.exe” and library “ebHevcEncLib.dll” are in the same folder.
 	-	Open the command prompt window at the chosen location and run the sample application to encode.
+	-	Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | ebHevcEncApp.exe -i stdin -n [number_of_frames_to_encode] -w [width] -h [height].
 
 ## Linux* Operating Systems (64-bit):
 
@@ -126,6 +127,7 @@ For the binaries to operate properly on your system, the following conditions ha
 	-	Change the permissions on the sample application “HevcEncoderApp” executable by running the command: 				chmod +x HevcEncoderApp
 	-	cd into your chosen location
 	-	Run the sample application to encode.
+	-	Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | ./HevcEncoderApp -i stdin -n [number_of_frames_to_encode] -w [width] -h [height].
 
 # Demo features and limitations
 
