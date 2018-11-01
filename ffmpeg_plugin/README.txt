@@ -12,6 +12,7 @@
 - cd ffmpeg
 - git reset --hard e10fe34e7c6031baa07fb3bad5c284b2911f501b
 - git apply svt-hevc.patch
+- ./configure --prefix=/usr --libdir=/usr/lib --enable-nonfree --enable-static --disable-shared --enable-libsvt --enable-gpl
 - make -j
 - sudo make install
 
