@@ -371,7 +371,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
             }
         }
 
-		SaoFunctionTableEO_135_45[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 3][(lcuHeight == MAX_LCU_SIZE_REMAINING) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
+        SaoFunctionTableEO_135_45[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 3][(lcuHeight == MAX_LCU_SIZE_REMAINING) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
             reconSamplePtr,
             reconStride,
             temporalBufferLeft,
@@ -437,7 +437,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
             }
         }
 
-		SaoFunctionTableEO_135_45[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 3][(lcuHeight == MAX_LCU_SIZE_REMAINING) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
+        SaoFunctionTableEO_135_45[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 3][(lcuHeight == MAX_LCU_SIZE_REMAINING) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
             reconSamplePtr,
             reconStride,
             temporalBufferLeft,
@@ -571,21 +571,21 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture(
 
                 if (saoParams->saoTypeIndex[0])
                     ApplySaoOffsetsLcu(
-                    pictureControlSetPtr,
-                    contextPtr,
-                    0,
-                    saoParams,
-                    tbOriginX,
-                    tbOriginY,
-                    &(reconPicturePtr->bufferY[reconSampleLumaIndex]),
-                    reconPicturePtr->strideY,
-                    pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->bitDepth,
-                    lcuWidth,
-                    lcuHeight,
-                    sequenceControlSetPtr->lumaWidth,
-                    sequenceControlSetPtr->lumaHeight,
-                    1 - pingpongIdxUp,
-                    1 - pingpongIdxLeft);
+                        pictureControlSetPtr,
+                        contextPtr,
+                        0,
+                        saoParams,
+                        tbOriginX,
+                        tbOriginY,
+                        &(reconPicturePtr->bufferY[reconSampleLumaIndex]),
+                        reconPicturePtr->strideY,
+                        pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->bitDepth,
+                        lcuWidth,
+                        lcuHeight,
+                        sequenceControlSetPtr->lumaWidth,
+                        sequenceControlSetPtr->lumaHeight,
+                        1 - pingpongIdxUp,
+                        1 - pingpongIdxLeft);
 
                 // Toggle pingpong buffer
                 pingpongIdxLeft = 1 - pingpongIdxLeft;
@@ -631,21 +631,21 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture(
 
                 if (saoParams->saoTypeIndex[1])
                     ApplySaoOffsetsLcu(
-                    pictureControlSetPtr,
-                    contextPtr,
-                    1,
-                    saoParams,
-                    tbOriginX,
-                    tbOriginY,
-                    &(reconPicturePtr->bufferCb[reconSampleChromaIndex]),
-                    reconPicturePtr->strideCb,
-                    pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->bitDepth,
-                    lcuWidth,
-                    lcuHeight,
-                    sequenceControlSetPtr->chromaWidth,
-                    sequenceControlSetPtr->chromaHeight,
-                    1 - pingpongIdxUp,
-                    1 - pingpongIdxLeft);
+                        pictureControlSetPtr,
+                        contextPtr,
+                        1,
+                        saoParams,
+                        tbOriginX,
+                        tbOriginY,
+                        &(reconPicturePtr->bufferCb[reconSampleChromaIndex]),
+                        reconPicturePtr->strideCb,
+                        pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->bitDepth,
+                        lcuWidth,
+                        lcuHeight,
+                        sequenceControlSetPtr->chromaWidth,
+                        sequenceControlSetPtr->chromaHeight,
+                        1 - pingpongIdxUp,
+                        1 - pingpongIdxLeft);
 
                 // Toggle pingpong buffer
                 pingpongIdxLeft = 1 - pingpongIdxLeft;
@@ -694,21 +694,21 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture(
 
                 if (saoParams->saoTypeIndex[1])
                     ApplySaoOffsetsLcu(
-                    pictureControlSetPtr,
-                    contextPtr,
-                    2,
-                    saoParams,
-                    tbOriginX,
-                    tbOriginY,
-                    &(reconPicturePtr->bufferCr[reconSampleChromaIndex]),
-                    reconPicturePtr->strideCr,
-                    pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->bitDepth,
-                    lcuWidth,
-                    lcuHeight,
-                    sequenceControlSetPtr->chromaWidth,
-                    sequenceControlSetPtr->chromaHeight,
-                    1 - pingpongIdxUp,
-                    1 - pingpongIdxLeft);
+                        pictureControlSetPtr,
+                        contextPtr,
+                        2,
+                        saoParams,
+                        tbOriginX,
+                        tbOriginY,
+                        &(reconPicturePtr->bufferCr[reconSampleChromaIndex]),
+                        reconPicturePtr->strideCr,
+                        pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->bitDepth,
+                        lcuWidth,
+                        lcuHeight,
+                        sequenceControlSetPtr->chromaWidth,
+                        sequenceControlSetPtr->chromaHeight,
+                        1 - pingpongIdxUp,
+                        1 - pingpongIdxLeft);
 
                 //Toggle pingpong buffer
                 pingpongIdxLeft = 1 - pingpongIdxLeft;
@@ -836,7 +836,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
             }
         }
 
-		SaoFunctionTableEO_0_90_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
+        SaoFunctionTableEO_0_90_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
             reconSamplePtr,
             reconStride,
             temporalBufferUpper,
@@ -892,7 +892,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
             }
         }
 
-		SaoFunctionTableEO_135_45_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 3][((lcuWidth & 15) == 0) && (lcuWidth >= 32) && ((lcuHeight & 7) == 0) && (lcuHeight >= 8)](
+        SaoFunctionTableEO_135_45_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 3][((lcuWidth & 15) == 0) && (lcuWidth >= 32) && ((lcuHeight & 7) == 0) && (lcuHeight >= 8)](
             reconSamplePtr,
             reconStride,
             temporalBufferLeft,
@@ -958,7 +958,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
             }
         }
 
-		SaoFunctionTableEO_135_45_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 3][((lcuWidth & 15) == 0) && (lcuWidth >= 32) && ((lcuHeight & 7) == 0) && (lcuHeight >= 8)](
+        SaoFunctionTableEO_135_45_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 3][((lcuWidth & 15) == 0) && (lcuWidth >= 32) && ((lcuHeight & 7) == 0) && (lcuHeight >= 8)](
             reconSamplePtr,
             reconStride,
             temporalBufferLeft,
@@ -993,7 +993,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
 
     case 5: // BO
 
-		SaoFunctionTableBo_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][((lcuWidth & 15) == 0)](
+        SaoFunctionTableBo_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][((lcuWidth & 15) == 0)](
             reconSamplePtr,
             reconStride,
             saoPtr->saoBandPosition[videoComponent],
@@ -1091,21 +1091,21 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture16bit(
 
                 if (saoParams->saoTypeIndex[0])
                     ApplySaoOffsetsLcu16bit(
-                    pictureControlSetPtr,
-                    contextPtr,
-                    0,
-                    saoParams,
-                    tbOriginX,
-                    tbOriginY,
-                    (EB_U16*)recBuf16bit->bufferY + reconSampleLumaIndex,
-                    recBuf16bit->strideY,
-                    pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->bitDepth,
-                    lcuWidth,
-                    lcuHeight,
-                    sequenceControlSetPtr->lumaWidth,
-                    sequenceControlSetPtr->lumaHeight,
-                    1 - pingpongIdxUp,
-                    1 - pingpongIdxLeft);
+                        pictureControlSetPtr,
+                        contextPtr,
+                        0,
+                        saoParams,
+                        tbOriginX,
+                        tbOriginY,
+                        (EB_U16*)recBuf16bit->bufferY + reconSampleLumaIndex,
+                        recBuf16bit->strideY,
+                        pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->bitDepth,
+                        lcuWidth,
+                        lcuHeight,
+                        sequenceControlSetPtr->lumaWidth,
+                        sequenceControlSetPtr->lumaHeight,
+                        1 - pingpongIdxUp,
+                        1 - pingpongIdxLeft);
 
                 //Toggle pingpong buffer
                 pingpongIdxLeft = 1 - pingpongIdxLeft;
@@ -1156,21 +1156,21 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture16bit(
 
                 if (saoParams->saoTypeIndex[1])
                     ApplySaoOffsetsLcu16bit(
-                    pictureControlSetPtr,
-                    contextPtr,
-                    1,
-                    saoParams,
-                    tbOriginX,
-                    tbOriginY,
-                    (EB_U16*)recBuf16bit->bufferCb + reconSampleChromaIndex,
-                    recBuf16bit->strideCb,
-                    pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->bitDepth,
-                    lcuWidth,
-                    lcuHeight,
-                    sequenceControlSetPtr->chromaWidth,
-                    sequenceControlSetPtr->chromaHeight,
-                    1 - pingpongIdxUp,
-                    1 - pingpongIdxLeft);
+                        pictureControlSetPtr,
+                        contextPtr,
+                        1,
+                        saoParams,
+                        tbOriginX,
+                        tbOriginY,
+                        (EB_U16*)recBuf16bit->bufferCb + reconSampleChromaIndex,
+                        recBuf16bit->strideCb,
+                        pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->bitDepth,
+                        lcuWidth,
+                        lcuHeight,
+                        sequenceControlSetPtr->chromaWidth,
+                        sequenceControlSetPtr->chromaHeight,
+                        1 - pingpongIdxUp,
+                        1 - pingpongIdxLeft);
 
 
                 // Toggle pingpong buffer
@@ -1218,21 +1218,21 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture16bit(
 
                 if (saoParams->saoTypeIndex[1])
                     ApplySaoOffsetsLcu16bit(
-                    pictureControlSetPtr,
-                    contextPtr,
-                    2,
-                    saoParams,
-                    tbOriginX,
-                    tbOriginY,
-                    (EB_U16*)recBuf16bit->bufferCr + reconSampleChromaIndex,
-                    recBuf16bit->strideCr,
-                    pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->bitDepth,
-                    lcuWidth,
-                    lcuHeight,
-                    sequenceControlSetPtr->chromaWidth,
-                    sequenceControlSetPtr->chromaHeight,
-                    1 - pingpongIdxUp,
-                    1 - pingpongIdxLeft);
+                        pictureControlSetPtr,
+                        contextPtr,
+                        2,
+                        saoParams,
+                        tbOriginX,
+                        tbOriginY,
+                        (EB_U16*)recBuf16bit->bufferCr + reconSampleChromaIndex,
+                        recBuf16bit->strideCr,
+                        pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->bitDepth,
+                        lcuWidth,
+                        lcuHeight,
+                        sequenceControlSetPtr->chromaWidth,
+                        sequenceControlSetPtr->chromaHeight,
+                        1 - pingpongIdxUp,
+                        1 - pingpongIdxLeft);
 
                 // Toggle pingpong buffer
                 pingpongIdxLeft = 1 - pingpongIdxLeft;
@@ -1331,7 +1331,7 @@ static void ResetEncDec(
 
     // Reset MD rate Estimation table to initial values by copying from mdRateEstimationArray
 
-	contextPtr->mdRateEstimationPtr = mdRateEstimationArray;
+    contextPtr->mdRateEstimationPtr = mdRateEstimationArray;
 
     // TMVP Map Writer Pointer
     if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
@@ -1390,8 +1390,8 @@ static void EncDecConfigureLcu(
 {
 
     //RC is off
-	if (sequenceControlSetPtr->staticConfig.rateControlMode == 0 && sequenceControlSetPtr->staticConfig.improveSharpness == 0 && sequenceControlSetPtr->staticConfig.bitRateReduction == 0) {
-		contextPtr->qp = pictureQp;
+    if (sequenceControlSetPtr->staticConfig.rateControlMode == 0 && sequenceControlSetPtr->staticConfig.improveSharpness == 0 && sequenceControlSetPtr->staticConfig.bitRateReduction == 0) {
+        contextPtr->qp = pictureQp;
     }
     //RC is on
     else {
@@ -1418,7 +1418,7 @@ static void EncDecConfigureLcu(
             contextPtr->qp,
             contextPtr->chromaQp);
     }
-	else{
+    else{
         (*lambdaAssignmentFunctionTable[pictureControlSetPtr->ParentPcsPtr->predStructure])(
             pictureControlSetPtr->ParentPcsPtr,
             &contextPtr->fastLambda,
@@ -3483,16 +3483,16 @@ void* EncDecKernel(void *inputPtr)
                 sequenceControlSetPtr,
                 segmentIndex);
 
-			contextPtr->mdContext->CabacCost = pictureControlSetPtr->cabacCost;
+            contextPtr->mdContext->CabacCost = pictureControlSetPtr->cabacCost;
 
             if (pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr != NULL) {
                 ((EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr)->picAvgVariance = pictureControlSetPtr->ParentPcsPtr->picAvgVariance;
                 ((EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr)->averageIntensity = pictureControlSetPtr->ParentPcsPtr->averageIntensity[0];
             }
 
-			if (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction) {
+            if (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction) {
 
-				QpmDeriveWeightsMinAndMax(
+                QpmDeriveWeightsMinAndMax(
                     pictureControlSetPtr,
                     contextPtr);
             }
