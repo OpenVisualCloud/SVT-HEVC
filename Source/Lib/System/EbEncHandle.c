@@ -1818,10 +1818,10 @@ void CopyApiFromApp(
     sequenceControlSetPtr->chromaHeight = sequenceControlSetPtr->maxInputLumaHeight >> 1;
 
     // Configure the padding
-    sequenceControlSetPtr->leftPadding = MAX_LCU_SIZE + 4;
-    sequenceControlSetPtr->topPadding = MAX_LCU_SIZE + 4;
-    sequenceControlSetPtr->rightPadding = ((sequenceControlSetPtr->maxInputLumaWidth    & (MIN_CU_SIZE - 1)) ? MIN_CU_SIZE - (sequenceControlSetPtr->maxInputLumaWidth & (MIN_CU_SIZE - 1)) : 0) + MAX_LCU_SIZE + 4;
-    sequenceControlSetPtr->botPadding = ((sequenceControlSetPtr->maxInputLumaHeight   & (MIN_CU_SIZE - 1)) ? (MIN_CU_SIZE - (sequenceControlSetPtr->maxInputLumaHeight & (MIN_CU_SIZE - 1))) : 0) + MAX_LCU_SIZE + 4;
+    sequenceControlSetPtr->leftPadding  = MAX_LCU_SIZE + 4;
+    sequenceControlSetPtr->topPadding   = MAX_LCU_SIZE + 4;
+    sequenceControlSetPtr->rightPadding = MAX_LCU_SIZE + 4;
+    sequenceControlSetPtr->botPadding   = MAX_LCU_SIZE + 4;
 
     // Interlaced Video
     sequenceControlSetPtr->staticConfig.interlacedVideo = sequenceControlSetPtr->interlacedVideo = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->interlacedVideo;
@@ -2172,11 +2172,19 @@ static EB_ERRORTYPE VerifySettings(\
         printf( "Error Instance %u: Base Layer Switch Mode 1 only when Prediction Structure is Random Access\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
-
-	if (sequenceControlSetPtr->maxInputLumaWidth % 8) {
-        printf("Error Instance %u: Only multiple of 8 width is supported in this release \n",channelNumber+1);
+    if ((sequenceControlSetPtr->maxInputLumaWidth % 8) && config->compressedTenBitFormat == 1) {
+        printf("Error Instance %u: Source Width that is not a multiple of 8 is not supported for the compressed 10bit format\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
-    } else if (sequenceControlSetPtr->maxInputLumaHeight % 2) {
+    }
+    if ((sequenceControlSetPtr->maxInputLumaHeight % 8) && config->compressedTenBitFormat == 1) {
+        printf("Error Instance %u: Source Height that is not a multiple of 8 is not supported for the compressed 10bit format\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+	if (sequenceControlSetPtr->maxInputLumaWidth % 2) {
+        printf("Error Instance %u: Source Width must be even for YUV_420 colorspace \n",channelNumber+1);
+        return_error = EB_ErrorBadParameter;
+    } 
+    if (sequenceControlSetPtr->maxInputLumaHeight % 2) {
         printf("Error Instance %u: Source Height must be even for YUV_420 colorspace\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     } 
