@@ -1592,7 +1592,7 @@ void ProductCodingLoopInitFastLoop(
 	return;
 }
 
-EB_EXTERN inline EB_ERRORTYPE ChromaPrediction(
+static inline EB_ERRORTYPE ChromaPrediction(
 	PictureControlSet_t                 *pictureControlSetPtr,
 	ModeDecisionCandidateBuffer_t       *candidateBuffer,
 	EB_U32                               cuChromaOriginIndex,

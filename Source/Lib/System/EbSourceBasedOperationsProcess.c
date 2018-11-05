@@ -540,7 +540,7 @@ void GrassSkinPicture(
 /******************************************************
 * Detect and mark LCU and 32x32 CUs which belong to an isolated non-homogeneous region surrounding a homogenous and flat region
 ******************************************************/
-inline void DetermineIsolatedNonHomogeneousRegionInPicture(
+static inline void DetermineIsolatedNonHomogeneousRegionInPicture(
 	SequenceControlSet_t            *sequenceControlSetPtr,
 	PictureParentControlSet_t       *pictureControlSetPtr)
 {
@@ -643,7 +643,7 @@ void SetDefaultDeltaQpRange(
 }
 
 
-inline void DetermineMorePotentialAuraAreas(
+static inline void DetermineMorePotentialAuraAreas(
 	SequenceControlSet_t        *sequenceControlSetPtr,
 	PictureParentControlSet_t	*pictureControlSetPtr)
 {
