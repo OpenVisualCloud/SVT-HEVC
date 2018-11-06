@@ -1306,6 +1306,10 @@ static void LogErrorOutput(
     case EB_ENC_RC_ERROR7:
         fprintf(errorLogFile, "Error: remainingBytes has to be multiple of 2 for 16 bit input\n");
         break;
+        
+    case EB_ENC_RC_ERROR8:
+        fprintf(errorLogFile, "Error: hlRateControlHistorgramQueue Overflow\n");
+        break;
 
         // EB_ENC_RD_COST_ERRORS:
     case EB_ENC_RD_COST_ERROR1:

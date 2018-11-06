@@ -17,6 +17,7 @@
 #include "EbUtility.h"
 #include "EbReferenceObject.h"
 #include "EbMotionEstimation.h"
+#include "EbErrorCodes.h"
 
 /**************************************
 * Macros
@@ -850,18 +851,18 @@ void UpdateHistogramQueueEntry(
 	HlRateControlHistogramEntry_t     *histogramQueueEntryPtr;
 	EB_S32                             histogramQueueEntryIndex;
 
-	EbBlockOnMutex(sequenceControlSetPtr->encodeContextPtr->rateTableUpdateMutex);
+	EbBlockOnMutex(sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueueMutex);
 
 	histogramQueueEntryIndex = (EB_S32)(pictureControlSetPtr->pictureNumber - encodeContextPtr->hlRateControlHistorgramQueue[encodeContextPtr->hlRateControlHistorgramQueueHeadIndex]->pictureNumber);
 	histogramQueueEntryIndex += encodeContextPtr->hlRateControlHistorgramQueueHeadIndex;
 	histogramQueueEntryIndex = (histogramQueueEntryIndex > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ?
 		histogramQueueEntryIndex - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
 		histogramQueueEntryIndex;
+    CHECK_REPORT_ERROR(histogramQueueEntryIndex >= 0, encodeContextPtr->appCallbackPtr, EB_ENC_RC_ERROR8);
 	histogramQueueEntryPtr = encodeContextPtr->hlRateControlHistorgramQueue[histogramQueueEntryIndex];
 	histogramQueueEntryPtr->lifeCount += pictureControlSetPtr->historgramLifeCount;
 	histogramQueueEntryPtr->passedToHlrc = EB_TRUE;
-
-	EbReleaseMutex(sequenceControlSetPtr->encodeContextPtr->rateTableUpdateMutex);
+	EbReleaseMutex(sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueueMutex);
 
 	return;
 

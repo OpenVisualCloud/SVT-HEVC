@@ -387,7 +387,7 @@ typedef struct PictureParentControlSet_s
     EB_BOOL                               sceneChangeInGop;
     // used for Look ahead
     EB_U8                                 framesInSw;
-    EB_S8                                 historgramLifeCount;
+    EB_S16                                historgramLifeCount;
 
     EB_BOOL                               qpOnTheFly;
 
