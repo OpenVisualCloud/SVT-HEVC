@@ -3856,7 +3856,7 @@ void EdgeDetection(
 /******************************************************
 * Calculate the variance of variance to determine Homogeneous regions. Note: Variance calculation should be on.
 ******************************************************/
-inline void DetermineHomogeneousRegionInPicture(
+static inline void DetermineHomogeneousRegionInPicture(
     SequenceControlSet_t            *sequenceControlSetPtr,
     PictureParentControlSet_t       *pictureControlSetPtr)
 {

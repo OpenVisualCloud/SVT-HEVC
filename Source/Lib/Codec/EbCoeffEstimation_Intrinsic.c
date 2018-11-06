@@ -330,7 +330,7 @@ static const EB_U8 g_mask[32] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-inline EB_U32 RemainingCoeffExponentialGolombCodeTempZeroParam(EB_U32 symbolValue)
+static inline EB_U32 RemainingCoeffExponentialGolombCodeTempZeroParam(EB_U32 symbolValue)
 {
 	EB_S32 codeWord = symbolValue;
 	EB_U32 numberOfBins;

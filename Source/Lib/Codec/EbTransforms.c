@@ -12,7 +12,7 @@
 #include "EbEncDecProcess.h"
 #include "EbLambdaRateTables.h"
 
-inline EB_U32 CheckNZero4x4(
+static inline EB_U32 CheckNZero4x4(
 	EB_S16  *coeff,
 	EB_U32   coeffStride
 	)
