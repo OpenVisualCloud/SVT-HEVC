@@ -15,9 +15,9 @@ This encoder has been optimized to achieve excellent performance levels using 13
 
 SVT-HEVC Encoder also supports 2 modes:
 
--  A Subjectively optimized mode (Default with -tune 0)
+-  A Subjectively optimized mode (-tune 0)
 
--  An Objectively optimized mode for PSNR / SSIM / VMAF benchmarking (-tune 1)
+-  An Objectively optimized mode for PSNR / SSIM / VMAF benchmarking (-tune 1 (Default setting))
 
 The encoder can also run the ABR profile below on one Intel® Xeon-D™ D-2191:
 
@@ -105,7 +105,7 @@ In order to run the highest resolution supported by the encoder, at least 64GB o
 	-	On any of the Windows* Operating Systems listed in the OS requirements section, install Visual Studio 2017
 	-	Once the installation is complete, copy the binaries to a location making sure that both the sample application “ebHevcEncApp.exe” and library “ebHevcEncLib.dll” are in the same folder.
 	-	Open the command prompt window at the chosen location and run the sample application to encode.
-	-	Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | ebHevcEncApp.exe -i stdin -n [number_of_frames_to_encode].
+	-	Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | ebHevcEncApp.exe -i stdin -n [number_of_frames_to_encode] -w [width] -h [height].
 
 ## Linux* Operating Systems (64-bit):
 
@@ -116,7 +116,6 @@ In order to run the highest resolution supported by the encoder, at least 64GB o
 
 * __Build Instructions__
 	 -	cd Build/linux
-	 -	chmod +x build.sh
 	 -	./build.sh <release | debug> (if none specified, both release and debug will be built)
 
 * __Sample Binaries location__
@@ -128,7 +127,7 @@ For the binaries to operate properly on your system, the following conditions ha
 	-	Change the permissions on the sample application “HevcEncoderApp” executable by running the command: 				chmod +x HevcEncoderApp
 	-	cd into your chosen location
 	-	Run the sample application to encode.
-	-	Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | ./HevcEncoderApp -i stdin -n [number_of_frames_to_encode].
+	-	Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | ./HevcEncoderApp -i stdin -n [number_of_frames_to_encode] -w [width] -h [height].
 
 # Demo features and limitations
 

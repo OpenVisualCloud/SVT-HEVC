@@ -1283,22 +1283,6 @@ EB_ERRORTYPE InterFastCostPsliceOpt(
 	return return_error;
 }
 
-inline void ExponentialGolombBitsOpt(
-	EB_U32  symbol,
-	EB_U32  count,
-	EB_U32 *bitNum)
-{
-	*bitNum = 0;
-
-	while (symbol >= (EB_U32)(1 << count)) {
-		(*bitNum)++;
-		symbol -= 1 << count;
-		count++;
-	}
-	(*bitNum)++;
-	(*bitNum) += count;
-}
-
 /*********************************************************************************
 * InterFastCostBslice function is used to estimate the cost of an inter candidate mode
 * for fast mode decisoion module in B Slice.

@@ -92,7 +92,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../../Source/API;../../Source/API/OpenMAX/IL;../../Source/Lib/Codec;../../Source/Lib/SRM;../../Source/Lib/PictureEnhancement;../../Source/Lib/System;../../Source/Lib/Utility;../../Source/Lib/ASM_SSE2/;../../Source/Lib/ASM_SSSE3/;../../Source/Lib/ASM_SSE4_1/;../../Source/Lib/ASM_AVX2/;../../Altera/ole_accelerator</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../Source/API;../../Source/Lib/Codec;../../Source/Lib/SRM;../../Source/Lib/PictureEnhancement;../../Source/Lib/System;../../Source/Lib/Utility;../../Source/Lib/ASM_SSE2/;../../Source/Lib/ASM_SSSE3/;../../Source/Lib/ASM_SSE4_1/;../../Source/Lib/ASM_AVX2/;../../Altera/ole_accelerator</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalOptions>/DynamicBase /sdl %(AdditionalOptions)</AdditionalOptions>
@@ -112,7 +112,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../../Source/API;../../Source/API/OpenMAX/IL;../../Source/Lib/Codec;../../Source/Lib/SRM;../../Source/Lib/PictureEnhancement;../../Source/Lib/System;../../Source/Lib/Utility;../../Source/Lib/ASM_SSE2/;../../Source/Lib/ASM_SSSE3/;../../Source/Lib/ASM_SSE4_1/;../../Source/Lib/ASM_AVX2/;../../Altera/ole_accelerator</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../Source/API;../../Source/Lib/Codec;../../Source/Lib/SRM;../../Source/Lib/PictureEnhancement;../../Source/Lib/System;../../Source/Lib/Utility;../../Source/Lib/ASM_SSE2/;../../Source/Lib/ASM_SSSE3/;../../Source/Lib/ASM_SSE4_1/;../../Source/Lib/ASM_AVX2/;../../Altera/ole_accelerator</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalOptions>/DynamicBase /sdl %(AdditionalOptions)</AdditionalOptions>

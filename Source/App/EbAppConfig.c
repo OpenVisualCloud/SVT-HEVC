@@ -363,7 +363,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
 {
     configPtr->configFile                           = NULL;
     configPtr->inputFile                            = NULL;
-    configPtr->bitstreamFile                        = NULL;;
+    configPtr->bitstreamFile                        = NULL;
     configPtr->errorLogFile                         = stderr;
     configPtr->qpFile                               = NULL;
     
@@ -432,7 +432,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->hmeLevel2SearchAreaInHeightArray[0]  = 1;
     configPtr->hmeLevel2SearchAreaInHeightArray[1]  = 1;
     configPtr->constrainedIntra                     = EB_FALSE;
-    configPtr->tune                                 = 0;
+    configPtr->tune                                 = 1; // OQ By Default
     // Thresholds
     configPtr->videoUsabilityInfo                   = 0;
     configPtr->highDynamicRangeInput                = 0;

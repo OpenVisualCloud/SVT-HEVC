@@ -17,6 +17,7 @@
 #include "EbUtility.h"
 #include "EbReferenceObject.h"
 #include "EbMotionEstimation.h"
+#include "EbErrorCodes.h"
 
 /**************************************
 * Macros
@@ -857,6 +858,7 @@ void UpdateHistogramQueueEntry(
 	histogramQueueEntryIndex = (histogramQueueEntryIndex > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ?
 		histogramQueueEntryIndex - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
 		histogramQueueEntryIndex;
+    CHECK_REPORT_ERROR(histogramQueueEntryIndex >= 0, encodeContextPtr->appCallbackPtr, EB_ENC_RC_ERROR8);
 	histogramQueueEntryPtr = encodeContextPtr->hlRateControlHistorgramQueue[histogramQueueEntryIndex];
 	histogramQueueEntryPtr->lifeCount += pictureControlSetPtr->historgramLifeCount;
 	histogramQueueEntryPtr->passedToHlrc = EB_TRUE;

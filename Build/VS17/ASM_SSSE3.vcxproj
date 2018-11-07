@@ -53,7 +53,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../../Source/API;../../Source/API/OpenMAX/IL;../../Source/Lib/Codec;../../Source/Lib/SRM;../../Source/Lib/PictureEnhancement;../../Source/Lib/System;../../Source/Lib/Utility;../../Source/Lib/ASM_SSE2/;../../Source/Lib/ASM_SSSE3/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../Source/API;../../Source/Lib/Codec;../../Source/Lib/SRM;../../Source/Lib/PictureEnhancement;../../Source/Lib/System;../../Source/Lib/Utility;../../Source/Lib/ASM_SSE2/;../../Source/Lib/ASM_SSSE3/</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
       <EnableEnhancedInstructionSet>
@@ -75,7 +75,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../../Source/API;../../Source/API/OpenMAX/IL;../../Source/Lib/Codec;../../Source/Lib/SRM;../../Source/Lib/PictureEnhancement;../../Source/Lib/System;../../Source/Lib/Utility;../../Source/Lib/ASM_SSE2/;../../Source/Lib/ASM_SSSE3/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../Source/API;../../Source/Lib/Codec;../../Source/Lib/SRM;../../Source/Lib/PictureEnhancement;../../Source/Lib/System;../../Source/Lib/Utility;../../Source/Lib/ASM_SSE2/;../../Source/Lib/ASM_SSSE3/</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
       <EnableEnhancedInstructionSet>

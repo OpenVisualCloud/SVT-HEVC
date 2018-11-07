@@ -188,6 +188,7 @@ typedef enum ENCODER_ERROR_CODES
     EB_ENC_RC_ERROR5                    = 0x1404, 
     EB_ENC_RC_ERROR6                    = 0x1405,
     EB_ENC_RC_ERROR7                    = 0x1406,
+    EB_ENC_RC_ERROR8                    = 0x1407,
 
     //EB_ENC_PU_ERRORS                  = 0x1500,
     EB_ENC_PU_ERROR1                    = 0x1500,
