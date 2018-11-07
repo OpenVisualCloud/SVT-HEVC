@@ -21,9 +21,6 @@ typedef struct EbAppContext_s {
     EB_PARAM_PORTDEFINITIONTYPE         outputStreamPortDefinition;
     EB_H265_ENC_CONFIGURATION           ebEncParameters;
 
-    // Local Contexts
-    InputBitstreamContext_t             inputContext;
-
     // Output Ports Active Flags
     APPPORTACTIVETYPE                   outputStreamPortActive;
 
@@ -43,7 +40,6 @@ typedef struct EbAppContext_s {
 /********************************
  * External Function
  ********************************/
-extern void EbAppContextCtor(EbAppContext_t *contextPtr);
 extern EB_ERRORTYPE InitEncoder(EbConfig_t *config, EbAppContext_t *callbackData, EB_U32 instanceIdx);
 extern EB_ERRORTYPE DeInitEncoder(EbAppContext_t *callbackDataPtr, EB_U32 instanceIndex);
 

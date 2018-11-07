@@ -70,19 +70,6 @@ void AllocateMemoryTable(
 **************************************
 **************************************/
 
-/***********************************
- * AppContext Constructor
- ***********************************/
-void EbAppContextCtor(EbAppContext_t *contextPtr)
-{
-    contextPtr->inputContext.processedByteCount     = 0;
-    contextPtr->inputContext.processedFrameCount    = 0;
-    contextPtr->inputContext.previousTimeSeconds    = 0;
-    contextPtr->inputContext.measuredFrameRate      = 0;
-
-    return;
-}
-
 
 /******************************************************
 * Copy fields from the stream to the input buffer

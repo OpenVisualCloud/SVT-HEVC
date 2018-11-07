@@ -142,7 +142,6 @@ int main(int argc, char* argv[])
             appCallbacks[instanceCount] = (EbAppContext_t*)malloc(sizeof(EbAppContext_t));
             if (!appCallbacks[instanceCount])
                 return EB_ErrorInsufficientResources;
-            EbAppContextCtor(appCallbacks[instanceCount]);
         }
 
         for (instanceCount = 0; instanceCount < MAX_CHANNEL_NUMBER; ++instanceCount) {

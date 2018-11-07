@@ -478,6 +478,9 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->stopEncoder                                  = EB_FALSE;
     configPtr->useRoundRobinThreadAssignment                = EB_FALSE;
 	configPtr->targetSocket                                 = 1;
+    configPtr->processedFrameCount                          = 0;
+    configPtr->processedByteCount                           = 0;
+    
 
     return;
 }

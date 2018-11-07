@@ -125,19 +125,6 @@ typedef enum EB_ERRORTYPE
 // Display Total Memory at the end of the memory allocations
 #define DISPLAY_MEMORY                                  0
 
-/***************************************
-* Input Bitstream Context
-***************************************/
-typedef struct InputBitstreamContext_s {
-
-    unsigned long long  processedByteCount;
-    unsigned long long  processedFrameCount;
-
-    signed long long  previousTimeSeconds;
-    double  measuredFrameRate;
-
-} InputBitstreamContext_t;
-
 // For 8-bit and 10-bit packed inputs, the luma, cb, and cr fields should be used
 //   for the three input picture planes.  However, for 10-bit unpacked planes the
 //   lumaExt, cbExt, and crExt fields should be used hold the extra 2-bits of 
@@ -155,8 +142,6 @@ typedef struct EB_H265_ENC_INPUT
     unsigned int   crStride;
     unsigned int   cbStride;
 
-    // Local Contexts
-    InputBitstreamContext_t             inputContext;
 } EB_H265_ENC_INPUT;
 
 // Will contain the EbEncApi which will live in the EncHandle class

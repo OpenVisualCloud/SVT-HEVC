@@ -436,6 +436,10 @@ typedef struct EbConfig_s
     EB_BOOL             useRoundRobinThreadAssignment;
     EB_U8               targetSocket;
     EB_BOOL             stopEncoder;         // to signal CTRL+C Event, need to stop encoding.
+
+    unsigned long long  processedFrameCount;
+    unsigned long long  processedByteCount;
+    
 } EbConfig_t;
 
 extern void EbConfigCtor(EbConfig_t *configPtr);
