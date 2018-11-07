@@ -192,7 +192,7 @@ void SadLoopKernel(
 			{
 				for (x = 0; x < width; x++)
 				{
-					sad += EB_ABS_DIFF(src[y*srcStride + x], ref[xSearchIndex + y*refStride + x]);
+					sad += EB_ABS_DIFF(src[y*srcStride + x], ref[xSearchIndex + (ySearchIndex+y)*refStride + x]);
 				}
 
 			}
