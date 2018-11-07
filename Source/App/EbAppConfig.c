@@ -743,6 +743,11 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, unsigned int channelNumbe
 		return_error = EB_ErrorBadParameter;
 	} 
 
+    if (config->bufferedInput < -1) {
+        fprintf(config->errorLogFile, "Error instance %u: Invalid BufferedInput. BufferedInput must greater or equal to -1\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
 	if (config->bufferedInput > config->framesToBeEncoded) {
 		fprintf(config->errorLogFile, "Error instance %u: Invalid BufferedInput. BufferedInput must be less or equal to the number of frames to be encoded\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
@@ -906,6 +911,18 @@ void mark_token_as_read(
     }
 }
 
+EB_BOOL is_negative_number(const char* string) {
+    int length = (int)strlen(string);
+    int index = 0;
+    if (string[0] != '-') return EB_FALSE;
+    for (index = 1; index < length; index++)
+    {
+        if (string[index] < '0' || string[index] > '9')
+            return EB_FALSE;
+    }
+    return EB_TRUE;
+}
+
 #define SIZE_OF_ONE_FRAME_IN_BYTES(width, height,is16bit) ( ( ((width)*(height)*3)>>1 )<<is16bit)
 // Computes the number of frames in the input file
 EB_S32 ComputeFramesToBeEncoded(
@@ -962,8 +979,8 @@ EB_ERRORTYPE ReadCommandLine(
     // Copy tokens (except for CHANNEL_NUMBER_TOKEN ) into a temp token buffer hosting all tokens that are passed through the command line
 	size_t len = EB_STRLEN(CHANNEL_NUMBER_TOKEN, COMMAND_LINE_MAX_SIZE);
     for (token_index = 0; token_index < argc; ++token_index) {
-        if ((argv[token_index][0] == '-') && strncmp(argv[token_index], CHANNEL_NUMBER_TOKEN, len)) {
-            cmd_copy[cmd_token_cnt++] = argv[token_index];
+        if ((argv[token_index][0] == '-') && strncmp(argv[token_index], CHANNEL_NUMBER_TOKEN, len) && !is_negative_number(argv[token_index])) {
+                cmd_copy[cmd_token_cnt++] = argv[token_index];
         }
     }
 
