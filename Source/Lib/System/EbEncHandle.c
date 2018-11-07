@@ -3001,6 +3001,7 @@ void CopyInputBuffer(
     dst->nTimeStamp = src->nTimeStamp;
     dst->nSize      = src->nSize;
     dst->qpValue    = src->qpValue;
+    dst->sliceType  = src->sliceType;
 
     // Copy the picture buffer
     if(src->pBuffer != NULL)
@@ -3056,6 +3057,7 @@ void CopyOutputBuffer(
     dst->nTickCount    =     src->nTickCount;
     dst->nTimeStamp    =     src->nTimeStamp;
     dst->nFlags        =     src->nFlags;
+    dst->sliceType     = src->sliceType;
     if (src->pBuffer)
         EB_MEMCPY(dst->pBuffer, src->pBuffer, src->nFilledLen);
     if (src->pAppPrivate)

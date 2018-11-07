@@ -327,12 +327,7 @@ FORCE_INLINE void eb_memcpy(void  *dstPtr, void  *srcPtr, size_t size)
 /** The EB_SLICE type is used to describe the slice prediction type.
 */
 
-#define EB_SLICE        EB_U8
-#define B_SLICE         0
-#define P_SLICE         1
-#define I_SLICE         2
-#define IDR_SLICE       3
-#define INVALID_SLICE   0xFF
+
 
 #define	Log2f					          Log2f_SSE2
 extern EB_U32 Log2f(EB_U32 x);

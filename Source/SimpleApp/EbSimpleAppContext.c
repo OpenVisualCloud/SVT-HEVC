@@ -100,6 +100,7 @@ EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config)
 
     contextPtr->inputPictureBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
     contextPtr->inputPictureBuffer->pAppPrivate = NULL;
+    contextPtr->inputPictureBuffer->sliceType = INVALID_SLICE;
     // Allocate frame buffer for the pBuffer
     AllocateFrameBuffer(
         config,
@@ -114,6 +115,7 @@ EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config)
     contextPtr->outputStreamBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
     contextPtr->outputStreamBuffer->nAllocLen = EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->sourceWidth*config->sourceHeight);
     contextPtr->outputStreamBuffer->pAppPrivate = (void*)contextPtr;
+    contextPtr->outputStreamBuffer->sliceType = INVALID_SLICE;
 
     return return_error;
 }

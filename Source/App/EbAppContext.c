@@ -353,7 +353,7 @@ EB_ERRORTYPE AllocateInputBuffers(
 
         // Assign the variables 
         callbackData->inputBufferPool[bufferIndex]->pAppPrivate = NULL;// (EB_PTR)callbackData;
-
+        callbackData->inputBufferPool[bufferIndex]->sliceType = INVALID_SLICE;
     }
 
     return return_error;
@@ -384,6 +384,7 @@ EB_ERRORTYPE AllocateOutputBuffers(
 
         callbackData->streamBufferPool[bufferIndex]->nAllocLen = callbackData->outputStreamPortDefinition.nStride;
         callbackData->streamBufferPool[bufferIndex]->pAppPrivate = (EB_PTR)callbackData;
+        callbackData->streamBufferPool[bufferIndex]->sliceType = INVALID_SLICE;
     }
     return return_error;
 }

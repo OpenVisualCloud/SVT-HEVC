@@ -73,6 +73,14 @@ typedef struct EbLinkedListNode
 
 } EbLinkedListNode;
 
+#define EB_SLICE        unsigned int
+#define B_SLICE         0
+#define P_SLICE         1
+#define I_SLICE         2
+#define IDR_SLICE       3
+#define NON_REF_SLICE   4
+#define INVALID_SLICE   0xFF
+
 typedef struct EB_BUFFERHEADERTYPE
 {
     unsigned int nSize;

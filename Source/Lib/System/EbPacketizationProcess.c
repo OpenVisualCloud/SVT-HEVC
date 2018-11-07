@@ -122,7 +122,9 @@ void* PacketizationKernel(void *inputPtr)
         outputStreamPtr->nFlags |= (encodeContextPtr->terminatingSequenceFlagReceived == EB_TRUE && pictureControlSetPtr->ParentPcsPtr->decodeOrder == encodeContextPtr->terminatingPictureNumber) ? EB_BUFFERFLAG_EOS : 0;
         outputStreamPtr->nFilledLen = 0;
         outputStreamPtr->nOffset = 0;
-
+        outputStreamPtr->sliceType = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag ? 
+                                     pictureControlSetPtr->ParentPcsPtr->idrFlag ? IDR_SLICE :
+                                     pictureControlSetPtr->ParentPcsPtr->sliceType : NON_REF_SLICE;
         // Get Empty Rate Control Input Tasks
         EbGetEmptyObject(
             contextPtr->rateControlTasksOutputFifoPtr,
