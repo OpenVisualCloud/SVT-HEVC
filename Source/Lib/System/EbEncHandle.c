@@ -2186,11 +2186,17 @@ static EB_ERRORTYPE VerifySettings(\
         printf( "Error Instance %u: Base Layer Switch Mode 1 only when Prediction Structure is Random Access\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
-
-	if (sequenceControlSetPtr->maxInputLumaWidth % 8) {
-        printf("Error Instance %u: Only multiple of 8 width is supported in this release \n",channelNumber+1);
+    if (sequenceControlSetPtr->maxInputLumaWidth % 8 && sequenceControlSetPtr->staticConfig.compressedTenBitFormat == 1) {
+        printf("Error Instance %u: Only multiple of 8 width is supported for compressed 10-bit inputs \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
-    } else if (sequenceControlSetPtr->maxInputLumaHeight % 2) {
+    }
+
+	if (sequenceControlSetPtr->maxInputLumaWidth % 2) {
+        printf("Error Instance %u: Source Width must be even for YUV_420 colorspace\n",channelNumber+1);
+        return_error = EB_ErrorBadParameter;
+    } 
+    
+    if (sequenceControlSetPtr->maxInputLumaHeight % 2) {
         printf("Error Instance %u: Source Height must be even for YUV_420 colorspace\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     } 
