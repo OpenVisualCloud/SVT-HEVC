@@ -5080,7 +5080,7 @@ EB_ERRORTYPE ComputeProfileTierLevelInfo(
 	return return_error;
 }
 /**************************************************
-* ComputeProfileTierLevelInfo
+* ComputeMaxDpbBuffer
 **************************************************/
 EB_ERRORTYPE ComputeMaxDpbBuffer(
 	SequenceControlSet_t    *scsPtr){
@@ -5956,13 +5956,13 @@ static void CodeSPS(
 
 static void CodePPS(
 	OutputBitstreamUnit_t *bitstreamPtr,
-	PictureControlSet_t *pcsPtr,
+    SequenceControlSet_t *scsPtr,
 	EbPPSConfig_t       *ppsConfig)
 {
-	SequenceControlSet_t    *scsPtr = (SequenceControlSet_t*)pcsPtr->sequenceControlSetWrapperPtr->objectPtr;
+	//SequenceControlSet_t    *scsPtr = (SequenceControlSet_t*)pcsPtr->sequenceControlSetWrapperPtr->objectPtr;
 
 	EB_BOOL disableDlfFlag = scsPtr->staticConfig.disableDlfFlag;
-	//static EB_U8   constrained = 0;
+
 	// uiFirstByte
 	//codeNALUnitHeader( NAL_UNIT_PPS, NAL_REF_IDC_PRIORITY_HIGHEST );
 	CodeNALUnitHeader(
@@ -6012,14 +6012,14 @@ static void CodePPS(
 		0);
 
 	// "num_ref_idx_l0_default_active_minus1"
-	WriteUvlc(
-		bitstreamPtr,
-		pcsPtr->ParentPcsPtr->predStructPtr->defaultRefPicsList0TotalCountMinus1);
+    WriteUvlc(
+        bitstreamPtr,
+        0);// pcsPtr->ParentPcsPtr->predStructPtr->defaultRefPicsList0TotalCountMinus1);
 
 	// "num_ref_idx_l1_default_active_minus1"
 	WriteUvlc(
 		bitstreamPtr,
-		pcsPtr->ParentPcsPtr->predStructPtr->defaultRefPicsList1TotalCountMinus1);
+        0);//pcsPtr->ParentPcsPtr->predStructPtr->defaultRefPicsList1TotalCountMinus1);
 
 
 	// "pic_init_qp_minus26"
@@ -6042,33 +6042,30 @@ static void CodePPS(
 	// "cu_qp_delta_enabled_flag"
 	WriteFlagCavlc(
 		bitstreamPtr,
-		pcsPtr->useDeltaQp);
+        scsPtr->staticConfig.improveSharpness || scsPtr->staticConfig.bitRateReduction);// pcsPtr->useDeltaQp);
 
-	//pcsPtr->difCuDeltaQpDepth in the config file
-	//pcsPtr->difCuDeltaQpDepth = 0; // for LCU level Delta QP, it should set to 0
-
-	if (pcsPtr->useDeltaQp) {
+	if (scsPtr->staticConfig.improveSharpness || scsPtr->staticConfig.bitRateReduction) { //pcsPtr->useDeltaQp) {
 		// "diff_cu_qp_delta_depth"
 		WriteUvlc(
 			bitstreamPtr,
-			pcsPtr->difCuDeltaQpDepth);
+            scsPtr->inputResolution < INPUT_SIZE_1080p_RANGE ? 2 : 3);// pcsPtr->difCuDeltaQpDepth);
 		//0); // max cu deltaqp depth
 	}
 
 	// "pps_cb_qp_offset"
 	WriteSvlc(
 		bitstreamPtr,
-		pcsPtr->cbQpOffset);
+        0);// pcsPtr->cbQpOffset);
 
 	// "pps_cr_qp_offset"
 	WriteSvlc(
 		bitstreamPtr,
-		pcsPtr->crQpOffset);
+        0);//pcsPtr->crQpOffset);
 
 	// "pps_slice_chroma_qp_offsets_present_flag"
-	WriteFlagCavlc(
-		bitstreamPtr,
-		pcsPtr->sliceLevelChromaQpFlag);
+    WriteFlagCavlc(
+        bitstreamPtr,
+        EB_TRUE);// pcsPtr->sliceLevelChromaQpFlag);
 
 	// "weighted_pred_flag"
 	WriteFlagCavlc(
@@ -7888,7 +7885,7 @@ EB_ERRORTYPE EncodeSPS(
 **************************************************/
 EB_ERRORTYPE EncodePPS(
 	Bitstream_t *bitstreamPtr,
-	PictureControlSet_t *pcsPtr,
+    SequenceControlSet_t *scsPtr,
 	EbPPSConfig_t       *ppsConfig)
 {
 	EB_ERRORTYPE return_error = EB_ErrorNone;
@@ -7896,7 +7893,7 @@ EB_ERRORTYPE EncodePPS(
 
 	CodePPS(
 		outputBitstreamPtr,
-		pcsPtr,
+        scsPtr,
 		ppsConfig);
 
 	// Byte Align the Bitstream

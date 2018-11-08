@@ -244,13 +244,15 @@ typedef struct EB_H265_ENC_CONFIGURATION
     unsigned int              level;
 
 	// Buffer Configuration
-    unsigned int				inputOutputBufferFifoInitCount;              // add check for minimum 
+    unsigned int			  inputOutputBufferFifoInitCount;              // add check for minimum 
 
-    signed int              injectorFrameRate;
+    signed int                injectorFrameRate;
     unsigned int              speedControlFlag;
     
     // ASM Type
-    EB_ASM			    asmType;
+    EB_ASM			          asmType;
+
+    unsigned char             codeVpsSpsPps;
 
 } EB_H265_ENC_CONFIGURATION;
 
@@ -263,6 +265,18 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(
 EB_API EB_ERRORTYPE EbH265EncSetParameter(
     EB_COMPONENTTYPE           *h265EncComponent,
     EB_H265_ENC_CONFIGURATION  *pComponentParameterStructure);
+
+EB_API EB_ERRORTYPE EbH265EncVPS(
+    EB_COMPONENTTYPE           *h265EncComponent,
+    EB_BUFFERHEADERTYPE*        outputStreamPtr);
+
+EB_API EB_ERRORTYPE EbH265EncSPS(
+    EB_COMPONENTTYPE           *h265EncComponent,
+    EB_BUFFERHEADERTYPE*        outputStreamPtr);
+
+EB_API EB_ERRORTYPE EbH265EncPPS(
+    EB_COMPONENTTYPE           *h265EncComponent,
+    EB_BUFFERHEADERTYPE*        outputStreamPtr);
 
 EB_API EB_ERRORTYPE EbH265EncSendPicture(
     EB_COMPONENTTYPE      *h265EncComponent,

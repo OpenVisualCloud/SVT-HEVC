@@ -157,7 +157,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.sourceWidth = config->sourceWidth;
     callbackData->ebEncParameters.sourceHeight = config->sourceHeight;
     callbackData->ebEncParameters.encoderBitDepth = config->encoderBitDepth;
-
+    callbackData->ebEncParameters.codeVpsSpsPps = 0;
     return return_error;
 
 }
@@ -187,7 +187,28 @@ EB_ERRORTYPE InitEncoder(
 
     // STEP 5: Init Encoder
     return_error = EbInitEncoder(callbackData->svtEncoderHandle);
+    if (callbackData->ebEncParameters.codeVpsSpsPps == 0) {
+        callbackData->outputStreamBuffer->nFilledLen = 0;
+        return_error = EbH265EncVPS(callbackData->svtEncoderHandle, callbackData->outputStreamBuffer);
+        if (return_error != EB_ErrorNone) {
+            return return_error;
+        }
+        fwrite(callbackData->outputStreamBuffer->pBuffer, 1, callbackData->outputStreamBuffer->nFilledLen, config->bitstreamFile);
 
+        callbackData->outputStreamBuffer->nFilledLen = 0;
+        return_error = EbH265EncSPS(callbackData->svtEncoderHandle, callbackData->outputStreamBuffer);
+        if (return_error != EB_ErrorNone) {
+            return return_error;
+        }
+        fwrite(callbackData->outputStreamBuffer->pBuffer, 1, callbackData->outputStreamBuffer->nFilledLen, config->bitstreamFile);
+
+        callbackData->outputStreamBuffer->nFilledLen = 0;
+        return_error = EbH265EncPPS(callbackData->svtEncoderHandle, callbackData->outputStreamBuffer);
+        if (return_error != EB_ErrorNone) {
+            return return_error;
+        }
+        fwrite(callbackData->outputStreamBuffer->pBuffer, 1, callbackData->outputStreamBuffer->nFilledLen, config->bitstreamFile);
+    }
     ///************************* LIBRARY INIT [END] *********************///
     return return_error;
 }

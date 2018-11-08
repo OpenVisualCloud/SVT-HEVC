@@ -51,7 +51,7 @@
 #include "EbEntropyCodingResults.h"
 
 #include "EbPredictionStructure.h"
-
+#include "EbBitstreamUnit.h"
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -1858,13 +1858,18 @@ void SetParamBasedOnInput(
     }
 
     // Configure the padding
-    sequenceControlSetPtr->leftPadding = MAX_LCU_SIZE + 4;
-    sequenceControlSetPtr->topPadding = MAX_LCU_SIZE + 4;
-    sequenceControlSetPtr->rightPadding = ((sequenceControlSetPtr->maxInputLumaWidth    & (MIN_CU_SIZE - 1)) ? MIN_CU_SIZE - (sequenceControlSetPtr->maxInputLumaWidth & (MIN_CU_SIZE - 1)) : 0) + MAX_LCU_SIZE + 4;
-    sequenceControlSetPtr->botPadding = ((sequenceControlSetPtr->maxInputLumaHeight   & (MIN_CU_SIZE - 1)) ? (MIN_CU_SIZE - (sequenceControlSetPtr->maxInputLumaHeight & (MIN_CU_SIZE - 1))) : 0) + MAX_LCU_SIZE + 4;
-    sequenceControlSetPtr->chromaWidth = sequenceControlSetPtr->maxInputLumaWidth >> 1;
+    sequenceControlSetPtr->leftPadding  = MAX_LCU_SIZE + 4;
+    sequenceControlSetPtr->topPadding   = MAX_LCU_SIZE + 4;
+    sequenceControlSetPtr->rightPadding = MAX_LCU_SIZE + 4;
+    sequenceControlSetPtr->botPadding   = MAX_LCU_SIZE + 4;
+    sequenceControlSetPtr->chromaWidth  = sequenceControlSetPtr->maxInputLumaWidth >> 1;
     sequenceControlSetPtr->chromaHeight = sequenceControlSetPtr->maxInputLumaHeight >> 1;
+    sequenceControlSetPtr->lumaWidth    = sequenceControlSetPtr->maxInputLumaWidth;
+    sequenceControlSetPtr->lumaHeight   = sequenceControlSetPtr->maxInputLumaHeight;
 
+    DeriveInputResolution(
+        sequenceControlSetPtr,
+        sequenceControlSetPtr->lumaWidth*sequenceControlSetPtr->lumaHeight);
 
 }
 
@@ -1892,7 +1897,7 @@ void CopyApiFromApp(
 	
     sequenceControlSetPtr->staticConfig.tune = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tune;
     sequenceControlSetPtr->staticConfig.encMode = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->encMode;
-
+    sequenceControlSetPtr->staticConfig.codeVpsSpsPps = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->codeVpsSpsPps;
     if (sequenceControlSetPtr->staticConfig.tune == 1) {
         sequenceControlSetPtr->staticConfig.bitRateReduction = 0;
         sequenceControlSetPtr->staticConfig.improveSharpness = 0;
@@ -2683,7 +2688,8 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->asmType = ASM_AVX2; 
     configPtr->useRoundRobinThreadAssignment = EB_FALSE;
     configPtr->channelId = 0;
-    configPtr->activeChannelCount = 1;
+    configPtr->activeChannelCount   = 1;
+    configPtr->codeVpsSpsPps = 1;
 
 
     return return_error;
@@ -2748,6 +2754,161 @@ EB_API EB_ERRORTYPE EbH265EncSetParameter(
 
     return return_error;
 }    
+
+
+EB_API EB_ERRORTYPE EbH265EncVPS(
+    EB_COMPONENTTYPE           *h265EncComponent,
+    EB_BUFFERHEADERTYPE*        outputStreamPtr
+)
+{
+    EB_ERRORTYPE           return_error = EB_ErrorNone;
+    EbEncHandle_t          *pEncCompData = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
+    Bitstream_t            *bitstreamPtr;
+    SequenceControlSet_t  *sequenceControlSetPtr = pEncCompData->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr;
+    EncodeContext_t        *encodeContextPtr = sequenceControlSetPtr->encodeContextPtr;
+    EB_MALLOC(Bitstream_t*, bitstreamPtr, sizeof(Bitstream_t), EB_N_PTR);
+    EB_MALLOC(OutputBitstreamUnit_t*, bitstreamPtr->outputBitstreamPtr, sizeof(OutputBitstreamUnit_t), EB_N_PTR);
+
+    return_error = OutputBitstreamUnitCtor(
+        (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr,
+        PACKETIZATION_PROCESS_BUFFER_SIZE);
+
+    // Reset the bitstream before writing to it
+    ResetBitstream(
+        (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr);
+
+    //if (sequenceControlSetPtr->staticConfig.accessUnitDelimiter) {
+
+    //    EncodeAUD(
+    //        pictureControlSetPtr->bitstreamPtr,
+    //        sliceType,
+    //        pictureControlSetPtr->temporalId);
+    //}
+
+    // Compute Profile Tier and Level Information
+    ComputeProfileTierLevelInfo(
+        sequenceControlSetPtr);
+
+    ComputeMaxDpbBuffer(
+        sequenceControlSetPtr);
+
+    // Code the VPS
+    EncodeVPS(
+        bitstreamPtr,
+        sequenceControlSetPtr);
+
+    // Flush the Bitstream
+    FlushBitstream(
+        bitstreamPtr->outputBitstreamPtr);
+
+    // Copy SPS & PPS to the Output Bitstream
+    CopyRbspBitstreamToPayload(
+        bitstreamPtr,
+        outputStreamPtr->pBuffer,
+        (EB_U32*) &(outputStreamPtr->nFilledLen),
+        (EB_U32*) &(outputStreamPtr->nAllocLen),
+        encodeContextPtr);
+
+    return return_error;
+}
+
+EB_API EB_ERRORTYPE EbH265EncSPS(
+    EB_COMPONENTTYPE           *h265EncComponent,
+    EB_BUFFERHEADERTYPE*        outputStreamPtr
+)
+{
+    EB_ERRORTYPE           return_error = EB_ErrorNone;
+    EbEncHandle_t          *pEncCompData = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
+    Bitstream_t            *bitstreamPtr;
+    SequenceControlSet_t  *sequenceControlSetPtr = pEncCompData->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr;
+    EncodeContext_t        *encodeContextPtr = sequenceControlSetPtr->encodeContextPtr;
+    EB_MALLOC(Bitstream_t*, bitstreamPtr, sizeof(Bitstream_t), EB_N_PTR);
+    EB_MALLOC(OutputBitstreamUnit_t*, bitstreamPtr->outputBitstreamPtr, sizeof(OutputBitstreamUnit_t), EB_N_PTR);
+
+    return_error = OutputBitstreamUnitCtor(
+        (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr,
+        PACKETIZATION_PROCESS_BUFFER_SIZE);
+
+    // Reset the bitstream before writing to it
+    ResetBitstream(
+        (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr);
+
+    // Code the SPS
+    EncodeSPS(
+        bitstreamPtr,
+        sequenceControlSetPtr);
+
+    // Flush the Bitstream
+    FlushBitstream(
+        bitstreamPtr->outputBitstreamPtr);
+
+    // Copy SPS & PPS to the Output Bitstream
+    CopyRbspBitstreamToPayload(
+        bitstreamPtr,
+        outputStreamPtr->pBuffer,
+        (EB_U32*) &(outputStreamPtr->nFilledLen),
+        (EB_U32*) &(outputStreamPtr->nAllocLen),
+        encodeContextPtr);
+
+    return return_error;
+}
+
+EB_API EB_ERRORTYPE EbH265EncPPS(
+    EB_COMPONENTTYPE           *h265EncComponent,
+    EB_BUFFERHEADERTYPE*        outputStreamPtr
+)
+{
+    EB_ERRORTYPE           return_error = EB_ErrorNone;
+    EbEncHandle_t          *pEncCompData = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
+    Bitstream_t            *bitstreamPtr;
+    SequenceControlSet_t  *sequenceControlSetPtr = pEncCompData->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr;
+    EncodeContext_t        *encodeContextPtr = sequenceControlSetPtr->encodeContextPtr;
+    EbPPSConfig_t          *ppsConfig;
+
+    EB_MALLOC(EbPPSConfig_t*, ppsConfig, sizeof(EbPPSConfig_t), EB_N_PTR);
+    EB_MALLOC(Bitstream_t*, bitstreamPtr, sizeof(Bitstream_t), EB_N_PTR);
+    EB_MALLOC(OutputBitstreamUnit_t*, bitstreamPtr->outputBitstreamPtr, sizeof(OutputBitstreamUnit_t), EB_N_PTR);
+
+    return_error = OutputBitstreamUnitCtor(
+        (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr,
+        PACKETIZATION_PROCESS_BUFFER_SIZE);
+
+    // Reset the bitstream before writing to it
+    ResetBitstream(
+        (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr);
+
+    ppsConfig->ppsId = 0;
+    ppsConfig->constrainedFlag = 0;
+    EncodePPS(
+        bitstreamPtr,
+        sequenceControlSetPtr,
+        ppsConfig);
+
+    if (sequenceControlSetPtr->staticConfig.constrainedIntra == EB_TRUE) {
+        // Configure second pps
+        ppsConfig->ppsId = 1;
+        ppsConfig->constrainedFlag = 1;
+
+        EncodePPS(
+            bitstreamPtr,
+            sequenceControlSetPtr,
+            ppsConfig);
+    }
+
+    // Flush the Bitstream
+    FlushBitstream(
+        bitstreamPtr->outputBitstreamPtr);
+
+    // Copy SPS & PPS to the Output Bitstream
+    CopyRbspBitstreamToPayload(
+        bitstreamPtr,
+        outputStreamPtr->pBuffer,
+        (EB_U32*) &(outputStreamPtr->nFilledLen),
+        (EB_U32*) &(outputStreamPtr->nAllocLen),
+        encodeContextPtr);
+
+    return return_error;
+}
 
 /***********************************************
 **** Copy the input buffer from the 

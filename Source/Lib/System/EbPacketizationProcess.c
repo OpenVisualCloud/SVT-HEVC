@@ -124,7 +124,7 @@ void* PacketizationKernel(void *inputPtr)
         outputStreamPtr->nOffset = 0;
         outputStreamPtr->sliceType = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag ? 
                                      pictureControlSetPtr->ParentPcsPtr->idrFlag ? IDR_SLICE :
-                                     pictureControlSetPtr->ParentPcsPtr->sliceType : NON_REF_SLICE;
+                                     pictureControlSetPtr->sliceType : NON_REF_SLICE;
         // Get Empty Rate Control Input Tasks
         EbGetEmptyObject(
             contextPtr->rateControlTasksOutputFifoPtr,
@@ -135,7 +135,7 @@ void* PacketizationKernel(void *inputPtr)
         
         sliceType = pictureControlSetPtr->sliceType;
         
-        if(pictureControlSetPtr->pictureNumber == 0) {
+        if(pictureControlSetPtr->pictureNumber == 0 && sequenceControlSetPtr->staticConfig.codeVpsSpsPps == 1) {
 
             // Reset the bitstream before writing to it
             ResetBitstream(
@@ -166,16 +166,16 @@ void* PacketizationKernel(void *inputPtr)
                 pictureControlSetPtr->bitstreamPtr,
                 sequenceControlSetPtr);
                 
-            // Code the PPS 
-            // *Note - when tiles are enabled, we send a separate PPS for each
-            //   temporal layer since Tiles vary across temporal layers
+           // Code the PPS 
+           // *Note - when tiles are enabled, we send a separate PPS for each
+           //   temporal layer since Tiles vary across temporal layers
 
-            // Configure first pps
+           //  Configure first pps
             contextPtr->ppsConfig->ppsId           = 0;
             contextPtr->ppsConfig->constrainedFlag = 0;
             EncodePPS(
                pictureControlSetPtr->bitstreamPtr,
-               pictureControlSetPtr,
+                sequenceControlSetPtr,
                contextPtr->ppsConfig);
 
             if (sequenceControlSetPtr->staticConfig.constrainedIntra == EB_TRUE){
@@ -185,7 +185,7 @@ void* PacketizationKernel(void *inputPtr)
 
                 EncodePPS(
                     pictureControlSetPtr->bitstreamPtr,
-                    pictureControlSetPtr,
+                    sequenceControlSetPtr,
                     contextPtr->ppsConfig);
             }
 

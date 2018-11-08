@@ -97,12 +97,8 @@ extern EB_ERRORTYPE EncodeSPS(
 
 extern EB_ERRORTYPE EncodePPS(
     Bitstream_t *bitstreamPtr,
-    PictureControlSet_t *pcsPtr,
+    SequenceControlSet_t *scsPtr,
     EbPPSConfig_t       *ppsConfig);
-
-extern EB_ERRORTYPE EncodePPS_1(
-    Bitstream_t *bitstreamPtr,
-    PictureControlSet_t *pcsPtr);
 
 EB_ERRORTYPE TuEstimateCoeffBits_R(
 	EB_U32                     tuOriginIndex,
