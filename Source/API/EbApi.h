@@ -90,7 +90,8 @@ typedef struct EB_BUFFERHEADERTYPE
     unsigned int nOffset;
     void* pAppPrivate;
     unsigned int nTickCount;
-    signed long long nTimeStamp;
+    signed long long dts;
+    signed long long pts;
     unsigned int nFlags;
     unsigned int qpValue;
     unsigned int sliceType;

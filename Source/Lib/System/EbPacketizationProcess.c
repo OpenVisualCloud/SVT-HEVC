@@ -122,6 +122,8 @@ void* PacketizationKernel(void *inputPtr)
         outputStreamPtr->nFlags |= (encodeContextPtr->terminatingSequenceFlagReceived == EB_TRUE && pictureControlSetPtr->ParentPcsPtr->decodeOrder == encodeContextPtr->terminatingPictureNumber) ? EB_BUFFERFLAG_EOS : 0;
         outputStreamPtr->nFilledLen = 0;
         outputStreamPtr->nOffset = 0;
+        outputStreamPtr->pts = pictureControlSetPtr->ParentPcsPtr->ebInputPtr->pts;
+        outputStreamPtr->dts = pictureControlSetPtr->ParentPcsPtr->decodeOrder;
         outputStreamPtr->sliceType = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag ? 
                                      pictureControlSetPtr->ParentPcsPtr->idrFlag ? IDR_SLICE :
                                      pictureControlSetPtr->sliceType : NON_REF_SLICE;

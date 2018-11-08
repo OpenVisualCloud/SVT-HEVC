@@ -3163,9 +3163,9 @@ void CopyInputBuffer(
     dst->nAllocLen  = src->nAllocLen;
     dst->nFilledLen = src->nFilledLen;
     dst->nFlags     = src->nFlags;
+    dst->pts        = src->pts;
     dst->nOffset    = src->nOffset;
     dst->nTickCount = src->nTickCount;
-    dst->nTimeStamp = src->nTimeStamp;
     dst->nSize      = src->nSize;
     dst->qpValue    = src->qpValue;
     dst->sliceType  = src->sliceType;
@@ -3216,14 +3216,15 @@ void CopyOutputBuffer(
 ) 
 {
     // copy output bitstream fileds
-    dst->nSize         =     src->nSize;
-    dst->nAllocLen     =     src->nAllocLen;
-    dst->nFilledLen    =     src->nFilledLen;
-    dst->nOffset       =     src->nOffset;
-    dst->pAppPrivate   =     src->pAppPrivate;
-    dst->nTickCount    =     src->nTickCount;
-    dst->nTimeStamp    =     src->nTimeStamp;
-    dst->nFlags        =     src->nFlags;
+    dst->nSize         = src->nSize;
+    dst->nAllocLen     = src->nAllocLen;
+    dst->nFilledLen    = src->nFilledLen;
+    dst->nOffset       = src->nOffset;
+    dst->pAppPrivate   = src->pAppPrivate;
+    dst->nTickCount    = src->nTickCount;
+    dst->pts           = src->pts;
+    dst->dts           = src->dts;
+    dst->nFlags        = src->nFlags;
     dst->sliceType     = src->sliceType;
     if (src->pBuffer)
         EB_MEMCPY(dst->pBuffer, src->pBuffer, src->nFilledLen);
