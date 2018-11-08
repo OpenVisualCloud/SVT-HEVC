@@ -2210,11 +2210,6 @@ static EB_ERRORTYPE VerifySettings(\
 		return_error = EB_ErrorBadParameter;
     }
 
-    if (sequenceControlSetPtr->maxInputLumaHeight % 8 != 0 && config->encoderBitDepth == 10) {
-        printf("Error instance %u: Source Height a multiple of 8 for 10 bit video\n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
-    }
-
 	EB_U32 inputSize = sequenceControlSetPtr->maxInputLumaWidth * sequenceControlSetPtr->maxInputLumaHeight;
 
 	EB_U8 inputResolution = (inputSize < INPUT_SIZE_1080i_TH)	?	INPUT_SIZE_576p_RANGE_OR_LOWER :
@@ -3352,8 +3347,8 @@ EB_ERRORTYPE AllocateFrameBuffer(
     EB_H265_ENC_CONFIGURATION   * config = &sequenceControlSetPtr->staticConfig;
     EB_U8 is16bit = config->encoderBitDepth > 8 ? 1 : 0;
     // Init Picture Init data
-    inputPictureBufferDescInitData.maxWidth  = (EB_U16)config->sourceWidth;
-    inputPictureBufferDescInitData.maxHeight = (EB_U16)config->sourceHeight;
+    inputPictureBufferDescInitData.maxWidth  = (EB_U16)sequenceControlSetPtr->maxInputLumaWidth;
+    inputPictureBufferDescInitData.maxHeight = (EB_U16)sequenceControlSetPtr->maxInputLumaHeight;
     inputPictureBufferDescInitData.bitDepth = (EB_BITDEPTH)config->encoderBitDepth;
 
     if (config->compressedTenBitFormat == 1) {
