@@ -32,7 +32,7 @@ The encoder can also run the ABR profile below on one Intel® Xeon-D™ D-2191:
 
 # License
 
-Scalable Video Technology is licensed under BSD+Patent license. See [LICENSE](LICENSE.md) for details.
+Scalable Video Technology is licensed under the OSI-approved BSD+Patent license. See [LICENSE](LICENSE.md) for details.
 
 # Documentation
 
