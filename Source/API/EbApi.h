@@ -267,15 +267,7 @@ EB_API EB_ERRORTYPE EbH265EncSetParameter(
     EB_COMPONENTTYPE           *h265EncComponent,
     EB_H265_ENC_CONFIGURATION  *pComponentParameterStructure);
 
-EB_API EB_ERRORTYPE EbH265EncVPS(
-    EB_COMPONENTTYPE           *h265EncComponent,
-    EB_BUFFERHEADERTYPE*        outputStreamPtr);
-
-EB_API EB_ERRORTYPE EbH265EncSPS(
-    EB_COMPONENTTYPE           *h265EncComponent,
-    EB_BUFFERHEADERTYPE*        outputStreamPtr);
-
-EB_API EB_ERRORTYPE EbH265EncPPS(
+EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     EB_COMPONENTTYPE           *h265EncComponent,
     EB_BUFFERHEADERTYPE*        outputStreamPtr);
 
