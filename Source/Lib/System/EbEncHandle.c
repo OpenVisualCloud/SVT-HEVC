@@ -2755,8 +2755,9 @@ EB_API EB_ERRORTYPE EbH265EncSetParameter(
 
     return return_error;
 }    
-
-
+#if __linux
+__attribute__((visibility("default")))
+#endif
 EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     EB_COMPONENTTYPE           *h265EncComponent,
     EB_BUFFERHEADERTYPE*        outputStreamPtr
