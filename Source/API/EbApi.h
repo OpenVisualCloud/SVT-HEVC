@@ -23,11 +23,7 @@ extern "C" {
 #define EB_HME_SEARCH_AREA_ROW_MAX_COUNT        2
     
 #ifdef _WIN32
-#ifdef __EB_EXPORTS
 #define EB_API __declspec(dllexport)
-#else
-#define EB_API __declspec(dllimport)
-#endif
 #else
 #ifdef __EB_EXPORTS
 #define EB_API

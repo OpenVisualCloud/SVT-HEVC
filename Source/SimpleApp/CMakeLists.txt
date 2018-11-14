@@ -4,24 +4,20 @@
 # 
 
 # APP Directory CMakeLists.txt
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 
 # Include Subdirectories
-include_directories (${PROJECT_SOURCE_DIR}/API/)
-include_directories (${PROJECT_SOURCE_DIR}/../Bin/${CMAKE_BUILD_TYPE}/)
-if(${COMPILE_AS_CPP} EQUAL 1) 
-
-	file(GLOB SourceFiles
-	    "*.c"
-	)
-
-	set_source_files_properties( 
-		${SourceFiles} 
-		PROPERTIES LANGUAGE CXX )
-endif(${COMPILE_AS_CPP} EQUAL 1)
-
+include_directories (${PROJECT_SOURCE_DIR}/Source/API/)
+include_directories (${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 
 # App Source Files
 add_executable (HevcEncoderSimpleApp 
+    ../API/EbApi.h
+	../API/EbErrorCodes.h
+    EbSimpleAppContext.h
+    ../API/EbTime.h
     EbSimpleAppContext.c
     EbSimpleAppMain.c
 )
@@ -31,23 +27,22 @@ add_executable (HevcEncoderSimpleApp
 if (UNIX)
 
 	# Configure the RPATH to allow relative runtime linking	
-	INSTALL(TARGETS HevcEncoderSimpleApp RUNTIME DESTINATION ".:\$ORIGIN/../lib:\$ORIGIN/")
+	INSTALL(TARGETS SvtHevcEncSimpleApp RUNTIME DESTINATION ".:\$ORIGIN/../lib:\$ORIGIN/")
 
 
 
 	# Link the Encoder App
-	target_link_libraries (HevcEncoderSimpleApp
-		${PROJECT_SOURCE_DIR}/../Bin/${CMAKE_BUILD_TYPE}/libHevcEncoder.so
+	target_link_libraries (SvtHevcEncSimpleApp
+		SvtHevcEncLib
 		pthread rt
 		m)
+endif()
 
-
-else()
-
+if (MSVC OR MSYS OR MINGW OR WIN32)
+	
 	# Link the Encoder App
-	target_link_libraries (HevcEncoderSimpleApp
-		${PROJECT_SOURCE_DIR}/../Bin/${CMAKE_BUILD_TYPE}/libHevcEncoder.dll)
-
+	target_link_libraries (SvtHevcEncSimpleApp
+                           SvtHevcEncLib)
 endif()
 
 
