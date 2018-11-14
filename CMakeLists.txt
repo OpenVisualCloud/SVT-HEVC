@@ -43,3 +43,4 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 # Add Subdirectories
 add_subdirectory (Source/Lib)
 add_subdirectory (Source/App)
+add_subdirectory (Source/SimpleApp)

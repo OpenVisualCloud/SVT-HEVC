@@ -13,7 +13,7 @@ include_directories (${PROJECT_SOURCE_DIR}/Source/API/)
 include_directories (${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 
 # App Source Files
-add_executable (HevcEncoderSimpleApp 
+add_executable (SvtHevcEncSimpleApp 
     ../API/EbApi.h
 	../API/EbErrorCodes.h
     EbSimpleAppContext.h
@@ -28,8 +28,6 @@ if (UNIX)
 
 	# Configure the RPATH to allow relative runtime linking	
 	INSTALL(TARGETS SvtHevcEncSimpleApp RUNTIME DESTINATION ".:\$ORIGIN/../lib:\$ORIGIN/")
-
-
 
 	# Link the Encoder App
 	target_link_libraries (SvtHevcEncSimpleApp
