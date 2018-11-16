@@ -35,20 +35,19 @@ typedef struct SvtEncoder {
     EB_COMPONENTTYPE                    *svt_handle;
     EB_BUFFERHEADERTYPE                 *in_buf;
     EB_BUFFERHEADERTYPE                 *out_buf;
-    int                                  raw_size;
+    int                                 raw_size;
 } SvtEncoder;
 
 typedef struct SvtParams {
     int vui_info;
     int hierarchical_level;
-    int intra_period;
     int la_depth;
     int intra_ref_type;
     int enc_mode;
     int rc_mode;
     int scd;
     int tune;
-	int qp;
+    int qp;
     int profile;
     int base_layer_switch_mode;
 }SvtParams;
@@ -140,10 +139,10 @@ static EB_ERRORTYPE config_enc_params(EB_H265_ENC_CONFIGURATION  *param, AVCodec
     param->sceneChangeDetection   = q->svt_param.scd;
     param->tune                   = q->svt_param.tune;
     param->baseLayerSwitchMode    = q->svt_param.base_layer_switch_mode;
-	param->qp                     = q->svt_param.qp;
-	param->intraPeriodLength      = q->svt_param.intra_period;
+    param->qp                     = q->svt_param.qp;
 
     param->targetBitRate          = avctx->bit_rate;
+    param->intraPeriodLength      = avctx->gop_size;
     param->frameRateNumerator     = avctx->time_base.den;
     param->frameRateDenominator   = avctx->time_base.num * avctx->ticks_per_frame;
 
@@ -173,11 +172,11 @@ static void read_in_data(EB_H265_ENC_CONFIGURATION *config, const AVFrame* frame
     in_data->luma = frame->data[0];
     in_data->cb   = frame->data[1];
     in_data->cr   = frame->data[2];
-	
-	// stride info
-	in_data->yStride  = frame->linesize[0] >> is16bit;
-	in_data->cbStride = frame->linesize[1] >> is16bit;
-	in_data->crStride = frame->linesize[2] >> is16bit;
+
+    // stride info
+    in_data->yStride  = frame->linesize[0] >> is16bit;
+    in_data->cbStride = frame->linesize[1] >> is16bit;
+    in_data->crStride = frame->linesize[2] >> is16bit;
 
     headerPtr->nFilledLen   += lumaReadSize * 3/2u;
 }
@@ -210,7 +209,30 @@ static av_cold int eb_enc_init(AVCodecContext *avctx)
     ret = EbInitEncoder(svt_enc->svt_handle);
     if (ret != EB_ErrorNone)
         goto failed_init;
-    return ret;
+
+    if (avctx->flags & AV_CODEC_FLAG_GLOBAL_HEADER) {
+        EB_BUFFERHEADERTYPE headerPtr;
+        headerPtr.nFilledLen  = 0;
+        headerPtr.pBuffer     = av_malloc(10 * 1024 * 1024);
+        if (!headerPtr.pBuffer)
+            return AVERROR(ENOMEM);
+
+        ret = EbH265EncStreamHeader(svt_enc->svt_handle, &headerPtr);
+        if (ret != EB_ErrorNone) {
+            av_freep(&headerPtr.pBuffer);
+            goto failed_init;
+        }
+        avctx->extradata_size = headerPtr.nFilledLen;
+        avctx->extradata = av_malloc(avctx->extradata_size + AV_INPUT_BUFFER_PADDING_SIZE);
+        if (!avctx->extradata) {
+            av_log(avctx, AV_LOG_ERROR,
+                   "Cannot allocate HEVC header of size %d.\n", avctx->extradata_size);
+            return AVERROR(ENOMEM);
+        }
+        memcpy(avctx->extradata, headerPtr.pBuffer, avctx->extradata_size);
+        av_freep(&headerPtr.pBuffer);
+    }
+    return 0;
 
 failed_init:
     return error_mapping(ret);
@@ -225,14 +247,13 @@ static int eb_send_frame(AVCodecContext *avctx, const AVFrame *frame)
 
     if (!frame) {
         EB_BUFFERHEADERTYPE headerPtrLast;
-        headerPtrLast.nAllocLen = 0;
-        headerPtrLast.nFilledLen = 0;
-        headerPtrLast.nTickCount = 0;
+        headerPtrLast.nAllocLen   = 0;
+        headerPtrLast.nFilledLen  = 0;
+        headerPtrLast.nTickCount  = 0;
         headerPtrLast.pAppPrivate = NULL;
-        headerPtrLast.nOffset = 0;
-        headerPtrLast.nTimeStamp = 0;
-        headerPtrLast.nFlags = EB_BUFFERFLAG_EOS;
-        headerPtrLast.pBuffer = NULL;
+        headerPtrLast.nOffset     = 0;
+        headerPtrLast.pBuffer     = NULL;
+        headerPtrLast.nFlags      = EB_BUFFERFLAG_EOS;
         EbH265EncSendPicture(svt_enc->svt_handle, &headerPtrLast);
         q->eos_flag = 1;
         av_log(avctx, AV_LOG_DEBUG, "Finish sending frames!!!\n");
@@ -241,11 +262,11 @@ static int eb_send_frame(AVCodecContext *avctx, const AVFrame *frame)
 
     read_in_data(&svt_enc->enc_params, frame, headerPtr);
 
-    headerPtr->nOffset    = 0;
-    headerPtr->nFlags     = 0;
-    headerPtr->nFlags     = 0;
-    headerPtr->nTimeStamp = 0;
-    headerPtr->pAppPrivate = NULL;
+    headerPtr->nOffset      = 0;
+    headerPtr->nFlags       = 0;
+    headerPtr->pAppPrivate  = NULL;
+    headerPtr->pts          = frame->pts;
+    headerPtr->sliceType    = INVALID_SLICE;
     EbH265EncSendPicture(svt_enc->svt_handle, headerPtr);
 
     return ret;
@@ -267,6 +288,13 @@ static int eb_receive_packet(AVCodecContext *avctx, AVPacket *pkt)
         return AVERROR(EAGAIN);
 
     pkt->size = headerPtr->nFilledLen;
+    pkt->pts  = headerPtr->pts;
+    pkt->dts  = headerPtr->dts;
+    if (headerPtr->sliceType == IDR_SLICE)
+        pkt->flags |= AV_PKT_FLAG_KEY;
+    if (headerPtr->sliceType == NON_REF_SLICE)
+        pkt->flags |= AV_PKT_FLAG_DISPOSABLE;
+
     ret = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? AVERROR_EOF : 0;
     return ret;
 }
@@ -295,8 +323,7 @@ static const AVOption options[] = {
     {"enc_p", "Encoding preset [0,12] (for tune 0 and >=4k resolution), [0,10] (for >= 1080p resolution), [0,9] (for all resolution and modes)", OFFSET(svt_param.enc_mode), AV_OPT_TYPE_INT, { .i64 = 9 }, 0, 12, VE },
     {"profile", "Profile now support[1,2],Main Still Picture Profile not supported", OFFSET(svt_param.profile), AV_OPT_TYPE_INT, { .i64 = 2 }, 1, 2, VE },
     {"rc", "RC mode 0: CQP 1: VBR", OFFSET(svt_param.rc_mode), AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, VE },
-	{"q", "QP value for intra frames", OFFSET(svt_param.qp), AV_OPT_TYPE_INT, { .i64 = 32 }, 0, 51, VE },
-	{"ip", "distance between intra frames", OFFSET(svt_param.intra_period), AV_OPT_TYPE_INT, { .i64 = -2 }, -2, 255, VE },
+    {"q", "QP value for intra frames", OFFSET(svt_param.qp), AV_OPT_TYPE_INT, { .i64 = 32 }, 0, 51, VE },
     {"scd", "scene change detection", OFFSET(svt_param.scd), AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, VE },
     {"tune", "tune mode: SQ/OQ[0,1]", OFFSET(svt_param.tune), AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, VE },
     {"bl_mode", "Random Access Prediction Structure Type", OFFSET(svt_param.base_layer_switch_mode), AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, VE },
