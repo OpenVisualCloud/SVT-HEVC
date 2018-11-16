@@ -6,6 +6,6 @@ includedir=${prefix}/include
 Name: svt
 Description: SVT (Scalable Video Technology) for HEVC encoder library
 Version: 0.1.0
-Libs: -L/usr/lib -lSvtHevcEncLib -lm -ldl -lpthread
+Libs: -L/usr/lib -lSvtHevcEnc -lm -ldl -lpthread
 Libs.private:
 Cflags: -I${prefix}/include

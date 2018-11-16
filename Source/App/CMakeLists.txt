@@ -38,7 +38,7 @@ if (UNIX)
 
 	# Link the Encoder App
 	target_link_libraries (SvtHevcEncApp
-		SvtHevcEncLib
+		SvtHevcEnc
 		pthread rt
 		m)
 endif()
@@ -47,7 +47,7 @@ if (MSVC OR MSYS OR MINGW OR WIN32)
 	
 	# Link the Encoder App
 	target_link_libraries (SvtHevcEncApp
-                           SvtHevcEncLib)
+                           SvtHevcEnc)
 endif()
 
 

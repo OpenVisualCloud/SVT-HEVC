@@ -24,7 +24,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 
 # Encoder Lib Source Files
-add_library(SvtHevcEncLib SHARED  
+add_library(SvtHevcEnc SHARED  
 	EbAdaptiveMotionVectorPrediction.h
 	EbAvailability.h
 	EbAvcStyleMcp.h
@@ -182,7 +182,7 @@ add_library(SvtHevcEncLib SHARED
     EbUtility.c
 )
 	
-target_link_libraries(SvtHevcEncLib 
+target_link_libraries(SvtHevcEnc 
 	C_DEFAULT
 	ASM_SSE2
 	ASM_SSSE3
