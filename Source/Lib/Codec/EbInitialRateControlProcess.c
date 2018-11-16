@@ -912,9 +912,6 @@ void* InitialRateControlKernel(void *inputPtr)
     EB_U8                               temporalLayerIndex;
 	EbObjectWrapper_t                  *referencePictureWrapperPtr;
 
-	// Segments
-	EB_U32                              segmentIndex;
-
 	EbObjectWrapper_t                *outputStreamWrapperPtr;
 
 	for (;;) {
@@ -929,13 +926,7 @@ void* InitialRateControlKernel(void *inputPtr)
 #if DEADLOCK_DEBUG
         printf("POC %lld IRC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
-		segmentIndex = inputResultsPtr->segmentIndex;
-
-		// Set the segment mask
-		//SEGMENT_COMPLETION_MASK_SET(pictureControlSetPtr->meSegmentsCompletionMask, segmentIndex);
         pictureControlSetPtr->meSegmentsCompletionMask++;
-		// If the picture is complete, proceed
-		//if (SEGMENT_COMPLETION_MASK_TEST(pictureControlSetPtr->meSegmentsCompletionMask, pictureControlSetPtr->meSegmentsTotalCount)) {
         if (pictureControlSetPtr->meSegmentsCompletionMask == pictureControlSetPtr->meSegmentsTotalCount) {
 			sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 			encodeContextPtr = (EncodeContext_t*)sequenceControlSetPtr->encodeContextPtr;

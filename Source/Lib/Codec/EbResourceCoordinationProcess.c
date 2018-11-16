@@ -671,7 +671,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
         if (sequenceControlSetPtr->staticConfig.useQpFile == 1){
             pictureControlSetPtr->qpOnTheFly = EB_TRUE;
-            if (ebInputPtr->qpValue < 0 || ebInputPtr->qpValue > 51)
+            if (ebInputPtr->qpValue > 51)
                 CHECK_REPORT_ERROR_NC(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->appCallbackPtr, EB_ENC_RES_COORD_InvalidQP);
             pictureControlSetPtr->pictureQp = (EB_U8)ebInputPtr->qpValue;
         }
