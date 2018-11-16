@@ -123,7 +123,7 @@ void* PacketizationKernel(void *inputPtr)
         outputStreamPtr->nFilledLen = 0;
         outputStreamPtr->nOffset = 0;
         outputStreamPtr->pts = pictureControlSetPtr->ParentPcsPtr->ebInputPtr->pts;
-        outputStreamPtr->dts = pictureControlSetPtr->ParentPcsPtr->decodeOrder;
+        outputStreamPtr->dts = pictureControlSetPtr->ParentPcsPtr->decodeOrder - (1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels);
         outputStreamPtr->sliceType = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag ? 
                                      pictureControlSetPtr->ParentPcsPtr->idrFlag ? IDR_SLICE :
                                      pictureControlSetPtr->sliceType : NON_REF_SLICE;
