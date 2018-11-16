@@ -5,7 +5,7 @@
 - git checkout new_api
 - cd Build/linux 
 - ./build release
-- cd ../../ffmpeg_plugin
+- cd ../..
 - sudo ./install_libsvt_hevc_ffmpeg.sh
 - cd ..
 - git clone https://github.com/FFmpeg/FFmpeg ffmpeg
