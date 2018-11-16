@@ -166,11 +166,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
 } EB_H265_ENC_CONFIGURATION;
 
 #ifdef _WIN32
-#ifdef __EB_EXPORTS
 #define EB_API __declspec(dllexport)
-#else
-#define EB_API __declspec(dllimport)
-#endif
 #else
 #ifdef __EB_EXPORTS
 #define EB_API

@@ -4,32 +4,33 @@
 # 
 
 # APP Directory CMakeLists.txt
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 
 # Include Subdirectories
-include_directories (${PROJECT_SOURCE_DIR}/API/)
-include_directories (${PROJECT_SOURCE_DIR}/API/OpenMAX/IL/)
-include_directories (${PROJECT_SOURCE_DIR}/../Bin/${CMAKE_BUILD_TYPE}/)
-if(${COMPILE_AS_CPP} EQUAL 1) 
-
-	file(GLOB SourceFiles
-	    "*.c"
-	)
-
-	set_source_files_properties( 
-		${SourceFiles} 
-		PROPERTIES LANGUAGE CXX )
-endif(${COMPILE_AS_CPP} EQUAL 1)
-
+include_directories (${PROJECT_SOURCE_DIR}/Source/API/)
+include_directories (${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 
 # App Source Files
-add_executable (HevcEncoderApp 
+add_executable (SvtHevcEncApp
     EbAppConfig.c
     EbAppContext.c
     EbAppFifo.c
     EbAppMain.c
     EbAppProcessCmd.c
-    EbAppSei.c
     EbTime.c
+    ../API/EbApi.h
+    EbAppConfig.h
+    EbAppContext.h
+    ../API/EbErrorCodes.h
+    ../API/EbTime.h
+    ../API/EbApiSei.h
+    ../API/EbBuild.h
+    ../API/EbTypes.h
+    EbAppSei.c
+    EbAppTypes.h
+    EbAppFifo.h
 )
 
 #********** SET COMPILE FLAGS************
@@ -37,23 +38,22 @@ add_executable (HevcEncoderApp
 if (UNIX)
 
 	# Configure the RPATH to allow relative runtime linking	
-	INSTALL(TARGETS HevcEncoderApp RUNTIME DESTINATION ".:\$ORIGIN/../lib:\$ORIGIN/")
+	INSTALL(TARGETS SvtHevcEncApp RUNTIME DESTINATION ".:\$ORIGIN/../lib:\$ORIGIN/")
 
 
 
 	# Link the Encoder App
-	target_link_libraries (HevcEncoderApp
-		${PROJECT_SOURCE_DIR}/../Bin/${CMAKE_BUILD_TYPE}/libHevcEncoder.so
+	target_link_libraries (SvtHevcEncApp
+		SvtHevcEnc
 		pthread rt
 		m)
+endif()
 
-
-else()
-
+if (MSVC OR MSYS OR MINGW OR WIN32)
+	
 	# Link the Encoder App
-	target_link_libraries (HevcEncoderApp
-		${PROJECT_SOURCE_DIR}/../Bin/${CMAKE_BUILD_TYPE}/libHevcEncoder.dll)
-
+	target_link_libraries (SvtHevcEncApp
+                           SvtHevcEnc)
 endif()
 
 
