@@ -10,8 +10,224 @@
 
 #include "EbApi.h"
 
-#define EB_NORMAL_LATENCY        0
-#define EB_LOW_LATENCY           1
+#ifdef __GNUC__
+#define fseeko64 fseek
+#define ftello64 ftell
+#endif
+// Define Cross-Platform 64-bit fseek() and ftell()
+#ifdef _MSC_VER
+typedef __int64 off64_t;
+#define fseeko64 _fseeki64
+#define ftello64 _ftelli64
+// Windows Compiler
+#pragma warning( disable : 4127 )
+#pragma warning( disable : 4201 )
+#pragma warning( disable : 4702 )
+#pragma warning( disable : 4456 )  
+#pragma warning( disable : 4457 )
+#pragma warning( disable : 4459 )
+#pragma warning( disable : 4334 ) 
+
+#elif _WIN32 // MinGW
+#else 
+    // *Note -- fseeko and ftello are already defined for linux
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#pragma GCC diagnostic ignored "-Wuninitialized"
+#pragma GCC diagnostic ignored "-Wunused-function"
+#ifndef __cplusplus
+#define __USE_LARGEFILE
+#endif
+#endif
+
+#ifndef _RSIZE_T_DEFINED
+typedef size_t rsize_t;
+#define _RSIZE_T_DEFINED
+#endif  /* _RSIZE_T_DEFINED */
+
+#ifndef _ERRNO_T_DEFINED
+#define _ERRNO_T_DEFINED
+typedef int errno_t;
+#endif  /* _ERRNO_T_DEFINED */
+
+/** The APPEXITCONDITIONTYPE type is used to define the App main loop exit
+conditions.
+*/
+typedef enum APPEXITCONDITIONTYPE {
+    APP_ExitConditionNone = 0,
+    APP_ExitConditionFinished,
+    APP_ExitConditionError
+} APPEXITCONDITIONTYPE;
+
+/** The APPPORTACTIVETYPE type is used to define the state of output ports in
+the App.
+*/
+typedef enum APPPORTACTIVETYPE {
+    APP_PortActive = 0,
+    APP_PortInactive
+} APPPORTACTIVETYPE;
+
+typedef enum EbPtrType {
+    EB_N_PTR = 0,                                   // malloc'd pointer
+    EB_A_PTR = 1,                                   // malloc'd pointer aligned
+    EB_MUTEX = 2,                                   // mutex
+    EB_SEMAPHORE = 3,                                   // semaphore
+    EB_THREAD = 4                                    // thread handle
+}EbPtrType;
+
+/** The EB_PTR type is intended to be used to pass pointers to and from the svt
+API.  This is a 32 bit pointer and is aligned on a 32 bit word boundary.
+*/
+typedef void * EB_PTR;
+
+/** The EB_NULL type is used to define the C style NULL pointer.
+*/
+#define EB_NULL ((void*) 0)
+
+typedef struct EbMemoryMapEntry
+{
+    EB_PTR                    ptr;                       // points to a memory pointer
+    EbPtrType                 ptrType;                   // pointer type
+} EbMemoryMapEntry;
+
+// *Note - This work around is needed for the windows visual studio compiler
+//  (MSVC) because it doesn't support the C99 header file stdint.h.  
+//  All other compilers should support the stdint.h C99 standard types. 
+#ifdef _MSC_VER
+
+	/** EB_U8 is an 8 bit unsigned quantity that is byte aligned */
+	typedef unsigned __int8     EB_U8;
+	/** EB_U16 is an 16 bit unsigned quantity that is byte aligned */
+	typedef unsigned __int16    EB_U16;
+	/** EB_U32 is an 32 bit unsigned quantity that is byte aligned */
+	typedef unsigned __int32    EB_U32;
+	/** EB_U64 is an 64 bit unsigned quantity that is byte aligned */
+	typedef unsigned __int64    EB_U64;
+
+	/** EB_S8 is an 8 bit signed quantity that is byte aligned */
+	typedef signed __int8         EB_S8;
+	/** EB_S16 is an 16 bit signed quantity that is byte aligned */
+	typedef signed __int16         EB_S16;
+	/** EB_S32 is an 32 bit signed quantity that is byte aligned */
+	typedef signed __int32        EB_S32;
+	/** EB_S64 is an 64 bit signed quantity that is byte aligned */
+	typedef signed __int64        EB_S64;
+
+#else
+
+#include <stdint.h>
+
+	/** EB_U8 is an 8 bit unsigned quantity that is byte aligned */
+	typedef uint8_t             EB_U8;
+	/** EB_U16 is an 16 bit unsigned quantity that is byte aligned */
+	typedef uint16_t            EB_U16;
+	/** EB_U32 is an 32 bit unsigned quantity that is byte aligned */
+	typedef uint32_t            EB_U32;
+	/** EB_U64 is an 64 bit unsigned quantity that is byte aligned */
+	typedef uint64_t            EB_U64;
+
+	/** EB_S8 is an 8 bit signed quantity that is byte aligned */
+	typedef int8_t                 EB_S8;
+	/** EB_S16 is an 16 bit signed quantity that is byte aligned */
+	typedef int16_t                EB_S16;
+	/** EB_S32 is an 32 bit signed quantity that is byte aligned */
+	typedef int32_t                EB_S32;
+	/** EB_S64 is an 64 bit signed quantity that is byte aligned */
+	typedef int64_t             EB_S64;
+
+#endif // _WIN32
+    
+/** The EB_BOOL type is intended to be used to represent a true or a false
+value when passing parameters to and from the svt API.  The
+EB_BOOL is a 32 bit quantity and is aligned on a 32 bit word boundary.
+*/
+
+#define EB_BOOL   EB_U8
+#define EB_FALSE  0
+#define EB_TRUE   1
+    
+extern    EbMemoryMapEntry        *appMemoryMap;            // App Memory table
+extern    EB_U32                  *appMemoryMapIndex;       // App Memory index
+extern    EB_U64                  *totalAppMemory;          // App Memory malloc'd
+extern    EB_U32                   appMallocCount;
+
+typedef struct EB_PARAM_PORTDEFINITIONTYPE {
+    EB_U32 nFrameWidth;
+    EB_U32 nFrameHeight;
+    EB_S32 nStride;
+    EB_U32 nSize;
+} EB_PARAM_PORTDEFINITIONTYPE;
+
+#define MAX_APP_NUM_PTR                             (0x186A0 << 2)             // Maximum number of pointers to be allocated for the app 
+
+#define EB_APP_MALLOC(type, pointer, nElements, pointerClass, returnType) \
+    pointer = (type)malloc(nElements); \
+    if (pointer == (type)EB_NULL){ \
+        return returnType; \
+		    } \
+			    else { \
+        appMemoryMap[*(appMemoryMapIndex)].ptrType = pointerClass; \
+        appMemoryMap[(*(appMemoryMapIndex))++].ptr = pointer; \
+		if (nElements % 8 == 0) { \
+			*totalAppMemory += (nElements); \
+						} \
+								else { \
+			*totalAppMemory += ((nElements) + (8 - ((nElements) % 8))); \
+			} \
+	    } \
+    if (*(appMemoryMapIndex) >= MAX_APP_NUM_PTR) { \
+        return returnType; \
+		        } \
+    appMallocCount++;
+
+#define EB_APP_MALLOC_NR(type, pointer, nElements, pointerClass,returnType) \
+    (void)returnType; \
+    pointer = (type)malloc(nElements); \
+    if (pointer == (type)EB_NULL){ \
+        returnType = EB_ErrorInsufficientResources; \
+        printf("Malloc has failed due to insuffucient resources"); \
+        return; \
+		    } \
+			    else { \
+        appMemoryMap[*(appMemoryMapIndex)].ptrType = pointerClass; \
+        appMemoryMap[(*(appMemoryMapIndex))++].ptr = pointer; \
+		if (nElements % 8 == 0) { \
+			*totalAppMemory += (nElements); \
+						} \
+								else { \
+			*totalAppMemory += ((nElements) + (8 - ((nElements) % 8))); \
+			} \
+	    } \
+    if (*(appMemoryMapIndex) >= MAX_APP_NUM_PTR) { \
+        returnType = EB_ErrorInsufficientResources; \
+        printf("Malloc has failed due to insuffucient resources"); \
+        return; \
+		        } \
+    appMallocCount++;
+
+/* string copy */
+extern errno_t strcpy_ss(char *dest, rsize_t dmax, const char *src);
+
+/* fitted string copy */
+extern errno_t strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t slen);
+
+/* string length */
+extern rsize_t strnlen_ss(const char *s, rsize_t smax);
+
+#define EB_STRNCPY(dst, src, count) \
+	strncpy_ss(dst, sizeof(dst), src, count)
+
+#define EB_STRCPY(dst, size, src) \
+	strcpy_ss(dst, size, src)
+
+#define EB_STRCMP(target,token) \
+	strcmp(target,token)
+
+#define EB_STRLEN(target, max_size) \
+	strnlen_ss(target, max_size)
+
+#define EB_APP_MEMORY() \
+    printf("Total Number of Mallocs in App: %d\n", appMallocCount); \
+    printf("Total App Memory: %.2lf KB\n\n",*totalAppMemory/(double)1024);
 
 #define MAX_CHANNEL_NUMBER      6
 #define MAX_NUM_TOKENS          200
@@ -220,6 +436,10 @@ typedef struct EbConfig_s
     EB_BOOL             useRoundRobinThreadAssignment;
     EB_U8               targetSocket;
     EB_BOOL             stopEncoder;         // to signal CTRL+C Event, need to stop encoding.
+
+    unsigned long long  processedFrameCount;
+    unsigned long long  processedByteCount;
+    
 } EbConfig_t;
 
 extern void EbConfigCtor(EbConfig_t *configPtr);

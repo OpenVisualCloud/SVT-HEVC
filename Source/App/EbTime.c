@@ -5,7 +5,6 @@
 
 #ifdef _WIN32
 #include <stdlib.h>
-#include "EbTypes.h"
 //#if  (WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
 #include <time.h>
 #include <windows.h>
@@ -14,7 +13,6 @@
 #elif __linux__
 #include <stdio.h>
 #include <stdlib.h>
-#include "EbTypes.h"
 //#if   (LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
 #include <sys/time.h>
 #include <time.h>
@@ -24,7 +22,7 @@
 #error OS/Platform not supported.
 #endif
 
-void StartTime(EB_U64 *Startseconds, EB_U64 *Startuseconds) {
+void StartTime(unsigned long long *Startseconds, unsigned long long *Startuseconds) {
 
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     struct timeval start;
@@ -32,7 +30,7 @@ void StartTime(EB_U64 *Startseconds, EB_U64 *Startuseconds) {
     *Startseconds=start.tv_sec;
     *Startuseconds=start.tv_usec;
 #elif _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
-    *Startseconds = (EB_U64) clock();
+    *Startseconds = (unsigned long long) clock();
     (void) (*Startuseconds);
 #else
     (void) (*Startuseconds);
@@ -41,7 +39,7 @@ void StartTime(EB_U64 *Startseconds, EB_U64 *Startuseconds) {
 
 }
 
-void FinishTime(EB_U64 *Finishseconds, EB_U64 *Finishuseconds) {
+void FinishTime(unsigned long long *Finishseconds, unsigned long long *Finishuseconds) {
 
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     struct timeval finish;
@@ -49,7 +47,7 @@ void FinishTime(EB_U64 *Finishseconds, EB_U64 *Finishuseconds) {
     *Finishseconds=finish.tv_sec;
     *Finishuseconds=finish.tv_usec;
 #elif _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
-    *Finishseconds= (EB_U64)clock();
+    *Finishseconds= (unsigned long long)clock();
     (void) (*Finishuseconds);
 #else
     (void) (*Finishuseconds);
@@ -57,7 +55,7 @@ void FinishTime(EB_U64 *Finishseconds, EB_U64 *Finishuseconds) {
 #endif
 
 }
-void ComputeOverallElapsedTime(EB_U64 Startseconds, EB_U64 Startuseconds,EB_U64 Finishseconds, EB_U64 Finishuseconds, double *duration)
+void ComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long long Startuseconds,unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration)
 {
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     long   mtime, seconds, useconds;
@@ -82,7 +80,7 @@ void ComputeOverallElapsedTime(EB_U64 Startseconds, EB_U64 Startuseconds,EB_U64 
 
 }
 
-void EbSleep(EB_U64 milliSeconds) {
+void EbSleep(unsigned long long milliSeconds) {
 
     if(milliSeconds) {
 #if __linux__     
@@ -99,13 +97,13 @@ void EbSleep(EB_U64 milliSeconds) {
     }
 }
 
-void EbInjector(EB_U64 processedFrameCount, EB_U32 injectorFrameRate){
+void EbInjector(unsigned long long processedFrameCount, unsigned int injectorFrameRate){
 
 #if __linux__ 
-    EB_U64                  currentTimesSeconds = 0;
-    EB_U64                  currentTimesuSeconds = 0;
-    static EB_U64           startTimesSeconds;
-    static EB_U64           startTimesuSeconds;
+    unsigned long long                  currentTimesSeconds = 0;
+    unsigned long long                  currentTimesuSeconds = 0;
+    static unsigned long long           startTimesSeconds;
+    static unsigned long long           startTimesuSeconds;
 #elif _WIN32
     static LARGE_INTEGER    startCount;               // this is the start time
     static LARGE_INTEGER    counterFreq;              // performance counter frequency
@@ -126,7 +124,7 @@ void EbInjector(EB_U64 processedFrameCount, EB_U32 injectorFrameRate){
         firstTime = 1;
 
 #if __linux__
-        StartTime(&startTimesSeconds, &startTimesuSeconds);  
+        StartTime((unsigned long long*)&startTimesSeconds, (unsigned long long*)&startTimesuSeconds);
 #elif _WIN32
         QueryPerformanceFrequency(&counterFreq);
         QueryPerformanceCounter(&startCount);
@@ -136,7 +134,7 @@ void EbInjector(EB_U64 processedFrameCount, EB_U32 injectorFrameRate){
     {
 
 #if __linux__
-        FinishTime(&currentTimesSeconds, &currentTimesuSeconds);  
+        FinishTime((unsigned long long*)&currentTimesSeconds, (unsigned long long*)&currentTimesuSeconds);
         ComputeOverallElapsedTime(startTimesSeconds, startTimesuSeconds, currentTimesSeconds, currentTimesuSeconds, &elapsedTime);
 #elif _WIN32
         QueryPerformanceCounter(&nowCount);

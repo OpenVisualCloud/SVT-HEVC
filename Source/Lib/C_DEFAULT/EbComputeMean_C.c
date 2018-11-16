@@ -4,7 +4,7 @@
 */
 
 #include "EbComputeMean_C.h"
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 #define VARIANCE_PRECISION      16
 

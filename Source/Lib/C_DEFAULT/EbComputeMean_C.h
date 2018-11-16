@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 EB_U64 ComputeMean(
     EB_U8 *  inputSamples,      // input parameter, input samples Ptr

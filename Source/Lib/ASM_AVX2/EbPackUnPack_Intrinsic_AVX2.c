@@ -6,7 +6,8 @@
 #include <immintrin.h>
 
 #include "EbPackUnPack_Intrinsic_AVX2.h"
-#include "EbTypes.h"
+#include "EbDefinitions.h"
+
 
 AVX512_FUNC_TARGET
 void EB_ENC_msbUnPack2D_AVX512_INTRIN(

@@ -6,7 +6,7 @@
 #ifndef EbDeblockingFilter_C_h
 #define EbDeblockingFilter_C_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -4,7 +4,7 @@
 */
 
 #include "EbDeblockingFilter_C.h"
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbUtility.h"
 
 

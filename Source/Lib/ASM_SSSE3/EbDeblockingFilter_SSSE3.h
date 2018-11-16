@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 extern void Luma4SampleEdgeDLFCore_SSSE3(
     EB_BYTE                edgeStartSample, 

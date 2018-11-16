@@ -6,7 +6,7 @@
 #ifndef EbPictureOperators_AVX2
 #define EbPictureOperators_AVX2
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -4,34 +4,150 @@
 # 
 
 # Include Encoder Subdirectories
-include_directories (${PROJECT_SOURCE_DIR}/API/)
-include_directories (${PROJECT_SOURCE_DIR}/API/OpenMAX/IL/)
-include_directories (${PROJECT_SOURCE_DIR}/Lib/SRM/)
-include_directories (${PROJECT_SOURCE_DIR}/Lib/System/)
-include_directories (${PROJECT_SOURCE_DIR}/Lib/Codec/)
-include_directories (${PROJECT_SOURCE_DIR}/Lib/Utility/)
+include_directories (${PROJECT_SOURCE_DIR}/Source/API/)
+include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Codec/)
 
-include_directories (${PROJECT_SOURCE_DIR}/Lib/C_DEFAULT/)
-include_directories (${PROJECT_SOURCE_DIR}/Lib/ASM_SSE2/)
-include_directories (${PROJECT_SOURCE_DIR}/Lib/ASM_SSSE3/)
-include_directories (${PROJECT_SOURCE_DIR}/Lib/ASM_SSE4_1/)
-include_directories (${PROJECT_SOURCE_DIR}/Lib/ASM_AVX2/)
+include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
+include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/)
+include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
+include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/)
+include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
 
-link_directories (${PROJECT_SOURCE_DIR}/Lib/SRM/)
+link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/)
+link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
+link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
+link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/)
+link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
 
-if(${COMPILE_AS_CPP} EQUAL 1) 
-
-	file(GLOB SourceFiles
-	    "*.c"
-	)
-
-	set_source_files_properties( 
-		${SourceFiles} 
-		PROPERTIES LANGUAGE CXX )
-endif(${COMPILE_AS_CPP} EQUAL 1)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 
 # Encoder Lib Source Files
-add_library(EncoderLib 
+add_library(SvtHevcEnc SHARED  
+	EbAdaptiveMotionVectorPrediction.h
+	EbAvailability.h
+	EbAvcStyleMcp.h
+	EbBitstreamUnit.h
+	EbCabacContextModel.h
+	EbCodingLoop.h
+	EbCodingUnit.h
+	EbComputeMean.h
+	EbComputeSAD.h
+	EbDeblockingFilter.h
+	EbDefinitions.h
+	EbEncDecProcess.h
+	EbEncDecResults.h
+	EbEncDecSegments.h
+	EbEncDecTasks.h
+	EbEncHandle.h
+	EbEncodeContext.h
+	EbEntropyCoding.h
+	EbEntropyCodingObject.h
+	EbEntropyCodingProcess.h
+	EbEntropyCodingResults.h
+	EbEntropyCodingUtil.h
+	EbFullLoop.h
+	EbHmCode.h
+	EbInitialRateControlProcess.h
+	EbInitialRateControlReorderQueue.h
+	EbInitialRateControlResults.h
+	EbInterPrediction.h
+	EbIntraPrediction.h
+	EbLambdaRateTables.h
+	EbMcp.h
+	EbMdRateEstimation.h
+	EbMeSadCalculation.h
+	EbModeDecision.h
+	EbModeDecisionConfiguration.h
+	EbModeDecisionConfigurationProcess.h
+	EbModeDecisionProcess.h
+	EbModeDecisionSegments.h
+	EbMotionEstimation.h
+	EbMotionEstimationContext.h
+	EbMotionEstimationLcuResults.h
+	EbMotionEstimationProcess.h
+	EbMotionEstimationResults.h
+	EbMotionVectorUnit.h
+	EbMvMerge.h
+	EbNeighborArrays.h
+	EbPacketizationProcess.h
+	EbPacketizationReorderQueue.h
+	EbPackUnPack.h
+	EbPictureAnalysisProcess.h
+	EbPictureAnalysisResults.h
+	EbPictureBufferDesc.h
+	EbPictureControlSet.h
+	EbPictureDecisionProcess.h
+	EbPictureDecisionQueue.h
+	EbPictureDecisionReorderQueue.h
+	EbPictureDecisionResults.h
+	EbPictureDemuxResults.h
+	EbPictureManagerProcess.h
+	EbPictureManagerQueue.h
+	EbPictureManagerReorderQueue.h
+	EbPictureOperators.h
+	EbPredictionStructure.h
+	EbPredictionUnit.h
+	EbRateControlProcess.h
+	EbRateControlResults.h
+	EbRateControlTables.h
+	EbRateControlTasks.h
+	EbRateDistortionCost.h
+	EbReferenceObject.h
+	EbResourceCoordinationProcess.h
+	EbResourceCoordinationResults.h
+	EbSampleAdaptiveOffset.h
+	EbSei.h
+	EbSequenceControlSet.h
+	EbSourceBasedOperationsProcess.h
+	EbSyntaxElements.h
+	EbSystemResourceManager.h
+	EbThreads.h
+	EbTransforms.h
+	EbTransformUnit.h
+	EbTransQuantBuffers.h
+	EbUtility.h
+    EbEncDecProcess.c
+    EbEncDecResults.c
+    EbEncDecSegments.c
+    EbEncDecTasks.c
+    EbEncHandle.c
+    EbEncodeContext.c
+    EbEntropyCodingProcess.c
+    EbEntropyCodingResults.c
+    EbInitialRateControlProcess.c
+    EbInitialRateControlReorderQueue.c
+    EbInitialRateControlResults.c
+    EbModeDecisionConfigurationProcess.c
+    EbModeDecisionProcess.c
+    EbMotionEstimationContext.c
+    EbMotionEstimationProcess.c
+    EbMotionEstimationResults.c
+    EbPacketizationProcess.c
+    EbPacketizationReorderQueue.c
+    EbPictureAnalysisProcess.c
+    EbPictureAnalysisResults.c
+    EbPictureBufferDesc.c
+    EbPictureControlSet.c
+    EbPictureDecisionProcess.c
+    EbPictureDecisionQueue.c
+    EbPictureDecisionReorderQueue.c
+    EbPictureDecisionResults.c
+    EbPictureDemuxResults.c
+    EbPictureManagerProcess.c
+    EbPictureManagerQueue.c
+    EbPictureManagerReorderQueue.c
+    EbRateControlProcess.c
+    EbRateControlResults.c
+    EbRateControlTasks.c
+    EbReferenceObject.c
+    EbResourceCoordinationProcess.c
+    EbResourceCoordinationResults.c
+    EbSequenceControlSet.c
+    EbSourceBasedOperationsProcess.c
+    EbSystemResourceManager.c
+    EbThreads.c
     EbAdaptiveMotionVectorPrediction.c
     EbAvailability.c
     EbAvcStyleMcp.c
@@ -63,15 +179,12 @@ add_library(EncoderLib
     EbSei.c
     EbTransforms.c
     EbTransQuantBuffers.c
+    EbUtility.c
 )
 	
-target_link_libraries(EncoderLib
-	Utility
+target_link_libraries(SvtHevcEnc 
 	C_DEFAULT
 	ASM_SSE2
 	ASM_SSSE3
 	ASM_SSE4_1
 	ASM_AVX2)
-
-
-

@@ -6,7 +6,7 @@
 #ifndef EbPackUnPack_asm_h
 #define EbPackUnPack_asm_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 #ifdef __cplusplus
 extern "C" {

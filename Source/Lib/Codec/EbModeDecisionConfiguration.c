@@ -264,7 +264,7 @@ EB_ERRORTYPE MdcIntraCuRate(
     EB_U64 chromaRate;
 
     EncodeContext_t *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
-
+    
     CHECK_REPORT_ERROR(
         (partitionMode == SIZE_2Nx2N),
         encodeContextPtr->appCallbackPtr,

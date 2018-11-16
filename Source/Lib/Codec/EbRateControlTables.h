@@ -6,10 +6,8 @@
 #ifndef EbRateControlTables_h
 #define EbRateControlTables_h
 
-#include "EbTypes.h"
 #include "EbDefinitions.h"
 #include "EbUtility.h"
-
 
 /**************************************
  * Rate Control Defines
