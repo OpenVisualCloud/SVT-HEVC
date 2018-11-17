@@ -29,7 +29,7 @@ function debug {
 	# Compile the App
 	make -j SvtHevcEncApp
 	# Compile the Simple App
-	# make -j SvtHevcEncSimpleApp
+	make -j SvtHevcEncSimpleApp
 	cd ..
 }
 
@@ -50,8 +50,9 @@ function release {
 	# Compile the App
 	make -j SvtHevcEncApp
 	# Compile the Simple App
-	# make -j SvtHevcEncSimpleApp
-	cd ..
+	make -j SvtHevcEncSimpleApp
+
+	cd ..	
 }
 
 # Defines
