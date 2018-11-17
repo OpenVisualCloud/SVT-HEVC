@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbUtility.h"
 #include "EbSystemResourceManager.h"
 #include "EbPictureControlSet.h"
@@ -172,8 +172,11 @@ void* PictureManagerKernel(void *inputPtr)
 
             pictureControlSetPtr            = (PictureParentControlSet_t*)  inputPictureDemuxPtr->pictureControlSetWrapperPtr->objectPtr;
             sequenceControlSetPtr           = (SequenceControlSet_t*) pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
-            encodeContextPtr                = sequenceControlSetPtr->encodeContextPtr;           
+            encodeContextPtr                = sequenceControlSetPtr->encodeContextPtr; 
 
+#if DEADLOCK_DEBUG
+            printf("POC %lld PM IN \n", pictureControlSetPtr->pictureNumber);
+#endif
            //printf("\nPicture Manager Process @ %d \n ", pictureControlSetPtr->pictureNumber);
 
 		   queueEntryIndex = (EB_S32)(pictureControlSetPtr->pictureNumber - encodeContextPtr->pictureManagerReorderQueue[encodeContextPtr->pictureManagerReorderQueueHeadIndex]->pictureNumber);
@@ -464,7 +467,9 @@ void* PictureManagerKernel(void *inputPtr)
 				   EbReleaseObject(pictureControlSetPtr->referencePictureWrapperPtr);
 				   pictureControlSetPtr->referencePictureWrapperPtr = (EbObjectWrapper_t*)EB_NULL;
 			   }
-
+#if DEADLOCK_DEBUG
+               printf("POC %lld PM OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
 			   // Release the Picture Manager Reorder Queue
 			   queueEntryPtr->parentPcsWrapperPtr = (EbObjectWrapper_t*)EB_NULL;
 			   queueEntryPtr->pictureNumber += PICTURE_MANAGER_REORDER_QUEUE_MAX_DEPTH;
@@ -576,9 +581,6 @@ void* PictureManagerKernel(void *inputPtr)
                         
                     // Increment the currentInputPoc is the case of POC rollover    
                     currentInputPoc = encodeContextPtr->currentInputPoc;
-                    //currentInputPoc += ((currentInputPoc < refPoc) && (inputEntryPtr->list0Ptr->referenceList[refIdx] > 0)) ?
-                    //    (1 << entrySequenceControlSetPtr->bitsForPictureOrderCount) :
-                    //    0;  
                                                 
                     availabilityFlag =
                         (availabilityFlag == EB_FALSE)          ? EB_FALSE  :   // Don't update if already False 

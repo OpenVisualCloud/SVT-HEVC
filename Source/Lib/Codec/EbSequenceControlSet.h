@@ -6,7 +6,7 @@
 #ifndef EbSequenceControlSet_h
 #define EbSequenceControlSet_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbThreads.h"
 #include "EbSystemResourceManager.h"
 #include "EbEncodeContext.h"
@@ -143,7 +143,6 @@ typedef struct SequenceControlSet_s
 	EB_U32						paReferencePictureBufferInitCount;
 	EB_U32						referencePictureBufferInitCount;
 	EB_U32						inputOutputBufferFifoInitCount;
-	EB_U32						outputStreamBufferFifoInitCount;      
 	EB_U32						resourceCoordinationFifoInitCount;     
 	EB_U32						pictureAnalysisFifoInitCount;
 	EB_U32						pictureDecisionFifoInitCount;
@@ -162,6 +161,8 @@ typedef struct SequenceControlSet_s
 	EB_U32						modeDecisionConfigurationProcessInitCount; 
     EB_U32						encDecProcessInitCount;
     EB_U32						entropyCodingProcessInitCount;
+
+    EB_U32						totalProcessInitCount;
 
 	LcuParams_t                *lcuParamsArray;
     EB_U8 						pictureWidthInLcu;

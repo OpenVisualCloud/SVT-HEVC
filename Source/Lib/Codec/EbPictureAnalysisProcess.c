@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbPictureControlSet.h"
 #include "EbSequenceControlSet.h"
@@ -4296,10 +4296,8 @@ void DecimateInputPicture(
 		sixteenthDecimatedPicturePtr->height,
 		sixteenthDecimatedPicturePtr->originX,
 		sixteenthDecimatedPicturePtr->originY);
-
-
 }
-
+#if !ONE_MEMCPY
 void CopyInputPicture(
     SequenceControlSet_t            *sequenceControlSetPtr,
     PictureParentControlSet_t       *pictureControlSetPtr
@@ -4315,7 +4313,7 @@ void CopyInputPicture(
     pictureControlSetPtr->startTimeSeconds = 0;
     pictureControlSetPtr->startTimeuSeconds = 0;
 
-    StartTime(&pictureControlSetPtr->startTimeSeconds, &pictureControlSetPtr->startTimeuSeconds);
+    StartTime((unsigned long long*)&pictureControlSetPtr->startTimeSeconds, (unsigned long long*)&pictureControlSetPtr->startTimeuSeconds);
 
 
     // Need to include for Interlacing on the fly with pictureScanType = 1
@@ -4466,7 +4464,7 @@ void CopyInputPicture(
 
     return;
 }
-
+#endif
 /************************************************
  * Picture Analysis Kernel
  * The Picture Analysis Process pads & decimates the input pictures.
@@ -4509,7 +4507,9 @@ void* PictureAnalysisKernel(void *inputPtr)
 		pictureControlSetPtr = (PictureParentControlSet_t*)inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;
 		sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 		inputPicturePtr = pictureControlSetPtr->enhancedPicturePtr;
-
+#if DEADLOCK_DEBUG
+        printf("POC %lld PA IN \n", pictureControlSetPtr->pictureNumber);
+#endif
 		paReferenceObject = (EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr;
 		inputPaddedPicturePtr = (EbPictureBufferDesc_t*)paReferenceObject->inputPaddedPicturePtr;
 		quarterDecimatedPicturePtr = (EbPictureBufferDesc_t*)paReferenceObject->quarterDecimatedPicturePtr;
@@ -4519,16 +4519,13 @@ void* PictureAnalysisKernel(void *inputPtr)
 		pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize;
 		pictureHeighInLcu = (sequenceControlSetPtr->lumaHeight + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize;
 		lcuTotalCount = pictureWidthInLcu * pictureHeighInLcu;
-        
+#if !ONE_MEMCPY        
         CopyInputPicture(
             sequenceControlSetPtr,
             pictureControlSetPtr);
 
-        sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->callbackFunctions.SendPictureDone(
-            sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->handle,           // Encoder Handle
-            sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->appPrivateData,   // App Private Data Ptr
-            pictureControlSetPtr->ebInputPtr);                                         // Bufferheader
-
+        EbReleaseObject(pictureControlSetPtr->ebInputWrapperPtr);
+#endif
 		// Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
 		SetPictureParametersForStatisticsGathering(
 			sequenceControlSetPtr);
@@ -4537,7 +4534,6 @@ void* PictureAnalysisKernel(void *inputPtr)
 		PadPictureToMultipleOfMinCuSizeDimensions(
 			sequenceControlSetPtr,
 			inputPicturePtr);
-
 
 		// Pre processing operations performed on the input picture 
         PicturePreProcessingOperations(
@@ -4589,6 +4585,10 @@ void* PictureAnalysisKernel(void *inputPtr)
 
 		outputResultsPtr = (PictureAnalysisResults_t*)outputResultsWrapperPtr->objectPtr;
 		outputResultsPtr->pictureControlSetWrapperPtr = inputResultsPtr->pictureControlSetWrapperPtr;
+
+#if DEADLOCK_DEBUG
+        printf("POC %lld PA OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
 
 		// Release the Input Results
 		EbReleaseObject(inputResultsWrapperPtr);

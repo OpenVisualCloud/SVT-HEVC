@@ -6,7 +6,7 @@
 #ifndef EbModeDecision_h
 #define EbModeDecision_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbUtility.h"
 #include "EbPictureControlSet.h"
 #include "EbCodingUnit.h"

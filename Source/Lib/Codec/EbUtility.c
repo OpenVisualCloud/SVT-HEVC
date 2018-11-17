@@ -6,14 +6,14 @@
 
 #include "EbUtility.h"
 #ifdef _WIN32
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 //#if  (WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
 #include <time.h>
 //#endif
 #elif __linux__
 #include <stdio.h>
 #include <stdlib.h>
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 //#if   (LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
 #include <sys/time.h>
 #include <time.h>
@@ -429,7 +429,7 @@ const MiniGopStats_t* GetMiniGopStats(const EB_U32 miniGopIndex)
 }
 
 
-void StartTime(EB_U64 *Startseconds, EB_U64 *Startuseconds) {
+void StartTime(unsigned long long *Startseconds, unsigned long long *Startuseconds) {
 
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     struct timeval start;
@@ -437,7 +437,7 @@ void StartTime(EB_U64 *Startseconds, EB_U64 *Startuseconds) {
     *Startseconds = start.tv_sec;
     *Startuseconds = start.tv_usec;
 #elif _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
-    *Startseconds = (EB_U64)clock();
+    *Startseconds = (unsigned long long)clock();
     (void)(*Startuseconds);
 #else
     (void)(*Startuseconds);
@@ -446,7 +446,7 @@ void StartTime(EB_U64 *Startseconds, EB_U64 *Startuseconds) {
 
 }
 
-void FinishTime(EB_U64 *Finishseconds, EB_U64 *Finishuseconds) {
+void FinishTime(unsigned long long *Finishseconds, unsigned long long *Finishuseconds) {
 
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     struct timeval finish;
@@ -454,7 +454,7 @@ void FinishTime(EB_U64 *Finishseconds, EB_U64 *Finishuseconds) {
     *Finishseconds = finish.tv_sec;
     *Finishuseconds = finish.tv_usec;
 #elif _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
-    *Finishseconds = (EB_U64)clock();
+    *Finishseconds = (unsigned long long)clock();
     (void)(*Finishuseconds);
 #else
     (void)(*Finishuseconds);
@@ -462,7 +462,7 @@ void FinishTime(EB_U64 *Finishseconds, EB_U64 *Finishuseconds) {
 #endif
 
 }
-void ComputeOverallElapsedTime(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U64 Finishseconds, EB_U64 Finishuseconds, double *duration)
+void ComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration)
 {
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     long   mtime, seconds, useconds;
@@ -486,7 +486,7 @@ void ComputeOverallElapsedTime(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U64
 #endif
 
 }
-void ComputeOverallElapsedTimeMs(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U64 Finishseconds, EB_U64 Finishuseconds, double *duration)
+void ComputeOverallElapsedTimeMs(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration)
 {
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     long   mtime, seconds, useconds;

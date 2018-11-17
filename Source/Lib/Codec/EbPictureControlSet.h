@@ -10,7 +10,7 @@
 
 #include "EbApi.h"
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbPictureBufferDesc.h"
 #include "EbCodingUnit.h"
@@ -349,6 +349,8 @@ typedef struct PictureParentControlSet_s
     EB_PICNOISE_CLASS                     picNoiseClass;
 
     EB_BUFFERHEADERTYPE                  *ebInputPtr;
+
+    EbObjectWrapper_t                    *ebInputWrapperPtr;
 
     EB_SLICE                              sliceType;                                 
     NalUnitType                           nalUnit;

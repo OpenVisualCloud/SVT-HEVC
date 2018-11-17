@@ -5,7 +5,6 @@
 
 #include <stdlib.h>
 
-#include "EbTypes.h"
 #include "EbBitstreamUnit.h"
 #include "EbDefinitions.h"
 

@@ -6,7 +6,7 @@
 #ifndef EbRateControlTasks_h
 #define EbRateControlTasks_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbPictureControlSet.h"
 

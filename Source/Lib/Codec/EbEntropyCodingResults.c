@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbEntropyCodingResults.h"
 
 EB_ERRORTYPE EntropyCodingResultsCtor(

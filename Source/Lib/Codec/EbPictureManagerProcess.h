@@ -6,7 +6,7 @@
 #ifndef EbPictureManager_h
 #define EbPictureManager_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #ifdef __cplusplus
 extern "C" {

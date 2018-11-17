@@ -6,7 +6,7 @@
 #ifndef EbInitialRateControlReorderQueue_h
 #define EbInitialRateControlReorderQueue_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbRateControlTables.h"
 #include "EbPictureControlSet.h"

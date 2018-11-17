@@ -337,7 +337,9 @@ void* EntropyCodingKernel(void *inputPtr)
         pictureControlSetPtr   = (PictureControlSet_t*) encDecResultsPtr->pictureControlSetWrapperPtr->objectPtr;
         sequenceControlSetPtr  = (SequenceControlSet_t*) pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
         lastLcuFlag            = EB_FALSE;
-
+#if DEADLOCK_DEBUG
+        printf("POC %lld EC IN \n", pictureControlSetPtr->pictureNumber);
+#endif
         // LCU Constants
         lcuSize     = sequenceControlSetPtr->lcuSize;
         lcuSizeLog2 = (EB_U8)Log2f(lcuSize);
@@ -458,6 +460,9 @@ void* EntropyCodingKernel(void *inputPtr)
 
 			}
         }
+#if DEADLOCK_DEBUG
+        printf("POC %lld EC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
         // Release Mode Decision Results
         EbReleaseObject(encDecResultsWrapperPtr);
 

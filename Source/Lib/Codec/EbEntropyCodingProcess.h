@@ -6,7 +6,7 @@
 #ifndef EbEntropyCodingProcess_h
 #define EbEntropyCodingProcess_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSyntaxElements.h"
 
 #include "EbSystemResourceManager.h"

@@ -6,7 +6,7 @@
 #ifndef EbPacketizationReorderQueue_h
 #define EbPacketizationReorderQueue_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #ifdef __cplusplus
 extern "C" {

@@ -6,7 +6,7 @@
 #ifndef EbEstimationProcess_h
 #define EbEstimationProcess_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbSequenceControlSet.h"
 #include "EbPictureControlSet.h"

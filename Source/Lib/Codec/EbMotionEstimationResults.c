@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbMotionEstimationResults.h"
 
 EB_ERRORTYPE MotionEstimationResultsCtor(

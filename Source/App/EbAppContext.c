@@ -9,10 +9,8 @@
 
 #include <stdlib.h>
 
-#include "EbTypes.h"
 #include "EbAppContext.h"
 #include "EbAppConfig.h"
-#include "EbApiSei.h"
 
 
 #define INPUT_SIZE_576p_TH				0x90000		// 0.58 Million   
@@ -72,51 +70,6 @@ void AllocateMemoryTable(
 **************************************
 **************************************/
 
-/***********************************
- * AppContext Constructor
- ***********************************/
-void EbAppContextCtor(EbAppContext_t *contextPtr)
-{
-    contextPtr->inputContext.processedByteCount     = 0;
-    contextPtr->inputContext.processedFrameCount    = 0;
-    contextPtr->inputContext.previousTimeSeconds    = 0;
-    contextPtr->inputContext.measuredFrameRate      = 0;
-
-    contextPtr->feedBackIsComplete                  = EB_FALSE;
-    return;
-}
-
-
-/***********************************
-* ParentAppContext Constructor 
-*  Allowing multi instance support
-***********************************/
-void EbParentAppContextCtor(EbAppContext_t **contextPtr, EbParentAppContext_t *parentContextPtr, unsigned int numChannels, EB_U32 totalBuffersSize)
-{
-
-	unsigned int count;
-	AppCommandFifoCtor(&parentContextPtr->fifo, totalBuffersSize);
-
-	for (count=0; count < numChannels; ++count){
-		parentContextPtr->appCallBacks[count]			= contextPtr[count];
-		parentContextPtr->appCallBacks[count]->fifoPtr	= &parentContextPtr->fifo;
-	}
-
-	parentContextPtr->numChannels = (EB_U8) numChannels;
-    
-
-    return;
-}
-
-/***********************************
- * AppContext Destructor
- ***********************************/
-void EbParentAppContextDtor(EbParentAppContext_t *parentContextPtr)
-{
-    AppCommandFifoDtor(&parentContextPtr->fifo);
-
-    return;
-}
 
 /******************************************************
 * Copy fields from the stream to the input buffer
@@ -210,11 +163,8 @@ EB_ERRORTYPE CopyConfigurationParameters(
 
     // Initialize Port Activity Flags
     callbackData->outputStreamPortActive = APP_PortActive;
-
-    callbackData->inputPortDefinition.nFrameWidth = config->sourceWidth;
-    callbackData->inputPortDefinition.nFrameHeight = config->sourceHeight;
-    callbackData->inputPortDefinition.nStride = config->inputPaddedWidth;
-
+    callbackData->ebEncParameters.sourceWidth = config->sourceWidth;
+    callbackData->ebEncParameters.sourceHeight = config->sourceHeight;
     callbackData->ebEncParameters.interlacedVideo = (EB_BOOL)config->interlacedVideo;
     callbackData->ebEncParameters.intraPeriodLength = config->intraPeriod;
     callbackData->ebEncParameters.intraRefreshType = config->intraRefreshType;
@@ -224,9 +174,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.frameRateDenominator = config->frameRateDenominator;
     callbackData->ebEncParameters.frameRateNumerator = config->frameRateNumerator;
 	callbackData->ebEncParameters.hierarchicalLevels = config->hierarchicalLevels;
-
-	callbackData->ebEncParameters.predStructure = (EB_PRED)config->predStructure;
-
+	callbackData->ebEncParameters.predStructure = (EB_U8)config->predStructure;
     callbackData->ebEncParameters.sceneChangeDetection = config->sceneChangeDetection;
     callbackData->ebEncParameters.lookAheadDistance = config->lookAheadDistance;
     callbackData->ebEncParameters.framesToBeEncoded = config->framesToBeEncoded;
@@ -250,13 +198,10 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.hmeLevel0TotalSearchAreaWidth = config->hmeLevel0TotalSearchAreaWidth;
     callbackData->ebEncParameters.hmeLevel0TotalSearchAreaHeight = config->hmeLevel0TotalSearchAreaHeight;
     callbackData->ebEncParameters.constrainedIntra = (EB_BOOL)config->constrainedIntra;
-
     callbackData->ebEncParameters.tune = config->tune;
-
     callbackData->ebEncParameters.channelId = config->channelId;
     callbackData->ebEncParameters.activeChannelCount = config->activeChannelCount;
     callbackData->ebEncParameters.useRoundRobinThreadAssignment = (EB_BOOL)config->useRoundRobinThreadAssignment;
-
 	callbackData->ebEncParameters.bitRateReduction = (EB_U8)config->bitRateReduction;
 	callbackData->ebEncParameters.improveSharpness = (EB_U8)config->improveSharpness;
     callbackData->ebEncParameters.videoUsabilityInfo = config->videoUsabilityInfo;
@@ -290,27 +235,14 @@ EB_ERRORTYPE CopyConfigurationParameters(
         callbackData->ebEncParameters.hmeLevel2SearchAreaInHeightArray[hmeRegionIndex] = config->hmeLevel2SearchAreaInHeightArray[hmeRegionIndex];
     }
 
-    // Video Usability Info
-    EB_APP_MALLOC(AppVideoUsabilityInfo_t*, callbackData->ebEncParameters.vuiPtr, sizeof(AppVideoUsabilityInfo_t), EB_N_PTR, EB_ErrorInsufficientResources);
-
-    // Initialize vui parameters
-    return_error = (EB_ERRORTYPE)EbAppVideoUsabilityInfoCtor(
-        callbackData->ebEncParameters.vuiPtr);
-    
-
-    // Set the Parameters
-    return_error = EbH265EncInitParameter(
-                       callbackData->svtEncoderHandle,
-                       &callbackData->inputPortDefinition);
-
     return return_error;
 
 }
 
 
 EB_ERRORTYPE AllocateFrameBuffer(
-    EbConfig_t				*config,
-    EB_U8      			*pBuffer)
+    EbConfig_t          *config,
+    EB_U8               *pBuffer)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
 
@@ -330,7 +262,9 @@ EB_ERRORTYPE AllocateFrameBuffer(
 
     // Determine  
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)pBuffer;
-
+    inputPtr->yStride = config->inputPaddedWidth;
+    inputPtr->crStride = config->inputPaddedWidth >> 1;
+    inputPtr->cbStride = config->inputPaddedWidth >> 1;
     if (luma8bitSize) {
         EB_APP_MALLOC(unsigned char*, inputPtr->luma, luma8bitSize, EB_N_PTR, EB_ErrorInsufficientResources);
     }
@@ -394,9 +328,6 @@ EB_ERRORTYPE AllocateInputBuffers(
         // Initialize Header
         callbackData->inputBufferPool[bufferIndex]->nSize                       = sizeof(EB_BUFFERHEADERTYPE);
 
-        callbackData->inputPortDefinition.nFrameWidth              = config->sourceWidth;
-        callbackData->inputPortDefinition.nFrameHeight             = config->sourceHeight;
-
         EB_APP_MALLOC(EB_U8*, callbackData->inputBufferPool[bufferIndex]->pBuffer, sizeof(EB_H265_ENC_INPUT), EB_N_PTR, EB_ErrorInsufficientResources);
 
         if (config->bufferedInput == -1) {
@@ -408,9 +339,8 @@ EB_ERRORTYPE AllocateInputBuffers(
         }
 
         // Assign the variables 
-        callbackData->inputBufferPool[bufferIndex]->nAllocLen               = callbackData->inputPortDefinition.nSize;
-        callbackData->inputBufferPool[bufferIndex]->pAppPrivate             = (EB_PTR)callbackData;
-
+        callbackData->inputBufferPool[bufferIndex]->pAppPrivate = NULL;// (EB_PTR)callbackData;
+        callbackData->inputBufferPool[bufferIndex]->sliceType = INVALID_SLICE;
     }
 
     return return_error;
@@ -441,7 +371,7 @@ EB_ERRORTYPE AllocateOutputBuffers(
 
         callbackData->streamBufferPool[bufferIndex]->nAllocLen = callbackData->outputStreamPortDefinition.nStride;
         callbackData->streamBufferPool[bufferIndex]->pAppPrivate = (EB_PTR)callbackData;
-        callbackData->streamBufferPool[bufferIndex]->nOutputPortIndex = EB_ENCODERSTREAMPORT;
+        callbackData->streamBufferPool[bufferIndex]->sliceType = INVALID_SLICE;
     }
     return return_error;
 }
@@ -449,17 +379,14 @@ EB_ERRORTYPE AllocateOutputBuffers(
 EB_ERRORTYPE PreloadFramesIntoRam(
     EbConfig_t				*config)
 {
-    EB_ERRORTYPE   return_error = EB_ErrorNone;
-    int processedFrameCount;
+    EB_ERRORTYPE    return_error = EB_ErrorNone;
+    int             processedFrameCount;
+    int             filledLen;
+    int             inputPaddedWidth = config->inputPaddedWidth;
+    int             inputPaddedHeight = config->inputPaddedHeight;
+    int             readSize;
+    unsigned char  *ebInputPtr;
 
-    int filledLen;
-
-
-    int inputPaddedWidth = config->inputPaddedWidth;
-    int inputPaddedHeight = config->inputPaddedHeight;
-
-    int readSize;
-    unsigned char *ebInputPtr;
     FILE *inputFile = config->inputFile;
 
     if (config->encoderBitDepth == 10 && config->compressedTenBitFormat == 1)
@@ -628,132 +555,9 @@ EB_ERRORTYPE PreloadFramesIntoRam(
     return return_error;
 }
 
-
 /***************************************
 * Functions Implementation
 ***************************************/
-
-/***************************************
-* Encoder Event Callback
-* This callback is used for error reporting
-* or to signal the encoding being done
-***************************************/
-EB_ERRORTYPE encoderFeedbackComplete(
-    EB_HANDLETYPE     hComponent,     // Component Handle
-    EB_PTR            pAppData,       // Pointer to private data
-    EB_U32            nData1,         // Type defined by event
-    EB_U32            nData2,         // Type defined by event
-    EB_PTR            pEventData)     // Pointer to event data
-{
-    EbAppContext_t *callbackDataPtr = (EbAppContext_t*)pAppData;
-    AppCommandItem_t commandItem;
-
-    pAppData = (EB_PTR)0;
-
-    // Configure the command
-    commandItem.command = APP_FeedBackIsComplete;
-    commandItem.headerPtr = (EB_BUFFERHEADERTYPE*)EB_NULL;
-    commandItem.instanceIndex = callbackDataPtr->instanceIdx;
-    AppCommandFifoPush(callbackDataPtr->fifoPtr, &commandItem);
-
-    (void)pEventData;
-    (void)hComponent;
-    (void)nData1;
-    (void)nData2;
-   
-    return EB_ErrorNone;
-}
-
-/***************************************
-* Encoder Event Callback
-* This callback is used for error reporting
-* or to signal the encoding being done
-***************************************/
-EB_ERRORTYPE encoderEventCb(
-    EB_HANDLETYPE     hComponent,     // Component Handle
-    EB_PTR            pAppData,       // Pointer to private data
-    EB_U32            nData1,         // Type defined by event
-    EB_U32            nData2,         // Type defined by event
-    EB_PTR            pEventData)
-{
-    EbAppContext_t *callbackDataPtr = (EbAppContext_t*)pAppData;
-    AppCommandItem_t commandItem;
-
-    pAppData = (EB_PTR)0;
-
-    commandItem.command = APP_ExitError;
-    commandItem.errorCode = nData1;
-    commandItem.headerPtr = (EB_BUFFERHEADERTYPE*)EB_NULL;
-    commandItem.instanceIndex = callbackDataPtr->instanceIdx;
-    AppCommandFifoPush(callbackDataPtr->fifoPtr, &commandItem);
-
-    (void)pEventData;
-    (void)hComponent;
-    (void)nData1;
-    (void)nData2;
-
-    return EB_ErrorNone;
-}
-
-/***************************************
-* Encoder Empty Buffer Done Callback
-***************************************/
-EB_ERRORTYPE encoderSendPictureDone(
-    EB_HANDLETYPE          hComponent,
-    EB_PTR                 pAppData,
-    EB_BUFFERHEADERTYPE   *pBuffer)
-{
-    EB_ERRORTYPE   return_error = EB_ErrorNone;
-    EbAppContext_t *callbackDataPtr = (EbAppContext_t*)pAppData;
-    AppCommandItem_t commandItem;
-
-    // Unused variable
-    hComponent = (EB_HANDLETYPE)0;
-    (void)hComponent;
-
-    // Configure the command
-    commandItem.command = APP_InputEmptyThisBuffer;
-    commandItem.headerPtr = pBuffer;
-    commandItem.instanceIndex = callbackDataPtr->instanceIdx;
-    AppCommandFifoPush(callbackDataPtr->fifoPtr, &commandItem);
-
-    return return_error;
-}
-
-/***************************************
-* Encoder Fill Buffer Done Callback
-***************************************/
-EB_ERRORTYPE encoderFillPacketDone(
-    EB_HANDLETYPE           hComponent,
-    EB_PTR                  pAppData,
-    EB_BUFFERHEADERTYPE    *pBuffer)
-{
-    AppCommandItem_t commandItem;
-    EB_ERRORTYPE   return_error = EB_ErrorNone;
-    EbAppContext_t *callbackDataPtr = (EbAppContext_t*)pAppData;
-
-    // Unused variable
-    hComponent = (EB_HANDLETYPE)0;
-    (void)hComponent;
-
-    // Configure the command
-    switch (pBuffer->nOutputPortIndex) {
-    case EB_ENCODERSTREAMPORT:
-        commandItem.command = APP_OutputStreamFillThisBuffer;
-        break;
-    default:
-        commandItem.command = APP_OutputStreamFillThisBuffer;
-        break;
-
-    }
-    commandItem.headerPtr = pBuffer;
-    commandItem.instanceIndex = callbackDataPtr->instanceIdx;
-
-    AppCommandFifoPush(callbackDataPtr->fifoPtr, &commandItem);
-
-    return return_error;
-}
-
 
 /***********************************
  * Initialize Core & Component
@@ -763,21 +567,20 @@ EB_ERRORTYPE InitEncoder(
     EbAppContext_t			*callbackData,
 	EB_U32					instanceIdx)
 {
-    EB_CALLBACKTYPE     encoderCallBacks = {encoderFeedbackComplete, encoderEventCb, encoderSendPictureDone, encoderFillPacketDone};
     EB_ERRORTYPE        return_error = EB_ErrorNone;
-    unsigned int        bufferIndex;
     
     // Allocate a memory table hosting all allocated pointers
     AllocateMemoryTable(instanceIdx);
-    	
+
+    ///************************* LIBRARY INIT [START] *********************///
     // STEP 1: Call the library to construct a Component Handle
-    return_error = EbInitHandle(&callbackData->svtEncoderHandle, callbackData, &encoderCallBacks);
+    return_error = EbInitHandle(&callbackData->svtEncoderHandle, callbackData, &callbackData->ebEncParameters);
 
     if (return_error != EB_ErrorNone) {
         return return_error;
     }
-    
-    // STEP 2: Copy all configuration parameters into the callback structure
+
+    // STEP 3: Copy all configuration parameters into the callback structure
     return_error = CopyConfigurationParameters(
                     config,
                     callbackData,
@@ -787,7 +590,7 @@ EB_ERRORTYPE InitEncoder(
         return return_error;
     }
     
-    // STEP 3: Send over all configuration parameters
+    // STEP 4: Send over all configuration parameters
     // Set the Parameters
     return_error = EbH265EncSetParameter(
                        callbackData->svtEncoderHandle,
@@ -797,7 +600,14 @@ EB_ERRORTYPE InitEncoder(
         return return_error;
     }
 
-    // STEP 4: Allocate input buffers carrying the yuv frames in
+    // STEP 5: Init Encoder
+    return_error = EbInitEncoder(callbackData->svtEncoderHandle);
+
+    ///************************* LIBRARY INIT [END] *********************///
+
+    ///********************** APPLICATION INIT [START] ******************///
+
+    // STEP 6: Allocate input buffers carrying the yuv frames in
     return_error = AllocateInputBuffers(
         config,
         callbackData);
@@ -806,7 +616,7 @@ EB_ERRORTYPE InitEncoder(
         return return_error;
     }
 
-    // STEP 5: Allocate output buffers carrying the bitstream out
+    // STEP 7: Allocate output buffers carrying the bitstream out
     return_error = AllocateOutputBuffers(
         config,
         callbackData);
@@ -826,33 +636,12 @@ EB_ERRORTYPE InitEncoder(
         config->sequenceBuffer = 0;
     }
 
-    // STEP 8: Init Encoder
-    return_error = EbInitEncoder(callbackData->svtEncoderHandle);
-
     if (return_error != EB_ErrorNone) {
         return return_error;
     }
-
     
-    // STEP 9: Queue the Input Buffers to be populated 
-    for(bufferIndex=0; bufferIndex < callbackData->ebEncParameters.inputOutputBufferFifoInitCount; ++bufferIndex) {
-
-        // Tag the input buffers with APP_InputEmptyThisBuffer for the library to empty them
-        AppCommandItem_t commandItem;
-		commandItem.instanceIndex   = callbackData->instanceIdx;
-        commandItem.command         = APP_InputEmptyThisBuffer;
-        commandItem.headerPtr       = callbackData->inputBufferPool[bufferIndex];
-
-        AppCommandFifoPush(callbackData->fifoPtr, &commandItem);
-    }
-
-    // STEP 10:  Queue the Bitstream Buffers (link the library bitstream pointers to the newly created buffers)
-    for(bufferIndex=0; bufferIndex < callbackData->ebEncParameters.inputOutputBufferFifoInitCount; ++bufferIndex) {
-         return_error = EbH265EncFillPacket(
-                           callbackData->svtEncoderHandle,
-                           callbackData->streamBufferPool[bufferIndex]);
-    }
-
+  
+    ///********************** APPLICATION INIT [END] ******************////////
     
     return return_error;
 }
@@ -862,20 +651,14 @@ EB_ERRORTYPE InitEncoder(
  ***********************************/
 EB_ERRORTYPE DeInitEncoder(
     EbAppContext_t *callbackDataPtr,
-    EB_U32          instanceIndex,
-    EB_ERRORTYPE   libExitError)
+    EB_U32          instanceIndex)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_S32              ptrIndex        = 0;
-    EbMemoryMapEntry*   memoryEntry     = (EbMemoryMapEntry*)EB_NULL;
+    EbMemoryMapEntry*   memoryEntry     = (EbMemoryMapEntry*)0;
     
     if (((EB_COMPONENTTYPE*)(callbackDataPtr->svtEncoderHandle)) != NULL) {
-        if (libExitError == EB_ErrorInsufficientResources) {
-            return_error = EbStopEncoder(callbackDataPtr->svtEncoderHandle, 0);
-        }
-        else {
             return_error = EbDeinitEncoder(callbackDataPtr->svtEncoderHandle);
-        }
     }
 
     // Destruct the buffer memory pool
@@ -899,33 +682,6 @@ EB_ERRORTYPE DeInitEncoder(
 
     // Destruct the component
     EbDeinitHandle(callbackDataPtr->svtEncoderHandle);
-
-    return return_error;
-}
-
-/***********************************
- * Start the Encoder Component
- ***********************************/
-EB_ERRORTYPE StartEncoder(
-    EbAppContext_t  *callbackDataPtr)
-{
-    EB_ERRORTYPE return_error = EB_ErrorNone;
-
-    return_error = EbStartEncoder(
-        callbackDataPtr->svtEncoderHandle, 0);
-
-    return return_error;
-}
-
-/***********************************
- * Stop the Encoder Component
- ***********************************/
-EB_ERRORTYPE StopEncoder(
-    EbAppContext_t  *callbackDataPtr)
-{
-    EB_ERRORTYPE return_error = EB_ErrorNone;
-
-    return_error = EbStopEncoder(callbackDataPtr->svtEncoderHandle, 0);
 
     return return_error;
 }

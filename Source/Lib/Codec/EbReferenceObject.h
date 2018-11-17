@@ -6,7 +6,7 @@
 #ifndef EbReferenceObject_h
 #define EbReferenceObject_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbAdaptiveMotionVectorPrediction.h" 
 
 typedef struct EbReferenceObject_s {

@@ -6,7 +6,7 @@
 #ifndef EbSourceBasedOperations_h
 #define EbSourceBasedOperations_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbNoiseExtractAVX2.h"
 typedef struct CuComplexityInfo_s

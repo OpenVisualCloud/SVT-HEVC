@@ -6,7 +6,7 @@
 #ifndef EbEncDecSegments_h
 #define EbEncDecSegments_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbThreads.h"
 #ifdef __cplusplus
 extern "C" {

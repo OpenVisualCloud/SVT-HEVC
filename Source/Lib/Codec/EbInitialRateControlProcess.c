@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbPictureControlSet.h"
 #include "EbSequenceControlSet.h"
@@ -862,6 +862,7 @@ void UpdateHistogramQueueEntry(
 	histogramQueueEntryPtr = encodeContextPtr->hlRateControlHistorgramQueue[histogramQueueEntryIndex];
 	histogramQueueEntryPtr->lifeCount += pictureControlSetPtr->historgramLifeCount;
 	histogramQueueEntryPtr->passedToHlrc = EB_TRUE;
+
 	EbReleaseMutex(sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueueMutex);
 
 	return;
@@ -911,9 +912,6 @@ void* InitialRateControlKernel(void *inputPtr)
     EB_U8                               temporalLayerIndex;
 	EbObjectWrapper_t                  *referencePictureWrapperPtr;
 
-	// Segments
-	EB_U32                              segmentIndex;
-
 	EbObjectWrapper_t                *outputStreamWrapperPtr;
 
 	for (;;) {
@@ -925,14 +923,11 @@ void* InitialRateControlKernel(void *inputPtr)
 
 		inputResultsPtr = (MotionEstimationResults_t*)inputResultsWrapperPtr->objectPtr;
 		pictureControlSetPtr = (PictureParentControlSet_t*)inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;
-
-		segmentIndex = inputResultsPtr->segmentIndex;
-
-		// Set the segment mask
-		SEGMENT_COMPLETION_MASK_SET(pictureControlSetPtr->meSegmentsCompletionMask, segmentIndex);
-
-		// If the picture is complete, proceed
-		if (SEGMENT_COMPLETION_MASK_TEST(pictureControlSetPtr->meSegmentsCompletionMask, pictureControlSetPtr->meSegmentsTotalCount)) {
+#if DEADLOCK_DEBUG
+        printf("POC %lld IRC IN \n", pictureControlSetPtr->pictureNumber);
+#endif
+        pictureControlSetPtr->meSegmentsCompletionMask++;
+        if (pictureControlSetPtr->meSegmentsCompletionMask == pictureControlSetPtr->meSegmentsTotalCount) {
 			sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 			encodeContextPtr = (EncodeContext_t*)sequenceControlSetPtr->encodeContextPtr;
 
@@ -1122,13 +1117,14 @@ void* InitialRateControlKernel(void *inputPtr)
 						1);
 					//OPTION 1:  get the buffer in resource coordination
 
-					EbGetFullObject(
+#if CHKN_OMX
+					EbGetEmptyObject(
 						sequenceControlSetPtr->encodeContextPtr->streamOutputFifoPtr,
 						&outputStreamWrapperPtr);
 
-					pictureControlSetPtr->outputStreamWrapperPtr = outputStreamWrapperPtr;
+					pictureControlSetPtr->outputStreamWrapperPtr = outputStreamWrapperPtr;					
 
-
+#endif
 					// Get Empty Results Object
 					EbGetEmptyObject(
 						contextPtr->initialrateControlResultsOutputFifoPtr,
@@ -1152,7 +1148,9 @@ void* InitialRateControlKernel(void *inputPtr)
 				}
 			}
 		}
-
+#if DEADLOCK_DEBUG
+        printf("POC %lld IRC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
 		// Release the Input Results
 		EbReleaseObject(inputResultsWrapperPtr);
 

@@ -8,7 +8,7 @@
 
 #include <stdio.h> 
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 
 #ifdef __cplusplus

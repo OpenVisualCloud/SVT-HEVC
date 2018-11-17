@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSequenceControlSet.h"
 
 /**************************************************************************************************
@@ -129,6 +129,7 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     // Initialize vui parameters
     return_error = EbVideoUsabilityInfoCtor(
         sequenceControlSetPtr->videoUsabilityInfoPtr);
+
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
@@ -149,12 +150,9 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
 		sequenceControlSetPtr);
 
 	// Buffers:
-	sequenceControlSetPtr->inputOutputBufferFifoInitCount					    =	100; 
-	sequenceControlSetPtr->outputStreamBufferFifoInitCount			    =	sequenceControlSetPtr->pictureControlSetPoolInitCount;  
+	sequenceControlSetPtr->inputOutputBufferFifoInitCount					    =	50; 
 	
-
-
-	sequenceControlSetPtr->maxDpbSize	= 0;
+    sequenceControlSetPtr->maxDpbSize	= 0;
     
     return EB_ErrorNone;
 }

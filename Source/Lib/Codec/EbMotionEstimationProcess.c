@@ -953,7 +953,9 @@ void* MotionEstimationKernel(void *inputPtr)
 		sixteenthDecimatedPicturePtr = (EbPictureBufferDesc_t*)paReferenceObject->sixteenthDecimatedPicturePtr;
         inputPaddedPicturePtr = (EbPictureBufferDesc_t*)paReferenceObject->inputPaddedPicturePtr;
 		inputPicturePtr = pictureControlSetPtr->enhancedPicturePtr;
-
+#if DEADLOCK_DEBUG
+        printf("POC %lld ME IN \n", pictureControlSetPtr->pictureNumber);
+#endif
 		// Segments
 		segmentIndex = inputResultsPtr->segmentIndex;
 		pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize;
@@ -1246,6 +1248,9 @@ void* MotionEstimationKernel(void *inputPtr)
 				}
 			}
 		}
+#if DEADLOCK_DEBUG
+        printf("POC %lld ME OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
         EbReleaseMutex(pictureControlSetPtr->rcDistortionHistogramMutex);
 		// Get Empty Results Object
 		EbGetEmptyObject(

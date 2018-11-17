@@ -58,6 +58,7 @@ static EB_ERRORTYPE EbFifoPushBack(
     return return_error;
 }
 
+
 /**************************************
  * EbFifoPopFront
  **************************************/
@@ -77,6 +78,22 @@ static EB_ERRORTYPE EbFifoPopFront(
     fifoPtr->firstPtr = fifoPtr->firstPtr->nextPtr;
 
     return return_error;
+}
+
+/**************************************
+* EbFifoPopFront
+**************************************/
+static EB_BOOL EbFifoPeakFront(
+    EbFifo_t            *fifoPtr)
+{
+
+    // Set wrapperPtr to head of BufferPool
+    if (fifoPtr->firstPtr == (EbObjectWrapper_t*)EB_NULL) {
+        return EB_TRUE;
+    }
+    else {
+        return EB_FALSE; 
+    }
 }
 
 /**************************************
@@ -223,7 +240,7 @@ static EB_ERRORTYPE EbMuxingQueueCtor(
     EB_MALLOC(EbFifo_t**, queuePtr->processFifoPtrArray, sizeof(EbFifo_t*) * queuePtr->processTotalCount, EB_N_PTR);
 
     for(processIndex=0; processIndex < queuePtr->processTotalCount; ++processIndex) {
-        EB_MALLOC(EbFifo_t*, queuePtr->processFifoPtrArray[processIndex], sizeof(EbFifo_t) * queuePtr->processTotalCount, EB_N_PTR);
+        EB_MALLOC(EbFifo_t*, queuePtr->processFifoPtrArray[processIndex], sizeof(EbFifo_t), EB_N_PTR);
         return_error = EbFifoCtor(
             queuePtr->processFifoPtrArray[processIndex],
             0,
@@ -664,7 +681,7 @@ EB_ERRORTYPE EbGetFullObject(
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
-    // Queue the Fifo requesting the full fifo
+    // Queue the process requesting the full fifo
     EbReleaseProcess(fullFifoPtr);
 
     // Block on the counting Semaphore until an empty buffer is available
@@ -679,6 +696,49 @@ EB_ERRORTYPE EbGetFullObject(
 
     // Release Mutex
     EbReleaseMutex(fullFifoPtr->lockoutMutex);
+
+    return return_error;
+}
+
+/******************************************************************************
+* EbSystemResourceGetFullObject
+*   Dequeues an full EbObjectWrapper from the SystemResource. This
+*   function does not block on the SystemResource fullFifo countingSemaphore.
+*   This function is write protected by the SystemResource fullFifo
+*   lockoutMutex.
+*
+*   resourcePtr
+*      Pointer to the SystemResource that provides the full
+*      EbObjectWrapper.
+*
+*   wrapperDblPtr
+*      Double pointer used to pass the pointer to the full
+*      EbObjectWrapper pointer.
+*******************************************************************************/
+EB_ERRORTYPE EbGetFullObjectNonBlocking(
+    EbFifo_t   *fullFifoPtr,
+    EbObjectWrapper_t **wrapperDblPtr)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    EB_BOOL      fifoEmpty;
+    // Queue the Fifo requesting the full fifo
+    EbReleaseProcess(fullFifoPtr);
+
+    // Acquire lockout Mutex
+    EbBlockOnMutex(fullFifoPtr->lockoutMutex);
+
+    fifoEmpty = EbFifoPeakFront(
+                        fullFifoPtr);
+
+    // Release Mutex
+    EbReleaseMutex(fullFifoPtr->lockoutMutex);
+
+    if (fifoEmpty == EB_FALSE)
+        EbGetFullObject(
+            fullFifoPtr,
+            wrapperDblPtr);
+    else
+        *wrapperDblPtr = (EbObjectWrapper_t*)EB_NULL;
 
     return return_error;
 }

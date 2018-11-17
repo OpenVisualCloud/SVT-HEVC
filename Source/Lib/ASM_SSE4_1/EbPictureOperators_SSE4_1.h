@@ -6,7 +6,7 @@
 #ifndef EbPictureOperators_SSE4_1_h
 #define EbPictureOperators_SSE4_1_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 #ifdef __cplusplus
 extern "C" {

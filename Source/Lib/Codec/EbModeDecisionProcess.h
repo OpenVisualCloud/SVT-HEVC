@@ -6,7 +6,7 @@
 #ifndef EbModeDecisionProcess_h
 #define EbModeDecisionProcess_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSyntaxElements.h"
 
 #include "EbSystemResourceManager.h"

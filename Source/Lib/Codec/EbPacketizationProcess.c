@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbPacketizationProcess.h"
 #include "EbEntropyCodingResults.h"
 
@@ -101,7 +101,9 @@ void* PacketizationKernel(void *inputPtr)
         pictureControlSetPtr    = (PictureControlSet_t*)    entropyCodingResultsPtr->pictureControlSetWrapperPtr->objectPtr;
         sequenceControlSetPtr   = (SequenceControlSet_t*)   pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
         encodeContextPtr        = (EncodeContext_t*)        sequenceControlSetPtr->encodeContextPtr;
-
+#if DEADLOCK_DEBUG
+        printf("POC %lld PK IN \n", pictureControlSetPtr->pictureNumber);
+#endif
         //****************************************************
         // Input Entropy Results into Reordering Queue
         //****************************************************
@@ -120,7 +122,11 @@ void* PacketizationKernel(void *inputPtr)
         outputStreamPtr->nFlags |= (encodeContextPtr->terminatingSequenceFlagReceived == EB_TRUE && pictureControlSetPtr->ParentPcsPtr->decodeOrder == encodeContextPtr->terminatingPictureNumber) ? EB_BUFFERFLAG_EOS : 0;
         outputStreamPtr->nFilledLen = 0;
         outputStreamPtr->nOffset = 0;
-
+        outputStreamPtr->pts = pictureControlSetPtr->ParentPcsPtr->ebInputPtr->pts;
+        outputStreamPtr->dts = pictureControlSetPtr->ParentPcsPtr->decodeOrder - (1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 1;
+        outputStreamPtr->sliceType = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag ? 
+                                     pictureControlSetPtr->ParentPcsPtr->idrFlag ? IDR_SLICE :
+                                     pictureControlSetPtr->sliceType : NON_REF_SLICE;
         // Get Empty Rate Control Input Tasks
         EbGetEmptyObject(
             contextPtr->rateControlTasksOutputFifoPtr,
@@ -131,7 +137,7 @@ void* PacketizationKernel(void *inputPtr)
         
         sliceType = pictureControlSetPtr->sliceType;
         
-        if(pictureControlSetPtr->pictureNumber == 0) {
+        if(pictureControlSetPtr->pictureNumber == 0 && sequenceControlSetPtr->staticConfig.codeVpsSpsPps == 1) {
 
             // Reset the bitstream before writing to it
             ResetBitstream(
@@ -162,16 +168,16 @@ void* PacketizationKernel(void *inputPtr)
                 pictureControlSetPtr->bitstreamPtr,
                 sequenceControlSetPtr);
                 
-            // Code the PPS 
-            // *Note - when tiles are enabled, we send a separate PPS for each
-            //   temporal layer since Tiles vary across temporal layers
+           // Code the PPS 
+           // *Note - when tiles are enabled, we send a separate PPS for each
+           //   temporal layer since Tiles vary across temporal layers
 
-            // Configure first pps
+           //  Configure first pps
             contextPtr->ppsConfig->ppsId           = 0;
             contextPtr->ppsConfig->constrainedFlag = 0;
             EncodePPS(
                pictureControlSetPtr->bitstreamPtr,
-               pictureControlSetPtr,
+                sequenceControlSetPtr,
                contextPtr->ppsConfig);
 
             if (sequenceControlSetPtr->staticConfig.constrainedIntra == EB_TRUE){
@@ -181,7 +187,7 @@ void* PacketizationKernel(void *inputPtr)
 
                 EncodePPS(
                     pictureControlSetPtr->bitstreamPtr,
-                    pictureControlSetPtr,
+                    sequenceControlSetPtr,
                     contextPtr->ppsConfig);
             }
 
@@ -609,7 +615,7 @@ void* PacketizationKernel(void *inputPtr)
             double latency = 0.0;
             EB_U64 finishTimeSeconds = 0;
             EB_U64 finishTimeuSeconds = 0;
-            FinishTime(&finishTimeSeconds, &finishTimeuSeconds);
+            FinishTime((unsigned long long*)&finishTimeSeconds, (unsigned long long*)&finishTimeuSeconds);
 
             ComputeOverallElapsedTimeMs(
                 queueEntryPtr->startTimeSeconds,
@@ -619,19 +625,9 @@ void* PacketizationKernel(void *inputPtr)
                 &latency);
 
             outputStreamPtr->nTickCount = (EB_U32)latency;
-
-            // Output the Bitstream
             outputStreamPtr->pAppPrivate = queueEntryPtr->outMetaData;
-            sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->callbackFunctions.FillPacketDone(
-                sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->handle,             // Encoder Handle
-                sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->appPrivateData,     // App Private Data Ptr
-                outputStreamPtr); 
+			EbPostFullObject(outputStreamWrapperPtr);
             queueEntryPtr->outMetaData = (EbLinkedListNode *)EB_NULL;
-                               
-
-            // Release the Bitstream wrapper object
-            EbReleaseObject(outputStreamWrapperPtr);         
-               
 
             // Reset the Reorder Queue Entry
             queueEntryPtr->pictureNumber    += PACKETIZATION_REORDER_QUEUE_MAX_DEPTH;            
@@ -645,7 +641,9 @@ void* PacketizationKernel(void *inputPtr)
  
 
         }
-      
+#if DEADLOCK_DEBUG
+        printf("POC %lld PK OUT \n", pictureControlSetPtr->pictureNumber);
+#endif     
     }
 return EB_NULL;
 }

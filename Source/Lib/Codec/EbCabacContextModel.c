@@ -3,7 +3,6 @@
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
 
-#include "EbTypes.h"
 #include "EbUtility.h"
 #include "EbCabacContextModel.h"
 #include "EbDefinitions.h"

@@ -6,7 +6,6 @@
 #ifndef EbSystemResource_h
 #define EbSystemResource_h
 
-#include "EbTypes.h"
 #include "EbThreads.h"
 #include "EbDefinitions.h"
 
@@ -294,6 +293,25 @@ extern EB_ERRORTYPE EbPostFullObject(
  *      EbObjectWrapper pointer.
  *********************************************************************/
 extern EB_ERRORTYPE EbGetFullObject(
+    EbFifo_t   *fullFifoPtr,
+    EbObjectWrapper_t **wrapperDblPtr);
+
+/*********************************************************************
+* EbSystemResourceGetFullObject
+*   Dequeues an full EbObjectWrapper from the SystemResource. This
+*   function does not block on the SystemResource fullFifo countingSemaphore.
+*   This function is write protected by the SystemResource fullFifo
+*   lockoutMutex.
+*
+*   resourcePtr
+*      Pointer to the SystemResource that provides the full
+*      EbObjectWrapper.
+*
+*   wrapperDblPtr
+*      Double pointer used to pass the pointer to the full
+*      EbObjectWrapper pointer.
+*********************************************************************/
+extern EB_ERRORTYPE EbGetFullObjectNonBlocking(
     EbFifo_t   *fullFifoPtr,
     EbObjectWrapper_t **wrapperDblPtr);
 

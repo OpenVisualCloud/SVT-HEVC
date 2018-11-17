@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbPictureControlSet.h"
 #include "EbPictureBufferDesc.h"
 
@@ -575,7 +575,7 @@ EB_ERRORTYPE PictureParentControlSetCtor(
     PictureParentControlSet_t   *objectPtr;
     PictureControlSetInitData_t *initDataPtr    = (PictureControlSetInitData_t*) objectInitDataPtr;
 
-    EbPictureBufferDescInitData_t inputPictureBufferDescInitData;
+    
     EB_ERRORTYPE return_error = EB_ErrorNone;
     const EB_U16 pictureLcuWidth    = (EB_U16)((initDataPtr->pictureWidth + initDataPtr->lcuSize - 1) / initDataPtr->lcuSize);
     const EB_U16 pictureLcuHeight   = (EB_U16)((initDataPtr->pictureHeight + initDataPtr->lcuSize - 1) / initDataPtr->lcuSize);
@@ -584,7 +584,14 @@ EB_ERRORTYPE PictureParentControlSetCtor(
 	EB_U32 regionInPictureHeightIndex;
 
     EB_MALLOC(PictureParentControlSet_t*, objectPtr, sizeof(PictureParentControlSet_t), EB_N_PTR);
+    *objectDblPtr = (EB_PTR)objectPtr;
 
+    objectPtr->sequenceControlSetWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
+    objectPtr->inputPictureWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
+    objectPtr->referencePictureWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
+
+#if !ONE_MEMCPY 
+    EbPictureBufferDescInitData_t inputPictureBufferDescInitData;
     // Init Picture Init data
     inputPictureBufferDescInitData.maxWidth            = initDataPtr->pictureWidth;
     inputPictureBufferDescInitData.maxHeight           = initDataPtr->pictureHeight;
@@ -604,11 +611,7 @@ EB_ERRORTYPE PictureParentControlSetCtor(
 
     inputPictureBufferDescInitData.splitMode            = initDataPtr->is16bit ? EB_TRUE : EB_FALSE;  
 
-    *objectDblPtr = (EB_PTR) objectPtr;
-    
-    objectPtr->sequenceControlSetWrapperPtr     = (EbObjectWrapper_t *)EB_NULL;
-    objectPtr->inputPictureWrapperPtr           = (EbObjectWrapper_t *)EB_NULL;
-    objectPtr->referencePictureWrapperPtr       = (EbObjectWrapper_t *)EB_NULL;
+
     
     inputPictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
  
@@ -633,7 +636,7 @@ EB_ERRORTYPE PictureParentControlSetCtor(
 		EB_ALLIGN_MALLOC(EB_U8*, objectPtr->enhancedPicturePtr->bufferBitIncCr, sizeof(EB_U8) * (initDataPtr->pictureWidth / 8)*(initDataPtr->pictureHeight / 2), EB_A_PTR);
 
 	}
-
+#endif
     // GOP
     objectPtr->predStructIndex      = 0;
     objectPtr->pictureNumber        = 0;

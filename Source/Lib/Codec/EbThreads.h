@@ -6,7 +6,6 @@
 #ifndef EbThreads_h
 #define EbThreads_h
 
-#include "EbTypes.h"
 #include "EbDefinitions.h"
 
 #ifdef _MSC_VER 
@@ -26,10 +25,6 @@ extern "C" {
 extern EB_HANDLE EbCreateThread(
     void *threadFunction(void *),
     void *threadContext);
-extern EB_ERRORTYPE EbStartThread(
-    EB_HANDLE threadHandle);
-extern EB_ERRORTYPE EbStopThread(
-    EB_HANDLE threadHandle);
 extern EB_ERRORTYPE EbDestroyThread(
     EB_HANDLE threadHandle);
 

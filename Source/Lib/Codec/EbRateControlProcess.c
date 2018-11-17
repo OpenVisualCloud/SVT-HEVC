@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbRateControlProcess.h"
 #include "EbSystemResourceManager.h"
 #include "EbSequenceControlSet.h"
@@ -2246,7 +2246,9 @@ void* RateControlKernel(void *inputPtr)
 
             pictureControlSetPtr = (PictureControlSet_t*)rateControlTasksPtr->pictureControlSetWrapperPtr->objectPtr;
             sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
-
+#if DEADLOCK_DEBUG
+            printf("POC %lld RC IN \n", pictureControlSetPtr->pictureNumber);
+#endif
             // High level RC
             if (pictureControlSetPtr->pictureNumber == 0){
 
@@ -2509,6 +2511,10 @@ void* RateControlKernel(void *inputPtr)
             rateControlResultsPtr = (RateControlResults_t*)rateControlResultsWrapperPtr->objectPtr;
             rateControlResultsPtr->pictureControlSetWrapperPtr = rateControlTasksPtr->pictureControlSetWrapperPtr;
 
+#if DEADLOCK_DEBUG
+            printf("POC %lld RC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
+
             // Post Full Rate Control Results
             EbPostFullObject(rateControlResultsWrapperPtr);
 
@@ -2710,21 +2716,15 @@ void* RateControlKernel(void *inputPtr)
             }
 #endif
 
-            if (totalNumberOfFbFrames == sequenceControlSetPtr->encodeContextPtr->terminatingPictureNumber){
-                sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->callbackFunctions.FeedbackComplete(
-                    sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->handle,
-                    sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->appPrivateData,
-                    0,
-                    0,
-                    sequenceControlSetPtr->encodeContextPtr->appCallbackPtr->appPrivateData);
-            }
             totalNumberOfFbFrames++;
-
 
 			// Release the SequenceControlSet
 			EbReleaseObject(parentPictureControlSetPtr->sequenceControlSetWrapperPtr);
-			// Release the ParentPictureControlSet
-
+#if ONE_MEMCPY 
+            // Release the input buffer
+            EbReleaseObject(parentPictureControlSetPtr->ebInputWrapperPtr);
+#endif		
+            // Release the ParentPictureControlSet
 			EbReleaseObject(rateControlTasksPtr->pictureControlSetWrapperPtr);
 
 			// Release Rate Control Tasks  

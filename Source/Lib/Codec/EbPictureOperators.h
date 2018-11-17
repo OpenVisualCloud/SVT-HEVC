@@ -11,7 +11,7 @@
 #include "EbPictureOperators_SSE4_1.h"
 #include "EbPictureOperators_AVX2.h"
 #include "EbHmCode.h"
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbPictureBufferDesc.h"
 #include "EbSequenceControlSet.h"
 #ifdef __cplusplus

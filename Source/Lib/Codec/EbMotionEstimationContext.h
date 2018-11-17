@@ -6,7 +6,7 @@
 #ifndef EbMotionEstimationContext_h
 #define EbMotionEstimationContext_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbMdRateEstimation.h"
 #include "EbCodingUnit.h"
 #ifdef __cplusplus

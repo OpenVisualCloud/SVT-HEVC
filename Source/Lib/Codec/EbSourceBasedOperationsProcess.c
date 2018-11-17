@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbPictureControlSet.h"
 #include "EbSequenceControlSet.h"
@@ -17,7 +17,6 @@
 #include "EbPictureOperators.h"
 #include "EbMotionEstimationContext.h"
 #include "emmintrin.h"
-#include "EbApiSei.h"
 /**************************************
 * Macros
 **************************************/
@@ -1425,6 +1424,9 @@ void* SourceBasedOperationsKernel(void *inputPtr)
         pictureControlSetPtr = (PictureParentControlSet_t*)inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;
 		sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 
+#if DEADLOCK_DEBUG
+        printf("POC %lld SRC IN \n", pictureControlSetPtr->pictureNumber);
+#endif
 		pictureControlSetPtr->darkBackGroundlightForeGround = EB_FALSE;
 		contextPtr->pictureNumGrassLcu = 0;
 		contextPtr->countOfMovingLcus = 0;
@@ -1670,6 +1672,10 @@ void* SourceBasedOperationsKernel(void *inputPtr)
                 pictureControlSetPtr->interMaxDistance[cuDepth] = interMaxDistance;
             }
         }
+
+#if DEADLOCK_DEBUG
+        printf("POC %lld SRC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
 
         // Get Empty Results Object
         EbGetEmptyObject(

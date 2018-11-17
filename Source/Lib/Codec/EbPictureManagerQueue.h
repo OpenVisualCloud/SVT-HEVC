@@ -6,12 +6,11 @@
 #ifndef EbPictureManagerQueue_h
 #define EbPictureManagerQueue_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSei.h"
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbPredictionStructure.h"
-#include "EbApiSei.h"
 
 #ifdef __cplusplus
 extern "C" {

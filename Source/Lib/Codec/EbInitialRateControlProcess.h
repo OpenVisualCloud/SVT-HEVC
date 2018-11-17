@@ -6,7 +6,7 @@
 #ifndef EbInitialRateControl_h
 #define EbInitialRateControl_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbRateControlProcess.h"
 

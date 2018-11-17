@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "EbAppConfig.h"
+#include "EbApi.h"
 
 #ifdef _WIN32
 #else
@@ -95,20 +96,20 @@
 #define ASM_TYPE_TOKEN				    "-asm" // no Eval
 #define RR_THREAD_MGMNT		            "-rr"
 #define TARGET_SOCKET		            "-ss"
-#define CONFIG_FILE_COMMENT_CHAR    '#'
-#define CONFIG_FILE_NEWLINE_CHAR    '\n'
-#define CONFIG_FILE_RETURN_CHAR     '\r'
-#define CONFIG_FILE_VALUE_SPLIT     ':'
-#define CONFIG_FILE_SPACE_CHAR      ' '
-#define CONFIG_FILE_ARRAY_SEP_CHAR  CONFIG_FILE_SPACE_CHAR
-#define CONFIG_FILE_TAB_CHAR        '\t'
-#define CONFIG_FILE_NULL_CHAR       '\0'
-#define CONFIG_FILE_MAX_ARG_COUNT   256
-#define CONFIG_FILE_MAX_VAR_LEN     128
-#define EVENT_FILE_MAX_ARG_COUNT    20
-#define EVENT_FILE_MAX_VAR_LEN      256
-#define BUFFER_FILE_MAX_ARG_COUNT   320
-#define BUFFER_FILE_MAX_VAR_LEN     128
+#define CONFIG_FILE_COMMENT_CHAR        '#'
+#define CONFIG_FILE_NEWLINE_CHAR        '\n'
+#define CONFIG_FILE_RETURN_CHAR         '\r'
+#define CONFIG_FILE_VALUE_SPLIT         ':'
+#define CONFIG_FILE_SPACE_CHAR          ' '
+#define CONFIG_FILE_ARRAY_SEP_CHAR      CONFIG_FILE_SPACE_CHAR
+#define CONFIG_FILE_TAB_CHAR            '\t'
+#define CONFIG_FILE_NULL_CHAR           '\0'
+#define CONFIG_FILE_MAX_ARG_COUNT       256
+#define CONFIG_FILE_MAX_VAR_LEN         128
+#define EVENT_FILE_MAX_ARG_COUNT        20
+#define EVENT_FILE_MAX_VAR_LEN          256
+#define BUFFER_FILE_MAX_ARG_COUNT       320
+#define BUFFER_FILE_MAX_VAR_LEN         128
 
 /**********************************
  * Set Cfg Functions
@@ -125,24 +126,17 @@ static void SetCfgErrorFile                     (const char *value, EbConfig_t *
 {
     if (cfg->errorLogFile) { fclose(cfg->errorLogFile); } cfg->errorLogFile = fopen(value, "w+");
 };
-
-static void SetCfgQpFile                       (const char *value, EbConfig_t *cfg) 
+static void SetCfgQpFile                        (const char *value, EbConfig_t *cfg) 
 {
     if (cfg->qpFile) { fclose(cfg->qpFile); } cfg->qpFile = fopen(value, "r");
 };
-
-
 static void SetCfgSourceWidth                   (const char *value, EbConfig_t *cfg) {cfg->sourceWidth = strtoul(value, NULL, 0);};
-
 static void SetInterlacedVideo                  (const char *value, EbConfig_t *cfg) {cfg->interlacedVideo  = (EB_BOOL) strtoul(value, NULL, 0);};
 static void SetSeperateFields                   (const char *value, EbConfig_t *cfg) {cfg->separateFields = (EB_BOOL) strtoul(value, NULL, 0);};
 static void SetCfgSourceHeight                  (const char *value, EbConfig_t *cfg) {cfg->sourceHeight = strtoul(value, NULL, 0) >> cfg->separateFields;};
 static void SetCfgFramesToBeEncoded             (const char *value, EbConfig_t *cfg) {cfg->framesToBeEncoded = strtol(value,  NULL, 0) << cfg->separateFields;};
-
-
 static void SetBufferedInput                    (const char *value, EbConfig_t *cfg) {cfg->bufferedInput = (strtol(value, NULL, 0) != -1 && cfg->separateFields) ? strtol(value, NULL, 0) << cfg->separateFields : strtol(value, NULL, 0);};
-
-static void SetFrameRate(const char *value, EbConfig_t *cfg) {
+static void SetFrameRate                        (const char *value, EbConfig_t *cfg) {
     cfg->frameRate = strtoul(value, NULL, 0);
     if (cfg->frameRate > 1000 ){
         cfg->frameRate = cfg->frameRate;
@@ -151,10 +145,8 @@ static void SetFrameRate(const char *value, EbConfig_t *cfg) {
         cfg->frameRate = cfg->frameRate << 16;
     }   
 }
-
 static void SetFrameRateNumerator               (const char *value, EbConfig_t *cfg) { cfg->frameRateNumerator = strtoul(value, NULL, 0);};
 static void SetFrameRateDenominator             (const char *value, EbConfig_t *cfg) { cfg->frameRateDenominator = strtoul(value, NULL, 0);};
-
 static void SetEncoderBitDepth                  (const char *value, EbConfig_t *cfg) {cfg->encoderBitDepth = strtoul(value, NULL, 0);}
 static void SetcompressedTenBitFormat			(const char *value, EbConfig_t *cfg) {cfg->compressedTenBitFormat = strtoul(value, NULL, 0);}
 static void SetBaseLayerSwitchMode              (const char *value, EbConfig_t *cfg) {cfg->baseLayerSwitchMode = (EB_BOOL) strtoul(value, NULL, 0);};
@@ -162,15 +154,9 @@ static void SetencMode                          (const char *value, EbConfig_t *
 static void SetCfgIntraPeriod                   (const char *value, EbConfig_t *cfg) {cfg->intraPeriod = strtol(value,  NULL, 0);};
 static void SetCfgIntraRefreshType              (const char *value, EbConfig_t *cfg) {cfg->intraRefreshType = strtol(value,  NULL, 0);};
 static void SetHierarchicalLevels				(const char *value, EbConfig_t *cfg) { cfg->hierarchicalLevels = strtol(value, NULL, 0); };
-
 static void SetCfgPredStructure					(const char *value, EbConfig_t *cfg) { cfg->predStructure = strtol(value, NULL, 0); };
-
-
-
 static void SetCfgQp                            (const char *value, EbConfig_t *cfg) {cfg->qp = strtoul(value, NULL, 0);};
-
 static void SetCfgUseQpFile                     (const char *value, EbConfig_t *cfg) {cfg->useQpFile = (EB_BOOL)strtol(value, NULL, 0); };
-
 static void SetDisableDlfFlag                   (const char *value, EbConfig_t *cfg) {cfg->disableDlfFlag = (EB_BOOL)strtoul(value, NULL, 0);};
 static void SetEnableSaoFlag                    (const char *value, EbConfig_t *cfg) {cfg->enableSaoFlag = (EB_BOOL)strtoul(value, NULL, 0);};
 static void SetEnableHmeFlag                    (const char *value, EbConfig_t *cfg) {cfg->enableHmeFlag = (EB_BOOL)strtoul(value, NULL, 0);};
@@ -198,8 +184,7 @@ static void SetHmeLevel2SearchAreaInWidthArray  (const char *value, EbConfig_t *
 static void SetHmeLevel2SearchAreaInHeightArray (const char *value, EbConfig_t *cfg) {cfg->hmeLevel2SearchAreaInHeightArray[cfg->hmeLevel2RowIndex++] = strtoul(value, NULL, 0);};
 static void SetEnableConstrainedIntra           (const char *value, EbConfig_t *cfg) {cfg->constrainedIntra 											= (EB_BOOL)strtoul(value, NULL, 0);};
 static void SetCfgTune                          (const char *value, EbConfig_t *cfg) { cfg->tune = (EB_U8)strtoul(value, NULL, 0); };
-static void SetBitRateReduction(const char *value, EbConfig_t *cfg) { cfg->bitRateReduction = (EB_BOOL)strtol(value, NULL, 0); };
-
+static void SetBitRateReduction                 (const char *value, EbConfig_t *cfg) { cfg->bitRateReduction = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetImproveSharpness                 (const char *value, EbConfig_t *cfg) {cfg->improveSharpness               = (EB_BOOL)strtol(value,  NULL, 0);};
 static void SetVideoUsabilityInfo               (const char *value, EbConfig_t *cfg) {cfg->videoUsabilityInfo               = strtol(value,  NULL, 0);};
 static void SetHighDynamicRangeInput            (const char *value, EbConfig_t *cfg) {cfg->highDynamicRangeInput            = strtol(value,  NULL, 0);};
@@ -212,19 +197,15 @@ static void SetRecoveryPointSEI                 (const char *value, EbConfig_t *
 static void SetEnableTemporalId                 (const char *value, EbConfig_t *cfg) {cfg->enableTemporalId                 = strtol(value,  NULL, 0);};
 static void SetProfile                          (const char *value, EbConfig_t *cfg) {cfg->profile                          = strtol(value,  NULL, 0);};
 static void SetTier                             (const char *value, EbConfig_t *cfg) {cfg->tier                             = strtol(value,  NULL, 0);};
-//static void SetLevel                            (const char *value, EbConfig_t *cfg) {cfg->level                            = (EB_U32)(10*strtod(value,  NULL));};
-static void SetLevel (const char *value, EbConfig_t *cfg) {	
+static void SetLevel                            (const char *value, EbConfig_t *cfg) {	
 	if (strtoul( value, NULL,0) != 0 || EB_STRCMP(value, "0") == 0 )
 		cfg->level = (EB_U32)(10*strtod(value,  NULL));
 	else 
 		cfg->level = 9999999;
 };
-
-static void             SetInjector                         (const char *value, EbConfig_t *cfg) {cfg->injector                         = strtol(value,  NULL, 0);};
-
-static void             SpeedControlFlag                    (const char *value, EbConfig_t *cfg) { cfg->speedControlFlag = strtol(value, NULL, 0); };
-
-static void SetInjectorFrameRate(const char *value, EbConfig_t *cfg) {
+static void SetInjector                         (const char *value, EbConfig_t *cfg) {cfg->injector                         = strtol(value,  NULL, 0);};
+static void SpeedControlFlag                    (const char *value, EbConfig_t *cfg) { cfg->speedControlFlag = strtol(value, NULL, 0); };
+static void SetInjectorFrameRate                (const char *value, EbConfig_t *cfg) {
     cfg->injectorFrameRate = strtoul(value, NULL, 0);
     if (cfg->injectorFrameRate > 1000 ){
         cfg->injectorFrameRate = cfg->injectorFrameRate;
@@ -233,14 +214,11 @@ static void SetInjectorFrameRate(const char *value, EbConfig_t *cfg) {
         cfg->injectorFrameRate = cfg->injectorFrameRate << 16;
     }   
 }
-
-static void				SetinputOutputBufferFifoInitCount					(const char *value, EbConfig_t *cfg)  {cfg->inputOutputBufferFifoInitCount               = strtoul(value, NULL, 0);};        
-
-static void				SetLatencyMode                                  (const char *value, EbConfig_t *cfg)  {cfg->latencyMode               = (EB_U8)strtol(value, NULL, 0);};
-
-static void             SetAsmType                                      (const char *value, EbConfig_t *cfg)  { cfg->asmType = (EB_ASM)strtoul(value, NULL, 0); };
-static void             SetUseRoundRobinThreadAssignment                (const char *value, EbConfig_t *cfg) {cfg->useRoundRobinThreadAssignment   = (EB_BOOL)strtol(value, NULL, 0);}; 
-static void             SetTargetSocket                                 (const char *value, EbConfig_t *cfg)  { cfg->targetSocket = (EB_U8)strtoul(value, NULL, 0); };
+static void	SetinputOutputBufferFifoInitCount	(const char *value, EbConfig_t *cfg)  {cfg->inputOutputBufferFifoInitCount               = strtoul(value, NULL, 0);};        
+static void	SetLatencyMode                      (const char *value, EbConfig_t *cfg)  {cfg->latencyMode               = (EB_U8)strtol(value, NULL, 0);};
+static void SetAsmType                          (const char *value, EbConfig_t *cfg)  { cfg->asmType = (EB_ASM)strtoul(value, NULL, 0); };
+static void SetUseRoundRobinThreadAssignment    (const char *value, EbConfig_t *cfg) {cfg->useRoundRobinThreadAssignment   = (EB_BOOL)strtol(value, NULL, 0);}; 
+static void SetTargetSocket                     (const char *value, EbConfig_t *cfg)  { cfg->targetSocket = (EB_U8)strtoul(value, NULL, 0); };
 
 enum cfg_type{
     SINGLE_INPUT,   // Configuration parameters that have only 1 value input
@@ -383,34 +361,32 @@ config_entry_t config_entry[] = {
  **********************************/
 void EbConfigCtor(EbConfig_t *configPtr)
 {
-    configPtr->configFile                       = NULL;
-    configPtr->inputFile                        = NULL;
-    configPtr->bitstreamFile                    = NULL;
-    configPtr->errorLogFile                     = stderr;
-    configPtr->qpFile                           = NULL;
+    configPtr->configFile                           = NULL;
+    configPtr->inputFile                            = NULL;
+    configPtr->bitstreamFile                        = NULL;
+    configPtr->errorLogFile                         = stderr;
+    configPtr->qpFile                               = NULL;
     
     
-    configPtr->frameRate                        = 60;
-    configPtr->frameRateNumerator               = 0;
-    configPtr->frameRateDenominator             = 0;
-    configPtr->encoderBitDepth                  = 8;    
-	configPtr->compressedTenBitFormat			= 0;
-    configPtr->sourceWidth                      = 0;
-    configPtr->sourceHeight                     = 0;
-
-    configPtr->inputPaddedWidth                 = 0;
-    configPtr->inputPaddedHeight                = 0;
-
-    configPtr->framesToBeEncoded                = 0;
-    configPtr->bufferedInput                    = -1;
-    configPtr->sequenceBuffer                   = 0;
-    configPtr->latencyMode                      = EB_NORMAL_LATENCY;
+    configPtr->frameRate                            = 60;
+    configPtr->frameRateNumerator                   = 0;
+    configPtr->frameRateDenominator                 = 0;
+    configPtr->encoderBitDepth                      = 8;    
+	configPtr->compressedTenBitFormat			    = 0;
+    configPtr->sourceWidth                          = 0;
+    configPtr->sourceHeight                         = 0;
+    configPtr->inputPaddedWidth                     = 0;
+    configPtr->inputPaddedHeight                    = 0;
+    configPtr->framesToBeEncoded                    = 0;
+    configPtr->bufferedInput                        = -1;
+    configPtr->sequenceBuffer                       = 0;
+    configPtr->latencyMode                          = 0;
     
     // Interlaced Video 
-    configPtr->interlacedVideo                  = EB_FALSE;
-    configPtr->separateFields                   = EB_FALSE;
-    configPtr->qp                               = 32;
-    configPtr->useQpFile                        = EB_FALSE;
+    configPtr->interlacedVideo                      = EB_FALSE;
+    configPtr->separateFields                       = EB_FALSE;
+    configPtr->qp                                   = 32;
+    configPtr->useQpFile                            = EB_FALSE;
 
     configPtr->sceneChangeDetection                 = 1;
     configPtr->rateControlMode                      = 0;
@@ -419,14 +395,11 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->maxQpAllowed                         = 48;
     configPtr->minQpAllowed                         = 10;
     configPtr->baseLayerSwitchMode                  = 0;
-
 	configPtr->encMode								= 9;
     configPtr->intraPeriod                          = -2;
     configPtr->intraRefreshType                     = 1;
 	configPtr->hierarchicalLevels					= 3;
-
 	configPtr->predStructure						= 2;
-
     configPtr->disableDlfFlag                       = EB_FALSE;
     configPtr->enableSaoFlag                        = EB_TRUE;
     configPtr->useDefaultMeHme                      = EB_TRUE;
@@ -467,18 +440,18 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->bufferingPeriodSEI                   = 0;
     configPtr->pictureTimingSEI                     = 0;
 
-	configPtr->bitRateReduction					= EB_TRUE;
-    configPtr->improveSharpness                 = EB_TRUE;
-    configPtr->registeredUserDataSeiFlag        = EB_FALSE;
-    configPtr->unregisteredUserDataSeiFlag      = EB_FALSE;
-    configPtr->recoveryPointSeiFlag             = EB_FALSE;
-    configPtr->enableTemporalId                 = 1;
-	configPtr->inputOutputBufferFifoInitCount					=   50;
+	configPtr->bitRateReduction					    = EB_TRUE;
+    configPtr->improveSharpness                     = EB_TRUE;
+    configPtr->registeredUserDataSeiFlag            = EB_FALSE;
+    configPtr->unregisteredUserDataSeiFlag          = EB_FALSE;
+    configPtr->recoveryPointSeiFlag                 = EB_FALSE;
+    configPtr->enableTemporalId                     = 1;
+	configPtr->inputOutputBufferFifoInitCount		= 1;
 
     // Annex A parameters
-    configPtr->profile                          = 2;
-    configPtr->tier                             = 0;
-    configPtr->level                            = 0;
+    configPtr->profile                              = 2;
+    configPtr->tier                                 = 0;
+    configPtr->level                                = 0;
 
     // Latency
     configPtr->injector                                     = 0;
@@ -493,15 +466,11 @@ void EbConfigCtor(EbConfig_t *configPtr)
 // Computational Performance Parameters
     configPtr->performanceContext.frameCount                = 0;
     configPtr->performanceContext.averageSpeed              = 0;
-
     configPtr->performanceContext.startsTime                = 0;
     configPtr->performanceContext.startuTime                = 0;
-    
     configPtr->performanceContext.maxLatency                = 0;
     configPtr->performanceContext.totalLatency              = 0;    
-
     configPtr->performanceContext.byteCount                 = 0;
-    
     
     // ASM Type
     configPtr->asmType                                      = ASM_AVX2;
@@ -509,6 +478,9 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->stopEncoder                                  = EB_FALSE;
     configPtr->useRoundRobinThreadAssignment                = EB_FALSE;
 	configPtr->targetSocket                                 = 1;
+    configPtr->processedFrameCount                          = 0;
+    configPtr->processedByteCount                           = 0;
+    
 
     return;
 }
@@ -759,8 +731,6 @@ static int ReadConfigFile(
 /******************************************
 * Verify Settings
 ******************************************/
-#define PowerOfTwoCheck(x) (((x) != 0) && (((x) & (~(x) + 1)) == (x)))
-
 static EB_ERRORTYPE VerifySettings(EbConfig_t *config, unsigned int channelNumber)
 {
 	EB_ERRORTYPE return_error = EB_ErrorNone;
@@ -776,15 +746,15 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, unsigned int channelNumbe
 		return_error = EB_ErrorBadParameter;
 	} 
 
+    if (config->bufferedInput < -1) {
+        fprintf(config->errorLogFile, "Error instance %u: Invalid BufferedInput. BufferedInput must greater or equal to -1\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
 	if (config->bufferedInput > config->framesToBeEncoded) {
 		fprintf(config->errorLogFile, "Error instance %u: Invalid BufferedInput. BufferedInput must be less or equal to the number of frames to be encoded\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	} 
-
-    if (config->latencyMode > 1) {
-        fprintf(config->errorLogFile, "Error Instance %u: invalid LatencyMode. LatencyMode must be [0 - 1]\n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
-    }
 
     if (config->useQpFile == EB_TRUE && config->qpFile == NULL) {
         fprintf(config->errorLogFile, "Error instance %u: Could not find QP file, UseQpFile is set to 1\n", channelNumber + 1);
@@ -793,11 +763,6 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, unsigned int channelNumbe
 
     if (config->separateFields > 1) {
         fprintf(config->errorLogFile, "Error Instance %u: Invalid SeperateFields Input\n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
-    }
-
-    if (config->intraPeriod < -2 || config->intraPeriod > 255 ) {
-        fprintf(config->errorLogFile, "Error Instance %u: The intra period must be [-2 - 255] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -819,11 +784,6 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, unsigned int channelNumbe
     // Check that the injector frameRate is non-zero
     if(config->injectorFrameRate <= 0 && config->injector) {
         fprintf(config->errorLogFile, "Error Instance %u: The injector frame rate should be greater than 0 fps \n",channelNumber+1);
-        return_error = EB_ErrorBadParameter;
-    }
-
-    if (config->speedControlFlag > 1) {
-        fprintf(config->errorLogFile, "Error Instance %u: Invalid Speed Control flag [0 - 1]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -881,27 +841,6 @@ int FindTokenMultipleInputs(
 
 	return return_error;
 }
-/******************************************************
-* Count the number of configuration files inputted 
-******************************************************/
-static int CountChannelsInput (
-	int         argc, 
-	char *const argv[])
-{
-	int return_error = -1;
-	unsigned int count = 0;
-	unsigned int argcMax = (unsigned int) argc;
-	while((argc > 0) && (return_error != 0)) {
-		return_error = EB_STRCMP(argv[--argc], "-c");
-		if (return_error == 0) {
-			while (((argc + count + 1) < argcMax) && (count < MAX_CHANNEL_NUMBER) && (argv[argc + count + 1][0] != '-')){
-				++count;
-			}
-			return count;
-		}
-	}
-	return -1;
-}
 
 unsigned int GetHelp(int argc, char *const argv[])
 {
@@ -912,9 +851,7 @@ unsigned int GetHelp(int argc, char *const argv[])
         printf("\n%-25s\t%-25s\t%-25s\t\n\n" ,"TOKEN", "DESCRIPTION", "INPUT TYPE");
         printf("%-25s\t%-25s\t%-25s\t\n" ,"-nch", "NumberOfChannels", "Single input");
         while (config_entry[++token_index].token != NULL) {
-
             printf("%-25s\t%-25s\t%-25s\t\n", config_entry[token_index].token, config_entry[token_index].name, config_entry[token_index].type ? "Array input": "Single input");
-            
         }
         return 1;
 
@@ -922,11 +859,7 @@ unsigned int GetHelp(int argc, char *const argv[])
     else {
         return 0;
     }
-        
-
- 
 }
-
 
 /******************************************************
 * Get the number of channels and validate it with input 
@@ -943,10 +876,6 @@ unsigned int GetNumberOfChannels(int argc, char *const argv[])
 			printf("Error: The number of channels has to be within the range [1,%u]\n",(unsigned int) MAX_CHANNEL_NUMBER);
 			return 0;		
 		}else{
-			if (channelNumber != (unsigned int) CountChannelsInput(argc,argv)){
-				printf("Error: The number of channels has to match the number of config files inputted\n");
-				return 0;
-			}
 			return channelNumber;
 		}
 	}
@@ -970,38 +899,6 @@ void cpuid(int CPUInfo[4], int InfoType){
 		);
 }
 #endif
-#define SCD_LAD 6
-#define INPUT_SIZE_4K_TH				0x29F630	// 2.75 Million  
-EB_ERRORTYPE BuffersSettings(EbConfig_t   **configs, unsigned int numChannels/*, EB_BOOL autoAllocate*/){
-
-	EB_ERRORTYPE	return_error    = EB_ErrorNone;
-	unsigned int	channelNumber   = 0;
-    
-
-    for (channelNumber = 0; channelNumber < numChannels; ++channelNumber){
-
-        EB_U32 fps  = (EB_U32)((configs[channelNumber]->frameRate > 1000) ? configs[channelNumber]->frameRate >> 16 : configs[channelNumber]->frameRate);
-        fps         = fps > 120 ? 120   : fps;
-        fps         = fps < 24  ? 24    : fps;
-
-        EB_U32     lowLatencyInput = (configs[channelNumber]->encMode < 6 || configs[channelNumber]->speedControlFlag == 1) ? fps :
-                                         (configs[channelNumber]->encMode < 8) ? fps >> 1 : (EB_U32)((2 << configs[channelNumber]->hierarchicalLevels) + SCD_LAD);
-
-        EB_U32     normalLatencyInput = (fps * 3) >> 1;
-
-        if ((configs[channelNumber]->sourceWidth * configs[channelNumber]->sourceHeight) > INPUT_SIZE_4K_TH)
-            normalLatencyInput = (normalLatencyInput * 3) >> 1;
-
-        if (configs[channelNumber]->latencyMode == EB_NORMAL_LATENCY )
-                configs[channelNumber]->inputOutputBufferFifoInitCount             = (normalLatencyInput  + configs[channelNumber]->lookAheadDistance) * numChannels;
-        else
-                configs[channelNumber]->inputOutputBufferFifoInitCount             = (EB_U32)(lowLatencyInput + configs[channelNumber]->lookAheadDistance) * numChannels;
-
-    }
-
-	return return_error;
-}
-//
 
 void mark_token_as_read(
     const char * token,
@@ -1016,21 +913,33 @@ void mark_token_as_read(
         }
     }
 }
-#define SIZE_OF_ONE_FRAME_IN_BYTES(width, height,is16bit) ( ( ((width)*(height)*3)>>1 )<<is16bit)
 
+EB_BOOL is_negative_number(const char* string) {
+    int length = (int)strlen(string);
+    int index = 0;
+    if (string[0] != '-') return EB_FALSE;
+    for (index = 1; index < length; index++)
+    {
+        if (string[index] < '0' || string[index] > '9')
+            return EB_FALSE;
+    }
+    return EB_TRUE;
+}
+
+#define SIZE_OF_ONE_FRAME_IN_BYTES(width, height,is16bit) ( ( ((width)*(height)*3)>>1 )<<is16bit)
 // Computes the number of frames in the input file
 EB_S32 ComputeFramesToBeEncoded(
     EbConfig_t   *config)
 {
     EB_U64 fileSize = 0;
     EB_S32 frameCount = 0;
+    EB_U32 frameSize;
     if (config->inputFile) {
         fseeko64(config->inputFile, 0L, SEEK_END);
         fileSize = ftello64(config->inputFile);
     }
-
-
-    EB_U32 frameSize = SIZE_OF_ONE_FRAME_IN_BYTES(config->inputPaddedWidth, config->inputPaddedHeight, (EB_U8)((config->encoderBitDepth == 10) ? 1 : 0));
+    
+    frameSize = SIZE_OF_ONE_FRAME_IN_BYTES(config->inputPaddedWidth, config->inputPaddedHeight, (EB_U8)((config->encoderBitDepth == 10) ? 1 : 0));
 
     if (frameSize == 0)
         return -1;
@@ -1045,38 +954,6 @@ EB_S32 ComputeFramesToBeEncoded(
     
     return frameCount;
 
-}
-
-// Sets the default intra period the closest possible to 1 second without breaking the minigop
-EB_S32 ComputeIntraPeriod(
-    EbConfig_t   *config)
-{
-    EB_S32 intraPeriod = 0;
-    EB_S32 fps = config->frameRate < 1000 ? config->frameRate : config->frameRate >> 16;
-
-    if (fps == 30) {
-        intraPeriod = 31;
-    }
-    else {
-        intraPeriod = ((int)((fps)/(1 << (config->hierarchicalLevels))))*(1 << (config->hierarchicalLevels));
-        intraPeriod -= 1;
-    }
-
-    return intraPeriod;
-
-}
-
-EB_U32 ComputeDefaultLookAhead(
-    EbConfig_t   *config)
-{
-    EB_S32 lad = 0;
-    if (config->rateControlMode == 0)
-        lad = 17;
-    else
-        lad = config->intraPeriod;
-
-
-    return lad;
 }
 
 /******************************************
@@ -1105,8 +982,8 @@ EB_ERRORTYPE ReadCommandLine(
     // Copy tokens (except for CHANNEL_NUMBER_TOKEN ) into a temp token buffer hosting all tokens that are passed through the command line
 	size_t len = EB_STRLEN(CHANNEL_NUMBER_TOKEN, COMMAND_LINE_MAX_SIZE);
     for (token_index = 0; token_index < argc; ++token_index) {
-        if ((argv[token_index][0] == '-') && strncmp(argv[token_index], CHANNEL_NUMBER_TOKEN, len)) {
-            cmd_copy[cmd_token_cnt++] = argv[token_index];
+        if ((argv[token_index][0] == '-') && strncmp(argv[token_index], CHANNEL_NUMBER_TOKEN, len) && !is_negative_number(argv[token_index])) {
+                cmd_copy[cmd_token_cnt++] = argv[token_index];
         }
     }
 
@@ -1308,7 +1185,7 @@ EB_ERRORTYPE ReadCommandLine(
 
                 // Assuming no errors, add padding to width and height
                 if (return_errors[index] == EB_ErrorNone) {
-                    configs[index]->inputPaddedWidth = configs[index]->sourceWidth + LEFT_INPUT_PADDING + RIGHT_INPUT_PADDING;
+                    configs[index]->inputPaddedWidth  = configs[index]->sourceWidth + LEFT_INPUT_PADDING + RIGHT_INPUT_PADDING;
                     configs[index]->inputPaddedHeight = configs[index]->sourceHeight + TOP_INPUT_PADDING + BOTTOM_INPUT_PADDING;
                 }
 
@@ -1321,19 +1198,6 @@ EB_ERRORTYPE ReadCommandLine(
                     fprintf(configs[index]->errorLogFile, "Error instance %u: Input yuv does not contain enough frames \n", index + 1);
                     return_errors[index] = EB_ErrorBadParameter;                
                 }
-
-                if (configs[index]->framesToBeEncoded < (EB_S32)configs[index]->lookAheadDistance) {
-                    fprintf(configs[index]->errorLogFile, "Error instance %u: lookAheadDistance must be less or equal to FrameToBeEncoded\n", index + 1);
-                    return_error = EB_ErrorBadParameter;
-                }
-                
-                if (return_errors[index] == EB_ErrorNone && configs[index]->intraPeriod == -2)
-                    configs[index]->intraPeriod = ComputeIntraPeriod(configs[index]);
-
-                if (return_errors[index] == EB_ErrorNone && configs[index]->lookAheadDistance ==  (EB_U32)~0)
-                    configs[index]->lookAheadDistance = ComputeDefaultLookAhead(configs[index]);
-
-                
 
                 // Force the injector latency mode, and injector frame rate when speed control is on
                 if (return_errors[index] == EB_ErrorNone && configs[index]->speedControlFlag == 1) {
@@ -1354,10 +1218,6 @@ EB_ERRORTYPE ReadCommandLine(
         }
         printf("\n\n");
         return_error = EB_ErrorBadParameter;
-    }
-
-    if (return_error == EB_ErrorNone){
-        return_error = (EB_ERRORTYPE)((return_error) | BuffersSettings(configs, numChannels/*, (EB_BOOL)FindToken(argc, argv, BUFFER_FILE_TOKEN,config_string)*/));
     }
 
     for (index = 0; index < MAX_CHANNEL_NUMBER; ++index){

@@ -10,7 +10,7 @@
 #include "EbSampleAdaptiveOffset_SSE2.h"
 #include "EbSaoApplication_SSSE3.h"
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 #include "EbPictureControlSet.h"
 #ifdef __cplusplus

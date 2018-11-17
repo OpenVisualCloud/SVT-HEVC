@@ -6,12 +6,10 @@
 #ifndef EbPictureDecisionQueue_h
 #define EbPictureDecisionQueue_h
 
-#include "EbTypes.h"
 #include "EbSei.h"
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbPredictionStructure.h"
-#include "EbApiSei.h"
 #include"EbPictureControlSet.h"  
 /************************************************
  * PA Reference Queue Entry

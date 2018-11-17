@@ -6,7 +6,6 @@
 #include <string.h>
 
 #include "EbDefinitions.h"
-#include "EbTypes.h"
 #include "EbUtility.h"
 
 #include "EbAdaptiveMotionVectorPrediction.h"

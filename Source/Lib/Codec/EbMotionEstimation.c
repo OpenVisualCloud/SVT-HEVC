@@ -4302,7 +4302,7 @@ EB_ERRORTYPE SortOisCandidateOpenLoop(
 
                 intraSadDistortion = oisCandidate[index1].distortion;
                 oisCandidate[index1].distortion = oisCandidate[index2].distortion;
-                oisCandidate[index2].distortion = intraSadDistortion;
+                oisCandidate[index2].distortion = (EB_U32)intraSadDistortion;
             }
         }
     }

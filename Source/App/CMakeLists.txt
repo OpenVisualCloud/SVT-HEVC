@@ -25,12 +25,6 @@ add_executable (SvtHevcEncApp
     EbAppContext.h
     ../API/EbErrorCodes.h
     ../API/EbTime.h
-    ../API/EbApiSei.h
-    ../API/EbBuild.h
-    ../API/EbTypes.h
-    EbAppSei.c
-    EbAppTypes.h
-    EbAppFifo.h
 )
 
 #********** SET COMPILE FLAGS************

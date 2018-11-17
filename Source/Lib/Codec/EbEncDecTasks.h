@@ -6,7 +6,7 @@
 #ifndef EbEncDecTasks_h
 #define EbEncDecTasks_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #ifdef __cplusplus
 extern "C" {

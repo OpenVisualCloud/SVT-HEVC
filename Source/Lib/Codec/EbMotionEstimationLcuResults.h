@@ -6,7 +6,6 @@
 #ifndef EbMotionEstimationLcuResults_h
 #define EbMotionEstimationLcuResults_h
 
-#include "EbTypes.h"
 #include "EbDefinitions.h"
 #ifdef __cplusplus
 extern "C" {
