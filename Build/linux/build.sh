@@ -24,12 +24,10 @@ function debug {
 		-DCMAKE_RANLIB=`which $RANLIB_COMPILER`	\
 	
 		
-	# Compile the Library	
-	make -j SvtHevcEnc
 	# Compile the App
-	make SvtHevcEncApp
+	make -j SvtHevcEncApp
 	# Compile the Simple App
-	make SvtHevcEncSimpleApp
+	make -j SvtHevcEncSimpleApp
 	cd ..
 }
 
@@ -45,12 +43,10 @@ function release {
 		-DCMAKE_AR=`which $AR_COMPILER`			\
 		-DCMAKE_RANLIB=`which $RANLIB_COMPILER`	\
 	
-	# Compile the Library	
-	make -j SvtHevcEnc
 	# Compile the App
-	make SvtHevcEncApp
+	make -j SvtHevcEncApp
 	# Compile the Simple App
-	make SvtHevcEncSimpleApp
+	make -j SvtHevcEncSimpleApp
 
 	cd ..	
 }
