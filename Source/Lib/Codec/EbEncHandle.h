@@ -92,6 +92,7 @@ typedef struct EbEncHandle_s
     // System Resource Managers
     EbSystemResource_t                     *inputBufferResourcePtr;
     EbSystemResource_t                    **outputStreamBufferResourcePtrArray;
+    EbSystemResource_t                    **outputReconBufferResourcePtrArray;
     EbSystemResource_t                     *resourceCoordinationResultsResourcePtr;
     EbSystemResource_t                     *pictureAnalysisResultsResourcePtr;
     EbSystemResource_t                     *pictureDecisionResultsResourcePtr;
@@ -107,6 +108,7 @@ typedef struct EbEncHandle_s
     // Inter-Process Producer Fifos
     EbFifo_t                              **inputBufferProducerFifoPtrArray;
     EbFifo_t                             ***outputStreamBufferProducerFifoPtrDblArray;
+    EbFifo_t                             ***outputReconBufferProducerFifoPtrDblArray;
     EbFifo_t                              **resourceCoordinationResultsProducerFifoPtrArray;
     EbFifo_t                              **pictureAnalysisResultsProducerFifoPtrArray;
     EbFifo_t                              **pictureDecisionResultsProducerFifoPtrArray;
@@ -123,6 +125,7 @@ typedef struct EbEncHandle_s
     // Inter-Process Consumer Fifos
     EbFifo_t                              **inputBufferConsumerFifoPtrArray;
     EbFifo_t                             ***outputStreamBufferConsumerFifoPtrDblArray;
+    EbFifo_t                             ***outputReconBufferConsumerFifoPtrDblArray;
     EbFifo_t                              **resourceCoordinationResultsConsumerFifoPtrArray;
     EbFifo_t                              **pictureAnalysisResultsConsumerFifoPtrArray;
     EbFifo_t                              **pictureDecisionResultsConsumerFifoPtrArray;
@@ -163,6 +166,10 @@ extern EB_ERRORTYPE EbInputBufferHeaderCtor(
     EB_PTR objectInitDataPtr);
 
 extern EB_ERRORTYPE EbOutputBufferHeaderCtor(
+    EB_PTR *objectDblPtr,
+    EB_PTR objectInitDataPtr);
+
+extern EB_ERRORTYPE EbOutputReconBufferHeaderCtor(
     EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
     

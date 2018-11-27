@@ -222,6 +222,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.speedControlFlag = config->speedControlFlag;
     callbackData->ebEncParameters.inputOutputBufferFifoInitCount = config->inputOutputBufferFifoInitCount;
     callbackData->ebEncParameters.asmType = config->asmType;
+    callbackData->ebEncParameters.reconEnabled = config->reconFile ? EB_TRUE : EB_FALSE;
 
     for (hmeRegionIndex = 0; hmeRegionIndex < callbackData->ebEncParameters.numberHmeSearchRegionInWidth; ++hmeRegionIndex) {
         callbackData->ebEncParameters.hmeLevel0SearchAreaInWidthArray[hmeRegionIndex] = config->hmeLevel0SearchAreaInWidthArray[hmeRegionIndex];
@@ -343,6 +344,32 @@ EB_ERRORTYPE AllocateInputBuffers(
         callbackData->inputBufferPool[bufferIndex]->sliceType = INVALID_SLICE;
     }
 
+    return return_error;
+}
+EB_ERRORTYPE AllocateOutputReconBuffers(
+    EbConfig_t				*config,
+    EbAppContext_t			*callbackData)
+{
+
+    EB_ERRORTYPE   return_error = EB_ErrorNone;
+    const size_t lumaSize =
+        config->inputPaddedWidth    *
+        config->inputPaddedHeight;
+    // both u and v
+    const size_t chromaSize = lumaSize >> 1;
+    const size_t tenBit = (config->encoderBitDepth > 8);
+    const size_t frameSize = (lumaSize + chromaSize) << tenBit;
+
+// ... Recon Port
+    EB_APP_MALLOC(EB_BUFFERHEADERTYPE*, callbackData->reconBuffer, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, EB_ErrorInsufficientResources);
+
+    // Initialize Header
+    callbackData->reconBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
+
+    EB_APP_MALLOC(EB_U8*, callbackData->reconBuffer->pBuffer, frameSize, EB_N_PTR, EB_ErrorInsufficientResources);
+
+    callbackData->reconBuffer->nAllocLen = (unsigned int)frameSize;
+    callbackData->reconBuffer->pAppPrivate = NULL;
     return return_error;
 }
 
@@ -624,6 +651,15 @@ EB_ERRORTYPE InitEncoder(
     if (return_error != EB_ErrorNone) {
         return return_error;
     }
+
+    // STEP 8: Allocate output Recon Buffer
+    return_error = AllocateOutputReconBuffers(
+        config,
+        callbackData);
+
+    if (return_error != EB_ErrorNone) {
+        return return_error;
+    }    
 
 	// Allocate the Sequence Buffer
     if (config->bufferedInput != -1) {

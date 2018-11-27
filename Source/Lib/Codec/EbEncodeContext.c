@@ -32,7 +32,7 @@ EB_ERRORTYPE EncodeContextCtor(
     encodeContextPtr->appCallbackPtr                                    = (EbCallback_t*) EB_NULL;
     
     // Port Active State
-    EB_CREATEMUTEX(EB_HANDLE, encodeContextPtr->totalNumberOfReconFrameMutex, sizeof(EB_HANDLE), EB_MUTEX);
+    EB_CREATEMUTEX(EB_HANDLE, encodeContextPtr->terminatingConditionsMutex, sizeof(EB_HANDLE), EB_MUTEX);
 
     encodeContextPtr->totalNumberOfReconFrames                          = 0;
 	

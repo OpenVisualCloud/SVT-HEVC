@@ -41,6 +41,10 @@ extern APPEXITCONDITIONTYPE ProcessInputBuffer(
     EbConfig_t             *config,
     EbAppContext_t         *appCallBack);
 
+extern APPEXITCONDITIONTYPE ProcessOutputReconBuffer(
+    EbConfig_t             *config,
+    EbAppContext_t         *appCallBack);
+
 extern APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     EbConfig_t             *config,
     EbAppContext_t         *appCallBack,
@@ -84,6 +88,7 @@ int main(int argc, char* argv[])
     EB_ERRORTYPE            return_errors[MAX_CHANNEL_NUMBER];          // Error Handling
     APPEXITCONDITIONTYPE    exitConditions[MAX_CHANNEL_NUMBER];          // Processing loop exit condition
     APPEXITCONDITIONTYPE    exitConditionsOutput[MAX_CHANNEL_NUMBER];         // Processing loop exit condition
+    APPEXITCONDITIONTYPE    exitConditionsRecon[MAX_CHANNEL_NUMBER];         // Processing loop exit condition
     APPEXITCONDITIONTYPE    exitConditionsInput[MAX_CHANNEL_NUMBER];          // Processing loop exit condition
 
 
@@ -147,6 +152,7 @@ int main(int argc, char* argv[])
         for (instanceCount = 0; instanceCount < MAX_CHANNEL_NUMBER; ++instanceCount) {
             exitConditions[instanceCount] = APP_ExitConditionError;         // Processing loop exit condition
             exitConditionsOutput[instanceCount] = APP_ExitConditionError;         // Processing loop exit condition
+            exitConditionsRecon[instanceCount] = APP_ExitConditionError;         // Processing loop exit condition
             exitConditionsInput[instanceCount] = APP_ExitConditionError;         // Processing loop exit condition
             channelActive[instanceCount] = EB_FALSE;
         }
@@ -184,6 +190,7 @@ int main(int argc, char* argv[])
                         return_error = (EB_ERRORTYPE)(return_error & return_errors[instanceCount]);
                         exitConditions[instanceCount]       = APP_ExitConditionNone;
                         exitConditionsOutput[instanceCount] = APP_ExitConditionNone;
+                        exitConditionsRecon[instanceCount]  = configs[instanceCount]->reconFile ? APP_ExitConditionNone : APP_ExitConditionError;
                         exitConditionsInput[instanceCount]  = APP_ExitConditionNone;
                         channelActive[instanceCount]        = EB_TRUE;
                         StartTime((unsigned long long*)&encodingStartTimesSeconds[instanceCount], (unsigned long long*)&encodingStartTimesuSeconds[instanceCount]);
@@ -191,6 +198,7 @@ int main(int argc, char* argv[])
                     else {
                         exitConditions[instanceCount]       = APP_ExitConditionError;
                         exitConditionsOutput[instanceCount] = APP_ExitConditionError;
+                        exitConditionsRecon[instanceCount]  = APP_ExitConditionError;
                         exitConditionsInput[instanceCount]  = APP_ExitConditionError;
                     }
 
@@ -209,16 +217,20 @@ int main(int argc, char* argv[])
                                 exitConditionsInput[instanceCount] = ProcessInputBuffer(
                                                                             configs[instanceCount],
                                                                             appCallbacks[instanceCount]);
+                            if (exitConditionsRecon[instanceCount] == APP_ExitConditionNone)
+                                exitConditionsRecon[instanceCount] = ProcessOutputReconBuffer(
+                                                                            configs[instanceCount],
+                                                                            appCallbacks[instanceCount]);
                             if (exitConditionsOutput[instanceCount] == APP_ExitConditionNone)
                                 exitConditionsOutput[instanceCount] = ProcessOutputStreamBuffer(
                                                                             configs[instanceCount],
                                                                             appCallbacks[instanceCount],
-                                                                            exitConditionsInput[instanceCount] == APP_ExitConditionNone ? 0 : 1);
-                            if ((exitConditionsOutput[instanceCount] != APP_ExitConditionNone && exitConditionsInput[instanceCount] != APP_ExitConditionNone)||
-                                (exitConditionsOutput[instanceCount] == APP_ExitConditionError || exitConditionsInput[instanceCount] == APP_ExitConditionError)){
+                                                                            (exitConditionsInput[instanceCount] == APP_ExitConditionNone) || (exitConditionsRecon[instanceCount] == APP_ExitConditionNone)? 0 : 1);
+                            if ((exitConditionsRecon[instanceCount] != APP_ExitConditionNone && exitConditionsOutput[instanceCount] != APP_ExitConditionNone && exitConditionsInput[instanceCount] != APP_ExitConditionNone)||
+                                (exitConditionsRecon[instanceCount] == APP_ExitConditionError || exitConditionsOutput[instanceCount] == APP_ExitConditionError || exitConditionsInput[instanceCount] == APP_ExitConditionError)){
                                 channelActive[instanceCount] = EB_FALSE;
                                 FinishTime((unsigned long long*)&encodingFinishTimesSeconds[instanceCount], (unsigned long long*)&encodingFinishTimesuSeconds[instanceCount]);
-                                exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsOutput[instanceCount] | exitConditionsInput[instanceCount]);
+                                exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsRecon[instanceCount] | exitConditionsOutput[instanceCount] | exitConditionsInput[instanceCount]);
                             }
                         }
                     }

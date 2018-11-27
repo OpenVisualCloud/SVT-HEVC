@@ -2,41 +2,30 @@
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
-
-/***************************************
- * Includes
- ***************************************/
-
 #include <stdlib.h>
-
 #include "EbSimpleAppContext.h"
-
 #define INPUT_SIZE_576p_TH				0x90000		// 0.58 Million   
 #define INPUT_SIZE_1080i_TH				0xB71B0		// 0.75 Million
 #define INPUT_SIZE_1080p_TH				0x1AB3F0	// 1.75 Million
 #define INPUT_SIZE_4K_TH				0x29F630	// 2.75 Million  
 #define EB_OUTPUTSTREAMBUFFERSIZE_MACRO(ResolutionSize)                ((ResolutionSize) < (INPUT_SIZE_1080i_TH) ? 0x1E8480 : (ResolutionSize) < (INPUT_SIZE_1080p_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_4K_TH) ? 0x2DC6C0 : 0x2DC6C0  )   
-
 EB_ERRORTYPE AllocateFrameBuffer(
     EbConfig_t        *config,
     unsigned char     *pBuffer)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
-
     const int tenBitPackedMode = (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
 
     // Determine size of each plane
     const size_t luma8bitSize =
-
         config->inputPaddedWidth    *
         config->inputPaddedHeight   *
-
         (1 << tenBitPackedMode);
 
     const size_t chroma8bitSize = luma8bitSize >> 2;
     const size_t luma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? luma8bitSize : 0;
     const size_t chroma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? chroma8bitSize : 0;
-
+    
     // Determine  
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)pBuffer;
 
@@ -105,6 +94,7 @@ EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config)
     AllocateFrameBuffer(
         config,
         contextPtr->inputPictureBuffer->pBuffer);
+
     // output buffer
     contextPtr->outputStreamBuffer = (EB_BUFFERHEADERTYPE*)malloc(sizeof(EB_BUFFERHEADERTYPE));
     if (!contextPtr->outputStreamBuffer) return return_error;
@@ -116,8 +106,29 @@ EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config)
     contextPtr->outputStreamBuffer->nAllocLen = EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->sourceWidth*config->sourceHeight);
     contextPtr->outputStreamBuffer->pAppPrivate = (void*)contextPtr;
     contextPtr->outputStreamBuffer->sliceType = INVALID_SLICE;
+    
+    // recon buffer
+    if (config->reconFile) {
+        contextPtr->reconBuffer = (EB_BUFFERHEADERTYPE*)malloc(sizeof(EB_BUFFERHEADERTYPE));
+        if (!contextPtr->reconBuffer) return return_error;
+        const size_t lumaSize =
+            config->inputPaddedWidth    *
+            config->inputPaddedHeight;
+        // both u and v
+        const size_t chromaSize = lumaSize >> 1;
+        const size_t tenBit = (config->encoderBitDepth > 8);
+        const size_t frameSize = (lumaSize + chromaSize) << tenBit;
 
-    return return_error;
+        // Initialize Header
+        contextPtr->reconBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
+
+        contextPtr->reconBuffer->pBuffer = (unsigned char*)malloc(frameSize);
+        if (!contextPtr->reconBuffer->pBuffer) return return_error;
+
+        contextPtr->reconBuffer->nAllocLen = (unsigned int)frameSize;
+        contextPtr->reconBuffer->pAppPrivate = NULL;
+    }
+    return EB_ErrorNone;
 }
 
 /***********************************
@@ -136,6 +147,8 @@ void EbAppContextDtor(EbAppContext_t *contextPtr)
     free(contextPtr->outputStreamBuffer->pBuffer);
     free(contextPtr->inputPictureBuffer);
     free(contextPtr->outputStreamBuffer);
+    if(contextPtr->reconBuffer)
+        free(contextPtr->reconBuffer);
 }
 
 /***********************************************
@@ -154,10 +167,11 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->instanceIdx = (unsigned char)instanceIdx;
 
     // Initialize Port Activity Flags
-    callbackData->ebEncParameters.sourceWidth = config->sourceWidth;
-    callbackData->ebEncParameters.sourceHeight = config->sourceHeight;
-    callbackData->ebEncParameters.encoderBitDepth = config->encoderBitDepth;
-    callbackData->ebEncParameters.codeVpsSpsPps = 0;
+    callbackData->ebEncParameters.sourceWidth       = config->sourceWidth;
+    callbackData->ebEncParameters.sourceHeight      = config->sourceHeight;
+    callbackData->ebEncParameters.encoderBitDepth   = config->encoderBitDepth;
+    callbackData->ebEncParameters.codeVpsSpsPps     = 0;
+    callbackData->ebEncParameters.reconEnabled      = config->reconFile ? 1 : 0;
     
     return return_error;
 

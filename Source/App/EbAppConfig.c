@@ -116,19 +116,27 @@
  **********************************/
 static void SetCfgInputFile                     (const char *value, EbConfig_t *cfg) 
 {
-    if (cfg->inputFile && cfg->inputFile != stdin) fclose(cfg->inputFile); if (!strcmp(value, "stdin")) cfg->inputFile = stdin; else cfg->inputFile = fopen(value, "rb");
+    if (cfg->inputFile && cfg->inputFile != stdin) fclose(cfg->inputFile); if (!strcmp(value, "stdin")) cfg->inputFile = stdin; else { FOPEN(cfg->inputFile, value, "rb"); }
 };
 static void SetCfgStreamFile                    (const char *value, EbConfig_t *cfg) 
 {
-    if (cfg->bitstreamFile) { fclose(cfg->bitstreamFile); } cfg->bitstreamFile = fopen(value, "wb");
+    if (cfg->bitstreamFile) { fclose(cfg->bitstreamFile); } 
+    FOPEN(cfg->bitstreamFile,value, "wb");
 };
 static void SetCfgErrorFile                     (const char *value, EbConfig_t *cfg) 
 {
-    if (cfg->errorLogFile) { fclose(cfg->errorLogFile); } cfg->errorLogFile = fopen(value, "w+");
+    if (cfg->errorLogFile) { fclose(cfg->errorLogFile); } 
+    FOPEN(cfg->errorLogFile,value, "w+");
+};
+static void SetCfgReconFile(const char *value, EbConfig_t *cfg)
+{
+    if (cfg->reconFile) { fclose(cfg->reconFile); }  
+    FOPEN(cfg->reconFile,value, "wb");
 };
 static void SetCfgQpFile                        (const char *value, EbConfig_t *cfg) 
 {
-    if (cfg->qpFile) { fclose(cfg->qpFile); } cfg->qpFile = fopen(value, "r");
+    if (cfg->qpFile) { fclose(cfg->qpFile); }  
+    FOPEN(cfg->qpFile,value, "r");
 };
 static void SetCfgSourceWidth                   (const char *value, EbConfig_t *cfg) {cfg->sourceWidth = strtoul(value, NULL, 0);};
 static void SetInterlacedVideo                  (const char *value, EbConfig_t *cfg) {cfg->interlacedVideo  = (EB_BOOL) strtoul(value, NULL, 0);};
@@ -244,6 +252,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, INPUT_FILE_TOKEN, "InputFile", SetCfgInputFile },
     { SINGLE_INPUT, OUTPUT_BITSTREAM_TOKEN,   "StreamFile",       SetCfgStreamFile },
     { SINGLE_INPUT, ERROR_FILE_TOKEN, "ErrorFile", SetCfgErrorFile },
+    { SINGLE_INPUT, OUTPUT_RECON_TOKEN, "ReconFile", SetCfgReconFile },
     { SINGLE_INPUT, QP_FILE_TOKEN, "QpFile", SetCfgQpFile },
 
     // Interlaced Video 
@@ -364,6 +373,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->configFile                           = NULL;
     configPtr->inputFile                            = NULL;
     configPtr->bitstreamFile                        = NULL;
+    configPtr->reconFile                            = NULL;
     configPtr->errorLogFile                         = stderr;
     configPtr->qpFile                               = NULL;
     
@@ -505,6 +515,11 @@ void EbConfigDtor(EbConfig_t *configPtr)
     if (configPtr->bitstreamFile) {
         fclose(configPtr->bitstreamFile);
         configPtr->bitstreamFile = (FILE *) NULL;
+    }
+
+    if (configPtr->reconFile) {
+        fclose(configPtr->reconFile);
+        configPtr->reconFile = (FILE *)NULL;
     }
 
     if (configPtr->errorLogFile) {
@@ -697,7 +712,7 @@ static int ReadConfigFile(
 	int return_error = 0;
 
 	// Open the config file
-	config->configFile = fopen(configPath, "rb");
+	FOPEN(config->configFile, configPath, "rb");
 
 	if (config->configFile != (FILE*) NULL) {
 		int configFileSize = findFileSize(config->configFile);
