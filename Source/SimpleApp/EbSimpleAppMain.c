@@ -18,7 +18,11 @@
 #include "EbApi.h"
 #if !__linux
 #include <Windows.h>
+#define fseeko64 _fseeki64
+#define ftello64 _ftelli64
+#define FOPEN(f,s,m) fopen_s(&f,s,m)
 #else
+#define FOPEN(f,s,m) f=fopen(s,m)
 #include <pthread.h>
 #include <semaphore.h>
 #include <time.h>
@@ -48,7 +52,8 @@ typedef enum APPEXITCONDITIONTYPE {
 static void EbConfigCtor(EbConfig_t *configPtr)
 {
     configPtr->inputFile = NULL;
-    configPtr->bitstreamFile = NULL;;
+    configPtr->bitstreamFile = NULL;
+    configPtr->reconFile = NULL;
     configPtr->encoderBitDepth = 8;
     configPtr->compressedTenBitFormat = 0;
     configPtr->sourceWidth = 0;
@@ -71,6 +76,11 @@ static void EbConfigDtor(EbConfig_t *configPtr)
         configPtr->inputFile = (FILE *)NULL;
     }
 
+    if (configPtr->reconFile) {
+        fclose(configPtr->reconFile);
+        configPtr->reconFile = (FILE *)NULL;
+    }
+
     if (configPtr->bitstreamFile) {
         fclose(configPtr->bitstreamFile);
         configPtr->bitstreamFile = (FILE *)NULL;
@@ -79,6 +89,43 @@ static void EbConfigDtor(EbConfig_t *configPtr)
     return;
 }
 
+APPEXITCONDITIONTYPE ProcessOutputReconBuffer(
+    EbConfig_t             *config,
+    EbAppContext_t         *appCallBack)
+{
+    EB_BUFFERHEADERTYPE    *headerPtr = appCallBack->reconBuffer; // needs to change for buffered input
+    EB_COMPONENTTYPE       *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
+    APPEXITCONDITIONTYPE    return_value = APP_ExitConditionNone;
+    EB_ERRORTYPE            recon_status = EB_ErrorNone;
+    int fseekReturnVal;
+    // non-blocking call until all input frames are sent
+    recon_status = EbH265GetRecon(componentHandle, headerPtr);
+
+    if (recon_status == EB_ErrorMax) {
+        printf("\nError while outputing recon, code 0x%x\n", headerPtr->nFlags);
+        return APP_ExitConditionError;
+    }
+    else if (recon_status != EB_NoErrorEmptyQueue) {
+        //Sets the File position to the beginning of the file.
+        rewind(config->reconFile);
+        unsigned long long frameNum = headerPtr->pts;
+        while (frameNum>0) {
+            fseekReturnVal = fseeko64(config->reconFile, headerPtr->nFilledLen, SEEK_CUR);
+
+            if (fseekReturnVal != 0) {
+                printf("Error in fseeko64  returnVal %i\n", fseekReturnVal);
+                return APP_ExitConditionError;
+            }
+            frameNum = frameNum - 1;
+        }
+
+        fwrite(headerPtr->pBuffer + headerPtr->nOffset, 1, headerPtr->nFilledLen, config->reconFile);
+
+        // Update Output Port Activity State
+        return_value = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? APP_ExitConditionFinished : APP_ExitConditionNone;
+    }
+    return return_value;
+}
 APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     EbConfig_t             *config,
     EbAppContext_t         *appCallback,
@@ -255,8 +302,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
 int main(int argc, char* argv[])
 {
     EB_ERRORTYPE            return_error = EB_ErrorNone;            // Error Handling
-    APPEXITCONDITIONTYPE    exitConditionOutput = APP_ExitConditionNone;    // Processing loop exit condition
-    APPEXITCONDITIONTYPE    exitConditionInput = APP_ExitConditionNone;    // Processing loop exit condition
+    APPEXITCONDITIONTYPE    exitConditionOutput = APP_ExitConditionNone , exitConditionInput = APP_ExitConditionNone , exitConditionRecon = APP_ExitConditionNone;    // Processing loop exit condition
     EbConfig_t             *config;        // Encoder Configuration
     EbAppContext_t         *appCallback;   // Instances App callback data
     
@@ -282,13 +328,14 @@ int main(int argc, char* argv[])
         // Initialize config
         config = (EbConfig_t*)malloc(sizeof(EbConfig_t));
         EbConfigCtor(config);
-        if (argc != 6) {
-            printf("Usage: ./HevcEncoderSimpleApp in.yuv out.265 width height bitdepth \n");
+        if (argc != 6 && argc != 7) {
+            printf("Usage: ./HevcEncoderSimpleApp in.yuv out.265 width height bitdepth recon.yuv(optional)\n");
             return_error = EB_ErrorBadParameter;
         }
         else {
             // Get info for config
-            FILE * fin = fopen(argv[1], "rb");
+            FILE * fin;
+            FOPEN(fin,argv[1], "rb");
             if (!fin) {
                 printf("Invalid input file \n");
                 return_error = EB_ErrorBadParameter;
@@ -296,7 +343,8 @@ int main(int argc, char* argv[])
             else
                 config->inputFile = fin;
 
-            FILE * fout = fopen(argv[2], "wb");
+            FILE * fout;
+            FOPEN(fout,argv[2], "wb");
             if (!fout) {
                 printf("Invalid input file \n");
                 return_error = EB_ErrorBadParameter;
@@ -316,6 +364,18 @@ int main(int argc, char* argv[])
             unsigned int bdepth = width = strtoul(argv[5], NULL, 0);
             if ((bdepth != 8) && (bdepth != 10)) {printf("Invalid bit depth\n"); return_error = EB_ErrorBadParameter; }
             config->encoderBitDepth = bdepth;
+
+            if (argc == 7) {
+                FILE * frec;
+                FOPEN(frec, argv[6], "wb");
+                if (!frec) {
+                    printf("Invalid recon file \n");
+                    return_error = EB_ErrorBadParameter;
+                }
+                else
+                    config->reconFile = frec;
+            }
+
         }
         if (return_error == EB_ErrorNone) {
 
@@ -330,9 +390,11 @@ int main(int argc, char* argv[])
 
             // Input Loop Thread
             exitConditionOutput = APP_ExitConditionNone;
+            exitConditionRecon = APP_ExitConditionNone;
             while (exitConditionOutput == APP_ExitConditionNone) {
                 exitConditionInput = ProcessInputBuffer(config, appCallback);
-                exitConditionOutput = ProcessOutputStreamBuffer(config, appCallback, (exitConditionInput == APP_ExitConditionNone ? 0 : 1));
+                exitConditionRecon = ProcessOutputReconBuffer(config, appCallback);
+                exitConditionOutput = ProcessOutputStreamBuffer(config, appCallback, (exitConditionInput == APP_ExitConditionNone || exitConditionRecon == APP_ExitConditionNone ? 0 : 1));
             }
             
             printf("\n");

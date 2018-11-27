@@ -12,17 +12,17 @@ include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
 
 # Utility Source Files
 add_library(C_DEFAULT
-	EbAvcStyleMcp_C.h
-	EbComputeMean_C.h
-	EbComputeSAD_C.h
-	EbDeblockingFilter_C.h
-	EbIntraPrediction_C.h
-	EbMcp_C.h
-	EbMeSadCalculation_C.h
-	EbPackUnPack_C.h
-	EbPictureOperators_C.h
-	EbSampleAdaptiveOffset_C.h
-	EbTransforms_C.h
+    EbAvcStyleMcp_C.h
+    EbComputeMean_C.h
+    EbComputeSAD_C.h
+    EbDeblockingFilter_C.h
+    EbIntraPrediction_C.h
+    EbMcp_C.h
+    EbMeSadCalculation_C.h
+    EbPackUnPack_C.h
+    EbPictureOperators_C.h
+    EbSampleAdaptiveOffset_C.h
+    EbTransforms_C.h
     EbAvcStyleMcp_C.c
     EbComputeMean_C.c
     EbComputeSAD_C.c

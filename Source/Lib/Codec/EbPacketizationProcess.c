@@ -118,8 +118,10 @@ void* PacketizationKernel(void *inputPtr)
         // Get Output Bitstream buffer
         outputStreamWrapperPtr   = pictureControlSetPtr->ParentPcsPtr->outputStreamWrapperPtr;
         outputStreamPtr          = (EB_BUFFERHEADERTYPE*) outputStreamWrapperPtr->objectPtr;
-        outputStreamPtr->nFlags  = 0;    
+        outputStreamPtr->nFlags  = 0; 
+        EbBlockOnMutex(encodeContextPtr->terminatingConditionsMutex);
         outputStreamPtr->nFlags |= (encodeContextPtr->terminatingSequenceFlagReceived == EB_TRUE && pictureControlSetPtr->ParentPcsPtr->decodeOrder == encodeContextPtr->terminatingPictureNumber) ? EB_BUFFERFLAG_EOS : 0;
+        EbReleaseMutex(encodeContextPtr->terminatingConditionsMutex);
         outputStreamPtr->nFilledLen = 0;
         outputStreamPtr->nOffset = 0;
         outputStreamPtr->pts = pictureControlSetPtr->ParentPcsPtr->ebInputPtr->pts;

@@ -1,4 +1,4 @@
-
+﻿
 # Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder)
 
 The Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder) is an HEVC-compliant encoder library core that achieves excellent density-quality tradeoffs, and is highly optimized for Intel® Xeon™ Scalable Processor and Xeon™ D processors.
@@ -32,7 +32,7 @@ The encoder can also run the ABR profile below on one Intel® Xeon-D™ D-2191:
 
 # License
 
-Scalable Video Technology is licensed under BSD+Patent license. See [LICENSE](LICENSE.md) for details.
+Scalable Video Technology is licensed under the OSI-approved BSD+Patent license. See [LICENSE](LICENSE.md) for details.
 
 # Documentation
 
@@ -137,7 +137,7 @@ For the binaries to operate properly on your system, the following conditions ha
 
 -  **Speed Control output:** The speed control functionality implemented for SVT-HEVC Encoder is a demo feature showcasing the capability of the library to adapt to the resources available on the fly in order to generate the best possible video quality while maintaining a real-time encoding speed. When set to use the Speed Control mode, the encoder does not produce a bit-exact output from one run to another.
 
--  **Multi-instance support:** The multi-instance functionality is a demo feature implemented in the SVT-HEVC Encoder sample application as an example of one sample application using multiple encoding libraries. Encoding using the multi-instance support is limited to only 6 simultaneous streams.
+-  **Multi-instance support:** The multi-instance functionality is a demo feature implemented in the SVT-HEVC Encoder sample application as an example of one sample application using multiple encoding libraries. Encoding using the multi-instance support is limited to only 6 simultaneous streams. For example two channels encoding on Windows: ebHevcEncApp.exe -nch 2 -c firstchannel.cfg secondchannel.cfg
 
 -  **Separate Fields:** Using the separate fields functionality migh result in a corrupted video output.
 

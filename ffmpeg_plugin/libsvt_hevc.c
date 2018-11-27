@@ -142,7 +142,7 @@ static EB_ERRORTYPE config_enc_params(EB_H265_ENC_CONFIGURATION  *param, AVCodec
     param->qp                     = q->svt_param.qp;
 
     param->targetBitRate          = avctx->bit_rate;
-    param->intraPeriodLength      = avctx->gop_size;
+    param->intraPeriodLength      = avctx->gop_size-1;
     param->frameRateNumerator     = avctx->time_base.den;
     param->frameRateDenominator   = avctx->time_base.num * avctx->ticks_per_frame;
 

@@ -14,18 +14,18 @@ include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/)
 # Utility Source Files
 add_library(ASM_SSE2
     EbAvcStyleMcp_SSE2.h
-	EbComputeMean_SSE2.h
-	EbComputeSAD_SSE2.h
-	EbDeblockingFilter_SSE2.h
-	EbIntraPrediction_SSE2.h
-	EbIntrinMacros16bit_SSE2.h
-	EbIntrinMacros_SSE2.h
-	EbMcp_SSE2.h
-	EbMeSadCalculation_SSE2.h
-	EbPackUnPack_SSE2.h
-	EbPictureOperators_SSE2.h
-	EbSampleAdaptiveOffset_SSE2.h
-	EbTransforms_SSE2.h
+    EbComputeMean_SSE2.h
+    EbComputeSAD_SSE2.h
+    EbDeblockingFilter_SSE2.h
+    EbIntraPrediction_SSE2.h
+    EbIntrinMacros16bit_SSE2.h
+    EbIntrinMacros_SSE2.h
+    EbMcp_SSE2.h
+    EbMeSadCalculation_SSE2.h
+    EbPackUnPack_SSE2.h
+    EbPictureOperators_SSE2.h
+    EbSampleAdaptiveOffset_SSE2.h
+    EbTransforms_SSE2.h
     EbApplySaoLcu16bit_Intrinsic_SSE2.c
     EbAvcStyleMcp_Intrinsic_SSE2.c
     EbCombinedAveragingSAD_Intrinsic_SSE2.c

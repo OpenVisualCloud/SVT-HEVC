@@ -45,11 +45,12 @@ typedef struct EncodeContext_s
     // Callback Functions
     EbCallback_t                     *appCallbackPtr;
 
-    EB_HANDLE                            totalNumberOfReconFrameMutex;
+    EB_HANDLE                            terminatingConditionsMutex;
     EB_U64                               totalNumberOfReconFrames;
 
     // Output Buffer Fifos
     EbFifo_t                            *streamOutputFifoPtr;
+    EbFifo_t                            *reconOutputFifoPtr;
     
     // Picture Buffer Fifos
     EbFifo_t                            *inputPicturePoolFifoPtr;

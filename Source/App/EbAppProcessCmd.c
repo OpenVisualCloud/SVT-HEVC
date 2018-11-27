@@ -1383,4 +1383,44 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     }
 	return return_value;
 }
+APPEXITCONDITIONTYPE ProcessOutputReconBuffer(
+    EbConfig_t             *config,
+    EbAppContext_t         *appCallBack)
+{
+    EB_BUFFERHEADERTYPE    *headerPtr = appCallBack->reconBuffer; // needs to change for buffered input
+    EB_COMPONENTTYPE       *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
+    APPEXITCONDITIONTYPE    return_value = APP_ExitConditionNone;
+    EB_ERRORTYPE            recon_status = EB_ErrorNone;
+    int fseekReturnVal;
+    // non-blocking call until all input frames are sent
+    recon_status = EbH265GetRecon(componentHandle, headerPtr);
+
+    if (recon_status == EB_ErrorMax) {
+        printf("\n");
+        LogErrorOutput(
+            config->errorLogFile,
+            headerPtr->nFlags);
+        return APP_ExitConditionError;
+    }
+    else if (recon_status != EB_NoErrorEmptyQueue) {
+        //Sets the File position to the beginning of the file.
+        rewind(config->reconFile);
+        EB_U64 frameNum = headerPtr->pts;
+        while (frameNum>0) {
+            fseekReturnVal = fseeko64(config->reconFile, headerPtr->nFilledLen, SEEK_CUR);
+
+            if (fseekReturnVal != 0) {
+                printf("Error in fseeko64  returnVal %i\n", fseekReturnVal);
+                return APP_ExitConditionError;
+            }
+            frameNum = frameNum - 1;
+        }
+
+        fwrite(headerPtr->pBuffer + headerPtr->nOffset, 1, headerPtr->nFilledLen, config->reconFile);
+        
+        // Update Output Port Activity State
+        return_value = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? APP_ExitConditionFinished : APP_ExitConditionNone;
+    }
+    return return_value;
+}
 

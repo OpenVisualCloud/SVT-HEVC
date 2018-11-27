@@ -232,6 +232,11 @@ extern rsize_t strnlen_ss(const char *s, rsize_t smax);
 #define MAX_CHANNEL_NUMBER      6
 #define MAX_NUM_TOKENS          200
 
+#ifdef _MSC_VER
+#define FOPEN(f,s,m) fopen_s(&f,s,m)
+#else
+#define FOPEN(f,s,m) f=fopen(s,m)
+#endif
 
 /****************************************
 * Padding
@@ -271,6 +276,7 @@ typedef struct EbConfig_s
     FILE                   *configFile;
     FILE                   *inputFile;
     FILE                   *bitstreamFile;
+    FILE                   *reconFile;
     FILE                   *errorLogFile;
 	FILE                   *bufferFile;
 
@@ -430,7 +436,9 @@ typedef struct EbConfig_s
      ****************************************/
     EbPerformanceContext_t  performanceContext;
 
-    // Channel info
+    /****************************************
+    * Instance Info
+    ****************************************/
     EB_U32              channelId;
     EB_U32              activeChannelCount;
     EB_BOOL             useRoundRobinThreadAssignment;

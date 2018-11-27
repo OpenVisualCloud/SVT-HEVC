@@ -1266,6 +1266,8 @@ void* PictureDecisionKernel(void *inputPtr)
                             pictureControlSetPtr->decodeOrder = pictureControlSetPtr->pictureNumber;
                         }
 
+                        EbBlockOnMutex(encodeContextPtr->terminatingConditionsMutex);
+
                         encodeContextPtr->terminatingSequenceFlagReceived = (pictureControlSetPtr->endOfSequenceFlag == EB_TRUE) ? 
                             EB_TRUE :  
                             encodeContextPtr->terminatingSequenceFlagReceived;
@@ -1273,7 +1275,9 @@ void* PictureDecisionKernel(void *inputPtr)
                         encodeContextPtr->terminatingPictureNumber = (pictureControlSetPtr->endOfSequenceFlag == EB_TRUE) ? 
                             pictureControlSetPtr->pictureNumber :
                             encodeContextPtr->terminatingPictureNumber;
-                    
+
+                        EbReleaseMutex(encodeContextPtr->terminatingConditionsMutex);
+
                         preAssignmentBufferFirstPassFlag = EB_FALSE;
                     
                         // Update the Dependant List Count - If there was an I-frame or Scene Change, then cleanup the Picture Decision PA Reference Queue Dependent Counts

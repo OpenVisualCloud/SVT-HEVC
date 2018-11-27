@@ -1608,6 +1608,129 @@ EB_BOOL AssignEncDecSegments(
 
     return continueProcessingFlag;
 }
+static void ReconOutput(
+    PictureControlSet_t    *pictureControlSetPtr,
+    SequenceControlSet_t   *sequenceControlSetPtr)
+{
+    EbObjectWrapper_t             *outputReconWrapperPtr;
+    EB_BUFFERHEADERTYPE           *outputReconPtr;
+    EncodeContext_t               *encodeContextPtr = sequenceControlSetPtr->encodeContextPtr;
+    EB_BOOL is16bit = (sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
+    // The totalNumberOfReconFrames counter has to be write/read protected as
+    //   it is used to determine the end of the stream.  If it is not protected
+    //   the encoder might not properly terminate.
+    EbBlockOnMutex(encodeContextPtr->terminatingConditionsMutex);
+
+    // Get Recon Buffer
+    EbGetEmptyObject( 
+        sequenceControlSetPtr->encodeContextPtr->reconOutputFifoPtr,
+        &outputReconWrapperPtr);
+    outputReconPtr = (EB_BUFFERHEADERTYPE*)outputReconWrapperPtr->objectPtr;
+    outputReconPtr->nFlags = 0;
+
+    // START READ/WRITE PROTECTED SECTION
+    if (encodeContextPtr->totalNumberOfReconFrames == encodeContextPtr->terminatingPictureNumber)
+        outputReconPtr->nFlags = EB_BUFFERFLAG_EOS;
+    
+    encodeContextPtr->totalNumberOfReconFrames++;
+
+    EbReleaseMutex(encodeContextPtr->terminatingConditionsMutex);
+
+    // STOP READ/WRITE PROTECTED SECTION
+    outputReconPtr->nFilledLen = 0;
+    outputReconPtr->nOffset = 0;
+
+    // Copy the Reconstructed Picture to the Output Recon Buffer
+    {
+        EB_U32 sampleTotalCount;
+        EB_U8 *reconReadPtr;
+        EB_U8 *reconWritePtr;
+
+        EbPictureBufferDesc_t *reconPtr;
+        {
+            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
+                reconPtr = is16bit ?
+                ((EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr)->referencePicture16bit :
+                ((EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr)->referencePicture;
+            else {
+                if (is16bit)
+                    reconPtr = pictureControlSetPtr->reconPicture16bitPtr;
+                else
+                    reconPtr = pictureControlSetPtr->reconPicturePtr;
+            }
+        }
+
+        // Y Recon Samples
+        sampleTotalCount = ((reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight) * (reconPtr->maxHeight - sequenceControlSetPtr->maxInputPadBottom)) << is16bit;
+        reconReadPtr = reconPtr->bufferY + (reconPtr->originY << is16bit) * reconPtr->strideY + (reconPtr->originX << is16bit);
+        reconWritePtr = &(outputReconPtr->pBuffer[outputReconPtr->nFilledLen + outputReconPtr->nOffset]);
+
+        CHECK_REPORT_ERROR(
+            (outputReconPtr->nFilledLen + outputReconPtr->nOffset + sampleTotalCount <= outputReconPtr->nAllocLen),
+            encodeContextPtr->appCallbackPtr,
+            EB_ENC_ROB_OF_ERROR);
+
+        // Initialize Y recon buffer
+        PictureCopyKernel(
+            reconReadPtr,
+            reconPtr->strideY,
+            reconWritePtr,
+            reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight,
+            reconPtr->width - sequenceControlSetPtr->padRight,
+            reconPtr->height - sequenceControlSetPtr->padBottom,
+            1 << is16bit);
+
+        outputReconPtr->nFilledLen += sampleTotalCount;
+
+        // U Recon Samples
+        sampleTotalCount = ((reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight) * (reconPtr->maxHeight - sequenceControlSetPtr->maxInputPadBottom) >> 2) << is16bit;
+        reconReadPtr = reconPtr->bufferCb + ((reconPtr->originY << is16bit) >> 1) * reconPtr->strideCb + ((reconPtr->originX << is16bit) >> 1);
+        reconWritePtr = &(outputReconPtr->pBuffer[outputReconPtr->nFilledLen + outputReconPtr->nOffset]);
+
+        CHECK_REPORT_ERROR(
+            (outputReconPtr->nFilledLen + outputReconPtr->nOffset + sampleTotalCount <= outputReconPtr->nAllocLen),
+            encodeContextPtr->appCallbackPtr,
+            EB_ENC_ROB_OF_ERROR);
+
+        // Initialize U recon buffer
+        PictureCopyKernel(
+            reconReadPtr,
+            reconPtr->strideCb,
+            reconWritePtr,
+            (reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight) >> 1,
+            (reconPtr->width - sequenceControlSetPtr->padRight) >> 1,
+            (reconPtr->height - sequenceControlSetPtr->padBottom) >> 1,
+            1 << is16bit);
+        outputReconPtr->nFilledLen += sampleTotalCount;
+
+        // V Recon Samples
+        sampleTotalCount = ((reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight) * (reconPtr->maxHeight - sequenceControlSetPtr->maxInputPadBottom) >> 2) << is16bit;
+        reconReadPtr = reconPtr->bufferCr + ((reconPtr->originY << is16bit) >> 1) * reconPtr->strideCr + ((reconPtr->originX << is16bit) >> 1);
+        reconWritePtr = &(outputReconPtr->pBuffer[outputReconPtr->nFilledLen + outputReconPtr->nOffset]);
+
+        CHECK_REPORT_ERROR(
+            (outputReconPtr->nFilledLen + outputReconPtr->nOffset + sampleTotalCount <= outputReconPtr->nAllocLen),
+            encodeContextPtr->appCallbackPtr,
+            EB_ENC_ROB_OF_ERROR);
+
+        // Initialize V recon buffer
+
+        PictureCopyKernel(
+            reconReadPtr,
+            reconPtr->strideCr,
+            reconWritePtr,
+            (reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight) >> 1,
+            (reconPtr->width - sequenceControlSetPtr->padRight) >> 1,
+            (reconPtr->height - sequenceControlSetPtr->padBottom) >> 1,
+            1 << is16bit);
+        outputReconPtr->nFilledLen += sampleTotalCount;
+        outputReconPtr->pts = pictureControlSetPtr->pictureNumber;
+    }
+
+    // Post the Recon object
+    EbPostFullObject(outputReconWrapperPtr);
+    
+}
 
 void PadRefAndSetFlags(
     PictureControlSet_t    *pictureControlSetPtr,
@@ -3672,7 +3795,8 @@ void* EncDecKernel(void *inputPtr)
             }
             
             EB_BOOL applySAOAtEncoderFlag = (sequenceControlSetPtr->staticConfig.enableSaoFlag &&
-                (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag )) ? EB_TRUE : EB_FALSE;
+                (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag )) ||
+                sequenceControlSetPtr->staticConfig.reconEnabled ? EB_TRUE : EB_FALSE;
 
             applySAOAtEncoderFlag = contextPtr->allowEncDecMismatch ? EB_FALSE : applySAOAtEncoderFlag;
 
@@ -3697,8 +3821,8 @@ void* EncDecKernel(void *inputPtr)
             // Pad the reference picture and set up TMVP flag and ref POC
             if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
                 PadRefAndSetFlags(
-                pictureControlSetPtr,
-                sequenceControlSetPtr);
+                    pictureControlSetPtr,
+                    sequenceControlSetPtr);
 
             if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE && pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr)
             {
@@ -3758,6 +3882,11 @@ void* EncDecKernel(void *inputPtr)
                     refDenPic->originY >> 1);
             }
 
+            if (sequenceControlSetPtr->staticConfig.reconEnabled) {
+                ReconOutput(
+                    pictureControlSetPtr,
+                    sequenceControlSetPtr);
+            }
 
             if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
 

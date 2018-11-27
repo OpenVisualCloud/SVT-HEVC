@@ -17,6 +17,7 @@ typedef struct EbConfig_s
     FILE                   *configFile;
     FILE                   *inputFile;
     FILE                   *bitstreamFile;
+    FILE                   *reconFile;
     FILE                   *errorLogFile;
     FILE                   *bufferFile;
 
@@ -191,6 +192,7 @@ typedef struct EbAppContext_s {
     // Buffer Pools
     EB_BUFFERHEADERTYPE                 *inputPictureBuffer;
     EB_BUFFERHEADERTYPE                 *outputStreamBuffer;
+    EB_BUFFERHEADERTYPE                 *reconBuffer;
 
     unsigned int instanceIdx;
 

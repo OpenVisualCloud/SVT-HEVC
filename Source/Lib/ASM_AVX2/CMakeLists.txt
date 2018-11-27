@@ -36,15 +36,15 @@ endif()
 
 add_library(ASM_AVX2
     EbCombinedAveragingSAD_Intrinsic_AVX2.h
-	EbCombinedAveragingSAD_Intrinsic_AVX512.h
-	EbComputeSAD_AVX2.h
-	EbComputeSAD_SadLoopKernel_AVX512.h
-	EbIntraPrediction_AVX2.h
-	EbMcp_AVX2.h
-	EbNoiseExtractAVX2.h
-	EbPackUnPack_Intrinsic_AVX2.h
-	EbPictureOperators_AVX2.h
-	EbTransforms_AVX2.h
+    EbCombinedAveragingSAD_Intrinsic_AVX512.h
+    EbComputeSAD_AVX2.h
+    EbComputeSAD_SadLoopKernel_AVX512.h
+    EbIntraPrediction_AVX2.h
+    EbMcp_AVX2.h
+    EbNoiseExtractAVX2.h
+    EbPackUnPack_Intrinsic_AVX2.h
+    EbPictureOperators_AVX2.h
+    EbTransforms_AVX2.h
     EbCombinedAveragingSAD_Intrinsic_AVX2.c
     EbCombinedAveragingSAD_Intrinsic_AVX512.c
     EbComputeSAD_Intrinsic_AVX2.c

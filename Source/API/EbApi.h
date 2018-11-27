@@ -240,6 +240,9 @@ typedef struct EB_H265_ENC_CONFIGURATION
     unsigned int              tier;
     unsigned int              level;
 
+    // Debug tools
+    unsigned int              reconEnabled;
+
 	// Buffer Configuration
     unsigned int			  inputOutputBufferFifoInitCount;              // add check for minimum 
 
@@ -275,6 +278,10 @@ EB_API EB_ERRORTYPE EbH265GetPacket(
     EB_COMPONENTTYPE      *h265EncComponent,
     EB_BUFFERHEADERTYPE   *pBuffer,
     unsigned char          picSendDone);
+
+EB_API EB_ERRORTYPE EbH265GetRecon(
+    EB_COMPONENTTYPE      *h265EncComponent,
+    EB_BUFFERHEADERTYPE   *pBuffer);
 
 EB_API EB_ERRORTYPE EbInitHandle(
     EB_COMPONENTTYPE** pHandle,
