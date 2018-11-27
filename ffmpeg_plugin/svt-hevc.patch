@@ -235,7 +235,7 @@ index 0000000000..922ea21666
 +    param->qp                     = q->svt_param.qp;
 +
 +    param->targetBitRate          = avctx->bit_rate;
-+    param->intraPeriodLength      = avctx->gop_size;
++    param->intraPeriodLength      = avctx->gop_size-1;
 +    param->frameRateNumerator     = avctx->time_base.den;
 +    param->frameRateDenominator   = avctx->time_base.num * avctx->ticks_per_frame;
 +
