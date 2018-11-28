@@ -85,7 +85,7 @@ In order to run the highest resolution supported by the encoder, at least 64GB o
 	-	CMake 3.5 or later (can be downloaded [here](https://github.com/Kitware/CMake/releases/download/v3.13.0/cmake-3.13.0-win64-x64.msi))
 	-   YASM Assembler version 1.2.0 or later
 	-	Download the yasm exe from the following [link](http://www.tortall.net/projects/yasm/releases/yasm-1.3.0-win64.exe)
-	-	rename yasm-1.3.0-win64.exe to yasm.exe
+	-	Rename yasm-1.3.0-win64.exe to yasm.exe
 	-   Copy yasm.exe into a location that is in the PATH environment variable
 
 * __Build Instructions__
