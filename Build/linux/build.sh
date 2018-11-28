@@ -1,15 +1,14 @@
 #!/bin/bash
 
+# Copyright(c) 2018 Intel Corporation 
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+
 function clean {
 	rm -R -f debug
 	rm -R -f release
-    	rm -R -f ../../Bin/Debug
-    	rm -R -f ../../Bin/Release
-
-
+    rm -R -f ../../Bin/Debug
+    rm -R -f ../../Bin/Release
 }
-
-
 
 function debug {
 	mkdir -p debug
@@ -20,10 +19,7 @@ function debug {
 		-DCMAKE_BUILD_TYPE=Debug			\
 		-DCMAKE_C_COMPILER=$CMAKE_COMPILER		\
 		-DCMAKE_ASM_NASM_COMPILER=$CMAKE_ASSEMBLER	\
-		-DCMAKE_AR=`which $AR_COMPILER`			\
-		-DCMAKE_RANLIB=`which $RANLIB_COMPILER`	\
-	
-		
+
 	# Compile the App
 	make -j SvtHevcEncApp
 	# Compile the Simple App
@@ -40,36 +36,18 @@ function release {
 		-DCMAKE_BUILD_TYPE=Release			\
 		-DCMAKE_C_COMPILER=$CMAKE_COMPILER		\
 		-DCMAKE_ASM_NASM_COMPILER=$CMAKE_ASSEMBLER	\
-		-DCMAKE_AR=`which $AR_COMPILER`			\
-		-DCMAKE_RANLIB=`which $RANLIB_COMPILER`	\
-	
+
 	# Compile the App
 	make -j SvtHevcEncApp
 	# Compile the Simple App
 	make -j SvtHevcEncSimpleApp
-
 	cd ..	
 }
 
 # Defines
 CMAKE_ASSEMBLER=yasm
 GCC_COMPILER=gcc
-ICC_COMPILER=/opt/intel/composerxe/bin/icc
-AR_COMPILER=gcc-ar
-RANLIB_COMPILER=gcc-ranlib
-
-if [ ! -e $ICC_COMPILER ]; then
-	CMAKE_COMPILER=$GCC_COMPILER
-elif [ "$1" == "gcc" ]; then
-	CMAKE_COMPILER=$GCC_COMPILER
-elif [ "$2" == "gcc" ]; then
-	CMAKE_COMPILER=$GCC_COMPILER
-else
-	CMAKE_COMPILER=$ICC_COMPILER
-	AR_COMPILER=`dirname $ICC_COMPILER`/xiar
-fi
-
-
+CMAKE_COMPILER=$GCC_COMPILER
 
 if [ $# -eq 0 ]; then
 	debug
