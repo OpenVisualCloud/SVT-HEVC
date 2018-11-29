@@ -843,11 +843,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     // EB_BUFFERHEADERTYPE Input
     return_error = EbSystemResourceCtor(
         &encHandlePtr->inputBufferResourcePtr,
-#if !ONE_MEMCPY 
-        2,// encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount,
-#else
-        encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount,
-#endif
+        encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->inputOutputBufferFifoInitCount,
         1,
         EB_ResourceCoordinationProcessInitCount,
         &encHandlePtr->inputBufferProducerFifoPtrArray,
@@ -867,7 +863,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
         return_error = EbSystemResourceCtor(
             &encHandlePtr->outputStreamBufferResourcePtrArray[instanceIndex],
-            encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount,
+            encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->inputOutputBufferFifoInitCount,
             encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->totalProcessInitCount,// EB_PacketizationProcessInitCount,
             1,
             &encHandlePtr->outputStreamBufferProducerFifoPtrDblArray[instanceIndex],
@@ -1580,7 +1576,7 @@ void LoadDefaultBufferConfigurationSettings(
 
     unsigned int coreCount = GetNumCores();
 
-    sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount = inputPic + sequenceControlSetPtr->staticConfig.lookAheadDistance + SCD_LAD;
+    sequenceControlSetPtr->inputOutputBufferFifoInitCount = inputPic + sequenceControlSetPtr->staticConfig.lookAheadDistance + SCD_LAD;
     
     // ME segments
     sequenceControlSetPtr->meSegmentRowCountArray[0] = meSegH;
@@ -1615,8 +1611,8 @@ void LoadDefaultBufferConfigurationSettings(
     //#====================== Data Structures and Picture Buffers ======================
     sequenceControlSetPtr->pictureControlSetPoolInitCount       = inputPic;
     sequenceControlSetPtr->pictureControlSetPoolInitCountChild  = MAX(4, coreCount / 6);
-    sequenceControlSetPtr->referencePictureBufferInitCount      = sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount;//MAX((EB_U32)(sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
-    sequenceControlSetPtr->paReferencePictureBufferInitCount    = sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount;//MAX((EB_U32)(sequenceControlSetPtr->staticConfig.inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
+    sequenceControlSetPtr->referencePictureBufferInitCount      = sequenceControlSetPtr->inputOutputBufferFifoInitCount;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
+    sequenceControlSetPtr->paReferencePictureBufferInitCount    = sequenceControlSetPtr->inputOutputBufferFifoInitCount;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
     sequenceControlSetPtr->reconBufferFifoInitCount             = sequenceControlSetPtr->referencePictureBufferInitCount;
     
     //#====================== Inter process Fifos ======================
@@ -2032,6 +2028,10 @@ void CopyApiFromApp(
         sequenceControlSetPtr->staticConfig.videoUsabilityInfo = 1;
     }
     
+    // Get Default Intra Period if not specified
+    if (sequenceControlSetPtr->staticConfig.intraPeriodLength == -2) {
+        sequenceControlSetPtr->intraPeriodLength = sequenceControlSetPtr->staticConfig.intraPeriodLength = ComputeIntraPeriod(sequenceControlSetPtr);
+    }
 
     if (sequenceControlSetPtr->staticConfig.lookAheadDistance == (EB_U32)~0) {
         sequenceControlSetPtr->staticConfig.lookAheadDistance = ComputeDefaultLookAhead(&sequenceControlSetPtr->staticConfig);
@@ -2042,10 +2042,7 @@ void CopyApiFromApp(
         sequenceControlSetPtr->staticConfig.frameRate = (sequenceControlSetPtr->staticConfig.frameRateNumerator << 16) / (sequenceControlSetPtr->staticConfig.frameRateDenominator);
     }
 
-    // Get Default Intra Period if not specified
-    if (sequenceControlSetPtr->staticConfig.intraPeriodLength == -2) {
-        sequenceControlSetPtr->intraPeriodLength = sequenceControlSetPtr->staticConfig.intraPeriodLength = ComputeIntraPeriod(sequenceControlSetPtr);
-    }
+    
     return;
 }
 
@@ -2650,7 +2647,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->useQpFile = EB_FALSE;
     configPtr->sceneChangeDetection = 1;
     configPtr->rateControlMode = 0;
-    configPtr->lookAheadDistance = 17;
+    configPtr->lookAheadDistance = (EB_U32)~0;
     configPtr->targetBitRate = 7000000;
     configPtr->maxQpAllowed = 48;
     configPtr->minQpAllowed = 10;
@@ -2686,7 +2683,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->hmeLevel2SearchAreaInHeightArray[0] = 1;
     configPtr->hmeLevel2SearchAreaInHeightArray[1] = 1;
     configPtr->constrainedIntra = EB_FALSE;
-    configPtr->tune = 0;
+    configPtr->tune = 1;
     configPtr->bitRateReduction = EB_TRUE;
     configPtr->improveSharpness = EB_TRUE;
 
@@ -2702,9 +2699,6 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->recoveryPointSeiFlag = EB_FALSE;
     configPtr->enableTemporalId = 1;
     
-    // HT - To be removed
-    configPtr->inputOutputBufferFifoInitCount = 50;
-
     // Annex A parameters
     configPtr->profile = 2;
     configPtr->tier = 0;

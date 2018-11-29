@@ -243,9 +243,6 @@ typedef struct EB_H265_ENC_CONFIGURATION
     // Debug tools
     unsigned int              reconEnabled;
 
-	// Buffer Configuration
-    unsigned int			  inputOutputBufferFifoInitCount;              // add check for minimum 
-
     signed int                injectorFrameRate;
     unsigned int              speedControlFlag;
     

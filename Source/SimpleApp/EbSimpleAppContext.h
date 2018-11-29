@@ -156,11 +156,6 @@ typedef struct EbConfig_s
     unsigned int         tier;
     unsigned int         level;
 
-	/****************************************
-     * Buffers and Fifos
-     ****************************************/
-    unsigned int         inputOutputBufferFifoInitCount;
-
     /****************************************
      * On-the-fly Testing 
      ****************************************/

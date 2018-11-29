@@ -17,8 +17,6 @@ typedef struct EbAppContext_s {
     void                               *cmdSemaphoreHandle;
     void                               *inputSemaphoreHandle;
     void                               *streamSemaphoreHandle;
-    EB_PARAM_PORTDEFINITIONTYPE         inputPortDefinition;
-    EB_PARAM_PORTDEFINITIONTYPE         outputStreamPortDefinition;
     EB_H265_ENC_CONFIGURATION           ebEncParameters;
 
     // Output Ports Active Flags
@@ -28,9 +26,9 @@ typedef struct EbAppContext_s {
     EB_COMPONENTTYPE*                   svtEncoderHandle;
 
     // Buffer Pools
-    EB_BUFFERHEADERTYPE              **inputBufferPool;
-    EB_BUFFERHEADERTYPE              **streamBufferPool;
-    EB_BUFFERHEADERTYPE               *reconBuffer;
+    EB_BUFFERHEADERTYPE                *inputBufferPool;
+    EB_BUFFERHEADERTYPE                *streamBufferPool;
+    EB_BUFFERHEADERTYPE                *reconBuffer;
 
 	// Instance Index
 	EB_U8								instanceIdx;

@@ -99,10 +99,10 @@ In order to run the highest resolution supported by the encoder, at least 64GB o
 
 * __Installation__
 -	For the binaries to operate properly on your system, the following conditions have to be met:
-	-	On any of the Windows* Operating Systems listed in the OS requirements section, install Visual Studio 2017
+	-	On any of the Windows* Operating Systems listed in the OS requirements section, install Visual Studio* 2017
 	-	Once the installation is complete, copy the binaries to a location making sure that both the sample application "SvtHevcEncApp.exe” and library "SvtHevcEnc.dll” are in the same folder.
-	-	Open the command prompt window at the chosen location and run the sample application to encode. SvtHevcEncApp.exe -i [in.yuv] -w [width] -h [height] -fps [int_framerate] -b [out.265].
-	-	Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | ebHevcEncApp.exe -i stdin -n [number_of_frames_to_encode] -w [width] -h [height].
+	-	Open the command prompt window at the chosen location and run the sample application to encode. SvtHevcEncApp.exe -i [in.yuv] -w [width] -h [height] -b [out.265].
+	-	Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | SvtHevcEncApp.exe -i stdin -n [number_of_frames_to_encode] -w [width] -h [height].
 
 ## Linux* Operating Systems (64-bit):
 
@@ -123,7 +123,7 @@ For the binaries to operate properly on your system, the following conditions ha
 	-	On any of the Linux* Operating Systems listed above, copy the binaries under a location of your choice.
 	-	Change the permissions on the sample application “SvtHevcEncApp” executable by running the command: 				chmod +x SvtHevcEncApp
 	-	cd into your chosen location
-	-	Run the sample application to encode. ./SvtHevcEncApp -i [in.yuv] -w [width] -h [height] -fps [int_framerate] -b [out.265].
+	-	Run the sample application to encode. ./SvtHevcEncApp -i [in.yuv] -w [width] -h [height] -b [out.265].
 	-	Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | ./SvtHevcEncApp -i stdin -n [number_of_frames_to_encode] -w [width] -h [height].
 
 # Demo features and limitations
@@ -134,7 +134,7 @@ For the binaries to operate properly on your system, the following conditions ha
 
 -  **Speed Control output:** The speed control functionality implemented for SVT-HEVC Encoder is a demo feature showcasing the capability of the library to adapt to the resources available on the fly in order to generate the best possible video quality while maintaining a real-time encoding speed. When set to use the Speed Control mode, the encoder does not produce a bit-exact output from one run to another.
 
--  **Multi-instance support:** The multi-instance functionality is a demo feature implemented in the SVT-HEVC Encoder sample application as an example of one sample application using multiple encoding libraries. Encoding using the multi-instance support is limited to only 6 simultaneous streams. For example two channels encoding on Windows: ebHevcEncApp.exe -nch 2 -c firstchannel.cfg secondchannel.cfg
+-  **Multi-instance support:** The multi-instance functionality is a demo feature implemented in the SVT-HEVC Encoder sample application as an example of one sample application using multiple encoding libraries. Encoding using the multi-instance support is limited to only 6 simultaneous streams. For example two channels encoding on Windows: SvtHevcEncApp.exe -nch 2 -c firstchannel.cfg secondchannel.cfg
 
 -  **Separate Fields:** Using the separate fields functionality migh result in a corrupted video output.
 

@@ -226,11 +226,14 @@ int main(int argc, char* argv[])
                                                                             configs[instanceCount],
                                                                             appCallbacks[instanceCount],
                                                                             (exitConditionsInput[instanceCount] == APP_ExitConditionNone) || (exitConditionsRecon[instanceCount] == APP_ExitConditionNone)? 0 : 1);
-                            if ((exitConditionsRecon[instanceCount] != APP_ExitConditionNone && exitConditionsOutput[instanceCount] != APP_ExitConditionNone && exitConditionsInput[instanceCount] != APP_ExitConditionNone)||
-                                (exitConditionsRecon[instanceCount] == APP_ExitConditionError || exitConditionsOutput[instanceCount] == APP_ExitConditionError || exitConditionsInput[instanceCount] == APP_ExitConditionError)){
+                            if (((exitConditionsRecon[instanceCount] == APP_ExitConditionFinished || !configs[instanceCount]->reconFile)  && exitConditionsOutput[instanceCount] == APP_ExitConditionFinished && exitConditionsInput[instanceCount] == APP_ExitConditionFinished)||
+                                ((exitConditionsRecon[instanceCount] == APP_ExitConditionError && configs[instanceCount]->reconFile) || exitConditionsOutput[instanceCount] == APP_ExitConditionError || exitConditionsInput[instanceCount] == APP_ExitConditionError)){
                                 channelActive[instanceCount] = EB_FALSE;
                                 FinishTime((unsigned long long*)&encodingFinishTimesSeconds[instanceCount], (unsigned long long*)&encodingFinishTimesuSeconds[instanceCount]);
-                                exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsRecon[instanceCount] | exitConditionsOutput[instanceCount] | exitConditionsInput[instanceCount]);
+                                if (configs[instanceCount]->reconFile)
+                                    exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsRecon[instanceCount] | exitConditionsOutput[instanceCount] | exitConditionsInput[instanceCount]);
+                                else
+                                    exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsOutput[instanceCount] | exitConditionsInput[instanceCount]);
                             }
                         }
                     }
