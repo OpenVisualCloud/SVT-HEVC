@@ -49,7 +49,6 @@
 #define TIER_TOKEN                      "-tier"
 #define LEVEL_TOKEN                     "-level" 
 #define LATENCY_MODE                    "-latency-mode" // no Eval
-#define INPUT_BUF_TOKEN                 "-inbuf"
 #define INTERLACED_VIDEO_TOKEN          "-interlaced-video" 
 #define SEPERATE_FILDS_TOKEN            "-separate-fields"
 #define INTRA_REFRESH_TYPE_TOKEN        "-irefresh-type" // no Eval
@@ -222,7 +221,6 @@ static void SetInjectorFrameRate                (const char *value, EbConfig_t *
         cfg->injectorFrameRate = cfg->injectorFrameRate << 16;
     }   
 }
-static void	SetinputOutputBufferFifoInitCount	(const char *value, EbConfig_t *cfg)  {cfg->inputOutputBufferFifoInitCount               = strtoul(value, NULL, 0);};        
 static void	SetLatencyMode                      (const char *value, EbConfig_t *cfg)  {cfg->latencyMode               = (EB_U8)strtol(value, NULL, 0);};
 static void SetAsmType                          (const char *value, EbConfig_t *cfg)  { cfg->asmType = (EB_ASM)strtoul(value, NULL, 0); };
 static void SetUseRoundRobinThreadAssignment    (const char *value, EbConfig_t *cfg) {cfg->useRoundRobinThreadAssignment   = (EB_BOOL)strtol(value, NULL, 0);}; 
@@ -350,7 +348,6 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, TIER_TOKEN, "Tier", SetTier },
     { SINGLE_INPUT, LEVEL_TOKEN, "Level", SetLevel },
     { SINGLE_INPUT, LATENCY_MODE, "LatencyMode", SetLatencyMode },
-    { SINGLE_INPUT, INPUT_BUF_TOKEN, "inputOutputBufferFifoInitCount", SetinputOutputBufferFifoInitCount },
 
     // Asm Type
     { SINGLE_INPUT, ASM_TYPE_TOKEN, "AsmType", SetAsmType },
@@ -456,7 +453,6 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->unregisteredUserDataSeiFlag          = EB_FALSE;
     configPtr->recoveryPointSeiFlag                 = EB_FALSE;
     configPtr->enableTemporalId                     = 1;
-	configPtr->inputOutputBufferFifoInitCount		= 1;
 
     // Annex A parameters
     configPtr->profile                              = 2;

@@ -415,11 +415,6 @@ typedef struct EbConfig_s
     EB_U32                 tier;
     EB_U32                 level;
 
-	/****************************************
-     * Buffers and Fifos
-     ****************************************/
-    EB_U32				   inputOutputBufferFifoInitCount;             
-
     /****************************************
      * On-the-fly Testing 
      ****************************************/

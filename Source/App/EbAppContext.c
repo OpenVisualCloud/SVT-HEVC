@@ -220,7 +220,6 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.level = config->level;
     callbackData->ebEncParameters.injectorFrameRate = config->injectorFrameRate;
     callbackData->ebEncParameters.speedControlFlag = config->speedControlFlag;
-    callbackData->ebEncParameters.inputOutputBufferFifoInitCount = config->inputOutputBufferFifoInitCount;
     callbackData->ebEncParameters.asmType = config->asmType;
     callbackData->ebEncParameters.reconEnabled = config->reconFile ? EB_TRUE : EB_FALSE;
 
@@ -317,31 +316,25 @@ EB_ERRORTYPE AllocateInputBuffers(
     EbAppContext_t			*callbackData)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
-    unsigned int    bufferIndex;
-    // Allocate the buffer pools for each port
-    // ... Input Port
-    EB_APP_MALLOC(EB_BUFFERHEADERTYPE**, callbackData->inputBufferPool, config->inputOutputBufferFifoInitCount * sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, EB_ErrorInsufficientResources);
-
-    for (bufferIndex = 0; bufferIndex < config->inputOutputBufferFifoInitCount; ++bufferIndex) {
-
-        EB_APP_MALLOC(EB_BUFFERHEADERTYPE*, callbackData->inputBufferPool[bufferIndex], sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, EB_ErrorInsufficientResources);
+    {
+        EB_APP_MALLOC(EB_BUFFERHEADERTYPE*, callbackData->inputBufferPool, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, EB_ErrorInsufficientResources);
 
         // Initialize Header
-        callbackData->inputBufferPool[bufferIndex]->nSize                       = sizeof(EB_BUFFERHEADERTYPE);
+        callbackData->inputBufferPool->nSize                       = sizeof(EB_BUFFERHEADERTYPE);
 
-        EB_APP_MALLOC(EB_U8*, callbackData->inputBufferPool[bufferIndex]->pBuffer, sizeof(EB_H265_ENC_INPUT), EB_N_PTR, EB_ErrorInsufficientResources);
+        EB_APP_MALLOC(EB_U8*, callbackData->inputBufferPool->pBuffer, sizeof(EB_H265_ENC_INPUT), EB_N_PTR, EB_ErrorInsufficientResources);
 
         if (config->bufferedInput == -1) {
 
             // Allocate frame buffer for the pBuffer
             AllocateFrameBuffer(
                     config,
-                    callbackData->inputBufferPool[bufferIndex]->pBuffer);
+                    callbackData->inputBufferPool->pBuffer);
         }
 
         // Assign the variables 
-        callbackData->inputBufferPool[bufferIndex]->pAppPrivate = NULL;// (EB_PTR)callbackData;
-        callbackData->inputBufferPool[bufferIndex]->sliceType = INVALID_SLICE;
+        callbackData->inputBufferPool->pAppPrivate = NULL;
+        callbackData->inputBufferPool->sliceType   = INVALID_SLICE;
     }
 
     return return_error;
@@ -379,26 +372,18 @@ EB_ERRORTYPE AllocateOutputBuffers(
 {
 
     EB_ERRORTYPE   return_error = EB_ErrorNone;
-    EB_U32		    outputStreamBufferSize;
-    unsigned int    bufferIndex;
-
-    // ... Bitstream Port
-    EB_APP_MALLOC(EB_BUFFERHEADERTYPE**, callbackData->streamBufferPool, config->inputOutputBufferFifoInitCount * sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, EB_ErrorInsufficientResources);
-
-    outputStreamBufferSize = (EB_U32)(EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->inputPaddedHeight * config->inputPaddedWidth));
-
-    callbackData->outputStreamPortDefinition.nStride = outputStreamBufferSize;
-    for (bufferIndex = 0; bufferIndex < config->inputOutputBufferFifoInitCount; ++bufferIndex) {
-        EB_APP_MALLOC(EB_BUFFERHEADERTYPE*, callbackData->streamBufferPool[bufferIndex], sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, EB_ErrorInsufficientResources);
+    EB_U32		   outputStreamBufferSize = (EB_U32)(EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->inputPaddedHeight * config->inputPaddedWidth));;
+    {
+        EB_APP_MALLOC(EB_BUFFERHEADERTYPE*, callbackData->streamBufferPool, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, EB_ErrorInsufficientResources);
 
         // Initialize Header
-        callbackData->streamBufferPool[bufferIndex]->nSize = sizeof(EB_BUFFERHEADERTYPE);
+        callbackData->streamBufferPool->nSize = sizeof(EB_BUFFERHEADERTYPE);
 
-        EB_APP_MALLOC(EB_U8*, callbackData->streamBufferPool[bufferIndex]->pBuffer, callbackData->outputStreamPortDefinition.nStride, EB_N_PTR, EB_ErrorInsufficientResources);
+        EB_APP_MALLOC(EB_U8*, callbackData->streamBufferPool->pBuffer, outputStreamBufferSize, EB_N_PTR, EB_ErrorInsufficientResources);
 
-        callbackData->streamBufferPool[bufferIndex]->nAllocLen = callbackData->outputStreamPortDefinition.nStride;
-        callbackData->streamBufferPool[bufferIndex]->pAppPrivate = (EB_PTR)callbackData;
-        callbackData->streamBufferPool[bufferIndex]->sliceType = INVALID_SLICE;
+        callbackData->streamBufferPool->nAllocLen = outputStreamBufferSize;
+        callbackData->streamBufferPool->pAppPrivate = (EB_PTR)callbackData;
+        callbackData->streamBufferPool->sliceType = INVALID_SLICE;
     }
     return return_error;
 }

@@ -1165,7 +1165,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
     EbAppContext_t         *appCallBack)
 {
     unsigned char            is16bit = (unsigned char)(config->encoderBitDepth > 8);
-    EB_BUFFERHEADERTYPE     *headerPtr = appCallBack->inputBufferPool[0]; // needs to change for buffered input
+    EB_BUFFERHEADERTYPE     *headerPtr = appCallBack->inputBufferPool; 
     EB_COMPONENTTYPE        *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
     
     APPEXITCONDITIONTYPE    return_value = APP_ExitConditionNone;
@@ -1257,7 +1257,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     unsigned char           picSendDone)
 {
     APPPORTACTIVETYPE       *portState = &appCallBack->outputStreamPortActive;
-    EB_BUFFERHEADERTYPE     *headerPtr = appCallBack->streamBufferPool[0]; // needs to change for buffered input
+    EB_BUFFERHEADERTYPE     *headerPtr = appCallBack->streamBufferPool; 
     EB_COMPONENTTYPE        *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
     APPEXITCONDITIONTYPE    return_value = APP_ExitConditionNone;
     EB_ERRORTYPE            stream_status = EB_ErrorNone;
