@@ -115,7 +115,15 @@
  **********************************/
 static void SetCfgInputFile                     (const char *value, EbConfig_t *cfg) 
 {
-    if (cfg->inputFile && cfg->inputFile != stdin) fclose(cfg->inputFile); if (!strcmp(value, "stdin")) cfg->inputFile = stdin; else { FOPEN(cfg->inputFile, value, "rb"); }
+    if (cfg->inputFile && cfg->inputFile != stdin) {
+        fclose(cfg->inputFile);
+    }
+    if (!strcmp(value, "stdin")) {
+        cfg->inputFile = stdin;
+    }
+    else {
+        FOPEN(cfg->inputFile, value, "rb"); 
+    }
 };
 static void SetCfgStreamFile                    (const char *value, EbConfig_t *cfg) 
 {

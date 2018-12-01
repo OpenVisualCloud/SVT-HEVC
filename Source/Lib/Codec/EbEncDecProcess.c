@@ -3512,7 +3512,7 @@ void* EncDecKernel(void *inputPtr)
                            
     // Segments            
     //EB_BOOL                 initialProcessCall;
-    EB_U16                  segmentIndex;
+    EB_U16                  segmentIndex = 0;
     EB_U32                  xLcuStartIndex;
     EB_U32                  yLcuStartIndex;
     EB_U32                  lcuStartIndex;

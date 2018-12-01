@@ -22,6 +22,8 @@
 #define ftello64 _ftelli64
 #define FOPEN(f,s,m) fopen_s(&f,s,m)
 #else
+#define fseeko64 fseek
+#define ftello64 ftell
 #define FOPEN(f,s,m) f=fopen(s,m)
 #include <pthread.h>
 #include <semaphore.h>
@@ -393,8 +395,10 @@ int main(int argc, char* argv[])
             exitConditionRecon = APP_ExitConditionNone;
             while (exitConditionOutput == APP_ExitConditionNone) {
                 exitConditionInput = ProcessInputBuffer(config, appCallback);
-                exitConditionRecon = ProcessOutputReconBuffer(config, appCallback);
-                exitConditionOutput = ProcessOutputStreamBuffer(config, appCallback, (exitConditionInput == APP_ExitConditionNone || exitConditionRecon == APP_ExitConditionNone ? 0 : 1));
+                if (config->reconFile) {
+                    exitConditionRecon = ProcessOutputReconBuffer(config, appCallback);
+                }                
+                exitConditionOutput = ProcessOutputStreamBuffer(config, appCallback, (exitConditionInput == APP_ExitConditionNone || (exitConditionRecon == APP_ExitConditionNone && config->reconFile) ? 0 : 1));
             }
             
             printf("\n");
