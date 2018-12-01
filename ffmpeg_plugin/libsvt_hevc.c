@@ -62,10 +62,8 @@ typedef struct SvtContext {
 static void free_buffer(SvtEncoder *svt_enc)
 {
     if (svt_enc->in_buf) {
-        EB_H265_ENC_INPUT *in_data = (EB_H265_ENC_INPUT* )svt_enc->in_buf->pBuffer;
-        if (in_data) {
-            av_freep(&in_data);
-        }
+        EB_H265_ENC_INPUT *in_data = (EB_H265_ENC_INPUT *)svt_enc->in_buf->pBuffer;
+        av_freep(&in_data);
         av_freep(&svt_enc->in_buf);
     }
     av_freep(&svt_enc->out_buf);
@@ -146,6 +144,8 @@ static EB_ERRORTYPE config_enc_params(EB_H265_ENC_CONFIGURATION  *param, AVCodec
     param->frameRateNumerator     = avctx->time_base.den;
     param->frameRateDenominator   = avctx->time_base.num * avctx->ticks_per_frame;
 
+    param->codeVpsSpsPps          = 0; 
+
     if (q->svt_param.vui_info)
         param->videoUsabilityInfo = q->svt_param.vui_info;
     if (q->svt_param.la_depth != -1)
@@ -211,9 +211,13 @@ static av_cold int eb_enc_init(AVCodecContext *avctx)
         goto failed_init;
 
     if (avctx->flags & AV_CODEC_FLAG_GLOBAL_HEADER) {
+        
         EB_BUFFERHEADERTYPE headerPtr;
+        headerPtr.nSize       = sizeof(EB_BUFFERHEADERTYPE);
         headerPtr.nFilledLen  = 0;
         headerPtr.pBuffer     = av_malloc(10 * 1024 * 1024);
+        headerPtr.nAllocLen   = (10 * 1024 * 1024);
+        
         if (!headerPtr.pBuffer)
             return AVERROR(ENOMEM);
 
@@ -280,11 +284,13 @@ static int eb_receive_packet(AVCodecContext *avctx, AVPacket *pkt)
     EB_ERRORTYPE          stream_status = EB_ErrorNone;
     int ret = 0;
 
-    if ((ret = ff_alloc_packet2(avctx, pkt, svt_enc->raw_size, 0)) < 0)
+    if ((ret = ff_alloc_packet2(avctx, pkt, svt_enc->raw_size, 0)) < 0) {
+        av_log(avctx, AV_LOG_ERROR, "Failed to allocate output packet.\n");
         return ret;
+    }
     headerPtr->pBuffer = pkt->data;
     stream_status = EbH265GetPacket(svt_enc->svt_handle, headerPtr, q->eos_flag);
-    if ((stream_status == EB_NoErrorEmptyQueue))
+    if (stream_status == EB_NoErrorEmptyQueue)
         return AVERROR(EAGAIN);
 
     pkt->size = headerPtr->nFilledLen;
@@ -316,22 +322,22 @@ static av_cold int eb_enc_close(AVCodecContext *avctx)
 #define OFFSET(x) offsetof(SvtContext, x)
 #define VE AV_OPT_FLAG_VIDEO_PARAM | AV_OPT_FLAG_ENCODING_PARAM
 static const AVOption options[] = {
-    {"vui", "Enable vui info", OFFSET(svt_param.vui_info), AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, VE },
+    {"vui", "Enable vui info", OFFSET(svt_param.vui_info), AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
     {"hielevel", "Hierarchical Prediction Levels [0,3]", OFFSET(svt_param.hierarchical_level), AV_OPT_TYPE_INT, { .i64 = 3 }, 0, 3, VE },
     {"la_depth", "Look Ahead Distance [0,256]", OFFSET(svt_param.la_depth), AV_OPT_TYPE_INT, { .i64 = -1 }, -1, 256, VE },
-    {"intra_ref_type", "Intra Refresh Type 0: No intra refresh1: CRA (Open GOP) 2: IDR", OFFSET(svt_param.intra_ref_type), AV_OPT_TYPE_INT, { .i64 = 1 }, 1, 2, VE },
+    {"intra_ref_type", "Intra Refresh Type 0: No intra refresh 1: CRA (Open GOP) 2: IDR", OFFSET(svt_param.intra_ref_type), AV_OPT_TYPE_INT, { .i64 = 1 }, 1, 2, VE },
     {"enc_p", "Encoding preset [0,12] (for tune 0 and >=4k resolution), [0,10] (for >= 1080p resolution), [0,9] (for all resolution and modes)", OFFSET(svt_param.enc_mode), AV_OPT_TYPE_INT, { .i64 = 9 }, 0, 12, VE },
-    {"profile", "Profile now support[1,2],Main Still Picture Profile not supported", OFFSET(svt_param.profile), AV_OPT_TYPE_INT, { .i64 = 2 }, 1, 2, VE },
+    {"profile", "Profile now support[1,2], Main Still Picture Profile not supported", OFFSET(svt_param.profile), AV_OPT_TYPE_INT, { .i64 = 2 }, 1, 2, VE },
     {"rc", "RC mode 0: CQP 1: VBR", OFFSET(svt_param.rc_mode), AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, VE },
     {"q", "QP value for intra frames", OFFSET(svt_param.qp), AV_OPT_TYPE_INT, { .i64 = 32 }, 0, 51, VE },
-    {"scd", "scene change detection", OFFSET(svt_param.scd), AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, VE },
-    {"tune", "tune mode: SQ/OQ[0,1]", OFFSET(svt_param.tune), AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, VE },
-    {"bl_mode", "Random Access Prediction Structure Type", OFFSET(svt_param.base_layer_switch_mode), AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, VE },
+    {"scd", "Scene change detection", OFFSET(svt_param.scd), AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
+    {"tune", "Tune mode: SQ/OQ[0,1]", OFFSET(svt_param.tune), AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, VE },
+    {"bl_mode", "Random Access Prediction Structure Type", OFFSET(svt_param.base_layer_switch_mode), AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
     {NULL},
 };
 
 static const AVClass class = {
-    .class_name = "hevc_svt encoder",
+    .class_name = "libsvt_hevc",
     .item_name  = av_default_item_name,
     .option     = options,
     .version    = LIBAVUTIL_VERSION_INT,
@@ -340,7 +346,7 @@ static const AVClass class = {
 static const AVCodecDefault eb_enc_defaults[] = {
     { "b",         "7M"    },
     { "refs",      "0"     },
-    { "g",         "90"   },
+    { "g",         "64"   },
     { "flags",     "+cgop" },
     { NULL },
 };
