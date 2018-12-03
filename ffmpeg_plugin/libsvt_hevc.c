@@ -18,7 +18,6 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-
 #include "EbErrorCodes.h"
 #include "EbTime.h"
 #include "EbApi.h"
@@ -144,7 +143,7 @@ static EB_ERRORTYPE config_enc_params(EB_H265_ENC_CONFIGURATION  *param, AVCodec
     param->frameRateNumerator     = avctx->time_base.den;
     param->frameRateDenominator   = avctx->time_base.num * avctx->ticks_per_frame;
 
-    param->codeVpsSpsPps          = 0; 
+    param->codeVpsSpsPps          = 0;
 
     if (q->svt_param.vui_info)
         param->videoUsabilityInfo = q->svt_param.vui_info;
@@ -163,7 +162,6 @@ static EB_ERRORTYPE config_enc_params(EB_H265_ENC_CONFIGURATION  *param, AVCodec
 
 static void read_in_data(EB_H265_ENC_CONFIGURATION *config, const AVFrame* frame, EB_BUFFERHEADERTYPE *headerPtr)
 {
-
     unsigned int is16bit = config->encoderBitDepth > 8;
     unsigned long long lumaReadSize = (unsigned long long)config->sourceWidth * config->sourceHeight<< is16bit;
     EB_H265_ENC_INPUT *in_data = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
@@ -211,13 +209,13 @@ static av_cold int eb_enc_init(AVCodecContext *avctx)
         goto failed_init;
 
     if (avctx->flags & AV_CODEC_FLAG_GLOBAL_HEADER) {
-        
+
         EB_BUFFERHEADERTYPE headerPtr;
         headerPtr.nSize       = sizeof(EB_BUFFERHEADERTYPE);
         headerPtr.nFilledLen  = 0;
         headerPtr.pBuffer     = av_malloc(10 * 1024 * 1024);
         headerPtr.nAllocLen   = (10 * 1024 * 1024);
-        
+
         if (!headerPtr.pBuffer)
             return AVERROR(ENOMEM);
 
@@ -370,4 +368,3 @@ AVCodec ff_hevc_svt_encoder = {
     .caps_internal  = FF_CODEC_CAP_INIT_CLEANUP,
     .wrapper_name   = "libsvt_hevc",
 };
-

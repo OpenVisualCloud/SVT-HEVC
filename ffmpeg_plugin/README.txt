@@ -10,12 +10,12 @@
 - cd ..
 - git clone https://github.com/FFmpeg/FFmpeg ffmpeg
 - cd ffmpeg
-- git reset --hard e10fe34e7c6031baa07fb3bad5c284b2911f501b
-- git apply svt-hevc.patch
+- git apply 0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch
 - ./configure --prefix=/usr --libdir=/usr/lib --enable-nonfree --enable-static --disable-shared --enable-libsvt --enable-gpl
 - make -j
 - sudo make install
 
 >> ffmpeg is now built with svt-hevc, sample command line: 
 ./ffmpeg  -i input.mp4   -c:v libsvt_hevc -rc 1 -c:b 10M  -enc_p 12  -y test.265
+./ffmpeg  -i inout.mp4 -vframes 1000 -c:v libsvt_hevc -y test.mp4
 
