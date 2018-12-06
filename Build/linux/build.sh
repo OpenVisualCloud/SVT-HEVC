@@ -19,6 +19,8 @@ function debug {
 		-DCMAKE_BUILD_TYPE=Debug			\
 		-DCMAKE_C_COMPILER=$CMAKE_COMPILER		\
 		-DCMAKE_ASM_NASM_COMPILER=$CMAKE_ASSEMBLER	\
+		-DCMAKE_AR=`which $AR_COMPILER`			\
+		-DCMAKE_RANLIB=`which $RANLIB_COMPILER`	\
 
 	# Compile the App
 	make -j SvtHevcEncApp
@@ -36,6 +38,8 @@ function release {
 		-DCMAKE_BUILD_TYPE=Release			\
 		-DCMAKE_C_COMPILER=$CMAKE_COMPILER		\
 		-DCMAKE_ASM_NASM_COMPILER=$CMAKE_ASSEMBLER	\
+		-DCMAKE_AR=`which $AR_COMPILER`			\
+		-DCMAKE_RANLIB=`which $RANLIB_COMPILER`	\
 
 	# Compile the App
 	make -j SvtHevcEncApp
@@ -47,6 +51,8 @@ function release {
 # Defines
 CMAKE_ASSEMBLER=yasm
 GCC_COMPILER=gcc
+AR_COMPILER=gcc-ar
+RANLIB_COMPILER=gcc-ranlib
 CMAKE_COMPILER=$GCC_COMPILER
 
 if [ $# -eq 0 ]; then
