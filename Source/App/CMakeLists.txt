@@ -32,7 +32,7 @@ add_executable (SvtHevcEncApp
 if (UNIX)
 
 	# Configure the RPATH to allow relative runtime linking	
-	INSTALL(TARGETS SvtHevcEncApp RUNTIME DESTINATION ".:\$ORIGIN/../lib:\$ORIGIN/")
+	INSTALL(TARGETS SvtHevcEncApp RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/")
 
 
 
