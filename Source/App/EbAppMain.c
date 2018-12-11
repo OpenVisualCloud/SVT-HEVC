@@ -23,24 +23,32 @@
 #include "EbTime.h"
 #if !__linux
 #include <Windows.h>
+#else
+#include <pthread.h>
+#include <semaphore.h>
+#include <time.h>
+#include <errno.h>
 #endif
 
 #ifdef _MSC_VER
 #include <io.h>     /* _setmode() */
 #include <fcntl.h>  /* _O_BINARY */
 #endif
-
 /***************************************
  * External Functions
  ***************************************/
-extern APPEXITCONDITIONTYPE AppProcessCommands(
-    EbConfig_t **configs,
-    EbParentAppContext_t *appCallback,
-    EB_U64 *encodingFinishTimesSeconds,
-    EB_U64 *encodingFinishTimesuSeconds,
-    APPEXITCONDITIONTYPE *exitConditions);
+extern APPEXITCONDITIONTYPE ProcessInputBuffer(
+    EbConfig_t             *config,
+    EbAppContext_t         *appCallBack);
 
+extern APPEXITCONDITIONTYPE ProcessOutputReconBuffer(
+    EbConfig_t             *config,
+    EbAppContext_t         *appCallBack);
 
+extern APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
+    EbConfig_t             *config,
+    EbAppContext_t         *appCallBack,
+    unsigned char           picSendDone);
 
 volatile int keepRunning = 1;
 
@@ -63,6 +71,7 @@ void AssignAppThreadGroup(EB_U8 targetSocket) {
 #endif
 }
 
+
 /***************************************
  * Encoder App Main
  ***************************************/
@@ -72,24 +81,29 @@ int main(int argc, char* argv[])
     _setmode(_fileno(stdin), _O_BINARY);
     _setmode(_fileno(stdout), _O_BINARY);
 #endif
-    EB_ERRORTYPE           return_error    = EB_ErrorNone;            // Error Handling
-    APPEXITCONDITIONTYPE    exitCondition   = APP_ExitConditionNone;    // Processing loop exit condition
+    // GLOBAL VARIABLES
+    EB_ERRORTYPE            return_error = EB_ErrorNone;            // Error Handling
+    APPEXITCONDITIONTYPE    exitCondition = APP_ExitConditionNone;    // Processing loop exit condition
 
-    EB_ERRORTYPE           return_errors[MAX_CHANNEL_NUMBER];          // Error Handling
-    APPEXITCONDITIONTYPE    exitConditions[MAX_CHANNEL_NUMBER];         // Processing loop exit condition
+    EB_ERRORTYPE            return_errors[MAX_CHANNEL_NUMBER];          // Error Handling
+    APPEXITCONDITIONTYPE    exitConditions[MAX_CHANNEL_NUMBER];          // Processing loop exit condition
+    APPEXITCONDITIONTYPE    exitConditionsOutput[MAX_CHANNEL_NUMBER];         // Processing loop exit condition
+    APPEXITCONDITIONTYPE    exitConditionsRecon[MAX_CHANNEL_NUMBER];         // Processing loop exit condition
+    APPEXITCONDITIONTYPE    exitConditionsInput[MAX_CHANNEL_NUMBER];          // Processing loop exit condition
+
 
     EB_BOOL                 channelActive[MAX_CHANNEL_NUMBER];
 
     EbConfig_t             *configs[MAX_CHANNEL_NUMBER];        // Encoder Configuration
-    EbAppContext_t         *appCallbacks[MAX_CHANNEL_NUMBER];   // Instances App callback data
-    EbParentAppContext_t   *parentAppCallBack = NULL;           // App callback context
-
+    
     EB_U64                  encodingStartTimesSeconds[MAX_CHANNEL_NUMBER]; // Array holding start time of each instance
     EB_U64                  encodingFinishTimesSeconds[MAX_CHANNEL_NUMBER]; // Array holding finish time of each instance
     EB_U64                  encodingStartTimesuSeconds[MAX_CHANNEL_NUMBER]; // Array holding start time of each instance
     EB_U64                  encodingFinishTimesuSeconds[MAX_CHANNEL_NUMBER]; // Array holding finish time of each instance
-    unsigned int            instanceCount=0, numChannels=0;
-    
+
+    unsigned int            numChannels = 0;
+    unsigned int            instanceCount=0;
+    EbAppContext_t         *appCallbacks[MAX_CHANNEL_NUMBER];   // Instances App callback data
     signal(SIGINT, EventHandler);
 
     // Print Encoder Info
@@ -122,6 +136,8 @@ int main(int argc, char* argv[])
         // Initialize config
         for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
             configs[instanceCount] = (EbConfig_t*)malloc(sizeof(EbConfig_t));
+            if (!configs[instanceCount])
+                return EB_ErrorInsufficientResources;
             EbConfigCtor(configs[instanceCount]);
             return_errors[instanceCount] = EB_ErrorNone;
         }
@@ -129,26 +145,21 @@ int main(int argc, char* argv[])
         // Initialize appCallback
         for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
             appCallbacks[instanceCount] = (EbAppContext_t*)malloc(sizeof(EbAppContext_t));
-            EbAppContextCtor(appCallbacks[instanceCount]);
+            if (!appCallbacks[instanceCount])
+                return EB_ErrorInsufficientResources;
         }
 
         for (instanceCount = 0; instanceCount < MAX_CHANNEL_NUMBER; ++instanceCount) {
             exitConditions[instanceCount] = APP_ExitConditionError;         // Processing loop exit condition
+            exitConditionsOutput[instanceCount] = APP_ExitConditionError;         // Processing loop exit condition
+            exitConditionsRecon[instanceCount] = APP_ExitConditionError;         // Processing loop exit condition
+            exitConditionsInput[instanceCount] = APP_ExitConditionError;         // Processing loop exit condition
             channelActive[instanceCount] = EB_FALSE;
         }
 
         // Read all configuration files.
         return_error = ReadCommandLine(argc, argv, configs, numChannels, return_errors);
 
-        {
-            EB_U32 totalBuffersSize = 0; // hard coded, to be revisited when changing buffers for multiple instances
-
-            for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
-                totalBuffersSize += (configs[instanceCount]->inputOutputBufferFifoInitCount << 1);
-            }
-            parentAppCallBack = (EbParentAppContext_t*)malloc(sizeof(EbParentAppContext_t));
-            EbParentAppContextCtor(appCallbacks, parentAppCallBack, numChannels, totalBuffersSize);
-        }
         // Process any command line options, including the configuration file
 
         if (return_error == EB_ErrorNone) {
@@ -171,19 +182,24 @@ int main(int argc, char* argv[])
                     channelActive[instanceCount] = EB_FALSE;
                 }
             }
-            // Start the Encoder
-            if (return_error == EB_ErrorNone) {
-
+            
+            {
+                // Start the Encoder
                 for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
                     if (return_errors[instanceCount] == EB_ErrorNone) {
-                        return_errors[instanceCount] = StartEncoder(appCallbacks[instanceCount]);
                         return_error = (EB_ERRORTYPE)(return_error & return_errors[instanceCount]);
-                        exitConditions[instanceCount] = APP_ExitConditionNone;
-                        channelActive[instanceCount] = EB_TRUE;
-                        StartTime(&encodingStartTimesSeconds[instanceCount], &encodingStartTimesuSeconds[instanceCount]);
+                        exitConditions[instanceCount]       = APP_ExitConditionNone;
+                        exitConditionsOutput[instanceCount] = APP_ExitConditionNone;
+                        exitConditionsRecon[instanceCount]  = configs[instanceCount]->reconFile ? APP_ExitConditionNone : APP_ExitConditionError;
+                        exitConditionsInput[instanceCount]  = APP_ExitConditionNone;
+                        channelActive[instanceCount]        = EB_TRUE;
+                        StartTime((unsigned long long*)&encodingStartTimesSeconds[instanceCount], (unsigned long long*)&encodingStartTimesuSeconds[instanceCount]);
                     }
                     else {
-                        exitConditions[instanceCount] = APP_ExitConditionError;
+                        exitConditions[instanceCount]       = APP_ExitConditionError;
+                        exitConditionsOutput[instanceCount] = APP_ExitConditionError;
+                        exitConditionsRecon[instanceCount]  = APP_ExitConditionError;
+                        exitConditionsInput[instanceCount]  = APP_ExitConditionError;
                     }
 
 #if DISPLAY_MEMORY
@@ -193,28 +209,43 @@ int main(int argc, char* argv[])
                 printf("Encoding          ");
                 fflush(stdout);
 
-                // Processing Loop
-                exitCondition = APP_ExitConditionNone;
                 while (exitCondition == APP_ExitConditionNone) {
-                    AppProcessCommands(configs, parentAppCallBack, encodingFinishTimesSeconds, encodingFinishTimesuSeconds, exitConditions);
-                    exitCondition = APP_ExitConditionError;
+                    exitCondition = APP_ExitConditionFinished;
                     for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
-                        if (exitConditions[instanceCount] != APP_ExitConditionNone && channelActive[instanceCount]) {
-                            return_errors[instanceCount] = StopEncoder(appCallbacks[instanceCount]);
-                            channelActive[instanceCount] = EB_FALSE;
-                            if (exitConditions[instanceCount] == APP_ExitConditionError) {
-                                return_error = (EB_ERRORTYPE)(return_error | exitConditions[instanceCount]);
+                        if (channelActive[instanceCount] == EB_TRUE) {
+                            if (exitConditionsInput[instanceCount] == APP_ExitConditionNone)
+                                exitConditionsInput[instanceCount] = ProcessInputBuffer(
+                                                                            configs[instanceCount],
+                                                                            appCallbacks[instanceCount]);
+                            if (exitConditionsRecon[instanceCount] == APP_ExitConditionNone)
+                                exitConditionsRecon[instanceCount] = ProcessOutputReconBuffer(
+                                                                            configs[instanceCount],
+                                                                            appCallbacks[instanceCount]);
+                            if (exitConditionsOutput[instanceCount] == APP_ExitConditionNone)
+                                exitConditionsOutput[instanceCount] = ProcessOutputStreamBuffer(
+                                                                            configs[instanceCount],
+                                                                            appCallbacks[instanceCount],
+                                                                            (exitConditionsInput[instanceCount] == APP_ExitConditionNone) || (exitConditionsRecon[instanceCount] == APP_ExitConditionNone)? 0 : 1);
+                            if (((exitConditionsRecon[instanceCount] == APP_ExitConditionFinished || !configs[instanceCount]->reconFile)  && exitConditionsOutput[instanceCount] == APP_ExitConditionFinished && exitConditionsInput[instanceCount] == APP_ExitConditionFinished)||
+                                ((exitConditionsRecon[instanceCount] == APP_ExitConditionError && configs[instanceCount]->reconFile) || exitConditionsOutput[instanceCount] == APP_ExitConditionError || exitConditionsInput[instanceCount] == APP_ExitConditionError)){
+                                channelActive[instanceCount] = EB_FALSE;
+                                FinishTime((unsigned long long*)&encodingFinishTimesSeconds[instanceCount], (unsigned long long*)&encodingFinishTimesuSeconds[instanceCount]);
+                                if (configs[instanceCount]->reconFile)
+                                    exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsRecon[instanceCount] | exitConditionsOutput[instanceCount] | exitConditionsInput[instanceCount]);
+                                else
+                                    exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsOutput[instanceCount] | exitConditionsInput[instanceCount]);
                             }
-
                         }
-                        else if (exitConditions[instanceCount] == APP_ExitConditionNone && channelActive[instanceCount]) {
+                    }
+                    // check if all channels are inactive
+                    for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
+                        if (channelActive[instanceCount] == EB_TRUE)
                             exitCondition = APP_ExitConditionNone;
-                        }
-
                     }
                 }
+
                 for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
-                    if (exitConditions[instanceCount] != APP_ExitConditionError) {
+                    if (exitConditions[instanceCount] == APP_ExitConditionFinished && return_errors[instanceCount] == EB_ErrorNone) {
                         double frameRate;
 
                         if ((configs[instanceCount]->frameRateNumerator != 0 && configs[instanceCount]->frameRateDenominator != 0) || configs[instanceCount]->frameRate != 0) {
@@ -239,7 +270,7 @@ int main(int argc, char* argv[])
                                 printf("Total Frames\t\tFrame Rate\t\tByte Count\t\tBitrate\n");
                             }
                             printf("%12d\t\t%4.2f fps\t\t%10.0f\t\t%5.2f kbps\n",
-                                (EB_S32)configs[instanceCount]->framesEncoded,
+                                (EB_S32)configs[instanceCount]->performanceContext.frameCount,
                                 (double)frameRate,
                                 (double)configs[instanceCount]->performanceContext.byteCount,
                                 ((double)(configs[instanceCount]->performanceContext.byteCount << 3) * frameRate / (configs[instanceCount]->framesEncoded * 1000)));
@@ -251,7 +282,7 @@ int main(int argc, char* argv[])
                 fflush(stdout);
             }
             for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
-                if (return_errors[instanceCount] == EB_ErrorNone && exitConditions[instanceCount] == APP_ExitConditionFinished) {
+                if (exitConditions[instanceCount] == APP_ExitConditionFinished && return_errors[instanceCount] == EB_ErrorNone) {
 
                     if (configs[instanceCount]->stopEncoder == EB_FALSE) {
                         // Interlaced Video
@@ -286,25 +317,26 @@ int main(int argc, char* argv[])
 
             // DeInit Encoder
             for (instanceCount = numChannels; instanceCount > 0; --instanceCount) {
-                return_errors[instanceCount - 1] = DeInitEncoder(appCallbacks[instanceCount - 1], instanceCount - 1, return_errors[instanceCount - 1]);
-
+                if (return_errors[instanceCount - 1] == EB_ErrorNone)
+                    return_errors[instanceCount - 1] = DeInitEncoder(appCallbacks[instanceCount - 1], instanceCount - 1);
             }
         }
         else {
             printf("Error in configuration, could not begin encoding! ... \n");
+            printf("Run %s -help for a list of options\n", argv[0]);
         }
         // Destruct the App memory variables
         for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
             EbConfigDtor(configs[instanceCount]);
-            free(configs[instanceCount]);
-            free(appCallbacks[instanceCount]);
+            if (configs[instanceCount])
+                free(configs[instanceCount]);
+            if (appCallbacks[instanceCount])
+                free(appCallbacks[instanceCount]);
         }
-        EbParentAppContextDtor(parentAppCallBack);
-        free(parentAppCallBack);
 
         printf("Encoder finished\n");
-
     }
 
     return (return_error == 0) ? 0 : 1;
 }
+

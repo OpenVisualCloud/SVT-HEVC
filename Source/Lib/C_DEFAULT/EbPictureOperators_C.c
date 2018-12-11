@@ -37,6 +37,7 @@
 */
 
 #include "EbPictureOperators_C.h"
+#include "EbDefinitions.h"
 #include "EbUtility.h"
 
 /*********************************

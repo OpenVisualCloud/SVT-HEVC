@@ -6,7 +6,7 @@
 #ifndef EbTransforms_SSSE3_h
 #define EbTransforms_SSSE3_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

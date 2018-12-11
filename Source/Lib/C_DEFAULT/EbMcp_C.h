@@ -6,7 +6,7 @@
 #ifndef EbMcp_C_h
 #define EbMcp_C_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -6,7 +6,6 @@
 #include "EbAvcStyleMcp_SSSE3.h"
 
 #include "EbDefinitions.h"
-#include "EbTypes.h"
 
 #include "emmintrin.h"
 #include "tmmintrin.h"

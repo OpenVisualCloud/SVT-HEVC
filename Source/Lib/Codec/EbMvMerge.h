@@ -6,7 +6,6 @@
 #ifndef EbMvMerge_h
 #define EbMvMerge_h
 
-#include "EbTypes.h"
 #include "EbDefinitions.h"
 #include "EbPictureControlSet.h"
 #include "EbCodingUnit.h"

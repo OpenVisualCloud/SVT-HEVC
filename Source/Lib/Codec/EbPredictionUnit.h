@@ -6,7 +6,6 @@
 #ifndef EbPredictionUnit_h
 #define EbPredictionUnit_h
 
-#include "EbTypes.h"
 #include "EbSyntaxElements.h"
 #include "EbDefinitions.h"
 #include "EbMotionVectorUnit.h"

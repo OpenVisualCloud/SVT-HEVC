@@ -6,7 +6,6 @@
 #ifndef EBMCP_SSE2_H
 #define EBMCP_SSE2_H
 
-#include "EbTypes.h"
 #include "EbDefinitions.h"
 #ifdef __cplusplus
 extern "C" {

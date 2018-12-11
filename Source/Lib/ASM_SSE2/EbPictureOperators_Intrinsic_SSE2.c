@@ -5,7 +5,7 @@
 
 #include "EbPictureOperators_SSE2.h"
 #include <emmintrin.h>
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 static __m128i _mm_loadh_epi64(__m128i x, __m128i *p)
 {

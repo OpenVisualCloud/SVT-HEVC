@@ -3,7 +3,7 @@
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbComputeSAD_SadLoopKernel_AVX512.h"
 
 #ifndef _mm256_setr_m128i

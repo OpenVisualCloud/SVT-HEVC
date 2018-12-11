@@ -4,7 +4,7 @@
 */
 
 #include "emmintrin.h"
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 #include "EbDeblockingFilter_SSE2.h"
 

@@ -6,7 +6,7 @@
 #ifndef EbBitstreamUnit_h
 #define EbBitstreamUnit_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbUtility.h"
 #ifdef __cplusplus
 extern "C" {
