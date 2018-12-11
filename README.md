@@ -90,8 +90,8 @@ In order to run the highest resolution supported by the encoder, at least 64GB o
 
 * __Build Instructions__
 	-	Generate the Visual Studio* 2017 project files by following the steps below in a windows command line prompt:
-		-	cd Build\windows
-		-   build.bat
+		-   cd Build\windows
+		-   generate_vs17.bat
 	-   Open "svt-hevc.sln" using Visual Studio* 2017 and build the solution
 
 * __Binaries Location__
