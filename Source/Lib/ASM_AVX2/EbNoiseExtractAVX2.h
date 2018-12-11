@@ -7,7 +7,7 @@
 #define EbNoiseExtractAVX2_h
 
 #include "immintrin.h"
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbPictureBufferDesc.h"
 #ifdef __cplusplus
 extern "C" {

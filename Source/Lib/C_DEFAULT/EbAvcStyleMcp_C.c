@@ -5,7 +5,6 @@
 
 #include "EbAvcStyleMcp_C.h"
 #include "EbPictureOperators_C.h"
-#include "EbTypes.h"
 #include "EbUtility.h"
 #include "EbDefinitions.h"
 

@@ -4,7 +4,6 @@
 */
 
 #include "emmintrin.h"
-#include "EbTypes.h"
 #include "EbMcp_SSE2.h"
 #include "EbDefinitions.h"
 

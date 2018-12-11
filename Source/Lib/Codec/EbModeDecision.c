@@ -8,7 +8,7 @@
 ***************************************/
 #include <stdlib.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbUtility.h"
 #include "EbSequenceControlSet.h"
 

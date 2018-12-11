@@ -6,7 +6,6 @@
 #ifndef EBAVCSTYLEMCP_C_H
 #define EBAVCSTYLEMCP_C_H
 
-#include "EbTypes.h"
 #include "EbDefinitions.h"
 
 #ifdef __cplusplus

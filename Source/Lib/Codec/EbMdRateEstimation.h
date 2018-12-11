@@ -6,7 +6,7 @@
 #ifndef EbMdRateEstimation_h
 #define EbMdRateEstimation_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbCabacContextModel.h"
 #ifdef __cplusplus
 extern "C" {

@@ -6,7 +6,7 @@
 #ifndef EbTransQuantBuffers_h
 #define EbTransQuantBuffers_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbPictureBufferDesc.h"
 
 #ifdef __cplusplus

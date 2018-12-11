@@ -1470,10 +1470,8 @@ EB_EXTERN void lowPrecisionTransform32x32_AVX2_INTRIN(EB_S16 *src, EB_U32 src_st
 {
     transform32_AVX2_INTRIN(src, src_stride, intermediate, 32, 6 + addshift);
     transpose32_AVX2_INTRIN(intermediate, 32, dst, dst_stride);
-
     transform32_AVX2_INTRIN(dst, dst_stride, intermediate, 32, 9);
     transpose32_AVX2_INTRIN(intermediate, 32, dst, dst_stride);
-
 }
 
 void MatMult4x4_OutBuff_AVX2_INTRIN(

@@ -6,7 +6,7 @@
 #ifndef EbIntraPrediction_SSE4_1_h
 #define EbIntraPrediction_SSE4_1_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 #ifdef __cplusplus
 extern "C" {

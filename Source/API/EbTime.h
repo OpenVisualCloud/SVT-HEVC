@@ -6,16 +6,14 @@
 #ifndef EbTime_h
 #define EbTime_h
 
-#include "EbTypes.h"
-
 #define NANOSECS_PER_SEC ((EB_U32)(1000000000L))
 
-void StartTime(EB_U64 *Startseconds, EB_U64 *Startuseconds);
-void FinishTime(EB_U64 *Finishseconds, EB_U64 *Finishuseconds);
-void ComputeOverallElapsedTime(EB_U64 Startseconds, EB_U64 Startuseconds,EB_U64 Finishseconds, EB_U64 Finishuseconds, double *duration);
-void ComputeOverallElapsedTimeMs(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U64 Finishseconds, EB_U64 Finishuseconds, double *duration);
-void EbSleep(EB_U64 milliSeconds);
-void EbInjector(EB_U64 processedFrameCount, EB_U32 injectorFrameRate);
+void StartTime(unsigned long long *Startseconds, unsigned long long *Startuseconds);
+void FinishTime(unsigned long long *Finishseconds, unsigned long long *Finishuseconds);
+void ComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long long Startuseconds,unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration);
+void ComputeOverallElapsedTimeMs(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration);
+void EbSleep(unsigned long long milliSeconds);
+void EbInjector(unsigned long long processedFrameCount, unsigned int injectorFrameRate);
 
 #endif // EbTime_h
 /* File EOF */

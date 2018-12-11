@@ -6,7 +6,7 @@
 #ifndef EbComputeSAD_h
 #define EbComputeSAD_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 #include "EbComputeSAD_C.h"
 #include "EbComputeSAD_SSE2.h"

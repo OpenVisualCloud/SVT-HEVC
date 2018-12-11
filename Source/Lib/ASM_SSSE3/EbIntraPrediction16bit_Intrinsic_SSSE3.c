@@ -3,7 +3,7 @@
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "tmmintrin.h"
 
 // Putting an #include here for EbIntraPrediction_SSSE3.h causes overloading errors

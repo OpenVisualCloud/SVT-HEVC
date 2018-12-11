@@ -9,7 +9,7 @@
 #include "EbMeSadCalculation_C.h"
 #include "EbMeSadCalculation_SSE2.h"
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

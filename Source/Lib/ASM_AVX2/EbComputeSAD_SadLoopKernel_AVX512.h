@@ -8,7 +8,7 @@
 
 #include "EbComputeSAD_AVX2.h"
 #include "EbMotionEstimation.h"
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

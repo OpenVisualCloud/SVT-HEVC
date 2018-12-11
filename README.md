@@ -47,17 +47,11 @@ SVT-HEVC may run on any Windows* or Linux* 64 bit operating systems. The list be
 
 * __Windows* Operating Systems (64-bit):__
 
-	-  Windows* 10
-
 	-  Windows* Server 2016
 
 * __Linux* Operating Systems (64-bit):__
 
-	-  Ubuntu* 16.04 Desktop LTS
-
 	-  Ubuntu* 16.04 Server LTS
-
-	-  Ubuntu* 18.04 Desktop LTS
 
 	-  Ubuntu* 18.04 Server LTS
 
@@ -88,24 +82,27 @@ In order to run the highest resolution supported by the encoder, at least 64GB o
 
 * __Build Requirements__
 	-	Visual Studio* 2017 (can be downloaded [here](https://www.visualstudio.com/vs/older-downloads/))
-	-	YASM Assembler version 1.2.0 or later
-	-	Download the yasm package from the following [link](http://www.tortall.net/projects/yasm/releases/vsyasm-1.2.0-win64.zip)
-	-	Unzip the package and in the vsyasm.props file and make the following change:
-		-	"(IntDir)"  into  "(IntDir)\%(Filename).obj"
-	-	Copy the Yasm files [all 4 of them] under the bin folder of your Visual Studio* installation folder ($(VCInstallDir)) e.g.: C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin (the path may differ based on the version of visual studio installed)
+	-	CMake 3.5 or later (can be downloaded [here](https://github.com/Kitware/CMake/releases/download/v3.13.0/cmake-3.13.0-win64-x64.msi))
+	-   YASM Assembler version 1.2.0 or later
+	-	Download the yasm exe from the following [link](http://www.tortall.net/projects/yasm/releases/yasm-1.3.0-win64.exe)
+	-	Rename yasm-1.3.0-win64.exe to yasm.exe
+	-   Copy yasm.exe into a location that is in the PATH environment variable
 
 * __Build Instructions__
-	-	Open the “Build\VS\ebHevcEnc.sln” file and build the solution
+	-	Generate the Visual Studio* 2017 project files by following the steps below in a windows command line prompt:
+		-	cd Build\windows
+		-   build.bat
+	-   Open "svt-hevc.sln" using Visual Studio* 2017 and build the solution
 
 * __Binaries Location__
 	-	Post build, binaries can be found under Bin/Release and / or Bin/Debug
 
 * __Installation__
 -	For the binaries to operate properly on your system, the following conditions have to be met:
-	-	On any of the Windows* Operating Systems listed in the OS requirements section, install Visual Studio 2017
-	-	Once the installation is complete, copy the binaries to a location making sure that both the sample application “ebHevcEncApp.exe” and library “ebHevcEncLib.dll” are in the same folder.
-	-	Open the command prompt window at the chosen location and run the sample application to encode.
-	-	Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | ebHevcEncApp.exe -i stdin -n [number_of_frames_to_encode] -w [width] -h [height].
+	-	On any of the Windows* Operating Systems listed in the OS requirements section, install Visual Studio* 2017
+	-	Once the installation is complete, copy the binaries to a location making sure that both the sample application "SvtHevcEncApp.exe” and library "SvtHevcEnc.dll” are in the same folder.
+	-	Open the command prompt window at the chosen location and run the sample application to encode. SvtHevcEncApp.exe -i [in.yuv] -w [width] -h [height] -b [out.265].
+	-	Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | SvtHevcEncApp.exe -i stdin -n [number_of_frames_to_encode] -w [width] -h [height].
 
 ## Linux* Operating Systems (64-bit):
 
@@ -124,10 +121,10 @@ In order to run the highest resolution supported by the encoder, at least 64GB o
 * __Installation__
 For the binaries to operate properly on your system, the following conditions have to be met:
 	-	On any of the Linux* Operating Systems listed above, copy the binaries under a location of your choice.
-	-	Change the permissions on the sample application “HevcEncoderApp” executable by running the command: 				chmod +x HevcEncoderApp
+	-	Change the permissions on the sample application “SvtHevcEncApp” executable by running the command: 				chmod +x SvtHevcEncApp
 	-	cd into your chosen location
-	-	Run the sample application to encode.
-	-	Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | ./HevcEncoderApp -i stdin -n [number_of_frames_to_encode] -w [width] -h [height].
+	-	Run the sample application to encode. ./SvtHevcEncApp -i [in.yuv] -w [width] -h [height] -b [out.265].
+	-	Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | ./SvtHevcEncApp -i stdin -n [number_of_frames_to_encode] -w [width] -h [height].
 
 # Demo features and limitations
 
@@ -137,7 +134,7 @@ For the binaries to operate properly on your system, the following conditions ha
 
 -  **Speed Control output:** The speed control functionality implemented for SVT-HEVC Encoder is a demo feature showcasing the capability of the library to adapt to the resources available on the fly in order to generate the best possible video quality while maintaining a real-time encoding speed. When set to use the Speed Control mode, the encoder does not produce a bit-exact output from one run to another.
 
--  **Multi-instance support:** The multi-instance functionality is a demo feature implemented in the SVT-HEVC Encoder sample application as an example of one sample application using multiple encoding libraries. Encoding using the multi-instance support is limited to only 6 simultaneous streams.
+-  **Multi-instance support:** The multi-instance functionality is a demo feature implemented in the SVT-HEVC Encoder sample application as an example of one sample application using multiple encoding libraries. Encoding using the multi-instance support is limited to only 6 simultaneous streams. For example two channels encoding on Windows: SvtHevcEncApp.exe -nch 2 -c firstchannel.cfg secondchannel.cfg
 
 -  **Separate Fields:** Using the separate fields functionality migh result in a corrupted video output.
 

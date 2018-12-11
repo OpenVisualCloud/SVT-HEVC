@@ -1,0 +1,144 @@
+From 2ba15cd2f3723aca9f56e0d508ee968d9a9e1f16 Mon Sep 17 00:00:00 2001
+From: Jun Zhao <mypopydev@gmail.com>
+Date: Tue, 4 Dec 2018 11:43:19 +0800
+Subject: [PATCH 2/2] doc: Add libsvt_hevc encoder docs
+
+Signed-off-by: Jun Zhao <jun.zhao@intel.com>
+Signed-off-by: Huang, Zhengxu <zhengxu.huang@intel.com>
+Signed-off-by: hassene <hassene.tmar@intel.com>
+---
+ doc/encoders.texi | 98 +++++++++++++++++++++++++++++++++++++++++++++++
+ doc/general.texi  |  8 ++++
+ 2 files changed, 106 insertions(+)
+
+diff --git a/doc/encoders.texi b/doc/encoders.texi
+index 4db7764f4d..33efbefa76 100644
+--- a/doc/encoders.texi
++++ b/doc/encoders.texi
+@@ -1566,6 +1566,104 @@ Set maximum NAL size in bytes.
+ Allow skipping frames to hit the target bitrate if set to 1.
+ @end table
+ 
++@section libsvt_hevc
++
++Intel Scalable Video Technology HEVC encoder wrapper.
++
++This encoder requires the presence of the headers and
++library during configuration. You need to explicitly configure the
++build with @code{--enable-libsvt}. The library is detected using
++@command{pkg-config}.
++
++For more information about the library see
++@url{https://github.com/intel/SVT-HEVC.git}.
++
++@subsection Options
++
++The following FFmpeg global options affect the configurations of the
++libsvt_hevc encoder.
++
++@table @option
++@item vui
++Enables or disables the vui structure in the HEVC elementary
++bitstream. 0 = Off, 1 = On
++
++@item hielevel
++Set hierarchical levels. Can assume one of the following possible values:
++
++@table @samp
++@item flat
++none hierarchy level
++@item 2level
++2-level hierarchy
++@item 3level
++3-level hierarchy
++@item 4level
++4-level hierarchy
++@end table
++
++@item la_depth
++Set look-ahead depth, depending on bit rate control mode @option{rc}, When
++bit rate control mode is set to vbr it's best to set this parameter to be
++equal to the Intra period value (such is the default set by the encoder),
++when cqp is chosen, then a look ahead is recommended.
++
++@item intra_ref_type
++Set intra refesh type. Can assume one of the following possible values:
++
++@table @samp
++@item cra
++open group of pictures
++@item idr
++closed group of pictures
++@end table
++
++@item preset
++A preset defining the quality vs density tradeoff point that the
++encoding is to be performed at.(e.g. 0 is the highest quality mode,
++12 is the highest density mode).
++
++@item profile (@emph{profile})
++Set profile restrictions. Can assume one of the following possible values:
++
++@table @samp
++@item main
++main profile
++@item main10
++main10 profile
++@end table
++
++@item rc
++Set bit rate control mode. Can assume one of the following possible values:
++
++@table @samp
++@item cqp
++cqp mode
++@item vbr
++vbr mode
++@end table
++
++@item qp
++Initial quantization parameter for the intra pictures used when
++@option{rc} is cqp mode.
++
++@item sc_detection
++Enables or disables the scene change detection algorithm.
++
++@item tune
++Set quality mode. Can assume one of the following possible values:
++
++@table @samp
++@item sq
++subjective quality mode
++@item oq
++objective quality mode
++@end table
++
++@item bl_mode
++Enables or disables Random Access Prediction.
++@end table
++
+ @section libtheora
+ 
+ libtheora Theora encoder wrapper.
+diff --git a/doc/general.texi b/doc/general.texi
+index d8832407bb..a071bfdab6 100644
+--- a/doc/general.texi
++++ b/doc/general.texi
+@@ -196,6 +196,14 @@ constrained baseline profile and CABAC.) Using it is mostly useful for
+ testing and for taking advantage of Cisco's patent portfolio license
+ (@url{http://www.openh264.org/BINARY_LICENSE.txt}).
+ 
++@section SVT-HEVC
++
++FFmpeg can make use of the SVT-HEVC library for HEVC encoding.
++
++Go to @url{https://github.com/intel/SVT-HEVC.git} and follow the instructions
++for installing the library. Then pass @code{--enable-libsvt} to configure to
++enable it.
++
+ @section x264
+ 
+ FFmpeg can make use of the x264 library for H.264 encoding.
+-- 
+2.17.1
+

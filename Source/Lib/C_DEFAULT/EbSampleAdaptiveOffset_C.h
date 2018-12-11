@@ -6,7 +6,6 @@
 #ifndef EbSampleAdaptiveOffset_C_h
 #define EbSampleAdaptiveOffset_C_h
 
-#include "EbTypes.h"
 #include "EbDefinitions.h"
 
 #ifdef __cplusplus

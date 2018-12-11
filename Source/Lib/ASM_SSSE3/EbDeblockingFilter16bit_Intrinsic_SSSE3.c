@@ -4,7 +4,7 @@
 */
 
 #include "tmmintrin.h"
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 EB_EXTERN void Luma4SampleEdgeDLFCore16bit_SSSE3_INTRIN(
     EB_U16*                edgeStartFilteredSamplePtr,

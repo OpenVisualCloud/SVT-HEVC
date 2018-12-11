@@ -8,7 +8,7 @@
 
 #include <emmintrin.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 void EB_ENC_UnPack8BitDataSafeSub_SSE2_INTRIN(
 	EB_U16      *in16BitBuffer,

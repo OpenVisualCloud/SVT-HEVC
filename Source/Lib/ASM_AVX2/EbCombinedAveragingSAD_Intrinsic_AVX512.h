@@ -6,7 +6,7 @@
 #ifndef EbCombinedAveragingSAD_AVX512_h
 #define EbCombinedAveragingSAD_AVX512_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 #ifdef __cplusplus
 extern "C" {
