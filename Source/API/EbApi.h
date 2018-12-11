@@ -202,6 +202,8 @@ typedef struct EB_H265_ENC_CONFIGURATION
     uint32_t                logicalProcessors;             // number of logical processor to run on
     int32_t                 targetSocket;                  // target socket to run on
     uint8_t                 switchThreadsToRtPriority;     // switch to real time mode
+    uint32_t                vbvMaxrate;
+    uint32_t                vbvBufsize;
 
     // ASM Type
     uint32_t                asmType;                      // level of optimization to use.
