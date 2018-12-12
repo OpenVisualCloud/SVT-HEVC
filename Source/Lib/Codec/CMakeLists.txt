@@ -181,7 +181,16 @@ add_library(SvtHevcEnc SHARED
     EbTransQuantBuffers.c
     EbUtility.c
 )
-	
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    # Pass version script to ensure that only global-namespace symbols
+    # are exported.
+    set(VERSION_SCRIPT ${PROJECT_SOURCE_DIR}/Source/API/EbApi.version)
+    set(CMAKE_SHARED_LINKER_FLAGS
+        "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--version-script=${VERSION_SCRIPT}")
+    set_target_properties(SvtHevcEnc PROPERTIES LINK_DEPENDS ${VERSION_SCRIPT})
+endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
 target_link_libraries(SvtHevcEnc 
 	C_DEFAULT
 	ASM_SSE2
