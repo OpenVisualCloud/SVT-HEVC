@@ -21,7 +21,7 @@ extern "C" {
 
 #define EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT     2
 #define EB_HME_SEARCH_AREA_ROW_MAX_COUNT        2
-    
+
 #ifdef _WIN32
 #define EB_API __declspec(dllexport)
 #else
@@ -31,7 +31,7 @@ extern "C" {
 /********************************
 * Defines
 ********************************/
-    
+
 /** Assembly Types
 */
 typedef enum EB_ASM {
@@ -54,8 +54,8 @@ typedef struct EB_BUFFERHEADERTYPE
 {
     // EB_BUFFERHEADERTYPE size
     unsigned int nSize;
-    
-    // picture (input or output) buffer 
+
+    // picture (input or output) buffer
     unsigned char* pBuffer;
     unsigned int nFilledLen;
     unsigned int nAllocLen;
@@ -82,7 +82,7 @@ typedef struct EB_COMPONENTTYPE
     void* pComponentPrivate;
     void* pApplicationPrivate;
 } EB_COMPONENTTYPE;
-    
+
 typedef enum EB_ERRORTYPE
 {
     EB_ErrorNone = 0,
@@ -100,13 +100,13 @@ typedef enum EB_ERRORTYPE
     EB_ErrorMax                                 = 0x7FFFFFFF
 } EB_ERRORTYPE;
 
-#define EB_BUFFERFLAG_EOS 0x00000001 
+#define EB_BUFFERFLAG_EOS 0x00000001
 
 // For 8-bit and 10-bit packed inputs, the luma, cb, and cr fields should be used
 //   for the three input picture planes.  However, for 10-bit unpacked planes the
-//   lumaExt, cbExt, and crExt fields should be used hold the extra 2-bits of 
+//   lumaExt, cbExt, and crExt fields should be used hold the extra 2-bits of
 //   precision while the luma, cb, and cr fields hold the 8-bit data.
-typedef struct EB_H265_ENC_INPUT 
+typedef struct EB_H265_ENC_INPUT
 {
     // Hosts 8 bit or 16 bit input YUV420p / YUV420p10le
     unsigned char *luma;
@@ -130,7 +130,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
 {
     // Encoding preset
     unsigned char             encMode;     // [0, 12](for tune 0 and >= 4k resolution), [0, 10](for >= 1080p resolution), [0, 9](for all resolution and modes)
-    unsigned char             tune;        // encoder tuning for Visual Quality [0], PSNR/SSIM [1] 
+    unsigned char             tune;        // encoder tuning for Visual Quality [0], PSNR/SSIM [1]
     unsigned char             latencyMode; // lossless change
 
     // GOP Structure
@@ -155,21 +155,21 @@ typedef struct EB_H265_ENC_CONFIGURATION
     unsigned char             bitRateReduction;
     unsigned char             improveSharpness;
 
-    // Interlaced Video 
+    // Interlaced Video
     unsigned char             interlacedVideo;
-        
+
     // Quantization
     unsigned int              qp;
     unsigned char             useQpFile;
 
     // Deblock Filter
     unsigned char             disableDlfFlag;
-    
+
     // SAO
     unsigned char             enableSaoFlag;
 
     // Motion Estimation Tools
-    unsigned char             useDefaultMeHme; 
+    unsigned char             useDefaultMeHme;
     unsigned char             enableHmeFlag;
     unsigned char             enableHmeLevel0Flag;
     unsigned char             enableHmeLevel1Flag;
@@ -222,7 +222,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     unsigned int              channelId;                    // when multiple instances are running within the same application
     unsigned int              activeChannelCount;           // how many channels are active
     unsigned char             useRoundRobinThreadAssignment;// create one thread on each socket [windows only]
-    
+
     // ASM Type
     EB_ASM			          asmType;                      // level of optimization to use.
 
@@ -235,7 +235,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
 } EB_H265_ENC_CONFIGURATION;
 
-// API calls: 
+// API calls:
 
 /*****************************************/
 /******* STEP 1: Init the Handle *********/

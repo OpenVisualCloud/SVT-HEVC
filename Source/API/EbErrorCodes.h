@@ -12,8 +12,8 @@ extern "C" {
 
 enum
 {
-    EB_APP_ERRORS                       = 0x0100,     
-    
+    EB_APP_ERRORS                       = 0x0100,
+
     //EB_ENC_AMVP_ERRORS                = 0x0200,
     EB_ENC_AMVP_ERROR1                  = 0x0200,
     EB_ENC_AMVP_ERROR2                  = 0x0201,
@@ -23,8 +23,8 @@ enum
     EB_ENC_AMVP_ERROR6                  = 0x0205,
     EB_ENC_AMVP_NULL_REF_ERROR          = 0x0206,
     EB_ENC_AMVP_SPATIAL_NA_ERROR        = 0x0207,
-	EB_ENC_AMVP_ERROR7					= 0x0208,
-	EB_ENC_AMVP_ERROR8					= 0x0209,
+    EB_ENC_AMVP_ERROR7                  = 0x0208,
+    EB_ENC_AMVP_ERROR8                  = 0x0209,
 
     EB_ENC_MCP_ERRORS                   = 0x0300,
 
@@ -37,7 +37,7 @@ enum
     EB_ENC_BITSTREAM_ERROR6             = 0x0405,
     EB_ENC_BITSTREAM_ERROR7             = 0x0406,
     EB_ENC_BITSTREAM_ERROR8             = 0x0407,
-    
+
     //EB_ENC_CL_ERRORS                  = 0x0500,
     EB_ENC_CL_ERROR1                    = 0x0500,
     EB_ENC_CL_ERROR2                    = 0x0501,
@@ -45,9 +45,9 @@ enum
     EB_ENC_CL_ERROR4                    = 0x0503,
     EB_ENC_CL_ERROR5                    = 0x0504,
     EB_ENC_CL_ERROR6                    = 0x0505,
-    EB_ENC_CL_ERROR7                    = 0x0506, 
-    EB_ENC_CL_ERROR8                    = 0x0507, 
-    EB_ENC_CL_ERROR9                    = 0x0508, 
+    EB_ENC_CL_ERROR7                    = 0x0506,
+    EB_ENC_CL_ERROR8                    = 0x0507,
+    EB_ENC_CL_ERROR9                    = 0x0508,
 
     //EB_ENC_DLF_ERRORS                 = 0x0600,
     EB_ENC_DLF_ERROR1                   = 0x0600,
@@ -59,7 +59,7 @@ enum
     EB_ENC_DLF_ERROR7                   = 0x0606,
     EB_ENC_DLF_ERROR8                   = 0x0607,
     EB_ENC_DLF_ERROR9                   = 0x0608,
-    EB_ENC_DLF_ERROR10                   = 0x0609,
+    EB_ENC_DLF_ERROR10                  = 0x0609,
 
     //EB_ENC_EC_ERRORS                  = 0x0700,
     EB_ENC_EC_ERROR1                    = 0x0700,
@@ -87,10 +87,10 @@ enum
     EB_ENC_EC_ERROR23                   = 0x0716,
     EB_ENC_EC_ERROR24                   = 0x0717,
     EB_ENC_EC_ERROR25                   = 0x0718,
-	EB_ENC_EC_ERROR26                   = 0x0719,
-	EB_ENC_EC_ERROR27                   = 0x0720,
-	EB_ENC_EC_ERROR28                   = 0x0721,
-	EB_ENC_EC_ERROR29                   = 0x0722,
+    EB_ENC_EC_ERROR26                   = 0x0719,
+    EB_ENC_EC_ERROR27                   = 0x0720,
+    EB_ENC_EC_ERROR28                   = 0x0721,
+    EB_ENC_EC_ERROR29                   = 0x0722,
 
     //EB_ENC_INTER_PRED_ERRORS          = 0x0800,
     EB_ENC_INTER_PRED_ERROR0            = 0x0800,
@@ -113,7 +113,7 @@ enum
     EB_ENC_TFILTER_ERRORS               = 0x0c00,
     EB_ENC_THREAD_ERRORS                = 0x0d00,
     EB_ENC_ALF_ERRORS                   = 0x0e00,
-    
+
     //EB_ENC_HANDLE_ERRORS              = 0x0f00,
     EB_ENC_HANDLE_ERROR1                = 0x0f00,
     EB_ENC_HANDLE_ERROR2                = 0x0f01,
@@ -144,7 +144,7 @@ enum
     EB_ENC_MD_ERROR7                    = 0x1006,
     EB_ENC_MD_ERROR8                    = 0x1007,
     EB_ENC_MD_ERROR9                    = 0x1008,
-    EB_ENC_MD_ERROR10                    = 0x1009,
+    EB_ENC_MD_ERROR10                   = 0x1009,
 
     //EB_ENC_ME_ERRORS                  = 0x1100,
     EB_ENC_ME_ERROR1                    = 0x1100,
@@ -175,12 +175,12 @@ enum
     EB_ENC_PM_ERROR14                   = 0x130f,
     EB_ENC_PM_ERROR15                   = 0x1310,
 
-    //EB_ENC_RC_ERRORS                  = 0x1400 
-    EB_ENC_RC_ERROR1                    = 0x1400, 
-    EB_ENC_RC_ERROR2                    = 0x1401, 
-    EB_ENC_RC_ERROR3                    = 0x1402, 
-    EB_ENC_RC_ERROR4                    = 0x1403, 
-    EB_ENC_RC_ERROR5                    = 0x1404, 
+    //EB_ENC_RC_ERRORS                  = 0x1400
+    EB_ENC_RC_ERROR1                    = 0x1400,
+    EB_ENC_RC_ERROR2                    = 0x1401,
+    EB_ENC_RC_ERROR3                    = 0x1402,
+    EB_ENC_RC_ERROR4                    = 0x1403,
+    EB_ENC_RC_ERROR5                    = 0x1404,
     EB_ENC_RC_ERROR6                    = 0x1405,
     EB_ENC_RC_ERROR7                    = 0x1406,
     EB_ENC_RC_ERROR8                    = 0x1407,
@@ -190,8 +190,8 @@ enum
     EB_ENC_PU_ERROR2                    = 0x1501,
     EB_ENC_INVLD_PART_SIZE_ERROR        = 0x1502,
 
-    //EB_ENC_ERRORS                 = 0x1600,
-    EB_ENC_ROB_OF_ERROR             = 0x1600,
+    //EB_ENC_ERRORS                     = 0x1600,
+    EB_ENC_ROB_OF_ERROR                 = 0x1600,
 
     //EB_ENC_INTRA_PRED_ERRORS          = 0x1700,
     EB_ENC_INTRA_PRED_ERROR1            = 0x1700,
