@@ -999,8 +999,8 @@ void  GetEightHorizontalSearchPointResults_8x8_16x16_PU_AVX512_INTRIN(
 	ref0temp = _mm256_inserti128_si256( _mm256_castsi128_si256(_mm_loadu_si128((__m128i*    ) (ref                   )))  , _mm_loadu_si128((__m128i*)(ref                   + 8 )), 0x1);
 	ref1temp = _mm256_inserti128_si256( _mm256_castsi128_si256(_mm_loadu_si128((__m128i*    ) (ref + (refStride  * 8 )))) , _mm_loadu_si128((__m128i*)(ref + (refStride * 8) + 8 )), 0x1);
 
-	temp  = _mm256_broadcastsi128_si256(*(__m128i*) (src                   ));
-	temp1 = _mm256_broadcastsi128_si256(*(__m128i*) (src + (srcStride * 8) ));
+	temp  = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*) (src                   )));
+	temp1 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*) (src + (srcStride * 8) )));
 
 	ss0temp = _mm256_permutevar8x32_epi32(temp , _mm256_setr_epi64x(0x0               , 0x0               , 0x0006000600060006, 0x0006000600060006));
 	ss2temp = _mm256_permutevar8x32_epi32(temp , _mm256_setr_epi64x(0x0001000100010001, 0x0001000100010001, 0x0007000700070007, 0x0007000700070007));
@@ -1019,8 +1019,8 @@ void  GetEightHorizontalSearchPointResults_8x8_16x16_PU_AVX512_INTRIN(
 	ref2temp = _mm256_inserti128_si256( _mm256_castsi128_si256(_mm_loadu_si128((__m128i*    ) (ref                   )))  , _mm_loadu_si128((__m128i*)(ref                   + 8 )), 0x1);
 	ref3temp = _mm256_inserti128_si256( _mm256_castsi128_si256(_mm_loadu_si128((__m128i*    ) (ref + (refStride  * 8 )))) , _mm_loadu_si128((__m128i*)(ref + (refStride * 8) + 8 )), 0x1);
 
-	temp2 = _mm256_broadcastsi128_si256(*(__m128i*) (src));
-	temp3 = _mm256_broadcastsi128_si256(*(__m128i*) (src + (srcStride * 8)));
+	temp2 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*) (src                   )));
+	temp3 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*) (src + (srcStride * 8) )));
 
 	ss4temp = _mm256_permutevar8x32_epi32(temp2, _mm256_setr_epi64x(0x0               , 0x0               , 0x0006000600060006, 0x0006000600060006));
 	ss6temp = _mm256_permutevar8x32_epi32(temp2, _mm256_setr_epi64x(0x0001000100010001, 0x0001000100010001, 0x0007000700070007, 0x0007000700070007));
@@ -1038,8 +1038,8 @@ void  GetEightHorizontalSearchPointResults_8x8_16x16_PU_AVX512_INTRIN(
 	ref0temp = _mm256_inserti128_si256( _mm256_castsi128_si256(_mm_loadu_si128((__m128i*    ) (ref                   )))  , _mm_loadu_si128((__m128i*)(ref                   + 8 )), 0x1);
 	ref1temp = _mm256_inserti128_si256( _mm256_castsi128_si256(_mm_loadu_si128((__m128i*    ) (ref + (refStride  * 8 )))) , _mm_loadu_si128((__m128i*)(ref + (refStride * 8) + 8 )), 0x1);
 
-	temp    = _mm256_broadcastsi128_si256(*(__m128i*) (src                   ));
-	temp1   = _mm256_broadcastsi128_si256(*(__m128i*) (src + (srcStride * 8) ));
+	temp  = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*) (src                   )));
+	temp1 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*) (src + (srcStride * 8) )));
 
 	ss0temp = _mm256_permutevar8x32_epi32(temp , _mm256_setr_epi64x(0x0               , 0x0               , 0x0006000600060006, 0x0006000600060006));
 	ss2temp = _mm256_permutevar8x32_epi32(temp , _mm256_setr_epi64x(0x0001000100010001, 0x0001000100010001, 0x0007000700070007, 0x0007000700070007));
@@ -1057,8 +1057,8 @@ void  GetEightHorizontalSearchPointResults_8x8_16x16_PU_AVX512_INTRIN(
 	ref2temp = _mm256_inserti128_si256( _mm256_castsi128_si256(_mm_loadu_si128((__m128i*    ) (ref                   )))  , _mm_loadu_si128((__m128i*)(ref                   + 8 )), 0x1);
 	ref3temp = _mm256_inserti128_si256( _mm256_castsi128_si256(_mm_loadu_si128((__m128i*    ) (ref + (refStride  * 8 )))) , _mm_loadu_si128((__m128i*)(ref + (refStride * 8) + 8 )), 0x1);
 
-	temp2 = _mm256_broadcastsi128_si256(*(__m128i*) (src));
-	temp3 = _mm256_broadcastsi128_si256(*(__m128i*) (src + (srcStride * 8)));
+	temp2 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*) (src                   )));
+	temp3 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*) (src + (srcStride * 8) )));
 
 	ss4temp = _mm256_permutevar8x32_epi32(temp2, _mm256_setr_epi64x(0x0               , 0x0               , 0x0006000600060006, 0x0006000600060006));
 	ss6temp = _mm256_permutevar8x32_epi32(temp2, _mm256_setr_epi64x(0x0001000100010001, 0x0001000100010001, 0x0007000700070007, 0x0007000700070007));
