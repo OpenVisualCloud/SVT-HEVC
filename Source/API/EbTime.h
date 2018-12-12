@@ -6,8 +6,6 @@
 #ifndef EbTime_h
 #define EbTime_h
 
-#define NANOSECS_PER_SEC ((EB_U32)(1000000000L))
-
 void StartTime(unsigned long long *Startseconds, unsigned long long *Startuseconds);
 void FinishTime(unsigned long long *Finishseconds, unsigned long long *Finishuseconds);
 void ComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long long Startuseconds,unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration);
