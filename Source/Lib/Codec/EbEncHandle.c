@@ -598,10 +598,10 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     * Plateform detection
     ************************************/
 
-    if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == ASM_AVX2) {
+    if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == EB_ASM_AVX2) {
         ASM_TYPES = GetCpuAsmType();
     }
-    else if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == ASM_NON_AVX2) {
+    else if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == EB_ASM_NON_AVX2) {
         ASM_TYPES = 0;
     }
 
@@ -2714,7 +2714,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->latencyMode = 0;
 
     // ASM Type
-    configPtr->asmType = ASM_AVX2; 
+    configPtr->asmType = EB_ASM_AVX2;
     
     // Channel info
     configPtr->useRoundRobinThreadAssignment = EB_FALSE;

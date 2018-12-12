@@ -35,11 +35,11 @@ extern "C" {
 /** Assembly Types
 */
 typedef enum EB_ASM {
-	ASM_NON_AVX2,
-	ASM_AVX2,
-	ASM_TYPE_TOTAL,
-	ASM_AVX512,
-	ASM_TYPE_INVALID = ~0
+    EB_ASM_NON_AVX2,
+    EB_ASM_AVX2,
+    EB_ASM_TYPE_TOTAL,
+    EB_ASM_AVX512,
+    EB_ASM_TYPE_INVALID = ~0
 } EB_ASM;
     
 /***************************************

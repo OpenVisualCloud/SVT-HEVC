@@ -1254,21 +1254,21 @@ void EncodeQuantizedCoefficients_generic(
     EB_U32  transCoeffShape = (componentType == COMPONENT_LUMA) ? tuPtr->transCoeffShapeLuma : tuPtr->transCoeffShapeChroma ;      
 
     if (transCoeffShape && tuPtr->isOnlyDc[(componentType == COMPONENT_LUMA) ? 0 : (componentType == COMPONENT_CHROMA_CB) ? 1 : 2] == EB_FALSE) {
-        PicZeroOutCoef_funcPtrArray[(ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 1) >> 3](
+        PicZeroOutCoef_funcPtrArray[(EB_ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 1) >> 3](
             coeffBufferPtr,
             coeffStride,
             (size >> 1),
             (size >> 1),
             (size >> 1));
 
-        PicZeroOutCoef_funcPtrArray[(ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 1) >> 3](
+        PicZeroOutCoef_funcPtrArray[(EB_ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 1) >> 3](
             coeffBufferPtr,
             coeffStride,
             (size >> 1) * coeffStride,
             (size >> 1),
             (size >> 1));
 
-        PicZeroOutCoef_funcPtrArray[(ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 1) >> 3](
+        PicZeroOutCoef_funcPtrArray[(EB_ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 1) >> 3](
             coeffBufferPtr,
             coeffStride,
             (size >> 1) * coeffStride + (size >> 1),
@@ -1276,21 +1276,21 @@ void EncodeQuantizedCoefficients_generic(
             (size >> 1));
 
         if (transCoeffShape == N4_SHAPE) {
-            PicZeroOutCoef_funcPtrArray[(ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 2) >> 3](
+            PicZeroOutCoef_funcPtrArray[(EB_ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 2) >> 3](
                 coeffBufferPtr,
                 coeffStride,
                 (size >> 2),
                 (size >> 2),
                 (size >> 2));
 
-            PicZeroOutCoef_funcPtrArray[(ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 2) >> 3](
+            PicZeroOutCoef_funcPtrArray[(EB_ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 2) >> 3](
                 coeffBufferPtr,
                 coeffStride,
                 (size >> 2) * coeffStride,
                 (size >> 2),
                 (size >> 2));
 
-            PicZeroOutCoef_funcPtrArray[(ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 2) >> 3](
+            PicZeroOutCoef_funcPtrArray[(EB_ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 2) >> 3](
                 coeffBufferPtr,
                 coeffStride,
                 (size >> 2) * coeffStride + (size >> 2),

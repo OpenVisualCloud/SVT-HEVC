@@ -299,7 +299,7 @@ typedef void(*EB_FPSEARCH_FUNC)(
 /*****************************
 * Function Tables
 *****************************/
-static EB_FPSEARCH_FUNC FUNC_TABLE GetEightHorizontalSearchPointResultsAll85PUs_funcPtrArray[ASM_TYPE_TOTAL] =
+static EB_FPSEARCH_FUNC FUNC_TABLE GetEightHorizontalSearchPointResultsAll85PUs_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
 	GetEightHorizontalSearchPointResultsAll85PUs_C,
 	GetEightHorizontalSearchPointResultsAll85PUs_AVX512_INTRIN

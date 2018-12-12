@@ -110,7 +110,7 @@ typedef EB_ERRORTYPE(*PM_RATE_EST_TYPE)(
 	EB_U32                        numNonZeroCoeffs,
 	EB_U64                       *coeffBitsLong);
 
-static PM_RATE_EST_TYPE FUNC_TABLE CoeffRateEst4x4_funcPtrArray[ASM_TYPE_TOTAL][2/*Luma+Chroma*/] =
+static PM_RATE_EST_TYPE FUNC_TABLE CoeffRateEst4x4_funcPtrArray[EB_ASM_TYPE_TOTAL][2/*Luma+Chroma*/] =
 {
 	{ EstimateQuantizedCoefficients_Lossy, EstimateQuantizedCoefficients_Lossy },
 	{ PmEstimateQuantCoeffLuma_SSE2, PmEstimateQuantCoeffChroma_SSE2 }
@@ -3337,7 +3337,7 @@ EB_ERRORTYPE EncodeTransform(
                 );
         }
         else {
-            (*transformFunctionTableEncode1[/*ASM_TYPES*/((bitIncrement & 2) ? ASM_NON_AVX2 : ((ASM_TYPES & PREAVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
+            (*transformFunctionTableEncode1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_NON_AVX2 : ((ASM_TYPES & PREAVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
                 residualBuffer,
                 residualStride,
                 coeffBuffer,
@@ -3360,7 +3360,7 @@ EB_ERRORTYPE EncodeTransform(
                     );
             }
             else {
-                (*PfreqN2TransformTable1[/*ASM_TYPES*/((bitIncrement & 2) ? ASM_NON_AVX2 : ((ASM_TYPES & AVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
+                (*PfreqN2TransformTable1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_NON_AVX2 : ((ASM_TYPES & AVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
                     residualBuffer,
                     residualStride,
                     coeffBuffer,
@@ -3382,7 +3382,7 @@ EB_ERRORTYPE EncodeTransform(
                 bitIncrement);
         }
         else {
-            (*PfreqN4TransformTable1[/*ASM_TYPES*/((bitIncrement & 2) ? ASM_NON_AVX2 : ((ASM_TYPES & AVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
+            (*PfreqN4TransformTable1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_NON_AVX2 : ((ASM_TYPES & AVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
                 residualBuffer,
                 residualStride,
                 coeffBuffer,

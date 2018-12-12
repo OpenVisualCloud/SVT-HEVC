@@ -92,7 +92,7 @@ extern "C" {
     /***************************************
     * Function Tables
     ***************************************/
-    static EB_SADKERNELNxM_TYPE FUNC_TABLE NxMSadKernel_funcPtrArray[ASM_TYPE_TOTAL][9] =   // [ASM_TYPES][SAD - block height]
+    static EB_SADKERNELNxM_TYPE FUNC_TABLE NxMSadKernel_funcPtrArray[EB_ASM_TYPE_TOTAL][9] =   // [ASM_TYPES][SAD - block height]
     {
         // C_DEFAULT
         {
@@ -120,7 +120,7 @@ extern "C" {
         },
     };
 
-    static EB_SADAVGKERNELNxM_TYPE FUNC_TABLE NxMSadAveragingKernel_funcPtrArray[ASM_TYPE_TOTAL][9] =   // [ASM_TYPES][SAD - block height]
+    static EB_SADAVGKERNELNxM_TYPE FUNC_TABLE NxMSadAveragingKernel_funcPtrArray[EB_ASM_TYPE_TOTAL][9] =   // [ASM_TYPES][SAD - block height]
     {
         // C_DEFAULT
         {
@@ -149,7 +149,7 @@ extern "C" {
     };
 
 
-    static EB_SADLOOPKERNELNxM_TYPE FUNC_TABLE NxMSadLoopKernel_funcPtrArray[ASM_TYPE_TOTAL] =
+    static EB_SADLOOPKERNELNxM_TYPE FUNC_TABLE NxMSadLoopKernel_funcPtrArray[EB_ASM_TYPE_TOTAL] =
     {
         // C_DEFAULT
         SadLoopKernel,
