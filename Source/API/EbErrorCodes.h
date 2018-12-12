@@ -10,7 +10,7 @@
 extern "C" {
 #endif // __cplusplus
 
-typedef enum ENCODER_ERROR_CODES
+enum
 {
     EB_APP_ERRORS                       = 0x0100,     
     
@@ -232,7 +232,7 @@ typedef enum ENCODER_ERROR_CODES
     EB_ENC_PD_ERROR7                    = 0x2106,
     EB_ENC_PD_ERROR8                    = 0x2107,
 
-} ENCODER_ERROR_CODES;
+};
 
 #ifdef __cplusplus
 }
