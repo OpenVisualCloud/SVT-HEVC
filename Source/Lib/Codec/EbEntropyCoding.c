@@ -14,6 +14,7 @@
 #include "EbTransformUnit.h"
 #include "EbDeblockingFilter.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 
 // SSE2 Intrinsics 
 #include "emmintrin.h"

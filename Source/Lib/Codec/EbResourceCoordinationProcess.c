@@ -13,6 +13,7 @@
 #include "EbPictureBufferDesc.h"
 #include "EbDefinitions.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 
 #include "EbResourceCoordinationProcess.h"
 

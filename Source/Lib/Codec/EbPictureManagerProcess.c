@@ -20,6 +20,7 @@
 #include "EbPredictionStructure.h"
 #include "EbRateControlTasks.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 
 /************************************************
  * Defines

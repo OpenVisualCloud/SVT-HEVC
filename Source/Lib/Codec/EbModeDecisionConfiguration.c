@@ -9,6 +9,7 @@
 #include "EbUtility.h"
 #include "EbModeDecisionProcess.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 
 
 /********************************************

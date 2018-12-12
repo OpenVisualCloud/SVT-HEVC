@@ -16,6 +16,7 @@
 #include "EbModeDecisionProcess.h"
 #include "EbEncDecProcess.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 #include "EbComputeSAD.h"
 #include "EbTransforms.h"
 

@@ -13,6 +13,7 @@
 #include "EbCodingLoop.h"
 #include "EbSampleAdaptiveOffset.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 
 
 void PrecomputeCabacCost(CabacCost_t            *CabacCostPtr,

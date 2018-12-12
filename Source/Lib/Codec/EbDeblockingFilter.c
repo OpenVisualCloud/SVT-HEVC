@@ -16,6 +16,7 @@
 #include "EbDeblockingFilter.h"
 #include "EbTransforms.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 
 
 #define   convertToChromaQp(iQpY)  ( ((iQpY) < 0) ? (iQpY) : (((iQpY) > 57) ? ((iQpY)-6) : (EB_S32)(MapChromaQp((EB_U32)iQpY))) )

@@ -13,6 +13,7 @@
 #include "EbSequenceControlSet.h"
 #include "EbReferenceObject.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 #include "EbModeDecisionProcess.h"
 
 static const EB_U32 mvMergeCandIndexArrayForFillingUp[2][12] = 

@@ -18,6 +18,7 @@
 #include "EbReferenceObject.h"
 #include "EbMotionEstimation.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 
 /**************************************
 * Macros

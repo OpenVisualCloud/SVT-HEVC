@@ -9,6 +9,7 @@
 #include "EbFullLoop.h"
 #include "EbRateDistortionCost.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 
 static const EB_U64 depth0Th[2][MAX_HIERARCHICAL_LEVEL][MAX_TEMPORAL_LAYERS] = {
 	{

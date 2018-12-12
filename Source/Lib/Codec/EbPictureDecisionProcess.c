@@ -19,6 +19,7 @@
 #include "EbMeSadCalculation.h"
 
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 
 /************************************************
  * Defines

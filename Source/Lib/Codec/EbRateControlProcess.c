@@ -12,6 +12,7 @@
 #include "EbPictureControlSet.h"
 #include "EbUtility.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 
 #include "EbRateControlResults.h"
 #include "EbRateControlTasks.h"
