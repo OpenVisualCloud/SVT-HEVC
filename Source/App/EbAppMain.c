@@ -175,7 +175,7 @@ int main(int argc, char* argv[])
                         exitConditionsRecon[instanceCount]  = configs[instanceCount]->reconFile ? APP_ExitConditionNone : APP_ExitConditionError;
                         exitConditionsInput[instanceCount]  = APP_ExitConditionNone;
                         channelActive[instanceCount]        = EB_TRUE;
-                        StartTime((unsigned long long*)&encodingStartTimesSeconds[instanceCount], (unsigned long long*)&encodingStartTimesuSeconds[instanceCount]);
+                        EbStartTime((unsigned long long*)&encodingStartTimesSeconds[instanceCount], (unsigned long long*)&encodingStartTimesuSeconds[instanceCount]);
                     }
                     else {
                         exitConditions[instanceCount]       = APP_ExitConditionError;
@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
                             if (((exitConditionsRecon[instanceCount] == APP_ExitConditionFinished || !configs[instanceCount]->reconFile)  && exitConditionsOutput[instanceCount] == APP_ExitConditionFinished && exitConditionsInput[instanceCount] == APP_ExitConditionFinished)||
                                 ((exitConditionsRecon[instanceCount] == APP_ExitConditionError && configs[instanceCount]->reconFile) || exitConditionsOutput[instanceCount] == APP_ExitConditionError || exitConditionsInput[instanceCount] == APP_ExitConditionError)){
                                 channelActive[instanceCount] = EB_FALSE;
-                                FinishTime((unsigned long long*)&encodingFinishTimesSeconds[instanceCount], (unsigned long long*)&encodingFinishTimesuSeconds[instanceCount]);
+                                EbFinishTime((unsigned long long*)&encodingFinishTimesSeconds[instanceCount], (unsigned long long*)&encodingFinishTimesuSeconds[instanceCount]);
                                 if (configs[instanceCount]->reconFile)
                                     exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsRecon[instanceCount] | exitConditionsOutput[instanceCount] | exitConditionsInput[instanceCount]);
                                 else

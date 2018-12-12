@@ -1294,17 +1294,17 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
 
         // Reset counters for long encodes
         if (config->performanceContext.frameCount - 1 == startFrame) {
-            StartTime((unsigned long long*)startsTime, (unsigned long long*)startuTime);
+            EbStartTime((unsigned long long*)startsTime, (unsigned long long*)startuTime);
             *maxLatency = 0;
             *totalLatency = 0;
         }
         if ((EB_U32)frameCount == allChannelsStartFrame && allChannelsStartFrame <= SPEED_MEASUREMENT_INTERVAL) {
-            StartTime((unsigned long long*)&allChannelsStartsTime, (unsigned long long*)&allChannelsStartuTime);
+            EbStartTime((unsigned long long*)&allChannelsStartsTime, (unsigned long long*)&allChannelsStartuTime);
         }
 
-        FinishTime((unsigned long long*)&finishsTime, (unsigned long long*)&finishuTime);
+        EbFinishTime((unsigned long long*)&finishsTime, (unsigned long long*)&finishuTime);
 
-        ComputeOverallElapsedTime(
+        EbComputeOverallElapsedTime(
             *startsTime,
             *startuTime,
             finishsTime,
@@ -1362,7 +1362,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
 
         if (!(frameCount % SPEED_MEASUREMENT_INTERVAL)) {
             if (frameCount < (EB_S32)allChannelsStartFrame && (frameCount >= (EB_S32)LONG_ENCODE_FRAME_ENCODE) && (allChannelsStartFrame <= SPEED_MEASUREMENT_INTERVAL)) {
-                ComputeOverallElapsedTime(
+                EbComputeOverallElapsedTime(
                     allChannelsStartsTime,
                     allChannelsStartuTime,
                     finishsTime,
@@ -1373,7 +1373,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
                 printf("Average System Encoding Speed:        %.2f\n", (double)(frameCount - allChannelsStartFrame) / duration);
             }
             else {
-                ComputeOverallElapsedTime(
+                EbComputeOverallElapsedTime(
                     *startsTime,
                     *startuTime,
                     finishsTime,

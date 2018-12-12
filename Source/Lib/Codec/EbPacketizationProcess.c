@@ -552,9 +552,9 @@ void* PacketizationKernel(void *inputPtr)
             double latency = 0.0;
             EB_U64 finishTimeSeconds = 0;
             EB_U64 finishTimeuSeconds = 0;
-            FinishTime((unsigned long long*)&finishTimeSeconds, (unsigned long long*)&finishTimeuSeconds);
+            EbFinishTime((unsigned long long*)&finishTimeSeconds, (unsigned long long*)&finishTimeuSeconds);
 
-            ComputeOverallElapsedTimeMs(
+            EbComputeOverallElapsedTimeMs(
                 queueEntryPtr->startTimeSeconds,
                 queueEntryPtr->startTimeuSeconds,
                 finishTimeSeconds,

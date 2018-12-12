@@ -113,23 +113,23 @@ void SpeedBufferControl(
 	EbBlockOnMutex(sequenceControlSetPtr->encodeContextPtr->scBufferMutex);
 
 	if (sequenceControlSetPtr->encodeContextPtr->scFrameIn == 0) {
-        StartTime((unsigned long long*)&contextPtr->firstInPicArrivedTimeSeconds, (unsigned long long*)&contextPtr->firstInPicArrivedTimeuSeconds);
+        EbStartTime((unsigned long long*)&contextPtr->firstInPicArrivedTimeSeconds, (unsigned long long*)&contextPtr->firstInPicArrivedTimeuSeconds);
 	}
 	else if (sequenceControlSetPtr->encodeContextPtr->scFrameIn == SC_FRAMES_TO_IGNORE) {
 		contextPtr->startFlag = EB_TRUE;
 	}
 
     // Compute duration since the start of the encode and since the previous checkpoint
-    FinishTime((unsigned long long*)&cursTimeSeconds, (unsigned long long*)&cursTimeuSeconds);
+    EbFinishTime((unsigned long long*)&cursTimeSeconds, (unsigned long long*)&cursTimeuSeconds);
 
-    ComputeOverallElapsedTimeMs(
+    EbComputeOverallElapsedTimeMs(
         contextPtr->firstInPicArrivedTimeSeconds,
         contextPtr->firstInPicArrivedTimeuSeconds,
         cursTimeSeconds,
         cursTimeuSeconds,
         &overallDuration);
 
-    ComputeOverallElapsedTimeMs(
+    EbComputeOverallElapsedTimeMs(
         contextPtr->prevsTimeSeconds,
         contextPtr->prevsTimeuSeconds,
         cursTimeSeconds,
@@ -588,7 +588,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         pictureControlSetPtr->startTimeSeconds = 0;
         pictureControlSetPtr->startTimeuSeconds = 0;
 
-        StartTime((unsigned long long*)&pictureControlSetPtr->startTimeSeconds, (unsigned long long*)&pictureControlSetPtr->startTimeuSeconds);
+        EbStartTime((unsigned long long*)&pictureControlSetPtr->startTimeSeconds, (unsigned long long*)&pictureControlSetPtr->startTimeuSeconds);
 
         inputPicturePtr = pictureControlSetPtr->enhancedPicturePtr;
 
