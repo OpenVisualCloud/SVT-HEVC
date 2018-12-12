@@ -183,6 +183,9 @@ add_library(SvtHevcEnc SHARED
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    # Set version number for SONAME.
+    set_target_properties(SvtHevcEnc PROPERTIES SOVERSION ${SVT_HEVC_SOVERSION})
+
     # Pass version script to ensure that only global-namespace symbols
     # are exported.
     set(VERSION_SCRIPT ${PROJECT_SOURCE_DIR}/Source/API/EbApi.version)
