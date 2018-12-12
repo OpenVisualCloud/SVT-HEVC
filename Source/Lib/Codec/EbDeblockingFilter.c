@@ -139,7 +139,7 @@ EB_U8 CalculateBSForPUBoundary(
 	}
 	else {
 		switch (sliceType) {
-		case P_SLICE:
+		case EB_P_SLICE:
 			puRefList0POC = ((EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr)->refPOC;
 			neighborPuRefList0POC = ((EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr)->refPOC;
 
@@ -162,7 +162,7 @@ EB_U8 CalculateBSForPUBoundary(
 
 			break;
 
-		case B_SLICE:
+		case EB_B_SLICE:
 			switch (puPtr->interPredDirectionIndex + ((neighbourPuPtr->interPredDirectionIndex) * 3)) {
 			case 0:         // UNI_PRED_LIST_0 + UNI_PRED_LIST_0
 				puRefList0POC = ((EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr)->refPOC;
@@ -315,7 +315,7 @@ EB_U8 CalculateBSForPUBoundary(
 
 			break;
 
-		case I_SLICE:
+		case EB_I_SLICE:
 			CHECK_REPORT_ERROR_NC(
 				encodeContextPtr->appCallbackPtr,
 				EB_ENC_DLF_ERROR3);
@@ -556,7 +556,7 @@ EB_U8 Intra4x4CalculateBSForPUBoundary(
 	}
 	else {
 		switch (sliceType) {
-		case P_SLICE:
+		case EB_P_SLICE:
 			puRefList0POC = ((EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr)->refPOC;
 			neighborPuRefList0POC = ((EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr)->refPOC;
 
@@ -579,7 +579,7 @@ EB_U8 Intra4x4CalculateBSForPUBoundary(
 
 			break;
 
-		case B_SLICE:
+		case EB_B_SLICE:
 			switch (puPtr->interPredDirectionIndex + ((neighbourPuPtr->interPredDirectionIndex) * 3)) {
 			case 0:         // UNI_PRED_LIST_0 + UNI_PRED_LIST_0
 				puRefList0POC = ((EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr)->refPOC;
@@ -732,7 +732,7 @@ EB_U8 Intra4x4CalculateBSForPUBoundary(
 
 			break;
 
-		case I_SLICE:
+		case EB_I_SLICE:
 			CHECK_REPORT_ERROR_NC(
 				encodeContextPtr->appCallbackPtr,
 				EB_ENC_DLF_ERROR3);

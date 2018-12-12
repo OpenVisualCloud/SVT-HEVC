@@ -1957,7 +1957,7 @@ EB_ERRORTYPE FillAMVPCandidates(
     }
 
     // Initialise TMVP map pointer
-    colocatedPuRefList     = pictureControlSetPtr->sliceType == B_SLICE ? preDefinedColocatedPuRefList : REF_LIST_0;
+    colocatedPuRefList     = pictureControlSetPtr->sliceType == EB_B_SLICE ? preDefinedColocatedPuRefList : REF_LIST_0;
     referenceObjectReadPtr = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[colocatedPuRefList]->objectPtr;
     if(referenceObjectReadPtr->tmvpEnableFlag == EB_FALSE)
     {
@@ -2343,7 +2343,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
     //numAvailableMVPCand = 0;
 
     // Initialise TMVP map pointer
-    colocatedPuRefList     = pictureControlSetPtr->sliceType == B_SLICE ? preDefinedColocatedPuRefList : REF_LIST_0;
+    colocatedPuRefList     = pictureControlSetPtr->sliceType == EB_B_SLICE ? preDefinedColocatedPuRefList : REF_LIST_0;
     referenceObjectReadPtr = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[colocatedPuRefList]->objectPtr;
     if(referenceObjectReadPtr->tmvpEnableFlag == EB_FALSE)
     {
@@ -2495,7 +2495,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
         //------------------AMVP L1-------------- 
         //------------------AMVP L1-------------- 
         //------------------AMVP L1-------------- 
-        if (pictureControlSetPtr->sliceType == B_SLICE)
+        if (pictureControlSetPtr->sliceType == EB_B_SLICE)
         {
             targetRefPicList = REF_LIST_1;
             numAvailableMVPCandL1 = 0;
@@ -2650,7 +2650,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
     switch(pictureControlSetPtr->sliceType) 
     {
     
-    case P_SLICE:
+    case EB_P_SLICE:
 
         // A1
         if (mvUnitA1 != (MvUnit_t*)EB_NULL) {
@@ -2770,7 +2770,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
 
         break;
 
-    case B_SLICE:
+    case EB_B_SLICE:
 
             // A1
             if (a1_availability == EB_TRUE)
@@ -3110,7 +3110,7 @@ EB_ERRORTYPE NonConformantGenerateL0L1AmvpMergeLists(
     switch(pictureControlSetPtr->sliceType) 
     {
     
-    case P_SLICE:
+    case EB_P_SLICE:
 
         // A1
         if (a1_availability == EB_TRUE)
@@ -3163,7 +3163,7 @@ EB_ERRORTYPE NonConformantGenerateL0L1AmvpMergeLists(
 
         break;
 
-    case B_SLICE:
+    case EB_B_SLICE:
 
             // A1
             if (a1_availability == EB_TRUE)

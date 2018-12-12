@@ -137,7 +137,7 @@ void ComplexityClassifier32x32(
 
         pictureControlSetPtr->cmplxStatusLcu[lcuIndex] = CMPLX_LOW;
 
-        if (pictureControlSetPtr->temporalLayerIndex >= 1 && pictureControlSetPtr->sliceType == B_SLICE) {
+        if (pictureControlSetPtr->temporalLayerIndex >= 1 && pictureControlSetPtr->sliceType == EB_B_SLICE) {
 
             lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
 
@@ -190,7 +190,7 @@ void FailingMotionLcu(
 
     EB_S64 failingMotionLcuFlag = 0;
 
-    if (pictureControlSetPtr->sliceType != I_SLICE && lcuParams->isCompleteLcu && (!pictureControlSetPtr->similarColocatedLcuArray[lcuIndex])){
+    if (pictureControlSetPtr->sliceType != EB_I_SLICE && lcuParams->isCompleteLcu && (!pictureControlSetPtr->similarColocatedLcuArray[lcuIndex])){
         for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_64x64; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_32x32_3; rasterScanCuIndex++) {
 
             meToOisSadDeviation = 0;
@@ -250,7 +250,7 @@ void DetectUncoveredLcu(
 	EB_S64 uncoveredAreaLcuFlag = 0;
 
 
-	if (pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != I_SLICE){
+	if (pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != EB_I_SLICE){
         if (lcuParams->isCompleteLcu && (!pictureControlSetPtr->similarColocatedLcuArray[lcuIndex])){
 
 
@@ -319,7 +319,7 @@ void CalculateAcEnergy(
 	EB_U8       *meanPtr = pictureControlSetPtr->yMean[lcuIndex];
 	inputOriginIndex = (lcuParams->originY + inputPicturePtr->originY) * inputLumaStride + (lcuParams->originX + inputPicturePtr->originX);
 
-	if (lcuParams->isCompleteLcu && pictureControlSetPtr->sliceType == I_SLICE){
+	if (lcuParams->isCompleteLcu && pictureControlSetPtr->sliceType == EB_I_SLICE){
 
 		EB_U32 inputCuOriginIndex;
 		EB_U32 cuNum, cuSize;
@@ -380,7 +380,7 @@ void LumaContrastDetectorLcu(
 	EB_U8  *yMeanPtr = contextPtr->yMeanPtr;
     LcuParams_t *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
 	if (lcuParams->isCompleteLcu){
-		if (pictureControlSetPtr->sliceType != I_SLICE && pictureControlSetPtr->temporalLayerIndex == 0) {
+		if (pictureControlSetPtr->sliceType != EB_I_SLICE && pictureControlSetPtr->temporalLayerIndex == 0) {
 
 
 
@@ -425,7 +425,7 @@ void LumaContrastDetectorPicture(
 
 	pictureControlSetPtr->intraCodedBlockProbability = 0;
 
-	if (pictureControlSetPtr->sliceType != I_SLICE && pictureControlSetPtr->temporalLayerIndex == 0){
+	if (pictureControlSetPtr->sliceType != EB_I_SLICE && pictureControlSetPtr->temporalLayerIndex == 0){
 		pictureControlSetPtr->intraCodedBlockProbability = (EB_U8)(contextPtr->depth1BlockNum != 0 ? contextPtr->toBeIntraCodedProbability * 100 / contextPtr->depth1BlockNum : 0);
 	}
 }
@@ -756,7 +756,7 @@ void TemporalHighContrastClassifier(
 	EB_U32 nsad;
 	EB_U32 meDist = 0;
 
-	if (pictureControlSetPtr->sliceType == B_SLICE){ 
+	if (pictureControlSetPtr->sliceType == EB_B_SLICE){ 
 
 			
 			for (blkIt = 0; blkIt < 4; blkIt++) {
@@ -1490,7 +1490,7 @@ void* SourceBasedOperationsKernel(void *inputPtr)
 			// Failing Motion Detection
             pictureControlSetPtr->failingMotionLcuFlag[lcuIndex] = EB_FALSE;
 
-            if (pictureControlSetPtr->sliceType != I_SLICE && isCompleteLcu){
+            if (pictureControlSetPtr->sliceType != EB_I_SLICE && isCompleteLcu){
 
                 FailingMotionLcu(
                     sequenceControlSetPtr,
@@ -1499,7 +1499,7 @@ void* SourceBasedOperationsKernel(void *inputPtr)
             }
 
 			pictureControlSetPtr->uncoveredAreaLcuFlag[lcuIndex] = EB_FALSE;
-			if (pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != I_SLICE){
+			if (pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != EB_I_SLICE){
 
 				if (isCompleteLcu && (!pictureControlSetPtr->similarColocatedLcuArray[lcuIndex])){
 					DetectUncoveredLcu(
@@ -1650,7 +1650,7 @@ void* SourceBasedOperationsKernel(void *inputPtr)
 
                 EB_S32 interMinDistance = 0;
                 EB_S32 interMaxDistance = 0;
-                if (pictureControlSetPtr->sliceType != I_SLICE) {
+                if (pictureControlSetPtr->sliceType != EB_I_SLICE) {
                     interMinDistance = ABS(((EB_S32)pictureControlSetPtr->interComplexityMin[cuDepth] - (EB_S32)pictureControlSetPtr->interComplexityAvg[cuDepth]));
                     interMaxDistance = ((EB_S32)pictureControlSetPtr->interComplexityMax[cuDepth] - (EB_S32)pictureControlSetPtr->interComplexityAvg[cuDepth]);
                 }

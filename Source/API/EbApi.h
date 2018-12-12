@@ -42,13 +42,13 @@ typedef enum EB_ASM {
     EB_ASM_TYPE_INVALID = ~0
 } EB_ASM;
 
-#define EB_SLICE        unsigned int
-#define B_SLICE         0
-#define P_SLICE         1
-#define I_SLICE         2
-#define IDR_SLICE       3
-#define NON_REF_SLICE   4
-#define INVALID_SLICE   0xFF
+#define EB_SLICE           unsigned int
+#define EB_B_SLICE         0
+#define EB_P_SLICE         1
+#define EB_I_SLICE         2
+#define EB_IDR_SLICE       3
+#define EB_NON_REF_SLICE   4
+#define EB_INVALID_SLICE   0xFF
 
 typedef struct EB_BUFFERHEADERTYPE
 {

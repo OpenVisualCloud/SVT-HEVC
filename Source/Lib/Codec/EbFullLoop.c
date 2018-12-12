@@ -104,7 +104,7 @@ void ProductUnifiedQuantizeInvQuantizeMd(
 
 	const EB_U32 transformShiftNum = 7 - Log2f(areaSize);
 	const EB_S32 shiftedQBits = QUANT_SHIFT + qpPer + transformShiftNum;
-	const EB_U32 q_offset = ((sliceType == I_SLICE || sliceType == IDR_SLICE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
+	const EB_U32 q_offset = ((sliceType == EB_I_SLICE || sliceType == EB_IDR_SLICE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
 
 	//for the iQuant
 	const EB_S32 shiftedFFunc = (qpPer > 8) ? (EB_S32)FFunc[qpRem] << (qpPer - 2) : (EB_S32)FFunc[qpRem] << qpPer; // this is 6+8+TRANS_BIT_INCREMENT
@@ -488,7 +488,7 @@ void UnifiedQuantizeInvQuantize_R(
 
 	const EB_U32 transformShiftNum = MAX_TR_DYNAMIC_RANGE - internalBitDepth - Log2f(areaSize);
 	const EB_S32 shiftedQBits = QUANT_SHIFT + qpPer + transformShiftNum;
-	const EB_U32 q_offset = ((sliceType == I_SLICE || sliceType == IDR_SLICE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
+	const EB_U32 q_offset = ((sliceType == EB_I_SLICE || sliceType == EB_IDR_SLICE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
 
 	//for the iQuant
 	const EB_S32 shiftedFFunc = (qpPer > 8) ? (EB_S32)FFunc[qpRem] << (qpPer - 2) : (EB_S32)FFunc[qpRem] << qpPer; // this is 6+8+TRANS_BIT_INCREMENT
@@ -1315,7 +1315,7 @@ EB_U32 ExitInterDepthDecision(
 	depthOneCuStatsPtr = GetCodedUnitStats(depthOneCandidateCuIndex);
 	cuOriginX = tbOriginX + depthTwoCuStatsPtr->originX;
 	cuOriginY = tbOriginY + depthTwoCuStatsPtr->originY;
-	if ((pictureControlSetPtr->sliceType == P_SLICE || pictureControlSetPtr->sliceType == B_SLICE)
+	if ((pictureControlSetPtr->sliceType == EB_P_SLICE || pictureControlSetPtr->sliceType == EB_B_SLICE)
 		&& GROUP_OF_4_32x32_BLOCKS(cuOriginX, cuOriginY) &&
 		(contextPtr->groupOf16x16BlocksCount == 4)) {
 
@@ -1412,7 +1412,7 @@ EB_BOOL  StopSplitCondition(
     }
     else{
         if (sequenceControlSetPtr->staticConfig.qp >= 20    && 
-            pictureControlSetPtr->sliceType != I_SLICE      && 
+            pictureControlSetPtr->sliceType != EB_I_SLICE      && 
             pictureControlSetPtr->temporalLayerIndex == 0   && 
             pictureControlSetPtr->ParentPcsPtr->logoPicFlag &&
             pictureControlSetPtr->ParentPcsPtr->edgeResultsPtr[lcuAddr].edgeBlockNum) {
@@ -1433,7 +1433,7 @@ EB_BOOL  StopSplitCondition(
             d1Th = depth1Th[lcuEdgeFlag][pictureControlSetPtr->ParentPcsPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex];
             d2Th = depth2Th[lcuEdgeFlag][pictureControlSetPtr->ParentPcsPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex];
 
-            EB_BOOL interSlice =    (pictureControlSetPtr->sliceType == P_SLICE) || (pictureControlSetPtr->sliceType == B_SLICE) ? EB_TRUE : EB_FALSE;
+            EB_BOOL interSlice =    (pictureControlSetPtr->sliceType == EB_P_SLICE) || (pictureControlSetPtr->sliceType == EB_B_SLICE) ? EB_TRUE : EB_FALSE;
             EB_BOOL stopAtDepth0 = ((curCuStatsPtr->depth == 0) && (contextPtr->mdLocalCuUnit[leafIndex].fullDistortion < d0Th)) ? EB_TRUE : EB_FALSE;
             EB_BOOL stopAtDepth1 = ((curCuStatsPtr->depth == 1) && (contextPtr->mdLocalCuUnit[leafIndex].fullDistortion < d1Th)) ? EB_TRUE : EB_FALSE;
             EB_BOOL stopAtDepth2 = ((curCuStatsPtr->depth == 2) && (contextPtr->mdLocalCuUnit[leafIndex].fullDistortion < d2Th)) ? EB_TRUE : EB_FALSE;
@@ -1700,7 +1700,7 @@ EB_U32 ProductPerformInterDepthDecision(
     depthOneCuStatsPtr = GetCodedUnitStats(depthOneCandidateCuIndex);
     cuOriginX  = tbOriginX + depthTwoCuStatsPtr->originX;
     cuOriginY  = tbOriginY + depthTwoCuStatsPtr->originY;
-    if ((pictureControlSetPtr->sliceType == P_SLICE || pictureControlSetPtr->sliceType == B_SLICE )
+    if ((pictureControlSetPtr->sliceType == EB_P_SLICE || pictureControlSetPtr->sliceType == EB_B_SLICE )
         && GROUP_OF_4_32x32_BLOCKS(cuOriginX, cuOriginY) && 
         (contextPtr->groupOf16x16BlocksCount == 4)) {
 
@@ -2008,7 +2008,7 @@ EB_U32 PillarInterDepthDecision(
     depthOneCuStatsPtr = GetCodedUnitStats(depthOneCandidateCuIndex);
     cuOriginX = tbOriginX + depthTwoCuStatsPtr->originX;
     cuOriginY = tbOriginY + depthTwoCuStatsPtr->originY;
-    if ((pictureControlSetPtr->sliceType == P_SLICE || pictureControlSetPtr->sliceType == B_SLICE)
+    if ((pictureControlSetPtr->sliceType == EB_P_SLICE || pictureControlSetPtr->sliceType == EB_B_SLICE)
         && GROUP_OF_4_32x32_BLOCKS(cuOriginX, cuOriginY) &&
         (contextPtr->groupOf16x16BlocksCount == 4)) {
 

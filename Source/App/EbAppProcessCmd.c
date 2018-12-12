@@ -1213,7 +1213,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
 
         // Fill in Buffers Header control data
         headerPtr->pts          = config->processedFrameCount-1;
-        headerPtr->sliceType    = INVALID_SLICE;
+        headerPtr->sliceType    = EB_INVALID_SLICE;
 
         headerPtr->nFlags = 0; 
 
@@ -1228,7 +1228,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
             headerPtr->pAppPrivate  = NULL;
             headerPtr->nFlags       = EB_BUFFERFLAG_EOS;
             headerPtr->pBuffer      = NULL;
-            headerPtr->sliceType    = INVALID_SLICE;
+            headerPtr->sliceType    = EB_INVALID_SLICE;
 
             EbH265EncSendPicture(componentHandle, headerPtr);
         

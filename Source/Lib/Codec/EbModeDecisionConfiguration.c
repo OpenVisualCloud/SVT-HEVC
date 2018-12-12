@@ -457,7 +457,7 @@ void RefinementPredictionLoop(
             EB_U32 depth = GetCodedUnitStats(cuIndex)->depth;
             EB_U8 refinementLevel;
 
-            if (lcuPtr->pictureControlSetPtr->sliceType == I_SLICE){
+            if (lcuPtr->pictureControlSetPtr->sliceType == EB_I_SLICE){
 
                 {
                     EB_U8 lowestLevel = 0x00;
@@ -553,7 +553,7 @@ void PrePredictionRefinement(
         *startDepth = DEPTH_16;
     }
 
-    if ((sliceType != I_SLICE && pictureControlSetPtr->highIntraSlection == 0) && (lcuParams->isCompleteLcu)){
+    if ((sliceType != EB_I_SLICE && pictureControlSetPtr->highIntraSlection == 0) && (lcuParams->isCompleteLcu)){
 
         if (pictureControlSetPtr->sceneCaracteristicId == EB_FRAME_CARAC_0){
             if (pictureControlSetPtr->ParentPcsPtr->grassPercentageInPicture > 60 && auraStatus == AURA_STATUS_1) {
@@ -609,7 +609,7 @@ void ForwardCuToModeDecision(
     EB_BOOL    testAllDepthIntraSliceFlag = EB_FALSE;
 
 
-    testAllDepthIntraSliceFlag = sliceType == I_SLICE &&
+    testAllDepthIntraSliceFlag = sliceType == EB_I_SLICE &&
         (lcuStatPtr->stationaryEdgeOverTimeFlag || pictureControlSetPtr->ParentPcsPtr->logoPicFlag ||
         (pictureControlSetPtr->ParentPcsPtr->veryLowVarPicFlag && pictureControlSetPtr->ParentPcsPtr->lowMotionContentFlag)) ?
     EB_TRUE : testAllDepthIntraSliceFlag;
@@ -635,7 +635,7 @@ void ForwardCuToModeDecision(
                 cuClass = DO_NOT_ADD_CU_CONTINUE_SPLIT;
 
 
-                if (sliceType == I_SLICE){
+                if (sliceType == EB_I_SLICE){
                     if (testAllDepthIntraSliceFlag){
                         cuClass = ADD_CU_CONTINUE_SPLIT;
                     }
@@ -651,12 +651,12 @@ void ForwardCuToModeDecision(
                 }
 
                 // Take into account MAX CU size & MAX intra size (from the API)   
-                cuClass = (cuStatsPtr->size > MAX_CU_SIZE || (sliceType == I_SLICE && cuStatsPtr->size > MAX_INTRA_SIZE)) ?
+                cuClass = (cuStatsPtr->size > MAX_CU_SIZE || (sliceType == EB_I_SLICE && cuStatsPtr->size > MAX_INTRA_SIZE)) ?
                 DO_NOT_ADD_CU_CONTINUE_SPLIT :
                                              cuClass;
 
                 // Take into account MIN CU size & Min intra size(from the API)
-                cuClass = (cuStatsPtr->size == MIN_CU_SIZE || (sliceType == I_SLICE && cuStatsPtr->size == MIN_INTRA_SIZE)) ?
+                cuClass = (cuStatsPtr->size == MIN_CU_SIZE || (sliceType == EB_I_SLICE && cuStatsPtr->size == MIN_INTRA_SIZE)) ?
                 ADD_CU_STOP_SPLIT :
                                   cuClass;
 
@@ -1008,7 +1008,7 @@ void PredictionPartitionLoop(
 
                 }
 
-                if (pictureControlSetPtr->sliceType != I_SLICE){
+                if (pictureControlSetPtr->sliceType != EB_I_SLICE){
 
 		
 
@@ -1027,7 +1027,7 @@ void PredictionPartitionLoop(
 
                 }
 
-                cuPtr->earlyCost = pictureControlSetPtr->sliceType == I_SLICE ? cuIntraCost : cuInterCost;
+                cuPtr->earlyCost = pictureControlSetPtr->sliceType == EB_I_SLICE ? cuIntraCost : cuInterCost;
 
                 if (endDepth == 2){
                     contextPtr->groupOf8x8BlocksCount = depth == 2 ? incrementalCount[cuIndexInRaterScan] : 0;
@@ -1072,7 +1072,7 @@ EB_ERRORTYPE EarlyModeDecisionLcu(
 
     EB_U32      startDepth = (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0) ? DEPTH_32 : DEPTH_64 ;
 
-    EB_U32      endDepth = (sliceType == I_SLICE) ? DEPTH_8 : DEPTH_16;
+    EB_U32      endDepth = (sliceType == EB_I_SLICE) ? DEPTH_8 : DEPTH_16;
 
     contextPtr->groupOf8x8BlocksCount = 0;
     contextPtr->groupOf16x16BlocksCount = 0;

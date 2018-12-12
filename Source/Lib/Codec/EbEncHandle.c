@@ -2868,7 +2868,7 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
 
         EncodeAUD(
             bitstreamPtr,
-            I_SLICE,
+            EB_I_SLICE,
             0);
     }
 
