@@ -930,8 +930,8 @@ void HighLevelRcInputPictureMode2(
         pictureControlSetPtr->targetBitsBestPredQp = pictureControlSetPtr->predBitsRefQp[pictureControlSetPtr->bestPredQp];
         //if (pictureControlSetPtr->sliceType == 2)
         // {
-        //printf("\nTID: %d\t", pictureControlSetPtr->temporalLayerIndex);
-        //printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+        //SVT_LOG("\nTID: %d\t", pictureControlSetPtr->temporalLayerIndex);
+        //SVT_LOG("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
         //    pictureControlSetPtr->pictureNumber,
         //    pictureControlSetPtr->bestPredQp,
         //    (int)pictureControlSetPtr->targetBitsBestPredQp,
@@ -2170,7 +2170,7 @@ void HighLevelRcFeedBackPicture(
     EB_U32                             queueEntryIndexHeadTemp;
 
 
-    //printf("\nOut:%d Slidings: ",pictureControlSetPtr->pictureNumber);        
+    //SVT_LOG("\nOut:%d Slidings: ",pictureControlSetPtr->pictureNumber);        
     if (sequenceControlSetPtr->staticConfig.lookAheadDistance != 0){
 
         // Update the coded rate in the histogram queue   
@@ -2247,7 +2247,7 @@ void* RateControlKernel(void *inputPtr)
             pictureControlSetPtr = (PictureControlSet_t*)rateControlTasksPtr->pictureControlSetWrapperPtr->objectPtr;
             sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 #if DEADLOCK_DEBUG
-            printf("POC %lld RC IN \n", pictureControlSetPtr->pictureNumber);
+            SVT_LOG("POC %lld RC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
             // High level RC
             if (pictureControlSetPtr->pictureNumber == 0){
@@ -2343,7 +2343,7 @@ void* RateControlKernel(void *inputPtr)
             lcuTotalCount = pictureControlSetPtr->lcuTotalCount;
 
             // ***Rate Control***
-            //printf("\nRate Control Thread %d\n", (int)  pictureControlSetPtr->ParentPcsPtr->pictureNumber);
+            //SVT_LOG("\nRate Control Thread %d\n", (int)  pictureControlSetPtr->ParentPcsPtr->pictureNumber);
             if (sequenceControlSetPtr->staticConfig.rateControlMode == 0){
                 // if RC mode is 0,  fixed QP is used                   
                 // QP scaling based on POC number for Flat IPPP structure
@@ -2512,7 +2512,7 @@ void* RateControlKernel(void *inputPtr)
             rateControlResultsPtr->pictureControlSetWrapperPtr = rateControlTasksPtr->pictureControlSetWrapperPtr;
 
 #if DEADLOCK_DEBUG
-            printf("POC %lld RC OUT \n", pictureControlSetPtr->pictureNumber);
+            SVT_LOG("POC %lld RC OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
 
             // Post Full Rate Control Results
@@ -2525,7 +2525,7 @@ void* RateControlKernel(void *inputPtr)
 
         case RC_PACKETIZATION_FEEDBACK_RESULT:
             //loopCount++;
-            //printf("Rate Control Thread FeedBack %d\n", (int) loopCount);            
+            //SVT_LOG("Rate Control Thread FeedBack %d\n", (int) loopCount);            
 
             parentPictureControlSetPtr = (PictureParentControlSet_t*)rateControlTasksPtr->pictureControlSetWrapperPtr->objectPtr;
             sequenceControlSetPtr = (SequenceControlSet_t*)parentPictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
@@ -2624,11 +2624,11 @@ void* RateControlKernel(void *inputPtr)
                 queueEntryPtr->endOfSequenceFlag    = parentPictureControlSetPtr->endOfSequenceFlag;
                 contextPtr->rateAveragePeriodinFrames = (EB_U64)sequenceControlSetPtr->staticConfig.intraPeriodLength + 1;
 
-                //printf("\n0_POC: %d\n",
+                //SVT_LOG("\n0_POC: %d\n",
                 //    queueEntryPtr->pictureNumber);
                 moveSlideWondowFlag = EB_TRUE;
                 while (moveSlideWondowFlag){
-                  //  printf("\n1_POC: %d\n",
+                  //  SVT_LOG("\n1_POC: %d\n",
                   //      queueEntryPtr->pictureNumber);
                     // Check if the sliding window condition is valid
                     queueEntryIndexTemp = contextPtr->codedFramesStatQueueHeadIndex;
@@ -2640,7 +2640,7 @@ void* RateControlKernel(void *inputPtr)
                     }
                     while (moveSlideWondowFlag && !endOfSequenceFlag &&
                         queueEntryIndexTemp < contextPtr->codedFramesStatQueueHeadIndex + contextPtr->rateAveragePeriodinFrames){
-                       // printf("\n2_POC: %d\n",
+                       // SVT_LOG("\n2_POC: %d\n",
                        //     queueEntryPtr->pictureNumber);
 
                         queueEntryIndexTemp2 = (queueEntryIndexTemp > CODED_FRAMES_STAT_QUEUE_MAX_DEPTH - 1) ? queueEntryIndexTemp - CODED_FRAMES_STAT_QUEUE_MAX_DEPTH : queueEntryIndexTemp;
@@ -2684,21 +2684,21 @@ void* RateControlKernel(void *inputPtr)
                         //
 
                         //if(framesInSw == contextPtr->rateAveragePeriodinFrames)
-                        //    printf("POC:%d\t %.3f\n", queueEntryPtr->pictureNumber, (double)contextPtr->totalBitActualPerSw*(sequenceControlSetPtr->frameRate>> RC_PRECISION)/(double)framesInSw/1000);
+                        //    SVT_LOG("POC:%d\t %.3f\n", queueEntryPtr->pictureNumber, (double)contextPtr->totalBitActualPerSw*(sequenceControlSetPtr->frameRate>> RC_PRECISION)/(double)framesInSw/1000);
                         if (framesInSw == (EB_U32)sequenceControlSetPtr->intraPeriodLength + 1){
                             contextPtr->maxBitActualPerSw = MAX(contextPtr->maxBitActualPerSw, contextPtr->totalBitActualPerSw*(sequenceControlSetPtr->frameRate >> RC_PRECISION) / framesInSw / 1000);
                             if (queueEntryPtr->pictureNumber % ((sequenceControlSetPtr->intraPeriodLength + 1)) == 0){
                                 contextPtr->maxBitActualPerGop = MAX(contextPtr->maxBitActualPerGop, contextPtr->totalBitActualPerSw*(sequenceControlSetPtr->frameRate >> RC_PRECISION) / framesInSw / 1000);
                                 if (contextPtr->totalBitActualPerSw > sequenceControlSetPtr->staticConfig.maxBufferSize){
-                                    printf("\nPOC:%d\tOvershoot:%.0f%% \n",
+                                    SVT_LOG("\nPOC:%d\tOvershoot:%.0f%% \n",
                                         (int)queueEntryPtr->pictureNumber,
                                         (double)((EB_S64)contextPtr->totalBitActualPerSw * 100 / (EB_S64)sequenceControlSetPtr->staticConfig.maxBufferSize - 100));
                                 }
                             }
                         }
                         if (framesInSw == contextPtr->rateAveragePeriodinFrames - 1){
-                            printf("\n%d MAX\n", (EB_S32)contextPtr->maxBitActualPerSw);
-                            printf("\n%d GopMa\n", (EB_S32)contextPtr->maxBitActualPerGop);
+                            SVT_LOG("\n%d MAX\n", (EB_S32)contextPtr->maxBitActualPerSw);
+                            SVT_LOG("\n%d GopMa\n", (EB_S32)contextPtr->maxBitActualPerGop);
                         }
 
                         // Reset the Queue Entry
@@ -2720,10 +2720,8 @@ void* RateControlKernel(void *inputPtr)
 
 			// Release the SequenceControlSet
 			EbReleaseObject(parentPictureControlSetPtr->sequenceControlSetWrapperPtr);
-#if ONE_MEMCPY 
             // Release the input buffer
             EbReleaseObject(parentPictureControlSetPtr->ebInputWrapperPtr);
-#endif		
             // Release the ParentPictureControlSet
 			EbReleaseObject(rateControlTasksPtr->pictureControlSetWrapperPtr);
 

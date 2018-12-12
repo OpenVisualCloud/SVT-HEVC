@@ -20,10 +20,7 @@
 #define RC_PRECISION                16
 #define RC_PRECISION_OFFSET         (1 << (RC_PRECISION - 1))
 
-#define OVERSHOOT_STAT_PRINT             0 // Do not remove. 
-                                           // For printing overshooting percentages for both RC and fixed QP. 
-                                           // Target rate and and max buffer size should be set properly even for fixed QP.
-                                           // Disabled by default. 
+
 #if OVERSHOOT_STAT_PRINT
 #define CODED_FRAMES_STAT_QUEUE_MAX_DEPTH   10000
 #endif

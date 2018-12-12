@@ -3840,7 +3840,7 @@ EB_ERRORTYPE MotionEstimateLcu(
 					break;
 
 			default:
-				printf("Err in sorting");
+				SVT_LOG("Err in sorting");
 				break;
 			}
 
@@ -4376,7 +4376,7 @@ EB_U32 UpdateNeighborDcIntraPred(
 	EB_U32                           cuSize)
 {
 	EB_U32 distortion;
-	//	printf("cuSize=%i  x=%i  y=%i  rasterScanCuIndex=%i   mdScanCuIndex=%i \n", cuSize, RASTER_SCAN_CU_X[rasterScanCuIndex], RASTER_SCAN_CU_Y[rasterScanCuIndex],rasterScanCuIndex, mdScanCuIndex );
+	//	SVT_LOG("cuSize=%i  x=%i  y=%i  rasterScanCuIndex=%i   mdScanCuIndex=%i \n", cuSize, RASTER_SCAN_CU_X[rasterScanCuIndex], RASTER_SCAN_CU_Y[rasterScanCuIndex],rasterScanCuIndex, mdScanCuIndex );
 	// Fill Neighbor Arrays
 	UpdateNeighborSamplesArrayOpenLoop(
 		contextPtr->intraRefPtr,

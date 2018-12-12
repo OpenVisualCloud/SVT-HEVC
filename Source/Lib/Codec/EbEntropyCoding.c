@@ -5283,11 +5283,57 @@ static void CodeVPS(
 	WriteUvlc(
 		bitstreamPtr,
 		0);
-
+#if 0//!FPS_in_VPS
 	// "vps_timing_info_present_flag"
 	WriteFlagCavlc(
 		bitstreamPtr,
 		EB_FALSE);
+#else
+    // "vps_timing_info_present_flag"
+    WriteFlagCavlc(
+        bitstreamPtr,
+        EB_TRUE);
+
+    if (scsPtr->staticConfig.frameRateDenominator != 0 && scsPtr->staticConfig.frameRateNumerator != 0) {
+
+        // vps_num_units_in_tick
+        WriteCodeCavlc(
+            bitstreamPtr,
+            scsPtr->staticConfig.frameRateNumerator,
+            32);
+
+        // vps_time_scale
+        WriteCodeCavlc(
+            bitstreamPtr,
+            scsPtr->staticConfig.frameRateDenominator,
+            32);
+    }
+    else {
+        // vps_num_units_in_tick
+        WriteCodeCavlc(
+            bitstreamPtr,
+            scsPtr->frameRate > 1000 ? scsPtr->frameRate : scsPtr->frameRate << 16,
+            32);
+
+        // vps_time_scale
+        WriteCodeCavlc(
+            bitstreamPtr,
+            1 << 16,
+            32);
+    }
+
+    // vps_poc_proportional_to_timing_flag 
+    WriteFlagCavlc(
+        bitstreamPtr,
+        0);
+
+    // vps_num_hrd_parameters 
+    WriteUvlc(
+        bitstreamPtr,
+        0);
+#endif
+
+
 
 	// "vps_extension_flag"
 	WriteFlagCavlc(
