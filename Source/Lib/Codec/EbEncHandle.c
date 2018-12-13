@@ -1647,9 +1647,9 @@ static EB_S32 ComputeIntraPeriod(
 {
     EB_S32 intraPeriod = 0;
     EB_H265_ENC_CONFIGURATION   *config = &sequenceControlSetPtr->staticConfig;
-    EB_S32 fps = config->frameRate < 1000 ? config->frameRate : config->frameRate >> 16;
+    EB_S32 fps = config->frameRate < (241) ? config->frameRate : config->frameRate >> 16;
 
-    if (fps == 30) {
+    if (fps > 25 && fps < 32) {
         intraPeriod = 31;
     }
     else {
@@ -1978,7 +1978,11 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.rateControlMode = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->rateControlMode;
     sequenceControlSetPtr->staticConfig.lookAheadDistance = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->lookAheadDistance;
     sequenceControlSetPtr->staticConfig.framesToBeEncoded = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->framesToBeEncoded;
-    sequenceControlSetPtr->frameRate = sequenceControlSetPtr->staticConfig.frameRate = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRate;
+    
+    if (((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRate > 1000)
+        sequenceControlSetPtr->frameRate = sequenceControlSetPtr->staticConfig.frameRate = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRate;
+    else
+        sequenceControlSetPtr->frameRate = sequenceControlSetPtr->staticConfig.frameRate = (((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRate << 16);
     sequenceControlSetPtr->staticConfig.targetBitRate = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->targetBitRate;
     sequenceControlSetPtr->encodeContextPtr->availableTargetBitRate = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->targetBitRate;
 
@@ -2017,13 +2021,25 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.useRoundRobinThreadAssignment = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->useRoundRobinThreadAssignment;
 
     sequenceControlSetPtr->staticConfig.frameRateDenominator = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRateDenominator;
+    
+    if (sequenceControlSetPtr->staticConfig.frameRateDenominator < (1 << 15))
+        sequenceControlSetPtr->staticConfig.frameRateDenominator = sequenceControlSetPtr->staticConfig.frameRateDenominator << 16;
+    
     sequenceControlSetPtr->staticConfig.frameRateNumerator = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRateNumerator;
+    
+    if (sequenceControlSetPtr->staticConfig.frameRateNumerator < (1 << 15))
+        sequenceControlSetPtr->staticConfig.frameRateNumerator = sequenceControlSetPtr->staticConfig.frameRateNumerator << 16;
 
     sequenceControlSetPtr->staticConfig.reconEnabled = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->reconEnabled;
 
     // if HDR is set videoUsabilityInfo should be set to 1
     if (sequenceControlSetPtr->staticConfig.highDynamicRangeInput == 1) {
         sequenceControlSetPtr->staticConfig.videoUsabilityInfo = 1;
+    }
+    
+    // Extract frame rate from Numerator and Denominator if not 0
+    if (sequenceControlSetPtr->staticConfig.frameRateNumerator != 0 && sequenceControlSetPtr->staticConfig.frameRateDenominator != 0) {
+        sequenceControlSetPtr->staticConfig.frameRate = (sequenceControlSetPtr->staticConfig.frameRateNumerator / (sequenceControlSetPtr->staticConfig.frameRateDenominator >> 16));
     }
     
     // Get Default Intra Period if not specified
@@ -2035,10 +2051,7 @@ void CopyApiFromApp(
         sequenceControlSetPtr->staticConfig.lookAheadDistance = ComputeDefaultLookAhead(&sequenceControlSetPtr->staticConfig);
     }
 
-    // Extract frame rate from Numerator and Denominator if not 0
-    if (sequenceControlSetPtr->staticConfig.frameRateNumerator != 0 && sequenceControlSetPtr->staticConfig.frameRateDenominator != 0) {
-        sequenceControlSetPtr->staticConfig.frameRate = (sequenceControlSetPtr->staticConfig.frameRateNumerator << 16) / (sequenceControlSetPtr->staticConfig.frameRateDenominator);
-    }
+    
 
     
     return;
@@ -2629,7 +2642,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
         return EB_ErrorBadParameter;
     }
 
-    configPtr->frameRate = 60;
+    configPtr->frameRate = 60 << 16;
     configPtr->frameRateNumerator = 0;
     configPtr->frameRateDenominator = 0;
     configPtr->encoderBitDepth = 8;
@@ -2728,28 +2741,44 @@ static void PrintLibParams(
 
     SVT_LOG("------------------------------------------- ");
     if (config->profile == 0)
-        SVT_LOG("\nSVT [config]: Main Profile,Tier %d,Level%.1f\t", config->tier, (float)(config->level / 10));
+        SVT_LOG("\nSVT [config]: Main Profile\t");
     else
-        SVT_LOG("\nSVT [config]: Main10 Profile,Tier %d,Level %.1f\t", config->tier, (float)(config->level / 10));
+        SVT_LOG("\nSVT [config]: Main10 Profile\t");
+    
+    if (config->tier != 0 && config->level !=0)
+        SVT_LOG("Tier %d\tLevel %.1f\t", config->tier, (float)(config->level / 10));
+    else {
+        if (config->tier == 0 )
+            SVT_LOG("Tier (auto)\t");
+        else
+            SVT_LOG("Tier %d\t", config->tier);
+        
+        if (config->level == 0 )
+            SVT_LOG("Level (auto)\t");
+        else
+            SVT_LOG("Level %.1f\t", (float)(config->level / 10));
+        
+        
+    }
 
-    SVT_LOG("\nSVT [config]: EncoderMode / LatencyMode / Tune\t\t\t\t: %d / %d / %d ", config->encMode, config->latencyMode, config->tune);
-    SVT_LOG("\nSVT [config]: EncoderBitDepth / CompressedTenBitFormat\t\t\t: %d / %d ", config->encoderBitDepth, config->compressedTenBitFormat);
-    SVT_LOG("\nSVT [config]: SourceWidth / SourceHeight\t\t\t\t: %d / %d ", config->sourceWidth, config->sourceHeight);
+    SVT_LOG("\nSVT [config]: EncoderMode / LatencyMode / Tune\t\t\t\t\t: %d / %d / %d ", config->encMode, config->latencyMode, config->tune);
+    SVT_LOG("\nSVT [config]: EncoderBitDepth / CompressedTenBitFormat\t\t\t\t: %d / %d ", config->encoderBitDepth, config->compressedTenBitFormat);
+    SVT_LOG("\nSVT [config]: SourceWidth / SourceHeight\t\t\t\t\t: %d / %d ", config->sourceWidth, config->sourceHeight);
     if (config->frameRateDenominator != 0 && config->frameRateNumerator != 0)
-        SVT_LOG("\nSVT [config]: FrameRateNumerator / FrameRateDenominator / Gop Size / IntraRefreshType \t\t\t\t\t: %d / %d / %d / %d", config->frameRateNumerator > 1000 ? config->frameRateNumerator : config->frameRateNumerator,
-            config->frameRateDenominator > 1000 ? config->frameRateDenominator : config->frameRateDenominator,
+        SVT_LOG("\nSVT [config]: Fps_Numerator / Fps_Denominator / Gop Size / IntraRefreshType \t: %d / %d / %d / %d", config->frameRateNumerator > (1<<16) ? config->frameRateNumerator >> 16: config->frameRateNumerator,
+            config->frameRateDenominator > (1<<16) ? config->frameRateDenominator >> 16: config->frameRateDenominator,
             config->intraPeriodLength + 1,
             config->intraRefreshType);
     else
-        SVT_LOG("\nSVT [config]: FrameRate / Gop Size\t\t\t\t\t: %d / %d ", config->frameRate > 1000 ? config->frameRate >> 16 : config->frameRate, config->intraPeriodLength + 1);
-    SVT_LOG("\nSVT [config]: HierarchicalLevels / BaseLayerSwitchMode / PredStructure\t: %d / %d / %d ", config->hierarchicalLevels, config->baseLayerSwitchMode, config->predStructure);
+        SVT_LOG("\nSVT [config]: FrameRate / Gop Size\t\t\t\t\t\t: %d / %d ", config->frameRate > 1000 ? config->frameRate >> 16 : config->frameRate, config->intraPeriodLength + 1);
+    SVT_LOG("\nSVT [config]: HierarchicalLevels / BaseLayerSwitchMode / PredStructure\t\t: %d / %d / %d ", config->hierarchicalLevels, config->baseLayerSwitchMode, config->predStructure);
     if (config->rateControlMode == 1)
         SVT_LOG("\nSVT [config]: RCMode / TargetBitrate / LookaheadDistance / SceneChange\t\t: VBR / %d / %d / %d ", config->targetBitRate, config->lookAheadDistance, config->sceneChangeDetection);
     else
-        SVT_LOG("\nSVT [config]: BRC Mode / QP  / LookaheadDistance / SceneChange\t\t: CQP / %d / %d / %d ", config->qp, config->lookAheadDistance, config->sceneChangeDetection);
+        SVT_LOG("\nSVT [config]: BRC Mode / QP  / LookaheadDistance / SceneChange\t\t\t: CQP / %d / %d / %d ", config->qp, config->lookAheadDistance, config->sceneChangeDetection);
 
     if (config->tune == 0)
-        SVT_LOG("\nSVT [config]: BitRateReduction / ImproveSharpness\t\t\t: %d / %d ", config->bitRateReduction, config->improveSharpness);
+        SVT_LOG("\nSVT [config]: BitRateReduction / ImproveSharpness\t\t\t\t: %d / %d ", config->bitRateReduction, config->improveSharpness);
     SVT_LOG("\n------------------------------------------- ");
     SVT_LOG("\n");
 
