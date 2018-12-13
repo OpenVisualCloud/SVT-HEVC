@@ -19,7 +19,6 @@
 
 #include "EbIntraPrediction.h"
 #include "EbLambdaRateTables.h"
-#include <math.h>
 #include "EbPictureOperators.h"
 
 #define OIS_TH_COUNT	4
@@ -1799,7 +1798,7 @@ void HmeOneQuadrantLevel0(
 
 		if ((searchAreaWidth & 15) != 0)
 		{
-			searchAreaWidth = (EB_S16)(floor((double)((searchAreaWidth >> 4) << 4)));
+			searchAreaWidth = (EB_S16)((double)((searchAreaWidth >> 4) << 4));
 		}
 
 	    if (((searchAreaWidth & 15) == 0) && ((ASM_TYPES & AVX512_MASK) && 1))
