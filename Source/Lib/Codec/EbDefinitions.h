@@ -19,20 +19,15 @@ extern "C" {
 
 #ifdef _MSC_VER
 // Windows Compiler
-#pragma warning( disable : 4127 )
-#pragma warning( disable : 4201 )
-#pragma warning( disable : 4702 )
-#pragma warning( disable : 4456 )  
-#pragma warning( disable : 4457 )
-#pragma warning( disable : 4459 )
-#pragma warning( disable : 4334 )
 #elif __INTEL_COMPILER
 #else
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #pragma GCC diagnostic ignored "-Wuninitialized"
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wformat-zero-length"
+#if   (__GNUC__ > 6)
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough="
+#endif
 #endif 
 
 #ifdef __GNUC__
