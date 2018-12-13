@@ -31,16 +31,11 @@ add_executable (SvtHevcEncApp
 
 if (UNIX)
 
-	# Configure the RPATH to allow relative runtime linking	
-	INSTALL(TARGETS SvtHevcEncApp RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/")
-
-
-
 	# Link the Encoder App
 	target_link_libraries (SvtHevcEncApp
-		SvtHevcEnc
-		pthread rt
-		m)
+							SvtHevcEnc
+							pthread
+							rt)
 endif()
 
 if (MSVC OR MSYS OR MINGW OR WIN32)
@@ -50,6 +45,4 @@ if (MSVC OR MSYS OR MINGW OR WIN32)
                            SvtHevcEnc)
 endif()
 
-
-
-
+install(TARGETS SvtHevcEncApp RUNTIME DESTINATION bin)

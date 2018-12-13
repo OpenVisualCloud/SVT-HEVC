@@ -27,6 +27,7 @@ extern "C" {
 
 #define SEGMENT_ENTROPY_BUFFER_SIZE         0x989680// Entropy Bitstream Buffer Size
 #define PACKETIZATION_PROCESS_BUFFER_SIZE   0x001000 // Bitstream used to code SPS, PPS, etc.
+#define EOS_NAL_BUFFER_SIZE                 0x0010 // Bitstream used to code EOS NAL
 #define HISTOGRAM_NUMBER_OF_BINS            256  
 #define MAX_NUMBER_OF_REGIONS_IN_WIDTH		4
 #define MAX_NUMBER_OF_REGIONS_IN_HEIGHT		4
@@ -471,12 +472,6 @@ typedef struct PictureParentControlSet_s
 
 	// Average intensity
     EB_U8                                 averageIntensity[3];
-
-    // Data attached to the picture. This includes data passed from the application, or other data the encoder attaches
-    // to the picture.
-    EbLinkedListNode                     *dataLLHeadPtr;
-    // Pointer to data to be passed back to the application when picture encoding is done
-    EbLinkedListNode                     *appOutDataLLHeadPtr;
 
     EbObjectWrapper_t                    *outputStreamWrapperPtr;
 	EB_BOOL							      disableTmvpFlag;

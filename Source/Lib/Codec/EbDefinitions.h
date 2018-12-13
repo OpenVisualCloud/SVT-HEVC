@@ -19,18 +19,15 @@ extern "C" {
 
 #ifdef _MSC_VER
 // Windows Compiler
-#pragma warning( disable : 4127 )
-#pragma warning( disable : 4201 )
-#pragma warning( disable : 4702 )
-#pragma warning( disable : 4456 )  
-#pragma warning( disable : 4457 )
-#pragma warning( disable : 4459 )
-#pragma warning( disable : 4334 )
 #elif __INTEL_COMPILER
 #else
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #pragma GCC diagnostic ignored "-Wuninitialized"
 #pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wformat-zero-length"
+#if   (__GNUC__ > 6)
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough="
+#endif
 #endif 
 
 #ifdef __GNUC__
@@ -560,14 +557,30 @@ extern    EB_U32                   libMutexCount;
     libMallocCount++;     
 #endif
 
+// Debug Macros
+#define OVERSHOOT_STAT_PRINT             0  // Do not remove. 
+                                            // For printing overshooting percentages for both RC and fixed QP. 
+                                            // Target rate and and max buffer size should be set properly even for fixed QP.
+                                            // Disabled by default. 
+#define DEADLOCK_DEBUG                   0
+#define LIB_PRINTF_ENABLE                1
 
+#if LIB_PRINTF_ENABLE
+#define SVT_LOG printf
+#else
+#if _MSC_VER
+#define SVT_LOG(s, ...) printf("")
+#else
+#define SVT_LOG(s, ...) printf("",##__VA_ARGS__)
+#endif
+#endif
 
 #define EB_MEMORY() \
-    printf("Total Number of Mallocs in Library: %d\n", libMallocCount); \
-    printf("Total Number of Threads in Library: %d\n", libThreadCount); \
-    printf("Total Number of Semaphore in Library: %d\n", libSemaphoreCount); \
-    printf("Total Number of Mutex in Library: %d\n", libMutexCount); \
-    printf("Total Library Memory: %.2lf KB\n\n",*totalLibMemory/(double)1024);
+    SVT_LOG("Total Number of Mallocs in Library: %d\n", libMallocCount); \
+    SVT_LOG("Total Number of Threads in Library: %d\n", libThreadCount); \
+    SVT_LOG("Total Number of Semaphore in Library: %d\n", libSemaphoreCount); \
+    SVT_LOG("Total Number of Mutex in Library: %d\n", libMutexCount); \
+    SVT_LOG("Total Library Memory: %.2lf KB\n\n",*totalLibMemory/(double)1024);
 
 #define EB_MALLOC(type, pointer, nElements, pointerClass) \
     pointer = (type) malloc(nElements); \

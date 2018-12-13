@@ -24,7 +24,7 @@ index b062b6318e..7fa2ae8da8 100755
    --enable-libspeex        enable Speex de/encoding via libspeex [no]
    --enable-libsrt          enable Haivision SRT protocol via libsrt [no]
    --enable-libssh          enable SFTP protocol via libssh [no]
-+  --enable-libsvt          enable HEVC encoding via svt [no]
++  --enable-libsvthevc          enable HEVC encoding via svt [no]
    --enable-libtensorflow   enable TensorFlow as a DNN module backend
                             for DNN based filters like sr [no]
    --enable-libtesseract    enable Tesseract, needed for ocr filter [no]
@@ -32,7 +32,7 @@ index b062b6318e..7fa2ae8da8 100755
      libcdio
      libdavs2
      librubberband
-+    libsvt
++    libsvthevc
      libvidstab
      libx264
      libx265
@@ -40,7 +40,7 @@ index b062b6318e..7fa2ae8da8 100755
  libspeex_decoder_deps="libspeex"
  libspeex_encoder_deps="libspeex"
  libspeex_encoder_select="audio_frame_queue"
-+libsvt_hevc_encoder_deps="libsvt"
++libsvt_hevc_encoder_deps="libsvthevc"
  libtheora_encoder_deps="libtheora"
  libtwolame_encoder_deps="libtwolame"
  libvo_amrwbenc_encoder_deps="libvo_amrwbenc"
@@ -48,7 +48,7 @@ index b062b6318e..7fa2ae8da8 100755
  enabled libssh            && require_pkg_config libssh libssh libssh/sftp.h sftp_init
  enabled libspeex          && require_pkg_config libspeex speex speex/speex.h speex_decoder_init
  enabled libsrt            && require_pkg_config libsrt "srt >= 1.3.0" srt/srt.h srt_socket
-+enabled libsvt            && require_pkg_config libsvt  libsvt  EbApi.h EbInitHandle
++enabled libsvthevc        && require_pkg_config libsvthevc SvtHevcEnc EbApi.h EbInitHandle
  enabled libtensorflow     && require libtensorflow tensorflow/c/c_api.h TF_Version -ltensorflow
  enabled libtesseract      && require_pkg_config libtesseract tesseract tesseract/capi.h TessBaseAPICreate
  enabled libtheora         && require libtheora theora/theoraenc.h th_info_init -ltheoraenc -ltheoradec -logg
@@ -81,7 +81,7 @@ new file mode 100644
 index 0000000000..d1281fbdb4
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,508 @@
+@@ -0,0 +1,506 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -399,7 +399,6 @@ index 0000000000..d1281fbdb4
 +        headerPtrLast.nFilledLen  = 0;
 +        headerPtrLast.nTickCount  = 0;
 +        headerPtrLast.pAppPrivate = NULL;
-+        headerPtrLast.nOffset     = 0;
 +        headerPtrLast.pBuffer     = NULL;
 +        headerPtrLast.nFlags      = EB_BUFFERFLAG_EOS;
 +
@@ -411,7 +410,6 @@ index 0000000000..d1281fbdb4
 +
 +    read_in_data(&svt_enc->enc_params, frame, headerPtr);
 +
-+    headerPtr->nOffset      = 0;
 +    headerPtr->nFlags       = 0;
 +    headerPtr->pAppPrivate  = NULL;
 +    headerPtr->pts          = frame->pts;

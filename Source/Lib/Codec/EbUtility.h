@@ -166,19 +166,6 @@ extern EB_U32 EndianSwap(EB_U32 ui);
 #define MAX_UNSIGNED_VALUE     ~0u
 #define MIN_SIGNED_VALUE       ~0 - ((signed) (~0u >> 1))
 #define MAX_SIGNED_VALUE       ((signed) (~0u >> 1))
-
-
-// Helper functions for EbLinkedListNode.
-
-// concatenate two linked list, and return the pointer to the new concatenated list
-EbLinkedListNode* concatEbLinkedList(EbLinkedListNode* a, EbLinkedListNode* b);
-
-// split a linked list into two. return the pointer to a linked list whose nodes meets the condition
-// predicateFunc(node) == TRUE, the rest of the nodes will be collected into another linked list to which (*restLL) is
-// set. Does not gaurantee the original order of the nodes.
-
-EbLinkedListNode* splitEbLinkedList(EbLinkedListNode* input, EbLinkedListNode** restLL, EB_BOOL (*predicateFunc)(EbLinkedListNode*));
-
 #define MINI_GOP_MAX_COUNT			15
 #define MINI_GOP_WINDOW_MAX_COUNT	 8	// widow subdivision: 8 x 3L
 

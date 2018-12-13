@@ -1128,11 +1128,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
 
     // Output Buffer Fifo Ptrs
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
-#if CHKN_OMX
 		encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->streamOutputFifoPtr  = (encHandlePtr->outputStreamBufferProducerFifoPtrDblArray[instanceIndex])[0];
-#else
-        encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->streamOutputFifoPtr  = (encHandlePtr->outputStreamBufferConsumerFifoPtrDblArray[instanceIndex])[0];
-#endif
         if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.reconEnabled) {
             encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->reconOutputFifoPtr = (encHandlePtr->outputReconBufferProducerFifoPtrDblArray[instanceIndex])[0];
         }
@@ -1487,7 +1483,7 @@ EB_API EB_ERRORTYPE EbInitHandle(
         }
     }
     else {
-        printf("Error: Component Struct Malloc Failed\n");
+        //SVT_LOG("Error: Component Struct Malloc Failed\n");
         return_error = EB_ErrorInsufficientResources;
     }
     return_error = EbH265EncInitParameter(configPtr);
@@ -1639,7 +1635,7 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->entropyCodingProcessInitCount                = MAX(3, coreCount / 12);
 
     sequenceControlSetPtr->totalProcessInitCount += 6; // single processes count
-    printf("Number of cores available: %u\nNumber of PPCS %u\n", coreCount >> 1 , inputPic);
+    SVT_LOG("Number of logical cores available: %u\nNumber of PPCS %u\n", coreCount, inputPic);
 
     return;
 
@@ -1651,9 +1647,9 @@ static EB_S32 ComputeIntraPeriod(
 {
     EB_S32 intraPeriod = 0;
     EB_H265_ENC_CONFIGURATION   *config = &sequenceControlSetPtr->staticConfig;
-    EB_S32 fps = config->frameRate < 1000 ? config->frameRate : config->frameRate >> 16;
+    EB_S32 fps = config->frameRate < (241) ? config->frameRate : config->frameRate >> 16;
 
-    if (fps == 30) {
+    if (fps > 25 && fps < 32) {
         intraPeriod = 31;
     }
     else {
@@ -1920,6 +1916,8 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.tune = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tune;
     sequenceControlSetPtr->staticConfig.encMode = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->encMode;
     sequenceControlSetPtr->staticConfig.codeVpsSpsPps = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->codeVpsSpsPps;
+    sequenceControlSetPtr->staticConfig.codeEosNal = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->codeEosNal;
+    
     if (sequenceControlSetPtr->staticConfig.tune == 1) {
         sequenceControlSetPtr->staticConfig.bitRateReduction = 0;
         sequenceControlSetPtr->staticConfig.improveSharpness = 0;
@@ -1980,7 +1978,11 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.rateControlMode = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->rateControlMode;
     sequenceControlSetPtr->staticConfig.lookAheadDistance = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->lookAheadDistance;
     sequenceControlSetPtr->staticConfig.framesToBeEncoded = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->framesToBeEncoded;
-    sequenceControlSetPtr->frameRate = sequenceControlSetPtr->staticConfig.frameRate = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRate;
+    
+    if (((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRate > 1000)
+        sequenceControlSetPtr->frameRate = sequenceControlSetPtr->staticConfig.frameRate = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRate;
+    else
+        sequenceControlSetPtr->frameRate = sequenceControlSetPtr->staticConfig.frameRate = (((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRate << 16);
     sequenceControlSetPtr->staticConfig.targetBitRate = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->targetBitRate;
     sequenceControlSetPtr->encodeContextPtr->availableTargetBitRate = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->targetBitRate;
 
@@ -2019,13 +2021,25 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.useRoundRobinThreadAssignment = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->useRoundRobinThreadAssignment;
 
     sequenceControlSetPtr->staticConfig.frameRateDenominator = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRateDenominator;
+    
+    if (sequenceControlSetPtr->staticConfig.frameRateDenominator < (1 << 15))
+        sequenceControlSetPtr->staticConfig.frameRateDenominator = sequenceControlSetPtr->staticConfig.frameRateDenominator << 16;
+    
     sequenceControlSetPtr->staticConfig.frameRateNumerator = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRateNumerator;
+    
+    if (sequenceControlSetPtr->staticConfig.frameRateNumerator < (1 << 15))
+        sequenceControlSetPtr->staticConfig.frameRateNumerator = sequenceControlSetPtr->staticConfig.frameRateNumerator << 16;
 
     sequenceControlSetPtr->staticConfig.reconEnabled = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->reconEnabled;
 
     // if HDR is set videoUsabilityInfo should be set to 1
     if (sequenceControlSetPtr->staticConfig.highDynamicRangeInput == 1) {
         sequenceControlSetPtr->staticConfig.videoUsabilityInfo = 1;
+    }
+    
+    // Extract frame rate from Numerator and Denominator if not 0
+    if (sequenceControlSetPtr->staticConfig.frameRateNumerator != 0 && sequenceControlSetPtr->staticConfig.frameRateDenominator != 0) {
+        sequenceControlSetPtr->staticConfig.frameRate = (sequenceControlSetPtr->staticConfig.frameRateNumerator / (sequenceControlSetPtr->staticConfig.frameRateDenominator >> 16));
     }
     
     // Get Default Intra Period if not specified
@@ -2037,10 +2051,7 @@ void CopyApiFromApp(
         sequenceControlSetPtr->staticConfig.lookAheadDistance = ComputeDefaultLookAhead(&sequenceControlSetPtr->staticConfig);
     }
 
-    // Extract frame rate from Numerator and Denominator if not 0
-    if (sequenceControlSetPtr->staticConfig.frameRateNumerator != 0 && sequenceControlSetPtr->staticConfig.frameRateDenominator != 0) {
-        sequenceControlSetPtr->staticConfig.frameRate = (sequenceControlSetPtr->staticConfig.frameRateNumerator << 16) / (sequenceControlSetPtr->staticConfig.frameRateDenominator);
-    }
+    
 
     
     return;
@@ -2061,7 +2072,7 @@ static int VerifyHmeDimention(unsigned int index,unsigned int HmeLevel0SearchAre
         totalSearchWidth += NumberHmeSearchRegionInWidth[i] ;
     }
     if ((totalSearchWidth) != (HmeLevel0SearchAreaInWidth)) {
-		 printf("Error Instance %u: Invalid  HME Total Search Area. \n", index);
+        SVT_LOG("Error Instance %u: Invalid  HME Total Search Area. \n", index);
 		 return_error = -1;
 		 return return_error;
 	 }
@@ -2079,7 +2090,7 @@ static int VerifyHmeDimentionL1L2(unsigned int index, EB_U32 NumberHmeSearchRegi
         totalSearchWidth += NumberHmeSearchRegionInWidth[i];
     }
     if ((totalSearchWidth > 256) || (totalSearchWidth == 0)) {
-        printf("Error Instance %u: Invalid  HME Total Search Area. Must be [1 - 256].\n", index);
+        SVT_LOG("Error Instance %u: Invalid  HME Total Search Area. Must be [1 - 256].\n", index);
         return_error = -1;
         return return_error;
     }
@@ -2098,13 +2109,13 @@ static EB_ERRORTYPE VerifySettings(\
 
 
 	if ( config->tier > 1 ) {
-		printf("Error instance %u: Tier must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("Error instance %u: Tier must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;    
 	}
 
 	// For levels below level 4 (exclusive), only the main tier is allowed
     if(config->level < 40 && config->tier != 0){
-        printf("Error Instance %u: For levels below level 4 (exclusive), only the main tier is allowed\n",channelNumber+1);
+        SVT_LOG("Error Instance %u: For levels below level 4 (exclusive), only the main tier is allowed\n",channelNumber+1);
         return_error = EB_ErrorBadParameter; 
     }
 
@@ -2189,49 +2200,49 @@ static EB_ERRORTYPE VerifySettings(\
     }
     
 	if(levelIdx > TOTAL_LEVEL_COUNT){
-        printf("Error Instance %u: Unsupported level\n",channelNumber+1);
+        SVT_LOG("Error Instance %u: Unsupported level\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter; 
     }	 
 
     if (sequenceControlSetPtr->maxInputLumaWidth < 64) {
-		printf("Error instance %u: Source Width must be at least 64\n",channelNumber+1);
+        SVT_LOG("Error instance %u: Source Width must be at least 64\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	}
     if (sequenceControlSetPtr->maxInputLumaHeight < 64) {
-        printf("Error instance %u: Source Width must be at least 64\n", channelNumber + 1);
+        SVT_LOG("Error instance %u: Source Width must be at least 64\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->predStructure > 2) {
-        printf("Error instance %u: Pred Structure must be [0-2]\n", channelNumber + 1);
+        SVT_LOG("Error instance %u: Pred Structure must be [0-2]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->baseLayerSwitchMode == 1 && config->predStructure != 2) {
-        printf( "Error Instance %u: Base Layer Switch Mode 1 only when Prediction Structure is Random Access\n", channelNumber + 1);
+        SVT_LOG( "Error Instance %u: Base Layer Switch Mode 1 only when Prediction Structure is Random Access\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
     if (sequenceControlSetPtr->maxInputLumaWidth % 8 && sequenceControlSetPtr->staticConfig.compressedTenBitFormat == 1) {
-        printf("Error Instance %u: Only multiple of 8 width is supported for compressed 10-bit inputs \n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: Only multiple of 8 width is supported for compressed 10-bit inputs \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
 	if (sequenceControlSetPtr->maxInputLumaWidth % 2) {
-        printf("Error Instance %u: Source Width must be even for YUV_420 colorspace\n",channelNumber+1);
+        SVT_LOG("Error Instance %u: Source Width must be even for YUV_420 colorspace\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     } 
     
     if (sequenceControlSetPtr->maxInputLumaHeight % 2) {
-        printf("Error Instance %u: Source Height must be even for YUV_420 colorspace\n",channelNumber+1);
+        SVT_LOG("Error Instance %u: Source Height must be even for YUV_420 colorspace\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     } 
     if (sequenceControlSetPtr->maxInputLumaWidth > 8192) {
-		printf("Error instance %u: Source Width must be less than 8192\n",channelNumber+1);
+        SVT_LOG("Error instance %u: Source Width must be less than 8192\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	} 
 
     if (sequenceControlSetPtr->maxInputLumaHeight > 4320) {
-		printf("Error instance %u: Source Height must be less than 4320\n",channelNumber+1);
+        SVT_LOG("Error instance %u: Source Height must be less than 4320\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
@@ -2244,25 +2255,25 @@ static EB_ERRORTYPE VerifySettings(\
 
     if (inputResolution <= INPUT_SIZE_1080i_RANGE) {
         if (config->encMode > 9) {
-            printf("Error instance %u: encMode must be [0 - 9] for this resolution\n", channelNumber + 1);
+            SVT_LOG("Error instance %u: encMode must be [0 - 9] for this resolution\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
         }
 
     }
     else if (inputResolution == INPUT_SIZE_1080p_RANGE) {
         if (config->encMode > 10) {
-            printf("Error instance %u: encMode must be [0 - 10] for this resolution\n", channelNumber + 1);
+            SVT_LOG("Error instance %u: encMode must be [0 - 10] for this resolution\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
         }
 
     }
     else {
         if (config->encMode > 12 && config->tune == 0) {
-            printf("Error instance %u: encMode must be [0 - 12] for this resolution\n", channelNumber + 1);
+            SVT_LOG("Error instance %u: encMode must be [0 - 12] for this resolution\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
         }
         else if (config->encMode > 10 && config->tune == 1) {
-            printf("Error instance %u: encMode must be [0 - 10] for this resolution\n", channelNumber + 1);
+            SVT_LOG("Error instance %u: encMode must be [0 - 10] for this resolution\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
         }
     }
@@ -2272,13 +2283,13 @@ static EB_ERRORTYPE VerifySettings(\
     if (inputResolution <= INPUT_SIZE_1080i_RANGE){
         sequenceControlSetPtr->maxEncMode = MAX_SUPPORTED_MODES_SUB1080P - 1;
         if (config->encMode > MAX_SUPPORTED_MODES_SUB1080P -1) {
-            printf("Error instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_SUB1080P-1);
+            SVT_LOG("Error instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_SUB1080P-1);
 			return_error = EB_ErrorBadParameter;
 		}
 	}else if (inputResolution == INPUT_SIZE_1080p_RANGE){
         sequenceControlSetPtr->maxEncMode = MAX_SUPPORTED_MODES_1080P - 1;
         if (config->encMode > MAX_SUPPORTED_MODES_1080P - 1) {
-            printf("Error instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_1080P - 1);
+            SVT_LOG("Error instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_1080P - 1);
 			return_error = EB_ErrorBadParameter;
 		}
 	}else {
@@ -2288,83 +2299,83 @@ static EB_ERRORTYPE VerifySettings(\
             sequenceControlSetPtr->maxEncMode = MAX_SUPPORTED_MODES_4K_OQ - 1;
 
         if (config->encMode > MAX_SUPPORTED_MODES_4K_SQ - 1 && config->tune == 0) {
-            printf("Error instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_4K_SQ-1);
+            SVT_LOG("Error instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_4K_SQ-1);
 			return_error = EB_ErrorBadParameter;
         }else if (config->encMode > MAX_SUPPORTED_MODES_4K_OQ - 1 && config->tune == 1) {
-            printf("Error instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_4K_OQ-1);
+            SVT_LOG("Error instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_4K_OQ-1);
 			return_error = EB_ErrorBadParameter;
 		}
 	}
 
 	if(config->qp > 51) {
-		printf("Error instance %u: QP must be [0 - 51]\n",channelNumber+1);
+        SVT_LOG("Error instance %u: QP must be [0 - 51]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;	
 	}
     
     if (config->hierarchicalLevels > 3) {
-		printf("Error instance %u: Hierarchical Levels supported [0-3]\n",channelNumber+1);
+        SVT_LOG("Error instance %u: Hierarchical Levels supported [0-3]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	} 
 
     if (config->intraPeriodLength < -2 || config->intraPeriodLength > 255) {
-        printf("Error Instance %u: The intra period must be [-2 - 255] \n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: The intra period must be [-2 - 255] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
 	if( config->intraRefreshType > 2 || config->intraRefreshType < 1) {
-        printf("Error Instance %u: Invalid intra Refresh Type [1-2]\n",channelNumber+1);
+        SVT_LOG("Error Instance %u: Invalid intra Refresh Type [1-2]\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
 	}
     if (config->baseLayerSwitchMode > 1) {
-        printf("Error Instance %u: Invalid Base Layer Switch Mode [0-1] \n",channelNumber+1);
+        SVT_LOG("Error Instance %u: Invalid Base Layer Switch Mode [0-1] \n",channelNumber+1);
         return_error = EB_ErrorBadParameter; 
     }
     if (config->interlacedVideo > 1) {
-        printf("Error Instance %u: Invalid Interlaced Video\n",channelNumber+1);
+        SVT_LOG("Error Instance %u: Invalid Interlaced Video\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     }  
 
 	if ( config->disableDlfFlag > 1) {
-       printf("Error Instance %u: Invalid LoopFilterDisable. LoopFilterDisable must be [0 - 1]\n",channelNumber+1);
+       SVT_LOG("Error Instance %u: Invalid LoopFilterDisable. LoopFilterDisable must be [0 - 1]\n",channelNumber+1);
 	   return_error = EB_ErrorBadParameter;	
     } 
 
 	if ( config->enableSaoFlag > 1) {
-       printf("Error Instance %u: Invalid SAO. SAO range must be [0 - 1]\n",channelNumber+1);
+       SVT_LOG("Error Instance %u: Invalid SAO. SAO range must be [0 - 1]\n",channelNumber+1);
 	   return_error = EB_ErrorBadParameter;	
     }
 	if ( config->useDefaultMeHme > 1 ){
-        printf("Error Instance %u: invalid useDefaultMeHme. useDefaultMeHme must be [0 - 1]\n",channelNumber+1);
+       SVT_LOG("Error Instance %u: invalid useDefaultMeHme. useDefaultMeHme must be [0 - 1]\n",channelNumber+1);
 	   return_error = EB_ErrorBadParameter;	
 	}
     if ( config->enableHmeFlag > 1 ){
-        printf("Error Instance %u: invalid HME. HME must be [0 - 1]\n",channelNumber+1);
+       SVT_LOG("Error Instance %u: invalid HME. HME must be [0 - 1]\n",channelNumber+1);
 	   return_error = EB_ErrorBadParameter;	
 	}
 
 	if ( config->enableHmeLevel0Flag > 1 ) {
-        printf("Error Instance %u: invalid enable HMELevel0. HMELevel0 must be [0 - 1]\n",channelNumber+1);
+       SVT_LOG("Error Instance %u: invalid enable HMELevel0. HMELevel0 must be [0 - 1]\n",channelNumber+1);
 	   return_error = EB_ErrorBadParameter;	
 	}
 
 	if ( config->enableHmeLevel1Flag > 1 ) {
-        printf("Error Instance %u: invalid enable HMELevel1. HMELevel1 must be [0 - 1]\n",channelNumber+1);
+       SVT_LOG("Error Instance %u: invalid enable HMELevel1. HMELevel1 must be [0 - 1]\n",channelNumber+1);
 	   return_error = EB_ErrorBadParameter;	
 	}
 
 	if ( config->enableHmeLevel2Flag > 1 ){
-        printf("Error Instance %u: invalid enable HMELevel2. HMELevel2 must be [0 - 1]\n",channelNumber+1);
+       SVT_LOG("Error Instance %u: invalid enable HMELevel2. HMELevel2 must be [0 - 1]\n",channelNumber+1);
 	   return_error = EB_ErrorBadParameter;	
 	}	
 	
 	if ((config->searchAreaWidth > 256) || (config->searchAreaWidth == 0)){
-        printf("Error Instance %u: Invalid SearchAreaWidth. SearchAreaWidth must be [1 - 256]\n",channelNumber+1);
+        SVT_LOG("Error Instance %u: Invalid SearchAreaWidth. SearchAreaWidth must be [1 - 256]\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;	
 
     }
 	 
 	 if((config->searchAreaHeight > 256) || (config->searchAreaHeight == 0)) {
-         printf("Error Instance %u: Invalid SearchAreaHeight. SearchAreaHeight must be [1 - 256]\n",channelNumber+1);
+        SVT_LOG("Error Instance %u: Invalid SearchAreaHeight. SearchAreaHeight must be [1 - 256]\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;	
 
     }
@@ -2372,21 +2383,21 @@ static EB_ERRORTYPE VerifySettings(\
 	 if (config->enableHmeFlag){
 
 		 if ((config->numberHmeSearchRegionInWidth > (EB_U32)EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT) || (config->numberHmeSearchRegionInWidth == 0)){
-             printf("Error Instance %u: Invalid NumberHmeSearchRegionInWidth. NumberHmeSearchRegionInWidth must be [1 - %d]\n",channelNumber+1,EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT);
+            SVT_LOG("Error Instance %u: Invalid NumberHmeSearchRegionInWidth. NumberHmeSearchRegionInWidth must be [1 - %d]\n",channelNumber+1,EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT);
 			return_error = EB_ErrorBadParameter;	
 		 }
 	 
 		 if ((config->numberHmeSearchRegionInHeight > (EB_U32)EB_HME_SEARCH_AREA_ROW_MAX_COUNT) || (config->numberHmeSearchRegionInHeight == 0)){
-             printf("Error Instance %u: Invalid NumberHmeSearchRegionInHeight. NumberHmeSearchRegionInHeight must be [1 - %d]\n",channelNumber+1,EB_HME_SEARCH_AREA_ROW_MAX_COUNT);
+            SVT_LOG("Error Instance %u: Invalid NumberHmeSearchRegionInHeight. NumberHmeSearchRegionInHeight must be [1 - %d]\n",channelNumber+1,EB_HME_SEARCH_AREA_ROW_MAX_COUNT);
 			return_error = EB_ErrorBadParameter;	
 		 }
 
 		 if ((config->hmeLevel0TotalSearchAreaHeight > 256) || (config->hmeLevel0TotalSearchAreaHeight == 0)) {
-			 printf("Error Instance %u: Invalid hmeLevel0TotalSearchAreaHeight. hmeLevel0TotalSearchAreaHeight must be [1 - 256]\n", channelNumber + 1);
+             SVT_LOG("Error Instance %u: Invalid hmeLevel0TotalSearchAreaHeight. hmeLevel0TotalSearchAreaHeight must be [1 - 256]\n", channelNumber + 1);
 			 return_error = EB_ErrorBadParameter;
 		 }
 		 if ((config->hmeLevel0TotalSearchAreaWidth > 256) || (config->hmeLevel0TotalSearchAreaWidth == 0)) {
-			 printf("Error Instance %u: Invalid hmeLevel0TotalSearchAreaWidth. hmeLevel0TotalSearchAreaWidth must be [1 - 256]\n", channelNumber + 1);
+             SVT_LOG("Error Instance %u: Invalid hmeLevel0TotalSearchAreaWidth. hmeLevel0TotalSearchAreaWidth must be [1 - 256]\n", channelNumber + 1);
 			 return_error = EB_ErrorBadParameter;
 		 }
 		 if ( VerifyHmeDimention(channelNumber+1, config->hmeLevel0TotalSearchAreaHeight, config->hmeLevel0SearchAreaInHeightArray, config->numberHmeSearchRegionInHeight) ) {
@@ -2414,200 +2425,200 @@ static EB_ERRORTYPE VerifySettings(\
     if (levelIdx < 13) {
     // Check if the current input video is conformant with the Level constraint
     if(config->level != 0 && ((EB_U64)(sequenceControlSetPtr->maxInputLumaWidth * sequenceControlSetPtr->maxInputLumaHeight) > maxLumaPictureSize[levelIdx])){
-        printf("Error Instance %u: The input luma picture size exceeds the maximum luma picture size allowed for level %s\n",channelNumber+1, levelIdc);
+        SVT_LOG("Error Instance %u: The input luma picture size exceeds the maximum luma picture size allowed for level %s\n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
 
     // Check if the current input video is conformant with the Level constraint
     if(config->level != 0 && ((EB_U64)config->frameRate * (EB_U64)sequenceControlSetPtr->maxInputLumaWidth * (EB_U64)sequenceControlSetPtr->maxInputLumaHeight > (maxLumaSampleRate[levelIdx]<<16))){
-        printf("Error Instance %u: The input luma sample rate exceeds the maximum input sample rate allowed for level %s\n",channelNumber+1, levelIdc);
+        SVT_LOG("Error Instance %u: The input luma sample rate exceeds the maximum input sample rate allowed for level %s\n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
 	
 	if ((config->level != 0) && (config->rateControlMode) && (config->tier == 0) && ((config->targetBitRate*2) > mainTierMaxBitRate[levelIdx])){
-		printf("Error Instance %u: Allowed MaxBitRate exceeded for level %s and tier 0 \n",channelNumber+1, levelIdc);
+        SVT_LOG("Error Instance %u: Allowed MaxBitRate exceeded for level %s and tier 0 \n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
 	if ((config->level != 0) && (config->rateControlMode) && (config->tier == 1) && ((config->targetBitRate*2) > highTierMaxBitRate[levelIdx])){
-		printf("Error Instance %u: Allowed MaxBitRate exceeded for level %s and tier 1 \n",channelNumber+1, levelIdc);
+        SVT_LOG("Error Instance %u: Allowed MaxBitRate exceeded for level %s and tier 1 \n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
 	if ((config->level != 0) && (config->rateControlMode) && (config->tier == 0) && ((config->targetBitRate * 3) > mainTierCPB[levelIdx])) {
-		printf("Error Instance %u: Out of bound maxBufferSize for level %s and tier 0 \n",channelNumber+1, levelIdc);
+        SVT_LOG("Error Instance %u: Out of bound maxBufferSize for level %s and tier 0 \n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
 	if ((config->level != 0) && (config->rateControlMode) && (config->tier == 1) && ((config->targetBitRate * 3) > highTierCPB[levelIdx])) {
-		printf("Error Instance %u: Out of bound maxBufferSize for level %s and tier 1 \n",channelNumber+1, levelIdc);
+        SVT_LOG("Error Instance %u: Out of bound maxBufferSize for level %s and tier 1 \n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
     }
 
 	if(config->profile > 3){
-        printf("Error Instance %u: The maximum allowed Profile number is 3 \n",channelNumber+1);
+        SVT_LOG("Error Instance %u: The maximum allowed Profile number is 3 \n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     }
 
 	if (config->profile == 0){
-		printf("Error Instance %u: The minimum allowed Profile number is 1 \n",channelNumber+1);
+        SVT_LOG("Error Instance %u: The minimum allowed Profile number is 1 \n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	}
 
 	if(config->profile == 3) {
-		printf("Error instance %u: The Main Still Picture Profile is not supported \n",channelNumber+1);
+        SVT_LOG("Error instance %u: The Main Still Picture Profile is not supported \n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	} 
 
     // Check if the current input video is conformant with the Level constraint
     if(config->frameRate > (240<<16)){
-        printf("Error Instance %u: The maximum allowed frame rate is 240 fps\n",channelNumber+1);
+        SVT_LOG("Error Instance %u: The maximum allowed frame rate is 240 fps\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     }
     // Check that the frameRate is non-zero
     if(config->frameRate <= 0) {
-        printf("Error Instance %u: The frame rate should be greater than 0 fps \n",channelNumber+1);
+        SVT_LOG("Error Instance %u: The frame rate should be greater than 0 fps \n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     }
     if (config->intraPeriodLength < -2 || config->intraPeriodLength > 255 ) {
-        printf("Error Instance %u: The intra period must be [-2 - 255] \n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: The intra period must be [-2 - 255] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 	if (config->constrainedIntra > 1) {
-		printf("Error Instance %u: The constrained intra must be [0 - 1] \n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: The constrained intra must be [0 - 1] \n", channelNumber + 1);
 		return_error = EB_ErrorBadParameter;
 	}
 	if (config->rateControlMode > 1) {
-		printf("Error Instance %u: The rate control mode must be [0 - 1] \n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: The rate control mode must be [0 - 1] \n", channelNumber + 1);
 		return_error = EB_ErrorBadParameter;
 	}
     if (config->rateControlMode == 1 && config->tune > 0) {
-        printf("Error Instance %u: The rate control is not supported for OQ mode (Tune = 1 )\n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: The rate control is not supported for OQ mode (Tune = 1 )\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->tune > 0 && config->bitRateReduction == 1){
-        printf("Error Instance %u: Bit Rate Reduction is not supported for OQ mode (Tune = 1 )\n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: Bit Rate Reduction is not supported for OQ mode (Tune = 1 )\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->tune > 0 && config->improveSharpness == 1){
-        printf("Error Instance %u: Improve sharpness is not supported for OQ mode (Tune = 1 )\n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: Improve sharpness is not supported for OQ mode (Tune = 1 )\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->lookAheadDistance > 256 && config->lookAheadDistance != (EB_U32)~0) {
-        printf("Error Instance %u: The lookahead distance must be [0 - 256] \n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: The lookahead distance must be [0 - 256] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 	if (config->sceneChangeDetection > 1) {
-		printf("Error Instance %u: The scene change detection must be [0 - 1] \n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: The scene change detection must be [0 - 1] \n", channelNumber + 1);
 		return_error = EB_ErrorBadParameter;
 	}
 	if ( config->maxQpAllowed > 51) {
-		printf("Error instance %u: MaxQpAllowed must be [0 - 51]\n",channelNumber+1);
+        SVT_LOG("Error instance %u: MaxQpAllowed must be [0 - 51]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;    
 	}
 	else if ( config->minQpAllowed > 50 ) {
-		printf("Error instance %u: MinQpAllowed must be [0 - 50]\n",channelNumber+1);
+        SVT_LOG("Error instance %u: MinQpAllowed must be [0 - 50]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;   
 	}
 	else if ( (config->minQpAllowed) > (config->maxQpAllowed))  {
-        printf("Error Instance %u:  MinQpAllowed must be smaller than MaxQpAllowed\n",channelNumber+1);
+        SVT_LOG("Error Instance %u:  MinQpAllowed must be smaller than MaxQpAllowed\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;  
 	}
 
 	if (config->videoUsabilityInfo > 1) {
-		printf("Error instance %u : Invalid VideoUsabilityInfo. VideoUsabilityInfo must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("Error instance %u : Invalid VideoUsabilityInfo. VideoUsabilityInfo must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
     if (config->tune > 1) {
-        printf("Error instance %u : Invalid Tune. Tune must be [0 - 1]\n", channelNumber + 1);
+        SVT_LOG("Error instance %u : Invalid Tune. Tune must be [0 - 1]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 	if (config->bitRateReduction > 1) {
-		printf("Error instance %u : Invalid BitRateReduction. BitRateReduction must be [0 - 1]\n", channelNumber + 1);
+        SVT_LOG("Error instance %u : Invalid BitRateReduction. BitRateReduction must be [0 - 1]\n", channelNumber + 1);
 		return_error = EB_ErrorBadParameter;
 	}
     if (config->improveSharpness > 1) {
-		printf("Error instance %u : Invalid ImproveSharpness. ImproveSharpness must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("Error instance %u : Invalid ImproveSharpness. ImproveSharpness must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
     if (config->highDynamicRangeInput > 1) {
-		printf("Error instance %u : Invalid HighDynamicRangeInput. HighDynamicRangeInput must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("Error instance %u : Invalid HighDynamicRangeInput. HighDynamicRangeInput must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 	if (config->accessUnitDelimiter > 1) {
-		printf("Error instance %u : Invalid AccessUnitDelimiter. AccessUnitDelimiter must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("Error instance %u : Invalid AccessUnitDelimiter. AccessUnitDelimiter must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
 	if (config->bufferingPeriodSEI > 1) {
-		printf("Error instance %u : Invalid BufferingPeriod. BufferingPeriod must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("Error instance %u : Invalid BufferingPeriod. BufferingPeriod must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
 	if (config->pictureTimingSEI > 1) {
-		printf("Error instance %u : Invalid PictureTiming. PictureTiming must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("Error instance %u : Invalid PictureTiming. PictureTiming must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
 	if (config->registeredUserDataSeiFlag > 1) {
-		printf("Error instance %u : Invalid RegisteredUserData. RegisteredUserData must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("Error instance %u : Invalid RegisteredUserData. RegisteredUserData must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
  
 	if (config->unregisteredUserDataSeiFlag > 1) {
-		printf("Error instance %u : Invalid UnregisteredUserData. UnregisteredUserData must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("Error instance %u : Invalid UnregisteredUserData. UnregisteredUserData must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
 	if (config->recoveryPointSeiFlag > 1) {
-		printf("Error instance %u : Invalid RecoveryPoint. RecoveryPoint must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("Error instance %u : Invalid RecoveryPoint. RecoveryPoint must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
  	if (config->enableTemporalId > 1) {
-		printf("Error instance %u : Invalid TemporalId. TemporalId must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("Error instance %u : Invalid TemporalId. TemporalId must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
     if (config->pictureTimingSEI && !config->videoUsabilityInfo){
-        printf("Error Instance %u: If pictureTimingSEI is set, VideoUsabilityInfo should be also set to 1\n",channelNumber);
+        SVT_LOG("Error Instance %u: If pictureTimingSEI is set, VideoUsabilityInfo should be also set to 1\n",channelNumber);
         return_error = EB_ErrorBadParameter;
 
     }
 	  if ( (config->encoderBitDepth !=8 )  && 
 		(config->encoderBitDepth !=10 ) 
 		) {
-			printf("Error instance %u: Encoder Bit Depth shall be only 8 or 10 \n",channelNumber+1);
+          SVT_LOG("Error instance %u: Encoder Bit Depth shall be only 8 or 10 \n",channelNumber+1);
 			return_error = EB_ErrorBadParameter;
 	}
 	// Check if the EncoderBitDepth is conformant with the Profile constraint
 	if(config->profile == 1 && config->encoderBitDepth == 10) {
-		printf("Error instance %u: The encoder bit depth shall be equal to 8 for Main Profile\n",channelNumber+1);
+        SVT_LOG("Error instance %u: The encoder bit depth shall be equal to 8 for Main Profile\n",channelNumber+1);
 			return_error = EB_ErrorBadParameter;
 	}
 
 	if (config->compressedTenBitFormat > 1)
 	{
-		printf("Error instance %u: Invalid Compressed Ten Bit Format shall be only [0 - 1] \n", channelNumber + 1);
+        SVT_LOG("Error instance %u: Invalid Compressed Ten Bit Format shall be only [0 - 1] \n", channelNumber + 1);
 		return_error = EB_ErrorBadParameter;
 	}
 
     if (config->speedControlFlag > 1) {
-        printf("Error Instance %u: Invalid Speed Control flag [0 - 1]\n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: Invalid Speed Control flag [0 - 1]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (((EB_S32)(config->asmType) < 0) || ((EB_S32)(config->asmType) > 1)){
-        printf("Error Instance %u: Invalid asm type value [0: C Only, 1: Auto] .\n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: Invalid asm type value [0: C Only, 1: Auto] .\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
 	// UseRoundRobinThreadAssignment
 	if (config->useRoundRobinThreadAssignment != 0 && config->useRoundRobinThreadAssignment != 1) {
-		printf("Error instance %u: Invalid UseRoundRobinThreadAssignment [0 - 1]\n", channelNumber + 1);
+        SVT_LOG("Error instance %u: Invalid UseRoundRobinThreadAssignment [0 - 1]\n", channelNumber + 1);
 		return_error = EB_ErrorBadParameter;
 	}
  
@@ -2627,11 +2638,11 @@ EB_ERRORTYPE EbH265EncInitParameter(
     EB_ERRORTYPE                  return_error = EB_ErrorNone;
 
     if (!configPtr) {
-        printf("The EB_H265_ENC_CONFIGURATION structure is empty! \n");
+        SVT_LOG("The EB_H265_ENC_CONFIGURATION structure is empty! \n");
         return EB_ErrorBadParameter;
     }
 
-    configPtr->frameRate = 60;
+    configPtr->frameRate = 60 << 16;
     configPtr->frameRateNumerator = 0;
     configPtr->frameRateDenominator = 0;
     configPtr->encoderBitDepth = 8;
@@ -2688,7 +2699,9 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->improveSharpness = EB_TRUE;
 
     // Bitstream options
-    configPtr->codeVpsSpsPps = 1;
+    configPtr->codeVpsSpsPps = 0;
+    configPtr->codeEosNal    = 0;
+
     configPtr->videoUsabilityInfo = 0;
     configPtr->highDynamicRangeInput = 0;
     configPtr->accessUnitDelimiter = 0;
@@ -2722,7 +2735,55 @@ EB_ERRORTYPE EbH265EncInitParameter(
 
     return return_error;
 }
+static void PrintLibParams(
+    EB_H265_ENC_CONFIGURATION*   config) 
+{
 
+    SVT_LOG("------------------------------------------- ");
+    if (config->profile == 0)
+        SVT_LOG("\nSVT [config]: Main Profile\t");
+    else
+        SVT_LOG("\nSVT [config]: Main10 Profile\t");
+    
+    if (config->tier != 0 && config->level !=0)
+        SVT_LOG("Tier %d\tLevel %.1f\t", config->tier, (float)(config->level / 10));
+    else {
+        if (config->tier == 0 )
+            SVT_LOG("Tier (auto)\t");
+        else
+            SVT_LOG("Tier %d\t", config->tier);
+        
+        if (config->level == 0 )
+            SVT_LOG("Level (auto)\t");
+        else
+            SVT_LOG("Level %.1f\t", (float)(config->level / 10));
+        
+        
+    }
+
+    SVT_LOG("\nSVT [config]: EncoderMode / LatencyMode / Tune\t\t\t\t\t: %d / %d / %d ", config->encMode, config->latencyMode, config->tune);
+    SVT_LOG("\nSVT [config]: EncoderBitDepth / CompressedTenBitFormat\t\t\t\t: %d / %d ", config->encoderBitDepth, config->compressedTenBitFormat);
+    SVT_LOG("\nSVT [config]: SourceWidth / SourceHeight\t\t\t\t\t: %d / %d ", config->sourceWidth, config->sourceHeight);
+    if (config->frameRateDenominator != 0 && config->frameRateNumerator != 0)
+        SVT_LOG("\nSVT [config]: Fps_Numerator / Fps_Denominator / Gop Size / IntraRefreshType \t: %d / %d / %d / %d", config->frameRateNumerator > (1<<16) ? config->frameRateNumerator >> 16: config->frameRateNumerator,
+            config->frameRateDenominator > (1<<16) ? config->frameRateDenominator >> 16: config->frameRateDenominator,
+            config->intraPeriodLength + 1,
+            config->intraRefreshType);
+    else
+        SVT_LOG("\nSVT [config]: FrameRate / Gop Size\t\t\t\t\t\t: %d / %d ", config->frameRate > 1000 ? config->frameRate >> 16 : config->frameRate, config->intraPeriodLength + 1);
+    SVT_LOG("\nSVT [config]: HierarchicalLevels / BaseLayerSwitchMode / PredStructure\t\t: %d / %d / %d ", config->hierarchicalLevels, config->baseLayerSwitchMode, config->predStructure);
+    if (config->rateControlMode == 1)
+        SVT_LOG("\nSVT [config]: RCMode / TargetBitrate / LookaheadDistance / SceneChange\t\t: VBR / %d / %d / %d ", config->targetBitRate, config->lookAheadDistance, config->sceneChangeDetection);
+    else
+        SVT_LOG("\nSVT [config]: BRC Mode / QP  / LookaheadDistance / SceneChange\t\t\t: CQP / %d / %d / %d ", config->qp, config->lookAheadDistance, config->sceneChangeDetection);
+
+    if (config->tune == 0)
+        SVT_LOG("\nSVT [config]: BitRateReduction / ImproveSharpness\t\t\t\t: %d / %d ", config->bitRateReduction, config->improveSharpness);
+    SVT_LOG("\n------------------------------------------- ");
+    SVT_LOG("\n");
+
+    fflush(stdout);
+}
 /**********************************
 
  * Set Parameter
@@ -2776,6 +2837,9 @@ EB_API EB_ERRORTYPE EbH265EncSetParameter(
 
     LoadDefaultBufferConfigurationSettings(
         pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr);
+
+    PrintLibParams(
+        &pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig);
 
     // Release Config Mutex
     EbReleaseMutex(pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->configMutex);
@@ -2867,78 +2931,54 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     return return_error;
 }
 
+#if __linux
+__attribute__((visibility("default")))
+#endif
+EB_API EB_ERRORTYPE EbH265EncEosNal(
+    EB_COMPONENTTYPE           *h265EncComponent,
+    EB_BUFFERHEADERTYPE*        outputStreamPtr
+)
+{
+    EB_ERRORTYPE           return_error = EB_ErrorNone;
+    EbEncHandle_t          *pEncCompData = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
+    Bitstream_t            *bitstreamPtr;
+    SequenceControlSet_t  *sequenceControlSetPtr = pEncCompData->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr;
+    EncodeContext_t        *encodeContextPtr = sequenceControlSetPtr->encodeContextPtr;
+
+    EB_MALLOC(Bitstream_t*, bitstreamPtr, sizeof(Bitstream_t), EB_N_PTR);
+    EB_MALLOC(OutputBitstreamUnit_t*, bitstreamPtr->outputBitstreamPtr, sizeof(OutputBitstreamUnit_t), EB_N_PTR);
+
+    return_error = OutputBitstreamUnitCtor(
+        (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr,
+        EOS_NAL_BUFFER_SIZE);
+
+    // Reset the bitstream before writing to it
+    ResetBitstream(
+        (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr);
+
+    CodeEndOfSequenceNalUnit(bitstreamPtr);
+
+    // Flush the Bitstream
+    FlushBitstream(
+        bitstreamPtr->outputBitstreamPtr);
+
+    // Copy SPS & PPS to the Output Bitstream
+    CopyRbspBitstreamToPayload(
+        bitstreamPtr,
+        outputStreamPtr->pBuffer,
+        (EB_U32*) &(outputStreamPtr->nFilledLen),
+        (EB_U32*) &(outputStreamPtr->nAllocLen),
+        encodeContextPtr);
+
+    return return_error;
+}
+
+
 
 /***********************************************
 **** Copy the input buffer from the 
 **** sample application to the library buffers
 ************************************************/
-#if !ONE_MEMCPY
-EB_ERRORTYPE CopyFrameBuffer(
-    SequenceControlSet_t        *sequenceControlSet,
-    EB_U8      			        *dst,
-    EB_U8      			        *src)
-{
-    EB_H265_ENC_CONFIGURATION   *config = &sequenceControlSet->staticConfig;
-    EB_ERRORTYPE   return_error = EB_ErrorNone;
-    const int tenBitPackedMode = (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
-
-    // Determine size of each plane
-    const size_t luma8bitSize =
-        config->sourceWidth    *
-        config->sourceHeight   *
-        (1 << tenBitPackedMode);
-
-    const size_t chroma8bitSize = luma8bitSize >> 2;
-    const size_t luma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? (luma8bitSize >> 2) : 0;
-    const size_t chroma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? (luma10bitSize >> 2) : 0;
-
-    // Determine  
-    EB_H265_ENC_INPUT* inputPtr     = (EB_H265_ENC_INPUT*)src;
-    EB_H265_ENC_INPUT* libInputPtr  = (EB_H265_ENC_INPUT*)dst;
-    if (luma8bitSize) {
-        EB_MEMCPY(libInputPtr->luma, inputPtr->luma, luma8bitSize);
-    }
-    else {
-        libInputPtr->luma = 0;
-    }
-    if (chroma8bitSize) {
-        EB_MEMCPY(libInputPtr->cb, inputPtr->cb, chroma8bitSize);
-    }
-    else {
-        libInputPtr->cb = 0;
-    }
-
-    if (chroma8bitSize) {
-        EB_MEMCPY(libInputPtr->cr, inputPtr->cr, chroma8bitSize);
-    }
-    else {
-        libInputPtr->cr = 0;
-    }
-
-    if (luma10bitSize) {
-        EB_MEMCPY(libInputPtr->lumaExt, inputPtr->lumaExt, luma10bitSize);
-    }
-    else {
-        libInputPtr->lumaExt = 0;
-    }
-
-    if (chroma10bitSize) {
-        EB_MEMCPY(libInputPtr->cbExt, inputPtr->cbExt, chroma10bitSize);
-    }
-    else {
-        libInputPtr->cbExt = 0;
-    }
-
-    if (chroma10bitSize) {
-        EB_MEMCPY(libInputPtr->crExt, inputPtr->crExt, chroma10bitSize);
-    }
-    else {
-        libInputPtr->crExt = 0;
-    }
-
-    return return_error;
-}
-#else
 static EB_ERRORTYPE CopyFrameBuffer(
     SequenceControlSet_t        *sequenceControlSetPtr,
     EB_U8      			        *dst,
@@ -3104,7 +3144,6 @@ static EB_ERRORTYPE CopyFrameBuffer(
     }
     return return_error;
 }
-#endif
 static void CopyInputBuffer(
     SequenceControlSet_t*    sequenceControlSet,
     EB_BUFFERHEADERTYPE*     dst,
@@ -3116,7 +3155,6 @@ static void CopyInputBuffer(
     dst->nFilledLen = src->nFilledLen;
     dst->nFlags     = src->nFlags;
     dst->pts        = src->pts;
-    dst->nOffset    = src->nOffset;
     dst->nTickCount = src->nTickCount;
     dst->nSize      = src->nSize;
     dst->qpValue    = src->qpValue;
@@ -3124,12 +3162,7 @@ static void CopyInputBuffer(
 
     // Copy the picture buffer
     if(src->pBuffer != NULL)
-#if ONE_MEMCPY
         CopyFrameBuffer(sequenceControlSet, dst->pBuffer, src->pBuffer);
-#else
-        CopyFrameBuffer(sequenceControlSet, dst->pBuffer, src->pBuffer);
-#endif
-    
 }
 
 /**********************************
@@ -3171,7 +3204,6 @@ static void CopyOutputBuffer(
     dst->nSize         = src->nSize;
     dst->nAllocLen     = src->nAllocLen;
     dst->nFilledLen    = src->nFilledLen;
-    dst->nOffset       = src->nOffset;
     dst->pAppPrivate   = src->pAppPrivate;
     dst->nTickCount    = src->nTickCount;
     dst->pts           = src->pts;
@@ -3180,9 +3212,6 @@ static void CopyOutputBuffer(
     dst->sliceType     = src->sliceType;
     if (src->pBuffer)
         EB_MEMCPY(dst->pBuffer, src->pBuffer, src->nFilledLen);
-    if (src->pAppPrivate)
-        EB_MEMCPY(dst->pAppPrivate, src->pAppPrivate, sizeof(EbLinkedListNode));
-
     return;
 }
 
@@ -3195,7 +3224,6 @@ static void CopyOutputReconBuffer(
     dst->nSize = src->nSize;
     dst->nAllocLen = src->nAllocLen;
     dst->nFilledLen = src->nFilledLen;
-    dst->nOffset = src->nOffset;
     dst->pAppPrivate = src->pAppPrivate;
     dst->nTickCount = src->nTickCount;
     dst->pts = src->pts;
@@ -3308,7 +3336,7 @@ void SwitchToRealTime()
 
     int retValue = pthread_setschedparam(pthread_self(), SCHED_FIFO, &schedParam);
     if (retValue == EPERM)
-        printf("\n[WARNING] For best speed performance, run with sudo privileges !\n\n");
+        SVT_LOG("\n[WARNING] For best speed performance, run with sudo privileges !\n\n");
 
 #endif
 }
@@ -3346,9 +3374,20 @@ EB_ERRORTYPE InitH265EncoderHandle(
     EB_ERRORTYPE       return_error            = EB_ErrorNone;
     EB_COMPONENTTYPE  *h265EncComponent        = (EB_COMPONENTTYPE*) hComponent;
 
+    printf("SVT [version]:\tSVT-HEVC Encoder Lib v%d.%d.%d\n", SVT_VERSION_MAJOR, SVT_VERSION_MINOR,SVT_VERSION_PATCHLEVEL);
+#if ( defined( _MSC_VER ) && (_MSC_VER < 1910) ) 
+    printf("SVT [build]  : Visual Studio 2013");
+#elif ( defined( _MSC_VER ) && (_MSC_VER >= 1910) ) 
+    printf("SVT [build]  :\tVisual Studio 2017");
+#elif defined(__GNUC__)
+    printf("SVT [build]  :\tGCC %d.%d.%d\t", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+#else
+    printf("SVT [build]  :\tunknown compiler");
+#endif
+    printf(" %u bit\n", (unsigned) sizeof(void*) * 8);
     printf("LIB Build date: %s %s\n",__DATE__,__TIME__);
-    printf("-------------------------------------\n");
-    
+    printf("-------------------------------------------\n");
+   
     SwitchToRealTime();
 
     // Set Component Size & Version
@@ -3361,7 +3400,6 @@ EB_ERRORTYPE InitH265EncoderHandle(
     
     return return_error;
 }
-#if ONE_MEMCPY
 EB_ERRORTYPE AllocateFrameBuffer(
     SequenceControlSet_t       *sequenceControlSetPtr,
     EB_BUFFERHEADERTYPE        *inputBuffer)
@@ -3413,77 +3451,7 @@ EB_ERRORTYPE AllocateFrameBuffer(
 
     return return_error;
 }
-#else
-EB_ERRORTYPE AllocateFrameBuffer(
-    EB_H265_ENC_CONFIGURATION   * config,
-    EB_BUFFERHEADERTYPE       	* inputBuffer)
-{
-    EB_ERRORTYPE   return_error = EB_ErrorNone;
 
-    const int tenBitPackedMode = (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
-
-    // Determine size of each plane
-    const size_t luma8bitSize =
-
-        config->sourceWidth    *
-        config->sourceHeight   *
-
-        (1 << tenBitPackedMode);
-
-    const size_t chroma8bitSize = luma8bitSize >> 2;
-    const size_t luma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? (luma8bitSize >> 2) : 0;
-    const size_t chroma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? (luma10bitSize >> 2) : 0;
-
-    EB_MALLOC(EB_U8*, inputBuffer->pBuffer, sizeof(EB_H265_ENC_INPUT), EB_N_PTR);
-
-    // Determine  
-    EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)inputBuffer->pBuffer;
-
-    if (luma8bitSize) {
-        EB_MALLOC(unsigned char*, inputPtr->luma, luma8bitSize, EB_N_PTR);
-    }
-    else {
-        inputPtr->luma = 0;
-    }
-    if (chroma8bitSize) {
-        EB_MALLOC(unsigned char*, inputPtr->cb, chroma8bitSize, EB_N_PTR);
-    }
-    else {
-        inputPtr->cb = 0;
-    }
-
-    if (chroma8bitSize) {
-        EB_MALLOC(unsigned char*, inputPtr->cr, chroma8bitSize, EB_N_PTR);
-    }
-    else {
-        inputPtr->cr = 0;
-    }
-
-    if (luma10bitSize) {
-        EB_MALLOC(unsigned char*, inputPtr->lumaExt, luma10bitSize, EB_N_PTR);
-    }
-    else {
-        inputPtr->lumaExt = 0;
-    }
-
-    if (chroma10bitSize) {
-        EB_MALLOC(unsigned char*, inputPtr->cbExt, chroma10bitSize, EB_N_PTR);
-    }
-    else {
-        inputPtr->cbExt = 0;
-    }
-
-    if (chroma10bitSize) {
-        EB_MALLOC(unsigned char*, inputPtr->crExt, chroma10bitSize, EB_N_PTR);
-
-    }
-    else {
-        inputPtr->crExt = 0;
-    }
-
-    return return_error;
-}
-#endif
 
 /**************************************
 * EB_BUFFERHEADERTYPE Constructor
@@ -3494,26 +3462,16 @@ EB_ERRORTYPE EbInputBufferHeaderCtor(
 {
     EB_BUFFERHEADERTYPE* inputBuffer;
     SequenceControlSet_t        *sequenceControlSetPtr = (SequenceControlSet_t*)objectInitDataPtr;
-#if !ONE_MEMCPY 
-    EB_H265_ENC_CONFIGURATION   *config = &sequenceControlSetPtr->staticConfig;
-#endif
     EB_MALLOC(EB_BUFFERHEADERTYPE*, inputBuffer, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR);
     *objectDblPtr = (EB_PTR)inputBuffer;
     // Initialize Header
     inputBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
-#if !ONE_MEMCPY 
-    // Allocate frame buffer for the pBuffer
-    AllocateFrameBuffer(
-        config,
-        inputBuffer);
-#else
+    
     AllocateFrameBuffer(
         sequenceControlSetPtr,
         inputBuffer);
-#endif
-    // Assign the variables 
-    EB_MALLOC(EbLinkedListNode*, inputBuffer->pAppPrivate, sizeof(EbLinkedListNode), EB_N_PTR);
-    ((EbLinkedListNode*)(inputBuffer->pAppPrivate))->type = EB_FALSE;
+
+    inputBuffer->pAppPrivate = NULL;
 
     return EB_ErrorNone;
 }
@@ -3525,7 +3483,6 @@ EB_ERRORTYPE EbOutputBufferHeaderCtor(
     EB_PTR *objectDblPtr, 
     EB_PTR objectInitDataPtr) 
 {
-#if CHKN_OMX
     EB_H265_ENC_CONFIGURATION   * config = (EB_H265_ENC_CONFIGURATION*)objectInitDataPtr;
     EB_U32 nStride = (EB_U32)(EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->sourceWidth * config->sourceHeight));  //TBC
 	EB_BUFFERHEADERTYPE* outBufPtr;
@@ -3539,16 +3496,10 @@ EB_ERRORTYPE EbOutputBufferHeaderCtor(
 	EB_MALLOC(EB_U8*, outBufPtr->pBuffer, nStride, EB_N_PTR);
 
 	outBufPtr->nAllocLen =  nStride;
-	outBufPtr->pAppPrivate = 0;// (EB_PTR)callbackData;
+	outBufPtr->pAppPrivate = NULL;
 	
 	    (void)objectInitDataPtr;
-#else
-    *objectDblPtr = (EB_PTR)EB_NULL;
-    objectInitDataPtr = (EB_PTR)EB_NULL;
 
-    (void)objectDblPtr;
-    (void)objectInitDataPtr;
-#endif
     return EB_ErrorNone;
 }
 

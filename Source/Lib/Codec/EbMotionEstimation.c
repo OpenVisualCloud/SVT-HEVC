@@ -19,7 +19,6 @@
 
 #include "EbIntraPrediction.h"
 #include "EbLambdaRateTables.h"
-#include <math.h>
 #include "EbPictureOperators.h"
 
 #define OIS_TH_COUNT	4
@@ -1799,7 +1798,7 @@ void HmeOneQuadrantLevel0(
 
 		if ((searchAreaWidth & 15) != 0)
 		{
-			searchAreaWidth = (EB_S16)(floor((double)((searchAreaWidth >> 4) << 4)));
+			searchAreaWidth = (EB_S16)((double)((searchAreaWidth >> 4) << 4));
 		}
 
 	    if (((searchAreaWidth & 15) == 0) && ((ASM_TYPES & AVX512_MASK) && 1))
@@ -3840,7 +3839,7 @@ EB_ERRORTYPE MotionEstimateLcu(
 					break;
 
 			default:
-				printf("Err in sorting");
+				SVT_LOG("Err in sorting");
 				break;
 			}
 
@@ -4376,7 +4375,7 @@ EB_U32 UpdateNeighborDcIntraPred(
 	EB_U32                           cuSize)
 {
 	EB_U32 distortion;
-	//	printf("cuSize=%i  x=%i  y=%i  rasterScanCuIndex=%i   mdScanCuIndex=%i \n", cuSize, RASTER_SCAN_CU_X[rasterScanCuIndex], RASTER_SCAN_CU_Y[rasterScanCuIndex],rasterScanCuIndex, mdScanCuIndex );
+	//	SVT_LOG("cuSize=%i  x=%i  y=%i  rasterScanCuIndex=%i   mdScanCuIndex=%i \n", cuSize, RASTER_SCAN_CU_X[rasterScanCuIndex], RASTER_SCAN_CU_Y[rasterScanCuIndex],rasterScanCuIndex, mdScanCuIndex );
 	// Fill Neighbor Arrays
 	UpdateNeighborSamplesArrayOpenLoop(
 		contextPtr->intraRefPtr,
