@@ -18,6 +18,6 @@
 
 3. Verify
 >> ffmpeg is now built with svt-hevc, sample command line: 
-./ffmpeg  -i input.mp4   -c:v libsvt_hevc -rc 1 -c:b 10M  -enc_p 12  -y test.265
+./ffmpeg  -i input.mp4   -c:v libsvt_hevc -rc 1 -b:v 10M  -tune 0 -preset 9  -y test.265
 ./ffmpeg  -i inout.mp4 -vframes 1000 -c:v libsvt_hevc -y test.mp4
 

@@ -1647,18 +1647,17 @@ static EB_S32 ComputeIntraPeriod(
 {
     EB_S32 intraPeriod = 0;
     EB_H265_ENC_CONFIGURATION   *config = &sequenceControlSetPtr->staticConfig;
-    EB_S32 fps = config->frameRate < (241) ? config->frameRate : config->frameRate >> 16;
-
-    if (fps > 25 && fps < 32) {
-        intraPeriod = 31;
-    }
-    else {
-        intraPeriod = ((int)((fps) / (1 << (config->hierarchicalLevels))))*(1 << (config->hierarchicalLevels));
+    EB_S32 fps = config->frameRate <= (240) ? config->frameRate : config->frameRate >> 16;
+    EB_S32 miniGopSize = (1 << (config->hierarchicalLevels));
+    EB_S32 minIp = ((int)((fps) / miniGopSize)*(miniGopSize));
+    EB_S32 maxIp = ((int)((fps + miniGopSize) / miniGopSize)*(miniGopSize));
+    
+    intraPeriod = (ABS((fps - maxIp)) > ABS((fps - minIp))) ? minIp : maxIp;
+  
+    if(config->intraRefreshType == 1)
         intraPeriod -= 1;
-    }
 
     return intraPeriod;
-
 }
 
 EB_ERRORTYPE EbAppVideoUsabilityInfoInit(
@@ -2021,15 +2020,7 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.useRoundRobinThreadAssignment = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->useRoundRobinThreadAssignment;
 
     sequenceControlSetPtr->staticConfig.frameRateDenominator = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRateDenominator;
-    
-    if (sequenceControlSetPtr->staticConfig.frameRateDenominator < (1 << 15))
-        sequenceControlSetPtr->staticConfig.frameRateDenominator = sequenceControlSetPtr->staticConfig.frameRateDenominator << 16;
-    
     sequenceControlSetPtr->staticConfig.frameRateNumerator = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRateNumerator;
-    
-    if (sequenceControlSetPtr->staticConfig.frameRateNumerator < (1 << 15))
-        sequenceControlSetPtr->staticConfig.frameRateNumerator = sequenceControlSetPtr->staticConfig.frameRateNumerator << 16;
-
     sequenceControlSetPtr->staticConfig.reconEnabled = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->reconEnabled;
 
     // if HDR is set videoUsabilityInfo should be set to 1
@@ -2039,7 +2030,7 @@ void CopyApiFromApp(
     
     // Extract frame rate from Numerator and Denominator if not 0
     if (sequenceControlSetPtr->staticConfig.frameRateNumerator != 0 && sequenceControlSetPtr->staticConfig.frameRateDenominator != 0) {
-        sequenceControlSetPtr->staticConfig.frameRate = (sequenceControlSetPtr->staticConfig.frameRateNumerator / (sequenceControlSetPtr->staticConfig.frameRateDenominator >> 16));
+        sequenceControlSetPtr->frameRate = sequenceControlSetPtr->staticConfig.frameRate = ((sequenceControlSetPtr->staticConfig.frameRateNumerator << 16) / (sequenceControlSetPtr->staticConfig.frameRateDenominator ));
     }
     
     // Get Default Intra Period if not specified
