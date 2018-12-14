@@ -107,8 +107,8 @@ void* PacketizationKernel(void *inputPtr)
         outputStreamPtr->nFlags |= (encodeContextPtr->terminatingSequenceFlagReceived == EB_TRUE && pictureControlSetPtr->ParentPcsPtr->decodeOrder == encodeContextPtr->terminatingPictureNumber) ? EB_BUFFERFLAG_EOS : 0;
         EbReleaseMutex(encodeContextPtr->terminatingConditionsMutex);
         outputStreamPtr->nFilledLen = 0;
-        outputStreamPtr->pts = pictureControlSetPtr->ParentPcsPtr->ebInputPtr->pts;
-        outputStreamPtr->dts = pictureControlSetPtr->ParentPcsPtr->decodeOrder - (EB_U64)(1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 1;
+        outputStreamPtr->pts = pictureControlSetPtr->ParentPcsPtr->ebInputPtr->pts + (EB_U64)(1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 1;
+        outputStreamPtr->dts = pictureControlSetPtr->ParentPcsPtr->decodeOrder;
         outputStreamPtr->sliceType = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag ? 
                                      pictureControlSetPtr->ParentPcsPtr->idrFlag ? IDR_SLICE :
                                      pictureControlSetPtr->sliceType : NON_REF_SLICE;
