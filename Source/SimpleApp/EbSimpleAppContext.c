@@ -104,7 +104,7 @@ EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config)
 
     contextPtr->outputStreamBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
     contextPtr->outputStreamBuffer->nAllocLen = EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->sourceWidth*config->sourceHeight);
-    contextPtr->outputStreamBuffer->pAppPrivate = (void*)contextPtr;
+    contextPtr->outputStreamBuffer->pAppPrivate = NULL;
     contextPtr->outputStreamBuffer->sliceType = INVALID_SLICE;
     
     // recon buffer

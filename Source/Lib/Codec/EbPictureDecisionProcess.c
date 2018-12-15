@@ -220,14 +220,14 @@ EB_BOOL SceneTransitionDetector(
 
                 if (aidFuturePast < FLASH_TH && aidFuturePresent >= FLASH_TH && aidPresentPast >= FLASH_TH){
 					isFlash = EB_TRUE;
-					//printf ("\nFlash in frame# %i , %i\n", currentPictureControlSetPtr->pictureNumber,aidFuturePast);
+					//SVT_LOG ("\nFlash in frame# %i , %i\n", currentPictureControlSetPtr->pictureNumber,aidFuturePast);
 				}
 				else if (aidFuturePresent < FADE_TH && aidPresentPast < FADE_TH){
 					isFade = EB_TRUE;
-					//printf ("\nFlash in frame# %i , %i\n", currentPictureControlSetPtr->pictureNumber,aidFuturePast);
+					//SVT_LOG ("\nFlash in frame# %i , %i\n", currentPictureControlSetPtr->pictureNumber,aidFuturePast);
 				} else {
 					isSceneChange = EB_TRUE;
-					//printf ("\nScene Change in frame# %i , %i\n", currentPictureControlSetPtr->pictureNumber,aidFuturePast);
+					//SVT_LOG ("\nScene Change in frame# %i , %i\n", currentPictureControlSetPtr->pictureNumber,aidFuturePast);
 				}
 
 			}
@@ -236,12 +236,12 @@ EB_BOOL SceneTransitionDetector(
 				aidFuturePast = (EB_U8) ABS((EB_S16)futurePictureControlSetPtr->averageIntensityPerRegion[regionInPictureWidthIndex][regionInPictureHeightIndex][0] - (EB_S16)previousPictureControlSetPtr->averageIntensityPerRegion[regionInPictureWidthIndex][regionInPictureHeightIndex][0]);
 				if (aidFuturePast < FLASH_TH){
 					// proper action to be signalled
-					//printf ("\nLight Flash in frame# %i , %i\n", currentPictureControlSetPtr->pictureNumber,aidFuturePast);
+					//SVT_LOG ("\nLight Flash in frame# %i , %i\n", currentPictureControlSetPtr->pictureNumber,aidFuturePast);
 					ahdRunningAvg[regionInPictureWidthIndex][regionInPictureHeightIndex] = (3 * ahdRunningAvg[regionInPictureWidthIndex][regionInPictureHeightIndex] + ahd) / 4;
 				}
 				else{
 					// proper action to be signalled
-					//printf ("\nLight Scene Change / fade detected in frame# %i , %i\n", currentPictureControlSetPtr->pictureNumber,aidFuturePast);
+					//SVT_LOG ("\nLight Scene Change / fade detected in frame# %i , %i\n", currentPictureControlSetPtr->pictureNumber,aidFuturePast);
 					ahdRunningAvg[regionInPictureWidthIndex][regionInPictureHeightIndex] = (3 * ahdRunningAvg[regionInPictureWidthIndex][regionInPictureHeightIndex] + ahd) / 4;
 				}
 
@@ -846,7 +846,7 @@ void* PictureDecisionKernel(void *inputPtr)
         encodeContextPtr        = (EncodeContext_t*)            sequenceControlSetPtr->encodeContextPtr;
 
 #if DEADLOCK_DEBUG
-        printf("POC %lld PD IN \n", pictureControlSetPtr->pictureNumber);
+        SVT_LOG("POC %lld PD IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 
         loopCount ++;
@@ -1405,17 +1405,17 @@ void* PictureDecisionKernel(void *inputPtr)
 
 						/* EB_U32 depCnt = ((EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr)->dependentPicturesCount;
 						if (pictureControlSetPtr->pictureNumber>0 && pictureControlSetPtr->sliceType==I_SLICE && depCnt!=8 )
-						printf("depCnt Error1  POC:%i  TL:%i   is needed:%i\n",pictureControlSetPtr->pictureNumber,pictureControlSetPtr->temporalLayerIndex,inputEntryPtr->dependentCount);
+						SVT_LOG("depCnt Error1  POC:%i  TL:%i   is needed:%i\n",pictureControlSetPtr->pictureNumber,pictureControlSetPtr->temporalLayerIndex,inputEntryPtr->dependentCount);
 						else if (pictureControlSetPtr->sliceType==B_SLICE && pictureControlSetPtr->temporalLayerIndex == 0 && depCnt!=8)
-						printf("depCnt Error2  POC:%i  TL:%i   is needed:%i\n",pictureControlSetPtr->pictureNumber,pictureControlSetPtr->temporalLayerIndex,inputEntryPtr->dependentCount);
+						SVT_LOG("depCnt Error2  POC:%i  TL:%i   is needed:%i\n",pictureControlSetPtr->pictureNumber,pictureControlSetPtr->temporalLayerIndex,inputEntryPtr->dependentCount);
 						else if (pictureControlSetPtr->sliceType==B_SLICE && pictureControlSetPtr->temporalLayerIndex == 1 && depCnt!=4)
-						printf("depCnt Error3  POC:%i  TL:%i   is needed:%i\n",pictureControlSetPtr->pictureNumber,pictureControlSetPtr->temporalLayerIndex,inputEntryPtr->dependentCount);
+						SVT_LOG("depCnt Error3  POC:%i  TL:%i   is needed:%i\n",pictureControlSetPtr->pictureNumber,pictureControlSetPtr->temporalLayerIndex,inputEntryPtr->dependentCount);
 						else if (pictureControlSetPtr->sliceType==B_SLICE && pictureControlSetPtr->temporalLayerIndex == 2 && depCnt!=2)
-						printf("depCnt Error4  POC:%i  TL:%i   is needed:%i\n",pictureControlSetPtr->pictureNumber,pictureControlSetPtr->temporalLayerIndex,inputEntryPtr->dependentCount);
+						SVT_LOG("depCnt Error4  POC:%i  TL:%i   is needed:%i\n",pictureControlSetPtr->pictureNumber,pictureControlSetPtr->temporalLayerIndex,inputEntryPtr->dependentCount);
 						else if (pictureControlSetPtr->sliceType==B_SLICE && pictureControlSetPtr->temporalLayerIndex == 3 && depCnt!=0)
-						printf("depCnt Error5  POC:%i  TL:%i   is needed:%i\n",pictureControlSetPtr->pictureNumber,pictureControlSetPtr->temporalLayerIndex,inputEntryPtr->dependentCount);*/
+						SVT_LOG("depCnt Error5  POC:%i  TL:%i   is needed:%i\n",pictureControlSetPtr->pictureNumber,pictureControlSetPtr->temporalLayerIndex,inputEntryPtr->dependentCount);*/
 						//if (pictureControlSetPtr->sliceType==P_SLICE )
-						//     printf("POC:%i  TL:%i   is needed:%i\n",pictureControlSetPtr->pictureNumber,pictureControlSetPtr->temporalLayerIndex,inputEntryPtr->dependentCount);
+						//     SVT_LOG("POC:%i  TL:%i   is needed:%i\n",pictureControlSetPtr->pictureNumber,pictureControlSetPtr->temporalLayerIndex,inputEntryPtr->dependentCount);
 
                         CHECK_REPORT_ERROR(
                             (pictureControlSetPtr->predStructPtr->predStructPeriod < MAX_ELAPSED_IDR_COUNT),
@@ -1621,7 +1621,7 @@ void* PictureDecisionKernel(void *inputPtr)
                 break;
         }        
 #if DEADLOCK_DEBUG
-        printf("POC %lld PD OUT \n", pictureControlSetPtr->pictureNumber);
+        SVT_LOG("POC %lld PD OUT \n", pictureControlSetPtr->pictureNumber);
 #endif        
         // Release the Input Results
         EbReleaseObject(inputResultsWrapperPtr);

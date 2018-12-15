@@ -222,6 +222,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.speedControlFlag = config->speedControlFlag;
     callbackData->ebEncParameters.asmType = config->asmType;
     callbackData->ebEncParameters.reconEnabled = config->reconFile ? EB_TRUE : EB_FALSE;
+    callbackData->ebEncParameters.codeVpsSpsPps = 1;
 
     for (hmeRegionIndex = 0; hmeRegionIndex < callbackData->ebEncParameters.numberHmeSearchRegionInWidth; ++hmeRegionIndex) {
         callbackData->ebEncParameters.hmeLevel0SearchAreaInWidthArray[hmeRegionIndex] = config->hmeLevel0SearchAreaInWidthArray[hmeRegionIndex];
@@ -382,7 +383,7 @@ EB_ERRORTYPE AllocateOutputBuffers(
         EB_APP_MALLOC(EB_U8*, callbackData->streamBufferPool->pBuffer, outputStreamBufferSize, EB_N_PTR, EB_ErrorInsufficientResources);
 
         callbackData->streamBufferPool->nAllocLen = outputStreamBufferSize;
-        callbackData->streamBufferPool->pAppPrivate = (EB_PTR)callbackData;
+        callbackData->streamBufferPool->pAppPrivate = NULL;
         callbackData->streamBufferPool->sliceType = INVALID_SLICE;
     }
     return return_error;

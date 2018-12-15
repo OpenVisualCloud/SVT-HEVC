@@ -590,53 +590,6 @@ EB_ERRORTYPE PictureParentControlSetCtor(
     objectPtr->inputPictureWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
     objectPtr->referencePictureWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
 
-#if !ONE_MEMCPY 
-    EbPictureBufferDescInitData_t inputPictureBufferDescInitData;
-    // Init Picture Init data
-    inputPictureBufferDescInitData.maxWidth            = initDataPtr->pictureWidth;
-    inputPictureBufferDescInitData.maxHeight           = initDataPtr->pictureHeight;
-    inputPictureBufferDescInitData.bitDepth            = initDataPtr->bitDepth;
-
-    if(initDataPtr->compressedTenBitFormat == 1) {
-    	inputPictureBufferDescInitData.bufferEnableMask = 0;
-    }
-    else {
-        inputPictureBufferDescInitData.bufferEnableMask = initDataPtr->is16bit ? PICTURE_BUFFER_DESC_FULL_MASK : 0;
-    }
-
-	inputPictureBufferDescInitData.leftPadding			= initDataPtr->leftPadding;
-	inputPictureBufferDescInitData.rightPadding			= initDataPtr->rightPadding;
-	inputPictureBufferDescInitData.topPadding			= initDataPtr->topPadding;
-	inputPictureBufferDescInitData.botPadding			= initDataPtr->botPadding;
-
-    inputPictureBufferDescInitData.splitMode            = initDataPtr->is16bit ? EB_TRUE : EB_FALSE;  
-
-
-    
-    inputPictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
- 
-	if (initDataPtr->is16bit && initDataPtr->compressedTenBitFormat == 1){  
-		inputPictureBufferDescInitData.splitMode = EB_FALSE;  //do special allocation for 2bit data down below.		
-	}
-
-    // Enhanced Picture Buffer
-    return_error = EbPictureBufferDescCtor(
-        (EB_PTR*) &(objectPtr->enhancedPicturePtr),
-        (EB_PTR ) &inputPictureBufferDescInitData);
-    
-    if (return_error == EB_ErrorInsufficientResources){
-        return EB_ErrorInsufficientResources;
-    }
-
-	if (initDataPtr->is16bit && initDataPtr->compressedTenBitFormat == 1){
-		//pack 4 2bit pixels into 1Byte
-
-		EB_ALLIGN_MALLOC(EB_U8*, objectPtr->enhancedPicturePtr->bufferBitIncY,  sizeof(EB_U8) * (initDataPtr->pictureWidth / 4)*(initDataPtr->pictureHeight),     EB_A_PTR);
-		EB_ALLIGN_MALLOC(EB_U8*, objectPtr->enhancedPicturePtr->bufferBitIncCb, sizeof(EB_U8) * (initDataPtr->pictureWidth / 8)*(initDataPtr->pictureHeight / 2), EB_A_PTR);
-		EB_ALLIGN_MALLOC(EB_U8*, objectPtr->enhancedPicturePtr->bufferBitIncCr, sizeof(EB_U8) * (initDataPtr->pictureWidth / 8)*(initDataPtr->pictureHeight / 2), EB_A_PTR);
-
-	}
-#endif
     // GOP
     objectPtr->predStructIndex      = 0;
     objectPtr->pictureNumber        = 0;
@@ -649,8 +602,6 @@ EB_ERRORTYPE PictureParentControlSetCtor(
 
     objectPtr->lcuTotalCount            = pictureLcuWidth * pictureLcuHeight;
 
-    objectPtr->dataLLHeadPtr = (EbLinkedListNode *)EB_NULL;
-    objectPtr->appOutDataLLHeadPtr = (EbLinkedListNode *)EB_NULL;
 	EB_MALLOC(EB_U16**, objectPtr->variance, sizeof(EB_U16*) * objectPtr->lcuTotalCount, EB_N_PTR);
 	EB_MALLOC(EB_U8**, objectPtr->yMean, sizeof(EB_U8*) * objectPtr->lcuTotalCount, EB_N_PTR);
 	EB_MALLOC(EB_U8**, objectPtr->cbMean, sizeof(EB_U8*) * objectPtr->lcuTotalCount, EB_N_PTR);

@@ -996,7 +996,7 @@ void CheckInputForBordersAndPreprocess(
 		filter2Lines = (ABS((EB_S64)avgLine1 - (EB_S64)avgLine2) > (EB_S64)(avgLine2 * SAMPLE_THRESHOLD_PRECENT_TWO_BORDER_LINES / 100)) ? EB_TRUE : EB_FALSE;
 		filter1Line = (ABS((EB_S64)avgLine1 - (EB_S64)avgLine0) > (EB_S64)(avgLine1 * SAMPLE_THRESHOLD_PRECENT_BORDER_LINE / 100)) ? EB_TRUE : EB_FALSE;
 
-		//printf("--filter2Lines %i--filter1Line% i\n",filter2Lines,filter1Line);
+		//SVT_LOG("--filter2Lines %i--filter1Line% i\n",filter2Lines,filter1Line);
 
 	}
 
@@ -2958,7 +2958,7 @@ EB_ERRORTYPE SubSampleFilterNoise(
 
 				if (denBlkVar<denBlkVarTh && noiseBlkVar> noiseBlkVarTh) {
 					pictureControlSetPtr->lcuFlatNoiseArray[lcuIndex] = 1;
-					//printf("POC %i (%i,%i) denBlkVar: %i  noiseBlkVar :%i\n", pictureControlSetPtr->pictureNumber,lcuOriginX,lcuOriginY, denBlkVar, noiseBlkVar);
+					//SVT_LOG("POC %i (%i,%i) denBlkVar: %i  noiseBlkVar :%i\n", pictureControlSetPtr->pictureNumber,lcuOriginX,lcuOriginY, denBlkVar, noiseBlkVar);
 					newTotFN++;
 
 				}
@@ -4297,174 +4297,7 @@ void DecimateInputPicture(
 		sixteenthDecimatedPicturePtr->originX,
 		sixteenthDecimatedPicturePtr->originY);
 }
-#if !ONE_MEMCPY
-void CopyInputPicture(
-    SequenceControlSet_t            *sequenceControlSetPtr,
-    PictureParentControlSet_t       *pictureControlSetPtr
-    )
-{
 
-    EbPictureBufferDesc_t           *inputPicturePtr    = pictureControlSetPtr->enhancedPicturePtr;
-    EB_H265_ENC_INPUT               *inputPtr           = (EB_H265_ENC_INPUT*) pictureControlSetPtr->ebInputPtr->pBuffer;
-    EB_U16                           inputRowIndex;
-    EB_BOOL                          is16BitInput       = (EB_BOOL)(sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
-
-    // start latency measure as soon as we copy input picture from buffer
-    pictureControlSetPtr->startTimeSeconds = 0;
-    pictureControlSetPtr->startTimeuSeconds = 0;
-
-    StartTime((unsigned long long*)&pictureControlSetPtr->startTimeSeconds, (unsigned long long*)&pictureControlSetPtr->startTimeuSeconds);
-
-
-    // Need to include for Interlacing on the fly with pictureScanType = 1
-
-    if (!is16BitInput) {
-
-        EB_U32                           lumaBufferOffset = (inputPicturePtr->strideY*sequenceControlSetPtr->topPadding + sequenceControlSetPtr->leftPadding) << is16BitInput;
-        EB_U32                           chromaBufferOffset = (inputPicturePtr->strideCr*(sequenceControlSetPtr->topPadding >> 1) + (sequenceControlSetPtr->leftPadding >> 1)) << is16BitInput;
-        EB_U16                           lumaStride = inputPicturePtr->strideY << is16BitInput;
-        EB_U16                           chromaStride = inputPicturePtr->strideCb << is16BitInput;
-		EB_U16                           lumaWidth = (EB_U16)(inputPicturePtr->width - sequenceControlSetPtr->padRight) << is16BitInput;
-        EB_U16                           chromaWidth = (lumaWidth >> 1) << is16BitInput;
-		EB_U16                           lumaHeight = (EB_U16)(inputPicturePtr->height - sequenceControlSetPtr->padBottom);
-
-        EB_U16                           sourceLumaStride = (EB_U16)(sequenceControlSetPtr->staticConfig.inputPictureStride);
-        EB_U16                           sourceChromaStride = (sourceLumaStride >> 1);
-
-        //EB_U16                           lumaHeight  = inputPicturePtr->maxHeight;
-        // Y
-        for (inputRowIndex = 0; inputRowIndex < lumaHeight; inputRowIndex++) {
-
-            EB_MEMCPY((inputPicturePtr->bufferY + lumaBufferOffset + lumaStride*inputRowIndex),
-                (inputPtr->luma + sourceLumaStride*inputRowIndex),
-                lumaWidth);
-        }
-
-        // U
-        for (inputRowIndex = 0; inputRowIndex < lumaHeight >> 1; inputRowIndex++) {
-            EB_MEMCPY((inputPicturePtr->bufferCb + chromaBufferOffset + chromaStride*inputRowIndex),
-                (inputPtr->cb + (sourceChromaStride*inputRowIndex)),
-                chromaWidth);
-        }
-
-        // V
-        for (inputRowIndex = 0; inputRowIndex < lumaHeight >> 1; inputRowIndex++) {
-            EB_MEMCPY((inputPicturePtr->bufferCr + chromaBufferOffset + chromaStride*inputRowIndex),
-                (inputPtr->cr + (sourceChromaStride*inputRowIndex)),
-                chromaWidth);
-        }
-
-    }
-    else if (is16BitInput && sequenceControlSetPtr->staticConfig.compressedTenBitFormat == 1)
-    {
-        {
-            EB_U32  lumaBufferOffset = (inputPicturePtr->strideY*sequenceControlSetPtr->topPadding + sequenceControlSetPtr->leftPadding);
-            EB_U32  chromaBufferOffset = (inputPicturePtr->strideCr*(sequenceControlSetPtr->topPadding >> 1) + (sequenceControlSetPtr->leftPadding >> 1));
-            EB_U16  lumaStride = inputPicturePtr->strideY;
-            EB_U16  chromaStride = inputPicturePtr->strideCb;
-            EB_U16  lumaWidth = (EB_U16)(inputPicturePtr->width - sequenceControlSetPtr->padRight);
-            EB_U16  chromaWidth = (lumaWidth >> 1);
-            EB_U16  lumaHeight = (EB_U16)(inputPicturePtr->height - sequenceControlSetPtr->padBottom);
-
-            EB_U16 sourceLumaStride = (EB_U16)(sequenceControlSetPtr->staticConfig.inputPictureStride);
-            EB_U16 sourceChromaStride = (sourceLumaStride >> 1);
-
-            // Y 8bit
-            for (inputRowIndex = 0; inputRowIndex < lumaHeight; inputRowIndex++) {
-
-                EB_MEMCPY((inputPicturePtr->bufferY + lumaBufferOffset + lumaStride*inputRowIndex),
-                    (inputPtr->luma + sourceLumaStride*inputRowIndex),
-                    lumaWidth);
-
-            }
-
-            // U 8bit
-            for (inputRowIndex = 0; inputRowIndex < lumaHeight >> 1; inputRowIndex++) {
-
-                EB_MEMCPY((inputPicturePtr->bufferCb + chromaBufferOffset + chromaStride*inputRowIndex),
-                    (inputPtr->cb + (sourceChromaStride*inputRowIndex)),
-                    chromaWidth);
-
-            }
-
-            // V 8bit
-            for (inputRowIndex = 0; inputRowIndex < lumaHeight >> 1; inputRowIndex++) {
-
-                EB_MEMCPY((inputPicturePtr->bufferCr + chromaBufferOffset + chromaStride*inputRowIndex),
-                    (inputPtr->cr + (sourceChromaStride*inputRowIndex)),
-                    chromaWidth);
-
-            }
-
-            //efficient copy - final
-            //compressed 2Bit in 1D format
-            {
-                EB_U16 luma2BitWidth = sequenceControlSetPtr->maxInputLumaWidth / 4;
-                EB_U16 lumaHeight = sequenceControlSetPtr->maxInputLumaHeight;
-
-                EB_U16 sourceLuma2BitStride = sourceLumaStride / 4;
-                EB_U16 sourceChroma2BitStride = sourceLuma2BitStride >> 1;
-
-                for (inputRowIndex = 0; inputRowIndex < lumaHeight; inputRowIndex++) {
-                    EB_MEMCPY(inputPicturePtr->bufferBitIncY + luma2BitWidth*inputRowIndex, inputPtr->lumaExt + sourceLuma2BitStride*inputRowIndex, luma2BitWidth);
-                }
-                for (inputRowIndex = 0; inputRowIndex < lumaHeight >> 1; inputRowIndex++) {
-                    EB_MEMCPY(inputPicturePtr->bufferBitIncCb + (luma2BitWidth >> 1)*inputRowIndex, inputPtr->cbExt + sourceChroma2BitStride*inputRowIndex, luma2BitWidth >> 1);
-                }
-                for (inputRowIndex = 0; inputRowIndex < lumaHeight >> 1; inputRowIndex++) {
-                    EB_MEMCPY(inputPicturePtr->bufferBitIncCr + (luma2BitWidth >> 1)*inputRowIndex, inputPtr->crExt + sourceChroma2BitStride*inputRowIndex, luma2BitWidth >> 1);
-                }
-            }
-
-        }
-
-    }
-    else { // 10bit packed 
-        
-        EB_U32 lumaOffset =0, chromaOffset = 0;
-        EB_U32 lumaBufferOffset   = (inputPicturePtr->strideY*sequenceControlSetPtr->topPadding + sequenceControlSetPtr->leftPadding) ;
-        EB_U32 chromaBufferOffset = (inputPicturePtr->strideCr*(sequenceControlSetPtr->topPadding >> 1) + (sequenceControlSetPtr->leftPadding >> 1));
-		EB_U16 lumaWidth		  = (EB_U16)(inputPicturePtr->width - sequenceControlSetPtr->padRight);
-        EB_U16 chromaWidth        = (lumaWidth >> 1);
-		EB_U16 lumaHeight		  = (EB_U16)(inputPicturePtr->height - sequenceControlSetPtr->padBottom);
-
-        EB_U16 sourceLumaStride = (EB_U16)(sequenceControlSetPtr->staticConfig.inputPictureStride);
-        EB_U16 sourceChromaStride = (sourceLumaStride >> 1);
-
-        UnPack2D(
-            (EB_U16*)(inputPtr->luma + lumaOffset),
-            sourceLumaStride,
-            inputPicturePtr->bufferY + lumaBufferOffset,
-            inputPicturePtr->strideY,
-            inputPicturePtr->bufferBitIncY + lumaBufferOffset,
-            inputPicturePtr->strideBitIncY,
-            lumaWidth,
-            lumaHeight);
-
-        UnPack2D(
-            (EB_U16*)(inputPtr->cb + chromaOffset),
-            sourceChromaStride,
-            inputPicturePtr->bufferCb + chromaBufferOffset,
-            inputPicturePtr->strideCb,
-            inputPicturePtr->bufferBitIncCb + chromaBufferOffset,
-            inputPicturePtr->strideBitIncCb,
-            chromaWidth,
-            (lumaHeight >> 1));
-
-        UnPack2D(
-            (EB_U16*)(inputPtr->cr + chromaOffset),
-            sourceChromaStride,
-            inputPicturePtr->bufferCr + chromaBufferOffset,
-            inputPicturePtr->strideCr,
-            inputPicturePtr->bufferBitIncCr + chromaBufferOffset,
-            inputPicturePtr->strideBitIncCr,
-            chromaWidth,
-            (lumaHeight >> 1));
-        }
-
-    return;
-}
-#endif
 /************************************************
  * Picture Analysis Kernel
  * The Picture Analysis Process pads & decimates the input pictures.
@@ -4508,7 +4341,7 @@ void* PictureAnalysisKernel(void *inputPtr)
 		sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 		inputPicturePtr = pictureControlSetPtr->enhancedPicturePtr;
 #if DEADLOCK_DEBUG
-        printf("POC %lld PA IN \n", pictureControlSetPtr->pictureNumber);
+        SVT_LOG("POC %lld PA IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 		paReferenceObject = (EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr;
 		inputPaddedPicturePtr = (EbPictureBufferDesc_t*)paReferenceObject->inputPaddedPicturePtr;
@@ -4519,14 +4352,8 @@ void* PictureAnalysisKernel(void *inputPtr)
 		pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize;
 		pictureHeighInLcu = (sequenceControlSetPtr->lumaHeight + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize;
 		lcuTotalCount = pictureWidthInLcu * pictureHeighInLcu;
-#if !ONE_MEMCPY        
-        CopyInputPicture(
-            sequenceControlSetPtr,
-            pictureControlSetPtr);
 
-        EbReleaseObject(pictureControlSetPtr->ebInputWrapperPtr);
-#endif
-		// Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
+        // Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
 		SetPictureParametersForStatisticsGathering(
 			sequenceControlSetPtr);
 
@@ -4587,7 +4414,7 @@ void* PictureAnalysisKernel(void *inputPtr)
 		outputResultsPtr->pictureControlSetWrapperPtr = inputResultsPtr->pictureControlSetWrapperPtr;
 
 #if DEADLOCK_DEBUG
-        printf("POC %lld PA OUT \n", pictureControlSetPtr->pictureNumber);
+        SVT_LOG("POC %lld PA OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
 
 		// Release the Input Results

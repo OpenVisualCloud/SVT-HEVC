@@ -36,7 +36,7 @@ void printfTime(const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	printf("  [%i ms]\t", ((int)clock()));
+    SVT_LOG("  [%i ms]\t", ((int)clock()));
 	vprintf(fmt, args);
 	va_end(args);
 }

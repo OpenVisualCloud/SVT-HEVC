@@ -105,26 +105,8 @@ int main(int argc, char* argv[])
     unsigned int            instanceCount=0;
     EbAppContext_t         *appCallbacks[MAX_CHANNEL_NUMBER];   // Instances App callback data
     signal(SIGINT, EventHandler);
-
-    // Print Encoder Info
-    printf("-------------------------------------\n");
-    printf("SVT-HEVC Encoder v1.2.0\n");
-    printf("Platform:   %u bit\n", (unsigned) sizeof(void*)*8);
-#if ( defined( _MSC_VER ) && (_MSC_VER < 1910) ) 
-	printf("Compiler: VS13\n");
-#elif ( defined( _MSC_VER ) && (_MSC_VER >= 1910) ) 
-	printf("Compiler: VS17\n");
-#elif defined(__INTEL_COMPILER)
-	printf("Compiler: Intel\n");
-#elif defined(__GNUC__)
-	printf("Compiler: GCC\n");
-#else
-	printf("Compiler: unknown\n");
-#endif
-
-    printf("APP Build date: %s %s\n",__DATE__,__TIME__);
-    fflush(stdout);
-
+    printf("-------------------------------------------\n");
+    printf("SVT-HEVC Encoder\n");
     if (!GetHelp(argc, argv)) {
 
         // Get NumChannels

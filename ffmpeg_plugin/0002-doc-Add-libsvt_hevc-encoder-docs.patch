@@ -1,4 +1,4 @@
-From c8ff172dacad5d40405e32a85e839b435222083f Mon Sep 17 00:00:00 2001
+From 024ea6e09abe7edaab8e7f39d9163c4e627b719d Mon Sep 17 00:00:00 2001
 From: Jun Zhao <mypopydev@gmail.com>
 Date: Sat, 8 Dec 2018 15:43:05 +0800
 Subject: [PATCH 2/2] doc: Add libsvt_hevc encoder docs
@@ -9,25 +9,25 @@ Signed-off-by: Jun Zhao <jun.zhao@intel.com>
 Signed-off-by: Huang, Zhengxu <zhengxu.huang@intel.com>
 Signed-off-by: hassene <hassene.tmar@intel.com>
 ---
- doc/encoders.texi | 157 ++++++++++++++++++++++++++++++++++++++++++++++
- doc/general.texi  |  14 +++++
- 2 files changed, 171 insertions(+)
+ doc/encoders.texi | 157 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ doc/general.texi  |   8 +++
+ 2 files changed, 165 insertions(+)
 
 diff --git a/doc/encoders.texi b/doc/encoders.texi
-index ca3892d682..ca90d94f1e 100644
+index 899faac..0a19596 100644
 --- a/doc/encoders.texi
 +++ b/doc/encoders.texi
-@@ -1569,6 +1569,163 @@ Set maximum NAL size in bytes.
+@@ -1457,6 +1457,163 @@ Set maximum NAL size in bytes.
  Allow skipping frames to hit the target bitrate if set to 1.
  @end table
  
 +@section libsvt_hevc
 +
-+Intel Scalable Video Technology HEVC encoder wrapper.
++Scalable Video Technology for HEVC encoder (SVT-HEVC encoder) wrapper.
 +
 +This encoder requires the presence of the headers and
 +library during configuration. You need to explicitly configure the
-+build with @code{--enable-libsvt}. The library is detected using
++build with @code{--enable-libsvthevc}. The library is detected using
 +@command{pkg-config}.
 +
 +For more information about the library see
@@ -182,30 +182,24 @@ index ca3892d682..ca90d94f1e 100644
  
  libtheora Theora encoder wrapper.
 diff --git a/doc/general.texi b/doc/general.texi
-index 2bc33d180d..81995a0278 100644
+index 2b015f1..070997a 100644
 --- a/doc/general.texi
 +++ b/doc/general.texi
-@@ -126,6 +126,20 @@ The dispatcher is open source and can be downloaded from
+@@ -280,6 +280,14 @@ The dispatcher is open source and can be downloaded from
  with the @code{--enable-libmfx} option and @code{pkg-config} needs to be able to
  locate the dispatcher's @code{.pc} files.
  
-+@section Intel SVT-HEVC
++@section Scalable Video Technology for HEVC
 +
 +FFmpeg can make use of the SVT-HEVC library for HEVC encoding.
 +
 +Go to @url{https://github.com/intel/SVT-HEVC.git} and follow the instructions
-+for installing the library. Then pass @code{--enable-libsvt} to configure to
++for installing the library. Pass @code{--enable-libsvthevc} to configure to
 +enable it.
 +
-+@float NOTE
-+Intel SVT_HEVC encoder is under the BSD-2-Clause Plus Patent License
-+(see @url{https://spdx.org/licenses/BSD-2-Clause-Patent.html} for
-+details), you must upgrade FFmpeg's license to GPL in order to use it.
-+@end float
-+
- @section Kvazaar
+ @section AMD VCE
  
- FFmpeg can make use of the Kvazaar library for HEVC encoding.
+ FFmpeg can use the AMD Advanced Media Framework library for accelerated H.264
 -- 
-2.17.1
+2.7.4
 

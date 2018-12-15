@@ -13,11 +13,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
-    
-#define CHKN_OMX        1
-#define DEADLOCK_DEBUG  0
-#define CHKN_EOS        1
-#define ONE_MEMCPY      1
+
+// API Version
+#define SVT_VERSION_MAJOR       1
+#define SVT_VERSION_MINOR       3
+#define SVT_VERSION_PATCHLEVEL  0
 
 #define EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT     2
 #define EB_HME_SEARCH_AREA_ROW_MAX_COUNT        2
@@ -25,11 +25,7 @@ extern "C" {
 #ifdef _WIN32
 #define EB_API __declspec(dllexport)
 #else
-#ifdef __EB_EXPORTS
 #define EB_API
-#else
-#define EB_API extern
-#endif
 #endif
 
 /********************************
@@ -49,25 +45,6 @@ typedef enum EB_ASM {
 /***************************************
 * Generic linked list data structure for passing data into/out from the library
 ***************************************/
-#define       EB_CONFIG_ON_FLY_PIC_QP        219
-
-typedef int   EB_LINKED_LIST_TYPE;
-typedef struct EbLinkedListNode
-{
-	void*                     app;                       // points to an application object this node is associated
-	// with. this is an opaque pointer to the encoder lib, but
-	// releaseCbFncPtr may need to access it.
-	EB_LINKED_LIST_TYPE       type;                      // type of data pointed by "data" member variable
-	unsigned int                    size;                      // size of (data)
-	unsigned char                   passthrough;               // whether this is passthrough data from application
-	void(*releaseCbFncPtr)(struct EbLinkedListNode*); // callback to be executed by encoder when picture reaches end of pipeline, or
-	// when aborting. However, at end of pipeline encoder shall
-	// NOT invoke this callback if passthrough is TRUE (but
-	// still needs to do so when aborting)
-	void                     *data;                      // pointer to application's data
-	struct EbLinkedListNode  *next;                      // pointer to next node (null when last)
-
-} EbLinkedListNode;
 
 #define EB_SLICE        unsigned int
 #define B_SLICE         0
@@ -79,18 +56,28 @@ typedef struct EbLinkedListNode
 
 typedef struct EB_BUFFERHEADERTYPE
 {
+    // EB_BUFFERHEADERTYPE size
     unsigned int nSize;
+    
+    // picture (input or output) buffer 
     unsigned char* pBuffer;
-    unsigned int nAllocLen;
     unsigned int nFilledLen;
-    unsigned int nOffset;
+    unsigned int nAllocLen;
+
+    // pic private data
     void* pAppPrivate;
+
+    // pic timing param
     unsigned int nTickCount;
     signed long long dts;
     signed long long pts;
-    unsigned int nFlags;
+
+    // pic info
     unsigned int qpValue;
     unsigned int sliceType;
+
+    // pic flags
+    unsigned int nFlags;
 } EB_BUFFERHEADERTYPE;
 
 typedef struct EB_COMPONENTTYPE
@@ -128,9 +115,12 @@ typedef enum EB_ERRORTYPE
 //   precision while the luma, cb, and cr fields hold the 8-bit data.
 typedef struct EB_H265_ENC_INPUT 
 {
+    // Hosts 8 bit or 16 bit input YUV420p / YUV420p10le
     unsigned char *luma;
     unsigned char *cb;
     unsigned char *cr;
+
+    // Hosts LSB 2 bits of 10bit input when the compressed 10bit format is used
     unsigned char *lumaExt;
     unsigned char *cbExt;
     unsigned char *crExt;
@@ -145,29 +135,32 @@ typedef struct EB_H265_ENC_INPUT
 // Only modifiable during config-time.
 typedef struct EB_H265_ENC_CONFIGURATION
 {
-    // Define the settings
+    // Encoding preset
+    unsigned char             encMode;     // [0, 12](for tune 0 and >= 4k resolution), [0, 10](for >= 1080p resolution), [0, 9](for all resolution and modes)
+    unsigned char             tune;        // encoder tuning for Visual Quality [0], PSNR/SSIM [1] 
+    unsigned char             latencyMode; // lossless change
 
-    // Channel info
-    unsigned int              channelId;
-    unsigned int              activeChannelCount;
-    unsigned char             useRoundRobinThreadAssignment;
-    
     // GOP Structure
-    signed int              intraPeriodLength;
+    signed int                intraPeriodLength;
     unsigned int              intraRefreshType;
-
-    unsigned char               predStructure;
-    unsigned int              baseLayerSwitchMode;
-    unsigned char               encMode;
-
     unsigned int              hierarchicalLevels;
 
+    unsigned char             predStructure;
+    unsigned int              baseLayerSwitchMode;
 
-    unsigned int             sourceWidth;
-    unsigned int             sourceHeight;
+    // Input Info
+    unsigned int              sourceWidth;
+    unsigned int              sourceHeight;
+    unsigned int              frameRate;
+    signed int                frameRateNumerator;
+    signed int                frameRateDenominator;
+    unsigned int              encoderBitDepth;
+    unsigned int              compressedTenBitFormat;
+    unsigned long long        framesToBeEncoded;
 
-    unsigned char              latencyMode;
-
+    // Visual quality optimizations only applicable when tune = 1
+    unsigned char             bitRateReduction;
+    unsigned char             improveSharpness;
 
     // Interlaced Video 
     unsigned char             interlacedVideo;
@@ -182,7 +175,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     // SAO
     unsigned char             enableSaoFlag;
 
-    // ME Tools
+    // Motion Estimation Tools
     unsigned char             useDefaultMeHme; 
     unsigned char             enableHmeFlag;
     unsigned char             enableHmeLevel0Flag;
@@ -209,24 +202,16 @@ typedef struct EB_H265_ENC_CONFIGURATION
     unsigned char             constrainedIntra;
 
     // Rate Control
-    unsigned int              frameRate;
-    signed int              frameRateNumerator;
-    signed int              frameRateDenominator;
-    unsigned int              encoderBitDepth;
-    unsigned int              compressedTenBitFormat;
     unsigned int              rateControlMode;
     unsigned int              sceneChangeDetection;
     unsigned int              lookAheadDistance;
-    unsigned long long        framesToBeEncoded;
     unsigned int              targetBitRate;
     unsigned int              maxQpAllowed;
     unsigned int              minQpAllowed;
 
-    unsigned char               tune;
-
-	unsigned char				bitRateReduction;
-    // Tresholds
-    unsigned char             improveSharpness;
+    // bitstream options
+    unsigned char             codeVpsSpsPps;
+    unsigned char             codeEosNal;
     unsigned int              videoUsabilityInfo;
     unsigned int              highDynamicRangeInput;
     unsigned int              accessUnitDelimiter;
@@ -240,51 +225,91 @@ typedef struct EB_H265_ENC_CONFIGURATION
     unsigned int              tier;
     unsigned int              level;
 
+    // Application Specific parameters
+    unsigned int              channelId;                    // when multiple instances are running within the same application
+    unsigned int              activeChannelCount;           // how many channels are active
+    unsigned char             useRoundRobinThreadAssignment;// create one thread on each socket [windows only]
+    
+    // ASM Type
+    EB_ASM			          asmType;                      // level of optimization to use.
+
+    // Demo features
+    unsigned int              speedControlFlag;             // dynamically change the encoding preset to meet the average speed defined in injectorFrameRate
+    signed int                injectorFrameRate;
+
     // Debug tools
     unsigned int              reconEnabled;
 
-    signed int                injectorFrameRate;
-    unsigned int              speedControlFlag;
-    
-    // ASM Type
-    EB_ASM			          asmType;
-
-    unsigned char             codeVpsSpsPps;
-
 } EB_H265_ENC_CONFIGURATION;
 
+// API calls: 
+
+/*****************************************/
+/******* STEP 1: Init the Handle *********/
+/*****************************************/
+EB_API EB_ERRORTYPE EbInitHandle(
+    EB_COMPONENTTYPE** pHandle,
+    void* pAppData,
+    EB_H265_ENC_CONFIGURATION  *configPtr); // configPtr will be loaded with default params from the library
+
+/***************************************************/
+/******* STEP 2: Update the encoder params *********/
+/***************************************************/
+EB_API EB_ERRORTYPE EbH265EncSetParameter(
+    EB_COMPONENTTYPE           *h265EncComponent,
+    EB_H265_ENC_CONFIGURATION  *pComponentParameterStructure); // pComponentParameterStructure contents will be copied to the library
+
+/***************************************************/
+/******* STEP 3: Init the encoder libray ***********/
+/***************************************************/
 EB_API EB_ERRORTYPE EbInitEncoder(
     EB_COMPONENTTYPE *h265EncComponent);
 
-EB_API EB_ERRORTYPE EbDeinitEncoder(
-    EB_COMPONENTTYPE *h265EncComponent);
-
-EB_API EB_ERRORTYPE EbH265EncSetParameter(
-    EB_COMPONENTTYPE           *h265EncComponent,
-    EB_H265_ENC_CONFIGURATION  *pComponentParameterStructure);
-
+/***************************************************/
+/****** OPTIONAL: Get the stream header NAL ********/
+/***************************************************/
 EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     EB_COMPONENTTYPE           *h265EncComponent,
     EB_BUFFERHEADERTYPE*        outputStreamPtr);
 
+/***************************************************/
+/******** OPTIONAL: Get the stream EOS NAL *********/
+/***************************************************/
+EB_API EB_ERRORTYPE EbH265EncEosNal(
+    EB_COMPONENTTYPE           *h265EncComponent,
+    EB_BUFFERHEADERTYPE*        outputStreamPtr);
+
+/***************************************************/
+/***** STEP 4: Send input pictures to encode *******/
+/***************************************************/
 EB_API EB_ERRORTYPE EbH265EncSendPicture(
     EB_COMPONENTTYPE      *h265EncComponent,
     EB_BUFFERHEADERTYPE   *pBuffer);
 
+/***************************************************/
+/****** STEP 5: Get output slices to encode ********/
+/***************************************************/
 EB_API EB_ERRORTYPE EbH265GetPacket(
     EB_COMPONENTTYPE      *h265EncComponent,
     EB_BUFFERHEADERTYPE   *pBuffer,
     unsigned char          picSendDone);
 
+/***************************************************/
+/*** OPTIONAL: Get output reconstructed picture ****/
+/***************************************************/
 EB_API EB_ERRORTYPE EbH265GetRecon(
     EB_COMPONENTTYPE      *h265EncComponent,
     EB_BUFFERHEADERTYPE   *pBuffer);
 
-EB_API EB_ERRORTYPE EbInitHandle(
-    EB_COMPONENTTYPE** pHandle,
-    void* pAppData,
-    EB_H265_ENC_CONFIGURATION  *configPtr);
+/***************************************************/
+/******* STEP 6: De-Init the encoder libray ********/
+/***************************************************/
+EB_API EB_ERRORTYPE EbDeinitEncoder(
+    EB_COMPONENTTYPE *h265EncComponent);
 
+/***************************************************/
+/******* STEP 7: De-Init the encoder libray ********/
+/***************************************************/
 EB_API EB_ERRORTYPE EbDeinitHandle(
     EB_COMPONENTTYPE  *h265EncComponent);
 

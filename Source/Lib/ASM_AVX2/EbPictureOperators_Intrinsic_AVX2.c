@@ -1259,7 +1259,6 @@ EB_S32  sumResidual8bit_AVX2_INTRIN(
    }
 
    else{
-       printf("\n add the rest \n");
        return 0;
    }
 
@@ -1403,10 +1402,6 @@ void memset16bitBlock_AVX2_INTRIN (
 
    }
 
-
-   else{
-       printf("\n add the rest \n");
-   }
 
 }
 
