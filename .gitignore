@@ -1,19 +1,64 @@
 *.265
-*.bin
+*.hevc
 *.yuv
-*.user
 *.o
-*.db
-*.sdf
-*.suo
-*.opendb
-*.vs
 *.bin
-*.opensdf
 *.log
-Build/VS17/x64
 Bin
 Build/linux/debug/
 Build/linux/release/
+Build/windows/Release/
+Build/windows/x64/
+
+# Visual Studio user-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual C++ cache files
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
+
+# Visual Studio cache/options directory
+*.vs
+
+# Visual Studio project files
+*.filters
+*.vcxproj
+*.sln
 
 
+#cmake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+
+
+Build/windows/ALL_BUILD.dir/
+Build/windows/INSTALL.dir/
+Build/windows/Source/
+Build/windows/SvtHevcEnc.pc
+Build/windows/ZERO_CHECK.dir/
+Source/App/SvtHevcEncApp.dir/
+Source/Lib/ASM_AVX2/ASM_AVX2.dir/
+Source/Lib/ASM_SSE2/ASM_SSE2.dir/
+Source/Lib/ASM_SSE4_1/ASM_SSE4_1.dir/
+Source/Lib/ASM_SSSE3/ASM_SSSE3.dir/
+Source/Lib/C_DEFAULT/C_DEFAULT.dir/
+Source/Lib/Codec/SvtHevcEnc.dir/
+Source/SimpleApp/SvtHevcEncSimpleApp.dir/
