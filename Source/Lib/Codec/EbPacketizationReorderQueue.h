@@ -18,8 +18,6 @@ typedef struct PacketizationReorderEntry_s {
     EB_U64                          pictureNumber;    
     EbObjectWrapper_t              *outputStreamWrapperPtr;
 
-    EbLinkedListNode               *outMetaData;
-
     EB_U64                          startTimeSeconds;
     EB_U64                          startTimeuSeconds;
 } PacketizationReorderEntry_t;   

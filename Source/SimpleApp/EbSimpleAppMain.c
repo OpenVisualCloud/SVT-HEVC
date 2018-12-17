@@ -121,7 +121,7 @@ APPEXITCONDITIONTYPE ProcessOutputReconBuffer(
             frameNum = frameNum - 1;
         }
 
-        fwrite(headerPtr->pBuffer + headerPtr->nOffset, 1, headerPtr->nFilledLen, config->reconFile);
+        fwrite(headerPtr->pBuffer, 1, headerPtr->nFilledLen, config->reconFile);
 
         // Update Output Port Activity State
         return_value = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? APP_ExitConditionFinished : APP_ExitConditionNone;
@@ -148,7 +148,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
         printf("\nError while encoding, code 0x%x\n", headerPtr->nFlags);
         return APP_ExitConditionError;
     }else if (stream_status != EB_NoErrorEmptyQueue) {
-        fwrite(headerPtr->pBuffer + headerPtr->nOffset, 1, headerPtr->nFilledLen, config->bitstreamFile);
+        fwrite(headerPtr->pBuffer, 1, headerPtr->nFilledLen, config->bitstreamFile);
 
         // Update Output Port Activity State
         return_value = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? APP_ExitConditionFinished : APP_ExitConditionNone;
@@ -267,11 +267,10 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
 
         if (config->stopEncoder == 0) {
             // Fill in Buffers Header control data
-            headerPtr->nOffset = 0;
             headerPtr->nFlags = 0;
             headerPtr->pAppPrivate = NULL;
             headerPtr->pts         = frameCount++;
-            headerPtr->sliceType = INVALID_SLICE;
+            headerPtr->sliceType   = INVALID_SLICE;
 #if TEST_IDR
             if (frameCount == 200)
                 headerPtr->sliceType = IDR_SLICE;
@@ -287,7 +286,6 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
             headerPtrLast.nFilledLen = 0;
             headerPtrLast.nTickCount = 0;
             headerPtrLast.pAppPrivate = NULL;
-            headerPtrLast.nOffset = 0;
             headerPtrLast.nFlags = EB_BUFFERFLAG_EOS;
             headerPtrLast.pBuffer = NULL;
 

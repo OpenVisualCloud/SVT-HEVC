@@ -2210,7 +2210,7 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
 		pictureControlSetPtr = (PictureControlSet_t*)rateControlResultsPtr->pictureControlSetWrapperPtr->objectPtr;
 		sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 #if DEADLOCK_DEBUG
-        printf("POC %lld MDC IN \n", pictureControlSetPtr->pictureNumber);
+        SVT_LOG("POC %lld MDC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
         // Mode Decision Configuration Kernel Signal(s) derivation
         if (sequenceControlSetPtr->staticConfig.tune == TUNE_SQ) {
@@ -2367,7 +2367,7 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
         }
 
 #if DEADLOCK_DEBUG
-        printf("POC %lld MDC OUT \n", pictureControlSetPtr->pictureNumber);
+        SVT_LOG("POC %lld MDC OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
         // Post the results to the MD processes
         EbGetEmptyObject(

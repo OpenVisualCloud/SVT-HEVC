@@ -1638,7 +1638,6 @@ static void ReconOutput(
 
     // STOP READ/WRITE PROTECTED SECTION
     outputReconPtr->nFilledLen = 0;
-    outputReconPtr->nOffset = 0;
 
     // Copy the Reconstructed Picture to the Output Recon Buffer
     {
@@ -1663,10 +1662,10 @@ static void ReconOutput(
         // Y Recon Samples
         sampleTotalCount = ((reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight) * (reconPtr->maxHeight - sequenceControlSetPtr->maxInputPadBottom)) << is16bit;
         reconReadPtr = reconPtr->bufferY + (reconPtr->originY << is16bit) * reconPtr->strideY + (reconPtr->originX << is16bit);
-        reconWritePtr = &(outputReconPtr->pBuffer[outputReconPtr->nFilledLen + outputReconPtr->nOffset]);
+        reconWritePtr = &(outputReconPtr->pBuffer[outputReconPtr->nFilledLen]);
 
         CHECK_REPORT_ERROR(
-            (outputReconPtr->nFilledLen + outputReconPtr->nOffset + sampleTotalCount <= outputReconPtr->nAllocLen),
+            (outputReconPtr->nFilledLen + sampleTotalCount <= outputReconPtr->nAllocLen),
             encodeContextPtr->appCallbackPtr,
             EB_ENC_ROB_OF_ERROR);
 
@@ -1685,10 +1684,10 @@ static void ReconOutput(
         // U Recon Samples
         sampleTotalCount = ((reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight) * (reconPtr->maxHeight - sequenceControlSetPtr->maxInputPadBottom) >> 2) << is16bit;
         reconReadPtr = reconPtr->bufferCb + ((reconPtr->originY << is16bit) >> 1) * reconPtr->strideCb + ((reconPtr->originX << is16bit) >> 1);
-        reconWritePtr = &(outputReconPtr->pBuffer[outputReconPtr->nFilledLen + outputReconPtr->nOffset]);
+        reconWritePtr = &(outputReconPtr->pBuffer[outputReconPtr->nFilledLen]);
 
         CHECK_REPORT_ERROR(
-            (outputReconPtr->nFilledLen + outputReconPtr->nOffset + sampleTotalCount <= outputReconPtr->nAllocLen),
+            (outputReconPtr->nFilledLen + sampleTotalCount <= outputReconPtr->nAllocLen),
             encodeContextPtr->appCallbackPtr,
             EB_ENC_ROB_OF_ERROR);
 
@@ -1706,10 +1705,10 @@ static void ReconOutput(
         // V Recon Samples
         sampleTotalCount = ((reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight) * (reconPtr->maxHeight - sequenceControlSetPtr->maxInputPadBottom) >> 2) << is16bit;
         reconReadPtr = reconPtr->bufferCr + ((reconPtr->originY << is16bit) >> 1) * reconPtr->strideCr + ((reconPtr->originX << is16bit) >> 1);
-        reconWritePtr = &(outputReconPtr->pBuffer[outputReconPtr->nFilledLen + outputReconPtr->nOffset]);
+        reconWritePtr = &(outputReconPtr->pBuffer[outputReconPtr->nFilledLen]);
 
         CHECK_REPORT_ERROR(
-            (outputReconPtr->nFilledLen + outputReconPtr->nOffset + sampleTotalCount <= outputReconPtr->nAllocLen),
+            (outputReconPtr->nFilledLen + sampleTotalCount <= outputReconPtr->nAllocLen),
             encodeContextPtr->appCallbackPtr,
             EB_ENC_ROB_OF_ERROR);
 
@@ -3539,7 +3538,7 @@ void* EncDecKernel(void *inputPtr)
         lastLcuFlag = EB_FALSE;
         is16bit = (EB_BOOL)(sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
 #if DEADLOCK_DEBUG
-        printf("POC %lld ENCDEC IN \n", pictureControlSetPtr->pictureNumber);
+        SVT_LOG("POC %lld ENCDEC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
         // LCU Constants
         lcuSize = (EB_U8)sequenceControlSetPtr->lcuSize;
@@ -3914,7 +3913,7 @@ void* EncDecKernel(void *inputPtr)
         }
 
 #if DEADLOCK_DEBUG
-        printf("POC %lld ENCDEC OUT \n", pictureControlSetPtr->pictureNumber);
+        SVT_LOG("POC %lld ENCDEC OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
 
         // Send the Entropy Coder incremental updates as each LCU row becomes available

@@ -364,42 +364,6 @@ EB_U64 Log2fHighPrecision(EB_U64 x, EB_U8 precision)
 
 }
 
-
-// concatenate two linked list, and return the pointer to the new concatenated list
-EbLinkedListNode* concatEbLinkedList(EbLinkedListNode* a, EbLinkedListNode* b)
-{
-    if ( a )
-    {
-        while ( a->next )
-        {  a = a->next;  }
-        a->next = b;
-        return a;
-    }
-    else
-    {   return b;  }
-}
-
-// split a linked list
-EbLinkedListNode* splitEbLinkedList(EbLinkedListNode* input, EbLinkedListNode** restLL, EB_BOOL (*predicateFunc)(EbLinkedListNode*))
-{
-    EbLinkedListNode* llTruePtr = (EbLinkedListNode *)EB_NULL;    // list of nodes satifying predicateFunc(node) == TRUE
-    EbLinkedListNode* llRestPtr = (EbLinkedListNode *)EB_NULL;    // list of nodes satifying predicateFunc(node) != TRUE
-
-    while ( input )
-    {
-        EbLinkedListNode* next = input->next;
-        input->next = (EbLinkedListNode *)EB_NULL;
-        if ( predicateFunc(input) )
-        {   llTruePtr = concatEbLinkedList(input, llTruePtr);   }
-        else
-        {   llRestPtr = concatEbLinkedList(input, llRestPtr);   }
-        input = next;
-    }
-
-    *restLL = llRestPtr;
-    return llTruePtr;
-}
-
 static const MiniGopStats_t MiniGopStatsArray[] = {
 
 	//	HierarchicalLevels	StartIndex	EndIndex	Lenght	miniGopIndex	                                
@@ -470,11 +434,11 @@ void ComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long lo
     useconds = Finishuseconds - Startuseconds;
     mtime = ((seconds) * 1000 + useconds / 1000.0) + 0.5;
     *duration = (double)mtime / 1000;
-    //printf("\nElapsed time: %3.3ld seconds\n", mtime/1000);
+    //SVT_LOG("\nElapsed time: %3.3ld seconds\n", mtime/1000);
 #elif _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
     //double  duration;
     *duration = (double)(Finishseconds - Startseconds) / CLOCKS_PER_SEC;
-    //printf("\nElapsed time: %3.3f seconds\n", *duration);
+    //SVT_LOG("\nElapsed time: %3.3f seconds\n", *duration);
     (void)(Startuseconds);
     (void)(Finishuseconds);
 #else
@@ -494,11 +458,11 @@ void ComputeOverallElapsedTimeMs(unsigned long long Startseconds, unsigned long 
     useconds = Finishuseconds - Startuseconds;
     mtime = ((seconds) * 1000 + useconds / 1000.0) + 0.5;
     *duration = (double)mtime;
-    //printf("\nElapsed time: %3.3ld seconds\n", mtime/1000);
+    //SVT_LOG("\nElapsed time: %3.3ld seconds\n", mtime/1000);
 #elif _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
     //double  duration;
     *duration = (double)(Finishseconds - Startseconds);
-    //printf("\nElapsed time: %3.3f seconds\n", *duration);
+    //SVT_LOG("\nElapsed time: %3.3f seconds\n", *duration);
     (void)(Startuseconds);
     (void)(Finishuseconds);
 #else

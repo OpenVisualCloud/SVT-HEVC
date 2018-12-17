@@ -14,7 +14,6 @@ EB_ERRORTYPE PacketizationReorderEntryCtor(
 
     (*entryDblPtr)->pictureNumber                   = pictureNumber;
     (*entryDblPtr)->outputStreamWrapperPtr          = (EbObjectWrapper_t *)EB_NULL;
-    (*entryDblPtr)->outMetaData                     = (EbLinkedListNode*)EB_NULL;
 
     return EB_ErrorNone;
 }

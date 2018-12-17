@@ -4279,7 +4279,7 @@ EB_EXTERN void EncodePass(
             cbCoeffBits = 0;
             crCoeffBits = 0;
 
-            //printf("sizeof %i \n",sizeof(CodingUnit_t));
+            //SVT_LOG("sizeof %i \n",sizeof(CodingUnit_t));
             EB_U32  totTu = (cuStats->size < MAX_LCU_SIZE) ? 1 : 4;
             EB_U8   tuIt;
 

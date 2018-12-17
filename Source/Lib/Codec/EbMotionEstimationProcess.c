@@ -954,7 +954,7 @@ void* MotionEstimationKernel(void *inputPtr)
         inputPaddedPicturePtr = (EbPictureBufferDesc_t*)paReferenceObject->inputPaddedPicturePtr;
 		inputPicturePtr = pictureControlSetPtr->enhancedPicturePtr;
 #if DEADLOCK_DEBUG
-        printf("POC %lld ME IN \n", pictureControlSetPtr->pictureNumber);
+        SVT_LOG("POC %lld ME IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 		// Segments
 		segmentIndex = inputResultsPtr->segmentIndex;
@@ -1249,7 +1249,7 @@ void* MotionEstimationKernel(void *inputPtr)
 			}
 		}
 #if DEADLOCK_DEBUG
-        printf("POC %lld ME OUT \n", pictureControlSetPtr->pictureNumber);
+        SVT_LOG("POC %lld ME OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
         EbReleaseMutex(pictureControlSetPtr->rcDistortionHistogramMutex);
 		// Get Empty Results Object
