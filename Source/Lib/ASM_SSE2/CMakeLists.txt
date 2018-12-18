@@ -11,6 +11,14 @@ include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Codec/)
 include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
 include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/)
 
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse2")
+endif()
+
+if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -static-intel -w")
+endif()
+
 # Utility Source Files
 add_library(ASM_SSE2
     EbAvcStyleMcp_SSE2.h

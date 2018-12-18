@@ -15,6 +15,14 @@ include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
 include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/)
 include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
 
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mssse3")
+endif()
+
+if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -static-intel -w")
+endif()
+
 # Utility Source Files
 add_library(ASM_SSSE3
     EbAvcStyleMcp_SSSE3.h

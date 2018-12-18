@@ -16,22 +16,15 @@ include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
 
 link_directories(${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
 
-if(UNIX)
-	# Intel Linux
-	if("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
-		SET(CMAKE_C_FLAGS "-fPIC -static-intel -w")
-	else()
-		SET(CMAKE_C_FLAGS "-march=core-avx2")
-	endif()
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx2")
+    if(CMAKE_C_COMPILER_VERSION VERSION_EQUAL 5.4)
+        string(REPLACE "-flto" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    endif()
+endif()
 
-else()
-	# Intel Windows (*Note - The Warning level /W0 should be made to /W4 at some point)
-	if("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
-		SET(CMAKE_C_FLAGS "/W0 /Qwd10148 /Qwd10010 /Qwd10157")
-	else()
-		SET(CMAKE_C_FLAGS "/arch:AVX2")	
-	endif()
-
+if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -static-intel /W0 /Qwd10148 /Qwd10010 /Qwd10157")
 endif()
 
 add_library(ASM_AVX2

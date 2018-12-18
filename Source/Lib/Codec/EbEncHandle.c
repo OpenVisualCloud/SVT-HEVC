@@ -1418,7 +1418,7 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             free(memoryEntry->ptr);
             break;
         case EB_A_PTR:
-#ifdef _MSC_VER
+#ifdef _WIN32
             _aligned_free(memoryEntry->ptr);
 #else
             free(memoryEntry->ptr);
