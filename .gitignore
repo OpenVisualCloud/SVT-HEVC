@@ -1,5 +1,6 @@
 *.265
 *.hevc
+*.bin
 *.yuv
 *.o
 *.bin
