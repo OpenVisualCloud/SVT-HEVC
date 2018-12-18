@@ -2059,6 +2059,8 @@ void CopyApiFromApp(
     // Rate Control
     sequenceControlSetPtr->staticConfig.sceneChangeDetection = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sceneChangeDetection;
     sequenceControlSetPtr->staticConfig.rateControlMode = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->rateControlMode;
+    sequenceControlSetPtr->staticConfig.vbvMaxrate = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->vbvMaxrate;
+    sequenceControlSetPtr->staticConfig.vbvBufsize = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->vbvBufsize;
     sequenceControlSetPtr->staticConfig.lookAheadDistance = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->lookAheadDistance;
     sequenceControlSetPtr->staticConfig.framesToBeEncoded = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->framesToBeEncoded;
     
