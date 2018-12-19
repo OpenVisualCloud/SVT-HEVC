@@ -41,10 +41,6 @@ typedef enum EB_ASM {
     EB_ASM_AVX512,
     EB_ASM_TYPE_INVALID = ~0
 } EB_ASM;
-    
-/***************************************
-* Generic linked list data structure for passing data into/out from the library
-***************************************/
 
 #define EB_SLICE        unsigned int
 #define B_SLICE         0
