@@ -1,0 +1,205 @@
+From 024ea6e09abe7edaab8e7f39d9163c4e627b719d Mon Sep 17 00:00:00 2001
+From: Jun Zhao <mypopydev@gmail.com>
+Date: Sat, 8 Dec 2018 15:43:05 +0800
+Subject: [PATCH 2/2] doc: Add libsvt_hevc encoder docs
+
+Add docs for libsvt_hevc encoder in encoders.texi and general.texi
+
+Signed-off-by: Jun Zhao <jun.zhao@intel.com>
+Signed-off-by: Huang, Zhengxu <zhengxu.huang@intel.com>
+Signed-off-by: hassene <hassene.tmar@intel.com>
+---
+ doc/encoders.texi | 157 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ doc/general.texi  |   8 +++
+ 2 files changed, 165 insertions(+)
+
+diff --git a/doc/encoders.texi b/doc/encoders.texi
+index 899faac..0a19596 100644
+--- a/doc/encoders.texi
++++ b/doc/encoders.texi
+@@ -1457,6 +1457,163 @@ Set maximum NAL size in bytes.
+ Allow skipping frames to hit the target bitrate if set to 1.
+ @end table
+ 
++@section libsvt_hevc
++
++Scalable Video Technology for HEVC encoder (SVT-HEVC encoder) wrapper.
++
++This encoder requires the presence of the headers and
++library during configuration. You need to explicitly configure the
++build with @code{--enable-libsvthevc}. The library is detected using
++@command{pkg-config}.
++
++For more information about the library see
++@url{https://github.com/intel/SVT-HEVC.git}.
++
++@subsection Options
++
++The following FFmpeg global options affect the configurations of the
++libsvt_hevc encoder.
++
++@table @option
++@item b  (@emph{bitrate})
++Set the bitrate (as a number of bits per second). Default is 7M.
++
++@item refs (@emph{ref})
++Number of reference frames each P-frame can use. The range is from @var{0-16}.
++Default is 0(disabled).
++
++@item g  / @option{gop_size}
++Set the GOP size. Default is 64.
++
++@item flags +cgop
++Enable closed GOP.
++
++@item qmin (@emph{min-q})
++Defaults 10
++
++@item qmax (@emph{max-q})
++Defaults 48
++
++Set minimum/maximum quantisation values.  Valid range is from 0 to 51
++(Only used when bit rate control mode @option{rc} is set to 0(cqp) mode.
++Has to be qmax > = qmin).
++
++@item profile (@emph{profile})
++Set profile restrictions. Can assume one of the following possible values:
++
++Default is 2 (main10).
++
++@table @samp
++@item main
++main profile
++@item main10
++main10 profile
++@end table
++
++@item level
++
++@option{profile} sets the value of @emph{profile_idc} and the @emph{constraint_set*_flag}s.
++@option{level} sets the value of @emph{level_idc}.
++
++@end table
++
++The encoder also has its own specific options:
++
++@table @option
++@item vui
++Enables or disables the vui structure in the HEVC elementary
++bitstream. 0 = Off, 1 = On. Default is 0 (Off).
++
++@item aud (@emph{aud})
++Enable use of access unit delimiters when set to 1. Default is 0 (Off).
++
++@item hielevel
++Set hierarchical levels. Can assume one of the following possible values:
++
++Default is 3 (4level).
++
++@table @samp
++@item flat
++none hierarchy level
++@item 2level
++2-level hierarchy
++@item 3level
++3-level hierarchy
++@item 4level
++4-level hierarchy
++@end table
++
++@item la_depth
++Set look-ahead depth, depending on bit rate control mode @option{rc}, when
++bit rate control mode is set to vbr it's best to set this parameter to be
++equal to the intra period value (such is the default set by the encoder),
++when cqp is chosen, then a look ahead is recommended. The range is from @var{0-256}.
++
++@item intra_ref_type
++Set intra refesh type. Can assume one of the following possible values:
++
++Default is 2 (idr).
++
++@table @samp
++@item cra
++open group of pictures
++@item idr
++closed group of pictures
++@end table
++
++@item preset
++A preset defining the quality vs density tradeoff point that the
++encoding is to be performed at.(e.g. 0 is the highest quality mode,
++12 is the highest density mode). The range is from @var{0-12}. Default is 9.
++
++@item tier
++Set @emph{general_tier_flag}.  This may affect the level chosen for the stream
++if it is not explicitly specified. Can assume one of the following possible values:
++
++Default is 1 (main).
++
++@table @samp
++@item main
++main tier
++@item high
++high tier
++@end table
++
++@item rc
++Set bit rate control mode. Can assume one of the following possible values:
++
++Default is 0 (cqp).
++
++@table @samp
++@item cqp
++Constant QP (CQP) mode
++@item vbr
++Variable Bit Rate (VBR) mode
++@end table
++
++@item qp
++Initial quantization parameter for the intra pictures used when
++@option{rc} is cqp mode. The range is from @var{0-51}. Default is 32.
++
++@item sc_detection
++Enables or disables the scene change detection algorithm. Default is 0 (disable).
++
++@item tune
++Set quality tuning mode. Can assume one of the following possible values:
++
++Default is 1 (objective).
++
++@table @samp
++@item subjective
++Subjective quality mode
++@item objective
++Objective quality mode for PSNR / SSIM / VMAF benchmarking
++@end table
++
++@item bl_mode
++Enables or disables Random Access Prediction. Default is 0 (disable).
++@end table
++
+ @section libtheora
+ 
+ libtheora Theora encoder wrapper.
+diff --git a/doc/general.texi b/doc/general.texi
+index 2b015f1..070997a 100644
+--- a/doc/general.texi
++++ b/doc/general.texi
+@@ -280,6 +280,14 @@ The dispatcher is open source and can be downloaded from
+ with the @code{--enable-libmfx} option and @code{pkg-config} needs to be able to
+ locate the dispatcher's @code{.pc} files.
+ 
++@section Scalable Video Technology for HEVC
++
++FFmpeg can make use of the SVT-HEVC library for HEVC encoding.
++
++Go to @url{https://github.com/intel/SVT-HEVC.git} and follow the instructions
++for installing the library. Pass @code{--enable-libsvthevc} to configure to
++enable it.
++
+ @section AMD VCE
+ 
+ FFmpeg can use the AMD Advanced Media Framework library for accelerated H.264
+-- 
+2.7.4
+

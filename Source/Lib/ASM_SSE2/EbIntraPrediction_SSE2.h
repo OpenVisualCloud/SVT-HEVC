@@ -6,7 +6,7 @@
 #ifndef EbIntraPrediction_SSE2_h
 #define EbIntraPrediction_SSE2_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 /*******************************************
 * Function Pointer Table

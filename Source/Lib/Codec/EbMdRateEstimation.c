@@ -5,7 +5,6 @@
 
 #include <stdlib.h>
 
-#include "EbTypes.h"
 #include "EbUtility.h"
 #include "EbMdRateEstimation.h"
 #include "EbDefinitions.h"
@@ -23,7 +22,7 @@
  *  bitNum
  *   output for the number of bits needed for exponential golomb code
  *********************************************************************/
-inline EB_ERRORTYPE ExponentialGolombBits(
+static inline EB_ERRORTYPE ExponentialGolombBits(
     EB_U32  symbol,
     EB_U32  count,
     EB_U32 *bitNum)

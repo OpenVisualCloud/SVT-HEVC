@@ -7,7 +7,7 @@
 #include <string.h>
 
 #include "EbMcp.h"
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbPictureBufferDesc.h"
 #include "EbPictureOperators.h"
 #include "EbDefinitions.h"

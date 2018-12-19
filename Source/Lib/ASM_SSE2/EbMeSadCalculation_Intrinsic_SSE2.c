@@ -5,7 +5,7 @@
 
 #include "EbMeSadCalculation_SSE2.h"
 #include <emmintrin.h>
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 
 void SadCalculation_8x8_16x16_SSE2_INTRIN(
 	EB_U8   *src,

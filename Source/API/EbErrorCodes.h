@@ -10,23 +10,9 @@
 extern "C" {
 #endif // __cplusplus
 
+#define   CHECK_REPORT_ERROR(cond, appCallbackPtr, errorCode)  { if(!(cond)){(appCallbackPtr)->ErrorHandler(((appCallbackPtr)->handle),(errorCode));while(1);}  }
 
-#define   CHECK_REPORT_ERROR(cond, appCallbackPtr, errorCode)  if(!(cond))                                           \
-                                                                {                                                    \
-                                                                    appCallbackPtr->callbackFunctions.ErrorHandler(  \
-                                                                        ((appCallbackPtr)->handle),                  \
-                                                                        ((appCallbackPtr)->appPrivateData),          \
-                                                                        (errorCode),                                 \
-                                                                        (0),                                         \
-                                                                        ((appCallbackPtr)->appPrivateData));                                    \
-                                                                }
-
-#define   CHECK_REPORT_ERROR_NC(appCallbackPtr, errorCode)     appCallbackPtr->callbackFunctions.ErrorHandler(  \
-                                                                        ((appCallbackPtr)->handle),                  \
-                                                                        ((appCallbackPtr)->appPrivateData),          \
-                                                                        (errorCode),                                 \
-                                                                        (0),                                         \
-                                                                        ((appCallbackPtr)->appPrivateData));         \
+#define   CHECK_REPORT_ERROR_NC(appCallbackPtr, errorCode)     { {(appCallbackPtr)->ErrorHandler(((appCallbackPtr)->handle),(errorCode));while(1);} }                              
 
 
 typedef enum ENCODER_ERROR_CODES
@@ -202,6 +188,7 @@ typedef enum ENCODER_ERROR_CODES
     EB_ENC_RC_ERROR5                    = 0x1404, 
     EB_ENC_RC_ERROR6                    = 0x1405,
     EB_ENC_RC_ERROR7                    = 0x1406,
+    EB_ENC_RC_ERROR8                    = 0x1407,
 
     //EB_ENC_PU_ERRORS                  = 0x1500,
     EB_ENC_PU_ERROR1                    = 0x1500,
@@ -237,6 +224,8 @@ typedef enum ENCODER_ERROR_CODES
     EB_ENC_RES_COORD_SubPictureFlagNotActive    = 0x2104,
     EB_ENC_RES_COORD_InputPictureNotEnoughRightPadding = 0x2105,
     EB_ENC_RES_COORD_InputPictureNotEnoughBottomPadding = 0x2106,
+    EB_ENC_RES_COORD_InvalidQP = 0x2108,
+    EB_ENC_RES_COORD_InvalidSliceType = 0x2109,
 
     //EB_ENC_PD_ERRORS                  = 0x2100,
     EB_ENC_PD_ERROR1                    = 0x2100,

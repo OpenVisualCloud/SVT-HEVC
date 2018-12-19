@@ -3,7 +3,7 @@
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbComputeSAD_SadLoopKernel_AVX512.h"
 
 #ifndef _mm256_setr_m128i
@@ -999,8 +999,8 @@ void  GetEightHorizontalSearchPointResults_8x8_16x16_PU_AVX512_INTRIN(
 	ref0temp = _mm256_inserti128_si256( _mm256_castsi128_si256(_mm_loadu_si128((__m128i*    ) (ref                   )))  , _mm_loadu_si128((__m128i*)(ref                   + 8 )), 0x1);
 	ref1temp = _mm256_inserti128_si256( _mm256_castsi128_si256(_mm_loadu_si128((__m128i*    ) (ref + (refStride  * 8 )))) , _mm_loadu_si128((__m128i*)(ref + (refStride * 8) + 8 )), 0x1);
 
-	temp  = _mm256_broadcastsi128_si256(*(__m128i*) (src                   ));
-	temp1 = _mm256_broadcastsi128_si256(*(__m128i*) (src + (srcStride * 8) ));
+	temp  = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*) (src                   )));
+	temp1 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*) (src + (srcStride * 8) )));
 
 	ss0temp = _mm256_permutevar8x32_epi32(temp , _mm256_setr_epi64x(0x0               , 0x0               , 0x0006000600060006, 0x0006000600060006));
 	ss2temp = _mm256_permutevar8x32_epi32(temp , _mm256_setr_epi64x(0x0001000100010001, 0x0001000100010001, 0x0007000700070007, 0x0007000700070007));
@@ -1019,8 +1019,8 @@ void  GetEightHorizontalSearchPointResults_8x8_16x16_PU_AVX512_INTRIN(
 	ref2temp = _mm256_inserti128_si256( _mm256_castsi128_si256(_mm_loadu_si128((__m128i*    ) (ref                   )))  , _mm_loadu_si128((__m128i*)(ref                   + 8 )), 0x1);
 	ref3temp = _mm256_inserti128_si256( _mm256_castsi128_si256(_mm_loadu_si128((__m128i*    ) (ref + (refStride  * 8 )))) , _mm_loadu_si128((__m128i*)(ref + (refStride * 8) + 8 )), 0x1);
 
-	temp2 = _mm256_broadcastsi128_si256(*(__m128i*) (src));
-	temp3 = _mm256_broadcastsi128_si256(*(__m128i*) (src + (srcStride * 8)));
+	temp2 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*) (src                   )));
+	temp3 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*) (src + (srcStride * 8) )));
 
 	ss4temp = _mm256_permutevar8x32_epi32(temp2, _mm256_setr_epi64x(0x0               , 0x0               , 0x0006000600060006, 0x0006000600060006));
 	ss6temp = _mm256_permutevar8x32_epi32(temp2, _mm256_setr_epi64x(0x0001000100010001, 0x0001000100010001, 0x0007000700070007, 0x0007000700070007));
@@ -1038,8 +1038,8 @@ void  GetEightHorizontalSearchPointResults_8x8_16x16_PU_AVX512_INTRIN(
 	ref0temp = _mm256_inserti128_si256( _mm256_castsi128_si256(_mm_loadu_si128((__m128i*    ) (ref                   )))  , _mm_loadu_si128((__m128i*)(ref                   + 8 )), 0x1);
 	ref1temp = _mm256_inserti128_si256( _mm256_castsi128_si256(_mm_loadu_si128((__m128i*    ) (ref + (refStride  * 8 )))) , _mm_loadu_si128((__m128i*)(ref + (refStride * 8) + 8 )), 0x1);
 
-	temp    = _mm256_broadcastsi128_si256(*(__m128i*) (src                   ));
-	temp1   = _mm256_broadcastsi128_si256(*(__m128i*) (src + (srcStride * 8) ));
+	temp  = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*) (src                   )));
+	temp1 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*) (src + (srcStride * 8) )));
 
 	ss0temp = _mm256_permutevar8x32_epi32(temp , _mm256_setr_epi64x(0x0               , 0x0               , 0x0006000600060006, 0x0006000600060006));
 	ss2temp = _mm256_permutevar8x32_epi32(temp , _mm256_setr_epi64x(0x0001000100010001, 0x0001000100010001, 0x0007000700070007, 0x0007000700070007));
@@ -1057,8 +1057,8 @@ void  GetEightHorizontalSearchPointResults_8x8_16x16_PU_AVX512_INTRIN(
 	ref2temp = _mm256_inserti128_si256( _mm256_castsi128_si256(_mm_loadu_si128((__m128i*    ) (ref                   )))  , _mm_loadu_si128((__m128i*)(ref                   + 8 )), 0x1);
 	ref3temp = _mm256_inserti128_si256( _mm256_castsi128_si256(_mm_loadu_si128((__m128i*    ) (ref + (refStride  * 8 )))) , _mm_loadu_si128((__m128i*)(ref + (refStride * 8) + 8 )), 0x1);
 
-	temp2 = _mm256_broadcastsi128_si256(*(__m128i*) (src));
-	temp3 = _mm256_broadcastsi128_si256(*(__m128i*) (src + (srcStride * 8)));
+	temp2 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*) (src                   )));
+	temp3 = _mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*) (src + (srcStride * 8) )));
 
 	ss4temp = _mm256_permutevar8x32_epi32(temp2, _mm256_setr_epi64x(0x0               , 0x0               , 0x0006000600060006, 0x0006000600060006));
 	ss6temp = _mm256_permutevar8x32_epi32(temp2, _mm256_setr_epi64x(0x0001000100010001, 0x0001000100010001, 0x0007000700070007, 0x0007000700070007));
@@ -1383,7 +1383,7 @@ void GetEightHorizontalSearchPointResults_32x32_64x64_PU_AVX2_INTRIN(
 	// ss3: Search Pos 3,7 for blocks 0,1,2,3
 
 	ss4 = _mm256_cmpgt_epi32(ss0, ss1);
-	// not different printf("%d\n", _mm_extract_epi32(_mm256_extracti128_si256(ss4, 0), 0)); // DEBUG
+	// not different SVT_LOG("%d\n", _mm_extract_epi32(_mm256_extracti128_si256(ss4, 0), 0)); // DEBUG
 	//ss4 = _mm256_or_si256(_mm256_cmpgt_epi32(ss0, ss1), _mm256_cmpeq_epi32(ss0, ss1));
 	ss0 = _mm256_min_epi32(ss0, ss1);
 	ss5 = _mm256_cmpgt_epi32(ss2, ss3);
@@ -1436,17 +1436,17 @@ void GetEightHorizontalSearchPointResults_32x32_64x64_PU_AVX2_INTRIN(
 #endif
 
 	//// Should be fine
-	//printf("sad0 %d, %d, %d, %d\n", _mm_extract_epi32(s0, 0), _mm_extract_epi32(s0, 1), _mm_extract_epi32(s0, 2), _mm_extract_epi32(s0, 3)); // DEBUG
-	//printf("sad1 %d, %d, %d, %d\n", _mm_extract_epi32(s1, 0), _mm_extract_epi32(s1, 1), _mm_extract_epi32(s1, 2), _mm_extract_epi32(s1, 3)); // DEBUG
-	//printf("mv0 %d, %d, %d, %d\n", _mm_extract_epi32(s2, 0), _mm_extract_epi32(s2, 1), _mm_extract_epi32(s2, 2), _mm_extract_epi32(s2, 3)); // DEBUG
-	//printf("mv1 %d, %d, %d, %d\n", _mm_extract_epi32(s3, 0), _mm_extract_epi32(s3, 1), _mm_extract_epi32(s3, 2), _mm_extract_epi32(s3, 3)); // DEBUG
+	//SVT_LOG("sad0 %d, %d, %d, %d\n", _mm_extract_epi32(s0, 0), _mm_extract_epi32(s0, 1), _mm_extract_epi32(s0, 2), _mm_extract_epi32(s0, 3)); // DEBUG
+	//SVT_LOG("sad1 %d, %d, %d, %d\n", _mm_extract_epi32(s1, 0), _mm_extract_epi32(s1, 1), _mm_extract_epi32(s1, 2), _mm_extract_epi32(s1, 3)); // DEBUG
+	//SVT_LOG("mv0 %d, %d, %d, %d\n", _mm_extract_epi32(s2, 0), _mm_extract_epi32(s2, 1), _mm_extract_epi32(s2, 2), _mm_extract_epi32(s2, 3)); // DEBUG
+	//SVT_LOG("mv1 %d, %d, %d, %d\n", _mm_extract_epi32(s3, 0), _mm_extract_epi32(s3, 1), _mm_extract_epi32(s3, 2), _mm_extract_epi32(s3, 3)); // DEBUG
 
 
 	// Choose the best MV out of the two, use s4 to hold results of min
 	s4 = _mm_cmpgt_epi32(s0, s1);
 
 	// DIFFERENT BETWEEN VS AND GCC
-	// printf("%d, %d, %d, %d\n", _mm_extract_epi32(s4, 0), _mm_extract_epi32(s4, 1), _mm_extract_epi32(s4, 2), _mm_extract_epi32(s4, 3)); // DEBUG
+	// SVT_LOG("%d, %d, %d, %d\n", _mm_extract_epi32(s4, 0), _mm_extract_epi32(s4, 1), _mm_extract_epi32(s4, 2), _mm_extract_epi32(s4, 3)); // DEBUG
 
 	//s4 = _mm_or_si128(_mm_cmpgt_epi32(s0, s1), _mm_cmpeq_epi32(s0, s1));
 	s0 = _mm_min_epi32(s0, s1);
@@ -1478,7 +1478,7 @@ void GetEightHorizontalSearchPointResults_32x32_64x64_PU_AVX2_INTRIN(
 	// Determine which candidates are better than the current best SAD's. 
 	// s4 is used to determine the MV's of the new best SAD's
 	s4 = _mm_cmpgt_epi32(s1, s0);
-	// not different printf("%d, %d, %d, %d\n", _mm_extract_epi32(s4, 0), _mm_extract_epi32(s4, 1), _mm_extract_epi32(s4, 2), _mm_extract_epi32(s4, 3)); // DEBUG
+	// not different SVT_LOG("%d, %d, %d, %d\n", _mm_extract_epi32(s4, 0), _mm_extract_epi32(s4, 1), _mm_extract_epi32(s4, 2), _mm_extract_epi32(s4, 3)); // DEBUG
 	//s4 = _mm_or_si128(_mm_cmpgt_epi32(s1, s0), _mm_cmpeq_epi32(s1, s0));
 	// Combine old and new min SAD's
 	s0 = _mm_min_epu32(s0, s1);

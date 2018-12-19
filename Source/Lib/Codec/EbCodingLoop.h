@@ -6,7 +6,7 @@
 #ifndef EbCodingLoop_h
 #define EbCodingLoop_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbCodingUnit.h"
 #include "EbSequenceControlSet.h"
 #include "EbModeDecisionProcess.h"

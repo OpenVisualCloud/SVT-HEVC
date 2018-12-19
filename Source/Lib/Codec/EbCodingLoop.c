@@ -5,7 +5,7 @@
 
 #include <string.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbUtility.h"
 #include "EbTransformUnit.h"
 #include "EbRateDistortionCost.h"
@@ -3462,13 +3462,16 @@ EB_EXTERN void EncodePass(
 
     // This falg needs to be set true when SAO is enabled for Non reference pictures so that SAO uses filtered samples
     EB_BOOL dlfEnableFlag = (EB_BOOL)(!sequenceControlSetPtr->staticConfig.disableDlfFlag &&
-        (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag));
+        (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag)) ||
+        sequenceControlSetPtr->staticConfig.reconEnabled;
 
     dlfEnableFlag = contextPtr->allowEncDecMismatch ? EB_FALSE : dlfEnableFlag;
 
     const EB_BOOL isIntraLCU = contextPtr->mdContext->limitIntra ? isIntraPresent(lcuPtr) : EB_TRUE;
 
-    EB_BOOL doRecon = (EB_BOOL)(contextPtr->mdContext->limitIntra == 0 || isIntraLCU == 1) || pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag;
+    EB_BOOL doRecon = (EB_BOOL)(contextPtr->mdContext->limitIntra == 0 || isIntraLCU == 1) ||
+                pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag ||
+                sequenceControlSetPtr->staticConfig.reconEnabled;
 
 
     CabacCost_t     *cabacCost = pictureControlSetPtr->cabacCost;
@@ -4276,7 +4279,7 @@ EB_EXTERN void EncodePass(
             cbCoeffBits = 0;
             crCoeffBits = 0;
 
-            //printf("sizeof %i \n",sizeof(CodingUnit_t));
+            //SVT_LOG("sizeof %i \n",sizeof(CodingUnit_t));
             EB_U32  totTu = (cuStats->size < MAX_LCU_SIZE) ? 1 : 4;
             EB_U8   tuIt;
 

@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbUtility.h"
 #include "EbTransformUnit.h"
 #include "EbRateDistortionCost.h"
@@ -1592,7 +1592,7 @@ void ProductCodingLoopInitFastLoop(
 	return;
 }
 
-EB_EXTERN inline EB_ERRORTYPE ChromaPrediction(
+static inline EB_ERRORTYPE ChromaPrediction(
 	PictureControlSet_t                 *pictureControlSetPtr,
 	ModeDecisionCandidateBuffer_t       *candidateBuffer,
 	EB_U32                               cuChromaOriginIndex,
@@ -2276,7 +2276,7 @@ void PerformIntraPrediction(
         }
     }
     else{
-        printf("ERR: prediction not ready");
+        SVT_LOG("ERR: prediction not ready");
     }
    
 }
@@ -2345,7 +2345,7 @@ void Intra4x4VsIntra8x8(
     EB_U32                  puIndex;
 
     if(cuPtr->predictionModeFlag!=INTRA_MODE)
-        printf("WARNING: cuPtr->costLuma needs to be filled in inter case"); 
+        SVT_LOG("WARNING: cuPtr->costLuma needs to be filled in inter case");
 
 		if (*intra4x4Cost < contextPtr->mdLocalCuUnit[cuPtr->leafIndex].costLuma) {
 
@@ -5951,7 +5951,7 @@ EB_EXTERN EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
 
                     EB_U8 leafIndex = leafIndexArray[leafCount];
 
-                    EB_U8 neighborLeafIndex;
+                    EB_U8 neighborLeafIndex = 0;
 
                     CodingUnit_t * const cuPtr = contextPtr->cuPtr = lcuPtr->codedLeafArrayPtr[leafIndex];
                     const CodedUnitStats_t *cuStatsPtr = contextPtr->cuStats = GetCodedUnitStats(leafIndex);

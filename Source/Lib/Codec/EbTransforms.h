@@ -17,7 +17,7 @@
 
 #include "EbEncDecProcess.h"
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -238,7 +238,7 @@ extern void MatMult(
     const EB_U32     coeffStride,
     const EB_U16     *maskingMatrix,
     const EB_U32     maskingMatrixStride,
-    EB_U32           computeSize,
+    const EB_U32     computeSize,
     const EB_S32     offset,
     const EB_S32     shiftNum,
     EB_U32			 *nonzerocoeff);

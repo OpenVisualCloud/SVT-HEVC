@@ -4,7 +4,7 @@
 */
 
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbTransQuantBuffers.h"
 #include "EbDefinitions.h"
 #include "EbPictureBufferDesc.h"

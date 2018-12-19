@@ -6,7 +6,7 @@
 #ifndef EbEntropyCodingObject_h
 #define EbEntropyCodingObject_h
 
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbCabacContextModel.h"
 #ifdef __cplusplus
 extern "C" {

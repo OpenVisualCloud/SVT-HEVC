@@ -6,7 +6,6 @@
 #ifndef EbTransformUnit_h
 #define EbTransformUnit_h
 
-#include "EbTypes.h"
 #include "EbDefinitions.h"
 #ifdef __cplusplus
 extern "C" {

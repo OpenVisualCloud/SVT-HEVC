@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 #include <immintrin.h>
-#include "EbTypes.h"
+#include "EbDefinitions.h"
 #include "EbPictureOperators_AVX2.h"
 
 #define _mm256_set_m128i(/* __m128i */ hi, /* __m128i */ lo) \
@@ -1259,7 +1259,6 @@ EB_S32  sumResidual8bit_AVX2_INTRIN(
    }
 
    else{
-       printf("\n add the rest \n");
        return 0;
    }
 
@@ -1403,10 +1402,6 @@ void memset16bitBlock_AVX2_INTRIN (
 
    }
 
-
-   else{
-       printf("\n add the rest \n");
-   }
 
 }
 
