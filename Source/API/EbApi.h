@@ -102,9 +102,6 @@ typedef enum EB_ERRORTYPE
 
 #define EB_BUFFERFLAG_EOS 0x00000001 
 
-// Display Total Memory at the end of the memory allocations
-#define DISPLAY_MEMORY                                  0
-
 // For 8-bit and 10-bit packed inputs, the luma, cb, and cr fields should be used
 //   for the three input picture planes.  However, for 10-bit unpacked planes the
 //   lumaExt, cbExt, and crExt fields should be used hold the extra 2-bits of 
