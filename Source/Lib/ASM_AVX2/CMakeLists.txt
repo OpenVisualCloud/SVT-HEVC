@@ -34,7 +34,7 @@ else()
 
 endif()
 
-add_library(ASM_AVX2
+add_library(ASM_AVX2 STATIC
     EbCombinedAveragingSAD_Intrinsic_AVX2.h
     EbCombinedAveragingSAD_Intrinsic_AVX512.h
     EbComputeSAD_AVX2.h
