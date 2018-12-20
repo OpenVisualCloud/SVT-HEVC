@@ -13,7 +13,7 @@
 - git apply ../SVT-HEVC/ffmpeg_plugin/0002-doc-Add-libsvt_hevc-encoder-docs.patch
 - export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
 - export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
-- ./configure --prefix=/usr --libdir=/usr/lib --enable-nonfree --enable-static --disable-shared --enable-libsvthevc --enable-gpl
+- ./configure --enable-libsvthevc
 - make -j `nproc`
 
 3. Verify
