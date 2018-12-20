@@ -12,7 +12,7 @@ include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
 include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/)
 
 # Utility Source Files
-add_library(ASM_SSE2
+add_library(ASM_SSE2 STATIC
     EbAvcStyleMcp_SSE2.h
     EbComputeMean_SSE2.h
     EbComputeSAD_SSE2.h
