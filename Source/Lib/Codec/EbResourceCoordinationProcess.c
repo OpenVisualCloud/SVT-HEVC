@@ -422,6 +422,54 @@ EB_ERRORTYPE SignalDerivationPreAnalysisOq(
     return return_error;
 }
 
+/******************************************************
+* Derive Pre-Analysis settings for VMAF
+Input   : encoder mode and tune
+Output  : Pre-Analysis signal(s)
+******************************************************/
+EB_ERRORTYPE SignalDerivationPreAnalysisVMAF(
+	SequenceControlSet_t       *sequenceControlSetPtr,
+	PictureParentControlSet_t  *pictureControlSetPtr) {
+
+	EB_ERRORTYPE return_error = EB_ErrorNone;
+
+	EB_U8 inputResolution = sequenceControlSetPtr->inputResolution;
+
+	// Derive Noise Detection Method
+	pictureControlSetPtr->noiseDetectionMethod = NOISE_DETECT_QUARTER_PRECISION;
+
+	// Derive Noise Detection Threshold
+	pictureControlSetPtr->noiseDetectionTh = 1;
+
+	// Derive HME Flag
+	if (sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
+		EB_U8  hmeMeLevel = pictureControlSetPtr->encMode;
+		EB_U32 inputRatio = sequenceControlSetPtr->lumaWidth / sequenceControlSetPtr->lumaHeight;
+		EB_U8 resolutionIndex = inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ? 0 : // 480P
+			(inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio < 2) ? 1 : // 720P
+			(inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio > 3) ? 2 : // 1080I
+			(inputResolution <= INPUT_SIZE_1080p_RANGE) ? 3 : // 1080I
+			4;    // 4K
+		resolutionIndex = 3;
+		pictureControlSetPtr->enableHmeFlag = EB_TRUE;
+		pictureControlSetPtr->enableHmeLevel0Flag = EnableHmeLevel0FlagVMAF[resolutionIndex][hmeMeLevel];
+		pictureControlSetPtr->enableHmeLevel1Flag = EnableHmeLevel1FlagVMAF[resolutionIndex][hmeMeLevel];
+		pictureControlSetPtr->enableHmeLevel2Flag = EnableHmeLevel2FlagVMAF[resolutionIndex][hmeMeLevel];
+	}
+	else {
+		pictureControlSetPtr->enableHmeFlag = sequenceControlSetPtr->staticConfig.enableHmeFlag;
+		pictureControlSetPtr->enableHmeLevel0Flag = sequenceControlSetPtr->staticConfig.enableHmeLevel0Flag;
+		pictureControlSetPtr->enableHmeLevel1Flag = sequenceControlSetPtr->staticConfig.enableHmeLevel1Flag;
+		pictureControlSetPtr->enableHmeLevel2Flag = sequenceControlSetPtr->staticConfig.enableHmeLevel2Flag;
+	}
+
+	pictureControlSetPtr->enableDenoiseSrcFlag = EB_FALSE;
+	pictureControlSetPtr->disableVarianceFlag = EB_TRUE;
+
+	return return_error;
+}
+
+
 /***************************************
  * ResourceCoordination Kernel
  ***************************************/
@@ -666,6 +714,11 @@ void* ResourceCoordinationKernel(void *inputPtr)
                 sequenceControlSetPtr,
                 pictureControlSetPtr);
         }
+        else if (sequenceControlSetPtr->staticConfig.tune == TUNE_VMAF) {
+            SignalDerivationPreAnalysisVMAF(
+                sequenceControlSetPtr,
+                pictureControlSetPtr);
+		}
         else {
             SignalDerivationPreAnalysisOq(
                 sequenceControlSetPtr,

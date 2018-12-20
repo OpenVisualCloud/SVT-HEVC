@@ -1917,7 +1917,7 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.codeVpsSpsPps = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->codeVpsSpsPps;
     sequenceControlSetPtr->staticConfig.codeEosNal = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->codeEosNal;
     
-    if (sequenceControlSetPtr->staticConfig.tune == 1) {
+    if (sequenceControlSetPtr->staticConfig.tune >= 1) {
         sequenceControlSetPtr->staticConfig.bitRateReduction = 0;
         sequenceControlSetPtr->staticConfig.improveSharpness = 0;
     }
@@ -2263,7 +2263,7 @@ static EB_ERRORTYPE VerifySettings(\
             SVT_LOG("Error instance %u: encMode must be [0 - 12] for this resolution\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
         }
-        else if (config->encMode > 10 && config->tune == 1) {
+        else if (config->encMode > 10 && config->tune >= 1) {
             SVT_LOG("Error instance %u: encMode must be [0 - 10] for this resolution\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
         }
@@ -2292,7 +2292,7 @@ static EB_ERRORTYPE VerifySettings(\
         if (config->encMode > MAX_SUPPORTED_MODES_4K_SQ - 1 && config->tune == 0) {
             SVT_LOG("Error instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_4K_SQ-1);
 			return_error = EB_ErrorBadParameter;
-        }else if (config->encMode > MAX_SUPPORTED_MODES_4K_OQ - 1 && config->tune == 1) {
+        }else if (config->encMode > MAX_SUPPORTED_MODES_4K_OQ - 1 && config->tune >= 1) {
             SVT_LOG("Error instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_4K_OQ-1);
 			return_error = EB_ErrorBadParameter;
 		}
@@ -2482,17 +2482,17 @@ static EB_ERRORTYPE VerifySettings(\
 		return_error = EB_ErrorBadParameter;
 	}
     if (config->rateControlMode == 1 && config->tune > 0) {
-        SVT_LOG("Error Instance %u: The rate control is not supported for OQ mode (Tune = 1 )\n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: The rate control is not supported for OQ mode (Tune = 1 ) and VMAF mode (Tune = 2)\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->tune > 0 && config->bitRateReduction == 1){
-        SVT_LOG("Error Instance %u: Bit Rate Reduction is not supported for OQ mode (Tune = 1 )\n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: Bit Rate Reduction is not supported for OQ mode (Tune = 1 ) and VMAF mode (Tune = 2)\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->tune > 0 && config->improveSharpness == 1){
-        SVT_LOG("Error Instance %u: Improve sharpness is not supported for OQ mode (Tune = 1 )\n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: Improve sharpness is not supported for OQ mode (Tune = 1 ) and VMAF mode (Tune = 2)\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -2522,8 +2522,8 @@ static EB_ERRORTYPE VerifySettings(\
 		return_error = EB_ErrorBadParameter;
     }
 
-    if (config->tune > 1) {
-        SVT_LOG("Error instance %u : Invalid Tune. Tune must be [0 - 1]\n", channelNumber + 1);
+    if (config->tune > 2) {
+        SVT_LOG("Error instance %u : Invalid Tune. Tune must be [0 - 2]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 	if (config->bitRateReduction > 1) {
