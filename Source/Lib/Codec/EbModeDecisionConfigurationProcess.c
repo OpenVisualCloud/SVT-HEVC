@@ -1376,42 +1376,39 @@ void SetTargetBudgetOq(
 	PictureControlSet_t                 *pictureControlSetPtr,
 	ModeDecisionConfigurationContext_t  *contextPtr)
 {
-
 	EB_U32 budget;
     
-    if (contextPtr->adpLevel <= ENC_MODE_4) {
+	if (contextPtr->adpLevel <= ENC_MODE_3) {
 		if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_1080i_RANGE) {
 			if (pictureControlSetPtr->temporalLayerIndex == 0)
 				budget = pictureControlSetPtr->lcuTotalCount * FULL_SEARCH_COST;
 			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
 				budget = (pictureControlSetPtr->ParentPcsPtr->isPan || pictureControlSetPtr->ParentPcsPtr->isTilt) ?
-                    pictureControlSetPtr->lcuTotalCount * U_152 :
-                    pictureControlSetPtr->lcuTotalCount * U_150;
+				pictureControlSetPtr->lcuTotalCount * U_152 :
+				pictureControlSetPtr->lcuTotalCount * U_150;
 			else
-                budget = (pictureControlSetPtr->ParentPcsPtr->isPan || pictureControlSetPtr->ParentPcsPtr->isTilt) ?
-                    pictureControlSetPtr->lcuTotalCount * U_152 :
-                    pictureControlSetPtr->lcuTotalCount * U_145;
-        }
-        else if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_1080p_RANGE) {
-            if (pictureControlSetPtr->temporalLayerIndex == 0)
-                budget = pictureControlSetPtr->lcuTotalCount * FULL_SEARCH_COST;
-            else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
-                budget = pictureControlSetPtr->lcuTotalCount * AVC_COST;
-            else
-                budget = pictureControlSetPtr->lcuTotalCount * U_134;
-        }
-        else {
-
-            if (pictureControlSetPtr->temporalLayerIndex == 0)
-                budget = pictureControlSetPtr->lcuTotalCount * BDP_COST;
-            else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
-                budget = pictureControlSetPtr->lcuTotalCount * OPEN_LOOP_COST;
-            else
-                budget = pictureControlSetPtr->lcuTotalCount * U_109;
-
-        }
-    }
-    else if (contextPtr->adpLevel == ENC_MODE_5) {
+				budget = (pictureControlSetPtr->ParentPcsPtr->isPan || pictureControlSetPtr->ParentPcsPtr->isTilt) ?
+				pictureControlSetPtr->lcuTotalCount * U_152 :
+				pictureControlSetPtr->lcuTotalCount * U_145;
+		}
+		else if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_1080p_RANGE) {
+			if (pictureControlSetPtr->temporalLayerIndex == 0)
+				budget = pictureControlSetPtr->lcuTotalCount * FULL_SEARCH_COST;
+			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
+				budget = pictureControlSetPtr->lcuTotalCount * AVC_COST;
+			else
+				budget = pictureControlSetPtr->lcuTotalCount * U_134;
+		}
+		else {
+			if (pictureControlSetPtr->temporalLayerIndex == 0)
+				budget = pictureControlSetPtr->lcuTotalCount * BDP_COST;
+			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
+				budget = pictureControlSetPtr->lcuTotalCount * OPEN_LOOP_COST;
+			else
+				budget = pictureControlSetPtr->lcuTotalCount * U_109;
+		}
+	}
+    else if (contextPtr->adpLevel <= ENC_MODE_5) {
         if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_1080i_RANGE) {
             if (pictureControlSetPtr->temporalLayerIndex == 0)
                 budget = pictureControlSetPtr->lcuTotalCount * FULL_SEARCH_COST;
@@ -1441,7 +1438,7 @@ void SetTargetBudgetOq(
                 budget = pictureControlSetPtr->lcuTotalCount * U_121;
         }
 	}
-    else if (contextPtr->adpLevel <= ENC_MODE_8) {
+	else if (contextPtr->adpLevel <= ENC_MODE_7) {
 		if (pictureControlSetPtr->temporalLayerIndex == 0)
 			budget = pictureControlSetPtr->lcuTotalCount * BDP_COST;
 		else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
@@ -1449,32 +1446,51 @@ void SetTargetBudgetOq(
 		else
 			budget = pictureControlSetPtr->lcuTotalCount * U_109;
 	}
+    else if (contextPtr->adpLevel <= ENC_MODE_8) {
+		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+			if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0)
+				budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+				pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_127 :
+				(contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+				pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_125 :
+				pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_121;
+			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag)
+				budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+				pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * OPEN_LOOP_COST :
+				(contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+				pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+				pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
+			else
+				budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+				pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+				pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
+		}
+		else {
+			if (pictureControlSetPtr->temporalLayerIndex == 0)
+				budget = pictureControlSetPtr->lcuTotalCount * BDP_COST;
+			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
+				budget = pictureControlSetPtr->lcuTotalCount * OPEN_LOOP_COST;
+			else
+				budget = pictureControlSetPtr->lcuTotalCount * U_109;
+		}
+	}
     else {
-        if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_1080i_RANGE) {
-            if (pictureControlSetPtr->temporalLayerIndex == 0)
-                budget = pictureControlSetPtr->lcuTotalCount * BDP_COST;
-            else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
-                budget = pictureControlSetPtr->lcuTotalCount * OPEN_LOOP_COST;
-            else
-                budget = pictureControlSetPtr->lcuTotalCount * LIGHT_OPEN_LOOP_COST;
-        }
-        else if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_1080p_RANGE) {
-            if (pictureControlSetPtr->temporalLayerIndex == 0)
-                budget = pictureControlSetPtr->lcuTotalCount * BDP_COST;
-            else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
-                budget = pictureControlSetPtr->lcuTotalCount * OPEN_LOOP_COST;
-            else
-                budget = pictureControlSetPtr->lcuTotalCount * U_107;
-        }
-        else {
-            if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0)
-                budget = pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_127;
-            else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
-                budget = pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * OPEN_LOOP_COST;
-            else
-                budget = pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_107;
-
-        }
+		if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0)
+			budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_127 :
+			(contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_125 :
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_121;
+		else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag)
+			budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * OPEN_LOOP_COST :
+			(contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
+		else
+			budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
     }
 
 	contextPtr->budget = budget;

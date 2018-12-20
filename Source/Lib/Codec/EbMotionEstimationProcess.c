@@ -208,7 +208,7 @@ void* SetMeHmeParamsOq(
     if (inputResolution == INPUT_SIZE_4K_RANGE) {
         if ((sequenceControlSetPtr->staticConfig.frameRate >> 16) <= 30) {
 
-            if (hmeMeLevel == ENC_MODE_6 || hmeMeLevel == ENC_MODE_7 || hmeMeLevel == ENC_MODE_8) {
+            if (hmeMeLevel == ENC_MODE_6 || hmeMeLevel == ENC_MODE_7) {
                 meContextPtr->hmeLevel0TotalSearchAreaWidth         = MAX(96  , meContextPtr->hmeLevel0TotalSearchAreaWidth        );
                 meContextPtr->hmeLevel0TotalSearchAreaHeight        = MAX(64  , meContextPtr->hmeLevel0TotalSearchAreaHeight       );
                 meContextPtr->hmeLevel0SearchAreaInWidthArray[0]    = MAX(48  , meContextPtr->hmeLevel0SearchAreaInWidthArray[0]   ); 
@@ -216,7 +216,7 @@ void* SetMeHmeParamsOq(
                 meContextPtr->hmeLevel0SearchAreaInHeightArray[0]   = MAX(32  , meContextPtr->hmeLevel0SearchAreaInHeightArray[0]  );
                 meContextPtr->hmeLevel0SearchAreaInHeightArray[1]   = MAX(32  , meContextPtr->hmeLevel0SearchAreaInHeightArray[1]  );
             }
-            else if (hmeMeLevel >= ENC_MODE_9) {
+            else if (hmeMeLevel >= ENC_MODE_8) {
                 meContextPtr->hmeLevel0TotalSearchAreaWidth         = MAX(64  , meContextPtr->hmeLevel0TotalSearchAreaWidth        );
                 meContextPtr->hmeLevel0TotalSearchAreaHeight        = MAX(48  , meContextPtr->hmeLevel0TotalSearchAreaHeight       );
                 meContextPtr->hmeLevel0SearchAreaInWidthArray[0]    = MAX(32  , meContextPtr->hmeLevel0SearchAreaInWidthArray[0]   ); 
@@ -603,42 +603,30 @@ EB_ERRORTYPE SignalDerivationMeKernelOq(
     }
 
     // Set ME Fractional Search Method
-    if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
+    if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
         contextPtr->meContextPtr->fractionalSearchMethod = SSD_SEARCH;
-    }
-    else if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
-    
-        if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER) {
-            contextPtr->meContextPtr->fractionalSearchMethod = SSD_SEARCH;
-        }
-        else {
-            contextPtr->meContextPtr->fractionalSearchMethod = SUB_SAD_SEARCH;
-        }
     }
     else {
         contextPtr->meContextPtr->fractionalSearchMethod = SUB_SAD_SEARCH;
     }
 
     // Set 64x64 Fractional Search Flag
-    contextPtr->meContextPtr->fractionalSearch64x64 = EB_FALSE;
+	if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
+		contextPtr->meContextPtr->fractionalSearch64x64 = EB_TRUE;
+	}
+	else {
+		contextPtr->meContextPtr->fractionalSearch64x64 = EB_FALSE;
+	}
 
     // Set OIS Kernel
-    if (pictureControlSetPtr->encMode <= ENC_MODE_5) {
-        if (sequenceControlSetPtr->inputResolution < INPUT_SIZE_4K_RANGE) {
-            contextPtr->oisKernelLevel = (pictureControlSetPtr->temporalLayerIndex == 0) ? EB_TRUE : EB_FALSE;
-        }
-        else {
-            contextPtr->oisKernelLevel = EB_FALSE;
-        }
-    }
-    else if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
-        if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER) {
-            contextPtr->oisKernelLevel = (pictureControlSetPtr->temporalLayerIndex == 0) ? EB_TRUE : EB_FALSE;
-        }
-        else {
-            contextPtr->oisKernelLevel = EB_FALSE;
-        }
-    }
+	if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
+		if (sequenceControlSetPtr->inputResolution < INPUT_SIZE_4K_RANGE) {
+			contextPtr->oisKernelLevel = (pictureControlSetPtr->temporalLayerIndex == 0) ? EB_TRUE : EB_FALSE;
+		}
+		else {
+			contextPtr->oisKernelLevel = EB_FALSE;
+		}
+	}
     else {
         contextPtr->oisKernelLevel = EB_FALSE;
     }
@@ -648,8 +636,7 @@ EB_ERRORTYPE SignalDerivationMeKernelOq(
     // 1: Default
     // 2: Conservative
     if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-
-        if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
+        if (pictureControlSetPtr->encMode <= ENC_MODE_5) {
             if (pictureControlSetPtr->isUsedAsReferenceFlag == EB_TRUE) {
                 contextPtr->oisThSet = 2;  
             }
@@ -662,46 +649,40 @@ EB_ERRORTYPE SignalDerivationMeKernelOq(
         }
     }
     else {
-        if (pictureControlSetPtr->encMode <= ENC_MODE_8) {
-            contextPtr->oisThSet = 2; 
-        }
+		if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
+			contextPtr->oisThSet = 2;
+		}
         else {
             contextPtr->oisThSet = 1; 
         }
     }
     
     // Set valid flag for the best OIS
-    if (pictureControlSetPtr->encMode > ENC_MODE_0) {
-        contextPtr->setBestOisDistortionToValid = EB_TRUE;
-    }
-    else {
-        contextPtr->setBestOisDistortionToValid = EB_FALSE;
-    }
+	contextPtr->setBestOisDistortionToValid = EB_FALSE;
 
     // Set fractional search model
     // 0: search all blocks 
     // 1: selective based on Full-Search SAD & MV.
     // 2: off
     if (pictureControlSetPtr->useSubpelFlag == 1) {
-        if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
+        if (pictureControlSetPtr->encMode <= ENC_MODE_5) {
             contextPtr->meContextPtr->fractionalSearchModel = 0;
         }
-        else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
-            if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER) {
-                contextPtr->meContextPtr->fractionalSearchModel = 0;
-            }
-            else {
-                contextPtr->meContextPtr->fractionalSearchModel = 1;
-            }
-        }
+		else if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
+			if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+				contextPtr->meContextPtr->fractionalSearchModel = 1;
+			}
+			else {
+				contextPtr->meContextPtr->fractionalSearchModel = 0;
+			}
+		}
         else {
             contextPtr->meContextPtr->fractionalSearchModel = 1;
         }
     }
     else {
         contextPtr->meContextPtr->fractionalSearchModel = 2;
-    }
-                    
+    }              
 
     return return_error;
 }

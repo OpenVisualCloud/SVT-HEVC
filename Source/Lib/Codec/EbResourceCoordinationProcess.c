@@ -343,7 +343,7 @@ EB_ERRORTYPE SignalDerivationPreAnalysisOq(
 
     // Derive Noise Detection Method
     if (inputResolution == INPUT_SIZE_4K_RANGE) {
-        if (pictureControlSetPtr->encMode <= ENC_MODE_8) {
+        if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
             pictureControlSetPtr->noiseDetectionMethod = NOISE_DETECT_FULL_PRECISION;
         }
         else {
@@ -351,20 +351,11 @@ EB_ERRORTYPE SignalDerivationPreAnalysisOq(
         }
     }
     else if (inputResolution == INPUT_SIZE_1080p_RANGE) {
-        if (pictureControlSetPtr->encMode <= ENC_MODE_8) {
+        if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
             pictureControlSetPtr->noiseDetectionMethod = NOISE_DETECT_FULL_PRECISION;
         }
         else {
             pictureControlSetPtr->noiseDetectionMethod = NOISE_DETECT_QUARTER_PRECISION;
-        }
-
-    }
-    else if (inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER) {
-        if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
-            pictureControlSetPtr->noiseDetectionMethod = NOISE_DETECT_FULL_PRECISION;
-        }
-        else {
-            pictureControlSetPtr->noiseDetectionMethod = NOISE_DETECT_HALF_PRECISION;
         }
     }
     else {
@@ -373,14 +364,22 @@ EB_ERRORTYPE SignalDerivationPreAnalysisOq(
     
 
     // Derive Noise Detection Threshold
-    if (pictureControlSetPtr->encMode <= ENC_MODE_8) {
+    if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
         pictureControlSetPtr->noiseDetectionTh = 0;
     }
+	else if (pictureControlSetPtr->encMode <= ENC_MODE_8) {
+		if (inputResolution <= INPUT_SIZE_1080p_RANGE) {
+			pictureControlSetPtr->noiseDetectionTh = 1;
+		}
+		else {
+			pictureControlSetPtr->noiseDetectionTh = 0;
+		}
+	}
     else{
         pictureControlSetPtr->noiseDetectionTh = 1;
     }
-    // Derive HME Flag
 
+    // Derive HME Flag
     if (sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
         EB_U8  hmeMeLevel       = pictureControlSetPtr->encMode;
 
@@ -403,8 +402,22 @@ EB_ERRORTYPE SignalDerivationPreAnalysisOq(
         pictureControlSetPtr->enableHmeLevel2Flag   = sequenceControlSetPtr->staticConfig.enableHmeLevel2Flag;
     }
 
-	pictureControlSetPtr->enableDenoiseSrcFlag      =  sequenceControlSetPtr->enableDenoiseFlag;
-	pictureControlSetPtr->disableVarianceFlag       = EB_FALSE;
+	pictureControlSetPtr->enableDenoiseSrcFlag = EB_FALSE;
+
+	if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
+		pictureControlSetPtr->disableVarianceFlag = EB_FALSE;
+	}
+	else if (pictureControlSetPtr->encMode <= ENC_MODE_8) {
+		if (inputResolution == INPUT_SIZE_4K_RANGE) {
+			pictureControlSetPtr->disableVarianceFlag = EB_TRUE;
+		}
+		else {
+			pictureControlSetPtr->disableVarianceFlag = EB_FALSE;
+		}
+	}
+	else {
+		pictureControlSetPtr->disableVarianceFlag = EB_TRUE;
+	}
 
     return return_error;
 }
