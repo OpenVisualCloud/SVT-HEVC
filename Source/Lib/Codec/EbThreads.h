@@ -71,13 +71,16 @@ extern    EB_BOOL                  alternateGroups;
     else { \
         memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
         memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-		if (nElements % 8 == 0) { \
-			*totalLibMemory += (nElements); \
-		} \
-		else { \
-			*totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
-		} \
-        if (numGroups == 2 && alternateGroups){ \
+        if (nElements % 8 == 0) { \
+            *totalLibMemory += (nElements); \
+        } \
+        else { \
+            *totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
+        } \
+        if(numGroups == 1) {\
+            SetThreadAffinityMask(pointer, groupAffinity.Mask);\
+        }\
+        else if (numGroups == 2 && alternateGroups){ \
             groupAffinity.Group = 1 - groupAffinity.Group; \
             SetThreadGroupAffinity(pointer,&groupAffinity,NULL); \
         } \
@@ -90,12 +93,18 @@ extern    EB_BOOL                  alternateGroups;
     } \
     libThreadCount++;
 #else
+#define __USE_GNU
+#define _GNU_SOURCE
+#include <sched.h>
+#include <pthread.h>
+extern    cpu_set_t                   groupAffinity;
 #define EB_CREATETHREAD(type, pointer, nElements, pointerClass, threadFunction, threadContext) \
     pointer = EbCreateThread(threadFunction, threadContext); \
     if (pointer == (type)EB_NULL) { \
         return EB_ErrorInsufficientResources; \
     } \
     else { \
+        pthread_setaffinity_np(*((pthread_t*)pointer),sizeof(cpu_set_t),&groupAffinity); \
         memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
         memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
 		if (nElements % 8 == 0) { \

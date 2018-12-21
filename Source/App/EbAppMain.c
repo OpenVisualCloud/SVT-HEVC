@@ -146,8 +146,8 @@ int main(int argc, char* argv[])
 
         if (return_error == EB_ErrorNone) {
 
-            // Set Default
-            if (configs[0]->targetSocket != 2)
+            // Set main thread affinity
+            if (configs[0]->targetSocket != -1)
                 AssignAppThreadGroup(configs[0]->targetSocket);
 
             // Init the Encoder

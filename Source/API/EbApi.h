@@ -21,7 +21,7 @@ extern "C" {
 
 #define EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT     2
 #define EB_HME_SEARCH_AREA_ROW_MAX_COUNT        2
-    
+
 #ifdef _WIN32
 #define EB_API __declspec(dllexport)
 #else
@@ -228,7 +228,10 @@ typedef struct EB_H265_ENC_CONFIGURATION
     // Application Specific parameters
     unsigned int              channelId;                    // when multiple instances are running within the same application
     unsigned int              activeChannelCount;           // how many channels are active
-    unsigned char             useRoundRobinThreadAssignment;// create one thread on each socket [windows only]
+
+    // Threads management
+    unsigned int              logicalProcessors;             // number of logical processor to run on
+    signed int                targetSocket;                  // target socket to run on
     
     // ASM Type
     EB_ASM			          asmType;                      // level of optimization to use.
