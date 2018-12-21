@@ -1542,6 +1542,9 @@ EB_U32 SetParentPcs(EB_H265_ENC_CONFIGURATION*   config)
     fps = fps > 120 ? 120 : fps;
     fps = fps < 24 ? 24 : fps;
 
+    if ((EB_U32)(config->intraPeriodLength) > (fps << 1) && ((config->sourceWidth * config->sourceHeight) < INPUT_SIZE_4K_TH))
+        fps = config->intraPeriodLength;
+
     EB_U32     lowLatencyInput = (config->encMode < 6 || config->speedControlFlag == 1) ? fps :
         (config->encMode < 8) ? fps >> 1 : (EB_U32)((2 << config->hierarchicalLevels) + SCD_LAD);
 
@@ -1551,9 +1554,9 @@ EB_U32 SetParentPcs(EB_H265_ENC_CONFIGURATION*   config)
         normalLatencyInput = (normalLatencyInput * 3) >> 1;
 
     if (config->latencyMode == 0)
-        inputPic = (normalLatencyInput /*+ config->lookAheadDistance*/);
+        inputPic = (normalLatencyInput + config->lookAheadDistance);
     else
-        inputPic = (EB_U32)(lowLatencyInput /*+ config->lookAheadDistance*/);
+        inputPic = (EB_U32)(lowLatencyInput + config->lookAheadDistance);
     
     return inputPic;
 }
@@ -1572,7 +1575,7 @@ void LoadDefaultBufferConfigurationSettings(
 
     unsigned int coreCount = GetNumCores();
 
-    sequenceControlSetPtr->inputOutputBufferFifoInitCount = inputPic + sequenceControlSetPtr->staticConfig.lookAheadDistance + SCD_LAD;
+    sequenceControlSetPtr->inputOutputBufferFifoInitCount = inputPic + SCD_LAD;
     
     // ME segments
     sequenceControlSetPtr->meSegmentRowCountArray[0] = meSegH;
@@ -2601,6 +2604,11 @@ static EB_ERRORTYPE VerifySettings(\
         SVT_LOG("Error Instance %u: Invalid Speed Control flag [0 - 1]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
+
+    if (config->latencyMode > 1) {
+        SVT_LOG("Error Instance %u: Invalid Latency Mode flag [0 - 1]\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }    
 
     if (((EB_S32)(config->asmType) < 0) || ((EB_S32)(config->asmType) > 1)){
         SVT_LOG("Error Instance %u: Invalid asm type value [0: C Only, 1: Auto] .\n", channelNumber + 1);
