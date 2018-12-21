@@ -235,7 +235,7 @@ void* SetMeHmeParamsOq(
 /************************************************
  * Set ME/HME Params
  ************************************************/
-void* SetMeHmeParamsVMAF(
+void* SetMeHmeParamsVmaf(
 	MeContext_t                     *meContextPtr,
 	PictureParentControlSet_t       *pictureControlSetPtr,
 	SequenceControlSet_t            *sequenceControlSetPtr,
@@ -258,26 +258,26 @@ void* SetMeHmeParamsVMAF(
 	meContextPtr->numberHmeSearchRegionInHeight = 2;
 	resolutionIndex = 3;
 	// HME Level0
-	meContextPtr->hmeLevel0TotalSearchAreaWidth = HmeLevel0TotalSearchAreaWidthVMAF[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel0TotalSearchAreaHeight = HmeLevel0TotalSearchAreaHeightVMAF[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel0SearchAreaInWidthArray[0] = HmeLevel0SearchAreaInWidthArrayRightVMAF[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel0SearchAreaInWidthArray[1] = HmeLevel0SearchAreaInWidthArrayLeftVMAF[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel0SearchAreaInHeightArray[0] = HmeLevel0SearchAreaInHeightArrayTopVMAF[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel0SearchAreaInHeightArray[1] = HmeLevel0SearchAreaInHeightArrayBottomVMAF[resolutionIndex][hmeMeLevel];
+	meContextPtr->hmeLevel0TotalSearchAreaWidth = HmeLevel0TotalSearchAreaWidthVmaf[resolutionIndex][hmeMeLevel];
+	meContextPtr->hmeLevel0TotalSearchAreaHeight = HmeLevel0TotalSearchAreaHeightVmaf[resolutionIndex][hmeMeLevel];
+	meContextPtr->hmeLevel0SearchAreaInWidthArray[0] = HmeLevel0SearchAreaInWidthArrayRightVmaf[resolutionIndex][hmeMeLevel];
+	meContextPtr->hmeLevel0SearchAreaInWidthArray[1] = HmeLevel0SearchAreaInWidthArrayLeftVmaf[resolutionIndex][hmeMeLevel];
+	meContextPtr->hmeLevel0SearchAreaInHeightArray[0] = HmeLevel0SearchAreaInHeightArrayTopVmaf[resolutionIndex][hmeMeLevel];
+	meContextPtr->hmeLevel0SearchAreaInHeightArray[1] = HmeLevel0SearchAreaInHeightArrayBottomVmaf[resolutionIndex][hmeMeLevel];
 	// HME Level1
-	meContextPtr->hmeLevel1SearchAreaInWidthArray[0] = HmeLevel1SearchAreaInWidthArrayRightVMAF[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel1SearchAreaInWidthArray[1] = HmeLevel1SearchAreaInWidthArrayLeftVMAF[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel1SearchAreaInHeightArray[0] = HmeLevel1SearchAreaInHeightArrayTopVMAF[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel1SearchAreaInHeightArray[1] = HmeLevel1SearchAreaInHeightArrayBottomVMAF[resolutionIndex][hmeMeLevel];
+	meContextPtr->hmeLevel1SearchAreaInWidthArray[0] = HmeLevel1SearchAreaInWidthArrayRightVmaf[resolutionIndex][hmeMeLevel];
+	meContextPtr->hmeLevel1SearchAreaInWidthArray[1] = HmeLevel1SearchAreaInWidthArrayLeftVmaf[resolutionIndex][hmeMeLevel];
+	meContextPtr->hmeLevel1SearchAreaInHeightArray[0] = HmeLevel1SearchAreaInHeightArrayTopVmaf[resolutionIndex][hmeMeLevel];
+	meContextPtr->hmeLevel1SearchAreaInHeightArray[1] = HmeLevel1SearchAreaInHeightArrayBottomVmaf[resolutionIndex][hmeMeLevel];
 	// HME Level2
-	meContextPtr->hmeLevel2SearchAreaInWidthArray[0] = HmeLevel2SearchAreaInWidthArrayRightVMAF[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel2SearchAreaInWidthArray[1] = HmeLevel2SearchAreaInWidthArrayLeftVMAF[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel2SearchAreaInHeightArray[0] = HmeLevel2SearchAreaInHeightArrayTopVMAF[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel2SearchAreaInHeightArray[1] = HmeLevel2SearchAreaInHeightArrayBottomVMAF[resolutionIndex][hmeMeLevel];
+	meContextPtr->hmeLevel2SearchAreaInWidthArray[0] = HmeLevel2SearchAreaInWidthArrayRightVmaf[resolutionIndex][hmeMeLevel];
+	meContextPtr->hmeLevel2SearchAreaInWidthArray[1] = HmeLevel2SearchAreaInWidthArrayLeftVmaf[resolutionIndex][hmeMeLevel];
+	meContextPtr->hmeLevel2SearchAreaInHeightArray[0] = HmeLevel2SearchAreaInHeightArrayTopVmaf[resolutionIndex][hmeMeLevel];
+	meContextPtr->hmeLevel2SearchAreaInHeightArray[1] = HmeLevel2SearchAreaInHeightArrayBottomVmaf[resolutionIndex][hmeMeLevel];
 
 	// ME
-	meContextPtr->searchAreaWidth = SearchAreaWidthVMAF[resolutionIndex][hmeMeLevel];
-	meContextPtr->searchAreaHeight = SearchAreaHeightVMAF[resolutionIndex][hmeMeLevel];
+	meContextPtr->searchAreaWidth = SearchAreaWidthVmaf[resolutionIndex][hmeMeLevel];
+	meContextPtr->searchAreaHeight = SearchAreaHeightVmaf[resolutionIndex][hmeMeLevel];
 
 	// HME Level0 adjustment for low frame rate contents (frame rate <= 30)
 
@@ -747,7 +747,7 @@ EB_ERRORTYPE SignalDerivationMeKernelOq(
   Input   : encoder mode and tune
   Output  : ME Kernel signal(s)
 ******************************************************/
-EB_ERRORTYPE SignalDerivationMeKernelVMAF(
+EB_ERRORTYPE SignalDerivationMeKernelVmaf(
 	SequenceControlSet_t        *sequenceControlSetPtr,
 	PictureParentControlSet_t   *pictureControlSetPtr,
 	MotionEstimationContext_t   *contextPtr) {
@@ -756,7 +756,7 @@ EB_ERRORTYPE SignalDerivationMeKernelVMAF(
 
 	// Set ME/HME search regions
 	if (sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
-		SetMeHmeParamsVMAF(
+		SetMeHmeParamsVmaf(
 			contextPtr->meContextPtr,
 			pictureControlSetPtr,
 			sequenceControlSetPtr,
@@ -1107,7 +1107,7 @@ void* MotionEstimationKernel(void *inputPtr)
                 contextPtr);
         }
         else if (sequenceControlSetPtr->staticConfig.tune == TUNE_VMAF) {
-            SignalDerivationMeKernelVMAF(
+            SignalDerivationMeKernelVmaf(
                 sequenceControlSetPtr,
                 pictureControlSetPtr,
                 contextPtr);

@@ -381,7 +381,7 @@ EB_U8 PictureLevelSubPelSettingsOq(
 	return subPelMode;
 }
 
-EB_U8 PictureLevelSubPelSettingsVMAF(
+EB_U8 PictureLevelSubPelSettingsVmaf(
 	EB_U8   inputResolution,
 	EB_U8   encMode,
 	EB_U8   temporalLayerIndex,
@@ -660,7 +660,7 @@ EB_ERRORTYPE SignalDerivationMultiProcessesOq(
 Input   : encoder mode and tune
 Output  : Multi-Processes signal(s)
 ******************************************************/
-EB_ERRORTYPE SignalDerivationMultiProcessesVMAF(
+EB_ERRORTYPE SignalDerivationMultiProcessesVmaf(
 	SequenceControlSet_t        *sequenceControlSetPtr,
 	PictureParentControlSet_t   *pictureControlSetPtr) {
 
@@ -685,7 +685,7 @@ EB_ERRORTYPE SignalDerivationMultiProcessesVMAF(
 	}
 
 	// Set the default settings of  subpel
-	pictureControlSetPtr->useSubpelFlag = PictureLevelSubPelSettingsVMAF(
+	pictureControlSetPtr->useSubpelFlag = PictureLevelSubPelSettingsVmaf(
 		sequenceControlSetPtr->inputResolution,
 		pictureControlSetPtr->encMode,
 		pictureControlSetPtr->temporalLayerIndex,
@@ -1282,7 +1282,7 @@ void* PictureDecisionKernel(void *inputPtr)
                                 pictureControlSetPtr);
                         }
                         else if (sequenceControlSetPtr->staticConfig.tune == TUNE_VMAF) {
-                            SignalDerivationMultiProcessesVMAF(
+                            SignalDerivationMultiProcessesVmaf(
                                 sequenceControlSetPtr,
                                 pictureControlSetPtr);
                         }

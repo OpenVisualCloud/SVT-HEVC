@@ -427,7 +427,7 @@ EB_ERRORTYPE SignalDerivationPreAnalysisOq(
 Input   : encoder mode and tune
 Output  : Pre-Analysis signal(s)
 ******************************************************/
-EB_ERRORTYPE SignalDerivationPreAnalysisVMAF(
+EB_ERRORTYPE SignalDerivationPreAnalysisVmaf(
 	SequenceControlSet_t       *sequenceControlSetPtr,
 	PictureParentControlSet_t  *pictureControlSetPtr) {
 
@@ -452,9 +452,9 @@ EB_ERRORTYPE SignalDerivationPreAnalysisVMAF(
 			4;    // 4K
 		resolutionIndex = 3;
 		pictureControlSetPtr->enableHmeFlag = EB_TRUE;
-		pictureControlSetPtr->enableHmeLevel0Flag = EnableHmeLevel0FlagVMAF[resolutionIndex][hmeMeLevel];
-		pictureControlSetPtr->enableHmeLevel1Flag = EnableHmeLevel1FlagVMAF[resolutionIndex][hmeMeLevel];
-		pictureControlSetPtr->enableHmeLevel2Flag = EnableHmeLevel2FlagVMAF[resolutionIndex][hmeMeLevel];
+		pictureControlSetPtr->enableHmeLevel0Flag = EnableHmeLevel0FlagVmaf[resolutionIndex][hmeMeLevel];
+		pictureControlSetPtr->enableHmeLevel1Flag = EnableHmeLevel1FlagVmaf[resolutionIndex][hmeMeLevel];
+		pictureControlSetPtr->enableHmeLevel2Flag = EnableHmeLevel2FlagVmaf[resolutionIndex][hmeMeLevel];
 	}
 	else {
 		pictureControlSetPtr->enableHmeFlag = sequenceControlSetPtr->staticConfig.enableHmeFlag;
@@ -715,7 +715,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
                 pictureControlSetPtr);
         }
         else if (sequenceControlSetPtr->staticConfig.tune == TUNE_VMAF) {
-            SignalDerivationPreAnalysisVMAF(
+            SignalDerivationPreAnalysisVmaf(
                 sequenceControlSetPtr,
                 pictureControlSetPtr);
 		}

@@ -17,6 +17,7 @@
 #include "EbModeDecisionConfiguration.h"
 #include "EbLambdaRateTables.h"
 #include "EbReferenceObject.h"
+#include "EbRateControlProcess.h"
 
 // Shooting states
 #define UNDER_SHOOTING                        0
@@ -109,7 +110,8 @@ static const EB_U8 AdpLuminosityChangeThArray[MAX_HIERARCHICAL_LEVEL][MAX_TEMPOR
 * Compute picture and slice level chroma QP offsets 
 ******************************************************/
 void SetSliceAndPictureChromaQpOffsets(
-	PictureControlSet_t                    *pictureControlSetPtr)
+	PictureControlSet_t                    *pictureControlSetPtr,
+    ModeDecisionConfigurationContext_t     *contextPtr)
 {
 
 	// This is a picture level chroma QP offset and is sent in the PPS
@@ -138,14 +140,31 @@ void SetSliceAndPictureChromaQpOffsets(
 
 	}
 	else{
-		if (pictureControlSetPtr->temporalLayerIndex == 1){
-			pictureControlSetPtr->sliceCbQpOffset = 2;
-			pictureControlSetPtr->sliceCrQpOffset = 2;
-		}
-		else{
-			pictureControlSetPtr->sliceCbQpOffset = 0;
-			pictureControlSetPtr->sliceCrQpOffset = 0;
-		}
+
+        if (contextPtr->chromaQpOffsetLevel == 0) {
+
+            if (pictureControlSetPtr->temporalLayerIndex == 1) {
+                pictureControlSetPtr->sliceCbQpOffset = 2;
+                pictureControlSetPtr->sliceCrQpOffset = 2;
+            }
+            else {
+                pictureControlSetPtr->sliceCbQpOffset = 0;
+                pictureControlSetPtr->sliceCrQpOffset = 0;
+            }
+        }
+        else {
+
+            int maxQpOffset = 3;
+            if (pictureControlSetPtr->sliceType == I_SLICE) {
+                pictureControlSetPtr->sliceCbQpOffset = -maxQpOffset;
+                pictureControlSetPtr->sliceCrQpOffset = -maxQpOffset;
+            }
+            else {
+                pictureControlSetPtr->sliceCbQpOffset = CLIP3(-12, 12, (int)MOD_QP_OFFSET_LAYER_ARRAY[pictureControlSetPtr->ParentPcsPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex] - maxQpOffset);
+                pictureControlSetPtr->sliceCrQpOffset = CLIP3(-12, 12, (int)MOD_QP_OFFSET_LAYER_ARRAY[pictureControlSetPtr->ParentPcsPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex] - maxQpOffset);
+            }
+
+        }
 	}
 
 }
@@ -1502,7 +1521,7 @@ Input   : cost per depth
 Output  : budget per picture
 ******************************************************/
 
-void SetTargetBudgetVMAF(
+void SetTargetBudgetVmaf(
 	SequenceControlSet_t                *sequenceControlSetPtr,
 	PictureControlSet_t                 *pictureControlSetPtr,
 	ModeDecisionConfigurationContext_t  *contextPtr)
@@ -2188,7 +2207,7 @@ void DeriveLcuMdMode(
             contextPtr);
     }
     else if (sequenceControlSetPtr->staticConfig.tune == TUNE_VMAF) {
-        SetTargetBudgetVMAF(
+        SetTargetBudgetVmaf(
             sequenceControlSetPtr,
             pictureControlSetPtr,
             contextPtr);
@@ -2249,6 +2268,10 @@ EB_ERRORTYPE SignalDerivationModeDecisionConfigKernelSq(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
     contextPtr->adpLevel = pictureControlSetPtr->ParentPcsPtr->encMode;
+    // Derive chroma Qp Offset
+    // 0 : 2 Layer1 0 OW 
+    // 1 : MOD_QP_OFFSET -3
+    contextPtr->chromaQpOffsetLevel = 0;
 
     return return_error;
 }
@@ -2265,10 +2288,35 @@ EB_ERRORTYPE SignalDerivationModeDecisionConfigKernelOq(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
     contextPtr->adpLevel = pictureControlSetPtr->ParentPcsPtr->encMode;
-
+    
+    // Derive chroma Qp Offset
+    // 0 : 2 Layer1 0 OW 
+    // 1 : MOD_QP_OFFSET -3
+    contextPtr->chromaQpOffsetLevel  = 1;
+    
     return return_error;
 }
 
+
+/******************************************************
+* Derive Mode Decision Config Settings for VMAF
+Input   : encoder mode and tune
+Output  : EncDec Kernel signal(s)
+******************************************************/
+EB_ERRORTYPE SignalDerivationModeDecisionConfigKernelVmaf(
+    PictureControlSet_t                    *pictureControlSetPtr,
+    ModeDecisionConfigurationContext_t     *contextPtr) {
+
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+
+    contextPtr->adpLevel        = pictureControlSetPtr->ParentPcsPtr->encMode;
+    // Derive chroma Qp Offset
+    // 0 : 2 Layer1 0 OW 
+    // 1 : MOD_QP_OFFSET -3
+    contextPtr->chromaQpOffsetLevel = 0;
+
+    return return_error;
+}
 
 /******************************************************
  * Mode Decision Configuration Kernel
@@ -2306,6 +2354,11 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
         // Mode Decision Configuration Kernel Signal(s) derivation
         if (sequenceControlSetPtr->staticConfig.tune == TUNE_SQ) {
             SignalDerivationModeDecisionConfigKernelSq(
+                pictureControlSetPtr,
+                contextPtr);
+        }
+        else if (sequenceControlSetPtr->staticConfig.tune == TUNE_VMAF) {
+            SignalDerivationModeDecisionConfigKernelVmaf(
                 pictureControlSetPtr,
                 contextPtr);
         }
@@ -2368,8 +2421,9 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
 			pictureWidthInLcu);
 
 		// Compute picture and slice level chroma QP offsets 
-		SetSliceAndPictureChromaQpOffsets( // HT done 
-			pictureControlSetPtr);
+        SetSliceAndPictureChromaQpOffsets( // HT done 
+            pictureControlSetPtr,
+            contextPtr);
 
 		// Compute Tc, and Beta offsets for a given picture
 		AdaptiveDlfParameterComputation( // HT done 

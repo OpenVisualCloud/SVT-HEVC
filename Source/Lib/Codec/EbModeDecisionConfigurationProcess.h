@@ -71,6 +71,7 @@ typedef struct ModeDecisionConfigurationContext_s
 
     // Multi - Mode signal(s)
     EB_U8                               adpLevel;
+    EB_U8                               chromaQpOffsetLevel;
 
 } ModeDecisionConfigurationContext_t;
 

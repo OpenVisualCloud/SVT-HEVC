@@ -3232,7 +3232,7 @@ EB_ERRORTYPE SignalDerivationEncDecKernelOq(
 Input   : encoder mode and tune
 Output  : EncDec Kernel signal(s)
 ******************************************************/
-EB_ERRORTYPE SignalDerivationEncDecKernelVMAF(
+EB_ERRORTYPE SignalDerivationEncDecKernelVmaf(
 	SequenceControlSet_t *sequenceControlSetPtr,
 	PictureControlSet_t  *pictureControlSetPtr,
 	EncDecContext_t      *contextPtr) {
@@ -3829,7 +3829,7 @@ void* EncDecKernel(void *inputPtr)
                 contextPtr);
         }
         else if (sequenceControlSetPtr->staticConfig.tune == TUNE_VMAF) {
-             SignalDerivationEncDecKernelVMAF(
+             SignalDerivationEncDecKernelVmaf(
                 sequenceControlSetPtr,
                 pictureControlSetPtr,
                 contextPtr);
