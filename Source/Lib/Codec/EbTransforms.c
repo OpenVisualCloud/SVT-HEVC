@@ -110,7 +110,7 @@ typedef EB_ERRORTYPE(*PM_RATE_EST_TYPE)(
 	EB_U32                        numNonZeroCoeffs,
 	EB_U64                       *coeffBitsLong);
 
-static PM_RATE_EST_TYPE FUNC_TABLE CoeffRateEst4x4_funcPtrArray[ASM_TYPE_TOTAL][2/*Luma+Chroma*/] =
+static PM_RATE_EST_TYPE FUNC_TABLE CoeffRateEst4x4_funcPtrArray[EB_ASM_TYPE_TOTAL][2/*Luma+Chroma*/] =
 {
 	{ EstimateQuantizedCoefficients_Lossy, EstimateQuantizedCoefficients_Lossy },
 	{ PmEstimateQuantCoeffLuma_SSE2, PmEstimateQuantCoeffChroma_SSE2 }
@@ -2989,7 +2989,7 @@ void UnifiedQuantizeInvQuantize(
 
 		const EB_U32 transformShiftNum = MAX_TR_DYNAMIC_RANGE - internalBitDepth - Log2f(areaSize);
 		const EB_S32 shiftedQBits = QUANT_SHIFT + qpPer + transformShiftNum;
-		const EB_U32 q_offset = ((sliceType == I_SLICE || sliceType == IDR_SLICE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
+		const EB_U32 q_offset = ((sliceType == EB_I_SLICE || sliceType == EB_IDR_SLICE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
 
 		//for the iQuant
 		const EB_S32 shiftedFFunc = (qpPer > 8) ? (EB_S32)FFunc[qpRem] << (qpPer - 2) : (EB_S32)FFunc[qpRem] << qpPer; // this is 6+8+TRANS_BIT_INCREMENT
@@ -3034,7 +3034,7 @@ void UnifiedQuantizeInvQuantize(
 
         const EB_U32 transformShiftNum = MAX_TR_DYNAMIC_RANGE - internalBitDepth - Log2f(areaSize);
         const EB_S32 shiftedQBits = QUANT_SHIFT + qpPer + transformShiftNum;
-        const EB_U32 q_offset = ((sliceType == I_SLICE || sliceType == IDR_SLICE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
+        const EB_U32 q_offset = ((sliceType == EB_I_SLICE || sliceType == EB_IDR_SLICE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
 
         // iQuant
         const EB_S32 shiftedFFunc = (qpPer > 8) ? (EB_S32)FFunc[qpRem] << (qpPer - 2) : (EB_S32)FFunc[qpRem] << qpPer; // this is 6+8+TRANS_BIT_INCREMENT
@@ -3076,7 +3076,7 @@ void UnifiedQuantizeInvQuantize(
 
         const EB_U32 transformShiftNum = MAX_TR_DYNAMIC_RANGE - internalBitDepth - Log2f(areaSize);
         const EB_S32 shiftedQBits = QUANT_SHIFT + qpPer + transformShiftNum;
-        const EB_U32 q_offset = ((sliceType == I_SLICE || sliceType == IDR_SLICE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
+        const EB_U32 q_offset = ((sliceType == EB_I_SLICE || sliceType == EB_IDR_SLICE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
 
         //for the iQuant
         const EB_S32 shiftedFFunc = (qpPer > 8) ? (EB_S32)FFunc[qpRem] << (qpPer - 2) : (EB_S32)FFunc[qpRem] << qpPer; // this is 6+8+TRANS_BIT_INCREMENT
@@ -3167,7 +3167,7 @@ void UnifiedQuantizeInvQuantize(
 
 
 
-        if (cleanSparseCeoffPfEncDec && areaSize >= 8 && yCountNonZeroCoeffs && (*yCountNonZeroCoeffs) && sliceType != I_SLICE){
+        if (cleanSparseCeoffPfEncDec && areaSize >= 8 && yCountNonZeroCoeffs && (*yCountNonZeroCoeffs) && sliceType != EB_I_SLICE){
             EB_U32 coeffLocation = 0;
             EB_U32 rowIndex = 0;
             EB_U32 colIndex = 0;
@@ -3337,7 +3337,7 @@ EB_ERRORTYPE EncodeTransform(
                 );
         }
         else {
-            (*transformFunctionTableEncode1[/*ASM_TYPES*/((bitIncrement & 2) ? ASM_NON_AVX2 : ((ASM_TYPES & PREAVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
+            (*transformFunctionTableEncode1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_NON_AVX2 : ((ASM_TYPES & PREAVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
                 residualBuffer,
                 residualStride,
                 coeffBuffer,
@@ -3360,7 +3360,7 @@ EB_ERRORTYPE EncodeTransform(
                     );
             }
             else {
-                (*PfreqN2TransformTable1[/*ASM_TYPES*/((bitIncrement & 2) ? ASM_NON_AVX2 : ((ASM_TYPES & AVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
+                (*PfreqN2TransformTable1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_NON_AVX2 : ((ASM_TYPES & AVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
                     residualBuffer,
                     residualStride,
                     coeffBuffer,
@@ -3382,7 +3382,7 @@ EB_ERRORTYPE EncodeTransform(
                 bitIncrement);
         }
         else {
-            (*PfreqN4TransformTable1[/*ASM_TYPES*/((bitIncrement & 2) ? ASM_NON_AVX2 : ((ASM_TYPES & AVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
+            (*PfreqN4TransformTable1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_NON_AVX2 : ((ASM_TYPES & AVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
                 residualBuffer,
                 residualStride,
                 coeffBuffer,

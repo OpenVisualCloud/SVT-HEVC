@@ -22,7 +22,7 @@ typedef EB_U64(*EB_COMPUTE_MEAN_FUNC)(
     EB_U32 inputAreaWidth,
     EB_U32 inputAreaHeight);
 
-static const EB_COMPUTE_MEAN_FUNC ComputeMeanFunc[2][ASM_TYPE_TOTAL] = {
+static const EB_COMPUTE_MEAN_FUNC ComputeMeanFunc[2][EB_ASM_TYPE_TOTAL] = {
     {
         // C_DEFAULT
         ComputeMean,

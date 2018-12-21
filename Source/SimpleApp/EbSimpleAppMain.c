@@ -270,7 +270,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
             headerPtr->nFlags = 0;
             headerPtr->pAppPrivate = NULL;
             headerPtr->pts         = frameCount++;
-            headerPtr->sliceType   = INVALID_SLICE;
+            headerPtr->sliceType   = EB_INVALID_SLICE;
 #if TEST_IDR
             if (frameCount == 200)
                 headerPtr->sliceType = IDR_SLICE;
