@@ -170,8 +170,8 @@ typedef struct EbConfig_s
     // Channel info
     unsigned int      channelId;
     unsigned int      activeChannelCount;
-    unsigned char     useRoundRobinThreadAssignment;
-    unsigned char     targetSocket;
+    unsigned int      logicalProcessors;
+    signed int        targetSocket;
     unsigned char     stopEncoder;         // to signal CTRL+C Event, need to stop encoding.
 } EbConfig_t;
 

@@ -201,7 +201,8 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.tune = config->tune;
     callbackData->ebEncParameters.channelId = config->channelId;
     callbackData->ebEncParameters.activeChannelCount = config->activeChannelCount;
-    callbackData->ebEncParameters.useRoundRobinThreadAssignment = (EB_BOOL)config->useRoundRobinThreadAssignment;
+    callbackData->ebEncParameters.logicalProcessors = config->logicalProcessors;
+    callbackData->ebEncParameters.targetSocket = config->targetSocket;
 	callbackData->ebEncParameters.bitRateReduction = (EB_U8)config->bitRateReduction;
 	callbackData->ebEncParameters.improveSharpness = (EB_U8)config->improveSharpness;
     callbackData->ebEncParameters.videoUsabilityInfo = config->videoUsabilityInfo;

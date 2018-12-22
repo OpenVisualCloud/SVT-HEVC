@@ -221,7 +221,10 @@ typedef struct EB_H265_ENC_CONFIGURATION
     // Application Specific parameters
     unsigned int              channelId;                    // when multiple instances are running within the same application
     unsigned int              activeChannelCount;           // how many channels are active
-    unsigned char             useRoundRobinThreadAssignment;// create one thread on each socket [windows only]
+
+  // Threads management
+    unsigned int              logicalProcessors;             // number of logical processor to run on
+    signed int                targetSocket;                  // target socket to run on
 
     // ASM Type
     EB_ASM			          asmType;                      // level of optimization to use.
