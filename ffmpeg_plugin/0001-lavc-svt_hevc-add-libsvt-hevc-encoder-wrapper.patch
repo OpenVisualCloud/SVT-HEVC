@@ -1,9 +1,11 @@
-From edb2d565d0868146825ac1eff61cfac20b171435 Mon Sep 17 00:00:00 2001
+From ed9da7f1f574f9282b80b5ada89e0b434efc91ea Mon Sep 17 00:00:00 2001
 From: Jun Zhao <mypopydev@gmail.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH 1/2] lavc/svt_hevc: add libsvt hevc encoder wrapper.
 
 base on patch by Huang, Zhengxu from https://github.com/intel/SVT-HEVC
+
+V3: - Fix the build error with new API
 
 V2: - Change the config options (didn't need to enable-gpl for BSD+Patent,
       it's can compatible with LGPL2+, thanks Xavier correct this part),
@@ -28,10 +30,10 @@ Signed-off-by: Jun Zhao <jun.zhao@intel.com>
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index a70c5f9e9e..06d5e8e2d5 100755
+index 2205751402..5e14df98b3 100755
 --- a/configure
 +++ b/configure
-@@ -262,6 +262,7 @@ External library support:
+@@ -263,6 +263,7 @@ External library support:
    --enable-libspeex        enable Speex de/encoding via libspeex [no]
    --enable-libsrt          enable Haivision SRT protocol via libsrt [no]
    --enable-libssh          enable SFTP protocol via libssh [no]
@@ -39,7 +41,7 @@ index a70c5f9e9e..06d5e8e2d5 100755
    --enable-libtensorflow   enable TensorFlow as a DNN module backend
                             for DNN based filters like sr [no]
    --enable-libtesseract    enable Tesseract, needed for ocr filter [no]
-@@ -1743,6 +1744,7 @@ EXTERNAL_LIBRARY_LIST="
+@@ -1745,6 +1746,7 @@ EXTERNAL_LIBRARY_LIST="
      libspeex
      libsrt
      libssh
@@ -47,7 +49,7 @@ index a70c5f9e9e..06d5e8e2d5 100755
      libtensorflow
      libtesseract
      libtheora
-@@ -3125,6 +3127,7 @@ libshine_encoder_select="audio_frame_queue"
+@@ -3131,6 +3133,7 @@ libshine_encoder_select="audio_frame_queue"
  libspeex_decoder_deps="libspeex"
  libspeex_encoder_deps="libspeex"
  libspeex_encoder_select="audio_frame_queue"
@@ -55,7 +57,7 @@ index a70c5f9e9e..06d5e8e2d5 100755
  libtheora_encoder_deps="libtheora"
  libtwolame_encoder_deps="libtwolame"
  libvo_amrwbenc_encoder_deps="libvo_amrwbenc"
-@@ -6135,6 +6138,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
+@@ -6154,6 +6157,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
  enabled libssh            && require_pkg_config libssh libssh libssh/sftp.h sftp_init
  enabled libspeex          && require_pkg_config libspeex speex speex/speex.h speex_decoder_init
  enabled libsrt            && require_pkg_config libsrt "srt >= 1.3.0" srt/srt.h srt_socket
@@ -64,10 +66,10 @@ index a70c5f9e9e..06d5e8e2d5 100755
  enabled libtesseract      && require_pkg_config libtesseract tesseract tesseract/capi.h TessBaseAPICreate
  enabled libtheora         && require libtheora theora/theoraenc.h th_info_init -ltheoraenc -ltheoradec -logg
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index 3e41497e34..728503be9c 100644
+index d53b8ff330..bd46866075 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
-@@ -981,6 +981,7 @@ OBJS-$(CONFIG_LIBOPUS_ENCODER)            += libopusenc.o libopus.o     \
+@@ -983,6 +983,7 @@ OBJS-$(CONFIG_LIBOPUS_ENCODER)            += libopusenc.o libopus.o     \
  OBJS-$(CONFIG_LIBSHINE_ENCODER)           += libshine.o
  OBJS-$(CONFIG_LIBSPEEX_DECODER)           += libspeexdec.o
  OBJS-$(CONFIG_LIBSPEEX_ENCODER)           += libspeexenc.o
@@ -76,10 +78,10 @@ index 3e41497e34..728503be9c 100644
  OBJS-$(CONFIG_LIBTWOLAME_ENCODER)         += libtwolame.o
  OBJS-$(CONFIG_LIBVO_AMRWBENC_ENCODER)     += libvo-amrwbenc.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
-index 1b8144a2b7..5739d53329 100644
+index d70646e91a..094ee3cd7f 100644
 --- a/libavcodec/allcodecs.c
 +++ b/libavcodec/allcodecs.c
-@@ -697,6 +697,7 @@ extern AVCodec ff_librsvg_decoder;
+@@ -699,6 +699,7 @@ extern AVCodec ff_librsvg_decoder;
  extern AVCodec ff_libshine_encoder;
  extern AVCodec ff_libspeex_encoder;
  extern AVCodec ff_libspeex_decoder;
@@ -89,7 +91,7 @@ index 1b8144a2b7..5739d53329 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000000..d43c2229d7
+index 0000000000..aa51830788
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
 @@ -0,0 +1,527 @@
@@ -447,16 +449,16 @@ index 0000000000..d43c2229d7
 +    headerPtr->pts          = frame->pts;
 +    switch (frame->pict_type) {
 +    case AV_PICTURE_TYPE_I:
-+        headerPtr->sliceType = svt_enc->forced_idr > 0 ? IDR_SLICE : I_SLICE;
++        headerPtr->sliceType = svt_enc->forced_idr > 0 ? EB_IDR_SLICE : EB_I_SLICE;
 +        break;
 +    case AV_PICTURE_TYPE_P:
-+        headerPtr->sliceType = P_SLICE;
++        headerPtr->sliceType = EB_P_SLICE;
 +        break;
 +    case AV_PICTURE_TYPE_B:
-+        headerPtr->sliceType = B_SLICE;
++        headerPtr->sliceType = EB_B_SLICE;
 +        break;
 +    default:
-+        headerPtr->sliceType = INVALID_SLICE;
++        headerPtr->sliceType = EB_INVALID_SLICE;
 +        break;
 +    }
 +    EbH265EncSendPicture(svt_enc->svt_handle, headerPtr);
@@ -483,9 +485,9 @@ index 0000000000..d43c2229d7
 +    pkt->size = headerPtr->nFilledLen;
 +    pkt->pts  = headerPtr->pts;
 +    pkt->dts  = headerPtr->dts;
-+    if (headerPtr->sliceType == IDR_SLICE)
++    if (headerPtr->sliceType == EB_IDR_SLICE)
 +        pkt->flags |= AV_PKT_FLAG_KEY;
-+    if (headerPtr->sliceType == NON_REF_SLICE)
++    if (headerPtr->sliceType == EB_NON_REF_SLICE)
 +        pkt->flags |= AV_PKT_FLAG_DISPOSABLE;
 +
 +    ret = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? AVERROR_EOF : 0;
