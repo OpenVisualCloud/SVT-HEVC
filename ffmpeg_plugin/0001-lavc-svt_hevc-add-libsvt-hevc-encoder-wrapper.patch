@@ -1,9 +1,20 @@
-From 555898e7e2035ff07ef08700a3689b1a9b8d5082 Mon Sep 17 00:00:00 2001
+From edb2d565d0868146825ac1eff61cfac20b171435 Mon Sep 17 00:00:00 2001
 From: Jun Zhao <mypopydev@gmail.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH 1/2] lavc/svt_hevc: add libsvt hevc encoder wrapper.
 
 base on patch by Huang, Zhengxu from https://github.com/intel/SVT-HEVC
+
+V2: - Change the config options (didn't need to enable-gpl for BSD+Patent,
+      it's can compatible with LGPL2+, thanks Xavier correct this part),
+      now just need to "--enable-libsvthevc" option
+    - Add force_idr option
+    - Remove default GoP size setting in the wrapper, SVT-HEVC will calc
+      the the GoP size internal
+    - Refine the code as the FFmpeg community's comments
+      (https://patchwork.ffmpeg.org/patch/11347/)
+
+V1: - base on patch by Huang, Zhengxu, then refine some code.
 
 Signed-off-by: Huang, Zhengxu <zhengxu.huang@intel.com>
 Signed-off-by: hassene <hassene.tmar@intel.com>
@@ -12,31 +23,31 @@ Signed-off-by: Jun Zhao <jun.zhao@intel.com>
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 508 +++++++++++++++++++++++++++++++++++++++
- 4 files changed, 514 insertions(+)
+ libavcodec/libsvt_hevc.c | 527 +++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 533 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index b062b6318e..7fa2ae8da8 100755
+index a70c5f9e9e..06d5e8e2d5 100755
 --- a/configure
 +++ b/configure
-@@ -263,6 +263,7 @@ External library support:
+@@ -262,6 +262,7 @@ External library support:
    --enable-libspeex        enable Speex de/encoding via libspeex [no]
    --enable-libsrt          enable Haivision SRT protocol via libsrt [no]
    --enable-libssh          enable SFTP protocol via libssh [no]
-+  --enable-libsvthevc          enable HEVC encoding via svt [no]
++  --enable-libsvthevc      enable HEVC encoding via svt [no]
    --enable-libtensorflow   enable TensorFlow as a DNN module backend
                             for DNN based filters like sr [no]
    --enable-libtesseract    enable Tesseract, needed for ocr filter [no]
-@@ -1665,6 +1666,7 @@ EXTERNAL_LIBRARY_GPL_LIST="
-     libcdio
-     libdavs2
-     librubberband
+@@ -1743,6 +1744,7 @@ EXTERNAL_LIBRARY_LIST="
+     libspeex
+     libsrt
+     libssh
 +    libsvthevc
-     libvidstab
-     libx264
-     libx265
-@@ -3130,6 +3132,7 @@ libshine_encoder_select="audio_frame_queue"
+     libtensorflow
+     libtesseract
+     libtheora
+@@ -3125,6 +3127,7 @@ libshine_encoder_select="audio_frame_queue"
  libspeex_decoder_deps="libspeex"
  libspeex_encoder_deps="libspeex"
  libspeex_encoder_select="audio_frame_queue"
@@ -44,7 +55,7 @@ index b062b6318e..7fa2ae8da8 100755
  libtheora_encoder_deps="libtheora"
  libtwolame_encoder_deps="libtwolame"
  libvo_amrwbenc_encoder_deps="libvo_amrwbenc"
-@@ -6148,6 +6151,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
+@@ -6135,6 +6138,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
  enabled libssh            && require_pkg_config libssh libssh libssh/sftp.h sftp_init
  enabled libspeex          && require_pkg_config libspeex speex speex/speex.h speex_decoder_init
  enabled libsrt            && require_pkg_config libsrt "srt >= 1.3.0" srt/srt.h srt_socket
@@ -53,10 +64,10 @@ index b062b6318e..7fa2ae8da8 100755
  enabled libtesseract      && require_pkg_config libtesseract tesseract tesseract/capi.h TessBaseAPICreate
  enabled libtheora         && require libtheora theora/theoraenc.h th_info_init -ltheoraenc -ltheoradec -logg
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index d53b8ff330..bd46866075 100644
+index 3e41497e34..728503be9c 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
-@@ -983,6 +983,7 @@ OBJS-$(CONFIG_LIBOPUS_ENCODER)            += libopusenc.o libopus.o     \
+@@ -981,6 +981,7 @@ OBJS-$(CONFIG_LIBOPUS_ENCODER)            += libopusenc.o libopus.o     \
  OBJS-$(CONFIG_LIBSHINE_ENCODER)           += libshine.o
  OBJS-$(CONFIG_LIBSPEEX_DECODER)           += libspeexdec.o
  OBJS-$(CONFIG_LIBSPEEX_ENCODER)           += libspeexenc.o
@@ -65,10 +76,10 @@ index d53b8ff330..bd46866075 100644
  OBJS-$(CONFIG_LIBTWOLAME_ENCODER)         += libtwolame.o
  OBJS-$(CONFIG_LIBVO_AMRWBENC_ENCODER)     += libvo-amrwbenc.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
-index d70646e91a..094ee3cd7f 100644
+index 1b8144a2b7..5739d53329 100644
 --- a/libavcodec/allcodecs.c
 +++ b/libavcodec/allcodecs.c
-@@ -699,6 +699,7 @@ extern AVCodec ff_librsvg_decoder;
+@@ -697,6 +697,7 @@ extern AVCodec ff_librsvg_decoder;
  extern AVCodec ff_libshine_encoder;
  extern AVCodec ff_libspeex_encoder;
  extern AVCodec ff_libspeex_decoder;
@@ -78,10 +89,10 @@ index d70646e91a..094ee3cd7f 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000000..d1281fbdb4
+index 0000000000..d43c2229d7
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,506 @@
+@@ -0,0 +1,527 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -115,24 +126,29 @@ index 0000000000..d1281fbdb4
 +#include "internal.h"
 +#include "avcodec.h"
 +
-+typedef struct SvtEncoder {
-+    EB_H265_ENC_CONFIGURATION           enc_params;
-+    EB_COMPONENTTYPE                    *svt_handle;
-+    EB_BUFFERHEADERTYPE                 *in_buf;
-+    EB_BUFFERHEADERTYPE                 *out_buf;
-+    int                                 raw_size;
-+} SvtEncoder;
++typedef struct SvtContext {
++    AVClass     *class;
 +
-+typedef struct SvtParams {
++    EB_H265_ENC_CONFIGURATION  enc_params;
++    EB_COMPONENTTYPE           *svt_handle;
++
++    EB_BUFFERHEADERTYPE        *in_buf;
++    EB_BUFFERHEADERTYPE        *out_buf;
++    int                         raw_size;
++
++    int         eos_flag;
++
++    // User options.
 +    int vui_info;
 +    int hierarchical_level;
 +    int la_depth;
-+    int intra_ref_type;
 +    int enc_mode;
 +    int rc_mode;
 +    int scd;
 +    int tune;
 +    int qp;
++
++    int forced_idr;
 +
 +    int aud;
 +
@@ -141,66 +157,13 @@ index 0000000000..d1281fbdb4
 +    int level;
 +
 +    int base_layer_switch_mode;
-+}SvtParams;
-+
-+typedef struct SvtContext {
-+    AVClass     *class;
-+    SvtEncoder  *svt_enc;
-+    SvtParams   svt_param;
-+    int         eos_flag;
 +} SvtContext;
 +
-+static void free_buffer(SvtEncoder *svt_enc)
-+{
-+    if (svt_enc->in_buf) {
-+        EB_H265_ENC_INPUT *in_data = (EB_H265_ENC_INPUT *)svt_enc->in_buf->pBuffer;
-+        av_freep(&in_data);
-+        av_freep(&svt_enc->in_buf);
-+    }
-+    av_freep(&svt_enc->out_buf);
-+}
-+
-+static EB_ERRORTYPE alloc_buffer(EB_H265_ENC_CONFIGURATION *config, SvtEncoder *svt_enc)
-+{
-+    EB_ERRORTYPE       ret         = EB_ErrorNone;
-+
-+    const int    pack_mode_10bit   =
-+        (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
-+    const size_t luma_size_8bit    =
-+        config->sourceWidth * config->sourceHeight * (1 << pack_mode_10bit);
-+    const size_t luma_size_10bit   =
-+        (config->encoderBitDepth > 8 && pack_mode_10bit == 0) ? luma_size_8bit : 0;
-+
-+    svt_enc->raw_size = (luma_size_8bit + luma_size_10bit) * 3 / 2;
-+
-+    // allocate buffer for in and out
-+    svt_enc->in_buf           = av_mallocz(sizeof(EB_BUFFERHEADERTYPE));
-+    svt_enc->out_buf          = av_mallocz(sizeof(EB_BUFFERHEADERTYPE));
-+    if (!svt_enc->in_buf || !svt_enc->out_buf)
-+        goto failed;
-+
-+    svt_enc->in_buf->pBuffer  = av_mallocz(sizeof(EB_H265_ENC_INPUT));
-+    if (!svt_enc->in_buf->pBuffer)
-+        goto failed;
-+
-+    svt_enc->in_buf->nSize        = sizeof(EB_BUFFERHEADERTYPE);
-+    svt_enc->in_buf->pAppPrivate  = NULL;
-+    svt_enc->out_buf->nSize       = sizeof(EB_BUFFERHEADERTYPE);
-+    svt_enc->out_buf->nAllocLen   = svt_enc->raw_size;
-+    svt_enc->out_buf->pAppPrivate = NULL;
-+
-+    return ret;
-+
-+failed:
-+    free_buffer(svt_enc);
-+    return EB_ErrorInsufficientResources;
-+}
-+
-+static int error_mapping(int val)
++static int error_mapping(EB_ERRORTYPE svt_ret)
 +{
 +    int err;
 +
-+    switch (val) {
++    switch (svt_ret) {
 +    case EB_ErrorInsufficientResources:
 +        err = AVERROR(ENOMEM);
 +        break;
@@ -211,23 +174,81 @@ index 0000000000..d1281fbdb4
 +        err = AVERROR(EINVAL);
 +        break;
 +
++    case EB_ErrorDestroyThreadFailed:
++    case EB_ErrorSemaphoreUnresponsive:
++    case EB_ErrorDestroySemaphoreFailed:
++    case EB_ErrorCreateMutexFailed:
++    case EB_ErrorMutexUnresponsive:
++    case EB_ErrorDestroyMutexFailed:
++        err = AVERROR_EXTERNAL;
++            break;
++
 +    case EB_NoErrorEmptyQueue:
 +        err = AVERROR(EAGAIN);
++
++    case EB_ErrorNone:
++        err = 0;
 +        break;
 +
 +    default:
-+        err = AVERROR_EXTERNAL;
++        err = AVERROR_UNKNOWN;
 +    }
 +
 +    return err;
 +}
 +
-+static EB_ERRORTYPE config_enc_params(EB_H265_ENC_CONFIGURATION *param,
-+                                      AVCodecContext *avctx)
++static void free_buffer(SvtContext *svt_enc)
 +{
-+    SvtContext *q       = avctx->priv_data;
-+    SvtEncoder *svt_enc = q->svt_enc;
-+    EB_ERRORTYPE    ret = EB_ErrorNone;
++    if (svt_enc->in_buf) {
++        EB_H265_ENC_INPUT *in_data = (EB_H265_ENC_INPUT *)svt_enc->in_buf->pBuffer;
++        av_freep(&in_data);
++        av_freep(&svt_enc->in_buf);
++    }
++    av_freep(&svt_enc->out_buf);
++}
++
++static int alloc_buffer(EB_H265_ENC_CONFIGURATION *config, SvtContext *svt_enc)
++{
++    const int    pack_mode_10bit   =
++        (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
++    const size_t luma_size_8bit    =
++        config->sourceWidth * config->sourceHeight * (1 << pack_mode_10bit);
++    const size_t luma_size_10bit   =
++        (config->encoderBitDepth > 8 && pack_mode_10bit == 0) ? luma_size_8bit : 0;
++
++    EB_H265_ENC_INPUT *in_data;
++
++    svt_enc->raw_size = (luma_size_8bit + luma_size_10bit) * 3 / 2;
++
++    // allocate buffer for in and out
++    svt_enc->in_buf           = av_mallocz(sizeof(*svt_enc->in_buf));
++    svt_enc->out_buf          = av_mallocz(sizeof(*svt_enc->out_buf));
++    if (!svt_enc->in_buf || !svt_enc->out_buf)
++        goto failed;
++
++    in_data  = av_mallocz(sizeof(*in_data));
++    if (!in_data)
++        goto failed;
++    svt_enc->in_buf->pBuffer  = (unsigned char *)in_data;
++
++    svt_enc->in_buf->nSize        = sizeof(*svt_enc->in_buf);
++    svt_enc->in_buf->pAppPrivate  = NULL;
++    svt_enc->out_buf->nSize       = sizeof(*svt_enc->out_buf);
++    svt_enc->out_buf->nAllocLen   = svt_enc->raw_size;
++    svt_enc->out_buf->pAppPrivate = NULL;
++
++    return 0;
++
++failed:
++    free_buffer(svt_enc);
++    return AVERROR(ENOMEM);
++}
++
++static int config_enc_params(EB_H265_ENC_CONFIGURATION *param,
++                             AVCodecContext *avctx)
++{
++    SvtContext *svt_enc = avctx->priv_data;
++    int             ret;
 +    int        ten_bits = 0;
 +
 +    param->sourceWidth     = avctx->width;
@@ -235,45 +256,64 @@ index 0000000000..d1281fbdb4
 +
 +    if (avctx->pix_fmt == AV_PIX_FMT_YUV420P10LE) {
 +        av_log(avctx, AV_LOG_DEBUG , "Encoder 10 bits depth input\n");
++        // Disable Compressed 10-bit format default
++        //
++        // SVT-HEVC support a compressed 10-bit format allowing the
++        // software to achieve a higher speed and channel density levels.
++        // The conversion between the 10-bit yuv420p10le and the compressed
++        // 10-bit format is a lossless operation. But in FFmpeg, we usually
++        // didn't use this format
 +        param->compressedTenBitFormat = 0;
 +        ten_bits = 1;
 +    }
 +
 +    // Update param from options
-+    param->hierarchicalLevels     = q->svt_param.hierarchical_level;
-+    param->encMode                = q->svt_param.enc_mode;
-+    param->intraRefreshType       = q->svt_param.intra_ref_type;
-+    param->profile                = q->svt_param.profile;
-+    param->tier                   = q->svt_param.tier;
-+    param->level                  = q->svt_param.level;
-+    param->rateControlMode        = q->svt_param.rc_mode;
-+    param->sceneChangeDetection   = q->svt_param.scd;
-+    param->tune                   = q->svt_param.tune;
-+    param->baseLayerSwitchMode    = q->svt_param.base_layer_switch_mode;
-+    param->qp                     = q->svt_param.qp;
-+    param->accessUnitDelimiter    = q->svt_param.aud;
++    param->hierarchicalLevels     = svt_enc->hierarchical_level - 1;
++    param->encMode                = svt_enc->enc_mode;
++    param->profile                = svt_enc->profile;
++    param->tier                   = svt_enc->tier;
++    param->level                  = svt_enc->level;
++    param->rateControlMode        = svt_enc->rc_mode;
++    param->sceneChangeDetection   = svt_enc->scd;
++    param->tune                   = svt_enc->tune;
++    param->baseLayerSwitchMode    = svt_enc->base_layer_switch_mode;
++    param->qp                     = svt_enc->qp;
++    param->accessUnitDelimiter    = svt_enc->aud;
 +
 +    param->targetBitRate          = avctx->bit_rate;
-+    param->intraPeriodLength      = avctx->gop_size-1;
-+    param->frameRateNumerator     = avctx->time_base.den;
-+    param->frameRateDenominator   = avctx->time_base.num * avctx->ticks_per_frame;
++    if (avctx->gop_size > 0)
++        param->intraPeriodLength  = avctx->gop_size - 1;
++
++    if (avctx->framerate.num > 0 && avctx->framerate.den > 0) {
++        param->frameRateNumerator     = avctx->framerate.num;
++        param->frameRateDenominator   = avctx->framerate.den * avctx->ticks_per_frame;
++    } else {
++        param->frameRateNumerator     = avctx->time_base.den;
++        param->frameRateDenominator   = avctx->time_base.num * avctx->ticks_per_frame;
++    }
 +
 +    if (param->rateControlMode) {
 +        param->maxQpAllowed       = avctx->qmax;
 +        param->minQpAllowed       = avctx->qmin;
 +    }
 +
-+    param->codeVpsSpsPps          = 0;
++    param->intraRefreshType       =
++        !!(avctx->flags & AV_CODEC_FLAG_CLOSED_GOP) + 1;
 +
-+    if (q->svt_param.vui_info)
-+        param->videoUsabilityInfo = q->svt_param.vui_info;
++    // is it repeat headers for MP4 or Annex-b
++    if (avctx->flags & AV_CODEC_FLAG_GLOBAL_HEADER)
++        param->codeVpsSpsPps          = 0;
++    else
++        param->codeVpsSpsPps          = 1;
 +
-+    if (q->svt_param.la_depth != -1)
-+        param->lookAheadDistance  = q->svt_param.la_depth;
++    if (svt_enc->vui_info)
++        param->videoUsabilityInfo = svt_enc->vui_info;
++
++    if (svt_enc->la_depth != -1)
++        param->lookAheadDistance  = svt_enc->la_depth;
 +
 +    if (ten_bits) {
 +        param->encoderBitDepth        = 10;
-+        param->profile                = 2;
 +    }
 +
 +    ret = alloc_buffer(param, svt_enc);
@@ -285,10 +325,10 @@ index 0000000000..d1281fbdb4
 +                         const AVFrame *frame,
 +                         EB_BUFFERHEADERTYPE *headerPtr)
 +{
-+    unsigned int is16bit = config->encoderBitDepth > 8;
-+    unsigned long long luma_size =
-+        (unsigned long long)config->sourceWidth * config->sourceHeight<< is16bit;
-+    EB_H265_ENC_INPUT *in_data = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
++    uint8_t is16bit = config->encoderBitDepth > 8;
++    uint64_t luma_size =
++        (uint64_t)config->sourceWidth * config->sourceHeight<< is16bit;
++    EB_H265_ENC_INPUT *in_data = (EB_H265_ENC_INPUT *)headerPtr->pBuffer;
 +
 +    // support yuv420p and yuv420p010
 +    in_data->luma = frame->data[0];
@@ -305,70 +345,63 @@ index 0000000000..d1281fbdb4
 +
 +static av_cold int eb_enc_init(AVCodecContext *avctx)
 +{
-+    SvtContext   *q = avctx->priv_data;
-+    SvtEncoder   *svt_enc = NULL;
-+    EB_ERRORTYPE ret = EB_ErrorNone;
++    SvtContext   *svt_enc = avctx->priv_data;
++    EB_ERRORTYPE svt_ret;
 +
-+    q->svt_enc  = av_mallocz(sizeof(*q->svt_enc));
-+    if (!q->svt_enc)
-+        return AVERROR(ENOMEM);
++    svt_enc->eos_flag = 0;
 +
-+    svt_enc = q->svt_enc;
-+
-+    q->eos_flag = 0;
-+
-+    ret = EbInitHandle(&svt_enc->svt_handle, q, &svt_enc->enc_params);
-+    if (ret != EB_ErrorNone) {
++    svt_ret = EbInitHandle(&svt_enc->svt_handle, svt_enc, &svt_enc->enc_params);
++    if (svt_ret != EB_ErrorNone) {
 +        av_log(avctx, AV_LOG_ERROR, "Error init encoder handle\n");
 +        goto failed;
 +    }
 +
-+    ret = config_enc_params(&svt_enc->enc_params, avctx);
-+    if (ret != EB_ErrorNone) {
++    svt_ret = config_enc_params(&svt_enc->enc_params, avctx);
++    if (svt_ret != EB_ErrorNone) {
 +        av_log(avctx, AV_LOG_ERROR, "Error configure encoder parameters\n");
 +        goto failed_init_handle;
 +    }
 +
-+    ret = EbH265EncSetParameter(svt_enc->svt_handle, &svt_enc->enc_params);
-+    if (ret != EB_ErrorNone) {
++    svt_ret = EbH265EncSetParameter(svt_enc->svt_handle, &svt_enc->enc_params);
++    if (svt_ret != EB_ErrorNone) {
 +        av_log(avctx, AV_LOG_ERROR, "Error setting encoder parameters\n");
 +        goto failed_init_handle;
 +    }
 +
-+    ret = EbInitEncoder(svt_enc->svt_handle);
-+    if (ret != EB_ErrorNone) {
++    svt_ret = EbInitEncoder(svt_enc->svt_handle);
++    if (svt_ret != EB_ErrorNone) {
 +        av_log(avctx, AV_LOG_ERROR, "Error init encoder\n");
 +        goto failed_init_handle;
 +    }
 +
 +    if (avctx->flags & AV_CODEC_FLAG_GLOBAL_HEADER) {
 +        EB_BUFFERHEADERTYPE headerPtr;
-+        headerPtr.nSize       = sizeof(EB_BUFFERHEADERTYPE);
-+        headerPtr.nFilledLen  = 0;
++        headerPtr.nSize       = sizeof(headerPtr);
++        headerPtr.nFilledLen  = 0; /* in/out */
 +        headerPtr.pBuffer     = av_malloc(10 * 1024 * 1024);
 +        headerPtr.nAllocLen   = (10 * 1024 * 1024);
 +
 +        if (!headerPtr.pBuffer) {
 +            av_log(avctx, AV_LOG_ERROR,
 +                   "Cannot allocate buffer size %d.\n", headerPtr.nAllocLen);
-+            ret = EB_ErrorInsufficientResources;
++            svt_ret = EB_ErrorInsufficientResources;
 +            goto failed_init_enc;
 +        }
 +
-+        ret = EbH265EncStreamHeader(svt_enc->svt_handle, &headerPtr);
-+        if (ret != EB_ErrorNone) {
++        svt_ret = EbH265EncStreamHeader(svt_enc->svt_handle, &headerPtr);
++        if (svt_ret != EB_ErrorNone) {
 +            av_log(avctx, AV_LOG_ERROR, "Error when build stream header.\n");
 +            av_freep(&headerPtr.pBuffer);
 +            goto failed_init_enc;
 +        }
 +
 +        avctx->extradata_size = headerPtr.nFilledLen;
-+        avctx->extradata = av_malloc(avctx->extradata_size + AV_INPUT_BUFFER_PADDING_SIZE);
++        avctx->extradata = av_mallocz(avctx->extradata_size + AV_INPUT_BUFFER_PADDING_SIZE);
 +        if (!avctx->extradata) {
 +            av_log(avctx, AV_LOG_ERROR,
 +                   "Cannot allocate HEVC header of size %d.\n", avctx->extradata_size);
 +            av_freep(&headerPtr.pBuffer);
-+            ret = EB_ErrorInsufficientResources;
++            svt_ret = EB_ErrorInsufficientResources;
 +            goto failed_init_enc;
 +        }
 +        memcpy(avctx->extradata, headerPtr.pBuffer, avctx->extradata_size);
@@ -383,15 +416,14 @@ index 0000000000..d1281fbdb4
 +failed_init_handle:
 +    EbDeinitHandle(svt_enc->svt_handle);
 +failed:
-+    return error_mapping(ret);
++    free_buffer(svt_enc);
++    return error_mapping(svt_ret);
 +}
 +
 +static int eb_send_frame(AVCodecContext *avctx, const AVFrame *frame)
 +{
-+    SvtContext           *q = avctx->priv_data;
-+    SvtEncoder           *svt_enc = q->svt_enc;
++    SvtContext           *svt_enc = avctx->priv_data;
 +    EB_BUFFERHEADERTYPE  *headerPtr = svt_enc->in_buf;
-+    int                  ret = 0;
 +
 +    if (!frame) {
 +        EB_BUFFERHEADERTYPE headerPtrLast;
@@ -403,9 +435,9 @@ index 0000000000..d1281fbdb4
 +        headerPtrLast.nFlags      = EB_BUFFERFLAG_EOS;
 +
 +        EbH265EncSendPicture(svt_enc->svt_handle, &headerPtrLast);
-+        q->eos_flag = 1;
++        svt_enc->eos_flag = 1;
 +        av_log(avctx, AV_LOG_DEBUG, "Finish sending frames!!!\n");
-+        return ret;
++        return 0;
 +    }
 +
 +    read_in_data(&svt_enc->enc_params, frame, headerPtr);
@@ -413,27 +445,39 @@ index 0000000000..d1281fbdb4
 +    headerPtr->nFlags       = 0;
 +    headerPtr->pAppPrivate  = NULL;
 +    headerPtr->pts          = frame->pts;
-+    headerPtr->sliceType    = INVALID_SLICE;
++    switch (frame->pict_type) {
++    case AV_PICTURE_TYPE_I:
++        headerPtr->sliceType = svt_enc->forced_idr > 0 ? IDR_SLICE : I_SLICE;
++        break;
++    case AV_PICTURE_TYPE_P:
++        headerPtr->sliceType = P_SLICE;
++        break;
++    case AV_PICTURE_TYPE_B:
++        headerPtr->sliceType = B_SLICE;
++        break;
++    default:
++        headerPtr->sliceType = INVALID_SLICE;
++        break;
++    }
 +    EbH265EncSendPicture(svt_enc->svt_handle, headerPtr);
 +
-+    return ret;
++    return 0;
 +}
 +
 +static int eb_receive_packet(AVCodecContext *avctx, AVPacket *pkt)
 +{
-+    SvtContext  *q = avctx->priv_data;
-+    SvtEncoder  *svt_enc = q->svt_enc;
++    SvtContext  *svt_enc = avctx->priv_data;
 +    EB_BUFFERHEADERTYPE   *headerPtr = svt_enc->out_buf;
-+    EB_ERRORTYPE          stream_status = EB_ErrorNone;
-+    int ret = 0;
++    EB_ERRORTYPE          svt_ret;
++    int ret;
 +
 +    if ((ret = ff_alloc_packet2(avctx, pkt, svt_enc->raw_size, 0)) < 0) {
 +        av_log(avctx, AV_LOG_ERROR, "Failed to allocate output packet.\n");
 +        return ret;
 +    }
 +    headerPtr->pBuffer = pkt->data;
-+    stream_status = EbH265GetPacket(svt_enc->svt_handle, headerPtr, q->eos_flag);
-+    if (stream_status == EB_NoErrorEmptyQueue)
++    svt_ret = EbH265GetPacket(svt_enc->svt_handle, headerPtr, svt_enc->eos_flag);
++    if (svt_ret == EB_NoErrorEmptyQueue)
 +        return AVERROR(EAGAIN);
 +
 +    pkt->size = headerPtr->nFilledLen;
@@ -450,14 +494,12 @@ index 0000000000..d1281fbdb4
 +
 +static av_cold int eb_enc_close(AVCodecContext *avctx)
 +{
-+    SvtContext *q = avctx->priv_data;
-+    SvtEncoder   *svt_enc = q->svt_enc;
++    SvtContext *svt_enc = avctx->priv_data;
 +
 +    EbDeinitEncoder(svt_enc->svt_handle);
 +    EbDeinitHandle(svt_enc->svt_handle);
 +
 +    free_buffer(svt_enc);
-+    av_freep(&svt_enc);
 +
 +    return 0;
 +}
@@ -465,31 +507,26 @@ index 0000000000..d1281fbdb4
 +#define OFFSET(x) offsetof(SvtContext, x)
 +#define VE AV_OPT_FLAG_VIDEO_PARAM | AV_OPT_FLAG_ENCODING_PARAM
 +static const AVOption options[] = {
-+    { "vui", "Enable vui info", OFFSET(svt_param.vui_info),
++    { "vui", "Enable vui info", OFFSET(vui_info),
++      AV_OPT_TYPE_BOOL, { .i64 = 1 }, 0, 1, VE },
++
++    { "aud", "Include AUD", OFFSET(aud),
 +      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
 +
-+    { "aud", "Include AUD", OFFSET(svt_param.aud),
-+      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
++    { "hielevel", "Hierarchical prediction levels setting", OFFSET(hierarchical_level),
++      AV_OPT_TYPE_INT, { .i64 = 4 }, 1, 4, VE , "hielevel"},
++        { "flat",   NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 1 },  INT_MIN, INT_MAX, VE, "hielevel" },
++        { "2level", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 2 },  INT_MIN, INT_MAX, VE, "hielevel" },
++        { "3level", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 3 },  INT_MIN, INT_MAX, VE, "hielevel" },
++        { "4level", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 4 },  INT_MIN, INT_MAX, VE, "hielevel" },
 +
-+    { "hielevel", "Hierarchical prediction levels setting", OFFSET(svt_param.hierarchical_level),
-+      AV_OPT_TYPE_INT, { .i64 = 3 }, 0, 3, VE , "hielevel"},
-+        { "flat",   NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 0 },  INT_MIN, INT_MAX, VE, "hielevel" },
-+        { "2level", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 1 },  INT_MIN, INT_MAX, VE, "hielevel" },
-+        { "3level", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 2 },  INT_MIN, INT_MAX, VE, "hielevel" },
-+        { "4level", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 3 },  INT_MIN, INT_MAX, VE, "hielevel" },
-+
-+    { "la_depth", "Look ahead distance [0, 256]", OFFSET(svt_param.la_depth),
++    { "la_depth", "Look ahead distance [0, 256]", OFFSET(la_depth),
 +      AV_OPT_TYPE_INT, { .i64 = -1 }, -1, 256, VE },
 +
-+    { "intra_ref_type", "Intra refresh type", OFFSET(svt_param.intra_ref_type),
-+      AV_OPT_TYPE_INT, { .i64 = 2 }, 0, 2, VE , "intra_ref_type"},
-+        { "none", "No intra refresh", 0, AV_OPT_TYPE_CONST, { .i64 = 0 },  INT_MIN, INT_MAX, VE, "intra_ref_type" },
-+        { "cra",  "CRA (Open GOP)",   0, AV_OPT_TYPE_CONST, { .i64 = 1 },  INT_MIN, INT_MAX, VE, "intra_ref_type" },
-+        { "idr",  "IDR",              0, AV_OPT_TYPE_CONST, { .i64 = 2 },  INT_MIN, INT_MAX, VE, "intra_ref_type" },
 +    { "preset", "Encoding preset [0, 12] (e,g, for subjective quality tuning mode and >=4k resolution), [0, 10] (for >= 1080p resolution), [0, 9] (for all resolution and modes)",
-+      OFFSET(svt_param.enc_mode), AV_OPT_TYPE_INT, { .i64 = 9 }, 0, 12, VE },
++      OFFSET(enc_mode), AV_OPT_TYPE_INT, { .i64 = 9 }, 0, 12, VE },
 +
-+    { "profile", "Profile setting, Main Still Picture Profile not supported", OFFSET(svt_param.profile),
++    { "profile", "Profile setting, Main Still Picture Profile not supported", OFFSET(profile),
 +      AV_OPT_TYPE_INT, { .i64 = FF_PROFILE_HEVC_MAIN_10 }, FF_PROFILE_HEVC_MAIN, FF_PROFILE_HEVC_MAIN_10, VE, "profile"},
 +
 +#define PROFILE(name, value)  name, NULL, 0, AV_OPT_TYPE_CONST, \
@@ -498,29 +535,23 @@ index 0000000000..d1281fbdb4
 +        { PROFILE("main10", FF_PROFILE_HEVC_MAIN_10) },
 +#undef PROFILE
 +
-+    { "tier", "Set tier (general_tier_flag)", OFFSET(svt_param.tier),
++    { "tier", "Set tier (general_tier_flag)", OFFSET(tier),
 +      AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, VE, "tier" },
 +        { "main", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 0 }, 0, 0, VE, "tier" },
 +        { "high", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 1 }, 0, 0, VE, "tier" },
 +
-+    { "level", "Set level (level_idc)", OFFSET(svt_param.level),
++    { "level", "Set level (level_idc)", OFFSET(level),
 +      AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 0xff, VE, "level" },
 +
 +#define LEVEL(name, value) name, NULL, 0, AV_OPT_TYPE_CONST, \
 +      { .i64 = value }, 0, 0, VE, "level"
 +        { LEVEL("1",   10) },
-+        { LEVEL("1.1", 11) },
-+        { LEVEL("1.2", 12) },
-+        { LEVEL("1.3", 13) },
 +        { LEVEL("2",   20) },
 +        { LEVEL("2.1", 21) },
-+        { LEVEL("2.2", 22) },
 +        { LEVEL("3",   30) },
 +        { LEVEL("3.1", 31) },
-+        { LEVEL("3.2", 32) },
 +        { LEVEL("4",   40) },
 +        { LEVEL("4.1", 41) },
-+        { LEVEL("4.2", 42) },
 +        { LEVEL("5",   50) },
 +        { LEVEL("5.1", 51) },
 +        { LEVEL("5.2", 52) },
@@ -529,25 +560,28 @@ index 0000000000..d1281fbdb4
 +        { LEVEL("6.2", 62) },
 +#undef LEVEL
 +
-+    { "rc", "Bit rate control mode", OFFSET(svt_param.rc_mode),
++    { "rc", "Bit rate control mode", OFFSET(rc_mode),
 +      AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, VE , "rc"},
 +        { "cqp", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 0 },  INT_MIN, INT_MAX, VE, "rc" },
 +        { "vbr", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 1 },  INT_MIN, INT_MAX, VE, "rc" },
 +
-+    { "qp", "QP value for intra frames", OFFSET(svt_param.qp),
++    { "qp", "QP value for intra frames", OFFSET(qp),
 +      AV_OPT_TYPE_INT, { .i64 = 32 }, 0, 51, VE },
 +
-+    { "sc_detection", "Scene change detection", OFFSET(svt_param.scd),
++    { "sc_detection", "Scene change detection", OFFSET(scd),
 +      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
 +
-+    { "tune", "Quality tuning mode", OFFSET(svt_param.tune), AV_OPT_TYPE_INT, { .i64 = 1 }, 0, 1, VE, "tune" },
++    { "tune", "Quality tuning mode", OFFSET(tune), AV_OPT_TYPE_INT, { .i64 = 1 }, 0, 1, VE, "tune" },
 +        { "subjective", "Subjective quality mode", 0,
 +          AV_OPT_TYPE_CONST, { .i64 = 0 },  INT_MIN, INT_MAX, VE, "tune" },
 +        { "objective",  "Objective quality mode for PSNR / SSIM / VMAF benchmarking",  0,
 +          AV_OPT_TYPE_CONST, { .i64 = 1 },  INT_MIN, INT_MAX, VE, "tune" },
 +
-+    { "bl_mode", "Random Access Prediction Structure type setting", OFFSET(svt_param.base_layer_switch_mode),
++    { "bl_mode", "Random Access Prediction Structure type setting", OFFSET(base_layer_switch_mode),
 +      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
++
++    { "forced-idr", "If forcing keyframes, force them as IDR frames.", OFFSET(forced_idr),
++      AV_OPT_TYPE_BOOL,   { .i64 = 0 }, -1, 1, VE },
 +
 +    {NULL},
 +};
@@ -561,8 +595,6 @@ index 0000000000..d1281fbdb4
 +
 +static const AVCodecDefault eb_enc_defaults[] = {
 +    { "b",         "7M"    },
-+    { "refs",      "0"     },
-+    { "g",         "64"    },
 +    { "flags",     "+cgop" },
 +    { "qmin",      "10"    },
 +    { "qmax",      "48"    },

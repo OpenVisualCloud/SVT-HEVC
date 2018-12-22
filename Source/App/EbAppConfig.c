@@ -487,7 +487,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->performanceContext.byteCount                 = 0;
     
     // ASM Type
-    configPtr->asmType                                      = ASM_AVX2;
+    configPtr->asmType                                      = EB_ASM_AVX2;
 
     configPtr->stopEncoder                                  = EB_FALSE;
     configPtr->useRoundRobinThreadAssignment                = EB_FALSE;

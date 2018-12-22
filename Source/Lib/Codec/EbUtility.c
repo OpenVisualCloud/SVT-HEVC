@@ -393,7 +393,7 @@ const MiniGopStats_t* GetMiniGopStats(const EB_U32 miniGopIndex)
 }
 
 
-void StartTime(unsigned long long *Startseconds, unsigned long long *Startuseconds) {
+void EbStartTime(unsigned long long *Startseconds, unsigned long long *Startuseconds) {
 
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     struct timeval start;
@@ -410,7 +410,7 @@ void StartTime(unsigned long long *Startseconds, unsigned long long *Startusecon
 
 }
 
-void FinishTime(unsigned long long *Finishseconds, unsigned long long *Finishuseconds) {
+void EbFinishTime(unsigned long long *Finishseconds, unsigned long long *Finishuseconds) {
 
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     struct timeval finish;
@@ -426,7 +426,7 @@ void FinishTime(unsigned long long *Finishseconds, unsigned long long *Finishuse
 #endif
 
 }
-void ComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration)
+void EbComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration)
 {
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     long   mtime, seconds, useconds;
@@ -450,7 +450,7 @@ void ComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long lo
 #endif
 
 }
-void ComputeOverallElapsedTimeMs(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration)
+void EbComputeOverallElapsedTimeMs(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration)
 {
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     long   mtime, seconds, useconds;

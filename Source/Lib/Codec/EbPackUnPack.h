@@ -24,7 +24,7 @@ typedef void(*EB_ENC_Pack2D_TYPE)(
     EB_U32     width,
     EB_U32     height);
 
-EB_ENC_Pack2D_TYPE Pack2D_funcPtrArray_16Bit_SRC[2][ASM_TYPE_TOTAL] =
+EB_ENC_Pack2D_TYPE Pack2D_funcPtrArray_16Bit_SRC[2][EB_ASM_TYPE_TOTAL] =
 {
     {
         // C_DEFAULT
@@ -41,7 +41,7 @@ EB_ENC_Pack2D_TYPE Pack2D_funcPtrArray_16Bit_SRC[2][ASM_TYPE_TOTAL] =
 };
 
 
-EB_ENC_Pack2D_TYPE CompressedPack_funcPtrArray[ASM_TYPE_TOTAL] =
+EB_ENC_Pack2D_TYPE CompressedPack_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
 	// C_DEFAULT
 	CompressedPackmsb,
@@ -58,7 +58,7 @@ typedef void(*COMPPack_TYPE)(
 	EB_U32     width,
 	EB_U32     height);
 
-COMPPack_TYPE  Convert_Unpack_CPack_funcPtrArray[ASM_TYPE_TOTAL] =
+COMPPack_TYPE  Convert_Unpack_CPack_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
 	// C_DEFAULT
 	CPack_C,
@@ -77,7 +77,7 @@ typedef void(*EB_ENC_UnPack2D_TYPE)(
     EB_U32       width,
     EB_U32       height);
 
-EB_ENC_UnPack2D_TYPE UnPack2D_funcPtrArray_16Bit[2][ASM_TYPE_TOTAL] =
+EB_ENC_UnPack2D_TYPE UnPack2D_funcPtrArray_16Bit[2][EB_ASM_TYPE_TOTAL] =
 {
     {
         // C_DEFAULT
@@ -103,7 +103,7 @@ typedef void(*EB_ENC_UnpackAvg_TYPE)(
         EB_U32  dstStride,      
         EB_U32  width,
         EB_U32  height );
-EB_ENC_UnpackAvg_TYPE UnPackAvg_funcPtrArray[ASM_TYPE_TOTAL] =
+EB_ENC_UnpackAvg_TYPE UnPackAvg_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
         // C_DEFAULT
 		UnpackAvg,
@@ -120,7 +120,7 @@ typedef void(*EB_ENC_UnpackAvgSub_TYPE)(
         EB_U32  dstStride,  
         EB_U32  width,
         EB_U32  height ); 
-EB_ENC_UnpackAvgSub_TYPE UnPackAvgSafeSub_funcPtrArray[ASM_TYPE_TOTAL] =
+EB_ENC_UnpackAvgSub_TYPE UnPackAvgSafeSub_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
         // C_DEFAULT
 		UnpackAvgSafeSub,
@@ -136,7 +136,7 @@ typedef void(*EB_ENC_UnPack8BitData_TYPE)(
     EB_U32       out8Stride,
     EB_U32       width,
     EB_U32       height);
-EB_ENC_UnPack8BitData_TYPE UnPack8BIT_funcPtrArray_16Bit[2][ASM_TYPE_TOTAL] =
+EB_ENC_UnPack8BitData_TYPE UnPack8BIT_funcPtrArray_16Bit[2][EB_ASM_TYPE_TOTAL] =
 {
     {
        UnPack8BitData,
@@ -157,7 +157,7 @@ typedef void(*EB_ENC_UnPack8BitDataSUB_TYPE)(
     EB_U32       width,
     EB_U32       height
     );
-EB_ENC_UnPack8BitDataSUB_TYPE UnPack8BITSafeSub_funcPtrArray_16Bit[ASM_TYPE_TOTAL] =
+EB_ENC_UnPack8BitDataSUB_TYPE UnPack8BITSafeSub_funcPtrArray_16Bit[EB_ASM_TYPE_TOTAL] =
 {
         // C_DEFAULT           
 		UnPack8BitDataSafeSub,

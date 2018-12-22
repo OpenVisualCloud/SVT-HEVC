@@ -22,7 +22,7 @@
 #error OS/Platform not supported.
 #endif
 
-void StartTime(unsigned long long *Startseconds, unsigned long long *Startuseconds) {
+void EbStartTime(unsigned long long *Startseconds, unsigned long long *Startuseconds) {
 
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     struct timeval start;
@@ -39,7 +39,7 @@ void StartTime(unsigned long long *Startseconds, unsigned long long *Startusecon
 
 }
 
-void FinishTime(unsigned long long *Finishseconds, unsigned long long *Finishuseconds) {
+void EbFinishTime(unsigned long long *Finishseconds, unsigned long long *Finishuseconds) {
 
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     struct timeval finish;
@@ -55,7 +55,7 @@ void FinishTime(unsigned long long *Finishseconds, unsigned long long *Finishuse
 #endif
 
 }
-void ComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long long Startuseconds,unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration)
+void EbComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long long Startuseconds,unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration)
 {
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     long   mtime, seconds, useconds;
@@ -124,7 +124,7 @@ void EbInjector(unsigned long long processedFrameCount, unsigned int injectorFra
         firstTime = 1;
 
 #if __linux__
-        StartTime((unsigned long long*)&startTimesSeconds, (unsigned long long*)&startTimesuSeconds);
+        EbStartTime((unsigned long long*)&startTimesSeconds, (unsigned long long*)&startTimesuSeconds);
 #elif _WIN32
         QueryPerformanceFrequency(&counterFreq);
         QueryPerformanceCounter(&startCount);
@@ -134,8 +134,8 @@ void EbInjector(unsigned long long processedFrameCount, unsigned int injectorFra
     {
 
 #if __linux__
-        FinishTime((unsigned long long*)&currentTimesSeconds, (unsigned long long*)&currentTimesuSeconds);
-        ComputeOverallElapsedTime(startTimesSeconds, startTimesuSeconds, currentTimesSeconds, currentTimesuSeconds, &elapsedTime);
+        EbFinishTime((unsigned long long*)&currentTimesSeconds, (unsigned long long*)&currentTimesuSeconds);
+        EbComputeOverallElapsedTime(startTimesSeconds, startTimesuSeconds, currentTimesSeconds, currentTimesuSeconds, &elapsedTime);
 #elif _WIN32
         QueryPerformanceCounter(&nowCount);
         elapsedTime = (double)(nowCount.QuadPart - startCount.QuadPart) / (double)counterFreq.QuadPart;

@@ -13,6 +13,7 @@
 #include "EbCodingUnit.h"
 #include "EbModeDecisionProcess.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 
 static const EB_U32 smoothingFilterShift[] = {
     3, // 4x4
