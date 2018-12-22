@@ -8,7 +8,7 @@
 
 #include "EbDefinitions.h"
 
-#ifdef _MSC_VER 
+#ifdef _WIN32
 #include <Windows.h>
 #endif
 
@@ -59,7 +59,7 @@ extern    EbMemoryMapEntry        *memoryMap;               // library Memory ta
 extern    EB_U32                  *memoryMapIndex;          // library memory index
 extern    EB_U64                  *totalLibMemory;          // library Memory malloc'd
 
-#ifdef _MSC_VER 
+#ifdef _WIN32
 extern    GROUP_AFFINITY           groupAffinity;
 extern    EB_U8                    numGroups;
 extern    EB_BOOL                  alternateGroups;

@@ -118,7 +118,7 @@ EB_U32                         libSemaphoreCount = 0;
 EB_U32                         libMutexCount = 0;
 
 EB_U8                           numGroups = 0;
-#ifdef _MSC_VER
+#ifdef _WIN32
 GROUP_AFFINITY                  groupAffinity;
 EB_BOOL                         alternateGroups = 0;
 #else
@@ -361,7 +361,7 @@ static EB_U32 EncDecPortTotalCount(void)
 }
 
 void InitThreadManagmentParams(){
-#ifdef _MSC_VER
+#ifdef _WIN32
     // Initialize groupAffinity structure with Current thread info
     GetThreadGroupAffinity(GetCurrentThread(),&groupAffinity);
     numGroups = (EB_U8) GetActiveProcessorGroupCount();
@@ -539,7 +539,7 @@ static EB_ERRORTYPE EbEncHandleCtor(
     return EB_ErrorNone;
 }
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 EB_U64 GetAffinityMask(EB_U32 lpnum) {
     EB_U64 mask = 0x1;
     for (EB_U32 i = lpnum - 1; i > 0; i--)
@@ -550,7 +550,7 @@ EB_U64 GetAffinityMask(EB_U32 lpnum) {
 
 void EbSetThreadManagementParameters(EB_H265_ENC_CONFIGURATION   *configPtr){
     EB_U32 numLogicProcessors = GetNumProcessors();
-#ifdef _MSC_VER
+#ifdef _WIN32
     // For system with a single processor group(no more than 64 logic processors all together)
     // Affinity of the thread can be set to one or more logical processors
     if (numGroups == 1) {
@@ -601,13 +601,13 @@ void EbSetThreadManagementParameters(EB_H265_ENC_CONFIGURATION   *configPtr){
         while (!feof(fin)) {
             char line[128];
             if (!fgets(line, sizeof(line), fin)) break;
-            if(strncmp(line, PROCESSORID, strlen(PROCESSORID)) == 0) {
-                char* p = line +  strlen(PROCESSORID);
+            if(strncmp(line, PROCESSORID, strnlen_ss(PROCESSORID,128)) == 0) {
+                char* p = line +  strnlen_ss(PROCESSORID,128);
                 while(*p < '0' || *p > '9') p++;
                 processor_id = atoi(p);
             }
-            if(strncmp(line, PHYSICALID, strlen(PHYSICALID)) == 0) {
-                char* p = line +  strlen(PHYSICALID);
+            if(strncmp(line, PHYSICALID, strnlen_ss(PHYSICALID,128)) == 0) {
+                char* p = line +  strnlen_ss(PHYSICALID,128);
                 while(*p < '0' || *p > '9') p++;
                 socket_id = atoi(p);
                 if (socket_id + 1 > numGroups)
