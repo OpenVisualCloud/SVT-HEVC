@@ -138,7 +138,7 @@ Groups of Pictures (GOP) units.
 	typedef int64_t             EB_S64;
 
 #endif // _WIN32
-#define HME_ENHANCED_CENTER_SEARCH     1 
+#define HME_ENHANCED_CENTER_SEARCH     0 
 /** The EB_BOOL type is intended to be used to represent a true or a false
 value when passing parameters to and from the svt API.  The
 EB_BOOL is a 32 bit quantity and is aligned on a 32 bit word boundary.
