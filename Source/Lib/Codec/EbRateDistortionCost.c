@@ -657,7 +657,7 @@ EB_ERRORTYPE Intra2Nx2NFastCostPsliceOpt(
 
 /*********************************************************************************
 * IntraFullCostIslice function is used to estimate the cost of an intra candidate mode
-* for full mode decisoion module in I_SLICE.
+* for full mode decisoion module in EB_I_SLICE.
 *
 *   @param *cuPtr(input)
 *       cuPtr is the pointer of the target CU.
@@ -947,7 +947,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 
 /*********************************************************************************
 * IntraFullCostIslice function is used to estimate the cost of an intra candidate mode
-* for full mode decisoion module in I_SLICE.
+* for full mode decisoion module in EB_I_SLICE.
 *
 *   @param *cuPtr(input)
 *       cuPtr is the pointer of the target CU.
@@ -2935,7 +2935,7 @@ EB_ERRORTYPE Intra4x4FastCostPslice(
 
 /*********************************************************************************
 * Intra4x4FullCostIslice function is used to estimate the cost of an intra candidate mode
-* for full mode decisoion module in I_SLICE.
+* for full mode decisoion module in EB_I_SLICE.
 *
 *   @param *cuPtr(input)
 *       cuPtr is the pointer of the target CU.

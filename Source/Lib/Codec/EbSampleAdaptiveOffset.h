@@ -169,7 +169,7 @@ typedef EB_ERRORTYPE(*EB_SAOGATHER_16bit_FUNC)(
 	EB_S32                   eoDiff[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1],		// output parameter, used to store Edge Offset diff, eoDiff[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
 	EB_U16                   eoCount[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1]);		// output parameter, used to store Edge Offset count, eoCount[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
 
-static const EB_SAOGATHER_16bit_FUNC SaoGatherFunctionTabl_16bit[ASM_TYPE_TOTAL] = {
+static const EB_SAOGATHER_16bit_FUNC SaoGatherFunctionTabl_16bit[EB_ASM_TYPE_TOTAL] = {
 	// C_DEFAULT
 	GatherSaoStatisticsLcu_62x62_16bit,
 	// AVX2 
@@ -178,7 +178,7 @@ static const EB_SAOGATHER_16bit_FUNC SaoGatherFunctionTabl_16bit[ASM_TYPE_TOTAL]
 };
 
 
-static const EB_SAOGATHER_FUNC SaoGatherFunctionTableLossy[ASM_TYPE_TOTAL] = {
+static const EB_SAOGATHER_FUNC SaoGatherFunctionTableLossy[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     GatherSaoStatisticsLcuLossy_62x62,
     // AVX2 
@@ -186,14 +186,14 @@ static const EB_SAOGATHER_FUNC SaoGatherFunctionTableLossy[ASM_TYPE_TOTAL] = {
 };
 
 
-static const EB_SAOGATHER_90_45_135_FUNC SaoGatherFunctionTableLossy_90_45_135[ASM_TYPE_TOTAL]= {
+static const EB_SAOGATHER_90_45_135_FUNC SaoGatherFunctionTableLossy_90_45_135[EB_ASM_TYPE_TOTAL]= {
 	// C_DEFAULT
     GatherSaoStatisticsLcu_OnlyEo_90_45_135_Lossy,
 	// AVX2 
 	GatherSaoStatisticsLcu_OnlyEo_90_45_135_BT_SSE2,
 };
 
-static const EB_SAOGATHER_90_45_135_16bit_SSE2_FUNC SaoGatherFunctionTable_90_45_135_16bit_SSE2[ASM_TYPE_TOTAL][2] = {
+static const EB_SAOGATHER_90_45_135_16bit_SSE2_FUNC SaoGatherFunctionTable_90_45_135_16bit_SSE2[EB_ASM_TYPE_TOTAL][2] = {
 	// C_DEFAULT
 	{
         GatherSaoStatisticsLcu_62x62_OnlyEo_90_45_135_16bit,
@@ -207,7 +207,7 @@ static const EB_SAOGATHER_90_45_135_16bit_SSE2_FUNC SaoGatherFunctionTable_90_45
 };
 
 
-static const EB_SAOAPPLY_BO_FUNC SaoFunctionTableBo[ASM_TYPE_TOTAL][2] = {
+static const EB_SAOAPPLY_BO_FUNC SaoFunctionTableBo[EB_ASM_TYPE_TOTAL][2] = {
     // C_DEFAULT
     {
         SAOApplyBO,
@@ -220,7 +220,7 @@ static const EB_SAOAPPLY_BO_FUNC SaoFunctionTableBo[ASM_TYPE_TOTAL][2] = {
     },
 };
 
-static const EB_SAOAPPLY_EO_0_90_FUNC SaoFunctionTableEO_0_90[ASM_TYPE_TOTAL][2][2] = {
+static const EB_SAOAPPLY_EO_0_90_FUNC SaoFunctionTableEO_0_90[EB_ASM_TYPE_TOTAL][2][2] = {
 	// C_DEFAULT
     {
         {
@@ -245,7 +245,7 @@ static const EB_SAOAPPLY_EO_0_90_FUNC SaoFunctionTableEO_0_90[ASM_TYPE_TOTAL][2]
     },
 };
 
-static const EB_SAOAPPLY_EO_135_45_FUNC SaoFunctionTableEO_135_45[ASM_TYPE_TOTAL][2][2][2] = {
+static const EB_SAOAPPLY_EO_135_45_FUNC SaoFunctionTableEO_135_45[EB_ASM_TYPE_TOTAL][2][2][2] = {
 	// C_DEFAULT
 	{
         {
@@ -295,7 +295,7 @@ static const EB_SAOAPPLY_EO_135_45_FUNC SaoFunctionTableEO_135_45[ASM_TYPE_TOTAL
     },
 };
 
-static const EB_SAOAPPLY_BO_16bit_FUNC SaoFunctionTableBo_16bit[ASM_TYPE_TOTAL][2] = { 
+static const EB_SAOAPPLY_BO_16bit_FUNC SaoFunctionTableBo_16bit[EB_ASM_TYPE_TOTAL][2] = { 
 	// C_DEFAULT
 	{
         SAOApplyBO16bit,
@@ -308,7 +308,7 @@ static const EB_SAOAPPLY_BO_16bit_FUNC SaoFunctionTableBo_16bit[ASM_TYPE_TOTAL][
 	},
 };
 
-static const EB_SAOAPPLY_EO_0_90_16bit_FUNC SaoFunctionTableEO_0_90_16bit[ASM_TYPE_TOTAL][2][2] = {
+static const EB_SAOAPPLY_EO_0_90_16bit_FUNC SaoFunctionTableEO_0_90_16bit[EB_ASM_TYPE_TOTAL][2][2] = {
 	// C_DEFAULT
     {
         {
@@ -333,7 +333,7 @@ static const EB_SAOAPPLY_EO_0_90_16bit_FUNC SaoFunctionTableEO_0_90_16bit[ASM_TY
     },
 };
 
-static const EB_SAOAPPLY_EO_135_45_16bit_FUNC SaoFunctionTableEO_135_45_16bit[ASM_TYPE_TOTAL][2][2] = {
+static const EB_SAOAPPLY_EO_135_45_16bit_FUNC SaoFunctionTableEO_135_45_16bit[EB_ASM_TYPE_TOTAL][2][2] = {
 	// C_DEFAULT
     {
         {

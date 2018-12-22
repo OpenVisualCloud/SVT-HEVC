@@ -230,8 +230,8 @@ EB_ERRORTYPE EncodeCabacContextModelCtor(
     for(sliceIdx = 0; sliceIdx < TOTAL_NUMBER_OF_SLICE_TYPES; sliceIdx++) {
 
         cabacInitialProbabilityTable =
-            (sliceIdx == I_SLICE) ? cabacInitialProbabilityTableI :
-            (sliceIdx == P_SLICE) ? cabacInitialProbabilityTableP :
+            (sliceIdx == EB_I_SLICE) ? cabacInitialProbabilityTableI :
+            (sliceIdx == EB_P_SLICE) ? cabacInitialProbabilityTableP :
             cabacInitialProbabilityTableB;
 
         bufferOffset1 = sliceIdx * TOTAL_NUMBER_OF_QP_VALUES * MAX_SIZE_OF_CABAC_CONTEXT_MODELS;
