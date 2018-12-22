@@ -10,6 +10,7 @@
 #include "EbPictureManagerQueue.h"
 #include "EbCabacContextModel.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 
 EB_ERRORTYPE EncodeContextCtor(
     EB_PTR *objectDblPtr, 

@@ -245,7 +245,7 @@ typedef EB_S32(*EB_SUM_RES)(
                      EB_U32   size,
                      EB_U32   strideIn );
 
-static EB_SUM_RES FUNC_TABLE SumResidual_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_SUM_RES FUNC_TABLE SumResidual_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
 	// C_DEFAULT
 	sumResidual,
 	// AVX2
@@ -265,7 +265,7 @@ typedef void(*EB_MEMSET16bitBLK)(
                     EB_U32   size,
                     EB_S16   value );
 
-static EB_MEMSET16bitBLK FUNC_TABLE memset16bitBlock_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_MEMSET16bitBLK FUNC_TABLE memset16bitBlock_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
 	// C_DEFAULT
 	memset16bitBlock,
 	// AVX2
@@ -352,7 +352,7 @@ typedef EB_U64(*EB_SATD_U8_TYPE)(
 /***************************************
 * Function Tables
 ***************************************/
-static EB_ADDDKERNEL_TYPE FUNC_TABLE AdditionKernel_funcPtrArray[ASM_TYPE_TOTAL][9] = {
+static EB_ADDDKERNEL_TYPE FUNC_TABLE AdditionKernel_funcPtrArray[EB_ASM_TYPE_TOTAL][9] = {
         // C_DEFAULT
         {
             /*0 4x4   */    PictureAdditionKernel,
@@ -379,14 +379,14 @@ static EB_ADDDKERNEL_TYPE FUNC_TABLE AdditionKernel_funcPtrArray[ASM_TYPE_TOTAL]
         },
 };
 
-static EB_ADDDKERNEL_TYPE_16BIT FUNC_TABLE AdditionKernel_funcPtrArray16bit[ASM_TYPE_TOTAL] = {
+static EB_ADDDKERNEL_TYPE_16BIT FUNC_TABLE AdditionKernel_funcPtrArray16bit[EB_ASM_TYPE_TOTAL] = {
 	// C_DEFAULT
     PictureAdditionKernel16bit,
 	// AVX2
 	PictureAdditionKernel16bit_SSE2_INTRIN,
 };
 
-static EB_PICCOPY_TYPE FUNC_TABLE PicCopyKernel_funcPtrArray[ASM_TYPE_TOTAL][9] = {
+static EB_PICCOPY_TYPE FUNC_TABLE PicCopyKernel_funcPtrArray[EB_ASM_TYPE_TOTAL][9] = {
         // C_DEFAULT
         {
             /*0 4x4   */     CopyKernel8Bit,
@@ -425,7 +425,7 @@ typedef void(*EB_RESDKERNELSUBSAMPLED_TYPE)(
     EB_U32   areaHeight , 
     EB_U8    lastLine  
     );
-static EB_RESDKERNELSUBSAMPLED_TYPE FUNC_TABLE ResidualKernelSubSampled_funcPtrArray[ASM_TYPE_TOTAL][9] = {
+static EB_RESDKERNELSUBSAMPLED_TYPE FUNC_TABLE ResidualKernelSubSampled_funcPtrArray[EB_ASM_TYPE_TOTAL][9] = {
 	// C_DEFAULT
 	{
 		/*0 4x4  */     ResidualKernelSubSampled,
@@ -452,7 +452,7 @@ static EB_RESDKERNELSUBSAMPLED_TYPE FUNC_TABLE ResidualKernelSubSampled_funcPtrA
 	},
 };
 
-static EB_RESDKERNEL_TYPE FUNC_TABLE ResidualKernel_funcPtrArray[ASM_TYPE_TOTAL][9] = {
+static EB_RESDKERNEL_TYPE FUNC_TABLE ResidualKernel_funcPtrArray[EB_ASM_TYPE_TOTAL][9] = {
 	// C_DEFAULT
 	{
         /*0 4x4  */     ResidualKernel,
@@ -480,14 +480,14 @@ static EB_RESDKERNEL_TYPE FUNC_TABLE ResidualKernel_funcPtrArray[ASM_TYPE_TOTAL]
 };
 
 
-static EB_RESDKERNEL_TYPE_16BIT FUNC_TABLE ResidualKernel_funcPtrArray16Bit[ASM_TYPE_TOTAL] = {
+static EB_RESDKERNEL_TYPE_16BIT FUNC_TABLE ResidualKernel_funcPtrArray16Bit[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT     
     ResidualKernel16bit,
     // AVX2     
     ResidualKernel16bit_SSE2_INTRIN
 };
 
-static EB_ZEROCOEFF_TYPE FUNC_TABLE PicZeroOutCoef_funcPtrArray[ASM_TYPE_TOTAL][5] = {
+static EB_ZEROCOEFF_TYPE FUNC_TABLE PicZeroOutCoef_funcPtrArray[EB_ASM_TYPE_TOTAL][5] = {
         // C_DEFAULT
         {
             /*0 4x4   */     ZeroOutCoeffKernel,
@@ -506,7 +506,7 @@ static EB_ZEROCOEFF_TYPE FUNC_TABLE PicZeroOutCoef_funcPtrArray[ASM_TYPE_TOTAL][
         },
 };
 
-static EB_FULLDIST_TYPE FUNC_TABLE FullDistortionIntrinsic_funcPtrArray[ASM_TYPE_TOTAL][2][2][9] = {     
+static EB_FULLDIST_TYPE FUNC_TABLE FullDistortionIntrinsic_funcPtrArray[EB_ASM_TYPE_TOTAL][2][2][9] = {     
     // C_DEFAULT
     // It was found that the SSE2 intrinsic code is much faster (~2x) than the SSE4.1 code
     {
@@ -614,14 +614,14 @@ static EB_FULLDIST_TYPE FUNC_TABLE FullDistortionIntrinsic_funcPtrArray[ASM_TYPE
     },   
 };
 
-static EB_SATD_TYPE FUNC_TABLE Compute8x8Satd_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_SATD_TYPE FUNC_TABLE Compute8x8Satd_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     Compute8x8Satd,
     // ASM_AVX2
     Compute8x8Satd_SSE4
 };
 
-static EB_SATD_U8_TYPE FUNC_TABLE Compute8x8Satd_U8_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_SATD_U8_TYPE FUNC_TABLE Compute8x8Satd_U8_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
 	// C_DEFAULT
     Compute8x8Satd_U8,
 	// ASM_AVX2
@@ -636,7 +636,7 @@ typedef EB_U64(*EB_SPATIALFULLDIST_TYPE)(
     EB_U32   areaWidth,
     EB_U32   areaHeight);
 
-static EB_SPATIALFULLDIST_TYPE FUNC_TABLE SpatialFullDistortionKernel_funcPtrArray[ASM_TYPE_TOTAL][5] = {
+static EB_SPATIALFULLDIST_TYPE FUNC_TABLE SpatialFullDistortionKernel_funcPtrArray[EB_ASM_TYPE_TOTAL][5] = {
     // C_DEFAULT
     {
         // 4x4

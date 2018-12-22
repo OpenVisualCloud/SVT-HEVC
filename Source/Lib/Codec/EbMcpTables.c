@@ -11,21 +11,21 @@
 * Function Pointer Tables
 **************************************************/
 
-const sampleBiPredClipping biPredClippingFuncPtrArray[ASM_TYPE_TOTAL] = {
+const sampleBiPredClipping biPredClippingFuncPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     BiPredClipping,
     // AVX2
     BiPredClipping_SSSE3,
 };
 
-const sampleBiPredClipping16bit biPredClipping16bitFuncPtrArray[ASM_TYPE_TOTAL] = {
+const sampleBiPredClipping16bit biPredClipping16bitFuncPtrArray[EB_ASM_TYPE_TOTAL] = {
 	// C_DEFAULT
     BiPredClipping16bit,
 	BiPredClipping16bit_SSE2_INTRIN
 };
 
 // Luma
-const InterpolationFilterNew uniPredLumaIFFunctionPtrArrayNew[ASM_TYPE_TOTAL][16] = {     //[ASM type][Interpolation position]
+const InterpolationFilterNew uniPredLumaIFFunctionPtrArrayNew[EB_ASM_TYPE_TOTAL][16] = {     //[ASM type][Interpolation position]
     // C_DEFAULT
     {
         LumaInterpolationCopy,                             //A
@@ -67,7 +67,7 @@ const InterpolationFilterNew uniPredLumaIFFunctionPtrArrayNew[ASM_TYPE_TOTAL][16
 };
 
 // Luma
-const InterpolationFilterNew16bit uniPredLuma16bitIFFunctionPtrArray[ASM_TYPE_TOTAL][16] = {     //[ASM type][Interpolation position]
+const InterpolationFilterNew16bit uniPredLuma16bitIFFunctionPtrArray[EB_ASM_TYPE_TOTAL][16] = {     //[ASM type][Interpolation position]
 		// C_DEFAULT
 		{
             LumaInterpolationCopy16bit,		                //A
@@ -109,7 +109,7 @@ const InterpolationFilterNew16bit uniPredLuma16bitIFFunctionPtrArray[ASM_TYPE_TO
 };
 
 
-const InterpolationFilterOutRaw biPredLumaIFFunctionPtrArrayNew[ASM_TYPE_TOTAL][16] = {     //[ASM type][Interpolation position]
+const InterpolationFilterOutRaw biPredLumaIFFunctionPtrArrayNew[EB_ASM_TYPE_TOTAL][16] = {     //[ASM type][Interpolation position]
         // C_DEFAULT
         {
             LumaInterpolationCopyOutRaw,                        //A
@@ -150,7 +150,7 @@ const InterpolationFilterOutRaw biPredLumaIFFunctionPtrArrayNew[ASM_TYPE_TOTAL][
         },
 };
 
-const InterpolationFilterOutRaw16bit biPredLumaIFFunctionPtrArrayNew16bit[ASM_TYPE_TOTAL][16] = {
+const InterpolationFilterOutRaw16bit biPredLumaIFFunctionPtrArrayNew16bit[EB_ASM_TYPE_TOTAL][16] = {
 		// C_DEFAULT
 		{
             LumaInterpolationCopyOutRaw16bit,                             //A
@@ -192,7 +192,7 @@ const InterpolationFilterOutRaw16bit biPredLumaIFFunctionPtrArrayNew16bit[ASM_TY
 };
 
 // Chroma
-const ChromaFilterNew uniPredChromaIFFunctionPtrArrayNew[ASM_TYPE_TOTAL][64] = {
+const ChromaFilterNew uniPredChromaIFFunctionPtrArrayNew[EB_ASM_TYPE_TOTAL][64] = {
         // C_DEFAULT
         {
             ChromaInterpolationCopy,                             //B
@@ -331,7 +331,7 @@ const ChromaFilterNew uniPredChromaIFFunctionPtrArrayNew[ASM_TYPE_TOTAL][64] = {
 };
 
 
-const InterpolationFilterChromaNew16bit uniPredChromaIFFunctionPtrArrayNew16bit[ASM_TYPE_TOTAL][64] = {
+const InterpolationFilterChromaNew16bit uniPredChromaIFFunctionPtrArrayNew16bit[EB_ASM_TYPE_TOTAL][64] = {
         // C_DEFAULT
         {
             ChromaInterpolationCopy16bit,                           //B
@@ -468,7 +468,7 @@ const InterpolationFilterChromaNew16bit uniPredChromaIFFunctionPtrArrayNew16bit[
         },
 };
 
-const ChromaFilterOutRaw biPredChromaIFFunctionPtrArrayNew[ASM_TYPE_TOTAL][64] = {
+const ChromaFilterOutRaw biPredChromaIFFunctionPtrArrayNew[EB_ASM_TYPE_TOTAL][64] = {
         // C_DEFAULT
         {
             ChromaInterpolationCopyOutRaw,                      //B
@@ -605,7 +605,7 @@ const ChromaFilterOutRaw biPredChromaIFFunctionPtrArrayNew[ASM_TYPE_TOTAL][64] =
         },
 };
 
-const ChromaFilterOutRaw16bit biPredChromaIFFunctionPtrArrayNew16bit[ASM_TYPE_TOTAL][64] = {
+const ChromaFilterOutRaw16bit biPredChromaIFFunctionPtrArrayNew16bit[EB_ASM_TYPE_TOTAL][64] = {
         // C_DEFAULT
         {
             ChromaInterpolationCopyOutRaw16bit,                       //B

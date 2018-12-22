@@ -180,7 +180,7 @@ void UpdateQiQCoef_R(
 	//EB_U32 colIndex = 0;
 
 
-    if ((*nonzerocoeff < 10) && enableContouringQCUpdateFlag && sliceType == I_SLICE && temporalLayer == 0 && componentType == 0){
+    if ((*nonzerocoeff < 10) && enableContouringQCUpdateFlag && sliceType == EB_I_SLICE && temporalLayer == 0 && componentType == 0){
 
 		coeffLocation = (areaSize - 1) + (areaSize - 1) * coeffStride;
 
@@ -229,7 +229,7 @@ void UpdateQiQCoef(
 
 
 
-    if ((*nonzerocoeff < 10) && enableContouringQCUpdateFlag && sliceType == I_SLICE && temporalLayer == 0 && componentType == 0){
+    if ((*nonzerocoeff < 10) && enableContouringQCUpdateFlag && sliceType == EB_I_SLICE && temporalLayer == 0 && componentType == 0){
 
         coeffLocation = (areaSize - 1) + (areaSize - 1) * coeffStride;
 

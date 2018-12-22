@@ -52,7 +52,7 @@ typedef void(*EB_WEAKLUMAFILTER_TYPE)(
 	EB_U32                       lcuOriginY,
 	EB_U32						 lcuOriginX
 	);
-static EB_WEAKLUMAFILTER_TYPE FUNC_TABLE WeakLumaFilter_funcPtrArray[ASM_TYPE_TOTAL] =
+static EB_WEAKLUMAFILTER_TYPE FUNC_TABLE WeakLumaFilter_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
 	// C_DEFAULT
 	noiseExtractLumaWeak,
@@ -68,7 +68,7 @@ void noiseExtractLumaWeakLcu(
 	EB_U32                       lcuOriginY,
 	EB_U32						 lcuOriginX
 	);
-static EB_WEAKLUMAFILTER_TYPE FUNC_TABLE WeakLumaFilterLcu_funcPtrArray[ASM_TYPE_TOTAL] =
+static EB_WEAKLUMAFILTER_TYPE FUNC_TABLE WeakLumaFilterLcu_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
 	// C_DEFAULT
 	noiseExtractLumaWeakLcu,
@@ -90,7 +90,7 @@ typedef void(*EB_STRONGLUMAFILTER_TYPE)(
 	EB_U32                       lcuOriginY,
 	EB_U32						 lcuOriginX
 	);
-static EB_STRONGLUMAFILTER_TYPE FUNC_TABLE StrongLumaFilter_funcPtrArray[ASM_TYPE_TOTAL] =
+static EB_STRONGLUMAFILTER_TYPE FUNC_TABLE StrongLumaFilter_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
 	// C_DEFAULT
 	noiseExtractLumaStrong,
@@ -110,7 +110,7 @@ typedef void(*EB_STRONGCHROMAFILTER_TYPE)(
 	EB_U32                       lcuOriginY,
 	EB_U32						 lcuOriginX
 	);
-static EB_STRONGCHROMAFILTER_TYPE FUNC_TABLE StrongChromaFilter_funcPtrArray[ASM_TYPE_TOTAL] =
+static EB_STRONGCHROMAFILTER_TYPE FUNC_TABLE StrongChromaFilter_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
 	// C_DEFAULT
 	noiseExtractChromaStrong,
@@ -131,7 +131,7 @@ typedef void(*EB_WEAKCHROMAFILTER_TYPE)(
 	EB_U32                       lcuOriginY,
 	EB_U32						 lcuOriginX
 	);
-static EB_WEAKCHROMAFILTER_TYPE FUNC_TABLE WeakChromaFilter_funcPtrArray[ASM_TYPE_TOTAL] =
+static EB_WEAKCHROMAFILTER_TYPE FUNC_TABLE WeakChromaFilter_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
 	// C_DEFAULT
 	noiseExtractChromaWeak,

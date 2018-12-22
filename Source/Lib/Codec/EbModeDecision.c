@@ -502,7 +502,7 @@ void Amvp2Nx2NCandidatesInjection(
     const EB_U32     cuOriginY = contextPtr->cuOriginY;
     EB_U32                   canTotalCnt = (*candidateTotalCnt);
 
-    for (interDirection = UNI_PRED_LIST_0; interDirection <= (pictureControlSetPtr->sliceType == B_SLICE ? BI_PRED : UNI_PRED_LIST_0); ++interDirection)
+    for (interDirection = UNI_PRED_LIST_0; interDirection <= (pictureControlSetPtr->sliceType == EB_B_SLICE ? BI_PRED : UNI_PRED_LIST_0); ++interDirection)
     {
 
         const unsigned targetRefList = (interDirection == UNI_PRED_LIST_0 || interDirection == BI_PRED) ? REF_LIST_0 : REF_LIST_1;
@@ -1034,7 +1034,7 @@ void  ProductIntraCandidateInjection(
                 //----------------------
                 // I Slice
                 //----------------------   
-                if (sliceType == I_SLICE) {
+                if (sliceType == EB_I_SLICE) {
 
                     if (cuSize == 32) {
                         if (contextPtr->intraInjectionMethod == 1 &&
@@ -1531,7 +1531,7 @@ EB_ERRORTYPE ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
 	//----------------------
 	// Intra
 	//---------------------- 
-    if (cuDepth != 0 && (sliceType == I_SLICE || cuDepth == 3 || contextPtr->restrictIntraGlobalMotion == EB_FALSE)) {
+    if (cuDepth != 0 && (sliceType == EB_I_SLICE || cuDepth == 3 || contextPtr->restrictIntraGlobalMotion == EB_FALSE)) {
 		const EB_BOOL  isLeftCu = contextPtr->cuStats->originX == 0;
 		const EB_BOOL  isTopCu = contextPtr->cuStats->originY == 0;
 		EB_BOOL limitIntraLoptLeft = contextPtr->limitIntra == EB_TRUE && isLeftCu  &&  isTopCu;
@@ -1547,7 +1547,7 @@ EB_ERRORTYPE ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
 			);
     }
 
-    if (sliceType != I_SLICE)
+    if (sliceType != EB_I_SLICE)
     {
 
         const EB_BOOL tmvpEnableFlag = pictureControlSetPtr->ParentPcsPtr->disableTmvpFlag ? EB_FALSE : EB_TRUE;
@@ -1606,7 +1606,7 @@ EB_ERRORTYPE ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
 				firstPuNumAvailableAMVPCand);
 		}
          
-        if (pictureControlSetPtr->sliceType == B_SLICE) {
+        if (pictureControlSetPtr->sliceType == EB_B_SLICE) {
             if (contextPtr->bipred3x3Injection) {
                 //----------------------
                 // Bipred2Nx2N

@@ -436,7 +436,7 @@ typedef void(*EB_INTRA_ANG_16BIT_TYPE)(
 /***************************************
 * Function Ptrs
 ***************************************/
-static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraVerticalLuma_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraVerticalLuma_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeVerticalLuma,
     // AVX2
@@ -444,42 +444,42 @@ static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraVerticalLuma_funcPtrArray[ASM_TYPE_TO
 
 };
 
-static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraVerticalLuma_16bit_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraVerticalLuma_16bit_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeVerticalLuma16bit,
     // AVX2
     IntraModeVerticalLuma16bit_SSE2_INTRIN,
 };
 
-static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraVerticalChroma_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraVerticalChroma_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeVerticalChroma,
     // AVX2
     IntraModeVerticalChroma_SSE2_INTRIN,
 };
 
-static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraVerticalChroma_16bit_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraVerticalChroma_16bit_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeVerticalChroma16bit,
     // AVX2
     IntraModeVerticalChroma16bit_SSE2_INTRIN,
 };
 
-static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraHorzLuma_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraHorzLuma_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeHorizontalLuma,
     // AVX2
     IntraModeHorizontalLuma_SSE2_INTRIN,
 };
 
-static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraHorzLuma_16bit_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraHorzLuma_16bit_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeHorizontalLuma16bit,
     // AVX2
     IntraModeHorizontalLuma16bit_SSE2_INTRIN,
 };
 
-static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraHorzChroma_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraHorzChroma_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeHorizontalChroma,
     // AVX2
@@ -487,14 +487,14 @@ static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraHorzChroma_funcPtrArray[ASM_TYPE_TOTA
 };
 
 
-static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraHorzChroma_16bit_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraHorzChroma_16bit_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeHorizontalChroma16bit,
     // AVX2
     IntraModeHorizontalChroma16bit_SSE2_INTRIN,
 };
 
-static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraDCLuma_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraDCLuma_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeDCLuma,
     // AVX2
@@ -509,56 +509,56 @@ EB_U32 UpdateNeighborDcIntraPred(
 	EB_U32                           srcOriginY,
 	EB_U32                           blockSize);
 
-static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraDCLuma_16bit_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraDCLuma_16bit_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeDCLuma16bit,
     // AVX2
     IntraModeDCLuma16bit_SSE4_1_INTRIN,
 };
 
-static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraDCChroma_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraDCChroma_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeDCChroma,
     // AVX2
     IntraModeDCChroma_SSE2_INTRIN,
 };
 
-static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraDCChroma_16bit_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraDCChroma_16bit_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeDCChroma16bit,
     // AVX2
     IntraModeDCChroma16bit_SSSE3_INTRIN,
 };
 
-static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraPlanar_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraPlanar_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModePlanar,
     // AVX2
     IntraModePlanar_AVX2_INTRIN,
 };
 
-static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraPlanar_16bit_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraPlanar_16bit_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModePlanar16bit,
     // AVX2
     IntraModePlanar16bit_SSE2_INTRIN,
 };
 
-static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraAng34_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraAng34_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeAngular_34,
     // AVX2
     IntraModeAngular_34_AVX2_INTRIN,
 };
 
-static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraAng34_16bit_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraAng34_16bit_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeAngular16bit_34,
     // AVX2
     IntraModeAngular16bit_34_SSE2_INTRIN,
 };
 
-static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraAng18_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraAng18_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeAngular_18,
     // AVX2
@@ -566,49 +566,49 @@ static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraAng18_funcPtrArray[ASM_TYPE_TOTAL] = 
 
 };
 
-static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraAng18_16bit_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraAng18_16bit_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeAngular16bit_18,
     // AVX2
     IntraModeAngular16bit_18_SSE2_INTRIN,
 };
 
-static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraAng2_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraAng2_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeAngular_2,
     // AVX2
     IntraModeAngular_2_AVX2_INTRIN,
 };
 
-static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraAng2_16bit_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraAng2_16bit_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeAngular16bit_2,
     // AVX2
     IntraModeAngular16bit_2_SSE2_INTRIN,
 };
 
-static EB_INTRA_ANG_TYPE FUNC_TABLE IntraAngVertical_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_ANG_TYPE FUNC_TABLE IntraAngVertical_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeAngular_Vertical_Kernel,
     // AVX2
     IntraModeAngular_Vertical_Kernel_AVX2_INTRIN,
 };
 
-static EB_INTRA_ANG_16BIT_TYPE FUNC_TABLE IntraAngVertical_16bit_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_ANG_16BIT_TYPE FUNC_TABLE IntraAngVertical_16bit_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeAngular16bit_Vertical_Kernel,
     // AVX2
     IntraModeAngular16bit_Vertical_Kernel_SSE2_INTRIN,
 };
 
-static EB_INTRA_ANG_TYPE FUNC_TABLE IntraAngHorizontal_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_ANG_TYPE FUNC_TABLE IntraAngHorizontal_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeAngular_Horizontal_Kernel,
     // AVX2
     IntraModeAngular_Horizontal_Kernel_AVX2_INTRIN,
 };
 
-static EB_INTRA_ANG_16BIT_TYPE FUNC_TABLE IntraAngHorizontal_16bit_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INTRA_ANG_16BIT_TYPE FUNC_TABLE IntraAngHorizontal_16bit_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     IntraModeAngular16bit_Horizontal_Kernel,
     // AVX2

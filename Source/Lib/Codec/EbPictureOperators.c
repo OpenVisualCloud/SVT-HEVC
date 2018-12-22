@@ -568,7 +568,7 @@ void CompressedPackLcu(
 )
 {
 
-    CompressedPack_funcPtrArray[((width == 64 || width == 32) ? ((ASM_TYPES & AVX2_MASK) && 1) : ASM_NON_AVX2)](
+    CompressedPack_funcPtrArray[((width == 64 || width == 32) ? ((ASM_TYPES & AVX2_MASK) && 1) : EB_ASM_NON_AVX2)](
         in8BitBuffer,
         in8Stride,
         innBitBuffer,
@@ -593,7 +593,7 @@ void CompressedPackBlk(
 {
 
 
-	CompressedPack_funcPtrArray[((width == 64 || width == 32 || width == 16 || width == 8) ? ((ASM_TYPES & AVX2_MASK) && 1) : ASM_NON_AVX2)](
+	CompressedPack_funcPtrArray[((width == 64 || width == 32 || width == 16 || width == 8) ? ((ASM_TYPES & AVX2_MASK) && 1) : EB_ASM_NON_AVX2)](
 		in8BitBuffer,
 		in8Stride,
 		innBitBuffer,
@@ -615,7 +615,7 @@ void Conv2bToCPackLcu(
 	EB_U32     height)
 {
 
-	Convert_Unpack_CPack_funcPtrArray[((width == 64 || width == 32) ? ((ASM_TYPES & AVX2_MASK) && 1) : ASM_NON_AVX2)](
+	Convert_Unpack_CPack_funcPtrArray[((width == 64 || width == 32) ? ((ASM_TYPES & AVX2_MASK) && 1) : EB_ASM_NON_AVX2)](
 		innBitBuffer,
 		innStride,
 		inCompnBitBuffer,

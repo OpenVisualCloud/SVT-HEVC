@@ -306,7 +306,7 @@ typedef void(*ENCODE_QUANTIZED_COEFF_TYPE) (
     EB_U32                        componentType,
     TransformUnit_t        *tuPtr);
 
-static ESTIMATE_QUANTIZED_COEFF_TYPE FUNC_TABLE EstimateQuantizedCoefficients[2][ASM_TYPE_TOTAL] = { // [lossless/lossy][c/assembly]
+static ESTIMATE_QUANTIZED_COEFF_TYPE FUNC_TABLE EstimateQuantizedCoefficients[2][EB_ASM_TYPE_TOTAL] = { // [lossless/lossy][c/assembly]
 {
     // C_DEFAULT
     EstimateQuantizedCoefficients_generic,
@@ -322,7 +322,7 @@ static ESTIMATE_QUANTIZED_COEFF_TYPE FUNC_TABLE EstimateQuantizedCoefficients[2]
 };
 
 
-static ENCODE_QUANTIZED_COEFF_TYPE FUNC_TABLE EncodeQuantizedCoefficientsFuncArray[ASM_TYPE_TOTAL] =
+static ENCODE_QUANTIZED_COEFF_TYPE FUNC_TABLE EncodeQuantizedCoefficientsFuncArray[EB_ASM_TYPE_TOTAL] =
 {
 	// C_DEFAULT
     EncodeQuantizedCoefficients_generic,
@@ -359,7 +359,7 @@ typedef EB_ERRORTYPE(*ESTIMATE_QUANTIZED_COEFF_TYPE_UPDATE)(
     EB_U32                        numNonZeroCoeffs,
     EB_U64                       *coeffBitsLong);
 
-static ESTIMATE_QUANTIZED_COEFF_TYPE_UPDATE FUNC_TABLE EstimateQuantizedCoefficientsUpdate[ASM_TYPE_TOTAL] = {
+static ESTIMATE_QUANTIZED_COEFF_TYPE_UPDATE FUNC_TABLE EstimateQuantizedCoefficientsUpdate[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     EstimateQuantizedCoefficients_generic_Update,
     // AVX2

@@ -15,6 +15,7 @@
 
 #include "EbModeDecisionProcess.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 
 
 EB_ERRORTYPE InterPredictionContextCtor(

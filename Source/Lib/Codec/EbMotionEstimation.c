@@ -299,7 +299,7 @@ typedef void(*EB_FPSEARCH_FUNC)(
 /*****************************
 * Function Tables
 *****************************/
-static EB_FPSEARCH_FUNC FUNC_TABLE GetEightHorizontalSearchPointResultsAll85PUs_funcPtrArray[ASM_TYPE_TOTAL] =
+static EB_FPSEARCH_FUNC FUNC_TABLE GetEightHorizontalSearchPointResultsAll85PUs_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
 	GetEightHorizontalSearchPointResultsAll85PUs_C,
 	GetEightHorizontalSearchPointResultsAll85PUs_AVX512_INTRIN
@@ -3579,7 +3579,7 @@ EB_ERRORTYPE MotionEstimateLcu(
 	EB_BOOL					enableQuarterPel    = EB_FALSE;
 
 
-    numOfListToSearch = (pictureControlSetPtr->sliceType == P_SLICE) ? (EB_U32)REF_LIST_0 : (EB_U32)REF_LIST_1;
+    numOfListToSearch = (pictureControlSetPtr->sliceType == EB_P_SLICE) ? (EB_U32)REF_LIST_0 : (EB_U32)REF_LIST_1;
 
 	referenceObject             = (EbPaReferenceObject_t*)pictureControlSetPtr->refPaPicPtrArray[0]->objectPtr;
 	ref0Poc                     = pictureControlSetPtr->refPicPocArray[0];
@@ -4861,7 +4861,7 @@ EB_ERRORTYPE OpenLoopIntraSearchLcu(
 	OisCu32Cu16Results_t    *oisCu32Cu16ResultsPtr = pictureControlSetPtr->oisCu32Cu16Results[lcuIndex];
 	OisCu8Results_t   	    *oisCu8ResultsPtr = pictureControlSetPtr->oisCu8Results[lcuIndex];
 
-	if (pictureControlSetPtr->sliceType == I_SLICE){
+	if (pictureControlSetPtr->sliceType == EB_I_SLICE){
 
 		for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_32x32_0; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_8x8_63; rasterScanCuIndex++) {
 
