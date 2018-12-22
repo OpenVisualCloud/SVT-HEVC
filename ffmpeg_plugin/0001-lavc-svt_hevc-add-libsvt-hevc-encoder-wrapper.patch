@@ -447,16 +447,16 @@ index 0000000000..d43c2229d7
 +    headerPtr->pts          = frame->pts;
 +    switch (frame->pict_type) {
 +    case AV_PICTURE_TYPE_I:
-+        headerPtr->sliceType = svt_enc->forced_idr > 0 ? IDR_SLICE : I_SLICE;
++        headerPtr->sliceType = svt_enc->forced_idr > 0 ? EB_IDR_SLICE : EB_I_SLICE;
 +        break;
 +    case AV_PICTURE_TYPE_P:
-+        headerPtr->sliceType = P_SLICE;
++        headerPtr->sliceType = EB_P_SLICE;
 +        break;
 +    case AV_PICTURE_TYPE_B:
-+        headerPtr->sliceType = B_SLICE;
++        headerPtr->sliceType = EB_B_SLICE;
 +        break;
 +    default:
-+        headerPtr->sliceType = INVALID_SLICE;
++        headerPtr->sliceType = EB_INVALID_SLICE;
 +        break;
 +    }
 +    EbH265EncSendPicture(svt_enc->svt_handle, headerPtr);
@@ -483,9 +483,9 @@ index 0000000000..d43c2229d7
 +    pkt->size = headerPtr->nFilledLen;
 +    pkt->pts  = headerPtr->pts;
 +    pkt->dts  = headerPtr->dts;
-+    if (headerPtr->sliceType == IDR_SLICE)
++    if (headerPtr->sliceType == EB_IDR_SLICE)
 +        pkt->flags |= AV_PKT_FLAG_KEY;
-+    if (headerPtr->sliceType == NON_REF_SLICE)
++    if (headerPtr->sliceType == EB_NON_REF_SLICE)
 +        pkt->flags |= AV_PKT_FLAG_DISPOSABLE;
 +
 +    ret = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? AVERROR_EOF : 0;
