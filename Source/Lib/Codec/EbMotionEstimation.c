@@ -407,7 +407,7 @@ static void GetSearchPointResults(
 
     //---- 16x16 : 12
 	blockIndex = blockIndex + 16;
-	searchPositionIndex = searchPositionIndex + 16;	searchPositionIndex = searchPositionIndex + 16;
+	searchPositionIndex = searchPositionIndex + 16;
     SadCalculation_8x8_16x16_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1](srcPtr + blockIndex, srcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[48], &pBestSad16x16[12], &pBestMV8x8[48], &pBestMV16x16[12], currMV, &pSad16x16[12]);
 
     //---- 16x16 : 13
