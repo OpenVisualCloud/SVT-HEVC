@@ -208,5 +208,4 @@ endif()
 configure_file(../pkg-config.pc.in ${CMAKE_BINARY_DIR}/SvtHevcEnc.pc @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/SvtHevcEnc.pc DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 install(TARGETS SvtHevcEnc DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-install(DIRECTORY ../../API/ DESTINATION include
-        FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY ../../API/ DESTINATION "${CMAKE_INSTALL_PREFIX}/include/svt-hevc" FILES_MATCHING PATTERN "*.h")

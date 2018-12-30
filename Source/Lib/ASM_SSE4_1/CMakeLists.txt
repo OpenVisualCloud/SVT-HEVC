@@ -15,7 +15,7 @@ include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/)
 include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
 
 # Utility Source Files
-add_library(ASM_SSE4_1
+add_library(ASM_SSE4_1 STATIC
     EbIntraPrediction_SSE4_1.h
     EbPictureOperators_SSE4_1.h
     EbTransforms_SSE4_1.h

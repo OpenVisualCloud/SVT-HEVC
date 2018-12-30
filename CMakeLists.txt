@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 2.8)
 set(project_name "svt-hevc")
 
 project(${project_name} C ASM_NASM)
