@@ -514,7 +514,7 @@ extern    EB_U32                   libSemaphoreCount;
 extern    EB_U32                   libMutexCount;
 
 
-#ifdef _MSC_VER 
+#ifdef _WIN32
 #define EB_ALLIGN_MALLOC(type, pointer, nElements, pointerClass) \
     pointer = (type) _aligned_malloc(nElements,ALVALUE); \
     if (pointer == (type)EB_NULL) { \
