@@ -157,6 +157,23 @@ extern "C" {
         SadLoopKernel_AVX2_INTRIN,
     };
 
+#ifdef NON_AVX512_SUPPORT
+    static EB_GETEIGHTSAD8x8 FUNC_TABLE GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[EB_ASM_TYPE_TOTAL] =
+    {
+        // C_DEFAULT
+        GetEightHorizontalSearchPointResults_8x8_16x16_PU,
+        // AVX2
+        GetEightHorizontalSearchPointResults_8x8_16x16_PU_AVX2_INTRIN,
+    };
+
+    static EB_GETEIGHTSAD32x32 FUNC_TABLE GetEightHorizontalSearchPointResults_32x32_64x64_funcPtrArray[EB_ASM_TYPE_TOTAL] =
+    {
+        // C_DEFAULT
+        GetEightHorizontalSearchPointResults_32x32_64x64,
+        // AVX2
+        GetEightHorizontalSearchPointResults_32x32_64x64_PU_AVX2_INTRIN,
+    };
+#endif
 #ifdef __cplusplus
 }
 #endif

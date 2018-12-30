@@ -247,7 +247,11 @@ EB_U32 GetCpuAsmType()
 	EB_U32 asmType = 0;
 
     if (CanUseIntelAVX512() == 1)
+#ifdef NON_AVX512_SUPPORT
+        asmType = 3; // bit-field
+#else
         asmType = 7; // bit-field
+#endif
     else
     if (CanUseIntelCore4thGenFeatures() == 1){
         asmType = 3; // bit-field
@@ -679,11 +683,11 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     * Plateform detection
     ************************************/
 
-    if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == EB_ASM_AVX2) {
-        ASM_TYPES = GetCpuAsmType();
+    if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == 1) {
+        ASM_TYPES = GetCpuAsmType(); // Use highest assembly
     }
-    else if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == EB_ASM_NON_AVX2) {
-        ASM_TYPES = 0;
+    else if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == 0) {
+        ASM_TYPES = 0; // Use C_only
     }
 
     /************************************
@@ -2794,7 +2798,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->latencyMode = 0;
 
     // ASM Type
-    configPtr->asmType = EB_ASM_AVX2;
+    configPtr->asmType = 1;
     
     // Channel info
     configPtr->logicalProcessors = 0;

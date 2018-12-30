@@ -75,8 +75,8 @@ typedef struct EbMemoryMapEntry
 } EbMemoryMapEntry;
 
 // *Note - This work around is needed for the windows visual studio compiler
-//  (MSVC) because it doesn't support the C99 header file stdint.h.  
-//  All other compilers should support the stdint.h C99 standard types. 
+//  (MSVC) because it doesn't support the C99 header file stdint.h.
+//  All other compilers should support the stdint.h C99 standard types.
 #ifdef _MSC_VER
 
 	/** EB_U8 is an 8 bit unsigned quantity that is byte aligned */
@@ -120,7 +120,7 @@ typedef struct EbMemoryMapEntry
 	typedef int64_t             EB_S64;
 
 #endif // _WIN32
-    
+
 /** The EB_BOOL type is intended to be used to represent a true or a false
 value when passing parameters to and from the svt API.  The
 EB_BOOL is a 32 bit quantity and is aligned on a 32 bit word boundary.
@@ -129,7 +129,7 @@ EB_BOOL is a 32 bit quantity and is aligned on a 32 bit word boundary.
 #define EB_BOOL   EB_U8
 #define EB_FALSE  0
 #define EB_TRUE   1
-    
+
 extern    EbMemoryMapEntry        *appMemoryMap;            // App Memory table
 extern    EB_U32                  *appMemoryMapIndex;       // App Memory index
 extern    EB_U64                  *totalAppMemory;          // App Memory malloc'd
@@ -142,7 +142,7 @@ typedef struct EB_PARAM_PORTDEFINITIONTYPE {
     EB_U32 nSize;
 } EB_PARAM_PORTDEFINITIONTYPE;
 
-#define MAX_APP_NUM_PTR                             (0x186A0 << 2)             // Maximum number of pointers to be allocated for the app 
+#define MAX_APP_NUM_PTR                             (0x186A0 << 2)             // Maximum number of pointers to be allocated for the app
 
 #define EB_APP_MALLOC(type, pointer, nElements, pointerClass, returnType) \
     pointer = (type)malloc(nElements); \
@@ -233,15 +233,15 @@ extern rsize_t strnlen_ss(const char *s, rsize_t smax);
 
 
 typedef struct EbPerformanceContext_s {
-    
-       
+
+
     /****************************************
      * Computational Performance Data
      ****************************************/
     EB_U64                  totalLatency;
 	EB_U32                  maxLatency;
 
-    EB_U64                  startsTime; 
+    EB_U64                  startsTime;
     EB_U64                  startuTime;
 
     EB_U64                  frameCount;
@@ -252,9 +252,9 @@ typedef struct EbPerformanceContext_s {
     EB_U64                  byteCount;
 
 }EbPerformanceContext_t;
-   
+
 typedef struct EbConfig_s
-{        
+{
     /****************************************
      * File I/O
      ****************************************/
@@ -266,7 +266,7 @@ typedef struct EbConfig_s
 	FILE                   *bufferFile;
 
     FILE                   *qpFile;
-    
+
     EB_BOOL                useQpFile;
 
     EB_S32                 frameRate;
@@ -289,9 +289,9 @@ typedef struct EbConfig_s
     unsigned char         **sequenceBuffer;
 
     EB_U8                  latencyMode;
-    
+
     /****************************************
-     * // Interlaced Video 
+     * // Interlaced Video
      ****************************************/
     EB_BOOL                 interlacedVideo;
     EB_BOOL                 separateFields;
@@ -316,7 +316,7 @@ typedef struct EbConfig_s
      * DLF
      ****************************************/
     EB_BOOL                disableDlfFlag;
-    
+
     /****************************************
      * SAO
      ****************************************/
@@ -361,7 +361,7 @@ typedef struct EbConfig_s
      * MD Parameters
      ****************************************/
     EB_BOOL                constrainedIntra;
-      
+
     /****************************************
      * Rate Control
      ****************************************/
@@ -401,7 +401,7 @@ typedef struct EbConfig_s
     EB_U32                 level;
 
     /****************************************
-     * On-the-fly Testing 
+     * On-the-fly Testing
      ****************************************/
 	EB_U32                 testUserData;
 	EB_BOOL				   eosFlag;
@@ -409,7 +409,7 @@ typedef struct EbConfig_s
     /****************************************
     * Optimization Type
     ****************************************/
-    EB_ASM					asmType;
+    EB_U32					asmType;
 
     /****************************************
      * Computational Performance Data
@@ -427,7 +427,7 @@ typedef struct EbConfig_s
 
     unsigned long long  processedFrameCount;
     unsigned long long  processedByteCount;
-    
+
 } EbConfig_t;
 
 extern void EbConfigCtor(EbConfig_t *configPtr);
