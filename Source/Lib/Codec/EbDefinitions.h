@@ -579,7 +579,6 @@ extern    EB_U32                   libMutexCount;
 #define DEADLOCK_DEBUG                   0
 #define DISPLAY_MEMORY                   0  // Display Total Memory at the end of the memory allocations
 #define LIB_PRINTF_ENABLE                1
-                      
 #if LIB_PRINTF_ENABLE
 #define SVT_LOG printf
 #else

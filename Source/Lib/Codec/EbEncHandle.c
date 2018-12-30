@@ -682,7 +682,6 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     /************************************
     * Plateform detection
     ************************************/
-
     if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == 1) {
         ASM_TYPES = GetCpuAsmType(); // Use highest assembly
     }
@@ -2799,6 +2798,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
 
     // ASM Type
     configPtr->asmType = 1;
+
     
     // Channel info
     configPtr->logicalProcessors = 0;
@@ -2814,7 +2814,6 @@ EB_ERRORTYPE EbH265EncInitParameter(
 static void PrintLibParams(
     EB_H265_ENC_CONFIGURATION*   config) 
 {
-
     SVT_LOG("------------------------------------------- ");
     if (config->profile == 0)
         SVT_LOG("\nSVT [config]: Main Profile\t");

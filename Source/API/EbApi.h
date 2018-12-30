@@ -31,9 +31,6 @@ extern "C" {
 /********************************
 * Defines
 ********************************/
-
-
-
 #define EB_SLICE           unsigned int
 #define EB_B_SLICE         0
 #define EB_P_SLICE         1
