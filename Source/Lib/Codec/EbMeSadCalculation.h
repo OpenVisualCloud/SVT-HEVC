@@ -103,14 +103,14 @@ typedef void(*EB_RECTAMPSADCALCULATION_TYPE)(
 /***************************************
 * Function Tables
 ***************************************/
-static EB_SADCALCULATION8X8AND16X16_TYPE SadCalculation_8x8_16x16_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_SADCALCULATION8X8AND16X16_TYPE SadCalculation_8x8_16x16_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     SadCalculation_8x8_16x16,
     // AVX2
 	SadCalculation_8x8_16x16_SSE2_INTRIN,
 };
 
-static EB_SADCALCULATION32X32AND64X64_TYPE SadCalculation_32x32_64x64_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_SADCALCULATION32X32AND64X64_TYPE SadCalculation_32x32_64x64_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     SadCalculation_32x32_64x64,
     // AVX2      
@@ -118,7 +118,7 @@ static EB_SADCALCULATION32X32AND64X64_TYPE SadCalculation_32x32_64x64_funcPtrArr
 };
 
 
-static EB_INIALIZEBUFFER_32BITS InitializeBuffer_32bits_funcPtrArray[ASM_TYPE_TOTAL] = {
+static EB_INIALIZEBUFFER_32BITS InitializeBuffer_32bits_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     InitializeBuffer_32bits,
     // AVX2

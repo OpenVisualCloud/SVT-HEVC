@@ -201,7 +201,8 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.tune = config->tune;
     callbackData->ebEncParameters.channelId = config->channelId;
     callbackData->ebEncParameters.activeChannelCount = config->activeChannelCount;
-    callbackData->ebEncParameters.useRoundRobinThreadAssignment = (EB_BOOL)config->useRoundRobinThreadAssignment;
+    callbackData->ebEncParameters.logicalProcessors = config->logicalProcessors;
+    callbackData->ebEncParameters.targetSocket = config->targetSocket;
 	callbackData->ebEncParameters.bitRateReduction = (EB_U8)config->bitRateReduction;
 	callbackData->ebEncParameters.improveSharpness = (EB_U8)config->improveSharpness;
     callbackData->ebEncParameters.videoUsabilityInfo = config->videoUsabilityInfo;
@@ -335,7 +336,7 @@ EB_ERRORTYPE AllocateInputBuffers(
 
         // Assign the variables 
         callbackData->inputBufferPool->pAppPrivate = NULL;
-        callbackData->inputBufferPool->sliceType   = INVALID_SLICE;
+        callbackData->inputBufferPool->sliceType   = EB_INVALID_SLICE;
     }
 
     return return_error;
@@ -384,7 +385,7 @@ EB_ERRORTYPE AllocateOutputBuffers(
 
         callbackData->streamBufferPool->nAllocLen = outputStreamBufferSize;
         callbackData->streamBufferPool->pAppPrivate = NULL;
-        callbackData->streamBufferPool->sliceType = INVALID_SLICE;
+        callbackData->streamBufferPool->sliceType = EB_INVALID_SLICE;
     }
     return return_error;
 }

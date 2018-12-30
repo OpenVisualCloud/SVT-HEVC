@@ -1,0 +1,6 @@
+SVT_HEVC_1 {
+    global:
+        Eb*;
+    local:
+        *;
+};

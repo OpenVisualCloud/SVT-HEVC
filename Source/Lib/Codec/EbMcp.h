@@ -651,17 +651,17 @@ void EstimateUniPredInterpolation(
 
 
 // Function Tables (Super-long, declared in EbMcpTables.c)
-extern const InterpolationFilterNew16bit uniPredLuma16bitIFFunctionPtrArray[ASM_TYPE_TOTAL][16];
-extern const InterpolationFilterChromaNew16bit uniPredChromaIFFunctionPtrArrayNew16bit[ASM_TYPE_TOTAL][64];
-extern const InterpolationFilterOutRaw16bit biPredLumaIFFunctionPtrArrayNew16bit[ASM_TYPE_TOTAL][16];
-extern const ChromaFilterOutRaw16bit biPredChromaIFFunctionPtrArrayNew16bit[ASM_TYPE_TOTAL][64];
-extern const sampleBiPredClipping biPredClippingFuncPtrArray[ASM_TYPE_TOTAL];
+extern const InterpolationFilterNew16bit uniPredLuma16bitIFFunctionPtrArray[EB_ASM_TYPE_TOTAL][16];
+extern const InterpolationFilterChromaNew16bit uniPredChromaIFFunctionPtrArrayNew16bit[EB_ASM_TYPE_TOTAL][64];
+extern const InterpolationFilterOutRaw16bit biPredLumaIFFunctionPtrArrayNew16bit[EB_ASM_TYPE_TOTAL][16];
+extern const ChromaFilterOutRaw16bit biPredChromaIFFunctionPtrArrayNew16bit[EB_ASM_TYPE_TOTAL][64];
+extern const sampleBiPredClipping biPredClippingFuncPtrArray[EB_ASM_TYPE_TOTAL];
 
-extern const InterpolationFilterNew     uniPredLumaIFFunctionPtrArrayNew[ASM_TYPE_TOTAL][16];
-extern const InterpolationFilterOutRaw  biPredLumaIFFunctionPtrArrayNew[ASM_TYPE_TOTAL][16];
-extern const ChromaFilterNew            uniPredChromaIFFunctionPtrArrayNew[ASM_TYPE_TOTAL][64];
-extern const ChromaFilterOutRaw         biPredChromaIFFunctionPtrArrayNew[ASM_TYPE_TOTAL][64];
-extern const sampleBiPredClipping16bit biPredClipping16bitFuncPtrArray[ASM_TYPE_TOTAL];
+extern const InterpolationFilterNew     uniPredLumaIFFunctionPtrArrayNew[EB_ASM_TYPE_TOTAL][16];
+extern const InterpolationFilterOutRaw  biPredLumaIFFunctionPtrArrayNew[EB_ASM_TYPE_TOTAL][16];
+extern const ChromaFilterNew            uniPredChromaIFFunctionPtrArrayNew[EB_ASM_TYPE_TOTAL][64];
+extern const ChromaFilterOutRaw         biPredChromaIFFunctionPtrArrayNew[EB_ASM_TYPE_TOTAL][64];
+extern const sampleBiPredClipping16bit biPredClipping16bitFuncPtrArray[EB_ASM_TYPE_TOTAL];
 
 
 #ifdef __cplusplus

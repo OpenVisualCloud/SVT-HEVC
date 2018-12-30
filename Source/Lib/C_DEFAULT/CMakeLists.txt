@@ -11,7 +11,7 @@ include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Codec/)
 include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
 
 # Utility Source Files
-add_library(C_DEFAULT
+add_library(C_DEFAULT STATIC
     EbAvcStyleMcp_C.h
     EbComputeMean_C.h
     EbComputeSAD_C.h

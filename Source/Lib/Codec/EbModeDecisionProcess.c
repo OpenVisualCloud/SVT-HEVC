@@ -330,7 +330,7 @@ void ProductResetModeDecision(
 	EB_U8 qpScaled = CLIP3(MIN_QP_VALUE, MAX_CHROMA_MAP_QP_VALUE, (EB_S32)(contextPtr->qp + pictureControlSetPtr->cbQpOffset + pictureControlSetPtr->sliceCbQpOffset));
 	contextPtr->chromaQp = MapChromaQp(qpScaled);
 
-	if (pictureControlSetPtr->sliceType == I_SLICE && pictureControlSetPtr->temporalId == 0){
+	if (pictureControlSetPtr->sliceType == EB_I_SLICE && pictureControlSetPtr->temporalId == 0){
 
 		(*lambdaAssignmentFunctionTable[3])(
             pictureControlSetPtr->ParentPcsPtr,
@@ -377,7 +377,7 @@ void ProductResetModeDecision(
 
 	// Slice Type
 	sliceType =
-		(pictureControlSetPtr->ParentPcsPtr->idrFlag == EB_TRUE) ? I_SLICE :
+		(pictureControlSetPtr->ParentPcsPtr->idrFlag == EB_TRUE) ? EB_I_SLICE :
 		pictureControlSetPtr->sliceType;
 
 	// Increment the MD Rate Estimation array pointer to point to the right address based on the QP and slice type
@@ -669,7 +669,7 @@ void DeriveDepthRefinment(
         contextPtr->depthRefinment = 2;
     }
 
-    if ((pictureControlSetPtr->ParentPcsPtr->sliceType != I_SLICE && (pictureControlSetPtr->ParentPcsPtr->logoPicFlag) &&
+    if ((pictureControlSetPtr->ParentPcsPtr->sliceType != EB_I_SLICE && (pictureControlSetPtr->ParentPcsPtr->logoPicFlag) &&
         pictureControlSetPtr->ParentPcsPtr->edgeResultsPtr[lcuAddr].edgeBlockNum)) {
         contextPtr->depthRefinment = 2;
     }
@@ -737,7 +737,7 @@ void ModeDecisionConfigureLcu(
     /* Note(CHKN) : when Qp modulation varies QP on a sub-LCU(CU) basis,  Lamda has to change based on Cu->QP , and then this code has to move inside the CU loop in MD */
 
     // Lambda Assignement
-    if(pictureControlSetPtr->sliceType == I_SLICE && pictureControlSetPtr->temporalId == 0){
+    if(pictureControlSetPtr->sliceType == EB_I_SLICE && pictureControlSetPtr->temporalId == 0){
 
         (*lambdaAssignmentFunctionTable[3])(
             pictureControlSetPtr->ParentPcsPtr,

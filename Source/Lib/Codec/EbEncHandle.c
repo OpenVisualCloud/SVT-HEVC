@@ -117,11 +117,13 @@ EB_U32                         libThreadCount = 0;
 EB_U32                         libSemaphoreCount = 0;
 EB_U32                         libMutexCount = 0;
 
-#ifdef _MSC_VER
+EB_U8                           numGroups = 0;
+#ifdef _WIN32
 GROUP_AFFINITY                  groupAffinity;
+EB_BOOL                         alternateGroups = 0;
+#else
+cpu_set_t                       groupAffinity;
 #endif
-EB_U8                           numGroups;
-EB_BOOL                         alternateGroups;
 
 /**************************************
 * Instruction Set Support
@@ -256,12 +258,12 @@ EB_U32 GetCpuAsmType()
 	return asmType;
 }
 
-//Get Number of processes
-EB_U32 GetNumCores() {
+//Get Number of logical processors
+EB_U32 GetNumProcessors() {
 #ifdef WIN32
-	SYSTEM_INFO sysinfo;
-	GetSystemInfo(&sysinfo);
-	return sysinfo.dwNumberOfProcessors<<1;
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo(&sysinfo);
+    return numGroups == 1 ? sysinfo.dwNumberOfProcessors : sysinfo.dwNumberOfProcessors << 1;
 #else
 	return sysconf(_SC_NPROCESSORS_ONLN);
 #endif
@@ -359,12 +361,10 @@ static EB_U32 EncDecPortTotalCount(void)
 }
 
 void InitThreadManagmentParams(){
-#ifdef _MSC_VER 
+#ifdef _WIN32
     // Initialize groupAffinity structure with Current thread info
     GetThreadGroupAffinity(GetCurrentThread(),&groupAffinity);
     numGroups = (EB_U8) GetActiveProcessorGroupCount();
-#else
-    return;
 #endif
 }
 void libSvtEncoderSendErrorExit(
@@ -539,41 +539,122 @@ static EB_ERRORTYPE EbEncHandleCtor(
     return EB_ErrorNone;
 }
 
+#ifdef _WIN32
+EB_U64 GetAffinityMask(EB_U32 lpnum) {
+    EB_U64 mask = 0x1;
+    for (EB_U32 i = lpnum - 1; i > 0; i--)
+        mask += (EB_U64)1 << i;
+    return mask;
+}
+#endif
+
 void EbSetThreadManagementParameters(EB_H265_ENC_CONFIGURATION   *configPtr){
-#ifdef _MSC_VER 
-    alternateGroups = 0;
-    if (configPtr->useRoundRobinThreadAssignment == EB_TRUE){
-        if (numGroups == 2 && configPtr->activeChannelCount > 1){
-            if ((configPtr->activeChannelCount % 2) && (configPtr->activeChannelCount - 1 == configPtr->channelId)){
-                alternateGroups = 1;
-                groupAffinity.Group = 0;
+    EB_U32 numLogicProcessors = GetNumProcessors();
+#ifdef _WIN32
+    // For system with a single processor group(no more than 64 logic processors all together)
+    // Affinity of the thread can be set to one or more logical processors
+    if (numGroups == 1) {
+        EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
+            configPtr->logicalProcessors < numLogicProcessors ? configPtr->logicalProcessors : numLogicProcessors;
+        groupAffinity.Mask = GetAffinityMask(lps);
+    }
+    else if (numGroups > 1) { // For system with multiple processor group
+        if (configPtr->logicalProcessors == 0) {
+            if (configPtr->targetSocket != -1) {
+                groupAffinity.Group = configPtr->targetSocket;
             }
-            else if (configPtr->channelId % 2){
-                alternateGroups = 0;
-                groupAffinity.Group = 1;
+        }
+        else {
+            EB_U32 numLpPerGroup = numLogicProcessors / numGroups;
+            if (configPtr->targetSocket == -1) {
+                if (configPtr->logicalProcessors > numLpPerGroup) {
+                    alternateGroups = TRUE;
+                    SVT_LOG("WARNING: -lp(logical processors) setting is ignored. Run on both sockets. \n");
+                }
+                else {
+                    groupAffinity.Mask = GetAffinityMask(configPtr->logicalProcessors);
+                }
             }
             else {
-                alternateGroups = 0;
-                groupAffinity.Group = 0;
+                EB_U32 lps = configPtr->logicalProcessors == 0 ? numLpPerGroup :
+                    configPtr->logicalProcessors < numLpPerGroup ? configPtr->logicalProcessors : numLpPerGroup;
+                groupAffinity.Mask = GetAffinityMask(lps);
+                groupAffinity.Group = configPtr->targetSocket;
             }
         }
-        else if (numGroups == 2 && configPtr->activeChannelCount == 1){
-            alternateGroups = 1;
-            groupAffinity.Group = 0;
-        }
-        else{
-            alternateGroups = 0;
-            numGroups = 1;
-        }
-    }
-    else{
-        alternateGroups = 0;
-        numGroups = 1;
     }
 #else
-    alternateGroups = 0;
+    const char* PROCESSORID = "processor";
+    const char* PHYSICALID = "physical id";
+    CPU_ZERO(&groupAffinity);
     numGroups = 1;
-    (void) configPtr;
+    typedef struct logicalProcessorGroup {
+        EB_U32 num;
+        EB_U32 group[1024];
+    }processorGroup;
+    processorGroup lpgroup[16];
+    memset(lpgroup, 0, 16* sizeof(processorGroup));
+
+    FILE *fin = fopen("/proc/cpuinfo", "rt");
+    if (fin) {
+        int processor_id = 0, socket_id = 0;
+        while (!feof(fin)) {
+            char line[128];
+            if (!fgets(line, sizeof(line), fin)) break;
+            if(strncmp(line, PROCESSORID, strnlen_ss(PROCESSORID,128)) == 0) {
+                char* p = line +  strnlen_ss(PROCESSORID,128);
+                while(*p < '0' || *p > '9') p++;
+                processor_id = atoi(p);
+            }
+            if(strncmp(line, PHYSICALID, strnlen_ss(PHYSICALID,128)) == 0) {
+                char* p = line +  strnlen_ss(PHYSICALID,128);
+                while(*p < '0' || *p > '9') p++;
+                socket_id = atoi(p);
+                if (socket_id + 1 > numGroups)
+                    numGroups = socket_id + 1;
+                lpgroup[socket_id].group[lpgroup[socket_id].num++] = processor_id;
+            }
+        }
+        fclose(fin);
+    }
+
+    if (numGroups == 1) {
+        EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
+            configPtr->logicalProcessors < numLogicProcessors ? configPtr->logicalProcessors : numLogicProcessors;
+        for(int i=0; i<lps; i++)
+            CPU_SET(lpgroup[0].group[i], &groupAffinity);
+    }
+    else if (numGroups > 1) {
+        EB_U32 numLpPerGroup = numLogicProcessors / numGroups;
+        if (configPtr->logicalProcessors == 0) {
+            if (configPtr->targetSocket != -1) {
+                for(int i=0; i<lpgroup[configPtr->targetSocket].num; i++)
+                    CPU_SET(lpgroup[configPtr->targetSocket].group[i], &groupAffinity);
+            }
+        }
+        else {
+            if (configPtr->targetSocket == -1) {
+                EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
+                    configPtr->logicalProcessors < numLogicProcessors ? configPtr->logicalProcessors : numLogicProcessors;
+                if(lps > numLpPerGroup) {
+                    for(int i=0; i<lpgroup[0].num; i++)
+                        CPU_SET(lpgroup[0].group[i], &groupAffinity);
+                    for(int i=0; i< (lps -lpgroup[0].num); i++)
+                        CPU_SET(lpgroup[1].group[i], &groupAffinity);
+                }
+                else {
+                    for(int i=0; i<lps; i++)
+                        CPU_SET(lpgroup[0].group[i], &groupAffinity);
+                }
+            }
+            else {
+                EB_U32 lps = configPtr->logicalProcessors == 0 ? numLpPerGroup :
+                    configPtr->logicalProcessors < numLpPerGroup ? configPtr->logicalProcessors : numLpPerGroup;
+                for(int i=0; i<lps; i++)
+                    CPU_SET(lpgroup[configPtr->targetSocket].group[i], &groupAffinity);
+            }
+        }
+    }
 #endif
 }
 
@@ -598,10 +679,10 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     * Plateform detection
     ************************************/
 
-    if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == ASM_AVX2) {
+    if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == EB_ASM_AVX2) {
         ASM_TYPES = GetCpuAsmType();
     }
-    else if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == ASM_NON_AVX2) {
+    else if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == EB_ASM_NON_AVX2) {
         ASM_TYPES = 0;
     }
 
@@ -1418,7 +1499,7 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             free(memoryEntry->ptr);
             break;
         case EB_A_PTR:
-#ifdef _MSC_VER
+#ifdef _WIN32
             _aligned_free(memoryEntry->ptr);
 #else
             free(memoryEntry->ptr);
@@ -1570,7 +1651,7 @@ void LoadDefaultBufferConfigurationSettings(
 
     EB_U32 inputPic = SetParentPcs(&sequenceControlSetPtr->staticConfig);
 
-    unsigned int coreCount = GetNumCores();
+    unsigned int coreCount = GetNumProcessors();
 
     sequenceControlSetPtr->inputOutputBufferFifoInitCount = inputPic + sequenceControlSetPtr->staticConfig.lookAheadDistance + SCD_LAD;
     
@@ -2017,8 +2098,8 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.asmType = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->asmType;
     sequenceControlSetPtr->staticConfig.channelId = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->channelId;
     sequenceControlSetPtr->staticConfig.activeChannelCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->activeChannelCount;
-    sequenceControlSetPtr->staticConfig.useRoundRobinThreadAssignment = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->useRoundRobinThreadAssignment;
-
+    sequenceControlSetPtr->staticConfig.logicalProcessors = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->logicalProcessors;
+    sequenceControlSetPtr->staticConfig.targetSocket = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->targetSocket;
     sequenceControlSetPtr->staticConfig.frameRateDenominator = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRateDenominator;
     sequenceControlSetPtr->staticConfig.frameRateNumerator = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRateNumerator;
     sequenceControlSetPtr->staticConfig.reconEnabled = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->reconEnabled;
@@ -2607,12 +2688,11 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
-	// UseRoundRobinThreadAssignment
-	if (config->useRoundRobinThreadAssignment != 0 && config->useRoundRobinThreadAssignment != 1) {
-        SVT_LOG("Error instance %u: Invalid UseRoundRobinThreadAssignment [0 - 1]\n", channelNumber + 1);
-		return_error = EB_ErrorBadParameter;
-	}
- 
+    if (config->targetSocket != -1 && config->targetSocket != 0 && config->targetSocket != 1) {
+        SVT_LOG("Error instance %u: Invalid TargetSocket [-1 - 1] \n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
 
     return return_error;
 }
@@ -2714,10 +2794,11 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->latencyMode = 0;
 
     // ASM Type
-    configPtr->asmType = ASM_AVX2; 
+    configPtr->asmType = EB_ASM_AVX2;
     
     // Channel info
-    configPtr->useRoundRobinThreadAssignment = EB_FALSE;
+    configPtr->logicalProcessors = 0;
+    configPtr->targetSocket = -1;
     configPtr->channelId = 0;
     configPtr->activeChannelCount   = 1;
     
@@ -2868,7 +2949,7 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
 
         EncodeAUD(
             bitstreamPtr,
-            I_SLICE,
+            EB_I_SLICE,
             0);
     }
 

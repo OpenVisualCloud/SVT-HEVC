@@ -238,7 +238,7 @@ typedef void(*EB_LUMADLF_TYPE_16BIT)(
 /***************************************
 * Function Ptr Types
 ***************************************/
-static EB_LUMA4SAMPLEDGEDLF_FUNC FUNC_TABLE Luma4SampleEdgeDLFCore_Table[ASM_TYPE_TOTAL] =
+static EB_LUMA4SAMPLEDGEDLF_FUNC FUNC_TABLE Luma4SampleEdgeDLFCore_Table[EB_ASM_TYPE_TOTAL] =
 {  
 	// C_DEFAULT
     Luma4SampleEdgeDLFCore,
@@ -246,7 +246,7 @@ static EB_LUMA4SAMPLEDGEDLF_FUNC FUNC_TABLE Luma4SampleEdgeDLFCore_Table[ASM_TYP
     Luma4SampleEdgeDLFCore_SSSE3,
 };
 
-static EB_CHROMA2SAMPLEDGEDLF_FUNC FUNC_TABLE Chroma2SampleEdgeDLFCore_Table[ASM_TYPE_TOTAL] =
+static EB_CHROMA2SAMPLEDGEDLF_FUNC FUNC_TABLE Chroma2SampleEdgeDLFCore_Table[EB_ASM_TYPE_TOTAL] =
 {
     // C_DEFAULT
     Chroma2SampleEdgeDLFCore,
@@ -254,14 +254,14 @@ static EB_CHROMA2SAMPLEDGEDLF_FUNC FUNC_TABLE Chroma2SampleEdgeDLFCore_Table[ASM
     Chroma2SampleEdgeDLFCore_SSSE3,
 };
 
-static EB_CHROMADLF_TYPE_16BIT FUNC_TABLE chromaDlf_funcPtrArray16bit[ASM_TYPE_TOTAL] = {
+static EB_CHROMADLF_TYPE_16BIT FUNC_TABLE chromaDlf_funcPtrArray16bit[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     Chroma2SampleEdgeDLFCore16bit,
     // AVX2
     Chroma2SampleEdgeDLFCore16bit_SSE2_INTRIN,
 };
 
-static EB_LUMADLF_TYPE_16BIT FUNC_TABLE lumaDlf_funcPtrArray16bit[ASM_TYPE_TOTAL] = {
+static EB_LUMADLF_TYPE_16BIT FUNC_TABLE lumaDlf_funcPtrArray16bit[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     Luma4SampleEdgeDLFCore16bit,
     // AVX2

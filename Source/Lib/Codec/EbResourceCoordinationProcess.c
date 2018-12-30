@@ -13,6 +13,7 @@
 #include "EbPictureBufferDesc.h"
 #include "EbDefinitions.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 
 #include "EbResourceCoordinationProcess.h"
 
@@ -113,23 +114,23 @@ void SpeedBufferControl(
 	EbBlockOnMutex(sequenceControlSetPtr->encodeContextPtr->scBufferMutex);
 
 	if (sequenceControlSetPtr->encodeContextPtr->scFrameIn == 0) {
-        StartTime((unsigned long long*)&contextPtr->firstInPicArrivedTimeSeconds, (unsigned long long*)&contextPtr->firstInPicArrivedTimeuSeconds);
+        EbStartTime((unsigned long long*)&contextPtr->firstInPicArrivedTimeSeconds, (unsigned long long*)&contextPtr->firstInPicArrivedTimeuSeconds);
 	}
 	else if (sequenceControlSetPtr->encodeContextPtr->scFrameIn == SC_FRAMES_TO_IGNORE) {
 		contextPtr->startFlag = EB_TRUE;
 	}
 
     // Compute duration since the start of the encode and since the previous checkpoint
-    FinishTime((unsigned long long*)&cursTimeSeconds, (unsigned long long*)&cursTimeuSeconds);
+    EbFinishTime((unsigned long long*)&cursTimeSeconds, (unsigned long long*)&cursTimeuSeconds);
 
-    ComputeOverallElapsedTimeMs(
+    EbComputeOverallElapsedTimeMs(
         contextPtr->firstInPicArrivedTimeSeconds,
         contextPtr->firstInPicArrivedTimeuSeconds,
         cursTimeSeconds,
         cursTimeuSeconds,
         &overallDuration);
 
-    ComputeOverallElapsedTimeMs(
+    EbComputeOverallElapsedTimeMs(
         contextPtr->prevsTimeSeconds,
         contextPtr->prevsTimeuSeconds,
         cursTimeSeconds,
@@ -588,7 +589,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         pictureControlSetPtr->startTimeSeconds = 0;
         pictureControlSetPtr->startTimeuSeconds = 0;
 
-        StartTime((unsigned long long*)&pictureControlSetPtr->startTimeSeconds, (unsigned long long*)&pictureControlSetPtr->startTimeuSeconds);
+        EbStartTime((unsigned long long*)&pictureControlSetPtr->startTimeSeconds, (unsigned long long*)&pictureControlSetPtr->startTimeuSeconds);
 
         inputPicturePtr = pictureControlSetPtr->enhancedPicturePtr;
 
@@ -623,8 +624,8 @@ void* ResourceCoordinationKernel(void *inputPtr)
         pictureControlSetPtr->inputPictureWrapperPtr          = inputPictureWrapperPtr;
 
         // Set Picture Control Flags
-        pictureControlSetPtr->idrFlag                         = sequenceControlSetPtr->encodeContextPtr->initialPicture || (ebInputPtr->sliceType == IDR_SLICE);
-        pictureControlSetPtr->craFlag                         = (ebInputPtr->sliceType == I_SLICE) ? EB_TRUE : EB_FALSE;
+        pictureControlSetPtr->idrFlag                         = sequenceControlSetPtr->encodeContextPtr->initialPicture || (ebInputPtr->sliceType == EB_IDR_SLICE);
+        pictureControlSetPtr->craFlag                         = (ebInputPtr->sliceType == EB_I_SLICE) ? EB_TRUE : EB_FALSE;
         pictureControlSetPtr->sceneChangeFlag                 = EB_FALSE;
 
         pictureControlSetPtr->qpOnTheFly                      = EB_FALSE;

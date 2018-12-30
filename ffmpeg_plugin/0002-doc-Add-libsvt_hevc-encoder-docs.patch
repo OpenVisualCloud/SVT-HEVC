@@ -1,4 +1,4 @@
-From 024ea6e09abe7edaab8e7f39d9163c4e627b719d Mon Sep 17 00:00:00 2001
+From 0bb8d7cd4131b1c6d29d57c709ce6f3a6b246031 Mon Sep 17 00:00:00 2001
 From: Jun Zhao <mypopydev@gmail.com>
 Date: Sat, 8 Dec 2018 15:43:05 +0800
 Subject: [PATCH 2/2] doc: Add libsvt_hevc encoder docs
@@ -9,12 +9,12 @@ Signed-off-by: Jun Zhao <jun.zhao@intel.com>
 Signed-off-by: Huang, Zhengxu <zhengxu.huang@intel.com>
 Signed-off-by: hassene <hassene.tmar@intel.com>
 ---
- doc/encoders.texi | 157 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ doc/encoders.texi | 157 ++++++++++++++++++++++++++++++++++++++++++++++
  doc/general.texi  |   8 +++
  2 files changed, 165 insertions(+)
 
 diff --git a/doc/encoders.texi b/doc/encoders.texi
-index 899faac..0a19596 100644
+index 899faac49b..0a19596299 100644
 --- a/doc/encoders.texi
 +++ b/doc/encoders.texi
 @@ -1457,6 +1457,163 @@ Set maximum NAL size in bytes.
@@ -182,7 +182,7 @@ index 899faac..0a19596 100644
  
  libtheora Theora encoder wrapper.
 diff --git a/doc/general.texi b/doc/general.texi
-index 2b015f1..070997a 100644
+index 2b015f143a..070997aa6f 100644
 --- a/doc/general.texi
 +++ b/doc/general.texi
 @@ -280,6 +280,14 @@ The dispatcher is open source and can be downloaded from
@@ -201,5 +201,5 @@ index 2b015f1..070997a 100644
  
  FFmpeg can use the AMD Advanced Media Framework library for accelerated H.264
 -- 
-2.7.4
+2.17.1
 
