@@ -14,6 +14,7 @@
 #include "EbTransformUnit.h"
 #include "EbDeblockingFilter.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 
 // SSE2 Intrinsics 
 #include "emmintrin.h"
@@ -1253,21 +1254,21 @@ void EncodeQuantizedCoefficients_generic(
     EB_U32  transCoeffShape = (componentType == COMPONENT_LUMA) ? tuPtr->transCoeffShapeLuma : tuPtr->transCoeffShapeChroma ;      
 
     if (transCoeffShape && tuPtr->isOnlyDc[(componentType == COMPONENT_LUMA) ? 0 : (componentType == COMPONENT_CHROMA_CB) ? 1 : 2] == EB_FALSE) {
-        PicZeroOutCoef_funcPtrArray[(ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 1) >> 3](
+        PicZeroOutCoef_funcPtrArray[(EB_ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 1) >> 3](
             coeffBufferPtr,
             coeffStride,
             (size >> 1),
             (size >> 1),
             (size >> 1));
 
-        PicZeroOutCoef_funcPtrArray[(ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 1) >> 3](
+        PicZeroOutCoef_funcPtrArray[(EB_ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 1) >> 3](
             coeffBufferPtr,
             coeffStride,
             (size >> 1) * coeffStride,
             (size >> 1),
             (size >> 1));
 
-        PicZeroOutCoef_funcPtrArray[(ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 1) >> 3](
+        PicZeroOutCoef_funcPtrArray[(EB_ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 1) >> 3](
             coeffBufferPtr,
             coeffStride,
             (size >> 1) * coeffStride + (size >> 1),
@@ -1275,21 +1276,21 @@ void EncodeQuantizedCoefficients_generic(
             (size >> 1));
 
         if (transCoeffShape == N4_SHAPE) {
-            PicZeroOutCoef_funcPtrArray[(ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 2) >> 3](
+            PicZeroOutCoef_funcPtrArray[(EB_ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 2) >> 3](
                 coeffBufferPtr,
                 coeffStride,
                 (size >> 2),
                 (size >> 2),
                 (size >> 2));
 
-            PicZeroOutCoef_funcPtrArray[(ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 2) >> 3](
+            PicZeroOutCoef_funcPtrArray[(EB_ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 2) >> 3](
                 coeffBufferPtr,
                 coeffStride,
                 (size >> 2) * coeffStride,
                 (size >> 2),
                 (size >> 2));
 
-            PicZeroOutCoef_funcPtrArray[(ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 2) >> 3](
+            PicZeroOutCoef_funcPtrArray[(EB_ASM_NON_AVX2 & PREAVX2_MASK) && 1][(size >> 2) >> 3](
                 coeffBufferPtr,
                 coeffStride,
                 (size >> 2) * coeffStride + (size >> 2),
@@ -6218,7 +6219,7 @@ static void CodeSliceHeader(
 
 	EB_BOOL disableDlfFlag = sequenceControlSetPtr->staticConfig.disableDlfFlag;
 
-	EB_U32 sliceType = (pcsPtr->ParentPcsPtr->idrFlag == EB_TRUE) ? I_SLICE : pcsPtr->sliceType;
+	EB_U32 sliceType = (pcsPtr->ParentPcsPtr->idrFlag == EB_TRUE) ? EB_I_SLICE : pcsPtr->sliceType;
 
 	EB_U32 refPicsTotalCount =
 		pcsPtr->ParentPcsPtr->predStructPtr->predStructEntryPtrArray[pcsPtr->ParentPcsPtr->predStructIndex]->negativeRefPicsTotalCount +
@@ -6362,7 +6363,7 @@ static void CodeSliceHeader(
 	}
 
 	// RPS List Construction
-	if (sliceType != I_SLICE) {
+	if (sliceType != EB_I_SLICE) {
 
 		// "num_ref_idx_active_override_flag"
 		WriteFlagCavlc(
@@ -6376,7 +6377,7 @@ static void CodeSliceHeader(
 				bitstreamPtr,
 				pcsPtr->ParentPcsPtr->predStructPtr->predStructEntryPtrArray[pcsPtr->ParentPcsPtr->predStructIndex]->refPicsList0TotalCountMinus1);
 
-			if (sliceType == B_SLICE){
+			if (sliceType == EB_B_SLICE){
 				// "num_ref_idx_l1_active_minus1"
 				WriteUvlc(
 					bitstreamPtr,
@@ -6386,7 +6387,7 @@ static void CodeSliceHeader(
 	}
 
 	// RPS List Modification
-	if (sliceType != I_SLICE) { // rd, Note: This needs to be changed
+	if (sliceType != EB_I_SLICE) { // rd, Note: This needs to be changed
 
 		// if( pcSlice->getPPS()->getListsModificationPresentFlag() && pcSlice->getNumRpsCurrTempList() > 1)
 		if (pcsPtr->ParentPcsPtr->predStructPtr->listsModificationEnableFlag == EB_TRUE && refPicsTotalCount > 1){
@@ -6407,7 +6408,7 @@ static void CodeSliceHeader(
 				}
 			}
 
-			if (sliceType == B_SLICE){
+			if (sliceType == EB_B_SLICE){
 				// "ref_pic_list_modification_flag_l1"
 				WriteFlagCavlc(
 					bitstreamPtr,
@@ -6427,7 +6428,7 @@ static void CodeSliceHeader(
 		}
 	}
 
-	if (sliceType == B_SLICE){
+	if (sliceType == EB_B_SLICE){
 		// "mvd_l1_zero_flag"
 		WriteFlagCavlc(
 			bitstreamPtr,
@@ -6435,14 +6436,14 @@ static void CodeSliceHeader(
 	}
 
 	if (!pcsPtr->ParentPcsPtr->disableTmvpFlag){
-		if (pcsPtr->sliceType == B_SLICE){
+		if (pcsPtr->sliceType == EB_B_SLICE){
 			WriteFlagCavlc(
 				bitstreamPtr,
 				pcsPtr->colocatedPuRefList == REF_LIST_0);
 		}
 	}
 
-	if (sliceType != I_SLICE) {
+	if (sliceType != EB_I_SLICE) {
 		// "five_minus_max_num_merge_cand"
 		WriteUvlc(
 			bitstreamPtr,
@@ -7083,7 +7084,7 @@ EB_ERRORTYPE EncodeLcu(
                     cuPtr->qp);
 
                 // Code the skip flag
-                if (pictureControlSetPtr->sliceType == P_SLICE || pictureControlSetPtr->sliceType == B_SLICE)
+                if (pictureControlSetPtr->sliceType == EB_P_SLICE || pictureControlSetPtr->sliceType == EB_B_SLICE)
                 {
                     EncodeSkipFlag(
                         cabacEncodeCtxPtr,
@@ -7105,7 +7106,7 @@ EB_ERRORTYPE EncodeLcu(
                 {
                     // Code CU pred mode (I, P, B, etc.)
                     // (not needed for Intra Slice)
-                    if (pictureControlSetPtr->sliceType == P_SLICE || pictureControlSetPtr->sliceType == B_SLICE)
+                    if (pictureControlSetPtr->sliceType == EB_P_SLICE || pictureControlSetPtr->sliceType == EB_B_SLICE)
                     {
                         EncodePredictionMode(
                             cabacEncodeCtxPtr,
@@ -7306,7 +7307,7 @@ EB_ERRORTYPE EncodeLcu(
                             }
                             else {
                                 // Inter Prediction Direction
-                                if (pictureControlSetPtr->sliceType == B_SLICE){
+                                if (pictureControlSetPtr->sliceType == EB_B_SLICE){
                                     EncodePredictionDirection(
                                         cabacEncodeCtxPtr,
                                         puPtr,
@@ -7842,8 +7843,8 @@ EB_ERRORTYPE EncodeAUD(
 	EB_U32 picType;
 	OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
 
-	picType = (sliceType == I_SLICE) ? 0 :
-		(sliceType == P_SLICE) ? 1 :
+	picType = (sliceType == EB_I_SLICE) ? 0 :
+		(sliceType == EB_P_SLICE) ? 1 :
 		2;
 
 	CodeNALUnitHeader(

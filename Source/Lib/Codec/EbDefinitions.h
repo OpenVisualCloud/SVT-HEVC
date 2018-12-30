@@ -563,6 +563,7 @@ extern    EB_U32                   libMutexCount;
                                             // Target rate and and max buffer size should be set properly even for fixed QP.
                                             // Disabled by default. 
 #define DEADLOCK_DEBUG                   0
+#define DISPLAY_MEMORY                   0  // Display Total Memory at the end of the memory allocations
 #define LIB_PRINTF_ENABLE                1
 
 #if LIB_PRINTF_ENABLE

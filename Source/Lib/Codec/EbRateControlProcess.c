@@ -12,6 +12,7 @@
 #include "EbPictureControlSet.h"
 #include "EbUtility.h"
 #include "EbErrorCodes.h"
+#include "EbErrorHandling.h"
 
 #include "EbRateControlResults.h"
 #include "EbRateControlTasks.h"
@@ -493,7 +494,7 @@ void HighLevelRcInputPictureMode2(
                     sequenceControlSetPtr->staticConfig.maxQpAllowed,
                     refQpIndexTemp);
 
-                if (hlRateControlHistogramPtrTemp->sliceType == I_SLICE){
+                if (hlRateControlHistogramPtrTemp->sliceType == EB_I_SLICE){
                     refQpIndexTemp = (EB_U32)MAX((EB_S32)refQpIndexTemp + RC_INTRA_QP_OFFSET,0);
                 }
 
@@ -504,7 +505,7 @@ void HighLevelRcInputPictureMode2(
                 predBitsRefQp = 0;
                 numOfFullLcus = 0;
 
-                if (hlRateControlHistogramPtrTemp->sliceType == I_SLICE){
+                if (hlRateControlHistogramPtrTemp->sliceType == EB_I_SLICE){
                     // Loop over block in the frame and calculated the predicted bits at reg QP
                     {
                         unsigned i;
@@ -622,7 +623,7 @@ void HighLevelRcInputPictureMode2(
                         sequenceControlSetPtr->staticConfig.maxQpAllowed,
                         refQpIndexTemp);
 
-                    if (hlRateControlHistogramPtrTemp->sliceType == I_SLICE){
+                    if (hlRateControlHistogramPtrTemp->sliceType == EB_I_SLICE){
                         refQpIndexTemp = (EB_U32)MAX((EB_S32)refQpIndexTemp + RC_INTRA_QP_OFFSET, 0);
                     }
 
@@ -642,7 +643,7 @@ void HighLevelRcInputPictureMode2(
                         predBitsRefQp = 0;
                         numOfFullLcus = 0;
 
-                        if (hlRateControlHistogramPtrTemp->sliceType == I_SLICE){
+                        if (hlRateControlHistogramPtrTemp->sliceType == EB_I_SLICE){
                             // Loop over block in the frame and calculated the predicted bits at reg QP
                             unsigned i;
                             EB_U32 accum = 0;
@@ -752,7 +753,7 @@ void HighLevelRcInputPictureMode2(
                         sequenceControlSetPtr->staticConfig.maxQpAllowed,
                         refQpIndexTemp);
 
-                    if (hlRateControlHistogramPtrTemp->sliceType == I_SLICE){
+                    if (hlRateControlHistogramPtrTemp->sliceType == EB_I_SLICE){
                         refQpIndexTemp = (EB_U32)MAX((EB_S32)refQpIndexTemp + RC_INTRA_QP_OFFSET, 0);
                     }
 
@@ -769,7 +770,7 @@ void HighLevelRcInputPictureMode2(
 
                         numOfFullLcus = 0;
 
-                        if (hlRateControlHistogramPtrTemp->sliceType == I_SLICE){
+                        if (hlRateControlHistogramPtrTemp->sliceType == EB_I_SLICE){
                             // Loop over block in the frame and calculated the predicted bits at reg QP
         
                             {
@@ -855,7 +856,7 @@ void HighLevelRcInputPictureMode2(
                         sequenceControlSetPtr->staticConfig.maxQpAllowed,
                         refQpIndexTemp);
 
-                    if (hlRateControlHistogramPtrTemp->sliceType == I_SLICE){
+                    if (hlRateControlHistogramPtrTemp->sliceType == EB_I_SLICE){
                         refQpIndexTemp = (EB_U32)MAX((EB_S32)refQpIndexTemp + RC_INTRA_QP_OFFSET, 0);
                     }
                     if (queueEntryIndexTemp == queueEntryIndexHeadTemp){
@@ -912,7 +913,7 @@ void HighLevelRcInputPictureMode2(
             sequenceControlSetPtr->staticConfig.maxQpAllowed,
             selectedRefQp + QP_OFFSET_LAYER_ARRAY[pictureControlSetPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex]);
 
-        if (pictureControlSetPtr->sliceType == I_SLICE){
+        if (pictureControlSetPtr->sliceType == EB_I_SLICE){
             pictureControlSetPtr->bestPredQp = (EB_U8)MAX((EB_S32)pictureControlSetPtr->bestPredQp + RC_INTRA_QP_OFFSET,0);
         }
 #if RC_UPDATE_TARGET_RATE
@@ -979,7 +980,7 @@ void FrameLevelRcInputPictureMode2(
     else{
         pictureControlSetPtr->ParentPcsPtr->firstFrameInTemporalLayer = 0;
     }
-	if (pictureControlSetPtr->sliceType != I_SLICE) {
+	if (pictureControlSetPtr->sliceType != EB_I_SLICE) {
         if (rateControlLayerPtr->firstNonIntraFrame == 1){
             rateControlLayerPtr->firstNonIntraFrame = 0;
             pictureControlSetPtr->ParentPcsPtr->firstNonIntraFrameInTemporalLayer = 1;
@@ -1113,7 +1114,7 @@ void FrameLevelRcInputPictureMode2(
 
         pictureControlSetPtr->ParentPcsPtr->sadMe = 0;
         // Finding the QP of the Intra frame by using variance tables
-		if (pictureControlSetPtr->sliceType == I_SLICE) {
+		if (pictureControlSetPtr->sliceType == EB_I_SLICE) {
             EB_U32         selectedRefQp;
 
             if (sequenceControlSetPtr->staticConfig.lookAheadDistance == 0){
@@ -1306,7 +1307,7 @@ void FrameLevelRcInputPictureMode2(
         pictureControlSetPtr->ParentPcsPtr->sadMe = 0;
 
         // if the pixture is an I slice, for now we set the QP as the QP of the previous frame
-		if (pictureControlSetPtr->sliceType == I_SLICE) {
+		if (pictureControlSetPtr->sliceType == EB_I_SLICE) {
             EB_U32         selectedRefQp;
 
             if (sequenceControlSetPtr->staticConfig.lookAheadDistance == 0)
@@ -1468,11 +1469,11 @@ void FrameLevelRcInputPictureMode2(
                 pictureControlSetPtr->ParentPcsPtr->calculatedQp++;                
             }
         }
-        if (pictureControlSetPtr->ParentPcsPtr->firstNonIntraFrameInTemporalLayer && pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != I_SLICE){
+        if (pictureControlSetPtr->ParentPcsPtr->firstNonIntraFrameInTemporalLayer && pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != EB_I_SLICE){
 			pictureControlSetPtr->pictureQp = (EB_U8)rateControlParamPtr->intraFramesQp + 1;
         }
 
-        if (!rateControlLayerPtr->feedbackArrived && pictureControlSetPtr->sliceType != I_SLICE){
+        if (!rateControlLayerPtr->feedbackArrived && pictureControlSetPtr->sliceType != EB_I_SLICE){
 
             pictureControlSetPtr->pictureQp = (EB_U8)CLIP3(
                 (EB_S32)sequenceControlSetPtr->staticConfig.minQpAllowed,
@@ -1565,8 +1566,8 @@ void FrameLevelRcInputPictureMode2(
                 
             if (!pictureControlSetPtr->ParentPcsPtr->endOfSequenceRegion){
                 if (contextPtr->framesInInterval[pictureControlSetPtr->temporalLayerIndex]< 5){
-                    if ((EB_S32)pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != I_SLICE){
-                        if (pictureControlSetPtr->refSliceTypeArray[0] == I_SLICE){
+                    if ((EB_S32)pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != EB_I_SLICE){
+                        if (pictureControlSetPtr->refSliceTypeArray[0] == EB_I_SLICE){
                             pictureControlSetPtr->pictureQp = (EB_U8)CLIP3(
                                 (EB_U32)pictureControlSetPtr->refPicQpArray[0],
                                 (EB_U32)pictureControlSetPtr->refPicQpArray[0] + 2,
@@ -1582,11 +1583,11 @@ void FrameLevelRcInputPictureMode2(
                     }
                     if ((EB_S32)pictureControlSetPtr->temporalLayerIndex == 1){
                         refQp = 0;
-                        if (pictureControlSetPtr->refSliceTypeArray[0] != I_SLICE){
+                        if (pictureControlSetPtr->refSliceTypeArray[0] != EB_I_SLICE){
                             refQp = MAX(refQp, pictureControlSetPtr->refPicQpArray[0]);
                         }
 
-                        if ((pictureControlSetPtr->sliceType == B_SLICE) && (pictureControlSetPtr->refSliceTypeArray[1] != I_SLICE)){
+                        if ((pictureControlSetPtr->sliceType == EB_B_SLICE) && (pictureControlSetPtr->refSliceTypeArray[1] != EB_I_SLICE)){
                             refQp = MAX(refQp, pictureControlSetPtr->refPicQpArray[1]);
                         }
                         if (refQp > 0){
@@ -1598,8 +1599,8 @@ void FrameLevelRcInputPictureMode2(
                     }
                 }
                 else{
-                    if ((EB_S32)pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != I_SLICE){
-                        if (pictureControlSetPtr->refSliceTypeArray[0] == I_SLICE){
+                    if ((EB_S32)pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != EB_I_SLICE){
+                        if (pictureControlSetPtr->refSliceTypeArray[0] == EB_I_SLICE){
                             pictureControlSetPtr->pictureQp = (EB_U8)CLIP3(
                                 (EB_U32)pictureControlSetPtr->refPicQpArray[0],
                                 (EB_U32)pictureControlSetPtr->refPicQpArray[0] + 2,
@@ -1614,10 +1615,10 @@ void FrameLevelRcInputPictureMode2(
                     }
                     if ((EB_S32)pictureControlSetPtr->temporalLayerIndex == 1){
                         refQp = 0;
-                        if (pictureControlSetPtr->refSliceTypeArray[0] != I_SLICE){
+                        if (pictureControlSetPtr->refSliceTypeArray[0] != EB_I_SLICE){
                             refQp = MAX(refQp, pictureControlSetPtr->refPicQpArray[0]);
                         }
-                        if ((pictureControlSetPtr->sliceType == B_SLICE) && (pictureControlSetPtr->refSliceTypeArray[1] != I_SLICE)){
+                        if ((pictureControlSetPtr->sliceType == EB_B_SLICE) && (pictureControlSetPtr->refSliceTypeArray[1] != EB_I_SLICE)){
                             refQp = MAX(refQp, pictureControlSetPtr->refPicQpArray[1]);
                         }
                         if (refQp > 0){
@@ -1631,15 +1632,15 @@ void FrameLevelRcInputPictureMode2(
                     
                 if ((EB_S32)pictureControlSetPtr->temporalLayerIndex == 2){
                     refQp = 0;
-                    if (pictureControlSetPtr->refSliceTypeArray[0] != I_SLICE){
+                    if (pictureControlSetPtr->refSliceTypeArray[0] != EB_I_SLICE){
                         refQp = MAX(refQp, pictureControlSetPtr->refPicQpArray[0]);
                     }
 
-                    if ((pictureControlSetPtr->sliceType == B_SLICE) && (pictureControlSetPtr->refSliceTypeArray[1] != I_SLICE)){
+                    if ((pictureControlSetPtr->sliceType == EB_B_SLICE) && (pictureControlSetPtr->refSliceTypeArray[1] != EB_I_SLICE)){
                         refQp = MAX(refQp, pictureControlSetPtr->refPicQpArray[1]);
                     }
                     if (refQp > 0){
-                        if (pictureControlSetPtr->sliceType == P_SLICE){
+                        if (pictureControlSetPtr->sliceType == EB_P_SLICE){
                             pictureControlSetPtr->pictureQp = (EB_U8)CLIP3(
                                 (EB_U32)MAX((EB_S32)refQp - 1,0),
                                 (EB_U32)refQp + 1,
@@ -1657,14 +1658,14 @@ void FrameLevelRcInputPictureMode2(
                 if ((EB_S32)pictureControlSetPtr->temporalLayerIndex >= 3){
 
                     refQp = 0;
-                    if (pictureControlSetPtr->refSliceTypeArray[0] != I_SLICE){
+                    if (pictureControlSetPtr->refSliceTypeArray[0] != EB_I_SLICE){
                         refQp = MAX(refQp, pictureControlSetPtr->refPicQpArray[0]);
                     }
-                    if ((pictureControlSetPtr->sliceType == B_SLICE) && (pictureControlSetPtr->refSliceTypeArray[1] != I_SLICE)){
+                    if ((pictureControlSetPtr->sliceType == EB_B_SLICE) && (pictureControlSetPtr->refSliceTypeArray[1] != EB_I_SLICE)){
                         refQp = MAX(refQp, pictureControlSetPtr->refPicQpArray[1]);
                     }
                     if (refQp > 0){
-                        if (pictureControlSetPtr->sliceType == P_SLICE){
+                        if (pictureControlSetPtr->sliceType == EB_P_SLICE){
                             pictureControlSetPtr->pictureQp = (EB_U8)CLIP3(
                                 (EB_U32)MAX((EB_S32)refQp - 1, 0),
                                 (EB_U32)refQp + 2,
@@ -1680,8 +1681,8 @@ void FrameLevelRcInputPictureMode2(
                 }
             }
             else{
-                if ((EB_S32)pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != I_SLICE){
-                    if (pictureControlSetPtr->refSliceTypeArray[0] == I_SLICE){
+                if ((EB_S32)pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != EB_I_SLICE){
+                    if (pictureControlSetPtr->refSliceTypeArray[0] == EB_I_SLICE){
                         pictureControlSetPtr->pictureQp = (EB_U8)CLIP3(
                             (EB_U32)MAX((EB_S32)pictureControlSetPtr->refPicQpArray[0] - 2,0),
                             (EB_U32)pictureControlSetPtr->refPicQpArray[0] + 3,
@@ -1697,10 +1698,10 @@ void FrameLevelRcInputPictureMode2(
 
                 if ((EB_S32)pictureControlSetPtr->temporalLayerIndex >= 1){
                     refQp = 0;
-                    if (pictureControlSetPtr->refSliceTypeArray[0] != I_SLICE){
+                    if (pictureControlSetPtr->refSliceTypeArray[0] != EB_I_SLICE){
                         refQp = MAX(refQp, pictureControlSetPtr->refPicQpArray[0]);
                     }
-                    if ((pictureControlSetPtr->sliceType == B_SLICE) && (pictureControlSetPtr->refSliceTypeArray[1] != I_SLICE)){
+                    if ((pictureControlSetPtr->sliceType == EB_B_SLICE) && (pictureControlSetPtr->refSliceTypeArray[1] != EB_I_SLICE)){
                         refQp = MAX(refQp, pictureControlSetPtr->refPicQpArray[1]);
                     }
                     if (refQp > 0){
@@ -1787,7 +1788,7 @@ void FrameLevelRcFeedbackPictureMode2(
         rateControlLayerPtr->criticalStates = 0;
     }
 
-    if (parentPictureControlSetPtr->sliceType != I_SLICE){
+    if (parentPictureControlSetPtr->sliceType != EB_I_SLICE){
         // Updating CCoeff
         rateControlLayerPtr->cCoeff = (((EB_S64)rateControlLayerPtr->previousFrameBitActual - (EB_S64)rateControlLayerPtr->previousFrameQuantizedCoeffBitActual) << (2 * RC_PRECISION))
             / rateControlLayerPtr->areaInPixel;
@@ -1815,7 +1816,7 @@ void FrameLevelRcFeedbackPictureMode2(
         }
         rateControlLayerPtr->kCoeff = MIN(rateControlLayerPtr->kCoeff, rateControlLayerPtr->previousKCoeff * 4);
         rateControlLayerPtr->cCoeff = MIN(rateControlLayerPtr->cCoeff, rateControlLayerPtr->previousCCoeff * 4);
-		if (parentPictureControlSetPtr->sliceType != I_SLICE) {
+		if (parentPictureControlSetPtr->sliceType != EB_I_SLICE) {
             rateControlLayerPtr->previousFrameSadMe = parentPictureControlSetPtr->sadMe;
         }
         else{
@@ -1824,7 +1825,7 @@ void FrameLevelRcFeedbackPictureMode2(
     }
 
     if (sequenceControlSetPtr->staticConfig.lookAheadDistance != 0){
-        if (parentPictureControlSetPtr->sliceType == I_SLICE){
+        if (parentPictureControlSetPtr->sliceType == EB_I_SLICE){
             if (parentPictureControlSetPtr->totalNumBits < parentPictureControlSetPtr->targetBitsBestPredQp << 1)
                 contextPtr->baseLayerIntraFramesAvgQp = (3 * contextPtr->baseLayerIntraFramesAvgQp + parentPictureControlSetPtr->pictureQp + 2) >> 2;
             else if (parentPictureControlSetPtr->totalNumBits > parentPictureControlSetPtr->targetBitsBestPredQp << 2)
@@ -1861,7 +1862,7 @@ void FrameLevelRcFeedbackPictureMode2(
 
         // update bitrate of different layers in the interval based on the rate of the I frame
         if (parentPictureControlSetPtr->pictureNumber == rateControlParamPtr->firstPoc &&
-            (parentPictureControlSetPtr->sliceType == I_SLICE) &&
+            (parentPictureControlSetPtr->sliceType == EB_I_SLICE) &&
             sequenceControlSetPtr->staticConfig.intraPeriodLength != -1){
             EB_U32 temporalLayerIdex;
             EB_U64 targetBitRate;
@@ -1922,7 +1923,7 @@ void FrameLevelRcFeedbackPictureMode2(
             EB_U64 bitChangesRate;
             // Updating virtual buffer level and it can be negative
             if ((parentPictureControlSetPtr->pictureNumber == rateControlParamPtr->firstPoc) &&
-                (parentPictureControlSetPtr->sliceType == I_SLICE) &&
+                (parentPictureControlSetPtr->sliceType == EB_I_SLICE) &&
                 (rateControlParamPtr->lastGop == EB_FALSE) &&
                 sequenceControlSetPtr->staticConfig.intraPeriodLength != -1){
                 rateControlParamPtr->virtualBufferLevel =
@@ -2350,7 +2351,7 @@ void* RateControlKernel(void *inputPtr)
 
                 if (sequenceControlSetPtr->enableQpScalingFlag && pictureControlSetPtr->ParentPcsPtr->qpOnTheFly == EB_FALSE){
 
-                    if (pictureControlSetPtr->sliceType == I_SLICE) {                    
+                    if (pictureControlSetPtr->sliceType == EB_I_SLICE) {
                         pictureControlSetPtr->pictureQp = (EB_U8)CLIP3((EB_S32)sequenceControlSetPtr->staticConfig.minQpAllowed, (EB_S32)sequenceControlSetPtr->staticConfig.maxQpAllowed, (EB_S32)(sequenceControlSetPtr->qp) + contextPtr->maxRateAdjustDeltaQP);
                     }
                     else{
@@ -2425,7 +2426,7 @@ void* RateControlKernel(void *inputPtr)
                     }
 
                     // Scene change
-                    if (pictureControlSetPtr->sliceType == I_SLICE && pictureControlSetPtr->pictureNumber != rateControlParamPtr->firstPoc){
+                    if (pictureControlSetPtr->sliceType == EB_I_SLICE && pictureControlSetPtr->pictureNumber != rateControlParamPtr->firstPoc){
                         if (nextGopRateControlParamPtr->firstPicActualQpAssigned){
 
                             pictureControlSetPtr->pictureQp = (EB_U8)CLIP3(
@@ -2455,7 +2456,7 @@ void* RateControlKernel(void *inputPtr)
                         sequenceControlSetPtr->staticConfig.maxQpAllowed,
                         pictureControlSetPtr->pictureQp);
             }
-            if (sequenceControlSetPtr->intraPeriodLength != -1 && pictureControlSetPtr->ParentPcsPtr->hierarchicalLevels < 2 && (EB_S32)pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != I_SLICE){
+            if (sequenceControlSetPtr->intraPeriodLength != -1 && pictureControlSetPtr->ParentPcsPtr->hierarchicalLevels < 2 && (EB_S32)pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != EB_I_SLICE){
                 if (nextGopRateControlParamPtr->firstPicActualQpAssigned || nextGopRateControlParamPtr->wasUsed){
 
                     pictureControlSetPtr->pictureQp = (EB_U8)CLIP3(
@@ -2474,7 +2475,7 @@ void* RateControlKernel(void *inputPtr)
             if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0 && sequenceControlSetPtr->staticConfig.lookAheadDistance != 0){
                 contextPtr->baseLayerFramesAvgQp = (3 * contextPtr->baseLayerFramesAvgQp + pictureControlSetPtr->pictureQp + 2) >> 2;
             }
-			if (pictureControlSetPtr->sliceType == I_SLICE){
+			if (pictureControlSetPtr->sliceType == EB_I_SLICE){
                 if (pictureControlSetPtr->pictureNumber == rateControlParamPtr->firstPoc){
                     rateControlParamPtr->firstPicPredQp = (EB_U16) pictureControlSetPtr->ParentPcsPtr->bestPredQp;
                     rateControlParamPtr->firstPicActualQp = (EB_U16) pictureControlSetPtr->pictureQp;
@@ -2533,7 +2534,7 @@ void* RateControlKernel(void *inputPtr)
             if (sequenceControlSetPtr->intraPeriodLength == -1 || sequenceControlSetPtr->staticConfig.rateControlMode == 0){
                 rateControlParamPtr = contextPtr->rateControlParamQueue[0];
                 prevGopRateControlParamPtr = contextPtr->rateControlParamQueue[0];
-                if (parentPictureControlSetPtr->sliceType == I_SLICE){
+                if (parentPictureControlSetPtr->sliceType == EB_I_SLICE){
 
                     if (parentPictureControlSetPtr->totalNumBits > MAX_BITS_PER_FRAME){
                         contextPtr->maxRateAdjustDeltaQP++;

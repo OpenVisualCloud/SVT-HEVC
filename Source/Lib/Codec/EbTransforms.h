@@ -267,7 +267,7 @@ void MatMultOut(
 	const EB_S32     shiftNum,
 	EB_U32			 *nonzerocoeff);
 
-static EB_MAT_OUT_MUL_TYPE FUNC_TABLE MatMulOut_funcPtrArray[ASM_TYPE_TOTAL] =
+static EB_MAT_OUT_MUL_TYPE FUNC_TABLE MatMulOut_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
 	  MatMultOut,
 	  MatMult4x4_OutBuff_AVX2_INTRIN,
@@ -294,7 +294,7 @@ typedef void(*EB_INVTRANSFORM_FUNC)(
 /*****************************
 * Function Tables
 *****************************/
-static EB_QIQ_TYPE FUNC_TABLE QiQ_funcPtrArray[ASM_TYPE_TOTAL][5] = {
+static EB_QIQ_TYPE FUNC_TABLE QiQ_funcPtrArray[EB_ASM_TYPE_TOTAL][5] = {
 	// C_DEFAULT
 	{
         /*0 4x4   */     QuantizeInvQuantize,
@@ -314,7 +314,7 @@ static EB_QIQ_TYPE FUNC_TABLE QiQ_funcPtrArray[ASM_TYPE_TOTAL][5] = {
 	},
 };
 
-static EB_MAT_MUL_TYPE FUNC_TABLE MatMul_funcPtrArray[ASM_TYPE_TOTAL][5] = {
+static EB_MAT_MUL_TYPE FUNC_TABLE MatMul_funcPtrArray[EB_ASM_TYPE_TOTAL][5] = {
     // C_DEFAULT
     {
         /*0 4x4   */     MatMult,
@@ -335,7 +335,7 @@ static EB_MAT_MUL_TYPE FUNC_TABLE MatMul_funcPtrArray[ASM_TYPE_TOTAL][5] = {
 
 };
 
-static const EB_TRANSFORM_FUNC transformFunctionTableEstimate[ASM_TYPE_TOTAL][5] = {
+static const EB_TRANSFORM_FUNC transformFunctionTableEstimate[EB_ASM_TYPE_TOTAL][5] = {
         // C_DEFAULT
         {
 	    	Transform32x32Estimate,
@@ -354,7 +354,7 @@ static const EB_TRANSFORM_FUNC transformFunctionTableEstimate[ASM_TYPE_TOTAL][5]
         },
 };
 
-static const EB_TRANSFORM_FUNC PfreqN2TransformTable0[ASM_TYPE_TOTAL][5] = {
+static const EB_TRANSFORM_FUNC PfreqN2TransformTable0[EB_ASM_TYPE_TOTAL][5] = {
     // NON_AVX2
     {
         Transform32x32Estimate,
@@ -374,7 +374,7 @@ static const EB_TRANSFORM_FUNC PfreqN2TransformTable0[ASM_TYPE_TOTAL][5] = {
     }
 };
 
-static const EB_TRANSFORM_FUNC PfreqN2TransformTable1[ASM_TYPE_TOTAL][5] = {
+static const EB_TRANSFORM_FUNC PfreqN2TransformTable1[EB_ASM_TYPE_TOTAL][5] = {
     // NON_AVX2
     {
         PfreqTransform32x32_SSE2,
@@ -394,7 +394,7 @@ static const EB_TRANSFORM_FUNC PfreqN2TransformTable1[ASM_TYPE_TOTAL][5] = {
     }
 };
 
-static const EB_TRANSFORM_FUNC PfreqN4TransformTable0[ASM_TYPE_TOTAL][5] = {
+static const EB_TRANSFORM_FUNC PfreqN4TransformTable0[EB_ASM_TYPE_TOTAL][5] = {
     // NON_AVX2
     {
         Transform32x32Estimate,
@@ -413,7 +413,7 @@ static const EB_TRANSFORM_FUNC PfreqN4TransformTable0[ASM_TYPE_TOTAL][5] = {
     }
 };
 
-static const EB_TRANSFORM_FUNC PfreqN4TransformTable1[ASM_TYPE_TOTAL][5] = {
+static const EB_TRANSFORM_FUNC PfreqN4TransformTable1[EB_ASM_TYPE_TOTAL][5] = {
     // NON_AVX2
     {
         PfreqN4Transform32x32_SSE2,
@@ -432,7 +432,7 @@ static const EB_TRANSFORM_FUNC PfreqN4TransformTable1[ASM_TYPE_TOTAL][5] = {
     }
 };
 
-static const EB_TRANSFORM_FUNC transformFunctionTableEncode0[ASM_TYPE_TOTAL][5] = {
+static const EB_TRANSFORM_FUNC transformFunctionTableEncode0[EB_ASM_TYPE_TOTAL][5] = {
     // NON_AVX2
     {
         Transform32x32Estimate,
@@ -451,7 +451,7 @@ static const EB_TRANSFORM_FUNC transformFunctionTableEncode0[ASM_TYPE_TOTAL][5] 
     },
 };
 
-static const EB_TRANSFORM_FUNC transformFunctionTableEncode1[ASM_TYPE_TOTAL][5] = {
+static const EB_TRANSFORM_FUNC transformFunctionTableEncode1[EB_ASM_TYPE_TOTAL][5] = {
     // NON_AVX2
     {
         Transform32x32_SSE2,
@@ -470,7 +470,7 @@ static const EB_TRANSFORM_FUNC transformFunctionTableEncode1[ASM_TYPE_TOTAL][5] 
     },
 };
 
-static const EB_INVTRANSFORM_FUNC invTransformFunctionTableEstimate[ASM_TYPE_TOTAL][5] = {
+static const EB_INVTRANSFORM_FUNC invTransformFunctionTableEstimate[EB_ASM_TYPE_TOTAL][5] = {
         // C_DEFAULT
         {
             InvTransform32x32,
@@ -489,7 +489,7 @@ static const EB_INVTRANSFORM_FUNC invTransformFunctionTableEstimate[ASM_TYPE_TOT
         },
 };
 
-static const EB_INVTRANSFORM_FUNC invTransformFunctionTableEncode[ASM_TYPE_TOTAL][5] = {
+static const EB_INVTRANSFORM_FUNC invTransformFunctionTableEncode[EB_ASM_TYPE_TOTAL][5] = {
         // C_DEFAULT
         {
             InvTransform32x32,

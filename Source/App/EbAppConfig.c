@@ -93,8 +93,8 @@
 #define INJECTOR_FRAMERATE_TOKEN        "-inj-frm-rt" // no Eval
 #define SPEED_CONTROL_TOKEN             "-speed-ctrl"
 #define ASM_TYPE_TOKEN				    "-asm" // no Eval
-#define RR_THREAD_MGMNT		            "-rr"
-#define TARGET_SOCKET		            "-ss"
+#define THREAD_MGMNT                    "-lp"
+#define TARGET_SOCKET                   "-ss"
 #define CONFIG_FILE_COMMENT_CHAR        '#'
 #define CONFIG_FILE_NEWLINE_CHAR        '\n'
 #define CONFIG_FILE_RETURN_CHAR         '\r'
@@ -231,8 +231,8 @@ static void SetInjectorFrameRate                (const char *value, EbConfig_t *
 }
 static void	SetLatencyMode                      (const char *value, EbConfig_t *cfg)  {cfg->latencyMode               = (EB_U8)strtol(value, NULL, 0);};
 static void SetAsmType                          (const char *value, EbConfig_t *cfg)  { cfg->asmType = (EB_ASM)strtoul(value, NULL, 0); };
-static void SetUseRoundRobinThreadAssignment    (const char *value, EbConfig_t *cfg) {cfg->useRoundRobinThreadAssignment   = (EB_BOOL)strtol(value, NULL, 0);}; 
-static void SetTargetSocket                     (const char *value, EbConfig_t *cfg)  { cfg->targetSocket = (EB_U8)strtoul(value, NULL, 0); };
+static void SetLogicalProcessors                (const char *value, EbConfig_t *cfg)  {cfg->logicalProcessors = (EB_U32)strtoul(value, NULL, 0);};
+static void SetTargetSocket                     (const char *value, EbConfig_t *cfg)  {cfg->targetSocket = (EB_S32)strtol(value, NULL, 0);};
 
 enum cfg_type{
     SINGLE_INPUT,   // Configuration parameters that have only 1 value input
@@ -328,8 +328,8 @@ config_entry_t config_entry[] = {
     // Tune
     { SINGLE_INPUT, TUNE_TOKEN, "Tune", SetCfgTune },
 
-    // Windows Manual Thread Management
-    { SINGLE_INPUT, RR_THREAD_MGMNT, "UseRoundRobinThreadAssignment", SetUseRoundRobinThreadAssignment },
+    // Thread Management
+    { SINGLE_INPUT, THREAD_MGMNT, "logicalProcessors", SetLogicalProcessors },
     { SINGLE_INPUT, TARGET_SOCKET, "TargetSocket", SetTargetSocket },
 
     // Optional Features 
@@ -487,14 +487,14 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->performanceContext.byteCount                 = 0;
     
     // ASM Type
-    configPtr->asmType                                      = ASM_AVX2;
+    configPtr->asmType                                      = EB_ASM_AVX2;
 
     configPtr->stopEncoder                                  = EB_FALSE;
-    configPtr->useRoundRobinThreadAssignment                = EB_FALSE;
-	configPtr->targetSocket                                 = 1;
+    configPtr->logicalProcessors                            = 0;
+    configPtr->targetSocket                                 = -1;
     configPtr->processedFrameCount                          = 0;
     configPtr->processedByteCount                           = 0;
-    
+
 
     return;
 }
@@ -806,15 +806,9 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, unsigned int channelNumbe
         return_error = EB_ErrorBadParameter;
     }
 
-	// UseRoundRobinThreadAssignment
-	if (config->useRoundRobinThreadAssignment != 0 && config->useRoundRobinThreadAssignment != 1) {
-		fprintf(config->errorLogFile, "Error instance %u: Invalid UseRoundRobinThreadAssignment [0 - 1]\n", channelNumber + 1);
-		return_error = EB_ErrorBadParameter;
-	}
-
     // TargetSocket
-    if (config->targetSocket != 0 && config->targetSocket != 1 && config->targetSocket != 2) {
-        fprintf(config->errorLogFile, "Error instance %u: Invalid TargetSocket [0 - 1]\n", channelNumber + 1);
+    if (config->targetSocket != -1 && config->targetSocket != 0 && config->targetSocket != 1) {
+        fprintf(config->errorLogFile, "Error instance %u: Invalid TargetSocket [-1 - 1], your input: %d\n", channelNumber + 1, config->targetSocket);
         return_error = EB_ErrorBadParameter;
     }
 

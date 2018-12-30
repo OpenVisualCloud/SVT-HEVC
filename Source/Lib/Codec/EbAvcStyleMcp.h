@@ -108,7 +108,7 @@ typedef void(*PictureAverage)(
 /***************************************
 * Function Tables
 ***************************************/
-static const AvcStyleInterpolationFilterNew FUNC_TABLE AvcStyleUniPredLumaIFFunctionPtrArray[ASM_TYPE_TOTAL][3] = {
+static const AvcStyleInterpolationFilterNew FUNC_TABLE AvcStyleUniPredLumaIFFunctionPtrArray[EB_ASM_TYPE_TOTAL][3] = {
     // C_DEFAULT
     {
         AvcStyleCopyNew,                                     //copy
@@ -126,7 +126,7 @@ static const AvcStyleInterpolationFilterNew FUNC_TABLE AvcStyleUniPredLumaIFFunc
 
 
 
-static const PictureAverage FUNC_TABLE PictureAverageArray[ASM_TYPE_TOTAL] = {
+static const PictureAverage FUNC_TABLE PictureAverageArray[EB_ASM_TYPE_TOTAL] = {
 	// C_DEFAULT
     PictureAverageKernel,
 	// AVX2
@@ -139,7 +139,7 @@ typedef void(*PictureAverage1Line)(
     EB_BYTE                  dst,  
     EB_U32                   areaWidth);  
 
-static const PictureAverage1Line FUNC_TABLE PictureAverage1LineArray[ASM_TYPE_TOTAL] = {
+static const PictureAverage1Line FUNC_TABLE PictureAverage1LineArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     PictureAverageKernel1Line_C,
     // AVX2

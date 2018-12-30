@@ -307,7 +307,7 @@ typedef void(*EB_BIAVG_FUNC)(
 /*****************************
 * Function Tables
 *****************************/
-static EB_BIAVG_FUNC FUNC_TABLE BiPredAverageKernel_funcPtrArray[ASM_TYPE_TOTAL] =
+static EB_BIAVG_FUNC FUNC_TABLE BiPredAverageKernel_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
 	BiPredAverageKernel_C,
 	BiPredAverageKernel_AVX512_INTRIN
