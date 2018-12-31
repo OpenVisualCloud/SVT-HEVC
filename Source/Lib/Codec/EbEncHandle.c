@@ -3343,42 +3343,56 @@ __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265GetPacket(
     EB_COMPONENTTYPE      *h265EncComponent,
-    EB_BUFFERHEADERTYPE   *pBuffer,
-    unsigned char          picSendDone)
+    EB_BUFFERHEADERTYPE  **pBuffer,
+    unsigned char          picSendDone,
+    void                 **wrapperRelease)
 {
     EB_ERRORTYPE           return_error = EB_ErrorNone;
-
     EbEncHandle_t          *pEncCompData = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
     EbObjectWrapper_t      *ebWrapperPtr = NULL;
-
+    EB_BUFFERHEADERTYPE    *packet;
     if (picSendDone)
         EbGetFullObject(
-            (pEncCompData->outputStreamBufferConsumerFifoPtrDblArray[0])[0],
+        (pEncCompData->outputStreamBufferConsumerFifoPtrDblArray[0])[0],
             &ebWrapperPtr);
     else
         EbGetFullObjectNonBlocking(
-            (pEncCompData->outputStreamBufferConsumerFifoPtrDblArray[0])[0],
+        (pEncCompData->outputStreamBufferConsumerFifoPtrDblArray[0])[0],
             &ebWrapperPtr);
 
     if (ebWrapperPtr) {
-        
-        EB_BUFFERHEADERTYPE* objPtr = (EB_BUFFERHEADERTYPE*)ebWrapperPtr->objectPtr;
-        CopyOutputBuffer(
-            pBuffer,
-            objPtr);
-                
-        if (pBuffer->nFlags != EB_BUFFERFLAG_EOS && pBuffer->nFlags != 0) {
+
+        packet = (EB_BUFFERHEADERTYPE*)ebWrapperPtr->objectPtr;
+
+        if (packet->nFlags != EB_BUFFERFLAG_EOS && packet->nFlags != 0) {
             return_error = EB_ErrorMax;
         }
-        EbReleaseObject((EbObjectWrapper_t  *)ebWrapperPtr);
+
+        // return the output stream buffer
+        *pBuffer = packet;
+
+        // save the wrapper pointer for the release
+        *wrapperRelease = (void*)ebWrapperPtr;
     }
     else {
-        return_error =  EB_NoErrorEmptyQueue;
+        return_error = EB_NoErrorEmptyQueue;
     }
-        
-    return return_error;
-} 
 
+    return return_error;
+}
+
+#if __linux
+__attribute__((visibility("default")))
+#endif
+EB_API void EbH265ReleaseOutBuffer(
+    void                 *wrapperRelease)
+{
+    if (wrapperRelease)
+        // Release out put buffer back into the pool
+        EbReleaseObject((EbObjectWrapper_t  *)wrapperRelease);
+
+    return;
+}
 
 /**********************************
 * Fill This Buffer

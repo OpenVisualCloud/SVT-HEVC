@@ -134,15 +134,16 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     unsigned char           picSendDone
 )
 {
-    EB_BUFFERHEADERTYPE    *headerPtr = appCallback->outputStreamBuffer;
-    EB_COMPONENTTYPE        *componentHandle = (EB_COMPONENTTYPE*)appCallback->svtEncoderHandle;
+    EB_BUFFERHEADERTYPE    *headerPtr;
+    void                   *wrapperRelease = NULL;
+    EB_COMPONENTTYPE       *componentHandle = (EB_COMPONENTTYPE*)appCallback->svtEncoderHandle;
     APPEXITCONDITIONTYPE    return_value = APP_ExitConditionNone;
     EB_ERRORTYPE            stream_status = EB_ErrorNone;
     // System performance variables
     static long long int              frameCount = 0;
 
     // non-blocking call
-    stream_status = EbH265GetPacket(componentHandle, headerPtr, picSendDone);
+    stream_status = EbH265GetPacket(componentHandle, &headerPtr, picSendDone, &wrapperRelease);
 
     if (stream_status == EB_ErrorMax) {
         printf("\nError while encoding, code 0x%x\n", headerPtr->nFlags);
@@ -156,6 +157,9 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
         printf("\nDecode Order:\t%lld\tdts:\t%lld\tpts:\t%lld\tSliceType:\t%d", frameCount++, headerPtr->dts , headerPtr->pts, headerPtr->sliceType);
 
         fflush(stdout);
+
+        // Release the output buffer
+        EbH265ReleaseOutBuffer(wrapperRelease);
     }
     return return_value;
 }

@@ -276,8 +276,15 @@ EB_API EB_ERRORTYPE EbH265EncSendPicture(
 /***************************************************/
 EB_API EB_ERRORTYPE EbH265GetPacket(
     EB_COMPONENTTYPE      *h265EncComponent,
-    EB_BUFFERHEADERTYPE   *pBuffer,
-    unsigned char          picSendDone);
+    EB_BUFFERHEADERTYPE  **pBuffer,
+    unsigned char          picSendDone,
+    void                 **wrapperRelease);
+
+/***************************************************/
+/******* STEP 5-1: Release output buffer ***********/
+/***************************************************/
+EB_API void EbH265ReleaseOutBuffer(
+    void                 *wrapperRelease);
 
 /***************************************************/
 /*** OPTIONAL: Get output reconstructed picture ****/
