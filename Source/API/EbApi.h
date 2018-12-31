@@ -262,7 +262,7 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
 /***************************************************/
 EB_API EB_ERRORTYPE EbH265EncEosNal(
     EB_COMPONENTTYPE           *h265EncComponent,
-    EB_BUFFERHEADERTYPE*        outputStreamPtr);
+    EB_BUFFERHEADERTYPE       **outputStreamPtr);
 
 /***************************************************/
 /***** STEP 4: Send input pictures to encode *******/

@@ -630,7 +630,7 @@ void ProcessInputFieldStandardMode(
     EB_U64  sourceLumaRowSize = (EB_U64)(inputPaddedWidth << is16bit);
 
     EB_U64  sourceChromaRowSize = sourceLumaRowSize >> 1;
-   
+
     EB_U8  *ebInputPtr;
     EB_U32  inputRowIndex;
 
@@ -666,7 +666,7 @@ void ProcessInputFieldStandardMode(
 
     // V
     ebInputPtr = crInputPtr;
-    // Step back 1 chroma row if bottom field (undo the previous jump), and skip 1 chroma row if bottom field (point to the bottom field) 
+    // Step back 1 chroma row if bottom field (undo the previous jump), and skip 1 chroma row if bottom field (point to the bottom field)
     // => no action
 
 
@@ -1165,13 +1165,13 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
     EbAppContext_t         *appCallBack)
 {
     unsigned char            is16bit = (unsigned char)(config->encoderBitDepth > 8);
-    EB_BUFFERHEADERTYPE     *headerPtr = appCallBack->inputBufferPool; 
+    EB_BUFFERHEADERTYPE     *headerPtr = appCallBack->inputBufferPool;
     EB_COMPONENTTYPE        *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
-    
+
     APPEXITCONDITIONTYPE    return_value = APP_ExitConditionNone;
 
     EB_S64                  inputPaddedWidth           = config->inputPaddedWidth;
-    EB_S64                  inputPaddedHeight          = config->inputPaddedHeight; 
+    EB_S64                  inputPaddedHeight          = config->inputPaddedHeight;
     EB_S64                  framesToBeEncoded          = config->framesToBeEncoded;
 	EB_U64                  frameSize                  = (EB_U64)((inputPaddedWidth*inputPaddedHeight * 3) / 2 + (inputPaddedWidth / 4 * inputPaddedHeight * 3) / 2);
     EB_S64                  totalBytesToProcessCount;
@@ -1183,7 +1183,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
     }
 
 	totalBytesToProcessCount = (framesToBeEncoded < 0) ? -1 : (config->encoderBitDepth == 10 && config->compressedTenBitFormat == 1) ?
-		framesToBeEncoded * (EB_S64)frameSize : 
+		framesToBeEncoded * (EB_S64)frameSize :
         framesToBeEncoded * SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, is16bit);
 
 
@@ -1205,7 +1205,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
         if (config->useQpFile && config->qpFile)
             SendQpOnTheFly(
                 config,
-                headerPtr);        
+                headerPtr);
 
         if (keepRunning == 0 && !config->stopEncoder) {
             config->stopEncoder = EB_TRUE;
@@ -1215,11 +1215,11 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
         headerPtr->pts          = config->processedFrameCount-1;
         headerPtr->sliceType    = EB_INVALID_SLICE;
 
-        headerPtr->nFlags = 0; 
+        headerPtr->nFlags = 0;
 
         // Send the picture
         EbH265EncSendPicture(componentHandle, headerPtr);
-        
+
         if ((config->processedFrameCount == (EB_U64)config->framesToBeEncoded) || config->stopEncoder) {
 
             headerPtr->nAllocLen    = 0;
@@ -1231,7 +1231,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
             headerPtr->sliceType    = EB_INVALID_SLICE;
 
             EbH265EncSendPicture(componentHandle, headerPtr);
-        
+
         }
 
         return_value = (headerPtr->nFlags == EB_BUFFERFLAG_EOS) ? APP_ExitConditionFinished : return_value;
@@ -1251,19 +1251,19 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     unsigned char           picSendDone)
 {
     APPPORTACTIVETYPE       *portState = &appCallBack->outputStreamPortActive;
-    EB_BUFFERHEADERTYPE     *headerPtr = appCallBack->streamBufferPool; 
+    EB_BUFFERHEADERTYPE     *headerPtr = appCallBack->streamBufferPool;
     EB_COMPONENTTYPE        *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
     APPEXITCONDITIONTYPE    return_value = APP_ExitConditionNone;
     EB_ERRORTYPE            stream_status = EB_ErrorNone;
     // Per channel variables
     FILE                 *streamFile      = config->bitstreamFile;
     EB_U32               startFrame      = (config->framesToBeEncoded == 0 || config->framesToBeEncoded < LONG_ENCODE_FRAME_ENCODE || (SPEED_MEASUREMENT_INTERVAL < START_STEADY_STATE)) ? 0 : START_STEADY_STATE;
-	EB_U64              *startsTime      = &config->performanceContext.startsTime ; 
+	EB_U64              *startsTime      = &config->performanceContext.startsTime ;
     EB_U64              *startuTime      = &config->performanceContext.startuTime ;
-                         
+
     EB_U64              *totalLatency    = &config->performanceContext.totalLatency;
     EB_U32              *maxLatency      = &config->performanceContext.maxLatency;
-    
+
     // System performance variables
     static EB_U64        allChannelsStartsTime     = 0;
     static EB_U64        allChannelsStartuTime     = 0;
@@ -1271,7 +1271,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
 
     // for a long encode, ignore startup time to get the steady state speed
     static EB_U32        allChannelsStartFrame     = START_STEADY_STATE;
-    
+
     // Local variables
     EB_U64                finishsTime     = 0;
     EB_U64                finishuTime     = 0;
@@ -1318,19 +1318,19 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
         config->performanceContext.byteCount += headerPtr->nFilledLen;
 
         if ((headerPtr->nFlags & EB_BUFFERFLAG_EOS) && appCallBack->ebEncParameters.codeEosNal == 0) {
-            headerPtr->nFilledLen = 0;
-            stream_status = EbH265EncEosNal(componentHandle, headerPtr);
+            EB_BUFFERHEADERTYPE *outputStreamBuffer;
+            stream_status = EbH265EncEosNal(componentHandle, &outputStreamBuffer);
             if (stream_status == EB_ErrorMax) {
                 printf("\n");
                 LogErrorOutput(
                     config->errorLogFile,
-                    headerPtr->nFlags);
+                    stream_status);
                 return APP_ExitConditionError;
             }
             else if (stream_status != EB_NoErrorEmptyQueue && streamFile) {
-                fwrite(headerPtr->pBuffer, 1, headerPtr->nFilledLen, streamFile);
+                fwrite(outputStreamBuffer->pBuffer, 1, outputStreamBuffer->nFilledLen, streamFile);
             }
-            config->performanceContext.byteCount += headerPtr->nFilledLen;
+            config->performanceContext.byteCount += outputStreamBuffer->nFilledLen;
         }
         // Update Output Port Activity State
         *portState = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? APP_PortInactive : *portState;
@@ -1421,7 +1421,7 @@ APPEXITCONDITIONTYPE ProcessOutputReconBuffer(
         }
 
         fwrite(headerPtr->pBuffer, 1, headerPtr->nFilledLen, config->reconFile);
-        
+
         // Update Output Port Activity State
         return_value = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? APP_ExitConditionFinished : APP_ExitConditionNone;
     }

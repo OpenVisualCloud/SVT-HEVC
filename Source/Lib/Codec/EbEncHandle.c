@@ -3024,7 +3024,7 @@ __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265EncEosNal(
     EB_COMPONENTTYPE           *h265EncComponent,
-    EB_BUFFERHEADERTYPE*        outputStreamPtr
+    EB_BUFFERHEADERTYPE       **outputStreamPtr
 )
 {
     EB_ERRORTYPE           return_error = EB_ErrorNone;
@@ -3032,7 +3032,18 @@ EB_API EB_ERRORTYPE EbH265EncEosNal(
     Bitstream_t            *bitstreamPtr;
     SequenceControlSet_t  *sequenceControlSetPtr = pEncCompData->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr;
     EncodeContext_t        *encodeContextPtr = sequenceControlSetPtr->encodeContextPtr;
+    EB_BUFFERHEADERTYPE    *outputStreamBuffer;
 
+    // Output buffer Allocation 
+    EB_MALLOC(EB_BUFFERHEADERTYPE*, outputStreamBuffer, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR);
+    EB_MALLOC(EB_U8*, outputStreamBuffer->pBuffer, sizeof(EB_U8) * PACKETIZATION_PROCESS_BUFFER_SIZE, EB_N_PTR);
+    outputStreamBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
+    outputStreamBuffer->nAllocLen = PACKETIZATION_PROCESS_BUFFER_SIZE;
+    outputStreamBuffer->pAppPrivate = NULL;
+    outputStreamBuffer->sliceType = EB_INVALID_SLICE;
+    outputStreamBuffer->nFilledLen = 0;
+
+    // 
     EB_MALLOC(Bitstream_t*, bitstreamPtr, sizeof(Bitstream_t), EB_N_PTR);
     EB_MALLOC(OutputBitstreamUnit_t*, bitstreamPtr->outputBitstreamPtr, sizeof(OutputBitstreamUnit_t), EB_N_PTR);
 
@@ -3053,15 +3064,15 @@ EB_API EB_ERRORTYPE EbH265EncEosNal(
     // Copy SPS & PPS to the Output Bitstream
     CopyRbspBitstreamToPayload(
         bitstreamPtr,
-        outputStreamPtr->pBuffer,
-        (EB_U32*) &(outputStreamPtr->nFilledLen),
-        (EB_U32*) &(outputStreamPtr->nAllocLen),
+        outputStreamBuffer->pBuffer,
+        (EB_U32*) &(outputStreamBuffer->nFilledLen),
+        (EB_U32*) &(outputStreamBuffer->nAllocLen),
         encodeContextPtr);
+    
+    *outputStreamPtr = outputStreamBuffer;
 
     return return_error;
 }
-
-
 
 /***********************************************
 **** Copy the input buffer from the 
