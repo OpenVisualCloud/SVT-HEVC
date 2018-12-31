@@ -47,7 +47,7 @@ typedef enum APPEXITCONDITIONTYPE {
 #define RIGHT_INPUT_PADDING 0
 #define TOP_INPUT_PADDING 0
 #define BOTTOM_INPUT_PADDING 0
-   
+
  /**********************************
  * Constructor
  **********************************/
@@ -305,14 +305,14 @@ int main(int argc, char* argv[])
     APPEXITCONDITIONTYPE    exitConditionOutput = APP_ExitConditionNone , exitConditionInput = APP_ExitConditionNone , exitConditionRecon = APP_ExitConditionNone;    // Processing loop exit condition
     EbConfig_t             *config;        // Encoder Configuration
     EbAppContext_t         *appCallback;   // Instances App callback data
-    
+
     // Print Encoder Info
     printf("-------------------------------------\n");
     printf("SVT-HEVC Encoder Simple Sample Application v1.2.0\n");
     printf("Platform:   %u bit\n", (unsigned) sizeof(void*)*8);
-#if ( defined( _MSC_VER ) && (_MSC_VER < 1910) ) 
+#if ( defined( _MSC_VER ) && (_MSC_VER < 1910) )
 	printf("Compiler: VS13\n");
-#elif ( defined( _MSC_VER ) && (_MSC_VER >= 1910) ) 
+#elif ( defined( _MSC_VER ) && (_MSC_VER >= 1910) )
 	printf("Compiler: VS17\n");
 #elif defined(__INTEL_COMPILER)
 	printf("Compiler: Intel\n");
@@ -353,7 +353,7 @@ int main(int argc, char* argv[])
                 config->bitstreamFile = fout;
 
             unsigned int width = 0, height = 0;
-            
+
             width = strtoul(argv[3], NULL, 0);
             height = strtoul(argv[4], NULL, 0);
             if ((width&&height) == 0) { printf("Invalid video dimensions\n"); return_error = EB_ErrorBadParameter; }
@@ -382,7 +382,7 @@ int main(int argc, char* argv[])
             // Initialize appCallback
             appCallback = (EbAppContext_t*)malloc(sizeof(EbAppContext_t));
             EbAppContextCtor(appCallback,config);
-            
+
             return_error = InitEncoder(config, appCallback, 0);
 
             printf("Encoding          ");
@@ -395,10 +395,10 @@ int main(int argc, char* argv[])
                 exitConditionInput = ProcessInputBuffer(config, appCallback);
                 if (config->reconFile) {
                     exitConditionRecon = ProcessOutputReconBuffer(config, appCallback);
-                }                
+                }
                 exitConditionOutput = ProcessOutputStreamBuffer(config, appCallback, (exitConditionInput == APP_ExitConditionNone || (exitConditionRecon == APP_ExitConditionNone && config->reconFile) ? 0 : 1));
             }
-            
+
             printf("\n");
             fflush(stdout);
 

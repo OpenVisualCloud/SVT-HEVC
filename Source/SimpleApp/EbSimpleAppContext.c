@@ -4,11 +4,11 @@
 */
 #include <stdlib.h>
 #include "EbSimpleAppContext.h"
-#define INPUT_SIZE_576p_TH				0x90000		// 0.58 Million   
+#define INPUT_SIZE_576p_TH				0x90000		// 0.58 Million
 #define INPUT_SIZE_1080i_TH				0xB71B0		// 0.75 Million
 #define INPUT_SIZE_1080p_TH				0x1AB3F0	// 1.75 Million
-#define INPUT_SIZE_4K_TH				0x29F630	// 2.75 Million  
-#define EB_OUTPUTSTREAMBUFFERSIZE_MACRO(ResolutionSize)                ((ResolutionSize) < (INPUT_SIZE_1080i_TH) ? 0x1E8480 : (ResolutionSize) < (INPUT_SIZE_1080p_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_4K_TH) ? 0x2DC6C0 : 0x2DC6C0  )   
+#define INPUT_SIZE_4K_TH				0x29F630	// 2.75 Million
+#define EB_OUTPUTSTREAMBUFFERSIZE_MACRO(ResolutionSize)                ((ResolutionSize) < (INPUT_SIZE_1080i_TH) ? 0x1E8480 : (ResolutionSize) < (INPUT_SIZE_1080p_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_4K_TH) ? 0x2DC6C0 : 0x2DC6C0  )
 EB_ERRORTYPE AllocateFrameBuffer(
     EbConfig_t        *config,
     unsigned char     *pBuffer)
@@ -25,8 +25,8 @@ EB_ERRORTYPE AllocateFrameBuffer(
     const size_t chroma8bitSize = luma8bitSize >> 2;
     const size_t luma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? luma8bitSize : 0;
     const size_t chroma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? chroma8bitSize : 0;
-    
-    // Determine  
+
+    // Determine
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)pBuffer;
 
     if (luma8bitSize) {
@@ -106,7 +106,7 @@ EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config)
     contextPtr->outputStreamBuffer->nAllocLen = EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->sourceWidth*config->sourceHeight);
     contextPtr->outputStreamBuffer->pAppPrivate = NULL;
     contextPtr->outputStreamBuffer->sliceType = EB_INVALID_SLICE;
-    
+
     // recon buffer
     if (config->reconFile) {
         contextPtr->reconBuffer = (EB_BUFFERHEADERTYPE*)malloc(sizeof(EB_BUFFERHEADERTYPE));
@@ -128,6 +128,8 @@ EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config)
         contextPtr->reconBuffer->nAllocLen = (unsigned int)frameSize;
         contextPtr->reconBuffer->pAppPrivate = NULL;
     }
+    else
+        contextPtr->reconBuffer = NULL;
     return EB_ErrorNone;
 }
 
@@ -152,8 +154,8 @@ void EbAppContextDtor(EbAppContext_t *contextPtr)
 }
 
 /***********************************************
-* Copy configuration parameters from 
-*  The config structure, to the 
+* Copy configuration parameters from
+*  The config structure, to the
 *  callback structure to send to the library
 ***********************************************/
 EB_ERRORTYPE CopyConfigurationParameters(
@@ -171,8 +173,9 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.sourceHeight      = config->sourceHeight;
     callbackData->ebEncParameters.encoderBitDepth   = config->encoderBitDepth;
     callbackData->ebEncParameters.codeVpsSpsPps     = 0;
+    callbackData->ebEncParameters.codeEosNal        = 1;
     callbackData->ebEncParameters.reconEnabled      = config->reconFile ? 1 : 0;
-    
+
     return return_error;
 
 }
@@ -186,7 +189,7 @@ EB_ERRORTYPE InitEncoder(
     unsigned int        instanceIdx)
 {
     EB_ERRORTYPE        return_error = EB_ErrorNone;
-    
+
     ///************************* LIBRARY INIT [START] *********************///
     // STEP 1: Call the library to construct a Component Handle
     return_error = EbInitHandle(&callbackData->svtEncoderHandle, callbackData, &callbackData->ebEncParameters);
@@ -195,7 +198,7 @@ EB_ERRORTYPE InitEncoder(
     // STEP 3: Copy all configuration parameters into the callback structure
     return_error = CopyConfigurationParameters(config,callbackData,instanceIdx);
     if (return_error != EB_ErrorNone) { return return_error; }
-    
+
     // STEP 4: Send over all configuration parameters
     return_error = EbH265EncSetParameter(callbackData->svtEncoderHandle,&callbackData->ebEncParameters);
     if (return_error != EB_ErrorNone) { return return_error; }
@@ -233,6 +236,6 @@ EB_ERRORTYPE DeInitEncoder(
 
     // Destruct the component
     EbDeinitHandle(callbackDataPtr->svtEncoderHandle);
-    
+
     return return_error;
 }

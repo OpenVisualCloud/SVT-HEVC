@@ -1635,9 +1635,9 @@ EB_U32 SetParentPcs(EB_H265_ENC_CONFIGURATION*   config)
         normalLatencyInput = (normalLatencyInput * 3) >> 1;
 
     if (config->latencyMode == 0)
-        inputPic = (normalLatencyInput /*+ config->lookAheadDistance*/);
+        inputPic = (normalLatencyInput + config->lookAheadDistance);
     else
-        inputPic = (EB_U32)(lowLatencyInput /*+ config->lookAheadDistance*/);
+        inputPic = (EB_U32)(lowLatencyInput + config->lookAheadDistance);
     
     return inputPic;
 }
@@ -1656,7 +1656,7 @@ void LoadDefaultBufferConfigurationSettings(
 
     unsigned int coreCount = GetNumProcessors();
 
-    sequenceControlSetPtr->inputOutputBufferFifoInitCount = inputPic + sequenceControlSetPtr->staticConfig.lookAheadDistance + SCD_LAD;
+    sequenceControlSetPtr->inputOutputBufferFifoInitCount = inputPic + SCD_LAD;
     
     // ME segments
     sequenceControlSetPtr->meSegmentRowCountArray[0] = meSegH;
@@ -1691,8 +1691,8 @@ void LoadDefaultBufferConfigurationSettings(
     //#====================== Data Structures and Picture Buffers ======================
     sequenceControlSetPtr->pictureControlSetPoolInitCount       = inputPic;
     sequenceControlSetPtr->pictureControlSetPoolInitCountChild  = MAX(4, coreCount / 6);
-    sequenceControlSetPtr->referencePictureBufferInitCount      = sequenceControlSetPtr->inputOutputBufferFifoInitCount;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
-    sequenceControlSetPtr->paReferencePictureBufferInitCount    = sequenceControlSetPtr->inputOutputBufferFifoInitCount;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
+    sequenceControlSetPtr->referencePictureBufferInitCount      = inputPic;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
+    sequenceControlSetPtr->paReferencePictureBufferInitCount    = inputPic;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
     sequenceControlSetPtr->reconBufferFifoInitCount             = sequenceControlSetPtr->referencePictureBufferInitCount;
     
     //#====================== Inter process Fifos ======================
@@ -2926,7 +2926,7 @@ __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     EB_COMPONENTTYPE           *h265EncComponent,
-    EB_BUFFERHEADERTYPE*        outputStreamPtr
+    EB_BUFFERHEADERTYPE        *outputStreamPtr
 )
 {
     EB_ERRORTYPE           return_error = EB_ErrorNone;
