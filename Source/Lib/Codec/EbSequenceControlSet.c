@@ -145,6 +145,10 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     EbRecoveryPointSeiCtor(
         &sequenceControlSetPtr->recoveryPoint);
 
+    // Initialize Content Light Level SEI
+    EbContentLightLevelCtor(
+        &sequenceControlSetPtr->contentLightLevel);
+
 	// Initialize LCU params
 	LcuParamsCtor(
 		sequenceControlSetPtr);
@@ -242,6 +246,13 @@ EB_ERRORTYPE CopySequenceControlSet(
         sizeof(AppRecoveryPoint_t));
 
     writeCount += sizeof(AppRecoveryPoint_t);
+
+    EB_MEMCPY(
+        &dst->contentLightLevel,
+        &src->contentLightLevel,
+        sizeof(AppContentLightLevelSei_t));
+
+    writeCount += sizeof(AppContentLightLevelSei_t);
 
     EB_MEMCPY(
         &dst->picTimingSei,

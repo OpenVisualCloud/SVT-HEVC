@@ -195,6 +195,13 @@ extern "C" {
 
     //
 
+    typedef struct AppContentLightLevelSei_s {
+
+        EB_U16 maxContentLightLevel;
+        EB_U16 maxPicAverageLightLevel;
+
+    }AppContentLightLevelSei_t;
+
 
     typedef struct EB_FRAME_RATE_CFG
     {
@@ -299,6 +306,9 @@ extern void EbBufferingPeriodSeiCtor(
 extern void EbRecoveryPointSeiCtor(
     AppRecoveryPoint_t   *recoveryPointSeiPtr);
 
+extern void EbContentLightLevelCtor(
+    AppContentLightLevelSei_t    *contentLightLevelPtr);
+
 extern EB_U32 GetPictureTimingSEILength(
     AppPictureTimingSei_t      *picTimingSeiPtr,
     AppVideoUsabilityInfo_t    *vuiPtr);
@@ -309,6 +319,8 @@ extern EB_U32 GetBufPeriodSEILength(
 
 extern EB_U32 GetRecoveryPointSEILength(
     AppRecoveryPoint_t    *recoveryPointSeiPtr);
+
+extern EB_U32 GetContentLightLevelSEILength();
 #ifdef __cplusplus
 }
 #endif

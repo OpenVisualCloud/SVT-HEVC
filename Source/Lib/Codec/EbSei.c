@@ -277,6 +277,13 @@ void EbRecoveryPointSeiCtor(
     return;
 }
 
+void EbContentLightLevelCtor(
+    AppContentLightLevelSei_t    *contentLightLevelPtr)
+{
+    contentLightLevelPtr->maxContentLightLevel = 0;
+    contentLightLevelPtr->maxPicAverageLightLevel = 0;
+}
+
 /**************************************************
  * GetUvlcCodeLength
  **************************************************/
@@ -451,6 +458,21 @@ EB_U32 GetRecoveryPointSEILength(
 
     // broken_link_flag
     seiLength += 1;
+
+    seiLength = (seiLength + 7) >> 3;
+
+    return seiLength;
+}
+
+EB_U32 GetContentLightLevelSEILength()
+{
+    EB_U32    seiLength = 0;
+
+    // max_content_light_level
+    seiLength += 16;
+
+    // max_pixel_average_light_level
+    seiLength += 16;
 
     seiLength = (seiLength + 7) >> 3;
 

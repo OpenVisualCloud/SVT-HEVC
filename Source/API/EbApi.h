@@ -213,6 +213,10 @@ typedef struct EB_H265_ENC_CONFIGURATION
     // Debug tools
     uint32_t                reconEnabled;
 
+    // SEI
+    uint16_t                maxCLL;
+    uint16_t                maxFALL;
+
 } EB_H265_ENC_CONFIGURATION;
 
 // API calls:

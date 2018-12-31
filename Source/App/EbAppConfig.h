@@ -363,6 +363,12 @@ typedef struct EbConfig_s
     uint64_t  processedFrameCount;
     uint64_t  processedByteCount;
 
+    /****************************************
+    * SEI parameters
+    ****************************************/
+    uint16_t  maxCLL;
+    uint16_t  maxFALL;
+
 } EbConfig_t;
 
 extern void EbConfigCtor(EbConfig_t *configPtr);

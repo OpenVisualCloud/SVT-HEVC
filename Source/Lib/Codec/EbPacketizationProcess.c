@@ -177,6 +177,14 @@ void* PacketizationKernel(void *inputPtr)
                     contextPtr->ppsConfig);
             }
 
+            if (sequenceControlSetPtr->staticConfig.maxCLL || sequenceControlSetPtr->staticConfig.maxFALL) {
+                sequenceControlSetPtr->contentLightLevel.maxContentLightLevel = sequenceControlSetPtr->staticConfig.maxCLL;
+                sequenceControlSetPtr->contentLightLevel.maxPicAverageLightLevel = sequenceControlSetPtr->staticConfig.maxFALL;
+                EncodeContentLightLevelSEI(
+                    pictureControlSetPtr->bitstreamPtr,
+                    &sequenceControlSetPtr->contentLightLevel);
+            }
+
             // Flush the Bitstream
             FlushBitstream(
                 pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);

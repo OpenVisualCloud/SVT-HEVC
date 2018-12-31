@@ -218,6 +218,9 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.fpsInVps = config->fpsInVps;
     callbackData->ebEncParameters.switchThreadsToRtPriority = config->switchThreadsToRtPriority;
 
+    callbackData->ebEncParameters.maxCLL = config->maxCLL;
+    callbackData->ebEncParameters.maxFALL = config->maxFALL;
+
     return return_error;
 
 }

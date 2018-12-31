@@ -8564,6 +8564,81 @@ EB_ERRORTYPE CodeEndOfSequenceNalUnit(
 	return return_error;
 }
 
+EB_ERRORTYPE EncodeContentLightLevelSEI(
+    Bitstream_t             *bitstreamPtr,
+    AppContentLightLevelSei_t   *contentLightLevelPtr)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    unsigned payloadType = CONTENT_LIGHT_LEVEL_INFO;
+    unsigned payloadSize = GetContentLightLevelSEILength();
+
+    OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
+
+    CodeNALUnitHeader(
+        outputBitstreamPtr,
+        NAL_UNIT_PREFIX_SEI,
+        0);
+
+    for (; payloadType >= 0xff; payloadType -= 0xff) {
+        OutputBitstreamWrite(
+            outputBitstreamPtr,
+            0xff,
+            8);
+    }
+    return_error = OutputBitstreamWrite(
+        outputBitstreamPtr,
+        payloadType,
+        8);
+
+    for (; payloadSize >= 0xff; payloadSize -= 0xff) {
+        OutputBitstreamWrite(
+            outputBitstreamPtr,
+            0xff,
+            8);
+    }
+    return_error = OutputBitstreamWrite(
+        outputBitstreamPtr,
+        payloadSize,
+        8);
+
+    //max_content_light_level
+    WriteCodeCavlc(
+        outputBitstreamPtr,
+        contentLightLevelPtr->maxContentLightLevel,
+        16);
+
+    // max_pixel_average_light_level
+    WriteCodeCavlc(
+        outputBitstreamPtr,
+        contentLightLevelPtr->maxPicAverageLightLevel,
+        16);
+
+    if (outputBitstreamPtr->writtenBitsCount % 8 != 0) {
+        // bit_equal_to_one
+        WriteFlagCavlc(
+            outputBitstreamPtr,
+            1);
+
+        while (outputBitstreamPtr->writtenBitsCount % 8 != 0) {
+            // bit_equal_to_zero
+            WriteFlagCavlc(
+                outputBitstreamPtr,
+                0);
+        }
+    }
+
+    // Byte Align the Bitstream
+    OutputBitstreamWrite(
+        outputBitstreamPtr,
+        1,
+        1);
+
+    OutputBitstreamWriteAlignZero(
+        outputBitstreamPtr);
+
+    return return_error;
+}
+
 EB_ERRORTYPE CopyRbspBitstreamToPayload(
 	Bitstream_t *bitstreamPtr,
 	EB_BYTE      outputBuffer,

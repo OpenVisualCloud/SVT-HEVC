@@ -181,6 +181,10 @@ extern EB_ERRORTYPE EncodeRecoveryPointSEI(
     Bitstream_t             *bitstreamPtr,
     AppRecoveryPoint_t      *recoveryPointSeiPtr);
 
+extern EB_ERRORTYPE EncodeContentLightLevelSEI(
+    Bitstream_t             *bitstreamPtr,
+    AppContentLightLevelSei_t   *contentLightLevelPtr);
+
 extern EB_ERRORTYPE CodeEndOfSequenceNalUnit(
     Bitstream_t             *bitstreamPtr);
 
