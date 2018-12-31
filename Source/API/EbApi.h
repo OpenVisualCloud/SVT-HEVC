@@ -255,7 +255,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(
 /***************************************************/
 EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     EB_COMPONENTTYPE           *h265EncComponent,
-    EB_BUFFERHEADERTYPE*        outputStreamPtr);
+    EB_BUFFERHEADERTYPE       **outputStreamPtr);
 
 /***************************************************/
 /******** OPTIONAL: Get the stream EOS NAL *********/

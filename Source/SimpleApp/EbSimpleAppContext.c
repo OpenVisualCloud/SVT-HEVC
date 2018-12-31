@@ -205,13 +205,14 @@ EB_ERRORTYPE InitEncoder(
 
     // STEP 5: Init Encoder
     return_error = EbInitEncoder(callbackData->svtEncoderHandle);
+    // Get VPS / SPS / PPS headers at init time
     if (callbackData->ebEncParameters.codeVpsSpsPps == 0) {
-        callbackData->outputStreamBuffer->nFilledLen = 0;
-        return_error = EbH265EncStreamHeader(callbackData->svtEncoderHandle, callbackData->outputStreamBuffer);
+        EB_BUFFERHEADERTYPE *outputStreamBuffer;
+        return_error = EbH265EncStreamHeader(callbackData->svtEncoderHandle, &outputStreamBuffer);
         if (return_error != EB_ErrorNone) {
             return return_error;
         }
-        fwrite(callbackData->outputStreamBuffer->pBuffer, 1, callbackData->outputStreamBuffer->nFilledLen, config->bitstreamFile);
+        fwrite(outputStreamBuffer->pBuffer, 1, outputStreamBuffer->nFilledLen, config->bitstreamFile);
     }
     ///************************* LIBRARY INIT [END] *********************///
     return return_error;
