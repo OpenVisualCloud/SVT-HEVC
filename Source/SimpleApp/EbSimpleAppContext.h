@@ -14,165 +14,165 @@ typedef struct EbConfig_s
     /****************************************
      * File I/O
      ****************************************/
-    FILE                   *configFile;
-    FILE                   *inputFile;
-    FILE                   *bitstreamFile;
-    FILE                   *reconFile;
-    FILE                   *errorLogFile;
-    FILE                   *bufferFile;
+    FILE                        *configFile;
+    FILE                        *inputFile;
+    FILE                        *bitstreamFile;
+    FILE                        *reconFile;
+    FILE                        *errorLogFile;
+    FILE                        *bufferFile;
 
-    FILE                   *qpFile;
+    FILE                        *qpFile;
 
-    unsigned char          useQpFile;
+    uint8_t                      useQpFile;
 
-    signed long long       frameRate;
-    signed long long       frameRateNumerator;
-    signed long long       frameRateDenominator;
-    signed long long       injectorFrameRate;
-    unsigned int           injector;
-    unsigned int           speedControlFlag;
-    unsigned int           encoderBitDepth;
-    unsigned int           compressedTenBitFormat;
-    unsigned int           sourceWidth;
-    unsigned int           sourceHeight;
+    int64_t                      frameRate;
+    int64_t                      frameRateNumerator;
+    int64_t                      frameRateDenominator;
+    int64_t                      injectorFrameRate;
+    uint32_t                     injector;
+    uint32_t                     speedControlFlag;
+    uint32_t                     encoderBitDepth;
+    uint32_t                     compressedTenBitFormat;
+    uint32_t                     sourceWidth;
+    uint32_t                     sourceHeight;
 
-    unsigned int           inputPaddedWidth;
-    unsigned int           inputPaddedHeight;
+    uint32_t                     inputPaddedWidth;
+    uint32_t                     inputPaddedHeight;
 
-    signed long long       framesToBeEncoded;
-    signed long long       framesEncoded;
-    signed long long       bufferedInput;
-    unsigned char         **sequenceBuffer;
+    int64_t                      framesToBeEncoded;
+    int64_t                      framesEncoded;
+    int64_t                      bufferedInput;
+    uint8_t                   **sequenceBuffer;
 
-    unsigned char          latencyMode;
+    uint8_t                     latencyMode;
 
     /****************************************
      * // Interlaced Video
      ****************************************/
-    unsigned char        interlacedVideo;
-    unsigned char        separateFields;
+    uint8_t                     interlacedVideo;
+    uint8_t                     separateFields;
 
     /*****************************************
      * Coding Structure
      *****************************************/
-    unsigned int         baseLayerSwitchMode;
-    unsigned char        encMode;
-    signed long long     intraPeriod;
-    unsigned int         intraRefreshType;
-    unsigned int         hierarchicalLevels;
-    unsigned int         predStructure;
+    uint32_t                    baseLayerSwitchMode;
+    uint8_t                     encMode;
+    int64_t                     intraPeriod;
+    uint32_t                    intraRefreshType;
+    uint32_t                    hierarchicalLevels;
+    uint32_t                    predStructure;
 
 
     /****************************************
      * Quantization
      ****************************************/
-    unsigned int         qp;
+    uint32_t                    qp;
 
     /****************************************
      * DLF
      ****************************************/
-    unsigned char        disableDlfFlag;
+    uint8_t                     disableDlfFlag;
 
     /****************************************
      * SAO
      ****************************************/
-    unsigned char        enableSaoFlag;
+    uint8_t                     enableSaoFlag;
 
     /****************************************
      * ME Tools
      ****************************************/
-    unsigned char        useDefaultMeHme;
-    unsigned char        enableHmeFlag;
-    unsigned char        enableHmeLevel0Flag;
-    unsigned char        enableHmeLevel1Flag;
-    unsigned char        enableHmeLevel2Flag;
+    uint8_t                     useDefaultMeHme;
+    uint8_t                     enableHmeFlag;
+    uint8_t                     enableHmeLevel0Flag;
+    uint8_t                     enableHmeLevel1Flag;
+    uint8_t                     enableHmeLevel2Flag;
 
     /****************************************
      * ME Parameters
      ****************************************/
-    unsigned int         searchAreaWidth;
-    unsigned int         searchAreaHeight;
+    uint32_t                    searchAreaWidth;
+    uint32_t                    searchAreaHeight;
 
     /****************************************
      * HME Parameters
      ****************************************/
-    unsigned int         numberHmeSearchRegionInWidth ;
-    unsigned int         numberHmeSearchRegionInHeight;
-    unsigned int         hmeLevel0TotalSearchAreaWidth;
-    unsigned int         hmeLevel0TotalSearchAreaHeight;
-    unsigned int         hmeLevel0ColumnIndex;
-    unsigned int         hmeLevel0RowIndex;
-    unsigned int         hmeLevel1ColumnIndex;
-    unsigned int         hmeLevel1RowIndex;
-    unsigned int         hmeLevel2ColumnIndex;
-    unsigned int         hmeLevel2RowIndex;
-    unsigned int         hmeLevel0SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    unsigned int         hmeLevel0SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    unsigned int         hmeLevel1SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    unsigned int         hmeLevel1SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    unsigned int         hmeLevel2SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    unsigned int         hmeLevel2SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+    uint32_t                    numberHmeSearchRegionInWidth ;
+    uint32_t                    numberHmeSearchRegionInHeight;
+    uint32_t                    hmeLevel0TotalSearchAreaWidth;
+    uint32_t                    hmeLevel0TotalSearchAreaHeight;
+    uint32_t                    hmeLevel0ColumnIndex;
+    uint32_t                    hmeLevel0RowIndex;
+    uint32_t                    hmeLevel1ColumnIndex;
+    uint32_t                    hmeLevel1RowIndex;
+    uint32_t                    hmeLevel2ColumnIndex;
+    uint32_t                    hmeLevel2RowIndex;
+    uint32_t                    hmeLevel0SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
+    uint32_t                    hmeLevel0SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+    uint32_t                    hmeLevel1SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
+    uint32_t                    hmeLevel1SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+    uint32_t                    hmeLevel2SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
+    uint32_t                    hmeLevel2SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
 
     /****************************************
      * MD Parameters
      ****************************************/
-    unsigned char        constrainedIntra;
+    uint8_t                     constrainedIntra;
 
     /****************************************
      * Rate Control
      ****************************************/
-    unsigned int         sceneChangeDetection;
-    unsigned int         rateControlMode;
-    unsigned int         lookAheadDistance;
-    unsigned int         targetBitRate;
-    unsigned int         maxQpAllowed;
-    unsigned int         minQpAllowed;
+    uint32_t                    sceneChangeDetection;
+    uint32_t                    rateControlMode;
+    uint32_t                    lookAheadDistance;
+    uint32_t                    targetBitRate;
+    uint32_t                    maxQpAllowed;
+    uint32_t                    minQpAllowed;
 
     /****************************************
     * TUNE
     ****************************************/
-    unsigned char        tune;
+    uint8_t                     tune;
 
     /****************************************
      * Optional Features
      ****************************************/
 
-    unsigned char        bitRateReduction;
-    unsigned char        improveSharpness;
-    unsigned int         videoUsabilityInfo;
-    unsigned int         highDynamicRangeInput;
-    unsigned int         accessUnitDelimiter;
-    unsigned int         bufferingPeriodSEI;
-    unsigned int         pictureTimingSEI;
-    unsigned char        registeredUserDataSeiFlag;
-    unsigned char        unregisteredUserDataSeiFlag;
-    unsigned char        recoveryPointSeiFlag;
-    unsigned int         enableTemporalId;
+    uint8_t                     bitRateReduction;
+    uint8_t                     improveSharpness;
+    uint32_t                    videoUsabilityInfo;
+    uint32_t                    highDynamicRangeInput;
+    uint32_t                    accessUnitDelimiter;
+    uint32_t                    bufferingPeriodSEI;
+    uint32_t                    pictureTimingSEI;
+    uint8_t                     registeredUserDataSeiFlag;
+    uint8_t                     unregisteredUserDataSeiFlag;
+    uint8_t                     recoveryPointSeiFlag;
+    uint32_t                    enableTemporalId;
 
     /****************************************
      * Annex A Parameters
      ****************************************/
-    unsigned int         profile;
-    unsigned int         tier;
-    unsigned int         level;
+    uint32_t                    profile;
+    uint32_t                    tier;
+    uint32_t                    level;
 
     /****************************************
      * On-the-fly Testing
      ****************************************/
-    unsigned int         testUserData;
-    unsigned char        eosFlag;
+    uint32_t                    testUserData;
+    uint8_t                     eosFlag;
 
     /****************************************
     * Optimization Type
     ****************************************/
-    unsigned int         asmType;
+    uint32_t                    asmType;
 
     // Channel info
-    unsigned int      channelId;
-    unsigned int      activeChannelCount;
-    unsigned int      logicalProcessors;
-    signed int        targetSocket;
-    unsigned char     stopEncoder;         // to signal CTRL+C Event, need to stop encoding.
+    uint32_t                    channelId;
+    uint32_t                    activeChannelCount;
+    uint32_t                    logicalProcessors;
+    int32_t                     targetSocket;
+    uint8_t                     stopEncoder;         // to signal CTRL+C Event, need to stop encoding.
 } EbConfig_t;
 
 /***************************************
@@ -189,7 +189,7 @@ typedef struct EbAppContext_s {
     EB_BUFFERHEADERTYPE                 *outputStreamBuffer;
     EB_BUFFERHEADERTYPE                 *reconBuffer;
 
-    unsigned int instanceIdx;
+    uint32_t instanceIdx;
 
 } EbAppContext_t;
 
@@ -199,7 +199,7 @@ typedef struct EbAppContext_s {
  ********************************/
 extern EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config);
 extern void EbAppContextDtor(EbAppContext_t *contextPtr);
-extern EB_ERRORTYPE InitEncoder(EbConfig_t *config, EbAppContext_t *callbackData, unsigned int instanceIdx);
-extern EB_ERRORTYPE DeInitEncoder(EbAppContext_t *callbackDataPtr, unsigned int instanceIndex);
+extern EB_ERRORTYPE InitEncoder(EbConfig_t *config, EbAppContext_t *callbackData, uint32_t instanceIdx);
+extern EB_ERRORTYPE DeInitEncoder(EbAppContext_t *callbackDataPtr, uint32_t instanceIndex);
 
 #endif // EbAppContext_h

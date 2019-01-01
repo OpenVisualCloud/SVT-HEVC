@@ -13,33 +13,33 @@
 #include "EbAppConfig.h"
 
 
-#define INPUT_SIZE_576p_TH				0x90000		// 0.58 Million   
+#define INPUT_SIZE_576p_TH				0x90000		// 0.58 Million
 #define INPUT_SIZE_1080i_TH				0xB71B0		// 0.75 Million
 #define INPUT_SIZE_1080p_TH				0x1AB3F0	// 1.75 Million
-#define INPUT_SIZE_4K_TH				0x29F630	// 2.75 Million   
+#define INPUT_SIZE_4K_TH				0x29F630	// 2.75 Million
 
 #define SIZE_OF_ONE_FRAME_IN_BYTES(width, height,is16bit) ( ( ((width)*(height)*3)>>1 )<<is16bit)
 #define IS_16_BIT(bit_depth) (bit_depth==10?1:0)
-#define EB_OUTPUTSTREAMBUFFERSIZE_MACRO(ResolutionSize)                ((ResolutionSize) < (INPUT_SIZE_1080i_TH) ? 0x1E8480 : (ResolutionSize) < (INPUT_SIZE_1080p_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_4K_TH) ? 0x2DC6C0 : 0x2DC6C0  )   
+#define EB_OUTPUTSTREAMBUFFERSIZE_MACRO(ResolutionSize)                ((ResolutionSize) < (INPUT_SIZE_1080i_TH) ? 0x1E8480 : (ResolutionSize) < (INPUT_SIZE_1080p_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_4K_TH) ? 0x2DC6C0 : 0x2DC6C0  )
 
  /***************************************
- * Variables Defining a memory table 
- *  hosting all allocated pointers 
+ * Variables Defining a memory table
+ *  hosting all allocated pointers
  ***************************************/
-EbMemoryMapEntry               *appMemoryMap; 
-EB_U32                         *appMemoryMapIndex;
-EB_U64                         *totalAppMemory;
-EB_U32                         appMallocCount = 0;
-static EbMemoryMapEntry        *appMemoryMapAllChannels[MAX_CHANNEL_NUMBER]; 
-static EB_U32                   appMemoryMapIndexAllChannels[MAX_CHANNEL_NUMBER];
-static EB_U64                   appMemoryMallocdAllChannels[MAX_CHANNEL_NUMBER];
+EbMemoryMapEntry                 *appMemoryMap;
+uint32_t                         *appMemoryMapIndex;
+uint64_t                         *totalAppMemory;
+uint32_t                          appMallocCount = 0;
+static EbMemoryMapEntry          *appMemoryMapAllChannels[MAX_CHANNEL_NUMBER];
+static uint32_t                   appMemoryMapIndexAllChannels[MAX_CHANNEL_NUMBER];
+static uint64_t                   appMemoryMallocdAllChannels[MAX_CHANNEL_NUMBER];
 
 /***************************************
 * Allocation and initializing a memory table
 *  hosting all allocated pointers
 ***************************************/
 void AllocateMemoryTable(
-    EB_U32	instanceIdx)
+    uint32_t	instanceIdx)
 {
     // Malloc Memory Table for the instance @ instanceIdx
     appMemoryMapAllChannels[instanceIdx]        = (EbMemoryMapEntry*)malloc(sizeof(EbMemoryMapEntry) * MAX_APP_NUM_PTR);
@@ -69,30 +69,28 @@ void AllocateMemoryTable(
 *** Helper functions Input / Output **
 **************************************
 **************************************/
-
-
 /******************************************************
 * Copy fields from the stream to the input buffer
     Input   : stream
     Output  : valid input buffer
 ******************************************************/
 void ProcessInputFieldBufferingMode(
-    EB_U64                    processedFrameCount,
-    int                      *filledLen,
-    FILE                     *inputFile,
-    EB_U8                    *lumaInputPtr,
-    EB_U8                    *cbInputPtr,
-    EB_U8                    *crInputPtr,
-    EB_U32                    inputPaddedWidth,
-    EB_U32                    inputPaddedHeight,
-    unsigned char             is16bit) {
+    uint64_t                      processedFrameCount,
+    int32_t                      *filledLen,
+    FILE                         *inputFile,
+    uint8_t                        *lumaInputPtr,
+    uint8_t                        *cbInputPtr,
+    uint8_t                        *crInputPtr,
+    uint32_t                      inputPaddedWidth,
+    uint32_t                      inputPaddedHeight,
+    uint8_t                       is16bit) {
 
 
-    EB_U64  sourceLumaRowSize   = (EB_U64)(inputPaddedWidth << is16bit);
-    EB_U64  sourceChromaRowSize = sourceLumaRowSize >> 1;
-   
-    EB_U8  *ebInputPtr;
-    EB_U32  inputRowIndex;
+    uint64_t  sourceLumaRowSize   = (uint64_t)(inputPaddedWidth << is16bit);
+    uint64_t  sourceChromaRowSize = sourceLumaRowSize >> 1;
+
+    uint8_t  *ebInputPtr;
+    uint32_t  inputRowIndex;
 
     // Y
     ebInputPtr = lumaInputPtr;
@@ -102,7 +100,7 @@ void ProcessInputFieldBufferingMode(
 
     for (inputRowIndex = 0; inputRowIndex < inputPaddedHeight; inputRowIndex++) {
 
-        *filledLen += (EB_U32)fread(ebInputPtr, 1, sourceLumaRowSize, inputFile);
+        *filledLen += (uint32_t)fread(ebInputPtr, 1, sourceLumaRowSize, inputFile);
         // Skip 1 luma row (only fields)
         fseeko64(inputFile, (long)sourceLumaRowSize, SEEK_CUR);
         ebInputPtr += sourceLumaRowSize;
@@ -118,7 +116,7 @@ void ProcessInputFieldBufferingMode(
 
     for (inputRowIndex = 0; inputRowIndex < inputPaddedHeight >> 1; inputRowIndex++) {
 
-        *filledLen += (EB_U32)fread(ebInputPtr, 1, sourceChromaRowSize, inputFile);
+        *filledLen += (uint32_t)fread(ebInputPtr, 1, sourceChromaRowSize, inputFile);
         // Skip 1 chroma row (only fields)
         fseeko64(inputFile, (long)sourceChromaRowSize, SEEK_CUR);
         ebInputPtr += sourceChromaRowSize;
@@ -126,13 +124,13 @@ void ProcessInputFieldBufferingMode(
 
     // V
     ebInputPtr = crInputPtr;
-    // Step back 1 chroma row if bottom field (undo the previous jump), and skip 1 chroma row if bottom field (point to the bottom field) 
+    // Step back 1 chroma row if bottom field (undo the previous jump), and skip 1 chroma row if bottom field (point to the bottom field)
     // => no action
 
 
     for (inputRowIndex = 0; inputRowIndex < inputPaddedHeight >> 1; inputRowIndex++) {
 
-        *filledLen += (EB_U32)fread(ebInputPtr, 1, sourceChromaRowSize, inputFile);
+        *filledLen += (uint32_t)fread(ebInputPtr, 1, sourceChromaRowSize, inputFile);
         // Skip 1 chroma row (only fields)
         fseeko64(inputFile, (long)sourceChromaRowSize, SEEK_CUR);
         ebInputPtr += sourceChromaRowSize;
@@ -146,20 +144,20 @@ void ProcessInputFieldBufferingMode(
 
 
 /***********************************************
-* Copy configuration parameters from 
-*  The config structure, to the 
+* Copy configuration parameters from
+*  The config structure, to the
 *  callback structure to send to the library
 ***********************************************/
 EB_ERRORTYPE CopyConfigurationParameters(
     EbConfig_t				*config,
     EbAppContext_t			*callbackData,
-    EB_U32                   instanceIdx)
+    uint32_t                 instanceIdx)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
-    EB_U32         hmeRegionIndex;
+    uint32_t         hmeRegionIndex;
 
     // Assign Instance index to the library
-    callbackData->instanceIdx = (EB_U8)instanceIdx;
+    callbackData->instanceIdx = (uint8_t)instanceIdx;
 
     // Initialize Port Activity Flags
     callbackData->outputStreamPortActive = APP_PortActive;
@@ -174,7 +172,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.frameRateDenominator = config->frameRateDenominator;
     callbackData->ebEncParameters.frameRateNumerator = config->frameRateNumerator;
 	callbackData->ebEncParameters.hierarchicalLevels = config->hierarchicalLevels;
-	callbackData->ebEncParameters.predStructure = (EB_U8)config->predStructure;
+	callbackData->ebEncParameters.predStructure = (uint8_t)config->predStructure;
     callbackData->ebEncParameters.sceneChangeDetection = config->sceneChangeDetection;
     callbackData->ebEncParameters.lookAheadDistance = config->lookAheadDistance;
     callbackData->ebEncParameters.framesToBeEncoded = config->framesToBeEncoded;
@@ -203,8 +201,8 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.activeChannelCount = config->activeChannelCount;
     callbackData->ebEncParameters.logicalProcessors = config->logicalProcessors;
     callbackData->ebEncParameters.targetSocket = config->targetSocket;
-	callbackData->ebEncParameters.bitRateReduction = (EB_U8)config->bitRateReduction;
-	callbackData->ebEncParameters.improveSharpness = (EB_U8)config->improveSharpness;
+	callbackData->ebEncParameters.bitRateReduction = (uint8_t)config->bitRateReduction;
+	callbackData->ebEncParameters.improveSharpness = (uint8_t)config->improveSharpness;
     callbackData->ebEncParameters.videoUsabilityInfo = config->videoUsabilityInfo;
     callbackData->ebEncParameters.highDynamicRangeInput = config->highDynamicRangeInput;
     callbackData->ebEncParameters.accessUnitDelimiter = config->accessUnitDelimiter;
@@ -244,11 +242,11 @@ EB_ERRORTYPE CopyConfigurationParameters(
 
 EB_ERRORTYPE AllocateFrameBuffer(
     EbConfig_t          *config,
-    EB_U8               *pBuffer)
+    uint8_t               *pBuffer)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
 
-    const int tenBitPackedMode = (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
+    const int32_t tenBitPackedMode = (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
 
     // Determine size of each plane
     const size_t luma8bitSize =
@@ -262,47 +260,47 @@ EB_ERRORTYPE AllocateFrameBuffer(
     const size_t luma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? luma8bitSize : 0;
     const size_t chroma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? chroma8bitSize : 0;
 
-    // Determine  
+    // Determine
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)pBuffer;
     inputPtr->yStride = config->inputPaddedWidth;
     inputPtr->crStride = config->inputPaddedWidth >> 1;
     inputPtr->cbStride = config->inputPaddedWidth >> 1;
     if (luma8bitSize) {
-        EB_APP_MALLOC(unsigned char*, inputPtr->luma, luma8bitSize, EB_N_PTR, EB_ErrorInsufficientResources);
+        EB_APP_MALLOC(uint8_t*, inputPtr->luma, luma8bitSize, EB_N_PTR, EB_ErrorInsufficientResources);
     }
     else {
         inputPtr->luma = 0;
     }
     if (chroma8bitSize) {
-        EB_APP_MALLOC(unsigned char*, inputPtr->cb, chroma8bitSize, EB_N_PTR, EB_ErrorInsufficientResources);
+        EB_APP_MALLOC(uint8_t*, inputPtr->cb, chroma8bitSize, EB_N_PTR, EB_ErrorInsufficientResources);
     }
     else {
         inputPtr->cb = 0;
     }
 
     if (chroma8bitSize) {
-        EB_APP_MALLOC(unsigned char*, inputPtr->cr, chroma8bitSize, EB_N_PTR, EB_ErrorInsufficientResources);
+        EB_APP_MALLOC(uint8_t*, inputPtr->cr, chroma8bitSize, EB_N_PTR, EB_ErrorInsufficientResources);
     }
     else {
         inputPtr->cr = 0;
     }
 
     if (luma10bitSize) {
-        EB_APP_MALLOC(unsigned char*, inputPtr->lumaExt, luma10bitSize, EB_N_PTR, EB_ErrorInsufficientResources);
+        EB_APP_MALLOC(uint8_t*, inputPtr->lumaExt, luma10bitSize, EB_N_PTR, EB_ErrorInsufficientResources);
     }
     else {
         inputPtr->lumaExt = 0;
     }
 
     if (chroma10bitSize) {
-        EB_APP_MALLOC(unsigned char*, inputPtr->cbExt, chroma10bitSize, EB_N_PTR, EB_ErrorInsufficientResources);
+        EB_APP_MALLOC(uint8_t*, inputPtr->cbExt, chroma10bitSize, EB_N_PTR, EB_ErrorInsufficientResources);
     }
     else {
         inputPtr->cbExt = 0;
     }
 
     if (chroma10bitSize) {
-        EB_APP_MALLOC(unsigned char*, inputPtr->crExt, chroma10bitSize, EB_N_PTR, EB_ErrorInsufficientResources);
+        EB_APP_MALLOC(uint8_t*, inputPtr->crExt, chroma10bitSize, EB_N_PTR, EB_ErrorInsufficientResources);
 
     }
     else {
@@ -324,7 +322,7 @@ EB_ERRORTYPE AllocateInputBuffers(
         // Initialize Header
         callbackData->inputBufferPool->nSize                       = sizeof(EB_BUFFERHEADERTYPE);
 
-        EB_APP_MALLOC(EB_U8*, callbackData->inputBufferPool->pBuffer, sizeof(EB_H265_ENC_INPUT), EB_N_PTR, EB_ErrorInsufficientResources);
+        EB_APP_MALLOC(uint8_t*, callbackData->inputBufferPool->pBuffer, sizeof(EB_H265_ENC_INPUT), EB_N_PTR, EB_ErrorInsufficientResources);
 
         if (config->bufferedInput == -1) {
 
@@ -334,7 +332,7 @@ EB_ERRORTYPE AllocateInputBuffers(
                     callbackData->inputBufferPool->pBuffer);
         }
 
-        // Assign the variables 
+        // Assign the variables
         callbackData->inputBufferPool->pAppPrivate = NULL;
         callbackData->inputBufferPool->sliceType   = EB_INVALID_SLICE;
     }
@@ -361,9 +359,9 @@ EB_ERRORTYPE AllocateOutputReconBuffers(
     // Initialize Header
     callbackData->reconBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
 
-    EB_APP_MALLOC(EB_U8*, callbackData->reconBuffer->pBuffer, frameSize, EB_N_PTR, EB_ErrorInsufficientResources);
+    EB_APP_MALLOC(uint8_t*, callbackData->reconBuffer->pBuffer, frameSize, EB_N_PTR, EB_ErrorInsufficientResources);
 
-    callbackData->reconBuffer->nAllocLen = (unsigned int)frameSize;
+    callbackData->reconBuffer->nAllocLen = (uint32_t)frameSize;
     callbackData->reconBuffer->pAppPrivate = NULL;
     return return_error;
 }
@@ -374,14 +372,14 @@ EB_ERRORTYPE AllocateOutputBuffers(
 {
 
     EB_ERRORTYPE   return_error = EB_ErrorNone;
-    EB_U32		   outputStreamBufferSize = (EB_U32)(EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->inputPaddedHeight * config->inputPaddedWidth));;
+    uint32_t		   outputStreamBufferSize = (uint32_t)(EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->inputPaddedHeight * config->inputPaddedWidth));;
     {
         EB_APP_MALLOC(EB_BUFFERHEADERTYPE*, callbackData->streamBufferPool, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, EB_ErrorInsufficientResources);
 
         // Initialize Header
         callbackData->streamBufferPool->nSize = sizeof(EB_BUFFERHEADERTYPE);
 
-        EB_APP_MALLOC(EB_U8*, callbackData->streamBufferPool->pBuffer, outputStreamBufferSize, EB_N_PTR, EB_ErrorInsufficientResources);
+        EB_APP_MALLOC(uint8_t*, callbackData->streamBufferPool->pBuffer, outputStreamBufferSize, EB_N_PTR, EB_ErrorInsufficientResources);
 
         callbackData->streamBufferPool->nAllocLen = outputStreamBufferSize;
         callbackData->streamBufferPool->pAppPrivate = NULL;
@@ -394,12 +392,12 @@ EB_ERRORTYPE PreloadFramesIntoRam(
     EbConfig_t				*config)
 {
     EB_ERRORTYPE    return_error = EB_ErrorNone;
-    int             processedFrameCount;
-    int             filledLen;
-    int             inputPaddedWidth = config->inputPaddedWidth;
-    int             inputPaddedHeight = config->inputPaddedHeight;
-    int             readSize;
-    unsigned char  *ebInputPtr;
+    int32_t             processedFrameCount;
+    int32_t             filledLen;
+    int32_t             inputPaddedWidth = config->inputPaddedWidth;
+    int32_t             inputPaddedHeight = config->inputPaddedHeight;
+    int32_t             readSize;
+    uint8_t  *ebInputPtr;
 
     FILE *inputFile = config->inputFile;
 
@@ -415,17 +413,17 @@ EB_ERRORTYPE PreloadFramesIntoRam(
         readSize = inputPaddedWidth * inputPaddedHeight * 3 * (config->encoderBitDepth > 8 ? 2 : 1) / 2;
 
     }
-    EB_APP_MALLOC(unsigned char **, config->sequenceBuffer, sizeof(unsigned char*) * config->bufferedInput, EB_N_PTR, EB_ErrorInsufficientResources);
+    EB_APP_MALLOC(uint8_t **, config->sequenceBuffer, sizeof(uint8_t*) * config->bufferedInput, EB_N_PTR, EB_ErrorInsufficientResources);
 
 
     for (processedFrameCount = 0; processedFrameCount < config->bufferedInput; ++processedFrameCount) {
-        EB_APP_MALLOC(unsigned char*, config->sequenceBuffer[processedFrameCount], readSize, EB_N_PTR, EB_ErrorInsufficientResources);
+        EB_APP_MALLOC(uint8_t*, config->sequenceBuffer[processedFrameCount], readSize, EB_N_PTR, EB_ErrorInsufficientResources);
         // Interlaced Video
         if (config->separateFields) {
             EB_BOOL is16bit = config->encoderBitDepth > 8;
             if (is16bit == 0 || (is16bit == 1 && config->compressedTenBitFormat == 0)) {
 
-                const int tenBitPackedMode = (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
+                const int32_t tenBitPackedMode = (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
 
                 const size_t luma8bitSize =
 
@@ -445,8 +443,8 @@ EB_ERRORTYPE PreloadFramesIntoRam(
                     config->sequenceBuffer[processedFrameCount],
                     config->sequenceBuffer[processedFrameCount] + luma8bitSize,
                     config->sequenceBuffer[processedFrameCount] + luma8bitSize + chroma8bitSize,
-                    (EB_U32)inputPaddedWidth,
-                    (EB_U32)inputPaddedHeight,
+                    (uint32_t)inputPaddedWidth,
+                    (uint32_t)inputPaddedHeight,
 
                     is16bit);
 
@@ -462,8 +460,8 @@ EB_ERRORTYPE PreloadFramesIntoRam(
                         config->sequenceBuffer[processedFrameCount],
                         config->sequenceBuffer[processedFrameCount] + luma8bitSize,
                         config->sequenceBuffer[processedFrameCount] + luma8bitSize + chroma8bitSize,
-                        (EB_U32)inputPaddedWidth,
-                        (EB_U32)inputPaddedHeight,
+                        (uint32_t)inputPaddedWidth,
+                        (uint32_t)inputPaddedHeight,
 
                         is16bit);
                 }
@@ -476,7 +474,7 @@ EB_ERRORTYPE PreloadFramesIntoRam(
             // Unpacked 10 bit
             else {
 
-                const int tenBitPackedMode = (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
+                const int32_t tenBitPackedMode = (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
 
                 const size_t luma8bitSize =
                     (config->inputPaddedWidth) *
@@ -497,8 +495,8 @@ EB_ERRORTYPE PreloadFramesIntoRam(
                     config->sequenceBuffer[processedFrameCount],
                     config->sequenceBuffer[processedFrameCount] + luma8bitSize,
                     config->sequenceBuffer[processedFrameCount] + luma8bitSize + chroma8bitSize,
-                    (EB_U32)inputPaddedWidth,
-                    (EB_U32)inputPaddedHeight,
+                    (uint32_t)inputPaddedWidth,
+                    (uint32_t)inputPaddedHeight,
                     0);
 
                 ProcessInputFieldBufferingMode(
@@ -508,8 +506,8 @@ EB_ERRORTYPE PreloadFramesIntoRam(
                     config->sequenceBuffer[processedFrameCount] + luma8bitSize + (chroma8bitSize << 1),
                     config->sequenceBuffer[processedFrameCount] + luma8bitSize + (chroma8bitSize << 1) + luma10bitSize,
                     config->sequenceBuffer[processedFrameCount] + luma8bitSize + (chroma8bitSize << 1) + luma10bitSize + chroma10bitSize,
-                    (EB_U32)inputPaddedWidth,
-                    (EB_U32)inputPaddedHeight,
+                    (uint32_t)inputPaddedWidth,
+                    (uint32_t)inputPaddedHeight,
                     0);
 
                 if (readSize != filledLen) {
@@ -524,8 +522,8 @@ EB_ERRORTYPE PreloadFramesIntoRam(
                         config->sequenceBuffer[processedFrameCount],
                         config->sequenceBuffer[processedFrameCount] + luma8bitSize,
                         config->sequenceBuffer[processedFrameCount] + luma8bitSize + chroma8bitSize,
-                        (EB_U32)inputPaddedWidth,
-                        (EB_U32)inputPaddedHeight,
+                        (uint32_t)inputPaddedWidth,
+                        (uint32_t)inputPaddedHeight,
                         0);
 
                     ProcessInputFieldBufferingMode(
@@ -535,8 +533,8 @@ EB_ERRORTYPE PreloadFramesIntoRam(
                         config->sequenceBuffer[processedFrameCount] + luma8bitSize + (chroma8bitSize << 1),
                         config->sequenceBuffer[processedFrameCount] + luma8bitSize + (chroma8bitSize << 1) + luma10bitSize,
                         config->sequenceBuffer[processedFrameCount] + luma8bitSize + (chroma8bitSize << 1) + luma10bitSize + chroma10bitSize,
-                        (EB_U32)inputPaddedWidth,
-                        (EB_U32)inputPaddedHeight,
+                        (uint32_t)inputPaddedWidth,
+                        (uint32_t)inputPaddedHeight,
                         0);
 
                 }
@@ -552,7 +550,7 @@ EB_ERRORTYPE PreloadFramesIntoRam(
             // Fill the buffer with a complete frame
             filledLen = 0;
             ebInputPtr = config->sequenceBuffer[processedFrameCount];
-            filledLen += (EB_U32)fread(ebInputPtr, 1, readSize, inputFile);
+            filledLen += (uint32_t)fread(ebInputPtr, 1, readSize, inputFile);
 
             if (readSize != filledLen) {
 
@@ -561,7 +559,7 @@ EB_ERRORTYPE PreloadFramesIntoRam(
                 // Fill the buffer with a complete frame
                 filledLen = 0;
                 ebInputPtr = config->sequenceBuffer[processedFrameCount];
-                filledLen += (EB_U32)fread(ebInputPtr, 1, readSize, inputFile);
+                filledLen += (uint32_t)fread(ebInputPtr, 1, readSize, inputFile);
             }
         }
     }
@@ -579,10 +577,10 @@ EB_ERRORTYPE PreloadFramesIntoRam(
 EB_ERRORTYPE InitEncoder(
     EbConfig_t				*config,
     EbAppContext_t			*callbackData,
-	EB_U32					instanceIdx)
+	uint32_t				 instanceIdx)
 {
     EB_ERRORTYPE        return_error = EB_ErrorNone;
-    
+
     // Allocate a memory table hosting all allocated pointers
     AllocateMemoryTable(instanceIdx);
 
@@ -603,7 +601,7 @@ EB_ERRORTYPE InitEncoder(
     if (return_error != EB_ErrorNone) {
         return return_error;
     }
-    
+
     // STEP 4: Send over all configuration parameters
     // Set the Parameters
     return_error = EbH265EncSetParameter(
@@ -646,7 +644,7 @@ EB_ERRORTYPE InitEncoder(
 
     if (return_error != EB_ErrorNone) {
         return return_error;
-    }    
+    }
 
 	// Allocate the Sequence Buffer
     if (config->bufferedInput != -1) {
@@ -662,10 +660,10 @@ EB_ERRORTYPE InitEncoder(
     if (return_error != EB_ErrorNone) {
         return return_error;
     }
-    
-  
+
+
     ///********************** APPLICATION INIT [END] ******************////////
-    
+
     return return_error;
 }
 
@@ -674,12 +672,12 @@ EB_ERRORTYPE InitEncoder(
  ***********************************/
 EB_ERRORTYPE DeInitEncoder(
     EbAppContext_t *callbackDataPtr,
-    EB_U32          instanceIndex)
+    uint32_t        instanceIndex)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
-    EB_S32              ptrIndex        = 0;
+    int32_t              ptrIndex        = 0;
     EbMemoryMapEntry*   memoryEntry     = (EbMemoryMapEntry*)0;
-    
+
     if (((EB_COMPONENTTYPE*)(callbackDataPtr->svtEncoderHandle)) != NULL) {
             return_error = EbDeinitEncoder(callbackDataPtr->svtEncoderHandle);
     }

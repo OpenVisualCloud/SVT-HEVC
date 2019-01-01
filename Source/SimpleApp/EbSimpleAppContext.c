@@ -11,10 +11,10 @@
 #define EB_OUTPUTSTREAMBUFFERSIZE_MACRO(ResolutionSize)                ((ResolutionSize) < (INPUT_SIZE_1080i_TH) ? 0x1E8480 : (ResolutionSize) < (INPUT_SIZE_1080p_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_4K_TH) ? 0x2DC6C0 : 0x2DC6C0  )
 EB_ERRORTYPE AllocateFrameBuffer(
     EbConfig_t        *config,
-    unsigned char     *pBuffer)
+    uint8_t           *pBuffer)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
-    const int tenBitPackedMode = (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
+    const int32_t tenBitPackedMode = (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
 
     // Determine size of each plane
     const size_t luma8bitSize =
@@ -30,42 +30,42 @@ EB_ERRORTYPE AllocateFrameBuffer(
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)pBuffer;
 
     if (luma8bitSize) {
-        inputPtr->luma = (unsigned char*)malloc(luma8bitSize);
+        inputPtr->luma = (uint8_t*)malloc(luma8bitSize);
         if (!inputPtr->luma) return EB_ErrorInsufficientResources;
     }
     else {
         inputPtr->luma = 0;
     }
     if (chroma8bitSize) {
-        inputPtr->cb = (unsigned char*)malloc(chroma8bitSize);
+        inputPtr->cb = (uint8_t*)malloc(chroma8bitSize);
         if (!inputPtr->cb) return EB_ErrorInsufficientResources;
     }
     else {
         inputPtr->cb = 0;
     }
     if (chroma8bitSize) {
-        inputPtr->cr = (unsigned char*)malloc(chroma8bitSize);
+        inputPtr->cr = (uint8_t*)malloc(chroma8bitSize);
         if (!inputPtr->cr) return EB_ErrorInsufficientResources;
     }
     else {
         inputPtr->cr = 0;
     }
     if (luma10bitSize) {
-        inputPtr->lumaExt = (unsigned char*)malloc(luma10bitSize);
+        inputPtr->lumaExt = (uint8_t*)malloc(luma10bitSize);
         if (!inputPtr->lumaExt) return EB_ErrorInsufficientResources;
     }
     else {
         inputPtr->lumaExt = 0;
     }
     if (chroma10bitSize) {
-        inputPtr->cbExt = (unsigned char*)malloc(chroma10bitSize);
+        inputPtr->cbExt = (uint8_t*)malloc(chroma10bitSize);
         if (!inputPtr->cbExt) return EB_ErrorInsufficientResources;
     }
     else {
         inputPtr->cbExt = 0;
     }
     if (chroma10bitSize) {
-        inputPtr->crExt = (unsigned char*)malloc(chroma10bitSize);
+        inputPtr->crExt = (uint8_t*)malloc(chroma10bitSize);
         if (!inputPtr->crExt) return EB_ErrorInsufficientResources;
     }
     else {
@@ -76,7 +76,9 @@ EB_ERRORTYPE AllocateFrameBuffer(
 /***********************************
  * AppContext Constructor
  ***********************************/
-EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config)
+EB_ERRORTYPE EbAppContextCtor(
+    EbAppContext_t *contextPtr,
+    EbConfig_t     *config)
 {
     EB_ERRORTYPE   return_error = EB_ErrorInsufficientResources;
 
@@ -84,7 +86,7 @@ EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config)
     contextPtr->inputPictureBuffer = (EB_BUFFERHEADERTYPE*)malloc(sizeof(EB_BUFFERHEADERTYPE));
     if (!contextPtr->inputPictureBuffer) return return_error;
 
-    contextPtr->inputPictureBuffer->pBuffer = (unsigned char*)malloc(sizeof(EB_H265_ENC_INPUT));
+    contextPtr->inputPictureBuffer->pBuffer = (uint8_t*)malloc(sizeof(EB_H265_ENC_INPUT));
     if (!contextPtr->inputPictureBuffer->pBuffer) return return_error;
 
     contextPtr->inputPictureBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
@@ -99,7 +101,7 @@ EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config)
     contextPtr->outputStreamBuffer = (EB_BUFFERHEADERTYPE*)malloc(sizeof(EB_BUFFERHEADERTYPE));
     if (!contextPtr->outputStreamBuffer) return return_error;
 
-    contextPtr->outputStreamBuffer->pBuffer = (unsigned char*)malloc(EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->sourceWidth*config->sourceHeight));
+    contextPtr->outputStreamBuffer->pBuffer = (uint8_t*)malloc(EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->sourceWidth*config->sourceHeight));
     if (!contextPtr->outputStreamBuffer->pBuffer) return return_error;
 
     contextPtr->outputStreamBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
@@ -122,10 +124,10 @@ EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config)
         // Initialize Header
         contextPtr->reconBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
 
-        contextPtr->reconBuffer->pBuffer = (unsigned char*)malloc(frameSize);
+        contextPtr->reconBuffer->pBuffer = (uint8_t*)malloc(frameSize);
         if (!contextPtr->reconBuffer->pBuffer) return return_error;
 
-        contextPtr->reconBuffer->nAllocLen = (unsigned int)frameSize;
+        contextPtr->reconBuffer->nAllocLen = (uint32_t)frameSize;
         contextPtr->reconBuffer->pAppPrivate = NULL;
     }
     else
@@ -136,7 +138,8 @@ EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config)
 /***********************************
  * AppContext Destructor
  ***********************************/
-void EbAppContextDtor(EbAppContext_t *contextPtr)
+void EbAppContextDtor(
+    EbAppContext_t *contextPtr)
 {
     EB_H265_ENC_INPUT *inputPtr = (EB_H265_ENC_INPUT*)contextPtr->inputPictureBuffer->pBuffer;
     free(inputPtr->luma);
@@ -161,12 +164,12 @@ void EbAppContextDtor(EbAppContext_t *contextPtr)
 EB_ERRORTYPE CopyConfigurationParameters(
     EbConfig_t				*config,
     EbAppContext_t			*callbackData,
-    unsigned int         instanceIdx)
+    uint32_t                 instanceIdx)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
 
     // Assign Instance index to the library
-    callbackData->instanceIdx = (unsigned char)instanceIdx;
+    callbackData->instanceIdx = (uint8_t)instanceIdx;
 
     // Initialize Port Activity Flags
     callbackData->ebEncParameters.sourceWidth       = config->sourceWidth;
@@ -186,7 +189,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
 EB_ERRORTYPE InitEncoder(
     EbConfig_t				*config,
     EbAppContext_t			*callbackData,
-    unsigned int        instanceIdx)
+    uint32_t                 instanceIdx)
 {
     EB_ERRORTYPE        return_error = EB_ErrorNone;
 
@@ -223,7 +226,7 @@ EB_ERRORTYPE InitEncoder(
  ***********************************/
 EB_ERRORTYPE DeInitEncoder(
     EbAppContext_t *callbackDataPtr,
-    unsigned int    instanceIndex)
+    uint32_t        instanceIndex)
 {
     (void)instanceIndex;
     EB_ERRORTYPE return_error = EB_ErrorNone;

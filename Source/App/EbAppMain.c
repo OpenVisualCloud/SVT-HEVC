@@ -8,6 +8,7 @@
 //      -memory
 //      -threads
 //      -semaphores
+//      -semaphores
 //  -Configures the encoder
 //  -Calls the encoder via the API
 //  -Destructs the resources
@@ -48,16 +49,16 @@ extern APPEXITCONDITIONTYPE ProcessOutputReconBuffer(
 extern APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     EbConfig_t             *config,
     EbAppContext_t         *appCallBack,
-    unsigned char           picSendDone);
+    uint8_t           picSendDone);
 
-volatile int keepRunning = 1;
+volatile int32_t keepRunning = 1;
 
-void EventHandler(int dummy) {
+void EventHandler(int32_t dummy) {
     (void)dummy;
     keepRunning = 0;
 }
 
-void AssignAppThreadGroup(EB_U8 targetSocket) {
+void AssignAppThreadGroup(uint8_t targetSocket) {
 #ifdef _MSC_VER
     if (GetActiveProcessorGroupCount() == 2) {
         GROUP_AFFINITY           groupAffinity;
@@ -65,7 +66,7 @@ void AssignAppThreadGroup(EB_U8 targetSocket) {
         groupAffinity.Group = targetSocket;
         SetThreadGroupAffinity(GetCurrentThread(), &groupAffinity, NULL);
     }
-#else 
+#else
     (void)targetSocket;
     return;
 #endif
@@ -75,7 +76,7 @@ void AssignAppThreadGroup(EB_U8 targetSocket) {
 /***************************************
  * Encoder App Main
  ***************************************/
-int main(int argc, char* argv[])
+int32_t main(int32_t argc, char* argv[])
 {
 #ifdef _MSC_VER
     _setmode(_fileno(stdin), _O_BINARY);
@@ -95,14 +96,14 @@ int main(int argc, char* argv[])
     EB_BOOL                 channelActive[MAX_CHANNEL_NUMBER];
 
     EbConfig_t             *configs[MAX_CHANNEL_NUMBER];        // Encoder Configuration
-    
-    EB_U64                  encodingStartTimesSeconds[MAX_CHANNEL_NUMBER]; // Array holding start time of each instance
-    EB_U64                  encodingFinishTimesSeconds[MAX_CHANNEL_NUMBER]; // Array holding finish time of each instance
-    EB_U64                  encodingStartTimesuSeconds[MAX_CHANNEL_NUMBER]; // Array holding start time of each instance
-    EB_U64                  encodingFinishTimesuSeconds[MAX_CHANNEL_NUMBER]; // Array holding finish time of each instance
 
-    unsigned int            numChannels = 0;
-    unsigned int            instanceCount=0;
+    uint64_t                  encodingStartTimesSeconds[MAX_CHANNEL_NUMBER]; // Array holding start time of each instance
+    uint64_t                  encodingFinishTimesSeconds[MAX_CHANNEL_NUMBER]; // Array holding finish time of each instance
+    uint64_t                  encodingStartTimesuSeconds[MAX_CHANNEL_NUMBER]; // Array holding start time of each instance
+    uint64_t                  encodingFinishTimesuSeconds[MAX_CHANNEL_NUMBER]; // Array holding finish time of each instance
+
+    uint32_t            numChannels = 0;
+    uint32_t            instanceCount=0;
     EbAppContext_t         *appCallbacks[MAX_CHANNEL_NUMBER];   // Instances App callback data
     signal(SIGINT, EventHandler);
     printf("-------------------------------------------\n");
@@ -164,7 +165,7 @@ int main(int argc, char* argv[])
                     channelActive[instanceCount] = EB_FALSE;
                 }
             }
-            
+
             {
                 // Start the Encoder
                 for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
@@ -175,7 +176,7 @@ int main(int argc, char* argv[])
                         exitConditionsRecon[instanceCount]  = configs[instanceCount]->reconFile ? APP_ExitConditionNone : APP_ExitConditionError;
                         exitConditionsInput[instanceCount]  = APP_ExitConditionNone;
                         channelActive[instanceCount]        = EB_TRUE;
-                        EbStartTime((unsigned long long*)&encodingStartTimesSeconds[instanceCount], (unsigned long long*)&encodingStartTimesuSeconds[instanceCount]);
+                        EbStartTime((uint64_t*)&encodingStartTimesSeconds[instanceCount], (uint64_t*)&encodingStartTimesuSeconds[instanceCount]);
                     }
                     else {
                         exitConditions[instanceCount]       = APP_ExitConditionError;
@@ -211,7 +212,7 @@ int main(int argc, char* argv[])
                             if (((exitConditionsRecon[instanceCount] == APP_ExitConditionFinished || !configs[instanceCount]->reconFile)  && exitConditionsOutput[instanceCount] == APP_ExitConditionFinished && exitConditionsInput[instanceCount] == APP_ExitConditionFinished)||
                                 ((exitConditionsRecon[instanceCount] == APP_ExitConditionError && configs[instanceCount]->reconFile) || exitConditionsOutput[instanceCount] == APP_ExitConditionError || exitConditionsInput[instanceCount] == APP_ExitConditionError)){
                                 channelActive[instanceCount] = EB_FALSE;
-                                EbFinishTime((unsigned long long*)&encodingFinishTimesSeconds[instanceCount], (unsigned long long*)&encodingFinishTimesuSeconds[instanceCount]);
+                                EbFinishTime((uint64_t*)&encodingFinishTimesSeconds[instanceCount], (uint64_t*)&encodingFinishTimesuSeconds[instanceCount]);
                                 if (configs[instanceCount]->reconFile)
                                     exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsRecon[instanceCount] | exitConditionsOutput[instanceCount] | exitConditionsInput[instanceCount]);
                                 else
@@ -252,7 +253,7 @@ int main(int argc, char* argv[])
                                 printf("Total Frames\t\tFrame Rate\t\tByte Count\t\tBitrate\n");
                             }
                             printf("%12d\t\t%4.2f fps\t\t%10.0f\t\t%5.2f kbps\n",
-                                (EB_S32)configs[instanceCount]->performanceContext.frameCount,
+                                (int32_t)configs[instanceCount]->performanceContext.frameCount,
                                 (double)frameRate,
                                 (double)configs[instanceCount]->performanceContext.byteCount,
                                 ((double)(configs[instanceCount]->performanceContext.byteCount << 3) * frameRate / (configs[instanceCount]->framesEncoded * 1000)));
@@ -271,22 +272,22 @@ int main(int argc, char* argv[])
                         if (configs[instanceCount]->interlacedVideo || configs[instanceCount]->separateFields) {
 
                             printf("\nChannel %u\nAverage Speed:\t\t%.2f fields per sec\nAverage Latency:\t%.0f ms\nMax Latency:\t\t%u ms\n",
-                                (unsigned int)(instanceCount + 1),
+                                (uint32_t)(instanceCount + 1),
                                 configs[instanceCount]->performanceContext.averageSpeed,
                                 configs[instanceCount]->performanceContext.averageLatency,
-                                (unsigned int)(configs[instanceCount]->performanceContext.maxLatency));
+                                (uint32_t)(configs[instanceCount]->performanceContext.maxLatency));
                         }
                         else {
                             printf("\nChannel %u\nAverage Speed:\t\t%.2f fps\nAverage Latency:\t%.0f ms\nMax Latency:\t\t%u ms\n",
-                                (unsigned int)(instanceCount + 1),
+                                (uint32_t)(instanceCount + 1),
                                 configs[instanceCount]->performanceContext.averageSpeed,
                                 configs[instanceCount]->performanceContext.averageLatency,
-                                (unsigned int)(configs[instanceCount]->performanceContext.maxLatency));
+                                (uint32_t)(configs[instanceCount]->performanceContext.maxLatency));
 
                         }
                     }
                     else {
-                        printf("\nChannel %u Encoding Interrupted\n", (unsigned int)(instanceCount + 1));                    
+                        printf("\nChannel %u Encoding Interrupted\n", (uint32_t)(instanceCount + 1));
                     }
                 }
                 else if (return_errors[instanceCount] == EB_ErrorInsufficientResources) {

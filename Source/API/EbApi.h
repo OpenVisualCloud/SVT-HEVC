@@ -14,7 +14,7 @@
 extern "C" {
 #endif // __cplusplus
 
-// API Version
+    // API Version
 #define SVT_VERSION_MAJOR       1
 #define SVT_VERSION_MINOR       3
 #define SVT_VERSION_PATCHLEVEL  0
@@ -31,7 +31,7 @@ extern "C" {
 /********************************
 * Defines
 ********************************/
-#define EB_SLICE           unsigned int
+#define EB_SLICE           uint32_t
 #define EB_B_SLICE         0
 #define EB_P_SLICE         1
 #define EB_I_SLICE         2
@@ -39,271 +39,271 @@ extern "C" {
 #define EB_NON_REF_SLICE   4
 #define EB_INVALID_SLICE   0xFF
 
-typedef struct EB_BUFFERHEADERTYPE
-{
-    // EB_BUFFERHEADERTYPE size
-    unsigned int nSize;
+    typedef struct EB_BUFFERHEADERTYPE
+    {
+        // EB_BUFFERHEADERTYPE size
+        uint32_t nSize;
 
-    // picture (input or output) buffer
-    unsigned char* pBuffer;
-    unsigned int nFilledLen;
-    unsigned int nAllocLen;
+        // picture (input or output) buffer
+        uint8_t* pBuffer;
+        uint32_t nFilledLen;
+        uint32_t nAllocLen;
 
-    // pic private data
-    void* pAppPrivate;
+        // pic private data
+        void*    pAppPrivate;
 
-    // pic timing param
-    unsigned int nTickCount;
-    signed long long dts;
-    signed long long pts;
+        // pic timing param
+        uint32_t nTickCount;
+        int64_t  dts;
+        int64_t  pts;
 
-    // pic info
-    unsigned int qpValue;
-    unsigned int sliceType;
+        // pic info
+        uint32_t qpValue;
+        uint32_t sliceType;
 
-    // pic flags
-    unsigned int nFlags;
-} EB_BUFFERHEADERTYPE;
+        // pic flags
+        uint32_t nFlags;
+    } EB_BUFFERHEADERTYPE;
 
-typedef struct EB_COMPONENTTYPE
-{
-    unsigned int nSize;
-    void* pComponentPrivate;
-    void* pApplicationPrivate;
-} EB_COMPONENTTYPE;
+    typedef struct EB_COMPONENTTYPE
+    {
+        uint32_t nSize;
+        void* pComponentPrivate;
+        void* pApplicationPrivate;
+    } EB_COMPONENTTYPE;
 
-typedef enum EB_ERRORTYPE
-{
-    EB_ErrorNone = 0,
-    EB_ErrorInsufficientResources               = (signed int) 0x80001000,
-    EB_ErrorUndefined                           = (signed int) 0x80001001,
-    EB_ErrorInvalidComponent                    = (signed int) 0x80001004,
-    EB_ErrorBadParameter                        = (signed int) 0x80001005,
-    EB_ErrorDestroyThreadFailed                 = (signed int) 0x80002012,
-    EB_ErrorSemaphoreUnresponsive               = (signed int) 0x80002021,
-    EB_ErrorDestroySemaphoreFailed              = (signed int) 0x80002022,
-    EB_ErrorCreateMutexFailed                   = (signed int) 0x80002030,
-    EB_ErrorMutexUnresponsive                   = (signed int) 0x80002031,
-    EB_ErrorDestroyMutexFailed                  = (signed int) 0x80002032,
-    EB_NoErrorEmptyQueue                        = (signed int) 0x80002033,
-    EB_ErrorMax                                 = 0x7FFFFFFF
-} EB_ERRORTYPE;
+    typedef enum EB_ERRORTYPE
+    {
+        EB_ErrorNone = 0,
+        EB_ErrorInsufficientResources = (int32_t)0x80001000,
+        EB_ErrorUndefined = (int32_t)0x80001001,
+        EB_ErrorInvalidComponent = (int32_t)0x80001004,
+        EB_ErrorBadParameter = (int32_t)0x80001005,
+        EB_ErrorDestroyThreadFailed = (int32_t)0x80002012,
+        EB_ErrorSemaphoreUnresponsive = (int32_t)0x80002021,
+        EB_ErrorDestroySemaphoreFailed = (int32_t)0x80002022,
+        EB_ErrorCreateMutexFailed = (int32_t)0x80002030,
+        EB_ErrorMutexUnresponsive = (int32_t)0x80002031,
+        EB_ErrorDestroyMutexFailed = (int32_t)0x80002032,
+        EB_NoErrorEmptyQueue = (int32_t)0x80002033,
+        EB_ErrorMax = 0x7FFFFFFF
+    } EB_ERRORTYPE;
 
 #define EB_BUFFERFLAG_EOS 0x00000001
 
-// For 8-bit and 10-bit packed inputs, the luma, cb, and cr fields should be used
-//   for the three input picture planes.  However, for 10-bit unpacked planes the
-//   lumaExt, cbExt, and crExt fields should be used hold the extra 2-bits of
-//   precision while the luma, cb, and cr fields hold the 8-bit data.
-typedef struct EB_H265_ENC_INPUT
-{
-    // Hosts 8 bit or 16 bit input YUV420p / YUV420p10le
-    unsigned char *luma;
-    unsigned char *cb;
-    unsigned char *cr;
+    // For 8-bit and 10-bit packed inputs, the luma, cb, and cr fields should be used
+    //   for the three input picture planes.  However, for 10-bit unpacked planes the
+    //   lumaExt, cbExt, and crExt fields should be used hold the extra 2-bits of
+    //   precision while the luma, cb, and cr fields hold the 8-bit data.
+    typedef struct EB_H265_ENC_INPUT
+    {
+        // Hosts 8 bit or 16 bit input YUV420p / YUV420p10le
+        uint8_t *luma;
+        uint8_t *cb;
+        uint8_t *cr;
 
-    // Hosts LSB 2 bits of 10bit input when the compressed 10bit format is used
-    unsigned char *lumaExt;
-    unsigned char *cbExt;
-    unsigned char *crExt;
+        // Hosts LSB 2 bits of 10bit input when the compressed 10bit format is used
+        uint8_t *lumaExt;
+        uint8_t *cbExt;
+        uint8_t *crExt;
 
-    unsigned int   yStride;
-    unsigned int   crStride;
-    unsigned int   cbStride;
+        uint32_t yStride;
+        uint32_t crStride;
+        uint32_t cbStride;
 
-} EB_H265_ENC_INPUT;
+    } EB_H265_ENC_INPUT;
 
-// Will contain the EbEncApi which will live in the EncHandle class
-// Only modifiable during config-time.
-typedef struct EB_H265_ENC_CONFIGURATION
-{
-    // Encoding preset
-    unsigned char             encMode;     // [0, 12](for tune 0 and >= 4k resolution), [0, 10](for >= 1080p resolution), [0, 9](for all resolution and modes)
-    unsigned char             tune;        // encoder tuning for Visual Quality [0], PSNR/SSIM [1]
-    unsigned char             latencyMode; // lossless change
+    // Will contain the EbEncApi which will live in the EncHandle class
+    // Only modifiable during config-time.
+    typedef struct EB_H265_ENC_CONFIGURATION
+    {
+        // Encoding preset
+        uint8_t                 encMode;     // [0, 12](for tune 0 and >= 4k resolution), [0, 10](for >= 1080p resolution), [0, 9](for all resolution and modes)
+        uint8_t                 tune;        // encoder tuning for Visual Quality [0], PSNR/SSIM [1]
+        uint8_t                 latencyMode; // lossless change
 
-    // GOP Structure
-    signed int                intraPeriodLength;
-    unsigned int              intraRefreshType;
-    unsigned int              hierarchicalLevels;
+        // GOP Structure
+        int32_t                 intraPeriodLength;
+        uint32_t                intraRefreshType;
+        uint32_t                hierarchicalLevels;
 
-    unsigned char             predStructure;
-    unsigned int              baseLayerSwitchMode;
+        uint8_t                 predStructure;
+        uint32_t                baseLayerSwitchMode;
 
-    // Input Info
-    unsigned int              sourceWidth;
-    unsigned int              sourceHeight;
-    unsigned int              frameRate;
-    signed int                frameRateNumerator;
-    signed int                frameRateDenominator;
-    unsigned int              encoderBitDepth;
-    unsigned int              compressedTenBitFormat;
-    unsigned long long        framesToBeEncoded;
+        // Input Info
+        uint32_t                sourceWidth;
+        uint32_t                sourceHeight;
+        uint32_t                frameRate;
+        int32_t                 frameRateNumerator;
+        int32_t                 frameRateDenominator;
+        uint32_t                encoderBitDepth;
+        uint32_t                compressedTenBitFormat;
+        uint64_t                framesToBeEncoded;
 
-    // Visual quality optimizations only applicable when tune = 1
-    unsigned char             bitRateReduction;
-    unsigned char             improveSharpness;
+        // Visual quality optimizations only applicable when tune = 1
+        uint8_t                 bitRateReduction;
+        uint8_t                 improveSharpness;
 
-    // Interlaced Video
-    unsigned char             interlacedVideo;
+        // Interlaced Video
+        uint8_t                 interlacedVideo;
 
-    // Quantization
-    unsigned int              qp;
-    unsigned char             useQpFile;
+        // Quantization
+        uint32_t                qp;
+        uint8_t                 useQpFile;
 
-    // Deblock Filter
-    unsigned char             disableDlfFlag;
+        // Deblock Filter
+        uint8_t                 disableDlfFlag;
 
-    // SAO
-    unsigned char             enableSaoFlag;
+        // SAO
+        uint8_t                 enableSaoFlag;
 
-    // Motion Estimation Tools
-    unsigned char             useDefaultMeHme;
-    unsigned char             enableHmeFlag;
-    unsigned char             enableHmeLevel0Flag;
-    unsigned char             enableHmeLevel1Flag;
-    unsigned char             enableHmeLevel2Flag;
+        // Motion Estimation Tools
+        uint8_t                 useDefaultMeHme;
+        uint8_t                 enableHmeFlag;
+        uint8_t                 enableHmeLevel0Flag;
+        uint8_t                 enableHmeLevel1Flag;
+        uint8_t                 enableHmeLevel2Flag;
 
-    // ME Parameters
-    unsigned int              searchAreaWidth;
-    unsigned int              searchAreaHeight;
+        // ME Parameters
+        uint32_t                searchAreaWidth;
+        uint32_t                searchAreaHeight;
 
-    // HME Parameters
-    unsigned int              numberHmeSearchRegionInWidth;
-    unsigned int              numberHmeSearchRegionInHeight;
-    unsigned int              hmeLevel0TotalSearchAreaWidth;
-    unsigned int              hmeLevel0TotalSearchAreaHeight;
-    unsigned int              hmeLevel0SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    unsigned int              hmeLevel0SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    unsigned int              hmeLevel1SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    unsigned int              hmeLevel1SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    unsigned int              hmeLevel2SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    unsigned int              hmeLevel2SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+        // HME Parameters
+        uint32_t                numberHmeSearchRegionInWidth;
+        uint32_t                numberHmeSearchRegionInHeight;
+        uint32_t                hmeLevel0TotalSearchAreaWidth;
+        uint32_t                hmeLevel0TotalSearchAreaHeight;
+        uint32_t                hmeLevel0SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
+        uint32_t                hmeLevel0SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+        uint32_t                hmeLevel1SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
+        uint32_t                hmeLevel1SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+        uint32_t                hmeLevel2SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
+        uint32_t                hmeLevel2SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
 
-    // MD Parameters
-    unsigned char             constrainedIntra;
+        // MD Parameters
+        uint8_t                 constrainedIntra;
 
-    // Rate Control
-    unsigned int              rateControlMode;
-    unsigned int              sceneChangeDetection;
-    unsigned int              lookAheadDistance;
-    unsigned int              targetBitRate;
-    unsigned int              maxQpAllowed;
-    unsigned int              minQpAllowed;
+        // Rate Control
+        uint32_t                rateControlMode;
+        uint32_t                sceneChangeDetection;
+        uint32_t                lookAheadDistance;
+        uint32_t                targetBitRate;
+        uint32_t                maxQpAllowed;
+        uint32_t                minQpAllowed;
 
-    // bitstream options
-    unsigned char             codeVpsSpsPps;
-    unsigned char             codeEosNal;
-    unsigned int              videoUsabilityInfo;
-    unsigned int              highDynamicRangeInput;
-    unsigned int              accessUnitDelimiter;
-    unsigned int              bufferingPeriodSEI;
-    unsigned int              pictureTimingSEI;
-    unsigned int              registeredUserDataSeiFlag;
-    unsigned int              unregisteredUserDataSeiFlag;
-    unsigned int              recoveryPointSeiFlag;
-    unsigned int              enableTemporalId;
-    unsigned int              profile;
-    unsigned int              tier;
-    unsigned int              level;
+        // bitstream options
+        uint8_t                 codeVpsSpsPps;
+        uint8_t                 codeEosNal;
+        uint32_t                videoUsabilityInfo;
+        uint32_t                highDynamicRangeInput;
+        uint32_t                accessUnitDelimiter;
+        uint32_t                bufferingPeriodSEI;
+        uint32_t                pictureTimingSEI;
+        uint32_t                registeredUserDataSeiFlag;
+        uint32_t                unregisteredUserDataSeiFlag;
+        uint32_t                recoveryPointSeiFlag;
+        uint32_t                enableTemporalId;
+        uint32_t                profile;
+        uint32_t                tier;
+        uint32_t                level;
 
-    // Application Specific parameters
-    unsigned int              channelId;                    // when multiple instances are running within the same application
-    unsigned int              activeChannelCount;           // how many channels are active
+        // Application Specific parameters
+        uint32_t                channelId;                    // when multiple instances are running within the same application
+        uint32_t                activeChannelCount;           // how many channels are active
 
-  // Threads management
-    unsigned int              logicalProcessors;             // number of logical processor to run on
-    signed int                targetSocket;                  // target socket to run on
+      // Threads management
+        uint32_t                logicalProcessors;             // number of logical processor to run on
+        int32_t                 targetSocket;                  // target socket to run on
 
-    // ASM Type
-    unsigned int              asmType;                      // level of optimization to use.
+        // ASM Type
+        uint32_t                asmType;                      // level of optimization to use.
 
-    // Demo features
-    unsigned int              speedControlFlag;             // dynamically change the encoding preset to meet the average speed defined in injectorFrameRate
-    signed int                injectorFrameRate;
+        // Demo features
+        uint32_t                speedControlFlag;             // dynamically change the encoding preset to meet the average speed defined in injectorFrameRate
+        int32_t                 injectorFrameRate;
 
-    // Debug tools
-    unsigned int              reconEnabled;
+        // Debug tools
+        uint32_t                reconEnabled;
 
-} EB_H265_ENC_CONFIGURATION;
+    } EB_H265_ENC_CONFIGURATION;
 
-// API calls:
+    // API calls:
 
-/*****************************************/
-/******* STEP 1: Init the Handle *********/
-/*****************************************/
-EB_API EB_ERRORTYPE EbInitHandle(
-    EB_COMPONENTTYPE** pHandle,
-    void* pAppData,
-    EB_H265_ENC_CONFIGURATION  *configPtr); // configPtr will be loaded with default params from the library
+    /*****************************************/
+    /******* STEP 1: Init the Handle *********/
+    /*****************************************/
+    EB_API EB_ERRORTYPE EbInitHandle(
+        EB_COMPONENTTYPE** pHandle,
+        void* pAppData,
+        EB_H265_ENC_CONFIGURATION  *configPtr); // configPtr will be loaded with default params from the library
 
-/***************************************************/
-/******* STEP 2: Update the encoder params *********/
-/***************************************************/
-EB_API EB_ERRORTYPE EbH265EncSetParameter(
-    EB_COMPONENTTYPE           *h265EncComponent,
-    EB_H265_ENC_CONFIGURATION  *pComponentParameterStructure); // pComponentParameterStructure contents will be copied to the library
+    /***************************************************/
+    /******* STEP 2: Update the encoder params *********/
+    /***************************************************/
+    EB_API EB_ERRORTYPE EbH265EncSetParameter(
+        EB_COMPONENTTYPE           *h265EncComponent,
+        EB_H265_ENC_CONFIGURATION  *pComponentParameterStructure); // pComponentParameterStructure contents will be copied to the library
 
-/***************************************************/
-/******* STEP 3: Init the encoder libray ***********/
-/***************************************************/
-EB_API EB_ERRORTYPE EbInitEncoder(
-    EB_COMPONENTTYPE *h265EncComponent);
+    /***************************************************/
+    /******* STEP 3: Init the encoder libray ***********/
+    /***************************************************/
+    EB_API EB_ERRORTYPE EbInitEncoder(
+        EB_COMPONENTTYPE *h265EncComponent);
 
-/***************************************************/
-/****** OPTIONAL: Get the stream header NAL ********/
-/***************************************************/
-EB_API EB_ERRORTYPE EbH265EncStreamHeader(
-    EB_COMPONENTTYPE           *h265EncComponent,
-    EB_BUFFERHEADERTYPE       **outputStreamPtr);
+    /***************************************************/
+    /****** OPTIONAL: Get the stream header NAL ********/
+    /***************************************************/
+    EB_API EB_ERRORTYPE EbH265EncStreamHeader(
+        EB_COMPONENTTYPE           *h265EncComponent,
+        EB_BUFFERHEADERTYPE       **outputStreamPtr);
 
-/***************************************************/
-/******** OPTIONAL: Get the stream EOS NAL *********/
-/***************************************************/
-EB_API EB_ERRORTYPE EbH265EncEosNal(
-    EB_COMPONENTTYPE           *h265EncComponent,
-    EB_BUFFERHEADERTYPE       **outputStreamPtr);
+    /***************************************************/
+    /******** OPTIONAL: Get the stream EOS NAL *********/
+    /***************************************************/
+    EB_API EB_ERRORTYPE EbH265EncEosNal(
+        EB_COMPONENTTYPE           *h265EncComponent,
+        EB_BUFFERHEADERTYPE       **outputStreamPtr);
 
-/***************************************************/
-/***** STEP 4: Send input pictures to encode *******/
-/***************************************************/
-EB_API EB_ERRORTYPE EbH265EncSendPicture(
-    EB_COMPONENTTYPE      *h265EncComponent,
-    EB_BUFFERHEADERTYPE   *pBuffer);
+    /***************************************************/
+    /***** STEP 4: Send input pictures to encode *******/
+    /***************************************************/
+    EB_API EB_ERRORTYPE EbH265EncSendPicture(
+        EB_COMPONENTTYPE      *h265EncComponent,
+        EB_BUFFERHEADERTYPE   *pBuffer);
 
-/***************************************************/
-/****** STEP 5: Get output slices to encode ********/
-/***************************************************/
-EB_API EB_ERRORTYPE EbH265GetPacket(
-    EB_COMPONENTTYPE      *h265EncComponent,
-    EB_BUFFERHEADERTYPE  **pBuffer,
-    unsigned char          picSendDone,
-    void                 **wrapperRelease);
+    /***************************************************/
+    /****** STEP 5: Get output slices to encode ********/
+    /***************************************************/
+    EB_API EB_ERRORTYPE EbH265GetPacket(
+        EB_COMPONENTTYPE      *h265EncComponent,
+        EB_BUFFERHEADERTYPE  **pBuffer,
+        uint8_t          picSendDone,
+        void                 **wrapperRelease);
 
-/***************************************************/
-/******* STEP 5-1: Release output buffer ***********/
-/***************************************************/
-EB_API void EbH265ReleaseOutBuffer(
-    void                 *wrapperRelease);
+    /***************************************************/
+    /******* STEP 5-1: Release output buffer ***********/
+    /***************************************************/
+    EB_API void EbH265ReleaseOutBuffer(
+        void                 *wrapperRelease);
 
-/***************************************************/
-/*** OPTIONAL: Get output reconstructed picture ****/
-/***************************************************/
-EB_API EB_ERRORTYPE EbH265GetRecon(
-    EB_COMPONENTTYPE      *h265EncComponent,
-    EB_BUFFERHEADERTYPE   *pBuffer);
+    /***************************************************/
+    /*** OPTIONAL: Get output reconstructed picture ****/
+    /***************************************************/
+    EB_API EB_ERRORTYPE EbH265GetRecon(
+        EB_COMPONENTTYPE      *h265EncComponent,
+        EB_BUFFERHEADERTYPE   *pBuffer);
 
-/***************************************************/
-/******* STEP 6: De-Init the encoder libray ********/
-/***************************************************/
-EB_API EB_ERRORTYPE EbDeinitEncoder(
-    EB_COMPONENTTYPE *h265EncComponent);
+    /***************************************************/
+    /******* STEP 6: De-Init the encoder libray ********/
+    /***************************************************/
+    EB_API EB_ERRORTYPE EbDeinitEncoder(
+        EB_COMPONENTTYPE *h265EncComponent);
 
-/***************************************************/
-/******* STEP 7: De-Init the encoder libray ********/
-/***************************************************/
-EB_API EB_ERRORTYPE EbDeinitHandle(
-    EB_COMPONENTTYPE  *h265EncComponent);
+    /***************************************************/
+    /******* STEP 7: De-Init the encoder libray ********/
+    /***************************************************/
+    EB_API EB_ERRORTYPE EbDeinitHandle(
+        EB_COMPONENTTYPE  *h265EncComponent);
 
 #ifdef __cplusplus
 }

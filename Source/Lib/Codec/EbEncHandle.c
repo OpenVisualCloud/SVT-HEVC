@@ -552,7 +552,9 @@ EB_U64 GetAffinityMask(EB_U32 lpnum) {
 }
 #endif
 
-void EbSetThreadManagementParameters(EB_H265_ENC_CONFIGURATION   *configPtr){
+void EbSetThreadManagementParameters(
+    EB_H265_ENC_CONFIGURATION   *configPtr)
+{
     EB_U32 numLogicProcessors = GetNumProcessors();
 #ifdef _WIN32
     // For system with a single processor group(no more than 64 logic processors all together)
@@ -625,14 +627,14 @@ void EbSetThreadManagementParameters(EB_H265_ENC_CONFIGURATION   *configPtr){
     if (numGroups == 1) {
         EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
             configPtr->logicalProcessors < numLogicProcessors ? configPtr->logicalProcessors : numLogicProcessors;
-        for(int i=0; i<lps; i++)
+        for(EB_U32 i=0; i<lps; i++)
             CPU_SET(lpgroup[0].group[i], &groupAffinity);
     }
     else if (numGroups > 1) {
         EB_U32 numLpPerGroup = numLogicProcessors / numGroups;
         if (configPtr->logicalProcessors == 0) {
             if (configPtr->targetSocket != -1) {
-                for(int i=0; i<lpgroup[configPtr->targetSocket].num; i++)
+                for(EB_U32 i=0; i<lpgroup[configPtr->targetSocket].num; i++)
                     CPU_SET(lpgroup[configPtr->targetSocket].group[i], &groupAffinity);
             }
         }
@@ -641,20 +643,20 @@ void EbSetThreadManagementParameters(EB_H265_ENC_CONFIGURATION   *configPtr){
                 EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
                     configPtr->logicalProcessors < numLogicProcessors ? configPtr->logicalProcessors : numLogicProcessors;
                 if(lps > numLpPerGroup) {
-                    for(int i=0; i<lpgroup[0].num; i++)
+                    for(EB_U32 i=0; i<lpgroup[0].num; i++)
                         CPU_SET(lpgroup[0].group[i], &groupAffinity);
-                    for(int i=0; i< (lps -lpgroup[0].num); i++)
+                    for(EB_U32 i=0; i< (lps -lpgroup[0].num); i++)
                         CPU_SET(lpgroup[1].group[i], &groupAffinity);
                 }
                 else {
-                    for(int i=0; i<lps; i++)
+                    for(EB_U32 i=0; i<lps; i++)
                         CPU_SET(lpgroup[0].group[i], &groupAffinity);
                 }
             }
             else {
                 EB_U32 lps = configPtr->logicalProcessors == 0 ? numLpPerGroup :
                     configPtr->logicalProcessors < numLpPerGroup ? configPtr->logicalProcessors : numLpPerGroup;
-                for(int i=0; i<lps; i++)
+                for(EB_U32 i=0; i<lps; i++)
                     CPU_SET(lpgroup[configPtr->targetSocket].group[i], &groupAffinity);
             }
         }
