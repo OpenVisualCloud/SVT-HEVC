@@ -36,7 +36,7 @@ typedef struct HlRateControlHistogramEntry_s {
     EbObjectWrapper_t              *parentPcsWrapperPtr;
     EB_BOOL                         endOfSequenceFlag;  
     EB_U64                          predBitsRefQp[MAX_REF_QP_NUM];
-    EB_SLICE                        sliceType;                                                   
+    EB_PICTURE                        sliceType;                                                   
     EB_U32                          temporalLayerIndex;     
 
     

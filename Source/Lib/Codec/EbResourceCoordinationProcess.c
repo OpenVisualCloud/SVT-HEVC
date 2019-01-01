@@ -624,8 +624,8 @@ void* ResourceCoordinationKernel(void *inputPtr)
         pictureControlSetPtr->inputPictureWrapperPtr          = inputPictureWrapperPtr;
 
         // Set Picture Control Flags
-        pictureControlSetPtr->idrFlag                         = sequenceControlSetPtr->encodeContextPtr->initialPicture || (ebInputPtr->sliceType == EB_IDR_SLICE);
-        pictureControlSetPtr->craFlag                         = (ebInputPtr->sliceType == EB_I_SLICE) ? EB_TRUE : EB_FALSE;
+        pictureControlSetPtr->idrFlag                         = sequenceControlSetPtr->encodeContextPtr->initialPicture || (ebInputPtr->sliceType == EB_IDR_PICTURE);
+        pictureControlSetPtr->craFlag                         = (ebInputPtr->sliceType == EB_I_PICTURE) ? EB_TRUE : EB_FALSE;
         pictureControlSetPtr->sceneChangeFlag                 = EB_FALSE;
 
         pictureControlSetPtr->qpOnTheFly                      = EB_FALSE;

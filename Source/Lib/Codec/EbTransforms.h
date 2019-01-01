@@ -74,7 +74,7 @@ extern EB_ERRORTYPE Quantize(
     const EB_BITDEPTH  bitDepth,
     const EB_U32       transformSize,
     const EB_U32       qp,
-    const EB_SLICE     sliceType);
+    const EB_PICTURE     sliceType);
 
 extern EB_ERRORTYPE InvQuantize(
     EB_S16            *quantCoeff,
@@ -97,7 +97,7 @@ extern void UnifiedQuantizeInvQuantize(
 	EB_U32               qp,
 	EB_U32               bitDepth,
 	EB_U32               areaSize,
-	EB_SLICE             sliceType,
+	EB_PICTURE             sliceType,
 	EB_U32			    *yCountNonZeroCoeffs,
 	EB_TRANS_COEFF_SHAPE transCoeffShape,
 

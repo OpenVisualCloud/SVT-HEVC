@@ -2945,7 +2945,7 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     outputStreamBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
     outputStreamBuffer->nAllocLen = PACKETIZATION_PROCESS_BUFFER_SIZE;
     outputStreamBuffer->pAppPrivate = NULL;
-    outputStreamBuffer->sliceType = EB_INVALID_SLICE;
+    outputStreamBuffer->sliceType = EB_INVALID_PICTURE;
     outputStreamBuffer->nFilledLen = 0;
 
     // Intermediate buffers 
@@ -2965,7 +2965,7 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
 
         EncodeAUD(
             bitstreamPtr,
-            EB_I_SLICE,
+            EB_I_PICTURE,
             0);
     }
 
@@ -3042,7 +3042,7 @@ EB_API EB_ERRORTYPE EbH265EncEosNal(
     outputStreamBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
     outputStreamBuffer->nAllocLen = PACKETIZATION_PROCESS_BUFFER_SIZE;
     outputStreamBuffer->pAppPrivate = NULL;
-    outputStreamBuffer->sliceType = EB_INVALID_SLICE;
+    outputStreamBuffer->sliceType = EB_INVALID_PICTURE;
     outputStreamBuffer->nFilledLen = 0;
 
     // 

@@ -31,13 +31,13 @@ extern "C" {
 /********************************
 * Defines
 ********************************/
-#define EB_SLICE           uint32_t
-#define EB_B_SLICE         0
-#define EB_P_SLICE         1
-#define EB_I_SLICE         2
-#define EB_IDR_SLICE       3
-#define EB_NON_REF_SLICE   4
-#define EB_INVALID_SLICE   0xFF
+#define EB_PICTURE           uint32_t
+#define EB_B_PICTURE         0
+#define EB_P_PICTURE         1
+#define EB_I_PICTURE         2
+#define EB_IDR_PICTURE       3
+#define EB_NON_REF_PICTURE   4
+#define EB_INVALID_PICTURE   0xFF
 
     typedef struct EB_BUFFERHEADERTYPE
     {

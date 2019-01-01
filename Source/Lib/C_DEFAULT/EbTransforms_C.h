@@ -39,7 +39,7 @@ void UpdateQiQCoef_R(
 		const EB_U32      areaSize,
 		EB_U32           *nonzerocoeff,
 		EB_U32            componentType,
-		EB_SLICE          sliceType,
+		EB_PICTURE          sliceType,
 		EB_U32            temporalLayer,
 		EB_U32            enableCbflag,
 		EB_U8             enableContouringQCUpdateFlag);
@@ -55,7 +55,7 @@ extern void UpdateQiQCoef(
 	const EB_U32      areaSize,
 	EB_U32           *nonzerocoeff,
 	EB_U32            componentType,
-	EB_SLICE          sliceType,
+	EB_PICTURE          sliceType,
 	EB_U32            temporalLayer,
 	EB_U32            enableCbflag,
 	EB_U8             enableContouringQCUpdateFlag);

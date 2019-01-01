@@ -169,7 +169,7 @@ void AdaptiveDlfParameterComputation(
 
     (void)contextPtr;
 
-    if (pictureControlSetPtr->sliceType == EB_B_SLICE){
+    if (pictureControlSetPtr->sliceType == EB_B_PICTURE){
 
         refObjL0 = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr;
         refObjL1 = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_1]->objectPtr;
@@ -191,7 +191,7 @@ void AdaptiveDlfParameterComputation(
             pictureControlSetPtr->betaOffset = 0;
         }
     }
-    if (pictureControlSetPtr->sliceType == EB_B_SLICE){
+    if (pictureControlSetPtr->sliceType == EB_B_PICTURE){
 
   
         refObjL0 = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr;
@@ -295,7 +295,7 @@ void PerformEarlyLcuPartitionning(
 
 	// Slice Type
 	sliceType =
-		(pictureControlSetPtr->ParentPcsPtr->idrFlag == EB_TRUE) ? EB_I_SLICE :
+		(pictureControlSetPtr->ParentPcsPtr->idrFlag == EB_TRUE) ? EB_I_PICTURE :
 		pictureControlSetPtr->sliceType;
 
 	// Increment the MD Rate Estimation array pointer to point to the right address based on the QP and slice type
@@ -708,7 +708,7 @@ void PartitioningInitialization(
 
     // Slice Type
     sliceType =
-        (pictureControlSetPtr->ParentPcsPtr->idrFlag == EB_TRUE) ? EB_I_SLICE :
+        (pictureControlSetPtr->ParentPcsPtr->idrFlag == EB_TRUE) ? EB_I_PICTURE :
         pictureControlSetPtr->sliceType;
 
     // Increment the MD Rate Estimation array pointer to point to the right address based on the QP and slice type
@@ -913,7 +913,7 @@ void AuraDetection(
         lcu_X = lcuParams->horizontalIndex;
         lcu_Y = lcuParams->verticalIndex;
 
-        if (pictureControlSetPtr->sliceType == EB_B_SLICE){ 
+        if (pictureControlSetPtr->sliceType == EB_B_PICTURE){ 
             if ((lcu_X > 0) && (lcu_X < pictureWidthInLcu - 1) && (lcu_Y < pictureHeightInLcu - 1)){
                 lcuPtr->auraStatus = AuraDetection64x64(
                     pictureControlSetPtr,
@@ -1497,7 +1497,7 @@ EB_BOOL IsAvcPartitioningMode(
 {
 	const EB_U32    lcuIndex = lcuPtr->index;
 	LcuParams_t    *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
-	EB_SLICE        sliceType = pictureControlSetPtr->sliceType;
+	EB_PICTURE        sliceType = pictureControlSetPtr->sliceType;
 	EB_U8           edgeBlockNum = pictureControlSetPtr->ParentPcsPtr->edgeResultsPtr[lcuIndex].edgeBlockNum;
 	LcuStat_t      *lcuStatPtr = &(pictureControlSetPtr->ParentPcsPtr->lcuStatArray[lcuIndex]);
 	EB_U8           stationaryEdgeOverTimeFlag = lcuStatPtr->stationaryEdgeOverTimeFlag;
@@ -1516,7 +1516,7 @@ EB_BOOL IsAvcPartitioningMode(
 	// Potential Aura/Grass
 	if (pictureControlSetPtr->sceneCaracteristicId == EB_FRAME_CARAC_0) {
 		if (pictureControlSetPtr->ParentPcsPtr->grassPercentageInPicture > 60 && auraStatus == AURA_STATUS_1) {
-			if ((sliceType != EB_I_SLICE && pictureControlSetPtr->highIntraSlection == 0) && (lcuParams->isCompleteLcu)) {
+			if ((sliceType != EB_I_PICTURE && pictureControlSetPtr->highIntraSlection == 0) && (lcuParams->isCompleteLcu)) {
 				return EB_TRUE;
 			}
 		}
@@ -1585,11 +1585,11 @@ void ConfigureAdp(
     EB_BOOL luminosityChange = EB_FALSE;
     // Derived for REF P & B & kept false otherwise (for temporal distance equal to 1 luminosity changes are easier to handle)
     // Derived for P & B
-    if (pictureControlSetPtr->sliceType != EB_I_SLICE) {
+    if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
         if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
             EbReferenceObject_t  * refObjL0, *refObjL1;
             refObjL0 = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr;
-            refObjL1 = (pictureControlSetPtr->ParentPcsPtr->sliceType == EB_B_SLICE) ? (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_1]->objectPtr : (EbReferenceObject_t*)EB_NULL;
+            refObjL1 = (pictureControlSetPtr->ParentPcsPtr->sliceType == EB_B_PICTURE) ? (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_1]->objectPtr : (EbReferenceObject_t*)EB_NULL;
             luminosityChange = ((ABS(pictureControlSetPtr->ParentPcsPtr->averageIntensity[0] - refObjL0->averageIntensity) >= AdpLuminosityChangeThArray[pictureControlSetPtr->ParentPcsPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex]) || (refObjL1 != EB_NULL && ABS(pictureControlSetPtr->ParentPcsPtr->averageIntensity[0] - refObjL1->averageIntensity) >= AdpLuminosityChangeThArray[pictureControlSetPtr->ParentPcsPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex]));
         }
     }
@@ -1875,7 +1875,7 @@ void DeriveLcuScore(
 
 		LcuParams_t *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
 
-		if (pictureControlSetPtr->sliceType == EB_I_SLICE) {
+		if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
             if (lcuParams->rasterScanCuValidity[RASTER_SCAN_CU_INDEX_64x64] == EB_FALSE) {
 
                 EB_U8 cu8x8Index;

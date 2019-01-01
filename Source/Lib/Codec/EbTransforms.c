@@ -2957,7 +2957,7 @@ void UnifiedQuantizeInvQuantize(
 	EB_U32                        qp,
 	EB_U32                        bitDepth,
 	EB_U32                        areaSize,
-	EB_SLICE                      sliceType,
+	EB_PICTURE                      sliceType,
 	EB_U32                       *yCountNonZeroCoeffs,
 	EB_U8                         transCoeffShape,
 	EB_U8		                  cleanSparseCeoffPfEncDec,
@@ -2989,7 +2989,7 @@ void UnifiedQuantizeInvQuantize(
 
 		const EB_U32 transformShiftNum = MAX_TR_DYNAMIC_RANGE - internalBitDepth - Log2f(areaSize);
 		const EB_S32 shiftedQBits = QUANT_SHIFT + qpPer + transformShiftNum;
-		const EB_U32 q_offset = ((sliceType == EB_I_SLICE || sliceType == EB_IDR_SLICE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
+		const EB_U32 q_offset = ((sliceType == EB_I_PICTURE || sliceType == EB_IDR_PICTURE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
 
 		//for the iQuant
 		const EB_S32 shiftedFFunc = (qpPer > 8) ? (EB_S32)FFunc[qpRem] << (qpPer - 2) : (EB_S32)FFunc[qpRem] << qpPer; // this is 6+8+TRANS_BIT_INCREMENT
@@ -3034,7 +3034,7 @@ void UnifiedQuantizeInvQuantize(
 
         const EB_U32 transformShiftNum = MAX_TR_DYNAMIC_RANGE - internalBitDepth - Log2f(areaSize);
         const EB_S32 shiftedQBits = QUANT_SHIFT + qpPer + transformShiftNum;
-        const EB_U32 q_offset = ((sliceType == EB_I_SLICE || sliceType == EB_IDR_SLICE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
+        const EB_U32 q_offset = ((sliceType == EB_I_PICTURE || sliceType == EB_IDR_PICTURE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
 
         // iQuant
         const EB_S32 shiftedFFunc = (qpPer > 8) ? (EB_S32)FFunc[qpRem] << (qpPer - 2) : (EB_S32)FFunc[qpRem] << qpPer; // this is 6+8+TRANS_BIT_INCREMENT
@@ -3076,7 +3076,7 @@ void UnifiedQuantizeInvQuantize(
 
         const EB_U32 transformShiftNum = MAX_TR_DYNAMIC_RANGE - internalBitDepth - Log2f(areaSize);
         const EB_S32 shiftedQBits = QUANT_SHIFT + qpPer + transformShiftNum;
-        const EB_U32 q_offset = ((sliceType == EB_I_SLICE || sliceType == EB_IDR_SLICE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
+        const EB_U32 q_offset = ((sliceType == EB_I_PICTURE || sliceType == EB_IDR_PICTURE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
 
         //for the iQuant
         const EB_S32 shiftedFFunc = (qpPer > 8) ? (EB_S32)FFunc[qpRem] << (qpPer - 2) : (EB_S32)FFunc[qpRem] << qpPer; // this is 6+8+TRANS_BIT_INCREMENT
@@ -3167,7 +3167,7 @@ void UnifiedQuantizeInvQuantize(
 
 
 
-        if (cleanSparseCeoffPfEncDec && areaSize >= 8 && yCountNonZeroCoeffs && (*yCountNonZeroCoeffs) && sliceType != EB_I_SLICE){
+        if (cleanSparseCeoffPfEncDec && areaSize >= 8 && yCountNonZeroCoeffs && (*yCountNonZeroCoeffs) && sliceType != EB_I_PICTURE){
             EB_U32 coeffLocation = 0;
             EB_U32 rowIndex = 0;
             EB_U32 colIndex = 0;

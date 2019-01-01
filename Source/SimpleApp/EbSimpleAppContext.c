@@ -91,7 +91,7 @@ EB_ERRORTYPE EbAppContextCtor(
 
     contextPtr->inputPictureBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
     contextPtr->inputPictureBuffer->pAppPrivate = NULL;
-    contextPtr->inputPictureBuffer->sliceType = EB_INVALID_SLICE;
+    contextPtr->inputPictureBuffer->sliceType = EB_INVALID_PICTURE;
     // Allocate frame buffer for the pBuffer
     AllocateFrameBuffer(
         config,
@@ -107,7 +107,7 @@ EB_ERRORTYPE EbAppContextCtor(
     contextPtr->outputStreamBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
     contextPtr->outputStreamBuffer->nAllocLen = EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->sourceWidth*config->sourceHeight);
     contextPtr->outputStreamBuffer->pAppPrivate = NULL;
-    contextPtr->outputStreamBuffer->sliceType = EB_INVALID_SLICE;
+    contextPtr->outputStreamBuffer->sliceType = EB_INVALID_PICTURE;
 
     // recon buffer
     if (config->reconFile) {

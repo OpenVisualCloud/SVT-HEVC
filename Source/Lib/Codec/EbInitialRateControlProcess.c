@@ -381,9 +381,9 @@ void ReleasePaReferenceObjects(
 	// PA Reference Pictures
 	EB_U32                             numOfListToSearch;
 	EB_U32                             listIndex;
-	if (pictureControlSetPtr->sliceType != EB_I_SLICE) {
+	if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
 
-		numOfListToSearch = (pictureControlSetPtr->sliceType == EB_P_SLICE) ? REF_LIST_0 : REF_LIST_1;
+		numOfListToSearch = (pictureControlSetPtr->sliceType == EB_P_PICTURE) ? REF_LIST_0 : REF_LIST_1;
 
 		// List Loop 
 		for (listIndex = REF_LIST_0; listIndex <= numOfListToSearch; ++listIndex) {
@@ -420,7 +420,7 @@ void MeBasedGlobalMotionDetection(
 	pictureControlSetPtr->isPan                 = EB_FALSE;
 	pictureControlSetPtr->isTilt                = EB_FALSE;
 
-	if (pictureControlSetPtr->sliceType != EB_I_SLICE) {
+	if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
         DetectGlobalMotion(
             sequenceControlSetPtr,
             pictureControlSetPtr);
@@ -508,7 +508,7 @@ void UpdateGlobalMotionDetectionOverTime(
 		temporaryQueueEntryPtr = encodeContextPtr->initialRateControlReorderQueue[inputQueueIndex];
 		temporaryPictureControlSetPtr = ((PictureParentControlSet_t*)(temporaryQueueEntryPtr->parentPcsWrapperPtr)->objectPtr);
 
-		if (temporaryPictureControlSetPtr->sliceType != EB_I_SLICE) {
+		if (temporaryPictureControlSetPtr->sliceType != EB_I_PICTURE) {
 
 			totalPanPictures += (temporaryPictureControlSetPtr->isPan == EB_TRUE);
 
@@ -527,7 +527,7 @@ void UpdateGlobalMotionDetectionOverTime(
 	pictureControlSetPtr->isTilt                = EB_FALSE;
 
 	if (totalCheckedPictures) {
-		if (pictureControlSetPtr->sliceType != EB_I_SLICE) {
+		if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
 			// If more than 75% of checked pictures are PAN then current picture is PAN
 			if ((((pictureControlSetPtr->hierarchicalLevels == 3)) ||
 				((pictureControlSetPtr->hierarchicalLevels == 4) && pictureControlSetPtr->temporalLayerIndex > 1) ||
@@ -587,7 +587,7 @@ void UpdateBeaInfoOverTime(
             temporaryPictureControlSetPtr = ((PictureParentControlSet_t*)(temporaryQueueEntryPtr->parentPcsWrapperPtr)->objectPtr);
 
 
-            if (temporaryPictureControlSetPtr->sliceType == EB_I_SLICE || temporaryPictureControlSetPtr->endOfSequenceFlag) {
+            if (temporaryPictureControlSetPtr->sliceType == EB_I_PICTURE || temporaryPictureControlSetPtr->endOfSequenceFlag) {
                 break;
             }
 
@@ -1063,7 +1063,7 @@ void* InitialRateControlKernel(void *inputPtr)
 							pictureControlSetPtr);
 					}
 					else {
-						if (pictureControlSetPtr->sliceType != EB_I_SLICE) {
+						if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
 							DetectGlobalMotion(
                                 sequenceControlSetPtr, 
                                 pictureControlSetPtr);

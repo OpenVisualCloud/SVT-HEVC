@@ -19,7 +19,7 @@ typedef struct EbReferenceObject_s {
     EB_U64                          refPOC;
 
     EB_U8                           qp;
-    EB_SLICE                        sliceType;
+    EB_PICTURE                        sliceType;
 
 	EB_U8                          intraCodedArea;//percentage of intra coded area 0-100%
 
@@ -46,7 +46,7 @@ typedef struct EbPaReferenceObject_s {
     EbPictureBufferDesc_t          *sixteenthDecimatedPicturePtr;
 	EB_U16                         variance[MAX_NUMBER_OF_TREEBLOCKS_PER_PICTURE];
 	EB_U8                          yMean[MAX_NUMBER_OF_TREEBLOCKS_PER_PICTURE];
-	EB_SLICE                       sliceType;
+	EB_PICTURE                       sliceType;
 
 	EB_U32 dependentPicturesCount; //number of pic using this reference frame  
     PictureParentControlSet_t       *pPcsPtr;

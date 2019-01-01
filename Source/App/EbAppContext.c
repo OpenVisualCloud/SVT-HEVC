@@ -334,7 +334,7 @@ EB_ERRORTYPE AllocateInputBuffers(
 
         // Assign the variables
         callbackData->inputBufferPool->pAppPrivate = NULL;
-        callbackData->inputBufferPool->sliceType   = EB_INVALID_SLICE;
+        callbackData->inputBufferPool->sliceType   = EB_INVALID_PICTURE;
     }
 
     return return_error;
@@ -383,7 +383,7 @@ EB_ERRORTYPE AllocateOutputBuffers(
 
         callbackData->streamBufferPool->nAllocLen = outputStreamBufferSize;
         callbackData->streamBufferPool->pAppPrivate = NULL;
-        callbackData->streamBufferPool->sliceType = EB_INVALID_SLICE;
+        callbackData->streamBufferPool->sliceType = EB_INVALID_PICTURE;
     }
     return return_error;
 }
