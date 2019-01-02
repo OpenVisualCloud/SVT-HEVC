@@ -92,6 +92,13 @@ extern "C" {
 
 #define EB_BUFFERFLAG_EOS 0x00000001
 
+typedef enum EB_COLOR_FORMAT {
+    EB_YUV400,
+    EB_YUV420,
+    EB_YUV422,
+    EB_YUV444
+} EB_COLOR_FORMAT;
+
 // For 8-bit and 10-bit packed inputs, the luma, cb, and cr fields should be used
 //   for the three input picture planes.  However, for 10-bit unpacked planes the
 //   lumaExt, cbExt, and crExt fields should be used hold the extra 2-bits of
@@ -138,6 +145,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     int32_t                 frameRateNumerator;
     int32_t                 frameRateDenominator;
     uint32_t                encoderBitDepth;
+    EB_COLOR_FORMAT         colorFormat;
     uint32_t                compressedTenBitFormat;
     uint64_t                framesToBeEncoded;
 

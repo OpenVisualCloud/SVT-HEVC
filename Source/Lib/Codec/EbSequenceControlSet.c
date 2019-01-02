@@ -72,7 +72,7 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     sequenceControlSetPtr->profileIdc                                       = 0;
     sequenceControlSetPtr->levelIdc                                         = 0;
     sequenceControlSetPtr->tierIdc                                          = 0;
-    sequenceControlSetPtr->chromaFormatIdc                                  = 1; // EB_YUV420
+    sequenceControlSetPtr->chromaFormatIdc                                  = EB_YUV420;
     sequenceControlSetPtr->maxTemporalLayers                                = 1;
     
     sequenceControlSetPtr->bitsForPictureOrderCount                         = 16;
