@@ -284,6 +284,26 @@ void EbContentLightLevelCtor(
     contentLightLevelPtr->maxPicAverageLightLevel = 0;
 }
 
+void EbMasteringDisplayColorVolumeCtor(
+    AppMasteringDisplayColorVolumeSei_t    *masteringDisplayPtr)
+{
+
+    EB_MEMSET(
+        masteringDisplayPtr->displayPrimaryX,
+        0,
+        sizeof(EB_U16) * 3);
+    EB_MEMSET(
+        masteringDisplayPtr->displayPrimaryY,
+        0,
+        sizeof(EB_U16) * 3);
+
+    masteringDisplayPtr->whitePointX = 0;
+    masteringDisplayPtr->whitePointY= 0 ;
+    masteringDisplayPtr->maxDisplayMasteringLuminance = 0;
+    masteringDisplayPtr->minDisplayMasteringLuminance = 0;
+}
+
+
 /**************************************************
  * GetUvlcCodeLength
  **************************************************/
@@ -473,6 +493,24 @@ EB_U32 GetContentLightLevelSEILength()
 
     // max_pixel_average_light_level
     seiLength += 16;
+
+    seiLength = (seiLength + 7) >> 3;
+
+    return seiLength;
+}
+
+EB_U32 GetMasteringDisplayColorVolumeSEILength()
+{
+    EB_U32    seiLength = 0;
+
+    // R, G, B Primaries
+    seiLength += 2 * 16 + 2 * 16 + 2 * 16;
+
+    // White Point Co-Ordinates
+    seiLength += 2 * 16;
+
+    // min & max luminance values
+    seiLength += 2 * 32;
 
     seiLength = (seiLength + 7) >> 3;
 

@@ -216,6 +216,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     // SEI
     uint16_t                maxCLL;
     uint16_t                maxFALL;
+    const char*             masteringDisplayColorVolume;  // SMPTE ST 2086 mastering display color volume info
 
 } EB_H265_ENC_CONFIGURATION;
 

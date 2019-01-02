@@ -71,6 +71,7 @@
 #define RECOVERY_POINT_TOKEN            "-recovery-point" // no Eval
 #define MAXCLL_TOKEN                    "-max-cll"
 #define MAXFALL_TOKEN                   "-max-fall"
+#define MASTER_DISPLAY_TOKEN            "-master-display"
 #define RATE_CONTROL_ENABLE_TOKEN       "-rc"
 #define TARGET_BIT_RATE_TOKEN           "-tbr"
 #define MAX_QP_TOKEN                    "-max-qp"
@@ -189,6 +190,13 @@ static void SetUnRegisteredUserDataSEI          (const char *value, EbConfig_t *
 static void SetRecoveryPointSEI                 (const char *value, EbConfig_t *cfg) {cfg->recoveryPointSeiFlag             = (EB_BOOL)strtol(value,  NULL, 0);};
 static void SetMaxCLL                           (const char *value, EbConfig_t *cfg) {cfg->maxCLL                           = (uint16_t)strtoul(value, NULL, 0);};
 static void SetMaxFALL                          (const char *value, EbConfig_t *cfg) {cfg->maxFALL                          = (uint16_t)strtoul(value, NULL, 0);};
+static void SetMasterDisplay(const char *value, EbConfig_t *cfg) {
+    if (value) {
+        EB_APP_STRDUP(cfg->masteringDisplayColorVolume, (char*)value);
+    }
+    else
+        cfg->masteringDisplayColorVolume = NULL;
+};
 static void SetEnableTemporalId                 (const char *value, EbConfig_t *cfg) {cfg->enableTemporalId                 = strtol(value,  NULL, 0);};
 static void SetProfile                          (const char *value, EbConfig_t *cfg) {cfg->profile                          = strtol(value,  NULL, 0);};
 static void SetTier                             (const char *value, EbConfig_t *cfg) {cfg->tier                             = strtol(value,  NULL, 0);};
@@ -319,6 +327,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, RECOVERY_POINT_TOKEN, "RecoveryPoint", SetRecoveryPointSEI },
     { SINGLE_INPUT, MAXCLL_TOKEN, "MaxCLL", SetMaxCLL },
     { SINGLE_INPUT, MAXFALL_TOKEN, "MaxFALL", SetMaxFALL },
+    { SINGLE_INPUT, MASTER_DISPLAY_TOKEN, "MasterDisplay", SetMasterDisplay },
     { SINGLE_INPUT, TEMPORAL_ID, "TemporalId", SetEnableTemporalId },
     { SINGLE_INPUT, FPSINVPS_TOKEN, "FPSInVPS", SetFpsInVps },
     // Latency
@@ -408,6 +417,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->enableTemporalId                     = 1;
     configPtr->maxCLL                               = 0;
     configPtr->maxFALL                              = 0;
+    configPtr->masteringDisplayColorVolume          = NULL;
 
     configPtr->switchThreadsToRtPriority            = EB_TRUE;
     configPtr->fpsInVps                             = EB_FALSE;

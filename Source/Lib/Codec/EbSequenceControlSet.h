@@ -125,6 +125,9 @@ typedef struct SequenceControlSet_s
     // Content Light Level sei
     AppContentLightLevelSei_t   contentLightLevel;
 
+    // Mastering Display Color Volume Sei
+    AppMasteringDisplayColorVolumeSei_t   masteringDisplayColorVolume;
+
     // Maximum Decoded Picture Buffer size.
     EB_U32                      maxDpbSize;
     

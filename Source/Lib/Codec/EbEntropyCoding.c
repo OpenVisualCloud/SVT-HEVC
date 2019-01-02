@@ -8639,6 +8639,112 @@ EB_ERRORTYPE EncodeContentLightLevelSEI(
     return return_error;
 }
 
+EB_ERRORTYPE EncodeMasteringDisplayColorVolumeSEI(
+    Bitstream_t             *bitstreamPtr,
+    AppMasteringDisplayColorVolumeSei_t   *masterDisplayPtr,
+    const char* value)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    EB_U32 payloadType = MASTERING_DISPLAY_INFO;
+    EB_U32 payloadSize = 0;
+
+    EB_SCANF(value, "G(%hu,%hu)B(%hu,%hu)R(%hu,%hu)WP(%hu,%hu)L(%u,%u)",
+        &masterDisplayPtr->displayPrimaryX[0], &masterDisplayPtr->displayPrimaryY[0],
+        &masterDisplayPtr->displayPrimaryX[1], &masterDisplayPtr->displayPrimaryY[1],
+        &masterDisplayPtr->displayPrimaryX[2], &masterDisplayPtr->displayPrimaryY[2],
+        &masterDisplayPtr->whitePointX, &masterDisplayPtr->whitePointY,
+        &masterDisplayPtr->maxDisplayMasteringLuminance, &masterDisplayPtr->minDisplayMasteringLuminance);
+
+    OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
+
+    payloadSize = GetMasteringDisplayColorVolumeSEILength();
+
+    CodeNALUnitHeader(
+        outputBitstreamPtr,
+        NAL_UNIT_PREFIX_SEI,
+        0);
+
+    for (; payloadType >= 0xff; payloadType -= 0xff) {
+        OutputBitstreamWrite(
+            outputBitstreamPtr,
+            0xff,
+            8);
+    }
+    OutputBitstreamWrite(
+        outputBitstreamPtr,
+        payloadType,
+        8);
+
+    for (; payloadSize >= 0xff; payloadSize -= 0xff) {
+        OutputBitstreamWrite(
+            outputBitstreamPtr,
+            0xff,
+            8);
+    }
+    OutputBitstreamWrite(
+        outputBitstreamPtr,
+        payloadSize,
+        8);
+
+    // R, G, B Primaries
+    for (int i = 0; i < 3; i++)
+    {
+        WriteCodeCavlc(
+            outputBitstreamPtr,
+            masterDisplayPtr->displayPrimaryX[i],
+            16);
+        WriteCodeCavlc(
+            outputBitstreamPtr,
+            masterDisplayPtr->displayPrimaryY[i],
+            16);
+    }
+
+    // White Point Co-ordinates
+    WriteCodeCavlc(
+        outputBitstreamPtr,
+        masterDisplayPtr->whitePointX,
+        16);
+    WriteCodeCavlc(
+        outputBitstreamPtr,
+        masterDisplayPtr->whitePointY,
+        16);
+
+    // Min & max Luminance
+    WriteCodeCavlc(
+        outputBitstreamPtr,
+        masterDisplayPtr->maxDisplayMasteringLuminance,
+        32);
+    WriteCodeCavlc(
+        outputBitstreamPtr,
+        masterDisplayPtr->minDisplayMasteringLuminance,
+        32);
+
+    if (outputBitstreamPtr->writtenBitsCount % 8 != 0) {
+        // bit_equal_to_one
+        WriteFlagCavlc(
+            outputBitstreamPtr,
+            1);
+
+        while (outputBitstreamPtr->writtenBitsCount % 8 != 0) {
+            // bit_equal_to_zero
+            WriteFlagCavlc(
+                outputBitstreamPtr,
+                0);
+        }
+    }
+
+    // Byte Align the Bitstream
+    OutputBitstreamWrite(
+        outputBitstreamPtr,
+        1,
+        1);
+
+    OutputBitstreamWriteAlignZero(
+        outputBitstreamPtr);
+
+    return return_error;
+}
+
 EB_ERRORTYPE CopyRbspBitstreamToPayload(
 	Bitstream_t *bitstreamPtr,
 	EB_BYTE      outputBuffer,

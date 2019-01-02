@@ -149,6 +149,10 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     EbContentLightLevelCtor(
         &sequenceControlSetPtr->contentLightLevel);
 
+    // Initialize Mastering Color Volume SEI
+    EbMasteringDisplayColorVolumeCtor(
+        &sequenceControlSetPtr->masteringDisplayColorVolume);
+
 	// Initialize LCU params
 	LcuParamsCtor(
 		sequenceControlSetPtr);
@@ -253,6 +257,13 @@ EB_ERRORTYPE CopySequenceControlSet(
         sizeof(AppContentLightLevelSei_t));
 
     writeCount += sizeof(AppContentLightLevelSei_t);
+
+    EB_MEMCPY(
+        &dst->masteringDisplayColorVolume,
+        &src->masteringDisplayColorVolume,
+        sizeof(AppMasteringDisplayColorVolumeSei_t));
+
+    writeCount += sizeof(AppMasteringDisplayColorVolumeSei_t);
 
     EB_MEMCPY(
         &dst->picTimingSei,

@@ -202,6 +202,16 @@ extern "C" {
 
     }AppContentLightLevelSei_t;
 
+    typedef struct AppMasteringDisplayColorVolumeSei_s {
+
+        EB_U16 displayPrimaryX[3];
+        EB_U16 displayPrimaryY[3];
+        EB_U16 whitePointX, whitePointY;
+        EB_U32 maxDisplayMasteringLuminance;
+        EB_U32 minDisplayMasteringLuminance;
+
+    }AppMasteringDisplayColorVolumeSei_t;
+
 
     typedef struct EB_FRAME_RATE_CFG
     {
@@ -309,6 +319,9 @@ extern void EbRecoveryPointSeiCtor(
 extern void EbContentLightLevelCtor(
     AppContentLightLevelSei_t    *contentLightLevelPtr);
 
+extern void EbMasteringDisplayColorVolumeCtor(
+    AppMasteringDisplayColorVolumeSei_t    *masteringDisplayPtr);
+
 extern EB_U32 GetPictureTimingSEILength(
     AppPictureTimingSei_t      *picTimingSeiPtr,
     AppVideoUsabilityInfo_t    *vuiPtr);
@@ -321,6 +334,8 @@ extern EB_U32 GetRecoveryPointSEILength(
     AppRecoveryPoint_t    *recoveryPointSeiPtr);
 
 extern EB_U32 GetContentLightLevelSEILength();
+
+extern EB_U32 GetMasteringDisplayColorVolumeSEILength();
 #ifdef __cplusplus
 }
 #endif

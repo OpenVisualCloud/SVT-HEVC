@@ -185,6 +185,11 @@ extern EB_ERRORTYPE EncodeContentLightLevelSEI(
     Bitstream_t             *bitstreamPtr,
     AppContentLightLevelSei_t   *contentLightLevelPtr);
 
+EB_ERRORTYPE EncodeMasteringDisplayColorVolumeSEI(
+    Bitstream_t             *bitstreamPtr,
+    AppMasteringDisplayColorVolumeSei_t   *masterDisplayPtr,
+    const char*              value);
+
 extern EB_ERRORTYPE CodeEndOfSequenceNalUnit(
     Bitstream_t             *bitstreamPtr);
 

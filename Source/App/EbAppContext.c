@@ -220,6 +220,8 @@ EB_ERRORTYPE CopyConfigurationParameters(
 
     callbackData->ebEncParameters.maxCLL = config->maxCLL;
     callbackData->ebEncParameters.maxFALL = config->maxFALL;
+    if(config->masteringDisplayColorVolume)
+        EB_APP_STRDUP(callbackData->ebEncParameters.masteringDisplayColorVolume, (char*)config->masteringDisplayColorVolume);
 
     return return_error;
 

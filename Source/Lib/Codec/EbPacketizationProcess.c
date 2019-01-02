@@ -185,6 +185,13 @@ void* PacketizationKernel(void *inputPtr)
                     &sequenceControlSetPtr->contentLightLevel);
             }
 
+            if (sequenceControlSetPtr->staticConfig.masteringDisplayColorVolume) {
+                EncodeMasteringDisplayColorVolumeSEI(
+                    pictureControlSetPtr->bitstreamPtr,
+                    &sequenceControlSetPtr->masteringDisplayColorVolume,
+                    sequenceControlSetPtr->staticConfig.masteringDisplayColorVolume);
+            }
+
             // Flush the Bitstream
             FlushBitstream(
                 pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);

@@ -2109,6 +2109,9 @@ void CopyApiFromApp(
 
     sequenceControlSetPtr->staticConfig.maxCLL = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxCLL;
     sequenceControlSetPtr->staticConfig.maxFALL = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxFALL;
+    if (pComponentParameterStructure->masteringDisplayColorVolume) {
+        EB_STRDUP(sequenceControlSetPtr->staticConfig.masteringDisplayColorVolume, (char*)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->masteringDisplayColorVolume);
+    }
 
     // if HDR is set videoUsabilityInfo should be set to 1
     if (sequenceControlSetPtr->staticConfig.highDynamicRangeInput == 1) {
@@ -2599,6 +2602,23 @@ static EB_ERRORTYPE VerifySettings(\
 		return_error = EB_ErrorBadParameter;
 	}
 
+	if (config->masteringDisplayColorVolume) {
+		EB_U16 temp[8] = { 0 };
+		EB_U32 temp1[2] = { 0 };
+		if (EB_SCANF(config->masteringDisplayColorVolume,
+			"G(%hu,%hu)B(%hu,%hu)R(%hu,%hu)WP(%hu,%hu)L(%u,%u)",
+			&temp[0], &temp[1], &temp[2], &temp[3], &temp[4],
+			&temp[5], &temp[6], &temp[7], &temp1[0], &temp1[1]) != 10) {
+			SVT_LOG("Error Instance %u: Error parsing MasterDisplay info. Make sure its passed in the format \"G(%%hu,%%hu)B(%%hu,%%hu)R(%%hu,%%hu)WP(%%hu,%%hu)L(%%u,%%u)\" \n", channelNumber);
+			return_error = EB_ErrorBadParameter;
+		}
+	}
+
+	if (config->masteringDisplayColorVolume && !config->highDynamicRangeInput) {
+		SVT_LOG("Error Instance %u: MasterDisplay should be used only with high dynamic range input; set highDynamicRangeInput to 1\n", channelNumber);
+		return_error = EB_ErrorBadParameter;
+	}
+
  	if (config->enableTemporalId > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid TemporalId. TemporalId must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
@@ -2755,6 +2775,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     //SEI
     configPtr->maxCLL = 0;
     configPtr->maxFALL = 0;
+    configPtr->masteringDisplayColorVolume = NULL;
 
     return return_error;
 }
