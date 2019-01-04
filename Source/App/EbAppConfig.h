@@ -327,36 +327,13 @@ typedef struct EbConfig_s
      ****************************************/
     EB_BOOL                useDefaultMeHme;
     EB_BOOL                enableHmeFlag;
-    EB_BOOL                enableHmeLevel0Flag;
-    EB_BOOL                enableHmeLevel1Flag;
-    EB_BOOL                enableHmeLevel2Flag;
 
     /****************************************
      * ME Parameters
      ****************************************/
     EB_U32                 searchAreaWidth;
     EB_U32                 searchAreaHeight;
-
-    /****************************************
-     * HME Parameters
-     ****************************************/
-    EB_U32                 numberHmeSearchRegionInWidth ;
-    EB_U32                 numberHmeSearchRegionInHeight;
-    EB_U32                 hmeLevel0TotalSearchAreaWidth;
-    EB_U32                 hmeLevel0TotalSearchAreaHeight;
-    EB_U32                 hmeLevel0ColumnIndex;
-    EB_U32                 hmeLevel0RowIndex;
-    EB_U32                 hmeLevel1ColumnIndex;
-    EB_U32                 hmeLevel1RowIndex;
-    EB_U32                 hmeLevel2ColumnIndex;
-    EB_U32                 hmeLevel2RowIndex;
-    EB_U32                 hmeLevel0SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    EB_U32                 hmeLevel0SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    EB_U32                 hmeLevel1SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    EB_U32                 hmeLevel1SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    EB_U32                 hmeLevel2SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    EB_U32                 hmeLevel2SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-
+    
     /****************************************
      * MD Parameters
      ****************************************/

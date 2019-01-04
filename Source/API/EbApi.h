@@ -171,25 +171,10 @@ typedef struct EB_H265_ENC_CONFIGURATION
     // Motion Estimation Tools
     unsigned char             useDefaultMeHme;
     unsigned char             enableHmeFlag;
-    unsigned char             enableHmeLevel0Flag;
-    unsigned char             enableHmeLevel1Flag;
-    unsigned char             enableHmeLevel2Flag;
 
     // ME Parameters
     unsigned int              searchAreaWidth;
     unsigned int              searchAreaHeight;
-
-    // HME Parameters
-    unsigned int              numberHmeSearchRegionInWidth;
-    unsigned int              numberHmeSearchRegionInHeight;
-    unsigned int              hmeLevel0TotalSearchAreaWidth;
-    unsigned int              hmeLevel0TotalSearchAreaHeight;
-    unsigned int              hmeLevel0SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    unsigned int              hmeLevel0SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    unsigned int              hmeLevel1SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    unsigned int              hmeLevel1SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    unsigned int              hmeLevel2SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    unsigned int              hmeLevel2SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
 
     // MD Parameters
     unsigned char             constrainedIntra;
