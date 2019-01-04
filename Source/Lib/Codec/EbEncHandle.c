@@ -684,11 +684,11 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     /************************************
     * Plateform detection
     ************************************/
-    if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == 1) {
+    if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == EB_ASM_AUTO) {
         ASM_TYPES = GetCpuAsmType(); // Use highest assembly
     }
-    else if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == 0) {
-        ASM_TYPES = 0; // Use C_only
+    else if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == EB_ASM_C) {
+        ASM_TYPES = EB_ASM_C; // Use C_only
     }
 
     /************************************
