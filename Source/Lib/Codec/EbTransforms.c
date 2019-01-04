@@ -2660,8 +2660,10 @@ void DecoupledQuantizeInvQuantizeLoops(
     EB_U64 coeffBitsLong = 0;
 
     EB_S32 rCoeffTmp, coeffTemp2;
+	EB_U64 rdoqBits_start = 0;
+	EB_BOOL first_non_zero_coef_done = EB_FALSE;
 
-    if (useRdoType == EB_RDOQ) {
+    if (useRdoType == EB_RDOQ || useRdoType == EB_LIGHT) {
 
         coeffLocation = (areaSize - 1) + ((areaSize - 1) * coeffStride);
 
@@ -2701,23 +2703,49 @@ void DecoupledQuantizeInvQuantizeLoops(
                         *nonzerocoeff -= (quantCoeff[coeffLocation] == 0);
 
                         coeffBitsLong = 0;
-                        if (*nonzerocoeff) {
-                            EstimateQuantizedCoefficients[1][(ASM_TYPES & PREAVX2_MASK) && 1](
-                                CabacCost,
-                                cabacEncodeCtxPtr,
-                                areaSize,
-                                type,
-                                intraLumaMode,
-                                intraChromaMode,
-                                quantCoeff,
-                                coeffStride,
-                                componentType,
-                                *nonzerocoeff,
-                                &coeffBitsLong);
-                        }
-                        rdoqBits[iteration] = coeffBitsLong;
 
+						if (useRdoType == EB_LIGHT) {
+							if (*nonzerocoeff) {
+								if (!first_non_zero_coef_done) {
+									first_non_zero_coef_done = EB_TRUE;
 
+									EstimateQuantizedCoefficients[1][(ASM_TYPES & PREAVX2_MASK) && 1](
+										CabacCost,
+										cabacEncodeCtxPtr,
+										areaSize,
+										type,
+										intraLumaMode,
+										intraChromaMode,
+										quantCoeff,
+										coeffStride,
+										componentType,
+										*nonzerocoeff,
+										&coeffBitsLong);
+									rdoqBits_start = coeffBitsLong;
+								}
+								else {
+									coeffBitsLong = rdoqBits_start + ((rdoqBits_start * iteration * 4) / 1000);
+								}
+							}
+							rdoqBits[iteration] = coeffBitsLong;
+						}
+						else {
+							if (*nonzerocoeff) {
+								EstimateQuantizedCoefficients[1][(ASM_TYPES & PREAVX2_MASK) && 1](
+									CabacCost,
+									cabacEncodeCtxPtr,
+									areaSize,
+									type,
+									intraLumaMode,
+									intraChromaMode,
+									quantCoeff,
+									coeffStride,
+									componentType,
+									*nonzerocoeff,
+									&coeffBitsLong);
+							}
+							rdoqBits[iteration] = coeffBitsLong;
+						}
 
                         EB_U32 shift = 2 * (7 - Log2f(areaSize));
 
@@ -2725,7 +2753,6 @@ void DecoupledQuantizeInvQuantizeLoops(
 
 
                         if (componentType == COMPONENT_CHROMA) {
-
                             if (temporalLayerIndex == 0) {
                                 rdoqError[iteration] = (((rdoqError[iteration] * ChromaWeightFactorRaBase[qp]) + CHROMA_WEIGHT_OFFSET) >> CHROMA_WEIGHT_SHIFT);
                             }
@@ -2739,34 +2766,28 @@ void DecoupledQuantizeInvQuantizeLoops(
                             rdoqCost[iteration] = ((rdoqError[iteration]) << COST_PRECISION) + (((lambda * rdoqBits[iteration]) + MD_OFFSET) >> MD_SHIFT);
                         }
                         else {
-
                             rdoqCost[iteration] = ((rdoqError[iteration]) << COST_PRECISION) + (((lambda * rdoqBits[iteration]) + MD_OFFSET) >> MD_SHIFT);
                         }
 
                         if (rdoqCost[iteration] < bestCost) {
-
                             // Add local bit counter to global bit counter
                             bestCost = rdoqCost[iteration];
 
                             bestQuantCoeff = quantCoeff[coeffLocation];
                             bestNonZeroCoeff = (EB_S16)*nonzerocoeff;
-
-
                         }
-
 
                         iteration++;
                     }
+
                     quantCoeff[coeffLocation] = bestQuantCoeff;
                     *nonzerocoeff = bestNonZeroCoeff;
-
                 }
-                --coeffLocation;
 
+                --coeffLocation;
             }
 
             coeffLocation -= (coeffStride - areaSize);
-
         }
     }
     else

@@ -17,6 +17,7 @@
 #include "EbModeDecisionConfiguration.h"
 #include "EbLambdaRateTables.h"
 #include "EbReferenceObject.h"
+#include "EbRateControlProcess.h"
 
 // Shooting states
 #define UNDER_SHOOTING                        0
@@ -109,7 +110,8 @@ static const EB_U8 AdpLuminosityChangeThArray[MAX_HIERARCHICAL_LEVEL][MAX_TEMPOR
 * Compute picture and slice level chroma QP offsets 
 ******************************************************/
 void SetSliceAndPictureChromaQpOffsets(
-	PictureControlSet_t                    *pictureControlSetPtr)
+	PictureControlSet_t                    *pictureControlSetPtr,
+    ModeDecisionConfigurationContext_t     *contextPtr)
 {
 
 	// This is a picture level chroma QP offset and is sent in the PPS
@@ -138,14 +140,31 @@ void SetSliceAndPictureChromaQpOffsets(
 
 	}
 	else{
-		if (pictureControlSetPtr->temporalLayerIndex == 1){
-			pictureControlSetPtr->sliceCbQpOffset = 2;
-			pictureControlSetPtr->sliceCrQpOffset = 2;
-		}
-		else{
-			pictureControlSetPtr->sliceCbQpOffset = 0;
-			pictureControlSetPtr->sliceCrQpOffset = 0;
-		}
+
+        if (contextPtr->chromaQpOffsetLevel == 0) {
+
+            if (pictureControlSetPtr->temporalLayerIndex == 1) {
+                pictureControlSetPtr->sliceCbQpOffset = 2;
+                pictureControlSetPtr->sliceCrQpOffset = 2;
+            }
+            else {
+                pictureControlSetPtr->sliceCbQpOffset = 0;
+                pictureControlSetPtr->sliceCrQpOffset = 0;
+            }
+        }
+        else {
+
+            int maxQpOffset = 3;
+            if (pictureControlSetPtr->sliceType == EB_I_SLICE) {
+                pictureControlSetPtr->sliceCbQpOffset = -maxQpOffset;
+                pictureControlSetPtr->sliceCrQpOffset = -maxQpOffset;
+            }
+            else {
+                pictureControlSetPtr->sliceCbQpOffset = CLIP3(-12, 12, (int)MOD_QP_OFFSET_LAYER_ARRAY[pictureControlSetPtr->ParentPcsPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex] - maxQpOffset);
+                pictureControlSetPtr->sliceCrQpOffset = CLIP3(-12, 12, (int)MOD_QP_OFFSET_LAYER_ARRAY[pictureControlSetPtr->ParentPcsPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex] - maxQpOffset);
+            }
+
+        }
 	}
 
 }
@@ -1376,42 +1395,39 @@ void SetTargetBudgetOq(
 	PictureControlSet_t                 *pictureControlSetPtr,
 	ModeDecisionConfigurationContext_t  *contextPtr)
 {
-
 	EB_U32 budget;
     
-    if (contextPtr->adpLevel <= ENC_MODE_4) {
+	if (contextPtr->adpLevel <= ENC_MODE_3) {
 		if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_1080i_RANGE) {
 			if (pictureControlSetPtr->temporalLayerIndex == 0)
 				budget = pictureControlSetPtr->lcuTotalCount * FULL_SEARCH_COST;
 			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
 				budget = (pictureControlSetPtr->ParentPcsPtr->isPan || pictureControlSetPtr->ParentPcsPtr->isTilt) ?
-                    pictureControlSetPtr->lcuTotalCount * U_152 :
-                    pictureControlSetPtr->lcuTotalCount * U_150;
+				pictureControlSetPtr->lcuTotalCount * U_152 :
+				pictureControlSetPtr->lcuTotalCount * U_150;
 			else
-                budget = (pictureControlSetPtr->ParentPcsPtr->isPan || pictureControlSetPtr->ParentPcsPtr->isTilt) ?
-                    pictureControlSetPtr->lcuTotalCount * U_152 :
-                    pictureControlSetPtr->lcuTotalCount * U_145;
-        }
-        else if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_1080p_RANGE) {
-            if (pictureControlSetPtr->temporalLayerIndex == 0)
-                budget = pictureControlSetPtr->lcuTotalCount * FULL_SEARCH_COST;
-            else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
-                budget = pictureControlSetPtr->lcuTotalCount * AVC_COST;
-            else
-                budget = pictureControlSetPtr->lcuTotalCount * U_134;
-        }
-        else {
-
-            if (pictureControlSetPtr->temporalLayerIndex == 0)
-                budget = pictureControlSetPtr->lcuTotalCount * BDP_COST;
-            else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
-                budget = pictureControlSetPtr->lcuTotalCount * OPEN_LOOP_COST;
-            else
-                budget = pictureControlSetPtr->lcuTotalCount * U_109;
-
-        }
-    }
-    else if (contextPtr->adpLevel == ENC_MODE_5) {
+				budget = (pictureControlSetPtr->ParentPcsPtr->isPan || pictureControlSetPtr->ParentPcsPtr->isTilt) ?
+				pictureControlSetPtr->lcuTotalCount * U_152 :
+				pictureControlSetPtr->lcuTotalCount * U_145;
+		}
+		else if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_1080p_RANGE) {
+			if (pictureControlSetPtr->temporalLayerIndex == 0)
+				budget = pictureControlSetPtr->lcuTotalCount * FULL_SEARCH_COST;
+			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
+				budget = pictureControlSetPtr->lcuTotalCount * AVC_COST;
+			else
+				budget = pictureControlSetPtr->lcuTotalCount * U_134;
+		}
+		else {
+			if (pictureControlSetPtr->temporalLayerIndex == 0)
+				budget = pictureControlSetPtr->lcuTotalCount * BDP_COST;
+			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
+				budget = pictureControlSetPtr->lcuTotalCount * OPEN_LOOP_COST;
+			else
+				budget = pictureControlSetPtr->lcuTotalCount * U_109;
+		}
+	}
+    else if (contextPtr->adpLevel <= ENC_MODE_5) {
         if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_1080i_RANGE) {
             if (pictureControlSetPtr->temporalLayerIndex == 0)
                 budget = pictureControlSetPtr->lcuTotalCount * FULL_SEARCH_COST;
@@ -1441,7 +1457,7 @@ void SetTargetBudgetOq(
                 budget = pictureControlSetPtr->lcuTotalCount * U_121;
         }
 	}
-    else if (contextPtr->adpLevel <= ENC_MODE_8) {
+	else if (contextPtr->adpLevel <= ENC_MODE_7) {
 		if (pictureControlSetPtr->temporalLayerIndex == 0)
 			budget = pictureControlSetPtr->lcuTotalCount * BDP_COST;
 		else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
@@ -1449,33 +1465,121 @@ void SetTargetBudgetOq(
 		else
 			budget = pictureControlSetPtr->lcuTotalCount * U_109;
 	}
+    else if (contextPtr->adpLevel <= ENC_MODE_8) {
+		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+			if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0)
+				budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+				pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_127 :
+				(contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+				pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_125 :
+				pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_121;
+			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag)
+				budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+				pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * OPEN_LOOP_COST :
+				(contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+				pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+				pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
+			else
+				budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+				pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+				pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
+		}
+		else {
+			if (pictureControlSetPtr->temporalLayerIndex == 0)
+				budget = pictureControlSetPtr->lcuTotalCount * BDP_COST;
+			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
+				budget = pictureControlSetPtr->lcuTotalCount * OPEN_LOOP_COST;
+			else
+				budget = pictureControlSetPtr->lcuTotalCount * U_109;
+		}
+	}
     else {
-        if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_1080i_RANGE) {
-            if (pictureControlSetPtr->temporalLayerIndex == 0)
-                budget = pictureControlSetPtr->lcuTotalCount * BDP_COST;
-            else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
-                budget = pictureControlSetPtr->lcuTotalCount * OPEN_LOOP_COST;
-            else
-                budget = pictureControlSetPtr->lcuTotalCount * LIGHT_OPEN_LOOP_COST;
-        }
-        else if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_1080p_RANGE) {
-            if (pictureControlSetPtr->temporalLayerIndex == 0)
-                budget = pictureControlSetPtr->lcuTotalCount * BDP_COST;
-            else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
-                budget = pictureControlSetPtr->lcuTotalCount * OPEN_LOOP_COST;
-            else
-                budget = pictureControlSetPtr->lcuTotalCount * U_107;
-        }
-        else {
-            if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0)
-                budget = pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_127;
-            else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
-                budget = pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * OPEN_LOOP_COST;
-            else
-                budget = pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_107;
-
-        }
+		if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0)
+			budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_127 :
+			(contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_125 :
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_121;
+		else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag)
+			budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * OPEN_LOOP_COST :
+			(contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
+		else
+			budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
     }
+
+	contextPtr->budget = budget;
+}
+
+/******************************************************
+* Set the target budget
+Input   : cost per depth
+Output  : budget per picture
+******************************************************/
+
+void SetTargetBudgetVmaf(
+	SequenceControlSet_t                *sequenceControlSetPtr,
+	PictureControlSet_t                 *pictureControlSetPtr,
+	ModeDecisionConfigurationContext_t  *contextPtr)
+{
+	EB_U32 budget;
+
+	if (contextPtr->adpLevel <= ENC_MODE_3) {
+		if (pictureControlSetPtr->temporalLayerIndex == 0)
+			budget = pictureControlSetPtr->lcuTotalCount * FULL_SEARCH_COST;
+		else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
+			budget = pictureControlSetPtr->lcuTotalCount * AVC_COST;
+		else
+			budget = pictureControlSetPtr->lcuTotalCount * U_134;
+	}
+	else if (contextPtr->adpLevel <= ENC_MODE_5) {
+		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+			if (pictureControlSetPtr->temporalLayerIndex == 0)
+				budget = pictureControlSetPtr->lcuTotalCount * BDP_COST;
+			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
+				budget = pictureControlSetPtr->lcuTotalCount * OPEN_LOOP_COST;
+			else
+				budget = pictureControlSetPtr->lcuTotalCount * U_109;
+		}
+		else {
+			if (pictureControlSetPtr->temporalLayerIndex == 0)
+				budget = pictureControlSetPtr->lcuTotalCount * FULL_SEARCH_COST;
+			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
+				budget = pictureControlSetPtr->lcuTotalCount * AVC_COST;
+			else
+				budget = pictureControlSetPtr->lcuTotalCount * U_134;
+		}
+	}
+	else if (contextPtr->adpLevel <= ENC_MODE_8) {
+		if (pictureControlSetPtr->temporalLayerIndex == 0)
+			budget = pictureControlSetPtr->lcuTotalCount * BDP_COST;
+		else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
+			budget = pictureControlSetPtr->lcuTotalCount * OPEN_LOOP_COST;
+		else
+			budget = pictureControlSetPtr->lcuTotalCount * U_109;
+	}
+	else {
+		if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0)
+			budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_127 :
+			(contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_125 :
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_121;
+		else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag)
+			budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * OPEN_LOOP_COST :
+			(contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
+		else
+			budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
+	}
 
 	contextPtr->budget = budget;
 }
@@ -2102,6 +2206,12 @@ void DeriveLcuMdMode(
             pictureControlSetPtr,
             contextPtr);
     }
+    else if (sequenceControlSetPtr->staticConfig.tune == TUNE_VMAF) {
+        SetTargetBudgetVmaf(
+            sequenceControlSetPtr,
+            pictureControlSetPtr,
+            contextPtr);
+ 	}
     else {
         SetTargetBudgetOq(
             sequenceControlSetPtr,
@@ -2158,6 +2268,10 @@ EB_ERRORTYPE SignalDerivationModeDecisionConfigKernelSq(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
     contextPtr->adpLevel = pictureControlSetPtr->ParentPcsPtr->encMode;
+    // Derive chroma Qp Offset
+    // 0 : 2 Layer1 0 OW 
+    // 1 : MOD_QP_OFFSET -3
+    contextPtr->chromaQpOffsetLevel = 0;
 
     return return_error;
 }
@@ -2174,10 +2288,35 @@ EB_ERRORTYPE SignalDerivationModeDecisionConfigKernelOq(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
     contextPtr->adpLevel = pictureControlSetPtr->ParentPcsPtr->encMode;
-
+    
+    // Derive chroma Qp Offset
+    // 0 : 2 Layer1 0 OW 
+    // 1 : MOD_QP_OFFSET -3
+    contextPtr->chromaQpOffsetLevel  = 1;
+    
     return return_error;
 }
 
+
+/******************************************************
+* Derive Mode Decision Config Settings for VMAF
+Input   : encoder mode and tune
+Output  : EncDec Kernel signal(s)
+******************************************************/
+EB_ERRORTYPE SignalDerivationModeDecisionConfigKernelVmaf(
+    PictureControlSet_t                    *pictureControlSetPtr,
+    ModeDecisionConfigurationContext_t     *contextPtr) {
+
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+
+    contextPtr->adpLevel        = pictureControlSetPtr->ParentPcsPtr->encMode;
+    // Derive chroma Qp Offset
+    // 0 : 2 Layer1 0 OW 
+    // 1 : MOD_QP_OFFSET -3
+    contextPtr->chromaQpOffsetLevel = 0;
+
+    return return_error;
+}
 
 /******************************************************
  * Mode Decision Configuration Kernel
@@ -2215,6 +2354,11 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
         // Mode Decision Configuration Kernel Signal(s) derivation
         if (sequenceControlSetPtr->staticConfig.tune == TUNE_SQ) {
             SignalDerivationModeDecisionConfigKernelSq(
+                pictureControlSetPtr,
+                contextPtr);
+        }
+        else if (sequenceControlSetPtr->staticConfig.tune == TUNE_VMAF) {
+            SignalDerivationModeDecisionConfigKernelVmaf(
                 pictureControlSetPtr,
                 contextPtr);
         }
@@ -2277,8 +2421,9 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
 			pictureWidthInLcu);
 
 		// Compute picture and slice level chroma QP offsets 
-		SetSliceAndPictureChromaQpOffsets( // HT done 
-			pictureControlSetPtr);
+        SetSliceAndPictureChromaQpOffsets( // HT done 
+            pictureControlSetPtr,
+            contextPtr);
 
 		// Compute Tc, and Beta offsets for a given picture
 		AdaptiveDlfParameterComputation( // HT done 
