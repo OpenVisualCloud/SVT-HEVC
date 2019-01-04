@@ -1626,6 +1626,9 @@ EB_U32 SetParentPcs(EB_H265_ENC_CONFIGURATION*   config)
     fps = fps > 120 ? 120 : fps;
     fps = fps < 24 ? 24 : fps;
 
+    if ((EB_U32)(config->intraPeriodLength) > (fps << 1) && ((config->sourceWidth * config->sourceHeight) < INPUT_SIZE_4K_TH))
+        fps = config->intraPeriodLength;
+
     EB_U32     lowLatencyInput = (config->encMode < 6 || config->speedControlFlag == 1) ? fps :
         (config->encMode < 8) ? fps >> 1 : (EB_U32)((2 << config->hierarchicalLevels) + SCD_LAD);
 
@@ -1635,9 +1638,9 @@ EB_U32 SetParentPcs(EB_H265_ENC_CONFIGURATION*   config)
         normalLatencyInput = (normalLatencyInput * 3) >> 1;
 
     if (config->latencyMode == 0)
-        inputPic = (normalLatencyInput /*+ config->lookAheadDistance*/);
+        inputPic = (normalLatencyInput + config->lookAheadDistance);
     else
-        inputPic = (EB_U32)(lowLatencyInput /*+ config->lookAheadDistance*/);
+        inputPic = (EB_U32)(lowLatencyInput + config->lookAheadDistance);
     
     return inputPic;
 }
@@ -1656,7 +1659,7 @@ void LoadDefaultBufferConfigurationSettings(
 
     unsigned int coreCount = GetNumProcessors();
 
-    sequenceControlSetPtr->inputOutputBufferFifoInitCount = inputPic + sequenceControlSetPtr->staticConfig.lookAheadDistance + SCD_LAD;
+    sequenceControlSetPtr->inputOutputBufferFifoInitCount = inputPic + SCD_LAD;
     
     // ME segments
     sequenceControlSetPtr->meSegmentRowCountArray[0] = meSegH;
@@ -2001,7 +2004,7 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.codeVpsSpsPps = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->codeVpsSpsPps;
     sequenceControlSetPtr->staticConfig.codeEosNal = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->codeEosNal;
     
-    if (sequenceControlSetPtr->staticConfig.tune == 1) {
+    if (sequenceControlSetPtr->staticConfig.tune >= 1) {
         sequenceControlSetPtr->staticConfig.bitRateReduction = 0;
         sequenceControlSetPtr->staticConfig.improveSharpness = 0;
     }
@@ -2347,7 +2350,7 @@ static EB_ERRORTYPE VerifySettings(\
             SVT_LOG("Error instance %u: encMode must be [0 - 12] for this resolution\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
         }
-        else if (config->encMode > 10 && config->tune == 1) {
+        else if (config->encMode > 10 && config->tune >= 1) {
             SVT_LOG("Error instance %u: encMode must be [0 - 10] for this resolution\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
         }
@@ -2376,7 +2379,7 @@ static EB_ERRORTYPE VerifySettings(\
         if (config->encMode > MAX_SUPPORTED_MODES_4K_SQ - 1 && config->tune == 0) {
             SVT_LOG("Error instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_4K_SQ-1);
 			return_error = EB_ErrorBadParameter;
-        }else if (config->encMode > MAX_SUPPORTED_MODES_4K_OQ - 1 && config->tune == 1) {
+        }else if (config->encMode > MAX_SUPPORTED_MODES_4K_OQ - 1 && config->tune >= 1) {
             SVT_LOG("Error instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_4K_OQ-1);
 			return_error = EB_ErrorBadParameter;
 		}
@@ -2566,17 +2569,17 @@ static EB_ERRORTYPE VerifySettings(\
 		return_error = EB_ErrorBadParameter;
 	}
     if (config->rateControlMode == 1 && config->tune > 0) {
-        SVT_LOG("Error Instance %u: The rate control is not supported for OQ mode (Tune = 1 )\n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: The rate control is not supported for OQ mode (Tune = 1 ) and VMAF mode (Tune = 2)\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->tune > 0 && config->bitRateReduction == 1){
-        SVT_LOG("Error Instance %u: Bit Rate Reduction is not supported for OQ mode (Tune = 1 )\n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: Bit Rate Reduction is not supported for OQ mode (Tune = 1 ) and VMAF mode (Tune = 2)\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->tune > 0 && config->improveSharpness == 1){
-        SVT_LOG("Error Instance %u: Improve sharpness is not supported for OQ mode (Tune = 1 )\n", channelNumber + 1);
+        SVT_LOG("Error Instance %u: Improve sharpness is not supported for OQ mode (Tune = 1 ) and VMAF mode (Tune = 2)\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -2606,8 +2609,8 @@ static EB_ERRORTYPE VerifySettings(\
 		return_error = EB_ErrorBadParameter;
     }
 
-    if (config->tune > 1) {
-        SVT_LOG("Error instance %u : Invalid Tune. Tune must be [0 - 1]\n", channelNumber + 1);
+    if (config->tune > 2) {
+        SVT_LOG("Error instance %u : Invalid Tune. Tune must be [0 - 2]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 	if (config->bitRateReduction > 1) {
@@ -2685,6 +2688,11 @@ static EB_ERRORTYPE VerifySettings(\
         SVT_LOG("Error Instance %u: Invalid Speed Control flag [0 - 1]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
+
+    if (config->latencyMode > 1) {
+        SVT_LOG("Error Instance %u: Invalid Latency Mode flag [0 - 1]\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }    
 
     if (((EB_S32)(config->asmType) < 0) || ((EB_S32)(config->asmType) > 1)){
         SVT_LOG("Error Instance %u: Invalid asm type value [0: C Only, 1: Auto] .\n", channelNumber + 1);

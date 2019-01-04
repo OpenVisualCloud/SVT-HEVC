@@ -221,6 +221,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.level = config->level;
     callbackData->ebEncParameters.injectorFrameRate = config->injectorFrameRate;
     callbackData->ebEncParameters.speedControlFlag = config->speedControlFlag;
+    callbackData->ebEncParameters.latencyMode = config->latencyMode;
     callbackData->ebEncParameters.asmType = config->asmType;
     callbackData->ebEncParameters.reconEnabled = config->reconFile ? EB_TRUE : EB_FALSE;
     callbackData->ebEncParameters.codeVpsSpsPps = 1;

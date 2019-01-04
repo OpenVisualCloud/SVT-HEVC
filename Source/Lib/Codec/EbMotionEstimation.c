@@ -2970,7 +2970,10 @@ EB_ERRORTYPE CheckZeroZeroCenter(
 	EB_S16       originX            = (EB_S16)lcuOriginX;
 	EB_S16       originY            = (EB_S16)lcuOriginY;
     EB_U32       subsampleSad       = 1;
-
+#if HME_ENHANCED_CENTER_SEARCH
+	EB_S16                  padWidth = (EB_S16)MAX_LCU_SIZE - 1;
+	EB_S16                  padHeight = (EB_S16)MAX_LCU_SIZE - 1;
+#endif
 	searchRegionIndex = (EB_S16)refPicPtr->originX + originX +
 		((EB_S16)refPicPtr->originY + originY) * refPicPtr->strideY;
 
@@ -2983,7 +2986,26 @@ EB_ERRORTYPE CheckZeroZeroCenter(
 		lcuWidth);
 
     zeroMvSad = zeroMvSad << subsampleSad;
-
+#if HME_ENHANCED_CENTER_SEARCH
+	// FIX
+	// Correct the left edge of the Search Area if it is not on the reference Picture
+	*xSearchCenter = ((originX + *xSearchCenter) < -padWidth) ?
+		-padWidth - originX :
+		*xSearchCenter;
+	// Correct the right edge of the Search Area if its not on the reference Picture
+	*xSearchCenter = ((originX + *xSearchCenter) > (EB_S16)refPicPtr->width - 1) ?
+		*xSearchCenter - ((originX + *xSearchCenter) - ((EB_S16)refPicPtr->width - 1)) :
+		*xSearchCenter;
+	// Correct the top edge of the Search Area if it is not on the reference Picture
+	*ySearchCenter = ((originY + *ySearchCenter) < -padHeight) ?
+		-padHeight - originY :
+		*ySearchCenter;
+	// Correct the bottom edge of the Search Area if its not on the reference Picture
+	*ySearchCenter = ((originY + *ySearchCenter) > (EB_S16)refPicPtr->height - 1) ?
+		*ySearchCenter - ((originY + *ySearchCenter) - ((EB_S16)refPicPtr->height - 1)) :
+		*ySearchCenter;
+	///
+#endif
 	zeroMvCost = zeroMvSad << COST_PRECISION;
 	searchRegionIndex = (EB_S16)(refPicPtr->originX + originX) + *xSearchCenter +
 		((EB_S16)(refPicPtr->originY + originY) + *ySearchCenter) * refPicPtr->strideY;
@@ -3343,6 +3365,308 @@ EB_ERRORTYPE SuPelEnable(
 	return return_error;
 }
 
+static void TestSearchAreaBounds(
+    EbPictureBufferDesc_t       *refPicPtr,
+    MeContext_t					*contextPtr,
+    EB_S16                      *xsc,
+    EB_S16                      *ysc,
+    EB_U32                       listIndex,
+    EB_S16                       originX,
+    EB_S16                       originY,
+    EB_U32                       lcuWidth,
+    EB_U32                       lcuHeight)
+{
+    // Search for (-srx/2, 0),  (+srx/2, 0),  (0, -sry/2), (0, +sry/2),
+    /*
+    |------------C-------------|
+    |--------------------------|
+    |--------------------------|
+    A            0             B
+    |--------------------------|
+    |--------------------------|
+    |------------D-------------|
+    */
+    EB_U32 searchRegionIndex;
+    EB_S16 xSearchCenter = *xsc;
+    EB_S16 ySearchCenter = *ysc;
+    EB_U64 bestCost;
+    EB_U64 directMvCost = 0xFFFFFFFFFFFFF;
+    EB_U8  sparce_scale = 1;
+    EB_S16 padWidth = (EB_S16)MAX_LCU_SIZE - 1;
+    EB_S16 padHeight = (EB_S16)MAX_LCU_SIZE - 1;
+    // O pos
+
+    searchRegionIndex = (EB_S16)refPicPtr->originX + originX +
+        ((EB_S16)refPicPtr->originY + originY) * refPicPtr->strideY;
+
+    EB_U32 subsampleSad = 1;
+    EB_U64 zeroMvSad = NxMSadKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][lcuWidth >> 3](
+        contextPtr->lcuSrcPtr,
+        contextPtr->lcuSrcStride << subsampleSad,
+        &(refPicPtr->bufferY[searchRegionIndex]),
+        refPicPtr->strideY << subsampleSad,
+        lcuHeight >> subsampleSad,
+        lcuWidth);
+
+    zeroMvSad = zeroMvSad << subsampleSad;
+
+    EB_U64 zeroMvCost = zeroMvSad << COST_PRECISION;
+
+    //A pos
+    xSearchCenter = 0 - (contextPtr->hmeLevel0TotalSearchAreaWidth*sparce_scale);
+    ySearchCenter = 0;
+
+    // Correct the left edge of the Search Area if it is not on the reference Picture
+    xSearchCenter = ((originX + xSearchCenter) < -padWidth) ?
+        -padWidth - originX :
+        xSearchCenter;
+    // Correct the right edge of the Search Area if its not on the reference Picture
+    xSearchCenter = ((originX + xSearchCenter) > (EB_S16)refPicPtr->width - 1) ?
+        xSearchCenter - ((originX + xSearchCenter) - ((EB_S16)refPicPtr->width - 1)) :
+        xSearchCenter;
+    // Correct the top edge of the Search Area if it is not on the reference Picture
+    ySearchCenter = ((originY + ySearchCenter) < -padHeight) ?
+        -padHeight - originY :
+        ySearchCenter;
+
+    // Correct the bottom edge of the Search Area if its not on the reference Picture
+    ySearchCenter = ((originY + ySearchCenter) > (EB_S16)refPicPtr->height - 1) ?
+        ySearchCenter - ((originY + ySearchCenter) - ((EB_S16)refPicPtr->height - 1)) :
+        ySearchCenter;
+
+
+    EB_U64 MvASad = NxMSadKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][lcuWidth >> 3](
+        contextPtr->lcuSrcPtr,
+        contextPtr->lcuSrcStride << subsampleSad,
+        &(refPicPtr->bufferY[searchRegionIndex]),
+        refPicPtr->strideY << subsampleSad,
+        lcuHeight >> subsampleSad,
+        lcuWidth);
+
+    MvASad = MvASad << subsampleSad;
+
+    EB_U32 MvAdRate = 0;
+    MeGetMvdFractionBits(
+        ABS(xSearchCenter << 2),
+        ABS(ySearchCenter << 2),
+        contextPtr->mvdBitsArray,
+        &MvAdRate);
+
+    EB_U64 MvACost = (MvASad << COST_PRECISION) + (MD_OFFSET >> MD_SHIFT);
+
+
+    //B pos
+    xSearchCenter = (contextPtr->hmeLevel0TotalSearchAreaWidth*sparce_scale);
+    ySearchCenter = 0;
+    ///////////////// correct
+    // Correct the left edge of the Search Area if it is not on the reference Picture
+    xSearchCenter = ((originX + xSearchCenter) < -padWidth) ?
+        -padWidth - originX :
+        xSearchCenter;
+    // Correct the right edge of the Search Area if its not on the reference Picture
+    xSearchCenter = ((originX + xSearchCenter) > (EB_S16)refPicPtr->width - 1) ?
+        xSearchCenter - ((originX + xSearchCenter) - ((EB_S16)refPicPtr->width - 1)) :
+        xSearchCenter;
+    // Correct the top edge of the Search Area if it is not on the reference Picture
+    ySearchCenter = ((originY + ySearchCenter) < -padHeight) ?
+        -padHeight - originY :
+        ySearchCenter;
+    // Correct the bottom edge of the Search Area if its not on the reference Picture
+    ySearchCenter = ((originY + ySearchCenter) > (EB_S16)refPicPtr->height - 1) ?
+        ySearchCenter - ((originY + ySearchCenter) - ((EB_S16)refPicPtr->height - 1)) :
+        ySearchCenter;
+
+
+    searchRegionIndex = (EB_S16)(refPicPtr->originX + originX) + xSearchCenter +
+        ((EB_S16)(refPicPtr->originY + originY) + ySearchCenter) * refPicPtr->strideY;
+
+    EB_U64 MvBSad = NxMSadKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][lcuWidth >> 3](
+        contextPtr->lcuSrcPtr,
+        contextPtr->lcuSrcStride << subsampleSad,
+        &(refPicPtr->bufferY[searchRegionIndex]),
+        refPicPtr->strideY << subsampleSad,
+        lcuHeight >> subsampleSad,
+        lcuWidth);
+
+    MvBSad = MvBSad << subsampleSad;
+
+
+    EB_U32 MvBdRate = 0;
+    MeGetMvdFractionBits(
+        ABS(xSearchCenter << 2),
+        ABS(ySearchCenter << 2),
+        contextPtr->mvdBitsArray,
+        &MvBdRate);
+
+    EB_U64 MvBCost = (MvBSad << COST_PRECISION) + (MD_OFFSET >> MD_SHIFT);
+    //C pos
+    xSearchCenter = 0;
+    ySearchCenter = 0 - (contextPtr->hmeLevel0TotalSearchAreaHeight * sparce_scale);
+    ///////////////// correct
+    // Correct the left edge of the Search Area if it is not on the reference Picture
+    xSearchCenter = ((originX + xSearchCenter) < -padWidth) ?
+        -padWidth - originX :
+        xSearchCenter;
+
+    // Correct the right edge of the Search Area if its not on the reference Picture
+    xSearchCenter = ((originX + xSearchCenter) > (EB_S16)refPicPtr->width - 1) ?
+        xSearchCenter - ((originX + xSearchCenter) - ((EB_S16)refPicPtr->width - 1)) :
+        xSearchCenter;
+
+    // Correct the top edge of the Search Area if it is not on the reference Picture
+    ySearchCenter = ((originY + ySearchCenter) < -padHeight) ?
+        -padHeight - originY :
+        ySearchCenter;
+
+    // Correct the bottom edge of the Search Area if its not on the reference Picture
+    ySearchCenter = ((originY + ySearchCenter) > (EB_S16)refPicPtr->height - 1) ?
+        ySearchCenter - ((originY + ySearchCenter) - ((EB_S16)refPicPtr->height - 1)) :
+        ySearchCenter;
+
+    searchRegionIndex = (EB_S16)(refPicPtr->originX + originX) + xSearchCenter +
+        ((EB_S16)(refPicPtr->originY + originY) + ySearchCenter) * refPicPtr->strideY;
+
+    EB_U64 MvCSad = NxMSadKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][lcuWidth >> 3](
+        contextPtr->lcuSrcPtr,
+        contextPtr->lcuSrcStride << subsampleSad,
+        &(refPicPtr->bufferY[searchRegionIndex]),
+        refPicPtr->strideY << subsampleSad,
+        lcuHeight >> subsampleSad,
+        lcuWidth);
+
+    MvCSad = MvCSad << subsampleSad;
+
+
+    EB_U32 MvCdRate = 0;
+    MeGetMvdFractionBits(
+        ABS(xSearchCenter << 2),
+        ABS(ySearchCenter << 2),
+        contextPtr->mvdBitsArray,
+        &MvCdRate);
+
+    EB_U64 MvCCost = (MvCSad << COST_PRECISION) + (MD_OFFSET >> MD_SHIFT);
+    //D pos
+    xSearchCenter = 0;
+    ySearchCenter = (contextPtr->hmeLevel0TotalSearchAreaHeight * sparce_scale);
+    // Correct the left edge of the Search Area if it is not on the reference Picture
+    xSearchCenter = ((originX + xSearchCenter) < -padWidth) ?
+        -padWidth - originX :
+        xSearchCenter;
+    // Correct the right edge of the Search Area if its not on the reference Picture
+    xSearchCenter = ((originX + xSearchCenter) > (EB_S16)refPicPtr->width - 1) ?
+        xSearchCenter - ((originX + xSearchCenter) - ((EB_S16)refPicPtr->width - 1)) :
+        xSearchCenter;
+    // Correct the top edge of the Search Area if it is not on the reference Picture
+    ySearchCenter = ((originY + ySearchCenter) < -padHeight) ?
+        -padHeight - originY :
+        ySearchCenter;
+    // Correct the bottom edge of the Search Area if its not on the reference Picture
+    ySearchCenter = ((originY + ySearchCenter) > (EB_S16)refPicPtr->height - 1) ?
+        ySearchCenter - ((originY + ySearchCenter) - ((EB_S16)refPicPtr->height - 1)) :
+        ySearchCenter;
+    searchRegionIndex = (EB_S16)(refPicPtr->originX + originX) + xSearchCenter +
+        ((EB_S16)(refPicPtr->originY + originY) + ySearchCenter) * refPicPtr->strideY;
+    EB_U64 MvDSad = NxMSadKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][lcuWidth >> 3](
+        contextPtr->lcuSrcPtr,
+        contextPtr->lcuSrcStride << subsampleSad,
+        &(refPicPtr->bufferY[searchRegionIndex]),
+        refPicPtr->strideY << subsampleSad,
+        lcuHeight >> subsampleSad,
+        lcuWidth);
+    MvDSad = MvDSad << subsampleSad;
+
+    EB_U32 MvDdRate = 0;
+    MeGetMvdFractionBits(
+        ABS(xSearchCenter << 2),
+        ABS(ySearchCenter << 2),
+        contextPtr->mvdBitsArray,
+        &MvDdRate);
+
+    EB_U64 MvDCost = (MvDSad << COST_PRECISION) + (MD_OFFSET >> MD_SHIFT);
+
+    if (listIndex == 1) {
+
+        xSearchCenter = listIndex ? 0 - (_MVXT(contextPtr->pLcuBestMV[0][0][0]) >> 2) : 0;
+        ySearchCenter = listIndex ? 0 - (_MVYT(contextPtr->pLcuBestMV[0][0][0]) >> 2) : 0;
+        ///////////////// correct
+        // Correct the left edge of the Search Area if it is not on the reference Picture
+        xSearchCenter = ((originX + xSearchCenter) < -padWidth) ?
+            -padWidth - originX :
+            xSearchCenter;
+        // Correct the right edge of the Search Area if its not on the reference Picture
+        xSearchCenter = ((originX + xSearchCenter) > (EB_S16)refPicPtr->width - 1) ?
+            xSearchCenter - ((originX + xSearchCenter) - ((EB_S16)refPicPtr->width - 1)) :
+            xSearchCenter;
+        // Correct the top edge of the Search Area if it is not on the reference Picture
+        ySearchCenter = ((originY + ySearchCenter) < -padHeight) ?
+            -padHeight - originY :
+            ySearchCenter;
+        // Correct the bottom edge of the Search Area if its not on the reference Picture
+        ySearchCenter = ((originY + ySearchCenter) > (EB_S16)refPicPtr->height - 1) ?
+            ySearchCenter - ((originY + ySearchCenter) - ((EB_S16)refPicPtr->height - 1)) :
+            ySearchCenter;
+
+        searchRegionIndex = (EB_S16)(refPicPtr->originX + originX) + xSearchCenter +
+            ((EB_S16)(refPicPtr->originY + originY) + ySearchCenter) * refPicPtr->strideY;
+
+        EB_U64 directMvSad = NxMSadKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][lcuWidth >> 3](
+            contextPtr->lcuSrcPtr,
+            contextPtr->lcuSrcStride << subsampleSad,
+            &(refPicPtr->bufferY[searchRegionIndex]),
+            refPicPtr->strideY << subsampleSad,
+            lcuHeight >> subsampleSad,
+            lcuWidth);
+
+        directMvSad = directMvSad << subsampleSad;
+
+
+        EB_U32 direcMvdRate = 0;
+        MeGetMvdFractionBits(
+            ABS(xSearchCenter << 2),
+            ABS(ySearchCenter << 2),
+            contextPtr->mvdBitsArray,
+            &direcMvdRate);
+
+        directMvCost = (directMvSad << COST_PRECISION) + (MD_OFFSET >> MD_SHIFT);
+    }
+
+    bestCost = MIN(zeroMvCost, MIN(MvACost, MIN(MvBCost, MIN(MvCCost, MIN(MvDCost, directMvCost)))));
+
+    if (bestCost == zeroMvCost) {
+        xSearchCenter = 0;
+        ySearchCenter = 0;
+    }
+    else if (bestCost == MvACost) {
+        xSearchCenter = 0 - (contextPtr->hmeLevel0TotalSearchAreaWidth*sparce_scale);
+        ySearchCenter = 0;
+    }
+    else if (bestCost == MvBCost) {
+        xSearchCenter = (contextPtr->hmeLevel0TotalSearchAreaWidth*sparce_scale);
+        ySearchCenter = 0;
+    }
+    else if (bestCost == MvCCost) {
+        xSearchCenter = 0;
+        ySearchCenter = 0 - (contextPtr->hmeLevel0TotalSearchAreaHeight * sparce_scale);
+    }
+    else if (bestCost == directMvCost) {
+        xSearchCenter = listIndex ? 0 - (_MVXT(contextPtr->pLcuBestMV[0][0][0]) >> 2) : 0;
+        ySearchCenter = listIndex ? 0 - (_MVYT(contextPtr->pLcuBestMV[0][0][0]) >> 2) : 0;
+    }
+    else if (bestCost == MvDCost) {
+        xSearchCenter = 0;
+        ySearchCenter = (contextPtr->hmeLevel0TotalSearchAreaHeight * sparce_scale);
+    }
+
+    else {
+        printf("error no center selected");
+    }
+
+    *xsc = xSearchCenter;
+    *ysc = ySearchCenter;
+
+
+}
+
 /*******************************************
  * MotionEstimateLcu
  *   performs ME (LCU)
@@ -3468,10 +3792,22 @@ EB_ERRORTYPE MotionEstimateLcu(
 			if (pictureControlSetPtr->temporalLayerIndex > 0 || listIndex == 0){
 				// A - The MV center for Tier0 search could be either (0,0), or HME
 				// A - Set HME MV Center
-                
+#if HME_ENHANCED_CENTER_SEARCH // TEST1
+                TestSearchAreaBounds(
+                    refPicPtr,
+                    contextPtr,
+                    &xSearchCenter,
+                    &ySearchCenter,
+                    listIndex,
+                    originX,
+                    originY,
+                    lcuWidth,
+                    lcuHeight);
+
+#else
 				xSearchCenter = 0;
 				ySearchCenter = 0;
-
+#endif
 				// B - NO HME in boundaries
 				// C - Skip HME
 
@@ -3479,13 +3815,20 @@ EB_ERRORTYPE MotionEstimateLcu(
 
 					while (searchRegionNumberInHeight < contextPtr->numberHmeSearchRegionInHeight) {
 						while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
+#if HME_ENHANCED_CENTER_SEARCH 
+							xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter >> 2;
+							yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter >> 2;
 
+							xHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter >> 1;
+							yHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter >> 1;
+
+#else
 							xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter;
 							yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter;
 
 							xHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter;
 							yHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter;
-
+#endif
 							xHmeLevel2SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter;
 							yHmeLevel2SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter;
 
