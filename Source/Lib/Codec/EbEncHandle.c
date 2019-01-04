@@ -2565,10 +2565,6 @@ static EB_ERRORTYPE VerifySettings(\
         SVT_LOG("Error Instance %u: The rate control mode must be [0 - 1] \n", channelNumber + 1);
 		return_error = EB_ErrorBadParameter;
 	}
-    if (config->rateControlMode == 1 && config->tune > 0) {
-        SVT_LOG("Error Instance %u: The rate control is not supported for OQ mode (Tune = 1 ) and VMAF mode (Tune = 2)\n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
-    }
 
     if (config->tune > 0 && config->bitRateReduction == 1){
         SVT_LOG("Error Instance %u: Bit Rate Reduction is not supported for OQ mode (Tune = 1 ) and VMAF mode (Tune = 2)\n", channelNumber + 1);
