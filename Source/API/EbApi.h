@@ -51,6 +51,7 @@ extern "C" {
 
         // pic private data
         void*    pAppPrivate;
+        void*    wrapperPtr;
 
         // pic timing param
         uint32_t nTickCount;
@@ -277,14 +278,13 @@ extern "C" {
     EB_API EB_ERRORTYPE EbH265GetPacket(
         EB_COMPONENTTYPE      *h265EncComponent,
         EB_BUFFERHEADERTYPE  **pBuffer,
-        uint8_t          picSendDone,
-        void                 **wrapperRelease);
+        uint8_t          picSendDone);
 
     /***************************************************/
     /******* STEP 5-1: Release output buffer ***********/
     /***************************************************/
     EB_API void EbH265ReleaseOutBuffer(
-        void                 *wrapperRelease);
+        EB_BUFFERHEADERTYPE  **pBuffer);
 
     /***************************************************/
     /*** OPTIONAL: Get output reconstructed picture ****/

@@ -146,8 +146,8 @@ Groups of Pictures (GOP) units.
 /** Assembly Types
 */
 typedef enum EB_ASM {
-    EB_ASM_PRE_AVX2,
-    EB_ASM_POST_AVX2,
+    EB_ASM_C,
+    EB_ASM_AUTO,
     EB_ASM_TYPE_TOTAL,
     EB_ASM_TYPE_INVALID = ~0
 } EB_ASM;

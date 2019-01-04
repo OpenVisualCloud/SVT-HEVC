@@ -1252,7 +1252,6 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
 {
     APPPORTACTIVETYPE       *portState = &appCallBack->outputStreamPortActive;
     EB_BUFFERHEADERTYPE     *headerPtr;
-    void                    *wrapperRelease = NULL;
     EB_COMPONENTTYPE        *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
     APPEXITCONDITIONTYPE    return_value = APP_ExitConditionNone;
     EB_ERRORTYPE            stream_status = EB_ErrorNone;
@@ -1279,7 +1278,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     double                duration        = 0.0;
 
     // non-blocking call until all input frames are sent
-    stream_status = EbH265GetPacket(componentHandle, &headerPtr, picSendDone, &wrapperRelease);
+    stream_status = EbH265GetPacket(componentHandle, &headerPtr, picSendDone);
 
     if (stream_status == EB_ErrorMax) {
         printf("\n");
@@ -1339,7 +1338,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
 
         // Release the output buffer
         if (stream_status != EB_NoErrorEmptyQueue)
-            EbH265ReleaseOutBuffer(wrapperRelease);
+            EbH265ReleaseOutBuffer(&headerPtr);
 
 #if DEADLOCK_DEBUG
         ++frameCount;

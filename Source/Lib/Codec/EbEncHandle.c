@@ -3346,8 +3346,7 @@ __attribute__((visibility("default")))
 EB_API EB_ERRORTYPE EbH265GetPacket(
     EB_COMPONENTTYPE      *h265EncComponent,
     EB_BUFFERHEADERTYPE  **pBuffer,
-    unsigned char          picSendDone,
-    void                 **wrapperRelease)
+    unsigned char          picSendDone)
 {
     EB_ERRORTYPE           return_error = EB_ErrorNone;
     EbEncHandle_t          *pEncCompData = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
@@ -3374,7 +3373,7 @@ EB_API EB_ERRORTYPE EbH265GetPacket(
         *pBuffer = packet;
 
         // save the wrapper pointer for the release
-        *wrapperRelease = (void*)ebWrapperPtr;
+        (*pBuffer)->wrapperPtr = (void*)ebWrapperPtr;
     }
     else {
         return_error = EB_NoErrorEmptyQueue;
@@ -3387,11 +3386,11 @@ EB_API EB_ERRORTYPE EbH265GetPacket(
 __attribute__((visibility("default")))
 #endif
 EB_API void EbH265ReleaseOutBuffer(
-    void                 *wrapperRelease)
+    EB_BUFFERHEADERTYPE  **pBuffer)
 {
-    if (wrapperRelease)
+    if ((*pBuffer)->wrapperPtr)
         // Release out put buffer back into the pool
-        EbReleaseObject((EbObjectWrapper_t  *)wrapperRelease);
+        EbReleaseObject((EbObjectWrapper_t  *)(*pBuffer)->wrapperPtr);
 
     return;
 }
