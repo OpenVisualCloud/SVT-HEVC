@@ -1435,6 +1435,13 @@ void ProductMpmCandidatesInjection(
 	EB_U32			         mostProbableModeCount;
     EB_BOOL                  mpmPresentFlag;
 
+    const EB_BOOL            cuSize = contextPtr->cuStats->size;
+    const EB_BOOL            isLeftCu = contextPtr->cuStats->originX == 0;
+    const EB_BOOL            isTopCu = contextPtr->cuStats->originY == 0;
+    const EB_BOOL            limitIntra = contextPtr->limitIntra;
+    const EB_U8              limitLeftMode = cuSize < 32 ? EB_INTRA_MODE_27 : EB_INTRA_VERTICAL;
+    const EB_U8              limitTopMode = cuSize < 32 ? EB_INTRA_MODE_9 : EB_INTRA_HORIZONTAL;
+
     ModeDecisionCandidate_t	*candidateArray     = contextPtr->fastCandidateArray;
 
     if (mpmSearch && cuDepth != 0){
@@ -1451,6 +1458,10 @@ void ProductMpmCandidatesInjection(
 
         while (mostProbableModeCount < mpmSearchCandidate) {
 
+            if (!(limitIntra == 0 || (isLeftCu == 0 && isTopCu == 0))) {
+                ++mostProbableModeCount;
+                continue;
+            }
             mpmPresentFlag = EB_FALSE;
             for (candidateIndex = 0; candidateIndex < fastLoopCandidate; ++candidateIndex) {
 
@@ -1660,13 +1671,17 @@ EB_ERRORTYPE ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
 
 	// Mark MPM candidates, and update the number of full recon - MPM candidates are going to get pushed to the full, 
 	// however they still need to be tested in the fast loop where the predicted, and the fast rate are going to get computed
-	ProductMpmCandidatesInjection(
-		contextPtr,
-		&canTotalCnt,
-		bufferTotalCountPtr,
-		mpmSearch,
-		mpmSearchCandidate,
-		mostProbableModeArray);
+    const EB_BOOL  isLeftCu = contextPtr->cuStats->originX == 0;
+    const EB_BOOL  isTopCu = contextPtr->cuStats->originY == 0;
+    EB_BOOL limitIntraLoptLeft = contextPtr->limitIntra == EB_TRUE && isLeftCu  &&  isTopCu;
+    if (limitIntraLoptLeft == 0)
+	    ProductMpmCandidatesInjection(
+		    contextPtr,
+		    &canTotalCnt,
+		    bufferTotalCountPtr,
+		    mpmSearch,
+		    mpmSearchCandidate,
+		    mostProbableModeArray);
 
 
 	*candidateTotalCountPtr = canTotalCnt;
