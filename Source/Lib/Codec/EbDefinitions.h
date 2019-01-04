@@ -11,6 +11,9 @@
 extern "C" {
 #endif
 
+// Internal Marcos
+#define NON_AVX512_SUPPORT
+
 #ifdef __cplusplus
 #define EB_EXTERN extern "C"
 #else
@@ -138,7 +141,18 @@ Groups of Pictures (GOP) units.
 	typedef int64_t             EB_S64;
 
 #endif // _WIN32
+  
+/** Assembly Types
+*/
+typedef enum EB_ASM {
+    EB_ASM_PRE_AVX2,
+    EB_ASM_POST_AVX2,
+    EB_ASM_TYPE_TOTAL,
+    EB_ASM_TYPE_INVALID = ~0
+} EB_ASM;
+
 #define HME_ENHANCED_CENTER_SEARCH     0 
+
 /** The EB_BOOL type is intended to be used to represent a true or a false
 value when passing parameters to and from the svt API.  The
 EB_BOOL is a 32 bit quantity and is aligned on a 32 bit word boundary.
@@ -349,8 +363,9 @@ typedef EB_U8 EB_MODETYPE;
 
 #define PREAVX2_MASK    1
 #define AVX2_MASK       2
+#ifndef NON_AVX512_SUPPORT
 #define AVX512_MASK     4
-
+#endif
 #define ASM_AVX2_BIT    3
 
 /** INTRA_4x4 offsets
@@ -566,7 +581,6 @@ extern    EB_U32                   libMutexCount;
 #define DEADLOCK_DEBUG                   0
 #define DISPLAY_MEMORY                   0  // Display Total Memory at the end of the memory allocations
 #define LIB_PRINTF_ENABLE                1
-
 #if LIB_PRINTF_ENABLE
 #define SVT_LOG printf
 #else

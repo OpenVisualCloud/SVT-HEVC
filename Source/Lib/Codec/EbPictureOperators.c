@@ -521,8 +521,11 @@ void UnPack2D(
     EB_U32       height
     )
 {
-    
+#ifndef NON_AVX512_SUPPORT
     UnPack2D_funcPtrArray_16Bit[((width & 3) == 0) && ((height & 1)== 0)][(ASM_TYPES & AVX512_MASK) && 1](
+#else
+    UnPack2D_funcPtrArray_16Bit[((width & 3) == 0) && ((height & 1) == 0)][(ASM_TYPES & AVX2_MASK) && 1](
+#endif
         in16BitBuffer,
         inStride,
         out8BitBuffer,
@@ -568,7 +571,7 @@ void CompressedPackLcu(
 )
 {
 
-    CompressedPack_funcPtrArray[((width == 64 || width == 32) ? ((ASM_TYPES & AVX2_MASK) && 1) : EB_ASM_NON_AVX2)](
+    CompressedPack_funcPtrArray[((width == 64 || width == 32) ? ((ASM_TYPES & AVX2_MASK) && 1) : EB_ASM_PRE_AVX2)](
         in8BitBuffer,
         in8Stride,
         innBitBuffer,
@@ -593,7 +596,7 @@ void CompressedPackBlk(
 {
 
 
-	CompressedPack_funcPtrArray[((width == 64 || width == 32 || width == 16 || width == 8) ? ((ASM_TYPES & AVX2_MASK) && 1) : EB_ASM_NON_AVX2)](
+	CompressedPack_funcPtrArray[((width == 64 || width == 32 || width == 16 || width == 8) ? ((ASM_TYPES & AVX2_MASK) && 1) : EB_ASM_PRE_AVX2)](
 		in8BitBuffer,
 		in8Stride,
 		innBitBuffer,
@@ -615,7 +618,7 @@ void Conv2bToCPackLcu(
 	EB_U32     height)
 {
 
-	Convert_Unpack_CPack_funcPtrArray[((width == 64 || width == 32) ? ((ASM_TYPES & AVX2_MASK) && 1) : EB_ASM_NON_AVX2)](
+	Convert_Unpack_CPack_funcPtrArray[((width == 64 || width == 32) ? ((ASM_TYPES & AVX2_MASK) && 1) : EB_ASM_PRE_AVX2)](
 		innBitBuffer,
 		innStride,
 		inCompnBitBuffer,

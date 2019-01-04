@@ -288,6 +288,143 @@ static void GetEightHorizontalSearchPointResultsAll85PUs_C(
 
 }
 
+#ifdef NON_AVX512_SUPPORT
+/*******************************************
+* GetEightHorizontalSearchPointResultsAll85CUs
+*******************************************/
+static void GetEightHorizontalSearchPointResultsAll85PUs_AVX2_INTRIN(
+    MeContext_t             *contextPtr,
+    EB_U32                   listIndex,
+    EB_U32                   searchRegionIndex,
+    EB_U32                   xSearchIndex,
+    EB_U32                   ySearchIndex
+)
+{
+    EB_U8  *srcPtr = contextPtr->lcuSrcPtr;
+
+    EB_U8  *refPtr = contextPtr->integerBufferPtr[listIndex][0] + (ME_FILTER_TAP >> 1) + ((ME_FILTER_TAP >> 1) * contextPtr->interpolatedFullStride[listIndex][0]);
+
+    EB_U32 reflumaStride = contextPtr->interpolatedFullStride[listIndex][0];
+
+    EB_U32 searchPositionTLIndex = searchRegionIndex;
+    EB_U32 searchPositionIndex;
+    EB_U32 blockIndex;
+
+    EB_U32 srcNext16x16Offset = (MAX_LCU_SIZE << 4);
+    EB_U32 refNext16x16Offset = (reflumaStride << 4);
+
+    EB_U32 currMVy = (((EB_U16)ySearchIndex) << 18);
+    EB_U16 currMVx = (((EB_U16)xSearchIndex << 2));
+    EB_U32 currMV = currMVy | currMVx;
+
+    EB_U32  *pBestSad8x8 = contextPtr->pBestSad8x8;
+    EB_U32  *pBestSad16x16 = contextPtr->pBestSad16x16;
+    EB_U32  *pBestSad32x32 = contextPtr->pBestSad32x32;
+    EB_U32  *pBestSad64x64 = contextPtr->pBestSad64x64;
+
+    EB_U32  *pBestMV8x8 = contextPtr->pBestMV8x8;
+    EB_U32  *pBestMV16x16 = contextPtr->pBestMV16x16;
+    EB_U32  *pBestMV32x32 = contextPtr->pBestMV32x32;
+    EB_U32  *pBestMV64x64 = contextPtr->pBestMV64x64;
+
+    EB_U16  *pSad16x16 = contextPtr->pEightPosSad16x16;
+
+    /*
+    ----------------------    ----------------------
+    |  16x16_0  |  16x16_1  |  16x16_4  |  16x16_5  |
+    ----------------------    ----------------------
+    |  16x16_2  |  16x16_3  |  16x16_6  |  16x16_7  |
+    -----------------------   -----------------------
+    |  16x16_8  |  16x16_9  |  16x16_12 |  16x16_13 |
+    ----------------------    ----------------------
+    |  16x16_10 |  16x16_11 |  16x16_14 |  16x16_15 |
+    -----------------------   -----------------------
+    */
+
+    const EB_U32  srcStride = contextPtr->lcuSrcStride;
+    srcNext16x16Offset = srcStride << 4;
+
+    //---- 16x16_0
+    blockIndex = 0;
+    searchPositionIndex = searchPositionTLIndex;
+    GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](srcPtr + blockIndex, contextPtr->lcuSrcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[0], &pBestMV8x8[0], &pBestSad16x16[0], &pBestMV16x16[0], currMV, &pSad16x16[0 * 8]);
+    //---- 16x16_1
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionTLIndex + 16;
+    GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](srcPtr + blockIndex, contextPtr->lcuSrcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[4], &pBestMV8x8[4], &pBestSad16x16[1], &pBestMV16x16[1], currMV, &pSad16x16[1 * 8]);
+    //---- 16x16_4
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](srcPtr + blockIndex, contextPtr->lcuSrcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[16], &pBestMV8x8[16], &pBestSad16x16[4], &pBestMV16x16[4], currMV, &pSad16x16[4 * 8]);
+    //---- 16x16_5
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](srcPtr + blockIndex, contextPtr->lcuSrcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[20], &pBestMV8x8[20], &pBestSad16x16[5], &pBestMV16x16[5], currMV, &pSad16x16[5 * 8]);
+
+
+
+    //---- 16x16_2
+    blockIndex = srcNext16x16Offset;
+    searchPositionIndex = searchPositionTLIndex + refNext16x16Offset;
+    GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](srcPtr + blockIndex, contextPtr->lcuSrcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[8], &pBestMV8x8[8], &pBestSad16x16[2], &pBestMV16x16[2], currMV, &pSad16x16[2 * 8]);
+    //---- 16x16_3
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](srcPtr + blockIndex, contextPtr->lcuSrcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[12], &pBestMV8x8[12], &pBestSad16x16[3], &pBestMV16x16[3], currMV, &pSad16x16[3 * 8]);
+    //---- 16x16_6
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](srcPtr + blockIndex, contextPtr->lcuSrcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[24], &pBestMV8x8[24], &pBestSad16x16[6], &pBestMV16x16[6], currMV, &pSad16x16[6 * 8]);
+    //---- 16x16_7
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](srcPtr + blockIndex, contextPtr->lcuSrcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[28], &pBestMV8x8[28], &pBestSad16x16[7], &pBestMV16x16[7], currMV, &pSad16x16[7 * 8]);
+
+
+    //---- 16x16_8
+    blockIndex = (srcNext16x16Offset << 1);
+    searchPositionIndex = searchPositionTLIndex + (refNext16x16Offset << 1);
+    GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](srcPtr + blockIndex, contextPtr->lcuSrcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[32], &pBestMV8x8[32], &pBestSad16x16[8], &pBestMV16x16[8], currMV, &pSad16x16[8 * 8]);
+    //---- 16x16_9
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](srcPtr + blockIndex, contextPtr->lcuSrcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[36], &pBestMV8x8[36], &pBestSad16x16[9], &pBestMV16x16[9], currMV, &pSad16x16[9 * 8]);
+    //---- 16x16_12
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](srcPtr + blockIndex, contextPtr->lcuSrcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[48], &pBestMV8x8[48], &pBestSad16x16[12], &pBestMV16x16[12], currMV, &pSad16x16[12 * 8]);
+    //---- 16x1_13
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](srcPtr + blockIndex, contextPtr->lcuSrcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[52], &pBestMV8x8[52], &pBestSad16x16[13], &pBestMV16x16[13], currMV, &pSad16x16[13 * 8]);
+
+
+
+    //---- 16x16_10
+    blockIndex = (srcNext16x16Offset * 3);
+    searchPositionIndex = searchPositionTLIndex + (refNext16x16Offset * 3);
+    GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](srcPtr + blockIndex, contextPtr->lcuSrcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[40], &pBestMV8x8[40], &pBestSad16x16[10], &pBestMV16x16[10], currMV, &pSad16x16[10 * 8]);
+    //---- 16x16_11
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](srcPtr + blockIndex, contextPtr->lcuSrcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[44], &pBestMV8x8[44], &pBestSad16x16[11], &pBestMV16x16[11], currMV, &pSad16x16[11 * 8]);
+    //---- 16x16_14
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](srcPtr + blockIndex, contextPtr->lcuSrcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[56], &pBestMV8x8[56], &pBestSad16x16[14], &pBestMV16x16[14], currMV, &pSad16x16[14 * 8]);
+    //---- 16x16_15
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    GetEightHorizontalSearchPointResults_8x8_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](srcPtr + blockIndex, contextPtr->lcuSrcStride, refPtr + searchPositionIndex, reflumaStride, &pBestSad8x8[60], &pBestMV8x8[60], &pBestSad16x16[15], &pBestMV16x16[15], currMV, &pSad16x16[15 * 8]);
+
+
+
+
+    //32x32 and 64x64
+    GetEightHorizontalSearchPointResults_32x32_64x64_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](pSad16x16, pBestSad32x32, pBestSad64x64, pBestMV32x32, pBestMV64x64, currMV);
+
+}
+#endif
 
 typedef void(*EB_FPSEARCH_FUNC)(
 	MeContext_t             *contextPtr,
@@ -302,7 +439,11 @@ typedef void(*EB_FPSEARCH_FUNC)(
 static EB_FPSEARCH_FUNC FUNC_TABLE GetEightHorizontalSearchPointResultsAll85PUs_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
 	GetEightHorizontalSearchPointResultsAll85PUs_C,
+#ifndef NON_AVX512_SUPPORT
 	GetEightHorizontalSearchPointResultsAll85PUs_AVX512_INTRIN
+#else
+    GetEightHorizontalSearchPointResultsAll85PUs_AVX2_INTRIN
+#endif
 };
 
 
@@ -462,8 +603,11 @@ static void FullPelSearch_LCU(
 		for (xSearchIndex = 0; xSearchIndex < searchAreaWidthMult8; xSearchIndex += 8){
 
 			//this function will do:  xSearchIndex, +1, +2, ..., +7
-
+#ifndef NON_AVX512_SUPPORT
 			GetEightHorizontalSearchPointResultsAll85PUs_funcPtrArray[ (ASM_TYPES & AVX512_MASK) && 1 ](
+#else
+            GetEightHorizontalSearchPointResultsAll85PUs_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+#endif
 				contextPtr,
 				listIndex,
 				xSearchIndex + ySearchIndex * contextPtr->interpolatedFullStride[listIndex][0],
@@ -1800,9 +1944,13 @@ void HmeOneQuadrantLevel0(
 		{
 			searchAreaWidth = (EB_S16)((double)((searchAreaWidth >> 4) << 4));
 		}
-
+#ifndef NON_AVX512_SUPPORT
 	    if (((searchAreaWidth & 15) == 0) && ((ASM_TYPES & AVX512_MASK) && 1))
+#else
+        if (((searchAreaWidth & 15) == 0) && ((ASM_TYPES & AVX2_MASK) && 1))
+#endif
 	    {
+#ifndef NON_AVX512_SUPPORT
 		    SadLoopKernel_AVX512_HmeL0_INTRIN(
 			    &contextPtr->sixteenthLcuBuffer[0],
 			    contextPtr->sixteenthLcuBufferStride,
@@ -1818,6 +1966,23 @@ void HmeOneQuadrantLevel0(
 			    searchAreaWidth,
 			    searchAreaHeight
 			    );
+#else
+            SadLoopKernel_AVX2_HmeL0_INTRIN(
+                &contextPtr->sixteenthLcuBuffer[0],
+                contextPtr->sixteenthLcuBufferStride,
+                &sixteenthRefPicPtr->bufferY[searchRegionIndex],
+                sixteenthRefPicPtr->strideY * 2,
+                lcuHeight >> 1, lcuWidth,
+                // results
+                level0BestSad,
+                xLevel0SearchCenter,
+                yLevel0SearchCenter,
+                // range
+                sixteenthRefPicPtr->strideY,
+                searchAreaWidth,
+                searchAreaHeight
+            );
+#endif
 
         }
         else {
@@ -1948,8 +2113,13 @@ void HmeLevel0(
 	
 	if (((lcuWidth  & 7) == 0) || (lcuWidth == 4))
 	{
-		if (((searchAreaWidth & 15) == 0) && ((ASM_TYPES & AVX512_MASK) && 1))
+#ifndef NON_AVX512_SUPPORT
+        if (((searchAreaWidth & 15) == 0) && ((ASM_TYPES & AVX512_MASK) && 1))
+#else
+        if (((searchAreaWidth & 15) == 0) && ((ASM_TYPES & AVX2_MASK) && 1))
+#endif
 		{
+#ifndef NON_AVX512_SUPPORT
 		    SadLoopKernel_AVX512_HmeL0_INTRIN(
 				&contextPtr->sixteenthLcuBuffer[0],
 				contextPtr->sixteenthLcuBufferStride,
@@ -1965,6 +2135,23 @@ void HmeLevel0(
 				searchAreaWidth,
 				searchAreaHeight
 				);
+#else
+            SadLoopKernel_AVX2_HmeL0_INTRIN(
+                &contextPtr->sixteenthLcuBuffer[0],
+                contextPtr->sixteenthLcuBufferStride,
+                &sixteenthRefPicPtr->bufferY[searchRegionIndex],
+                sixteenthRefPicPtr->strideY * 2,
+                lcuHeight >> 1, lcuWidth,
+                // results
+                level0BestSad,
+                xLevel0SearchCenter,
+                yLevel0SearchCenter,
+                // range
+                sixteenthRefPicPtr->strideY,
+                searchAreaWidth,
+                searchAreaHeight
+            );
+#endif
         }
 		else
 		    {

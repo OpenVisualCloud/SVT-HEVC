@@ -23,7 +23,7 @@ void ComputeIntermVarFour8x8_AVX2_INTRIN(
 	EB_U16   inputStride,
 	EB_U64 * meanOf8x8Blocks,      // mean of four  8x8
 	EB_U64 * meanOfSquared8x8Blocks);
-
+#ifndef NON_AVX512_SUPPORT
 void BiPredAverageKernel_AVX512_INTRIN(
 	EB_BYTE                  src0,
 	EB_U32                   src0Stride,
@@ -33,6 +33,17 @@ void BiPredAverageKernel_AVX512_INTRIN(
 	EB_U32                   dstStride,
 	EB_U32                   areaWidth,
 	EB_U32                   areaHeight);
+#else
+void BiPredAverageKernel_AVX2_INTRIN(
+    EB_BYTE                  src0,
+    EB_U32                   src0Stride,
+    EB_BYTE                  src1,
+    EB_U32                   src1Stride,
+    EB_BYTE                  dst,
+    EB_U32                   dstStride,
+    EB_U32                   areaWidth,
+    EB_U32                   areaHeight);
+#endif
 
 #ifdef __cplusplus
 }

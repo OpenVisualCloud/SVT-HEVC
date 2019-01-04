@@ -89,7 +89,11 @@ EB_ENC_UnPack2D_TYPE UnPack2D_funcPtrArray_16Bit[2][EB_ASM_TYPE_TOTAL] =
         // C_DEFAULT
 		EB_ENC_msbUnPack2D,
         // AVX512
+#ifndef NON_AVX512_SUPPORT
         EB_ENC_msbUnPack2D_AVX512_INTRIN,
+#else
+        EB_ENC_msbUnPack2D_AVX2_INTRIN,
+#endif
 
     }
 };
