@@ -2,7 +2,7 @@
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
-
+#include <stdint.h>
 #ifdef _WIN32
 #include <stdlib.h>
 //#if  (WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
@@ -22,7 +22,10 @@
 #error OS/Platform not supported.
 #endif
 
-void EbStartTime(unsigned long long *Startseconds, unsigned long long *Startuseconds) {
+void EbStartTime(
+    uint64_t *Startseconds,
+    uint64_t *Startuseconds)
+{
 
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     struct timeval start;
@@ -30,7 +33,7 @@ void EbStartTime(unsigned long long *Startseconds, unsigned long long *Startusec
     *Startseconds=start.tv_sec;
     *Startuseconds=start.tv_usec;
 #elif _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
-    *Startseconds = (unsigned long long) clock();
+    *Startseconds = (uint64_t) clock();
     (void) (*Startuseconds);
 #else
     (void) (*Startuseconds);
@@ -39,7 +42,10 @@ void EbStartTime(unsigned long long *Startseconds, unsigned long long *Startusec
 
 }
 
-void EbFinishTime(unsigned long long *Finishseconds, unsigned long long *Finishuseconds) {
+void EbFinishTime(
+    uint64_t *Finishseconds,
+    uint64_t *Finishuseconds)
+{
 
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     struct timeval finish;
@@ -47,7 +53,7 @@ void EbFinishTime(unsigned long long *Finishseconds, unsigned long long *Finishu
     *Finishseconds=finish.tv_sec;
     *Finishuseconds=finish.tv_usec;
 #elif _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
-    *Finishseconds= (unsigned long long)clock();
+    *Finishseconds= (uint64_t)clock();
     (void) (*Finishuseconds);
 #else
     (void) (*Finishuseconds);
@@ -55,7 +61,12 @@ void EbFinishTime(unsigned long long *Finishseconds, unsigned long long *Finishu
 #endif
 
 }
-void EbComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long long Startuseconds,unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration)
+void EbComputeOverallElapsedTime(
+    uint64_t Startseconds,
+    uint64_t Startuseconds,
+    uint64_t Finishseconds,
+    uint64_t Finishuseconds,
+    double *duration)
 {
 #if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     long   mtime, seconds, useconds;
@@ -80,12 +91,14 @@ void EbComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long 
 
 }
 
-void EbSleep(unsigned long long milliSeconds) {
+void EbSleep(
+    uint64_t milliSeconds)
+{
 
     if(milliSeconds) {
-#if __linux__     
+#if __linux__
         struct timespec req,rem;
-        req.tv_sec=(int)(milliSeconds/1000);
+        req.tv_sec=(int32_t)(milliSeconds/1000);
         milliSeconds -= req.tv_sec * 1000;
         req.tv_nsec = milliSeconds * 1000000UL;
         nanosleep(&req,&rem);
@@ -97,13 +110,16 @@ void EbSleep(unsigned long long milliSeconds) {
     }
 }
 
-void EbInjector(unsigned long long processedFrameCount, unsigned int injectorFrameRate){
+void EbInjector(
+    uint64_t processedFrameCount,
+    uint32_t injectorFrameRate)
+{
 
-#if __linux__ 
-    unsigned long long                  currentTimesSeconds = 0;
-    unsigned long long                  currentTimesuSeconds = 0;
-    static unsigned long long           startTimesSeconds;
-    static unsigned long long           startTimesuSeconds;
+#if __linux__
+    uint64_t                  currentTimesSeconds = 0;
+    uint64_t                  currentTimesuSeconds = 0;
+    static uint64_t           startTimesSeconds;
+    static uint64_t           startTimesuSeconds;
 #elif _WIN32
     static LARGE_INTEGER    startCount;               // this is the start time
     static LARGE_INTEGER    counterFreq;              // performance counter frequency
@@ -115,16 +131,16 @@ void EbInjector(unsigned long long processedFrameCount, unsigned int injectorFra
     double                 injectorInterval  = (double)(1<<16)/(double)injectorFrameRate;     // 1.0 / injector frame rate (in this case, 1.0/encodRate)
     double                  elapsedTime;
     double                  predictedTime;
-    int                     bufferFrames = 1;         // How far ahead of time should we let it get
-    int                     milliSecAhead;
-    static int              firstTime = 0;
+    int32_t                     bufferFrames = 1;         // How far ahead of time should we let it get
+    int32_t                     milliSecAhead;
+    static int32_t              firstTime = 0;
 
-    if (firstTime == 0) 
-    {  
+    if (firstTime == 0)
+    {
         firstTime = 1;
 
 #if __linux__
-        EbStartTime((unsigned long long*)&startTimesSeconds, (unsigned long long*)&startTimesuSeconds);
+        EbStartTime((uint64_t*)&startTimesSeconds, (uint64_t*)&startTimesuSeconds);
 #elif _WIN32
         QueryPerformanceFrequency(&counterFreq);
         QueryPerformanceCounter(&startCount);
@@ -134,7 +150,7 @@ void EbInjector(unsigned long long processedFrameCount, unsigned int injectorFra
     {
 
 #if __linux__
-        EbFinishTime((unsigned long long*)&currentTimesSeconds, (unsigned long long*)&currentTimesuSeconds);
+        EbFinishTime((uint64_t*)&currentTimesSeconds, (uint64_t*)&currentTimesuSeconds);
         EbComputeOverallElapsedTime(startTimesSeconds, startTimesuSeconds, currentTimesSeconds, currentTimesuSeconds, &elapsedTime);
 #elif _WIN32
         QueryPerformanceCounter(&nowCount);
@@ -142,7 +158,7 @@ void EbInjector(unsigned long long processedFrameCount, unsigned int injectorFra
 #endif
 
         predictedTime = (processedFrameCount - bufferFrames) * injectorInterval;
-        milliSecAhead = (int)(1000 * (predictedTime - elapsedTime ));
+        milliSecAhead = (int32_t)(1000 * (predictedTime - elapsedTime ));
         if (milliSecAhead>0)
         {
             //  timeBeginPeriod(1);

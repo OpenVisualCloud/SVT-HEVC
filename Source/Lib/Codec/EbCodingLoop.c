@@ -466,7 +466,7 @@ static void EncodeLoop(
     EB_U32                 chromaQp           = cbQp; 
     CodingUnit_t		  *cuPtr              = contextPtr->cuPtr;
     TransformUnit_t       *tuPtr              = &cuPtr->transformUnitArray[contextPtr->tuItr]; 
-    EB_SLICE               sliceType          = lcuPtr->pictureControlSetPtr->sliceType;
+    EB_PICTURE               sliceType          = lcuPtr->pictureControlSetPtr->sliceType;
     EB_U32                 temporalLayerIndex = lcuPtr->pictureControlSetPtr->temporalLayerIndex;
     EB_U32                 qp                 = cuPtr->qp;
     EB_U32                 tuSize             = (contextPtr->cuStats->size == 64) ? 32 : contextPtr->cuStats->size;
@@ -938,7 +938,7 @@ static void EncodeLoop16bit(
 
     CodingUnit_t		  *cuPtr              = contextPtr->cuPtr;
     TransformUnit_t       *tuPtr              = &cuPtr->transformUnitArray[contextPtr->tuItr]; 
-    EB_SLICE               sliceType          = lcuPtr->pictureControlSetPtr->sliceType;
+    EB_PICTURE               sliceType          = lcuPtr->pictureControlSetPtr->sliceType;
     EB_U32                 temporalLayerIndex = lcuPtr->pictureControlSetPtr->temporalLayerIndex;
     EB_U32                 qp                 = cuPtr->qp;
     EB_U32                 tuSize             = (contextPtr->cuStats->size == 64) ? 32 : contextPtr->cuStats->size;
@@ -1410,7 +1410,7 @@ static void EncodeLoopIntra4x4(
     EB_U32                 chromaQp           = cbQp; 
     CodingUnit_t		  *cuPtr              = contextPtr->cuPtr;
     TransformUnit_t       *tuPtr              = &cuPtr->transformUnitArray[contextPtr->tuItr]; 
-    EB_SLICE               sliceType          = lcuPtr->pictureControlSetPtr->sliceType;
+    EB_PICTURE               sliceType          = lcuPtr->pictureControlSetPtr->sliceType;
     EB_U32                 temporalLayerIndex = lcuPtr->pictureControlSetPtr->temporalLayerIndex;
     EB_U32                 qp                 = cuPtr->qp;
     EB_U32                 tuSize             = MIN_PU_SIZE; 
@@ -1823,7 +1823,7 @@ static void EncodeLoopIntra4x416bit(
 
     CodingUnit_t		  *cuPtr              = contextPtr->cuPtr;
     TransformUnit_t       *tuPtr              = &cuPtr->transformUnitArray[contextPtr->tuItr]; 
-    EB_SLICE               sliceType          = lcuPtr->pictureControlSetPtr->sliceType;
+    EB_PICTURE               sliceType          = lcuPtr->pictureControlSetPtr->sliceType;
     EB_U32                 temporalLayerIndex = lcuPtr->pictureControlSetPtr->temporalLayerIndex;
     EB_U32                 qp                 = cuPtr->qp;
     EB_U32                 tuSize             = MIN_PU_SIZE;
@@ -2511,7 +2511,7 @@ void SetPmEncDecMode(
 
     EB_BOOL pmSensitiveUncoveredBackground = EB_FALSE;
     // Derived for REF P & B & kept false otherwise (for temporal distance equal to 1 uncovered area are easier to handle)
-    if (pictureControlSetPtr->sliceType != EB_I_SLICE) {
+    if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
         if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
             EbReferenceObject_t  * refObjL0;
             refObjL0 = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr;
@@ -2539,11 +2539,11 @@ void SetPmEncDecMode(
         }
     }
 
-	if (sequenceControlSetPtr->staticConfig.bitRateReduction == EB_TRUE && !contextPtr->forceCbfFlag && !((pictureControlSetPtr->sliceType == EB_I_SLICE && contextPtr->cuStats->size == 8) || stationaryEdgeOverTimeFlag || pmSensitiveSkinArea || pmSensitiveCmplxContrastArea)) {
+	if (sequenceControlSetPtr->staticConfig.bitRateReduction == EB_TRUE && !contextPtr->forceCbfFlag && !((pictureControlSetPtr->sliceType == EB_I_PICTURE && contextPtr->cuStats->size == 8) || stationaryEdgeOverTimeFlag || pmSensitiveSkinArea || pmSensitiveCmplxContrastArea)) {
 
 		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
 
-            if (pictureControlSetPtr->sliceType != EB_I_SLICE) {
+            if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
 
                 if (stationaryEdgeOverTimeFlag || pictureControlSetPtr->ParentPcsPtr->logoPicFlag || pmSensitiveUncoveredBackground || pmSensitiveComplexArea) {
 
@@ -2606,7 +2606,7 @@ void SetPmEncDecMode(
 
 
 
-            if (pictureControlSetPtr->sliceType == EB_P_SLICE) {
+            if (pictureControlSetPtr->sliceType == EB_P_PICTURE) {
                 contextPtr->pmpMaskingLevelEncDec = 1;
             }
 
@@ -2620,7 +2620,7 @@ void SetPmEncDecMode(
                 if (pictureControlSetPtr->temporalLayerIndex > 0 && !pmSensitiveUncoveredBackground && !pmSensitiveComplexArea) {
                     contextPtr->cleanSparseCeoffPfEncDec = 1;
                 }
-                if (pictureControlSetPtr->sliceType != EB_I_SLICE) {
+                if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
                     {
                         if (stationaryEdgeOverTimeFlag || pictureControlSetPtr->ParentPcsPtr->logoPicFlag){
                             contextPtr->pmpMaskingLevelEncDec = 0;
@@ -2666,7 +2666,7 @@ void SetPmEncDecMode(
 								contextPtr->pmpMaskingLevelEncDec = 0;
 							}
 
-							if (pictureControlSetPtr->sliceType == EB_P_SLICE) {
+							if (pictureControlSetPtr->sliceType == EB_P_PICTURE) {
 								contextPtr->pmpMaskingLevelEncDec = 1;
 							}
 
@@ -2782,7 +2782,7 @@ EB_ERRORTYPE QpmDeriveBeaAndSkipQpmFlagLcu(
 	}
 
     if (contextPtr->skipQpmFlag == EB_FALSE) {
-        if (pictureControlSetPtr->ParentPcsPtr->picHomogenousOverTimeLcuPercentage > 30 && pictureControlSetPtr->sliceType != EB_I_SLICE){
+        if (pictureControlSetPtr->ParentPcsPtr->picHomogenousOverTimeLcuPercentage > 30 && pictureControlSetPtr->sliceType != EB_I_PICTURE){
 			contextPtr->qpmQp = CLIP3(minQpAllowed, maxQpAllowed, pictureQp + 1);
         }
     }
@@ -2822,7 +2822,7 @@ EB_ERRORTYPE EncQpmDeriveDeltaQPForEachLeafLcu(
 
 	EB_U32 cuIndexInRaterScan = MD_SCAN_TO_RASTER_SCAN[cuIndex];
 
-	EB_BOOL acEnergyBasedAntiContouring = pictureControlSetPtr->sliceType == EB_I_SLICE ? EB_TRUE : EB_FALSE;
+	EB_BOOL acEnergyBasedAntiContouring = pictureControlSetPtr->sliceType == EB_I_PICTURE ? EB_TRUE : EB_FALSE;
 	EB_U8   lowerQPClass;
 	
 	EB_S8	nonMovingDeltaQp = contextPtr->nonMovingDeltaQp;
@@ -3492,7 +3492,7 @@ EB_EXTERN void EncodePass(
                 (pictureControlSetPtr->ParentPcsPtr->intraCodedBlockProbability > 90) ||
                 (pictureControlSetPtr->ParentPcsPtr->highDarkAreaDensityFlag))) {
 
-                if (pictureControlSetPtr->sliceType != EB_I_SLICE &&
+                if (pictureControlSetPtr->sliceType != EB_I_PICTURE &&
                     pictureControlSetPtr->temporalLayerIndex == 0 &&
                     pictureControlSetPtr->ParentPcsPtr->intraCodedBlockProbability > 60 &&
                     !pictureControlSetPtr->ParentPcsPtr->isTilt &&
@@ -3503,7 +3503,7 @@ EB_EXTERN void EncodePass(
 
                 if (dzCondition) {
                     if (pictureControlSetPtr->sceneCaracteristicId == EB_FRAME_CARAC_1) {
-                        if (pictureControlSetPtr->sliceType == EB_I_SLICE) {
+                        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
                             dZoffset = lcuStatPtr->cuStatArray[0].grassArea ? 10 : dZoffset;
                         }
                         else if (pictureControlSetPtr->temporalLayerIndex == 0) {
@@ -3627,7 +3627,7 @@ EB_EXTERN void EncodePass(
             if (cuPtr->predictionModeFlag == INTRA_MODE && cuPtr->predictionUnitArray->intraLumaMode != EB_INTRA_MODE_4x4){
 
                 contextPtr->totIntraCodedArea += cuStats->size*cuStats->size;
-                if (pictureControlSetPtr->sliceType != EB_I_SLICE){
+                if (pictureControlSetPtr->sliceType != EB_I_PICTURE){
                     contextPtr->intraCodedAreaLCU[tbAddr] += cuStats->size*cuStats->size;
                 }
 
@@ -3809,7 +3809,7 @@ EB_EXTERN void EncodePass(
 
 
                 contextPtr->totIntraCodedArea += cuStats->size*cuStats->size;
-                if (pictureControlSetPtr->sliceType != EB_I_SLICE) {
+                if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
                     contextPtr->intraCodedAreaLCU[tbAddr] += cuStats->size*cuStats->size;
                 }
 
@@ -4169,7 +4169,7 @@ EB_EXTERN void EncodePass(
 						}
 
 						if (
-							pictureControlSetPtr->sliceType == EB_B_SLICE                             &&
+							pictureControlSetPtr->sliceType == EB_B_PICTURE                             &&
 							pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_FALSE
 							)
 						{
@@ -4907,8 +4907,8 @@ EB_EXTERN void EncodePass(
         shutSaoCondition1 = (contextPtr->saoMode) ?
             EB_FALSE :
             (sequenceControlSetPtr->inputResolution < INPUT_SIZE_4K_RANGE) ?
-            (varCount32x32 < 1 && lcuDeltaQp <= 0 && pictureControlSetPtr->sliceType != EB_I_SLICE && !lcuStatPtr->stationaryEdgeOverTimeFlag) :
-            (((varCount32x32 < 1) && (lcuDeltaQp <= 0 && pictureControlSetPtr->sliceType != EB_I_SLICE) && (contextPtr->skipQpmFlag == EB_FALSE)) && pictureControlSetPtr->ParentPcsPtr->picNoiseClass >= PIC_NOISE_CLASS_1 && !lcuStatPtr->stationaryEdgeOverTimeFlag);
+            (varCount32x32 < 1 && lcuDeltaQp <= 0 && pictureControlSetPtr->sliceType != EB_I_PICTURE && !lcuStatPtr->stationaryEdgeOverTimeFlag) :
+            (((varCount32x32 < 1) && (lcuDeltaQp <= 0 && pictureControlSetPtr->sliceType != EB_I_PICTURE) && (contextPtr->skipQpmFlag == EB_FALSE)) && pictureControlSetPtr->ParentPcsPtr->picNoiseClass >= PIC_NOISE_CLASS_1 && !lcuStatPtr->stationaryEdgeOverTimeFlag);
 
         if (doRecon == EB_FALSE || shutSaoCondition0 || shutSaoCondition1) {
 

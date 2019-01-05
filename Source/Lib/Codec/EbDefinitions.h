@@ -141,12 +141,9 @@ Groups of Pictures (GOP) units.
 	typedef int64_t             EB_S64;
 
 #endif // _WIN32
-  
-/** Assembly Types
-*/
 typedef enum EB_ASM {
-    EB_ASM_PRE_AVX2,
-    EB_ASM_POST_AVX2,
+    EB_ASM_C,
+    EB_ASM_AUTO,
     EB_ASM_TYPE_TOTAL,
     EB_ASM_TYPE_INVALID = ~0
 } EB_ASM;
@@ -334,11 +331,6 @@ FORCE_INLINE void eb_memcpy(void  *dstPtr, void  *srcPtr, size_t size)
 #define       EB_TYPE_UNREG_USER_DATA_SEI    3
 #define       EB_TYPE_REG_USER_DATA_SEI      4
 #define       EB_TYPE_PIC_STRUCT             5             // It is a requirement (for the application) that if pictureStruct is present for 1 picture it shall be present for every picture
-
-
-/** The EB_SLICE type is used to describe the slice prediction type.
-*/
-
 
 
 #define	Log2f					          Log2f_SSE2

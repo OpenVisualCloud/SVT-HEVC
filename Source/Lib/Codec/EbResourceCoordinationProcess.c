@@ -114,14 +114,14 @@ void SpeedBufferControl(
 	EbBlockOnMutex(sequenceControlSetPtr->encodeContextPtr->scBufferMutex);
 
 	if (sequenceControlSetPtr->encodeContextPtr->scFrameIn == 0) {
-        EbStartTime((unsigned long long*)&contextPtr->firstInPicArrivedTimeSeconds, (unsigned long long*)&contextPtr->firstInPicArrivedTimeuSeconds);
+        EbStartTime((uint64_t*)&contextPtr->firstInPicArrivedTimeSeconds, (uint64_t*)&contextPtr->firstInPicArrivedTimeuSeconds);
 	}
 	else if (sequenceControlSetPtr->encodeContextPtr->scFrameIn == SC_FRAMES_TO_IGNORE) {
 		contextPtr->startFlag = EB_TRUE;
 	}
 
     // Compute duration since the start of the encode and since the previous checkpoint
-    EbFinishTime((unsigned long long*)&cursTimeSeconds, (unsigned long long*)&cursTimeuSeconds);
+    EbFinishTime((uint64_t*)&cursTimeSeconds, (uint64_t*)&cursTimeuSeconds);
 
     EbComputeOverallElapsedTimeMs(
         contextPtr->firstInPicArrivedTimeSeconds,
@@ -650,7 +650,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         pictureControlSetPtr->startTimeSeconds = 0;
         pictureControlSetPtr->startTimeuSeconds = 0;
 
-        EbStartTime((unsigned long long*)&pictureControlSetPtr->startTimeSeconds, (unsigned long long*)&pictureControlSetPtr->startTimeuSeconds);
+        EbStartTime((uint64_t*)&pictureControlSetPtr->startTimeSeconds, (uint64_t*)&pictureControlSetPtr->startTimeuSeconds);
 
         inputPicturePtr = pictureControlSetPtr->enhancedPicturePtr;
 
@@ -685,8 +685,8 @@ void* ResourceCoordinationKernel(void *inputPtr)
         pictureControlSetPtr->inputPictureWrapperPtr          = inputPictureWrapperPtr;
 
         // Set Picture Control Flags
-        pictureControlSetPtr->idrFlag                         = sequenceControlSetPtr->encodeContextPtr->initialPicture || (ebInputPtr->sliceType == EB_IDR_SLICE);
-        pictureControlSetPtr->craFlag                         = (ebInputPtr->sliceType == EB_I_SLICE) ? EB_TRUE : EB_FALSE;
+        pictureControlSetPtr->idrFlag                         = sequenceControlSetPtr->encodeContextPtr->initialPicture || (ebInputPtr->sliceType == EB_IDR_PICTURE);
+        pictureControlSetPtr->craFlag                         = (ebInputPtr->sliceType == EB_I_PICTURE) ? EB_TRUE : EB_FALSE;
         pictureControlSetPtr->sceneChangeFlag                 = EB_FALSE;
 
         pictureControlSetPtr->qpOnTheFly                      = EB_FALSE;

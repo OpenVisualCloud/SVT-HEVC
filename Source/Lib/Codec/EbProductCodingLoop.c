@@ -775,7 +775,7 @@ void Bdp16x16vs8x8RefinementUpdateNeighborArrays(
     }
 
     // For P & B SLICES the Pillar Neighbor Arrays update happens @ the MvMerge Pass
-    if (pictureControlSetPtr->sliceType == EB_I_SLICE) {
+    if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
 
         NeighborArrayUnitDepthSkipWrite(
             pictureControlSetPtr->mdLeafDepthNeighborArray[PILLAR_NEIGHBOR_ARRAY_INDEX],
@@ -1179,7 +1179,7 @@ void CheckHighCostPartition(
 			areGrandChildrenDone = EB_TRUE;
 
 		if (enableExitPartitioning)
-            areGrandChildrenDone = (lcuPtr->pictureControlSetPtr->sliceType != EB_I_SLICE) ? EB_TRUE : areGrandChildrenDone;
+            areGrandChildrenDone = (lcuPtr->pictureControlSetPtr->sliceType != EB_I_PICTURE) ? EB_TRUE : areGrandChildrenDone;
 
 		if (totChildren<4 && areGrandChildrenDone)
 		{
@@ -1925,7 +1925,7 @@ void ProductPerformFastLoop(
 	EB_U64                          lumaFastDistortion;
 	EB_U64                          chromaFastDistortion;
 	ModeDecisionCandidateBuffer_t  *candidateBuffer;
-	const EB_SLICE                  sliceType = pictureControlSetPtr->sliceType;
+	const EB_PICTURE                  sliceType = pictureControlSetPtr->sliceType;
 	EB_U32                          highestCostIndex;
 	EB_U64                          highestCost;
 	EB_U32							isCandzz = 0;
@@ -2111,7 +2111,7 @@ void ProductPerformFastLoop(
                     candidateBuffer->fastCostPtr);
 
                 // Bias against bipred merge candidates to reduce blurriness in layer 0 pictures
-                if (pictureControlSetPtr->sliceType != EB_I_SLICE){
+                if (pictureControlSetPtr->sliceType != EB_I_PICTURE){
                     if (pictureControlSetPtr->temporalLayerIndex <= 1){
                         if (candidateBuffer->candidatePtr->type == INTER_MODE && (EB_U32)candidatePtr->predictionDirection[0] == BI_PRED) {
                             // Myanmar_5&6 flickering on the Grass
@@ -4396,7 +4396,7 @@ void PerformFullLoop(
         candidatePtr->chromaDistortion = 0;
         candidatePtr->chromaDistortionInterDepth = 0;
         
-        if (pictureControlSetPtr->sliceType != EB_I_SLICE) {
+        if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
             if (candidatePtr->type == INTRA_MODE && prevRootCbf == 0) {
                 continue;
             }
@@ -4449,7 +4449,7 @@ void PerformFullLoop(
             candidatePtr->crCbf = 1;
         }
 
-        if (cuStatsPtr->size == 32 && pictureControlSetPtr->sliceType == EB_I_SLICE)
+        if (cuStatsPtr->size == 32 && pictureControlSetPtr->sliceType == EB_I_PICTURE)
             candidatePtr->countNonZeroCoeffs = (EB_U16)countNonZeroCoeffs[0][0];
         else
             candidatePtr->countNonZeroCoeffs = 0;
@@ -4644,7 +4644,7 @@ void PerformFullLoop(
 
 
 
-            if (pictureControlSetPtr->sliceType != EB_I_SLICE && pictureControlSetPtr->ParentPcsPtr->picHomogenousOverTimeLcuPercentage < 90) {
+            if (pictureControlSetPtr->sliceType != EB_I_PICTURE && pictureControlSetPtr->ParentPcsPtr->picHomogenousOverTimeLcuPercentage < 90) {
                 if (pictureControlSetPtr->temporalLayerIndex <= 1) {
                     if (candidatePtr->type == INTER_MODE && (EB_U32)candidatePtr->predictionDirection[0] == BI_PRED) {
 
@@ -4658,7 +4658,7 @@ void PerformFullLoop(
 
 		if (contextPtr->fullLoopEscape)
 
-            if (pictureControlSetPtr->sliceType != EB_I_SLICE) {
+            if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
                 if (candidatePtr->type == INTER_MODE) {
                     if (*candidateBuffer->fullCostPtr < bestfullCost) {
                         prevRootCbf = candidatePtr->yCbf;
@@ -4711,7 +4711,7 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
 
 	// Pre Intra Search                   
 	const EB_U32                            lcuHeight = MIN(MAX_LCU_SIZE, (EB_U32)(sequenceControlSetPtr->lumaHeight - lcuOriginY));
-	const EB_SLICE                          sliceType = pictureControlSetPtr->sliceType;
+	const EB_PICTURE                          sliceType = pictureControlSetPtr->sliceType;
 	const EB_U32                            leafCount = mdcResultTbPtr->leafCount;
 	const EbMdcLeafData_t *const            leafDataArray = mdcResultTbPtr->leafDataArray;
 	ModeDecisionCandidate_t                *fastCandidateArray = contextPtr->fastCandidateArray;
@@ -4791,7 +4791,7 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
 		contextPtr->mdLocalCuUnit[leafIndex].testedCuFlag = EB_TRUE;
 		cuPtr->leafIndex = leafIndex;
 		cuPtr->splitFlag = (EB_U16)(
-            (sliceType == EB_I_SLICE) && (cuStatsPtr->depth == 0) ? EB_TRUE :
+            (sliceType == EB_I_PICTURE) && (cuStatsPtr->depth == 0) ? EB_TRUE :
             leafDataPtr->splitFlag);		
         cuPtr->qp = contextPtr->qp;
 

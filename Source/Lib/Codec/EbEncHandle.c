@@ -552,7 +552,9 @@ EB_U64 GetAffinityMask(EB_U32 lpnum) {
 }
 #endif
 
-void EbSetThreadManagementParameters(EB_H265_ENC_CONFIGURATION   *configPtr){
+void EbSetThreadManagementParameters(
+    EB_H265_ENC_CONFIGURATION   *configPtr)
+{
     EB_U32 numLogicProcessors = GetNumProcessors();
 #ifdef _WIN32
     // For system with a single processor group(no more than 64 logic processors all together)
@@ -625,14 +627,14 @@ void EbSetThreadManagementParameters(EB_H265_ENC_CONFIGURATION   *configPtr){
     if (numGroups == 1) {
         EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
             configPtr->logicalProcessors < numLogicProcessors ? configPtr->logicalProcessors : numLogicProcessors;
-        for(int i=0; i<lps; i++)
+        for(EB_U32 i=0; i<lps; i++)
             CPU_SET(lpgroup[0].group[i], &groupAffinity);
     }
     else if (numGroups > 1) {
         EB_U32 numLpPerGroup = numLogicProcessors / numGroups;
         if (configPtr->logicalProcessors == 0) {
             if (configPtr->targetSocket != -1) {
-                for(int i=0; i<lpgroup[configPtr->targetSocket].num; i++)
+                for(EB_U32 i=0; i<lpgroup[configPtr->targetSocket].num; i++)
                     CPU_SET(lpgroup[configPtr->targetSocket].group[i], &groupAffinity);
             }
         }
@@ -641,20 +643,20 @@ void EbSetThreadManagementParameters(EB_H265_ENC_CONFIGURATION   *configPtr){
                 EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
                     configPtr->logicalProcessors < numLogicProcessors ? configPtr->logicalProcessors : numLogicProcessors;
                 if(lps > numLpPerGroup) {
-                    for(int i=0; i<lpgroup[0].num; i++)
+                    for(EB_U32 i=0; i<lpgroup[0].num; i++)
                         CPU_SET(lpgroup[0].group[i], &groupAffinity);
-                    for(int i=0; i< (lps -lpgroup[0].num); i++)
+                    for(EB_U32 i=0; i< (lps -lpgroup[0].num); i++)
                         CPU_SET(lpgroup[1].group[i], &groupAffinity);
                 }
                 else {
-                    for(int i=0; i<lps; i++)
+                    for(EB_U32 i=0; i<lps; i++)
                         CPU_SET(lpgroup[0].group[i], &groupAffinity);
                 }
             }
             else {
                 EB_U32 lps = configPtr->logicalProcessors == 0 ? numLpPerGroup :
                     configPtr->logicalProcessors < numLpPerGroup ? configPtr->logicalProcessors : numLpPerGroup;
-                for(int i=0; i<lps; i++)
+                for(EB_U32 i=0; i<lps; i++)
                     CPU_SET(lpgroup[configPtr->targetSocket].group[i], &groupAffinity);
             }
         }
@@ -682,11 +684,11 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     /************************************
     * Plateform detection
     ************************************/
-    if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == 1) {
+    if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == EB_ASM_AUTO) {
         ASM_TYPES = GetCpuAsmType(); // Use highest assembly
     }
-    else if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == 0) {
-        ASM_TYPES = 0; // Use C_only
+    else if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == EB_ASM_C) {
+        ASM_TYPES = EB_ASM_C; // Use C_only
     }
 
     /************************************
@@ -1694,8 +1696,8 @@ void LoadDefaultBufferConfigurationSettings(
     //#====================== Data Structures and Picture Buffers ======================
     sequenceControlSetPtr->pictureControlSetPoolInitCount       = inputPic;
     sequenceControlSetPtr->pictureControlSetPoolInitCountChild  = MAX(4, coreCount / 6);
-    sequenceControlSetPtr->referencePictureBufferInitCount      = sequenceControlSetPtr->inputOutputBufferFifoInitCount;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
-    sequenceControlSetPtr->paReferencePictureBufferInitCount    = sequenceControlSetPtr->inputOutputBufferFifoInitCount;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
+    sequenceControlSetPtr->referencePictureBufferInitCount      = inputPic;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
+    sequenceControlSetPtr->paReferencePictureBufferInitCount    = inputPic;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
     sequenceControlSetPtr->reconBufferFifoInitCount             = sequenceControlSetPtr->referencePictureBufferInitCount;
     
     //#====================== Inter process Fifos ======================
@@ -2934,16 +2936,27 @@ __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     EB_COMPONENTTYPE           *h265EncComponent,
-    EB_BUFFERHEADERTYPE*        outputStreamPtr
+    EB_BUFFERHEADERTYPE        **outputStreamPtr
 )
 {
     EB_ERRORTYPE           return_error = EB_ErrorNone;
     EbEncHandle_t          *pEncCompData = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
     Bitstream_t            *bitstreamPtr;
-    SequenceControlSet_t  *sequenceControlSetPtr = pEncCompData->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr;
+    SequenceControlSet_t   *sequenceControlSetPtr = pEncCompData->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr;
     EncodeContext_t        *encodeContextPtr = sequenceControlSetPtr->encodeContextPtr;
     EbPPSConfig_t          *ppsConfig;
+    EB_BUFFERHEADERTYPE    *outputStreamBuffer;
+    
+    // Output buffer Allocation 
+    EB_MALLOC(EB_BUFFERHEADERTYPE*, outputStreamBuffer, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR);
+    EB_MALLOC(EB_U8*, outputStreamBuffer->pBuffer, sizeof(EB_U8) * PACKETIZATION_PROCESS_BUFFER_SIZE, EB_N_PTR);
+    outputStreamBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
+    outputStreamBuffer->nAllocLen = PACKETIZATION_PROCESS_BUFFER_SIZE;
+    outputStreamBuffer->pAppPrivate = NULL;
+    outputStreamBuffer->sliceType = EB_INVALID_PICTURE;
+    outputStreamBuffer->nFilledLen = 0;
 
+    // Intermediate buffers 
     EB_MALLOC(EbPPSConfig_t*, ppsConfig, sizeof(EbPPSConfig_t), EB_N_PTR);
     EB_MALLOC(Bitstream_t*, bitstreamPtr, sizeof(Bitstream_t), EB_N_PTR);
     EB_MALLOC(OutputBitstreamUnit_t*, bitstreamPtr->outputBitstreamPtr, sizeof(OutputBitstreamUnit_t), EB_N_PTR);
@@ -2960,7 +2973,7 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
 
         EncodeAUD(
             bitstreamPtr,
-            EB_I_SLICE,
+            EB_I_PICTURE,
             0);
     }
 
@@ -3006,10 +3019,12 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     // Copy SPS & PPS to the Output Bitstream
     CopyRbspBitstreamToPayload(
         bitstreamPtr,
-        outputStreamPtr->pBuffer,
-        (EB_U32*) &(outputStreamPtr->nFilledLen),
-        (EB_U32*) &(outputStreamPtr->nAllocLen),
+        outputStreamBuffer->pBuffer,
+        (EB_U32*) &(outputStreamBuffer->nFilledLen),
+        (EB_U32*) &(outputStreamBuffer->nAllocLen),
         encodeContextPtr);
+
+    *outputStreamPtr = outputStreamBuffer;
 
     return return_error;
 }
@@ -3019,7 +3034,7 @@ __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265EncEosNal(
     EB_COMPONENTTYPE           *h265EncComponent,
-    EB_BUFFERHEADERTYPE*        outputStreamPtr
+    EB_BUFFERHEADERTYPE       **outputStreamPtr
 )
 {
     EB_ERRORTYPE           return_error = EB_ErrorNone;
@@ -3027,7 +3042,18 @@ EB_API EB_ERRORTYPE EbH265EncEosNal(
     Bitstream_t            *bitstreamPtr;
     SequenceControlSet_t  *sequenceControlSetPtr = pEncCompData->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr;
     EncodeContext_t        *encodeContextPtr = sequenceControlSetPtr->encodeContextPtr;
+    EB_BUFFERHEADERTYPE    *outputStreamBuffer;
 
+    // Output buffer Allocation 
+    EB_MALLOC(EB_BUFFERHEADERTYPE*, outputStreamBuffer, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR);
+    EB_MALLOC(EB_U8*, outputStreamBuffer->pBuffer, sizeof(EB_U8) * PACKETIZATION_PROCESS_BUFFER_SIZE, EB_N_PTR);
+    outputStreamBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
+    outputStreamBuffer->nAllocLen = PACKETIZATION_PROCESS_BUFFER_SIZE;
+    outputStreamBuffer->pAppPrivate = NULL;
+    outputStreamBuffer->sliceType = EB_INVALID_PICTURE;
+    outputStreamBuffer->nFilledLen = 0;
+
+    // 
     EB_MALLOC(Bitstream_t*, bitstreamPtr, sizeof(Bitstream_t), EB_N_PTR);
     EB_MALLOC(OutputBitstreamUnit_t*, bitstreamPtr->outputBitstreamPtr, sizeof(OutputBitstreamUnit_t), EB_N_PTR);
 
@@ -3048,15 +3074,15 @@ EB_API EB_ERRORTYPE EbH265EncEosNal(
     // Copy SPS & PPS to the Output Bitstream
     CopyRbspBitstreamToPayload(
         bitstreamPtr,
-        outputStreamPtr->pBuffer,
-        (EB_U32*) &(outputStreamPtr->nFilledLen),
-        (EB_U32*) &(outputStreamPtr->nAllocLen),
+        outputStreamBuffer->pBuffer,
+        (EB_U32*) &(outputStreamBuffer->nFilledLen),
+        (EB_U32*) &(outputStreamBuffer->nAllocLen),
         encodeContextPtr);
+    
+    *outputStreamPtr = outputStreamBuffer;
 
     return return_error;
 }
-
-
 
 /***********************************************
 **** Copy the input buffer from the 
@@ -3327,42 +3353,55 @@ __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265GetPacket(
     EB_COMPONENTTYPE      *h265EncComponent,
-    EB_BUFFERHEADERTYPE   *pBuffer,
+    EB_BUFFERHEADERTYPE  **pBuffer,
     unsigned char          picSendDone)
 {
     EB_ERRORTYPE           return_error = EB_ErrorNone;
-
     EbEncHandle_t          *pEncCompData = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
     EbObjectWrapper_t      *ebWrapperPtr = NULL;
-
+    EB_BUFFERHEADERTYPE    *packet;
     if (picSendDone)
         EbGetFullObject(
-            (pEncCompData->outputStreamBufferConsumerFifoPtrDblArray[0])[0],
+        (pEncCompData->outputStreamBufferConsumerFifoPtrDblArray[0])[0],
             &ebWrapperPtr);
     else
         EbGetFullObjectNonBlocking(
-            (pEncCompData->outputStreamBufferConsumerFifoPtrDblArray[0])[0],
+        (pEncCompData->outputStreamBufferConsumerFifoPtrDblArray[0])[0],
             &ebWrapperPtr);
 
     if (ebWrapperPtr) {
-        
-        EB_BUFFERHEADERTYPE* objPtr = (EB_BUFFERHEADERTYPE*)ebWrapperPtr->objectPtr;
-        CopyOutputBuffer(
-            pBuffer,
-            objPtr);
-                
-        if (pBuffer->nFlags != EB_BUFFERFLAG_EOS && pBuffer->nFlags != 0) {
+
+        packet = (EB_BUFFERHEADERTYPE*)ebWrapperPtr->objectPtr;
+
+        if (packet->nFlags != EB_BUFFERFLAG_EOS && packet->nFlags != 0) {
             return_error = EB_ErrorMax;
         }
-        EbReleaseObject((EbObjectWrapper_t  *)ebWrapperPtr);
+
+        // return the output stream buffer
+        *pBuffer = packet;
+
+        // save the wrapper pointer for the release
+        (*pBuffer)->wrapperPtr = (void*)ebWrapperPtr;
     }
     else {
-        return_error =  EB_NoErrorEmptyQueue;
+        return_error = EB_NoErrorEmptyQueue;
     }
-        
-    return return_error;
-} 
 
+    return return_error;
+}
+
+#if __linux
+__attribute__((visibility("default")))
+#endif
+EB_API void EbH265ReleaseOutBuffer(
+    EB_BUFFERHEADERTYPE  **pBuffer)
+{
+    if ((*pBuffer)->wrapperPtr)
+        // Release out put buffer back into the pool
+        EbReleaseObject((EbObjectWrapper_t  *)(*pBuffer)->wrapperPtr);
+
+    return;
+}
 
 /**********************************
 * Fill This Buffer
