@@ -310,7 +310,11 @@ typedef void(*EB_BIAVG_FUNC)(
 static EB_BIAVG_FUNC FUNC_TABLE BiPredAverageKernel_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
 	BiPredAverageKernel_C,
+#ifndef NON_AVX512_SUPPORT
 	BiPredAverageKernel_AVX512_INTRIN
+#else
+    BiPredAverageKernel_AVX2_INTRIN
+#endif
 };
 
 
@@ -379,8 +383,11 @@ void BiPredIFreeRef8Bit(
 
 		if ( (fracPosL0 == 0) && (fracPosL1 == 0) )	 
 		{
-
+#ifndef NON_AVX512_SUPPORT
 			BiPredAverageKernel_funcPtrArray[(ASM_TYPES & AVX512_MASK) && 1 ](
+#else
+            BiPredAverageKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+#endif
 				refPicList0->bufferY + integPosL0x + integPosL0y * refLumaStride,
 				refLumaStride,
 				refPicList1->bufferY + integPosL1x + integPosL1y * refLumaStride,
@@ -488,7 +495,11 @@ void BiPredIFreeRef8Bit(
 		shift = 0;
 		if ((fracPosL0 == 0) && (fracPosL1 == 0))
 		{
+#ifndef NON_AVX512_SUPPORT
             BiPredAverageKernel_funcPtrArray[(ASM_TYPES & AVX512_MASK) && 1](
+#else
+            BiPredAverageKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+#endif
 				refPicList0->bufferCb + integPosL0x + integPosL0y * refPicList0->strideCb,
 				refPicList0->strideCb,
 				refPicList1->bufferCb + integPosL1x + integPosL1y * refPicList1->strideCb,
@@ -498,7 +509,11 @@ void BiPredIFreeRef8Bit(
 				chromaPuWidth,
 				chromaPuHeight);
 
+#ifndef NON_AVX512_SUPPORT
             BiPredAverageKernel_funcPtrArray[(ASM_TYPES & AVX512_MASK) && 1](
+#else
+            BiPredAverageKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+#endif
 				refPicList0->bufferCr + integPosL0x + integPosL0y * refPicList0->strideCr,
 				refPicList0->strideCr,
 				refPicList1->bufferCr + integPosL1x + integPosL1y * refPicList1->strideCr,

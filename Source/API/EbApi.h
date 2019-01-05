@@ -31,17 +31,6 @@ extern "C" {
 /********************************
 * Defines
 ********************************/
-
-/** Assembly Types
-*/
-typedef enum EB_ASM {
-    EB_ASM_NON_AVX2,
-    EB_ASM_AVX2,
-    EB_ASM_TYPE_TOTAL,
-    EB_ASM_AVX512,
-    EB_ASM_TYPE_INVALID = ~0
-} EB_ASM;
-
 #define EB_SLICE           unsigned int
 #define EB_B_SLICE         0
 #define EB_P_SLICE         1
@@ -212,7 +201,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     signed int                targetSocket;                  // target socket to run on
 
     // ASM Type
-    EB_ASM			          asmType;                      // level of optimization to use.
+    unsigned int              asmType;                      // level of optimization to use.
 
     // Demo features
     unsigned int              speedControlFlag;             // dynamically change the encoding preset to meet the average speed defined in injectorFrameRate

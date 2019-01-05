@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 typedef struct EbConfig_s
-{        
+{
     /****************************************
      * File I/O
      ****************************************/
@@ -22,7 +22,7 @@ typedef struct EbConfig_s
     FILE                   *bufferFile;
 
     FILE                   *qpFile;
-    
+
     unsigned char          useQpFile;
 
     signed long long       frameRate;
@@ -45,9 +45,9 @@ typedef struct EbConfig_s
     unsigned char         **sequenceBuffer;
 
     unsigned char          latencyMode;
-    
+
     /****************************************
-     * // Interlaced Video 
+     * // Interlaced Video
      ****************************************/
     unsigned char        interlacedVideo;
     unsigned char        separateFields;
@@ -72,7 +72,7 @@ typedef struct EbConfig_s
      * DLF
      ****************************************/
     unsigned char        disableDlfFlag;
-    
+
     /****************************************
      * SAO
      ****************************************/
@@ -117,7 +117,7 @@ typedef struct EbConfig_s
      * MD Parameters
      ****************************************/
     unsigned char        constrainedIntra;
-      
+
     /****************************************
      * Rate Control
      ****************************************/
@@ -157,7 +157,7 @@ typedef struct EbConfig_s
     unsigned int         level;
 
     /****************************************
-     * On-the-fly Testing 
+     * On-the-fly Testing
      ****************************************/
     unsigned int         testUserData;
     unsigned char        eosFlag;
@@ -165,7 +165,7 @@ typedef struct EbConfig_s
     /****************************************
     * Optimization Type
     ****************************************/
-    EB_ASM					asmType;
+    unsigned int         asmType;
 
     // Channel info
     unsigned int      channelId;
