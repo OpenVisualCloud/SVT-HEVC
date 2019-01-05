@@ -2630,7 +2630,7 @@ EB_ERRORTYPE SignalDerivationEncDecKernelOq(
 		}
 	}
     else {
-        contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->sliceType == EB_I_PICTURE ? EB_FALSE : EB_TRUE;
+        contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->temporalLayerIndex == 0 ? EB_FALSE : EB_TRUE;
     }
 
     // Derive INTRA Injection Method
