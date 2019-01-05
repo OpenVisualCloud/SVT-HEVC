@@ -155,7 +155,7 @@ void SetSliceAndPictureChromaQpOffsets(
         else {
 
             int maxQpOffset = 3;
-            if (pictureControlSetPtr->sliceType == EB_I_SLICE) {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
                 pictureControlSetPtr->sliceCbQpOffset = -maxQpOffset;
                 pictureControlSetPtr->sliceCrQpOffset = -maxQpOffset;
             }
