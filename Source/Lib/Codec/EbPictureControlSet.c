@@ -636,13 +636,7 @@ EB_ERRORTYPE PictureParentControlSetCtor(
 		}
 	}
 
-    EB_U32 maxOisCand;
-    if ((initDataPtr->pictureWidth * initDataPtr->pictureHeight) >= INPUT_SIZE_4K_TH) {
-        maxOisCand = MAX(MAX_OIS_0, MAX_OIS_1);
-    }
-    else {
-        maxOisCand = MAX(MAX_OIS_0, MAX_OIS_2);
-    }
+    EB_U32 maxOisCand = MAX(MAX_OIS_0, MAX_OIS_2);
 
 	EB_MALLOC(OisCu32Cu16Results_t**, objectPtr->oisCu32Cu16Results, sizeof(OisCu32Cu16Results_t*) * objectPtr->lcuTotalCount, EB_N_PTR);
 

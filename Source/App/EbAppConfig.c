@@ -896,7 +896,6 @@ uint32_t GetNumberOfChannels(
 			return channelNumber;
 		}
 	}
-
 	return 1;
 }
 

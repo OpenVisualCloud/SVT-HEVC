@@ -38,6 +38,24 @@
 
 #define		RC_QPMOD_MAXQP					42
 
+
+static const EB_U8 MOD_QP_OFFSET_LAYER_ARRAY[MAX_HIERARCHICAL_LEVEL][MAX_TEMPORAL_LAYERS] = { // [Highest Temporal Layer] [Temporal Layer Index]
+    { 1 },
+    { 5, 6 },
+    { 3, 4, 5 },
+    { 1, 3, 5, 5 },
+    { 1, 3, 5, 5, 6 },
+    { 1, 3, 5, 5, 6, 7 }
+};
+static const EB_U8 QP_OFFSET_LAYER_ARRAY[MAX_HIERARCHICAL_LEVEL][MAX_TEMPORAL_LAYERS] = { // [Highest Temporal Layer] [Temporal Layer Index]
+    { 1 },
+    { 5, 6 },
+    { 3, 4, 5 },
+    { 1, 2, 4, 5 },
+    { 1, 2, 4, 5, 6 },
+    { 1, 2, 4, 5, 6, 7 }
+};
+
 static const EB_U32  RATE_PERCENTAGE_LAYER_ARRAY[EB_MAX_TEMPORAL_LAYERS][EB_MAX_TEMPORAL_LAYERS] = {
     {100,  0,  0,  0,  0,  0 },
     { 70, 30,  0,  0,  0,  0 },

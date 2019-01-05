@@ -78,7 +78,6 @@ typedef struct EbMemoryMapEntry
 //  (MSVC) because it doesn't support the C99 header file stdint.h.
 //  All other compilers should support the stdint.h C99 standard types.
 
-
 /** The EB_BOOL type is intended to be used to represent a true or a false
 value when passing parameters to and from the svt API.  The
 EB_BOOL is a 32 bit quantity and is aligned on a 32 bit word boundary.
@@ -201,7 +200,6 @@ typedef struct EbPerformanceContext_s {
 
     uint64_t                  startsTime;
     uint64_t                  startuTime;
-
     uint64_t                  frameCount;
 
     double                  averageSpeed;
