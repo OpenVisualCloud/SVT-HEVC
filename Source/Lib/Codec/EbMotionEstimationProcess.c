@@ -857,7 +857,7 @@ void DeriveSimilarCollocatedFlag(
    // Similairty detector for collocated LCU -- all layers
    pictureControlSetPtr->similarColocatedLcuArrayAllLayers[lcuIndex] = EB_FALSE;
 
-   if (pictureControlSetPtr->sliceType != EB_I_SLICE) {
+   if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
 
        EB_U8                   refMean, curMean;
        EB_U16                  refVar, curVar;
@@ -956,10 +956,10 @@ void StationaryEdgeOverUpdateOverTimeLcuPart2(
     
         EB_BOOL lowSad = EB_FALSE;
     
-        if (pictureControlSetPtr->sliceType == EB_B_SLICE) {
+        if (pictureControlSetPtr->sliceType == EB_B_PICTURE) {
             GetMeDist(pictureControlSetPtr, lcuIndex, &meDist);
         }
-        lowSad = (pictureControlSetPtr->sliceType != EB_B_SLICE) ?
+        lowSad = (pictureControlSetPtr->sliceType != EB_B_PICTURE) ?
     
             EB_FALSE : (meDist < 64 * 64 * lowSadTh) ? EB_TRUE : EB_FALSE;
     
@@ -1106,7 +1106,7 @@ void* MotionEstimationKernel(void *inputPtr)
         }
 
         // Motion Estimation
-        if (pictureControlSetPtr->sliceType != EB_I_SLICE) {
+        if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
 
             // LCU Loop
             for (yLcuIndex = yLcuStartIndex; yLcuIndex < yLcuEndIndex; ++yLcuIndex) {
@@ -1245,7 +1245,7 @@ void* MotionEstimationKernel(void *inputPtr)
 		// Calculate the ME Distortion and OIS Historgrams
         EbBlockOnMutex(pictureControlSetPtr->rcDistortionHistogramMutex);
 		if (sequenceControlSetPtr->staticConfig.rateControlMode){
-			if (pictureControlSetPtr->sliceType != EB_I_SLICE){
+			if (pictureControlSetPtr->sliceType != EB_I_PICTURE){
 				EB_U16 sadIntervalIndex;
 				for (yLcuIndex = yLcuStartIndex; yLcuIndex < yLcuEndIndex; ++yLcuIndex) {
 					for (xLcuIndex = xLcuStartIndex; xLcuIndex < xLcuEndIndex; ++xLcuIndex) {

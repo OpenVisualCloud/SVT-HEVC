@@ -10,6 +10,7 @@ Build/linux/debug/
 Build/linux/release/
 Build/windows/Release/
 Build/windows/x64/
+Build/windows/lib/
 
 # Visual Studio user-specific files
 *.rsuser

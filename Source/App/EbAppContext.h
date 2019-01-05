@@ -31,7 +31,7 @@ typedef struct EbAppContext_s {
     EB_BUFFERHEADERTYPE                *reconBuffer;
 
 	// Instance Index
-	EB_U8								instanceIdx;
+	uint8_t								instanceIdx;
 
 } EbAppContext_t;
 
@@ -39,7 +39,7 @@ typedef struct EbAppContext_s {
 /********************************
  * External Function
  ********************************/
-extern EB_ERRORTYPE InitEncoder(EbConfig_t *config, EbAppContext_t *callbackData, EB_U32 instanceIdx);
-extern EB_ERRORTYPE DeInitEncoder(EbAppContext_t *callbackDataPtr, EB_U32 instanceIndex);
+extern EB_ERRORTYPE InitEncoder(EbConfig_t *config, EbAppContext_t *callbackData, uint32_t instanceIdx);
+extern EB_ERRORTYPE DeInitEncoder(EbAppContext_t *callbackDataPtr, uint32_t instanceIndex);
 
 #endif // EbAppContext_h

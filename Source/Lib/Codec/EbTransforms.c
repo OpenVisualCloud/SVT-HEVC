@@ -1188,7 +1188,7 @@ static const EB_U16 *MaskingMatrix[2][8][4] =//
     /****************** 4K ************************/
     {
         { MaskingMatrix4x4_Level0_4K, MaskingMatrix8x8_Level0_4K, MaskingMatrix16x16_Level0_4K, MaskingMatrix32x32_Level0_4K }, // Level 0 OFF
-        { MaskingMatrix4x4_Level1_4K, MaskingMatrix8x8_Level1_4K, MaskingMatrix16x16_Level1_4K, MaskingMatrix32x32_Level1_4K }, // Level 1 I_SLICE
+        { MaskingMatrix4x4_Level1_4K, MaskingMatrix8x8_Level1_4K, MaskingMatrix16x16_Level1_4K, MaskingMatrix32x32_Level1_4K }, // Level 1 I_PICTURE
         /*************************  L23_SETTING *************************/
         { MaskingMatrix4x4_Level2_4K, MaskingMatrix8x8_Level2_4K, MaskingMatrix16x16_Level2_4K, MaskingMatrix32x32_Level2_4K }, // Level 2 Base Intra
         { MaskingMatrix4x4_Level3_4K, MaskingMatrix8x8_Level1_MOD1_4K, MaskingMatrix16x16_Level1_4K, MaskingMatrix32x32_Level1_4K }, // Level 3 Base Inter
@@ -1202,7 +1202,7 @@ static const EB_U16 *MaskingMatrix[2][8][4] =//
     /****************** 1080P ************************/
     {
         { MaskingMatrix4x4_Level0_1080p, MaskingMatrix8x8_Level0_1080p, MaskingMatrix16x16_Level0_1080p, MaskingMatrix32x32_Level0_1080p }, // Level 0 OFF
-        { MaskingMatrix4x4_Level1_1080p, MaskingMatrix8x8_Level1_1080p, MaskingMatrix16x16_Level1_1080p, MaskingMatrix32x32_Level1_1080p }, // Level 1 I_SLICE
+        { MaskingMatrix4x4_Level1_1080p, MaskingMatrix8x8_Level1_1080p, MaskingMatrix16x16_Level1_1080p, MaskingMatrix32x32_Level1_1080p }, // Level 1 I_PICTURE
         /*************************  L23_SETTING *************************/
         { MaskingMatrix4x4_Level2_1080p, MaskingMatrix8x8_Level2_1080p, MaskingMatrix16x16_Level2_1080p, MaskingMatrix32x32_Level2_1080p }, // Level 2 Base Intra
         { MaskingMatrix4x4_Level2_1080p, MaskingMatrix8x8_Level2_1080p, MaskingMatrix16x16_Level2_1080p, MaskingMatrix32x32_Level2_1080p }, // Level 3 Base Inter
@@ -2978,7 +2978,7 @@ void UnifiedQuantizeInvQuantize(
 	EB_U32                        qp,
 	EB_U32                        bitDepth,
 	EB_U32                        areaSize,
-	EB_SLICE                      sliceType,
+	EB_PICTURE                      sliceType,
 	EB_U32                       *yCountNonZeroCoeffs,
 	EB_U8                         transCoeffShape,
 	EB_U8		                  cleanSparseCeoffPfEncDec,
@@ -3010,7 +3010,7 @@ void UnifiedQuantizeInvQuantize(
 
 		const EB_U32 transformShiftNum = MAX_TR_DYNAMIC_RANGE - internalBitDepth - Log2f(areaSize);
 		const EB_S32 shiftedQBits = QUANT_SHIFT + qpPer + transformShiftNum;
-		const EB_U32 q_offset = ((sliceType == EB_I_SLICE || sliceType == EB_IDR_SLICE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
+		const EB_U32 q_offset = ((sliceType == EB_I_PICTURE || sliceType == EB_IDR_PICTURE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
 
 		//for the iQuant
 		const EB_S32 shiftedFFunc = (qpPer > 8) ? (EB_S32)FFunc[qpRem] << (qpPer - 2) : (EB_S32)FFunc[qpRem] << qpPer; // this is 6+8+TRANS_BIT_INCREMENT
@@ -3055,7 +3055,7 @@ void UnifiedQuantizeInvQuantize(
 
         const EB_U32 transformShiftNum = MAX_TR_DYNAMIC_RANGE - internalBitDepth - Log2f(areaSize);
         const EB_S32 shiftedQBits = QUANT_SHIFT + qpPer + transformShiftNum;
-        const EB_U32 q_offset = ((sliceType == EB_I_SLICE || sliceType == EB_IDR_SLICE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
+        const EB_U32 q_offset = ((sliceType == EB_I_PICTURE || sliceType == EB_IDR_PICTURE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
 
         // iQuant
         const EB_S32 shiftedFFunc = (qpPer > 8) ? (EB_S32)FFunc[qpRem] << (qpPer - 2) : (EB_S32)FFunc[qpRem] << qpPer; // this is 6+8+TRANS_BIT_INCREMENT
@@ -3097,7 +3097,7 @@ void UnifiedQuantizeInvQuantize(
 
         const EB_U32 transformShiftNum = MAX_TR_DYNAMIC_RANGE - internalBitDepth - Log2f(areaSize);
         const EB_S32 shiftedQBits = QUANT_SHIFT + qpPer + transformShiftNum;
-        const EB_U32 q_offset = ((sliceType == EB_I_SLICE || sliceType == EB_IDR_SLICE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
+        const EB_U32 q_offset = ((sliceType == EB_I_PICTURE || sliceType == EB_IDR_PICTURE) ? QUANT_OFFSET_I : QUANT_OFFSET_P) << (shiftedQBits - 9);
 
         //for the iQuant
         const EB_S32 shiftedFFunc = (qpPer > 8) ? (EB_S32)FFunc[qpRem] << (qpPer - 2) : (EB_S32)FFunc[qpRem] << qpPer; // this is 6+8+TRANS_BIT_INCREMENT
@@ -3188,7 +3188,7 @@ void UnifiedQuantizeInvQuantize(
 
 
 
-        if (cleanSparseCeoffPfEncDec && areaSize >= 8 && yCountNonZeroCoeffs && (*yCountNonZeroCoeffs) && sliceType != EB_I_SLICE){
+        if (cleanSparseCeoffPfEncDec && areaSize >= 8 && yCountNonZeroCoeffs && (*yCountNonZeroCoeffs) && sliceType != EB_I_PICTURE){
             EB_U32 coeffLocation = 0;
             EB_U32 rowIndex = 0;
             EB_U32 colIndex = 0;
@@ -3358,7 +3358,7 @@ EB_ERRORTYPE EncodeTransform(
                 );
         }
         else {
-            (*transformFunctionTableEncode1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_PRE_AVX2 : ((ASM_TYPES & PREAVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
+            (*transformFunctionTableEncode1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_C : ((ASM_TYPES & PREAVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
                 residualBuffer,
                 residualStride,
                 coeffBuffer,
@@ -3381,7 +3381,7 @@ EB_ERRORTYPE EncodeTransform(
                     );
             }
             else {
-                (*PfreqN2TransformTable1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_PRE_AVX2 : ((ASM_TYPES & AVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
+                (*PfreqN2TransformTable1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_C : ((ASM_TYPES & AVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
                     residualBuffer,
                     residualStride,
                     coeffBuffer,
@@ -3403,7 +3403,7 @@ EB_ERRORTYPE EncodeTransform(
                 bitIncrement);
         }
         else {
-            (*PfreqN4TransformTable1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_PRE_AVX2 : ((ASM_TYPES & AVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
+            (*PfreqN4TransformTable1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_C : ((ASM_TYPES & AVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
                 residualBuffer,
                 residualStride,
                 coeffBuffer,

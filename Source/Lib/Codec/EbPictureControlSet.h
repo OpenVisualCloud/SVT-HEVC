@@ -147,7 +147,7 @@ typedef struct PictureControlSet_s
     EbObjectWrapper_t                    *refPicPtrArray[MAX_NUM_OF_REF_PIC_LIST];
 
     EB_U8                                 refPicQpArray[MAX_NUM_OF_REF_PIC_LIST];
-    EB_SLICE                              refSliceTypeArray[MAX_NUM_OF_REF_PIC_LIST];    
+    EB_PICTURE                              refSliceTypeArray[MAX_NUM_OF_REF_PIC_LIST];    
     
     // GOP
     EB_U64                                pictureNumber;        
@@ -176,7 +176,7 @@ typedef struct PictureControlSet_s
     EB_BOOL                               constrainedIntraFlag;
 
     // Slice Type
-    EB_SLICE                              sliceType;
+    EB_PICTURE                              sliceType;
     
     // Rate Control
     EB_U8                                 pictureQp;
@@ -353,7 +353,7 @@ typedef struct PictureParentControlSet_s
 
     EbObjectWrapper_t                    *ebInputWrapperPtr;
 
-    EB_SLICE                              sliceType;                                 
+    EB_PICTURE                              sliceType;                                 
     NalUnitType                           nalUnit;
     EB_U8                                 predStructIndex;  
     EB_BOOL                               useRpsInSps;   

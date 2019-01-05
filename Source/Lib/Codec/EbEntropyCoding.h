@@ -71,14 +71,14 @@ extern EB_ERRORTYPE ResetEntropyCoder(
     EncodeContext_t       *encodeContextPtr,
     EntropyCoder_t        *entropyCoderPtr,
     EB_U32                 qp,
-    EB_SLICE               sliceType);
+    EB_PICTURE               sliceType);
 
 extern EB_ERRORTYPE FlushBitstream(
     EB_PTR outputBitstreamPtr);
 
 extern EB_ERRORTYPE EncodeAUD(
     Bitstream_t *bitstreamPtr,
-    EB_SLICE     sliceType,
+    EB_PICTURE     sliceType,
     EB_U32       temporalId); 
 
 extern EB_ERRORTYPE ComputeProfileTierLevelInfo(

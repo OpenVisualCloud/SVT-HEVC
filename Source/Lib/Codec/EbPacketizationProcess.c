@@ -73,7 +73,7 @@ void* PacketizationKernel(void *inputPtr)
     EB_U32                          refQpIndex = 0;       
     EB_U32                          packetizationQp;
        
-    EB_SLICE                        sliceType;
+    EB_PICTURE                        sliceType;
     
     for(;;) {
     
@@ -110,8 +110,8 @@ void* PacketizationKernel(void *inputPtr)
         outputStreamPtr->pts = pictureControlSetPtr->ParentPcsPtr->ebInputPtr->pts;
         outputStreamPtr->dts = pictureControlSetPtr->ParentPcsPtr->decodeOrder - (EB_U64)(1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 1;
         outputStreamPtr->sliceType = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag ? 
-                                     pictureControlSetPtr->ParentPcsPtr->idrFlag ? EB_IDR_SLICE :
-                                     pictureControlSetPtr->sliceType : EB_NON_REF_SLICE;
+                                     pictureControlSetPtr->ParentPcsPtr->idrFlag ? EB_IDR_PICTURE :
+                                     pictureControlSetPtr->sliceType : EB_NON_REF_PICTURE;
 
         outputStreamPtr->pAppPrivate = pictureControlSetPtr->ParentPcsPtr->ebInputPtr->pAppPrivate;
         // Get Empty Rate Control Input Tasks
@@ -222,7 +222,7 @@ void* PacketizationKernel(void *inputPtr)
 
                     //Code for using 64x64 Block
                     if (( lcuWidth == MAX_LCU_SIZE) && (lcuHeight == MAX_LCU_SIZE)){
-                        if(pictureControlSetPtr->sliceType == EB_I_SLICE){
+                        if(pictureControlSetPtr->sliceType == EB_I_PICTURE){
 
                        
                             intraSadIntervalIndex = pictureControlSetPtr->ParentPcsPtr->intraSadIntervalIndex[lcuCodingOrder];
@@ -244,7 +244,7 @@ void* PacketizationKernel(void *inputPtr)
                     EB_U32 blkSize = BLKSIZE;
                     EbBlockOnMutex(sequenceControlSetPtr->encodeContextPtr->rateTableUpdateMutex);
                     {
-                        if(pictureControlSetPtr->sliceType == EB_I_SLICE){
+                        if(pictureControlSetPtr->sliceType == EB_I_PICTURE){
                          //   SVT_LOG("Update After: %d\n", pictureControlSetPtr->pictureNumber);
                             if (sequenceControlSetPtr->inputResolution < INPUT_SIZE_4K_RANGE){
                                 for (sadIntervalIndex = 0; sadIntervalIndex < NUMBER_OF_INTRA_SAD_INTERVALS; sadIntervalIndex++){
@@ -433,7 +433,7 @@ void* PacketizationKernel(void *inputPtr)
         sequenceControlSetPtr->picTimingSei.picStruct = 0;
 
         if( sequenceControlSetPtr->staticConfig.bufferingPeriodSEI && 
-            pictureControlSetPtr->sliceType == EB_I_SLICE && 
+            pictureControlSetPtr->sliceType == EB_I_PICTURE && 
             sequenceControlSetPtr->staticConfig.videoUsabilityInfo &&
             (sequenceControlSetPtr->videoUsabilityInfoPtr->hrdParametersPtr->nalHrdParametersPresentFlag || sequenceControlSetPtr->videoUsabilityInfoPtr->hrdParametersPtr->vclHrdParametersPresentFlag)) 
         {                           
@@ -552,7 +552,7 @@ void* PacketizationKernel(void *inputPtr)
             double latency = 0.0;
             EB_U64 finishTimeSeconds = 0;
             EB_U64 finishTimeuSeconds = 0;
-            EbFinishTime((unsigned long long*)&finishTimeSeconds, (unsigned long long*)&finishTimeuSeconds);
+            EbFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
 
             EbComputeOverallElapsedTimeMs(
                 queueEntryPtr->startTimeSeconds,

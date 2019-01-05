@@ -323,7 +323,7 @@ void* PictureManagerKernel(void *inputPtr)
 			   }
 
 			   // If there was an I-frame or Scene Change, then cleanup the Reference Queue's Dependent Counts
-			   if (pictureControlSetPtr->sliceType == EB_I_SLICE)
+			   if (pictureControlSetPtr->sliceType == EB_I_PICTURE)
 			   {
 
 				   referenceQueueIndex = encodeContextPtr->referencePictureQueueHeadIndex;
@@ -416,8 +416,8 @@ void* PictureManagerKernel(void *inputPtr)
 
 			   // Copy the reference lists into the inputEntry and 
 			   // set the Reference Counts Based on Temporal Layer and how many frames are active
-			   pictureControlSetPtr->refList0Count = (pictureControlSetPtr->sliceType == EB_I_SLICE) ? 0 : (EB_U8)predPositionPtr->refList0.referenceListCount;
-			   pictureControlSetPtr->refList1Count = (pictureControlSetPtr->sliceType == EB_I_SLICE) ? 0 : (EB_U8)predPositionPtr->refList1.referenceListCount;
+			   pictureControlSetPtr->refList0Count = (pictureControlSetPtr->sliceType == EB_I_PICTURE) ? 0 : (EB_U8)predPositionPtr->refList0.referenceListCount;
+			   pictureControlSetPtr->refList1Count = (pictureControlSetPtr->sliceType == EB_I_PICTURE) ? 0 : (EB_U8)predPositionPtr->refList1.referenceListCount;
 			   inputEntryPtr->list0Ptr = &predPositionPtr->refList0;
 			   inputEntryPtr->list1Ptr = &predPositionPtr->refList1;
 
@@ -589,7 +589,7 @@ void* PictureManagerKernel(void *inputPtr)
                 }
                 
                 // Check RefList1 Availability
-                if(entryPictureControlSetPtr->sliceType == EB_B_SLICE) {
+                if(entryPictureControlSetPtr->sliceType == EB_B_PICTURE) {
 					if (entryPictureControlSetPtr->refList1Count){
                         // If Reference is valid (non-zero), update the availability
                         if(inputEntryPtr->list1Ptr->referenceList != (EB_S32) INVALID_POC) {
@@ -724,10 +724,10 @@ void* PictureManagerKernel(void *inputPtr)
 
                     EB_MEMSET(ChildPictureControlSetPtr->refPicQpArray, 0,  2 * sizeof(EB_U8));
 
-                    EB_MEMSET(ChildPictureControlSetPtr->refSliceTypeArray, 0,  2 * sizeof(EB_SLICE));
+                    EB_MEMSET(ChildPictureControlSetPtr->refSliceTypeArray, 0,  2 * sizeof(EB_PICTURE));
                    
                     // Configure List0
-                    if ((entryPictureControlSetPtr->sliceType == EB_P_SLICE) || (entryPictureControlSetPtr->sliceType == EB_B_SLICE)) {
+                    if ((entryPictureControlSetPtr->sliceType == EB_P_PICTURE) || (entryPictureControlSetPtr->sliceType == EB_B_PICTURE)) {
                     
 						if (entryPictureControlSetPtr->refList0Count){
                             referenceQueueIndex = (EB_U32) CIRCULAR_ADD(
@@ -759,7 +759,7 @@ void* PictureManagerKernel(void *inputPtr)
                     }
                     
                     // Configure List1
-                    if (entryPictureControlSetPtr->sliceType == EB_B_SLICE) {
+                    if (entryPictureControlSetPtr->sliceType == EB_B_PICTURE) {
                         
 						if (entryPictureControlSetPtr->refList1Count){
                             referenceQueueIndex = (EB_U32) CIRCULAR_ADD(
@@ -793,9 +793,9 @@ void* PictureManagerKernel(void *inputPtr)
 
                     // Adjust the Slice-type if the Lists are Empty, but don't reset the Prediction Structure
                     entryPictureControlSetPtr->sliceType =
-                        (entryPictureControlSetPtr->refList1Count > 0) ? EB_B_SLICE :
-                        (entryPictureControlSetPtr->refList0Count > 0) ? EB_P_SLICE : 
-                                                                         EB_I_SLICE;
+                        (entryPictureControlSetPtr->refList1Count > 0) ? EB_B_PICTURE :
+                        (entryPictureControlSetPtr->refList0Count > 0) ? EB_P_PICTURE : 
+                                                                         EB_I_PICTURE;
 
 
                     // Increment the sequenceControlSet Wrapper's live count by 1 for only the pictures which are used as reference

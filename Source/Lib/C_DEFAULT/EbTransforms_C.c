@@ -167,7 +167,7 @@ void UpdateQiQCoef_R(
 	const EB_U32      areaSize,
 	EB_U32           *nonzerocoeff,
 	EB_U32            componentType,
-	EB_SLICE          sliceType,
+	EB_PICTURE          sliceType,
 	EB_U32            temporalLayer,
 	EB_U32            enableCbflag,
 	EB_U8             enableContouringQCUpdateFlag)
@@ -180,7 +180,7 @@ void UpdateQiQCoef_R(
 	//EB_U32 colIndex = 0;
 
 
-    if ((*nonzerocoeff < 10) && enableContouringQCUpdateFlag && sliceType == EB_I_SLICE && temporalLayer == 0 && componentType == 0){
+    if ((*nonzerocoeff < 10) && enableContouringQCUpdateFlag && sliceType == EB_I_PICTURE && temporalLayer == 0 && componentType == 0){
 
 		coeffLocation = (areaSize - 1) + (areaSize - 1) * coeffStride;
 
@@ -216,7 +216,7 @@ void UpdateQiQCoef(
 	const EB_U32      areaSize,
 	EB_U32           *nonzerocoeff,
 	EB_U32            componentType,
-	EB_SLICE          sliceType,
+	EB_PICTURE          sliceType,
 	EB_U32            temporalLayer,
 	EB_U32            enableCbflag,
 	EB_U8             enableContouringQCUpdateFlag)
@@ -229,7 +229,7 @@ void UpdateQiQCoef(
 
 
 
-    if ((*nonzerocoeff < 10) && enableContouringQCUpdateFlag && sliceType == EB_I_SLICE && temporalLayer == 0 && componentType == 0){
+    if ((*nonzerocoeff < 10) && enableContouringQCUpdateFlag && sliceType == EB_I_PICTURE && temporalLayer == 0 && componentType == 0){
 
         coeffLocation = (areaSize - 1) + (areaSize - 1) * coeffStride;
 

@@ -122,7 +122,7 @@ static void SetCfgErrorFile                     (const char *value, EbConfig_t *
     if (cfg->errorLogFile) { fclose(cfg->errorLogFile); }
     FOPEN(cfg->errorLogFile,value, "w+");
 };
-static void SetCfgReconFile(const char *value, EbConfig_t *cfg)
+static void SetCfgReconFile                     (const char *value, EbConfig_t *cfg)
 {
     if (cfg->reconFile) { fclose(cfg->reconFile); }
     FOPEN(cfg->reconFile,value, "wb");
@@ -152,7 +152,7 @@ static void SetFrameRateDenominator             (const char *value, EbConfig_t *
 static void SetEncoderBitDepth                  (const char *value, EbConfig_t *cfg) {cfg->encoderBitDepth                  = strtoul(value, NULL, 0);}
 static void SetcompressedTenBitFormat           (const char *value, EbConfig_t *cfg) {cfg->compressedTenBitFormat           = strtoul(value, NULL, 0);}
 static void SetBaseLayerSwitchMode              (const char *value, EbConfig_t *cfg) {cfg->baseLayerSwitchMode              = (EB_BOOL) strtoul(value, NULL, 0);};
-static void SetencMode                          (const char *value, EbConfig_t *cfg) {cfg->encMode                          = (EB_U8)strtoul(value, NULL, 0);};
+static void SetencMode                          (const char *value, EbConfig_t *cfg) {cfg->encMode                          = (uint8_t)strtoul(value, NULL, 0);};
 static void SetCfgIntraPeriod                   (const char *value, EbConfig_t *cfg) {cfg->intraPeriod                      = strtol(value,  NULL, 0);};
 static void SetCfgIntraRefreshType              (const char *value, EbConfig_t *cfg) {cfg->intraRefreshType                 = strtol(value,  NULL, 0);};
 static void SetHierarchicalLevels               (const char *value, EbConfig_t *cfg) {cfg->hierarchicalLevels               = strtol(value, NULL, 0); };
@@ -172,7 +172,7 @@ static void SetCfgSearchAreaWidth               (const char *value, EbConfig_t *
 static void SetCfgSearchAreaHeight              (const char *value, EbConfig_t *cfg) {cfg->searchAreaHeight                 = strtoul(value, NULL, 0);};
 static void SetCfgUseDefaultMeHme               (const char *value, EbConfig_t *cfg) {cfg->useDefaultMeHme                  = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetEnableConstrainedIntra           (const char *value, EbConfig_t *cfg) {cfg->constrainedIntra                 = (EB_BOOL)strtoul(value, NULL, 0);};
-static void SetCfgTune                          (const char *value, EbConfig_t *cfg) {cfg->tune                             = (EB_U8)strtoul(value, NULL, 0); };
+static void SetCfgTune                          (const char *value, EbConfig_t *cfg) {cfg->tune                             = (uint8_t)strtoul(value, NULL, 0); };
 static void SetBitRateReduction                 (const char *value, EbConfig_t *cfg) {cfg->bitRateReduction                 = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetImproveSharpness                 (const char *value, EbConfig_t *cfg) {cfg->improveSharpness                 = (EB_BOOL)strtol(value,  NULL, 0);};
 static void SetVideoUsabilityInfo               (const char *value, EbConfig_t *cfg) {cfg->videoUsabilityInfo               = strtol(value,  NULL, 0);};
@@ -188,7 +188,7 @@ static void SetProfile                          (const char *value, EbConfig_t *
 static void SetTier                             (const char *value, EbConfig_t *cfg) {cfg->tier                             = strtol(value,  NULL, 0);};
 static void SetLevel                            (const char *value, EbConfig_t *cfg) {
 	if (strtoul( value, NULL,0) != 0 || EB_STRCMP(value, "0") == 0 )
-		cfg->level = (EB_U32)(10*strtod(value,  NULL));
+		cfg->level = (uint32_t)(10*strtod(value,  NULL));
 	else
 		cfg->level = 9999999;
 };
@@ -203,11 +203,10 @@ static void SetInjectorFrameRate                (const char *value, EbConfig_t *
         cfg->injectorFrameRate = cfg->injectorFrameRate << 16;
     }
 }
-
-static void SetLatencyMode                      (const char *value, EbConfig_t *cfg)  {cfg->latencyMode                     = (EB_U8)strtol(value, NULL, 0);};
-static void SetAsmType                          (const char *value, EbConfig_t *cfg)  {cfg->asmType                         = (EB_ASM)strtoul(value, NULL, 0); };
-static void SetLogicalProcessors                (const char *value, EbConfig_t *cfg)  {cfg->logicalProcessors               = (EB_U32)strtoul(value, NULL, 0);};
-static void SetTargetSocket                     (const char *value, EbConfig_t *cfg)  {cfg->targetSocket                    = (EB_S32)strtol(value, NULL, 0);};
+static void SetLatencyMode                      (const char *value, EbConfig_t *cfg)  {cfg->latencyMode                     = (uint8_t)strtol(value, NULL, 0);};
+static void SetAsmType                          (const char *value, EbConfig_t *cfg)  {cfg->asmType                         = (uint32_t)strtoul(value, NULL, 0); };
+static void SetLogicalProcessors                (const char *value, EbConfig_t *cfg)  {cfg->logicalProcessors               = (uint32_t)strtoul(value, NULL, 0);};
+static void SetTargetSocket                     (const char *value, EbConfig_t *cfg)  {cfg->targetSocket                    = (int32_t)strtol(value, NULL, 0);};
 
 enum cfg_type{
     SINGLE_INPUT,   // Configuration parameters that have only 1 value input
@@ -364,7 +363,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
 
     configPtr->sceneChangeDetection                 = 1;
     configPtr->rateControlMode                      = 0;
-    configPtr->lookAheadDistance                    = (EB_U32)~0;
+    configPtr->lookAheadDistance                    = (uint32_t)~0;
     configPtr->targetBitRate                        = 7000000;
     configPtr->maxQpAllowed                         = 48;
     configPtr->minQpAllowed                         = 10;
@@ -476,10 +475,10 @@ void EbConfigDtor(EbConfig_t *configPtr)
 /**********************************
  * File Size
  **********************************/
-static int findFileSize(
+static int32_t findFileSize(
     FILE * const pFile)
 {
-    int fileSize;
+    int32_t fileSize;
 
     fseek(pFile, 0, SEEK_END);
     fileSize = ftell(pFile);
@@ -492,12 +491,12 @@ static int findFileSize(
  * Line Split
  **********************************/
 static void lineSplit(
-    unsigned int   *argc,
+    uint32_t       *argc,
     char           *argv  [CONFIG_FILE_MAX_ARG_COUNT],
-    unsigned int    argLen[CONFIG_FILE_MAX_ARG_COUNT],
+    uint32_t        argLen[CONFIG_FILE_MAX_ARG_COUNT],
     char           *linePtr)
 {
-    unsigned int i=0;
+    uint32_t i=0;
     *argc = 0;
 
     while((*linePtr != CONFIG_FILE_NEWLINE_CHAR) &&
@@ -541,10 +540,10 @@ static void lineSplit(
 **********************************/
 static void SetConfigValue(
 	EbConfig_t *config,
-	char *name,
-	char *value)
+	char       *name,
+	char       *value)
 {
-	int i=0;
+	int32_t i=0;
 
 	while(config_entry[i].name != NULL) {
 		if(EB_STRCMP(config_entry[i].name, name) == 0)  {
@@ -562,19 +561,19 @@ static void SetConfigValue(
 static void ParseConfigFile(
 	EbConfig_t *config,
 	char       *buffer,
-	int         size)
+	int32_t         size)
 {
-	unsigned int argc;
+	uint32_t argc;
 	char *argv[CONFIG_FILE_MAX_ARG_COUNT];
-	unsigned int argLen[CONFIG_FILE_MAX_ARG_COUNT];
+	uint32_t argLen[CONFIG_FILE_MAX_ARG_COUNT];
 
 	char varName[CONFIG_FILE_MAX_VAR_LEN];
 	char varValue[CONFIG_FILE_MAX_ARG_COUNT][CONFIG_FILE_MAX_VAR_LEN];
 
-	unsigned int valueIndex;
+	uint32_t valueIndex;
 
-	unsigned int commentSectionFlag = 0;
-	unsigned int newLineFlag = 0;
+	uint32_t commentSectionFlag = 0;
+	uint32_t newLineFlag = 0;
 
 	// Keep looping until we process the entire file
 	while(size--) {
@@ -621,13 +620,13 @@ static void ParseConfigFile(
 /******************************************
 * Find Token
 ******************************************/
-static int FindToken(
-	int             argc,
+static int32_t FindToken(
+	int32_t         argc,
 	char * const    argv[],
 	char const *    token,
 	char*           configStr)
 {
-	int return_error = -1;
+	int32_t return_error = -1;
 
 	while((argc > 0) && (return_error != 0)) {
 		return_error = EB_STRCMP(argv[--argc], token);
@@ -642,22 +641,22 @@ static int FindToken(
 /**********************************
 * Read Config File
 **********************************/
-static int ReadConfigFile(
+static int32_t ReadConfigFile(
 	EbConfig_t  *config,
 	char		*configPath,
-	EB_U32		 instanceIdx)
+	uint32_t     instanceIdx)
 {
-	int return_error = 0;
+	int32_t return_error = 0;
 
 	// Open the config file
 	FOPEN(config->configFile, configPath, "rb");
 
 	if (config->configFile != (FILE*) NULL) {
-		int configFileSize = findFileSize(config->configFile);
+		int32_t configFileSize = findFileSize(config->configFile);
 		char *configFileBuffer = (char*) malloc(configFileSize);
 
 		if (configFileBuffer != (char *) NULL) {
-			int resultSize = (int) fread(configFileBuffer, 1, configFileSize, config->configFile);
+			int32_t resultSize = (int32_t) fread(configFileBuffer, 1, configFileSize, config->configFile);
 
 			if (resultSize == configFileSize) {
 				ParseConfigFile(config, configFileBuffer, configFileSize);
@@ -684,7 +683,7 @@ static int ReadConfigFile(
 /******************************************
 * Verify Settings
 ******************************************/
-static EB_ERRORTYPE VerifySettings(EbConfig_t *config, unsigned int channelNumber)
+static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
 {
 	EB_ERRORTYPE return_error = EB_ErrorNone;
 
@@ -752,18 +751,18 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, unsigned int channelNumbe
 /******************************************
  * Find Token for multiple inputs
  ******************************************/
-int FindTokenMultipleInputs(
-    int             argc,
+int32_t FindTokenMultipleInputs(
+    int32_t         argc,
     char* const     argv[],
     const char*     token,
 	char**          configStr)
 {
-	int return_error = -1;
-	int done = 0;
+	int32_t return_error = -1;
+	int32_t done = 0;
 	while((argc > 0) && (return_error != 0)) {
 		return_error = EB_STRCMP(argv[--argc], token);
 		if (return_error == 0) {
-			int count;
+			int32_t count;
 			for (count=0; count < MAX_CHANNEL_NUMBER  ; ++count){
 				if (done ==0){
 					if (argv[argc + count + 1] ){
@@ -789,11 +788,13 @@ int FindTokenMultipleInputs(
 	return return_error;
 }
 
-unsigned int GetHelp(int argc, char *const argv[])
+uint32_t GetHelp(
+    int32_t     argc,
+    char *const argv[])
 {
 	char config_string[COMMAND_LINE_MAX_SIZE];
     if (FindToken(argc, argv, HELP_TOKEN, config_string) == 0) {
-        int token_index = -1;
+        int32_t token_index = -1;
 
         printf("\n%-25s\t%-25s\t%-25s\t\n\n" ,"TOKEN", "DESCRIPTION", "INPUT TYPE");
         printf("%-25s\t%-25s\t%-25s\t\n" ,"-nch", "NumberOfChannels", "Single input");
@@ -811,49 +812,33 @@ unsigned int GetHelp(int argc, char *const argv[])
 /******************************************************
 * Get the number of channels and validate it with input
 ******************************************************/
-unsigned int GetNumberOfChannels(int argc, char *const argv[])
+uint32_t GetNumberOfChannels(
+    int32_t     argc,
+    char *const argv[])
 {
 	char config_string[COMMAND_LINE_MAX_SIZE];
-	unsigned int channelNumber;
+	uint32_t channelNumber;
 	if (FindToken(argc, argv, CHANNEL_NUMBER_TOKEN, config_string) == 0) {
 
 		// Set the input file
 		channelNumber = strtol(config_string,  NULL, 0);
-		if ((channelNumber > (EB_U32) MAX_CHANNEL_NUMBER) || channelNumber == 0){
-			printf("Error: The number of channels has to be within the range [1,%u]\n",(unsigned int) MAX_CHANNEL_NUMBER);
+		if ((channelNumber > (uint32_t) MAX_CHANNEL_NUMBER) || channelNumber == 0){
+			printf("Error: The number of channels has to be within the range [1,%u]\n",(uint32_t) MAX_CHANNEL_NUMBER);
 			return 0;
 		}else{
 			return channelNumber;
 		}
 	}
-
 	return 1;
 }
 
-#ifdef _MSC_VER
-//  VS
-#define cpuid(info,x)    __cpuidex(info,x,0)
-#else
-//  GCC Inline Assembly
-void cpuid(int CPUInfo[4], int InfoType){
-	__asm__ __volatile__(
-		"cpuid":
-	"=a" (CPUInfo[0]),
-		"=b" (CPUInfo[1]),
-		"=c" (CPUInfo[2]),
-		"=d" (CPUInfo[3]) :
-		"a" (InfoType), "c" (0)
-		);
-}
-#endif
-
 void mark_token_as_read(
-    const char * token,
-    char * cmd_copy[],
-    int * cmd_token_cnt
+    const char  * token,
+    char        * cmd_copy[],
+    int32_t     * cmd_token_cnt
     )
 {
-    int cmd_copy_index;
+    int32_t cmd_copy_index;
     for (cmd_copy_index = 0; cmd_copy_index < *(cmd_token_cnt); ++cmd_copy_index) {
         if (!EB_STRCMP(cmd_copy[cmd_copy_index], token)) {
             cmd_copy[cmd_copy_index] = cmd_copy[--(*cmd_token_cnt)];
@@ -861,9 +846,10 @@ void mark_token_as_read(
     }
 }
 
-EB_BOOL is_negative_number(const char* string) {
-    int length = (int)strlen(string);
-    int index = 0;
+EB_BOOL is_negative_number(
+    const char* string) {
+    int32_t length = (int32_t)strlen(string);
+    int32_t index = 0;
     if (string[0] != '-') return EB_FALSE;
     for (index = 1; index < length; index++)
     {
@@ -875,26 +861,26 @@ EB_BOOL is_negative_number(const char* string) {
 
 #define SIZE_OF_ONE_FRAME_IN_BYTES(width, height,is16bit) ( ( ((width)*(height)*3)>>1 )<<is16bit)
 // Computes the number of frames in the input file
-EB_S32 ComputeFramesToBeEncoded(
+int32_t ComputeFramesToBeEncoded(
     EbConfig_t   *config)
 {
-    EB_U64 fileSize = 0;
-    EB_S32 frameCount = 0;
-    EB_U32 frameSize;
+    uint64_t fileSize = 0;
+    int32_t frameCount = 0;
+    uint32_t frameSize;
     if (config->inputFile) {
         fseeko64(config->inputFile, 0L, SEEK_END);
         fileSize = ftello64(config->inputFile);
     }
 
-    frameSize = SIZE_OF_ONE_FRAME_IN_BYTES(config->inputPaddedWidth, config->inputPaddedHeight, (EB_U8)((config->encoderBitDepth == 10) ? 1 : 0));
+    frameSize = SIZE_OF_ONE_FRAME_IN_BYTES(config->inputPaddedWidth, config->inputPaddedHeight, (uint8_t)((config->encoderBitDepth == 10) ? 1 : 0));
 
     if (frameSize == 0)
         return -1;
 
     if (config->encoderBitDepth == 10 && config->compressedTenBitFormat == 1)
-        frameCount = (EB_S32)(2 * ((double)fileSize / frameSize) / 1.25);
+        frameCount = (int32_t)(2 * ((double)fileSize / frameSize) / 1.25);
     else
-        frameCount = (EB_S32)(fileSize / frameSize);
+        frameCount = (int32_t)(fileSize / frameSize);
 
     if (frameCount == 0)
         return -1;
@@ -907,20 +893,20 @@ EB_S32 ComputeFramesToBeEncoded(
 * Read Command Line
 ******************************************/
 EB_ERRORTYPE ReadCommandLine(
-	int            argc,
+	int32_t        argc,
 	char *const    argv[],
 	EbConfig_t   **configs,
-	unsigned int   numChannels,
-	EB_ERRORTYPE *return_errors)
+	uint32_t       numChannels,
+	EB_ERRORTYPE  *return_errors)
 {
 
     EB_ERRORTYPE return_error = EB_ErrorBadParameter;
     char		    config_string[COMMAND_LINE_MAX_SIZE];		// for one input options
     char		   *config_strings[MAX_CHANNEL_NUMBER]; // for multiple input options
     char           *cmd_copy[MAX_NUM_TOKENS];                 // keep track of extra tokens
-    unsigned int    index           = 0;
-    int             cmd_token_cnt   = 0;                        // total number of tokens
-    int             token_index     = -1;
+    uint32_t    index           = 0;
+    int32_t             cmd_token_cnt   = 0;                        // total number of tokens
+    int32_t             token_index     = -1;
 
     for (index = 0; index < MAX_CHANNEL_NUMBER; ++index){
         config_strings[index] = (char*)malloc(sizeof(char)*COMMAND_LINE_MAX_SIZE);
@@ -1023,7 +1009,7 @@ EB_ERRORTYPE ReadCommandLine(
 
     // Print message for unprocessed tokens
     if (cmd_token_cnt > 0) {
-        EB_S32 cmd_copy_index;
+        int32_t cmd_copy_index;
         printf("Unprocessed tokens: ");
         for (cmd_copy_index = 0; cmd_copy_index < cmd_token_cnt; ++cmd_copy_index) {
             printf(" %s ", cmd_copy[cmd_copy_index]);
