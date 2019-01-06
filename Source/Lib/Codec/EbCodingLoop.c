@@ -2777,10 +2777,6 @@ EB_ERRORTYPE QpmDeriveBeaAndSkipQpmFlagLcu(
 		contextPtr->skipQpmFlag = EB_TRUE;
 	}
 
-	if (sequenceControlSetPtr->inputResolution < INPUT_SIZE_4K_RANGE){
-		contextPtr->skipQpmFlag = EB_TRUE;
-	}
-
     if (contextPtr->skipQpmFlag == EB_FALSE) {
         if (pictureControlSetPtr->ParentPcsPtr->picHomogenousOverTimeLcuPercentage > 30 && pictureControlSetPtr->sliceType != EB_I_PICTURE){
 			contextPtr->qpmQp = CLIP3(minQpAllowed, maxQpAllowed, pictureQp + 1);
@@ -2981,10 +2977,11 @@ EB_ERRORTYPE EncQpmDeriveDeltaQPForEachLeafLcu(
 
 
         deltaQp -= contextPtr->grassEnhancementFlag ? 3 : 0;
-
-		deltaQp = ((deltaQp < 0 && sequenceControlSetPtr->staticConfig.bitRateReduction && !sequenceControlSetPtr->staticConfig.improveSharpness) ||
-			(deltaQp > 0 && sequenceControlSetPtr->staticConfig.improveSharpness && !sequenceControlSetPtr->staticConfig.bitRateReduction)) ? 0 : deltaQp;
-
+		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE)
+			deltaQp = ((deltaQp < 0 && sequenceControlSetPtr->staticConfig.bitRateReduction && !sequenceControlSetPtr->staticConfig.improveSharpness) ||
+				(deltaQp > 0 && sequenceControlSetPtr->staticConfig.improveSharpness && !sequenceControlSetPtr->staticConfig.bitRateReduction)) ? 0 : deltaQp;
+		else
+			deltaQp = (deltaQp > 0 && sequenceControlSetPtr->staticConfig.improveSharpness) ? 0 : deltaQp;
 		if (sequenceControlSetPtr->staticConfig.rateControlMode == 1 || sequenceControlSetPtr->staticConfig.rateControlMode == 2){
 
 			if (qpmQp > RC_QPMOD_MAXQP){
