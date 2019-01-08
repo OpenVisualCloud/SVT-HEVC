@@ -2954,6 +2954,7 @@ EB_S8 Sort3Elements(EB_U32 a, EB_U32 b, EB_U32 c){
 
 
 EB_ERRORTYPE CheckZeroZeroCenter(
+    SequenceControlSet_t         *sequenceControlSetPtr,
 	EbPictureBufferDesc_t        *refPicPtr,
 	MeContext_t                  *contextPtr,
 	EB_U32                       lcuOriginX,
@@ -2970,10 +2971,9 @@ EB_ERRORTYPE CheckZeroZeroCenter(
 	EB_S16       originX            = (EB_S16)lcuOriginX;
 	EB_S16       originY            = (EB_S16)lcuOriginY;
     EB_U32       subsampleSad       = 1;
-#if HME_ENHANCED_CENTER_SEARCH
-	EB_S16                  padWidth = (EB_S16)MAX_LCU_SIZE - 1;
-	EB_S16                  padHeight = (EB_S16)MAX_LCU_SIZE - 1;
-#endif
+    EB_S16       padWidth = (EB_S16)MAX_LCU_SIZE - 1;
+    EB_S16       padHeight = (EB_S16)MAX_LCU_SIZE - 1;
+
 	searchRegionIndex = (EB_S16)refPicPtr->originX + originX +
 		((EB_S16)refPicPtr->originY + originY) * refPicPtr->strideY;
 
@@ -2986,26 +2986,32 @@ EB_ERRORTYPE CheckZeroZeroCenter(
 		lcuWidth);
 
     zeroMvSad = zeroMvSad << subsampleSad;
-#if HME_ENHANCED_CENTER_SEARCH
-	// FIX
-	// Correct the left edge of the Search Area if it is not on the reference Picture
-	*xSearchCenter = ((originX + *xSearchCenter) < -padWidth) ?
-		-padWidth - originX :
-		*xSearchCenter;
-	// Correct the right edge of the Search Area if its not on the reference Picture
-	*xSearchCenter = ((originX + *xSearchCenter) > (EB_S16)refPicPtr->width - 1) ?
-		*xSearchCenter - ((originX + *xSearchCenter) - ((EB_S16)refPicPtr->width - 1)) :
-		*xSearchCenter;
-	// Correct the top edge of the Search Area if it is not on the reference Picture
-	*ySearchCenter = ((originY + *ySearchCenter) < -padHeight) ?
-		-padHeight - originY :
-		*ySearchCenter;
-	// Correct the bottom edge of the Search Area if its not on the reference Picture
-	*ySearchCenter = ((originY + *ySearchCenter) > (EB_S16)refPicPtr->height - 1) ?
-		*ySearchCenter - ((originY + *ySearchCenter) - ((EB_S16)refPicPtr->height - 1)) :
-		*ySearchCenter;
-	///
-#endif
+
+    if (sequenceControlSetPtr->inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER && sequenceControlSetPtr->staticConfig.tune > 0) {
+        // FIX
+        // Correct the left edge of the Search Area if it is not on the reference Picture
+        *xSearchCenter = ((originX + *xSearchCenter) < -padWidth) ?
+            -padWidth - originX :
+            *xSearchCenter;
+        // Correct the right edge of the Search Area if its not on the reference Picture
+        *xSearchCenter = ((originX + *xSearchCenter) > (EB_S16)refPicPtr->width - 1) ?
+            *xSearchCenter - ((originX + *xSearchCenter) - ((EB_S16)refPicPtr->width - 1)) :
+            *xSearchCenter;
+        // Correct the top edge of the Search Area if it is not on the reference Picture
+        *ySearchCenter = ((originY + *ySearchCenter) < -padHeight) ?
+            -padHeight - originY :
+            *ySearchCenter;
+        // Correct the bottom edge of the Search Area if its not on the reference Picture
+        *ySearchCenter = ((originY + *ySearchCenter) > (EB_S16)refPicPtr->height - 1) ?
+            *ySearchCenter - ((originY + *ySearchCenter) - ((EB_S16)refPicPtr->height - 1)) :
+            *ySearchCenter;
+        ///
+    }
+    else {
+        (void)padWidth;
+        (void)padHeight;
+    }
+
 	zeroMvCost = zeroMvSad << COST_PRECISION;
 	searchRegionIndex = (EB_S16)(refPicPtr->originX + originX) + *xSearchCenter +
 		((EB_S16)(refPicPtr->originY + originY) + *ySearchCenter) * refPicPtr->strideY;
@@ -3792,43 +3798,43 @@ EB_ERRORTYPE MotionEstimateLcu(
 			if (pictureControlSetPtr->temporalLayerIndex > 0 || listIndex == 0){
 				// A - The MV center for Tier0 search could be either (0,0), or HME
 				// A - Set HME MV Center
-#if HME_ENHANCED_CENTER_SEARCH // TEST1
-                TestSearchAreaBounds(
-                    refPicPtr,
-                    contextPtr,
-                    &xSearchCenter,
-                    &ySearchCenter,
-                    listIndex,
-                    originX,
-                    originY,
-                    lcuWidth,
-                    lcuHeight);
-
-#else
-				xSearchCenter = 0;
-				ySearchCenter = 0;
-#endif
+                if (sequenceControlSetPtr->inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER && sequenceControlSetPtr->staticConfig.tune > 0) {
+                    TestSearchAreaBounds(
+                        refPicPtr,
+                        contextPtr,
+                        &xSearchCenter,
+                        &ySearchCenter,
+                        listIndex,
+                        originX,
+                        originY,
+                        lcuWidth,
+                        lcuHeight);
+                }
+                else {
+                    xSearchCenter = 0;
+                    ySearchCenter = 0;
+                }
 				// B - NO HME in boundaries
 				// C - Skip HME
 
                 if (pictureControlSetPtr->enableHmeFlag && /*B*/lcuHeight == MAX_LCU_SIZE) {//(searchCenterSad > sequenceControlSetPtr->staticConfig.skipTier0HmeTh)) {
 
 					while (searchRegionNumberInHeight < contextPtr->numberHmeSearchRegionInHeight) {
-						while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
-#if HME_ENHANCED_CENTER_SEARCH 
-							xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter >> 2;
-							yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter >> 2;
+                        while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
+                            if (sequenceControlSetPtr->inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER && sequenceControlSetPtr->staticConfig.tune > 0) {
+                                xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter >> 2;
+                                yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter >> 2;
 
-							xHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter >> 1;
-							yHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter >> 1;
+                                xHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter >> 1;
+                                yHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter >> 1;
+                            }
+                            else {
+                                xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter;
+                                yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter;
 
-#else
-							xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter;
-							yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter;
-
-							xHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter;
-							yHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter;
-#endif
+                                xHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter;
+                                yHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter;
+                            }
 							xHmeLevel2SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter;
 							yHmeLevel2SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter;
 
@@ -4083,6 +4089,7 @@ EB_ERRORTYPE MotionEstimateLcu(
 
 			if (xSearchCenter != 0 || ySearchCenter != 0) {
 				CheckZeroZeroCenter(
+                    sequenceControlSetPtr,
 					refPicPtr,
 					contextPtr,
 					lcuOriginX,
