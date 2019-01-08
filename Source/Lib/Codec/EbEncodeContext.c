@@ -145,7 +145,7 @@ EB_ERRORTYPE EncodeContextCtor(
     // High level Rate Control histogram Queue
     encodeContextPtr->hlRateControlHistorgramQueueHeadIndex                 = 0;
     
-    EB_MALLOC(HlRateControlHistogramEntry_t**, encodeContextPtr->hlRateControlHistorgramQueue, sizeof(HlRateControlHistogramEntry_t*) * HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH, EB_N_PTR);
+    EB_CALLOC(HlRateControlHistogramEntry_t**, encodeContextPtr->hlRateControlHistorgramQueue, sizeof(HlRateControlHistogramEntry_t*) * HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH, 1, EB_N_PTR);
 
     for(pictureIndex=0; pictureIndex < HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH; ++pictureIndex) {
         return_error = HlRateControlHistogramEntryCtor(
