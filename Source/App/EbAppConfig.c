@@ -72,6 +72,8 @@
 #define MAXCLL_TOKEN                    "-max-cll"
 #define MAXFALL_TOKEN                   "-max-fall"
 #define MASTER_DISPLAY_TOKEN            "-master-display"
+#define DOLBY_VISION_PROFILE_TOKEN      "-dolby-vision-profile"
+#define DOLBY_VISION_RPU_FILE_TOKEN     "-dolby-vision-rpu"
 #define RATE_CONTROL_ENABLE_TOKEN       "-rc"
 #define TARGET_BIT_RATE_TOKEN           "-tbr"
 #define MAX_QP_TOKEN                    "-max-qp"
@@ -137,6 +139,11 @@ static void SetCfgQpFile                        (const char *value, EbConfig_t *
     if (cfg->qpFile) { fclose(cfg->qpFile); }
     FOPEN(cfg->qpFile,value, "r");
 };
+static void SetCfgDolbyVisionRpuFile(const char *value, EbConfig_t *cfg)
+{
+    if (cfg->dolbyVisionRpuFile) { fclose(cfg->dolbyVisionRpuFile); }
+    FOPEN(cfg->dolbyVisionRpuFile, value, "rb");
+};
 static void SetCfgSourceWidth                   (const char *value, EbConfig_t *cfg) {cfg->sourceWidth                      = strtoul(value, NULL, 0);};
 static void SetInterlacedVideo                  (const char *value, EbConfig_t *cfg) {cfg->interlacedVideo                  = (EB_BOOL) strtoul(value, NULL, 0);};
 static void SetSeperateFields                   (const char *value, EbConfig_t *cfg) {cfg->separateFields                   = (EB_BOOL) strtoul(value, NULL, 0);};
@@ -196,6 +203,10 @@ static void SetMasterDisplay(const char *value, EbConfig_t *cfg) {
     }
     else
         cfg->masteringDisplayColorVolume = NULL;
+};
+static void SetDolbyVisionProfile               (const char *value, EbConfig_t *cfg) { 
+    if (strtoul(value, NULL, 0) != 0 || EB_STRCMP(value, "0") == 0)
+        cfg->dolbyVisionProfile = (uint32_t)(10 * strtod(value, NULL));
 };
 static void SetEnableTemporalId                 (const char *value, EbConfig_t *cfg) {cfg->enableTemporalId                 = strtol(value,  NULL, 0);};
 static void SetProfile                          (const char *value, EbConfig_t *cfg) {cfg->profile                          = strtol(value,  NULL, 0);};
@@ -328,6 +339,8 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, MAXCLL_TOKEN, "MaxCLL", SetMaxCLL },
     { SINGLE_INPUT, MAXFALL_TOKEN, "MaxFALL", SetMaxFALL },
     { SINGLE_INPUT, MASTER_DISPLAY_TOKEN, "MasterDisplay", SetMasterDisplay },
+    { SINGLE_INPUT, DOLBY_VISION_PROFILE_TOKEN, "DolbyVisionProfile", SetDolbyVisionProfile },
+    { SINGLE_INPUT, DOLBY_VISION_RPU_FILE_TOKEN, "DolbyVisionRpuFile", SetCfgDolbyVisionRpuFile },
     { SINGLE_INPUT, TEMPORAL_ID, "TemporalId", SetEnableTemporalId },
     { SINGLE_INPUT, FPSINVPS_TOKEN, "FPSInVPS", SetFpsInVps },
     // Latency
@@ -418,6 +431,8 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->maxCLL                               = 0;
     configPtr->maxFALL                              = 0;
     configPtr->masteringDisplayColorVolume          = NULL;
+    configPtr->dolbyVisionProfile                   = 0;
+    configPtr->dolbyVisionRpuFile                   = NULL;
 
     configPtr->switchThreadsToRtPriority            = EB_TRUE;
     configPtr->fpsInVps                             = EB_FALSE;
@@ -495,6 +510,11 @@ void EbConfigDtor(EbConfig_t *configPtr)
         fclose(configPtr->qpFile);
         configPtr->qpFile = (FILE *)NULL;
     }
+
+	if (configPtr->dolbyVisionRpuFile) {
+		fclose(configPtr->dolbyVisionRpuFile);
+		configPtr->dolbyVisionRpuFile = (FILE *)NULL;
+	}
 
     return;
 }

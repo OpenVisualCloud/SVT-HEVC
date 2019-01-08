@@ -373,6 +373,9 @@ typedef struct EbConfig_s
     uint16_t  maxCLL;
     uint16_t  maxFALL;
     const char*  masteringDisplayColorVolume;
+    uint32_t     dolbyVisionProfile;
+    FILE*        dolbyVisionRpuFile;
+
 } EbConfig_t;
 
 extern void EbConfigCtor(EbConfig_t *configPtr);

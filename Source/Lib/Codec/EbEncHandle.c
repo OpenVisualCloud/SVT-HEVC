@@ -2112,6 +2112,12 @@ void CopyApiFromApp(
     if (pComponentParameterStructure->masteringDisplayColorVolume) {
         EB_STRDUP(sequenceControlSetPtr->staticConfig.masteringDisplayColorVolume, (char*)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->masteringDisplayColorVolume);
     }
+    sequenceControlSetPtr->staticConfig.dolbyVisionProfile = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->dolbyVisionProfile;
+
+    // if dolby Profile is set HDR should be set to 1
+    if (sequenceControlSetPtr->staticConfig.dolbyVisionProfile == 81) {
+        sequenceControlSetPtr->staticConfig.highDynamicRangeInput = 1;
+    }
 
     // if HDR is set videoUsabilityInfo should be set to 1
     if (sequenceControlSetPtr->staticConfig.highDynamicRangeInput == 1) {
@@ -2619,6 +2625,21 @@ static EB_ERRORTYPE VerifySettings(\
 		return_error = EB_ErrorBadParameter;
 	}
 
+	if (config->dolbyVisionProfile != 0 && config->dolbyVisionProfile != 81) {
+		SVT_LOG("Error Instance %u: Only Dolby Vision Profile 8.1 is supported \n", channelNumber);
+		return_error = EB_ErrorBadParameter;
+	}
+
+	if (config->dolbyVisionProfile == 81 && config->encoderBitDepth != 10) {
+		SVT_LOG("Error Instance %u: Dolby Vision Profile 8.1 work only with main10 input \n", channelNumber);
+		return_error = EB_ErrorBadParameter;
+	}
+
+	if (config->dolbyVisionProfile == 81 && !config->masteringDisplayColorVolume) {
+		SVT_LOG("Error Instance %u: Dolby Vision Profile 8.1 requires mastering display color volume information \n", channelNumber);
+		return_error = EB_ErrorBadParameter;
+	}
+
  	if (config->enableTemporalId > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid TemporalId. TemporalId must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
@@ -2776,6 +2797,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->maxCLL = 0;
     configPtr->maxFALL = 0;
     configPtr->masteringDisplayColorVolume = NULL;
+    configPtr->dolbyVisionProfile = 0;
 
     return return_error;
 }
@@ -2980,7 +3002,8 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
         outputStreamBuffer->pBuffer,
         (EB_U32*) &(outputStreamBuffer->nFilledLen),
         (EB_U32*) &(outputStreamBuffer->nAllocLen),
-        encodeContextPtr);
+        encodeContextPtr,
+        9999);
 
     *outputStreamPtr = outputStreamBuffer;
 
@@ -3035,7 +3058,8 @@ EB_API EB_ERRORTYPE EbH265EncEosNal(
         outputStreamBuffer->pBuffer,
         (EB_U32*) &(outputStreamBuffer->nFilledLen),
         (EB_U32*) &(outputStreamBuffer->nAllocLen),
-        encodeContextPtr);
+        encodeContextPtr,
+        9999);
     
     *outputStreamPtr = outputStreamBuffer;
 
@@ -3209,6 +3233,18 @@ static EB_ERRORTYPE CopyFrameBuffer(
             chromaWidth,
             (lumaHeight >> 1));
     }
+
+    // Copy Dolby Vision RPU metadata from input
+    if (inputPtr->dolbyVisionRpu.payloadSize) {
+        inputPicturePtr->dolbyVisionRpu.payloadSize = inputPtr->dolbyVisionRpu.payloadSize;
+        EB_MALLOC(EB_U8*, inputPicturePtr->dolbyVisionRpu.payload, inputPtr->dolbyVisionRpu.payloadSize, EB_N_PTR);
+        EB_MEMCPY(inputPicturePtr->dolbyVisionRpu.payload, inputPtr->dolbyVisionRpu.payload, inputPtr->dolbyVisionRpu.payloadSize);
+    }
+    else {
+        inputPicturePtr->dolbyVisionRpu.payloadSize = 0;
+        inputPicturePtr->dolbyVisionRpu.payload = NULL;
+    }
+
     return return_error;
 }
 static void CopyInputBuffer(

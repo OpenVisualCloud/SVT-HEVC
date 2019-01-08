@@ -92,6 +92,13 @@ extern "C" {
 
 #define EB_BUFFERFLAG_EOS 0x00000001
 
+typedef struct EB_SEI_MESSAGE
+{
+    uint32_t  payloadSize;
+    unsigned char  *payload;
+}EB_SEI_MESSAGE;
+
+
 // For 8-bit and 10-bit packed inputs, the luma, cb, and cr fields should be used
 //   for the three input picture planes.  However, for 10-bit unpacked planes the
 //   lumaExt, cbExt, and crExt fields should be used hold the extra 2-bits of
@@ -111,6 +118,7 @@ typedef struct EB_H265_ENC_INPUT
     uint32_t yStride;
     uint32_t crStride;
     uint32_t cbStride;
+    EB_SEI_MESSAGE    dolbyVisionRpu;
 
 } EB_H265_ENC_INPUT;
 
@@ -217,6 +225,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     uint16_t                maxCLL;
     uint16_t                maxFALL;
     const char*             masteringDisplayColorVolume;  // SMPTE ST 2086 mastering display color volume info
+    uint32_t                dolbyVisionProfile;
 
 } EB_H265_ENC_CONFIGURATION;
 

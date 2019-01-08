@@ -8745,12 +8745,32 @@ EB_ERRORTYPE EncodeMasteringDisplayColorVolumeSEI(
     return return_error;
 }
 
+EB_ERRORTYPE CodeDolbyVisionRpuMetadata(
+    Bitstream_t  *bitstreamPtr,
+    PictureControlSet_t *pictureControlSetPtr)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
+    EB_SEI_MESSAGE *rpu = &pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->dolbyVisionRpu;
+
+    CodeNALUnitHeader(
+        outputBitstreamPtr,
+        NAL_UNIT_UNSPECIFIED_62,
+        0);
+
+    for (EB_U32 i = 0; i < rpu->payloadSize; i++)
+        WriteCodeCavlc(outputBitstreamPtr, rpu->payload[i], 8);
+
+    return return_error;
+}
+
 EB_ERRORTYPE CopyRbspBitstreamToPayload(
 	Bitstream_t *bitstreamPtr,
 	EB_BYTE      outputBuffer,
 	EB_U32      *outputBufferIndex,
 	EB_U32      *outputBufferSize,
-	EncodeContext_t         *encodeContextPtr)
+	EncodeContext_t         *encodeContextPtr,
+	NalUnitType naltype)
 {
 	EB_ERRORTYPE return_error = EB_ErrorNone;
 	OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
@@ -8768,7 +8788,8 @@ EB_ERRORTYPE CopyRbspBitstreamToPayload(
 		outputBuffer,
 		outputBufferIndex,
 		outputBufferSize,
-		0);
+		0,
+		naltype);
 
 	return return_error;
 }

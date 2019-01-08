@@ -222,6 +222,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.maxFALL = config->maxFALL;
     if(config->masteringDisplayColorVolume)
         EB_APP_STRDUP(callbackData->ebEncParameters.masteringDisplayColorVolume, (char*)config->masteringDisplayColorVolume);
+    callbackData->ebEncParameters.dolbyVisionProfile = config->dolbyVisionProfile;
 
     return return_error;
 
@@ -293,6 +294,10 @@ EB_ERRORTYPE AllocateFrameBuffer(
     }
     else {
         inputPtr->crExt = 0;
+    }
+
+    if (config->dolbyVisionProfile == 81 && config->dolbyVisionRpuFile) {
+        EB_APP_MALLOC(uint8_t*, inputPtr->dolbyVisionRpu.payload, 1024, EB_N_PTR, EB_ErrorInsufficientResources);
     }
 
     return return_error;

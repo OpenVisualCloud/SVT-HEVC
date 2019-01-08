@@ -770,6 +770,7 @@ void ReadInputFrames(
     inputPtr->yStride  = inputPaddedWidth;
     inputPtr->crStride = inputPaddedWidth >> 1;
     inputPtr->cbStride = inputPaddedWidth >> 1;
+    inputPtr->dolbyVisionRpu.payloadSize = 0;
 
     if (config->bufferedInput == -1) {
 
@@ -1155,6 +1156,62 @@ void SendQpOnTheFly(
     return;
 }
 
+#define START_CODE 0x00000001
+#define START_CODE_BYTES 4
+
+int ParseDolbyVisionRPUMetadata(
+    EbConfig_t               *config,
+    EB_BUFFERHEADERTYPE      *headerPtr)
+{
+    uint8_t byteVal = 0;
+    uint32_t code = 0;
+    uint32_t bytesRead = 0;
+    EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
+    FILE* ptr = config->dolbyVisionRpuFile;
+
+    if (!headerPtr->pts) {
+        while (bytesRead++ < 4 && fread(&byteVal, sizeof(uint8_t), 1, ptr))
+            code = (code << 8) | byteVal;
+
+        if (code != START_CODE) {
+            printf("Warning : Invalid Dolby Vision RPU startcode in POC  %lld\n", headerPtr->pts);
+            return 1;
+        }
+    }
+
+    bytesRead = 0;
+    while (fread(&byteVal, sizeof(uint8_t), 1, ptr))
+    {
+        code = (code << 8) | byteVal;
+        if (bytesRead++ < 3)
+            continue;
+        if (bytesRead >= 1024) {
+            printf("Warning : Invalid Dolby Vision RPU size in POC  %lld\n", headerPtr->pts);
+            return 1;
+        }
+
+        if (code != START_CODE)
+            inputPtr->dolbyVisionRpu.payload[inputPtr->dolbyVisionRpu.payloadSize++] = (code >> (3 * 8)) & 0xFF;
+        else
+            return 0;
+
+    }
+
+    int ShiftBytes = START_CODE_BYTES - (bytesRead - inputPtr->dolbyVisionRpu.payloadSize);
+    int bytesLeft = bytesRead - inputPtr->dolbyVisionRpu.payloadSize;
+    code = (code << ShiftBytes * 8);
+    for (int i = 0; i < bytesLeft; i++) {
+        inputPtr->dolbyVisionRpu.payload[inputPtr->dolbyVisionRpu.payloadSize++] = (code >> (3 * 8)) & 0xFF;
+        code = (code << 8);
+    }
+    if (!inputPtr->dolbyVisionRpu.payloadSize) {
+        printf("Warning : Dolby Vision RPU not found for POC  %lld\n", headerPtr->pts);
+        return 1;
+    }
+    return 0;
+
+}
+
 //************************************/
 // ProcessInputBuffer
 // Reads yuv frames from file and copy
@@ -1176,6 +1233,8 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
 	uint64_t                  frameSize                  = (uint64_t)((inputPaddedWidth*inputPaddedHeight * 3) / 2 + (inputPaddedWidth / 4 * inputPaddedHeight * 3) / 2);
     int64_t                  totalBytesToProcessCount;
     int64_t                  remainingByteCount;
+
+    int ret;
 
     if (config->injector && config->processedFrameCount)
     {
@@ -1216,6 +1275,14 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
         headerPtr->sliceType    = EB_INVALID_PICTURE;
 
         headerPtr->nFlags = 0;
+
+        if (config->dolbyVisionProfile == 81 && config->dolbyVisionRpuFile) {
+            ret = ParseDolbyVisionRPUMetadata(
+                  config,
+                  headerPtr);
+            if (ret)
+                printf("\n Warning : Dolby vision RPU not parsed for POC %llu ", headerPtr->pts);
+        }
 
         // Send the picture
         EbH265EncSendPicture(componentHandle, headerPtr);

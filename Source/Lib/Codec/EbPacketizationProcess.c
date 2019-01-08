@@ -202,7 +202,8 @@ void* PacketizationKernel(void *inputPtr)
                 outputStreamPtr->pBuffer,
                 (EB_U32*) &(outputStreamPtr->nFilledLen),
                 (EB_U32*) &(outputStreamPtr->nAllocLen),
-				encodeContextPtr);
+                encodeContextPtr,
+                9999);
         }
         
         
@@ -491,7 +492,8 @@ void* PacketizationKernel(void *inputPtr)
             outputStreamPtr->pBuffer,
             (EB_U32*) &(outputStreamPtr->nFilledLen),
             (EB_U32*) &(outputStreamPtr->nAllocLen),
-			encodeContextPtr);
+            encodeContextPtr,
+            9999);
 
         // Reset the bitstream
         ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
@@ -506,10 +508,35 @@ void* PacketizationKernel(void *inputPtr)
             outputStreamPtr->pBuffer,
             (EB_U32*) &(outputStreamPtr->nFilledLen),
             (EB_U32*) &(outputStreamPtr->nAllocLen),
-			encodeContextPtr);
+            encodeContextPtr,
+            9999);
         
         // Send the number of bytes per frame to RC
         pictureControlSetPtr->ParentPcsPtr->totalNumBits = outputStreamPtr->nFilledLen << 3;    
+
+        // Copy Dolby Vision RPU metadata to the output bitstream
+        if (sequenceControlSetPtr->staticConfig.dolbyVisionProfile == 81 && pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->dolbyVisionRpu.payloadSize) {
+            // Reset the bitstream
+            ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+
+            CodeDolbyVisionRpuMetadata(
+                pictureControlSetPtr->bitstreamPtr,
+                pictureControlSetPtr
+            );
+
+            // Flush the Bitstream
+            FlushBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+
+            // Copy payload to the Output Bitstream
+            CopyRbspBitstreamToPayload(
+                pictureControlSetPtr->bitstreamPtr,
+                outputStreamPtr->pBuffer,
+                (EB_U32*) &(outputStreamPtr->nFilledLen),
+                (EB_U32*) &(outputStreamPtr->nAllocLen),
+                ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr,
+                NAL_UNIT_UNSPECIFIED_62);
+        }
+
 
         // Code EOS NUT
         if (outputStreamPtr->nFlags & EB_BUFFERFLAG_EOS && sequenceControlSetPtr->staticConfig.codeEosNal == 1) 
@@ -528,7 +555,8 @@ void* PacketizationKernel(void *inputPtr)
                 outputStreamPtr->pBuffer,
                 (EB_U32*) &(outputStreamPtr->nFilledLen),
                 (EB_U32*) &(outputStreamPtr->nAllocLen),
-                ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr);
+                ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr,
+                9999);
         }
         
         //Store the buffer in the Queue
