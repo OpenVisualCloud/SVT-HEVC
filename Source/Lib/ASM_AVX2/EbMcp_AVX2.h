@@ -16,7 +16,7 @@
 void ChromaInterpolationFilterOneDOutRaw16bitHorizontal_AVX2_INTRIN(EB_U16 *refPic, EB_U32 srcStride, EB_S16 *dst, EB_U32 puWidth, EB_U32 puHeight, EB_S16 *firstPassIFDst, EB_U32 fracPosx, EB_U32 fracPosy);
 void ChromaInterpolationFilterTwoD16bit_AVX2_INTRIN(EB_U16 *refPic, EB_U32 srcStride, EB_U16 *dst, EB_U32 dstStride, EB_U32 puWidth, EB_U32 puHeight, EB_S16 *firstPassIFDst, EB_U32 fracPosx, EB_U32 fracPosy);
 void ChromaInterpolationFilterTwoDOutRaw16bit_AVX2_INTRIN(EB_U16 *refPic, EB_U32 srcStride, EB_S16 *dst, EB_U32 puWidth, EB_U32 puHeight, EB_S16 *firstPassIFDst, EB_U32 fracPosx, EB_U32 fracPosy);
-
+void BiPredClipping_AVX2(EB_U32 puWidth, EB_U32 puHeight, EB_S16 *list0Src, EB_S16 *list1Src, EB_BYTE dst, EB_U32 dstStride, EB_S32 offset);
 void BiPredClippingOnTheFly_AVX2(
 	EB_BYTE    list0Src,
 	EB_U32     list0SrcStride,

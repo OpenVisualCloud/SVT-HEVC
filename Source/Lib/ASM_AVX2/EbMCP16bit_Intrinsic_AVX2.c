@@ -293,6 +293,121 @@ void ChromaInterpolationFilterOneDOutRaw16bitHorizontal_AVX2_INTRIN(
 
 }
 
+void BiPredClipping_AVX2(
+    EB_U32     puWidth,
+    EB_U32     puHeight,
+    EB_S16    *list0Src,
+    EB_S16    *list1Src,
+    EB_BYTE    dst,
+    EB_U32     dstStride,
+    EB_S32     offset)
+{
+    EB_U32 rowCount, colCount;
+
+    if (puWidth & 2)
+    {
+        EB_BYTE q = dst;
+        rowCount = puHeight;
+        do
+        {
+            __m128i a0, a2;
+            a0 = _mm_loadu_si128((__m128i *)list0Src);
+            a2 = _mm_loadu_si128((__m128i *)list1Src);
+            list0Src += 8;
+            list1Src += 8;
+
+            a0 = _mm_adds_epi16(a0, a2);
+            a0 = _mm_adds_epi16(a0, _mm_set1_epi16((short)offset));
+            a0 = _mm_srai_epi16(a0, 7);
+            a0 = _mm_packus_epi16(a0, a0);
+
+            *(EB_U16 *)q = (EB_U16)(_mm_extract_epi16(a0, 0)); q += dstStride;
+            *(EB_U16 *)q = (EB_U16)(_mm_extract_epi16(a0, 1)); q += dstStride;
+            *(EB_U16 *)q = (EB_U16)(_mm_extract_epi16(a0, 2)); q += dstStride;
+            *(EB_U16 *)q = (EB_U16)(_mm_extract_epi16(a0, 3)); q += dstStride;
+            rowCount -= 4;
+        } while (rowCount != 0);
+
+        puWidth -= 2;
+        if (puWidth == 0)
+        {
+            return;
+        }
+
+        dst += 2;
+    }
+
+    if (puWidth & 4)
+    {
+        EB_BYTE q = dst;
+        rowCount = puHeight;
+        do
+        {
+            __m256i a0, a2;
+            a0 = _mm256_load_si256((__m256i *)list0Src);
+            a2 = _mm256_load_si256((__m256i *)list1Src);
+            list0Src += 16;
+            list1Src += 16;
+
+            a0 = _mm256_adds_epi16(a0, a2);
+            a0 = _mm256_adds_epi16(a0, _mm256_set1_epi16((short)offset));
+            a0 = _mm256_srai_epi16(a0, 7);
+            a0 = _mm256_packus_epi16(a0, a0);
+            *(EB_U32 *)q = _mm256_extract_epi32(a0, 0); q += dstStride;
+            *(EB_U32 *)q = _mm256_extract_epi32(a0, 1); q += dstStride;
+            *(EB_U32 *)q = _mm256_extract_epi32(a0, 4); q += dstStride;
+            *(EB_U32 *)q = _mm256_extract_epi32(a0, 5); q += dstStride;
+            rowCount -= 4;
+        } while (rowCount != 0);
+
+        puWidth -= 4;
+        if (puWidth == 0)
+        {
+            return;
+        }
+
+        dst += 4;
+    }
+
+    colCount = puWidth;
+    do
+    {
+        EB_BYTE q = dst;
+        rowCount = puHeight;
+        do
+        {
+            __m256i a0, a1, a2, a3;
+            a0 = _mm256_load_si256((__m256i *)list0Src);
+            a2 = _mm256_load_si256((__m256i *)list1Src);
+            list0Src += 16;
+            list1Src += 16;
+            a0 = _mm256_adds_epi16(a0, a2);
+            a0 = _mm256_adds_epi16(a0, _mm256_set1_epi16((short)offset));
+            a0 = _mm256_srai_epi16(a0, 7);
+
+            a1 = _mm256_load_si256((__m256i *)list0Src);
+            a3 = _mm256_load_si256((__m256i *)list1Src);
+            list0Src += 16;
+            list1Src += 16;
+            a1 = _mm256_adds_epi16(a1, a3);
+            a1 = _mm256_adds_epi16(a1, _mm256_set1_epi16((short)offset));
+            a1 = _mm256_srai_epi16(a1, 7);
+
+            a0 = _mm256_packus_epi16(a0, a1);
+            *(EB_U64 *)q = _mm256_extract_epi64(a0, 0); q += dstStride;
+            *(EB_U64 *)q = _mm256_extract_epi64(a0, 2); q += dstStride;
+            *(EB_U64 *)q = _mm256_extract_epi64(a0, 1); q += dstStride;
+            *(EB_U64 *)q = _mm256_extract_epi64(a0, 3); q += dstStride;
+
+            rowCount -= 4;
+        } while (rowCount != 0);
+
+        colCount -= 8;
+        dst += 8;
+    } while (colCount != 0);
+}
+
+
 void BiPredClippingOnTheFly_AVX2(
     EB_BYTE    list0Src,
     EB_U32     list0SrcStride,

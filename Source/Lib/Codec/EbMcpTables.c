@@ -15,7 +15,7 @@ const sampleBiPredClipping biPredClippingFuncPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     BiPredClipping,
     // AVX2
-    BiPredClipping_SSSE3,
+    BiPredClipping_AVX2,
 };
 
 const sampleBiPredClipping16bit biPredClipping16bitFuncPtrArray[EB_ASM_TYPE_TOTAL] = {
