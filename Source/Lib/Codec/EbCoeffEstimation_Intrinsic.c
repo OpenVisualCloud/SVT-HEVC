@@ -8,7 +8,7 @@
 
 #include "emmintrin.h"
 #include "EbEntropyCoding.h"
-#include "EbCombinedAveragingSAD_Intrinsic_AVX512.h"
+#include "EbDefinitions.h"
 
 #define ONE_BIT                 32
 

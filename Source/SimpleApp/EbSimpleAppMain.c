@@ -17,7 +17,7 @@
 #include "EbSimpleAppContext.h"
 #include "EbApi.h"
 #if !__linux
-#include <Windows.h>
+#include <stdlib.h>
 #define fseeko64 _fseeki64
 #define ftello64 _ftelli64
 #define FOPEN(f,s,m) fopen_s(&f,s,m)

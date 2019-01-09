@@ -4,7 +4,6 @@
 */
 
 
-#include <stdio.h>
 #include <immintrin.h>
 #include "EbDefinitions.h"
 #include "EbPictureOperators_AVX2.h"
