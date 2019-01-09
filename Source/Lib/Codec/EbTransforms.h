@@ -481,7 +481,7 @@ static const EB_INVTRANSFORM_FUNC invTransformFunctionTableEstimate[EB_ASM_TYPE_
         },
         // AVX2
         {
-            EstimateInvTransform32x32_SSE2,
+            EstimateInvTransform32x32_AVX2,
             EstimateInvTransform16x16_SSE2,
             InvTransform8x8_SSE2_INTRIN,
             InvTransform4x4_SSE2_INTRIN,
