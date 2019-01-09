@@ -95,6 +95,7 @@
 #define ASM_TYPE_TOKEN				    "-asm" // no Eval
 #define THREAD_MGMNT                    "-lp"
 #define TARGET_SOCKET                   "-ss"
+#define FPSINVPS_TOKEN                  "-fpsinvps"
 #define CONFIG_FILE_COMMENT_CHAR        '#'
 #define CONFIG_FILE_NEWLINE_CHAR        '\n'
 #define CONFIG_FILE_RETURN_CHAR         '\r'
@@ -233,6 +234,7 @@ static void	SetLatencyMode                      (const char *value, EbConfig_t *
 static void SetAsmType                          (const char *value, EbConfig_t *cfg)  {cfg->asmType                  = (uint32_t)strtoul(value, NULL, 0);};
 static void SetLogicalProcessors                (const char *value, EbConfig_t *cfg)  {cfg->logicalProcessors         = (uint32_t)strtoul(value, NULL, 0);};
 static void SetTargetSocket                     (const char *value, EbConfig_t *cfg)  {cfg->targetSocket              = (int32_t)strtol(value, NULL, 0);};
+static void SetFpsInVps                         (const char *value, EbConfig_t *cfg)  {cfg->fpsInVps                   = (EB_BOOL)strtol(value, NULL, 0);};
 
 enum cfg_type{
     SINGLE_INPUT,   // Configuration parameters that have only 1 value input
@@ -345,6 +347,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, UNREG_USER_DATA_TOKEN, "UnregisteredUserData", SetUnRegisteredUserDataSEI },
     { SINGLE_INPUT, RECOVERY_POINT_TOKEN, "RecoveryPoint", SetRecoveryPointSEI },
     { SINGLE_INPUT, TEMPORAL_ID, "TemporalId", SetEnableTemporalId },
+    { SINGLE_INPUT, FPSINVPS_TOKEN, "FPSInVPS", SetFpsInVps },
     // Latency
     { SINGLE_INPUT, INJECTOR_TOKEN, "Injector", SetInjector },
     { SINGLE_INPUT, INJECTOR_FRAMERATE_TOKEN, "InjectorFrameRate", SetInjectorFrameRate },
@@ -461,6 +464,8 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->unregisteredUserDataSeiFlag          = EB_FALSE;
     configPtr->recoveryPointSeiFlag                 = EB_FALSE;
     configPtr->enableTemporalId                     = 1;
+
+    configPtr->fpsInVps                             = EB_FALSE;
 
     // Annex A parameters
     configPtr->profile                              = 2;

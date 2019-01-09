@@ -5284,16 +5284,11 @@ static void CodeVPS(
 	WriteUvlc(
 		bitstreamPtr,
 		0);
-#if 0//!FPS_in_VPS
-	// "vps_timing_info_present_flag"
-	WriteFlagCavlc(
-		bitstreamPtr,
-		EB_FALSE);
-#else
+
     // "vps_timing_info_present_flag"
     WriteFlagCavlc(
         bitstreamPtr,
-        EB_TRUE);
+		scsPtr->staticConfig.fpsInVps == 1 ? EB_TRUE : EB_FALSE);
 
     if (scsPtr->staticConfig.frameRateDenominator != 0 && scsPtr->staticConfig.frameRateNumerator != 0) {
 
@@ -5332,7 +5327,6 @@ static void CodeVPS(
     WriteUvlc(
         bitstreamPtr,
         0);
-#endif
 
 
 

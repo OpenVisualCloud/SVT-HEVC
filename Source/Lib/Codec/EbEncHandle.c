@@ -2005,6 +2005,7 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.encMode = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->encMode;
     sequenceControlSetPtr->staticConfig.codeVpsSpsPps = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->codeVpsSpsPps;
     sequenceControlSetPtr->staticConfig.codeEosNal = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->codeEosNal;
+    sequenceControlSetPtr->staticConfig.fpsInVps = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->fpsInVps;
     
     if (sequenceControlSetPtr->staticConfig.tune >= 1) {
         sequenceControlSetPtr->staticConfig.bitRateReduction = 0;
@@ -2702,6 +2703,10 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
+    if (config->fpsInVps > 1) {
+        SVT_LOG("Error instance %u : Invalid FPS in VPS flag [0 - 1]\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
 
     return return_error;
 }
@@ -2781,6 +2786,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     // Bitstream options
     configPtr->codeVpsSpsPps = 0;
     configPtr->codeEosNal    = 0;
+    configPtr->fpsInVps      = EB_FALSE;
 
     configPtr->videoUsabilityInfo = 0;
     configPtr->highDynamicRangeInput = 0;

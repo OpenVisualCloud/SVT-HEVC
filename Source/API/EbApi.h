@@ -207,6 +207,7 @@ extern "C" {
         uint32_t                profile;
         uint32_t                tier;
         uint32_t                level;
+        uint8_t                 fpsInVps;
 
         // Application Specific parameters
         uint32_t                channelId;                    // when multiple instances are running within the same application

@@ -348,6 +348,7 @@ typedef struct EbConfig_s
     EB_BOOL                unregisteredUserDataSeiFlag;
     EB_BOOL                recoveryPointSeiFlag;
     uint32_t                 enableTemporalId;
+    EB_BOOL                fpsInVps;
 
     /****************************************
      * Annex A Parameters
