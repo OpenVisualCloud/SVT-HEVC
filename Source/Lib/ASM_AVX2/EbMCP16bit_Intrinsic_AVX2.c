@@ -8,6 +8,10 @@
 #include "EbMcp_SSE2.h"
 #include "EbDefinitions.h"
 
+#ifndef PREFETCH
+#define PREFETCH 0 // prefetching: enables prefetching of data before interpolation
+#endif
+
 EB_EXTERN EB_ALIGN(16) const EB_S16 chromaFilterCoeffSR1_AVX[8][4] =
 {
 {  0, 32,  0,  0 },
@@ -20,6 +24,27 @@ EB_EXTERN EB_ALIGN(16) const EB_S16 chromaFilterCoeffSR1_AVX[8][4] =
 { -1,  5, 29, -1 },
 };
 
+static void PrefetchBlock(EB_U8 *src, EB_U32 srcStride, EB_U32 blkWidth, EB_U32 blkHeight)
+{
+#if PREFETCH
+    EB_U32 rowCount = blkHeight;
+
+    do
+    {
+        EB_U8 *addr0 = src;
+        EB_U8 *addr1 = addr0 + blkWidth - 1;
+        src += srcStride;
+
+        _mm_prefetch((char*)addr0, _MM_HINT_T0);
+        _mm_prefetch((char*)addr1, _MM_HINT_T0);
+    } while (--rowCount != 0);
+#else
+    (void)src;
+    (void)srcStride;
+    (void)blkWidth;
+    (void)blkHeight;
+#endif
+}
 
 void ChromaInterpolationFilterTwoD16bit_AVX2_INTRIN(
     EB_U16               *refPic,
@@ -268,3 +293,182 @@ void ChromaInterpolationFilterOneDOutRaw16bitHorizontal_AVX2_INTRIN(
 
 }
 
+void BiPredClippingOnTheFly_AVX2(
+    EB_BYTE    list0Src,
+    EB_U32     list0SrcStride,
+    EB_BYTE    list1Src,
+    EB_U32     list1SrcStride,
+    EB_BYTE    dst,
+    EB_U32     dstStride,
+    EB_U32     puWidth,
+    EB_U32     puHeight,
+    EB_S32     offset,
+    EB_BOOL	   isLuma)
+{
+	EB_U32 rowCount, colCount;
+	__m128i o1;
+	__m256i o2;
+
+	PrefetchBlock(list0Src, list0SrcStride, puWidth, puHeight);
+	PrefetchBlock(list1Src, list1SrcStride, puWidth, puHeight);
+
+	if (puWidth & 2)
+	{
+		o1 = (isLuma) ? _mm_set1_epi16(128 * 64) : _mm_set1_epi16(0);
+		EB_BYTE q = dst;
+		EB_BYTE ptrSrc0 = list0Src;
+		EB_BYTE ptrSrc1 = list1Src;
+		rowCount = puHeight;
+		__m128i a0, a2;
+		a0 = _mm_setzero_si128();
+		a2 = _mm_setzero_si128();
+		do
+		{
+			a0 = _mm_insert_epi16(a0, *(EB_U16 *)ptrSrc0, 0); ptrSrc0 += list0SrcStride;
+			a0 = _mm_insert_epi16(a0, *(EB_U16 *)ptrSrc0, 1); ptrSrc0 += list0SrcStride;
+			a0 = _mm_insert_epi16(a0, *(EB_U16 *)ptrSrc0, 2); ptrSrc0 += list0SrcStride;
+			a0 = _mm_insert_epi16(a0, *(EB_U16 *)ptrSrc0, 3); ptrSrc0 += list0SrcStride;
+			a0 = _mm_unpacklo_epi8(a0, _mm_setzero_si128());
+			a0 = _mm_slli_epi16(a0, 6);
+			a0 = _mm_sub_epi16(a0, o1);
+
+
+			a2 = _mm_insert_epi16(a2, *(EB_U16 *)ptrSrc1, 0); ptrSrc1 += list1SrcStride;
+			a2 = _mm_insert_epi16(a2, *(EB_U16 *)ptrSrc1, 1); ptrSrc1 += list1SrcStride;
+			a2 = _mm_insert_epi16(a2, *(EB_U16 *)ptrSrc1, 2); ptrSrc1 += list1SrcStride;
+			a2 = _mm_insert_epi16(a2, *(EB_U16 *)ptrSrc1, 3); ptrSrc1 += list1SrcStride;
+			a2 = _mm_unpacklo_epi8(a2, _mm_setzero_si128());
+			a2 = _mm_slli_epi16(a2, 6);
+			a2 = _mm_sub_epi16(a2, o1);
+
+			a0 = _mm_adds_epi16(a0, a2);
+			a0 = _mm_adds_epi16(a0, _mm_set1_epi16((short)offset));
+			a0 = _mm_srai_epi16(a0, 7);
+			a0 = _mm_packus_epi16(a0, a0);
+
+			*(EB_U16 *)q = (EB_U16)(_mm_extract_epi16(a0, 0)); q += dstStride;
+			*(EB_U16 *)q = (EB_U16)(_mm_extract_epi16(a0, 1)); q += dstStride;
+			*(EB_U16 *)q = (EB_U16)(_mm_extract_epi16(a0, 2)); q += dstStride;
+			*(EB_U16 *)q = (EB_U16)(_mm_extract_epi16(a0, 3)); q += dstStride;
+			rowCount -= 4;
+		} while (rowCount != 0);
+
+		puWidth -= 2;
+		if (puWidth == 0)
+		{
+			return;
+		}
+		list0Src += 2;
+		list1Src += 2;
+		dst += 2;
+	}
+
+	o2 = (isLuma) ? _mm256_set1_epi16(128 * 64) : _mm256_set1_epi16(0);
+	if (puWidth & 4)
+	{
+		EB_BYTE q = dst;
+		EB_BYTE ptrSrc0 = list0Src;
+		EB_BYTE ptrSrc1 = list1Src;
+		rowCount = puHeight;
+		do
+		{
+			__m256i a0, a2;
+			a0 = _mm256_setzero_si256();
+			a0 = _mm256_insert_epi32(a0, *(EB_U32*)ptrSrc0, 0); ptrSrc0 += list0SrcStride;
+			a0 = _mm256_insert_epi32(a0, *(EB_U32*)ptrSrc0, 1); ptrSrc0 += list0SrcStride;
+			a0 = _mm256_insert_epi32(a0, *(EB_U32*)ptrSrc0, 4); ptrSrc0 += list0SrcStride;
+			a0 = _mm256_insert_epi32(a0, *(EB_U32*)ptrSrc0, 5); ptrSrc0 += list0SrcStride;
+			a0 = _mm256_unpacklo_epi8(a0, _mm256_setzero_si256());
+			a0 = _mm256_slli_epi16(a0, 6);
+			a0 = _mm256_sub_epi16(a0, o2);
+
+			a2 = _mm256_setzero_si256();
+			a2 = _mm256_insert_epi32(a2, *(EB_U32*)ptrSrc1, 0); ptrSrc1 += list1SrcStride;
+			a2 = _mm256_insert_epi32(a2, *(EB_U32*)ptrSrc1, 1); ptrSrc1 += list1SrcStride;
+			a2 = _mm256_insert_epi32(a2, *(EB_U32*)ptrSrc1, 4); ptrSrc1 += list1SrcStride;
+			a2 = _mm256_insert_epi32(a2, *(EB_U32*)ptrSrc1, 5); ptrSrc1 += list1SrcStride;
+			a2 = _mm256_unpacklo_epi8(a2, _mm256_setzero_si256());
+			a2 = _mm256_slli_epi16(a2, 6);
+			a2 = _mm256_sub_epi16(a2, o2);
+
+			a0 = _mm256_adds_epi16(a0, a2);
+			a0 = _mm256_adds_epi16(a0, _mm256_set1_epi16((short)offset));
+			a0 = _mm256_srai_epi16(a0, 7);
+
+			a0 = _mm256_packus_epi16(a0, a0);
+			*(EB_U32 *)q = _mm256_extract_epi32(a0, 0); q += dstStride;
+			*(EB_U32 *)q = _mm256_extract_epi32(a0, 1); q += dstStride;
+			*(EB_U32 *)q = _mm256_extract_epi32(a0, 4); q += dstStride;
+			*(EB_U32 *)q = _mm256_extract_epi32(a0, 5); q += dstStride;
+			rowCount -= 4;
+		} while (rowCount != 0);
+		puWidth -= 4;
+		if (puWidth == 0)
+		{
+			return;
+		}
+
+		list0Src += 4;
+		list1Src += 4;
+		dst += 4;
+	}
+
+	colCount = puWidth;
+	do
+	{
+		EB_BYTE q = dst;
+		EB_BYTE ptrSrc0 = list0Src;
+		EB_BYTE ptrSrc1 = list1Src;
+		rowCount = puHeight;
+		do
+		{
+			__m256i a0, a1, a2, a3;
+			a0 = _mm256_setzero_si256();
+			a0 = _mm256_insert_epi64(a0, *(EB_U64*)ptrSrc0, 0); ptrSrc0 += list0SrcStride;
+			a0 = _mm256_insert_epi64(a0, *(EB_U64*)ptrSrc0, 2); ptrSrc0 += list0SrcStride;
+			a0 = _mm256_unpacklo_epi8(a0, _mm256_setzero_si256());
+			a0 = _mm256_slli_epi16(a0, 6);
+			a0 = _mm256_sub_epi16(a0, o2);
+
+			a2 = _mm256_setzero_si256();
+			a2 = _mm256_insert_epi64(a2, *(EB_U64*)ptrSrc1, 0); ptrSrc1 += list1SrcStride;
+			a2 = _mm256_insert_epi64(a2, *(EB_U64*)ptrSrc1, 2); ptrSrc1 += list1SrcStride;
+			a2 = _mm256_unpacklo_epi8(a2, _mm256_setzero_si256());
+			a2 = _mm256_slli_epi16(a2, 6);
+			a2 = _mm256_sub_epi16(a2, o2);
+
+			a0 = _mm256_adds_epi16(a0, a2);
+			a0 = _mm256_adds_epi16(a0, _mm256_set1_epi16((short)offset));
+			a0 = _mm256_srai_epi16(a0, 7);
+
+			a1 = _mm256_setzero_si256();
+			a1 = _mm256_insert_epi64(a1, *(EB_U64*)ptrSrc0, 0); ptrSrc0 += list0SrcStride;
+			a1 = _mm256_insert_epi64(a1, *(EB_U64*)ptrSrc0, 2); ptrSrc0 += list0SrcStride;
+			a1 = _mm256_unpacklo_epi8(a1, _mm256_setzero_si256());
+			a1 = _mm256_slli_epi16(a1, 6);
+			a1 = _mm256_sub_epi16(a1, o2);
+
+			a3 = _mm256_setzero_si256();
+			a3 = _mm256_insert_epi64(a3, *(EB_U64*)ptrSrc1, 0); ptrSrc1 += list1SrcStride;
+			a3 = _mm256_insert_epi64(a3, *(EB_U64*)ptrSrc1, 2); ptrSrc1 += list1SrcStride;
+			a3 = _mm256_unpacklo_epi8(a3, _mm256_setzero_si256());
+			a3 = _mm256_slli_epi16(a3, 6);
+			a3 = _mm256_sub_epi16(a3, o2);
+
+			a1 = _mm256_adds_epi16(a1, a3);
+			a1 = _mm256_adds_epi16(a1, _mm256_set1_epi16((short)offset));
+			a1 = _mm256_srai_epi16(a1, 7);
+			a0 = _mm256_packus_epi16(a0, a1);
+			*(EB_U64 *)q = _mm256_extract_epi64(a0, 0); q += dstStride;
+			*(EB_U64 *)q = _mm256_extract_epi64(a0, 2); q += dstStride;
+			*(EB_U64 *)q = _mm256_extract_epi64(a0, 1); q += dstStride;
+			*(EB_U64 *)q = _mm256_extract_epi64(a0, 3); q += dstStride;
+			rowCount -= 4;
+		} while (rowCount != 0);
+
+		colCount -= 8;
+		list0Src += 8;
+		list1Src += 8;
+		dst += 8;
+	} while (colCount != 0);
+}

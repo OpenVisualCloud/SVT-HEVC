@@ -56,18 +56,6 @@ void LumaInterpolationFilterPosqOutRaw_SSSE3(EB_BYTE refPic, EB_U32 srcStride, E
 void LumaInterpolationFilterPosrOutRaw_SSSE3(EB_BYTE refPic, EB_U32 srcStride, EB_S16* dst, EB_U32 puWidth, EB_U32 puHeight, EB_S16 *firstPassIFDst);
 void BiPredClipping_SSSE3(EB_U32 puWidth, EB_U32 puHeight, EB_S16 *list0Src, EB_S16 *list1Src, EB_BYTE dst, EB_U32 dstStride, EB_S32 offset);
 
-void BiPredClippingOnTheFly_SSSE3(
-	EB_BYTE    list0Src,
-	EB_U32     list0SrcStride,
-	EB_BYTE    list1Src,
-	EB_U32     list1SrcStride,
-	EB_BYTE    dst,
-	EB_U32     dstStride,
-	EB_U32     puWidth,
-	EB_U32     puHeight,
-	EB_S32     offset,
-	EB_BOOL	   isLuma);
-
 #ifdef __cplusplus
 }
 #endif

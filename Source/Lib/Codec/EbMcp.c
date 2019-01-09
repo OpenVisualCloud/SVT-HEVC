@@ -360,7 +360,7 @@ void BiPredHevcInterpolationMd(
 		if (((fracPosL0x + (fracPosL0y << 2)) == 0) && ((fracPosL1x + (fracPosL1y << 2)) == 0))
 		{
 			// bi-pred luma clipping
-			BiPredClippingOnTheFly_SSSE3(
+			BiPredClippingOnTheFly_AVX2(
 				is16Bit ? refPicList0->bufferY + 4 + 4 * refPicList0->strideY : refPicList0->bufferY + integPosL0x + integPosL0y*refPicList0->strideY,
 				refPicList0->strideY,
 				is16Bit ? refPicList1->bufferY + 4 + 4 * refPicList1->strideY : refPicList1->bufferY + integPosL1x + integPosL1y*refPicList1->strideY,
@@ -438,7 +438,7 @@ void BiPredHevcInterpolationMd(
 		if (((fracPosL0x + (fracPosL0y << 3)) == 0) && ((fracPosL1x + (fracPosL1y << 3)) == 0))
 		{
 			// bi-pred luma clipping
-			BiPredClippingOnTheFly_SSSE3(
+			BiPredClippingOnTheFly_AVX2(
 				is16Bit ? refPicList0->bufferCb + 2 + 2 * refPicList0->strideCb : refPicList0->bufferCb + integPosL0x + integPosL0y*refPicList0->strideCb,
 				refPicList0->strideCb,
 				is16Bit ? refPicList1->bufferCb + 2 + 2 * refPicList1->strideCb : refPicList1->bufferCb + integPosL1x + integPosL1y*refPicList1->strideCb,
@@ -451,7 +451,7 @@ void BiPredHevcInterpolationMd(
 				EB_FALSE);
 
 			// bi-pred luma clipping
-			BiPredClippingOnTheFly_SSSE3(
+			BiPredClippingOnTheFly_AVX2(
 				is16Bit ? refPicList0->bufferCr + 2 + 2 * refPicList0->strideCr : refPicList0->bufferCr + integPosL0x + integPosL0y*refPicList0->strideCr,
 				refPicList0->strideCr,
 				is16Bit ? refPicList1->bufferCr + 2 + 2 * refPicList1->strideCr : refPicList1->bufferCr + integPosL1x + integPosL1y*refPicList1->strideCr,
@@ -596,7 +596,7 @@ void EncodeBiPredInterpolation(
 	if (((fracPosL0x + (fracPosL0y << 2)) == 0) && ((fracPosL1x + (fracPosL1y << 2)) == 0))
 	{
 		// bi-pred luma clipping
-		BiPredClippingOnTheFly_SSSE3(
+		BiPredClippingOnTheFly_AVX2(
 			refPicList0->bufferY + integPosL0x + integPosL0y*refPicList0->strideY,
 			refPicList0->strideY,
 			refPicList1->bufferY + integPosL1x + integPosL1y*refPicList1->strideY,
@@ -672,7 +672,7 @@ void EncodeBiPredInterpolation(
 	if (((fracPosL0x + (fracPosL0y << 3)) == 0) && ((fracPosL1x + (fracPosL1y << 3)) == 0))
 	{
 		// bi-pred luma clipping
-		BiPredClippingOnTheFly_SSSE3(
+		BiPredClippingOnTheFly_AVX2(
 			refPicList0->bufferCb + integPosL0x + integPosL0y*refPicList0->strideCb,
 			refPicList0->strideCb,
 			refPicList1->bufferCb + integPosL1x + integPosL1y*refPicList1->strideCb,
@@ -685,7 +685,7 @@ void EncodeBiPredInterpolation(
 			EB_FALSE);
 
 		// bi-pred luma clipping
-		BiPredClippingOnTheFly_SSSE3(
+		BiPredClippingOnTheFly_AVX2(
 			refPicList0->bufferCr + integPosL0x + integPosL0y*refPicList0->strideCr,
 			refPicList0->strideCr,
 			refPicList1->bufferCr + integPosL1x + integPosL1y*refPicList1->strideCr,
