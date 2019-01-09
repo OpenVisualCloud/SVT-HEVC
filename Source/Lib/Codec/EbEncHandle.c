@@ -2064,6 +2064,7 @@ void CopyApiFromApp(
     // Rate Control
     sequenceControlSetPtr->staticConfig.sceneChangeDetection = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sceneChangeDetection;
     sequenceControlSetPtr->staticConfig.rateControlMode = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->rateControlMode;
+    sequenceControlSetPtr->staticConfig.crf = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->crf;
     sequenceControlSetPtr->staticConfig.lookAheadDistance = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->lookAheadDistance;
     sequenceControlSetPtr->staticConfig.framesToBeEncoded = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->framesToBeEncoded;
     
@@ -2566,11 +2567,14 @@ static EB_ERRORTYPE VerifySettings(\
         SVT_LOG("Error Instance %u: The constrained intra must be [0 - 1] \n", channelNumber + 1);
 		return_error = EB_ErrorBadParameter;
 	}
-	if (config->rateControlMode > 1) {
-        SVT_LOG("Error Instance %u: The rate control mode must be [0 - 1] \n", channelNumber + 1);
+	if (config->rateControlMode > 2) {
+        SVT_LOG("Error Instance %u: The rate control mode must be [0 - 2] \n", channelNumber + 1);
 		return_error = EB_ErrorBadParameter;
 	}
-
+	if ((config->rateControlMode == 2) && (config->crf > 51))
+	{
+		SVT_LOG("Error instance %u:The crf value must be [0-51] \n", channelNumber + 1);
+	}
     if (config->tune > 0 && config->bitRateReduction == 1){
         SVT_LOG("Error Instance %u: Bit Rate Reduction is not supported for OQ mode (Tune = 1 ) and VMAF mode (Tune = 2)\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
@@ -2855,6 +2859,8 @@ static void PrintLibParams(
     SVT_LOG("\nSVT [config]: HierarchicalLevels / BaseLayerSwitchMode / PredStructure\t\t: %d / %d / %d ", config->hierarchicalLevels, config->baseLayerSwitchMode, config->predStructure);
     if (config->rateControlMode == 1)
         SVT_LOG("\nSVT [config]: RCMode / TargetBitrate / LookaheadDistance / SceneChange\t\t: VBR / %d / %d / %d ", config->targetBitRate, config->lookAheadDistance, config->sceneChangeDetection);
+    else if(config->rateControlMode == 2)
+        SVT_LOG("\nSVT [config]: RCMode / TargetQuality / LookaheadDistance / SceneChange\t\t: CRF / %d / %d / %d ", config->crf, config->lookAheadDistance, config->sceneChangeDetection);
     else
         SVT_LOG("\nSVT [config]: BRC Mode / QP  / LookaheadDistance / SceneChange\t\t\t: CQP / %d / %d / %d ", config->qp, config->lookAheadDistance, config->sceneChangeDetection);
 

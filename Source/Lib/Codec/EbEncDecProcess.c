@@ -1391,7 +1391,7 @@ static void EncDecConfigureLcu(
 {
 
     //RC is off
-    if (sequenceControlSetPtr->staticConfig.rateControlMode == 0 && sequenceControlSetPtr->staticConfig.improveSharpness == 0 && sequenceControlSetPtr->staticConfig.bitRateReduction == 0) {
+    if ((sequenceControlSetPtr->staticConfig.rateControlMode != 1) && sequenceControlSetPtr->staticConfig.improveSharpness == 0 && sequenceControlSetPtr->staticConfig.bitRateReduction == 0) {
         contextPtr->qp = pictureQp;
     }
     //RC is on

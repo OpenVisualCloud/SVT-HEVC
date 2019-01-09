@@ -327,6 +327,7 @@ typedef struct EbConfig_s
     uint32_t                 targetBitRate;
     uint32_t                 maxQpAllowed;
     uint32_t                 minQpAllowed;
+    uint32_t                 crf;
 
     /****************************************
     * TUNE

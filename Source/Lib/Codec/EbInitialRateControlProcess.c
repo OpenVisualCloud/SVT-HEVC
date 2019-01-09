@@ -952,7 +952,7 @@ void* InitialRateControlKernel(void *inputPtr)
 				pictureControlSetPtr,
 				inputResultsPtr);
 
-			if (sequenceControlSetPtr->staticConfig.rateControlMode)
+			if (sequenceControlSetPtr->staticConfig.rateControlMode == 1)
 			{
 				if (sequenceControlSetPtr->staticConfig.lookAheadDistance != 0){
 
@@ -1039,7 +1039,7 @@ void* InitialRateControlKernel(void *inputPtr)
 					else
 						pictureControlSetPtr->endOfSequenceRegion = EB_FALSE;
 
-					if (sequenceControlSetPtr->staticConfig.rateControlMode)
+					if (sequenceControlSetPtr->staticConfig.rateControlMode == 1)
 					{
 						// Determine offset from the Head Ptr for HLRC histogram queue and set the life count
 						if (sequenceControlSetPtr->staticConfig.lookAheadDistance != 0){

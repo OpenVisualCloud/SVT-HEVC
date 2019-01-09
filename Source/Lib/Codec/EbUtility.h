@@ -108,7 +108,7 @@ extern EB_U32 EndianSwap(EB_U32 ui);
 #define POW2_CHECK(x)                   ((x) == ((x) & (-((EB_S32)(x)))))
 #define ROUND_UP_MUL_8(x)               ((x) + ((8 - ((x) & 0x7)) & 0x7))
 #define ROUND_UP_MULT(x,mult)           ((x) + (((mult) - ((x) & ((mult)-1))) & ((mult)-1)))
-
+#define LOG2(x)                         (log((double)(x)) * 1.4426950408889640513713538072172)
 // rounds down to the next power of two
 #define FLOOR_POW2(x)       \
     MULTI_LINE_MACRO_BEGIN  \

@@ -649,6 +649,7 @@ EB_ERRORTYPE PictureParentControlSetCtor(
 
 		EB_U32 cuIdx;
 		for (cuIdx = 0; cuIdx < 21; ++cuIdx){
+            contigousCand[cuIdx*maxOisCand] = (OisCandidate_t) { 0 };
 			objectPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[cuIdx] = &contigousCand[cuIdx*maxOisCand];
 		}
 	}

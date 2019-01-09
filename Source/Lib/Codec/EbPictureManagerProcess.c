@@ -725,6 +725,8 @@ void* PictureManagerKernel(void *inputPtr)
                     EB_MEMSET(ChildPictureControlSetPtr->refPicQpArray, 0,  2 * sizeof(EB_U8));
 
                     EB_MEMSET(ChildPictureControlSetPtr->refSliceTypeArray, 0,  2 * sizeof(EB_PICTURE));
+
+                    EB_MEMSET(ChildPictureControlSetPtr->refPicTemporalLayerArray, 0, 2 * sizeof(EB_U8));
                    
                     // Configure List0
                     if ((entryPictureControlSetPtr->sliceType == EB_P_PICTURE) || (entryPictureControlSetPtr->sliceType == EB_B_PICTURE)) {
@@ -741,6 +743,7 @@ void* PictureManagerKernel(void *inputPtr)
 
                             ChildPictureControlSetPtr->refPicQpArray[REF_LIST_0]  = ((EbReferenceObject_t*) referenceEntryPtr->referenceObjectPtr->objectPtr)->qp;
                             ChildPictureControlSetPtr->refSliceTypeArray[REF_LIST_0] = ((EbReferenceObject_t*) referenceEntryPtr->referenceObjectPtr->objectPtr)->sliceType;
+                            ChildPictureControlSetPtr->refPicTemporalLayerArray[REF_LIST_0] = ((EbReferenceObject_t*)referenceEntryPtr->referenceObjectPtr->objectPtr)->tmpLayerIdx;
 
                             // Increment the Reference's liveCount by the number of tiles in the input picture
                             EbObjectIncLiveCount(
@@ -773,6 +776,7 @@ void* PictureManagerKernel(void *inputPtr)
 
                             ChildPictureControlSetPtr->refPicQpArray[REF_LIST_1]  = ((EbReferenceObject_t*) referenceEntryPtr->referenceObjectPtr->objectPtr)->qp;
                             ChildPictureControlSetPtr->refSliceTypeArray[REF_LIST_1] = ((EbReferenceObject_t*) referenceEntryPtr->referenceObjectPtr->objectPtr)->sliceType;
+                            ChildPictureControlSetPtr->refPicTemporalLayerArray[REF_LIST_1] = ((EbReferenceObject_t*)referenceEntryPtr->referenceObjectPtr->objectPtr)->tmpLayerIdx;
                             
 
 

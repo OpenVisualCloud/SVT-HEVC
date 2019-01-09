@@ -181,6 +181,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.maxQpAllowed = config->maxQpAllowed;
     callbackData->ebEncParameters.minQpAllowed = config->minQpAllowed;
     callbackData->ebEncParameters.qp = config->qp;
+    callbackData->ebEncParameters.crf = config->crf;
     callbackData->ebEncParameters.useQpFile = (EB_BOOL)config->useQpFile;
     callbackData->ebEncParameters.disableDlfFlag = (EB_BOOL)config->disableDlfFlag;
     callbackData->ebEncParameters.enableSaoFlag = (EB_BOOL)config->enableSaoFlag;

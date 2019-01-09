@@ -84,6 +84,7 @@
 #define RECOVERY_POINT_TOKEN            "-recovery-point" // no Eval
 #define RATE_CONTROL_ENABLE_TOKEN       "-rc"
 #define TARGET_BIT_RATE_TOKEN           "-tbr"
+#define CRF_TOKEN                       "-crf"
 #define MAX_QP_TOKEN                    "-max-qp"
 #define MIN_QP_TOKEN                    "-min-qp"
 #define TEMPORAL_ID					    "-temporal-id" // no Eval
@@ -171,6 +172,7 @@ static void SetCfgIntraRefreshType              (const char *value, EbConfig_t *
 static void SetHierarchicalLevels				(const char *value, EbConfig_t *cfg) { cfg->hierarchicalLevels = strtol(value, NULL, 0); };
 static void SetCfgPredStructure					(const char *value, EbConfig_t *cfg) { cfg->predStructure = strtol(value, NULL, 0); };
 static void SetCfgQp                            (const char *value, EbConfig_t *cfg) {cfg->qp = strtoul(value, NULL, 0);};
+static void SetCfgCrf                           (const char *value, EbConfig_t *cfg) {cfg->crf = strtoul(value, NULL, 0); };
 static void SetCfgUseQpFile                     (const char *value, EbConfig_t *cfg) {cfg->useQpFile = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetDisableDlfFlag                   (const char *value, EbConfig_t *cfg) {cfg->disableDlfFlag = (EB_BOOL)strtoul(value, NULL, 0);};
 static void SetEnableSaoFlag                    (const char *value, EbConfig_t *cfg) {cfg->enableSaoFlag = (EB_BOOL)strtoul(value, NULL, 0);};
@@ -295,6 +297,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "RateControlMode", SetRateControlMode },
     { SINGLE_INPUT, LOOK_AHEAD_DIST_TOKEN, "LookAheadDistance",                             SetLookAheadDistance},
     { SINGLE_INPUT, TARGET_BIT_RATE_TOKEN, "TargetBitRate", SetTargetBitRate },
+    { SINGLE_INPUT, CRF_TOKEN, "CRF", SetCfgCrf },
     { SINGLE_INPUT, MAX_QP_TOKEN, "MaxQpAllowed", SetMaxQpAllowed },
     { SINGLE_INPUT, MIN_QP_TOKEN, "MinQpAllowed", SetMinQpAllowed },
 
@@ -410,6 +413,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->maxQpAllowed                         = 48;
     configPtr->minQpAllowed                         = 10;
     configPtr->baseLayerSwitchMode                  = 0;
+    configPtr->crf                                  = 28;
 	configPtr->encMode								= 9;
     configPtr->intraPeriod                          = -2;
     configPtr->intraRefreshType                     = 1;

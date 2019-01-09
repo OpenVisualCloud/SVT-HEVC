@@ -147,8 +147,11 @@ typedef struct PictureControlSet_s
     EbObjectWrapper_t                    *refPicPtrArray[MAX_NUM_OF_REF_PIC_LIST];
 
     EB_U8                                 refPicQpArray[MAX_NUM_OF_REF_PIC_LIST];
-    EB_PICTURE                              refSliceTypeArray[MAX_NUM_OF_REF_PIC_LIST];    
-    
+
+    EB_PICTURE                              refSliceTypeArray[MAX_NUM_OF_REF_PIC_LIST];
+
+    EB_U8                                 refPicTemporalLayerArray[MAX_NUM_OF_REF_PIC_LIST];
+
     // GOP
     EB_U64                                pictureNumber;        
     EB_U8                                 temporalLayerIndex;
@@ -182,6 +185,7 @@ typedef struct PictureControlSet_s
     EB_U8                                 pictureQp;
     EB_U8                                 difCuDeltaQpDepth;
     EB_U8                                 useDeltaQp;
+    EB_U64                                sadCost;
     
     // LCU Array
     EB_U8                                 lcuMaxDepth;
@@ -381,6 +385,7 @@ typedef struct PictureParentControlSet_s
     EB_BOOL                               tablesUpdated;
     EB_BOOL                               percentageUpdated;
     EB_U32                                targetBitRate;
+    EB_U32                                crf;
     EB_BOOL                               minTargetRateAssigned;
     EB_U32                                frameRate;
     EB_BOOL                               frameRateIsUpdated;

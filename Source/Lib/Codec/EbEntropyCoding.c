@@ -4916,7 +4916,7 @@ EB_ERRORTYPE ComputeProfileTierLevelInfo(
 	scsPtr->profileIdc = scsPtr->staticConfig.profile;
 
 
-	if (scsPtr->staticConfig.rateControlMode == 0){
+	if (scsPtr->staticConfig.rateControlMode != 1){
 		// level calculation
 		if ((lumaSampleRate <= maxLumaSampleRate[0]) && (lumaPictureSize <= maxLumaPictureSize[0]) && (lumaWidthSquare <= maxLumaPictureSize[0] * 8) && (lumaHeightSquare <= maxLumaPictureSize[0] * 8))
 			scsPtr->levelIdc = 30; //1*30

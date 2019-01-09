@@ -1012,6 +1012,11 @@ typedef enum EB_SEI {
 #define MIN_QP_VALUE                     0
 #define MAX_QP_VALUE                    51
 #define MAX_CHROMA_MAP_QP_VALUE         57
+#define BASE_FRAME_DURATION             0.04
+#define MIN_FRAME_DURATION              0.01
+#define MAX_FRAME_DURATION              1.00
+#define SAD_SATD_CONSTANT               5
+
 
 
 //***Transforms***

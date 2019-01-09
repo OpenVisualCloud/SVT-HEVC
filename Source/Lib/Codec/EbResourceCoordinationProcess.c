@@ -728,7 +728,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
 	    // Rate Control                                            
 		// Set the ME Distortion and OIS Historgrams to zero
-        if (sequenceControlSetPtr->staticConfig.rateControlMode){
+        if (sequenceControlSetPtr->staticConfig.rateControlMode==1){
 	            EB_MEMSET(pictureControlSetPtr->meDistortionHistogram, 0, NUMBER_OF_SAD_INTERVALS*sizeof(EB_U16));
 	            EB_MEMSET(pictureControlSetPtr->oisDistortionHistogram, 0, NUMBER_OF_INTRA_SAD_INTERVALS*sizeof(EB_U16));
         }
