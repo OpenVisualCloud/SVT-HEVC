@@ -2954,7 +2954,6 @@ EB_S8 Sort3Elements(EB_U32 a, EB_U32 b, EB_U32 c){
 
 
 EB_ERRORTYPE CheckZeroZeroCenter(
-    SequenceControlSet_t         *sequenceControlSetPtr,
 	EbPictureBufferDesc_t        *refPicPtr,
 	MeContext_t                  *contextPtr,
 	EB_U32                       lcuOriginX,
@@ -2987,7 +2986,7 @@ EB_ERRORTYPE CheckZeroZeroCenter(
 
     zeroMvSad = zeroMvSad << subsampleSad;
 
-    if (sequenceControlSetPtr->inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER && sequenceControlSetPtr->staticConfig.tune > 0) {
+    if (contextPtr->updateHmeSearchCenter) {
         // FIX
         // Correct the left edge of the Search Area if it is not on the reference Picture
         *xSearchCenter = ((originX + *xSearchCenter) < -padWidth) ?
@@ -3798,7 +3797,7 @@ EB_ERRORTYPE MotionEstimateLcu(
 			if (pictureControlSetPtr->temporalLayerIndex > 0 || listIndex == 0){
 				// A - The MV center for Tier0 search could be either (0,0), or HME
 				// A - Set HME MV Center
-                if (sequenceControlSetPtr->inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER && sequenceControlSetPtr->staticConfig.tune > 0) {
+                if (contextPtr->updateHmeSearchCenter) {
                     TestSearchAreaBounds(
                         refPicPtr,
                         contextPtr,
@@ -3821,7 +3820,7 @@ EB_ERRORTYPE MotionEstimateLcu(
 
 					while (searchRegionNumberInHeight < contextPtr->numberHmeSearchRegionInHeight) {
                         while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
-                            if (sequenceControlSetPtr->inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER && sequenceControlSetPtr->staticConfig.tune > 0) {
+                            if (contextPtr->updateHmeSearchCenter) {
                                 xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter >> 2;
                                 yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter >> 2;
 
@@ -4089,7 +4088,6 @@ EB_ERRORTYPE MotionEstimateLcu(
 
 			if (xSearchCenter != 0 || ySearchCenter != 0) {
 				CheckZeroZeroCenter(
-                    sequenceControlSetPtr,
 					refPicPtr,
 					contextPtr,
 					lcuOriginX,

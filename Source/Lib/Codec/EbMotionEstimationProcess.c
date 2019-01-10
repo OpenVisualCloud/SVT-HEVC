@@ -45,16 +45,6 @@
 |40||41||44||45|     |56||57||60||61|
 |42||43||46||47|     |58||59||62||63|
 -------------------------------------*/
-EB_ERRORTYPE CheckZeroZeroCenter(
-	PictureParentControlSet_t   *pictureControlSetPtr,
-	EbPictureBufferDesc_t        *refPicPtr,
-	MeContext_t                  *contextPtr,
-	EB_U32                       lcuOriginX,
-	EB_U32                       lcuOriginY,
-	EB_U32                       lcuWidth,
-	EB_U32                       lcuHeight,
-	EB_S16                       *xSearchCenter,
-	EB_S16                       *ySearchCenter);
 
 EB_ERRORTYPE SwapMeCandidateBuffer(
 	MeCandidate_t *a,
@@ -152,6 +142,8 @@ void* SetMeHmeParamsSq(
         }
     }
 
+    if ((inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER) && (sequenceControlSetPtr->staticConfig.tune > 0))
+        meContextPtr->updateHmeSearchCenter = EB_TRUE;
 	return EB_NULL;
 };
 
@@ -227,6 +219,9 @@ void* SetMeHmeParamsOq(
         }
     }
 
+    if ((inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER) && (sequenceControlSetPtr->staticConfig.tune > 0))
+        meContextPtr->updateHmeSearchCenter = EB_TRUE;
+
 	return EB_NULL;
 };
 
@@ -279,8 +274,8 @@ void* SetMeHmeParamsVmaf(
 	meContextPtr->searchAreaWidth = SearchAreaWidthVmaf[resolutionIndex][hmeMeLevel];
 	meContextPtr->searchAreaHeight = SearchAreaHeightVmaf[resolutionIndex][hmeMeLevel];
 
-	// HME Level0 adjustment for low frame rate contents (frame rate <= 30)
-
+    if ((inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER) && (sequenceControlSetPtr->staticConfig.tune > 0))
+        meContextPtr->updateHmeSearchCenter = EB_TRUE;
 
 	return EB_NULL;
 };
