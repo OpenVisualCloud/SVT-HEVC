@@ -309,8 +309,9 @@ typedef struct MotionEstimationTierZero_s {
 } MotionEstimationTierZero_t;
 
 typedef struct MeContext_s {
-
+    
     // MV offset (search center)
+    EB_BOOL         updateHmeSearchCenter;
     EB_S16          xMvOffset;
     EB_S16          yMvOffset;
 

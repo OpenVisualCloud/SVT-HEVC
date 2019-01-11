@@ -56,21 +56,8 @@
 #define SAO_ENABLE_TOKEN                "-sao"
 #define USE_DEFAULT_ME_HME_TOKEN        "-use-default-me-hme"
 #define HME_ENABLE_TOKEN                "-hme"      // no Eval
-#define HME_L0_ENABLE_TOKEN             "-hme-l0"   // no Eval
-#define HME_L1_ENABLE_TOKEN             "-hme-l1"   // no Eval
-#define HME_L2_ENABLE_TOKEN             "-hme-l2"   // no Eval
 #define SEARCH_AREA_WIDTH_TOKEN         "-search-w" // no Eval
 #define SEARCH_AREA_HEIGHT_TOKEN        "-search-h" // no Eval
-#define NUM_HME_SEARCH_WIDTH_TOKEN      "-num-hme-w"// no Eval
-#define NUM_HME_SEARCH_HEIGHT_TOKEN     "-num-hme-h"// no Eval
-#define HME_SRCH_T_L0_WIDTH_TOKEN       "-hme-tot-l0-w"// no Eval
-#define HME_SRCH_T_L0_HEIGHT_TOKEN      "-hme-tot-l0-h"// no Eval
-#define HME_LEVEL0_WIDTH			    "-hme-l0-w" // no Eval
-#define HME_LEVEL0_HEIGHT			    "-hme-l0-h" // no Eval
-#define HME_LEVEL1_WIDTH			    "-hme-l1-w" // no Eval
-#define HME_LEVEL1_HEIGHT			    "-hme-l1-h" // no Eval
-#define HME_LEVEL2_WIDTH                "-hme-l2-w" // no Eval
-#define HME_LEVEL2_HEIGHT               "-hme-l2-h" // no Eval
 #define CONSTRAINED_INTRA_ENABLE_TOKEN  "-constrd-intra"
 #define IMPROVE_SHARPNESS_TOKEN         "-sharp"
 #define BITRATE_REDUCTION_TOKEN         "-brr"
@@ -96,6 +83,7 @@
 #define THREAD_MGMNT                    "-lp"
 #define TARGET_SOCKET                   "-ss"
 #define SWITCHTHREADSTOREALTIME_TOKEN   "-switchThreadsToRtPriority"
+#define FPSINVPS_TOKEN                  "-fpsinvps"
 #define CONFIG_FILE_COMMENT_CHAR        '#'
 #define CONFIG_FILE_NEWLINE_CHAR        '\n'
 #define CONFIG_FILE_RETURN_CHAR         '\r'
@@ -146,12 +134,12 @@ static void SetCfgQpFile                        (const char *value, EbConfig_t *
     if (cfg->qpFile) { fclose(cfg->qpFile); }
     FOPEN(cfg->qpFile,value, "r");
 };
-static void SetCfgSourceWidth                   (const char *value, EbConfig_t *cfg) {cfg->sourceWidth = strtoul(value, NULL, 0);};
-static void SetInterlacedVideo                  (const char *value, EbConfig_t *cfg) {cfg->interlacedVideo  = (EB_BOOL) strtoul(value, NULL, 0);};
-static void SetSeperateFields                   (const char *value, EbConfig_t *cfg) {cfg->separateFields = (EB_BOOL) strtoul(value, NULL, 0);};
-static void SetCfgSourceHeight                  (const char *value, EbConfig_t *cfg) {cfg->sourceHeight = strtoul(value, NULL, 0) >> cfg->separateFields;};
-static void SetCfgFramesToBeEncoded             (const char *value, EbConfig_t *cfg) {cfg->framesToBeEncoded = strtol(value,  NULL, 0) << cfg->separateFields;};
-static void SetBufferedInput                    (const char *value, EbConfig_t *cfg) {cfg->bufferedInput = (strtol(value, NULL, 0) != -1 && cfg->separateFields) ? strtol(value, NULL, 0) << cfg->separateFields : strtol(value, NULL, 0);};
+static void SetCfgSourceWidth                   (const char *value, EbConfig_t *cfg) {cfg->sourceWidth                      = strtoul(value, NULL, 0);};
+static void SetInterlacedVideo                  (const char *value, EbConfig_t *cfg) {cfg->interlacedVideo                  = (EB_BOOL) strtoul(value, NULL, 0);};
+static void SetSeperateFields                   (const char *value, EbConfig_t *cfg) {cfg->separateFields                   = (EB_BOOL) strtoul(value, NULL, 0);};
+static void SetCfgSourceHeight                  (const char *value, EbConfig_t *cfg) {cfg->sourceHeight                     = strtoul(value, NULL, 0) >> cfg->separateFields;};
+static void SetCfgFramesToBeEncoded             (const char *value, EbConfig_t *cfg) {cfg->framesToBeEncoded                = strtol(value,  NULL, 0) << cfg->separateFields;};
+static void SetBufferedInput                    (const char *value, EbConfig_t *cfg) {cfg->bufferedInput                    = (strtol(value, NULL, 0) != -1 && cfg->separateFields) ? strtol(value, NULL, 0) << cfg->separateFields : strtol(value, NULL, 0);};
 static void SetFrameRate                        (const char *value, EbConfig_t *cfg) {
     cfg->frameRate = strtoul(value, NULL, 0);
     if (cfg->frameRate > 1000 ){
@@ -161,47 +149,34 @@ static void SetFrameRate                        (const char *value, EbConfig_t *
         cfg->frameRate = cfg->frameRate << 16;
     }
 }
-static void SetFrameRateNumerator               (const char *value, EbConfig_t *cfg) { cfg->frameRateNumerator = strtoul(value, NULL, 0);};
-static void SetFrameRateDenominator             (const char *value, EbConfig_t *cfg) { cfg->frameRateDenominator = strtoul(value, NULL, 0);};
-static void SetEncoderBitDepth                  (const char *value, EbConfig_t *cfg) {cfg->encoderBitDepth = strtoul(value, NULL, 0);}
-static void SetcompressedTenBitFormat			(const char *value, EbConfig_t *cfg) {cfg->compressedTenBitFormat = strtoul(value, NULL, 0);}
-static void SetBaseLayerSwitchMode              (const char *value, EbConfig_t *cfg) {cfg->baseLayerSwitchMode = (EB_BOOL) strtoul(value, NULL, 0);};
-static void SetencMode                          (const char *value, EbConfig_t *cfg) {cfg->encMode = (uint8_t)strtoul(value, NULL, 0);};
-static void SetCfgIntraPeriod                   (const char *value, EbConfig_t *cfg) {cfg->intraPeriod = strtol(value,  NULL, 0);};
-static void SetCfgIntraRefreshType              (const char *value, EbConfig_t *cfg) {cfg->intraRefreshType = strtol(value,  NULL, 0);};
-static void SetHierarchicalLevels				(const char *value, EbConfig_t *cfg) { cfg->hierarchicalLevels = strtol(value, NULL, 0); };
-static void SetCfgPredStructure					(const char *value, EbConfig_t *cfg) { cfg->predStructure = strtol(value, NULL, 0); };
-static void SetCfgQp                            (const char *value, EbConfig_t *cfg) {cfg->qp = strtoul(value, NULL, 0);};
-static void SetCfgUseQpFile                     (const char *value, EbConfig_t *cfg) {cfg->useQpFile = (EB_BOOL)strtol(value, NULL, 0); };
-static void SetDisableDlfFlag                   (const char *value, EbConfig_t *cfg) {cfg->disableDlfFlag = (EB_BOOL)strtoul(value, NULL, 0);};
-static void SetEnableSaoFlag                    (const char *value, EbConfig_t *cfg) {cfg->enableSaoFlag = (EB_BOOL)strtoul(value, NULL, 0);};
-static void SetEnableHmeFlag                    (const char *value, EbConfig_t *cfg) {cfg->enableHmeFlag = (EB_BOOL)strtoul(value, NULL, 0);};
-static void SetEnableHmeLevel0Flag              (const char *value, EbConfig_t *cfg) {cfg->enableHmeLevel0Flag = (EB_BOOL)strtoul(value, NULL, 0);};
-static void SetSceneChangeDetection             (const char *value, EbConfig_t *cfg) {cfg->sceneChangeDetection = strtoul(value, NULL, 0);};
-static void SetLookAheadDistance                (const char *value, EbConfig_t *cfg) {cfg->lookAheadDistance = strtoul(value, NULL, 0);};
-static void SetRateControlMode                  (const char *value, EbConfig_t *cfg) {cfg->rateControlMode = strtoul(value, NULL, 0);};
-static void SetTargetBitRate                    (const char *value, EbConfig_t *cfg) {cfg->targetBitRate = strtoul(value, NULL, 0);};
-static void SetMaxQpAllowed                     (const char *value, EbConfig_t *cfg) {cfg->maxQpAllowed = strtoul(value, NULL, 0);};
-static void SetMinQpAllowed                     (const char *value, EbConfig_t *cfg) {cfg->minQpAllowed = strtoul(value, NULL, 0);};
-static void SetEnableHmeLevel1Flag              (const char *value, EbConfig_t *cfg) {cfg->enableHmeLevel1Flag  = (EB_BOOL)strtoul(value, NULL, 0);};
-static void SetEnableHmeLevel2Flag              (const char *value, EbConfig_t *cfg) {cfg->enableHmeLevel2Flag  = (EB_BOOL)strtoul(value, NULL, 0);};
-static void SetCfgSearchAreaWidth               (const char *value, EbConfig_t *cfg) {cfg->searchAreaWidth = strtoul(value, NULL, 0);};
-static void SetCfgSearchAreaHeight              (const char *value, EbConfig_t *cfg) {cfg->searchAreaHeight = strtoul(value, NULL, 0);};
-static void SetCfgNumberHmeSearchRegionInWidth  (const char *value, EbConfig_t *cfg) {cfg->numberHmeSearchRegionInWidth = strtoul(value, NULL, 0);};
-static void SetCfgNumberHmeSearchRegionInHeight (const char *value, EbConfig_t *cfg) {cfg->numberHmeSearchRegionInHeight = strtoul(value, NULL, 0);};
-static void SetCfgHmeLevel0TotalSearchAreaWidth (const char *value, EbConfig_t *cfg) {cfg->hmeLevel0TotalSearchAreaWidth = strtoul(value, NULL, 0);};
-static void SetCfgHmeLevel0TotalSearchAreaHeight(const char *value, EbConfig_t *cfg) {cfg->hmeLevel0TotalSearchAreaHeight = strtoul(value, NULL, 0);};
-static void SetCfgUseDefaultMeHme               (const char *value, EbConfig_t *cfg) {cfg->useDefaultMeHme = (EB_BOOL)strtol(value, NULL, 0); };
-static void SetHmeLevel0SearchAreaInWidthArray  (const char *value, EbConfig_t *cfg) {cfg->hmeLevel0SearchAreaInWidthArray[cfg->hmeLevel0ColumnIndex++] = strtoul(value, NULL, 0);};
-static void SetHmeLevel0SearchAreaInHeightArray (const char *value, EbConfig_t *cfg) {cfg->hmeLevel0SearchAreaInHeightArray[cfg->hmeLevel0RowIndex++] = strtoul(value, NULL, 0);};
-static void SetHmeLevel1SearchAreaInWidthArray  (const char *value, EbConfig_t *cfg) {cfg->hmeLevel1SearchAreaInWidthArray[cfg->hmeLevel1ColumnIndex++] = strtoul(value, NULL, 0);};
-static void SetHmeLevel1SearchAreaInHeightArray (const char *value, EbConfig_t *cfg) {cfg->hmeLevel1SearchAreaInHeightArray[cfg->hmeLevel1RowIndex++] = strtoul(value, NULL, 0);};
-static void SetHmeLevel2SearchAreaInWidthArray  (const char *value, EbConfig_t *cfg) {cfg->hmeLevel2SearchAreaInWidthArray[cfg->hmeLevel2ColumnIndex++] = strtoul(value, NULL, 0);};
-static void SetHmeLevel2SearchAreaInHeightArray (const char *value, EbConfig_t *cfg) {cfg->hmeLevel2SearchAreaInHeightArray[cfg->hmeLevel2RowIndex++] = strtoul(value, NULL, 0);};
-static void SetEnableConstrainedIntra           (const char *value, EbConfig_t *cfg) {cfg->constrainedIntra 											= (EB_BOOL)strtoul(value, NULL, 0);};
-static void SetCfgTune                          (const char *value, EbConfig_t *cfg) { cfg->tune = (uint8_t)strtoul(value, NULL, 0); };
-static void SetBitRateReduction                 (const char *value, EbConfig_t *cfg) { cfg->bitRateReduction = (EB_BOOL)strtol(value, NULL, 0); };
-static void SetImproveSharpness                 (const char *value, EbConfig_t *cfg) {cfg->improveSharpness               = (EB_BOOL)strtol(value,  NULL, 0);};
+static void SetFrameRateNumerator               (const char *value, EbConfig_t *cfg) {cfg->frameRateNumerator               = strtoul(value, NULL, 0);};
+static void SetFrameRateDenominator             (const char *value, EbConfig_t *cfg) {cfg->frameRateDenominator             = strtoul(value, NULL, 0);};
+static void SetEncoderBitDepth                  (const char *value, EbConfig_t *cfg) {cfg->encoderBitDepth                  = strtoul(value, NULL, 0);}
+static void SetcompressedTenBitFormat           (const char *value, EbConfig_t *cfg) {cfg->compressedTenBitFormat           = strtoul(value, NULL, 0);}
+static void SetBaseLayerSwitchMode              (const char *value, EbConfig_t *cfg) {cfg->baseLayerSwitchMode              = (EB_BOOL) strtoul(value, NULL, 0);};
+static void SetencMode                          (const char *value, EbConfig_t *cfg) {cfg->encMode                          = (uint8_t)strtoul(value, NULL, 0);};
+static void SetCfgIntraPeriod                   (const char *value, EbConfig_t *cfg) {cfg->intraPeriod                      = strtol(value,  NULL, 0);};
+static void SetCfgIntraRefreshType              (const char *value, EbConfig_t *cfg) {cfg->intraRefreshType                 = strtol(value,  NULL, 0);};
+static void SetHierarchicalLevels               (const char *value, EbConfig_t *cfg) {cfg->hierarchicalLevels               = strtol(value, NULL, 0); };
+static void SetCfgPredStructure                 (const char *value, EbConfig_t *cfg) {cfg->predStructure                    = strtol(value, NULL, 0); };
+static void SetCfgQp                            (const char *value, EbConfig_t *cfg) {cfg->qp                               = strtoul(value, NULL, 0);};
+static void SetCfgUseQpFile                     (const char *value, EbConfig_t *cfg) {cfg->useQpFile                        = (EB_BOOL)strtol(value, NULL, 0); };
+static void SetDisableDlfFlag                   (const char *value, EbConfig_t *cfg) {cfg->disableDlfFlag                   = (EB_BOOL)strtoul(value, NULL, 0);};
+static void SetEnableSaoFlag                    (const char *value, EbConfig_t *cfg) {cfg->enableSaoFlag                    = (EB_BOOL)strtoul(value, NULL, 0);};
+static void SetEnableHmeFlag                    (const char *value, EbConfig_t *cfg) {cfg->enableHmeFlag                    = (EB_BOOL)strtoul(value, NULL, 0);};
+static void SetSceneChangeDetection             (const char *value, EbConfig_t *cfg) {cfg->sceneChangeDetection             = strtoul(value, NULL, 0);};
+static void SetLookAheadDistance                (const char *value, EbConfig_t *cfg) {cfg->lookAheadDistance                = strtoul(value, NULL, 0);};
+static void SetRateControlMode                  (const char *value, EbConfig_t *cfg) {cfg->rateControlMode                  = strtoul(value, NULL, 0);};
+static void SetTargetBitRate                    (const char *value, EbConfig_t *cfg) {cfg->targetBitRate                    = strtoul(value, NULL, 0);};
+static void SetMaxQpAllowed                     (const char *value, EbConfig_t *cfg) {cfg->maxQpAllowed                     = strtoul(value, NULL, 0);};
+static void SetMinQpAllowed                     (const char *value, EbConfig_t *cfg) {cfg->minQpAllowed                     = strtoul(value, NULL, 0);};
+static void SetCfgSearchAreaWidth               (const char *value, EbConfig_t *cfg) {cfg->searchAreaWidth                  = strtoul(value, NULL, 0);};
+static void SetCfgSearchAreaHeight              (const char *value, EbConfig_t *cfg) {cfg->searchAreaHeight                 = strtoul(value, NULL, 0);};
+static void SetCfgUseDefaultMeHme               (const char *value, EbConfig_t *cfg) {cfg->useDefaultMeHme                  = (EB_BOOL)strtol(value, NULL, 0); };
+static void SetEnableConstrainedIntra           (const char *value, EbConfig_t *cfg) {cfg->constrainedIntra                 = (EB_BOOL)strtoul(value, NULL, 0);};
+static void SetCfgTune                          (const char *value, EbConfig_t *cfg) {cfg->tune                             = (uint8_t)strtoul(value, NULL, 0); };
+static void SetBitRateReduction                 (const char *value, EbConfig_t *cfg) {cfg->bitRateReduction                 = (EB_BOOL)strtol(value, NULL, 0); };
+static void SetImproveSharpness                 (const char *value, EbConfig_t *cfg) {cfg->improveSharpness                 = (EB_BOOL)strtol(value,  NULL, 0);};
 static void SetVideoUsabilityInfo               (const char *value, EbConfig_t *cfg) {cfg->videoUsabilityInfo               = strtol(value,  NULL, 0);};
 static void SetHighDynamicRangeInput            (const char *value, EbConfig_t *cfg) {cfg->highDynamicRangeInput            = strtol(value,  NULL, 0);};
 static void SetAccessUnitDelimiter              (const char *value, EbConfig_t *cfg) {cfg->accessUnitDelimiter              = strtol(value,  NULL, 0);};
@@ -220,7 +195,7 @@ static void SetLevel                            (const char *value, EbConfig_t *
 		cfg->level = 9999999;
 };
 static void SetInjector                         (const char *value, EbConfig_t *cfg) {cfg->injector                         = strtol(value,  NULL, 0);};
-static void SpeedControlFlag                    (const char *value, EbConfig_t *cfg) { cfg->speedControlFlag = strtol(value, NULL, 0); };
+static void SpeedControlFlag                    (const char *value, EbConfig_t *cfg) {cfg->speedControlFlag                 = strtol(value, NULL, 0); };
 static void SetInjectorFrameRate                (const char *value, EbConfig_t *cfg) {
     cfg->injectorFrameRate = strtoul(value, NULL, 0);
     if (cfg->injectorFrameRate > 1000 ){
@@ -230,11 +205,12 @@ static void SetInjectorFrameRate                (const char *value, EbConfig_t *
         cfg->injectorFrameRate = cfg->injectorFrameRate << 16;
     }
 }
-static void	SetLatencyMode                      (const char *value, EbConfig_t *cfg)  {cfg->latencyMode               = (uint8_t)strtol(value, NULL, 0);};
-static void SetAsmType                          (const char *value, EbConfig_t *cfg)  {cfg->asmType                  = (uint32_t)strtoul(value, NULL, 0);};
-static void SetLogicalProcessors                (const char *value, EbConfig_t *cfg)  {cfg->logicalProcessors         = (uint32_t)strtoul(value, NULL, 0);};
-static void SetTargetSocket                     (const char *value, EbConfig_t *cfg)  {cfg->targetSocket              = (int32_t)strtol(value, NULL, 0);};
-static void SetSwitchThreadsToRtPriority        (const char *value, EbConfig_t *cfg)  {cfg->switchThreadsToRtPriority  = (EB_BOOL)strtol(value, NULL, 0); };
+static void SetLatencyMode                      (const char *value, EbConfig_t *cfg)  {cfg->latencyMode                     = (uint8_t)strtol(value, NULL, 0);};
+static void SetAsmType                          (const char *value, EbConfig_t *cfg)  {cfg->asmType                         = (uint32_t)strtoul(value, NULL, 0); };
+static void SetLogicalProcessors                (const char *value, EbConfig_t *cfg)  {cfg->logicalProcessors               = (uint32_t)strtoul(value, NULL, 0);};
+static void SetTargetSocket                     (const char *value, EbConfig_t *cfg)  {cfg->targetSocket                    = (int32_t)strtol(value, NULL, 0);};
+static void SetSwitchThreadsToRtPriority        (const char *value, EbConfig_t *cfg)  {cfg->switchThreadsToRtPriority       = (EB_BOOL)strtol(value, NULL, 0); };
+static void SetFpsInVps                         (const char *value, EbConfig_t *cfg)  {cfg->fpsInVps                        = (EB_BOOL)strtol(value, NULL, 0);};
 
 enum cfg_type{
     SINGLE_INPUT,   // Configuration parameters that have only 1 value input
@@ -309,23 +285,13 @@ config_entry_t config_entry[] = {
     // ME Tools
     { SINGLE_INPUT, USE_DEFAULT_ME_HME_TOKEN, "UseDefaultMeHme", SetCfgUseDefaultMeHme },
     { SINGLE_INPUT, HME_ENABLE_TOKEN, "HME", SetEnableHmeFlag },
-    { SINGLE_INPUT, HME_L0_ENABLE_TOKEN, "HMELevel0", SetEnableHmeLevel0Flag },
-    { SINGLE_INPUT, HME_L1_ENABLE_TOKEN, "HMELevel1", SetEnableHmeLevel1Flag },
-    { SINGLE_INPUT, HME_L2_ENABLE_TOKEN, "HMELevel2", SetEnableHmeLevel2Flag },
-
-    // ME Parameters
+                                                
+    // ME Parameters                                  
     { SINGLE_INPUT, SEARCH_AREA_WIDTH_TOKEN, "SearchAreaWidth", SetCfgSearchAreaWidth },
     { SINGLE_INPUT, SEARCH_AREA_HEIGHT_TOKEN, "SearchAreaHeight", SetCfgSearchAreaHeight },
-
-    // HME Parameters
-    { SINGLE_INPUT, NUM_HME_SEARCH_WIDTH_TOKEN, "NumberHmeSearchRegionInWidth", SetCfgNumberHmeSearchRegionInWidth },
-    { SINGLE_INPUT, NUM_HME_SEARCH_HEIGHT_TOKEN, "NumberHmeSearchRegionInHeight", SetCfgNumberHmeSearchRegionInHeight },
-    { SINGLE_INPUT, HME_SRCH_T_L0_WIDTH_TOKEN, "HmeLevel0TotalSearchAreaWidth", SetCfgHmeLevel0TotalSearchAreaWidth },
-    { SINGLE_INPUT, HME_SRCH_T_L0_HEIGHT_TOKEN, "HmeLevel0TotalSearchAreaHeight", SetCfgHmeLevel0TotalSearchAreaHeight },
-
-    // MD Parameters
+                                                      
+    // MD Parameters         
     { SINGLE_INPUT, CONSTRAINED_INTRA_ENABLE_TOKEN, "ConstrainedIntra", SetEnableConstrainedIntra},
-
 
     // Tune
     { SINGLE_INPUT, TUNE_TOKEN, "Tune", SetCfgTune },
@@ -348,6 +314,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, UNREG_USER_DATA_TOKEN, "UnregisteredUserData", SetUnRegisteredUserDataSEI },
     { SINGLE_INPUT, RECOVERY_POINT_TOKEN, "RecoveryPoint", SetRecoveryPointSEI },
     { SINGLE_INPUT, TEMPORAL_ID, "TemporalId", SetEnableTemporalId },
+    { SINGLE_INPUT, FPSINVPS_TOKEN, "FPSInVPS", SetFpsInVps },
     // Latency
     { SINGLE_INPUT, INJECTOR_TOKEN, "Injector", SetInjector },
     { SINGLE_INPUT, INJECTOR_FRAMERATE_TOKEN, "InjectorFrameRate", SetInjectorFrameRate },
@@ -362,13 +329,7 @@ config_entry_t config_entry[] = {
 
     // Asm Type
     { SINGLE_INPUT, ASM_TYPE_TOKEN, "AsmType", SetAsmType },
-    // HME
-    { ARRAY_INPUT,HME_LEVEL0_WIDTH, "HmeLevel0SearchAreaInWidth", SetHmeLevel0SearchAreaInWidthArray },
-    { ARRAY_INPUT,HME_LEVEL0_HEIGHT, "HmeLevel0SearchAreaInHeight", SetHmeLevel0SearchAreaInHeightArray },
-    { ARRAY_INPUT,HME_LEVEL1_WIDTH, "HmeLevel1SearchAreaInWidth", SetHmeLevel1SearchAreaInWidthArray },
-    { ARRAY_INPUT,HME_LEVEL1_HEIGHT, "HmeLevel1SearchAreaInHeight", SetHmeLevel1SearchAreaInHeightArray },
-    { ARRAY_INPUT,HME_LEVEL2_WIDTH, "HmeLevel2SearchAreaInWidth", SetHmeLevel2SearchAreaInWidthArray },
-    { ARRAY_INPUT,HME_LEVEL2_HEIGHT, "HmeLevel2SearchAreaInHeight", SetHmeLevel2SearchAreaInHeightArray },
+
     // Termination
     {SINGLE_INPUT,NULL,  NULL,                                NULL}
 };
@@ -390,7 +351,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->frameRateNumerator                   = 0;
     configPtr->frameRateDenominator                 = 0;
     configPtr->encoderBitDepth                      = 8;
-	configPtr->compressedTenBitFormat			    = 0;
+	  configPtr->compressedTenBitFormat			          = 0;
     configPtr->sourceWidth                          = 0;
     configPtr->sourceHeight                         = 0;
     configPtr->inputPaddedWidth                     = 0;
@@ -413,42 +374,17 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->maxQpAllowed                         = 48;
     configPtr->minQpAllowed                         = 10;
     configPtr->baseLayerSwitchMode                  = 0;
-	configPtr->encMode								= 9;
+	  configPtr->encMode								              = 9;
     configPtr->intraPeriod                          = -2;
     configPtr->intraRefreshType                     = 1;
-	configPtr->hierarchicalLevels					= 3;
-	configPtr->predStructure						= 2;
+	  configPtr->hierarchicalLevels					          = 3;
+	  configPtr->predStructure						            = 2;
     configPtr->disableDlfFlag                       = EB_FALSE;
     configPtr->enableSaoFlag                        = EB_TRUE;
     configPtr->useDefaultMeHme                      = EB_TRUE;
     configPtr->enableHmeFlag                        = EB_TRUE;
-    configPtr->enableHmeLevel0Flag                  = EB_TRUE;
-    configPtr->enableHmeLevel1Flag                  = EB_FALSE;
-    configPtr->enableHmeLevel2Flag                  = EB_FALSE;
     configPtr->searchAreaWidth                      = 16;
     configPtr->searchAreaHeight                     = 7;
-    configPtr->numberHmeSearchRegionInWidth         = 2;
-    configPtr->numberHmeSearchRegionInHeight        = 2;
-    configPtr->hmeLevel0TotalSearchAreaWidth        = 64;
-    configPtr->hmeLevel0TotalSearchAreaHeight       = 25;
-    configPtr->hmeLevel0ColumnIndex                 = 0;
-    configPtr->hmeLevel0RowIndex                    = 0;
-    configPtr->hmeLevel1ColumnIndex                 = 0;
-    configPtr->hmeLevel1RowIndex                    = 0;
-    configPtr->hmeLevel2ColumnIndex                 = 0;
-    configPtr->hmeLevel2RowIndex                    = 0;
-    configPtr->hmeLevel0SearchAreaInWidthArray[0]   = 32;
-    configPtr->hmeLevel0SearchAreaInWidthArray[1]   = 32;
-    configPtr->hmeLevel0SearchAreaInHeightArray[0]  = 12;
-    configPtr->hmeLevel0SearchAreaInHeightArray[1]  = 13;
-    configPtr->hmeLevel1SearchAreaInWidthArray[0]   = 1;
-    configPtr->hmeLevel1SearchAreaInWidthArray[1]   = 1;
-    configPtr->hmeLevel1SearchAreaInHeightArray[0]  = 1;
-    configPtr->hmeLevel1SearchAreaInHeightArray[1]  = 1;
-    configPtr->hmeLevel2SearchAreaInWidthArray[0]   = 1;
-    configPtr->hmeLevel2SearchAreaInWidthArray[1]   = 1;
-    configPtr->hmeLevel2SearchAreaInHeightArray[0]  = 1;
-    configPtr->hmeLevel2SearchAreaInHeightArray[1]  = 1;
     configPtr->constrainedIntra                     = EB_FALSE;
     configPtr->tune                                 = 1; // OQ By Default
     // Thresholds
@@ -458,7 +394,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->bufferingPeriodSEI                   = 0;
     configPtr->pictureTimingSEI                     = 0;
 
-	configPtr->bitRateReduction					    = EB_TRUE;
+    configPtr->bitRateReduction					    = EB_TRUE;
     configPtr->improveSharpness                     = EB_TRUE;
     configPtr->registeredUserDataSeiFlag            = EB_FALSE;
     configPtr->unregisteredUserDataSeiFlag          = EB_FALSE;
@@ -466,6 +402,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->enableTemporalId                     = 1;
 
     configPtr->switchThreadsToRtPriority            = EB_FALSE;
+    configPtr->fpsInVps                             = EB_FALSE;
 
     // Annex A parameters
     configPtr->profile                              = 2;
@@ -1040,141 +977,6 @@ EB_ERRORTYPE ReadCommandLine(
                     }
                 }
             }
-        }
-    }
-
-    /***************************************************************************************************/
-    /***********   Find SPECIAL configuration parameter tokens and call respective functions  **********/
-    /***************************************************************************************************/
-    // Parse command line for search region at level 0 width token
-    if (FindTokenMultipleInputs(argc, argv, HME_LEVEL0_WIDTH, config_strings) == 0) {
-        uint32_t inputIndex = 0, lastIndex = 0;
-        uint32_t done = 1;
-
-        mark_token_as_read(HME_LEVEL0_WIDTH, cmd_copy, &cmd_token_cnt);
-
-        for (index = 0; done && (index < numChannels); ++index){
-            configs[index]->hmeLevel0ColumnIndex = 0;
-            for (inputIndex = lastIndex; inputIndex < configs[index]->numberHmeSearchRegionInWidth + lastIndex; ++inputIndex){
-                if (EB_STRCMP(config_strings[inputIndex], " "))
-                    SetHmeLevel0SearchAreaInWidthArray(config_strings[inputIndex], configs[index]);
-                else{
-                    done = 0;
-                    break;
-                }
-            }
-            lastIndex += configs[index]->numberHmeSearchRegionInWidth;
-        }
-    }
-
-
-    //// Parse command line for search region at level 0 height token
-    if (FindTokenMultipleInputs(argc, argv, HME_LEVEL0_HEIGHT, config_strings) == 0) {
-
-        uint32_t inputIndex = 0, lastIndex = 0;
-        uint32_t done = 1;
-
-        mark_token_as_read(HME_LEVEL0_HEIGHT, cmd_copy, &cmd_token_cnt);
-
-        for (index = 0; done && (index < numChannels); ++index){
-            configs[index]->hmeLevel0RowIndex = 0;
-            for (inputIndex = lastIndex; inputIndex < configs[index]->numberHmeSearchRegionInHeight + lastIndex; ++inputIndex){
-                if (EB_STRCMP(config_strings[inputIndex], " "))
-                    SetHmeLevel0SearchAreaInHeightArray(config_strings[inputIndex], configs[index]);
-                else{
-                    done = 0;
-                    break;
-                }
-            }
-            lastIndex += configs[index]->numberHmeSearchRegionInHeight;
-        }
-    }
-
-    // Parse command line for search region at level 1 Height token
-    if (FindTokenMultipleInputs(argc, argv, HME_LEVEL1_HEIGHT, config_strings) == 0) {
-
-        uint32_t inputIndex = 0, lastIndex = 0;
-        uint32_t done = 1;
-
-        mark_token_as_read(HME_LEVEL1_HEIGHT, cmd_copy, &cmd_token_cnt);
-
-        for (index = 0; done && (index < numChannels); ++index){
-            configs[index]->hmeLevel1RowIndex = 0;
-            for (inputIndex = lastIndex; inputIndex < configs[index]->numberHmeSearchRegionInHeight + lastIndex; ++inputIndex){
-                if (EB_STRCMP(config_strings[inputIndex], " "))
-                    SetHmeLevel1SearchAreaInHeightArray(config_strings[inputIndex], configs[index]);
-                else{
-                    done = 0;
-                    break;
-                }
-            }
-            lastIndex += configs[index]->numberHmeSearchRegionInHeight;
-        }
-    }
-
-    // Parse command line for search region at level 1 width token
-    if (FindTokenMultipleInputs(argc, argv, HME_LEVEL1_WIDTH, config_strings) == 0) {
-
-        uint32_t inputIndex = 0, lastIndex = 0;
-        uint32_t done = 1;
-
-        mark_token_as_read(HME_LEVEL1_WIDTH, cmd_copy, &cmd_token_cnt);
-
-        for (index = 0; done && (index < numChannels); ++index){
-            configs[index]->hmeLevel1ColumnIndex = 0;
-            for (inputIndex = lastIndex; inputIndex < configs[index]->numberHmeSearchRegionInWidth + lastIndex; ++inputIndex){
-                if (EB_STRCMP(config_strings[inputIndex], " "))
-                    SetHmeLevel1SearchAreaInWidthArray(config_strings[inputIndex], configs[index]);
-                else{
-                    done = 0;
-                    break;
-                }
-            }
-            lastIndex += configs[index]->numberHmeSearchRegionInWidth;
-        }
-    }
-
-    // Parse command line for search region at level 2 width token
-    if (FindTokenMultipleInputs(argc, argv, HME_LEVEL2_WIDTH, config_strings) == 0) {
-
-        uint32_t inputIndex = 0, lastIndex = 0;
-        uint32_t done = 1;
-
-        mark_token_as_read(HME_LEVEL2_WIDTH, cmd_copy, &cmd_token_cnt);
-
-        for (index = 0; done && (index < numChannels); ++index){
-            configs[index]->hmeLevel2ColumnIndex = 0;
-            for (inputIndex = lastIndex; inputIndex < configs[index]->numberHmeSearchRegionInWidth + lastIndex; ++inputIndex){
-                if (EB_STRCMP(config_strings[inputIndex], " "))
-                    SetHmeLevel2SearchAreaInWidthArray(config_strings[inputIndex], configs[index]);
-                else{
-                    done = 0;
-                    break;
-                }
-            }
-            lastIndex += configs[index]->numberHmeSearchRegionInWidth;
-        }
-    }
-
-    // Parse command line for search region at level 2 height token
-    if (FindTokenMultipleInputs(argc, argv, HME_LEVEL2_HEIGHT, config_strings) == 0) {
-
-        uint32_t inputIndex = 0, lastIndex = 0;
-        uint32_t done = 1;
-
-        mark_token_as_read(HME_LEVEL2_HEIGHT, cmd_copy, &cmd_token_cnt);
-
-        for (index = 0; done && (index < numChannels); ++index){
-            configs[index]->hmeLevel2RowIndex = 0;
-            for (inputIndex = lastIndex; inputIndex < configs[index]->numberHmeSearchRegionInHeight + lastIndex; ++inputIndex){
-                if (EB_STRCMP(config_strings[inputIndex], " "))
-                    SetHmeLevel2SearchAreaInHeightArray(config_strings[inputIndex], configs[index]);
-                else{
-                    done = 0;
-                    break;
-                }
-            }
-            lastIndex += configs[index]->numberHmeSearchRegionInHeight;
         }
     }
 

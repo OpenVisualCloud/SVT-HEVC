@@ -698,7 +698,6 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     EB_U32 instanceIndex;
     EB_U32 processIndex;
     EB_U32 maxPictureWidth;
-    EB_U32 maxLookAheadDistance  = 0;
 
     EB_BOOL is16bit = (EB_BOOL) (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
 
@@ -734,12 +733,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
      ************************************/
     EB_MALLOC(EbSystemResource_t**, encHandlePtr->pictureParentControlSetPoolPtrArray, sizeof(EbSystemResource_t*)  * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
     EB_MALLOC(EbFifo_t***, encHandlePtr->pictureParentControlSetPoolProducerFifoPtrDblArray, sizeof(EbSystemResource_t**) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-    	
-	// Updating the pictureControlSetPoolTotalCount based on the maximum look ahead distance
-    for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
-        maxLookAheadDistance    = MAX(maxLookAheadDistance, encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.lookAheadDistance);
-    }   
-    
+    	    
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
     
         // The segment Width & Height Arrays are in units of LCUs, not samples
@@ -756,7 +750,6 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         inputData.maxDepth              = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxLcuDepth;
         inputData.is16bit               = is16bit;
 		inputData.compressedTenBitFormat = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.compressedTenBitFormat;
-		encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->pictureControlSetPoolInitCount += maxLookAheadDistance;
 
 		inputData.encMode = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.encMode;
 		inputData.speedControl = (EB_U8)encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.speedControlFlag;
@@ -970,7 +963,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
         return_error = EbSystemResourceCtor(
             &encHandlePtr->outputStreamBufferResourcePtrArray[instanceIndex],
-            encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->inputOutputBufferFifoInitCount,
+            encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->inputOutputBufferFifoInitCount + 4, // to accommodate output error + vps + eos
             encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->totalProcessInitCount,// EB_PacketizationProcessInitCount,
             1,
             &encHandlePtr->outputStreamBufferProducerFifoPtrDblArray[instanceIndex],
@@ -1649,7 +1642,7 @@ EB_U32 SetParentPcs(EB_H265_ENC_CONFIGURATION*   config)
     fps = fps > 120 ? 120 : fps;
     fps = fps < 24 ? 24 : fps;
 
-    if ((EB_U32)(config->intraPeriodLength) > (fps << 1) && ((config->sourceWidth * config->sourceHeight) < INPUT_SIZE_4K_TH))
+    if (((EB_U32)(config->intraPeriodLength) > (fps << 1)) && ((config->sourceWidth * config->sourceHeight) < INPUT_SIZE_4K_TH))
         fps = config->intraPeriodLength;
 
     EB_U32     lowLatencyInput = (config->encMode < 6 || config->speedControlFlag == 1) ? fps :
@@ -2027,6 +2020,7 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.codeVpsSpsPps = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->codeVpsSpsPps;
     sequenceControlSetPtr->staticConfig.codeEosNal = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->codeEosNal;
     sequenceControlSetPtr->staticConfig.switchThreadsToRtPriority = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->switchThreadsToRtPriority;
+    sequenceControlSetPtr->staticConfig.fpsInVps = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->fpsInVps;
     
     if (sequenceControlSetPtr->staticConfig.tune >= 1) {
         sequenceControlSetPtr->staticConfig.bitRateReduction = 0;
@@ -2058,28 +2052,9 @@ void CopyApiFromApp(
     
     // Default HME/ME settings
     sequenceControlSetPtr->staticConfig.enableHmeFlag = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->enableHmeFlag;
-    sequenceControlSetPtr->staticConfig.enableHmeLevel0Flag = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->enableHmeLevel0Flag;
-    sequenceControlSetPtr->staticConfig.enableHmeLevel1Flag = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->enableHmeLevel1Flag;
-    sequenceControlSetPtr->staticConfig.enableHmeLevel2Flag = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->enableHmeLevel2Flag;
     sequenceControlSetPtr->staticConfig.searchAreaWidth = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->searchAreaWidth;
     sequenceControlSetPtr->staticConfig.searchAreaHeight = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->searchAreaHeight;
-    sequenceControlSetPtr->staticConfig.numberHmeSearchRegionInWidth = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->numberHmeSearchRegionInWidth;
-    sequenceControlSetPtr->staticConfig.numberHmeSearchRegionInHeight = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->numberHmeSearchRegionInHeight;
-    sequenceControlSetPtr->staticConfig.hmeLevel0TotalSearchAreaWidth = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hmeLevel0TotalSearchAreaWidth;
-    sequenceControlSetPtr->staticConfig.hmeLevel0TotalSearchAreaHeight = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hmeLevel0TotalSearchAreaHeight;
     
-    for (hmeRegionIndex = 0; hmeRegionIndex < sequenceControlSetPtr->staticConfig.numberHmeSearchRegionInWidth; ++hmeRegionIndex) {
-        sequenceControlSetPtr->staticConfig.hmeLevel0SearchAreaInWidthArray[hmeRegionIndex] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hmeLevel0SearchAreaInWidthArray[hmeRegionIndex];
-        sequenceControlSetPtr->staticConfig.hmeLevel1SearchAreaInWidthArray[hmeRegionIndex] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hmeLevel1SearchAreaInWidthArray[hmeRegionIndex];
-        sequenceControlSetPtr->staticConfig.hmeLevel2SearchAreaInWidthArray[hmeRegionIndex] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hmeLevel2SearchAreaInWidthArray[hmeRegionIndex];
-    }
-    
-    for (hmeRegionIndex = 0; hmeRegionIndex < sequenceControlSetPtr->staticConfig.numberHmeSearchRegionInHeight; ++hmeRegionIndex) {
-        sequenceControlSetPtr->staticConfig.hmeLevel0SearchAreaInHeightArray[hmeRegionIndex] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hmeLevel0SearchAreaInHeightArray[hmeRegionIndex];
-        sequenceControlSetPtr->staticConfig.hmeLevel1SearchAreaInHeightArray[hmeRegionIndex] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hmeLevel1SearchAreaInHeightArray[hmeRegionIndex];
-        sequenceControlSetPtr->staticConfig.hmeLevel2SearchAreaInHeightArray[hmeRegionIndex] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hmeLevel2SearchAreaInHeightArray[hmeRegionIndex];
-    }
-
     // MD Parameters
     sequenceControlSetPtr->staticConfig.constrainedIntra = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->constrainedIntra;
 
@@ -2454,22 +2429,6 @@ static EB_ERRORTYPE VerifySettings(\
        SVT_LOG("SVT [Error]: Instance %u: invalid HME. HME must be [0 - 1]\n",channelNumber+1);
 	   return_error = EB_ErrorBadParameter;	
 	}
-
-	if ( config->enableHmeLevel0Flag > 1 ) {
-       SVT_LOG("SVT [Error]: Instance %u: invalid enable HMELevel0. HMELevel0 must be [0 - 1]\n",channelNumber+1);
-	   return_error = EB_ErrorBadParameter;	
-	}
-
-	if ( config->enableHmeLevel1Flag > 1 ) {
-       SVT_LOG("SVT [Error]: Instance %u: invalid enable HMELevel1. HMELevel1 must be [0 - 1]\n",channelNumber+1);
-	   return_error = EB_ErrorBadParameter;	
-	}
-
-	if ( config->enableHmeLevel2Flag > 1 ){
-       SVT_LOG("SVT [Error]: Instance %u: invalid enable HMELevel2. HMELevel2 must be [0 - 1]\n",channelNumber+1);
-	   return_error = EB_ErrorBadParameter;	
-	}	
-	
 	if ((config->searchAreaWidth > 256) || (config->searchAreaWidth == 0)){
         SVT_LOG("SVT [Error]: Instance %u: Invalid SearchAreaWidth. SearchAreaWidth must be [1 - 256]\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;	
@@ -2482,48 +2441,6 @@ static EB_ERRORTYPE VerifySettings(\
 
     }
 	 
-	 if (config->enableHmeFlag){
-
-		 if ((config->numberHmeSearchRegionInWidth > (EB_U32)EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT) || (config->numberHmeSearchRegionInWidth == 0)){
-            SVT_LOG("SVT [Error]: Instance %u: Invalid NumberHmeSearchRegionInWidth. NumberHmeSearchRegionInWidth must be [1 - %d]\n",channelNumber+1,EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT);
-			return_error = EB_ErrorBadParameter;	
-		 }
-	 
-		 if ((config->numberHmeSearchRegionInHeight > (EB_U32)EB_HME_SEARCH_AREA_ROW_MAX_COUNT) || (config->numberHmeSearchRegionInHeight == 0)){
-            SVT_LOG("SVT [Error]: Instance %u: Invalid NumberHmeSearchRegionInHeight. NumberHmeSearchRegionInHeight must be [1 - %d]\n",channelNumber+1,EB_HME_SEARCH_AREA_ROW_MAX_COUNT);
-			return_error = EB_ErrorBadParameter;	
-		 }
-
-		 if ((config->hmeLevel0TotalSearchAreaHeight > 256) || (config->hmeLevel0TotalSearchAreaHeight == 0)) {
-             SVT_LOG("SVT [Error]: Instance %u: Invalid hmeLevel0TotalSearchAreaHeight. hmeLevel0TotalSearchAreaHeight must be [1 - 256]\n", channelNumber + 1);
-			 return_error = EB_ErrorBadParameter;
-		 }
-		 if ((config->hmeLevel0TotalSearchAreaWidth > 256) || (config->hmeLevel0TotalSearchAreaWidth == 0)) {
-             SVT_LOG("SVT [Error]: Instance %u: Invalid hmeLevel0TotalSearchAreaWidth. hmeLevel0TotalSearchAreaWidth must be [1 - 256]\n", channelNumber + 1);
-			 return_error = EB_ErrorBadParameter;
-		 }
-		 if ( VerifyHmeDimention(channelNumber+1, config->hmeLevel0TotalSearchAreaHeight, config->hmeLevel0SearchAreaInHeightArray, config->numberHmeSearchRegionInHeight) ) {
-			 return_error = EB_ErrorBadParameter;	
-		 }
-		 
-		 if ( VerifyHmeDimention(channelNumber+1, config->hmeLevel0TotalSearchAreaWidth, config->hmeLevel0SearchAreaInWidthArray, config->numberHmeSearchRegionInWidth) ) {
-			 return_error = EB_ErrorBadParameter;	
-		 }
-		 if (VerifyHmeDimentionL1L2(channelNumber + 1, config->hmeLevel1SearchAreaInWidthArray , config->numberHmeSearchRegionInWidth)) {
-			 return_error = EB_ErrorBadParameter;
-		 }
-		 if (VerifyHmeDimentionL1L2(channelNumber + 1, config->hmeLevel1SearchAreaInHeightArray, config->numberHmeSearchRegionInWidth)) {
-			 return_error = EB_ErrorBadParameter;
-		 }
-		 if (VerifyHmeDimentionL1L2(channelNumber + 1, config->hmeLevel2SearchAreaInWidthArray, config->numberHmeSearchRegionInWidth)) {
-			 return_error = EB_ErrorBadParameter;
-		 }
-		 if (VerifyHmeDimentionL1L2(channelNumber + 1, config->hmeLevel2SearchAreaInHeightArray, config->numberHmeSearchRegionInWidth)) {
-			 return_error = EB_ErrorBadParameter;	
-		 }
-	 }
-
-
     if (levelIdx < 13) {
     // Check if the current input video is conformant with the Level constraint
     if(config->level != 0 && ((EB_U64)(sequenceControlSetPtr->maxInputLumaWidth * sequenceControlSetPtr->maxInputLumaHeight) > maxLumaPictureSize[levelIdx])){
@@ -2603,8 +2520,8 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->lookAheadDistance > 256 && config->lookAheadDistance != (EB_U32)~0) {
-        SVT_LOG("SVT [Error]: Instance %u: The lookahead distance must be [0 - 256] \n", channelNumber + 1);
+    if (config->lookAheadDistance > 250 && config->lookAheadDistance != (EB_U32)~0) {
+        SVT_LOG("SVT [Error]: Instance %u: The lookahead distance must be [0 - 250] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 	if (config->sceneChangeDetection > 1) {
@@ -2729,6 +2646,11 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
+    if (config->fpsInVps > 1) {
+        SVT_LOG("SVT [Error]: Instance %u : Invalid FPS in VPS flag [0 - 1]\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
     return return_error;
 }
 
@@ -2778,27 +2700,8 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->enableSaoFlag = EB_TRUE;
     configPtr->useDefaultMeHme = EB_TRUE;
     configPtr->enableHmeFlag = EB_TRUE;
-    configPtr->enableHmeLevel0Flag = EB_TRUE;
-    configPtr->enableHmeLevel1Flag = EB_FALSE;
-    configPtr->enableHmeLevel2Flag = EB_FALSE;
     configPtr->searchAreaWidth = 16;
     configPtr->searchAreaHeight = 7;
-    configPtr->numberHmeSearchRegionInWidth = 2;
-    configPtr->numberHmeSearchRegionInHeight = 2;
-    configPtr->hmeLevel0TotalSearchAreaWidth = 64;
-    configPtr->hmeLevel0TotalSearchAreaHeight = 25;
-    configPtr->hmeLevel0SearchAreaInWidthArray[0] = 32;
-    configPtr->hmeLevel0SearchAreaInWidthArray[1] = 32;
-    configPtr->hmeLevel0SearchAreaInHeightArray[0] = 12;
-    configPtr->hmeLevel0SearchAreaInHeightArray[1] = 13;
-    configPtr->hmeLevel1SearchAreaInWidthArray[0] = 1;
-    configPtr->hmeLevel1SearchAreaInWidthArray[1] = 1;
-    configPtr->hmeLevel1SearchAreaInHeightArray[0] = 1;
-    configPtr->hmeLevel1SearchAreaInHeightArray[1] = 1;
-    configPtr->hmeLevel2SearchAreaInWidthArray[0] = 1;
-    configPtr->hmeLevel2SearchAreaInWidthArray[1] = 1;
-    configPtr->hmeLevel2SearchAreaInHeightArray[0] = 1;
-    configPtr->hmeLevel2SearchAreaInHeightArray[1] = 1;
     configPtr->constrainedIntra = EB_FALSE;
     configPtr->tune = 1;
     configPtr->bitRateReduction = EB_TRUE;
@@ -2808,6 +2711,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->codeVpsSpsPps = 0;
     configPtr->codeEosNal    = 0;
     configPtr->switchThreadsToRtPriority = EB_FALSE;
+    configPtr->fpsInVps      = EB_FALSE;
 
     configPtr->videoUsabilityInfo = 0;
     configPtr->highDynamicRangeInput = 0;
