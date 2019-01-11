@@ -120,7 +120,6 @@ void* SetMeHmeParamsSq(
 	meContextPtr->searchAreaWidth                       = SearchAreaWidthSq[resolutionIndex][hmeMeLevel];
 	meContextPtr->searchAreaHeight                      = SearchAreaHeightSq[resolutionIndex][hmeMeLevel];
 
-
 	// HME Level0 adjustment for low frame rate contents (frame rate <= 30)
     if (inputResolution == INPUT_SIZE_4K_RANGE) {
         if ((sequenceControlSetPtr->staticConfig.frameRate >> 16) <= 30) {
@@ -299,24 +298,6 @@ void* SetMeHmeParamsFromConfig(
     meContextPtr->searchAreaWidth = (EB_U8)sequenceControlSetPtr->staticConfig.searchAreaWidth;
     meContextPtr->searchAreaHeight = (EB_U8)sequenceControlSetPtr->staticConfig.searchAreaHeight;
 
-    meContextPtr->numberHmeSearchRegionInWidth = (EB_U16)sequenceControlSetPtr->staticConfig.numberHmeSearchRegionInWidth;
-    meContextPtr->numberHmeSearchRegionInHeight = (EB_U16)sequenceControlSetPtr->staticConfig.numberHmeSearchRegionInHeight;
-
-    meContextPtr->hmeLevel0TotalSearchAreaWidth = (EB_U16)sequenceControlSetPtr->staticConfig.hmeLevel0TotalSearchAreaWidth;
-    meContextPtr->hmeLevel0TotalSearchAreaHeight = (EB_U16)sequenceControlSetPtr->staticConfig.hmeLevel0TotalSearchAreaHeight;
-
-    for (hmeRegionIndex = 0; hmeRegionIndex < meContextPtr->numberHmeSearchRegionInWidth; ++hmeRegionIndex) {
-        meContextPtr->hmeLevel0SearchAreaInWidthArray[hmeRegionIndex] = (EB_U16)sequenceControlSetPtr->staticConfig.hmeLevel0SearchAreaInWidthArray[hmeRegionIndex];
-        meContextPtr->hmeLevel1SearchAreaInWidthArray[hmeRegionIndex] = (EB_U16)sequenceControlSetPtr->staticConfig.hmeLevel1SearchAreaInWidthArray[hmeRegionIndex];
-        meContextPtr->hmeLevel2SearchAreaInWidthArray[hmeRegionIndex] = (EB_U16)sequenceControlSetPtr->staticConfig.hmeLevel2SearchAreaInWidthArray[hmeRegionIndex];
-    }
-
-    for (hmeRegionIndex = 0; hmeRegionIndex < meContextPtr->numberHmeSearchRegionInHeight; ++hmeRegionIndex) {
-        meContextPtr->hmeLevel0SearchAreaInHeightArray[hmeRegionIndex] = (EB_U16)sequenceControlSetPtr->staticConfig.hmeLevel0SearchAreaInHeightArray[hmeRegionIndex];
-        meContextPtr->hmeLevel1SearchAreaInHeightArray[hmeRegionIndex] = (EB_U16)sequenceControlSetPtr->staticConfig.hmeLevel1SearchAreaInHeightArray[hmeRegionIndex];
-        meContextPtr->hmeLevel2SearchAreaInHeightArray[hmeRegionIndex] = (EB_U16)sequenceControlSetPtr->staticConfig.hmeLevel2SearchAreaInHeightArray[hmeRegionIndex];
-    }
-
 	return EB_NULL;
 }
 
@@ -493,14 +474,12 @@ EB_ERRORTYPE SignalDerivationMeKernelSq(
     
     
     // Set ME/HME search regions
-    if (sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
-        SetMeHmeParamsSq(
-            contextPtr->meContextPtr,
-            pictureControlSetPtr,
-            sequenceControlSetPtr,
-            sequenceControlSetPtr->inputResolution);
-    }
-    else {
+    SetMeHmeParamsSq(
+        contextPtr->meContextPtr,
+        pictureControlSetPtr,
+        sequenceControlSetPtr,
+        sequenceControlSetPtr->inputResolution);
+    if (!sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
         SetMeHmeParamsFromConfig(
             sequenceControlSetPtr,
             contextPtr->meContextPtr);
@@ -631,14 +610,12 @@ EB_ERRORTYPE SignalDerivationMeKernelOq(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
     // Set ME/HME search regions
-    if (sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
-        SetMeHmeParamsOq(
-            contextPtr->meContextPtr,
-            pictureControlSetPtr,
-            sequenceControlSetPtr,
-            sequenceControlSetPtr->inputResolution);
-    }
-    else {
+    SetMeHmeParamsOq(
+        contextPtr->meContextPtr,
+        pictureControlSetPtr,
+        sequenceControlSetPtr,
+        sequenceControlSetPtr->inputResolution);
+    if (!sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
         SetMeHmeParamsFromConfig(
             sequenceControlSetPtr,
             contextPtr->meContextPtr);
@@ -755,14 +732,12 @@ EB_ERRORTYPE SignalDerivationMeKernelVmaf(
 	EB_ERRORTYPE return_error = EB_ErrorNone;
 
 	// Set ME/HME search regions
-	if (sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
-		SetMeHmeParamsVmaf(
-			contextPtr->meContextPtr,
-			pictureControlSetPtr,
-			sequenceControlSetPtr,
-			sequenceControlSetPtr->inputResolution);
-	}
-	else {
+	SetMeHmeParamsVmaf(
+		contextPtr->meContextPtr,
+		pictureControlSetPtr,
+		sequenceControlSetPtr,
+		sequenceControlSetPtr->inputResolution);
+    if (!sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
 		SetMeHmeParamsFromConfig(
 			sequenceControlSetPtr,
 			contextPtr->meContextPtr);
