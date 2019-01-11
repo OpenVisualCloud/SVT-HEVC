@@ -91,7 +91,6 @@ extern "C" {
     } EB_ERRORTYPE;
 
 #define EB_BUFFERFLAG_EOS 0x00000001
-  
 // For 8-bit and 10-bit packed inputs, the luma, cb, and cr fields should be used
 //   for the three input picture planes.  However, for 10-bit unpacked planes the
 //   lumaExt, cbExt, and crExt fields should be used hold the extra 2-bits of
@@ -192,6 +191,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     uint32_t                profile;
     uint32_t                tier;
     uint32_t                level;
+    uint8_t                 fpsInVps;
 
     // Application Specific parameters
     uint32_t                channelId;                    // when multiple instances are running within the same application

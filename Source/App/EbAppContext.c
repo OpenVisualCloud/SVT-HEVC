@@ -216,7 +216,8 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.asmType = config->asmType;
     callbackData->ebEncParameters.reconEnabled = config->reconFile ? EB_TRUE : EB_FALSE;
     callbackData->ebEncParameters.codeVpsSpsPps = 1;
-    
+    callbackData->ebEncParameters.fpsInVps = config->fpsInVps;
+
     return return_error;
 
 }
