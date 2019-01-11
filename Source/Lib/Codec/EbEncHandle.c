@@ -558,7 +558,7 @@ void SwitchToRealTime()
 #if  __linux__
 
     struct sched_param schedParam = {
-        .sched_priority = 99
+        .sched_priority = sched_get_priority_max(SCHED_FIFO)
     };
 
     int retValue = pthread_setschedparam(pthread_self(), SCHED_FIFO, &schedParam);
@@ -2710,7 +2710,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     // Bitstream options
     configPtr->codeVpsSpsPps = 0;
     configPtr->codeEosNal    = 0;
-    configPtr->switchThreadsToRtPriority = EB_FALSE;
+    configPtr->switchThreadsToRtPriority = EB_TRUE;
     configPtr->fpsInVps      = EB_FALSE;
 
     configPtr->videoUsabilityInfo = 0;

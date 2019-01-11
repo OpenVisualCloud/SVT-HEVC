@@ -82,7 +82,7 @@
 #define ASM_TYPE_TOKEN				    "-asm" // no Eval
 #define THREAD_MGMNT                    "-lp"
 #define TARGET_SOCKET                   "-ss"
-#define SWITCHTHREADSTOREALTIME_TOKEN   "-switchThreadsToRtPriority"
+#define SWITCHTHREADSTOREALTIME_TOKEN   "-rt"
 #define FPSINVPS_TOKEN                  "-fpsinvps"
 #define CONFIG_FILE_COMMENT_CHAR        '#'
 #define CONFIG_FILE_NEWLINE_CHAR        '\n'
@@ -401,7 +401,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->recoveryPointSeiFlag                 = EB_FALSE;
     configPtr->enableTemporalId                     = 1;
 
-    configPtr->switchThreadsToRtPriority            = EB_FALSE;
+    configPtr->switchThreadsToRtPriority            = EB_TRUE;
     configPtr->fpsInVps                             = EB_FALSE;
 
     // Annex A parameters
