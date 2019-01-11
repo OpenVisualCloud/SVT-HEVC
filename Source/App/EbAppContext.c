@@ -186,15 +186,8 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.enableSaoFlag = (EB_BOOL)config->enableSaoFlag;
     callbackData->ebEncParameters.useDefaultMeHme = (EB_BOOL)config->useDefaultMeHme;
     callbackData->ebEncParameters.enableHmeFlag = (EB_BOOL)config->enableHmeFlag;
-    callbackData->ebEncParameters.enableHmeLevel0Flag = (EB_BOOL)config->enableHmeLevel0Flag;
-    callbackData->ebEncParameters.enableHmeLevel1Flag = (EB_BOOL)config->enableHmeLevel1Flag;
-    callbackData->ebEncParameters.enableHmeLevel2Flag = (EB_BOOL)config->enableHmeLevel2Flag;
     callbackData->ebEncParameters.searchAreaWidth = config->searchAreaWidth;
     callbackData->ebEncParameters.searchAreaHeight = config->searchAreaHeight;
-    callbackData->ebEncParameters.numberHmeSearchRegionInWidth = config->numberHmeSearchRegionInWidth;
-    callbackData->ebEncParameters.numberHmeSearchRegionInHeight = config->numberHmeSearchRegionInHeight;
-    callbackData->ebEncParameters.hmeLevel0TotalSearchAreaWidth = config->hmeLevel0TotalSearchAreaWidth;
-    callbackData->ebEncParameters.hmeLevel0TotalSearchAreaHeight = config->hmeLevel0TotalSearchAreaHeight;
     callbackData->ebEncParameters.constrainedIntra = (EB_BOOL)config->constrainedIntra;
     callbackData->ebEncParameters.tune = config->tune;
     callbackData->ebEncParameters.channelId = config->channelId;
@@ -224,18 +217,6 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.reconEnabled = config->reconFile ? EB_TRUE : EB_FALSE;
     callbackData->ebEncParameters.codeVpsSpsPps = 1;
     callbackData->ebEncParameters.fpsInVps = config->fpsInVps;
-
-    for (hmeRegionIndex = 0; hmeRegionIndex < callbackData->ebEncParameters.numberHmeSearchRegionInWidth; ++hmeRegionIndex) {
-        callbackData->ebEncParameters.hmeLevel0SearchAreaInWidthArray[hmeRegionIndex] = config->hmeLevel0SearchAreaInWidthArray[hmeRegionIndex];
-        callbackData->ebEncParameters.hmeLevel1SearchAreaInWidthArray[hmeRegionIndex] = config->hmeLevel1SearchAreaInWidthArray[hmeRegionIndex];
-        callbackData->ebEncParameters.hmeLevel2SearchAreaInWidthArray[hmeRegionIndex] = config->hmeLevel2SearchAreaInWidthArray[hmeRegionIndex];
-    }
-
-    for (hmeRegionIndex = 0; hmeRegionIndex < callbackData->ebEncParameters.numberHmeSearchRegionInHeight; ++hmeRegionIndex) {
-        callbackData->ebEncParameters.hmeLevel0SearchAreaInHeightArray[hmeRegionIndex] = config->hmeLevel0SearchAreaInHeightArray[hmeRegionIndex];
-        callbackData->ebEncParameters.hmeLevel1SearchAreaInHeightArray[hmeRegionIndex] = config->hmeLevel1SearchAreaInHeightArray[hmeRegionIndex];
-        callbackData->ebEncParameters.hmeLevel2SearchAreaInHeightArray[hmeRegionIndex] = config->hmeLevel2SearchAreaInHeightArray[hmeRegionIndex];
-    }
 
     return return_error;
 
