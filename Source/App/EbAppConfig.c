@@ -95,6 +95,7 @@
 #define ASM_TYPE_TOKEN				    "-asm" // no Eval
 #define THREAD_MGMNT                    "-lp"
 #define TARGET_SOCKET                   "-ss"
+#define SWITCHTHREADSTOREALTIME_TOKEN   "-switchThreadsToRtPriority"
 #define CONFIG_FILE_COMMENT_CHAR        '#'
 #define CONFIG_FILE_NEWLINE_CHAR        '\n'
 #define CONFIG_FILE_RETURN_CHAR         '\r'
@@ -233,6 +234,7 @@ static void	SetLatencyMode                      (const char *value, EbConfig_t *
 static void SetAsmType                          (const char *value, EbConfig_t *cfg)  {cfg->asmType                  = (uint32_t)strtoul(value, NULL, 0);};
 static void SetLogicalProcessors                (const char *value, EbConfig_t *cfg)  {cfg->logicalProcessors         = (uint32_t)strtoul(value, NULL, 0);};
 static void SetTargetSocket                     (const char *value, EbConfig_t *cfg)  {cfg->targetSocket              = (int32_t)strtol(value, NULL, 0);};
+static void SetSwitchThreadsToRtPriority        (const char *value, EbConfig_t *cfg)  {cfg->switchThreadsToRtPriority  = (EB_BOOL)strtol(value, NULL, 0); };
 
 enum cfg_type{
     SINGLE_INPUT,   // Configuration parameters that have only 1 value input
@@ -331,6 +333,7 @@ config_entry_t config_entry[] = {
     // Thread Management
     { SINGLE_INPUT, THREAD_MGMNT, "logicalProcessors", SetLogicalProcessors },
     { SINGLE_INPUT, TARGET_SOCKET, "TargetSocket", SetTargetSocket },
+    { SINGLE_INPUT, SWITCHTHREADSTOREALTIME_TOKEN, "SwitchThreadsToRtPriority", SetSwitchThreadsToRtPriority },
 
     // Optional Features
 
@@ -461,6 +464,8 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->unregisteredUserDataSeiFlag          = EB_FALSE;
     configPtr->recoveryPointSeiFlag                 = EB_FALSE;
     configPtr->enableTemporalId                     = 1;
+
+    configPtr->switchThreadsToRtPriority            = EB_FALSE;
 
     // Annex A parameters
     configPtr->profile                              = 2;

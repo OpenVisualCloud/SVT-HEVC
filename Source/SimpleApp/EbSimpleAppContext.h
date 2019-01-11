@@ -148,6 +148,7 @@ typedef struct EbConfig_s
     uint8_t                     unregisteredUserDataSeiFlag;
     uint8_t                     recoveryPointSeiFlag;
     uint32_t                    enableTemporalId;
+    uint8_t                     switchThreadsToRtPriority;
 
     /****************************************
      * Annex A Parameters

@@ -552,10 +552,31 @@ EB_U64 GetAffinityMask(EB_U32 lpnum) {
 }
 #endif
 
+void SwitchToRealTime()
+{
+
+#if  __linux__
+
+    struct sched_param schedParam = {
+        .sched_priority = 99
+    };
+
+    int retValue = pthread_setschedparam(pthread_self(), SCHED_FIFO, &schedParam);
+    if (retValue == EPERM)
+        SVT_LOG("\n[WARNING] For best speed performance, run with sudo privileges !\n\n");
+
+#endif
+}
+
 void EbSetThreadManagementParameters(
     EB_H265_ENC_CONFIGURATION   *configPtr)
 {
     EB_U32 numLogicProcessors = GetNumProcessors();
+
+    if (configPtr->switchThreadsToRtPriority == 1) {
+        SwitchToRealTime();
+    }
+
 #ifdef _WIN32
     // For system with a single processor group(no more than 64 logic processors all together)
     // Affinity of the thread can be set to one or more logical processors
@@ -2005,6 +2026,7 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.encMode = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->encMode;
     sequenceControlSetPtr->staticConfig.codeVpsSpsPps = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->codeVpsSpsPps;
     sequenceControlSetPtr->staticConfig.codeEosNal = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->codeEosNal;
+    sequenceControlSetPtr->staticConfig.switchThreadsToRtPriority = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->switchThreadsToRtPriority;
     
     if (sequenceControlSetPtr->staticConfig.tune >= 1) {
         sequenceControlSetPtr->staticConfig.bitRateReduction = 0;
@@ -2702,6 +2724,10 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
+    if (config->switchThreadsToRtPriority > 1) {
+        SVT_LOG("Error instance %u : Invalid Switch Threads To Real Time Priority flag [0 - 1]\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
 
     return return_error;
 }
@@ -2781,6 +2807,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     // Bitstream options
     configPtr->codeVpsSpsPps = 0;
     configPtr->codeEosNal    = 0;
+    configPtr->switchThreadsToRtPriority = EB_FALSE;
 
     configPtr->videoUsabilityInfo = 0;
     configPtr->highDynamicRangeInput = 0;
@@ -3442,22 +3469,6 @@ EB_API EB_ERRORTYPE EbH265GetRecon(
 
     return return_error;
 }
-
-void SwitchToRealTime()
-{
-
-#if  __linux__
-
-    struct sched_param schedParam = {
-        .sched_priority = 99
-    };
-
-    int retValue = pthread_setschedparam(pthread_self(), SCHED_FIFO, &schedParam);
-    if (retValue == EPERM)
-        SVT_LOG("\n[WARNING] For best speed performance, run with sudo privileges !\n\n");
-
-#endif
-}
 /**********************************
 * Encoder Error Handling
 **********************************/
@@ -3505,8 +3516,6 @@ EB_ERRORTYPE InitH265EncoderHandle(
     printf(" %u bit\n", (unsigned) sizeof(void*) * 8);
     printf("LIB Build date: %s %s\n",__DATE__,__TIME__);
     printf("-------------------------------------------\n");
-   
-    SwitchToRealTime();
 
     // Set Component Size & Version
     h265EncComponent->nSize                     = sizeof(EB_COMPONENTTYPE);
