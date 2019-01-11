@@ -677,7 +677,6 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     EB_U32 instanceIndex;
     EB_U32 processIndex;
     EB_U32 maxPictureWidth;
-    EB_U32 maxLookAheadDistance  = 0;
 
     EB_BOOL is16bit = (EB_BOOL) (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
 
@@ -713,12 +712,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
      ************************************/
     EB_MALLOC(EbSystemResource_t**, encHandlePtr->pictureParentControlSetPoolPtrArray, sizeof(EbSystemResource_t*)  * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
     EB_MALLOC(EbFifo_t***, encHandlePtr->pictureParentControlSetPoolProducerFifoPtrDblArray, sizeof(EbSystemResource_t**) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-    	
-	// Updating the pictureControlSetPoolTotalCount based on the maximum look ahead distance
-    for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
-        maxLookAheadDistance    = MAX(maxLookAheadDistance, encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.lookAheadDistance);
-    }   
-    
+    	    
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
     
         // The segment Width & Height Arrays are in units of LCUs, not samples
@@ -735,7 +729,6 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         inputData.maxDepth              = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxLcuDepth;
         inputData.is16bit               = is16bit;
 		inputData.compressedTenBitFormat = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.compressedTenBitFormat;
-		encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->pictureControlSetPoolInitCount += maxLookAheadDistance;
 
 		inputData.encMode = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.encMode;
 		inputData.speedControl = (EB_U8)encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.speedControlFlag;
@@ -949,7 +942,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
         return_error = EbSystemResourceCtor(
             &encHandlePtr->outputStreamBufferResourcePtrArray[instanceIndex],
-            encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->inputOutputBufferFifoInitCount,
+            encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->inputOutputBufferFifoInitCount + 4, // to accommodate output error + vps + eos
             encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->totalProcessInitCount,// EB_PacketizationProcessInitCount,
             1,
             &encHandlePtr->outputStreamBufferProducerFifoPtrDblArray[instanceIndex],
@@ -1628,7 +1621,7 @@ EB_U32 SetParentPcs(EB_H265_ENC_CONFIGURATION*   config)
     fps = fps > 120 ? 120 : fps;
     fps = fps < 24 ? 24 : fps;
 
-    if ((EB_U32)(config->intraPeriodLength) > (fps << 1) && ((config->sourceWidth * config->sourceHeight) < INPUT_SIZE_4K_TH))
+    if (((EB_U32)(config->intraPeriodLength) > (fps << 1)) && ((config->sourceWidth * config->sourceHeight) < INPUT_SIZE_4K_TH))
         fps = config->intraPeriodLength;
 
     EB_U32     lowLatencyInput = (config->encMode < 6 || config->speedControlFlag == 1) ? fps :
@@ -2506,8 +2499,8 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->lookAheadDistance > 256 && config->lookAheadDistance != (EB_U32)~0) {
-        SVT_LOG("Error Instance %u: The lookahead distance must be [0 - 256] \n", channelNumber + 1);
+    if (config->lookAheadDistance > 250 && config->lookAheadDistance != (EB_U32)~0) {
+        SVT_LOG("Error Instance %u: The lookahead distance must be [0 - 250] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 	if (config->sceneChangeDetection > 1) {
