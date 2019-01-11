@@ -1435,7 +1435,7 @@ void ProductMpmCandidatesInjection(
 	EB_U32			         mostProbableModeCount;
     EB_BOOL                  mpmPresentFlag;
 
-#ifndef REVERT_LIMITINRA_MPM_PATCH
+#ifdef LIMITINRA_MPM_PATCH
     const EB_BOOL            cuSize = contextPtr->cuStats->size;
     const EB_BOOL            isLeftCu = contextPtr->cuStats->originX == 0;
     const EB_BOOL            isTopCu = contextPtr->cuStats->originY == 0;
@@ -1460,7 +1460,7 @@ void ProductMpmCandidatesInjection(
 
         while (mostProbableModeCount < mpmSearchCandidate) {
 
-#ifndef REVERT_LIMITINRA_MPM_PATCH
+#ifdef LIMITINRA_MPM_PATCH
             if (!(limitIntra == 0 || (isLeftCu == 0 && isTopCu == 0))) {
                 ++mostProbableModeCount;
                 continue;
@@ -1675,7 +1675,7 @@ EB_ERRORTYPE ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
 
 	// Mark MPM candidates, and update the number of full recon - MPM candidates are going to get pushed to the full, 
 	// however they still need to be tested in the fast loop where the predicted, and the fast rate are going to get computed
-#ifndef REVERT_LIMITINRA_MPM_PATCH
+#ifdef LIMITINRA_MPM_PATCH
     const EB_BOOL  isLeftCu = contextPtr->cuStats->originX == 0;
     const EB_BOOL  isTopCu = contextPtr->cuStats->originY == 0;
     EB_BOOL limitIntraLoptLeft = contextPtr->limitIntra == EB_TRUE && isLeftCu  &&  isTopCu;
