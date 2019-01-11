@@ -779,7 +779,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         ((EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr)->inputPaddedPicturePtr->bufferY = inputPicturePtr->bufferY;
 
         // Get Empty Output Results Object
-		if (pictureControlSetPtr->pictureNumber > 0)
+		if (pictureControlSetPtr->pictureNumber > 0 && prevPictureControlSetWrapperPtr != (EbObjectWrapper_t*)EB_NULL)
 		{
 			((PictureParentControlSet_t       *)prevPictureControlSetWrapperPtr->objectPtr)->endOfSequenceFlag = endOfSequenceFlag;
 
