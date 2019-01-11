@@ -1,5 +1,4 @@
 
-#include "EbApi.h"
 #include "EbAppConfig.h"
 
 /* SAFE STRING LIBRARY */

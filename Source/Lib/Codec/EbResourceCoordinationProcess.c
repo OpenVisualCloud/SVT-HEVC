@@ -11,7 +11,6 @@
 #include "EbPictureControlSet.h"
 #include "EbSequenceControlSet.h"
 #include "EbPictureBufferDesc.h"
-#include "EbDefinitions.h"
 #include "EbErrorCodes.h"
 #include "EbErrorHandling.h"
 
