@@ -1145,7 +1145,7 @@ void SendQpOnTheFly(
 
         if (tmpQp == -1) {
             config->useQpFile = EB_FALSE;
-            printf("\nWarning: QP File did not contain any valid QPs");
+            printf("\nSVT [Warning]: QP File did not contain any valid QPs");
         }
 
         qpPtr = CLIP3(0, 51, tmpQp);

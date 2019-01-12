@@ -83,35 +83,12 @@ typedef struct EbConfig_s
      ****************************************/
     uint8_t                     useDefaultMeHme;
     uint8_t                     enableHmeFlag;
-    uint8_t                     enableHmeLevel0Flag;
-    uint8_t                     enableHmeLevel1Flag;
-    uint8_t                     enableHmeLevel2Flag;
 
     /****************************************
      * ME Parameters
      ****************************************/
     uint32_t                    searchAreaWidth;
     uint32_t                    searchAreaHeight;
-
-    /****************************************
-     * HME Parameters
-     ****************************************/
-    uint32_t                    numberHmeSearchRegionInWidth ;
-    uint32_t                    numberHmeSearchRegionInHeight;
-    uint32_t                    hmeLevel0TotalSearchAreaWidth;
-    uint32_t                    hmeLevel0TotalSearchAreaHeight;
-    uint32_t                    hmeLevel0ColumnIndex;
-    uint32_t                    hmeLevel0RowIndex;
-    uint32_t                    hmeLevel1ColumnIndex;
-    uint32_t                    hmeLevel1RowIndex;
-    uint32_t                    hmeLevel2ColumnIndex;
-    uint32_t                    hmeLevel2RowIndex;
-    uint32_t                    hmeLevel0SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    uint32_t                    hmeLevel0SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    uint32_t                    hmeLevel1SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    uint32_t                    hmeLevel1SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    uint32_t                    hmeLevel2SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    uint32_t                    hmeLevel2SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
 
     /****************************************
      * MD Parameters
@@ -148,6 +125,8 @@ typedef struct EbConfig_s
     uint8_t                     unregisteredUserDataSeiFlag;
     uint8_t                     recoveryPointSeiFlag;
     uint32_t                    enableTemporalId;
+    uint8_t                     switchThreadsToRtPriority;
+    uint8_t                     fpsInVps;
 
     /****************************************
      * Annex A Parameters

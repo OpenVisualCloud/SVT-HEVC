@@ -301,29 +301,24 @@ EB_ERRORTYPE SignalDerivationPreAnalysisSq(
         pictureControlSetPtr->noiseDetectionTh = 1;
     }
 
+    EB_U8  hmeMeLevel       = pictureControlSetPtr->encMode;
+
+    EB_U32 inputRatio       = sequenceControlSetPtr->lumaWidth / sequenceControlSetPtr->lumaHeight;
+    EB_U8 resolutionIndex   = inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ?               0   : // 480P
+                                (inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio < 2) ?    1   : // 720P
+                                (inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio > 3) ?    2   : // 1080I
+                                (inputResolution <= INPUT_SIZE_1080p_RANGE) ?                      3   : // 1080I
+                                                                                                4;    // 4K
+    
     // Derive HME Flag
-    if (sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
-        EB_U8  hmeMeLevel       = pictureControlSetPtr->encMode;
+    if (sequenceControlSetPtr->staticConfig.useDefaultMeHme)
+        pictureControlSetPtr->enableHmeFlag = EB_TRUE;
+    else
+        pictureControlSetPtr->enableHmeFlag = sequenceControlSetPtr->staticConfig.enableHmeFlag;
+    pictureControlSetPtr->enableHmeLevel0Flag   = EnableHmeLevel0FlagSq[resolutionIndex][hmeMeLevel];
+    pictureControlSetPtr->enableHmeLevel1Flag   = EnableHmeLevel1FlagSq[resolutionIndex][hmeMeLevel];
+    pictureControlSetPtr->enableHmeLevel2Flag   = EnableHmeLevel2FlagSq[resolutionIndex][hmeMeLevel];
 
-        EB_U32 inputRatio       = sequenceControlSetPtr->lumaWidth / sequenceControlSetPtr->lumaHeight;
-        EB_U8 resolutionIndex   = inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ?               0   : // 480P
-                                 (inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio < 2) ?    1   : // 720P
-                                 (inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio > 3) ?    2   : // 1080I
-                                 (inputResolution <= INPUT_SIZE_1080p_RANGE) ?                      3   : // 1080I
-                                                                                                    4;    // 4K
-
-        pictureControlSetPtr->enableHmeFlag         = EB_TRUE;
-        pictureControlSetPtr->enableHmeLevel0Flag   = EnableHmeLevel0FlagSq[resolutionIndex][hmeMeLevel];
-        pictureControlSetPtr->enableHmeLevel1Flag   = EnableHmeLevel1FlagSq[resolutionIndex][hmeMeLevel];
-        pictureControlSetPtr->enableHmeLevel2Flag   = EnableHmeLevel2FlagSq[resolutionIndex][hmeMeLevel];
-
-    } 
-    else{
-        pictureControlSetPtr->enableHmeFlag         = sequenceControlSetPtr->staticConfig.enableHmeFlag;
-        pictureControlSetPtr->enableHmeLevel0Flag   = sequenceControlSetPtr->staticConfig.enableHmeLevel0Flag;
-        pictureControlSetPtr->enableHmeLevel1Flag   = sequenceControlSetPtr->staticConfig.enableHmeLevel1Flag;
-        pictureControlSetPtr->enableHmeLevel2Flag   = sequenceControlSetPtr->staticConfig.enableHmeLevel2Flag;
-    }
     return return_error;
 }
 
@@ -379,28 +374,23 @@ EB_ERRORTYPE SignalDerivationPreAnalysisOq(
         pictureControlSetPtr->noiseDetectionTh = 1;
     }
 
+    EB_U8  hmeMeLevel       = pictureControlSetPtr->encMode;
+
+    EB_U32 inputRatio       = sequenceControlSetPtr->lumaWidth / sequenceControlSetPtr->lumaHeight;
+    EB_U8 resolutionIndex   = inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ?               0   : // 480P
+                                (inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio < 2) ?    1   : // 720P
+                                (inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio > 3) ?    2   : // 1080I
+                                (inputResolution <= INPUT_SIZE_1080p_RANGE) ?                      3   : // 1080I
+                                                                                                4;    // 4K
+
     // Derive HME Flag
-    if (sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
-        EB_U8  hmeMeLevel       = pictureControlSetPtr->encMode;
-
-        EB_U32 inputRatio       = sequenceControlSetPtr->lumaWidth / sequenceControlSetPtr->lumaHeight;
-        EB_U8 resolutionIndex   = inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ?               0   : // 480P
-                                 (inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio < 2) ?    1   : // 720P
-                                 (inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio > 3) ?    2   : // 1080I
-                                 (inputResolution <= INPUT_SIZE_1080p_RANGE) ?                      3   : // 1080I
-                                                                                                    4;    // 4K
-
-        pictureControlSetPtr->enableHmeFlag         = EB_TRUE;
-        pictureControlSetPtr->enableHmeLevel0Flag   = EnableHmeLevel0FlagOq[resolutionIndex][hmeMeLevel];
-        pictureControlSetPtr->enableHmeLevel1Flag   = EnableHmeLevel1FlagOq[resolutionIndex][hmeMeLevel];
-        pictureControlSetPtr->enableHmeLevel2Flag   = EnableHmeLevel2FlagOq[resolutionIndex][hmeMeLevel];
-    }
-    else{
-        pictureControlSetPtr->enableHmeFlag         = sequenceControlSetPtr->staticConfig.enableHmeFlag;
-        pictureControlSetPtr->enableHmeLevel0Flag   = sequenceControlSetPtr->staticConfig.enableHmeLevel0Flag;
-        pictureControlSetPtr->enableHmeLevel1Flag   = sequenceControlSetPtr->staticConfig.enableHmeLevel1Flag;
-        pictureControlSetPtr->enableHmeLevel2Flag   = sequenceControlSetPtr->staticConfig.enableHmeLevel2Flag;
-    }
+    if (sequenceControlSetPtr->staticConfig.useDefaultMeHme)
+        pictureControlSetPtr->enableHmeFlag = EB_TRUE;
+    else
+        pictureControlSetPtr->enableHmeFlag = sequenceControlSetPtr->staticConfig.enableHmeFlag;
+    pictureControlSetPtr->enableHmeLevel0Flag   = EnableHmeLevel0FlagOq[resolutionIndex][hmeMeLevel];
+    pictureControlSetPtr->enableHmeLevel1Flag   = EnableHmeLevel1FlagOq[resolutionIndex][hmeMeLevel];
+    pictureControlSetPtr->enableHmeLevel2Flag   = EnableHmeLevel2FlagOq[resolutionIndex][hmeMeLevel];
 
 	pictureControlSetPtr->enableDenoiseSrcFlag = EB_FALSE;
 
@@ -441,27 +431,21 @@ EB_ERRORTYPE SignalDerivationPreAnalysisVmaf(
 	// Derive Noise Detection Threshold
 	pictureControlSetPtr->noiseDetectionTh = 1;
 
-	// Derive HME Flag
-	if (sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
-		EB_U8  hmeMeLevel = pictureControlSetPtr->encMode;
-		EB_U32 inputRatio = sequenceControlSetPtr->lumaWidth / sequenceControlSetPtr->lumaHeight;
-		EB_U8 resolutionIndex = inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ? 0 : // 480P
-			(inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio < 2) ? 1 : // 720P
-			(inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio > 3) ? 2 : // 1080I
-			(inputResolution <= INPUT_SIZE_1080p_RANGE) ? 3 : // 1080I
-			4;    // 4K
-		resolutionIndex = 3;
-		pictureControlSetPtr->enableHmeFlag = EB_TRUE;
-		pictureControlSetPtr->enableHmeLevel0Flag = EnableHmeLevel0FlagVmaf[resolutionIndex][hmeMeLevel];
-		pictureControlSetPtr->enableHmeLevel1Flag = EnableHmeLevel1FlagVmaf[resolutionIndex][hmeMeLevel];
-		pictureControlSetPtr->enableHmeLevel2Flag = EnableHmeLevel2FlagVmaf[resolutionIndex][hmeMeLevel];
-	}
-	else {
-		pictureControlSetPtr->enableHmeFlag = sequenceControlSetPtr->staticConfig.enableHmeFlag;
-		pictureControlSetPtr->enableHmeLevel0Flag = sequenceControlSetPtr->staticConfig.enableHmeLevel0Flag;
-		pictureControlSetPtr->enableHmeLevel1Flag = sequenceControlSetPtr->staticConfig.enableHmeLevel1Flag;
-		pictureControlSetPtr->enableHmeLevel2Flag = sequenceControlSetPtr->staticConfig.enableHmeLevel2Flag;
-	}
+	EB_U8  hmeMeLevel = pictureControlSetPtr->encMode;
+	EB_U32 inputRatio = sequenceControlSetPtr->lumaWidth / sequenceControlSetPtr->lumaHeight;
+	EB_U8 resolutionIndex = inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ? 0 : // 480P
+		(inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio < 2) ? 1 : // 720P
+		(inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio > 3) ? 2 : // 1080I
+		(inputResolution <= INPUT_SIZE_1080p_RANGE) ? 3 : // 1080I
+		4;    // 4K
+	resolutionIndex = 3;
+    // Derive HME Flag
+    if (sequenceControlSetPtr->staticConfig.useDefaultMeHme)
+	    pictureControlSetPtr->enableHmeFlag = EB_TRUE;
+    else
+        pictureControlSetPtr->enableHmeFlag = sequenceControlSetPtr->staticConfig.enableHmeFlag;
+	pictureControlSetPtr->enableHmeLevel0Flag = EnableHmeLevel0FlagVmaf[resolutionIndex][hmeMeLevel];
+	pictureControlSetPtr->enableHmeLevel1Flag = EnableHmeLevel1FlagVmaf[resolutionIndex][hmeMeLevel];
 
 	pictureControlSetPtr->enableDenoiseSrcFlag = EB_FALSE;
 	pictureControlSetPtr->disableVarianceFlag = EB_TRUE;

@@ -34,7 +34,8 @@ EB_ERRORTYPE MeContextCtor(
     EB_U32                   meCandidateIndex;
 
     EB_MALLOC(MeContext_t*, *objectDblPtr, sizeof(MeContext_t), EB_N_PTR);
-    
+
+    (*objectDblPtr)->updateHmeSearchCenter = EB_FALSE;
     (*objectDblPtr)->xMvOffset = 0;
     (*objectDblPtr)->yMvOffset = 0;
 
