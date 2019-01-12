@@ -217,6 +217,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.reconEnabled = config->reconFile ? EB_TRUE : EB_FALSE;
     callbackData->ebEncParameters.codeVpsSpsPps = 1;
     callbackData->ebEncParameters.fpsInVps = config->fpsInVps;
+    callbackData->ebEncParameters.switchThreadsToRtPriority = config->switchThreadsToRtPriority;
 
     return return_error;
 

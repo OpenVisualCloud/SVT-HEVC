@@ -91,6 +91,7 @@ extern "C" {
     } EB_ERRORTYPE;
 
 #define EB_BUFFERFLAG_EOS 0x00000001
+
 // For 8-bit and 10-bit packed inputs, the luma, cb, and cr fields should be used
 //   for the three input picture planes.  However, for 10-bit unpacked planes the
 //   lumaExt, cbExt, and crExt fields should be used hold the extra 2-bits of
@@ -200,6 +201,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
   // Threads management
     uint32_t                logicalProcessors;             // number of logical processor to run on
     int32_t                 targetSocket;                  // target socket to run on
+    uint8_t                 switchThreadsToRtPriority;     // switch to real time mode
 
     // ASM Type
     uint32_t                asmType;                      // level of optimization to use.

@@ -82,6 +82,7 @@
 #define ASM_TYPE_TOKEN				    "-asm" // no Eval
 #define THREAD_MGMNT                    "-lp"
 #define TARGET_SOCKET                   "-ss"
+#define SWITCHTHREADSTOREALTIME_TOKEN   "-rt"
 #define FPSINVPS_TOKEN                  "-fpsinvps"
 #define CONFIG_FILE_COMMENT_CHAR        '#'
 #define CONFIG_FILE_NEWLINE_CHAR        '\n'
@@ -208,6 +209,7 @@ static void SetLatencyMode                      (const char *value, EbConfig_t *
 static void SetAsmType                          (const char *value, EbConfig_t *cfg)  {cfg->asmType                         = (uint32_t)strtoul(value, NULL, 0); };
 static void SetLogicalProcessors                (const char *value, EbConfig_t *cfg)  {cfg->logicalProcessors               = (uint32_t)strtoul(value, NULL, 0);};
 static void SetTargetSocket                     (const char *value, EbConfig_t *cfg)  {cfg->targetSocket                    = (int32_t)strtol(value, NULL, 0);};
+static void SetSwitchThreadsToRtPriority        (const char *value, EbConfig_t *cfg)  {cfg->switchThreadsToRtPriority       = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetFpsInVps                         (const char *value, EbConfig_t *cfg)  {cfg->fpsInVps                        = (EB_BOOL)strtol(value, NULL, 0);};
 
 enum cfg_type{
@@ -297,6 +299,7 @@ config_entry_t config_entry[] = {
     // Thread Management
     { SINGLE_INPUT, THREAD_MGMNT, "logicalProcessors", SetLogicalProcessors },
     { SINGLE_INPUT, TARGET_SOCKET, "TargetSocket", SetTargetSocket },
+    { SINGLE_INPUT, SWITCHTHREADSTOREALTIME_TOKEN, "SwitchThreadsToRtPriority", SetSwitchThreadsToRtPriority },
 
     // Optional Features
 
@@ -391,13 +394,14 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->bufferingPeriodSEI                   = 0;
     configPtr->pictureTimingSEI                     = 0;
 
-	configPtr->bitRateReduction					    = EB_TRUE;
+    configPtr->bitRateReduction					    = EB_TRUE;
     configPtr->improveSharpness                     = EB_TRUE;
     configPtr->registeredUserDataSeiFlag            = EB_FALSE;
     configPtr->unregisteredUserDataSeiFlag          = EB_FALSE;
     configPtr->recoveryPointSeiFlag                 = EB_FALSE;
     configPtr->enableTemporalId                     = 1;
 
+    configPtr->switchThreadsToRtPriority            = EB_TRUE;
     configPtr->fpsInVps                             = EB_FALSE;
 
     // Annex A parameters
@@ -694,59 +698,59 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
 
 	// Check Input File
 	if(config->inputFile == (FILE*) NULL) {
-		fprintf(config->errorLogFile, "Error instance %u: Invalid Input File\n",channelNumber+1);
+		fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid Input File\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	}
 
     if (config->framesToBeEncoded <= -1) {
-		fprintf(config->errorLogFile, "Error instance %u: FrameToBeEncoded must be greater than 0\n",channelNumber+1);
+		fprintf(config->errorLogFile, "SVT [Error]: Instance %u: FrameToBeEncoded must be greater than 0\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	}
 
     if (config->bufferedInput < -1) {
-        fprintf(config->errorLogFile, "Error instance %u: Invalid BufferedInput. BufferedInput must greater or equal to -1\n", channelNumber + 1);
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid BufferedInput. BufferedInput must greater or equal to -1\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
 	if (config->bufferedInput > config->framesToBeEncoded) {
-		fprintf(config->errorLogFile, "Error instance %u: Invalid BufferedInput. BufferedInput must be less or equal to the number of frames to be encoded\n",channelNumber+1);
+		fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid BufferedInput. BufferedInput must be less or equal to the number of frames to be encoded\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	}
 
     if (config->useQpFile == EB_TRUE && config->qpFile == NULL) {
-        fprintf(config->errorLogFile, "Error instance %u: Could not find QP file, UseQpFile is set to 1\n", channelNumber + 1);
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Could not find QP file, UseQpFile is set to 1\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->separateFields > 1) {
-        fprintf(config->errorLogFile, "Error Instance %u: Invalid SeperateFields Input\n", channelNumber + 1);
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid SeperateFields Input\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->encoderBitDepth == 10 && config->separateFields == 1)
     {
-        fprintf(config->errorLogFile, "Error instance %u: Separate fields is not supported for 10 bit input \n", channelNumber + 1);
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Separate fields is not supported for 10 bit input \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->injector > 1 ){
-        fprintf(config->errorLogFile, "Error Instance %u: Invalid injector [0 - 1]\n",channelNumber+1);
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid injector [0 - 1]\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     }
 
     if(config->injectorFrameRate > (240<<16) && config->injector){
-        fprintf(config->errorLogFile, "Error Instance %u: The maximum allowed injectorFrameRate is 240 fps\n",channelNumber+1);
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: The maximum allowed injectorFrameRate is 240 fps\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     }
     // Check that the injector frameRate is non-zero
     if(config->injectorFrameRate <= 0 && config->injector) {
-        fprintf(config->errorLogFile, "Error Instance %u: The injector frame rate should be greater than 0 fps \n",channelNumber+1);
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: The injector frame rate should be greater than 0 fps \n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     }
 
     // TargetSocket
     if (config->targetSocket != -1 && config->targetSocket != 0 && config->targetSocket != 1) {
-        fprintf(config->errorLogFile, "Error instance %u: Invalid TargetSocket [-1 - 1], your input: %d\n", channelNumber + 1, config->targetSocket);
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid TargetSocket [-1 - 1], your input: %d\n", channelNumber + 1, config->targetSocket);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -998,7 +1002,7 @@ EB_ERRORTYPE ReadCommandLine(
                     configs[index]->framesToBeEncoded = ComputeFramesToBeEncoded(configs[index]);
 
                 if (configs[index]->framesToBeEncoded == -1) {
-                    fprintf(configs[index]->errorLogFile, "Error instance %u: Input yuv does not contain enough frames \n", index + 1);
+                    fprintf(configs[index]->errorLogFile, "SVT [Error]: Instance %u: Input yuv does not contain enough frames \n", index + 1);
                     return_errors[index] = EB_ErrorBadParameter;
                 }
 
