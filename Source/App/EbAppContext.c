@@ -154,7 +154,6 @@ EB_ERRORTYPE CopyConfigurationParameters(
     uint32_t                 instanceIdx)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
-    uint32_t         hmeRegionIndex;
 
     // Assign Instance index to the library
     callbackData->instanceIdx = (uint8_t)instanceIdx;
