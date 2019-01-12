@@ -448,6 +448,7 @@ EB_ERRORTYPE SignalDerivationPreAnalysisVmaf(
     }
 	pictureControlSetPtr->enableHmeLevel0Flag = EnableHmeLevel0FlagVmaf[resolutionIndex][hmeMeLevel];
 	pictureControlSetPtr->enableHmeLevel1Flag = EnableHmeLevel1FlagVmaf[resolutionIndex][hmeMeLevel];
+    pictureControlSetPtr->enableHmeLevel2Flag = EnableHmeLevel2FlagVmaf[resolutionIndex][hmeMeLevel];
 
 	pictureControlSetPtr->enableDenoiseSrcFlag = EB_FALSE;
 	pictureControlSetPtr->disableVarianceFlag = EB_TRUE;
