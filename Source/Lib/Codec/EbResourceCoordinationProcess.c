@@ -440,10 +440,12 @@ EB_ERRORTYPE SignalDerivationPreAnalysisVmaf(
 		4;    // 4K
 	resolutionIndex = 3;
     // Derive HME Flag
-    if (sequenceControlSetPtr->staticConfig.useDefaultMeHme)
-	    pictureControlSetPtr->enableHmeFlag = EB_TRUE;
-    else
+    if (sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
+        pictureControlSetPtr->enableHmeFlag = EB_TRUE;
+    }
+    else {
         pictureControlSetPtr->enableHmeFlag = sequenceControlSetPtr->staticConfig.enableHmeFlag;
+    }
 	pictureControlSetPtr->enableHmeLevel0Flag = EnableHmeLevel0FlagVmaf[resolutionIndex][hmeMeLevel];
 	pictureControlSetPtr->enableHmeLevel1Flag = EnableHmeLevel1FlagVmaf[resolutionIndex][hmeMeLevel];
 

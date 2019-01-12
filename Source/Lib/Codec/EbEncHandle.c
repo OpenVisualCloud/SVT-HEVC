@@ -1998,8 +1998,6 @@ void CopyApiFromApp(
     EB_H265_ENC_CONFIGURATION* pComponentParameterStructure
 ) {
 
-    EB_U32                  hmeRegionIndex = 0;
-
     sequenceControlSetPtr->staticConfig.sourceWidth  = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceWidth;
     sequenceControlSetPtr->staticConfig.sourceHeight = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceHeight;
     sequenceControlSetPtr->maxInputLumaWidth  = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceWidth;
