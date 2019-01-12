@@ -53,6 +53,92 @@ static void ConfigurePictureEdges(
     return;
 }
 
+#if TILES
+/************************************************
+ * Configure Tiles
+ ************************************************/
+static void ConfigureTiles(
+    SequenceControlSet_t *scsPtr,
+    PictureControlSet_t  *ppsPtr)
+{
+    // Tiles Initialisation
+    const unsigned pictureWidthInLcu = (scsPtr->lumaWidth + scsPtr->lcuSize - 1) / scsPtr->lcuSize;
+    const unsigned pictureHeightInLcu = (scsPtr->lumaHeight + scsPtr->lcuSize - 1) / scsPtr->lcuSize;
+
+    const unsigned tileColumns = scsPtr->tileColumnCount;
+    const unsigned tileRows = scsPtr->tileRowCount;
+
+    unsigned lastColumnWidth = pictureWidthInLcu;
+    unsigned lastRowHeight = pictureHeightInLcu;
+
+    unsigned rowIndex, columnIndex;
+    unsigned xLcuIndex, yLcuIndex, lcuIndex;
+    unsigned xLcuStart, yLcuStart;
+
+    ppsPtr->tileColumnCount = tileColumns;
+    ppsPtr->tileRowCount = tileRows;
+    ppsPtr->tileTotalCount = tileColumns * tileRows;
+
+    if (scsPtr->tileUniformSpacing == 1)
+    {
+        for (columnIndex = 0; columnIndex < tileColumns - 1; ++columnIndex) {
+            ppsPtr->tileColumnArray[columnIndex] = (EB_U16)((columnIndex + 1) * pictureWidthInLcu / tileColumns -
+                columnIndex * pictureWidthInLcu / tileColumns);
+            lastColumnWidth -= ppsPtr->tileColumnArray[columnIndex];
+        }
+        ppsPtr->tileColumnArray[columnIndex] = (EB_U16)lastColumnWidth;
+
+        for (rowIndex = 0; rowIndex < tileRows - 1; ++rowIndex) {
+            ppsPtr->tileRowArray[rowIndex] = (EB_U16)((rowIndex + 1) * pictureHeightInLcu / tileRows -
+                rowIndex * pictureHeightInLcu / tileRows);
+            lastRowHeight -= ppsPtr->tileRowArray[rowIndex];
+        }
+        ppsPtr->tileRowArray[rowIndex] = (EB_U16)lastRowHeight;
+
+    }
+    else
+    {
+        for (columnIndex = 0; columnIndex < tileColumns - 1; ++columnIndex) {
+            ppsPtr->tileColumnArray[columnIndex] = (EB_U16)scsPtr->tileColumnWidthArray[columnIndex];
+            lastColumnWidth -= ppsPtr->tileColumnArray[columnIndex];
+        }
+        ppsPtr->tileColumnArray[columnIndex] = (EB_U16)lastColumnWidth;
+
+        for (rowIndex = 0; rowIndex < tileRows - 1; ++rowIndex) {
+            ppsPtr->tileRowArray[rowIndex] = (EB_U16)scsPtr->tileRowHeightArray[rowIndex];
+            lastRowHeight -= ppsPtr->tileRowArray[rowIndex];
+        }
+        ppsPtr->tileRowArray[rowIndex] = (EB_U16)lastRowHeight;
+    }
+
+    // Tile-loops
+    yLcuStart = 0;
+    for (rowIndex = 0; rowIndex < tileRows; ++rowIndex) {
+        xLcuStart = 0;
+        for (columnIndex = 0; columnIndex < tileColumns; ++columnIndex) {
+
+            // LCU-loops
+            for (yLcuIndex = yLcuStart; yLcuIndex < yLcuStart + ppsPtr->tileRowArray[rowIndex]; ++yLcuIndex) {
+                for (xLcuIndex = xLcuStart; xLcuIndex < xLcuStart + ppsPtr->tileColumnArray[columnIndex]; ++xLcuIndex) {
+
+                    lcuIndex = xLcuIndex + yLcuIndex * pictureWidthInLcu;
+                    ppsPtr->lcuPtrArray[lcuIndex]->tileLeftEdgeFlag = (xLcuIndex == xLcuStart) ? EB_TRUE : EB_FALSE;
+                    ppsPtr->lcuPtrArray[lcuIndex]->tileTopEdgeFlag = (yLcuIndex == yLcuStart) ? EB_TRUE : EB_FALSE;
+                    ppsPtr->lcuPtrArray[lcuIndex]->tileRightEdgeFlag =
+                        (xLcuIndex == xLcuStart + ppsPtr->tileColumnArray[columnIndex] - 1) ? EB_TRUE : EB_FALSE;
+                    ppsPtr->lcuPtrArray[lcuIndex]->tileOriginX = xLcuStart * scsPtr->lcuSize;
+                    ppsPtr->lcuPtrArray[lcuIndex]->tileOriginY = yLcuStart * scsPtr->lcuSize;
+                }
+            }
+            xLcuStart += ppsPtr->tileColumnArray[columnIndex];
+        }
+        yLcuStart += ppsPtr->tileRowArray[rowIndex];
+    }
+
+    return;
+}
+#endif
+
 /************************************************
  * Picture Manager Context Constructor
  ************************************************/
@@ -671,6 +757,11 @@ void* PictureManagerKernel(void *inputPtr)
                     pictureWidthInLcu  = (EB_U8)((entrySequenceControlSetPtr->lumaWidth + entrySequenceControlSetPtr->lcuSize - 1) / entrySequenceControlSetPtr->lcuSize);
                     pictureHeightInLcu = (EB_U8)((entrySequenceControlSetPtr->lumaHeight + entrySequenceControlSetPtr->lcuSize - 1) / entrySequenceControlSetPtr->lcuSize); 
 
+#if TILES
+                    ConfigureTiles(
+                        entrySequenceControlSetPtr,
+                        ChildPictureControlSetPtr);
+#endif
                     // EncDec Segments 
                     EncDecSegmentsInit(
                         ChildPictureControlSetPtr->encDecSegmentCtrl,
@@ -711,7 +802,7 @@ void* PictureManagerKernel(void *inputPtr)
 
                     // Rate Control 
 
-					ChildPictureControlSetPtr->useDeltaQp = (EB_U8)(entrySequenceControlSetPtr->staticConfig.improveSharpness || entrySequenceControlSetPtr->staticConfig.bitRateReduction);
+                    ChildPictureControlSetPtr->useDeltaQp =  (EB_U8)(entrySequenceControlSetPtr->staticConfig.improveSharpness || entrySequenceControlSetPtr->staticConfig.bitRateReduction);
 
                     // Check resolution
                     if (sequenceControlSetPtr->inputResolution < INPUT_SIZE_1080p_RANGE)

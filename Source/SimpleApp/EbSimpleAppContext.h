@@ -24,7 +24,10 @@ typedef struct EbConfig_s
     FILE                        *qpFile;
 
     uint8_t                      useQpFile;
-
+#if 1//TILES
+    uint8_t                      tileColumnCount;
+    uint8_t                      tileRowCount ;
+#endif
     int64_t                      frameRate;
     int64_t                      frameRateNumerator;
     int64_t                      frameRateDenominator;

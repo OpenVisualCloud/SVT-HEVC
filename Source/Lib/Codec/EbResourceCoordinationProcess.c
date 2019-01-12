@@ -750,7 +750,11 @@ void* ResourceCoordinationKernel(void *inputPtr)
                 TOP_FIELD_PICT_STRUCT :
                 BOTTOM_FIELD_PICT_STRUCT ;
 
-
+#if TILES        
+        sequenceControlSetPtr->tileUniformSpacing = 1;
+        sequenceControlSetPtr->tileColumnCount = sequenceControlSetPtr->staticConfig.tileColumnCount;
+        sequenceControlSetPtr->tileRowCount    = sequenceControlSetPtr->staticConfig.tileRowCount;
+#endif
         sequenceControlSetPtr->encodeContextPtr->initialPicture = EB_FALSE;
 
         // Get Empty Reference Picture Object
