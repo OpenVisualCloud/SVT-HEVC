@@ -11,7 +11,6 @@
 #include "EbCodingUnit.h"
 #include "EbSequenceControlSet.h"
 #include "EbReferenceObject.h"
-#include "EbDefinitions.h"
 
 #include "EbDeblockingFilter.h"
 #include "EbTransforms.h"

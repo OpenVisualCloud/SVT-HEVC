@@ -224,7 +224,7 @@ EB_ERRORTYPE EncodeCabacContextModelCtor(
     EB_ContextModel  tempContextModel;
     const EB_S16    *cabacInitialProbabilityTable;
 
-    contextModelPtr = cabacContextModelArray->splitFlagContextModel;
+    contextModelPtr = (EB_ContextModel*)cabacContextModelArray;
 
     // Loop over all slice types
     for(sliceIdx = 0; sliceIdx < TOTAL_NUMBER_OF_SLICE_TYPES; sliceIdx++) {

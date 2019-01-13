@@ -6,7 +6,6 @@
 /*********************************
  * Includes
  *********************************/
-#include <immintrin.h>
 
 #include "EbPictureOperators.h"
 #define VARIANCE_PRECISION      16

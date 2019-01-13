@@ -297,7 +297,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, TUNE_TOKEN, "Tune", SetCfgTune },
 
     // Thread Management
-    { SINGLE_INPUT, THREAD_MGMNT, "logicalProcessors", SetLogicalProcessors },
+    { SINGLE_INPUT, THREAD_MGMNT, "LogicalProcessors", SetLogicalProcessors },
     { SINGLE_INPUT, TARGET_SOCKET, "TargetSocket", SetTargetSocket },
     { SINGLE_INPUT, SWITCHTHREADSTOREALTIME_TOKEN, "SwitchThreadsToRtPriority", SetSwitchThreadsToRtPriority },
 

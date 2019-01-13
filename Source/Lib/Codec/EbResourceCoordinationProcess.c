@@ -11,7 +11,6 @@
 #include "EbPictureControlSet.h"
 #include "EbSequenceControlSet.h"
 #include "EbPictureBufferDesc.h"
-#include "EbDefinitions.h"
 #include "EbErrorCodes.h"
 #include "EbErrorHandling.h"
 
@@ -441,12 +440,15 @@ EB_ERRORTYPE SignalDerivationPreAnalysisVmaf(
 		4;    // 4K
 	resolutionIndex = 3;
     // Derive HME Flag
-    if (sequenceControlSetPtr->staticConfig.useDefaultMeHme)
-	    pictureControlSetPtr->enableHmeFlag = EB_TRUE;
-    else
+    if (sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
+        pictureControlSetPtr->enableHmeFlag = EB_TRUE;
+    }
+    else {
         pictureControlSetPtr->enableHmeFlag = sequenceControlSetPtr->staticConfig.enableHmeFlag;
+    }
 	pictureControlSetPtr->enableHmeLevel0Flag = EnableHmeLevel0FlagVmaf[resolutionIndex][hmeMeLevel];
 	pictureControlSetPtr->enableHmeLevel1Flag = EnableHmeLevel1FlagVmaf[resolutionIndex][hmeMeLevel];
+    pictureControlSetPtr->enableHmeLevel2Flag = EnableHmeLevel2FlagVmaf[resolutionIndex][hmeMeLevel];
 
 	pictureControlSetPtr->enableDenoiseSrcFlag = EB_FALSE;
 	pictureControlSetPtr->disableVarianceFlag = EB_TRUE;
@@ -764,7 +766,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         ((EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr)->inputPaddedPicturePtr->bufferY = inputPicturePtr->bufferY;
 
         // Get Empty Output Results Object
-		if (pictureControlSetPtr->pictureNumber > 0)
+		if (pictureControlSetPtr->pictureNumber > 0 && prevPictureControlSetWrapperPtr != (EbObjectWrapper_t*)EB_NULL)
 		{
 			((PictureParentControlSet_t       *)prevPictureControlSetWrapperPtr->objectPtr)->endOfSequenceFlag = endOfSequenceFlag;
 

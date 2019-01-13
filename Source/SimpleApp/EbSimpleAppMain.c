@@ -17,7 +17,7 @@
 #include "EbSimpleAppContext.h"
 #include "EbApi.h"
 #if !__linux
-#include <Windows.h>
+#include <stdlib.h>
 #define fseeko64 _fseeki64
 #define ftello64 _ftelli64
 #define FOPEN(f,s,m) fopen_s(&f,s,m)
@@ -330,60 +330,68 @@ int32_t main(int32_t argc, char* argv[])
     {
         // Initialize config
         config = (EbConfig_t*)malloc(sizeof(EbConfig_t));
-        EbConfigCtor(config);
-        if (argc != 6 && argc != 7) {
-            printf("Usage: ./HevcEncoderSimpleApp in.yuv out.265 width height bitdepth recon.yuv(optional)\n");
-            return_error = EB_ErrorBadParameter;
+        if (config == NULL) {
+            return_error =  EB_ErrorInsufficientResources; 
         }
         else {
-            // Get info for config
-            FILE * fin;
-            FOPEN(fin,argv[1], "rb");
-            if (!fin) {
-                printf("Invalid input file \n");
+            EbConfigCtor(config);
+            if (argc != 6 && argc != 7) {
+                printf("Usage: ./HevcEncoderSimpleApp in.yuv out.265 width height bitdepth recon.yuv(optional)\n");
                 return_error = EB_ErrorBadParameter;
             }
-            else
-                config->inputFile = fin;
-
-            FILE * fout;
-            FOPEN(fout,argv[2], "wb");
-            if (!fout) {
-                printf("Invalid input file \n");
-                return_error = EB_ErrorBadParameter;
-            }
-            else
-                config->bitstreamFile = fout;
-
-            uint32_t width = 0, height = 0;
-
-            width = strtoul(argv[3], NULL, 0);
-            height = strtoul(argv[4], NULL, 0);
-            if ((width&&height) == 0) { printf("Invalid video dimensions\n"); return_error = EB_ErrorBadParameter; }
-
-            config->inputPaddedWidth  = config->sourceWidth = width;
-            config->inputPaddedHeight = config->sourceHeight = height;
-
-            uint32_t bdepth = width = strtoul(argv[5], NULL, 0);
-            if ((bdepth != 8) && (bdepth != 10)) {printf("Invalid bit depth\n"); return_error = EB_ErrorBadParameter; }
-            config->encoderBitDepth = bdepth;
-
-            if (argc == 7) {
-                FILE * frec;
-                FOPEN(frec, argv[6], "wb");
-                if (!frec) {
-                    printf("Invalid recon file \n");
+            else if (return_error == EB_ErrorNone) {
+                // Get info for config
+                FILE * fin;
+                FOPEN(fin, argv[1], "rb");
+                if (!fin) {
+                    printf("Invalid input file \n");
                     return_error = EB_ErrorBadParameter;
                 }
                 else
-                    config->reconFile = frec;
-            }
+                    config->inputFile = fin;
 
+                FILE * fout;
+                FOPEN(fout, argv[2], "wb");
+                if (!fout) {
+                    printf("Invalid input file \n");
+                    return_error = EB_ErrorBadParameter;
+                }
+                else
+                    config->bitstreamFile = fout;
+
+                uint32_t width = 0, height = 0;
+
+                width = strtoul(argv[3], NULL, 0);
+                height = strtoul(argv[4], NULL, 0);
+                if ((width&&height) == 0) { printf("Invalid video dimensions\n"); return_error = EB_ErrorBadParameter; }
+
+                config->inputPaddedWidth = config->sourceWidth = width;
+                config->inputPaddedHeight = config->sourceHeight = height;
+
+                uint32_t bdepth = width = strtoul(argv[5], NULL, 0);
+                if ((bdepth != 8) && (bdepth != 10)) { printf("Invalid bit depth\n"); return_error = EB_ErrorBadParameter; }
+                config->encoderBitDepth = bdepth;
+
+                if (argc == 7) {
+                    FILE * frec;
+                    FOPEN(frec, argv[6], "wb");
+                    if (!frec) {
+                        printf("Invalid recon file \n");
+                        return_error = EB_ErrorBadParameter;
+                    }
+                    else
+                        config->reconFile = frec;
+                }
+            }
+        }
+
+        appCallback = (EbAppContext_t*)malloc(sizeof(EbAppContext_t));
+        if (appCallback == NULL) {
+            return_error = EB_ErrorInsufficientResources;
         }
         if (return_error == EB_ErrorNone) {
 
             // Initialize appCallback
-            appCallback = (EbAppContext_t*)malloc(sizeof(EbAppContext_t));
             EbAppContextCtor(appCallback,config);
 
             return_error = InitEncoder(config, appCallback, 0);
@@ -408,17 +416,20 @@ int32_t main(int32_t argc, char* argv[])
             // DeInit Encoder
             return_error = DeInitEncoder(appCallback, 0);
 
-            // Destruct the App memory variables
-            EbAppContextDtor(appCallback);
-            EbConfigDtor(config);
-            free(config);
-            free(appCallback);
         }
         else {
             printf("Error in configuration, could not begin encoding! ... \n");
         }
+        // Destruct the App memory variables
+        if (appCallback != NULL) {
+            EbAppContextDtor(appCallback);
+            free(appCallback);
+        }
+        if (config != NULL) {
+            EbConfigDtor(config);
+            free(config);
+        }
     }
     printf("Encoder finished\n");
-
     return (return_error == 0) ? 0 : 1;
 }

@@ -10,7 +10,6 @@
 #include "EbDefinitions.h"
 #include "EbPictureBufferDesc.h"
 #include "EbPictureOperators.h"
-#include "EbDefinitions.h"
 
 
 #if (InternalBitDepthIncrement == 0)

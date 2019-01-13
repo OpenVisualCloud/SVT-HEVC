@@ -2667,14 +2667,17 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
 
         // B1 
         if (mvUnitB1 != (MvUnit_t*)EB_NULL) {
-        if(  (  b1_availability == EB_TRUE) &&
-             ( (a1_availability == EB_FALSE) || 
-               (mvUnitB1->mv[REF_LIST_0].mvUnion != mvUnitA1->mv[REF_LIST_0].mvUnion)))
-        {
-            mergeCandidateArray[mvMergeCandidateIndex].predictionDirection          = UNI_PRED_LIST_0;
-            mergeCandidateArray[mvMergeCandidateIndex].mv[REF_LIST_0].mvUnion       = mvUnitB1->mv[REF_LIST_0].mvUnion;
-            ++mvMergeCandidateIndex;
-        }
+            EB_BOOL mvUnion = EB_FALSE;
+            if (mvUnitB1 != (MvUnit_t*)EB_NULL && mvUnitA1 != (MvUnit_t*)EB_NULL)
+                mvUnion = (mvUnitB1->mv[REF_LIST_0].mvUnion != mvUnitA1->mv[REF_LIST_0].mvUnion);
+            if(  (  b1_availability == EB_TRUE) &&
+                 ( (a1_availability == EB_FALSE) || 
+                   mvUnion))
+            {
+                mergeCandidateArray[mvMergeCandidateIndex].predictionDirection          = UNI_PRED_LIST_0;
+                mergeCandidateArray[mvMergeCandidateIndex].mv[REF_LIST_0].mvUnion       = mvUnitB1->mv[REF_LIST_0].mvUnion;
+                ++mvMergeCandidateIndex;
+            }
         }
 
         if(mvMergeCandidateIndex == totalMergeCandidates )
@@ -2682,40 +2685,52 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
         
         // B0
         if (mvUnitB0 != (MvUnit_t*)EB_NULL) {
-        if ( (b0_availability == EB_TRUE) &&
-             ((b1_availability == EB_FALSE) ||                
-             (mvUnitB0->mv[REF_LIST_0].mvUnion != mvUnitB1->mv[REF_LIST_0].mvUnion)))
-        {
-            mergeCandidateArray[mvMergeCandidateIndex].predictionDirection           = UNI_PRED_LIST_0;
-            mergeCandidateArray[mvMergeCandidateIndex].mv[REF_LIST_0].mvUnion        = mvUnitB0->mv[REF_LIST_0].mvUnion;
-            ++mvMergeCandidateIndex;
-        }
+            EB_BOOL mvUnion = EB_FALSE;
+            if (mvUnitB0 != (MvUnit_t*)EB_NULL && mvUnitB1 != (MvUnit_t*)EB_NULL)
+                mvUnion = (mvUnitB0->mv[REF_LIST_0].mvUnion != mvUnitB1->mv[REF_LIST_0].mvUnion);
+            if ( (b0_availability == EB_TRUE) &&
+                 ((b1_availability == EB_FALSE) ||                
+                 mvUnion))
+            {
+                mergeCandidateArray[mvMergeCandidateIndex].predictionDirection           = UNI_PRED_LIST_0;
+                mergeCandidateArray[mvMergeCandidateIndex].mv[REF_LIST_0].mvUnion        = mvUnitB0->mv[REF_LIST_0].mvUnion;
+                ++mvMergeCandidateIndex;
+            }
         }
 
-         if(mvMergeCandidateIndex == totalMergeCandidates )
+        if(mvMergeCandidateIndex == totalMergeCandidates )
             break;
 
         // A0
-         if (mvUnitA0 != (MvUnit_t*)EB_NULL) {
-         if ((a0_availability == EB_TRUE) &&
-            ((a1_availability == EB_FALSE) ||                
-            (mvUnitA0->mv[REF_LIST_0].mvUnion != mvUnitA1->mv[REF_LIST_0].mvUnion)))
-        {
-            mergeCandidateArray[mvMergeCandidateIndex].predictionDirection          = UNI_PRED_LIST_0;
-            mergeCandidateArray[mvMergeCandidateIndex].mv[REF_LIST_0].mvUnion       = mvUnitA0->mv[REF_LIST_0].mvUnion;
-            ++mvMergeCandidateIndex;
+        if (mvUnitA0 != (MvUnit_t*)EB_NULL) {
+            EB_BOOL mvUnion = EB_FALSE;
+            if (mvUnitA0 != (MvUnit_t*)EB_NULL && mvUnitA1 != (MvUnit_t*)EB_NULL)
+                mvUnion = (mvUnitA0->mv[REF_LIST_0].mvUnion != mvUnitA1->mv[REF_LIST_0].mvUnion);
+            if ((a0_availability == EB_TRUE) &&
+               ((a1_availability == EB_FALSE) ||                
+               mvUnion))
+            {
+                mergeCandidateArray[mvMergeCandidateIndex].predictionDirection          = UNI_PRED_LIST_0;
+                mergeCandidateArray[mvMergeCandidateIndex].mv[REF_LIST_0].mvUnion       = mvUnitA0->mv[REF_LIST_0].mvUnion;
+                ++mvMergeCandidateIndex;
+            }
         }
-         }
 
         if(mvMergeCandidateIndex == totalMergeCandidates )
             break;
 
         // B2
         if (mvUnitB2 != (MvUnit_t*)EB_NULL) {
+            EB_BOOL mvUnion1 = EB_FALSE;
+            EB_BOOL mvUnion2 = EB_FALSE;
+            if (mvUnitB2 != (MvUnit_t*)EB_NULL && mvUnitA1 != (MvUnit_t*)EB_NULL)
+                mvUnion1 = (mvUnitB2->mv[REF_LIST_0].mvUnion != mvUnitA1->mv[REF_LIST_0].mvUnion);
+            if (mvUnitB2 != (MvUnit_t*)EB_NULL && mvUnitB1 != (MvUnit_t*)EB_NULL)
+                mvUnion2 = (mvUnitB2->mv[REF_LIST_0].mvUnion != mvUnitB1->mv[REF_LIST_0].mvUnion);
         if (    mvMergeCandidateIndex < 4      &&
                 (b2_availability == EB_TRUE)   &&
-                ((a1_availability == EB_FALSE) || (mvUnitB2->mv[REF_LIST_0].mvUnion != mvUnitA1->mv[REF_LIST_0].mvUnion)) &&
-                ((b1_availability == EB_FALSE) || (mvUnitB2->mv[REF_LIST_0].mvUnion != mvUnitB1->mv[REF_LIST_0].mvUnion))     )
+                ((a1_availability == EB_FALSE) || mvUnion1) &&
+                ((b1_availability == EB_FALSE) || mvUnion2)     )
         {
             mergeCandidateArray[mvMergeCandidateIndex].predictionDirection          = UNI_PRED_LIST_0;
             mergeCandidateArray[mvMergeCandidateIndex].mv[REF_LIST_0].mvUnion       = mvUnitB2->mv[REF_LIST_0].mvUnion;

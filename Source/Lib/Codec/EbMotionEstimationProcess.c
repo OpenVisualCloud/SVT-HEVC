@@ -141,8 +141,9 @@ void* SetMeHmeParamsSq(
         }
     }
 
-    if ((inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER) && (sequenceControlSetPtr->staticConfig.tune > 0))
+    if ((inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER) && (sequenceControlSetPtr->staticConfig.tune > 0)) {
         meContextPtr->updateHmeSearchCenter = EB_TRUE;
+    }
 	return EB_NULL;
 };
 
@@ -218,9 +219,9 @@ void* SetMeHmeParamsOq(
         }
     }
 
-    if ((inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER) && (sequenceControlSetPtr->staticConfig.tune > 0))
+    if ((inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER) && (sequenceControlSetPtr->staticConfig.tune > 0)) {
         meContextPtr->updateHmeSearchCenter = EB_TRUE;
-
+    }
 	return EB_NULL;
 };
 
@@ -273,8 +274,9 @@ void* SetMeHmeParamsVmaf(
 	meContextPtr->searchAreaWidth = SearchAreaWidthVmaf[resolutionIndex][hmeMeLevel];
 	meContextPtr->searchAreaHeight = SearchAreaHeightVmaf[resolutionIndex][hmeMeLevel];
 
-    if ((inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER) && (sequenceControlSetPtr->staticConfig.tune > 0))
+    if ((inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER) && (sequenceControlSetPtr->staticConfig.tune > 0)) {
         meContextPtr->updateHmeSearchCenter = EB_TRUE;
+    }
 
 	return EB_NULL;
 };
@@ -287,8 +289,6 @@ void* SetMeHmeParamsFromConfig(
     SequenceControlSet_t	    *sequenceControlSetPtr,
     MeContext_t                 *meContextPtr)
 {
-                        
-    EB_U16 hmeRegionIndex = 0;
 
     meContextPtr->searchAreaWidth = (EB_U8)sequenceControlSetPtr->staticConfig.searchAreaWidth;
     meContextPtr->searchAreaHeight = (EB_U8)sequenceControlSetPtr->staticConfig.searchAreaHeight;
