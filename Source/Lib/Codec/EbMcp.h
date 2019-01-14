@@ -165,6 +165,18 @@ typedef void (*sampleBiPredClipping)(
     EB_U32     dstStride,
     EB_S32     offset);
 
+typedef void(*sampleBiPredClippingOnTheFly)(
+	EB_BYTE    list0Src,
+	EB_U32     list0SrcStride,
+	EB_BYTE    list1Src,
+	EB_U32     list1SrcStride,
+	EB_BYTE    dst,
+	EB_U32     dstStride,
+	EB_U32     puWidth,
+	EB_U32     puHeight,
+	EB_S32     offset,
+	EB_BOOL	   isLuma);
+
 typedef void (*sampleBiPredClipping16bit)(
     EB_U32     puWidth,
     EB_U32     puHeight,
@@ -656,6 +668,7 @@ extern const InterpolationFilterChromaNew16bit uniPredChromaIFFunctionPtrArrayNe
 extern const InterpolationFilterOutRaw16bit biPredLumaIFFunctionPtrArrayNew16bit[EB_ASM_TYPE_TOTAL][16];
 extern const ChromaFilterOutRaw16bit biPredChromaIFFunctionPtrArrayNew16bit[EB_ASM_TYPE_TOTAL][64];
 extern const sampleBiPredClipping biPredClippingFuncPtrArray[EB_ASM_TYPE_TOTAL];
+extern const sampleBiPredClippingOnTheFly biPredClippingOnTheFlyFuncPtrArray[EB_ASM_TYPE_TOTAL];
 
 extern const InterpolationFilterNew     uniPredLumaIFFunctionPtrArrayNew[EB_ASM_TYPE_TOTAL][16];
 extern const InterpolationFilterOutRaw  biPredLumaIFFunctionPtrArrayNew[EB_ASM_TYPE_TOTAL][16];

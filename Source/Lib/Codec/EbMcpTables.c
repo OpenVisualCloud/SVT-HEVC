@@ -24,6 +24,14 @@ const sampleBiPredClipping16bit biPredClipping16bitFuncPtrArray[EB_ASM_TYPE_TOTA
 	BiPredClipping16bit_SSE2_INTRIN
 };
 
+const sampleBiPredClippingOnTheFly biPredClippingOnTheFlyFuncPtrArray[EB_ASM_TYPE_TOTAL] = {
+	// C_DEFAULT
+	BiPredClippingOnTheFly,
+	// AVX2
+	BiPredClippingOnTheFly_AVX2,
+};
+
+
 // Luma
 const InterpolationFilterNew uniPredLumaIFFunctionPtrArrayNew[EB_ASM_TYPE_TOTAL][16] = {     //[ASM type][Interpolation position]
     // C_DEFAULT
