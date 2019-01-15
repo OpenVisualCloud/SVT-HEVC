@@ -141,14 +141,18 @@ EB_ERRORTYPE EbAppContextCtor(
 void EbAppContextDtor(
     EbAppContext_t *contextPtr)
 {
-    EB_H265_ENC_INPUT *inputPtr = (EB_H265_ENC_INPUT*)contextPtr->inputPictureBuffer->pBuffer;
-    free(inputPtr->luma);
-    free(inputPtr->cb);
-    free(inputPtr->cr);
-    free(inputPtr->lumaExt);
-    free(inputPtr->cbExt);
-    free(inputPtr->crExt);
-    free(contextPtr->inputPictureBuffer->pBuffer);
+    EB_H265_ENC_INPUT *inputPtr = NULL;
+    if (contextPtr->inputPictureBuffer) {
+        inputPtr = (EB_H265_ENC_INPUT*)contextPtr->inputPictureBuffer->pBuffer;
+        free(inputPtr->luma);
+        free(inputPtr->cb);
+        free(inputPtr->cr);
+        free(inputPtr->lumaExt);
+        free(inputPtr->cbExt);
+        free(inputPtr->crExt);
+        free(contextPtr->inputPictureBuffer->pBuffer);
+    }
+
     free(contextPtr->outputStreamBuffer->pBuffer);
     free(contextPtr->inputPictureBuffer);
     free(contextPtr->outputStreamBuffer);

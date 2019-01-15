@@ -332,44 +332,48 @@ int32_t main(int32_t argc, char* argv[])
         config = (EbConfig_t*)malloc(sizeof(EbConfig_t));
         if (config == NULL) {
             return_error =  EB_ErrorInsufficientResources; 
-        }
-        else {
+        } else {
             EbConfigCtor(config);
             if (argc != 6 && argc != 7) {
                 printf("Usage: ./HevcEncoderSimpleApp in.yuv out.265 width height bitdepth recon.yuv(optional)\n");
                 return_error = EB_ErrorBadParameter;
-            }
-            else if (return_error == EB_ErrorNone) {
+            } else if (return_error == EB_ErrorNone) {
                 // Get info for config
-                FILE * fin;
+                FILE *fin = NULL;
                 FOPEN(fin, argv[1], "rb");
                 if (!fin) {
                     printf("Invalid input file \n");
                     return_error = EB_ErrorBadParameter;
-                }
-                else
+                } else {
                     config->inputFile = fin;
+                }
 
-                FILE * fout;
+                FILE *fout = NULL;
                 FOPEN(fout, argv[2], "wb");
                 if (!fout) {
                     printf("Invalid input file \n");
                     return_error = EB_ErrorBadParameter;
-                }
-                else
+                } else {
                     config->bitstreamFile = fout;
+                }
 
                 uint32_t width = 0, height = 0;
 
                 width = strtoul(argv[3], NULL, 0);
                 height = strtoul(argv[4], NULL, 0);
-                if ((width&&height) == 0) { printf("Invalid video dimensions\n"); return_error = EB_ErrorBadParameter; }
+                if ((width&&height) == 0) {
+                    printf("Invalid video dimensions\n");
+                    return_error = EB_ErrorBadParameter;
+                }
 
                 config->inputPaddedWidth = config->sourceWidth = width;
                 config->inputPaddedHeight = config->sourceHeight = height;
 
                 uint32_t bdepth = width = strtoul(argv[5], NULL, 0);
-                if ((bdepth != 8) && (bdepth != 10)) { printf("Invalid bit depth\n"); return_error = EB_ErrorBadParameter; }
+                if ((bdepth != 8) && (bdepth != 10)) {
+                    printf("Invalid bit depth\n");
+                    return_error = EB_ErrorBadParameter;
+                }
                 config->encoderBitDepth = bdepth;
 
                 if (argc == 7) {
@@ -378,11 +382,19 @@ int32_t main(int32_t argc, char* argv[])
                     if (!frec) {
                         printf("Invalid recon file \n");
                         return_error = EB_ErrorBadParameter;
-                    }
-                    else
+                    } else {
                         config->reconFile = frec;
+                    }
                 }
             }
+        }
+
+        if (return_error != EB_ErrorNone) {
+            if (config != NULL) {
+                EbConfigDtor(config);
+                free(config);
+            }
+            return return_error;
         }
 
         appCallback = (EbAppContext_t*)malloc(sizeof(EbAppContext_t));
