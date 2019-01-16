@@ -463,7 +463,7 @@ static const AVClass class = {
 
 static const AVCodecDefault eb_enc_defaults[] = {
     { "b",         "7M"    },
-    { "flags",     "+cgop" },
+    { "flags",     "-cgop" },
     { "qmin",      "10"    },
     { "qmax",      "48"    },
     { NULL },
