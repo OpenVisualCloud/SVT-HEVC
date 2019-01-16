@@ -2112,6 +2112,9 @@ void CopyApiFromApp(
     if (pComponentParameterStructure->masteringDisplayColorVolume) {
         EB_STRDUP(sequenceControlSetPtr->staticConfig.masteringDisplayColorVolume, (char*)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->masteringDisplayColorVolume);
     }
+    else {
+        sequenceControlSetPtr->staticConfig.masteringDisplayColorVolume = NULL;
+    }
     sequenceControlSetPtr->staticConfig.dolbyVisionProfile = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->dolbyVisionProfile;
 
     // if dolby Profile is set HDR should be set to 1
