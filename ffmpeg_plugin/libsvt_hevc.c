@@ -50,8 +50,6 @@ typedef struct SvtContext {
     int tune;
     int qp;
 
-    int forced_idr;
-
     int aud;
 
     int profile;
@@ -203,8 +201,6 @@ static int config_enc_params(EB_H265_ENC_CONFIGURATION *param,
     else
         param->codeVpsSpsPps          = 1;
 
-    param->codeEosNal             = 1;
-
     if (svt_enc->vui_info)
         param->videoUsabilityInfo = svt_enc->vui_info;
 
@@ -275,22 +271,9 @@ static av_cold int eb_enc_init(AVCodecContext *avctx)
 
     if (avctx->flags & AV_CODEC_FLAG_GLOBAL_HEADER) {
         EB_BUFFERHEADERTYPE* headerPtr;
-        headerPtr->nSize       = sizeof(headerPtr);
-        headerPtr->nFilledLen  = 0; /* in/out */
-        headerPtr->pBuffer     = av_malloc(10 * 1024 * 1024);
-        headerPtr->nAllocLen   = (10 * 1024 * 1024);
-
-        if (!headerPtr->pBuffer) {
-            av_log(avctx, AV_LOG_ERROR,
-                   "Cannot allocate buffer size %d.\n", headerPtr->nAllocLen);
-            svt_ret = EB_ErrorInsufficientResources;
-            goto failed_init_enc;
-        }
-
         svt_ret = EbH265EncStreamHeader(svt_enc->svt_handle, &headerPtr);
         if (svt_ret != EB_ErrorNone) {
             av_log(avctx, AV_LOG_ERROR, "Error when build stream header.\n");
-            av_freep(&headerPtr->pBuffer);
             goto failed_init_enc;
         }
 
@@ -299,13 +282,11 @@ static av_cold int eb_enc_init(AVCodecContext *avctx)
         if (!avctx->extradata) {
             av_log(avctx, AV_LOG_ERROR,
                    "Cannot allocate HEVC header of size %d.\n", avctx->extradata_size);
-            av_freep(&headerPtr->pBuffer);
             svt_ret = EB_ErrorInsufficientResources;
             goto failed_init_enc;
         }
         memcpy(avctx->extradata, headerPtr->pBuffer, avctx->extradata_size);
 
-        av_freep(&headerPtr->pBuffer);
     }
 
     return 0;
@@ -344,20 +325,8 @@ static int eb_send_frame(AVCodecContext *avctx, const AVFrame *frame)
     headerPtr->nFlags       = 0;
     headerPtr->pAppPrivate  = NULL;
     headerPtr->pts          = frame->pts;
-    switch (frame->pict_type) {
-    case AV_PICTURE_TYPE_I:
-        headerPtr->sliceType = svt_enc->forced_idr > 0 ? EB_IDR_PICTURE : EB_I_PICTURE;
-        break;
-    case AV_PICTURE_TYPE_P:
-        headerPtr->sliceType = EB_P_PICTURE;
-        break;
-    case AV_PICTURE_TYPE_B:
-        headerPtr->sliceType = EB_B_PICTURE;
-        break;
-    default:
-        headerPtr->sliceType = EB_INVALID_PICTURE;
-        break;
-    }
+    headerPtr->sliceType    = EB_INVALID_PICTURE;
+    
     EbH265EncSendPicture(svt_enc->svt_handle, headerPtr);
 
     return 0;
@@ -481,9 +450,6 @@ static const AVOption options[] = {
 
     { "bl_mode", "Random Access Prediction Structure type setting", OFFSET(base_layer_switch_mode),
       AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
-
-    { "forced-idr", "If forcing keyframes, force them as IDR frames.", OFFSET(forced_idr),
-      AV_OPT_TYPE_BOOL,   { .i64 = 0 }, -1, 1, VE },
 
     {NULL},
 };
