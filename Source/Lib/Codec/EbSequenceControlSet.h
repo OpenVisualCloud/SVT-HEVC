@@ -128,6 +128,12 @@ typedef struct SequenceControlSet_s
     // Mastering Display Color Volume Sei
     AppMasteringDisplayColorVolumeSei_t   masteringDisplayColorVolume;
 
+    // Registered User data Sei
+    RegistedUserData_t          regUserDataSeiPtr;
+
+    // Un Registered User data Sei
+    UnregistedUserData_t        unRegUserDataSeiPtr;
+
     // Maximum Decoded Picture Buffer size.
     EB_U32                      maxDpbSize;
     
@@ -184,6 +190,7 @@ typedef struct SequenceControlSet_s
     EB_U8                       transCoeffShapeArray[2][8][4];    // [componantTypeIndex][resolutionIndex][levelIndex][tuSizeIndex]
 
     EB_U8                       maxEncMode;
+    FILE*                       naluFile;
 
 } SequenceControlSet_t;
 

@@ -375,6 +375,7 @@ typedef struct EbConfig_s
     const char*  masteringDisplayColorVolume;
     uint32_t     dolbyVisionProfile;
     FILE*        dolbyVisionRpuFile;
+    const char*  naluFile;
 
 } EbConfig_t;
 

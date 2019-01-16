@@ -322,6 +322,12 @@ extern void EbContentLightLevelCtor(
 extern void EbMasteringDisplayColorVolumeCtor(
     AppMasteringDisplayColorVolumeSei_t    *masteringDisplayPtr);
 
+extern void EbRegUserDataSEICtor(
+    RegistedUserData_t    *regUserDataSeiPtr);
+
+extern void EbUnRegUserDataSEICtor(
+    UnregistedUserData_t    *UnRegUserDataPtr);
+
 extern EB_U32 GetPictureTimingSEILength(
     AppPictureTimingSei_t      *picTimingSeiPtr,
     AppVideoUsabilityInfo_t    *vuiPtr);

@@ -8387,7 +8387,7 @@ EB_ERRORTYPE EncodeUnregUserDataSEI(
 	EB_U32       index;
 	unsigned     payloadType = UNREG_USER_DATA;
 
-	unsigned     payloadSize = unregUserDataSeiPtr->userDataSize;
+	unsigned     payloadSize = unregUserDataSeiPtr->userDataSize + 16 ;
 
 	OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
 

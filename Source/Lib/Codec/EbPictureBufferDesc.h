@@ -58,6 +58,7 @@ typedef struct EbPictureBufferDesc_s
 	EB_BOOL         packedFlag;     // Indicates if sample buffers are packed or not
 
 	EB_SEI_MESSAGE    dolbyVisionRpu;
+	EB_SEI_MESSAGE    userSeiMsg;
 
 } EbPictureBufferDesc_t;
 

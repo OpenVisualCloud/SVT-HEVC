@@ -123,6 +123,8 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     // Mv merge
     sequenceControlSetPtr->mvMergeTotalCount                                = 5;
 
+    sequenceControlSetPtr->naluFile                                         = NULL;
+
     // Video Usability Info
     EB_MALLOC(AppVideoUsabilityInfo_t*, sequenceControlSetPtr->videoUsabilityInfoPtr, sizeof(AppVideoUsabilityInfo_t), EB_N_PTR);
     
@@ -153,9 +155,17 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     EbMasteringDisplayColorVolumeCtor(
         &sequenceControlSetPtr->masteringDisplayColorVolume);
 
-	// Initialize LCU params
-	LcuParamsCtor(
-		sequenceControlSetPtr);
+    // Initialize Registered User Data SEI
+    EbRegUserDataSEICtor(
+        &sequenceControlSetPtr->regUserDataSeiPtr);
+
+    // Initialize Un-Registered User Data SEI
+    EbUnRegUserDataSEICtor(
+        &sequenceControlSetPtr->unRegUserDataSeiPtr);
+
+    // Initialize LCU params
+    LcuParamsCtor(
+        sequenceControlSetPtr);
 
     sequenceControlSetPtr->maxDpbSize	= 0;
     
@@ -228,6 +238,7 @@ EB_ERRORTYPE CopySequenceControlSet(
     dst->botPadding                 = src->botPadding;                              writeCount += sizeof(EB_U16);         
     dst->enableDenoiseFlag          = src->enableDenoiseFlag;                       writeCount += sizeof(EB_BOOL);
     dst->maxEncMode                 = src->maxEncMode;                              writeCount += sizeof(EB_U8);
+    dst->naluFile                   = src->naluFile;                                writeCount += sizeof(FILE*);
 
     // Segments
     for (segmentIndex = 0; segmentIndex < MAX_TEMPORAL_LAYERS; ++segmentIndex) {
@@ -271,6 +282,20 @@ EB_ERRORTYPE CopySequenceControlSet(
         sizeof(AppPictureTimingSei_t));
 
     writeCount += sizeof(AppPictureTimingSei_t);
+
+    EB_MEMCPY(
+        &dst->regUserDataSeiPtr,
+        &src->regUserDataSeiPtr,
+        sizeof(RegistedUserData_t));
+
+    writeCount += sizeof(RegistedUserData_t);
+
+    EB_MEMCPY(
+        &dst->unRegUserDataSeiPtr,
+        &src->unRegUserDataSeiPtr,
+        sizeof(UnregistedUserData_t));
+
+    writeCount += sizeof(UnregistedUserData_t);
 
     EbVideoUsabilityInfoCopy(
         dst->videoUsabilityInfoPtr,

@@ -475,7 +475,25 @@ void* PacketizationKernel(void *inputPtr)
                 pictureControlSetPtr->bitstreamPtr,
                 &sequenceControlSetPtr->recoveryPoint);
         }
-    
+
+        if (sequenceControlSetPtr->naluFile && pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadSize) {
+            if (pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadType == USER_DATA_REGISTERED_ITU_T_T35) {
+                sequenceControlSetPtr->regUserDataSeiPtr.userDataSize = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadSize;
+                sequenceControlSetPtr->regUserDataSeiPtr.userData = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payload;
+                EncodeRegUserDataSEI(
+                    pictureControlSetPtr->bitstreamPtr,
+                    &sequenceControlSetPtr->regUserDataSeiPtr);
+            }
+            if (pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadType == USER_DATA_UNREGISTERED) {
+                sequenceControlSetPtr->unRegUserDataSeiPtr.userDataSize = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadSize;
+                sequenceControlSetPtr->unRegUserDataSeiPtr.userData = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payload;
+                EncodeUnregUserDataSEI(
+                    pictureControlSetPtr->bitstreamPtr,
+                    &sequenceControlSetPtr->unRegUserDataSeiPtr,
+                    encodeContextPtr);
+            }
+        }
+
         EncodeSliceHeader(
             0,
             packetizationQp,

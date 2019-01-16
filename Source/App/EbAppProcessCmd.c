@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "EbAppContext.h"
 #include "EbAppConfig.h"
@@ -1174,7 +1175,7 @@ int ParseDolbyVisionRPUMetadata(
             code = (code << 8) | byteVal;
 
         if (code != START_CODE) {
-            printf("Warning : Invalid Dolby Vision RPU startcode in POC  %lld\n", headerPtr->pts);
+            printf("Warning : Invalid Dolby Vision RPU startcode in POC  %" PRId64 "\n", headerPtr->pts);
             return 1;
         }
     }
@@ -1186,7 +1187,7 @@ int ParseDolbyVisionRPUMetadata(
         if (bytesRead++ < 3)
             continue;
         if (bytesRead >= 1024) {
-            printf("Warning : Invalid Dolby Vision RPU size in POC  %lld\n", headerPtr->pts);
+            printf("Warning : Invalid Dolby Vision RPU size in POC  %" PRId64 "\n", headerPtr->pts);
             return 1;
         }
 
@@ -1205,7 +1206,7 @@ int ParseDolbyVisionRPUMetadata(
         code = (code << 8);
     }
     if (!inputPtr->dolbyVisionRpu.payloadSize) {
-        printf("Warning : Dolby Vision RPU not found for POC  %lld\n", headerPtr->pts);
+        printf("Warning : Dolby Vision RPU not found for POC  %" PRId64 "\n", headerPtr->pts);
         return 1;
     }
     return 0;
@@ -1281,7 +1282,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
                   config,
                   headerPtr);
             if (ret)
-                printf("\n Warning : Dolby vision RPU not parsed for POC %llu ", headerPtr->pts);
+                printf("\n Warning : Dolby vision RPU not parsed for POC %" PRId64 "\t", headerPtr->pts);
         }
 
         // Send the picture

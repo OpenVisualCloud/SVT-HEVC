@@ -224,7 +224,9 @@ EB_ERRORTYPE CopyConfigurationParameters(
         EB_APP_STRDUP(callbackData->ebEncParameters.masteringDisplayColorVolume, (char*)config->masteringDisplayColorVolume);
     }
     callbackData->ebEncParameters.dolbyVisionProfile = config->dolbyVisionProfile;
-
+    if (config->naluFile) {
+        EB_APP_STRDUP(callbackData->ebEncParameters.naluFile, (char*)config->naluFile);
+    }
     return return_error;
 
 }

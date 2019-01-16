@@ -303,6 +303,24 @@ void EbMasteringDisplayColorVolumeCtor(
     masteringDisplayPtr->minDisplayMasteringLuminance = 0;
 }
 
+void EbRegUserDataSEICtor(
+    RegistedUserData_t* regUserDataSeiPtr) {
+
+    regUserDataSeiPtr->userData = NULL;
+    regUserDataSeiPtr->userDataSize = 0;
+}
+
+void EbUnRegUserDataSEICtor(
+    UnregistedUserData_t* UnRegUserDataPtr) {
+
+    UnRegUserDataPtr->userData = NULL;
+    UnRegUserDataPtr->userDataSize = 0;
+    EB_MEMSET(
+        UnRegUserDataPtr->uuidIsoIec_11578,
+        0,
+        sizeof(EB_U8) * 16);
+}
+
 
 /**************************************************
  * GetUvlcCodeLength

@@ -12,6 +12,7 @@
  **************************************/
 #include <stdlib.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 #include "EbDefinitions.h"
 #include "EbApi.h"
@@ -2117,6 +2118,16 @@ void CopyApiFromApp(
     }
     sequenceControlSetPtr->staticConfig.dolbyVisionProfile = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->dolbyVisionProfile;
 
+    if(pComponentParameterStructure->naluFile) {
+        EB_STRDUP(sequenceControlSetPtr->staticConfig.naluFile, (char*)(EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure->naluFile);
+        FOPEN(sequenceControlSetPtr->naluFile, sequenceControlSetPtr->staticConfig.naluFile, "rb");
+    }
+    else {
+        sequenceControlSetPtr->naluFile = NULL;
+        sequenceControlSetPtr->staticConfig.naluFile = NULL;
+    }
+
+
     // if dolby Profile is set HDR should be set to 1
     if (sequenceControlSetPtr->staticConfig.dolbyVisionProfile == 81) {
         sequenceControlSetPtr->staticConfig.highDynamicRangeInput = 1;
@@ -2801,6 +2812,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->maxFALL = 0;
     configPtr->masteringDisplayColorVolume = NULL;
     configPtr->dolbyVisionProfile = 0;
+    configPtr->naluFile = NULL;
 
     return return_error;
 }
@@ -3069,6 +3081,127 @@ EB_API EB_ERRORTYPE EbH265EncEosNal(
     return return_error;
 }
 
+/* charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/" */
+static void baseDecodeFunction(EB_U8* encodedString, EB_U32 base64EncodeLength, EB_U8* decodedString )
+{
+    EB_U32 i, j, k = 0;
+    EB_U32 bitstream = 0;
+    EB_U32 countBits = 0;
+
+    // selects 4 characters from encodedString at a time
+    for (i = 0; i < base64EncodeLength; i += 4) {
+        bitstream = 0, countBits = 0;
+        for (j = 0; j < 4; j++) {
+            // make space for 6 bits
+            if (encodedString[i + j] != '=') {
+                bitstream = bitstream << 6;
+                countBits += 6;
+            }
+            // Finding the position of each encoded character in charSet and storing in bitstream
+            if (encodedString[i + j] >= 'A' && encodedString[i + j] <= 'Z')
+                bitstream = bitstream | (encodedString[i + j] - 'A');
+
+            else if (encodedString[i + j] >= 'a' && encodedString[i + j] <= 'z')
+                bitstream = bitstream | (encodedString[i + j] - 'a' + 26);
+
+            else if (encodedString[i + j] >= '0' && encodedString[i + j] <= '9')
+                bitstream = bitstream | (encodedString[i + j] - '0' + 52);
+
+            // '+' occurs in 62nd position in charSet
+            else if (encodedString[i + j] == '+')
+                bitstream = bitstream | 62;
+
+            // '/' occurs in 63rd position in charSet
+            else if (encodedString[i + j] == '/')
+                bitstream = bitstream | 63;
+
+            else {
+                bitstream = bitstream >> 2;
+                countBits -= 2;
+            }
+        }
+
+        while (countBits != 0) {
+            countBits -= 8;
+            decodedString[k++] = (bitstream >> countBits) & 255;
+        }
+    }
+}
+
+static EB_ERRORTYPE ParseSeiMetaData(
+    SequenceControlSet_t        *sequenceControlSetPtr,
+    EB_BUFFERHEADERTYPE         *dst,
+    EB_BUFFERHEADERTYPE         *src)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    EB_U8    line[1024];
+    EB_U8    *context;
+    EbPictureBufferDesc_t *headerPtr = (EbPictureBufferDesc_t*)dst->pBuffer;
+
+    while (fgets((char*)line, sizeof(line), sequenceControlSetPtr->naluFile)) {
+        EB_U32 poc = atoi(EB_STRTOK(line, " ", context));
+        EB_U8 *prefix = (EB_U8*)EB_STRTOK(NULL, " ", context);
+        EB_U32 nalType = atoi(EB_STRTOK(NULL, "/", context));
+        EB_U32 payloadType = atoi(EB_STRTOK(NULL, " ", context));
+        EB_U8 *base64Encode = (EB_U8*)EB_STRTOK(NULL, "\n", context);
+        if (*context) {
+            SVT_LOG("\n[Warning] Extra characters present at the end of the line in User SEI file for poc %d", poc);
+        }
+
+        EB_U32 base64EncodeLength = (uint32_t)strlen((char*)base64Encode);
+        EB_U8 *base64Decode;
+        EB_MALLOC(EB_U8*, base64Decode, (base64EncodeLength / 4) * 3, EB_N_PTR);
+        baseDecodeFunction(base64Encode, base64EncodeLength, base64Decode);
+
+        if (nalType == NAL_UNIT_PREFIX_SEI && (!strcmp((char*)prefix, "PREFIX"))) {
+            EB_U64 currentPOC = src->pts;
+            if (currentPOC == poc) {
+                headerPtr->userSeiMsg.payloadSize = (base64EncodeLength / 4) * 3;
+
+                EB_MALLOC(EB_U8*, headerPtr->userSeiMsg.payload, headerPtr->userSeiMsg.payloadSize, EB_N_PTR);
+
+                if (payloadType == 4)
+                    headerPtr->userSeiMsg.payloadType = USER_DATA_REGISTERED_ITU_T_T35;
+                else if (payloadType == 5)
+                    headerPtr->userSeiMsg.payloadType = USER_DATA_UNREGISTERED;
+                else {
+                    SVT_LOG("\n[WARNING] Unsupported SEI payload Type for frame %u\n ", poc);
+                    break;
+                }
+                EB_MEMCPY(headerPtr->userSeiMsg.payload, base64Decode, headerPtr->userSeiMsg.payloadSize);
+                break;
+            }
+            else
+                SVT_LOG("\n[WARNING] User SEI frame number %u doesn't match input frame number %" PRId64 "\n ", poc, currentPOC);
+        }
+        else {
+            SVT_LOG("\n[WARNING] SEI message for frame %u is not inserted. Will support only PREFIX SEI message \n ", poc);
+            break;
+        }
+    }
+    return return_error;
+}
+
+static EB_ERRORTYPE CopyUserSei(
+    SequenceControlSet_t*    sequenceControlSetPtr,
+    EB_BUFFERHEADERTYPE*     dst,
+    EB_BUFFERHEADERTYPE*     src)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    EB_H265_ENC_CONFIGURATION   *config = &sequenceControlSetPtr->staticConfig;
+    EbPictureBufferDesc_t       *dstPicturePtr = (EbPictureBufferDesc_t*)dst->pBuffer;
+
+    // Copy User SEI metadata from input
+    if (config->naluFile) {
+        return_error = ParseSeiMetaData(sequenceControlSetPtr, dst, src);
+    }
+    else {
+        dstPicturePtr->userSeiMsg.payloadSize = 0;
+        dstPicturePtr->userSeiMsg.payload = NULL;
+    }
+    return return_error;
+}
+
 /***********************************************
 **** Copy the input buffer from the 
 **** sample application to the library buffers
@@ -3269,6 +3402,11 @@ static void CopyInputBuffer(
     // Copy the picture buffer
     if(src->pBuffer != NULL)
         CopyFrameBuffer(sequenceControlSet, dst->pBuffer, src->pBuffer);
+
+    // Copy User SEI
+    if (src->pBuffer != NULL)
+        CopyUserSei(sequenceControlSet, dst, src);
+
 }
 
 /**********************************

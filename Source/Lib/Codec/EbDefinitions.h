@@ -678,6 +678,17 @@ extern    EB_U32                   libMutexCount;
 #define EB_SCANF sscanf
 #endif
 
+#ifdef _MSC_VER
+#define FOPEN(f,s,m) fopen_s(&f,s,m)
+#else
+#define FOPEN(f,s,m) f=fopen(s,m)
+#endif
+
+#ifdef _MSC_VER
+#define EB_STRTOK(str,delim,next) strtok_s((char*)str,delim,&(char*)next)
+#else
+#define EB_STRTOK(str,delim,next) strtok((char*)str,delim)
+#endif
 
 /** The EB_CTOR type is used to define the svt object constructors.
 objectPtr is a EB_PTR to the object being constructed.

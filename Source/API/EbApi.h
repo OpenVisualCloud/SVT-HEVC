@@ -96,6 +96,8 @@ typedef struct EB_SEI_MESSAGE
 {
     uint32_t  payloadSize;
     unsigned char  *payload;
+    uint32_t  payloadType;
+
 }EB_SEI_MESSAGE;
 
 
@@ -226,6 +228,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     uint16_t                maxFALL;
     const char*             masteringDisplayColorVolume;  // SMPTE ST 2086 mastering display color volume info
     uint32_t                dolbyVisionProfile;
+    const char*             naluFile;
 
 } EB_H265_ENC_CONFIGURATION;
 
