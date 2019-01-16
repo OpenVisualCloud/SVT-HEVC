@@ -379,7 +379,7 @@ static av_cold int eb_enc_close(AVCodecContext *avctx)
 #define VE AV_OPT_FLAG_VIDEO_PARAM | AV_OPT_FLAG_ENCODING_PARAM
 static const AVOption options[] = {
     { "vui", "Enable vui info", OFFSET(vui_info),
-      AV_OPT_TYPE_BOOL, { .i64 = 1 }, 0, 1, VE },
+      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
 
     { "aud", "Include AUD", OFFSET(aud),
       AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
@@ -440,7 +440,7 @@ static const AVOption options[] = {
       AV_OPT_TYPE_INT, { .i64 = 32 }, 0, 51, VE },
 
     { "sc_detection", "Scene change detection", OFFSET(scd),
-      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
+      AV_OPT_TYPE_BOOL, { .i64 = 1 }, 0, 1, VE },
 
     { "tune", "Quality tuning mode", OFFSET(tune), AV_OPT_TYPE_INT, { .i64 = 1 }, 0, 1, VE, "tune" },
         { "subjective", "Subjective quality mode", 0,
