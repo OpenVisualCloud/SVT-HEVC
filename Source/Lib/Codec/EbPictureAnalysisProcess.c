@@ -25,9 +25,6 @@
 #include "EbComputeMean_SSE2.h"
 #include "EbCombinedAveragingSAD_Intrinsic_AVX2.h"
 
-#include "EbTime.h"
-
-
 #define VARIANCE_PRECISION		16
 #define  LCU_LOW_VAR_TH                5
 #define  PIC_LOW_VAR_PERCENTAGE_TH    60

@@ -34,7 +34,7 @@ ENC_PATH = "encoders"
 BIN_PATH = "bitstreams"
 YUV_PATH = "yuvs"
 
-TEST_CONFIGURATION = 1 # 0 - Validation Test, 1 - Speed Test (Refer to Validation/Speed Test specific configurations)
+TEST_CONFIGURATION = 0 # 0 - Validation Test, 1 - Speed Test (Refer to Validation/Speed Test specific configurations)
 SQ_OQ_MODE = 0 # 0 - Both OQ and SQ, 1 - SQ Only, 2 - OQ Only
 
 #------------- Validation Test Specific -------------#
@@ -88,11 +88,11 @@ MIN_WIDTH                       = 832
 MAX_WIDTH                       = 4096
 MIN_HEIGHT                      = 480
 MAX_HEIGHT                      = 2304
-MIN_QP                          = 15
+MIN_QP                          = 30
 MAX_QP                          = 51
 MIN_BR                          = 1000
 MAX_BR                          = 10000000
-SA_ITER                         = 1 # Search Area WidthxHeight per test
+SA_ITER                         = 3 # Search Area WidthxHeight per test
 LAD_ITER                        = 3 # LAD per test
 INTRA_PERIOD_ITER               = 3 # Intra Period per test
 WH_ITER                         = 3 # WidthxHeight per test
@@ -106,11 +106,13 @@ elif QP_VBR_MODE == 2:
     QP_VBR_COMBINATION = [1]
     
 if SQ_OQ_MODE == 0:
-    SQ_OQ_COMBINATION = [0, 1]
+    SQ_OQ_COMBINATION = [0, 1, 2]
 elif SQ_OQ_MODE == 1:
     SQ_OQ_COMBINATION = [0]
 elif SQ_OQ_MODE == 2:
     SQ_OQ_COMBINATION = [1]
+elif SQ_OQ_MODE == 3:
+    SQ_OQ_COMBINATION = [2]
 
 class EB_Test(object):
     # Initialization parameters for folders
@@ -243,21 +245,8 @@ class EB_Test(object):
                         'LookAheadDistance'                 : '-lad',
                         'DefaultMeHme'                      : '-use-default-me-hme',
                         'HME'                               : '-hme',
-                        'HMELevel0'                         : '-hme-l0',
-                        'HMELevel1'                         : '-hme-l1',
-                        'HMELevel2'                         : '-hme-l2',
                         'SearchAreaWidth'                   : '-search-w',
                         'SearchAreaHeight'                  : '-search-h',
-                        'NumberHmeSearchRegionInWidth'      : '-num-hme-w',
-                        'NumberHmeSearchRegionInHeight'     : '-num-hme-h',
-                        'HmeLevel0TotalSearchAreaWidth'     : '-hme-tot-l0-w',
-                        'HmeLevel0TotalSearchAreaHeight'    : '-hme-tot-l0-h',
-                        'HmeLevel0SearchAreaInWidth'        : '-hme-l0-w',
-                        'HmeLevel0SearchAreaInHeight'       : '-hme-l0-h',
-                        'HmeLevel1SearchAreaInWidth'        : '-hme-l1-w',
-                        'HmeLevel1SearchAreaInHeight'       : '-hme-l1-h',
-                        'HmeLevel2SearchAreaInWidth'        : '-hme-l2-w',
-                        'HmeLevel2SearchAreaInHeight'       : '-hme-l2-h',
                         }
         return default_tokens
     
@@ -351,40 +340,6 @@ class EB_Test(object):
                     break
         return search_area
     
-    def get_me_hme_params(self, seq, small_param):
-        test_params = []
-        for hme in range(0,2):
-            for hme_0 in range(0,2): 
-                if hme == 0 and hme_0 >= 1:
-                    continue
-                for hme_1 in range(0,2):
-                    if hme_0 == 0 and hme_1 >= 1:
-                        continue
-                    for hme_2 in range(0,2):
-                        if hme_1 == 0 and hme_2 >= 1:
-                            continue
-                        for params in small_param:
-                            for count in range(SA_ITER):
-                                sa_width = random.randint(1,255)
-                                sa_height = random.randint(1,255)
-                                total_search_area_width = [random.randint(1,255) for x in range(3)]
-                                total_search_area_height = [random.randint(1,255) for x in range(3)]
-                                width_num_sr = params[1]['NumberHmeSearchRegionInWidth']
-                                height_num_sr = params[1]['NumberHmeSearchRegionInHeight']
-                                params[1].update({  'SearchAreaWidth': sa_width, 'SearchAreaHeight': sa_height})
-                                params[1].update({  'HME': hme, 'HMELevel0': hme_0, 'HMELevel1': hme_1, 'HMELevel2': hme_2,
-                                                    'HmeLevel0TotalSearchAreaWidth': total_search_area_width[0], 'HmeLevel0TotalSearchAreaHeight': total_search_area_height[0]
-                                                    })
-                                hme_sa_width = []
-                                hme_sa_height = []
-                                for x in range(0,3):
-                                    hme_sa_width.append(self.split_search_region(total_search_area_width[x], width_num_sr))
-                                    hme_sa_height.append(self.split_search_region(total_search_area_height[x], height_num_sr))
-                                params[1].update({  'HmeLevel0SearchAreaInWidth': hme_sa_width[0], 'HmeLevel0SearchAreaInHeight': hme_sa_height[0],
-                                                    'HmeLevel1SearchAreaInWidth': hme_sa_width[1], 'HmeLevel1SearchAreaInHeight': hme_sa_height[1],
-                                                    'HmeLevel2SearchAreaInWidth': hme_sa_width[2], 'HmeLevel2SearchAreaInHeight': hme_sa_height[2]})
-                                test_params.append((seq, params[1]))
-        return test_params
     
     # Check if sequence and combination is supported
     def check_seq_support(self, test_name, seq, enc_params):
@@ -405,6 +360,8 @@ class EB_Test(object):
                 tune        = enc_params['tune']
                 if tune == 1 and encMode >= 10:
                     return -1
+                elif tune == 2 and encMode >= 10:
+                    return -1
         if width %2 != 0 or height %2 != 0:
             return -1
         if bitdepth == 10 and height %8 != 0:
@@ -416,9 +373,13 @@ class EB_Test(object):
                 brr         = enc_params['brr']
                 if tune == 1 and sharpness == 1:
                     return -1
+                elif tune == 2 and sharpness == 1:
+                    return -1
                 elif tune == 0 and sharpness == 0:
                     return -1
                 elif tune == 1 and brr == 1:
+                    return -1
+                elif tune == 2 and brr == 1:
                     return -1
                 elif tune == 0 and brr == 0:
                     return -1
@@ -426,17 +387,17 @@ class EB_Test(object):
                 sharpness   = enc_params['ImproveSharpness']
                 if tune == 1 and sharpness == 1:
                     return -1
+                elif tune == 2 and sharpness == 1:
+                    return -1
                 elif tune == 0 and sharpness == 0:
                     return -1
             elif 'brr' in enc_params:
                 brr         = enc_params['brr']
                 if tune == 1 and brr == 1:
                     return -1
-                elif tune == 0 and brr == 0:
+                elif tune == 2 and brr == 1:
                     return -1
-            if 'rc' in enc_params:
-                rc = enc_params['rc']
-                if rc == 1 and tune == 1:
+                elif tune == 0 and brr == 0:
                     return -1
         # Test specific constraints
         if test_name == 'unpacked_test':
@@ -445,6 +406,9 @@ class EB_Test(object):
         if test_name == 'defield_test':
             if bitdepth == 10:
                 return -1
+            if encMode == 10:
+                if width*height == 1920*1080:
+                    return -1
         if test_name == 'enc_struct_test':
             hierar_levels   = enc_params['HierarchicalLevels']
             pred_struct   = enc_params['PredStructure']
@@ -515,8 +479,10 @@ class EB_Test(object):
                     enc_params.update({'tune': OQ})
                     if OQ == 0:
                         bitstream_name = bitstream_name + '_SQ'
-                    else:
+                    elif OQ == 1:
                         bitstream_name = bitstream_name + '_OQ'
+                    elif OQ == 2:
+                        bitstream_name = bitstream_name + '_VMAF'
                     for cond in test_cond:
                         enc_params.update({cond: test_cond[cond]})
                         if not isinstance(test_cond[cond], list):
@@ -584,8 +550,6 @@ class EB_Test(object):
         for seq in seq_list:
             # Run test
             test_params = self.get_test_params(seq, combination_test_params)
-            if test_name == 'me_hme_test':
-                test_params = self.get_me_hme_params(seq, test_params)
             for VBR in QP_VBR_COMBINATION:
                 for OQ in SQ_OQ_COMBINATION:
                     num_tests, num_passed = self.run_test(test_name, test_params, enc_params, OQ, VBR, 0)
@@ -724,13 +688,14 @@ class EB_Test(object):
         # Test specific parameters:
         test_name = 'intra_period_test'
         intra = []
-        intra_min = -1
-        intra_max = 230
+        intra_min = -2
+        intra_max = 250
         bin = (float(intra_max) - float(intra_min))/float(LAD_ITER)
         for count in range(LAD_ITER):
             intra.append(random.randint(intra_min + int(bin*count), intra_min + int(bin*(count+1))))
         combination_test_params = { 'intra_period'      : intra,
-                                    'IntraRefreshType'  : [1, 2]
+                                    'IntraRefreshType'  : [1, 2],
+                                    'frame_to_be_encoded': [300]
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
@@ -784,7 +749,7 @@ class EB_Test(object):
         test_name = 'scene_change_test'
         lad = []
         lad_min = 0
-        lad_max = 255
+        lad_max = 250
         bin = (float(lad_max) - float(lad_min))/float(LAD_ITER)
         for count in range(LAD_ITER):
             lad.append(random.randint(lad_min + int(bin*count), lad_min + int(bin*(count+1))))
@@ -798,8 +763,18 @@ class EB_Test(object):
     def me_hme_test(self,seq_list):
         # Test specific parameters:
         test_name = 'me_hme_test'
-        combination_test_params = { 'NumberHmeSearchRegionInWidth'  : [1,2],
-                                    'NumberHmeSearchRegionInHeight'  : [1,2],
+        sa_w = []
+        sa_h = []
+        sa_min = 1
+        sa_max = 255
+        bin = (float(sa_max) - float(sa_min))/float(SA_ITER)
+        for count in range(LAD_ITER):
+            sa_w.append(random.randint(sa_min + int(bin*count), sa_min + int(bin*(count+1))))
+            sa_h.append(random.randint(sa_min + int(bin*count), sa_min + int(bin*(count+1))))
+        combination_test_params = { 'DefaultMeHme'  : [0],
+                                    'HME'  : [1],
+                                    'SearchAreaWidth'  : sa_w,
+                                    'SearchAreaHeight'  : sa_h,
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)

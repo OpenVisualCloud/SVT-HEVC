@@ -283,36 +283,13 @@ typedef struct EbConfig_s
      ****************************************/
     EB_BOOL                useDefaultMeHme;
     EB_BOOL                enableHmeFlag;
-    EB_BOOL                enableHmeLevel0Flag;
-    EB_BOOL                enableHmeLevel1Flag;
-    EB_BOOL                enableHmeLevel2Flag;
 
     /****************************************
      * ME Parameters
      ****************************************/
-    uint32_t                 searchAreaWidth;
-    uint32_t                 searchAreaHeight;
-
-    /****************************************
-     * HME Parameters
-     ****************************************/
-    uint32_t                 numberHmeSearchRegionInWidth ;
-    uint32_t                 numberHmeSearchRegionInHeight;
-    uint32_t                 hmeLevel0TotalSearchAreaWidth;
-    uint32_t                 hmeLevel0TotalSearchAreaHeight;
-    uint32_t                 hmeLevel0ColumnIndex;
-    uint32_t                 hmeLevel0RowIndex;
-    uint32_t                 hmeLevel1ColumnIndex;
-    uint32_t                 hmeLevel1RowIndex;
-    uint32_t                 hmeLevel2ColumnIndex;
-    uint32_t                 hmeLevel2RowIndex;
-    uint32_t                 hmeLevel0SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    uint32_t                 hmeLevel0SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    uint32_t                 hmeLevel1SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    uint32_t                 hmeLevel1SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    uint32_t                 hmeLevel2SearchAreaInWidthArray[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-    uint32_t                 hmeLevel2SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-
+    uint32_t               searchAreaWidth;
+    uint32_t               searchAreaHeight;
+    
     /****************************************
      * MD Parameters
      ****************************************/
@@ -349,6 +326,8 @@ typedef struct EbConfig_s
     EB_BOOL                unregisteredUserDataSeiFlag;
     EB_BOOL                recoveryPointSeiFlag;
     uint32_t                 enableTemporalId;
+    EB_BOOL                switchThreadsToRtPriority;
+    EB_BOOL                fpsInVps;
 
     /****************************************
      * Annex A Parameters

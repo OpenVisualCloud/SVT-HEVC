@@ -16,7 +16,6 @@
 #include "EbEntropyCoding.h"
 #include "EbRateControlTasks.h"
 #include "EbRateControlProcess.h"
-#include "EbErrorCodes.h"
 #include "EbTime.h"
 
 EB_ERRORTYPE PacketizationContextCtor(

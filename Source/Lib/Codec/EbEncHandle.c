@@ -552,10 +552,31 @@ EB_U64 GetAffinityMask(EB_U32 lpnum) {
 }
 #endif
 
+void SwitchToRealTime()
+{
+
+#if  __linux__
+
+    struct sched_param schedParam = {
+        .sched_priority = sched_get_priority_max(SCHED_FIFO)
+    };
+
+    int retValue = pthread_setschedparam(pthread_self(), SCHED_FIFO, &schedParam);
+    if (retValue == EPERM)
+        SVT_LOG("\nSVT [WARNING]: For best speed performance, run with sudo privileges !\n\n");
+
+#endif
+}
+
 void EbSetThreadManagementParameters(
     EB_H265_ENC_CONFIGURATION   *configPtr)
 {
     EB_U32 numLogicProcessors = GetNumProcessors();
+
+    if (configPtr->switchThreadsToRtPriority == 1) {
+        SwitchToRealTime();
+    }
+
 #ifdef _WIN32
     // For system with a single processor group(no more than 64 logic processors all together)
     // Affinity of the thread can be set to one or more logical processors
@@ -575,7 +596,7 @@ void EbSetThreadManagementParameters(
             if (configPtr->targetSocket == -1) {
                 if (configPtr->logicalProcessors > numLpPerGroup) {
                     alternateGroups = TRUE;
-                    SVT_LOG("WARNING: -lp(logical processors) setting is ignored. Run on both sockets. \n");
+                    SVT_LOG("SVT [WARNING]: -lp(logical processors) setting is ignored. Run on both sockets. \n");
                 }
                 else {
                     groupAffinity.Mask = GetAffinityMask(configPtr->logicalProcessors);
@@ -677,7 +698,6 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     EB_U32 instanceIndex;
     EB_U32 processIndex;
     EB_U32 maxPictureWidth;
-    EB_U32 maxLookAheadDistance  = 0;
 
     EB_BOOL is16bit = (EB_BOOL) (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
 
@@ -713,12 +733,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
      ************************************/
     EB_MALLOC(EbSystemResource_t**, encHandlePtr->pictureParentControlSetPoolPtrArray, sizeof(EbSystemResource_t*)  * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
     EB_MALLOC(EbFifo_t***, encHandlePtr->pictureParentControlSetPoolProducerFifoPtrDblArray, sizeof(EbSystemResource_t**) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-    	
-	// Updating the pictureControlSetPoolTotalCount based on the maximum look ahead distance
-    for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
-        maxLookAheadDistance    = MAX(maxLookAheadDistance, encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.lookAheadDistance);
-    }   
-    
+    	    
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
     
         // The segment Width & Height Arrays are in units of LCUs, not samples
@@ -735,7 +750,6 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         inputData.maxDepth              = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxLcuDepth;
         inputData.is16bit               = is16bit;
 		inputData.compressedTenBitFormat = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.compressedTenBitFormat;
-		encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->pictureControlSetPoolInitCount += maxLookAheadDistance;
 
 		inputData.encMode = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.encMode;
 		inputData.speedControl = (EB_U8)encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.speedControlFlag;
@@ -949,7 +963,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
         return_error = EbSystemResourceCtor(
             &encHandlePtr->outputStreamBufferResourcePtrArray[instanceIndex],
-            encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->inputOutputBufferFifoInitCount,
+            encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->inputOutputBufferFifoInitCount + 4, // to accommodate output error + vps + eos
             encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->totalProcessInitCount,// EB_PacketizationProcessInitCount,
             1,
             &encHandlePtr->outputStreamBufferProducerFifoPtrDblArray[instanceIndex],
@@ -1628,7 +1642,7 @@ EB_U32 SetParentPcs(EB_H265_ENC_CONFIGURATION*   config)
     fps = fps > 120 ? 120 : fps;
     fps = fps < 24 ? 24 : fps;
 
-    if ((EB_U32)(config->intraPeriodLength) > (fps << 1) && ((config->sourceWidth * config->sourceHeight) < INPUT_SIZE_4K_TH))
+    if (((EB_U32)(config->intraPeriodLength) > (fps << 1)) && ((config->sourceWidth * config->sourceHeight) < INPUT_SIZE_4K_TH))
         fps = config->intraPeriodLength;
 
     EB_U32     lowLatencyInput = (config->encMode < 6 || config->speedControlFlag == 1) ? fps :
@@ -1984,8 +1998,6 @@ void CopyApiFromApp(
     EB_H265_ENC_CONFIGURATION* pComponentParameterStructure
 ) {
 
-    EB_U32                  hmeRegionIndex = 0;
-
     sequenceControlSetPtr->staticConfig.sourceWidth  = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceWidth;
     sequenceControlSetPtr->staticConfig.sourceHeight = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceHeight;
     sequenceControlSetPtr->maxInputLumaWidth  = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceWidth;
@@ -2005,6 +2017,8 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.encMode = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->encMode;
     sequenceControlSetPtr->staticConfig.codeVpsSpsPps = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->codeVpsSpsPps;
     sequenceControlSetPtr->staticConfig.codeEosNal = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->codeEosNal;
+    sequenceControlSetPtr->staticConfig.switchThreadsToRtPriority = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->switchThreadsToRtPriority;
+    sequenceControlSetPtr->staticConfig.fpsInVps = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->fpsInVps;
     
     if (sequenceControlSetPtr->staticConfig.tune >= 1) {
         sequenceControlSetPtr->staticConfig.bitRateReduction = 0;
@@ -2036,28 +2050,9 @@ void CopyApiFromApp(
     
     // Default HME/ME settings
     sequenceControlSetPtr->staticConfig.enableHmeFlag = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->enableHmeFlag;
-    sequenceControlSetPtr->staticConfig.enableHmeLevel0Flag = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->enableHmeLevel0Flag;
-    sequenceControlSetPtr->staticConfig.enableHmeLevel1Flag = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->enableHmeLevel1Flag;
-    sequenceControlSetPtr->staticConfig.enableHmeLevel2Flag = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->enableHmeLevel2Flag;
     sequenceControlSetPtr->staticConfig.searchAreaWidth = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->searchAreaWidth;
     sequenceControlSetPtr->staticConfig.searchAreaHeight = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->searchAreaHeight;
-    sequenceControlSetPtr->staticConfig.numberHmeSearchRegionInWidth = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->numberHmeSearchRegionInWidth;
-    sequenceControlSetPtr->staticConfig.numberHmeSearchRegionInHeight = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->numberHmeSearchRegionInHeight;
-    sequenceControlSetPtr->staticConfig.hmeLevel0TotalSearchAreaWidth = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hmeLevel0TotalSearchAreaWidth;
-    sequenceControlSetPtr->staticConfig.hmeLevel0TotalSearchAreaHeight = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hmeLevel0TotalSearchAreaHeight;
     
-    for (hmeRegionIndex = 0; hmeRegionIndex < sequenceControlSetPtr->staticConfig.numberHmeSearchRegionInWidth; ++hmeRegionIndex) {
-        sequenceControlSetPtr->staticConfig.hmeLevel0SearchAreaInWidthArray[hmeRegionIndex] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hmeLevel0SearchAreaInWidthArray[hmeRegionIndex];
-        sequenceControlSetPtr->staticConfig.hmeLevel1SearchAreaInWidthArray[hmeRegionIndex] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hmeLevel1SearchAreaInWidthArray[hmeRegionIndex];
-        sequenceControlSetPtr->staticConfig.hmeLevel2SearchAreaInWidthArray[hmeRegionIndex] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hmeLevel2SearchAreaInWidthArray[hmeRegionIndex];
-    }
-    
-    for (hmeRegionIndex = 0; hmeRegionIndex < sequenceControlSetPtr->staticConfig.numberHmeSearchRegionInHeight; ++hmeRegionIndex) {
-        sequenceControlSetPtr->staticConfig.hmeLevel0SearchAreaInHeightArray[hmeRegionIndex] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hmeLevel0SearchAreaInHeightArray[hmeRegionIndex];
-        sequenceControlSetPtr->staticConfig.hmeLevel1SearchAreaInHeightArray[hmeRegionIndex] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hmeLevel1SearchAreaInHeightArray[hmeRegionIndex];
-        sequenceControlSetPtr->staticConfig.hmeLevel2SearchAreaInHeightArray[hmeRegionIndex] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hmeLevel2SearchAreaInHeightArray[hmeRegionIndex];
-    }
-
     // MD Parameters
     sequenceControlSetPtr->staticConfig.constrainedIntra = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->constrainedIntra;
 
@@ -2153,7 +2148,7 @@ static int VerifyHmeDimention(unsigned int index,unsigned int HmeLevel0SearchAre
         totalSearchWidth += NumberHmeSearchRegionInWidth[i] ;
     }
     if ((totalSearchWidth) != (HmeLevel0SearchAreaInWidth)) {
-        SVT_LOG("Error Instance %u: Invalid  HME Total Search Area. \n", index);
+        SVT_LOG("SVT [Error]: Instance %u: Invalid  HME Total Search Area. \n", index);
 		 return_error = -1;
 		 return return_error;
 	 }
@@ -2171,7 +2166,7 @@ static int VerifyHmeDimentionL1L2(unsigned int index, EB_U32 NumberHmeSearchRegi
         totalSearchWidth += NumberHmeSearchRegionInWidth[i];
     }
     if ((totalSearchWidth > 256) || (totalSearchWidth == 0)) {
-        SVT_LOG("Error Instance %u: Invalid  HME Total Search Area. Must be [1 - 256].\n", index);
+        SVT_LOG("SVT [Error]: Instance %u: Invalid  HME Total Search Area. Must be [1 - 256].\n", index);
         return_error = -1;
         return return_error;
     }
@@ -2190,13 +2185,13 @@ static EB_ERRORTYPE VerifySettings(\
 
 
 	if ( config->tier > 1 ) {
-        SVT_LOG("Error instance %u: Tier must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: Tier must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;    
 	}
 
 	// For levels below level 4 (exclusive), only the main tier is allowed
     if(config->level < 40 && config->tier != 0){
-        SVT_LOG("Error Instance %u: For levels below level 4 (exclusive), only the main tier is allowed\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: For levels below level 4 (exclusive), only the main tier is allowed\n",channelNumber+1);
         return_error = EB_ErrorBadParameter; 
     }
 
@@ -2281,49 +2276,49 @@ static EB_ERRORTYPE VerifySettings(\
     }
     
 	if(levelIdx > TOTAL_LEVEL_COUNT){
-        SVT_LOG("Error Instance %u: Unsupported level\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: Unsupported level\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter; 
     }	 
 
     if (sequenceControlSetPtr->maxInputLumaWidth < 64) {
-        SVT_LOG("Error instance %u: Source Width must be at least 64\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: Source Width must be at least 64\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	}
     if (sequenceControlSetPtr->maxInputLumaHeight < 64) {
-        SVT_LOG("Error instance %u: Source Width must be at least 64\n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: Source Width must be at least 64\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->predStructure > 2) {
-        SVT_LOG("Error instance %u: Pred Structure must be [0-2]\n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: Pred Structure must be [0-2]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->baseLayerSwitchMode == 1 && config->predStructure != 2) {
-        SVT_LOG( "Error Instance %u: Base Layer Switch Mode 1 only when Prediction Structure is Random Access\n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: Base Layer Switch Mode 1 only when Prediction Structure is Random Access\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
     if (sequenceControlSetPtr->maxInputLumaWidth % 8 && sequenceControlSetPtr->staticConfig.compressedTenBitFormat == 1) {
-        SVT_LOG("Error Instance %u: Only multiple of 8 width is supported for compressed 10-bit inputs \n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: Only multiple of 8 width is supported for compressed 10-bit inputs \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
 	if (sequenceControlSetPtr->maxInputLumaWidth % 2) {
-        SVT_LOG("Error Instance %u: Source Width must be even for YUV_420 colorspace\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: Source Width must be even for YUV_420 colorspace\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     } 
     
     if (sequenceControlSetPtr->maxInputLumaHeight % 2) {
-        SVT_LOG("Error Instance %u: Source Height must be even for YUV_420 colorspace\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: Source Height must be even for YUV_420 colorspace\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     } 
     if (sequenceControlSetPtr->maxInputLumaWidth > 8192) {
-        SVT_LOG("Error instance %u: Source Width must be less than 8192\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: Source Width must be less than 8192\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	} 
 
     if (sequenceControlSetPtr->maxInputLumaHeight > 4320) {
-        SVT_LOG("Error instance %u: Source Height must be less than 4320\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: Source Height must be less than 4320\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
@@ -2336,25 +2331,25 @@ static EB_ERRORTYPE VerifySettings(\
 
     if (inputResolution <= INPUT_SIZE_1080i_RANGE) {
         if (config->encMode > 9) {
-            SVT_LOG("Error instance %u: encMode must be [0 - 9] for this resolution\n", channelNumber + 1);
+            SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - 9] for this resolution\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
         }
 
     }
     else if (inputResolution == INPUT_SIZE_1080p_RANGE) {
         if (config->encMode > 10) {
-            SVT_LOG("Error instance %u: encMode must be [0 - 10] for this resolution\n", channelNumber + 1);
+            SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - 10] for this resolution\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
         }
 
     }
     else {
         if (config->encMode > 12 && config->tune == 0) {
-            SVT_LOG("Error instance %u: encMode must be [0 - 12] for this resolution\n", channelNumber + 1);
+            SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - 12] for this resolution\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
         }
         else if (config->encMode > 10 && config->tune >= 1) {
-            SVT_LOG("Error instance %u: encMode must be [0 - 10] for this resolution\n", channelNumber + 1);
+            SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - 10] for this resolution\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
         }
     }
@@ -2364,13 +2359,13 @@ static EB_ERRORTYPE VerifySettings(\
     if (inputResolution <= INPUT_SIZE_1080i_RANGE){
         sequenceControlSetPtr->maxEncMode = MAX_SUPPORTED_MODES_SUB1080P - 1;
         if (config->encMode > MAX_SUPPORTED_MODES_SUB1080P -1) {
-            SVT_LOG("Error instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_SUB1080P-1);
+            SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_SUB1080P-1);
 			return_error = EB_ErrorBadParameter;
 		}
 	}else if (inputResolution == INPUT_SIZE_1080p_RANGE){
         sequenceControlSetPtr->maxEncMode = MAX_SUPPORTED_MODES_1080P - 1;
         if (config->encMode > MAX_SUPPORTED_MODES_1080P - 1) {
-            SVT_LOG("Error instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_1080P - 1);
+            SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_1080P - 1);
 			return_error = EB_ErrorBadParameter;
 		}
 	}else {
@@ -2380,195 +2375,137 @@ static EB_ERRORTYPE VerifySettings(\
             sequenceControlSetPtr->maxEncMode = MAX_SUPPORTED_MODES_4K_OQ - 1;
 
         if (config->encMode > MAX_SUPPORTED_MODES_4K_SQ - 1 && config->tune == 0) {
-            SVT_LOG("Error instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_4K_SQ-1);
+            SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_4K_SQ-1);
 			return_error = EB_ErrorBadParameter;
         }else if (config->encMode > MAX_SUPPORTED_MODES_4K_OQ - 1 && config->tune >= 1) {
-            SVT_LOG("Error instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_4K_OQ-1);
+            SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_4K_OQ-1);
 			return_error = EB_ErrorBadParameter;
 		}
 	}
 
 	if(config->qp > 51) {
-        SVT_LOG("Error instance %u: QP must be [0 - 51]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: QP must be [0 - 51]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;	
 	}
     
     if (config->hierarchicalLevels > 3) {
-        SVT_LOG("Error instance %u: Hierarchical Levels supported [0-3]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: Hierarchical Levels supported [0-3]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	} 
 
     if (config->intraPeriodLength < -2 || config->intraPeriodLength > 255) {
-        SVT_LOG("Error Instance %u: The intra period must be [-2 - 255] \n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: The intra period must be [-2 - 255] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
 	if( config->intraRefreshType > 2 || config->intraRefreshType < 1) {
-        SVT_LOG("Error Instance %u: Invalid intra Refresh Type [1-2]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: Invalid intra Refresh Type [1-2]\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
 	}
     if (config->baseLayerSwitchMode > 1) {
-        SVT_LOG("Error Instance %u: Invalid Base Layer Switch Mode [0-1] \n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: Invalid Base Layer Switch Mode [0-1] \n",channelNumber+1);
         return_error = EB_ErrorBadParameter; 
     }
     if (config->interlacedVideo > 1) {
-        SVT_LOG("Error Instance %u: Invalid Interlaced Video\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: Invalid Interlaced Video\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     }  
 
 	if ( config->disableDlfFlag > 1) {
-       SVT_LOG("Error Instance %u: Invalid LoopFilterDisable. LoopFilterDisable must be [0 - 1]\n",channelNumber+1);
+       SVT_LOG("SVT [Error]: Instance %u: Invalid LoopFilterDisable. LoopFilterDisable must be [0 - 1]\n",channelNumber+1);
 	   return_error = EB_ErrorBadParameter;	
     } 
 
 	if ( config->enableSaoFlag > 1) {
-       SVT_LOG("Error Instance %u: Invalid SAO. SAO range must be [0 - 1]\n",channelNumber+1);
+       SVT_LOG("SVT [Error]: Instance %u: Invalid SAO. SAO range must be [0 - 1]\n",channelNumber+1);
 	   return_error = EB_ErrorBadParameter;	
     }
 	if ( config->useDefaultMeHme > 1 ){
-       SVT_LOG("Error Instance %u: invalid useDefaultMeHme. useDefaultMeHme must be [0 - 1]\n",channelNumber+1);
+       SVT_LOG("SVT [Error]: Instance %u: invalid useDefaultMeHme. useDefaultMeHme must be [0 - 1]\n",channelNumber+1);
 	   return_error = EB_ErrorBadParameter;	
 	}
     if ( config->enableHmeFlag > 1 ){
-       SVT_LOG("Error Instance %u: invalid HME. HME must be [0 - 1]\n",channelNumber+1);
+       SVT_LOG("SVT [Error]: Instance %u: invalid HME. HME must be [0 - 1]\n",channelNumber+1);
 	   return_error = EB_ErrorBadParameter;	
 	}
-
-	if ( config->enableHmeLevel0Flag > 1 ) {
-       SVT_LOG("Error Instance %u: invalid enable HMELevel0. HMELevel0 must be [0 - 1]\n",channelNumber+1);
-	   return_error = EB_ErrorBadParameter;	
-	}
-
-	if ( config->enableHmeLevel1Flag > 1 ) {
-       SVT_LOG("Error Instance %u: invalid enable HMELevel1. HMELevel1 must be [0 - 1]\n",channelNumber+1);
-	   return_error = EB_ErrorBadParameter;	
-	}
-
-	if ( config->enableHmeLevel2Flag > 1 ){
-       SVT_LOG("Error Instance %u: invalid enable HMELevel2. HMELevel2 must be [0 - 1]\n",channelNumber+1);
-	   return_error = EB_ErrorBadParameter;	
-	}	
-	
 	if ((config->searchAreaWidth > 256) || (config->searchAreaWidth == 0)){
-        SVT_LOG("Error Instance %u: Invalid SearchAreaWidth. SearchAreaWidth must be [1 - 256]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: Invalid SearchAreaWidth. SearchAreaWidth must be [1 - 256]\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;	
 
     }
 	 
 	 if((config->searchAreaHeight > 256) || (config->searchAreaHeight == 0)) {
-        SVT_LOG("Error Instance %u: Invalid SearchAreaHeight. SearchAreaHeight must be [1 - 256]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: Invalid SearchAreaHeight. SearchAreaHeight must be [1 - 256]\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;	
 
     }
 	 
-	 if (config->enableHmeFlag){
-
-		 if ((config->numberHmeSearchRegionInWidth > (EB_U32)EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT) || (config->numberHmeSearchRegionInWidth == 0)){
-            SVT_LOG("Error Instance %u: Invalid NumberHmeSearchRegionInWidth. NumberHmeSearchRegionInWidth must be [1 - %d]\n",channelNumber+1,EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT);
-			return_error = EB_ErrorBadParameter;	
-		 }
-	 
-		 if ((config->numberHmeSearchRegionInHeight > (EB_U32)EB_HME_SEARCH_AREA_ROW_MAX_COUNT) || (config->numberHmeSearchRegionInHeight == 0)){
-            SVT_LOG("Error Instance %u: Invalid NumberHmeSearchRegionInHeight. NumberHmeSearchRegionInHeight must be [1 - %d]\n",channelNumber+1,EB_HME_SEARCH_AREA_ROW_MAX_COUNT);
-			return_error = EB_ErrorBadParameter;	
-		 }
-
-		 if ((config->hmeLevel0TotalSearchAreaHeight > 256) || (config->hmeLevel0TotalSearchAreaHeight == 0)) {
-             SVT_LOG("Error Instance %u: Invalid hmeLevel0TotalSearchAreaHeight. hmeLevel0TotalSearchAreaHeight must be [1 - 256]\n", channelNumber + 1);
-			 return_error = EB_ErrorBadParameter;
-		 }
-		 if ((config->hmeLevel0TotalSearchAreaWidth > 256) || (config->hmeLevel0TotalSearchAreaWidth == 0)) {
-             SVT_LOG("Error Instance %u: Invalid hmeLevel0TotalSearchAreaWidth. hmeLevel0TotalSearchAreaWidth must be [1 - 256]\n", channelNumber + 1);
-			 return_error = EB_ErrorBadParameter;
-		 }
-		 if ( VerifyHmeDimention(channelNumber+1, config->hmeLevel0TotalSearchAreaHeight, config->hmeLevel0SearchAreaInHeightArray, config->numberHmeSearchRegionInHeight) ) {
-			 return_error = EB_ErrorBadParameter;	
-		 }
-		 
-		 if ( VerifyHmeDimention(channelNumber+1, config->hmeLevel0TotalSearchAreaWidth, config->hmeLevel0SearchAreaInWidthArray, config->numberHmeSearchRegionInWidth) ) {
-			 return_error = EB_ErrorBadParameter;	
-		 }
-		 if (VerifyHmeDimentionL1L2(channelNumber + 1, config->hmeLevel1SearchAreaInWidthArray , config->numberHmeSearchRegionInWidth)) {
-			 return_error = EB_ErrorBadParameter;
-		 }
-		 if (VerifyHmeDimentionL1L2(channelNumber + 1, config->hmeLevel1SearchAreaInHeightArray, config->numberHmeSearchRegionInWidth)) {
-			 return_error = EB_ErrorBadParameter;
-		 }
-		 if (VerifyHmeDimentionL1L2(channelNumber + 1, config->hmeLevel2SearchAreaInWidthArray, config->numberHmeSearchRegionInWidth)) {
-			 return_error = EB_ErrorBadParameter;
-		 }
-		 if (VerifyHmeDimentionL1L2(channelNumber + 1, config->hmeLevel2SearchAreaInHeightArray, config->numberHmeSearchRegionInWidth)) {
-			 return_error = EB_ErrorBadParameter;	
-		 }
-	 }
-
-
     if (levelIdx < 13) {
     // Check if the current input video is conformant with the Level constraint
     if(config->level != 0 && ((EB_U64)(sequenceControlSetPtr->maxInputLumaWidth * sequenceControlSetPtr->maxInputLumaHeight) > maxLumaPictureSize[levelIdx])){
-        SVT_LOG("Error Instance %u: The input luma picture size exceeds the maximum luma picture size allowed for level %s\n",channelNumber+1, levelIdc);
+        SVT_LOG("SVT [Error]: Instance %u: The input luma picture size exceeds the maximum luma picture size allowed for level %s\n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
 
     // Check if the current input video is conformant with the Level constraint
     if(config->level != 0 && ((EB_U64)config->frameRate * (EB_U64)sequenceControlSetPtr->maxInputLumaWidth * (EB_U64)sequenceControlSetPtr->maxInputLumaHeight > (maxLumaSampleRate[levelIdx]<<16))){
-        SVT_LOG("Error Instance %u: The input luma sample rate exceeds the maximum input sample rate allowed for level %s\n",channelNumber+1, levelIdc);
+        SVT_LOG("SVT [Error]: Instance %u: The input luma sample rate exceeds the maximum input sample rate allowed for level %s\n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
 	
 	if ((config->level != 0) && (config->rateControlMode) && (config->tier == 0) && ((config->targetBitRate*2) > mainTierMaxBitRate[levelIdx])){
-        SVT_LOG("Error Instance %u: Allowed MaxBitRate exceeded for level %s and tier 0 \n",channelNumber+1, levelIdc);
+        SVT_LOG("SVT [Error]: Instance %u: Allowed MaxBitRate exceeded for level %s and tier 0 \n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
 	if ((config->level != 0) && (config->rateControlMode) && (config->tier == 1) && ((config->targetBitRate*2) > highTierMaxBitRate[levelIdx])){
-        SVT_LOG("Error Instance %u: Allowed MaxBitRate exceeded for level %s and tier 1 \n",channelNumber+1, levelIdc);
+        SVT_LOG("SVT [Error]: Instance %u: Allowed MaxBitRate exceeded for level %s and tier 1 \n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
 	if ((config->level != 0) && (config->rateControlMode) && (config->tier == 0) && ((config->targetBitRate * 3) > mainTierCPB[levelIdx])) {
-        SVT_LOG("Error Instance %u: Out of bound maxBufferSize for level %s and tier 0 \n",channelNumber+1, levelIdc);
+        SVT_LOG("SVT [Error]: Instance %u: Out of bound maxBufferSize for level %s and tier 0 \n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
 	if ((config->level != 0) && (config->rateControlMode) && (config->tier == 1) && ((config->targetBitRate * 3) > highTierCPB[levelIdx])) {
-        SVT_LOG("Error Instance %u: Out of bound maxBufferSize for level %s and tier 1 \n",channelNumber+1, levelIdc);
+        SVT_LOG("SVT [Error]: Instance %u: Out of bound maxBufferSize for level %s and tier 1 \n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
     }
 
 	if(config->profile > 3){
-        SVT_LOG("Error Instance %u: The maximum allowed Profile number is 3 \n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: The maximum allowed Profile number is 3 \n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     }
 
 	if (config->profile == 0){
-        SVT_LOG("Error Instance %u: The minimum allowed Profile number is 1 \n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: The minimum allowed Profile number is 1 \n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	}
 
 	if(config->profile == 3) {
-        SVT_LOG("Error instance %u: The Main Still Picture Profile is not supported \n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: The Main Still Picture Profile is not supported \n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	} 
 
     // Check if the current input video is conformant with the Level constraint
     if(config->frameRate > (240<<16)){
-        SVT_LOG("Error Instance %u: The maximum allowed frame rate is 240 fps\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: The maximum allowed frame rate is 240 fps\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     }
     // Check that the frameRate is non-zero
     if(config->frameRate <= 0) {
-        SVT_LOG("Error Instance %u: The frame rate should be greater than 0 fps \n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: The frame rate should be greater than 0 fps \n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     }
     if (config->intraPeriodLength < -2 || config->intraPeriodLength > 255 ) {
-        SVT_LOG("Error Instance %u: The intra period must be [-2 - 255] \n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: The intra period must be [-2 - 255] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 	if (config->constrainedIntra > 1) {
-        SVT_LOG("Error Instance %u: The constrained intra must be [0 - 1] \n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: The constrained intra must be [0 - 1] \n", channelNumber + 1);
 		return_error = EB_ErrorBadParameter;
 	}
 	if (config->rateControlMode > 2) {
-        SVT_LOG("Error Instance %u: The rate control mode must be [0 - 2] \n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: The rate control mode must be [0 - 2] \n", channelNumber + 1);
 		return_error = EB_ErrorBadParameter;
 	}
 	if ((config->rateControlMode == 2) && (config->crf > 51))
@@ -2576,136 +2513,145 @@ static EB_ERRORTYPE VerifySettings(\
 		SVT_LOG("Error instance %u:The crf value must be [0-51] \n", channelNumber + 1);
 	}
     if (config->tune > 0 && config->bitRateReduction == 1){
-        SVT_LOG("Error Instance %u: Bit Rate Reduction is not supported for OQ mode (Tune = 1 ) and VMAF mode (Tune = 2)\n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: Bit Rate Reduction is not supported for OQ mode (Tune = 1 ) and VMAF mode (Tune = 2)\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->tune > 0 && config->improveSharpness == 1){
-        SVT_LOG("Error Instance %u: Improve sharpness is not supported for OQ mode (Tune = 1 ) and VMAF mode (Tune = 2)\n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: Improve sharpness is not supported for OQ mode (Tune = 1 ) and VMAF mode (Tune = 2)\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->lookAheadDistance > 256 && config->lookAheadDistance != (EB_U32)~0) {
-        SVT_LOG("Error Instance %u: The lookahead distance must be [0 - 256] \n", channelNumber + 1);
+    if (config->lookAheadDistance > 250 && config->lookAheadDistance != (EB_U32)~0) {
+        SVT_LOG("SVT [Error]: Instance %u: The lookahead distance must be [0 - 250] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 	if (config->sceneChangeDetection > 1) {
-        SVT_LOG("Error Instance %u: The scene change detection must be [0 - 1] \n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: The scene change detection must be [0 - 1] \n", channelNumber + 1);
 		return_error = EB_ErrorBadParameter;
 	}
 	if ( config->maxQpAllowed > 51) {
-        SVT_LOG("Error instance %u: MaxQpAllowed must be [0 - 51]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: MaxQpAllowed must be [0 - 51]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;    
 	}
 	else if ( config->minQpAllowed > 50 ) {
-        SVT_LOG("Error instance %u: MinQpAllowed must be [0 - 50]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: MinQpAllowed must be [0 - 50]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;   
 	}
 	else if ( (config->minQpAllowed) > (config->maxQpAllowed))  {
-        SVT_LOG("Error Instance %u:  MinQpAllowed must be smaller than MaxQpAllowed\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u:  MinQpAllowed must be smaller than MaxQpAllowed\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;  
 	}
 
 	if (config->videoUsabilityInfo > 1) {
-        SVT_LOG("Error instance %u : Invalid VideoUsabilityInfo. VideoUsabilityInfo must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u : Invalid VideoUsabilityInfo. VideoUsabilityInfo must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
     if (config->tune > 2) {
-        SVT_LOG("Error instance %u : Invalid Tune. Tune must be [0 - 2]\n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u : Invalid Tune. Tune must be [0 - 2]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 	if (config->bitRateReduction > 1) {
-        SVT_LOG("Error instance %u : Invalid BitRateReduction. BitRateReduction must be [0 - 1]\n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u : Invalid BitRateReduction. BitRateReduction must be [0 - 1]\n", channelNumber + 1);
 		return_error = EB_ErrorBadParameter;
 	}
     if (config->improveSharpness > 1) {
-        SVT_LOG("Error instance %u : Invalid ImproveSharpness. ImproveSharpness must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u : Invalid ImproveSharpness. ImproveSharpness must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
     if (config->highDynamicRangeInput > 1) {
-        SVT_LOG("Error instance %u : Invalid HighDynamicRangeInput. HighDynamicRangeInput must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u : Invalid HighDynamicRangeInput. HighDynamicRangeInput must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 	if (config->accessUnitDelimiter > 1) {
-        SVT_LOG("Error instance %u : Invalid AccessUnitDelimiter. AccessUnitDelimiter must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u : Invalid AccessUnitDelimiter. AccessUnitDelimiter must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
 	if (config->bufferingPeriodSEI > 1) {
-        SVT_LOG("Error instance %u : Invalid BufferingPeriod. BufferingPeriod must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u : Invalid BufferingPeriod. BufferingPeriod must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
 	if (config->pictureTimingSEI > 1) {
-        SVT_LOG("Error instance %u : Invalid PictureTiming. PictureTiming must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u : Invalid PictureTiming. PictureTiming must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
 	if (config->registeredUserDataSeiFlag > 1) {
-        SVT_LOG("Error instance %u : Invalid RegisteredUserData. RegisteredUserData must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u : Invalid RegisteredUserData. RegisteredUserData must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
  
 	if (config->unregisteredUserDataSeiFlag > 1) {
-        SVT_LOG("Error instance %u : Invalid UnregisteredUserData. UnregisteredUserData must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u : Invalid UnregisteredUserData. UnregisteredUserData must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
 	if (config->recoveryPointSeiFlag > 1) {
-        SVT_LOG("Error instance %u : Invalid RecoveryPoint. RecoveryPoint must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u : Invalid RecoveryPoint. RecoveryPoint must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
  	if (config->enableTemporalId > 1) {
-        SVT_LOG("Error instance %u : Invalid TemporalId. TemporalId must be [0 - 1]\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u : Invalid TemporalId. TemporalId must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
     }
 
     if (config->pictureTimingSEI && !config->videoUsabilityInfo){
-        SVT_LOG("Error Instance %u: If pictureTimingSEI is set, VideoUsabilityInfo should be also set to 1\n",channelNumber);
+        SVT_LOG("SVT [Error]: Instance %u: If pictureTimingSEI is set, VideoUsabilityInfo should be also set to 1\n",channelNumber);
         return_error = EB_ErrorBadParameter;
 
     }
 	  if ( (config->encoderBitDepth !=8 )  && 
 		(config->encoderBitDepth !=10 ) 
 		) {
-          SVT_LOG("Error instance %u: Encoder Bit Depth shall be only 8 or 10 \n",channelNumber+1);
+          SVT_LOG("SVT [Error]: Instance %u: Encoder Bit Depth shall be only 8 or 10 \n",channelNumber+1);
 			return_error = EB_ErrorBadParameter;
 	}
 	// Check if the EncoderBitDepth is conformant with the Profile constraint
 	if(config->profile == 1 && config->encoderBitDepth == 10) {
-        SVT_LOG("Error instance %u: The encoder bit depth shall be equal to 8 for Main Profile\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: The encoder bit depth shall be equal to 8 for Main Profile\n",channelNumber+1);
 			return_error = EB_ErrorBadParameter;
 	}
 
 	if (config->compressedTenBitFormat > 1)
 	{
-        SVT_LOG("Error instance %u: Invalid Compressed Ten Bit Format shall be only [0 - 1] \n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: Invalid Compressed Ten Bit Format shall be only [0 - 1] \n", channelNumber + 1);
 		return_error = EB_ErrorBadParameter;
 	}
 
     if (config->speedControlFlag > 1) {
-        SVT_LOG("Error Instance %u: Invalid Speed Control flag [0 - 1]\n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: Invalid Speed Control flag [0 - 1]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->latencyMode > 1) {
-        SVT_LOG("Error Instance %u: Invalid Latency Mode flag [0 - 1]\n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: Invalid Latency Mode flag [0 - 1]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }    
 
     if (((EB_S32)(config->asmType) < 0) || ((EB_S32)(config->asmType) > 1)){
-        SVT_LOG("Error Instance %u: Invalid asm type value [0: C Only, 1: Auto] .\n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: Invalid asm type value [0: C Only, 1: Auto] .\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->targetSocket != -1 && config->targetSocket != 0 && config->targetSocket != 1) {
-        SVT_LOG("Error instance %u: Invalid TargetSocket [-1 - 1] \n", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: Invalid TargetSocket [-1 - 1] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
+    if (config->switchThreadsToRtPriority > 1) {
+        SVT_LOG("SVT [Error]: Instance %u : Invalid Switch Threads To Real Time Priority flag [0 - 1]\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->fpsInVps > 1) {
+        SVT_LOG("SVT [Error]: Instance %u : Invalid FPS in VPS flag [0 - 1]\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
 
     return return_error;
 }
@@ -2756,27 +2702,8 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->enableSaoFlag = EB_TRUE;
     configPtr->useDefaultMeHme = EB_TRUE;
     configPtr->enableHmeFlag = EB_TRUE;
-    configPtr->enableHmeLevel0Flag = EB_TRUE;
-    configPtr->enableHmeLevel1Flag = EB_FALSE;
-    configPtr->enableHmeLevel2Flag = EB_FALSE;
     configPtr->searchAreaWidth = 16;
     configPtr->searchAreaHeight = 7;
-    configPtr->numberHmeSearchRegionInWidth = 2;
-    configPtr->numberHmeSearchRegionInHeight = 2;
-    configPtr->hmeLevel0TotalSearchAreaWidth = 64;
-    configPtr->hmeLevel0TotalSearchAreaHeight = 25;
-    configPtr->hmeLevel0SearchAreaInWidthArray[0] = 32;
-    configPtr->hmeLevel0SearchAreaInWidthArray[1] = 32;
-    configPtr->hmeLevel0SearchAreaInHeightArray[0] = 12;
-    configPtr->hmeLevel0SearchAreaInHeightArray[1] = 13;
-    configPtr->hmeLevel1SearchAreaInWidthArray[0] = 1;
-    configPtr->hmeLevel1SearchAreaInWidthArray[1] = 1;
-    configPtr->hmeLevel1SearchAreaInHeightArray[0] = 1;
-    configPtr->hmeLevel1SearchAreaInHeightArray[1] = 1;
-    configPtr->hmeLevel2SearchAreaInWidthArray[0] = 1;
-    configPtr->hmeLevel2SearchAreaInWidthArray[1] = 1;
-    configPtr->hmeLevel2SearchAreaInHeightArray[0] = 1;
-    configPtr->hmeLevel2SearchAreaInHeightArray[1] = 1;
     configPtr->constrainedIntra = EB_FALSE;
     configPtr->tune = 1;
     configPtr->bitRateReduction = EB_TRUE;
@@ -2785,6 +2712,8 @@ EB_ERRORTYPE EbH265EncInitParameter(
     // Bitstream options
     configPtr->codeVpsSpsPps = 0;
     configPtr->codeEosNal    = 0;
+    configPtr->switchThreadsToRtPriority = EB_TRUE;
+    configPtr->fpsInVps      = EB_FALSE;
 
     configPtr->videoUsabilityInfo = 0;
     configPtr->highDynamicRangeInput = 0;
@@ -3448,22 +3377,6 @@ EB_API EB_ERRORTYPE EbH265GetRecon(
 
     return return_error;
 }
-
-void SwitchToRealTime()
-{
-
-#if  __linux__
-
-    struct sched_param schedParam = {
-        .sched_priority = 99
-    };
-
-    int retValue = pthread_setschedparam(pthread_self(), SCHED_FIFO, &schedParam);
-    if (retValue == EPERM)
-        SVT_LOG("\n[WARNING] For best speed performance, run with sudo privileges !\n\n");
-
-#endif
-}
 /**********************************
 * Encoder Error Handling
 **********************************/
@@ -3511,8 +3424,6 @@ EB_ERRORTYPE InitH265EncoderHandle(
     printf(" %u bit\n", (unsigned) sizeof(void*) * 8);
     printf("LIB Build date: %s %s\n",__DATE__,__TIME__);
     printf("-------------------------------------------\n");
-   
-    SwitchToRealTime();
 
     // Set Component Size & Version
     h265EncComponent->nSize                     = sizeof(EB_COMPONENTTYPE);
