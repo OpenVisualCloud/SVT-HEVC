@@ -91,23 +91,21 @@ index d70646e91a..094ee3cd7f 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000000..7dcf2f73ec
+index 0000000000..e2f27bb9f5
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,526 @@
+@@ -0,0 +1,490 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
 +* Copyright (c) 2018 Intel Corporation
 +*
-+* This file is part of FFmpeg.
-+*
-+* FFmpeg is free software; you can redistribute it and/or
++* This program is free software; you can redistribute it and/or
 +* modify it under the terms of the GNU Lesser General Public
 +* License as published by the Free Software Foundation; either
 +* version 2.1 of the License, or (at your option) any later version.
 +*
-+* FFmpeg is distributed in the hope that it will be useful,
++* This program is distributed in the hope that it will be useful,
 +* but WITHOUT ANY WARRANTY; without even the implied warranty of
 +* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 +* Lesser General Public License for more details.
@@ -148,8 +146,6 @@ index 0000000000..7dcf2f73ec
 +    int scd;
 +    int tune;
 +    int qp;
-+
-+    int forced_idr;
 +
 +    int aud;
 +
@@ -302,8 +298,6 @@ index 0000000000..7dcf2f73ec
 +    else
 +        param->codeVpsSpsPps          = 1;
 +
-+    param->codeEosNal             = 1;
-+
 +    if (svt_enc->vui_info)
 +        param->videoUsabilityInfo = svt_enc->vui_info;
 +
@@ -374,22 +368,9 @@ index 0000000000..7dcf2f73ec
 +
 +    if (avctx->flags & AV_CODEC_FLAG_GLOBAL_HEADER) {
 +        EB_BUFFERHEADERTYPE* headerPtr;
-+        headerPtr->nSize       = sizeof(headerPtr);
-+        headerPtr->nFilledLen  = 0; /* in/out */
-+        headerPtr->pBuffer     = av_malloc(10 * 1024 * 1024);
-+        headerPtr->nAllocLen   = (10 * 1024 * 1024);
-+
-+        if (!headerPtr->pBuffer) {
-+            av_log(avctx, AV_LOG_ERROR,
-+                   "Cannot allocate buffer size %d.\n", headerPtr->nAllocLen);
-+            svt_ret = EB_ErrorInsufficientResources;
-+            goto failed_init_enc;
-+        }
-+
 +        svt_ret = EbH265EncStreamHeader(svt_enc->svt_handle, &headerPtr);
 +        if (svt_ret != EB_ErrorNone) {
 +            av_log(avctx, AV_LOG_ERROR, "Error when build stream header.\n");
-+            av_freep(&headerPtr->pBuffer);
 +            goto failed_init_enc;
 +        }
 +
@@ -398,13 +379,11 @@ index 0000000000..7dcf2f73ec
 +        if (!avctx->extradata) {
 +            av_log(avctx, AV_LOG_ERROR,
 +                   "Cannot allocate HEVC header of size %d.\n", avctx->extradata_size);
-+            av_freep(&headerPtr->pBuffer);
 +            svt_ret = EB_ErrorInsufficientResources;
 +            goto failed_init_enc;
 +        }
 +        memcpy(avctx->extradata, headerPtr->pBuffer, avctx->extradata_size);
 +
-+        av_freep(&headerPtr->pBuffer);
 +    }
 +
 +    return 0;
@@ -443,20 +422,8 @@ index 0000000000..7dcf2f73ec
 +    headerPtr->nFlags       = 0;
 +    headerPtr->pAppPrivate  = NULL;
 +    headerPtr->pts          = frame->pts;
-+    switch (frame->pict_type) {
-+    case AV_PICTURE_TYPE_I:
-+        headerPtr->sliceType = svt_enc->forced_idr > 0 ? EB_IDR_PICTURE : EB_I_PICTURE;
-+        break;
-+    case AV_PICTURE_TYPE_P:
-+        headerPtr->sliceType = EB_P_PICTURE;
-+        break;
-+    case AV_PICTURE_TYPE_B:
-+        headerPtr->sliceType = EB_B_PICTURE;
-+        break;
-+    default:
-+        headerPtr->sliceType = EB_INVALID_PICTURE;
-+        break;
-+    }
++    headerPtr->sliceType    = EB_INVALID_PICTURE;
++    
 +    EbH265EncSendPicture(svt_enc->svt_handle, headerPtr);
 +
 +    return 0;
@@ -509,7 +476,7 @@ index 0000000000..7dcf2f73ec
 +#define VE AV_OPT_FLAG_VIDEO_PARAM | AV_OPT_FLAG_ENCODING_PARAM
 +static const AVOption options[] = {
 +    { "vui", "Enable vui info", OFFSET(vui_info),
-+      AV_OPT_TYPE_BOOL, { .i64 = 1 }, 0, 1, VE },
++      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
 +
 +    { "aud", "Include AUD", OFFSET(aud),
 +      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
@@ -521,8 +488,8 @@ index 0000000000..7dcf2f73ec
 +        { "3level", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 3 },  INT_MIN, INT_MAX, VE, "hielevel" },
 +        { "4level", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 4 },  INT_MIN, INT_MAX, VE, "hielevel" },
 +
-+    { "la_depth", "Look ahead distance [0, 256]", OFFSET(la_depth),
-+      AV_OPT_TYPE_INT, { .i64 = -1 }, -1, 256, VE },
++    { "la_depth", "Look ahead distance [0, 250]", OFFSET(la_depth),
++      AV_OPT_TYPE_INT, { .i64 = -1 }, -1, 250, VE },
 +
 +    { "preset", "Encoding preset [0, 12] (e,g, for subjective quality tuning mode and >=4k resolution), [0, 10] (for >= 1080p resolution), [0, 9] (for all resolution and modes)",
 +      OFFSET(enc_mode), AV_OPT_TYPE_INT, { .i64 = 9 }, 0, 12, VE },
@@ -570,7 +537,7 @@ index 0000000000..7dcf2f73ec
 +      AV_OPT_TYPE_INT, { .i64 = 32 }, 0, 51, VE },
 +
 +    { "sc_detection", "Scene change detection", OFFSET(scd),
-+      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
++      AV_OPT_TYPE_BOOL, { .i64 = 1 }, 0, 1, VE },
 +
 +    { "tune", "Quality tuning mode", OFFSET(tune), AV_OPT_TYPE_INT, { .i64 = 1 }, 0, 1, VE, "tune" },
 +        { "subjective", "Subjective quality mode", 0,
@@ -580,9 +547,6 @@ index 0000000000..7dcf2f73ec
 +
 +    { "bl_mode", "Random Access Prediction Structure type setting", OFFSET(base_layer_switch_mode),
 +      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
-+
-+    { "forced-idr", "If forcing keyframes, force them as IDR frames.", OFFSET(forced_idr),
-+      AV_OPT_TYPE_BOOL,   { .i64 = 0 }, -1, 1, VE },
 +
 +    {NULL},
 +};
@@ -596,7 +560,7 @@ index 0000000000..7dcf2f73ec
 +
 +static const AVCodecDefault eb_enc_defaults[] = {
 +    { "b",         "7M"    },
-+    { "flags",     "+cgop" },
++    { "flags",     "-cgop" },
 +    { "qmin",      "10"    },
 +    { "qmax",      "48"    },
 +    { NULL },
