@@ -391,8 +391,8 @@ static const AVOption options[] = {
         { "3level", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 3 },  INT_MIN, INT_MAX, VE, "hielevel" },
         { "4level", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 4 },  INT_MIN, INT_MAX, VE, "hielevel" },
 
-    { "la_depth", "Look ahead distance [0, 256]", OFFSET(la_depth),
-      AV_OPT_TYPE_INT, { .i64 = -1 }, -1, 256, VE },
+    { "la_depth", "Look ahead distance [0, 250]", OFFSET(la_depth),
+      AV_OPT_TYPE_INT, { .i64 = -1 }, -1, 250, VE },
 
     { "preset", "Encoding preset [0, 12] (e,g, for subjective quality tuning mode and >=4k resolution), [0, 10] (for >= 1080p resolution), [0, 9] (for all resolution and modes)",
       OFFSET(enc_mode), AV_OPT_TYPE_INT, { .i64 = 9 }, 0, 12, VE },
