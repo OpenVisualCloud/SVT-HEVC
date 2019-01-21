@@ -8647,13 +8647,32 @@ EB_ERRORTYPE EncodeMasteringDisplayColorVolumeSEI(
     EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_U32 payloadType = MASTERING_DISPLAY_INFO;
     EB_U32 payloadSize = 0;
+    EB_U8 *context = NULL, *token = NULL;
+    const EB_U8 *delimeter = (EB_U8*) "(,)GBRWPL";
+    EB_U32 primaries[10];
+    EB_U32 i = 0, j = 0, k = 0;
 
-    EB_SCANF(value, "G(%hu,%hu)B(%hu,%hu)R(%hu,%hu)WP(%hu,%hu)L(%u,%u)",
-        &masterDisplayPtr->displayPrimaryX[0], &masterDisplayPtr->displayPrimaryY[0],
-        &masterDisplayPtr->displayPrimaryX[1], &masterDisplayPtr->displayPrimaryY[1],
-        &masterDisplayPtr->displayPrimaryX[2], &masterDisplayPtr->displayPrimaryY[2],
-        &masterDisplayPtr->whitePointX, &masterDisplayPtr->whitePointY,
-        &masterDisplayPtr->maxDisplayMasteringLuminance, &masterDisplayPtr->minDisplayMasteringLuminance);
+    if (strstr(value, "G") != NULL && strstr(value, "B") != NULL && strstr(value, "R") != NULL && strstr(value, "WP") != NULL && strstr(value, "L") != NULL) {
+        for (token = (EB_U8*) EB_STRTOK(value, delimeter, &context); token != NULL; token = (EB_U8*) EB_STRTOK(NULL, delimeter, &context)) {
+            primaries[i++] = (EB_U32) strtoul((char*)token, NULL, 0);
+        }
+        if (i == 10 && token == NULL) {
+            for (j = 0; j < 3; j++) {
+                masterDisplayPtr->displayPrimaryX[j] = primaries[k++];
+                masterDisplayPtr->displayPrimaryY[j] = primaries[k++];
+            }
+            masterDisplayPtr->whitePointX = primaries[k++];
+            masterDisplayPtr->whitePointY = primaries[k++];
+            masterDisplayPtr->maxDisplayMasteringLuminance = primaries[k++];
+            masterDisplayPtr->minDisplayMasteringLuminance = primaries[k++];
+        }
+        else {
+            SVT_LOG("[Warning] : Couldn't parse MasterDisplay info. Make sure its passed in this format \"G(%%hu,%%hu)B(%%hu,%%hu)R(%%hu,%%hu)WP(%%hu,%%hu)L(%%u,%%u)\"");
+        }
+    }
+    else {
+        SVT_LOG("[Warning] : Couldn't parse MasterDisplay info. Make sure its passed in this format \"G(%%hu,%%hu)B(%%hu,%%hu)R(%%hu,%%hu)WP(%%hu,%%hu)L(%%u,%%u)\"");
+    }
 
     OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
 

@@ -685,9 +685,9 @@ extern    EB_U32                   libMutexCount;
 #endif
 
 #ifdef _MSC_VER
-#define EB_STRTOK(str,delim,next) strtok_s((char*)str,delim,&(char*)next)
+#define EB_STRTOK(str,delim,next) strtok_s((char*)str,(const char*)delim,(char**)next)
 #else
-#define EB_STRTOK(str,delim,next) strtok((char*)str,delim)
+#define EB_STRTOK(str,delim,next) strtok_r((char*)str,(const char*)delim,(char**)next)
 #endif
 
 /** The EB_CTOR type is used to define the svt object constructors.

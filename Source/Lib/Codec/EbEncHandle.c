@@ -2622,18 +2622,6 @@ static EB_ERRORTYPE VerifySettings(\
 		return_error = EB_ErrorBadParameter;
 	}
 
-	if (config->masteringDisplayColorVolume) {
-		EB_U16 temp[8] = { 0 };
-		EB_U32 temp1[2] = { 0 };
-		if (EB_SCANF(config->masteringDisplayColorVolume,
-			"G(%hu,%hu)B(%hu,%hu)R(%hu,%hu)WP(%hu,%hu)L(%u,%u)",
-			&temp[0], &temp[1], &temp[2], &temp[3], &temp[4],
-			&temp[5], &temp[6], &temp[7], &temp1[0], &temp1[1]) != 10) {
-			SVT_LOG("Error Instance %u: Error parsing MasterDisplay info. Make sure its passed in the format \"G(%%hu,%%hu)B(%%hu,%%hu)R(%%hu,%%hu)WP(%%hu,%%hu)L(%%u,%%u)\" \n", channelNumber);
-			return_error = EB_ErrorBadParameter;
-		}
-	}
-
 	if (config->masteringDisplayColorVolume && !config->highDynamicRangeInput) {
 		SVT_LOG("Error Instance %u: MasterDisplay should be used only with high dynamic range input; set highDynamicRangeInput to 1\n", channelNumber);
 		return_error = EB_ErrorBadParameter;
@@ -3135,15 +3123,15 @@ static EB_ERRORTYPE ParseSeiMetaData(
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_U8    line[1024];
-    EB_U8    *context;
+    EB_U8    *context = NULL;
     EbPictureBufferDesc_t *headerPtr = (EbPictureBufferDesc_t*)dst->pBuffer;
 
     while (fgets((char*)line, sizeof(line), sequenceControlSetPtr->naluFile)) {
-        EB_U32 poc = atoi(EB_STRTOK(line, " ", context));
-        EB_U8 *prefix = (EB_U8*)EB_STRTOK(NULL, " ", context);
-        EB_U32 nalType = atoi(EB_STRTOK(NULL, "/", context));
-        EB_U32 payloadType = atoi(EB_STRTOK(NULL, " ", context));
-        EB_U8 *base64Encode = (EB_U8*)EB_STRTOK(NULL, "\n", context);
+        EB_U32 poc = atoi(EB_STRTOK(line, " ", &context));
+        EB_U8 *prefix = (EB_U8*)EB_STRTOK(NULL, " ", &context);
+        EB_U32 nalType = atoi(EB_STRTOK(NULL, "/", &context));
+        EB_U32 payloadType = atoi(EB_STRTOK(NULL, " ", &context));
+        EB_U8 *base64Encode = (EB_U8*)EB_STRTOK(NULL, "\n", &context);
         if (*context) {
             SVT_LOG("\n[Warning] Extra characters present at the end of the line in User SEI file for poc %d", poc);
         }
