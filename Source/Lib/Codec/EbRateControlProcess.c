@@ -797,7 +797,8 @@ void HighLevelRcInputPictureMode2(
                     endOfSequenceFlag = EB_FALSE;
 
                     if ((endOfSequenceFlag ||
-                        queueEntryIndexTemp >= sequenceControlSetPtr->staticConfig.lookAheadDistance)
+                        queueEntryIndexTemp >= (currentInd + sequenceControlSetPtr->staticConfig.lookAheadDistance)) ||
+                        (queueEntryIndexTemp >= sequenceControlSetPtr->staticConfig.framesToBeEncoded)
                         || (totalDuration >= 1.0))
                         break;
                     totalDuration += fps;
@@ -838,7 +839,6 @@ void HighLevelRcInputPictureMode2(
             q = MAX(q0 / 2, q);
             selectedRefQp = q;
         }
-
 #if RC_UPDATE_TARGET_RATE
         selectedOrgRefQp = selectedRefQp;
         if (sequenceControlSetPtr->intraPeriodLength != -1 && pictureControlSetPtr->pictureNumber % ((sequenceControlSetPtr->intraPeriodLength + 1)) == 0 &&
@@ -2746,8 +2746,6 @@ void* RateControlKernel(void *inputPtr)
                     bufferfill_temp = (EB_S64) (bufferfill_temp + (contextPtr->vbvMaxrate * (1.0 / (sequenceControlSetPtr->frameRate >> RC_PRECISION))));
                     bufferfill_temp = MIN(bufferfill_temp, contextPtr->vbvBufsize);
                     contextPtr->highLevelRateControlPtr->bufferFill = (EB_U64)(bufferfill_temp);
-
-                    //printf("parentPictureControlSetPtr->totalNumBits = %lld \t contextPtr->highLevelRateControlPtr->bufferFill = %lld \t parentPictureControlSetPtr->pictureNumber = %lld \t parentPictureControlSetPtr->sliceType = %d \n", parentPictureControlSetPtr->totalNumBits, contextPtr->highLevelRateControlPtr->bufferFill, parentPictureControlSetPtr->pictureNumber, parentPictureControlSetPtr->sliceType);
 
                     //printf("totalNumBits = %lld \t bufferFill = %lld \t pictureNumber = %lld \t sliceType = %d \t qp = %d \n", parentPictureControlSetPtr->totalNumBits, contextPtr->highLevelRateControlPtr->bufferFill, parentPictureControlSetPtr->pictureNumber, parentPictureControlSetPtr->sliceType, parentPictureControlSetPtr->bestPredQp);
 
