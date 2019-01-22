@@ -191,7 +191,7 @@ extern EB_ERRORTYPE CopyRbspBitstreamToPayload(
     EB_U32      *outputBufferSize,
     EncodeContext_t         *encodeContextPtr);
 
-void EncodeQuantizedCoefficients_SSE2(
+void EncodeQuantizedCoefficients_AVX2(
     CabacEncodeContext_t         *cabacEncodeCtxPtr,
     EB_U32                        size,                 // Input: TU size
     EB_MODETYPE                   type,                 // Input: CU type (INTRA, INTER)
@@ -327,7 +327,7 @@ static ENCODE_QUANTIZED_COEFF_TYPE FUNC_TABLE EncodeQuantizedCoefficientsFuncArr
 	// C_DEFAULT
     EncodeQuantizedCoefficients_generic,
 	// AVX2
-	EncodeQuantizedCoefficients_SSE2,
+	EncodeQuantizedCoefficients_AVX2,
 };
 
 
