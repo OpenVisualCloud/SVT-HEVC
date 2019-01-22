@@ -23,9 +23,11 @@ if platform == WINDOWS_PLATFORM_STR:
     subprocess_flags = 0x8000000
     slash = '\\'
     exe_name = 'SvtHevcEncApp.exe'
+    dec_exe = 'TAppDecoder.exe'
 else:
     slash = '/'
     exe_name = 'SvtHevcEncApp'
+    dec_exe = 'TAppDecoder'
     
 DEBUG_MODE = 0 # For debugging purposes
 
@@ -33,9 +35,10 @@ DEBUG_MODE = 0 # For debugging purposes
 ENC_PATH = "encoders"
 BIN_PATH = "bitstreams"
 YUV_PATH = "yuvs"
+TOOLS_PATH = "tools"
 
 TEST_CONFIGURATION = 0 # 0 - Validation Test, 1 - Speed Test (Refer to Validation/Speed Test specific configurations)
-SQ_OQ_MODE = 0 # 0 - Both OQ and SQ, 1 - SQ Only, 2 - OQ Only
+SQ_OQ_MODE = 0 # 0 - SQ, OQ and VMAF, 1 - SQ Only, 2 - OQ Only
 
 #------------- Validation Test Specific -------------#
 VALIDATION_TEST_MODE = 0 # 0 - Fast Test, 1 - Overnight Test, 2- Full Test
@@ -55,32 +58,57 @@ SPEED_ENC_MODES = [0,6,9]
 
 # Speed Test Sequences, use 'qp' and 'tbr' to specify to run in Fixed QP or VBR Mode
 SPEED_TEST_SEQUENCES = [
-{'name': 'Netflix_FoodMarket2_4096x2160_10bit_60Hz_P420_2bitspacked', 'tbr': 10000},
-{'name': 'Netflix_Crosswalk_3840x2160_10bit_60Hz_P420_2bitspacked', 'tbr': 10000},
-{'name': 'Netflix_FoodMarket2_4096x2160_10bit_60Hz_P420_2bitspacked', 'qp': 34},
-{'name': 'Netflix_Crosswalk_3840x2160_10bit_60Hz_P420_2bitspacked', 'qp': 34},
-{'name': 'Fallout4_1920x1080_8bit_60Hz_P420', 'qp': 34},
-{'name': 'DucksTakeOff_1280x720_8bit_50Hz_P420', 'qp': 34},
-{'name': 'ParkJoy_864x480_10bit_50Hz_P420_2bitspacked', 'qp': 34}
+{'name': 'Netflix_Boat_4096x2160_10bit_60Hz_P420', 'tbr': 13000},
+{'name': 'Netflix_FoodMarket2_4096x2160_10bit_60Hz_P420_2bitspack', 'tbr': 13000},
+{'name': 'Netflix_Narrator_4096x2160_10bit_60Hz_P420', 'tbr': 13000},
+{'name': 'Netflix_RitualDance_4096x2160_10bit_60Hz_P420', 'tbr': 13000},
+{'name': 'Netflix_Tango_4096x2160_10bit_60Hz_P420_2bitspack', 'tbr': 13000},
+{'name': 'EuroTruckSimulator2_003_1920x1080_8bit_60Hz_P420', 'tbr': 7500},
+{'name': 'Fallout4_003_1920x1080_8bit_60Hz_P420', 'tbr': 7500},
+{'name': 'GTAV_005_1920x1080_8bit_60Hz_P420', 'tbr': 7500},
+{'name': 'RUST_004_1920x1080_8bit_60Hz_P420', 'tbr': 7500},
+{'name': 'WITCHER3_007_1920x1080_8bit_60Hz_P420', 'tbr': 7500},
+{'name': 'EuroTruckSimulator2_003_1280x720_8bit_60Hz_P420', 'tbr': 4500},
+{'name': 'Fallout4_003_1280x720_8bit_60Hz_P420', 'tbr': 4500},
+{'name': 'GTAV_005_1280x720_8bit_60Hz_P420', 'tbr': 4500},
+{'name': 'RUST_004_1280x720_8bit_60Hz_P420', 'tbr': 4500},
+{'name': 'WITCHER3_007_1280x720_8bit_60Hz_P420', 'tbr': 4500},
+{'name': 'ParkJoy_864x480_10bit_50Hz_P420', 'tbr': 2500},
+{'name': 'DucksTakeOff_864x480_8bit_50Hz_P420', 'tbr': 2500},
+{'name': 'CrowdRun_864x480_8bit_50Hz_P420', 'tbr': 2500},
+{'name': 'InToTree_864x480_8bit_50Hz_P420', 'tbr': 2500},
+{'name': 'OldTownCross_864x480_8bit_50Hz_P420', 'tbr': 2500},
 ]
 ##--------------------------------------------------------##
 
 ##-------------- TEST MODE SPECIFIC SETTINGS -------------##
 if VALIDATION_TEST_MODE == 0:
-    ENC_MODES                       = [0,3,6,9,11]
+    ENC_MODES                       = [1,4,8,12]
     NUM_FRAMES                      = 20
     QP_ITERATIONS                   = 1
     VBR_ITERATIONS                  = 1
+    SA_ITER                         = 1 # Search Area WidthxHeight per test
+    LAD_ITER                        = 1 # LAD per test
+    INTRA_PERIOD_ITER               = 1 # Intra Period per test
+    WH_ITER                         = 1 # WidthxHeight per test
 elif VALIDATION_TEST_MODE == 1:
     ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11,12]
-    NUM_FRAMES                      = 80
+    NUM_FRAMES                      = 40
     QP_ITERATIONS                   = 1
     VBR_ITERATIONS                  = 1
+    SA_ITER                         = 1 # Search Area WidthxHeight per test
+    LAD_ITER                        = 1 # LAD per test
+    INTRA_PERIOD_ITER               = 1 # Intra Period per test
+    WH_ITER                         = 1 # WidthxHeight per test
 elif VALIDATION_TEST_MODE == 2:
     ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11,12]
-    NUM_FRAMES                      = 100
-    QP_ITERATIONS                   = 5
-    VBR_ITERATIONS                  = 5
+    NUM_FRAMES                      = 60
+    QP_ITERATIONS                   = 2
+    VBR_ITERATIONS                  = 2
+    SA_ITER                         = 2 # Search Area WidthxHeight per test
+    LAD_ITER                        = 2 # LAD per test
+    INTRA_PERIOD_ITER               = 2 # Intra Period per test
+    WH_ITER                         = 2 # WidthxHeight per test
 ##--------------------------------------------------------##
 
 ##-------------------- Global Defines --------------------##
@@ -92,10 +120,6 @@ MIN_QP                          = 30
 MAX_QP                          = 51
 MIN_BR                          = 1000
 MAX_BR                          = 10000000
-SA_ITER                         = 3 # Search Area WidthxHeight per test
-LAD_ITER                        = 3 # LAD per test
-INTRA_PERIOD_ITER               = 3 # Intra Period per test
-WH_ITER                         = 3 # WidthxHeight per test
 ##--------------------------------------------------------##
 
 if QP_VBR_MODE == 0:
@@ -119,11 +143,13 @@ class EB_Test(object):
     def __init__(self,
                  encoder_path,
                  bitstream_path,
-                 yuv_path):
+                 yuv_path,
+                 tools_path):
     
         self.yuv_path       = yuv_path
         self.encoder_path   = encoder_path
         self.bitstream_path = bitstream_path
+        self.tools_path     = tools_path
         
         if not os.path.exists(bitstream_path):
             os.mkdir(bitstream_path)
@@ -150,6 +176,7 @@ class EB_Test(object):
         default_enc = { 'encoder_dir'                       : self.encoder_path,
                         'bitstream_dir'                     : self.bitstream_path,
                         'yuv_dir'                           : self.yuv_path,
+                        'tools_dir'                         : self.tools_path,
                         'encoder_bit_depth'                 : encoder_bit_depth,
                         'width'                             : width,
                         'height'                            : height,
@@ -507,6 +534,10 @@ class EB_Test(object):
                     print(enc_cmd, file=open(test_name + '.txt', 'a'))
                     if DEBUG_MODE == 0:
                         exit_code = subprocess.call(enc_cmd, shell = True)
+                        if exit_code == 0 and test_name == 'decode_test':
+                            dec_cmd = enc_params['tools_dir'] + slash + dec_exe + " -b " + enc_params['bitstream_dir'] + slash + bitstream_name + '.265 > NUL'
+                            print(dec_cmd, file=open(test_name + '.txt', 'a'))
+                            exit_code = subprocess.call(dec_cmd, shell = True)
                     else:
                         continue
                     if COMPARE == 0:
@@ -600,8 +631,8 @@ class EB_Test(object):
         total_passed = 0
         for seq in seq_list:
             test_params = [
-            [seq, {'frame_to_be_encoded': 300}],
-            [seq, {'frame_to_be_encoded': 300}]
+            [seq, {'frame_to_be_encoded': 150}],
+            [seq, {'frame_to_be_encoded': 150}]
             ]
             # Run test
             for OQ in SQ_OQ_COMBINATION:
@@ -695,7 +726,7 @@ class EB_Test(object):
             intra.append(random.randint(intra_min + int(bin*count), intra_min + int(bin*(count+1))))
         combination_test_params = { 'intra_period'      : intra,
                                     'IntraRefreshType'  : [1, 2],
-                                    'frame_to_be_encoded': [300]
+                                    'frame_to_be_encoded': [260]
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
@@ -755,7 +786,7 @@ class EB_Test(object):
             lad.append(random.randint(lad_min + int(bin*count), lad_min + int(bin*(count+1))))
         combination_test_params = { 'SceneChangeDetection'  : [0, 1],
                                     'LookAheadDistance'     : lad,
-                                    'frame_to_be_encoded'   : [300]
+                                    'frame_to_be_encoded'   : [260]
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
@@ -778,7 +809,34 @@ class EB_Test(object):
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
+## ------------------------------------------- ##
 
+## --------------- DECODE TEST --------------- ##
+# The decode test ensure encoded streams are conformant to standard decoders
+    def decode_test(self,seq_list):
+        # Test specific parameters:
+        test_name = 'decode_test'
+        # Get default encoding params
+        enc_params = self.get_default_params().copy()
+        if os.path.exists(test_name + '.txt'):
+            return 0, 0
+        print ("Running Test: " + test_name)
+        print ("---------------------------------------", file=open(test_name + '.txt', 'w'))
+        print ("Test Name: " + test_name, file=open(test_name + '.txt', 'a'))
+        total_test = 0
+        total_passed = 0
+        for seq in seq_list:
+            for VBR in QP_VBR_COMBINATION:
+                for OQ in SQ_OQ_COMBINATION:
+                    test_params = [
+                    [seq, {'frame_to_be_encoded': 20}],
+                    ]
+                    num_tests, num_passed = self.run_test(test_name, test_params, enc_params, OQ, VBR, 0)
+                    total_test = total_test + num_tests
+                    total_passed = total_passed + num_passed
+        return total_test, total_passed
+                
+    
 ## ------------------------------------------- ##
     
     def get_time(self, total_seconds):
@@ -805,6 +863,10 @@ class EB_Test(object):
         exit_code = 0
         if not os.path.exists(self.encoder_path + slash + exe_name):
             print ("Cannot find encoder executable. Please make sure " + exe_name + " can be found in the folder \"" + self.encoder_path + "\"")
+            exit_code = -1
+            return exit_code
+        if not os.path.exists(self.tools_path + slash + dec_exe):
+            print ("Cannot find decoder executable. Please make sure " + dec_exe + " can be found in the folder \"" + self.tools_path + "\"")
             exit_code = -1
             return exit_code
         for seq in seq_list:
@@ -873,6 +935,9 @@ class EB_Test(object):
         num_tests, num_passed = self.me_hme_test(seq_list)
         total_tests = total_tests + num_tests
         total_passed = total_passed + num_passed
+        num_tests, num_passed = self.decode_test(seq_list)
+        total_tests = total_tests + num_tests
+        total_passed = total_passed + num_passed
         finish_time = time.time()
         if total_tests == 0 and total_passed == 0:
             print ("No tests were ran.. Exiting...", file=open(file_name + '.txt', 'a'))
@@ -889,7 +954,7 @@ class EB_Test(object):
         print ("1. Run shell script (Run in \"sudo\" mode in Linux)", file=open('Running_Speed_Test.txt', 'a'))
         print ("Note: Running it from a shell script minimizes use of CPU cycles from Python", file=open('Running_Speed_Test.txt', 'a'))
     
-    # Set number of frames for speed test
+    # Set number of channels for speed test
     def get_num_channels(self, enc_mode, enc_params):
         if enc_params['width']*enc_params['height'] > 1920*1080:
             if enc_mode >= 0 and enc_mode <= 3:
@@ -915,6 +980,16 @@ class EB_Test(object):
         else:
             num_channels = 6
         return num_channels
+        
+    # Set number of frames for speed test
+    def get_num_frames(self, enc_mode):
+        if enc_mode >= 0 and enc_mode <= 1:
+            num_frames = 500
+        elif enc_mode >= 2 and enc_mode <= 4:
+            num_frames = 2000
+        elif enc_mode >= 5:
+            num_frames = 4000
+        return num_frames
     
     def run_speed_test(self, seq_dict):
         seq_list = []
@@ -951,15 +1026,18 @@ class EB_Test(object):
                     continue
                 for enc_mode in SPEED_ENC_MODES:
                     num_channels = self.get_num_channels(enc_mode, enc_params)
+                    num_frames = self.get_num_frames(enc_mode)
                     if OQ == 0:
                         quality_mode = '_SQ'
-                    else:
+                    elif OQ == 1:
                         quality_mode = '_OQ'
+                    else:
+                        quality_mode = '_VMAF'
                     if VBR == 0:
-                        enc_params.update({'enc_mode': enc_mode, 'qp': iter_list, 'rc': 0, 'tune': OQ})
+                        enc_params.update({'enc_mode': enc_mode, 'qp': iter_list, 'rc': 0, 'tune': OQ, 'frame_to_be_encoded': num_frames})
                         cmd = self.get_enc_cmd(enc_params, seq['name'], 'Speed_Test_M' + str(enc_mode) + '_' + seq['name'] + quality_mode + '_Q' + str(iter_list), num_channels)
                     else:
-                        enc_params.update({'enc_mode': enc_mode, 'tbr': iter_list, 'rc': 1, 'tune': OQ})
+                        enc_params.update({'enc_mode': enc_mode, 'tbr': iter_list, 'rc': 1, 'tune': OQ, 'frame_to_be_encoded': num_frames})
                         cmd = self.get_enc_cmd(enc_params, seq['name'], 'Speed_Test_M' + str(enc_mode) + '_' + seq['name'] + quality_mode + '_TBR' + str(iter_list), num_channels)
                     print (cmd)
                     if platform == WINDOWS_PLATFORM_STR:
@@ -968,7 +1046,7 @@ class EB_Test(object):
                         print(cmd, file=open('speed_script.sh', 'a'))
                     
 ##----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------##
-small_test = EB_Test(ENC_PATH, BIN_PATH, YUV_PATH)
+small_test = EB_Test(ENC_PATH, BIN_PATH, YUV_PATH, TOOLS_PATH)
 if TEST_CONFIGURATION == 0:
     small_test.run_validation_test(VALIDATION_TEST_SEQUENCES)
 elif TEST_CONFIGURATION == 1:
