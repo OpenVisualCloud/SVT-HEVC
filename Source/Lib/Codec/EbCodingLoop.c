@@ -3464,6 +3464,7 @@ EB_EXTERN void EncodePass(
         sequenceControlSetPtr->staticConfig.reconEnabled;
 
     dlfEnableFlag = contextPtr->allowEncDecMismatch ? EB_FALSE : dlfEnableFlag;
+    pictureControlSetPtr->sliceDlfDisableFlag = !dlfEnableFlag;
 
     const EB_BOOL isIntraLCU = contextPtr->mdContext->limitIntra ? isIntraPresent(lcuPtr) : EB_TRUE;
 

@@ -265,6 +265,7 @@ typedef struct PictureControlSet_s
 
 	struct PictureParentControlSet_s     *ParentPcsPtr;//The parent of this PCS.
 	EbObjectWrapper_t                    *PictureParentControlSetWrapperPtr;
+    EB_BOOL                               sliceDlfDisableFlag;
 	EB_S8                                 betaOffset;
 	EB_S8                                 tcOffset;
 

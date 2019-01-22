@@ -6211,7 +6211,7 @@ static void CodeSliceHeader(
 
 	SequenceControlSet_t     *sequenceControlSetPtr = (SequenceControlSet_t*)pcsPtr->sequenceControlSetWrapperPtr->objectPtr;
 
-	EB_BOOL disableDlfFlag = sequenceControlSetPtr->staticConfig.disableDlfFlag;
+    EB_BOOL disableDlfFlag = pcsPtr->sliceDlfDisableFlag;
 
 	EB_U32 sliceType = (pcsPtr->ParentPcsPtr->idrFlag == EB_TRUE) ? EB_I_PICTURE : pcsPtr->sliceType;
 
