@@ -45,7 +45,6 @@ VALIDATION_TEST_MODE = 0 # 0 - Fast Test, 1 - Overnight Test, 2- Full Test
 QP_VBR_MODE = 0 # 0 - Both QP and VBR, 1 - QP Only, 2 - VBR Only
 
 VALIDATION_TEST_SEQUENCES = [
-'Netflix_FoodMarket2_4096x2160_10bit_60Hz_P420',
 'Netflix_Crosswalk_3840x2160_10bit_60Hz_P420',
 'Fallout4_1920x1080_8bit_60Hz_P420',
 'DucksTakeOff_1280x720_8bit_50Hz_P420',
@@ -102,7 +101,7 @@ elif VALIDATION_TEST_MODE == 1:
     WH_ITER                         = 1 # WidthxHeight per test
 elif VALIDATION_TEST_MODE == 2:
     ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11,12]
-    NUM_FRAMES                      = 60
+    NUM_FRAMES                      = 40
     QP_ITERATIONS                   = 2
     VBR_ITERATIONS                  = 2
     SA_ITER                         = 2 # Search Area WidthxHeight per test
@@ -441,6 +440,8 @@ class EB_Test(object):
             pred_struct   = enc_params['PredStructure']
             base_sw_mode   = enc_params['BaseLayerSwitchMode']
             if base_sw_mode == 1 and pred_struct != 2:
+                return -1
+            if width*height >= 1920*1080:
                 return -1
         if test_name == 'qp_file_test':
             if 'rc' in enc_params:
