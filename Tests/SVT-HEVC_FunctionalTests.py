@@ -12,6 +12,7 @@ import math
 import filecmp
 import time
 import glob
+import sys
 
 LINUX_PLATFORM_STR    = "Linux"
 WINDOWS_PLATFORM_STR  = "Windows"
@@ -29,6 +30,25 @@ else:
     exe_name = 'SvtHevcEncApp'
     dec_exe = 'TAppDecoder'
     
+def get_test_mode(mode):
+    if len(mode) <= 1:
+        print("Running default mode: Fast")
+        return 0
+    test_mode = mode[1]
+    if test_mode == "fast" or test_mode == "Fast":
+        print("Running mode: Fast")
+        return 0
+    elif test_mode == "nightly" or test_mode == "Nightly":
+        print("Running mode: Nightly")
+        return 1
+    elif test_mode == "full" or test_mode == "Full":
+        print("Running mode: Full")
+        return 2
+    else:
+        print("Mode not recognized")
+        print("Running default mode: Fast")
+        return 0
+
 DEBUG_MODE = 0 # For debugging purposes
 
 ##--------------------- TEST SETTINGS --------------------##
@@ -41,7 +61,7 @@ TEST_CONFIGURATION = 0 # 0 - Validation Test, 1 - Speed Test (Refer to Validatio
 SQ_OQ_MODE = 0 # 0 - SQ, OQ and VMAF, 1 - SQ Only, 2 - OQ Only
 
 #------------- Validation Test Specific -------------#
-VALIDATION_TEST_MODE = 0 # 0 - Fast Test, 1 - Overnight Test, 2- Full Test
+VALIDATION_TEST_MODE = get_test_mode(sys.argv) # 0 - Fast Test, 1 - Overnight Test, 2- Full Test
 QP_VBR_MODE = 0 # 0 - Both QP and VBR, 1 - QP Only, 2 - VBR Only
 
 VALIDATION_TEST_SEQUENCES = [
