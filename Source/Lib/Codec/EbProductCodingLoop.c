@@ -5898,12 +5898,11 @@ EB_EXTERN EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
     
     while (parentLeafIndex < CU_MAX_COUNT) {
 
-        EB_U8  parentDepthOffset    = DepthOffset[GetCodedUnitStats(parentLeafIndex)->depth];
-        EB_U8  childDepthOffset     = DepthOffset[GetCodedUnitStats(parentLeafIndex)->depth + 1];
-
         if (lcuPtr->codedLeafArrayPtr[parentLeafIndex]->splitFlag == EB_FALSE) {
-            EB_BOOL cu16x16RefinementFlag;  
 
+            EB_U8  parentDepthOffset = DepthOffset[GetCodedUnitStats(parentLeafIndex)->depth];
+            EB_U8  childDepthOffset = DepthOffset[GetCodedUnitStats(parentLeafIndex)->depth + 1];
+            EB_BOOL cu16x16RefinementFlag;  
 
 			if (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_LIGHT_BDP_DEPTH_MODE || (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_LCU_SWITCH_DEPTH_MODE  && (pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuAddr] == LCU_LIGHT_BDP_DEPTH_MODE))){
 
