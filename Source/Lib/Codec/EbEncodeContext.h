@@ -144,6 +144,10 @@ typedef struct EncodeContext_s
     // Rate Control
     EB_U32                               availableTargetBitRate;
     EB_BOOL                              availableTargetBitRateChanged;
+    EB_U32                               vbvMaxrate;
+    EB_U32                               vbvBufsize;
+    EB_U64                               bufferFill;
+
 
     EB_U32								 previousSelectedRefQp;
     EB_U64								 maxCodedPoc;

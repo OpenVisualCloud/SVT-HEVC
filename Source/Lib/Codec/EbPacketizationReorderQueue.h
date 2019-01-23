@@ -20,6 +20,7 @@ typedef struct PacketizationReorderEntry_s {
 
     EB_U64                          startTimeSeconds;
     EB_U64                          startTimeuSeconds;
+    EB_U64                          actualBits;
 } PacketizationReorderEntry_t;   
 
 extern EB_ERRORTYPE PacketizationReorderEntryCtor(   

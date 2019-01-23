@@ -206,6 +206,9 @@ EB_ERRORTYPE EncodeContextCtor(
     // Rate Control
     encodeContextPtr->availableTargetBitRate                            = 10000000;
     encodeContextPtr->availableTargetBitRateChanged                     = EB_FALSE;
+    encodeContextPtr->bufferFill                                        = 0;
+    encodeContextPtr->vbvBufsize                                        = 0;
+    encodeContextPtr->vbvMaxrate                                        = 0;
 
     // Rate Control Bit Tables
     EB_MALLOC(RateControlTables_t*, encodeContextPtr->rateControlTablesArray, sizeof(RateControlTables_t) * TOTAL_NUMBER_OF_INITIAL_RC_TABLES_ENTRY, EB_N_PTR);

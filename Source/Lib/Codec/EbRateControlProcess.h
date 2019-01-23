@@ -227,7 +227,6 @@ typedef struct HighLevelRateControlContext_s
     EB_U32                       prevIntraSelectedRefQp;
     EB_U32                       prevIntraOrgSelectedRefQp;
     EB_U64                       previousUpdatedBitConstraintPerSw;
-    EB_U64                       bufferFill;
 #endif
     
 
@@ -244,10 +243,6 @@ typedef struct RateControlContext_s
     EB_U64                       rateControlParamQueueHeadIndex;   
 
     EB_U64                       frameRate;   
-    EB_U32                       vbvMaxrate;
-    EB_U32                       vbvBufsize;
-    EB_U64                       bufferFill;
-
 
     EB_U64                       virtualBufferSize; 
 

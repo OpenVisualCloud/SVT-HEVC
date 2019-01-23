@@ -495,7 +495,7 @@ void* PacketizationKernel(void *inputPtr)
         
         // Send the number of bytes per frame to RC
         pictureControlSetPtr->ParentPcsPtr->totalNumBits = outputStreamPtr->nFilledLen << 3;    
-
+        queueEntryPtr->actualBits = pictureControlSetPtr->ParentPcsPtr->totalNumBits;
         // Code EOS NUT
         if (outputStreamPtr->nFlags & EB_BUFFERFLAG_EOS && sequenceControlSetPtr->staticConfig.codeEosNal == 1) 
         {
@@ -562,7 +562,18 @@ void* PacketizationKernel(void *inputPtr)
 
             outputStreamPtr->nTickCount = (EB_U32)latency;
 			EbPostFullObject(outputStreamWrapperPtr);
+            /* update VBV plan */
+            if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize)
+            {
+                EB_S64 bufferfill_temp = (EB_S64)(encodeContextPtr->bufferFill);
 
+                bufferfill_temp -= queueEntryPtr->actualBits;
+                bufferfill_temp = MAX(bufferfill_temp, 0);
+                bufferfill_temp = (EB_S64)(bufferfill_temp + (encodeContextPtr->vbvMaxrate * (1.0 / (sequenceControlSetPtr->frameRate >> RC_PRECISION))));
+                bufferfill_temp = MIN(bufferfill_temp, encodeContextPtr->vbvBufsize);
+                encodeContextPtr->bufferFill = (EB_U64)(bufferfill_temp);
+
+            }
             // Reset the Reorder Queue Entry
             queueEntryPtr->pictureNumber    += PACKETIZATION_REORDER_QUEUE_MAX_DEPTH;            
             queueEntryPtr->outputStreamWrapperPtr = (EbObjectWrapper_t *)EB_NULL;

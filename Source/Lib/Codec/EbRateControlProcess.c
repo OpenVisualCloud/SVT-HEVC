@@ -347,8 +347,6 @@ EB_ERRORTYPE RateControlContextCtor(
     contextPtr->extraBitsGen = 0;
     contextPtr->maxRateAdjustDeltaQP = 0;
 
-
-    contextPtr->bufferFill = 0;
     return EB_ErrorNone;
 }
 
@@ -756,7 +754,7 @@ void HighLevelRcInputPictureMode2(
             bestQp = previousSelectedRefQp;
         }
 
-        if (contextPtr->vbvMaxrate && contextPtr->vbvBufsize)
+        if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize)
         {
             /* Lookahead VBV: If lookahead is done, raise the quantizer as necessary
             * such that no frames in the lookahead overflow and such that the buffer
@@ -780,9 +778,8 @@ void HighLevelRcInputPictureMode2(
             for (EB_U32 iterations = 0; iterations < 1000 && loopTerminate != 3; iterations++)
             {
                 hlRateControlHistogramPtrTemp = (encodeContextPtr->hlRateControlHistorgramQueue[currentInd]);
-
                 double curBits = (double)predictBits(sequenceControlSetPtr, encodeContextPtr, hlRateControlHistogramPtrTemp, q);
-                double bufferFillCur = highLevelRateControlPtr->bufferFill - curBits;
+                double bufferFillCur = encodeContextPtr->bufferFill - curBits;
                 double targetFill;
                 double fps = 1.0 / (sequenceControlSetPtr->frameRate >> RC_PRECISION);
                 double totalDuration = fps;
@@ -801,9 +798,10 @@ void HighLevelRcInputPictureMode2(
                         (queueEntryIndexTemp >= sequenceControlSetPtr->staticConfig.framesToBeEncoded)
                         || (totalDuration >= 1.0))
                         break;
+
                     totalDuration += fps;
-                    double wantedFrameSize = contextPtr->vbvMaxrate * fps;
-                    if (bufferFillCur + wantedFrameSize <= contextPtr->vbvBufsize)
+                    double wantedFrameSize = encodeContextPtr->vbvMaxrate * fps;
+                    if (bufferFillCur + wantedFrameSize <= encodeContextPtr->vbvBufsize)
                         bufferFillCur += wantedFrameSize;
                     curBits = (double)predictBits(sequenceControlSetPtr, encodeContextPtr, hlRateControlHistogramPtrTemp, q);
                     bufferFillCur -= curBits;
@@ -811,7 +809,7 @@ void HighLevelRcInputPictureMode2(
                 }
                 /* Try to get the buffer at least 50% filled, but don't set an impossible goal. */
                 double finalDur = 1;
-                targetFill = MIN(highLevelRateControlPtr->bufferFill + totalDuration * contextPtr->vbvMaxrate * 0.5, contextPtr->vbvBufsize * (1 - 0.5 * finalDur));
+                targetFill = MIN(encodeContextPtr->bufferFill + totalDuration * encodeContextPtr->vbvMaxrate * 0.5, encodeContextPtr->vbvBufsize * (1 - 0.5 * finalDur));
                 if (bufferFillCur < targetFill)
                 {
                     q++;
@@ -823,7 +821,7 @@ void HighLevelRcInputPictureMode2(
                     continue;
                 }
                 /* Try to get the buffer not more than 80% filled, but don't set an impossible goal. */
-                targetFill = CLIP3(contextPtr->vbvBufsize * (1 - 0.2 * finalDur), contextPtr->vbvBufsize, highLevelRateControlPtr->bufferFill - totalDuration * contextPtr->vbvMaxrate * 0.5);
+                targetFill = CLIP3(encodeContextPtr->vbvBufsize * (1 - 0.2 * finalDur), encodeContextPtr->vbvBufsize, encodeContextPtr->bufferFill - totalDuration * encodeContextPtr->vbvMaxrate * 0.5);
                 if (bufferFillCur > targetFill)
                 {
                     q--;
@@ -2327,7 +2325,7 @@ void* RateControlKernel(void *inputPtr)
 {
     // Context
     RateControlContext_t        *contextPtr = (RateControlContext_t*)inputPtr;
-    // EncodeContext_t             *encodeContextPtr;
+    EncodeContext_t             *encodeContextPtr;
 
     RateControlIntervalParamContext_t *rateControlParamPtr;
 
@@ -2376,9 +2374,11 @@ void* RateControlKernel(void *inputPtr)
 
             pictureControlSetPtr = (PictureControlSet_t*)rateControlTasksPtr->pictureControlSetWrapperPtr->objectPtr;
             sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
+            encodeContextPtr = (EncodeContext_t*)sequenceControlSetPtr->encodeContextPtr;
 #if DEADLOCK_DEBUG
             SVT_LOG("POC %lld RC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
+
             // High level RC
             if (pictureControlSetPtr->pictureNumber == 0){
 
@@ -2388,9 +2388,7 @@ void* RateControlKernel(void *inputPtr)
 
                 contextPtr->highLevelRateControlPtr->channelBitRatePerSw            = contextPtr->highLevelRateControlPtr->channelBitRatePerFrame * (sequenceControlSetPtr->staticConfig.lookAheadDistance + 1);
                 contextPtr->highLevelRateControlPtr->bitConstraintPerSw             = contextPtr->highLevelRateControlPtr->channelBitRatePerSw;
-
-                contextPtr->highLevelRateControlPtr->bufferFill = (EB_U64)(sequenceControlSetPtr->staticConfig.vbvBufsize * 0.9);
-
+                encodeContextPtr->bufferFill = (EB_U64)(sequenceControlSetPtr->staticConfig.vbvBufsize * 0.9);
 #if RC_UPDATE_TARGET_RATE
                 contextPtr->highLevelRateControlPtr->previousUpdatedBitConstraintPerSw = contextPtr->highLevelRateControlPtr->channelBitRatePerSw;
 #endif
@@ -2422,9 +2420,8 @@ void* RateControlKernel(void *inputPtr)
                 contextPtr->vbFillThreshold2                = (contextPtr->virtualBufferSize << 3) >> 3;
                 contextPtr->baseLayerFramesAvgQp            = sequenceControlSetPtr->qp;
                 contextPtr->baseLayerIntraFramesAvgQp       = sequenceControlSetPtr->qp;
-                contextPtr->vbvMaxrate                      = sequenceControlSetPtr->staticConfig.vbvMaxrate;
-                contextPtr->vbvBufsize                      = sequenceControlSetPtr->staticConfig.vbvBufsize;
-                contextPtr->bufferFill                      = contextPtr->vbvMaxrate;
+                encodeContextPtr->vbvMaxrate                = sequenceControlSetPtr->staticConfig.vbvMaxrate;
+                encodeContextPtr->vbvBufsize                = sequenceControlSetPtr->staticConfig.vbvBufsize;
             }
             if (sequenceControlSetPtr->staticConfig.rateControlMode)
             {
@@ -2736,21 +2733,6 @@ void* RateControlKernel(void *inputPtr)
 
                 }
 
-                /* update VBV plan */
-                if (contextPtr->vbvMaxrate && contextPtr->vbvBufsize)
-                {
-                    EB_S64 bufferfill_temp = (EB_S64)(contextPtr->highLevelRateControlPtr->bufferFill);
-
-                    bufferfill_temp -= parentPictureControlSetPtr->totalNumBits;
-                    bufferfill_temp = MAX(bufferfill_temp, 0);
-                    bufferfill_temp = (EB_S64) (bufferfill_temp + (contextPtr->vbvMaxrate * (1.0 / (sequenceControlSetPtr->frameRate >> RC_PRECISION))));
-                    bufferfill_temp = MIN(bufferfill_temp, contextPtr->vbvBufsize);
-                    contextPtr->highLevelRateControlPtr->bufferFill = (EB_U64)(bufferfill_temp);
-
-                    //printf("totalNumBits = %lld \t bufferFill = %lld \t pictureNumber = %lld \t sliceType = %d \t qp = %d \n", parentPictureControlSetPtr->totalNumBits, contextPtr->highLevelRateControlPtr->bufferFill, parentPictureControlSetPtr->pictureNumber, parentPictureControlSetPtr->sliceType, parentPictureControlSetPtr->bestPredQp);
-
-                }
-                //printf("totalNumBits = %lld \t pictureNumber = %lld \t sliceType = %d \t qp = %d \n", parentPictureControlSetPtr->totalNumBits, parentPictureControlSetPtr->pictureNumber, parentPictureControlSetPtr->sliceType, parentPictureControlSetPtr->bestPredQp);
             }
 
             // Queue variables
