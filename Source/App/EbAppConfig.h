@@ -329,6 +329,7 @@ typedef struct EbConfig_s
     uint32_t                 enableTemporalId;
     EB_BOOL                switchThreadsToRtPriority;
     EB_BOOL                fpsInVps;
+    uint32_t                 hrdFlag;
 
     /****************************************
      * Annex A Parameters

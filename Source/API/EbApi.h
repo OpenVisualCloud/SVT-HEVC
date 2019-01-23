@@ -204,6 +204,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     uint8_t                 switchThreadsToRtPriority;     // switch to real time mode
     uint32_t                vbvMaxrate;
     uint32_t                vbvBufsize;
+    uint32_t                hrdFlag;
 
     // ASM Type
     uint32_t                asmType;                      // level of optimization to use.

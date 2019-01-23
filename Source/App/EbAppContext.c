@@ -185,6 +185,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.useQpFile = (EB_BOOL)config->useQpFile;
     callbackData->ebEncParameters.disableDlfFlag = (EB_BOOL)config->disableDlfFlag;
     callbackData->ebEncParameters.enableSaoFlag = (EB_BOOL)config->enableSaoFlag;
+    callbackData->ebEncParameters.hrdFlag = (EB_BOOL)config->hrdFlag;
     callbackData->ebEncParameters.useDefaultMeHme = (EB_BOOL)config->useDefaultMeHme;
     callbackData->ebEncParameters.enableHmeFlag = (EB_BOOL)config->enableHmeFlag;
     callbackData->ebEncParameters.searchAreaWidth = config->searchAreaWidth;

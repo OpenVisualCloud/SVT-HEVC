@@ -2108,6 +2108,7 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.frameRateDenominator = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRateDenominator;
     sequenceControlSetPtr->staticConfig.frameRateNumerator = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRateNumerator;
     sequenceControlSetPtr->staticConfig.reconEnabled = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->reconEnabled;
+    sequenceControlSetPtr->staticConfig.hrdFlag = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hrdFlag;
 
     // if HDR is set videoUsabilityInfo should be set to 1
     if (sequenceControlSetPtr->staticConfig.highDynamicRangeInput == 1) {
@@ -2128,6 +2129,16 @@ void CopyApiFromApp(
         sequenceControlSetPtr->staticConfig.lookAheadDistance = ComputeDefaultLookAhead(&sequenceControlSetPtr->staticConfig);
     }
 
+    //Set required flags to signal vbv status when hrd is enabled
+    if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
+    {
+        sequenceControlSetPtr->staticConfig.videoUsabilityInfo = 1;
+        sequenceControlSetPtr->videoUsabilityInfoPtr->vuiHrdParametersPresentFlag = 1;
+        sequenceControlSetPtr->staticConfig.bufferingPeriodSEI = 1;
+        sequenceControlSetPtr->staticConfig.pictureTimingSEI = 1;
+        sequenceControlSetPtr->videoUsabilityInfoPtr->hrdParametersPtr->nalHrdParametersPresentFlag = 1;
+        sequenceControlSetPtr->videoUsabilityInfoPtr->hrdParametersPtr->cpbDpbDelaysPresentFlag = 1;
+    }
     
 
     
@@ -2416,6 +2427,18 @@ static EB_ERRORTYPE VerifySettings(\
        SVT_LOG("SVT [Error]: Instance %u: Invalid LoopFilterDisable. LoopFilterDisable must be [0 - 1]\n",channelNumber+1);
 	   return_error = EB_ErrorBadParameter;	
     } 
+
+    if (config->hrdFlag > 1)
+    {
+        printf("Error Instance %u: hrdFlag must be [0 - 1]\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->hrdFlag == 1 && ((config->vbvBufsize <= 0) || (config->vbvMaxrate <= 0)))
+    {
+        printf("Error instance %u: hrd requires vbv max rate and vbv bufsize to be greater than 0 ", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
 
 	if ( config->enableSaoFlag > 1) {
        SVT_LOG("SVT [Error]: Instance %u: Invalid SAO. SAO range must be [0 - 1]\n",channelNumber+1);
