@@ -338,7 +338,7 @@ EB_U32 GetPictureTimingSEILength(
 
     if(vuiPtr->hrdParametersPtr->cpbDpbDelaysPresentFlag) {
         // au_cpb_removal_delay_minus1
-        seiLength += vuiPtr->hrdParametersPtr->duCpbRemovalDelayLengthMinus1 + 1;
+        seiLength += vuiPtr->hrdParametersPtr->auCpbRemovalDelayLengthMinus1 + 1;
 
         // pic_dpb_output_delay
         seiLength += vuiPtr->hrdParametersPtr->dpbOutputDelayLengthMinus1 + 1;
@@ -400,7 +400,7 @@ EB_U32 GetBufPeriodSEILength(
     seiLength += 1;
 
     // au_cpb_removal_delay_delta_minus1
-    seiLength += vuiPtr->hrdParametersPtr->initialCpbRemovalDelayLengthMinus1 + 1;
+    seiLength += vuiPtr->hrdParametersPtr->auCpbRemovalDelayLengthMinus1 + 1;
 
     if(bufferingPeriodPtr->rapCpbParamsPresentFlag) {
         // cpb_delay_offset

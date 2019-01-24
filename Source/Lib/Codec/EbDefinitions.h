@@ -1045,6 +1045,9 @@ typedef enum EB_SEI {
 #define LOW_LCU_VARIANCE		10
 #define MEDIUM_LCU_VARIANCE		50
 
+//HRD constants
+#define BR_SHIFT               6
+#define CPB_SHIFT              4
 
 // INTRA restriction for global motion
 #define INTRA_GLOBAL_MOTION_NON_MOVING_INDEX_TH  2

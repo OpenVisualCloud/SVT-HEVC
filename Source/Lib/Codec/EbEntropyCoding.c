@@ -7983,7 +7983,7 @@ EB_ERRORTYPE CodeBufferingPeriodSEI(
 	WriteCodeCavlc(
 		bitstreamPtr,
 		bufferingPeriodPtr->auCpbRemovalDelayDeltaMinus1,
-		vuiPtr->hrdParametersPtr->initialCpbRemovalDelayLengthMinus1 + 1);
+		vuiPtr->hrdParametersPtr->auCpbRemovalDelayLengthMinus1 + 1);
 
 	if (bufferingPeriodPtr->rapCpbParamsPresentFlag){
 		// cpb_delay_offset
@@ -8055,6 +8055,7 @@ EB_ERRORTYPE CodeBufferingPeriodSEI(
 }
 
 
+
 EB_ERRORTYPE CodePictureTimingSEI(
 	OutputBitstreamUnit_t   *bitstreamPtr,
 	AppPictureTimingSei_t   *picTimingSeiPtr,
@@ -8092,7 +8093,7 @@ EB_ERRORTYPE CodePictureTimingSEI(
 		WriteCodeCavlc(
 			bitstreamPtr,
 			picTimingSeiPtr->auCpbRemovalDelayMinus1,
-			vuiPtr->hrdParametersPtr->duCpbRemovalDelayLengthMinus1 + 1);
+			vuiPtr->hrdParametersPtr->auCpbRemovalDelayLengthMinus1 + 1);
 
 		// pic_dpb_output_delay
 		WriteCodeCavlc(

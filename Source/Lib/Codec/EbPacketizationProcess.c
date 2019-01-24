@@ -18,6 +18,78 @@
 #include "EbRateControlProcess.h"
 #include "EbTime.h"
 
+void HrdFullness(SequenceControlSet_t *sequenceControlSetPtr, PictureControlSet_t *pictureControlSetptr, AppBufferingPeriodSei_t *seiBP)
+{
+    EB_U32 i;
+    const AppVideoUsabilityInfo_t* vui = sequenceControlSetPtr->videoUsabilityInfoPtr;
+    const AppHrdParameters_t* hrd = vui->hrdParametersPtr;
+    EB_U32 num = 90000;
+    EB_U32 denom = (hrd->bitRateValueMinus1[pictureControlSetptr->temporalLayerIndex][0][hrd->cpbCountMinus1[0]] + 1) << (hrd->bitRateScale + BR_SHIFT);
+    EB_U64 cpbState = sequenceControlSetPtr->encodeContextPtr->bufferFill;
+    EB_U64 cpbSize = (hrd->cpbSizeValueMinus1[pictureControlSetptr->temporalLayerIndex][0][hrd->cpbCountMinus1[0]] + 1) << (hrd->cpbSizeScale + CPB_SHIFT);
+
+    for (i = 0; i < hrd->cpbCountMinus1[0]+1; i++)
+    {
+        seiBP->initialCpbRemovalDelay[0][i] = (EB_U32)(num * cpbState / denom);
+        seiBP->initialCpbRemovalDelayOffset[0][i] = (EB_U32)(num * cpbSize / denom - seiBP->initialCpbRemovalDelay[0][i]);
+    }
+}
+
+static inline EB_S32 calcScale(EB_U32 x)
+{
+    EB_U8 lut[16] = { 4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0 };
+    EB_S32 y, z = (((x & 0xffff) - 1) >> 27) & 16;
+    x >>= z;
+    z += y = (((x & 0xff) - 1) >> 28) & 8;
+    x >>= y;
+    z += y = (((x & 0xf) - 1) >> 29) & 4;
+    x >>= y;
+    return z + lut[x & 0xf];
+}
+
+static inline EB_S32 calcLength(EB_U32 x)
+{
+    EB_U8 lut[16] = { 4, 3, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
+    EB_S32 y, z = (((x >> 16) - 1) >> 27) & 16;
+    x >>= z ^ 16;
+    z += y = ((x - 0x100) >> 28) & 8;
+    x >>= y ^ 8;
+    z += y = ((x - 0x10) >> 29) & 4;
+    x >>= y ^ 4;
+    return z + lut[x];
+}
+
+void InitHRD(SequenceControlSet_t *scsPtr)
+{
+    EB_U32 i, j, k;
+    AppHrdParameters_t *hrd = scsPtr->videoUsabilityInfoPtr->hrdParametersPtr;
+
+    // normalize HRD size and rate to the value / scale notation
+    hrd->bitRateScale = (EB_U32)CLIP3(0, 15, calcScale(scsPtr->staticConfig.vbvMaxrate) - BR_SHIFT);
+    hrd->cpbSizeScale = (EB_U32)CLIP3(0, 15, calcScale(scsPtr->staticConfig.vbvBufsize) - CPB_SHIFT);
+    for (i = 0; i < MAX_TEMPORAL_LAYERS; i++)
+        for (j = 0; j < 2; j++)
+            for (k = 0; k < MAX_CPB_COUNT; k++)
+            {
+                hrd->bitRateValueMinus1[i][j][k] = (scsPtr->staticConfig.vbvMaxrate >> (hrd->bitRateScale + BR_SHIFT))-1;
+                hrd->cpbSizeValueMinus1[i][j][k] = (scsPtr->staticConfig.vbvBufsize >> (hrd->cpbSizeScale + CPB_SHIFT))-1;
+            }
+    EB_U32 bitRateUnscale = ((scsPtr->staticConfig.vbvMaxrate >> (hrd->bitRateScale + BR_SHIFT)) << (hrd->bitRateScale + BR_SHIFT));
+    EB_U32 cpbSizeUnscale = ((scsPtr->staticConfig.vbvBufsize >> (hrd->cpbSizeScale + CPB_SHIFT)) << (hrd->cpbSizeScale + CPB_SHIFT));
+
+    // arbitrary
+#define MAX_DURATION 0.5
+
+    EB_U32 maxCpbOutputDelay = (EB_U32)MIN((EB_U32)scsPtr->staticConfig.intraPeriodLength* MAX_DURATION *scsPtr->videoUsabilityInfoPtr->vuiTimeScale / scsPtr->videoUsabilityInfoPtr->vuiNumUnitsInTick, MAX_UNSIGNED_VALUE);
+    EB_U32 maxDpbOutputDelay = (EB_U32)(scsPtr->maxDpbSize* MAX_DURATION *scsPtr->videoUsabilityInfoPtr->vuiTimeScale / scsPtr->videoUsabilityInfoPtr->vuiNumUnitsInTick);
+    EB_U32 maxDelay = (EB_U32)(90000.0 * cpbSizeUnscale / bitRateUnscale + 0.5);
+    hrd->initialCpbRemovalDelayLengthMinus1 = (EB_U32)((2 + CLIP3(4, 22, 32 - calcLength(maxDelay)))-1);
+    hrd->auCpbRemovalDelayLengthMinus1 = (EB_U32)((CLIP3(4, 31, 32 - calcLength(maxCpbOutputDelay)))-1);
+    hrd->dpbOutputDelayLengthMinus1 = (EB_U32)((CLIP3(4, 31, 32 - calcLength(maxDpbOutputDelay)))-1);
+
+#undef MAX_DURATION
+}
+
 EB_ERRORTYPE PacketizationContextCtor(
     PacketizationContext_t **contextDblPtr,
     EbFifo_t                *entropyCodingInputFifoPtr,
@@ -74,6 +146,7 @@ void* PacketizationKernel(void *inputPtr)
        
     EB_PICTURE                        sliceType;
     
+    EB_U64                          prevBPpictureNumber =0;
     for(;;) {
     
         // Get EntropyCoding Results
@@ -143,6 +216,9 @@ void* PacketizationKernel(void *inputPtr)
                             
 			ComputeMaxDpbBuffer(
                 sequenceControlSetPtr);
+
+            if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
+                InitHRD(sequenceControlSetPtr);
 
 			// Code the VPS
             EncodeVPS(
@@ -435,7 +511,13 @@ void* PacketizationKernel(void *inputPtr)
             pictureControlSetPtr->sliceType == EB_I_PICTURE && 
             sequenceControlSetPtr->staticConfig.videoUsabilityInfo &&
             (sequenceControlSetPtr->videoUsabilityInfoPtr->hrdParametersPtr->nalHrdParametersPresentFlag || sequenceControlSetPtr->videoUsabilityInfoPtr->hrdParametersPtr->vclHrdParametersPresentFlag)) 
-        {                           
+        {
+            //Calculating the hrdfullness based on the vbv buffer fill status
+            if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
+            {
+                HrdFullness(sequenceControlSetPtr, pictureControlSetPtr, &sequenceControlSetPtr->bufferingPeriod);
+                prevBPpictureNumber = pictureControlSetPtr->ParentPcsPtr->decodeOrder;
+            }
             EncodeBufferingPeriodSEI(
                 pictureControlSetPtr->bitstreamPtr,
                 &sequenceControlSetPtr->bufferingPeriod,
@@ -444,6 +526,17 @@ void* PacketizationKernel(void *inputPtr)
         }
 
         if(sequenceControlSetPtr->staticConfig.pictureTimingSEI) {
+            if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
+            {
+                // The aucpbremoval delay specifies how many clock ticks the
+                // access unit associated with the picture timing SEI message has to
+                // wait after removal of the access unit with the most recent
+                // buffering period SEI message
+                const AppVideoUsabilityInfo_t* vui = sequenceControlSetPtr->videoUsabilityInfoPtr;
+                const AppHrdParameters_t* hrd = vui->hrdParametersPtr;
+                sequenceControlSetPtr->picTimingSei.auCpbRemovalDelayMinus1 = (EB_U32)((MIN(MAX(1, (EB_S32)pictureControlSetPtr->ParentPcsPtr->decodeOrder - (EB_S32)prevBPpictureNumber), (1 << hrd->auCpbRemovalDelayLengthMinus1)))-1);
+                sequenceControlSetPtr->picTimingSei.picDpbOutputDelay = (EB_U32)(sequenceControlSetPtr->maxDpbSize + pictureControlSetPtr->pictureNumber - pictureControlSetPtr->ParentPcsPtr->decodeOrder);
+            }
 
             EncodePictureTimingSEI(
                 pictureControlSetPtr->bitstreamPtr,
