@@ -756,6 +756,7 @@ void HighLevelRcInputPictureMode2(
 
         if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize)
         {
+            EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
             /* Lookahead VBV: If lookahead is done, raise the quantizer as necessary
             * such that no frames in the lookahead overflow and such that the buffer
             * is in a reasonable state by the end of the lookahead. */
@@ -836,6 +837,7 @@ void HighLevelRcInputPictureMode2(
             }
             q = MAX(q0 / 2, q);
             selectedRefQp = q;
+            EbReleaseMutex(encodeContextPtr->bufferFillMutex);
         }
 #if RC_UPDATE_TARGET_RATE
         selectedOrgRefQp = selectedRefQp;

@@ -147,7 +147,7 @@ typedef struct EncodeContext_s
     EB_U32                               vbvMaxrate;
     EB_U32                               vbvBufsize;
     EB_U64                               bufferFill;
-
+    EB_HANDLE                            bufferFillMutex;
 
     EB_U32								 previousSelectedRefQp;
     EB_U64								 maxCodedPoc;

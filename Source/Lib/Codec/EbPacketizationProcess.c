@@ -664,6 +664,7 @@ void* PacketizationKernel(void *inputPtr)
             outputStreamPtr->nTickCount = (EB_U32)latency;
 			EbPostFullObject(outputStreamWrapperPtr);
             /* update VBV plan */
+            EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
             if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize)
             {
                 EB_S64 bufferfill_temp = (EB_S64)(encodeContextPtr->bufferFill);
@@ -675,6 +676,8 @@ void* PacketizationKernel(void *inputPtr)
                 encodeContextPtr->bufferFill = (EB_U64)(bufferfill_temp);
 
             }
+            EbReleaseMutex(encodeContextPtr->bufferFillMutex);
+
             // Reset the Reorder Queue Entry
             queueEntryPtr->pictureNumber    += PACKETIZATION_REORDER_QUEUE_MAX_DEPTH;            
             queueEntryPtr->outputStreamWrapperPtr = (EbObjectWrapper_t *)EB_NULL;

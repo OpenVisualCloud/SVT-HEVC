@@ -226,7 +226,10 @@ EB_ERRORTYPE EncodeContextCtor(
     encodeContextPtr->scBuffer      = 0;
     encodeContextPtr->scFrameIn     = 0;
     encodeContextPtr->scFrameOut    = 0;
-	encodeContextPtr->encMode = SPEED_CONTROL_INIT_MOD;
+    encodeContextPtr->encMode = SPEED_CONTROL_INIT_MOD;
+
+    EB_CREATEMUTEX(EB_HANDLE, encodeContextPtr->bufferFillMutex, sizeof(EB_HANDLE), EB_MUTEX);
+
     encodeContextPtr->previousSelectedRefQp = 32;
     encodeContextPtr->maxCodedPoc = 0;
     encodeContextPtr->maxCodedPocSelectedRefQp = 32;
