@@ -7,10 +7,12 @@
 // This file remains in ebHevcEncLib because the functions have dependencies Lib structs
 
 #include "emmintrin.h"
+#include "immintrin.h"
 #include "EbEntropyCoding.h"
 #include "EbDefinitions.h"
 
 #define ONE_BIT                 32
+#define _mm256_cvtsi256_si32(a) (_mm_cvtsi128_si32(_mm256_castsi256_si128(a)))
 
 // Table of subblock scans
 // Note: for 4x4, only one entry with value 0 is required (hence reusing 8x8 scan)
