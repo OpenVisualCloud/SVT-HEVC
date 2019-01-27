@@ -2665,6 +2665,30 @@ void* RateControlKernel(void *inputPtr)
 
             parentPictureControlSetPtr = (PictureParentControlSet_t*)rateControlTasksPtr->pictureControlSetWrapperPtr->objectPtr;
             sequenceControlSetPtr = (SequenceControlSet_t*)parentPictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
+
+            // Update feedback arrived in referencepictureQueue
+           // printf("RC FEEDBACK ARRIVED %d\n", (int)parentPictureControlSetPtr->pictureNumber);
+
+            ReferenceQueueEntry_t           *referenceEntryPtr;
+            EB_U32                          referenceQueueIndex;
+            encodeContextPtr = sequenceControlSetPtr->encodeContextPtr;
+            referenceQueueIndex = encodeContextPtr->referencePictureQueueHeadIndex;
+            // Find the Reference in the Reference Queue
+            do {
+
+                referenceEntryPtr = encodeContextPtr->referencePictureQueue[referenceQueueIndex];
+
+                if (referenceEntryPtr->pictureNumber == parentPictureControlSetPtr->pictureNumber) {
+
+                    // Set the feedback arrived
+                    referenceEntryPtr->feedbackArrived = EB_TRUE;
+                }
+
+                // Increment the referenceQueueIndex Iterator
+                referenceQueueIndex = (referenceQueueIndex == REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : referenceQueueIndex + 1;
+
+            } while ((referenceQueueIndex != encodeContextPtr->referencePictureQueueTailIndex) && (referenceEntryPtr->pictureNumber != parentPictureControlSetPtr->pictureNumber));
+
             // Frame level RC
             if (sequenceControlSetPtr->intraPeriodLength == -1 || sequenceControlSetPtr->staticConfig.rateControlMode == 0){
                 rateControlParamPtr = contextPtr->rateControlParamQueue[0];
