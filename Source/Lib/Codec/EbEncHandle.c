@@ -561,9 +561,7 @@ void SwitchToRealTime()
         .sched_priority = sched_get_priority_max(SCHED_FIFO)
     };
 
-    int retValue = pthread_setschedparam(pthread_self(), SCHED_FIFO, &schedParam);
-    if (retValue == EPERM)
-        SVT_LOG("\nSVT [WARNING]: For best speed performance, run with sudo privileges !\n\n");
+    pthread_setschedparam(pthread_self(), SCHED_FIFO, &schedParam);
 
 #endif
 }
