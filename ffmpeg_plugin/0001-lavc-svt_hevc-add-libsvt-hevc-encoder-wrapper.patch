@@ -1,9 +1,13 @@
-From ed9da7f1f574f9282b80b5ada89e0b434efc91ea Mon Sep 17 00:00:00 2001
-From: Jun Zhao <mypopydev@gmail.com>
+From 664d07f1cee2f161583537ddc98715143f8d1d28 Mon Sep 17 00:00:00 2001
+From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH 1/2] lavc/svt_hevc: add libsvt hevc encoder wrapper.
 
 base on patch by Huang, Zhengxu from https://github.com/intel/SVT-HEVC
+
+V4: - Fix the build error with new API in PR#52
+    - Fix the encoding hang issue by API change in PR#52
+    - Fix the last frame dropping issue
 
 V3: - Fix the build error with new API
 
@@ -18,22 +22,24 @@ V2: - Change the config options (didn't need to enable-gpl for BSD+Patent,
 
 V1: - base on patch by Huang, Zhengxu, then refine some code.
 
+Change-Id: If0dcc5044ab9effd6847a8f48797b985d02b0816
 Signed-off-by: Huang, Zhengxu <zhengxu.huang@intel.com>
 Signed-off-by: hassene <hassene.tmar@intel.com>
 Signed-off-by: Jun Zhao <jun.zhao@intel.com>
+Signed-off-by: Jing Sun <jing.a.sun@intel.com>
 ---
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 527 +++++++++++++++++++++++++++++++++++++++
- 4 files changed, 533 insertions(+)
+ libavcodec/libsvt_hevc.c | 526 +++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 532 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index 2205751402..5e14df98b3 100755
+index a70c5f9..06d5e8e 100755
 --- a/configure
 +++ b/configure
-@@ -263,6 +263,7 @@ External library support:
+@@ -262,6 +262,7 @@ External library support:
    --enable-libspeex        enable Speex de/encoding via libspeex [no]
    --enable-libsrt          enable Haivision SRT protocol via libsrt [no]
    --enable-libssh          enable SFTP protocol via libssh [no]
@@ -41,7 +47,7 @@ index 2205751402..5e14df98b3 100755
    --enable-libtensorflow   enable TensorFlow as a DNN module backend
                             for DNN based filters like sr [no]
    --enable-libtesseract    enable Tesseract, needed for ocr filter [no]
-@@ -1745,6 +1746,7 @@ EXTERNAL_LIBRARY_LIST="
+@@ -1743,6 +1744,7 @@ EXTERNAL_LIBRARY_LIST="
      libspeex
      libsrt
      libssh
@@ -49,7 +55,7 @@ index 2205751402..5e14df98b3 100755
      libtensorflow
      libtesseract
      libtheora
-@@ -3131,6 +3133,7 @@ libshine_encoder_select="audio_frame_queue"
+@@ -3125,6 +3127,7 @@ libshine_encoder_select="audio_frame_queue"
  libspeex_decoder_deps="libspeex"
  libspeex_encoder_deps="libspeex"
  libspeex_encoder_select="audio_frame_queue"
@@ -57,7 +63,7 @@ index 2205751402..5e14df98b3 100755
  libtheora_encoder_deps="libtheora"
  libtwolame_encoder_deps="libtwolame"
  libvo_amrwbenc_encoder_deps="libvo_amrwbenc"
-@@ -6154,6 +6157,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
+@@ -6135,6 +6138,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
  enabled libssh            && require_pkg_config libssh libssh libssh/sftp.h sftp_init
  enabled libspeex          && require_pkg_config libspeex speex speex/speex.h speex_decoder_init
  enabled libsrt            && require_pkg_config libsrt "srt >= 1.3.0" srt/srt.h srt_socket
@@ -66,10 +72,10 @@ index 2205751402..5e14df98b3 100755
  enabled libtesseract      && require_pkg_config libtesseract tesseract tesseract/capi.h TessBaseAPICreate
  enabled libtheora         && require libtheora theora/theoraenc.h th_info_init -ltheoraenc -ltheoradec -logg
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index d53b8ff330..bd46866075 100644
+index 3e41497..728503b 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
-@@ -983,6 +983,7 @@ OBJS-$(CONFIG_LIBOPUS_ENCODER)            += libopusenc.o libopus.o     \
+@@ -981,6 +981,7 @@ OBJS-$(CONFIG_LIBOPUS_ENCODER)            += libopusenc.o libopus.o     \
  OBJS-$(CONFIG_LIBSHINE_ENCODER)           += libshine.o
  OBJS-$(CONFIG_LIBSPEEX_DECODER)           += libspeexdec.o
  OBJS-$(CONFIG_LIBSPEEX_ENCODER)           += libspeexenc.o
@@ -78,10 +84,10 @@ index d53b8ff330..bd46866075 100644
  OBJS-$(CONFIG_LIBTWOLAME_ENCODER)         += libtwolame.o
  OBJS-$(CONFIG_LIBVO_AMRWBENC_ENCODER)     += libvo-amrwbenc.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
-index d70646e91a..094ee3cd7f 100644
+index 1b8144a..5739d53 100644
 --- a/libavcodec/allcodecs.c
 +++ b/libavcodec/allcodecs.c
-@@ -699,6 +699,7 @@ extern AVCodec ff_librsvg_decoder;
+@@ -697,6 +697,7 @@ extern AVCodec ff_librsvg_decoder;
  extern AVCodec ff_libshine_encoder;
  extern AVCodec ff_libspeex_encoder;
  extern AVCodec ff_libspeex_decoder;
@@ -91,10 +97,10 @@ index d70646e91a..094ee3cd7f 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000000..aa51830788
+index 0000000..8a13cdc
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,527 @@
+@@ -0,0 +1,526 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -128,6 +134,12 @@ index 0000000000..aa51830788
 +#include "internal.h"
 +#include "avcodec.h"
 +
++typedef enum eos_status {
++    EOS_NOT_REACHED = 0,
++    EOS_REACHED,
++    EOS_TOTRIGGER
++}EOS_STATUS;
++
 +typedef struct SvtContext {
 +    AVClass     *class;
 +
@@ -135,10 +147,9 @@ index 0000000000..aa51830788
 +    EB_COMPONENTTYPE           *svt_handle;
 +
 +    EB_BUFFERHEADERTYPE        *in_buf;
-+    EB_BUFFERHEADERTYPE        *out_buf;
 +    int                         raw_size;
 +
-+    int         eos_flag;
++    EOS_STATUS eos_flag;
 +
 +    // User options.
 +    int vui_info;
@@ -206,7 +217,6 @@ index 0000000000..aa51830788
 +        av_freep(&in_data);
 +        av_freep(&svt_enc->in_buf);
 +    }
-+    av_freep(&svt_enc->out_buf);
 +}
 +
 +static int alloc_buffer(EB_H265_ENC_CONFIGURATION *config, SvtContext *svt_enc)
@@ -224,8 +234,7 @@ index 0000000000..aa51830788
 +
 +    // allocate buffer for in and out
 +    svt_enc->in_buf           = av_mallocz(sizeof(*svt_enc->in_buf));
-+    svt_enc->out_buf          = av_mallocz(sizeof(*svt_enc->out_buf));
-+    if (!svt_enc->in_buf || !svt_enc->out_buf)
++    if (!svt_enc->in_buf)
 +        goto failed;
 +
 +    in_data  = av_mallocz(sizeof(*in_data));
@@ -235,9 +244,6 @@ index 0000000000..aa51830788
 +
 +    svt_enc->in_buf->nSize        = sizeof(*svt_enc->in_buf);
 +    svt_enc->in_buf->pAppPrivate  = NULL;
-+    svt_enc->out_buf->nSize       = sizeof(*svt_enc->out_buf);
-+    svt_enc->out_buf->nAllocLen   = svt_enc->raw_size;
-+    svt_enc->out_buf->pAppPrivate = NULL;
 +
 +    return 0;
 +
@@ -308,6 +314,8 @@ index 0000000000..aa51830788
 +    else
 +        param->codeVpsSpsPps          = 1;
 +
++    param->codeEosNal             = 1;
++
 +    if (svt_enc->vui_info)
 +        param->videoUsabilityInfo = svt_enc->vui_info;
 +
@@ -350,7 +358,7 @@ index 0000000000..aa51830788
 +    SvtContext   *svt_enc = avctx->priv_data;
 +    EB_ERRORTYPE svt_ret;
 +
-+    svt_enc->eos_flag = 0;
++    svt_enc->eos_flag = EOS_NOT_REACHED;
 +
 +    svt_ret = EbInitHandle(&svt_enc->svt_handle, svt_enc, &svt_enc->enc_params);
 +    if (svt_ret != EB_ErrorNone) {
@@ -377,38 +385,23 @@ index 0000000000..aa51830788
 +    }
 +
 +    if (avctx->flags & AV_CODEC_FLAG_GLOBAL_HEADER) {
-+        EB_BUFFERHEADERTYPE headerPtr;
-+        headerPtr.nSize       = sizeof(headerPtr);
-+        headerPtr.nFilledLen  = 0; /* in/out */
-+        headerPtr.pBuffer     = av_malloc(10 * 1024 * 1024);
-+        headerPtr.nAllocLen   = (10 * 1024 * 1024);
-+
-+        if (!headerPtr.pBuffer) {
-+            av_log(avctx, AV_LOG_ERROR,
-+                   "Cannot allocate buffer size %d.\n", headerPtr.nAllocLen);
-+            svt_ret = EB_ErrorInsufficientResources;
-+            goto failed_init_enc;
-+        }
++        EB_BUFFERHEADERTYPE *headerPtr = NULL;
 +
 +        svt_ret = EbH265EncStreamHeader(svt_enc->svt_handle, &headerPtr);
 +        if (svt_ret != EB_ErrorNone) {
 +            av_log(avctx, AV_LOG_ERROR, "Error when build stream header.\n");
-+            av_freep(&headerPtr.pBuffer);
 +            goto failed_init_enc;
 +        }
 +
-+        avctx->extradata_size = headerPtr.nFilledLen;
++        avctx->extradata_size = headerPtr->nFilledLen;
 +        avctx->extradata = av_mallocz(avctx->extradata_size + AV_INPUT_BUFFER_PADDING_SIZE);
 +        if (!avctx->extradata) {
 +            av_log(avctx, AV_LOG_ERROR,
 +                   "Cannot allocate HEVC header of size %d.\n", avctx->extradata_size);
-+            av_freep(&headerPtr.pBuffer);
 +            svt_ret = EB_ErrorInsufficientResources;
 +            goto failed_init_enc;
 +        }
-+        memcpy(avctx->extradata, headerPtr.pBuffer, avctx->extradata_size);
-+
-+        av_freep(&headerPtr.pBuffer);
++        memcpy(avctx->extradata, headerPtr->pBuffer, avctx->extradata_size);
 +    }
 +
 +    return 0;
@@ -437,7 +430,7 @@ index 0000000000..aa51830788
 +        headerPtrLast.nFlags      = EB_BUFFERFLAG_EOS;
 +
 +        EbH265EncSendPicture(svt_enc->svt_handle, &headerPtrLast);
-+        svt_enc->eos_flag = 1;
++        svt_enc->eos_flag = EOS_REACHED;
 +        av_log(avctx, AV_LOG_DEBUG, "Finish sending frames!!!\n");
 +        return 0;
 +    }
@@ -449,16 +442,16 @@ index 0000000000..aa51830788
 +    headerPtr->pts          = frame->pts;
 +    switch (frame->pict_type) {
 +    case AV_PICTURE_TYPE_I:
-+        headerPtr->sliceType = svt_enc->forced_idr > 0 ? EB_IDR_SLICE : EB_I_SLICE;
++        headerPtr->sliceType = svt_enc->forced_idr > 0 ? EB_IDR_PICTURE : EB_I_PICTURE;
 +        break;
 +    case AV_PICTURE_TYPE_P:
-+        headerPtr->sliceType = EB_P_SLICE;
++        headerPtr->sliceType = EB_P_PICTURE;
 +        break;
 +    case AV_PICTURE_TYPE_B:
-+        headerPtr->sliceType = EB_B_SLICE;
++        headerPtr->sliceType = EB_B_PICTURE;
 +        break;
 +    default:
-+        headerPtr->sliceType = EB_INVALID_SLICE;
++        headerPtr->sliceType = EB_INVALID_PICTURE;
 +        break;
 +    }
 +    EbH265EncSendPicture(svt_enc->svt_handle, headerPtr);
@@ -469,29 +462,41 @@ index 0000000000..aa51830788
 +static int eb_receive_packet(AVCodecContext *avctx, AVPacket *pkt)
 +{
 +    SvtContext  *svt_enc = avctx->priv_data;
-+    EB_BUFFERHEADERTYPE   *headerPtr = svt_enc->out_buf;
++    EB_BUFFERHEADERTYPE   *headerPtr = NULL;
 +    EB_ERRORTYPE          svt_ret;
-+    int ret;
++    int ret = 0;
 +
-+    if ((ret = ff_alloc_packet2(avctx, pkt, svt_enc->raw_size, 0)) < 0) {
-+        av_log(avctx, AV_LOG_ERROR, "Failed to allocate output packet.\n");
-+        return ret;
++    if (EOS_TOTRIGGER == svt_enc->eos_flag) {
++        pkt = NULL;
++        return AVERROR_EOF;
 +    }
-+    headerPtr->pBuffer = pkt->data;
-+    svt_ret = EbH265GetPacket(svt_enc->svt_handle, headerPtr, svt_enc->eos_flag);
++
++    svt_ret = EbH265GetPacket(svt_enc->svt_handle, &headerPtr, svt_enc->eos_flag);
 +    if (svt_ret == EB_NoErrorEmptyQueue)
 +        return AVERROR(EAGAIN);
++
++    if ((ret = ff_alloc_packet2(avctx, pkt, headerPtr->nFilledLen, 0)) < 0) {
++        av_log(avctx, AV_LOG_ERROR, "Failed to allocate output packet.\n");
++        EbH265ReleaseOutBuffer(&headerPtr);
++        return ret;
++    }
++
++    memcpy(pkt->data, headerPtr->pBuffer, headerPtr->nFilledLen);
 +
 +    pkt->size = headerPtr->nFilledLen;
 +    pkt->pts  = headerPtr->pts;
 +    pkt->dts  = headerPtr->dts;
-+    if (headerPtr->sliceType == EB_IDR_SLICE)
++    if (headerPtr->sliceType == EB_IDR_PICTURE)
 +        pkt->flags |= AV_PKT_FLAG_KEY;
-+    if (headerPtr->sliceType == EB_NON_REF_SLICE)
++    if (headerPtr->sliceType == EB_NON_REF_PICTURE)
 +        pkt->flags |= AV_PKT_FLAG_DISPOSABLE;
 +
-+    ret = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? AVERROR_EOF : 0;
-+    return ret;
++    EbH265ReleaseOutBuffer(&headerPtr);
++
++    if (EB_BUFFERFLAG_EOS == headerPtr->nFlags)
++        svt_enc->eos_flag = EOS_TOTRIGGER;
++
++    return 0;
 +}
 +
 +static av_cold int eb_enc_close(AVCodecContext *avctx)
@@ -623,5 +628,5 @@ index 0000000000..aa51830788
 +    .wrapper_name   = "libsvt_hevc",
 +};
 -- 
-2.17.1
+1.8.3.1
 
