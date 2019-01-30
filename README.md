@@ -89,13 +89,13 @@ In order to run the highest resolution supported by the encoder, at least 64GB o
 	-   Copy yasm.exe into a location that is in the PATH environment variable
 
 * __Build Instructions__
-	-	Generate the Visual Studio* 2017 project files by following the steps below in a windows command line prompt:
-		-   cd Build\windows
-		-   generate_vs17.bat
-	-   Open "svt-hevc.sln" using Visual Studio* 2017 and build the solution
+	-   Generate the Visual Studio* 2017 project files by following the steps below in a windows command line prompt:
+        -   In the main repository directory go under the <repo dir>\Build\windows location
+        -   Run generate_vs17.bat [such would generate the visual studio project files]
+    -   Open the "svt-hevc.sln" using Visual Studio* 2017 and click on Build -- > Build Solution
 
 * __Binaries Location__
-	-	Post build, binaries can be found under Bin/Release and / or Bin/Debug
+	-	Binaries can be found under <repo dir>\Bin/Release or <repo dir>\Bin/Debug, depending on whether Debug or Release were selected in the build mode
 
 * __Installation__
 -	For the binaries to operate properly on your system, the following conditions have to be met:
