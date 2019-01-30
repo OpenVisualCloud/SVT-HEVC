@@ -97,13 +97,8 @@ int32_t main(int32_t argc, char* argv[])
 
     EbConfig_t             *configs[MAX_CHANNEL_NUMBER];        // Encoder Configuration
 
-    uint64_t                  encodingStartTimesSeconds[MAX_CHANNEL_NUMBER]; // Array holding start time of each instance
-    uint64_t                  encodingFinishTimesSeconds[MAX_CHANNEL_NUMBER]; // Array holding finish time of each instance
-    uint64_t                  encodingStartTimesuSeconds[MAX_CHANNEL_NUMBER]; // Array holding start time of each instance
-    uint64_t                  encodingFinishTimesuSeconds[MAX_CHANNEL_NUMBER]; // Array holding finish time of each instance
-
-    uint32_t            numChannels = 0;
-    uint32_t            instanceCount=0;
+    uint32_t                numChannels = 0;
+    uint32_t                instanceCount=0;
     EbAppContext_t         *appCallbacks[MAX_CHANNEL_NUMBER];   // Instances App callback data
     signal(SIGINT, EventHandler);
     printf("-------------------------------------------\n");
@@ -158,6 +153,8 @@ int32_t main(int32_t argc, char* argv[])
                     configs[instanceCount]->activeChannelCount = numChannels;
                     configs[instanceCount]->channelId = instanceCount;
 
+                    EbStartTime((uint64_t*)&configs[instanceCount]->performanceContext.libStartTime[0], (uint64_t*)&configs[instanceCount]->performanceContext.libStartTime[1]);
+
                     return_errors[instanceCount] = InitEncoder(configs[instanceCount], appCallbacks[instanceCount], instanceCount);
                     return_error = (EB_ERRORTYPE)(return_error | return_errors[instanceCount]);
                 }
@@ -176,7 +173,7 @@ int32_t main(int32_t argc, char* argv[])
                         exitConditionsRecon[instanceCount]  = configs[instanceCount]->reconFile ? APP_ExitConditionNone : APP_ExitConditionError;
                         exitConditionsInput[instanceCount]  = APP_ExitConditionNone;
                         channelActive[instanceCount]        = EB_TRUE;
-                        EbStartTime((uint64_t*)&encodingStartTimesSeconds[instanceCount], (uint64_t*)&encodingStartTimesuSeconds[instanceCount]);
+                        EbStartTime((uint64_t*)&configs[instanceCount]->performanceContext.encodeStartTime[0], (uint64_t*)&configs[instanceCount]->performanceContext.encodeStartTime[1]);
                     }
                     else {
                         exitConditions[instanceCount]       = APP_ExitConditionError;
@@ -212,7 +209,6 @@ int32_t main(int32_t argc, char* argv[])
                             if (((exitConditionsRecon[instanceCount] == APP_ExitConditionFinished || !configs[instanceCount]->reconFile)  && exitConditionsOutput[instanceCount] == APP_ExitConditionFinished && exitConditionsInput[instanceCount] == APP_ExitConditionFinished)||
                                 ((exitConditionsRecon[instanceCount] == APP_ExitConditionError && configs[instanceCount]->reconFile) || exitConditionsOutput[instanceCount] == APP_ExitConditionError || exitConditionsInput[instanceCount] == APP_ExitConditionError)){
                                 channelActive[instanceCount] = EB_FALSE;
-                                EbFinishTime((uint64_t*)&encodingFinishTimesSeconds[instanceCount], (uint64_t*)&encodingFinishTimesuSeconds[instanceCount]);
                                 if (configs[instanceCount]->reconFile)
                                     exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsRecon[instanceCount] | exitConditionsOutput[instanceCount] | exitConditionsInput[instanceCount]);
                                 else
@@ -271,16 +267,20 @@ int32_t main(int32_t argc, char* argv[])
                         // Interlaced Video
                         if (configs[instanceCount]->interlacedVideo || configs[instanceCount]->separateFields) {
 
-                            printf("\nChannel %u\nAverage Speed:\t\t%.2f fields per sec\nAverage Latency:\t%.0f ms\nMax Latency:\t\t%u ms\n",
+                            printf("\nChannel %u\nAverage Speed:\t\t%.0f fields per sec\nTotal Encoding Time:\t\t%.0f ms\nTotal Execution Time:\t\t%.2f ms\nAverage Latency:\t%.0f ms\nMax Latency:\t\t%u ms\n",
                                 (uint32_t)(instanceCount + 1),
                                 configs[instanceCount]->performanceContext.averageSpeed,
+                                configs[instanceCount]->performanceContext.totalEncodeTime * 1000,
+                                configs[instanceCount]->performanceContext.totalExecutionTime * 1000,
                                 configs[instanceCount]->performanceContext.averageLatency,
                                 (uint32_t)(configs[instanceCount]->performanceContext.maxLatency));
                         }
                         else {
-                            printf("\nChannel %u\nAverage Speed:\t\t%.2f fps\nAverage Latency:\t%.0f ms\nMax Latency:\t\t%u ms\n",
+                            printf("\nChannel %u\nAverage Speed:\t\t%.2f fps\nTotal Encoding Time:\t%.0f ms\nTotal Execution Time:\t%.0f ms\nAverage Latency:\t%.0f ms\nMax Latency:\t\t%u ms\n",
                                 (uint32_t)(instanceCount + 1),
                                 configs[instanceCount]->performanceContext.averageSpeed,
+                                configs[instanceCount]->performanceContext.totalEncodeTime * 1000,
+                                configs[instanceCount]->performanceContext.totalExecutionTime * 1000,
                                 configs[instanceCount]->performanceContext.averageLatency,
                                 (uint32_t)(configs[instanceCount]->performanceContext.maxLatency));
 
