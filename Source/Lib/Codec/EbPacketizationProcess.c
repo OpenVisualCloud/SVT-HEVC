@@ -253,6 +253,14 @@ void* PacketizationKernel(void *inputPtr)
                     contextPtr->ppsConfig);
             }
 
+            if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
+            {
+                sequenceControlSetPtr->activeParameterSet.selfContainedCvsFlag = EB_TRUE;
+                sequenceControlSetPtr->activeParameterSet.noParameterSetUpdateFlag = EB_TRUE;
+                EncodeActiveParameterSetsSEI(
+                    pictureControlSetPtr->bitstreamPtr,
+                    &sequenceControlSetPtr->activeParameterSet);
+            }
             // Flush the Bitstream
             FlushBitstream(
                 pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);

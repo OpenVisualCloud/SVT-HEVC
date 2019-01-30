@@ -141,6 +141,10 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     EbBufferingPeriodSeiCtor(
         &sequenceControlSetPtr->bufferingPeriod);
 
+    //Initilaize Active Parametr Set SEI
+    EbActiveParameterSetSeiCtor(
+        &sequenceControlSetPtr->activeParameterSet);
+
         // Initialize picture timing SEI
     EbRecoveryPointSeiCtor(
         &sequenceControlSetPtr->recoveryPoint);
@@ -235,6 +239,13 @@ EB_ERRORTYPE CopySequenceControlSet(
         sizeof(AppBufferingPeriodSei_t));
 
     writeCount += sizeof(AppBufferingPeriodSei_t);
+
+    EB_MEMCPY(
+        &dst->activeParameterSet,
+        &src->activeParameterSet,
+        sizeof(AppActiveparameterSetSei_t));
+
+    writeCount += sizeof(AppActiveparameterSetSei_t);
 
     EB_MEMCPY(
         &dst->recoveryPoint,
