@@ -56,7 +56,6 @@ RANLIB_COMPILER=gcc-ranlib
 CMAKE_COMPILER=$GCC_COMPILER
 
 if [ $# -eq 0 ]; then
-	debug
 	release
 elif [ "$1" = "clean" ]; then
 	clean
@@ -66,10 +65,8 @@ elif [ "$1" = "release" ]; then
 	release
 
 elif [ "$1" = "all" ]; then
-	debug
 	release
 elif [ "$1" = "gcc" ]; then
-	debug
 	release
 else
 	echo "build.sh <clean|all|debug|release|help>"
