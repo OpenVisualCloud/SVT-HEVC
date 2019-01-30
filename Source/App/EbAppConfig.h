@@ -195,6 +195,12 @@ typedef struct EbPerformanceContext_s {
     /****************************************
      * Computational Performance Data
      ****************************************/
+    uint64_t                  libStartTime[2];       // [sec, micro_sec] including init time
+    uint64_t                  encodeStartTime[2];    // [sec, micro_sec] first frame sent
+
+    double                    totalExecutionTime;    // includes init
+    double                    totalEncodeTime;       // not including init
+
     uint64_t                  totalLatency;
 	uint32_t                  maxLatency;
 
