@@ -2748,7 +2748,7 @@ static void PrintLibParams(
     EB_H265_ENC_CONFIGURATION*   config) 
 {
     SVT_LOG("------------------------------------------- ");
-    if (config->profile == 0)
+    if (config->profile == 1)
         SVT_LOG("\nSVT [config]: Main Profile\t");
     else
         SVT_LOG("\nSVT [config]: Main10 Profile\t");
