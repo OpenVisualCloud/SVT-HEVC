@@ -128,15 +128,13 @@ For the binaries to operate properly on your system, the following conditions ha
 
 # Demo features and limitations
 
--  **Resolution support:** This version supports only multiple-of-8 resolutions in width for 8-bit video input and in width and height for 10-bit video input.
-
 -  **VBR BRC mode:** The VBR functionality implemented in SVT-HEVC Encoder is a demo feature to allow for an easier integration of product level BRC. The algorithm implemented would allow the encoder to generate an output bit stream matching, with a best effort, the target bitrate. The algorithm does not guarantee a certain maximum bitrate or maximum buffer size [does not follow HRD compliance]. When set to encode in VBR mode, the encoder does not produce a bit-exact output from one run to another.
 
 -  **Speed Control output:** The speed control functionality implemented for SVT-HEVC Encoder is a demo feature showcasing the capability of the library to adapt to the resources available on the fly in order to generate the best possible video quality while maintaining a real-time encoding speed. When set to use the Speed Control mode, the encoder does not produce a bit-exact output from one run to another.
 
 -  **Multi-instance support:** The multi-instance functionality is a demo feature implemented in the SVT-HEVC Encoder sample application as an example of one sample application using multiple encoding libraries. Encoding using the multi-instance support is limited to only 6 simultaneous streams. For example two channels encoding on Windows: SvtHevcEncApp.exe -nch 2 -c firstchannel.cfg secondchannel.cfg
 
--  **Separate Fields:** Using the separate fields functionality migh result in a corrupted video output.
+-  **Speed Drop in 4k:** The speed obtained running SQ mode (-tune 0) drops approximately 8% from M11 to M12. Average encoding speed should be equal to or faster as encoding mode is increased from M0 to M12. This is a known issue and will be addressed.
 
 # How to Contribute
 
