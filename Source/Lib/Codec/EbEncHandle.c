@@ -2114,7 +2114,8 @@ void CopyApiFromApp(
     
     // Extract frame rate from Numerator and Denominator if not 0
     if (sequenceControlSetPtr->staticConfig.frameRateNumerator != 0 && sequenceControlSetPtr->staticConfig.frameRateDenominator != 0) {
-        sequenceControlSetPtr->frameRate = sequenceControlSetPtr->staticConfig.frameRate = ((sequenceControlSetPtr->staticConfig.frameRateNumerator << 16) / (sequenceControlSetPtr->staticConfig.frameRateDenominator ));
+        sequenceControlSetPtr->frameRate = sequenceControlSetPtr->staticConfig.frameRate =
+            (EB_U32)((double)sequenceControlSetPtr->staticConfig.frameRateNumerator/(double)sequenceControlSetPtr->staticConfig.frameRateDenominator)<<16;
     }
     
     // Get Default Intra Period if not specified
