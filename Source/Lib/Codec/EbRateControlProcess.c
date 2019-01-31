@@ -2390,7 +2390,7 @@ void* RateControlKernel(void *inputPtr)
 
                 contextPtr->highLevelRateControlPtr->channelBitRatePerSw            = contextPtr->highLevelRateControlPtr->channelBitRatePerFrame * (sequenceControlSetPtr->staticConfig.lookAheadDistance + 1);
                 contextPtr->highLevelRateControlPtr->bitConstraintPerSw             = contextPtr->highLevelRateControlPtr->channelBitRatePerSw;
-                encodeContextPtr->bufferFill = (EB_U64)(sequenceControlSetPtr->staticConfig.vbvBufsize * 0.9);
+                encodeContextPtr->bufferFill = (EB_U64)(sequenceControlSetPtr->staticConfig.vbvBufsize * sequenceControlSetPtr->staticConfig.vbvBufInit / 100);
 #if RC_UPDATE_TARGET_RATE
                 contextPtr->highLevelRateControlPtr->previousUpdatedBitConstraintPerSw = contextPtr->highLevelRateControlPtr->channelBitRatePerSw;
 #endif

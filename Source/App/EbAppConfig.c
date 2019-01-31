@@ -73,6 +73,7 @@
 #define TARGET_BIT_RATE_TOKEN           "-tbr"
 #define VBV_MAX_RATE_TOKEN              "-vbv-maxrate"
 #define VBV_BUFFER_SIZE_TOKEN           "-vbv-bufsize"
+#define VBV_BUFFER_INIT_TOKEN           "-vbv-init"
 #define HRD_TOKEN                       "-hrd"
 #define MAX_QP_TOKEN                    "-max-qp"
 #define MIN_QP_TOKEN                    "-min-qp"
@@ -182,6 +183,7 @@ static void SetBitRateReduction                 (const char *value, EbConfig_t *
 static void SetImproveSharpness                 (const char *value, EbConfig_t *cfg) {cfg->improveSharpness                 = (EB_BOOL)strtol(value,  NULL, 0);};
 static void SetVbvMaxrate                       (const char *value, EbConfig_t *cfg) { cfg->vbvMaxRate = strtoul(value, NULL, 0); };
 static void SetVbvBufsize                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufsize = strtoul(value, NULL, 0); };
+static void SetVbvBufInit                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufInit = strtoul(value, NULL, 0); };
 static void SetHrdFlag                          (const char *value, EbConfig_t *cfg) { cfg->hrdFlag = strtoul(value, NULL, 0); };
 static void SetVideoUsabilityInfo               (const char *value, EbConfig_t *cfg) {cfg->videoUsabilityInfo               = strtol(value,  NULL, 0);};
 static void SetHighDynamicRangeInput            (const char *value, EbConfig_t *cfg) {cfg->highDynamicRangeInput            = strtol(value,  NULL, 0);};
@@ -284,6 +286,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, VBV_MAX_RATE_TOKEN, "vbvMaxRate", SetVbvMaxrate },
     { SINGLE_INPUT, VBV_BUFFER_SIZE_TOKEN, "vbvBufsize", SetVbvBufsize },
     { SINGLE_INPUT, HRD_TOKEN, "hrd", SetHrdFlag },
+    { SINGLE_INPUT, VBV_BUFFER_INIT_TOKEN, "vbvBufInit", SetVbvBufInit},
 
     // DLF
     { SINGLE_INPUT, LOOP_FILTER_DISABLE_TOKEN, "LoopFilterDisable", SetDisableDlfFlag },
@@ -386,6 +389,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
 	  configPtr->encMode								              = 9;
     configPtr->vbvMaxRate                           = 0;
     configPtr->vbvBufsize                           = 0;
+    configPtr->vbvBufInit                           = 90;
     configPtr->hrdFlag                              =  0;
     configPtr->intraPeriod                          = -2;
     configPtr->intraRefreshType                     = 1;

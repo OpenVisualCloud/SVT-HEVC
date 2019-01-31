@@ -306,6 +306,7 @@ typedef struct EbConfig_s
     uint32_t                 minQpAllowed;
     uint32_t                 vbvMaxRate;
     uint32_t                 vbvBufsize;
+    uint64_t                 vbvBufInit;
 
     /****************************************
     * TUNE
