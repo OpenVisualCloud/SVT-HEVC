@@ -1620,10 +1620,6 @@ static void ReconOutput(
     EB_BUFFERHEADERTYPE           *outputReconPtr;
     EncodeContext_t               *encodeContextPtr = sequenceControlSetPtr->encodeContextPtr;
     EB_BOOL is16bit = (sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
-    // The totalNumberOfReconFrames counter has to be write/read protected as
-    //   it is used to determine the end of the stream.  If it is not protected
-    //   the encoder might not properly terminate.
-    EbBlockOnMutex(encodeContextPtr->terminatingConditionsMutex);
 
     // Get Recon Buffer
     EbGetEmptyObject( 
@@ -1631,14 +1627,6 @@ static void ReconOutput(
         &outputReconWrapperPtr);
     outputReconPtr = (EB_BUFFERHEADERTYPE*)outputReconWrapperPtr->objectPtr;
     outputReconPtr->nFlags = 0;
-
-    // START READ/WRITE PROTECTED SECTION
-    if (encodeContextPtr->totalNumberOfReconFrames == encodeContextPtr->terminatingPictureNumber)
-        outputReconPtr->nFlags = EB_BUFFERFLAG_EOS;
-    
-    encodeContextPtr->totalNumberOfReconFrames++;
-
-    EbReleaseMutex(encodeContextPtr->terminatingConditionsMutex);
 
     // STOP READ/WRITE PROTECTED SECTION
     outputReconPtr->nFilledLen = 0;
@@ -1730,9 +1718,21 @@ static void ReconOutput(
         outputReconPtr->pts = pictureControlSetPtr->pictureNumber;
     }
 
+    // The totalNumberOfReconFrames counter has to be write/read protected as
+    //   it is used to determine the end of the stream.  If it is not protected
+    //   the encoder might not properly terminate.
+    EbBlockOnMutex(encodeContextPtr->terminatingConditionsMutex);
+
+    // START READ/WRITE PROTECTED SECTION
+    if (encodeContextPtr->totalNumberOfReconFrames == encodeContextPtr->terminatingPictureNumber) {
+        outputReconPtr->nFlags = EB_BUFFERFLAG_EOS;
+    }
+    encodeContextPtr->totalNumberOfReconFrames++;
+
     // Post the Recon object
     EbPostFullObject(outputReconWrapperPtr);
-    
+
+    EbReleaseMutex(encodeContextPtr->terminatingConditionsMutex);
 }
 
 void PadRefAndSetFlags(
