@@ -1,4 +1,4 @@
-From 664d07f1cee2f161583537ddc98715143f8d1d28 Mon Sep 17 00:00:00 2001
+From da4945e14903d889365172f80b60aa9d1e67f1f5 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH 1/2] lavc/svt_hevc: add libsvt hevc encoder wrapper.
@@ -27,12 +27,13 @@ Signed-off-by: Huang, Zhengxu <zhengxu.huang@intel.com>
 Signed-off-by: hassene <hassene.tmar@intel.com>
 Signed-off-by: Jun Zhao <jun.zhao@intel.com>
 Signed-off-by: Jing Sun <jing.a.sun@intel.com>
+Signed-off-by: Jing SUN <jing.a.sun@intel.com>
 ---
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 526 +++++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 532 insertions(+)
+ libavcodec/libsvt_hevc.c | 527 +++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 533 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
@@ -97,10 +98,10 @@ index 1b8144a..5739d53 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000..8a13cdc
+index 0000000..c73511e
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,526 @@
+@@ -0,0 +1,527 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -576,7 +577,7 @@ index 0000000..8a13cdc
 +      AV_OPT_TYPE_INT, { .i64 = 32 }, 0, 51, VE },
 +
 +    { "sc_detection", "Scene change detection", OFFSET(scd),
-+      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
++      AV_OPT_TYPE_BOOL, { .i64 = 1 }, 0, 1, VE },
 +
 +    { "tune", "Quality tuning mode", OFFSET(tune), AV_OPT_TYPE_INT, { .i64 = 1 }, 0, 1, VE, "tune" },
 +        { "subjective", "Subjective quality mode", 0,
@@ -605,6 +606,7 @@ index 0000000..8a13cdc
 +    { "flags",     "+cgop" },
 +    { "qmin",      "10"    },
 +    { "qmax",      "48"    },
++    { "g",         "-2"    },
 +    { NULL },
 +};
 +
