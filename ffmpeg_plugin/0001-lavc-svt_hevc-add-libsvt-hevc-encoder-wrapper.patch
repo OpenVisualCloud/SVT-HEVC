@@ -1,4 +1,4 @@
-From da4945e14903d889365172f80b60aa9d1e67f1f5 Mon Sep 17 00:00:00 2001
+From c22efb79bf2a55005595054432b21aa75e3c6a19 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH 1/2] lavc/svt_hevc: add libsvt hevc encoder wrapper.
@@ -8,6 +8,7 @@ base on patch by Huang, Zhengxu from https://github.com/intel/SVT-HEVC
 V4: - Fix the build error with new API in PR#52
     - Fix the encoding hang issue by API change in PR#52
     - Fix the last frame dropping issue
+    - Fix the invalid parameter causing segmentation fault issue
 
 V3: - Fix the build error with new API
 
@@ -32,8 +33,8 @@ Signed-off-by: Jing SUN <jing.a.sun@intel.com>
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 527 +++++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 533 insertions(+)
+ libavcodec/libsvt_hevc.c | 535 +++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 541 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
@@ -98,10 +99,10 @@ index 1b8144a..5739d53 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000..c73511e
+index 0000000..d08f492
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,527 @@
+@@ -0,0 +1,535 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -413,6 +414,8 @@ index 0000000..c73511e
 +    EbDeinitHandle(svt_enc->svt_handle);
 +failed:
 +    free_buffer(svt_enc);
++    svt_enc->svt_handle = NULL;
++    svt_enc = NULL;
 +    return error_mapping(svt_ret);
 +}
 +
@@ -504,10 +507,16 @@ index 0000000..c73511e
 +{
 +    SvtContext *svt_enc = avctx->priv_data;
 +
-+    EbDeinitEncoder(svt_enc->svt_handle);
-+    EbDeinitHandle(svt_enc->svt_handle);
++    if (svt_enc->svt_handle) {
++        EbDeinitEncoder(svt_enc->svt_handle);
++        EbDeinitHandle(svt_enc->svt_handle);
++        svt_enc->svt_handle = NULL;
++    }
 +
-+    free_buffer(svt_enc);
++    if (svt_enc) {
++        free_buffer(svt_enc);
++        svt_enc = NULL;
++    }
 +
 +    return 0;
 +}
