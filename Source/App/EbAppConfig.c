@@ -420,6 +420,14 @@ void EbConfigCtor(EbConfig_t *configPtr)
 	configPtr->eosFlag										= EB_FALSE;
 
     // Computational Performance Parameters
+    configPtr->performanceContext.libStartTime[0] = 0;
+    configPtr->performanceContext.libStartTime[1] = 0;
+
+    configPtr->performanceContext.encodeStartTime[0] = 0;
+    configPtr->performanceContext.encodeStartTime[1] = 0;
+
+    configPtr->performanceContext.totalExecutionTime = 0;
+    configPtr->performanceContext.totalEncodeTime = 0;
     configPtr->performanceContext.frameCount                = 0;
     configPtr->performanceContext.averageSpeed              = 0;
     configPtr->performanceContext.startsTime                = 0;

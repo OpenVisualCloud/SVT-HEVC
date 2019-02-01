@@ -561,9 +561,7 @@ void SwitchToRealTime()
         .sched_priority = sched_get_priority_max(SCHED_FIFO)
     };
 
-    int retValue = pthread_setschedparam(pthread_self(), SCHED_FIFO, &schedParam);
-    if (retValue == EPERM)
-        SVT_LOG("\nSVT [WARNING]: For best speed performance, run with sudo privileges !\n\n");
+    pthread_setschedparam(pthread_self(), SCHED_FIFO, &schedParam);
 
 #endif
 }
@@ -2114,7 +2112,8 @@ void CopyApiFromApp(
     
     // Extract frame rate from Numerator and Denominator if not 0
     if (sequenceControlSetPtr->staticConfig.frameRateNumerator != 0 && sequenceControlSetPtr->staticConfig.frameRateDenominator != 0) {
-        sequenceControlSetPtr->frameRate = sequenceControlSetPtr->staticConfig.frameRate = ((sequenceControlSetPtr->staticConfig.frameRateNumerator << 16) / (sequenceControlSetPtr->staticConfig.frameRateDenominator ));
+        sequenceControlSetPtr->frameRate = sequenceControlSetPtr->staticConfig.frameRate =
+            (EB_U32)((double)sequenceControlSetPtr->staticConfig.frameRateNumerator/(double)sequenceControlSetPtr->staticConfig.frameRateDenominator)<<16;
     }
     
     // Get Default Intra Period if not specified
@@ -2750,7 +2749,7 @@ static void PrintLibParams(
     EB_H265_ENC_CONFIGURATION*   config) 
 {
     SVT_LOG("------------------------------------------- ");
-    if (config->profile == 0)
+    if (config->profile == 1)
         SVT_LOG("\nSVT [config]: Main Profile\t");
     else
         SVT_LOG("\nSVT [config]: Main10 Profile\t");

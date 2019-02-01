@@ -229,7 +229,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
     EB_U8           *temporalBufferLeft;
     EB_U8           tmp[64], tmpY[64];
     EB_U32          i, j;
-    EB_S8           ReorderedsaoOffset[4 + 1];
+    EB_S8           ReorderedsaoOffset[4 + 1 + 3];
     EB_S8           OrderedsaoOffsetBo[5];
     EB_BOOL         FirstColLcu, LastColLcu, FirstRowLcu, LastRowLcu;
     EncodeContext_t *encodeContextPtr;
@@ -244,6 +244,9 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
     ReorderedsaoOffset[2] = 0;
     ReorderedsaoOffset[3] = (EB_S8)saoPtr->saoOffset[videoComponent][2];
     ReorderedsaoOffset[4] = (EB_S8)saoPtr->saoOffset[videoComponent][3];
+    ReorderedsaoOffset[5] = 0;
+    ReorderedsaoOffset[6] = 0;
+    ReorderedsaoOffset[7] = 0;
 
     OrderedsaoOffsetBo[0] = (EB_S8)saoPtr->saoOffset[videoComponent][0];
     OrderedsaoOffsetBo[1] = (EB_S8)saoPtr->saoOffset[videoComponent][1];
