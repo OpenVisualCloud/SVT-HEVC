@@ -2818,9 +2818,15 @@ EB_API EB_ERRORTYPE EbH265EncSetParameter(
     EB_COMPONENTTYPE           *h265EncComponent,
     EB_H265_ENC_CONFIGURATION  *pComponentParameterStructure)
 {
-    EB_ERRORTYPE           return_error      = EB_ErrorNone;
-    EbEncHandle_t          *pEncCompData      = (EbEncHandle_t*) h265EncComponent->pComponentPrivate;
+    EB_ERRORTYPE            return_error      = EB_ErrorNone;
     EB_U32                  instanceIndex     = 0;
+    EbEncHandle_t          *pEncCompData;
+
+    if (h265EncComponent == (EB_COMPONENTTYPE*)EB_NULL) {
+        return EB_ErrorBadParameter;
+    }
+
+    pEncCompData = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
 
     // Acquire Config Mutex
     EbBlockOnMutex(pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->configMutex);
