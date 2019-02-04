@@ -566,10 +566,11 @@ void SwitchToRealTime()
 #endif
 }
 
-void EbSetThreadManagementParameters(
+EB_ERRORTYPE EbSetThreadManagementParameters(
     EB_H265_ENC_CONFIGURATION   *configPtr)
 {
     EB_U32 numLogicProcessors = GetNumProcessors();
+    EB_ERRORTYPE return_error = EB_ErrorNone;
 
     if (configPtr->switchThreadsToRtPriority == 1) {
         SwitchToRealTime();
@@ -611,6 +612,10 @@ void EbSetThreadManagementParameters(
 #else
     const char* PROCESSORID = "processor";
     const char* PHYSICALID = "physical id";
+    int processor_id_len = strnlen_ss(PROCESSORID, 128);
+    int physical_id_len = strnlen_ss(PHYSICALID, 128);
+    if (processor_id_len < 0 || processor_id_len >= 128) return EB_ErrorInsufficientResources;
+    if (physical_id_len < 0 || physical_id_len >= 128) return EB_ErrorInsufficientResources;
     CPU_ZERO(&groupAffinity);
     numGroups = 1;
     typedef struct logicalProcessorGroup {
@@ -629,12 +634,13 @@ void EbSetThreadManagementParameters(
             if(strncmp(line, PROCESSORID, strnlen_ss(PROCESSORID,128)) == 0) {
                 char* p = line +  strnlen_ss(PROCESSORID,128);
                 while(*p < '0' || *p > '9') p++;
-                processor_id = atoi(p);
+                processor_id = strtol(p, NULL, 0);
             }
             if(strncmp(line, PHYSICALID, strnlen_ss(PHYSICALID,128)) == 0) {
                 char* p = line +  strnlen_ss(PHYSICALID,128);
                 while(*p < '0' || *p > '9') p++;
-                socket_id = atoi(p);
+                socket_id = strtol(p, NULL, 0);
+                if (socket_id == LONG_MIN || socket_id == LONG_MAX) return EB_ErrorInsufficientResources;
                 if (socket_id + 1 > numGroups)
                     numGroups = socket_id + 1;
                 lpgroup[socket_id].group[lpgroup[socket_id].num++] = processor_id;
@@ -681,6 +687,7 @@ void EbSetThreadManagementParameters(
         }
     }
 #endif
+    return return_error;
 }
 
 /**********************************
@@ -1426,7 +1433,11 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
      * Thread Handles
      ************************************/
     EB_H265_ENC_CONFIGURATION   *configPtr = &encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig;
-    EbSetThreadManagementParameters(configPtr);    
+    return_error = EbSetThreadManagementParameters(configPtr);
+
+    if (return_error == EB_ErrorInsufficientResources) {
+        return EB_ErrorInsufficientResources;
+    }
 
     // Resource Coordination
     EB_CREATETHREAD(EB_HANDLE, encHandlePtr->resourceCoordinationThreadHandle, sizeof(EB_HANDLE), EB_THREAD, ResourceCoordinationKernel, encHandlePtr->resourceCoordinationContextPtr);
