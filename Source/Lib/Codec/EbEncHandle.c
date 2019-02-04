@@ -627,7 +627,7 @@ EB_ERRORTYPE EbSetThreadManagementParameters(
 
     FILE *fin = fopen("/proc/cpuinfo", "rt");
     if (fin) {
-        long int processor_id = 0, socket_id = 0;
+        int processor_id = 0, socket_id = 0;
         while (!feof(fin)) {
             char line[128];
             if (!fgets(line, sizeof(line), fin)) break;
@@ -640,7 +640,7 @@ EB_ERRORTYPE EbSetThreadManagementParameters(
                 char* p = line + physical_id_len;
                 while(*p < '0' || *p > '9') p++;
                 socket_id = strtol(p, NULL, 0);
-                if (socket_id < 0) {
+                if (socket_id < 0 || socket_id > 15) {
                     fclose(fin);
                     return EB_ErrorInsufficientResources;
                 }
