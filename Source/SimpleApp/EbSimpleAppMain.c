@@ -361,7 +361,7 @@ int32_t main(int32_t argc, char* argv[])
 
                 width = strtoul(argv[3], NULL, 0);
                 height = strtoul(argv[4], NULL, 0);
-                if ((width&&height) == 0) {
+                if (width <= 0 || width > 8192 || height <= 0 || height > 4320) {
                     printf("Invalid video dimensions\n");
                     return_error = EB_ErrorBadParameter;
                 }
