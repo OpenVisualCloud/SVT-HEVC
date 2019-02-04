@@ -642,8 +642,8 @@ EB_ERRORTYPE EbSetThreadManagementParameters(
                 socket_id = strtol(p, NULL, 0);
                 if (socket_id < 0) {
                     fclose(fin);
-                    return EB_ErrorInsufficientResources 
-                };
+                    return EB_ErrorInsufficientResources;
+                }
                 if (socket_id + 1 > numGroups)
                     numGroups = socket_id + 1;
                 lpgroup[socket_id].group[lpgroup[socket_id].num++] = processor_id;
