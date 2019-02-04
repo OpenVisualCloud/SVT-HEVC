@@ -74,28 +74,32 @@ EB_HANDLE EbCreateThread(
     pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
 
     threadHandle = (pthread_t*) malloc(sizeof(pthread_t));
-    int ret = pthread_create(
-        (pthread_t*)threadHandle,      // Thread handle
-        &attr,                       // attributes
-        threadFunction,                 // function to be run by new thread
-        threadContext);
+    if (threadHandle != NULL) {
+        int ret = pthread_create(
+            (pthread_t*)threadHandle,      // Thread handle
+            &attr,                       // attributes
+            threadFunction,                 // function to be run by new thread
+            threadContext);
 
-    if (ret != 0)
-        if (ret == EPERM) {
+        if (ret != 0) {
+            if (ret == EPERM) {
 
-            pthread_cancel(*((pthread_t*)threadHandle));
-            pthread_join(*((pthread_t*)threadHandle), NULL);
-            free(threadHandle);
+                pthread_cancel(*((pthread_t*)threadHandle));
+                pthread_join(*((pthread_t*)threadHandle), NULL);
+                free(threadHandle);
 
-            threadHandle = (pthread_t*)malloc(sizeof(pthread_t));
-
-            pthread_create(
-                (pthread_t*)threadHandle,      // Thread handle
-                (const pthread_attr_t*)EB_NULL,                        // attributes
-                threadFunction,                 // function to be run by new thread
-                threadContext);
-       }
-
+                threadHandle = (pthread_t*)malloc(sizeof(pthread_t));
+                if (threadHandle != NULL) {
+                    pthread_create(
+                        (pthread_t*)threadHandle,      // Thread handle
+                        (const pthread_attr_t*)EB_NULL,                        // attributes
+                        threadFunction,                 // function to be run by new thread
+                        threadContext);
+                }
+            }
+        }
+    }
+    pthread_destroy_init(&attr);
 #endif // _WIN32
 
     return threadHandle;
@@ -210,19 +214,19 @@ EB_HANDLE EbCreateMutex(
     EB_HANDLE mutexHandle = NULL;
 
 #ifdef _WIN32
-    mutexHandle = (EB_HANDLE) CreateMutex(
-                      NULL,                   // default security attributes
-                      FALSE,                  // FALSE := not initially owned
-                      NULL);                  // mutex is not named
+    mutexHandle = (EB_HANDLE)CreateMutex(
+        NULL,                   // default security attributes
+        FALSE,                  // FALSE := not initially owned
+        NULL);                  // mutex is not named
 
 #elif __linux__
 
-    mutexHandle = (EB_HANDLE) malloc(sizeof(pthread_mutex_t));
-
-    pthread_mutex_init(
-        (pthread_mutex_t*) mutexHandle,
-        NULL);                  // default attributes
-
+    mutexHandle = (EB_HANDLE)malloc(sizeof(pthread_mutex_t));
+    if (mutexHandle != NULL) {
+        pthread_mutex_init(
+            (pthread_mutex_t*)mutexHandle,
+            NULL);                  // default attributes
+    }
 #endif // _WIN32
 
     return mutexHandle;

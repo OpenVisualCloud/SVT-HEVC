@@ -3233,21 +3233,22 @@ void UnifiedQuantizeInvQuantize(
                 }
             }
         }
-
-		UpdateQiQCoef(
-			quantCoeff,
-			reconCoeff,
-			coeffStride,
-			shiftedFFunc,
-			iq_offset,
-			shiftNum,
-			activeAreaSize,
-			&(*yCountNonZeroCoeffs),
-			componentType,
-			sliceType,
-			temporalLayerIndex,
-			enableCbflag,
-			enableContouringQCUpdateFlag);
+        if (yCountNonZeroCoeffs != (EB_U32*)EB_NULL) {
+            UpdateQiQCoef(
+                quantCoeff,
+                reconCoeff,
+                coeffStride,
+                shiftedFFunc,
+                iq_offset,
+                shiftNum,
+                activeAreaSize,
+                &(*yCountNonZeroCoeffs),
+                componentType,
+                sliceType,
+                temporalLayerIndex,
+                enableCbflag,
+                enableContouringQCUpdateFlag);
+        }
 	}
 }
 
