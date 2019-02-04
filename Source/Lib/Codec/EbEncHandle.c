@@ -632,13 +632,13 @@ EB_ERRORTYPE EbSetThreadManagementParameters(
         while (!feof(fin)) {
             char line[128];
             if (!fgets(line, sizeof(line), fin)) break;
-            if(strncmp(line, PROCESSORID, strnlen_ss(PROCESSORID,128)) == 0) {
-                char* p = line +  strnlen_ss(PROCESSORID,128);
+            if(strncmp(line, PROCESSORID, processor_id_len) == 0) {
+                char* p = line + processor_id_len;
                 while(*p < '0' || *p > '9') p++;
                 processor_id = strtol(p, NULL, 0);
             }
-            if(strncmp(line, PHYSICALID, strnlen_ss(PHYSICALID,128)) == 0) {
-                char* p = line +  strnlen_ss(PHYSICALID,128);
+            if(strncmp(line, PHYSICALID, physical_id_len) == 0) {
+                char* p = line + physical_id_len;
                 while(*p < '0' || *p > '9') p++;
                 socket_id = strtol(p, NULL, 0);
                 if (socket_id == LONG_MIN || socket_id == LONG_MAX) return EB_ErrorInsufficientResources;
