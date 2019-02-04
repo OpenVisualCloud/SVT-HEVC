@@ -61,6 +61,7 @@
 #if __linux__
 #include <pthread.h>
 #include <errno.h>
+#include <limits.h>
 #endif
 
 /**************************************
@@ -627,7 +628,7 @@ EB_ERRORTYPE EbSetThreadManagementParameters(
 
     FILE *fin = fopen("/proc/cpuinfo", "rt");
     if (fin) {
-        int processor_id = 0, socket_id = 0;
+        long int processor_id = 0, socket_id = 0;
         while (!feof(fin)) {
             char line[128];
             if (!fgets(line, sizeof(line), fin)) break;
