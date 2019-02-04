@@ -172,7 +172,7 @@ extern rsize_t strnlen_ss(const char *s, rsize_t smax);
     printf("Total App Memory: %.2lf KB\n\n",*totalAppMemory/(double)1024);
 
 #define EB_APP_STRDUP(dst, src) \
-    dst = (char*) malloc(strlen(src)+1); \
+    EB_APP_MALLOC(char*, dst, strlen(src)+1, EB_N_PTR, EB_ErrorInsufficientResources); \
     EB_STRCPY((char*)dst, strlen(src)+1,  src);
 
 #define MAX_CHANNEL_NUMBER      6

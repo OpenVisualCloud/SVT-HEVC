@@ -2120,11 +2120,9 @@ void CopyApiFromApp(
 
     if(pComponentParameterStructure->naluFile) {
         EB_STRDUP(sequenceControlSetPtr->staticConfig.naluFile, (char*)(EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure->naluFile);
-        FOPEN(sequenceControlSetPtr->naluFile, sequenceControlSetPtr->staticConfig.naluFile, "rb");
     }
     else {
-        sequenceControlSetPtr->naluFile = NULL;
-        sequenceControlSetPtr->staticConfig.naluFile = NULL;
+         sequenceControlSetPtr->staticConfig.naluFile = NULL;
     }
 
 
@@ -3126,7 +3124,7 @@ static EB_ERRORTYPE ParseSeiMetaData(
     EB_U8    *context = NULL;
     EbPictureBufferDesc_t *headerPtr = (EbPictureBufferDesc_t*)dst->pBuffer;
 
-    while (fgets((char*)line, sizeof(line), sequenceControlSetPtr->naluFile)) {
+    while(strcpy_ss((char*)line, sizeof(line), sequenceControlSetPtr->staticConfig.naluFile)){
         EB_U32 poc = atoi(EB_STRTOK(line, " ", &context));
         EB_U8 *prefix = (EB_U8*)EB_STRTOK(NULL, " ", &context);
         EB_U32 nalType = atoi(EB_STRTOK(NULL, "/", &context));

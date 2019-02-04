@@ -123,8 +123,6 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     // Mv merge
     sequenceControlSetPtr->mvMergeTotalCount                                = 5;
 
-    sequenceControlSetPtr->naluFile                                         = NULL;
-
     // Video Usability Info
     EB_MALLOC(AppVideoUsabilityInfo_t*, sequenceControlSetPtr->videoUsabilityInfoPtr, sizeof(AppVideoUsabilityInfo_t), EB_N_PTR);
     
@@ -238,8 +236,7 @@ EB_ERRORTYPE CopySequenceControlSet(
     dst->botPadding                 = src->botPadding;                              writeCount += sizeof(EB_U16);         
     dst->enableDenoiseFlag          = src->enableDenoiseFlag;                       writeCount += sizeof(EB_BOOL);
     dst->maxEncMode                 = src->maxEncMode;                              writeCount += sizeof(EB_U8);
-    dst->naluFile                   = src->naluFile;                                writeCount += sizeof(FILE*);
-
+    
     // Segments
     for (segmentIndex = 0; segmentIndex < MAX_TEMPORAL_LAYERS; ++segmentIndex) {
         dst->meSegmentColumnCountArray[segmentIndex] = src->meSegmentColumnCountArray[segmentIndex]; writeCount += sizeof(EB_U32);

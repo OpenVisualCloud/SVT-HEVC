@@ -190,7 +190,6 @@ typedef struct SequenceControlSet_s
     EB_U8                       transCoeffShapeArray[2][8][4];    // [componantTypeIndex][resolutionIndex][levelIndex][tuSizeIndex]
 
     EB_U8                       maxEncMode;
-    FILE*                       naluFile;
 
 } SequenceControlSet_t;
 

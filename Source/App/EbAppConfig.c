@@ -140,7 +140,7 @@ static void SetCfgQpFile                        (const char *value, EbConfig_t *
     if (cfg->qpFile) { fclose(cfg->qpFile); }
     FOPEN(cfg->qpFile,value, "r");
 };
-static void SetCfgDolbyVisionRpuFile(const char *value, EbConfig_t *cfg)
+static void SetCfgDolbyVisionRpuFile			(const char *value, EbConfig_t *cfg)
 {
     if (cfg->dolbyVisionRpuFile) { fclose(cfg->dolbyVisionRpuFile); }
     FOPEN(cfg->dolbyVisionRpuFile, value, "rb");

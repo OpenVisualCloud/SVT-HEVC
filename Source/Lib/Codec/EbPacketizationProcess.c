@@ -476,7 +476,7 @@ void* PacketizationKernel(void *inputPtr)
                 &sequenceControlSetPtr->recoveryPoint);
         }
 
-        if (sequenceControlSetPtr->naluFile && pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadSize) {
+        if (sequenceControlSetPtr->staticConfig.naluFile && pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadSize) {
             if (pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadType == USER_DATA_REGISTERED_ITU_T_T35) {
                 sequenceControlSetPtr->regUserDataSeiPtr.userDataSize = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadSize;
                 sequenceControlSetPtr->regUserDataSeiPtr.userData = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payload;
