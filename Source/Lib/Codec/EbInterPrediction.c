@@ -612,19 +612,21 @@ EB_ERRORTYPE Inter2Nx2NPuPredictionHevc(
 
         }
         else {
-			UniPredHevcInterpolationMd(
-                refPicList0,
-                refList0PosX,
-                refList0PosY,
-                puWidth,
-                puHeight,
-                candidateBufferPtr->predictionPtr,
-                puOriginIndex,
-                puChromaOriginIndex,
-                contextPtr->mcpContext->motionCompensationIntermediateResultBuf0,
-                contextPtr->mcpContext->TwoDInterpolationFirstPassFilterResultBuf,
-				EB_FALSE,
-				componentMask);
+            if (refPicList0) {
+                UniPredHevcInterpolationMd(
+                    refPicList0,
+                    refList0PosX,
+                    refList0PosY,
+                    puWidth,
+                    puHeight,
+                    candidateBufferPtr->predictionPtr,
+                    puOriginIndex,
+                    puChromaOriginIndex,
+                    contextPtr->mcpContext->motionCompensationIntermediateResultBuf0,
+                    contextPtr->mcpContext->TwoDInterpolationFirstPassFilterResultBuf,
+                    EB_FALSE,
+                    componentMask);
+            }
         }
 
         break;
@@ -658,22 +660,21 @@ EB_ERRORTYPE Inter2Nx2NPuPredictionHevc(
 
         }
         else {
-
-			UniPredHevcInterpolationMd(
-
-                refPicList1,
-                refList1PosX,
-                refList1PosY,
-                puWidth,
-                puHeight,
-                candidateBufferPtr->predictionPtr,
-                puOriginIndex,
-                puChromaOriginIndex,
-                contextPtr->mcpContext->motionCompensationIntermediateResultBuf0,
-                contextPtr->mcpContext->TwoDInterpolationFirstPassFilterResultBuf,
-				EB_FALSE,
-				componentMask);
-
+            if (refPicList1) {
+                UniPredHevcInterpolationMd(
+                    refPicList1,
+                    refList1PosX,
+                    refList1PosY,
+                    puWidth,
+                    puHeight,
+                    candidateBufferPtr->predictionPtr,
+                    puOriginIndex,
+                    puChromaOriginIndex,
+                    contextPtr->mcpContext->motionCompensationIntermediateResultBuf0,
+                    contextPtr->mcpContext->TwoDInterpolationFirstPassFilterResultBuf,
+                    EB_FALSE,
+                    componentMask);
+            }
         }
 
         break;
@@ -722,24 +723,25 @@ EB_ERRORTYPE Inter2Nx2NPuPredictionHevc(
 
         }
         else {
-
-			BiPredHevcInterpolationMd(
-                refPicList0,
-                refPicList1,
-                refList0PosX,
-                refList0PosY,
-                refList1PosX,
-                refList1PosY,
-                puWidth,
-                puHeight,
-                candidateBufferPtr->predictionPtr,
-                puOriginIndex,
-                puChromaOriginIndex,
-                contextPtr->mcpContext->motionCompensationIntermediateResultBuf0,
-                contextPtr->mcpContext->motionCompensationIntermediateResultBuf1,
-                contextPtr->mcpContext->TwoDInterpolationFirstPassFilterResultBuf,
-				EB_FALSE,
-				componentMask);
+            if (refPicList0 && refPicList1) {
+                BiPredHevcInterpolationMd(
+                    refPicList0,
+                    refPicList1,
+                    refList0PosX,
+                    refList0PosY,
+                    refList1PosX,
+                    refList1PosY,
+                    puWidth,
+                    puHeight,
+                    candidateBufferPtr->predictionPtr,
+                    puOriginIndex,
+                    puChromaOriginIndex,
+                    contextPtr->mcpContext->motionCompensationIntermediateResultBuf0,
+                    contextPtr->mcpContext->motionCompensationIntermediateResultBuf1,
+                    contextPtr->mcpContext->TwoDInterpolationFirstPassFilterResultBuf,
+                    EB_FALSE,
+                    componentMask);
+            }
         }
 
         break;
