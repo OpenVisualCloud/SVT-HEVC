@@ -99,7 +99,7 @@ EB_HANDLE EbCreateThread(
             }
         }
     }
-    pthread_destroy_init(&attr);
+    pthread_attr_destroy(&attr);
 #endif // _WIN32
 
     return threadHandle;
