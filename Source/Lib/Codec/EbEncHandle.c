@@ -61,7 +61,6 @@
 #if __linux__
 #include <pthread.h>
 #include <errno.h>
-#include <limits.h>
 #endif
 
 /**************************************
@@ -641,7 +640,10 @@ EB_ERRORTYPE EbSetThreadManagementParameters(
                 char* p = line + physical_id_len;
                 while(*p < '0' || *p > '9') p++;
                 socket_id = strtol(p, NULL, 0);
-                if (socket_id == LONG_MIN || socket_id == LONG_MAX) return EB_ErrorInsufficientResources;
+                if (socket_id < 0) {
+                    fclose(fin);
+                    return EB_ErrorInsufficientResources 
+                };
                 if (socket_id + 1 > numGroups)
                     numGroups = socket_id + 1;
                 lpgroup[socket_id].group[lpgroup[socket_id].num++] = processor_id;
