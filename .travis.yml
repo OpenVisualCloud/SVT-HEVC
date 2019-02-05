@@ -1,0 +1,46 @@
+language: c
+dist: xenial
+
+addons:
+  apt:
+    packages:
+     - cmake
+     - yasm
+
+jobs:
+  include:
+   # General build job
+   - name: Build
+     script:
+     - cd Build/linux
+     - ./build.sh release
+     
+   # Coveralls test job
+   - name: Test & Coveralls
+     before_install:
+     - pip install --user cpp-coveralls
+     script:
+     - cd Build/linux
+     - ./build.sh release
+     after_success:
+     - coveralls
+     
+   # FFmpeg interation build
+   - name: FFmpeg patch
+     script:
+     # Build and install SVT-HEVC
+     - cd $TRAVIS_BUILD_DIR
+     - cd Build
+     - cmake ..
+     - make -j$(nproc)
+     - sudo make install
+     # Apply SVT-HEVC plugin and enable libsvthevc to FFmpeg
+     - git clone https://github.com/FFmpeg/FFmpeg ffmpeg
+     - cd ffmpeg
+     - git checkout release/4.1
+     - git apply $TRAVIS_BUILD_DIR/ffmpeg_plugin/0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch
+     - git apply $TRAVIS_BUILD_DIR/ffmpeg_plugin/0002-doc-Add-libsvt_hevc-encoder-docs.patch
+     - export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
+     - export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
+     - ./configure --enable-libsvthevc
+     - make --quiet -j$(nproc)
