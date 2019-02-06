@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 #include "EbAppConfig.h"
 #include "EbApi.h"
@@ -715,7 +716,7 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
 		return_error = EB_ErrorBadParameter;
 	}
 
-    if (config->framesToBeEncoded >= 0x7FFFFFFFFFFFFFFF) {
+    if (config->framesToBeEncoded >= LLONG_MAX) {
         fprintf(config->errorLogFile, "SVT [Error]: Instance %u: FrameToBeEncoded must be less than 2^64 - 1\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
