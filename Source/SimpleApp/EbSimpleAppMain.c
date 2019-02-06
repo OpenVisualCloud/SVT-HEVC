@@ -299,11 +299,11 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
     return return_value;
 }
 
-static EB_ERRORTYPE checkFileInput(char* input) {
+static char* checkFileInput(char* input) {
     if (!input) {
-        return EB_ErrorBadParameter;
+        return NULL;
     }
-    return EB_ErrorNone;
+    return input;
 }
 
 /***************************************
@@ -348,7 +348,8 @@ int32_t main(int32_t argc, char* argv[])
                 // Get info for config
                 FILE *fin = NULL;
                 char* input_file = argv[1];
-                if (checkFileInput(input_file) == EB_ErrorNone) {
+                input_file = checkFileInput(input_file);
+                if (input_file) {
                     FOPEN(fin, input_file, "rb");
                 }
                 if (!fin) {
@@ -360,7 +361,8 @@ int32_t main(int32_t argc, char* argv[])
 
                 FILE *fout = NULL;
                 char* output_file = argv[2];
-                if (checkFileInput(output_file) == EB_ErrorNone) {
+                output_file = checkFileInput(output_file);
+                if (output_file) {
                     FOPEN(fout, output_file, "wb");
                 }
                 if (!fout) {
@@ -392,7 +394,8 @@ int32_t main(int32_t argc, char* argv[])
                 if (argc == 7) {
                     FILE * frec = NULL;
                     char* recon_file = argv[6];
-                    if (checkFileInput(recon_file) == EB_ErrorNone) {
+                    recon_file = checkFileInput(recon_file);
+                    if (recon_file) {
                         FOPEN(frec, recon_file, "wb");
                     }
                     if (!frec) {
