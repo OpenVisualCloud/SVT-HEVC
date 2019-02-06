@@ -138,7 +138,7 @@ static void SetCfgSourceWidth                   (const char *value, EbConfig_t *
 static void SetInterlacedVideo                  (const char *value, EbConfig_t *cfg) {cfg->interlacedVideo                  = (EB_BOOL) strtoul(value, NULL, 0);};
 static void SetSeperateFields                   (const char *value, EbConfig_t *cfg) {cfg->separateFields                   = (EB_BOOL) strtoul(value, NULL, 0);};
 static void SetCfgSourceHeight                  (const char *value, EbConfig_t *cfg) {cfg->sourceHeight                     = strtoul(value, NULL, 0) >> cfg->separateFields;};
-static void SetCfgFramesToBeEncoded             (const char *value, EbConfig_t *cfg) {cfg->framesToBeEncoded                = strtol(value,  NULL, 0) << cfg->separateFields;};
+static void SetCfgFramesToBeEncoded             (const char *value, EbConfig_t *cfg) {cfg->framesToBeEncoded                = strtoll(value,  NULL, 0) << cfg->separateFields;};
 static void SetBufferedInput                    (const char *value, EbConfig_t *cfg) {cfg->bufferedInput                    = (strtol(value, NULL, 0) != -1 && cfg->separateFields) ? strtol(value, NULL, 0) << cfg->separateFields : strtol(value, NULL, 0);};
 static void SetFrameRate                        (const char *value, EbConfig_t *cfg) {
     cfg->frameRate = strtoul(value, NULL, 0);
@@ -714,6 +714,11 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
 		fprintf(config->errorLogFile, "SVT [Error]: Instance %u: FrameToBeEncoded must be greater than 0\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	}
+
+    if (config->framesToBeEncoded >= 0x7FFFFFFFFFFFFFFF) {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: FrameToBeEncoded must be less than 2^64 - 1\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
 
     if (config->bufferedInput < -1) {
         fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid BufferedInput. BufferedInput must greater or equal to -1\n", channelNumber + 1);
