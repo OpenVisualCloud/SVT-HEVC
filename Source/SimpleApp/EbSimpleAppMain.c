@@ -299,6 +299,13 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
     return return_value;
 }
 
+static EB_ERRORTYPE checkFileInput(char* input) {
+    if (!input) {
+        return EB_ErrorBadParameter;
+    }
+    return EB_ErrorNone;
+}
+
 /***************************************
  * Encoder App Main
  ***************************************/
@@ -340,8 +347,9 @@ int32_t main(int32_t argc, char* argv[])
             } else if (return_error == EB_ErrorNone) {
                 // Get info for config
                 FILE *fin = NULL;
-                if (argv[1]) {
-                    FOPEN(fin, argv[1], "rb");
+                char* input_file = argv[1];
+                if (checkFileInput(input_file) == EB_ErrorNone) {
+                    FOPEN(fin, input_file, "rb");
                 }
                 if (!fin) {
                     printf("Invalid input file \n");
@@ -351,11 +359,12 @@ int32_t main(int32_t argc, char* argv[])
                 }
 
                 FILE *fout = NULL;
-                if (argv[2]) {
-                    FOPEN(fout, argv[2], "wb");
+                char* output_file = argv[2];
+                if (checkFileInput(output_file) == EB_ErrorNone) {
+                    FOPEN(fout, output_file, "wb");
                 }
                 if (!fout) {
-                    printf("Invalid input file \n");
+                    printf("Invalid output file \n");
                     return_error = EB_ErrorBadParameter;
                 } else {
                     config->bitstreamFile = fout;
@@ -382,8 +391,9 @@ int32_t main(int32_t argc, char* argv[])
 
                 if (argc == 7) {
                     FILE * frec = NULL;
-                    if (argv[6]) {
-                        FOPEN(frec, argv[6], "wb");
+                    char* recon_file = argv[6];
+                    if (checkFileInput(recon_file) == EB_ErrorNone) {
+                        FOPEN(frec, recon_file, "wb");
                     }
                     if (!frec) {
                         printf("Invalid recon file \n");
