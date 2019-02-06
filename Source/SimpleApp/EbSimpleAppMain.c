@@ -340,7 +340,9 @@ int32_t main(int32_t argc, char* argv[])
             } else if (return_error == EB_ErrorNone) {
                 // Get info for config
                 FILE *fin = NULL;
-                FOPEN(fin, argv[1], "rb");
+                if (argv[1]) {
+                    FOPEN(fin, argv[1], "rb");
+                }
                 if (!fin) {
                     printf("Invalid input file \n");
                     return_error = EB_ErrorBadParameter;
@@ -349,7 +351,9 @@ int32_t main(int32_t argc, char* argv[])
                 }
 
                 FILE *fout = NULL;
-                FOPEN(fout, argv[2], "wb");
+                if (argv[2]) {
+                    FOPEN(fout, argv[2], "wb");
+                }
                 if (!fout) {
                     printf("Invalid input file \n");
                     return_error = EB_ErrorBadParameter;
@@ -377,8 +381,10 @@ int32_t main(int32_t argc, char* argv[])
                 config->encoderBitDepth = bdepth;
 
                 if (argc == 7) {
-                    FILE * frec;
-                    FOPEN(frec, argv[6], "wb");
+                    FILE * frec = NULL;
+                    if (argv[6]) {
+                        FOPEN(frec, argv[6], "wb");
+                    }
                     if (!frec) {
                         printf("Invalid recon file \n");
                         return_error = EB_ErrorBadParameter;

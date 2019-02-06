@@ -2334,7 +2334,7 @@ static EB_ERRORTYPE VerifySettings(\
 		return_error = EB_ErrorBadParameter;
     }
 
-	EB_U32 inputSize = sequenceControlSetPtr->maxInputLumaWidth * sequenceControlSetPtr->maxInputLumaHeight;
+	EB_U32 inputSize = (EB_U32)sequenceControlSetPtr->maxInputLumaWidth * (EB_U32)sequenceControlSetPtr->maxInputLumaHeight;
 
 	EB_U8 inputResolution = (inputSize < INPUT_SIZE_1080i_TH)	?	INPUT_SIZE_576p_RANGE_OR_LOWER :
 							(inputSize < INPUT_SIZE_1080p_TH)	?	INPUT_SIZE_1080i_RANGE :
