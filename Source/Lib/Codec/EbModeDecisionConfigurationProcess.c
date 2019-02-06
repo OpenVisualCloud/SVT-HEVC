@@ -1991,7 +1991,8 @@ void DeriveLcuScore(
                         validCu8x8Count++;
                     }
                 }
-                distortion = CLIP3(pictureControlSetPtr->ParentPcsPtr->intraComplexityMinPre, pictureControlSetPtr->ParentPcsPtr->intraComplexityMaxPre, (distortion / validCu8x8Count) * 64);
+                if (validCu8x8Count)
+                    distortion = CLIP3(pictureControlSetPtr->ParentPcsPtr->intraComplexityMinPre, pictureControlSetPtr->ParentPcsPtr->intraComplexityMaxPre, (distortion / validCu8x8Count) * 64);
             }
             else {
                 distortion = pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[RASTER_SCAN_CU_INDEX_32x32_0][0].distortion +
@@ -2014,7 +2015,8 @@ void DeriveLcuScore(
                         validCu8x8Count++;
                     }
                 }
-                distortion = CLIP3(pictureControlSetPtr->ParentPcsPtr->interComplexityMinPre, pictureControlSetPtr->ParentPcsPtr->interComplexityMaxPre, (distortion / validCu8x8Count) * 64);
+                if (validCu8x8Count)
+                    distortion = CLIP3(pictureControlSetPtr->ParentPcsPtr->interComplexityMinPre, pictureControlSetPtr->ParentPcsPtr->interComplexityMaxPre, (distortion / validCu8x8Count) * 64);
 
                 // Do not perform LCU score manipulation for incomplete LCUs as not valid signals
                 lcuScore   = distortion;
@@ -2164,9 +2166,11 @@ void PerformOutlierRemoval(
 	
     // Zero-out the bin if percentage lower than VALID_SLOT_TH
 	for (slot = 0; slot < 10; slot++){
-		if ((lcuScoreHistogram[slot] * 100 / processedlcuCount) < VALID_SLOT_TH){
-			lcuScoreHistogram[slot] = 0;
-		}
+        if (processedlcuCount) {
+            if ((lcuScoreHistogram[slot] * 100 / processedlcuCount) < VALID_SLOT_TH) {
+                lcuScoreHistogram[slot] = 0;
+            }
+        }
 	}
 
     // Ignore null bins

@@ -110,8 +110,10 @@ void DerivePictureActivityStatistics(
 
 	}
 
-    pictureControlSetPtr->nonMovingIndexAverage = (EB_U16)(nonMovingIndexSum / completeLcuCount);
-    pictureControlSetPtr->zzCostAverage         = zzSum / completeLcuCount;
+    if (completeLcuCount) {
+        pictureControlSetPtr->nonMovingIndexAverage = (EB_U16)(nonMovingIndexSum / completeLcuCount);
+        pictureControlSetPtr->zzCostAverage = zzSum / completeLcuCount;
+    }
     pictureControlSetPtr->lowMotionContentFlag  = pictureControlSetPtr->zzCostAverage == 0 ? EB_TRUE : EB_FALSE;
 
 	return;
