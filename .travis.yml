@@ -6,15 +6,23 @@ addons:
     packages:
      - cmake
      - yasm
+  homebrew:
+    packages:
+      - yasm
 
 jobs:
   include:
-   # General build job
+   # General Linux build job
    - name: Build
      script:
      - cd Build/linux
      - ./build.sh release
-     
+   # General macOS build job
+   - name: macOS build
+     os: osx
+     script:
+     - cd Build/linux
+     - ./build.sh release    
    # Coveralls test job
    - name: Test & Coveralls
      before_install:
