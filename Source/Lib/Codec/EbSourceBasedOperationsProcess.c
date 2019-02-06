@@ -110,7 +110,7 @@ void DerivePictureActivityStatistics(
 
 	}
 
-    if (completeLcuCount) {
+    if (completeLcuCount > 0) {
         pictureControlSetPtr->nonMovingIndexAverage = (EB_U16)(nonMovingIndexSum / completeLcuCount);
         pictureControlSetPtr->zzCostAverage = zzSum / completeLcuCount;
     }

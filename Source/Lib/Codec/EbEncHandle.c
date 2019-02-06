@@ -2454,7 +2454,7 @@ static EB_ERRORTYPE VerifySettings(\
 	 
     if (levelIdx < 13) {
     // Check if the current input video is conformant with the Level constraint
-    if(config->level != 0 && ((EB_U64)(sequenceControlSetPtr->maxInputLumaWidth * sequenceControlSetPtr->maxInputLumaHeight) > maxLumaPictureSize[levelIdx])){
+    if(config->level != 0 && (((EB_U64)sequenceControlSetPtr->maxInputLumaWidth * (EB_U64)sequenceControlSetPtr->maxInputLumaHeight) > maxLumaPictureSize[levelIdx])){
         SVT_LOG("SVT [Error]: Instance %u: The input luma picture size exceeds the maximum luma picture size allowed for level %s\n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }

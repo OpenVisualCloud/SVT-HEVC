@@ -1991,7 +1991,7 @@ void DeriveLcuScore(
                         validCu8x8Count++;
                     }
                 }
-                if (validCu8x8Count)
+                if (validCu8x8Count > 0)
                     distortion = CLIP3(pictureControlSetPtr->ParentPcsPtr->intraComplexityMinPre, pictureControlSetPtr->ParentPcsPtr->intraComplexityMaxPre, (distortion / validCu8x8Count) * 64);
             }
             else {
@@ -2015,7 +2015,7 @@ void DeriveLcuScore(
                         validCu8x8Count++;
                     }
                 }
-                if (validCu8x8Count)
+                if (validCu8x8Count > 0)
                     distortion = CLIP3(pictureControlSetPtr->ParentPcsPtr->interComplexityMinPre, pictureControlSetPtr->ParentPcsPtr->interComplexityMaxPre, (distortion / validCu8x8Count) * 64);
 
                 // Do not perform LCU score manipulation for incomplete LCUs as not valid signals
@@ -2166,7 +2166,7 @@ void PerformOutlierRemoval(
 	
     // Zero-out the bin if percentage lower than VALID_SLOT_TH
 	for (slot = 0; slot < 10; slot++){
-        if (processedlcuCount) {
+        if (processedlcuCount > 0) {
             if ((lcuScoreHistogram[slot] * 100 / processedlcuCount) < VALID_SLOT_TH) {
                 lcuScoreHistogram[slot] = 0;
             }

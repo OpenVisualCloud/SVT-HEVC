@@ -2726,7 +2726,7 @@ EB_ERRORTYPE DetectInputPictureNoise(
 
 	}
 
-    if (totLcuCount) {
+    if (totLcuCount > 0) {
         contextPtr->picNoiseVarianceFloat = (double)picNoiseVariance / (double)totLcuCount;
 
         picNoiseVariance = picNoiseVariance / totLcuCount;
@@ -3115,7 +3115,7 @@ EB_ERRORTYPE QuarterSampleDetectNoise(
 		}
 	}
 
-    if (totLcuCount) {
+    if (totLcuCount > 0) {
         contextPtr->picNoiseVarianceFloat = (double)picNoiseVariance / (double)totLcuCount;
 
         picNoiseVariance = picNoiseVariance / totLcuCount;
@@ -3259,7 +3259,7 @@ EB_ERRORTYPE SubSampleDetectNoise(
 		}
 	}
 
-    if (totLcuCount) {
+    if (totLcuCount > 0) {
         contextPtr->picNoiseVarianceFloat = (double)picNoiseVariance / (double)totLcuCount;
 
         picNoiseVariance = picNoiseVariance / totLcuCount;
@@ -3960,14 +3960,14 @@ static inline void DetermineHomogeneousRegionInPicture(
         }
     }
     pictureControlSetPtr->veryLowVarPicFlag = EB_FALSE;
-    if (varLcuCnt) {
+    if (varLcuCnt > 0) {
         if (((veryLowVarCnt * 100) / varLcuCnt) > PIC_LOW_VAR_PERCENTAGE_TH) {
             pictureControlSetPtr->veryLowVarPicFlag = EB_TRUE;
         }
     }
 
     pictureControlSetPtr->logoPicFlag = EB_FALSE;
-    if (varLcuCnt) {
+    if (varLcuCnt > 0) {
         if (((veryLowVarCnt * 100) / varLcuCnt) > 80) {
             pictureControlSetPtr->logoPicFlag = EB_TRUE;
         }

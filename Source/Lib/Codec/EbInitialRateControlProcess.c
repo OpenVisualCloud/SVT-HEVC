@@ -342,13 +342,11 @@ void DetectGlobalMotion(
 	pictureControlSetPtr->isPan = EB_FALSE;
 	pictureControlSetPtr->isTilt = EB_FALSE;
 
-    if (totalCheckedLcus) {
+    if (totalCheckedLcus > 0) {
         // If more than PAN_LCU_PERCENTAGE % of LCUs are PAN
         if ((totalPanLcus * 100 / totalCheckedLcus) > PAN_LCU_PERCENTAGE) {
             pictureControlSetPtr->isPan = EB_TRUE;
         }
-    }
-    if (totalCheckedLcus) {
         if ((totalTiltLcus * 100 / totalCheckedLcus) > PAN_LCU_PERCENTAGE) {
             pictureControlSetPtr->isTilt = EB_TRUE;
         }
