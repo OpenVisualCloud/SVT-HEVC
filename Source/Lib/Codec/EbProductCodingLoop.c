@@ -1141,10 +1141,7 @@ void SetNmm(
             if (contextPtr->cuSize == 32)
                 contextPtr->mvMergeSkipModeCount = 3;
             else
-                if (contextPtr->cuSize == 32)
-                    contextPtr->mvMergeSkipModeCount = 3;
-                else
-                    contextPtr->mvMergeSkipModeCount = 2;           
+                contextPtr->mvMergeSkipModeCount = 2;           
         }
         else {
             contextPtr->mvMergeSkipModeCount = 2;
