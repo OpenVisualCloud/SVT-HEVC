@@ -1378,6 +1378,11 @@ static void ResetEncDec(
             entropyCodingQp,
             pictureControlSetPtr->sliceType);
 
+        ResetEntropyCoder(
+            sequenceControlSetPtr->encodeContextPtr,
+            pictureControlSetPtr->tempEntropyCoderPtr,
+            entropyCodingQp,
+            pictureControlSetPtr->sliceType);
         ResetEncodePassNeighborArrays(pictureControlSetPtr);
 
         //this fucntion could be optimized by removed chroma, and unessary TU sizes.
@@ -3829,6 +3834,11 @@ void* EncDecKernel(void *inputPtr)
     EB_U32                  segmentBandSize;
     EncDecSegments_t       *segmentsPtr;
 
+    //Proxy entropy coding
+    EbPictureBufferDesc_t *  tempCoeffPicturePtr;
+    EB_U32                   totalbits = 0;
+    EB_U32                   tempWrittenBitsBeforeQuantizedCoeff;
+    EB_U32                   tempWrittenBitsAfterQuantizedCoeff;
 
     for (;;) {
 
@@ -3945,6 +3955,8 @@ void* EncDecKernel(void *inputPtr)
                     lcuRowIndexCount = (xLcuIndex == pictureWidthInLcu - 1) ? lcuRowIndexCount + 1 : lcuRowIndexCount;
                     mdcPtr = &pictureControlSetPtr->mdcLcuArray[lcuIndex];
                     contextPtr->lcuIndex = lcuIndex;
+
+                    tempCoeffPicturePtr = lcuPtr->quantizedCoeff;
 					
                     // Derive cuUseRefSrcFlag Flag
                     contextPtr->mdContext->cuUseRefSrcFlag = (pictureControlSetPtr->ParentPcsPtr->useSrcRef) && (pictureControlSetPtr->ParentPcsPtr->edgeResultsPtr[lcuIndex].edgeBlockNum == EB_FALSE || pictureControlSetPtr->ParentPcsPtr->lcuFlatNoiseArray[lcuIndex]) ? EB_TRUE : EB_FALSE;
@@ -4083,6 +4095,29 @@ void* EncDecKernel(void *inputPtr)
                         lcuPtr->qp,
                         enableSaoFlag,
                         contextPtr);
+
+                    /*Entropy Estimation for LCU*/
+                    tempWrittenBitsBeforeQuantizedCoeff = ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->tempEntropyCoderPtr))->writtenBitsCount +
+                        32 - ((CabacEncodeContext_t*)pictureControlSetPtr->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
+                        (((CabacEncodeContext_t*)pictureControlSetPtr->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum << 3);
+                    EncodeLcu(
+                        lcuPtr,
+                        lcuOriginX,
+                        lcuOriginY,
+                        pictureControlSetPtr,
+                        sequenceControlSetPtr->lcuSize,
+                        pictureControlSetPtr->tempEntropyCoderPtr,
+                        tempCoeffPicturePtr,
+                        pictureControlSetPtr->tempModeTypeNeighborArray,
+                        pictureControlSetPtr->tempLeafDepthNeighborArray,
+                        pictureControlSetPtr->tempIntraLumaModeNeighborArray,
+                        pictureControlSetPtr->tempSkipFlagNeighborArray,
+                        0,
+                        0);
+                    tempWrittenBitsAfterQuantizedCoeff = ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->tempEntropyCoderPtr))->writtenBitsCount +
+                        32 - ((CabacEncodeContext_t*)pictureControlSetPtr->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
+                        (((CabacEncodeContext_t*)pictureControlSetPtr->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum << 3);
+                    totalbits = tempWrittenBitsAfterQuantizedCoeff - tempWrittenBitsBeforeQuantizedCoeff;
 
                     if (pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr != NULL){
                         ((EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr)->intraCodedAreaLCU[lcuIndex] = (EB_U8)((100 * contextPtr->intraCodedAreaLCU[lcuIndex]) / (64 * 64));

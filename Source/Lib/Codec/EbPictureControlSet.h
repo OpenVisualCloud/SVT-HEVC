@@ -140,6 +140,8 @@ typedef struct PictureControlSet_s
     
     EntropyCoder_t                       *entropyCoderPtr;
 
+	EntropyCoder_t                       *tempEntropyCoderPtr;
+
     // Packetization (used to encode SPS, PPS, etc)
     Bitstream_t                          *bitstreamPtr;
     
@@ -248,6 +250,11 @@ typedef struct PictureControlSet_s
     NeighborArrayUnit_t                  *leafDepthNeighborArray;
     NeighborArrayUnit_t                  *intraLumaModeNeighborArray;
     NeighborArrayUnit_t                  *skipFlagNeighborArray;
+
+	NeighborArrayUnit_t                  *tempModeTypeNeighborArray;
+	NeighborArrayUnit_t                  *tempLeafDepthNeighborArray;
+	NeighborArrayUnit_t                  *tempIntraLumaModeNeighborArray;
+	NeighborArrayUnit_t                  *tempSkipFlagNeighborArray;
 
     EB_REFLIST                            colocatedPuRefList;
     EB_BOOL                               isLowDelay;
