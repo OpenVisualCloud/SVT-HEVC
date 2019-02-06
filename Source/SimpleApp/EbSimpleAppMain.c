@@ -299,6 +299,13 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
     return return_value;
 }
 
+static char* checkFileInput(char* input) {
+    if (!input) {
+        return NULL;
+    }
+    return input;
+}
+
 /***************************************
  * Encoder App Main
  ***************************************/
@@ -340,7 +347,11 @@ int32_t main(int32_t argc, char* argv[])
             } else if (return_error == EB_ErrorNone) {
                 // Get info for config
                 FILE *fin = NULL;
-                FOPEN(fin, argv[1], "rb");
+                char* input_file = argv[1];
+                input_file = checkFileInput(input_file);
+                if (input_file) {
+                    FOPEN(fin, input_file, "rb");
+                }
                 if (!fin) {
                     printf("Invalid input file \n");
                     return_error = EB_ErrorBadParameter;
@@ -349,9 +360,13 @@ int32_t main(int32_t argc, char* argv[])
                 }
 
                 FILE *fout = NULL;
-                FOPEN(fout, argv[2], "wb");
+                char* output_file = argv[2];
+                output_file = checkFileInput(output_file);
+                if (output_file) {
+                    FOPEN(fout, output_file, "wb");
+                }
                 if (!fout) {
-                    printf("Invalid input file \n");
+                    printf("Invalid output file \n");
                     return_error = EB_ErrorBadParameter;
                 } else {
                     config->bitstreamFile = fout;
@@ -361,7 +376,7 @@ int32_t main(int32_t argc, char* argv[])
 
                 width = strtoul(argv[3], NULL, 0);
                 height = strtoul(argv[4], NULL, 0);
-                if ((width&&height) == 0) {
+                if (width <= 0 || width > 8192 || height <= 0 || height > 4320) {
                     printf("Invalid video dimensions\n");
                     return_error = EB_ErrorBadParameter;
                 }
@@ -377,8 +392,12 @@ int32_t main(int32_t argc, char* argv[])
                 config->encoderBitDepth = bdepth;
 
                 if (argc == 7) {
-                    FILE * frec;
-                    FOPEN(frec, argv[6], "wb");
+                    FILE * frec = NULL;
+                    char* recon_file = argv[6];
+                    recon_file = checkFileInput(recon_file);
+                    if (recon_file) {
+                        FOPEN(frec, recon_file, "wb");
+                    }
                     if (!frec) {
                         printf("Invalid recon file \n");
                         return_error = EB_ErrorBadParameter;

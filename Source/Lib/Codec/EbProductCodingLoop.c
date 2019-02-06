@@ -2723,7 +2723,7 @@ EB_EXTERN EB_ERRORTYPE PerformIntra4x4Search(
 	EB_U32                   chromaShift;
     
     if (contextPtr->coeffCabacUpdate)
-        memcpy(&(contextPtr->i4x4CoeffCtxModel), &(contextPtr->latestValidCoeffCtxModel), sizeof(CoeffCtxtMdl_t));
+        EB_MEMCPY(&(contextPtr->i4x4CoeffCtxModel), &(contextPtr->latestValidCoeffCtxModel), sizeof(CoeffCtxtMdl_t));
 
     for (partitionIndex = 0; partitionIndex < 4; partitionIndex++) {
 
