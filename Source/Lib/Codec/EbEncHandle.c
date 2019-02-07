@@ -629,32 +629,34 @@ EB_ERRORTYPE EbSetThreadManagementParameters(
 
     int fd = open("/proc/cpuinfo", O_RDONLY | O_NOFOLLOW, "rt");
     struct stat file_stat;
-    if (fd >= 0 && fstat(fd, &file_stat) != -1 && S_ISREG(file_stat.st_mode) != 0) {
-        int processor_id = 0, socket_id = 0;
-        char line[128];
-        int bytes = 1;
-        while (bytes > 0) {
-            bytes = read(fd,line,128);
-            if (bytes > 0) {
-                if(strncmp(line, PROCESSORID, processor_id_len) == 0) {
-                    char* p = line + processor_id_len;
-                    while(*p < '0' || *p > '9') p++;
-                    processor_id = strtol(p, NULL, 0);
-                }
-                if(strncmp(line, PHYSICALID, physical_id_len) == 0) {
-                    char* p = line + physical_id_len;
-                    while(*p < '0' || *p > '9') p++;
-                    socket_id = strtol(p, NULL, 0);
-                    if (socket_id < 0 || socket_id > 15) {
-                        close(fd);
-                        return EB_ErrorInsufficientResources;
+    if (fd >= 0)
+        if fstat(fd, &file_stat) != -1 && S_ISREG(file_stat.st_mode) != 0) {
+            int processor_id = 0, socket_id = 0;
+            char line[128];
+            int bytes = 1;
+            while (bytes > 0) {
+                bytes = read(fd, line, 128);
+                if (bytes > 0) {
+                    if (strncmp(line, PROCESSORID, processor_id_len) == 0) {
+                        char* p = line + processor_id_len;
+                        while (*p < '0' || *p > '9') p++;
+                        processor_id = strtol(p, NULL, 0);
                     }
-                    if (socket_id + 1 > numGroups)
-                        numGroups = socket_id + 1;
-                    lpgroup[socket_id].group[lpgroup[socket_id].num++] = processor_id;
+                    if (strncmp(line, PHYSICALID, physical_id_len) == 0) {
+                        char* p = line + physical_id_len;
+                        while (*p < '0' || *p > '9') p++;
+                        socket_id = strtol(p, NULL, 0);
+                        if (socket_id < 0 || socket_id > 15) {
+                            close(fd);
+                            return EB_ErrorInsufficientResources;
+                        }
+                        if (socket_id + 1 > numGroups)
+                            numGroups = socket_id + 1;
+                        lpgroup[socket_id].group[lpgroup[socket_id].num++] = processor_id;
+                    }
+                    lseek(fd, -bytes + 1, SEEK_CUR);
+                    while (line[0] != '\n' && bytes > 0) bytes = read(fd, line, 1);
                 }
-                lseek(fd, -bytes + 1, SEEK_CUR);
-                while (line[0] != '\n' && bytes > 0) bytes = read(fd,line,1);
             }
         }
         close(fd);
