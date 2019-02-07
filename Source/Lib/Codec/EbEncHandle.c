@@ -629,8 +629,8 @@ EB_ERRORTYPE EbSetThreadManagementParameters(
 
     int fd = open("/proc/cpuinfo", O_RDONLY | O_NOFOLLOW, "rt");
     struct stat file_stat;
-    if (fd >= 0)
-        if fstat(fd, &file_stat) != -1 && S_ISREG(file_stat.st_mode) != 0) {
+    if (fd >= 0) {
+        if (fstat(fd, &file_stat) != -1 && S_ISREG(file_stat.st_mode) != 0) {
             int processor_id = 0, socket_id = 0;
             char line[128];
             int bytes = 1;
