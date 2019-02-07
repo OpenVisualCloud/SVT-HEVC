@@ -628,7 +628,7 @@ EB_ERRORTYPE EbSetThreadManagementParameters(
     memset(lpgroup, 0, 16* sizeof(processorGroup));
 
     int fd = open("/proc/cpuinfo", O_RDONLY | O_NOFOLLOW, "rt");
-    if (fd > 0) {
+    if (fd >= 0) {
         struct stat file_stat;
         if (fstat(fd, &file_stat) != -1) {
             if (S_ISREG(file_stat.st_mode) != 0) {
