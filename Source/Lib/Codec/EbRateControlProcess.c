@@ -1961,8 +1961,6 @@ void FrameLevelRcFeedbackPictureMode2(
             rateControlParamPtr->firstPoc += PARALLEL_GOP_MAX_NUMBER*(EB_U32)(sequenceControlSetPtr->intraPeriodLength + 1);
             rateControlParamPtr->lastPoc += PARALLEL_GOP_MAX_NUMBER*(EB_U32)(sequenceControlSetPtr->intraPeriodLength + 1);
             rateControlParamPtr->processedFramesNumber = 0;
-            rateControlParamPtr->virtualBufferLevel = rateControlParamPtr->virtualBufferLevel;
-            rateControlParamPtr->previousVirtualBufferLevel = rateControlParamPtr->previousVirtualBufferLevel;
             rateControlParamPtr->extraApBitRatioI = 0;
             rateControlParamPtr->inUse = EB_FALSE;
             rateControlParamPtr->wasUsed = EB_TRUE;
@@ -2347,8 +2345,6 @@ void* RateControlKernel(void *inputPtr)
                     pictureControlSetPtr->pictureQp = (EB_U8)CLIP3((EB_S32)sequenceControlSetPtr->staticConfig.minQpAllowed, (EB_S32)sequenceControlSetPtr->staticConfig.maxQpAllowed,pictureControlSetPtr->ParentPcsPtr->pictureQp);
                 }
 
-
-                pictureControlSetPtr->pictureQp = pictureControlSetPtr->pictureQp;
             }
             else{
                     FrameLevelRcInputPictureMode2(

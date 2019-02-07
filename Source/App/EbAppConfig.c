@@ -143,10 +143,7 @@ static void SetCfgFramesToBeEncoded             (const char *value, EbConfig_t *
 static void SetBufferedInput                    (const char *value, EbConfig_t *cfg) {cfg->bufferedInput                    = (strtol(value, NULL, 0) != -1 && cfg->separateFields) ? strtol(value, NULL, 0) << cfg->separateFields : strtol(value, NULL, 0);};
 static void SetFrameRate                        (const char *value, EbConfig_t *cfg) {
     cfg->frameRate = strtoul(value, NULL, 0);
-    if (cfg->frameRate > 1000 ){
-        cfg->frameRate = cfg->frameRate;
-    }
-    else{
+    if (cfg->frameRate <= 1000 ){
         cfg->frameRate = cfg->frameRate << 16;
     }
 }
@@ -199,10 +196,7 @@ static void SetInjector                         (const char *value, EbConfig_t *
 static void SpeedControlFlag                    (const char *value, EbConfig_t *cfg) {cfg->speedControlFlag                 = strtol(value, NULL, 0); };
 static void SetInjectorFrameRate                (const char *value, EbConfig_t *cfg) {
     cfg->injectorFrameRate = strtoul(value, NULL, 0);
-    if (cfg->injectorFrameRate > 1000 ){
-        cfg->injectorFrameRate = cfg->injectorFrameRate;
-    }
-    else{
+    if (cfg->injectorFrameRate <= 1000 ){
         cfg->injectorFrameRate = cfg->injectorFrameRate << 16;
     }
 }
