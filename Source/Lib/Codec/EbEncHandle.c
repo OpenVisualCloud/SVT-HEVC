@@ -564,6 +564,8 @@ void SwitchToRealTime()
     };
 
     pthread_setschedparam(pthread_self(), SCHED_FIFO, &schedParam);
+    if (retValue == EPERM)
+        SVT_LOG("\n[WARNING] Elevated privileges required to run with real-time policies! Check KBC in User Guide to run application in real-time without elevated privileges!\n\n");
 
 #endif
 }
