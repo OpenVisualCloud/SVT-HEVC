@@ -218,6 +218,15 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.fpsInVps = config->fpsInVps;
     callbackData->ebEncParameters.switchThreadsToRtPriority = config->switchThreadsToRtPriority;
 
+    callbackData->ebEncParameters.maxCLL = config->maxCLL;
+    callbackData->ebEncParameters.maxFALL = config->maxFALL;
+    if (config->masteringDisplayColorVolume) {
+        EB_APP_STRDUP(callbackData->ebEncParameters.masteringDisplayColorVolume, (char*)config->masteringDisplayColorVolume);
+    }
+    callbackData->ebEncParameters.dolbyVisionProfile = config->dolbyVisionProfile;
+    if (config->naluFile) {
+        EB_APP_STRDUP(callbackData->ebEncParameters.naluFile, (char*)config->naluFile);
+    }
     return return_error;
 
 }
@@ -288,6 +297,10 @@ EB_ERRORTYPE AllocateFrameBuffer(
     }
     else {
         inputPtr->crExt = 0;
+    }
+
+    if (config->dolbyVisionProfile == 81 && config->dolbyVisionRpuFile) {
+        EB_APP_MALLOC(uint8_t*, inputPtr->dolbyVisionRpu.payload, 1024, EB_N_PTR, EB_ErrorInsufficientResources);
     }
 
     return return_error;

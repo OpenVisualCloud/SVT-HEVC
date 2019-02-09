@@ -171,6 +171,10 @@ extern rsize_t strnlen_ss(const char *s, rsize_t smax);
     printf("Total Number of Mallocs in App: %d\n", appMallocCount); \
     printf("Total App Memory: %.2lf KB\n\n",*totalAppMemory/(double)1024);
 
+#define EB_APP_STRDUP(dst, src) \
+    EB_APP_MALLOC(char*, dst, strlen(src)+1, EB_N_PTR, EB_ErrorInsufficientResources); \
+    EB_STRCPY((char*)dst, strlen(src)+1,  src);
+
 #define MAX_CHANNEL_NUMBER      6
 #define MAX_NUM_TOKENS          200
 
@@ -368,6 +372,16 @@ typedef struct EbConfig_s
 
     uint64_t  processedFrameCount;
     uint64_t  processedByteCount;
+
+    /****************************************
+    * SEI parameters
+    ****************************************/
+    uint16_t  maxCLL;
+    uint16_t  maxFALL;
+    const char*  masteringDisplayColorVolume;
+    uint32_t     dolbyVisionProfile;
+    FILE*        dolbyVisionRpuFile;
+    const char*  naluFile;
 
 } EbConfig_t;
 

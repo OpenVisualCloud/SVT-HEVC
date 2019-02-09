@@ -121,6 +121,19 @@ typedef struct SequenceControlSet_s
 
     // Recovery point
     AppRecoveryPoint_t          recoveryPoint;
+
+    // Content Light Level sei
+    AppContentLightLevelSei_t   contentLightLevel;
+
+    // Mastering Display Color Volume Sei
+    AppMasteringDisplayColorVolumeSei_t   masteringDisplayColorVolume;
+
+    // Registered User data Sei
+    RegistedUserData_t          regUserDataSeiPtr;
+
+    // Un Registered User data Sei
+    UnregistedUserData_t        unRegUserDataSeiPtr;
+
     // Maximum Decoded Picture Buffer size.
     EB_U32                      maxDpbSize;
     

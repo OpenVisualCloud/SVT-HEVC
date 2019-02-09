@@ -668,6 +668,28 @@ extern    EB_U32                   libMutexCount;
     } \
     libMutexCount++;
 
+#define EB_STRDUP(dst, src) \
+    dst = (char*) malloc(strlen(src)+1); \
+    strcpy_ss((char*)dst, strlen(src)+1, src);
+
+#ifdef _WIN32
+#define EB_SCANF sscanf_s
+#else
+#define EB_SCANF sscanf
+#endif
+
+#ifdef _MSC_VER
+#define FOPEN(f,s,m) fopen_s(&f,s,m)
+#else
+#define FOPEN(f,s,m) f=fopen(s,m)
+#endif
+
+#ifdef _MSC_VER
+#define EB_STRTOK(str,delim,next) strtok_s((char*)str,(const char*)delim,(char**)next)
+#else
+#define EB_STRTOK(str,delim,next) strtok_r((char*)str,(const char*)delim,(char**)next)
+#endif
+
 /** The EB_CTOR type is used to define the svt object constructors.
 objectPtr is a EB_PTR to the object being constructed.
 objectInitDataPtr is a EB_PTR to a data structure used to initialize the object.
@@ -810,6 +832,8 @@ typedef enum EB_SEI {
     TEMPORAL_LEVEL0_INDEX = 131,
     SCALABLE_NESTING = 133,
     REGION_REFRESH_INFO = 134,
+    MASTERING_DISPLAY_INFO = 137,
+    CONTENT_LIGHT_LEVEL_INFO = 144
 
 } EB_SEI;
 

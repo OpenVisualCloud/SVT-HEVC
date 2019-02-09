@@ -145,9 +145,25 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     EbRecoveryPointSeiCtor(
         &sequenceControlSetPtr->recoveryPoint);
 
-	// Initialize LCU params
-	LcuParamsCtor(
-		sequenceControlSetPtr);
+    // Initialize Content Light Level SEI
+    EbContentLightLevelCtor(
+        &sequenceControlSetPtr->contentLightLevel);
+
+    // Initialize Mastering Color Volume SEI
+    EbMasteringDisplayColorVolumeCtor(
+        &sequenceControlSetPtr->masteringDisplayColorVolume);
+
+    // Initialize Registered User Data SEI
+    EbRegUserDataSEICtor(
+        &sequenceControlSetPtr->regUserDataSeiPtr);
+
+    // Initialize Un-Registered User Data SEI
+    EbUnRegUserDataSEICtor(
+        &sequenceControlSetPtr->unRegUserDataSeiPtr);
+
+    // Initialize LCU params
+    LcuParamsCtor(
+        sequenceControlSetPtr);
 
     sequenceControlSetPtr->maxDpbSize	= 0;
     
@@ -220,7 +236,7 @@ EB_ERRORTYPE CopySequenceControlSet(
     dst->botPadding                 = src->botPadding;                              writeCount += sizeof(EB_U16);         
     dst->enableDenoiseFlag          = src->enableDenoiseFlag;                       writeCount += sizeof(EB_BOOL);
     dst->maxEncMode                 = src->maxEncMode;                              writeCount += sizeof(EB_U8);
-
+    
     // Segments
     for (segmentIndex = 0; segmentIndex < MAX_TEMPORAL_LAYERS; ++segmentIndex) {
         dst->meSegmentColumnCountArray[segmentIndex] = src->meSegmentColumnCountArray[segmentIndex]; writeCount += sizeof(EB_U32);
@@ -244,11 +260,39 @@ EB_ERRORTYPE CopySequenceControlSet(
     writeCount += sizeof(AppRecoveryPoint_t);
 
     EB_MEMCPY(
+        &dst->contentLightLevel,
+        &src->contentLightLevel,
+        sizeof(AppContentLightLevelSei_t));
+
+    writeCount += sizeof(AppContentLightLevelSei_t);
+
+    EB_MEMCPY(
+        &dst->masteringDisplayColorVolume,
+        &src->masteringDisplayColorVolume,
+        sizeof(AppMasteringDisplayColorVolumeSei_t));
+
+    writeCount += sizeof(AppMasteringDisplayColorVolumeSei_t);
+
+    EB_MEMCPY(
         &dst->picTimingSei,
         &src->picTimingSei,
         sizeof(AppPictureTimingSei_t));
 
     writeCount += sizeof(AppPictureTimingSei_t);
+
+    EB_MEMCPY(
+        &dst->regUserDataSeiPtr,
+        &src->regUserDataSeiPtr,
+        sizeof(RegistedUserData_t));
+
+    writeCount += sizeof(RegistedUserData_t);
+
+    EB_MEMCPY(
+        &dst->unRegUserDataSeiPtr,
+        &src->unRegUserDataSeiPtr,
+        sizeof(UnregistedUserData_t));
+
+    writeCount += sizeof(UnregistedUserData_t);
 
     EbVideoUsabilityInfoCopy(
         dst->videoUsabilityInfoPtr,

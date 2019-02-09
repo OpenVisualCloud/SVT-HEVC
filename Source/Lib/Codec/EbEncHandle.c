@@ -12,6 +12,7 @@
  **************************************/
 #include <stdlib.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 #include "EbDefinitions.h"
 #include "EbApi.h"
@@ -2128,6 +2129,29 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.frameRateNumerator = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRateNumerator;
     sequenceControlSetPtr->staticConfig.reconEnabled = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->reconEnabled;
 
+    sequenceControlSetPtr->staticConfig.maxCLL = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxCLL;
+    sequenceControlSetPtr->staticConfig.maxFALL = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxFALL;
+    if (pComponentParameterStructure->masteringDisplayColorVolume) {
+        EB_STRDUP(sequenceControlSetPtr->staticConfig.masteringDisplayColorVolume, (char*)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->masteringDisplayColorVolume);
+    }
+    else {
+        sequenceControlSetPtr->staticConfig.masteringDisplayColorVolume = NULL;
+    }
+    sequenceControlSetPtr->staticConfig.dolbyVisionProfile = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->dolbyVisionProfile;
+
+    if(pComponentParameterStructure->naluFile) {
+        EB_STRDUP(sequenceControlSetPtr->staticConfig.naluFile, (char*)(EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure->naluFile);
+    }
+    else {
+         sequenceControlSetPtr->staticConfig.naluFile = NULL;
+    }
+
+
+    // if dolby Profile is set HDR should be set to 1
+    if (sequenceControlSetPtr->staticConfig.dolbyVisionProfile == 81) {
+        sequenceControlSetPtr->staticConfig.highDynamicRangeInput = 1;
+    }
+
     // if HDR is set videoUsabilityInfo should be set to 1
     if (sequenceControlSetPtr->staticConfig.highDynamicRangeInput == 1) {
         sequenceControlSetPtr->staticConfig.videoUsabilityInfo = 1;
@@ -2613,6 +2637,31 @@ static EB_ERRORTYPE VerifySettings(\
 		return_error = EB_ErrorBadParameter;
     }
 
+	if ((config->maxCLL && !config->highDynamicRangeInput) || (config->maxFALL && !config->highDynamicRangeInput)) {
+		SVT_LOG("Error Instance %u: maxCLL or maxFALL should be used only with high dynamic range input; set highDynamicRangeInput to 1\n", channelNumber);
+		return_error = EB_ErrorBadParameter;
+	}
+
+	if (config->masteringDisplayColorVolume && !config->highDynamicRangeInput) {
+		SVT_LOG("Error Instance %u: MasterDisplay should be used only with high dynamic range input; set highDynamicRangeInput to 1\n", channelNumber);
+		return_error = EB_ErrorBadParameter;
+	}
+
+	if (config->dolbyVisionProfile != 0 && config->dolbyVisionProfile != 81) {
+		SVT_LOG("Error Instance %u: Only Dolby Vision Profile 8.1 is supported \n", channelNumber);
+		return_error = EB_ErrorBadParameter;
+	}
+
+	if (config->dolbyVisionProfile == 81 && config->encoderBitDepth != 10) {
+		SVT_LOG("Error Instance %u: Dolby Vision Profile 8.1 work only with main10 input \n", channelNumber);
+		return_error = EB_ErrorBadParameter;
+	}
+
+	if (config->dolbyVisionProfile == 81 && !config->masteringDisplayColorVolume) {
+		SVT_LOG("Error Instance %u: Dolby Vision Profile 8.1 requires mastering display color volume information \n", channelNumber);
+		return_error = EB_ErrorBadParameter;
+	}
+
  	if (config->enableTemporalId > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid TemporalId. TemporalId must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
@@ -2765,6 +2814,13 @@ EB_ERRORTYPE EbH265EncInitParameter(
     
     // Debug info
     configPtr->reconEnabled = 0;
+
+    //SEI
+    configPtr->maxCLL = 0;
+    configPtr->maxFALL = 0;
+    configPtr->masteringDisplayColorVolume = NULL;
+    configPtr->dolbyVisionProfile = 0;
+    configPtr->naluFile = NULL;
 
     return return_error;
 }
@@ -2975,7 +3031,8 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
         outputStreamBuffer->pBuffer,
         (EB_U32*) &(outputStreamBuffer->nFilledLen),
         (EB_U32*) &(outputStreamBuffer->nAllocLen),
-        encodeContextPtr);
+        encodeContextPtr,
+        9999);
 
     *outputStreamPtr = outputStreamBuffer;
 
@@ -3030,10 +3087,132 @@ EB_API EB_ERRORTYPE EbH265EncEosNal(
         outputStreamBuffer->pBuffer,
         (EB_U32*) &(outputStreamBuffer->nFilledLen),
         (EB_U32*) &(outputStreamBuffer->nAllocLen),
-        encodeContextPtr);
+        encodeContextPtr,
+        9999);
     
     *outputStreamPtr = outputStreamBuffer;
 
+    return return_error;
+}
+
+/* charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/" */
+static void baseDecodeFunction(EB_U8* encodedString, EB_U32 base64EncodeLength, EB_U8* decodedString )
+{
+    EB_U32 i, j, k = 0;
+    EB_U32 bitstream = 0;
+    EB_U32 countBits = 0;
+
+    // selects 4 characters from encodedString at a time
+    for (i = 0; i < base64EncodeLength; i += 4) {
+        bitstream = 0, countBits = 0;
+        for (j = 0; j < 4; j++) {
+            // make space for 6 bits
+            if (encodedString[i + j] != '=') {
+                bitstream = bitstream << 6;
+                countBits += 6;
+            }
+            // Finding the position of each encoded character in charSet and storing in bitstream
+            if (encodedString[i + j] >= 'A' && encodedString[i + j] <= 'Z')
+                bitstream = bitstream | (encodedString[i + j] - 'A');
+
+            else if (encodedString[i + j] >= 'a' && encodedString[i + j] <= 'z')
+                bitstream = bitstream | (encodedString[i + j] - 'a' + 26);
+
+            else if (encodedString[i + j] >= '0' && encodedString[i + j] <= '9')
+                bitstream = bitstream | (encodedString[i + j] - '0' + 52);
+
+            // '+' occurs in 62nd position in charSet
+            else if (encodedString[i + j] == '+')
+                bitstream = bitstream | 62;
+
+            // '/' occurs in 63rd position in charSet
+            else if (encodedString[i + j] == '/')
+                bitstream = bitstream | 63;
+
+            else {
+                bitstream = bitstream >> 2;
+                countBits -= 2;
+            }
+        }
+
+        while (countBits != 0) {
+            countBits -= 8;
+            decodedString[k++] = (bitstream >> countBits) & 255;
+        }
+    }
+}
+
+static EB_ERRORTYPE ParseSeiMetaData(
+    SequenceControlSet_t        *sequenceControlSetPtr,
+    EB_BUFFERHEADERTYPE         *dst,
+    EB_BUFFERHEADERTYPE         *src)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    EB_U8    line[1024];
+    EB_U8    *context = NULL;
+    EbPictureBufferDesc_t *headerPtr = (EbPictureBufferDesc_t*)dst->pBuffer;
+
+    while(strcpy_ss((char*)line, sizeof(line), sequenceControlSetPtr->staticConfig.naluFile)){
+        EB_U32 poc = atoi(EB_STRTOK(line, " ", &context));
+        EB_U8 *prefix = (EB_U8*)EB_STRTOK(NULL, " ", &context);
+        EB_U32 nalType = atoi(EB_STRTOK(NULL, "/", &context));
+        EB_U32 payloadType = atoi(EB_STRTOK(NULL, " ", &context));
+        EB_U8 *base64Encode = (EB_U8*)EB_STRTOK(NULL, "\n", &context);
+        if (*context) {
+            SVT_LOG("\n[Warning] Extra characters present at the end of the line in User SEI file for poc %d", poc);
+        }
+
+        EB_U32 base64EncodeLength = (uint32_t)strlen((char*)base64Encode);
+        EB_U8 *base64Decode;
+        EB_MALLOC(EB_U8*, base64Decode, (base64EncodeLength / 4) * 3, EB_N_PTR);
+        baseDecodeFunction(base64Encode, base64EncodeLength, base64Decode);
+
+        if (nalType == NAL_UNIT_PREFIX_SEI && (!strcmp((char*)prefix, "PREFIX"))) {
+            EB_U64 currentPOC = src->pts;
+            if (currentPOC == poc) {
+                headerPtr->userSeiMsg.payloadSize = (base64EncodeLength / 4) * 3;
+
+                EB_MALLOC(EB_U8*, headerPtr->userSeiMsg.payload, headerPtr->userSeiMsg.payloadSize, EB_N_PTR);
+
+                if (payloadType == 4)
+                    headerPtr->userSeiMsg.payloadType = USER_DATA_REGISTERED_ITU_T_T35;
+                else if (payloadType == 5)
+                    headerPtr->userSeiMsg.payloadType = USER_DATA_UNREGISTERED;
+                else {
+                    SVT_LOG("\n[WARNING] Unsupported SEI payload Type for frame %u\n ", poc);
+                    break;
+                }
+                EB_MEMCPY(headerPtr->userSeiMsg.payload, base64Decode, headerPtr->userSeiMsg.payloadSize);
+                break;
+            }
+            else
+                SVT_LOG("\n[WARNING] User SEI frame number %u doesn't match input frame number %" PRId64 "\n ", poc, currentPOC);
+        }
+        else {
+            SVT_LOG("\n[WARNING] SEI message for frame %u is not inserted. Will support only PREFIX SEI message \n ", poc);
+            break;
+        }
+    }
+    return return_error;
+}
+
+static EB_ERRORTYPE CopyUserSei(
+    SequenceControlSet_t*    sequenceControlSetPtr,
+    EB_BUFFERHEADERTYPE*     dst,
+    EB_BUFFERHEADERTYPE*     src)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    EB_H265_ENC_CONFIGURATION   *config = &sequenceControlSetPtr->staticConfig;
+    EbPictureBufferDesc_t       *dstPicturePtr = (EbPictureBufferDesc_t*)dst->pBuffer;
+
+    // Copy User SEI metadata from input
+    if (config->naluFile) {
+        return_error = ParseSeiMetaData(sequenceControlSetPtr, dst, src);
+    }
+    else {
+        dstPicturePtr->userSeiMsg.payloadSize = 0;
+        dstPicturePtr->userSeiMsg.payload = NULL;
+    }
     return return_error;
 }
 
@@ -3204,6 +3383,18 @@ static EB_ERRORTYPE CopyFrameBuffer(
             chromaWidth,
             (lumaHeight >> 1));
     }
+
+    // Copy Dolby Vision RPU metadata from input
+    if (inputPtr->dolbyVisionRpu.payloadSize) {
+        inputPicturePtr->dolbyVisionRpu.payloadSize = inputPtr->dolbyVisionRpu.payloadSize;
+        EB_MALLOC(EB_U8*, inputPicturePtr->dolbyVisionRpu.payload, inputPtr->dolbyVisionRpu.payloadSize, EB_N_PTR);
+        EB_MEMCPY(inputPicturePtr->dolbyVisionRpu.payload, inputPtr->dolbyVisionRpu.payload, inputPtr->dolbyVisionRpu.payloadSize);
+    }
+    else {
+        inputPicturePtr->dolbyVisionRpu.payloadSize = 0;
+        inputPicturePtr->dolbyVisionRpu.payload = NULL;
+    }
+
     return return_error;
 }
 static void CopyInputBuffer(
@@ -3225,6 +3416,11 @@ static void CopyInputBuffer(
     // Copy the picture buffer
     if(src->pBuffer != NULL)
         CopyFrameBuffer(sequenceControlSet, dst->pBuffer, src->pBuffer);
+
+    // Copy User SEI
+    if (src->pBuffer != NULL)
+        CopyUserSei(sequenceControlSet, dst, src);
+
 }
 
 /**********************************

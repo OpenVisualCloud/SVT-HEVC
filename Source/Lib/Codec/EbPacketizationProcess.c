@@ -177,6 +177,21 @@ void* PacketizationKernel(void *inputPtr)
                     contextPtr->ppsConfig);
             }
 
+            if (sequenceControlSetPtr->staticConfig.maxCLL || sequenceControlSetPtr->staticConfig.maxFALL) {
+                sequenceControlSetPtr->contentLightLevel.maxContentLightLevel = sequenceControlSetPtr->staticConfig.maxCLL;
+                sequenceControlSetPtr->contentLightLevel.maxPicAverageLightLevel = sequenceControlSetPtr->staticConfig.maxFALL;
+                EncodeContentLightLevelSEI(
+                    pictureControlSetPtr->bitstreamPtr,
+                    &sequenceControlSetPtr->contentLightLevel);
+            }
+
+            if (sequenceControlSetPtr->staticConfig.masteringDisplayColorVolume) {
+                EncodeMasteringDisplayColorVolumeSEI(
+                    pictureControlSetPtr->bitstreamPtr,
+                    &sequenceControlSetPtr->masteringDisplayColorVolume,
+                    sequenceControlSetPtr->staticConfig.masteringDisplayColorVolume);
+            }
+
             // Flush the Bitstream
             FlushBitstream(
                 pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
@@ -187,7 +202,8 @@ void* PacketizationKernel(void *inputPtr)
                 outputStreamPtr->pBuffer,
                 (EB_U32*) &(outputStreamPtr->nFilledLen),
                 (EB_U32*) &(outputStreamPtr->nAllocLen),
-				encodeContextPtr);
+                encodeContextPtr,
+                9999);
         }
         
         
@@ -459,7 +475,25 @@ void* PacketizationKernel(void *inputPtr)
                 pictureControlSetPtr->bitstreamPtr,
                 &sequenceControlSetPtr->recoveryPoint);
         }
-    
+
+        if (sequenceControlSetPtr->staticConfig.naluFile && pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadSize) {
+            if (pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadType == USER_DATA_REGISTERED_ITU_T_T35) {
+                sequenceControlSetPtr->regUserDataSeiPtr.userDataSize = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadSize;
+                sequenceControlSetPtr->regUserDataSeiPtr.userData = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payload;
+                EncodeRegUserDataSEI(
+                    pictureControlSetPtr->bitstreamPtr,
+                    &sequenceControlSetPtr->regUserDataSeiPtr);
+            }
+            if (pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadType == USER_DATA_UNREGISTERED) {
+                sequenceControlSetPtr->unRegUserDataSeiPtr.userDataSize = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadSize;
+                sequenceControlSetPtr->unRegUserDataSeiPtr.userData = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payload;
+                EncodeUnregUserDataSEI(
+                    pictureControlSetPtr->bitstreamPtr,
+                    &sequenceControlSetPtr->unRegUserDataSeiPtr,
+                    encodeContextPtr);
+            }
+        }
+
         EncodeSliceHeader(
             0,
             packetizationQp,
@@ -476,7 +510,8 @@ void* PacketizationKernel(void *inputPtr)
             outputStreamPtr->pBuffer,
             (EB_U32*) &(outputStreamPtr->nFilledLen),
             (EB_U32*) &(outputStreamPtr->nAllocLen),
-			encodeContextPtr);
+            encodeContextPtr,
+            9999);
 
         // Reset the bitstream
         ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
@@ -491,10 +526,35 @@ void* PacketizationKernel(void *inputPtr)
             outputStreamPtr->pBuffer,
             (EB_U32*) &(outputStreamPtr->nFilledLen),
             (EB_U32*) &(outputStreamPtr->nAllocLen),
-			encodeContextPtr);
+            encodeContextPtr,
+            9999);
         
         // Send the number of bytes per frame to RC
         pictureControlSetPtr->ParentPcsPtr->totalNumBits = outputStreamPtr->nFilledLen << 3;    
+
+        // Copy Dolby Vision RPU metadata to the output bitstream
+        if (sequenceControlSetPtr->staticConfig.dolbyVisionProfile == 81 && pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->dolbyVisionRpu.payloadSize) {
+            // Reset the bitstream
+            ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+
+            CodeDolbyVisionRpuMetadata(
+                pictureControlSetPtr->bitstreamPtr,
+                pictureControlSetPtr
+            );
+
+            // Flush the Bitstream
+            FlushBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+
+            // Copy payload to the Output Bitstream
+            CopyRbspBitstreamToPayload(
+                pictureControlSetPtr->bitstreamPtr,
+                outputStreamPtr->pBuffer,
+                (EB_U32*) &(outputStreamPtr->nFilledLen),
+                (EB_U32*) &(outputStreamPtr->nAllocLen),
+                ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr,
+                NAL_UNIT_UNSPECIFIED_62);
+        }
+
 
         // Code EOS NUT
         if (outputStreamPtr->nFlags & EB_BUFFERFLAG_EOS && sequenceControlSetPtr->staticConfig.codeEosNal == 1) 
@@ -513,7 +573,8 @@ void* PacketizationKernel(void *inputPtr)
                 outputStreamPtr->pBuffer,
                 (EB_U32*) &(outputStreamPtr->nFilledLen),
                 (EB_U32*) &(outputStreamPtr->nAllocLen),
-                ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr);
+                ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr,
+                9999);
         }
         
         //Store the buffer in the Queue
