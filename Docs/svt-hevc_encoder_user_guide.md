@@ -193,7 +193,7 @@ A text file that contains encoder parameters such as input file name, quantizati
 
 >-tune integer **[Optional]**
 
-This token sets the encoder to run in either the subjective quality optimized mode (when set to 0) or in the objective quality optimized mode (when set to 1 [default setting])
+This token sets the encoder to run in the visual quality optimized mode (when set to 0), PSNR/SSIM optimized mode (when set to 1 [default setting]), or VMAF optimized mode (when set to 2)
 
 >-i filename **[Required]**
 
@@ -287,8 +287,8 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **MinQpAllowed** | -min-qp | [0 - 50] | 10 | Minimum QP value allowed for rate control use. Only used when RateControlMode is set to 1. Has to be < MaxQpAllowed |
 | **LookAheadDistance** | -lad | [0 - 250] | Depending on BRC mode | When RateControlMode is set to 1 it&#39;s best to set this parameter to be equal to the Intra period value (such is the default set by the encoder), When CQP is chosen, then a (2 \* minigopsize +1) look ahead is recommended. |
 | **SceneChangeDetection** | -scd | [0,1] | 1 | Enables or disables the scene change detection algorithm <br> 0 = OFF, 1 = ON |
-| **BitRateReduction** | -brr | [0,1] | 1 | Enables subjective quality algorithms to reduce the output bitrate with minimal or no subjective visual quality impact. (no support for –tune 1) <br>0 = OFF, 1 = ON |
-| **ImproveSharpness** | -sharp | [0,1] | 1 | This is a visual quality knob that allows the use of adaptive quantization within the picture and enables visual quality algorithms that improve the sharpness of the background. This feature is only available for 4k and 8k resolutions (no support for –tune 1) <br> 0 = OFF, 1 = ON |
+| **BitRateReduction** | -brr | [0,1] | 1 | Enables visual quality algorithms to reduce the output bitrate with minimal or no subjective visual quality impact. (no support for –tune 1 or -tune 2) <br>0 = OFF, 1 = ON |
+| **ImproveSharpness** | -sharp | [0,1] | 1 | This is a visual quality knob that allows the use of adaptive quantization within the picture and enables visual quality algorithms that improve the sharpness of the background. This feature is only available for 4k and 8k resolutions (no support for –tune 1 or -tune 2) <br> 0 = OFF, 1 = ON |
 | **VideoUsabilityInfo** | -vid-info | [0,1] | 0 | Enables or disables sending a vui structure in the HEVC Elementary bitstream. 0 = OFF, 1 = ON |
 | **HighDynamicRangeInput** | -hdr | [0,1] | 0 | When set to 1, signals HDR10 input in the output HEVC elementary bitstream and forces VideoUsabilityInfo to 1. <br>0 = OFF, 1 = ON |
 | **AccessUnitDelimiter** | -ua-delm | [0,1] | 0 | SEI message, 0 = OFF, 1 = ON |
