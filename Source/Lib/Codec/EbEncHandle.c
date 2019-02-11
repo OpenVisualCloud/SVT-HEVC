@@ -563,7 +563,7 @@ void SwitchToRealTime()
         .sched_priority = sched_get_priority_max(SCHED_FIFO)
     };
 
-    pthread_setschedparam(pthread_self(), SCHED_FIFO, &schedParam);
+    int retValue = pthread_setschedparam(pthread_self(), SCHED_FIFO, &schedParam);
     if (retValue == EPERM)
         SVT_LOG("\n[WARNING] Elevated privileges required to run with real-time policies! Check Linux Best Known Configuration in User Guide to run application in real-time without elevated privileges!\n\n");
 

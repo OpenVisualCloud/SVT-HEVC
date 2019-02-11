@@ -345,9 +345,9 @@ Some Linux\* Operating systems and kernels assign CPU utilization limits to appl
 > sudo  sysctl  -w  kernel.sched\_rt\_runtime\_us=1000000
 - this command should be executed every time the server is rebooted
 
-> ./run_encode &
+> SvtHevcEncApp -i input.yuv -w 3840 -h 2160 &
   export PID=$! 
-  sudo chrt -f -a -p 99 $PIDGME
+  sudo chrt -f -a -p 99 $PID
 - this command should be executed with "-rt 1" with the SVT-HEVC application to allow run-time priorities
 
 The above section is not needed for Windows\* as it does not perform the CPU utilization limitation on the application.
