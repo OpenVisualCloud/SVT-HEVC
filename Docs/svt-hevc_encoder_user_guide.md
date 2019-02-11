@@ -342,8 +342,13 @@ Visual Studio 2017 offers Profile Guided Optimization (PGO) to improve compiler 
 
 Some Linux\* Operating systems and kernels assign CPU utilization limits to applications running on servers. Therefore, to allow the application to utilize up to ~100% of the CPUs assigned to it, it is best to run the following commands before and when running the encoder:
 
->sudo  sysctl  -w  kernel.sched\_rt\_runtime\_us=1000000
+> sudo  sysctl  -w  kernel.sched\_rt\_runtime\_us=1000000
 - this command should be executed every time the server is rebooted
+
+> ./run_encode &
+  export PID=$! 
+  sudo chrt -f -a -p 99 $PIDGME
+- this command should be executed with "-rt 1" with the SVT-HEVC application to allow run-time priorities
 
 The above section is not needed for Windows\* as it does not perform the CPU utilization limitation on the application.
 
