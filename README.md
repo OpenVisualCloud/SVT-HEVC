@@ -3,6 +3,8 @@
 
 The Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder) is an HEVC-compliant encoder library core that achieves excellent density-quality tradeoffs, and is highly optimized for Intel® Xeon™ Scalable Processor and Xeon™ D processors.
 
+The whitepaper for SVT-HEVC can be found here: https://01.org/svt
+
 This encoder has been optimized to achieve excellent performance levels using 13 density-quality presets (please refer to the user guide for more details) on a system with a dual Intel® Xeon® Scalable CPU targeting:
 
 -  Real-time encoding of up to one 8Kp60/10-bit streams on the Platinum 8180 with M11 in the visual quality mode
