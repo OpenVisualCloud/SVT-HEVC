@@ -669,7 +669,7 @@ extern    EB_U32                   libMutexCount;
     libMutexCount++;
 
 #define EB_STRDUP(dst, src) \
-    dst = (char*) malloc(strlen(src)+1); \
+    EB_MALLOC_(char*, dst, strlen(src)+1, EB_N_PTR); \
     strcpy_ss((char*)dst, strlen(src)+1, src);
 
 #ifdef _WIN32

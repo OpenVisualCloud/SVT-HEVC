@@ -185,11 +185,10 @@ void* PacketizationKernel(void *inputPtr)
                     &sequenceControlSetPtr->contentLightLevel);
             }
 
-            if (sequenceControlSetPtr->staticConfig.masteringDisplayColorVolume) {
+            if (sequenceControlSetPtr->staticConfig.useMasteringDisplayColorVolume) {
                 EncodeMasteringDisplayColorVolumeSEI(
                     pictureControlSetPtr->bitstreamPtr,
-                    &sequenceControlSetPtr->masteringDisplayColorVolume,
-                    sequenceControlSetPtr->staticConfig.masteringDisplayColorVolume);
+                    &sequenceControlSetPtr->masteringDisplayColorVolume);
             }
 
             // Flush the Bitstream
@@ -476,7 +475,7 @@ void* PacketizationKernel(void *inputPtr)
                 &sequenceControlSetPtr->recoveryPoint);
         }
 
-        if (sequenceControlSetPtr->staticConfig.naluFile && pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadSize) {
+        if (sequenceControlSetPtr->staticConfig.useNaluFile && pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadSize) {
             if (pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadType == USER_DATA_REGISTERED_ITU_T_T35) {
                 sequenceControlSetPtr->regUserDataSeiPtr.userDataSize = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadSize;
                 sequenceControlSetPtr->regUserDataSeiPtr.userData = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payload;

@@ -72,6 +72,7 @@
 #define RECOVERY_POINT_TOKEN            "-recovery-point" // no Eval
 #define MAXCLL_TOKEN                    "-max-cll"
 #define MAXFALL_TOKEN                   "-max-fall"
+#define USE_MASTER_DISPLAY_TOKEN        "-use-master-display"
 #define MASTER_DISPLAY_TOKEN            "-master-display"
 #define DOLBY_VISION_PROFILE_TOKEN      "-dolby-vision-profile"
 #define DOLBY_VISION_RPU_FILE_TOKEN     "-dolby-vision-rpu"
@@ -146,6 +147,11 @@ static void SetCfgDolbyVisionRpuFile			(const char *value, EbConfig_t *cfg)
     if (cfg->dolbyVisionRpuFile) { fclose(cfg->dolbyVisionRpuFile); }
     FOPEN(cfg->dolbyVisionRpuFile, value, "rb");
 };
+static void SetNaluFile(const char *value, EbConfig_t *cfg)
+{
+    if (cfg->naluFile) { fclose(cfg->naluFile); }
+    FOPEN(cfg->naluFile, value, "rb");
+};
 static void SetCfgSourceWidth                   (const char *value, EbConfig_t *cfg) {cfg->sourceWidth                      = strtoul(value, NULL, 0);};
 static void SetInterlacedVideo                  (const char *value, EbConfig_t *cfg) {cfg->interlacedVideo                  = (EB_BOOL) strtoul(value, NULL, 0);};
 static void SetSeperateFields                   (const char *value, EbConfig_t *cfg) {cfg->separateFields                   = (EB_BOOL) strtoul(value, NULL, 0);};
@@ -196,24 +202,15 @@ static void SetUnRegisteredUserDataSEI          (const char *value, EbConfig_t *
 static void SetRecoveryPointSEI                 (const char *value, EbConfig_t *cfg) {cfg->recoveryPointSeiFlag             = (EB_BOOL)strtol(value,  NULL, 0);};
 static void SetMaxCLL                           (const char *value, EbConfig_t *cfg) {cfg->maxCLL                           = (uint16_t)strtoul(value, NULL, 0);};
 static void SetMaxFALL                          (const char *value, EbConfig_t *cfg) {cfg->maxFALL                          = (uint16_t)strtoul(value, NULL, 0);};
-static void SetMasterDisplay(const char *value, EbConfig_t *cfg) {
-    if (value) {
-        EB_APP_STRDUP(cfg->masteringDisplayColorVolume, (char*)value);
-    }
-    else
-        cfg->masteringDisplayColorVolume = NULL;
+static void SetMasterDisplayFlag                (const char *value, EbConfig_t *cfg) {cfg->useMasteringDisplayColorVolume   = (EB_BOOL)strtol(value, NULL, 0);};
+static void SetMasterDisplay                    (const char *value, EbConfig_t *cfg) {
+    if (cfg->useMasteringDisplayColorVolume)
+        EB_STRCPY(cfg->masteringDisplayColorVolumeString, EB_STRLEN(value, MAX_STRING_LENGTH), value);
 };
 static void SetDolbyVisionProfile               (const char *value, EbConfig_t *cfg) { 
     if (strtoul(value, NULL, 0) != 0 || EB_STRCMP(value, "0") == 0)
         cfg->dolbyVisionProfile = (uint32_t)(10 * strtod(value, NULL));
 };
-static void SetNaluFile                         (const char *value, EbConfig_t *cfg) {
-    if (value) {
-        EB_APP_STRDUP(cfg->naluFile, (char*)value);
-    }
-    else
-        cfg->naluFile = NULL;
-    };
 static void SetEnableTemporalId                 (const char *value, EbConfig_t *cfg) {cfg->enableTemporalId                 = strtol(value,  NULL, 0);};
 static void SetProfile                          (const char *value, EbConfig_t *cfg) {cfg->profile                          = strtol(value,  NULL, 0);};
 static void SetTier                             (const char *value, EbConfig_t *cfg) {cfg->tier                             = strtol(value,  NULL, 0);};
@@ -341,6 +338,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, RECOVERY_POINT_TOKEN, "RecoveryPoint", SetRecoveryPointSEI },
     { SINGLE_INPUT, MAXCLL_TOKEN, "MaxCLL", SetMaxCLL },
     { SINGLE_INPUT, MAXFALL_TOKEN, "MaxFALL", SetMaxFALL },
+    { SINGLE_INPUT, USE_MASTER_DISPLAY_TOKEN, "UseMasterDisplay", SetMasterDisplayFlag },
     { SINGLE_INPUT, MASTER_DISPLAY_TOKEN, "MasterDisplay", SetMasterDisplay },
     { SINGLE_INPUT, DOLBY_VISION_PROFILE_TOKEN, "DolbyVisionProfile", SetDolbyVisionProfile },
     { SINGLE_INPUT, DOLBY_VISION_RPU_FILE_TOKEN, "DolbyVisionRpuFile", SetCfgDolbyVisionRpuFile },
@@ -432,12 +430,25 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->unregisteredUserDataSeiFlag          = EB_FALSE;
     configPtr->recoveryPointSeiFlag                 = EB_FALSE;
     configPtr->enableTemporalId                     = 1;
+
+    // SEI
     configPtr->maxCLL                               = 0;
     configPtr->maxFALL                              = 0;
-    configPtr->masteringDisplayColorVolume          = NULL;
+    configPtr->useMasteringDisplayColorVolume       = EB_FALSE;
+    configPtr->useNaluFile                          = EB_FALSE;
     configPtr->dolbyVisionProfile                   = 0;
     configPtr->dolbyVisionRpuFile                   = NULL;
     configPtr->naluFile                             = NULL;
+    configPtr->displayPrimaryX[0]                   = 0;
+    configPtr->displayPrimaryX[1]                   = 0;
+    configPtr->displayPrimaryX[2]                   = 0;
+    configPtr->displayPrimaryY[0]                   = 0;
+    configPtr->displayPrimaryY[1]                   = 0;
+    configPtr->displayPrimaryY[2]                   = 0;
+    configPtr->whitePointX                          = 0;
+    configPtr->whitePointY                          = 0;
+    configPtr->maxDisplayMasteringLuminance         = 0;
+    configPtr->minDisplayMasteringLuminance         = 0;
 
     configPtr->switchThreadsToRtPriority            = EB_TRUE;
     configPtr->fpsInVps                             = EB_FALSE;
@@ -522,6 +533,11 @@ void EbConfigDtor(EbConfig_t *configPtr)
     if (configPtr->qpFile) {
         fclose(configPtr->qpFile);
         configPtr->qpFile = (FILE *)NULL;
+    }
+
+    if (configPtr->naluFile) {
+        fclose(configPtr->naluFile);
+        configPtr->naluFile = (FILE *)NULL;
     }
 
 	if (configPtr->dolbyVisionRpuFile) {
@@ -954,6 +970,39 @@ int32_t ComputeFramesToBeEncoded(
 
 }
 
+static EB_ERRORTYPE ParseMasteringDisplayColorVolumeSEI(
+    EbConfig_t* config)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    uint8_t *context = NULL, *token = NULL;
+    const uint8_t *delimeter = (uint8_t*) "(,)GBRWPL";
+    uint32_t primaries[10];
+    uint32_t i = 0, j = 0, k = 0;
+
+    if (strstr(config->masteringDisplayColorVolumeString, "G") != NULL && strstr(config->masteringDisplayColorVolumeString, "B") != NULL && strstr(config->masteringDisplayColorVolumeString, "R") != NULL && strstr(config->masteringDisplayColorVolumeString, "WP") != NULL && strstr(config->masteringDisplayColorVolumeString, "L") != NULL) {
+        for (token = (uint8_t*)EB_STRTOK(config->masteringDisplayColorVolumeString, delimeter, &context); token != NULL; token = (uint8_t*)EB_STRTOK(NULL, delimeter, &context)) {
+            primaries[i++] = (uint32_t)strtoul((char*)token, NULL, 0);
+        }
+        if (i == 10 && token == NULL) {
+            for (j = 0; j < 3; j++) {
+                config->displayPrimaryX[j] = primaries[k++];
+                config->displayPrimaryY[j] = primaries[k++];
+            }
+            config->whitePointX = primaries[k++];
+            config->whitePointY = primaries[k++];
+            config->maxDisplayMasteringLuminance = primaries[k++];
+            config->minDisplayMasteringLuminance = primaries[k++];
+        }
+        else {
+            return_error = EB_ErrorBadParameter;
+        }
+    }
+    else {
+        return_error = EB_ErrorBadParameter;
+    }
+    return return_error;
+}
+
 /******************************************
 * Read Command Line
 ******************************************/
@@ -1067,6 +1116,12 @@ EB_ERRORTYPE ReadCommandLine(
                     configs[index]->injector    = 1;
                 }
 
+                // Parse Master Display Color
+                if (return_errors[index] == EB_ErrorNone && configs[index]->useMasteringDisplayColorVolume == EB_TRUE) {
+                    return_errors[index] = ParseMasteringDisplayColorVolumeSEI(configs[index]);
+                    if (return_errors[index] != EB_ErrorNone)
+                        fprintf(configs[index]->errorLogFile, "SVT [Error]:  Instance %u: Couldn't parse MasterDisplay info. Make sure its passed in this format \"G(%%hu,%%hu)B(%%hu,%%hu)R(%%hu,%%hu)WP(%%hu,%%hu)L(%%u,%%u)\"", index + 1);
+                }
             }
             return_error = (EB_ERRORTYPE)(return_error & return_errors[index]);
         }

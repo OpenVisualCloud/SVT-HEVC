@@ -2131,21 +2131,31 @@ void CopyApiFromApp(
 
     sequenceControlSetPtr->staticConfig.maxCLL = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxCLL;
     sequenceControlSetPtr->staticConfig.maxFALL = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxFALL;
-    if (pComponentParameterStructure->masteringDisplayColorVolume) {
-        EB_STRDUP(sequenceControlSetPtr->staticConfig.masteringDisplayColorVolume, (char*)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->masteringDisplayColorVolume);
-    }
-    else {
-        sequenceControlSetPtr->staticConfig.masteringDisplayColorVolume = NULL;
-    }
-    sequenceControlSetPtr->staticConfig.dolbyVisionProfile = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->dolbyVisionProfile;
 
-    if(pComponentParameterStructure->naluFile) {
-        EB_STRDUP(sequenceControlSetPtr->staticConfig.naluFile, (char*)(EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure->naluFile);
-    }
-    else {
-         sequenceControlSetPtr->staticConfig.naluFile = NULL;
-    }
-
+    sequenceControlSetPtr->staticConfig.useMasteringDisplayColorVolume = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->useMasteringDisplayColorVolume;
+    sequenceControlSetPtr->staticConfig.useNaluFile = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->useNaluFile;
+    sequenceControlSetPtr->staticConfig.displayPrimaryX[0] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryX[0];
+    sequenceControlSetPtr->staticConfig.displayPrimaryX[1] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryX[1];
+    sequenceControlSetPtr->staticConfig.displayPrimaryX[2] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryX[2];
+    sequenceControlSetPtr->staticConfig.displayPrimaryY[0] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryY[0];
+    sequenceControlSetPtr->staticConfig.displayPrimaryY[1] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryY[1];
+    sequenceControlSetPtr->staticConfig.displayPrimaryY[2] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryY[2];
+    sequenceControlSetPtr->staticConfig.whitePointX = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->whitePointX;
+    sequenceControlSetPtr->staticConfig.whitePointY = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->whitePointY;
+    sequenceControlSetPtr->staticConfig.maxDisplayMasteringLuminance = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxDisplayMasteringLuminance;
+    sequenceControlSetPtr->staticConfig.minDisplayMasteringLuminance = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->minDisplayMasteringLuminance;
+    
+    // Copying to masteringDisplayColorVolume structure
+    sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryX[0] = sequenceControlSetPtr->staticConfig.displayPrimaryX[0];
+    sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryX[1] = sequenceControlSetPtr->staticConfig.displayPrimaryX[1];
+    sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryX[2] = sequenceControlSetPtr->staticConfig.displayPrimaryX[2];
+    sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryY[0] = sequenceControlSetPtr->staticConfig.displayPrimaryY[0];
+    sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryY[1] = sequenceControlSetPtr->staticConfig.displayPrimaryY[1];
+    sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryY[2] = sequenceControlSetPtr->staticConfig.displayPrimaryY[2];
+    sequenceControlSetPtr->masteringDisplayColorVolume.whitePointX = sequenceControlSetPtr->staticConfig.whitePointX;
+    sequenceControlSetPtr->masteringDisplayColorVolume.whitePointY = sequenceControlSetPtr->staticConfig.whitePointY;
+    sequenceControlSetPtr->masteringDisplayColorVolume.maxDisplayMasteringLuminance = sequenceControlSetPtr->staticConfig.maxDisplayMasteringLuminance;
+    sequenceControlSetPtr->masteringDisplayColorVolume.minDisplayMasteringLuminance = sequenceControlSetPtr->staticConfig.minDisplayMasteringLuminance;
 
     // if dolby Profile is set HDR should be set to 1
     if (sequenceControlSetPtr->staticConfig.dolbyVisionProfile == 81) {
@@ -2642,7 +2652,7 @@ static EB_ERRORTYPE VerifySettings(\
 		return_error = EB_ErrorBadParameter;
 	}
 
-	if (config->masteringDisplayColorVolume && !config->highDynamicRangeInput) {
+	if (config->useMasteringDisplayColorVolume && !config->highDynamicRangeInput) {
 		SVT_LOG("Error Instance %u: MasterDisplay should be used only with high dynamic range input; set highDynamicRangeInput to 1\n", channelNumber);
 		return_error = EB_ErrorBadParameter;
 	}
@@ -2657,7 +2667,7 @@ static EB_ERRORTYPE VerifySettings(\
 		return_error = EB_ErrorBadParameter;
 	}
 
-	if (config->dolbyVisionProfile == 81 && !config->masteringDisplayColorVolume) {
+	if (config->dolbyVisionProfile == 81 && !config->useMasteringDisplayColorVolume) {
 		SVT_LOG("Error Instance %u: Dolby Vision Profile 8.1 requires mastering display color volume information \n", channelNumber);
 		return_error = EB_ErrorBadParameter;
 	}
@@ -2812,15 +2822,27 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->channelId = 0;
     configPtr->activeChannelCount   = 1;
     
-    // Debug info
-    configPtr->reconEnabled = 0;
-
     //SEI
     configPtr->maxCLL = 0;
     configPtr->maxFALL = 0;
-    configPtr->masteringDisplayColorVolume = NULL;
     configPtr->dolbyVisionProfile = 0;
-    configPtr->naluFile = NULL;
+    configPtr->useMasteringDisplayColorVolume = EB_FALSE;
+    configPtr->useNaluFile = EB_FALSE;
+
+    // Master Display
+    configPtr->displayPrimaryX[0] = 0;
+    configPtr->displayPrimaryX[1] = 0;
+    configPtr->displayPrimaryX[2] = 0;
+    configPtr->displayPrimaryY[0] = 0;
+    configPtr->displayPrimaryY[1] = 0;
+    configPtr->displayPrimaryY[2] = 0;
+    configPtr->whitePointX = 0;
+    configPtr->whitePointY = 0;
+    configPtr->maxDisplayMasteringLuminance = 0;
+    configPtr->minDisplayMasteringLuminance = 0;
+
+    // Debug info
+    configPtr->reconEnabled = 0;
 
     return return_error;
 }
@@ -3096,102 +3118,94 @@ EB_API EB_ERRORTYPE EbH265EncEosNal(
 }
 
 /* charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/" */
-static void baseDecodeFunction(EB_U8* encodedString, EB_U32 base64EncodeLength, EB_U8* decodedString )
+static EB_ERRORTYPE baseDecodeFunction(EB_U8* encodedString, EB_U32 base64EncodeLength, EB_U8* decodedString )
 {
+    EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_U32 i, j, k = 0;
     EB_U32 bitstream = 0;
     EB_U32 countBits = 0;
+    if (encodedString == NULL || decodedString == NULL) {
+        return_error = EB_ErrorBadParameter;
+    }
+    if (return_error == EB_ErrorNone) {
+        // selects 4 characters from encodedString at a time
+        for (i = 0; i < base64EncodeLength; i += 4) {
+            bitstream = 0, countBits = 0;
+            for (j = 0; j < 4; j++) {
+                // make space for 6 bits
+                if (encodedString[i + j] != '=') {
+                    bitstream = bitstream << 6;
+                    countBits += 6;
+                }
+                // Finding the position of each encoded character in charSet and storing in bitstream
+                if (encodedString[i + j] >= 'A' && encodedString[i + j] <= 'Z')
+                    bitstream = bitstream | (encodedString[i + j] - 'A');
 
-    // selects 4 characters from encodedString at a time
-    for (i = 0; i < base64EncodeLength; i += 4) {
-        bitstream = 0, countBits = 0;
-        for (j = 0; j < 4; j++) {
-            // make space for 6 bits
-            if (encodedString[i + j] != '=') {
-                bitstream = bitstream << 6;
-                countBits += 6;
+                else if (encodedString[i + j] >= 'a' && encodedString[i + j] <= 'z')
+                    bitstream = bitstream | (encodedString[i + j] - 'a' + 26);
+
+                else if (encodedString[i + j] >= '0' && encodedString[i + j] <= '9')
+                    bitstream = bitstream | (encodedString[i + j] - '0' + 52);
+
+                // '+' occurs in 62nd position in charSet
+                else if (encodedString[i + j] == '+')
+                    bitstream = bitstream | 62;
+
+                // '/' occurs in 63rd position in charSet
+                else if (encodedString[i + j] == '/')
+                    bitstream = bitstream | 63;
+
+                else {
+                    bitstream = bitstream >> 2;
+                    countBits -= 2;
+                }
             }
-            // Finding the position of each encoded character in charSet and storing in bitstream
-            if (encodedString[i + j] >= 'A' && encodedString[i + j] <= 'Z')
-                bitstream = bitstream | (encodedString[i + j] - 'A');
 
-            else if (encodedString[i + j] >= 'a' && encodedString[i + j] <= 'z')
-                bitstream = bitstream | (encodedString[i + j] - 'a' + 26);
-
-            else if (encodedString[i + j] >= '0' && encodedString[i + j] <= '9')
-                bitstream = bitstream | (encodedString[i + j] - '0' + 52);
-
-            // '+' occurs in 62nd position in charSet
-            else if (encodedString[i + j] == '+')
-                bitstream = bitstream | 62;
-
-            // '/' occurs in 63rd position in charSet
-            else if (encodedString[i + j] == '/')
-                bitstream = bitstream | 63;
-
-            else {
-                bitstream = bitstream >> 2;
-                countBits -= 2;
+            while (countBits != 0) {
+                countBits -= 8;
+                decodedString[k++] = (bitstream >> countBits) & 255;
             }
-        }
-
-        while (countBits != 0) {
-            countBits -= 8;
-            decodedString[k++] = (bitstream >> countBits) & 255;
         }
     }
+    return return_error;
 }
 
 static EB_ERRORTYPE ParseSeiMetaData(
-    SequenceControlSet_t        *sequenceControlSetPtr,
     EB_BUFFERHEADERTYPE         *dst,
     EB_BUFFERHEADERTYPE         *src)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
-    EB_U8    line[1024];
-    EB_U8    *context = NULL;
+
     EbPictureBufferDesc_t *headerPtr = (EbPictureBufferDesc_t*)dst->pBuffer;
+    EB_U8 *base64Encode = src->naluBase64Encode;
+    EB_U32 base64EncodeLength = (uint32_t)strlen((char*)base64Encode);
+    EB_U8 *base64Decode;
+    EB_MALLOC(EB_U8*, base64Decode, (base64EncodeLength / 4) * 3, EB_N_PTR);
+    return_error = baseDecodeFunction(base64Encode, base64EncodeLength, base64Decode);
 
-    while(strcpy_ss((char*)line, sizeof(line), sequenceControlSetPtr->staticConfig.naluFile)){
-        EB_U32 poc = atoi(EB_STRTOK(line, " ", &context));
-        EB_U8 *prefix = (EB_U8*)EB_STRTOK(NULL, " ", &context);
-        EB_U32 nalType = atoi(EB_STRTOK(NULL, "/", &context));
-        EB_U32 payloadType = atoi(EB_STRTOK(NULL, " ", &context));
-        EB_U8 *base64Encode = (EB_U8*)EB_STRTOK(NULL, "\n", &context);
-        if (*context) {
-            SVT_LOG("\n[Warning] Extra characters present at the end of the line in User SEI file for poc %d", poc);
-        }
-
-        EB_U32 base64EncodeLength = (uint32_t)strlen((char*)base64Encode);
-        EB_U8 *base64Decode;
-        EB_MALLOC(EB_U8*, base64Decode, (base64EncodeLength / 4) * 3, EB_N_PTR);
-        baseDecodeFunction(base64Encode, base64EncodeLength, base64Decode);
-
-        if (nalType == NAL_UNIT_PREFIX_SEI && (!strcmp((char*)prefix, "PREFIX"))) {
-            EB_U64 currentPOC = src->pts;
-            if (currentPOC == poc) {
-                headerPtr->userSeiMsg.payloadSize = (base64EncodeLength / 4) * 3;
-
-                EB_MALLOC(EB_U8*, headerPtr->userSeiMsg.payload, headerPtr->userSeiMsg.payloadSize, EB_N_PTR);
-
-                if (payloadType == 4)
-                    headerPtr->userSeiMsg.payloadType = USER_DATA_REGISTERED_ITU_T_T35;
-                else if (payloadType == 5)
-                    headerPtr->userSeiMsg.payloadType = USER_DATA_UNREGISTERED;
-                else {
-                    SVT_LOG("\n[WARNING] Unsupported SEI payload Type for frame %u\n ", poc);
-                    break;
-                }
-                EB_MEMCPY(headerPtr->userSeiMsg.payload, base64Decode, headerPtr->userSeiMsg.payloadSize);
-                break;
+    if (return_error == EB_ErrorNone && src->naluNalType == NAL_UNIT_PREFIX_SEI && src->naluPrefix == 0) {
+        EB_U64 currentPOC = src->pts;
+        if (currentPOC == src->naluPOC) {
+            headerPtr->userSeiMsg.payloadSize = (base64EncodeLength / 4) * 3;
+            EB_MALLOC(EB_U8*, headerPtr->userSeiMsg.payload, headerPtr->userSeiMsg.payloadSize, EB_N_PTR);
+            if (src->naluPayloadType == 4)
+                headerPtr->userSeiMsg.payloadType = USER_DATA_REGISTERED_ITU_T_T35;
+            else if (src->naluPayloadType == 5)
+                headerPtr->userSeiMsg.payloadType = USER_DATA_UNREGISTERED;
+            else {
+                SVT_LOG("\nSVT [WARNING]: Unsupported SEI payload Type for frame %u\n ", src->naluPOC);
+                return EB_ErrorBadParameter;
             }
-            else
-                SVT_LOG("\n[WARNING] User SEI frame number %u doesn't match input frame number %" PRId64 "\n ", poc, currentPOC);
+            EB_MEMCPY(headerPtr->userSeiMsg.payload, base64Decode, headerPtr->userSeiMsg.payloadSize);
         }
         else {
-            SVT_LOG("\n[WARNING] SEI message for frame %u is not inserted. Will support only PREFIX SEI message \n ", poc);
-            break;
+            SVT_LOG("\nSVT [WARNING]: User SEI frame number %u doesn't match input frame number %" PRId64 "\n ", src->naluPOC, currentPOC);
+            return EB_ErrorBadParameter;
         }
+    }
+    else {
+        SVT_LOG("\nSVT [WARNING]: SEI message for frame %u is not inserted. Will support only PREFIX SEI message \n ", src->naluPOC);
+        return EB_ErrorBadParameter;
     }
     return return_error;
 }
@@ -3206,8 +3220,8 @@ static EB_ERRORTYPE CopyUserSei(
     EbPictureBufferDesc_t       *dstPicturePtr = (EbPictureBufferDesc_t*)dst->pBuffer;
 
     // Copy User SEI metadata from input
-    if (config->naluFile) {
-        return_error = ParseSeiMetaData(sequenceControlSetPtr, dst, src);
+    if (config->useNaluFile) {
+        return_error = ParseSeiMetaData(dst, src);
     }
     else {
         dstPicturePtr->userSeiMsg.payloadSize = 0;

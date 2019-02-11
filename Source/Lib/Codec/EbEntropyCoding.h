@@ -187,8 +187,7 @@ extern EB_ERRORTYPE EncodeContentLightLevelSEI(
 
 EB_ERRORTYPE EncodeMasteringDisplayColorVolumeSEI(
     Bitstream_t             *bitstreamPtr,
-    AppMasteringDisplayColorVolumeSei_t   *masterDisplayPtr,
-    const char*              value);
+    AppMasteringDisplayColorVolumeSei_t   *masterDisplayPtr);
 
 EB_ERRORTYPE CodeDolbyVisionRpuMetadata(
     Bitstream_t  *bitstreamPtr,

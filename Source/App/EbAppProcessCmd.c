@@ -1154,6 +1154,38 @@ void SendQpOnTheFly(
     return;
 }
 
+void SendNaluOnTheFly(
+    EbConfig_t                  *config,
+    EB_BUFFERHEADERTYPE        *headerPtr)
+{
+    {
+        char line[1024];
+        uint32_t poc = 0;
+        uint8_t *prefix = NULL;
+        uint32_t nalType = 0;
+        uint32_t payloadType = 0;
+        uint8_t *base64Encode = NULL;
+        uint8_t *context = NULL;
+
+        if (fgets(line, sizeof(line), config->naluFile) != NULL) {
+            poc = atoi(EB_STRTOK(line, " ", &context));
+            prefix = (uint8_t*)EB_STRTOK(NULL, " ", &context);
+            nalType = atoi(EB_STRTOK(NULL, "/", &context));
+            payloadType = atoi(EB_STRTOK(NULL, " ", &context));
+            base64Encode = (uint8_t*)EB_STRTOK(NULL, "\n", &context);
+        }
+        headerPtr->naluPOC = poc;
+        if (prefix != NULL && !EB_STRCMP((char*)prefix, "PREFIX"))
+            headerPtr->naluPrefix = 0;
+        else
+            headerPtr->naluPrefix = -1;
+        headerPtr->naluNalType = nalType;
+        headerPtr->naluPayloadType = payloadType;
+        headerPtr->naluBase64Encode = base64Encode;
+    }
+    return;
+}
+
 #define START_CODE 0x00000001
 #define START_CODE_BYTES 4
 
@@ -1264,6 +1296,12 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
                 config,
                 headerPtr);
 
+        // Configuration parameters changed on the fly
+        if (config->useNaluFile && config->naluFile)
+            SendNaluOnTheFly(
+                config,
+                headerPtr);
+
         if (keepRunning == 0 && !config->stopEncoder) {
             config->stopEncoder = EB_TRUE;
         }
@@ -1278,8 +1316,9 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
             ret = ParseDolbyVisionRPUMetadata(
                   config,
                   headerPtr);
-            if (ret)
+            if (ret) {
                 printf("\n Warning : Dolby vision RPU not parsed for POC %" PRId64 "\t", headerPtr->pts);
+            }
         }
 
         // Send the picture

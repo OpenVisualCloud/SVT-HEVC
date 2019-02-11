@@ -220,13 +220,20 @@ EB_ERRORTYPE CopyConfigurationParameters(
 
     callbackData->ebEncParameters.maxCLL = config->maxCLL;
     callbackData->ebEncParameters.maxFALL = config->maxFALL;
-    if (config->masteringDisplayColorVolume) {
-        EB_APP_STRDUP(callbackData->ebEncParameters.masteringDisplayColorVolume, (char*)config->masteringDisplayColorVolume);
-    }
-    callbackData->ebEncParameters.dolbyVisionProfile = config->dolbyVisionProfile;
-    if (config->naluFile) {
-        EB_APP_STRDUP(callbackData->ebEncParameters.naluFile, (char*)config->naluFile);
-    }
+    callbackData->ebEncParameters.useMasteringDisplayColorVolume = config->useMasteringDisplayColorVolume;
+    callbackData->ebEncParameters.useNaluFile = config->useNaluFile;
+
+    callbackData->ebEncParameters.displayPrimaryX[0] = config->displayPrimaryX[0];
+    callbackData->ebEncParameters.displayPrimaryX[1] = config->displayPrimaryX[1];
+    callbackData->ebEncParameters.displayPrimaryX[2] = config->displayPrimaryX[2];
+    callbackData->ebEncParameters.displayPrimaryY[0] = config->displayPrimaryY[0];
+    callbackData->ebEncParameters.displayPrimaryY[1] = config->displayPrimaryY[1];
+    callbackData->ebEncParameters.displayPrimaryY[2] = config->displayPrimaryY[2];
+    callbackData->ebEncParameters.whitePointX = config->whitePointX;
+    callbackData->ebEncParameters.whitePointY = config->whitePointY;
+    callbackData->ebEncParameters.maxDisplayMasteringLuminance = config->maxDisplayMasteringLuminance;
+    callbackData->ebEncParameters.minDisplayMasteringLuminance = config->minDisplayMasteringLuminance;
+
     return return_error;
 
 }

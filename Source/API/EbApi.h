@@ -64,6 +64,14 @@ extern "C" {
 
         // pic flags
         uint32_t nFlags;
+
+        // nalu info
+        uint32_t naluPOC;
+        uint32_t naluPrefix;
+        uint32_t naluNalType;
+        uint32_t naluPayloadType;
+        uint8_t* naluBase64Encode;
+
     } EB_BUFFERHEADERTYPE;
 
     typedef struct EB_COMPONENTTYPE
@@ -99,7 +107,6 @@ typedef struct EB_SEI_MESSAGE
     uint32_t  payloadType;
 
 }EB_SEI_MESSAGE;
-
 
 /* For 8-bit and 10-bit packed inputs, the luma, cb, and cr fields should be used
  * for the three input picture planes. However, for 10-bit unpacked planes the
@@ -560,9 +567,17 @@ typedef struct EB_H265_ENC_CONFIGURATION
     // SEI
     uint16_t                maxCLL;
     uint16_t                maxFALL;
-    const char*             masteringDisplayColorVolume;  // SMPTE ST 2086 mastering display color volume info
+
+    uint8_t                 useMasteringDisplayColorVolume;
+    uint8_t                 useNaluFile;
     uint32_t                dolbyVisionProfile;
-    const char*             naluFile;
+
+    // Master Display Color Volume Parameters
+    uint16_t                displayPrimaryX[3];
+    uint16_t                displayPrimaryY[3];
+    uint16_t                whitePointX, whitePointY;
+    uint32_t                maxDisplayMasteringLuminance;
+    uint32_t                minDisplayMasteringLuminance;
 
 } EB_H265_ENC_CONFIGURATION;
 
