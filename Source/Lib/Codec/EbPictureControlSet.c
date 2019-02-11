@@ -26,6 +26,7 @@ EB_ERRORTYPE PictureControlSetCtor(
     const EB_U16 pictureLcuWidth    = (EB_U16)((initDataPtr->pictureWidth + initDataPtr->lcuSize - 1) / initDataPtr->lcuSize);
     const EB_U16 pictureLcuHeight   = (EB_U16)((initDataPtr->pictureHeight + initDataPtr->lcuSize - 1) / initDataPtr->lcuSize);
     EB_U16 lcuIndex;
+    EB_U16 rowIndex;
     EB_U16 lcuOriginX;
     EB_U16 lcuOriginY;
     EB_ERRORTYPE return_error = EB_ErrorNone;
@@ -150,6 +151,16 @@ EB_ERRORTYPE PictureControlSetCtor(
         lcuOriginX = (lcuOriginX == pictureLcuWidth - 1) ? 0 : lcuOriginX + 1;
     }
 
+    //Row stats Array
+    EB_MALLOC(RCStatRow_t**, objectPtr->rowStats, sizeof(RCStatRow_t*) * pictureLcuHeight, EB_N_PTR);
+    for (rowIndex = 0; rowIndex < pictureLcuHeight; ++rowIndex)
+    {
+        return_error = RCStatRowCtor(
+            &(objectPtr->rowStats[rowIndex]), (EB_U16)rowIndex);
+        if (return_error == EB_ErrorInsufficientResources) {
+            return EB_ErrorInsufficientResources;
+        }
+    }
     // Mode Decision Control config
     EB_MALLOC(MdcLcuData_t*, objectPtr->mdcLcuArray, objectPtr->lcuTotalCount  * sizeof(MdcLcuData_t), EB_N_PTR);
     objectPtr->qpArrayStride = (EB_U16)((initDataPtr->pictureWidth +  MIN_CU_SIZE - 1) / MIN_CU_SIZE);

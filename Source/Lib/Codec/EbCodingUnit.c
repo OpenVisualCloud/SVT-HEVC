@@ -19,6 +19,30 @@ Tasks & Questions
     -Need a ReconPicture for each candidate.
     -I don't see a way around doing the copies in temp memory and then copying it in...
 */
+EB_ERRORTYPE RCStatRowCtor(
+    RCStatRow_t         **rcStatRowDblPtr,
+    EB_U16                rowIndex)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    RCStatRow_t *rcStatRowPtr;
+    EB_MALLOC(RCStatRow_t*, rcStatRowPtr, sizeof(RCStatRow_t), EB_N_PTR);
+    *rcStatRowDblPtr = rcStatRowPtr;
+    rcStatRowPtr->rowIndex = rowIndex;
+    rcStatRowPtr->numEncodedCUs = 0;
+    rcStatRowPtr->distortionBitsForVbv = 0;
+    rcStatRowPtr->encodedBits = 0;
+    rcStatRowPtr->intradistortionBitsForVbv = 0;
+    rcStatRowPtr->rowDistortionBits = 0;
+    rcStatRowPtr->rowIntraDistortionBits = 0;
+    rcStatRowPtr->rowQp = 0;
+    rcStatRowPtr->sumQpRc = 0;
+    if (return_error == EB_ErrorInsufficientResources) {
+        return EB_ErrorInsufficientResources;
+    }
+
+    return EB_ErrorNone;
+}
+
 EB_ERRORTYPE LargestCodingUnitCtor(
     LargestCodingUnit_t        **largetCodingUnitDblPtr,
     EB_U8                        lcuSize,

@@ -201,6 +201,26 @@ typedef struct LargestCodingUnit_s {
 
 
 
+/**************************************
+ * Row level vbv
+ **************************************/
+typedef struct RCStatRow_s
+{
+    EB_U16                          rowIndex;
+    EB_U32                          numEncodedCUs;             /* Addr of last encoded LCU in row */
+    EB_U32                          encodedBits;               /* sum of 'totalBits' of encoded LCUs */
+    EB_U32                          distortionBitsForVbv;      /* sum of lowres (estimated) costs for entire row */
+    EB_U32                          intradistortionBitsForVbv; /* sum of lowres (estimated) intra costs for entire row */
+    EB_U32                          rowDistortionBits;
+    EB_U32                          rowIntraDistortionBits;
+    EB_U32                          rowQp;
+    EB_U32                          sumQpRc;
+
+}RCStatRow_t;
+
+
+extern EB_ERRORTYPE RCStatRowCtor(
+RCStatRow_t       **rcStatRowDblPtr, EB_U16  rowIndex);
 
 
 extern EB_ERRORTYPE LargestCodingUnitCtor(

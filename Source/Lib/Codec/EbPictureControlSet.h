@@ -285,6 +285,9 @@ typedef struct PictureControlSet_s
     EB_BOOL                               bdpPresentFlag;
     EB_BOOL                               mdPresentFlag;
 
+    //Row level vbv data
+    RCStatRow_t                           **rowStats;
+
 } PictureControlSet_t;
 
 
