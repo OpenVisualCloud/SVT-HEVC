@@ -1168,10 +1168,10 @@ void SendNaluOnTheFly(
         uint8_t *context = NULL;
 
         if (fgets(line, sizeof(line), config->naluFile) != NULL) {
-            poc = atoi(EB_STRTOK(line, " ", &context));
+            poc = strtol(EB_STRTOK(line, " ", &context), NULL, 0);
             prefix = (uint8_t*)EB_STRTOK(NULL, " ", &context);
-            nalType = atoi(EB_STRTOK(NULL, "/", &context));
-            payloadType = atoi(EB_STRTOK(NULL, " ", &context));
+            nalType = strtol(EB_STRTOK(NULL, "/", &context), NULL, 0);
+            payloadType = strtol(EB_STRTOK(NULL, " ", &context), NULL, 0);
             base64Encode = (uint8_t*)EB_STRTOK(NULL, "\n", &context);
         }
         headerPtr->naluPOC = poc;
