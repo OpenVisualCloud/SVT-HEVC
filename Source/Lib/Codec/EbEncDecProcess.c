@@ -3805,6 +3805,7 @@ void* EncDecKernel(void *inputPtr)
     // LCU Loop variables  
     LargestCodingUnit_t    *lcuPtr;
     EB_U16                  lcuIndex;
+    EB_U16                  rowIndex;
     EB_U8                   lcuSize;
     EB_U8                   lcuSizeLog2;
     EB_U32                  xLcuIndex;
@@ -3816,7 +3817,11 @@ void* EncDecKernel(void *inputPtr)
     EB_U32                  lcuRowIndexStart;
     EB_U32                  lcuRowIndexCount;
     EB_U32                  pictureWidthInLcu;
+    EB_U32                  pictureHeightInLcu;
     MdcLcuData_t           *mdcPtr;
+
+    //Row level vbv controls
+    RCStatRow_t             *rowPtr;
     // Variables           
     EB_BOOL                 enableSaoFlag = EB_TRUE;
     EB_BOOL                 is16bit;
@@ -3862,6 +3867,7 @@ void* EncDecKernel(void *inputPtr)
         lcuSizeLog2 = (EB_U8)Log2f(lcuSize);
         contextPtr->lcuSize = lcuSize;
         pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + lcuSize - 1) >> lcuSizeLog2;
+        pictureHeightInLcu = (sequenceControlSetPtr->lumaHeight + lcuSize - 1) >> lcuSizeLog2;
         endOfRowFlag = EB_FALSE;
         lcuRowIndexStart = lcuRowIndexCount = 0;
         contextPtr->totIntraCodedArea = 0;
@@ -3947,6 +3953,9 @@ void* EncDecKernel(void *inputPtr)
 
                     lcuIndex = (EB_U16)(yLcuIndex * pictureWidthInLcu + xLcuIndex);
                     lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuIndex];
+                    rowIndex = (EB_U16)(yLcuIndex / pictureHeightInLcu);
+                    rowPtr = pictureControlSetPtr->rowStats[rowIndex];
+                    pictureControlSetPtr->firstRowOfPicture = (xLcuIndex <= pictureWidthInLcu) ? EB_TRUE : EB_FALSE;
                     lcuOriginX = xLcuIndex << lcuSizeLog2;
                     lcuOriginY = yLcuIndex << lcuSizeLog2;
                     lastLcuFlag = (lcuIndex == pictureControlSetPtr->lcuTotalCount - 1) ? EB_TRUE : EB_FALSE;
@@ -3963,6 +3972,18 @@ void* EncDecKernel(void *inputPtr)
                     // Derive restrictIntraGlobalMotion Flag
                     contextPtr->mdContext->restrictIntraGlobalMotion = ((pictureControlSetPtr->ParentPcsPtr->isPan || pictureControlSetPtr->ParentPcsPtr->isTilt) && pictureControlSetPtr->ParentPcsPtr->nonMovingIndexArray[lcuIndex] < INTRA_GLOBAL_MOTION_NON_MOVING_INDEX_TH && pictureControlSetPtr->ParentPcsPtr->yMean[lcuIndex][RASTER_SCAN_CU_INDEX_64x64] < INTRA_GLOBAL_MOTION_DARK_LCU_TH);
 
+                    //Block level vbv tuning starts here
+                    if (sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate)
+                    {
+                        if (pictureControlSetPtr->firstRowOfPicture)
+                            pictureControlSetPtr->rowStats[rowIndex]->rowQp=pictureControlSetPtr->pictureQp;
+
+                        //Assign the base qp for the LCU
+                        if (xLcuIndex <= yLcuIndex && yLcuIndex)
+                            lcuPtr->qp = pictureControlSetPtr->lcuPtrArray[lcuIndex - pictureWidthInLcu]->qp;
+                        else 
+                            lcuPtr->qp = pictureControlSetPtr->rowStats[rowPtr->rowIndex]->rowQp;
+                    }
 					// Configure the LCU
                     ModeDecisionConfigureLcu(  // HT done
                         contextPtr->mdContext,

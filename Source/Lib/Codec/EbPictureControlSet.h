@@ -287,6 +287,7 @@ typedef struct PictureControlSet_s
 
     //Row level vbv data
     RCStatRow_t                           **rowStats;
+    EB_BOOL                               firstRowOfPicture;
 
 } PictureControlSet_t;
 
