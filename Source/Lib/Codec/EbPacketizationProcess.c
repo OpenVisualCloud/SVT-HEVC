@@ -202,7 +202,7 @@ void* PacketizationKernel(void *inputPtr)
                 (EB_U32*) &(outputStreamPtr->nFilledLen),
                 (EB_U32*) &(outputStreamPtr->nAllocLen),
                 encodeContextPtr,
-                9999);
+				NAL_UNIT_INVALID);
         }
         
         
@@ -510,7 +510,7 @@ void* PacketizationKernel(void *inputPtr)
             (EB_U32*) &(outputStreamPtr->nFilledLen),
             (EB_U32*) &(outputStreamPtr->nAllocLen),
             encodeContextPtr,
-            9999);
+			NAL_UNIT_INVALID);
 
         // Reset the bitstream
         ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
@@ -526,7 +526,7 @@ void* PacketizationKernel(void *inputPtr)
             (EB_U32*) &(outputStreamPtr->nFilledLen),
             (EB_U32*) &(outputStreamPtr->nAllocLen),
             encodeContextPtr,
-            9999);
+			NAL_UNIT_INVALID);
         
         // Send the number of bytes per frame to RC
         pictureControlSetPtr->ParentPcsPtr->totalNumBits = outputStreamPtr->nFilledLen << 3;    
@@ -573,7 +573,7 @@ void* PacketizationKernel(void *inputPtr)
                 (EB_U32*) &(outputStreamPtr->nFilledLen),
                 (EB_U32*) &(outputStreamPtr->nAllocLen),
                 ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr,
-                9999);
+				NAL_UNIT_INVALID);
         }
         
         //Store the buffer in the Queue

@@ -3054,7 +3054,7 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
         (EB_U32*) &(outputStreamBuffer->nFilledLen),
         (EB_U32*) &(outputStreamBuffer->nAllocLen),
         encodeContextPtr,
-        9999);
+		NAL_UNIT_INVALID);
 
     *outputStreamPtr = outputStreamBuffer;
 
@@ -3110,7 +3110,7 @@ EB_API EB_ERRORTYPE EbH265EncEosNal(
         (EB_U32*) &(outputStreamBuffer->nFilledLen),
         (EB_U32*) &(outputStreamBuffer->nAllocLen),
         encodeContextPtr,
-        9999);
+		NAL_UNIT_INVALID);
     
     *outputStreamPtr = outputStreamBuffer;
 
@@ -3118,7 +3118,7 @@ EB_API EB_ERRORTYPE EbH265EncEosNal(
 }
 
 /* charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/" */
-static EB_ERRORTYPE baseDecodeFunction(EB_U8* encodedString, EB_U32 base64EncodeLength, EB_U8* decodedString )
+static EB_ERRORTYPE BaseDecodeFunction(EB_U8* encodedString, EB_U32 base64EncodeLength, EB_U8* decodedString )
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_U32 i, j, k = 0;
@@ -3181,7 +3181,7 @@ static EB_ERRORTYPE ParseSeiMetaData(
     EB_U32 base64EncodeLength = (uint32_t)strlen((char*)base64Encode);
     EB_U8 *base64Decode;
     EB_MALLOC(EB_U8*, base64Decode, (base64EncodeLength / 4) * 3, EB_N_PTR);
-    return_error = baseDecodeFunction(base64Encode, base64EncodeLength, base64Decode);
+    return_error = BaseDecodeFunction(base64Encode, base64EncodeLength, base64Decode);
 
     if (return_error == EB_ErrorNone && src->naluNalType == NAL_UNIT_PREFIX_SEI && src->naluPrefix == 0) {
         EB_U64 currentPOC = src->pts;
