@@ -3844,6 +3844,7 @@ void* EncDecKernel(void *inputPtr)
     EB_U32                   totalbits = 0;
     EB_U32                   tempWrittenBitsBeforeQuantizedCoeff;
     EB_U32                   tempWrittenBitsAfterQuantizedCoeff;
+    EB_U32                   bestOisCuIndex = 0;
 
     for (;;) {
 
@@ -3983,6 +3984,25 @@ void* EncDecKernel(void *inputPtr)
                             lcuPtr->qp = pictureControlSetPtr->lcuPtrArray[lcuIndex - pictureWidthInLcu]->qp;
                         else 
                             lcuPtr->qp = pictureControlSetPtr->rowStats[rowPtr->rowIndex]->rowQp;
+
+                        //Update CU Stats for row level vbv control
+                        rowPtr->rowDistortionBits += pictureControlSetPtr->ParentPcsPtr->rcMEdistortion[lcuIndex];
+                        rowPtr->rowIntraDistortionBits += pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[1][bestOisCuIndex].distortion +
+
+                            pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[2][bestOisCuIndex].distortion +
+
+                            pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[3][bestOisCuIndex].distortion +
+
+                            pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[4][bestOisCuIndex].distortion;
+
+                        rowPtr->encodedBits += lcuPtr->proxytotalBits;
+
+                        // If current block is at row diagonal checkpoint, call vbv ratecontrol.
+                        if (yLcuIndex == xLcuIndex && !pictureControlSetPtr->firstRowOfPicture)
+                        {
+
+                        }
+
                     }
 					// Configure the LCU
                     ModeDecisionConfigureLcu(  // HT done
@@ -4138,8 +4158,8 @@ void* EncDecKernel(void *inputPtr)
                     tempWrittenBitsAfterQuantizedCoeff = ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->tempEntropyCoderPtr))->writtenBitsCount +
                         32 - ((CabacEncodeContext_t*)pictureControlSetPtr->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
                         (((CabacEncodeContext_t*)pictureControlSetPtr->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum << 3);
-                    totalbits = tempWrittenBitsAfterQuantizedCoeff - tempWrittenBitsBeforeQuantizedCoeff;
-
+                    lcuPtr->proxytotalBits = tempWrittenBitsAfterQuantizedCoeff - tempWrittenBitsBeforeQuantizedCoeff;
+                    rowPtr->numEncodedCUs = lcuPtr->rowInd;
                     if (pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr != NULL){
                         ((EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr)->intraCodedAreaLCU[lcuIndex] = (EB_U8)((100 * contextPtr->intraCodedAreaLCU[lcuIndex]) / (64 * 64));
                     }

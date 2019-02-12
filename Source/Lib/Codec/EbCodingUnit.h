@@ -185,6 +185,8 @@ typedef struct LargestCodingUnit_s {
     //Bits only used for quantized coeffs
     EB_U32                          quantizedCoeffsBits;
     EB_U32                          totalBits;
+    EB_U32                          proxytotalBits;
+    EB_U32                          rowInd;
 
     // Quantized Coefficients
     EbPictureBufferDesc_t          *quantizedCoeff;
