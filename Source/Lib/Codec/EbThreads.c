@@ -85,7 +85,6 @@ EB_HANDLE EbCreateThread(
             if (ret == EPERM) {
 
                 pthread_cancel(*((pthread_t*)threadHandle));
-                pthread_join(*((pthread_t*)threadHandle), NULL);
                 free(threadHandle);
 
                 threadHandle = (pthread_t*)malloc(sizeof(pthread_t));
