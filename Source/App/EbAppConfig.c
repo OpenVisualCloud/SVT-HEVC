@@ -206,7 +206,7 @@ static void SetMaxFALL                          (const char *value, EbConfig_t *
 static void SetMasterDisplayFlag                (const char *value, EbConfig_t *cfg) {cfg->useMasteringDisplayColorVolume   = (EB_BOOL)strtol(value, NULL, 0);};
 static void SetMasterDisplay                    (const char *value, EbConfig_t *cfg) {
     if (cfg->useMasteringDisplayColorVolume)
-        EB_STRCPY(cfg->masteringDisplayColorVolumeString, EB_STRLEN(value, MAX_STRING_LENGTH), value);
+        EB_STRCPY(cfg->masteringDisplayColorVolumeString, EB_STRLEN(value, MAX_STRING_LENGTH) + 1, value);
 };
 static void SetDolbyVisionProfile               (const char *value, EbConfig_t *cfg) { 
     if (strtoul(value, NULL, 0) != 0 || EB_STRCMP(value, "0") == 0)

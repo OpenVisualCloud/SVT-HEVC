@@ -221,6 +221,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.maxCLL = config->maxCLL;
     callbackData->ebEncParameters.maxFALL = config->maxFALL;
     callbackData->ebEncParameters.useMasteringDisplayColorVolume = config->useMasteringDisplayColorVolume;
+    callbackData->ebEncParameters.dolbyVisionProfile = config->dolbyVisionProfile;
     callbackData->ebEncParameters.useNaluFile = config->useNaluFile;
 
     callbackData->ebEncParameters.displayPrimaryX[0] = config->displayPrimaryX[0];

@@ -2146,7 +2146,8 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.whitePointY = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->whitePointY;
     sequenceControlSetPtr->staticConfig.maxDisplayMasteringLuminance = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxDisplayMasteringLuminance;
     sequenceControlSetPtr->staticConfig.minDisplayMasteringLuminance = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->minDisplayMasteringLuminance;
-    
+    sequenceControlSetPtr->staticConfig.dolbyVisionProfile = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->dolbyVisionProfile;
+
     // Copying to masteringDisplayColorVolume structure
     sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryX[0] = sequenceControlSetPtr->staticConfig.displayPrimaryX[0];
     sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryX[1] = sequenceControlSetPtr->staticConfig.displayPrimaryX[1];
