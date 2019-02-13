@@ -3782,7 +3782,133 @@ EB_ERRORTYPE SignalDerivationEncDecKernelVmaf(
 	return return_error;
 }
 
-EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,
+EB_U64 predBits(PictureControlSet_t* pictureControlSetPtr, SequenceControlSet_t* sequenceControlSetPtr, EB_U64 distortion, EB_U8 qpVbv, EB_BOOL useIntraSadFlag)
+{
+    EB_U16 sadIntervalIndex = 0;
+    EB_U64 sadBits = 0;
+    sadIntervalIndex = (EB_U16)(distortion >> (12 - SAD_PRECISION_INTERVAL));//change 12 to 2*log2(64) 
+
+    sadIntervalIndex = (EB_U16)(sadIntervalIndex >> 2);
+    if (sadIntervalIndex > (NUMBER_OF_SAD_INTERVALS >> 1) - 1) {
+        EB_U16 sadIntervalIndexTemp = sadIntervalIndex - ((NUMBER_OF_SAD_INTERVALS >> 1) - 1);
+
+        sadIntervalIndex = ((NUMBER_OF_SAD_INTERVALS >> 1) - 1) + (sadIntervalIndexTemp >> 3);
+
+    }
+    RateControlTables_t *rateControlTablesPtr = &(sequenceControlSetPtr->encodeContextPtr)->rateControlTablesArray[qpVbv];
+    EB_Bit_Number *sadBitsArrayPtr = rateControlTablesPtr->sadBitsArray[pictureControlSetPtr->temporalLayerIndex];
+    EB_Bit_Number *intraSadBitsArrayPtr = rateControlTablesPtr->intraSadBitsArray[0];
+
+    if (useIntraSadFlag)
+        sadBits = intraSadBitsArrayPtr[sadIntervalIndex];
+    else
+        sadBits = sadBitsArrayPtr[sadIntervalIndex];
+
+    return sadBits;
+}
+
+EB_U64 predictBitsDup(SequenceControlSet_t *sequenceControlSetPtr, PictureControlSet_t* pictureControlSetPtr, EncodeContext_t *encodeContextPtr, HlRateControlHistogramEntry_t *hlRateControlHistogramPtrTemp,EB_U32 qp)
+{
+    EB_U64 totalBits = 0;
+        RateControlTables_t *rateControlTablesPtr = &encodeContextPtr->rateControlTablesArray[qp];
+        EB_Bit_Number *sadBitsArrayPtr = rateControlTablesPtr->sadBitsArray[hlRateControlHistogramPtrTemp->temporalLayerIndex];
+        EB_Bit_Number *intraSadBitsArrayPtr = rateControlTablesPtr->intraSadBitsArray[0];
+        EB_U32 predBitsRefQp = 0;
+        EB_U32 numOfFullLcus = 0;
+        EB_U32 areaInPixel = sequenceControlSetPtr->lumaWidth * sequenceControlSetPtr->lumaHeight;
+
+        if (hlRateControlHistogramPtrTemp->sliceType == EB_I_PICTURE) {
+            // Loop over block in the frame and calculated the predicted bits at reg QP
+            EB_U32 i;
+            EB_U32 accum = 0;
+            for (i = 0; i < NUMBER_OF_INTRA_SAD_INTERVALS; ++i)
+            {
+                accum += (EB_U32)(hlRateControlHistogramPtrTemp->oisDistortionHistogram[i] * intraSadBitsArrayPtr[i]);
+            }
+
+            predBitsRefQp = accum;
+            numOfFullLcus = hlRateControlHistogramPtrTemp->fullLcuCount;
+            totalBits += predBitsRefQp;
+        }
+        else {
+            EB_U32 i;
+            EB_U32 accum = 0;
+            EB_U32 accumIntra = 0;
+            for (i = 0; i < NUMBER_OF_SAD_INTERVALS; ++i)
+            {
+                accum += (EB_U32)(hlRateControlHistogramPtrTemp->meDistortionHistogram[i] * sadBitsArrayPtr[i]);
+                accumIntra += (EB_U32)(hlRateControlHistogramPtrTemp->oisDistortionHistogram[i] * intraSadBitsArrayPtr[i]);
+
+            }
+            if (accum > accumIntra * 3)
+                predBitsRefQp = accumIntra;
+            else
+                predBitsRefQp = accum;
+            numOfFullLcus = hlRateControlHistogramPtrTemp->fullLcuCount;
+            totalBits += predBitsRefQp;
+        }
+
+        // Scale for in complete LCSs
+        //  predBitsRefQp is normalized based on the area because of the LCUs at the picture boundries
+        totalBits = totalBits * (EB_U64)areaInPixel / (numOfFullLcus << 12);
+    return totalBits;
+}
+
+EB_U64 predictRowsSizeSum(PictureControlSet_t* pictureControlSetPtr, SequenceControlSet_t* sequenceControlSetPtr, EB_U8 qpVbv, EB_U64 *encodedBitsSoFar)
+{
+    EB_U64 predictedBitsForFrame = 0;
+    EB_U64 predictedBitsDoneSoFar = 0;
+    EB_U64 distortionBitsSoFar = 0;
+    *encodedBitsSoFar = 0;
+    EB_U64 distortionSofar = 0;
+    EB_U64 distortionSofarIntra = 0;
+    EB_U64 distortionSofarInter = 0;
+    EB_U32 queueEntryIndexTemp;
+    EB_U32 queueEntryIndexHeadTemp;
+    HlRateControlHistogramEntry_t      *hlRateControlHistogramPtrTemp;
+    EB_BOOL useIntraSadFlag = EB_TRUE;
+    EB_U8 lcuSizeLog2 = (EB_U8)Log2f(sequenceControlSetPtr->lcuSize);
+    EB_U8 pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + sequenceControlSetPtr->lcuSize - 1) >> lcuSizeLog2;
+    EB_U8 pictureHeightInLcu = (sequenceControlSetPtr->lumaHeight + sequenceControlSetPtr->lcuSize - 1) >> lcuSizeLog2;
+    queueEntryIndexHeadTemp = (EB_S32)(pictureControlSetPtr->pictureNumber - sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueue[sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueueHeadIndex]->pictureNumber);
+    queueEntryIndexHeadTemp += sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueueHeadIndex;
+    queueEntryIndexHeadTemp = (queueEntryIndexHeadTemp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ?
+        queueEntryIndexHeadTemp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
+        queueEntryIndexHeadTemp;
+
+    queueEntryIndexTemp = queueEntryIndexHeadTemp;
+
+
+    EB_U32 currentInd = (queueEntryIndexTemp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ? queueEntryIndexTemp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH : queueEntryIndexTemp;
+    hlRateControlHistogramPtrTemp = (sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueue[currentInd]);
+    for (EB_U8 row = 0; row < pictureHeightInLcu; row++)
+    {
+        *encodedBitsSoFar += pictureControlSetPtr->rowStats[row]->encodedBits;
+        if (pictureControlSetPtr->sliceType == EB_I_PICTURE)
+            distortionSofarIntra += pictureControlSetPtr->rowStats[row]->rowIntraDistortion;
+        else
+        {
+            distortionSofarIntra += pictureControlSetPtr->rowStats[row]->rowIntraDistortion;
+            distortionSofarInter += pictureControlSetPtr->rowStats[row]->rowDistortion;
+        }
+    }
+    if ((pictureControlSetPtr->sliceType != EB_I_PICTURE)
+        && distortionSofarInter <= distortionSofarIntra * 3)
+    {
+        distortionSofar = distortionSofarInter;
+        useIntraSadFlag = EB_FALSE;
+    }
+    else
+    {
+        distortionSofar = distortionSofarIntra;
+    }
+    predictedBitsDoneSoFar = predBits(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, distortionSofar, useIntraSadFlag);
+    predictedBitsForFrame = predictBitsDup(sequenceControlSetPtr, pictureControlSetPtr, sequenceControlSetPtr->encodeContextPtr, hlRateControlHistogramPtrTemp, qpVbv);
+    EB_U64 framesizeEstimated = (predictedBitsForFrame - predictedBitsDoneSoFar) + (*encodedBitsSoFar);
+    return framesizeEstimated;
+}
+
+EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,///mutex to be added since Buffer fill is read
     SequenceControlSet_t                       *sequenceControlSetPtr,
     RCStatRow_t                                *rowPtr,
     EncodeContext_t                            *rcData,
@@ -3803,9 +3929,10 @@ EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,
     if (rowPtr->rowIndex<pictureHeightInLcu+1)
     {
 
-            double rcTol = 1*bufferLeftPlanned;
+            /* More threads means we have to be more cautious in letting ratecontrol use up extra bits. */
+            EB_U64 rcTol = 1 * bufferLeftPlanned;//bufferLeftPlanned / m_param->frameNumThreads * m_rateTolerance;
             EB_U64 encodedBitsSoFar = 0;
-            EB_U64 accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, encodedBitsSoFar);
+            EB_U64 accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, &encodedBitsSoFar);
 
 
             /* * Don't increase the row QPs until a sufficent amount of the bits of
@@ -3826,7 +3953,7 @@ EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,
                     )))
             {
                 qpVbv += 1;
-                accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, encodedBitsSoFar);
+                accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, &encodedBitsSoFar);
             }
 
             while (qpVbv > qpMin
@@ -3836,16 +3963,7 @@ EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,
                     ))
             {
                 qpVbv -= 1;
-                accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, encodedBitsSoFar);
-            }
-
-            /* avoid VBV underflow */
-            while ((qpVbv < qpAbsoluteMax)
-                && (rcData->bufferFill - accFrameBits < (EB_U64)((rcData->vbvMaxrate / pictureControlSetPtr->ParentPcsPtr->frameRate) * maxFrameError))
-                )
-            {
-                qpVbv += 1;
-                accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, encodedBitsSoFar);
+                accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, &encodedBitsSoFar);
             }
 
             pictureControlSetPtr->frameSizeEstimated = accFrameBits;
@@ -4067,15 +4185,16 @@ void* EncDecKernel(void *inputPtr)
                             lcuPtr->qp = pictureControlSetPtr->rowStats[rowPtr->rowIndex]->rowQp;
 
                         //Update CU Stats for row level vbv control
-                        rowPtr->rowDistortionBits += pictureControlSetPtr->ParentPcsPtr->rcMEdistortion[lcuIndex];
-                        rowPtr->rowIntraDistortionBits += pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[1][bestOisCuIndex].distortion +
+						//predBitsLCU(pictureControlSetPtr, lcuIndex);
+                        rowPtr->rowIntraDistortion += pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[1][bestOisCuIndex].distortion +
 
                             pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[2][bestOisCuIndex].distortion +
 
                             pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[3][bestOisCuIndex].distortion +
 
                             pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[4][bestOisCuIndex].distortion;
-
+						if (pictureControlSetPtr->sliceType != EB_I_PICTURE)
+							rowPtr->rowDistortion += pictureControlSetPtr->ParentPcsPtr->rcMEdistortion[lcuIndex];
                         rowPtr->encodedBits += lcuPtr->proxytotalBits;
 
                         // If current block is at row diagonal checkpoint, call vbv ratecontrol.

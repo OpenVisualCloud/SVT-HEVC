@@ -187,6 +187,9 @@ typedef struct LargestCodingUnit_s {
     EB_U32                          totalBits;
     EB_U32                          proxytotalBits;
     EB_U32                          rowInd;
+    EB_U32                          intraSadBits;
+    EB_U32                          interSadBits;
+    EB_U32                          sadVbv;
 
     // Quantized Coefficients
     EbPictureBufferDesc_t          *quantizedCoeff;
@@ -211,10 +214,10 @@ typedef struct RCStatRow_s
     EB_U16                          rowIndex;
     EB_U32                          numEncodedCUs;             /* Addr of last encoded LCU in row */
     EB_U32                          encodedBits;               /* sum of 'totalBits' of encoded LCUs */
-    EB_U32                          distortionBitsForVbv;      /* sum of lowres (estimated) costs for entire row */
-    EB_U32                          intradistortionBitsForVbv; /* sum of lowres (estimated) intra costs for entire row */
-    EB_U32                          rowDistortionBits;
-    EB_U32                          rowIntraDistortionBits;
+    EB_U32                          distortionDataForVbv;      /* sum of lowres (estimated) costs for entire row */
+    EB_U32                          intradistortionDataForVbv; /* sum of lowres (estimated) intra costs for entire row */
+    EB_U32                          rowDistortion;
+    EB_U32                          rowIntraDistortion;
     EB_U32                          rowQp;
     EB_U32                          sumQpRc;
 

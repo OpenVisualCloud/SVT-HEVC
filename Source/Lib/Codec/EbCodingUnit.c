@@ -29,11 +29,11 @@ EB_ERRORTYPE RCStatRowCtor(
     *rcStatRowDblPtr = rcStatRowPtr;
     rcStatRowPtr->rowIndex = rowIndex;
     rcStatRowPtr->numEncodedCUs = 0;
-    rcStatRowPtr->distortionBitsForVbv = 0;
+    rcStatRowPtr->distortionDataForVbv = 0;
     rcStatRowPtr->encodedBits = 0;
-    rcStatRowPtr->intradistortionBitsForVbv = 0;
-    rcStatRowPtr->rowDistortionBits = 0;
-    rcStatRowPtr->rowIntraDistortionBits = 0;
+    rcStatRowPtr->intradistortionDataForVbv = 0;
+    rcStatRowPtr->rowDistortion = 0;
+    rcStatRowPtr->rowIntraDistortion = 0;
     rcStatRowPtr->rowQp = 0;
     rcStatRowPtr->sumQpRc = 0;
     if (return_error == EB_ErrorInsufficientResources) {
