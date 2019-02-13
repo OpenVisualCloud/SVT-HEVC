@@ -3251,7 +3251,7 @@ static EB_ERRORTYPE CopyUserSei(
     EB_H265_ENC_CONFIGURATION   *config = &sequenceControlSetPtr->staticConfig;
     EbPictureBufferDesc_t       *dstPicturePtr = (EbPictureBufferDesc_t*)dst->pBuffer;
 
-    if (src->naluFound == EB_FALSE) {
+    if (config->useNaluFile == EB_TRUE && src->naluFound == EB_FALSE) {
         config->useNaluFile = EB_FALSE;
     }
 
