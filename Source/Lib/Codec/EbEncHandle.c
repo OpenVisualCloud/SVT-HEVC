@@ -566,7 +566,7 @@ void SwitchToRealTime()
 
     int retValue = pthread_setschedparam(pthread_self(), SCHED_FIFO, &schedParam);
     if (retValue == EPERM)
-        SVT_LOG("\n[WARNING] Elevated privileges required to run with real-time policies! Check Linux Best Known Configuration in User Guide to run application in real-time without elevated privileges!\n\n");
+        SVT_LOG("\nSVT [WARNING] Elevated privileges required to run with real-time policies! Check Linux Best Known Configuration in User Guide to run application in real-time without elevated privileges!\n\n");
 
 #endif
 }
@@ -2647,6 +2647,16 @@ static EB_ERRORTYPE VerifySettings(\
 	if (config->recoveryPointSeiFlag > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid RecoveryPoint. RecoveryPoint must be [0 - 1]\n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->useMasteringDisplayColorVolume > 1) {
+        SVT_LOG("SVT [Error]: Instance %u : Invalid useMasterDisplay. useMasterDisplay must be [0 - 1]\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->useNaluFile > 1) {
+        SVT_LOG("SVT [Error]: Instance %u : Invalid useNaluFile. useNaluFile must be [0 - 1]\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
     }
 
 	if ((config->maxCLL && !config->highDynamicRangeInput) || (config->maxFALL && !config->highDynamicRangeInput)) {
