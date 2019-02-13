@@ -827,6 +827,11 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         return_error = EB_ErrorBadParameter;
     }
 
+    if (config->useNaluFile == 1 && config->naluFile == NULL) {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u : Invalid Nalu File\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
     return return_error;
 }
 

@@ -3176,6 +3176,9 @@ static EB_ERRORTYPE BaseDecodeFunction(EB_U8* encodedString, EB_U32 base64Encode
 
             while (countBits != 0) {
                 countBits -= 8;
+                if (k >= sizeof(decodedString)) {
+                    return EB_ErrorBadParameter;
+                }
                 decodedString[k++] = (bitstream >> countBits) & 255;
             }
         }
@@ -3190,13 +3193,26 @@ static EB_ERRORTYPE ParseSeiMetaData(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
     EbPictureBufferDesc_t *headerPtr = (EbPictureBufferDesc_t*)dst->pBuffer;
-    EB_U8 *base64Encode = src->naluBase64Encode;
-    EB_U32 base64EncodeLength = (uint32_t)strlen((char*)base64Encode);
+    EB_U8 *base64Encode;
+    EB_U32 base64EncodeLength;
     EB_U8 *base64Decode;
+
+    if (src->naluFound == EB_FALSE) {
+        return EB_ErrorBadParameter;
+    }
+
+    base64Encode = src->naluBase64Encode;
+    base64EncodeLength = (uint32_t)strlen((char*)base64Encode);
     EB_MALLOC(EB_U8*, base64Decode, (base64EncodeLength / 4) * 3, EB_N_PTR);
     return_error = BaseDecodeFunction(base64Encode, base64EncodeLength, base64Decode);
 
-    if (return_error == EB_ErrorNone && src->naluNalType == NAL_UNIT_PREFIX_SEI && src->naluPrefix == 0) {
+    if (return_error != EB_ErrorNone) {
+        src->naluFound = EB_FALSE;
+        SVT_LOG("\nSVT [WARNING]: SEI encoded message cannot be decoded \n ");
+        return EB_ErrorBadParameter;
+    }
+
+    if (src->naluNalType == NAL_UNIT_PREFIX_SEI && src->naluPrefix == 0) {
         EB_U64 currentPOC = src->pts;
         if (currentPOC == src->naluPOC) {
             headerPtr->userSeiMsg.payloadSize = (base64EncodeLength / 4) * 3;
@@ -3206,17 +3222,20 @@ static EB_ERRORTYPE ParseSeiMetaData(
             else if (src->naluPayloadType == 5)
                 headerPtr->userSeiMsg.payloadType = USER_DATA_UNREGISTERED;
             else {
+                src->naluFound = EB_FALSE;
                 SVT_LOG("\nSVT [WARNING]: Unsupported SEI payload Type for frame %u\n ", src->naluPOC);
                 return EB_ErrorBadParameter;
             }
             EB_MEMCPY(headerPtr->userSeiMsg.payload, base64Decode, headerPtr->userSeiMsg.payloadSize);
         }
         else {
+            src->naluFound = EB_FALSE;
             SVT_LOG("\nSVT [WARNING]: User SEI frame number %u doesn't match input frame number %" PRId64 "\n ", src->naluPOC, currentPOC);
             return EB_ErrorBadParameter;
         }
     }
     else {
+        src->naluFound = EB_FALSE;
         SVT_LOG("\nSVT [WARNING]: SEI message for frame %u is not inserted. Will support only PREFIX SEI message \n ", src->naluPOC);
         return EB_ErrorBadParameter;
     }
@@ -3231,6 +3250,10 @@ static EB_ERRORTYPE CopyUserSei(
     EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_H265_ENC_CONFIGURATION   *config = &sequenceControlSetPtr->staticConfig;
     EbPictureBufferDesc_t       *dstPicturePtr = (EbPictureBufferDesc_t*)dst->pBuffer;
+
+    if (src->naluFound == EB_FALSE) {
+        config->useNaluFile = EB_FALSE;
+    }
 
     // Copy User SEI metadata from input
     if (config->useNaluFile) {

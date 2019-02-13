@@ -1160,6 +1160,7 @@ void SendNaluOnTheFly(
 {
     {
         char line[1024];
+        EB_ERRORTYPE return_error = EB_ErrorNone;
         uint32_t poc = 0;
         uint8_t *prefix = NULL;
         uint32_t nalType = 0;
@@ -1169,19 +1170,48 @@ void SendNaluOnTheFly(
 
         if (fgets(line, sizeof(line), config->naluFile) != NULL) {
             poc = strtol(EB_STRTOK(line, " ", &context), NULL, 0);
-            prefix = (uint8_t*)EB_STRTOK(NULL, " ", &context);
-            nalType = strtol(EB_STRTOK(NULL, "/", &context), NULL, 0);
-            payloadType = strtol(EB_STRTOK(NULL, " ", &context), NULL, 0);
-            base64Encode = (uint8_t*)EB_STRTOK(NULL, "\n", &context);
+            if (return_error == EB_ErrorNone && *context != 0) {
+                prefix = (uint8_t*)EB_STRTOK(NULL, " ", &context);
+            }
+            else {
+                return_error = EB_ErrorBadParameter;
+            }
+            if (return_error == EB_ErrorNone && *context != 0) {
+                nalType = strtol(EB_STRTOK(NULL, "/", &context), NULL, 0);
+            }
+            else {
+                return_error = EB_ErrorBadParameter;
+            }
+            if (return_error == EB_ErrorNone && *context != 0) {
+                payloadType = strtol(EB_STRTOK(NULL, " ", &context), NULL, 0);
+            }
+            else {
+                return_error = EB_ErrorBadParameter;
+            }
+            if (return_error == EB_ErrorNone && *context != 0) {
+                base64Encode = (uint8_t*)EB_STRTOK(NULL, "\n", &context);
+            }
+            else {
+                return_error = EB_ErrorBadParameter;
+            }
+
+            headerPtr->naluPOC = poc;
+            if (prefix != NULL && !EB_STRCMP((char*)prefix, "PREFIX"))
+                headerPtr->naluPrefix = 0;
+            headerPtr->naluNalType = nalType;
+            headerPtr->naluPayloadType = payloadType;
+            headerPtr->naluBase64Encode = base64Encode;
+            headerPtr->naluFound = EB_TRUE;
         }
-        headerPtr->naluPOC = poc;
-        if (prefix != NULL && !EB_STRCMP((char*)prefix, "PREFIX"))
-            headerPtr->naluPrefix = 0;
-        else
-            headerPtr->naluPrefix = -1;
-        headerPtr->naluNalType = nalType;
-        headerPtr->naluPayloadType = payloadType;
-        headerPtr->naluBase64Encode = base64Encode;
+        else {
+            return_error = EB_ErrorBadParameter;
+        }
+        if (return_error != EB_ErrorNone) {
+            printf("\nSVT [Warning]: Nalu file cannot be parsed correctly \n ");
+            headerPtr->naluFound = EB_FALSE;
+            //config->useNaluFile = EB_FALSE;
+            return;
+        }
     }
     return;
 }

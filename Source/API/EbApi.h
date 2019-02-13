@@ -66,6 +66,7 @@ extern "C" {
         uint32_t nFlags;
 
         // nalu info
+        uint8_t  naluFound;
         uint32_t naluPOC;
         uint32_t naluPrefix;
         uint32_t naluNalType;
