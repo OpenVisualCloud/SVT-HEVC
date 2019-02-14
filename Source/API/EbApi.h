@@ -109,6 +109,13 @@ typedef struct EB_SEI_MESSAGE
 
 }EB_SEI_MESSAGE;
 
+typedef enum EB_COLOR_FORMAT {
+    EB_YUV400,
+    EB_YUV420,
+    EB_YUV422,
+    EB_YUV444
+} EB_COLOR_FORMAT;
+
 /* For 8-bit and 10-bit packed inputs, the luma, cb, and cr fields should be used
  * for the three input picture planes. However, for 10-bit unpacked planes the
  * lumaExt, cbExt, and crExt fields should be used hold the extra 2-bits of
@@ -258,6 +265,8 @@ typedef struct EB_H265_ENC_CONFIGURATION
      *
      * Default is 8. */
     uint32_t                encoderBitDepth;
+
+	EB_COLOR_FORMAT         encoderColorFormat;
 
     /* Offline packing of the 2bits: requires two bits packed input.
      *
