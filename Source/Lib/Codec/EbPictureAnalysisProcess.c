@@ -62,6 +62,14 @@ EB_ERRORTYPE PictureAnalysisContextCtor(
 	if (denoiseFlag == EB_TRUE){
 
 		//denoised
+        // If 420/422, re-use luma for chroma
+        // If 444, re-use luma for Cr
+        if (inputPictureBufferDescInitData->colorFormat != EB_YUV444) {
+		    inputPictureBufferDescInitData->bufferEnableMask = PICTURE_BUFFER_DESC_Y_FLAG;
+        } else {
+		    inputPictureBufferDescInitData->bufferEnableMask = PICTURE_BUFFER_DESC_Y_FLAG | PICTURE_BUFFER_DESC_Cb_FLAG;
+        }
+
 		return_error = EbPictureBufferDescCtor(
 			(EB_PTR*)&(contextPtr->denoisedPicturePtr),
 			(EB_PTR)inputPictureBufferDescInitData);
@@ -70,9 +78,12 @@ EB_ERRORTYPE PictureAnalysisContextCtor(
 			return EB_ErrorInsufficientResources;
 		}
 
-		//luma buffer could re-used to process chroma  
+        if (inputPictureBufferDescInitData->colorFormat != EB_YUV444) {
 		contextPtr->denoisedPicturePtr->bufferCb = contextPtr->denoisedPicturePtr->bufferY;
 		contextPtr->denoisedPicturePtr->bufferCr = contextPtr->denoisedPicturePtr->bufferY + contextPtr->denoisedPicturePtr->chromaSize;
+        } else {
+		    contextPtr->denoisedPicturePtr->bufferCr = contextPtr->denoisedPicturePtr->bufferY;
+        }
 
 		// noise
 		inputPictureBufferDescInitData->maxHeight = MAX_LCU_SIZE;
@@ -94,6 +105,66 @@ EB_ERRORTYPE PictureAnalysisContextCtor(
 
 
 	return EB_ErrorNone;
+}
+
+static void DownSampleChroma(EbPictureBufferDesc_t* inputPicturePtr, EbPictureBufferDesc_t* outputPicturePtr)
+{
+	EB_U32 inputColorFormat = inputPicturePtr->colorFormat;
+	EB_U16 inputSubWidthCMinus1 = (inputColorFormat == EB_YUV444 ? 1 : 2) - 1;
+	EB_U16 inputSubHeightCMinus1 = (inputColorFormat >= EB_YUV422 ? 1 : 2) - 1;
+
+	EB_U32 outputColorFormat = outputPicturePtr->colorFormat;
+	EB_U16 outputSubWidthCMinus1 = (outputColorFormat == EB_YUV444 ? 1 : 2) - 1;
+	EB_U16 outputSubHeightCMinus1 = (outputColorFormat >= EB_YUV422 ? 1 : 2) - 1;
+
+	EB_U32 strideIn, strideOut;
+	EB_U32 inputOriginIndex, outputOriginIndex;
+
+	EB_U8 *ptrIn;
+	EB_U8 *ptrOut;
+
+	EB_U32 ii, jj;
+
+	//Cb
+	{
+		strideIn = inputPicturePtr->strideCb;
+		inputOriginIndex = (inputPicturePtr->originX >> inputSubWidthCMinus1) +
+            (inputPicturePtr->originY >> inputSubHeightCMinus1)  * inputPicturePtr->strideCb;
+		ptrIn = &(inputPicturePtr->bufferCb[inputOriginIndex]);
+
+		strideOut = outputPicturePtr->strideCb;
+		outputOriginIndex = (outputPicturePtr->originX >> outputSubWidthCMinus1) +
+            (outputPicturePtr->originY >> outputSubHeightCMinus1)  * outputPicturePtr->strideCb;
+		ptrOut = &(outputPicturePtr->bufferCb[outputOriginIndex]);
+
+		for (jj = 0; jj < (EB_U32)(outputPicturePtr->height >> outputSubHeightCMinus1); jj++) {
+			for (ii = 0; ii < (EB_U32)(outputPicturePtr->width >> outputSubWidthCMinus1); ii++) {
+				ptrOut[ii + jj * strideOut] =
+                    ptrIn[(ii << (1 - inputSubWidthCMinus1)) +
+                    (jj << (1 - inputSubHeightCMinus1)) * strideIn];
+			}
+		}
+
+	}
+
+	//Cr
+	{
+		strideIn = inputPicturePtr->strideCr;
+		inputOriginIndex = (inputPicturePtr->originX >> inputSubWidthCMinus1) + (inputPicturePtr->originY >> inputSubHeightCMinus1)  * inputPicturePtr->strideCr;
+		ptrIn = &(inputPicturePtr->bufferCr[inputOriginIndex]);
+
+		strideOut = outputPicturePtr->strideCr;
+		outputOriginIndex = (outputPicturePtr->originX >> outputSubWidthCMinus1) + (outputPicturePtr->originY >> outputSubHeightCMinus1)  * outputPicturePtr->strideCr;
+		ptrOut = &(outputPicturePtr->bufferCr[outputOriginIndex]);
+
+		for (jj = 0; jj < (EB_U32)(outputPicturePtr->height >> outputSubHeightCMinus1); jj++) {
+			for (ii = 0; ii < (EB_U32)(outputPicturePtr->width >> outputSubWidthCMinus1); ii++) {
+				ptrOut[ii + jj * strideOut] =
+                    ptrIn[(ii << (1 - inputSubWidthCMinus1)) +
+                    (jj << (1 - inputSubHeightCMinus1)) * strideIn];
+			}
+		}
+	}
 }
 
 /************************************************
@@ -1208,17 +1279,22 @@ void noiseExtractChromaStrong(
 	EB_U32 strideOut;
 	EB_U32 idx = (lcuOriginX + MAX_LCU_SIZE > inputPicturePtr->width) ? lcuOriginX : 0;
 
+    EB_U32 colorFormat      = inputPicturePtr->colorFormat;
+    EB_U16 subWidthCMinus1  = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
+
+
 	//Cb
 	{
-		picHeight = inputPicturePtr->height / 2;
-		picWidth = inputPicturePtr->width / 2;
-		lcuHeight = MIN(MAX_LCU_SIZE / 2, picHeight - lcuOriginY);
+		picHeight = inputPicturePtr->height >> subHeightCMinus1;
+		picWidth = inputPicturePtr->width >> subWidthCMinus1;
+		lcuHeight = MIN(MAX_LCU_SIZE >> subHeightCMinus1, picHeight - lcuOriginY);
 
 		strideIn = inputPicturePtr->strideCb;
-		inputOriginIndex = inputPicturePtr->originX / 2 + (inputPicturePtr->originY / 2 + lcuOriginY)  * inputPicturePtr->strideCb;
+		inputOriginIndex = (inputPicturePtr->originX >> subWidthCMinus1) + ((inputPicturePtr->originY >> subHeightCMinus1) + lcuOriginY)  * inputPicturePtr->strideCb;
 		ptrIn = &(inputPicturePtr->bufferCb[inputOriginIndex]);
 
-		inputOriginIndexPad = denoisedPicturePtr->originX / 2 + (denoisedPicturePtr->originY / 2 + lcuOriginY)  * denoisedPicturePtr->strideCb;
+		inputOriginIndexPad = (denoisedPicturePtr->originX >> subWidthCMinus1) + ((denoisedPicturePtr->originY >> subHeightCMinus1) + lcuOriginY)  * denoisedPicturePtr->strideCb;
 		strideOut = denoisedPicturePtr->strideCb;
 		ptrDenoised = &(denoisedPicturePtr->bufferCb[inputOriginIndexPad]);
 
@@ -1240,15 +1316,15 @@ void noiseExtractChromaStrong(
 
 	//Cr
 	{
-		picHeight = inputPicturePtr->height / 2;
-		picWidth = inputPicturePtr->width / 2;
-		lcuHeight = MIN(MAX_LCU_SIZE / 2, picHeight - lcuOriginY);
+		picHeight = inputPicturePtr->height >> subHeightCMinus1;
+		picWidth = inputPicturePtr->width >> subWidthCMinus1;
+		lcuHeight = MIN(MAX_LCU_SIZE >> subHeightCMinus1, picHeight - lcuOriginY);
 
 		strideIn = inputPicturePtr->strideCr;
-		inputOriginIndex = inputPicturePtr->originX / 2 + (inputPicturePtr->originY / 2 + lcuOriginY)  * inputPicturePtr->strideCr;
+		inputOriginIndex = (inputPicturePtr->originX >> subWidthCMinus1) + ((inputPicturePtr->originY >> subHeightCMinus1) + lcuOriginY)  * inputPicturePtr->strideCr;
 		ptrIn = &(inputPicturePtr->bufferCr[inputOriginIndex]);
 
-		inputOriginIndexPad = denoisedPicturePtr->originX / 2 + (denoisedPicturePtr->originY / 2 + lcuOriginY)  * denoisedPicturePtr->strideCr;
+		inputOriginIndexPad = (denoisedPicturePtr->originX >> subWidthCMinus1) + ((denoisedPicturePtr->originY >> subHeightCMinus1) + lcuOriginY)  * denoisedPicturePtr->strideCr;
 		strideOut = denoisedPicturePtr->strideCr;
 		ptrDenoised = &(denoisedPicturePtr->bufferCr[inputOriginIndexPad]);
 
@@ -1294,18 +1370,23 @@ void noiseExtractChromaWeak(
 
 	EB_U32 idx = (lcuOriginX + MAX_LCU_SIZE > inputPicturePtr->width) ? lcuOriginX : 0;
 
+    EB_U32 colorFormat      = inputPicturePtr->colorFormat;
+    EB_U16 subWidthCMinus1  = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
+
+
 	//Cb
 	{
-		picHeight = inputPicturePtr->height / 2;
-		picWidth = inputPicturePtr->width / 2;
+		picHeight = inputPicturePtr->height >> subHeightCMinus1;
+		picWidth = inputPicturePtr->width >> subWidthCMinus1;
 
-		lcuHeight = MIN(MAX_LCU_SIZE / 2, picHeight - lcuOriginY);
+		lcuHeight = MIN(MAX_LCU_SIZE >> subHeightCMinus1, picHeight - lcuOriginY);
 
 		strideIn = inputPicturePtr->strideCb;
-		inputOriginIndex = inputPicturePtr->originX / 2 + (inputPicturePtr->originY / 2 + lcuOriginY)* inputPicturePtr->strideCb;
+		inputOriginIndex = (inputPicturePtr->originX >> subWidthCMinus1) + ((inputPicturePtr->originY >> subHeightCMinus1) + lcuOriginY)* inputPicturePtr->strideCb;
 		ptrIn = &(inputPicturePtr->bufferCb[inputOriginIndex]);
 
-		inputOriginIndexPad = denoisedPicturePtr->originX / 2 + (denoisedPicturePtr->originY / 2 + lcuOriginY)* denoisedPicturePtr->strideCb;
+		inputOriginIndexPad = (denoisedPicturePtr->originX >> subWidthCMinus1) + ((denoisedPicturePtr->originY >> subHeightCMinus1) + lcuOriginY)* denoisedPicturePtr->strideCb;
 		strideOut = denoisedPicturePtr->strideCb;
 		ptrDenoised = &(denoisedPicturePtr->bufferCb[inputOriginIndexPad]);
 
@@ -1327,15 +1408,15 @@ void noiseExtractChromaWeak(
 
 	//Cr
 	{
-		picHeight = inputPicturePtr->height / 2;
-		picWidth = inputPicturePtr->width / 2;
-		lcuHeight = MIN(MAX_LCU_SIZE / 2, picHeight - lcuOriginY);
+		picHeight = inputPicturePtr->height >> subHeightCMinus1;
+		picWidth = inputPicturePtr->width >> subWidthCMinus1;
+		lcuHeight = MIN(MAX_LCU_SIZE >> subHeightCMinus1, picHeight - lcuOriginY);
 
 		strideIn = inputPicturePtr->strideCr;
-		inputOriginIndex = inputPicturePtr->originX / 2 + (inputPicturePtr->originY / 2 + lcuOriginY)* inputPicturePtr->strideCr;
+		inputOriginIndex = (inputPicturePtr->originX >> subWidthCMinus1) + ((inputPicturePtr->originY >> subHeightCMinus1) + lcuOriginY)* inputPicturePtr->strideCr;
 		ptrIn = &(inputPicturePtr->bufferCr[inputOriginIndex]);
 
-		inputOriginIndexPad = denoisedPicturePtr->originX / 2 + (denoisedPicturePtr->originY / 2 + lcuOriginY)* denoisedPicturePtr->strideCr;
+		inputOriginIndexPad = (denoisedPicturePtr->originX >> subWidthCMinus1) + ((denoisedPicturePtr->originY >> subHeightCMinus1) + lcuOriginY)* denoisedPicturePtr->strideCr;
 		strideOut = denoisedPicturePtr->strideCr;
 		ptrDenoised = &(denoisedPicturePtr->bufferCr[inputOriginIndexPad]);
 
@@ -2467,13 +2548,16 @@ EB_ERRORTYPE DenoiseInputPicture(
 	EB_U32       lcuOriginX;
 	EB_U32       lcuOriginY;
 	EB_U16       verticalIdx;
+    EB_U32 		 colorFormat      = inputPicturePtr->colorFormat;
+    EB_U16 		 subWidthCMinus1  = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    EB_U16 		 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
 	//use denoised input if the source is extremly noisy 
 	if (pictureControlSetPtr->picNoiseClass >= PIC_NOISE_CLASS_4){
 
 		EB_U32 inLumaOffSet = inputPicturePtr->originX + inputPicturePtr->originY      * inputPicturePtr->strideY;
-		EB_U32 inChromaOffSet = inputPicturePtr->originX / 2 + inputPicturePtr->originY / 2 * inputPicturePtr->strideCb;
+        EB_U32 inChromaOffSet = (inputPicturePtr->originX >> subWidthCMinus1) + (inputPicturePtr->originY >> subHeightCMinus1) * inputPicturePtr->strideCb;
 		EB_U32 denLumaOffSet = denoisedPicturePtr->originX + denoisedPicturePtr->originY   * denoisedPicturePtr->strideY;
-		EB_U32 denChromaOffSet = denoisedPicturePtr->originX / 2 + denoisedPicturePtr->originY / 2 * denoisedPicturePtr->strideCb;
+        EB_U32 denChromaOffSet = (denoisedPicturePtr->originX >> subWidthCMinus1) + (denoisedPicturePtr->originY >> subHeightCMinus1) * denoisedPicturePtr->strideCb;
 
 		//filter Luma
         for (lcuIndex = 0; lcuIndex < pictureControlSetPtr->lcuTotalCount; ++lcuIndex) {
@@ -2521,39 +2605,39 @@ EB_ERRORTYPE DenoiseInputPicture(
 				StrongChromaFilter_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
 				inputPicturePtr,
 				denoisedPicturePtr,
-				lcuOriginY / 2,
-				lcuOriginX / 2);
+				lcuOriginY >> subHeightCMinus1,
+				lcuOriginX >> subWidthCMinus1);
 
 			if (lcuOriginX + MAX_LCU_SIZE > inputPicturePtr->width)
 			{
 				noiseExtractChromaStrong(
 					inputPicturePtr,
 					denoisedPicturePtr,
-					lcuOriginY / 2,
-					lcuOriginX / 2);
+					lcuOriginY >> subHeightCMinus1,
+					lcuOriginX >> subWidthCMinus1);
 			}
 
 		}
 
 		//copy chroma
-		for (verticalIdx = 0; verticalIdx < inputPicturePtr->height / 2; ++verticalIdx) {
+		for (verticalIdx = 0; verticalIdx < inputPicturePtr->height >> subHeightCMinus1; ++verticalIdx) {
 
 			EB_MEMCPY(inputPicturePtr->bufferCb + inChromaOffSet + verticalIdx * inputPicturePtr->strideCb,
 				denoisedPicturePtr->bufferCb + denChromaOffSet + verticalIdx * denoisedPicturePtr->strideCb,
-				sizeof(EB_U8) * inputPicturePtr->width / 2);
+				sizeof(EB_U8) * inputPicturePtr->width >> subWidthCMinus1);
 
 			EB_MEMCPY(inputPicturePtr->bufferCr + inChromaOffSet + verticalIdx * inputPicturePtr->strideCr,
 				denoisedPicturePtr->bufferCr + denChromaOffSet + verticalIdx * denoisedPicturePtr->strideCr,
-				sizeof(EB_U8) * inputPicturePtr->width / 2);
+				sizeof(EB_U8) * inputPicturePtr->width >> subWidthCMinus1);
 		}
 
 	}
 	else if (pictureControlSetPtr->picNoiseClass >= PIC_NOISE_CLASS_3_1){
 
 		EB_U32 inLumaOffSet = inputPicturePtr->originX + inputPicturePtr->originY      * inputPicturePtr->strideY;
-		EB_U32 inChromaOffSet = inputPicturePtr->originX / 2 + inputPicturePtr->originY / 2 * inputPicturePtr->strideCb;
+        EB_U32 inChromaOffSet = (inputPicturePtr->originX >> subWidthCMinus1) + (inputPicturePtr->originY >> subHeightCMinus1) * inputPicturePtr->strideCb;
 		EB_U32 denLumaOffSet = denoisedPicturePtr->originX + denoisedPicturePtr->originY   * denoisedPicturePtr->strideY;
-		EB_U32 denChromaOffSet = denoisedPicturePtr->originX / 2 + denoisedPicturePtr->originY / 2 * denoisedPicturePtr->strideCb;
+        EB_U32 denChromaOffSet = (denoisedPicturePtr->originX >> subWidthCMinus1) + (denoisedPicturePtr->originY >> subHeightCMinus1) * denoisedPicturePtr->strideCb;
 
 
 		for (verticalIdx = 0; verticalIdx < inputPicturePtr->height; ++verticalIdx) {
@@ -2574,31 +2658,31 @@ EB_ERRORTYPE DenoiseInputPicture(
 				WeakChromaFilter_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
 				inputPicturePtr,
 				denoisedPicturePtr,
-				lcuOriginY / 2,
-				lcuOriginX / 2);
+				lcuOriginY >> subHeightCMinus1,
+				lcuOriginX >> subWidthCMinus1);
 
 			if (lcuOriginX + MAX_LCU_SIZE > inputPicturePtr->width)
 			{
 				noiseExtractChromaWeak(
 					inputPicturePtr,
 					denoisedPicturePtr,
-					lcuOriginY / 2,
-					lcuOriginX / 2);
+					lcuOriginY >> subHeightCMinus1,
+					lcuOriginX >> subWidthCMinus1);
 			}
 
 		}
 
 
 
-		for (verticalIdx = 0; verticalIdx < inputPicturePtr->height / 2; ++verticalIdx) {
+		for (verticalIdx = 0; verticalIdx < inputPicturePtr->height >> subHeightCMinus1; ++verticalIdx) {
 
 			EB_MEMCPY(inputPicturePtr->bufferCb + inChromaOffSet + verticalIdx * inputPicturePtr->strideCb,
 				denoisedPicturePtr->bufferCb + denChromaOffSet + verticalIdx * denoisedPicturePtr->strideCb,
-				sizeof(EB_U8) * inputPicturePtr->width / 2);
+				sizeof(EB_U8) * inputPicturePtr->width >> subWidthCMinus1);
 
 			EB_MEMCPY(inputPicturePtr->bufferCr + inChromaOffSet + verticalIdx * inputPicturePtr->strideCr,
 				denoisedPicturePtr->bufferCr + denChromaOffSet + verticalIdx * denoisedPicturePtr->strideCr,
-				sizeof(EB_U8) * inputPicturePtr->width / 2);
+				sizeof(EB_U8) * inputPicturePtr->width >> subWidthCMinus1);
 		}
 
 	}
@@ -2825,12 +2909,16 @@ EB_ERRORTYPE SubSampleFilterNoise(
 	EB_U32       lcuOriginX;
 	EB_U32       lcuOriginY;
 	EB_U16       verticalIdx;
+    EB_U32       colorFormat = inputPicturePtr->colorFormat;
+    EB_U16       subWidthCMinus1 = (colorFormat  == EB_YUV444 ? 1 : 2) - 1;
+    EB_U16       subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
+
 	if (pictureControlSetPtr->picNoiseClass == PIC_NOISE_CLASS_3_1) {
 
 		EB_U32 inLumaOffSet = inputPicturePtr->originX + inputPicturePtr->originY      * inputPicturePtr->strideY;
-		EB_U32 inChromaOffSet = inputPicturePtr->originX / 2 + inputPicturePtr->originY / 2 * inputPicturePtr->strideCb;
+        EB_U32 inChromaOffSet = (inputPicturePtr->originX >> subWidthCMinus1) + (inputPicturePtr->originY >> subHeightCMinus1) * inputPicturePtr->strideCb;
 		EB_U32 denLumaOffSet = denoisedPicturePtr->originX + denoisedPicturePtr->originY   * denoisedPicturePtr->strideY;
-		EB_U32 denChromaOffSet = denoisedPicturePtr->originX / 2 + denoisedPicturePtr->originY / 2 * denoisedPicturePtr->strideCb;
+        EB_U32 denChromaOffSet = (denoisedPicturePtr->originX >> subWidthCMinus1) + (denoisedPicturePtr->originY >> subHeightCMinus1) * denoisedPicturePtr->strideCb;
 
 
 		//filter Luma
@@ -2879,34 +2967,33 @@ EB_ERRORTYPE SubSampleFilterNoise(
 				WeakChromaFilter_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
 				inputPicturePtr,
 				denoisedPicturePtr,
-				lcuOriginY / 2,
-				lcuOriginX / 2);
+				lcuOriginY >> subHeightCMinus1,
+				lcuOriginX >> subWidthCMinus1);
 
 			if (lcuOriginX + MAX_LCU_SIZE > inputPicturePtr->width)
 			{
 				noiseExtractChromaWeak(
 					inputPicturePtr,
 					denoisedPicturePtr,
-					lcuOriginY / 2,
-					lcuOriginX / 2);
+					lcuOriginY >> subHeightCMinus1,
+					lcuOriginX >> subWidthCMinus1);
 			}
 
 		}
 
 		//copy chroma
-		for (verticalIdx = 0; verticalIdx < inputPicturePtr->height / 2; ++verticalIdx) {
+		for (verticalIdx = 0; verticalIdx < inputPicturePtr->height >> subHeightCMinus1; ++verticalIdx) {
 
 			EB_MEMCPY(inputPicturePtr->bufferCb + inChromaOffSet + verticalIdx * inputPicturePtr->strideCb,
 				denoisedPicturePtr->bufferCb + denChromaOffSet + verticalIdx * denoisedPicturePtr->strideCb,
-				sizeof(EB_U8) * inputPicturePtr->width / 2);
+				sizeof(EB_U8) * inputPicturePtr->width >> subWidthCMinus1);
 
 			EB_MEMCPY(inputPicturePtr->bufferCr + inChromaOffSet + verticalIdx * inputPicturePtr->strideCr,
 				denoisedPicturePtr->bufferCr + denChromaOffSet + verticalIdx * denoisedPicturePtr->strideCr,
-				sizeof(EB_U8) * inputPicturePtr->width / 2);
+				sizeof(EB_U8) * inputPicturePtr->width >> subWidthCMinus1);
 		}
 
-	}
-	else if (pictureControlSetPtr->picNoiseClass == PIC_NOISE_CLASS_2){
+	} else if (pictureControlSetPtr->picNoiseClass == PIC_NOISE_CLASS_2){
 
 		EB_U32 newTotFN = 0;
 
@@ -4157,6 +4244,9 @@ void PadPictureToMultipleOfMinCuSizeDimensions(
 	EbPictureBufferDesc_t           *inputPicturePtr)
 {
     EB_BOOL is16BitInput = (EB_BOOL)(sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
+    EB_U32 colorFormat = inputPicturePtr->colorFormat;
+    EB_U16 subWidthCMinus1  = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
 
 	// Input Picture Padding
 	PadInputPicture(
@@ -4168,23 +4258,22 @@ void PadPictureToMultipleOfMinCuSizeDimensions(
 		sequenceControlSetPtr->padBottom);
 
 	PadInputPicture(
-		&inputPicturePtr->bufferCb[(inputPicturePtr->originX >> 1) + ((inputPicturePtr->originY >> 1) * inputPicturePtr->strideCb)],
+		&inputPicturePtr->bufferCb[(inputPicturePtr->originX >> subWidthCMinus1) + ((inputPicturePtr->originY >> subHeightCMinus1) * inputPicturePtr->strideCb)],
 		inputPicturePtr->strideCb,
-		(inputPicturePtr->width - sequenceControlSetPtr->padRight) >> 1,
-		(inputPicturePtr->height - sequenceControlSetPtr->padBottom) >> 1,
-		sequenceControlSetPtr->padRight >> 1,
-		sequenceControlSetPtr->padBottom >> 1);
+        (inputPicturePtr->width - sequenceControlSetPtr->padRight) >> subWidthCMinus1,
+        (inputPicturePtr->height - sequenceControlSetPtr->padBottom) >> subHeightCMinus1,
+        sequenceControlSetPtr->padRight >> subWidthCMinus1,
+        sequenceControlSetPtr->padBottom >> subHeightCMinus1);
 
 	PadInputPicture(
-		&inputPicturePtr->bufferCr[(inputPicturePtr->originX >> 1) + ((inputPicturePtr->originY >> 1) * inputPicturePtr->strideCr)],
+		&inputPicturePtr->bufferCr[(inputPicturePtr->originX >> subWidthCMinus1) + ((inputPicturePtr->originY >> subHeightCMinus1) * inputPicturePtr->strideCr)],
 		inputPicturePtr->strideCr,
-		(inputPicturePtr->width - sequenceControlSetPtr->padRight) >> 1,
-		(inputPicturePtr->height - sequenceControlSetPtr->padBottom) >> 1,
-		sequenceControlSetPtr->padRight >> 1,
-		sequenceControlSetPtr->padBottom >> 1);
+        (inputPicturePtr->width - sequenceControlSetPtr->padRight) >> subWidthCMinus1,
+        (inputPicturePtr->height - sequenceControlSetPtr->padBottom) >> subHeightCMinus1,
+        sequenceControlSetPtr->padRight >> subWidthCMinus1,
+        sequenceControlSetPtr->padBottom >> subHeightCMinus1);
 
-    if (is16BitInput)
-    {
+    if (is16BitInput) {
         PadInputPicture(
             &inputPicturePtr->bufferBitIncY[inputPicturePtr->originX + (inputPicturePtr->originY * inputPicturePtr->strideBitIncY)],
             inputPicturePtr->strideBitIncY,
@@ -4194,20 +4283,20 @@ void PadPictureToMultipleOfMinCuSizeDimensions(
             sequenceControlSetPtr->padBottom);
 
         PadInputPicture(
-            &inputPicturePtr->bufferBitIncCb[(inputPicturePtr->originX >> 1) + ((inputPicturePtr->originY >> 1) * inputPicturePtr->strideBitIncCb)],
+			&inputPicturePtr->bufferBitIncCb[(inputPicturePtr->originX >> subWidthCMinus1) + ((inputPicturePtr->originY >> subHeightCMinus1) * inputPicturePtr->strideBitIncCb)],
             inputPicturePtr->strideBitIncCb,
-            (inputPicturePtr->width - sequenceControlSetPtr->padRight) >> 1,
-            (inputPicturePtr->height - sequenceControlSetPtr->padBottom) >> 1,
-            sequenceControlSetPtr->padRight >> 1,
-            sequenceControlSetPtr->padBottom >> 1);
+            (inputPicturePtr->width - sequenceControlSetPtr->padRight) >> subWidthCMinus1,
+            (inputPicturePtr->height - sequenceControlSetPtr->padBottom) >> subHeightCMinus1,
+            sequenceControlSetPtr->padRight >> subWidthCMinus1,
+            sequenceControlSetPtr->padBottom >> subHeightCMinus1);
 
         PadInputPicture(
-            &inputPicturePtr->bufferBitIncCr[(inputPicturePtr->originX >> 1) + ((inputPicturePtr->originY >> 1) * inputPicturePtr->strideBitIncCr)],
+			&inputPicturePtr->bufferBitIncCr[(inputPicturePtr->originX >> subWidthCMinus1) + ((inputPicturePtr->originY >> subHeightCMinus1) * inputPicturePtr->strideBitIncCr)],
             inputPicturePtr->strideBitIncCr,
-            (inputPicturePtr->width - sequenceControlSetPtr->padRight) >> 1,
-            (inputPicturePtr->height - sequenceControlSetPtr->padBottom) >> 1,
-            sequenceControlSetPtr->padRight >> 1,
-            sequenceControlSetPtr->padBottom >> 1);
+            (inputPicturePtr->width - sequenceControlSetPtr->padRight) >> subWidthCMinus1,
+            (inputPicturePtr->height - sequenceControlSetPtr->padBottom) >> subHeightCMinus1,
+            sequenceControlSetPtr->padRight >> subWidthCMinus1,
+            sequenceControlSetPtr->padBottom >> subHeightCMinus1);
 
     }
 
@@ -4266,7 +4355,7 @@ void DecimateInputPicture(
 		        inputPaddedPicturePtr->strideY,
 		        inputPaddedPicturePtr->width ,
 		        inputPaddedPicturePtr->height,
-		        &quarterDecimatedPicturePtr->bufferY[quarterDecimatedPicturePtr->originX+quarterDecimatedPicturePtr->originX*quarterDecimatedPicturePtr->strideY],
+		        &quarterDecimatedPicturePtr->bufferY[quarterDecimatedPicturePtr->originX+quarterDecimatedPicturePtr->originY*quarterDecimatedPicturePtr->strideY],
 		        quarterDecimatedPicturePtr->strideY,
 		        2);
 
@@ -4287,7 +4376,7 @@ void DecimateInputPicture(
 		inputPaddedPicturePtr->strideY,
 		inputPaddedPicturePtr->width ,
 		inputPaddedPicturePtr->height ,
-		&sixteenthDecimatedPicturePtr->bufferY[sixteenthDecimatedPicturePtr->originX+sixteenthDecimatedPicturePtr->originX*sixteenthDecimatedPicturePtr->strideY],
+		&sixteenthDecimatedPicturePtr->bufferY[sixteenthDecimatedPicturePtr->originX+sixteenthDecimatedPicturePtr->originY*sixteenthDecimatedPicturePtr->strideY],
 		sixteenthDecimatedPicturePtr->strideY,
 		4);
 
@@ -4375,6 +4464,17 @@ void* PictureAnalysisKernel(void *inputPtr)
             lcuTotalCount,
             pictureWidthInLcu);
 	
+        if (inputPicturePtr->colorFormat >= EB_YUV422) {
+            // Jing: Do the conversion of 422/444=>420 here since it's multi-threaded kernel
+            //       Reuse the Y, only add cb/cr in the newly created buffer desc
+            //       NOTE: since denoise may change the src, so this part is after PicturePreProcessingOperations()
+            //       This is a bug here
+            pictureControlSetPtr->chromaDownSamplePicturePtr->bufferY = inputPicturePtr->bufferY;
+            DownSampleChroma(inputPicturePtr, pictureControlSetPtr->chromaDownSamplePicturePtr);
+        } else {
+            pictureControlSetPtr->chromaDownSamplePicturePtr = inputPicturePtr;
+        }
+
 		// Pad input picture to complete border LCUs
 		PadPictureToMultipleOfLcuDimensions(
 			inputPaddedPicturePtr
@@ -4393,7 +4493,7 @@ void* PictureAnalysisKernel(void *inputPtr)
 			sequenceControlSetPtr,
 			pictureControlSetPtr,
             contextPtr,
-			inputPicturePtr,
+			pictureControlSetPtr->chromaDownSamplePicturePtr, //420 inputPicturePtr
 			inputPaddedPicturePtr,
 			sixteenthDecimatedPicturePtr,
 			lcuTotalCount);
