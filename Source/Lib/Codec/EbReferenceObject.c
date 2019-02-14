@@ -200,6 +200,7 @@ EB_ERRORTYPE EbReferenceObjectCtor(
         bufDesc.topPadding   = pictureBufferDescInitDataPtr->topPadding;
         bufDesc.botPadding   = pictureBufferDescInitDataPtr->botPadding;
         bufDesc.splitMode    = 0;
+        bufDesc.colorFormat  = pictureBufferDescInitDataPtr->colorFormat;
 
 
         return_error = EbPictureBufferDescCtor((EB_PTR*)&(referenceObject->refDenSrcPicture),

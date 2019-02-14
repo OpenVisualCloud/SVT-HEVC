@@ -779,8 +779,12 @@ EB_ERRORTYPE EncodePassInterPrediction(
 	EB_U16                  refList1PosX = 0;
 	EB_U16                  refList1PosY = 0;
 
+    EB_COLOR_FORMAT colorFormat=predictionPtr->colorFormat;
+    EB_U16 subWidthCMinus1  = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
+
     EB_U32                  puOriginIndex           = ((predictionPtr->originY +puOriginY) * predictionPtr->strideY)  + (predictionPtr->originX+puOriginX);
-    EB_U32                  puChromaOriginIndex     = (((predictionPtr->originY+puOriginY) * predictionPtr->strideCb) + (predictionPtr->originX+puOriginX)) >> 1;
+    EB_U32                  puChromaOriginIndex     = (((predictionPtr->originY+puOriginY) * predictionPtr->strideCb) >> subHeightCMinus1) + ((predictionPtr->originX+puOriginX) >> subWidthCMinus1);
     SequenceControlSet_t   *sequenceControlSetPtr  = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 	EncodeContext_t        *encodeContextPtr       = sequenceControlSetPtr->encodeContextPtr;
 
@@ -941,16 +945,20 @@ EB_ERRORTYPE EncodePassInterPrediction16bit(
 	EB_U16                  refList0PosY = 0;
 	EB_U16                  refList1PosX = 0;
 	EB_U16                  refList1PosY = 0;
+    const EB_COLOR_FORMAT colorFormat = predictionPtr->colorFormat;
+    const EB_U16 subWidthCMinus1  = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    const EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
 
 
-    EB_U32                  puOriginIndex           =        ((predictionPtr->originY+puOriginY) * predictionPtr->strideY)   + (predictionPtr->originX+puOriginX);
-    EB_U32                  puChromaOriginIndex     = (((predictionPtr->originY+puOriginY) * predictionPtr->strideCb) + (predictionPtr->originX+puOriginX)) >> 1;
-    SequenceControlSet_t   *sequenceControlSetPtr   = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
-	EncodeContext_t        *encodeContextPtr        = sequenceControlSetPtr->encodeContextPtr;
+    EB_U32 puOriginIndex = (predictionPtr->originX + puOriginX) +
+        ((predictionPtr->originY+puOriginY) * predictionPtr->strideY);
+    EB_U32 puChromaOriginIndex = ((predictionPtr->originX + puOriginX) >> subWidthCMinus1) +
+        (((predictionPtr->originY+puOriginY) * predictionPtr->strideCb) >> subHeightCMinus1);
+    SequenceControlSet_t *sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
+	EncodeContext_t *encodeContextPtr = sequenceControlSetPtr->encodeContextPtr;
 
 	// Setup List 0
 	if (mvUnit->predDirection == UNI_PRED_LIST_0 || mvUnit->predDirection == BI_PRED) {
-
 		referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr;
 		refPicList0 = (EbPictureBufferDesc_t*)referenceObject->referencePicture16bit;
 
@@ -978,8 +986,8 @@ EB_ERRORTYPE EncodePassInterPrediction16bit(
 			EB_ENC_INTER_INVLD_MCP_ERROR);
 
 		EB_U32  lumaOffSet = ((refList0PosX >> 2) - 4) * 2 + ((refList0PosY >> 2) - 4) * 2 * refPicList0->strideY; //refPicList0->originX + refPicList0->originY*refPicList0->strideY; //
-		EB_U32  cbOffset = ((refList0PosX >> 3) - 2) * 2 + ((refList0PosY >> 3) - 2) * 2 * refPicList0->strideCb;
-		EB_U32  crOffset = ((refList0PosX >> 3) - 2) * 2 + ((refList0PosY >> 3) - 2) * 2 * refPicList0->strideCr;
+		EB_U32  cbOffset = ((refList0PosX >> (2 + subWidthCMinus1)) - 2) * 2 + ((refList0PosY >> (2 + subHeightCMinus1)) - 2) * 2 * refPicList0->strideCb; //Jing:double check for 444
+		EB_U32  crOffset = ((refList0PosX >> (2 + subWidthCMinus1)) - 2) * 2 + ((refList0PosY >> (2 + subHeightCMinus1)) - 2) * 2 * refPicList0->strideCr;
 		//EB_U8  verticalIdx;
 
 		mcpContext->localReferenceBlockL0->bufferY = refPicList0->bufferY + lumaOffSet;
@@ -988,9 +996,7 @@ EB_ERRORTYPE EncodePassInterPrediction16bit(
 		mcpContext->localReferenceBlockL0->strideY = refPicList0->strideY;
 		mcpContext->localReferenceBlockL0->strideCb = refPicList0->strideCb;
 		mcpContext->localReferenceBlockL0->strideCr = refPicList0->strideCr;
-
 	}
-
 
 	// Setup List 1
 	if (mvUnit->predDirection == UNI_PRED_LIST_1 || mvUnit->predDirection == BI_PRED) {
@@ -1024,8 +1030,8 @@ EB_ERRORTYPE EncodePassInterPrediction16bit(
 		//mcpContext->localReferenceBlockL1->bufferCb = refPicList1->bufferCb + ((refList1PosX >> 3) - 2) * 2 + ((refList1PosY >> 3) - 2) * 2 * refPicList1->strideCb;
 		//mcpContext->localReferenceBlockL1->bufferCr = refPicList1->bufferCr + ((refList1PosX >> 3) - 2) * 2 + ((refList1PosY >> 3) - 2) * 2 * refPicList1->strideCr;
 		EB_U32  lumaOffSet = ((refList1PosX >> 2) - 4) * 2 + ((refList1PosY >> 2) - 4) * 2 * refPicList1->strideY; //refPicList0->originX + refPicList0->originY*refPicList0->strideY; //
-		EB_U32  cbOffset = ((refList1PosX >> 3) - 2) * 2 + ((refList1PosY >> 3) - 2) * 2 * refPicList1->strideCb;
-		EB_U32  crOffset = ((refList1PosX >> 3) - 2) * 2 + ((refList1PosY >> 3) - 2) * 2 * refPicList1->strideCr;
+		EB_U32  cbOffset = ((refList1PosX >> (2 + subWidthCMinus1)) - 2) * 2 + ((refList1PosY >> (2 + subHeightCMinus1)) - 2) * 2 * refPicList1->strideCb;
+		EB_U32  crOffset = ((refList1PosX >> (2 + subWidthCMinus1)) - 2) * 2 + ((refList1PosY >> (2 + subHeightCMinus1)) - 2) * 2 * refPicList1->strideCr;
 		//EB_U8  verticalIdx;
 
 		mcpContext->localReferenceBlockL1->bufferY = refPicList1->bufferY + lumaOffSet;
@@ -1037,15 +1043,10 @@ EB_ERRORTYPE EncodePassInterPrediction16bit(
 		mcpContext->localReferenceBlockL1->strideCr = refPicList1->strideCr;
 	}
 
-
-
-
     switch(mvUnit->predDirection)
     {
 
     case UNI_PRED_LIST_0:
-
-
         //CHKN load the needed FP block from reference frame in a local buffer, we load 4 pixel more in each direction to be used for interpolation.
         //TODO: the max area needed for interpolation is 4, we could optimize this later on a case by case basis
         //size of the buffer would be (64+4+4)x(64+4+4)

@@ -72,7 +72,7 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     sequenceControlSetPtr->profileIdc                                       = 0;
     sequenceControlSetPtr->levelIdc                                         = 0;
     sequenceControlSetPtr->tierIdc                                          = 0;
-    sequenceControlSetPtr->chromaFormatIdc                                  = 1; // EB_YUV420
+    sequenceControlSetPtr->chromaFormatIdc                                  = EB_YUV420;
     sequenceControlSetPtr->maxTemporalLayers                                = 1;
     
     sequenceControlSetPtr->bitsForPictureOrderCount                         = 16;
@@ -236,7 +236,7 @@ EB_ERRORTYPE CopySequenceControlSet(
     dst->botPadding                 = src->botPadding;                              writeCount += sizeof(EB_U16);         
     dst->enableDenoiseFlag          = src->enableDenoiseFlag;                       writeCount += sizeof(EB_BOOL);
     dst->maxEncMode                 = src->maxEncMode;                              writeCount += sizeof(EB_U8);
-    
+
     // Segments
     for (segmentIndex = 0; segmentIndex < MAX_TEMPORAL_LAYERS; ++segmentIndex) {
         dst->meSegmentColumnCountArray[segmentIndex] = src->meSegmentColumnCountArray[segmentIndex]; writeCount += sizeof(EB_U32);

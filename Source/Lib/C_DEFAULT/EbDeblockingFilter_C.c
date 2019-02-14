@@ -441,7 +441,7 @@ void Luma4SampleEdgeDLFCore16bit(
 /** Chroma2SampleEdgeDLFCore()
 is used to conduct the deblocking filter upon a particular
 2 sample chroma edge. This method doesn't care about whether the deblocking
-fitler will be turned ON/OFF on this 2 sample chroma edge.
+filter will be turned ON/OFF on this 2 sample chroma edge.
 
 @param reconPic (input)
 reconPic is the pointer to reconstructed picture to be filtered.
@@ -483,7 +483,7 @@ void Chroma2SampleEdgeDLFCore(
     EB_S16   delta;
 
     // Cb
-    // fitler the first sample
+    // filter the first sample
     q0 = edgeStartSampleCb;
     q1 = edgeStartSampleCb + filterStride;
     p0 = edgeStartSampleCb - filterStride;
@@ -501,7 +501,7 @@ void Chroma2SampleEdgeDLFCore(
     (*q0) = (EB_U8)CLIP3(0, MAX_CHROMA_SAMPLE_VALUE, (*q0) - delta);
 
     // Cr
-    // fitler the first sample
+    // filter the first sample
     q0 = edgeStartSampleCr;
     q1 = edgeStartSampleCr + filterStride;
     p0 = edgeStartSampleCr - filterStride;
@@ -538,7 +538,7 @@ void Chroma2SampleEdgeDLFCore16bit(
     EB_S16   delta;
 
     // Cb
-    // fitler the first sample
+    // filter the first sample
     q0 = edgeStartSampleCb;
     q1 = edgeStartSampleCb + filterStride;
     p0 = edgeStartSampleCb - filterStride;
@@ -556,7 +556,7 @@ void Chroma2SampleEdgeDLFCore16bit(
     (*q0) = (EB_U16)CLIP3(0, MAX_CHROMA_SAMPLE_VALUE_10BIT, (*q0) - delta);
 
     // Cr
-    // fitler the first sample
+    // filter the first sample
     q0 = edgeStartSampleCr;
     q1 = edgeStartSampleCr + filterStride;
     p0 = edgeStartSampleCr - filterStride;

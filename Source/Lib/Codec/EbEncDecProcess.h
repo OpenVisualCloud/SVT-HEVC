@@ -106,6 +106,7 @@ typedef struct EncDecContext_s
 
 	EB_U8                           tuItr;
 	EB_BOOL                         is16bit; //enable 10 bit encode in CL
+    EB_COLOR_FORMAT                 colorFormat;
 	// SAO application 
 	EB_U8                          *saoUpBuffer[2];
 	EB_U8                          *saoLeftBuffer[2];
@@ -155,7 +156,8 @@ extern EB_ERRORTYPE EncDecContextCtor(
     EbFifo_t                *packetizationOutputFifoPtr,
     EbFifo_t                *feedbackFifoPtr,
     EbFifo_t                *pictureDemuxFifoPtr,
-    EB_BOOL                  is16bit);
+    EB_BOOL                  is16bit,
+    EB_COLOR_FORMAT          colorFormat);
 
 
     
