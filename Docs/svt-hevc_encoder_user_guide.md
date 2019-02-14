@@ -303,6 +303,13 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **TargetSocket** | -ss | [-1,1] | -1 | For dual socket systems, this can specify which socket the encoder runs on.Refer to Appendix A.2 |
 | **SwitchThreadsToRtPriority** | -rt | [0,1] | 1 | Enables or disables threads to real time priority, 0 = OFF, 1 = ON (only works on Linux) |
 | **FPSInVPS** | -fpsinvps | [0,1] | 0 | Enables or disables the VPS timing info, 0 = OFF, 1 = ON |
+| **MaxCLL** | -max-cll | [0 , 2^16-1] | 0 | Maximum content light level (MaxCLL) as required by the Consumer Electronics Association 861.3 specification. Applicable for HDR content. If specified, signalled only when HighDynamicRangeInput is set to 1 |
+| **MaxFALL** | -max-fall | [0 , 2^16-1] | 0 | Maximum Frame Average light level (MaxFALL) as required by the Consumer Electronics Association 861.3 specification. Applicable for HDR content. If specified, signalled only when HighDynamicRangeInput is set to 1 |
+| **UseMasterDisplay** | -use-master-display | [0,1] | 0 | Enables or disables the MasterDisplayColorVolume, 0 = OFF, 1 = ON |
+| **MasterDisplay** | -master-display | For R, G, B and whitepoint [0, 2^16-1]. For max, min luminance [0, 2^32-1] | 0 | SMPTE ST 2086 mastering display color volume SEI info, specified as a string. The string format is “G(%hu,%hu)B(%hu,%hu)R(%hu,% hu)WP(%hu,%hu)L(%u,%u)” where %hu are unsigned 16bit integers and %u are unsigned 32bit integers. The SEI includes X, Y display primaries for RGB channels and white point (WP) in units of 0.00002 and max, min luminance (L) values in units of 0.0001 candela per meter square. Applicable for HDR content. Example for a P3D65 1000-nits monitor,G(13250,34500)B(7500,3 000)R(34000,16000)WP(15635,16 450)L(10000000,1) |
+| **DolbyVisionRpuFile** | -dolby-vision-rpu | any string | null | Path to the file containing Dolby Vision RPU metadata |
+| **DolbyVisionProfile** | -dolby-vision-profile | 8.1 or 81 | 0 | Generate bitstreams confirming to the specified Dolby Vision profile 8.1. When specified, enables HighDynamicRangeInput automatically. Applicable only for 10-bit input content. MasterDisplay should be set for using dolby vision profile 81. Pass the dynamic metadata through DolbyVisionRpuFile option |
+| **NaluFile** | -nalu-file | any string | null | Path to the file containing CEA 608/708 metadata. Text file should contain the userSEI in POC order as per below format: <POC><space><PREFIX><space><NALUNITTYPE>/<SEITYPE><space><SEI Payload>. Currently only PREFIX_SEI messages are supported |
 
 ### Encoding presets table
 

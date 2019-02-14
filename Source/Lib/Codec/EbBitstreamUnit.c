@@ -166,7 +166,8 @@ EB_ERRORTYPE OutputBitstreamRBSPToPayload(
     EB_BYTE                  outputBuffer,
     EB_U32                  *outputBufferIndex,
     EB_U32                  *outputBufferSize,
-    EB_U32                   startLocation)
+    EB_U32                   startLocation,
+    NalUnitType              nalType)
 {
     EB_ERRORTYPE return_error      = EB_ErrorNone;
 
@@ -197,7 +198,7 @@ EB_ERRORTYPE OutputBitstreamRBSPToPayload(
         }
 
         // add emulation code
-        if( (zeroByteCount == 2) && ((readBytePtr[readLocation] & 0xfc) == 0) && ((*outputBufferIndex) < (*outputBufferSize)) ) {
+        if( (zeroByteCount == 2) && ((readBytePtr[readLocation] & 0xfc) == 0) && ((*outputBufferIndex) < (*outputBufferSize)) && nalType != NAL_UNIT_UNSPECIFIED_62 ) {
             writeBytePtr[writeLocation++] = 0x03;
             zeroByteCount = 0;
             *outputBufferIndex += 1;

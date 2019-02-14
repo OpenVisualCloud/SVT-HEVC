@@ -8387,7 +8387,7 @@ EB_ERRORTYPE EncodeUnregUserDataSEI(
 	EB_U32       index;
 	unsigned     payloadType = UNREG_USER_DATA;
 
-	unsigned     payloadSize = unregUserDataSeiPtr->userDataSize;
+	unsigned     payloadSize = unregUserDataSeiPtr->userDataSize + 16 ;
 
 	OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
 
@@ -8564,12 +8564,205 @@ EB_ERRORTYPE CodeEndOfSequenceNalUnit(
 	return return_error;
 }
 
+EB_ERRORTYPE EncodeContentLightLevelSEI(
+    Bitstream_t             *bitstreamPtr,
+    AppContentLightLevelSei_t   *contentLightLevelPtr)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    unsigned payloadType = CONTENT_LIGHT_LEVEL_INFO;
+    unsigned payloadSize = GetContentLightLevelSEILength();
+
+    OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
+
+    CodeNALUnitHeader(
+        outputBitstreamPtr,
+        NAL_UNIT_PREFIX_SEI,
+        0);
+
+    for (; payloadType >= 0xff; payloadType -= 0xff) {
+        OutputBitstreamWrite(
+            outputBitstreamPtr,
+            0xff,
+            8);
+    }
+    return_error = OutputBitstreamWrite(
+        outputBitstreamPtr,
+        payloadType,
+        8);
+
+    for (; payloadSize >= 0xff; payloadSize -= 0xff) {
+        OutputBitstreamWrite(
+            outputBitstreamPtr,
+            0xff,
+            8);
+    }
+    return_error = OutputBitstreamWrite(
+        outputBitstreamPtr,
+        payloadSize,
+        8);
+
+    //max_content_light_level
+    WriteCodeCavlc(
+        outputBitstreamPtr,
+        contentLightLevelPtr->maxContentLightLevel,
+        16);
+
+    // max_pixel_average_light_level
+    WriteCodeCavlc(
+        outputBitstreamPtr,
+        contentLightLevelPtr->maxPicAverageLightLevel,
+        16);
+
+    if (outputBitstreamPtr->writtenBitsCount % 8 != 0) {
+        // bit_equal_to_one
+        WriteFlagCavlc(
+            outputBitstreamPtr,
+            1);
+
+        while (outputBitstreamPtr->writtenBitsCount % 8 != 0) {
+            // bit_equal_to_zero
+            WriteFlagCavlc(
+                outputBitstreamPtr,
+                0);
+        }
+    }
+
+    // Byte Align the Bitstream
+    OutputBitstreamWrite(
+        outputBitstreamPtr,
+        1,
+        1);
+
+    OutputBitstreamWriteAlignZero(
+        outputBitstreamPtr);
+
+    return return_error;
+}
+
+EB_ERRORTYPE EncodeMasteringDisplayColorVolumeSEI(
+    Bitstream_t             *bitstreamPtr,
+    AppMasteringDisplayColorVolumeSei_t   *masterDisplayPtr)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    EB_U32 payloadType = MASTERING_DISPLAY_INFO;
+    EB_U32 payloadSize = 0;
+
+    OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
+
+    payloadSize = GetMasteringDisplayColorVolumeSEILength();
+
+    CodeNALUnitHeader(
+        outputBitstreamPtr,
+        NAL_UNIT_PREFIX_SEI,
+        0);
+
+    for (; payloadType >= 0xff; payloadType -= 0xff) {
+        OutputBitstreamWrite(
+            outputBitstreamPtr,
+            0xff,
+            8);
+    }
+    OutputBitstreamWrite(
+        outputBitstreamPtr,
+        payloadType,
+        8);
+
+    for (; payloadSize >= 0xff; payloadSize -= 0xff) {
+        OutputBitstreamWrite(
+            outputBitstreamPtr,
+            0xff,
+            8);
+    }
+    OutputBitstreamWrite(
+        outputBitstreamPtr,
+        payloadSize,
+        8);
+
+    // R, G, B Primaries
+    for (int i = 0; i < 3; i++)
+    {
+        WriteCodeCavlc(
+            outputBitstreamPtr,
+            masterDisplayPtr->displayPrimaryX[i],
+            16);
+        WriteCodeCavlc(
+            outputBitstreamPtr,
+            masterDisplayPtr->displayPrimaryY[i],
+            16);
+    }
+
+    // White Point Co-ordinates
+    WriteCodeCavlc(
+        outputBitstreamPtr,
+        masterDisplayPtr->whitePointX,
+        16);
+    WriteCodeCavlc(
+        outputBitstreamPtr,
+        masterDisplayPtr->whitePointY,
+        16);
+
+    // Min & max Luminance
+    WriteCodeCavlc(
+        outputBitstreamPtr,
+        masterDisplayPtr->maxDisplayMasteringLuminance,
+        32);
+    WriteCodeCavlc(
+        outputBitstreamPtr,
+        masterDisplayPtr->minDisplayMasteringLuminance,
+        32);
+
+    if (outputBitstreamPtr->writtenBitsCount % 8 != 0) {
+        // bit_equal_to_one
+        WriteFlagCavlc(
+            outputBitstreamPtr,
+            1);
+
+        while (outputBitstreamPtr->writtenBitsCount % 8 != 0) {
+            // bit_equal_to_zero
+            WriteFlagCavlc(
+                outputBitstreamPtr,
+                0);
+        }
+    }
+
+    // Byte Align the Bitstream
+    OutputBitstreamWrite(
+        outputBitstreamPtr,
+        1,
+        1);
+
+    OutputBitstreamWriteAlignZero(
+        outputBitstreamPtr);
+
+    return return_error;
+}
+
+EB_ERRORTYPE CodeDolbyVisionRpuMetadata(
+    Bitstream_t  *bitstreamPtr,
+    PictureControlSet_t *pictureControlSetPtr)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
+    EB_SEI_MESSAGE *rpu = &pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->dolbyVisionRpu;
+
+    CodeNALUnitHeader(
+        outputBitstreamPtr,
+        NAL_UNIT_UNSPECIFIED_62,
+        0);
+
+    for (EB_U32 i = 0; i < rpu->payloadSize; i++)
+        WriteCodeCavlc(outputBitstreamPtr, rpu->payload[i], 8);
+
+    return return_error;
+}
+
 EB_ERRORTYPE CopyRbspBitstreamToPayload(
 	Bitstream_t *bitstreamPtr,
 	EB_BYTE      outputBuffer,
 	EB_U32      *outputBufferIndex,
 	EB_U32      *outputBufferSize,
-	EncodeContext_t         *encodeContextPtr)
+	EncodeContext_t         *encodeContextPtr,
+	NalUnitType naltype)
 {
 	EB_ERRORTYPE return_error = EB_ErrorNone;
 	OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
@@ -8587,7 +8780,8 @@ EB_ERRORTYPE CopyRbspBitstreamToPayload(
 		outputBuffer,
 		outputBufferIndex,
 		outputBufferSize,
-		0);
+		0,
+		naltype);
 
 	return return_error;
 }
