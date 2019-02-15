@@ -131,6 +131,7 @@ typedef struct EbConfig_s
     uint32_t                    enableTemporalId;
     uint8_t                     switchThreadsToRtPriority;
     uint8_t                     fpsInVps;
+    uint8_t                     unrestrictedMotionVector;
 
     /****************************************
      * Annex A Parameters

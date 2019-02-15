@@ -97,6 +97,7 @@
 #define TARGET_SOCKET                   "-ss"
 #define SWITCHTHREADSTOREALTIME_TOKEN   "-rt"
 #define FPSINVPS_TOKEN                  "-fpsinvps"
+#define UNRESTRICTED_MOTION_VECTOR      "-umv"
 #define CONFIG_FILE_COMMENT_CHAR        '#'
 #define CONFIG_FILE_NEWLINE_CHAR        '\n'
 #define CONFIG_FILE_RETURN_CHAR         '\r'
@@ -243,8 +244,9 @@ static void SetInjectorFrameRate                (const char *value, EbConfig_t *
 static void SetAsmType                          (const char *value, EbConfig_t *cfg)  {cfg->asmType                         = (uint32_t)strtoul(value, NULL, 0); };
 static void SetLogicalProcessors                (const char *value, EbConfig_t *cfg)  {cfg->logicalProcessors               = (uint32_t)strtoul(value, NULL, 0);};
 static void SetTargetSocket                     (const char *value, EbConfig_t *cfg)  {cfg->targetSocket                    = (int32_t)strtol(value, NULL, 0);};
-static void SetSwitchThreadsToRtPriority        (const char *value, EbConfig_t *cfg)  {cfg->switchThreadsToRtPriority       = (EB_BOOL)strtol(value, NULL, 0); };
+static void SetSwitchThreadsToRtPriority        (const char *value, EbConfig_t *cfg)  {cfg->switchThreadsToRtPriority       = (EB_BOOL)strtol(value, NULL, 0);};
 static void SetFpsInVps                         (const char *value, EbConfig_t *cfg)  {cfg->fpsInVps                        = (EB_BOOL)strtol(value, NULL, 0);};
+static void SetUnrestrictedMotionVector         (const char *value, EbConfig_t *cfg)  {cfg->unrestrictedMotionVector        = (EB_BOOL)strtol(value, NULL, 0);};
 
 enum cfg_type{
     SINGLE_INPUT,   // Configuration parameters that have only 1 value input
@@ -371,6 +373,21 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, DOLBY_VISION_PROFILE_TOKEN, "DolbyVisionProfile", SetDolbyVisionProfile },
     { SINGLE_INPUT, DOLBY_VISION_RPU_FILE_TOKEN, "DolbyVisionRpuFile", SetCfgDolbyVisionRpuFile },
     { SINGLE_INPUT, NALU_FILE_TOKEN, "NaluFile", SetNaluFile },
+    { SINGLE_INPUT, TEMPORAL_ID, "TemporalId", SetEnableTemporalId },
+    { SINGLE_INPUT, FPSINVPS_TOKEN, "FPSInVPS", SetFpsInVps },
+    { SINGLE_INPUT, UNRESTRICTED_MOTION_VECTOR, "UnrestrictedMotionVector", SetUnrestrictedMotionVector },
+
+    // Latency
+    { SINGLE_INPUT, INJECTOR_TOKEN, "Injector", SetInjector },
+    { SINGLE_INPUT, INJECTOR_FRAMERATE_TOKEN, "InjectorFrameRate", SetInjectorFrameRate },
+
+    { SINGLE_INPUT, SPEED_CONTROL_TOKEN, "SpeedControlFlag", SpeedControlFlag },
+
+    // Annex A parameters
+    { SINGLE_INPUT, PROFILE_TOKEN, "Profile", SetProfile },
+    { SINGLE_INPUT, TIER_TOKEN, "Tier", SetTier },
+    { SINGLE_INPUT, LEVEL_TOKEN, "Level", SetLevel },
+//    { SINGLE_INPUT, LATENCY_MODE, "LatencyMode", SetLatencyMode },
 
     // Platform Specific Flags
     { SINGLE_INPUT, ASM_TYPE_TOKEN, "AsmType", SetAsmType },
@@ -399,6 +416,62 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->tileColumnCount                          = 1;
     configPtr->tileRowCount                             = 1;
 #endif
+    configPtr->sceneChangeDetection                 = 1;
+    configPtr->rateControlMode                      = 0;
+    configPtr->lookAheadDistance                    = (uint32_t)~0;
+    configPtr->targetBitRate                        = 7000000;
+    configPtr->maxQpAllowed                         = 48;
+    configPtr->minQpAllowed                         = 10;
+    configPtr->baseLayerSwitchMode                  = 0;
+	  configPtr->encMode								              = 9;
+    configPtr->intraPeriod                          = -2;
+    configPtr->intraRefreshType                     = 1;
+	  configPtr->hierarchicalLevels					          = 3;
+	  configPtr->predStructure						            = 2;
+    configPtr->disableDlfFlag                       = EB_FALSE;
+    configPtr->enableSaoFlag                        = EB_TRUE;
+    configPtr->useDefaultMeHme                      = EB_TRUE;
+    configPtr->enableHmeFlag                        = EB_TRUE;
+    configPtr->searchAreaWidth                      = 16;
+    configPtr->searchAreaHeight                     = 7;
+    configPtr->constrainedIntra                     = EB_FALSE;
+    configPtr->tune                                 = 1; // OQ By Default
+    // Thresholds
+    configPtr->videoUsabilityInfo                   = 0;
+    configPtr->highDynamicRangeInput                = 0;
+    configPtr->accessUnitDelimiter                  = 0;
+    configPtr->bufferingPeriodSEI                   = 0;
+    configPtr->pictureTimingSEI                     = 0;
+
+    configPtr->bitRateReduction					    = EB_TRUE;
+    configPtr->improveSharpness                     = EB_TRUE;
+    configPtr->registeredUserDataSeiFlag            = EB_FALSE;
+    configPtr->unregisteredUserDataSeiFlag          = EB_FALSE;
+    configPtr->recoveryPointSeiFlag                 = EB_FALSE;
+    configPtr->enableTemporalId                     = 1;
+
+    // SEI
+    configPtr->maxCLL                               = 0;
+    configPtr->maxFALL                              = 0;
+    configPtr->useMasteringDisplayColorVolume       = EB_FALSE;
+    configPtr->useNaluFile                          = EB_FALSE;
+    configPtr->dolbyVisionProfile                   = 0;
+    configPtr->dolbyVisionRpuFile                   = NULL;
+    configPtr->naluFile                             = NULL;
+    configPtr->displayPrimaryX[0]                   = 0;
+    configPtr->displayPrimaryX[1]                   = 0;
+    configPtr->displayPrimaryX[2]                   = 0;
+    configPtr->displayPrimaryY[0]                   = 0;
+    configPtr->displayPrimaryY[1]                   = 0;
+    configPtr->displayPrimaryY[2]                   = 0;
+    configPtr->whitePointX                          = 0;
+    configPtr->whitePointY                          = 0;
+    configPtr->maxDisplayMasteringLuminance         = 0;
+    configPtr->minDisplayMasteringLuminance         = 0;
+
+    configPtr->switchThreadsToRtPriority            = EB_TRUE;
+    configPtr->fpsInVps                             = EB_FALSE;
+    configPtr->unrestrictedMotionVector             = EB_TRUE;
 
     // Encoding Presets
     configPtr->encMode								    = 9;

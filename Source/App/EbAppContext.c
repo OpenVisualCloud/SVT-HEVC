@@ -197,6 +197,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.activeChannelCount = config->activeChannelCount;
     callbackData->ebEncParameters.logicalProcessors = config->logicalProcessors;
     callbackData->ebEncParameters.targetSocket = config->targetSocket;
+    callbackData->ebEncParameters.unrestrictedMotionVector = config->unrestrictedMotionVector;
 	callbackData->ebEncParameters.bitRateReduction = (uint8_t)config->bitRateReduction;
 	callbackData->ebEncParameters.improveSharpness = (uint8_t)config->improveSharpness;
     callbackData->ebEncParameters.videoUsabilityInfo = config->videoUsabilityInfo;

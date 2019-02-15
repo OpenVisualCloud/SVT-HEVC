@@ -2173,6 +2173,8 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.frameRateDenominator = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRateDenominator;
     sequenceControlSetPtr->staticConfig.frameRateNumerator = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRateNumerator;
     sequenceControlSetPtr->staticConfig.reconEnabled = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->reconEnabled;
+    sequenceControlSetPtr->staticConfig.unrestrictedMotionVector = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->unrestrictedMotionVector;
+    sequenceControlSetPtr->enableTmvpSps = sequenceControlSetPtr->staticConfig.unrestrictedMotionVector;
 
     sequenceControlSetPtr->staticConfig.maxCLL = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxCLL;
     sequenceControlSetPtr->staticConfig.maxFALL = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxFALL;
@@ -2792,6 +2794,11 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
+    if (config->unrestrictedMotionVector > 1) {
+        SVT_LOG("SVT [Error]: Instance %u : Invalid Unrestricted Motion Vector flag [0 - 1]\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
     return return_error;
 }
 
@@ -2857,6 +2864,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->codeEosNal    = 0;
     configPtr->switchThreadsToRtPriority = EB_TRUE;
     configPtr->fpsInVps      = EB_FALSE;
+    configPtr->unrestrictedMotionVector = EB_TRUE;
 
     configPtr->videoUsabilityInfo = 0;
     configPtr->highDynamicRangeInput = 0;
