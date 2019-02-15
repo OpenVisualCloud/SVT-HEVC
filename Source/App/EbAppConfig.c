@@ -41,6 +41,7 @@
 #define FRAME_RATE_NUMERATOR_TOKEN      "-fps-num"
 #define FRAME_RATE_DENOMINATOR_TOKEN    "-fps-denom"
 #define ENCODER_BIT_DEPTH               "-bit-depth"
+#define ENCODER_COLOR_FORMAT            "-color-format"
 #define INPUT_COMPRESSED_TEN_BIT_FORMAT "-compressed-ten-bit-format"
 #define ENCMODE_TOKEN                   "-encMode"
 #define HIERARCHICAL_LEVELS_TOKEN       "-hierarchical-levels" // no Eval
@@ -168,6 +169,7 @@ static void SetFrameRate                        (const char *value, EbConfig_t *
 static void SetFrameRateNumerator               (const char *value, EbConfig_t *cfg) {cfg->frameRateNumerator               = strtoul(value, NULL, 0);};
 static void SetFrameRateDenominator             (const char *value, EbConfig_t *cfg) {cfg->frameRateDenominator             = strtoul(value, NULL, 0);};
 static void SetEncoderBitDepth                  (const char *value, EbConfig_t *cfg) {cfg->encoderBitDepth                  = strtoul(value, NULL, 0);}
+static void SetEncoderColorFormat               (const char *value, EbConfig_t *cfg) {cfg->encoderColorFormat = strtoul(value, NULL, 0);}
 static void SetcompressedTenBitFormat           (const char *value, EbConfig_t *cfg) {cfg->compressedTenBitFormat           = strtoul(value, NULL, 0);}
 static void SetBaseLayerSwitchMode              (const char *value, EbConfig_t *cfg) {cfg->baseLayerSwitchMode              = (EB_BOOL) strtoul(value, NULL, 0);};
 static void SetencMode                          (const char *value, EbConfig_t *cfg) {cfg->encMode                          = (uint8_t)strtoul(value, NULL, 0);};
@@ -282,6 +284,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, FRAME_RATE_NUMERATOR_TOKEN, "FrameRateNumerator", SetFrameRateNumerator },
     { SINGLE_INPUT, FRAME_RATE_DENOMINATOR_TOKEN, "FrameRateDenominator", SetFrameRateDenominator },
     { SINGLE_INPUT, ENCODER_BIT_DEPTH, "EncoderBitDepth", SetEncoderBitDepth },
+    { SINGLE_INPUT, ENCODER_COLOR_FORMAT, "420:1, 422:2, 444:3", SetEncoderColorFormat},
 	{ SINGLE_INPUT, INPUT_COMPRESSED_TEN_BIT_FORMAT, "CompressedTenBitFormat", SetcompressedTenBitFormat },
 	{ SINGLE_INPUT, HIERARCHICAL_LEVELS_TOKEN, "HierarchicalLevels", SetHierarchicalLevels },
 
@@ -382,6 +385,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->frameRateNumerator                   = 0;
     configPtr->frameRateDenominator                 = 0;
     configPtr->encoderBitDepth                      = 8;
+    configPtr->encoderColorFormat                   = EB_YUV420;
 	  configPtr->compressedTenBitFormat			          = 0;
     configPtr->sourceWidth                          = 0;
     configPtr->sourceHeight                         = 0;
