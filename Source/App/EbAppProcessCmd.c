@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "EbAppContext.h"
 #include "EbAppConfig.h"
@@ -767,6 +768,7 @@ void ReadInputFrames(
     inputPtr->yStride  = inputPaddedWidth;
     inputPtr->crStride = inputPaddedWidth >> 1;
     inputPtr->cbStride = inputPaddedWidth >> 1;
+    inputPtr->dolbyVisionRpu.payloadSize = 0;
 
     if (config->bufferedInput == -1) {
 
@@ -1152,6 +1154,124 @@ void SendQpOnTheFly(
     return;
 }
 
+void SendNaluOnTheFly(
+    EbConfig_t                  *config,
+    EB_BUFFERHEADERTYPE        *headerPtr)
+{
+    {
+        char line[1024];
+        EB_ERRORTYPE return_error = EB_ErrorNone;
+        uint32_t poc = 0;
+        uint8_t *prefix = NULL;
+        uint32_t nalType = 0;
+        uint32_t payloadType = 0;
+        uint8_t *base64Encode = NULL;
+        uint8_t *context = NULL;
+
+        if (fgets(line, sizeof(line), config->naluFile) != NULL) {
+            poc = strtol(EB_STRTOK(line, " ", &context), NULL, 0);
+            if (return_error == EB_ErrorNone && *context != 0) {
+                prefix = (uint8_t*)EB_STRTOK(NULL, " ", &context);
+            }
+            else {
+                return_error = EB_ErrorBadParameter;
+            }
+            if (return_error == EB_ErrorNone && *context != 0) {
+                nalType = strtol(EB_STRTOK(NULL, "/", &context), NULL, 0);
+            }
+            else {
+                return_error = EB_ErrorBadParameter;
+            }
+            if (return_error == EB_ErrorNone && *context != 0) {
+                payloadType = strtol(EB_STRTOK(NULL, " ", &context), NULL, 0);
+            }
+            else {
+                return_error = EB_ErrorBadParameter;
+            }
+            if (return_error == EB_ErrorNone && *context != 0) {
+                base64Encode = (uint8_t*)EB_STRTOK(NULL, "\n", &context);
+            }
+            else {
+                return_error = EB_ErrorBadParameter;
+            }
+
+            headerPtr->naluPOC = poc;
+            if (prefix != NULL && !EB_STRCMP((char*)prefix, "PREFIX"))
+                headerPtr->naluPrefix = 0;
+            headerPtr->naluNalType = nalType;
+            headerPtr->naluPayloadType = payloadType;
+            headerPtr->naluBase64Encode = base64Encode;
+            headerPtr->naluFound = EB_TRUE;
+        }
+        else {
+            return_error = EB_ErrorBadParameter;
+        }
+        if (return_error != EB_ErrorNone) {
+            printf("\nSVT [Warning]: Nalu file cannot be parsed correctly \n ");
+            headerPtr->naluFound = EB_FALSE;
+            //config->useNaluFile = EB_FALSE;
+            return;
+        }
+    }
+    return;
+}
+
+#define START_CODE 0x00000001
+#define START_CODE_BYTES 4
+
+int ParseDolbyVisionRPUMetadata(
+    EbConfig_t               *config,
+    EB_BUFFERHEADERTYPE      *headerPtr)
+{
+    uint8_t byteVal = 0;
+    uint32_t code = 0;
+    uint32_t bytesRead = 0;
+    EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
+    FILE* ptr = config->dolbyVisionRpuFile;
+
+    if (!headerPtr->pts) {
+        while (bytesRead++ < 4 && fread(&byteVal, sizeof(uint8_t), 1, ptr))
+            code = (code << 8) | byteVal;
+
+        if (code != START_CODE) {
+            printf("Warning : Invalid Dolby Vision RPU startcode in POC  %" PRId64 "\n", headerPtr->pts);
+            return 1;
+        }
+    }
+
+    bytesRead = 0;
+    while (fread(&byteVal, sizeof(uint8_t), 1, ptr))
+    {
+        code = (code << 8) | byteVal;
+        if (bytesRead++ < 3)
+            continue;
+        if (bytesRead >= 1024) {
+            printf("Warning : Invalid Dolby Vision RPU size in POC  %" PRId64 "\n", headerPtr->pts);
+            return 1;
+        }
+
+        if (code != START_CODE)
+            inputPtr->dolbyVisionRpu.payload[inputPtr->dolbyVisionRpu.payloadSize++] = (code >> (3 * 8)) & 0xFF;
+        else
+            return 0;
+
+    }
+
+    int ShiftBytes = START_CODE_BYTES - (bytesRead - inputPtr->dolbyVisionRpu.payloadSize);
+    int bytesLeft = bytesRead - inputPtr->dolbyVisionRpu.payloadSize;
+    code = (code << ShiftBytes * 8);
+    for (int i = 0; i < bytesLeft; i++) {
+        inputPtr->dolbyVisionRpu.payload[inputPtr->dolbyVisionRpu.payloadSize++] = (code >> (3 * 8)) & 0xFF;
+        code = (code << 8);
+    }
+    if (!inputPtr->dolbyVisionRpu.payloadSize) {
+        printf("Warning : Dolby Vision RPU not found for POC  %" PRId64 "\n", headerPtr->pts);
+        return 1;
+    }
+    return 0;
+
+}
+
 //************************************/
 // ProcessInputBuffer
 // Reads yuv frames from file and copy
@@ -1173,6 +1293,8 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
 	uint64_t                  frameSize                  = (uint64_t)((inputPaddedWidth*inputPaddedHeight * 3) / 2 + (inputPaddedWidth / 4 * inputPaddedHeight * 3) / 2);
     int64_t                  totalBytesToProcessCount;
     int64_t                  remainingByteCount;
+
+    int ret;
 
     if (config->injector && config->processedFrameCount)
     {
@@ -1204,6 +1326,12 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
                 config,
                 headerPtr);
 
+        // Configuration parameters changed on the fly
+        if (config->useNaluFile && config->naluFile)
+            SendNaluOnTheFly(
+                config,
+                headerPtr);
+
         if (keepRunning == 0 && !config->stopEncoder) {
             config->stopEncoder = EB_TRUE;
         }
@@ -1213,6 +1341,15 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
         headerPtr->sliceType    = EB_INVALID_PICTURE;
 
         headerPtr->nFlags = 0;
+
+        if (config->dolbyVisionProfile == 81 && config->dolbyVisionRpuFile) {
+            ret = ParseDolbyVisionRPUMetadata(
+                  config,
+                  headerPtr);
+            if (ret) {
+                printf("\n Warning : Dolby vision RPU not parsed for POC %" PRId64 "\t", headerPtr->pts);
+            }
+        }
 
         // Send the picture
         EbH265EncSendPicture(componentHandle, headerPtr);

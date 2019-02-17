@@ -2726,10 +2726,11 @@ EB_ERRORTYPE DetectInputPictureNoise(
 
 	}
 
-	contextPtr->picNoiseVarianceFloat = (double)picNoiseVariance / (double)totLcuCount;
+    if (totLcuCount > 0) {
+        contextPtr->picNoiseVarianceFloat = (double)picNoiseVariance / (double)totLcuCount;
 
-	picNoiseVariance = picNoiseVariance / totLcuCount;
-
+        picNoiseVariance = picNoiseVariance / totLcuCount;
+    }
 
 	//the variance of a 64x64 noise area tends to be bigger for small resolutions.
 	if (sequenceControlSetPtr->lumaHeight <= 720)
@@ -3114,11 +3115,11 @@ EB_ERRORTYPE QuarterSampleDetectNoise(
 		}
 	}
 
+    if (totLcuCount > 0) {
+        contextPtr->picNoiseVarianceFloat = (double)picNoiseVariance / (double)totLcuCount;
 
-	contextPtr->picNoiseVarianceFloat = (double)picNoiseVariance / (double)totLcuCount;
-
-	picNoiseVariance = picNoiseVariance / totLcuCount;
-
+        picNoiseVariance = picNoiseVariance / totLcuCount;
+    }
 
 	//the variance of a 64x64 noise area tends to be bigger for small resolutions.
 	//if (sequenceControlSetPtr->lumaHeight <= 720)
@@ -3258,11 +3259,11 @@ EB_ERRORTYPE SubSampleDetectNoise(
 		}
 	}
 
+    if (totLcuCount > 0) {
+        contextPtr->picNoiseVarianceFloat = (double)picNoiseVariance / (double)totLcuCount;
 
-	contextPtr->picNoiseVarianceFloat = (double)picNoiseVariance / (double)totLcuCount;
-
-	picNoiseVariance = picNoiseVariance / totLcuCount;
-
+        picNoiseVariance = picNoiseVariance / totLcuCount;
+    }
 
 	//the variance of a 64x64 noise area tends to be bigger for small resolutions.
 	if (sequenceControlSetPtr->lumaHeight <= 720)
@@ -3959,13 +3960,17 @@ static inline void DetermineHomogeneousRegionInPicture(
         }
     }
     pictureControlSetPtr->veryLowVarPicFlag = EB_FALSE;
-    if (((veryLowVarCnt * 100) / varLcuCnt) > PIC_LOW_VAR_PERCENTAGE_TH){
-        pictureControlSetPtr->veryLowVarPicFlag = EB_TRUE;
+    if (varLcuCnt > 0) {
+        if (((veryLowVarCnt * 100) / varLcuCnt) > PIC_LOW_VAR_PERCENTAGE_TH) {
+            pictureControlSetPtr->veryLowVarPicFlag = EB_TRUE;
+        }
     }
 
     pictureControlSetPtr->logoPicFlag = EB_FALSE;
-    if (((veryLowVarCnt * 100) / varLcuCnt) > 80){
-        pictureControlSetPtr->logoPicFlag = EB_TRUE;
+    if (varLcuCnt > 0) {
+        if (((veryLowVarCnt * 100) / varLcuCnt) > 80) {
+            pictureControlSetPtr->logoPicFlag = EB_TRUE;
+        }
     }
 
     return;

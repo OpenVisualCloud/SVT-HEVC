@@ -181,6 +181,18 @@ extern EB_ERRORTYPE EncodeRecoveryPointSEI(
     Bitstream_t             *bitstreamPtr,
     AppRecoveryPoint_t      *recoveryPointSeiPtr);
 
+extern EB_ERRORTYPE EncodeContentLightLevelSEI(
+    Bitstream_t             *bitstreamPtr,
+    AppContentLightLevelSei_t   *contentLightLevelPtr);
+
+EB_ERRORTYPE EncodeMasteringDisplayColorVolumeSEI(
+    Bitstream_t             *bitstreamPtr,
+    AppMasteringDisplayColorVolumeSei_t   *masterDisplayPtr);
+
+EB_ERRORTYPE CodeDolbyVisionRpuMetadata(
+    Bitstream_t  *bitstreamPtr,
+    PictureControlSet_t *pictureControlSetPtr);
+
 extern EB_ERRORTYPE CodeEndOfSequenceNalUnit(
     Bitstream_t             *bitstreamPtr);
 
@@ -189,7 +201,8 @@ extern EB_ERRORTYPE CopyRbspBitstreamToPayload(
     EB_BYTE      outputBuffer,
     EB_U32      *outputBufferIndex,
     EB_U32      *outputBufferSize,
-    EncodeContext_t         *encodeContextPtr);
+    EncodeContext_t         *encodeContextPtr,
+    NalUnitType nalType);
 
 void EncodeQuantizedCoefficients_SSE2(
     CabacEncodeContext_t         *cabacEncodeCtxPtr,

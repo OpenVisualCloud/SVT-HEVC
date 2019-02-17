@@ -1141,10 +1141,7 @@ void SetNmm(
             if (contextPtr->cuSize == 32)
                 contextPtr->mvMergeSkipModeCount = 3;
             else
-                if (contextPtr->cuSize == 32)
-                    contextPtr->mvMergeSkipModeCount = 3;
-                else
-                    contextPtr->mvMergeSkipModeCount = 2;           
+                contextPtr->mvMergeSkipModeCount = 2;           
         }
         else {
             contextPtr->mvMergeSkipModeCount = 2;
@@ -2723,7 +2720,7 @@ EB_EXTERN EB_ERRORTYPE PerformIntra4x4Search(
 	EB_U32                   chromaShift;
     
     if (contextPtr->coeffCabacUpdate)
-        memcpy(&(contextPtr->i4x4CoeffCtxModel), &(contextPtr->latestValidCoeffCtxModel), sizeof(CoeffCtxtMdl_t));
+        EB_MEMCPY(&(contextPtr->i4x4CoeffCtxModel), &(contextPtr->latestValidCoeffCtxModel), sizeof(CoeffCtxtMdl_t));
 
     for (partitionIndex = 0; partitionIndex < 4; partitionIndex++) {
 
