@@ -2899,7 +2899,7 @@ static void PrintLibParams(
     }
 
     SVT_LOG("\nSVT [config]: EncoderMode / LatencyMode / Tune\t\t\t\t\t: %d / %d / %d ", config->encMode, config->latencyMode, config->tune);
-    SVT_LOG("\nSVT [config]: EncoderBitDepth / CompressedTenBitFormat\t\t\t\t: %d / %d ", config->encoderBitDepth, config->compressedTenBitFormat);
+    SVT_LOG("\nSVT [config]: EncoderBitDepth / CompressedTenBitFormat / EncoderColorFormat \t: %d / %d / %d", config->encoderBitDepth, config->compressedTenBitFormat, config->encoderColorFormat);
     SVT_LOG("\nSVT [config]: SourceWidth / SourceHeight\t\t\t\t\t: %d / %d ", config->sourceWidth, config->sourceHeight);
     if (config->frameRateDenominator != 0 && config->frameRateNumerator != 0)
         SVT_LOG("\nSVT [config]: Fps_Numerator / Fps_Denominator / Gop Size / IntraRefreshType \t: %d / %d / %d / %d", config->frameRateNumerator > (1<<16) ? config->frameRateNumerator >> 16: config->frameRateNumerator,
