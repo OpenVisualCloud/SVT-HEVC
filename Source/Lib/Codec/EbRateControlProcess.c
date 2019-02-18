@@ -350,61 +350,6 @@ EB_ERRORTYPE RateControlContextCtor(
     return EB_ErrorNone;
 }
 
-EB_U64 predictBits(SequenceControlSet_t *sequenceControlSetPtr, EncodeContext_t *encodeContextPtr, HlRateControlHistogramEntry_t *hlRateControlHistogramPtrTemp, EB_U32 qp)
-{
-    EB_U64 totalBits = 0;
-    if (hlRateControlHistogramPtrTemp->isCoded) {
-        // If the frame is already coded, use the actual number of bits
-        totalBits = hlRateControlHistogramPtrTemp->totalNumBitsCoded;
-    }
-    else {
-        RateControlTables_t *rateControlTablesPtr = &encodeContextPtr->rateControlTablesArray[qp];
-        EB_Bit_Number *sadBitsArrayPtr = rateControlTablesPtr->sadBitsArray[hlRateControlHistogramPtrTemp->temporalLayerIndex];
-        EB_Bit_Number *intraSadBitsArrayPtr = rateControlTablesPtr->intraSadBitsArray[0];
-        EB_U32 predBitsRefQp = 0;
-        EB_U32 numOfFullLcus = 0;
-        EB_U32 areaInPixel = sequenceControlSetPtr->lumaWidth * sequenceControlSetPtr->lumaHeight;
-
-        if (hlRateControlHistogramPtrTemp->sliceType == EB_I_PICTURE) {
-            // Loop over block in the frame and calculated the predicted bits at reg QP
-            EB_U32 i;
-            EB_U32 accum = 0;
-            for (i = 0; i < NUMBER_OF_INTRA_SAD_INTERVALS; ++i)
-            {
-                accum += (EB_U32)(hlRateControlHistogramPtrTemp->oisDistortionHistogram[i] * intraSadBitsArrayPtr[i]);
-            }
-
-            predBitsRefQp = accum;
-            numOfFullLcus = hlRateControlHistogramPtrTemp->fullLcuCount;
-            totalBits += predBitsRefQp;
-        }
-        else {
-            EB_U32 i;
-            EB_U32 accum = 0;
-            EB_U32 accumIntra = 0;
-            for (i = 0; i < NUMBER_OF_SAD_INTERVALS; ++i)
-            {
-                accum += (EB_U32)(hlRateControlHistogramPtrTemp->meDistortionHistogram[i] * sadBitsArrayPtr[i]);
-                accumIntra += (EB_U32)(hlRateControlHistogramPtrTemp->oisDistortionHistogram[i] * intraSadBitsArrayPtr[i]);
-
-            }
-            if (accum > accumIntra * 3)
-                predBitsRefQp = accumIntra;
-            else
-                predBitsRefQp = accum;
-            numOfFullLcus = hlRateControlHistogramPtrTemp->fullLcuCount;
-            totalBits += predBitsRefQp;
-        }
-
-        // Scale for in complete LCSs
-        //  predBitsRefQp is normalized based on the area because of the LCUs at the picture boundries
-        totalBits = totalBits * (EB_U64)areaInPixel / (numOfFullLcus << 12);
-    }
-    hlRateControlHistogramPtrTemp->predBitsRefQp[qp] = totalBits;
-    return totalBits;
-}
-
-
 void HighLevelRcInputPictureMode2(
     PictureParentControlSet_t         *pictureControlSetPtr,
     SequenceControlSet_t              *sequenceControlSetPtr,
@@ -754,91 +699,6 @@ void HighLevelRcInputPictureMode2(
             bestQp = previousSelectedRefQp;
         }
 
-        if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize)
-        {
-            EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
-            /* Lookahead VBV: If lookahead is done, raise the quantizer as necessary
-            * such that no frames in the lookahead overflow and such that the buffer
-            * is in a reasonable state by the end of the lookahead. */
-            EB_U32 loopTerminate = 0;
-            EB_U32 q = bestQp;
-            EB_U32 q0 = bestQp;
-
-
-            queueEntryIndexHeadTemp = (EB_S32)(pictureControlSetPtr->pictureNumber - encodeContextPtr->hlRateControlHistorgramQueue[encodeContextPtr->hlRateControlHistorgramQueueHeadIndex]->pictureNumber);
-            queueEntryIndexHeadTemp += encodeContextPtr->hlRateControlHistorgramQueueHeadIndex;
-            queueEntryIndexHeadTemp = (queueEntryIndexHeadTemp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ?
-                queueEntryIndexHeadTemp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
-                queueEntryIndexHeadTemp;
-
-            queueEntryIndexTemp = queueEntryIndexHeadTemp;
-
-            EB_U32 currentInd = (queueEntryIndexTemp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ? queueEntryIndexTemp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH : queueEntryIndexTemp;
-
-            /* Avoid an infinite loop. */
-            for (EB_U32 iterations = 0; iterations < 1000 && loopTerminate != 3; iterations++)
-            {
-                hlRateControlHistogramPtrTemp = (encodeContextPtr->hlRateControlHistorgramQueue[currentInd]);
-                double curBits = (double)predictBits(sequenceControlSetPtr, encodeContextPtr, hlRateControlHistogramPtrTemp, q);
-                double bufferFillCur = encodeContextPtr->bufferFill - curBits;
-                double targetFill;
-                double fps = 1.0 / (sequenceControlSetPtr->frameRate >> RC_PRECISION);
-                double totalDuration = fps;
-                queueEntryIndexTemp = currentInd;
-
-                /* Loop over the planned future frames. */
-                for (EB_U32 j = 0; bufferFillCur >= 0; j++)
-                {
-                    queueEntryIndexTemp2 = (queueEntryIndexTemp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ? queueEntryIndexTemp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH : queueEntryIndexTemp;
-                    hlRateControlHistogramPtrTemp = (encodeContextPtr->hlRateControlHistorgramQueue[queueEntryIndexTemp2]);
-                    /* This is set to false, so the last frame would go inside the loop */
-                    endOfSequenceFlag = EB_FALSE;
-
-                    if ((endOfSequenceFlag ||
-                        queueEntryIndexTemp >= (currentInd + sequenceControlSetPtr->staticConfig.lookAheadDistance)) ||
-                        (queueEntryIndexTemp >= sequenceControlSetPtr->staticConfig.framesToBeEncoded)
-                        || (totalDuration >= 1.0))
-                        break;
-
-                    totalDuration += fps;
-                    double wantedFrameSize = encodeContextPtr->vbvMaxrate * fps;
-                    if (bufferFillCur + wantedFrameSize <= encodeContextPtr->vbvBufsize)
-                        bufferFillCur += wantedFrameSize;
-                    curBits = (double)predictBits(sequenceControlSetPtr, encodeContextPtr, hlRateControlHistogramPtrTemp, q);
-                    bufferFillCur -= curBits;
-                    queueEntryIndexTemp++;
-                }
-                /* Try to get the buffer at least 50% filled, but don't set an impossible goal. */
-                double finalDur = 1;
-                targetFill = MIN(encodeContextPtr->bufferFill + totalDuration * encodeContextPtr->vbvMaxrate * 0.5, encodeContextPtr->vbvBufsize * (1 - 0.5 * finalDur));
-                if (bufferFillCur < targetFill)
-                {
-                    q++;
-                    q = CLIP3(
-                        sequenceControlSetPtr->staticConfig.minQpAllowed,
-                        sequenceControlSetPtr->staticConfig.maxQpAllowed,
-                        q);
-                    loopTerminate |= 1;
-                    continue;
-                }
-                /* Try to get the buffer not more than 80% filled, but don't set an impossible goal. */
-                targetFill = CLIP3(encodeContextPtr->vbvBufsize * (1 - 0.2 * finalDur), encodeContextPtr->vbvBufsize, encodeContextPtr->bufferFill - totalDuration * encodeContextPtr->vbvMaxrate * 0.5);
-                if (bufferFillCur > targetFill)
-                {
-                    q--;
-                    q = CLIP3(
-                        sequenceControlSetPtr->staticConfig.minQpAllowed,
-                        sequenceControlSetPtr->staticConfig.maxQpAllowed,
-                        q);
-                    loopTerminate |= 2;
-                    continue;
-                }
-                break;
-            }
-            q = MAX(q0 / 2, q);
-            selectedRefQp = q;
-            EbReleaseMutex(encodeContextPtr->bufferFillMutex);
-        }
 #if RC_UPDATE_TARGET_RATE
         selectedOrgRefQp = selectedRefQp;
         if (sequenceControlSetPtr->intraPeriodLength != -1 && pictureControlSetPtr->pictureNumber % ((sequenceControlSetPtr->intraPeriodLength + 1)) == 0 &&
@@ -2323,6 +2183,153 @@ void HighLevelRcFeedBackPicture(
 
     }
 }
+
+EB_U64 predictBits(SequenceControlSet_t *sequenceControlSetPtr, EncodeContext_t *encodeContextPtr, HlRateControlHistogramEntry_t *hlRateControlHistogramPtrTemp, EB_U32 qp)
+{
+	EB_U64 totalBits = 0;
+	if (hlRateControlHistogramPtrTemp->isCoded) {
+		// If the frame is already coded, use the actual number of bits
+		totalBits = hlRateControlHistogramPtrTemp->totalNumBitsCoded;
+	}
+	else {
+		RateControlTables_t *rateControlTablesPtr = &encodeContextPtr->rateControlTablesArray[qp];
+		EB_Bit_Number *sadBitsArrayPtr = rateControlTablesPtr->sadBitsArray[hlRateControlHistogramPtrTemp->temporalLayerIndex];
+		EB_Bit_Number *intraSadBitsArrayPtr = rateControlTablesPtr->intraSadBitsArray[0];
+		EB_U32 predBitsRefQp = 0;
+		EB_U32 numOfFullLcus = 0;
+		EB_U32 areaInPixel = sequenceControlSetPtr->lumaWidth * sequenceControlSetPtr->lumaHeight;
+
+		if (hlRateControlHistogramPtrTemp->sliceType == EB_I_PICTURE) {
+			// Loop over block in the frame and calculated the predicted bits at reg QP
+			EB_U32 i;
+			EB_U32 accum = 0;
+			for (i = 0; i < NUMBER_OF_INTRA_SAD_INTERVALS; ++i)
+			{
+				accum += (EB_U32)(hlRateControlHistogramPtrTemp->oisDistortionHistogram[i] * intraSadBitsArrayPtr[i]);
+			}
+
+			predBitsRefQp = accum;
+			numOfFullLcus = hlRateControlHistogramPtrTemp->fullLcuCount;
+			totalBits += predBitsRefQp;
+		}
+		else {
+			EB_U32 i;
+			EB_U32 accum = 0;
+			EB_U32 accumIntra = 0;
+			for (i = 0; i < NUMBER_OF_SAD_INTERVALS; ++i)
+			{
+				accum += (EB_U32)(hlRateControlHistogramPtrTemp->meDistortionHistogram[i] * sadBitsArrayPtr[i]);
+				accumIntra += (EB_U32)(hlRateControlHistogramPtrTemp->oisDistortionHistogram[i] * intraSadBitsArrayPtr[i]);
+
+			}
+			if (accum > accumIntra * 3)
+				predBitsRefQp = accumIntra;
+			else
+				predBitsRefQp = accum;
+			numOfFullLcus = hlRateControlHistogramPtrTemp->fullLcuCount;
+			totalBits += predBitsRefQp;
+		}
+
+		// Scale for in complete LCSs
+		//  predBitsRefQp is normalized based on the area because of the LCUs at the picture boundries
+		totalBits = totalBits * (EB_U64)areaInPixel / (numOfFullLcus << 12);
+	}
+	hlRateControlHistogramPtrTemp->predBitsRefQp[qp] = totalBits;
+	return totalBits;
+}
+
+EB_U8 Vbv_Buf_Calc(PictureControlSet_t *pictureControlSetPtr, SequenceControlSet_t *sequenceControlSetPtr, EncodeContext_t *encodeContextPtr)
+{
+	EB_S32 loopTerminate = 0;
+	EB_U32 q = pictureControlSetPtr->pictureQp;
+	EB_U32 q0 = pictureControlSetPtr->pictureQp;
+	// Queue variables
+	EB_U32                             queueEntryIndexTemp;
+	EB_U32                             queueEntryIndexTemp2;
+	EB_U32                             queueEntryIndexHeadTemp;
+	EB_BOOL                             endOfSequenceFlag = EB_TRUE;
+
+	HlRateControlHistogramEntry_t      *hlRateControlHistogramPtrTemp;
+
+	/* Lookahead VBV: If lookahead is done, raise the quantizer as necessary
+				* such that no frames in the lookahead overflow and such that the buffer
+				* is in a reasonable state by the end of the lookahead. */
+
+	queueEntryIndexHeadTemp = (EB_S32)(pictureControlSetPtr->pictureNumber - encodeContextPtr->hlRateControlHistorgramQueue[encodeContextPtr->hlRateControlHistorgramQueueHeadIndex]->pictureNumber);
+	queueEntryIndexHeadTemp += encodeContextPtr->hlRateControlHistorgramQueueHeadIndex;
+	queueEntryIndexHeadTemp = (queueEntryIndexHeadTemp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ?
+		queueEntryIndexHeadTemp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
+		queueEntryIndexHeadTemp;
+
+	queueEntryIndexTemp = queueEntryIndexHeadTemp;
+
+	EB_S32 currentInd = (queueEntryIndexTemp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ? queueEntryIndexTemp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH : queueEntryIndexTemp;
+
+
+	/* Avoid an infinite loop. */
+	for (EB_S32 iterations = 0; iterations < 1000 && loopTerminate != 3; iterations++)
+	{
+		hlRateControlHistogramPtrTemp = (encodeContextPtr->hlRateControlHistorgramQueue[currentInd]);
+		double curBits = (double)predictBits(sequenceControlSetPtr, encodeContextPtr, hlRateControlHistogramPtrTemp, q);
+		double bufferFillCur = encodeContextPtr->bufferFill - curBits;
+		double targetFill;
+		double fps = 1.0 / (sequenceControlSetPtr->frameRate >> RC_PRECISION);
+		double totalDuration = fps;
+		queueEntryIndexTemp = currentInd;
+
+		/* Loop over the planned future frames. */
+		for (EB_S32 j = 0; bufferFillCur >= 0; j++)
+		{
+			queueEntryIndexTemp2 = (queueEntryIndexTemp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ? queueEntryIndexTemp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH : queueEntryIndexTemp;
+			hlRateControlHistogramPtrTemp = (encodeContextPtr->hlRateControlHistorgramQueue[queueEntryIndexTemp2]);
+			/* This is set to false, so the last frame would go inside the loop */
+			endOfSequenceFlag = EB_FALSE;
+
+			if ((endOfSequenceFlag ||
+				queueEntryIndexTemp >= (currentInd + sequenceControlSetPtr->staticConfig.lookAheadDistance)) ||
+				(queueEntryIndexTemp >= sequenceControlSetPtr->staticConfig.framesToBeEncoded)
+				|| (totalDuration >= 1.0))
+				break;
+
+			totalDuration += fps;
+			double wantedFrameSize = encodeContextPtr->vbvMaxrate * fps;
+			if (bufferFillCur + wantedFrameSize <= encodeContextPtr->vbvBufsize)
+				bufferFillCur += wantedFrameSize;
+			curBits = (double)predictBits(sequenceControlSetPtr, encodeContextPtr, hlRateControlHistogramPtrTemp, q);
+			bufferFillCur -= curBits;
+			queueEntryIndexTemp++;
+		}
+		/* Try to get the buffer at least 50% filled, but don't set an impossible goal. */
+		double finalDur = 1;
+		targetFill = MIN(encodeContextPtr->bufferFill + totalDuration * encodeContextPtr->vbvMaxrate * 0.5, encodeContextPtr->vbvBufsize * (1 - 0.5 * finalDur));
+		if (bufferFillCur < targetFill)
+		{
+			q++;
+			q = CLIP3(
+				sequenceControlSetPtr->staticConfig.minQpAllowed,
+				sequenceControlSetPtr->staticConfig.maxQpAllowed,
+				q);
+			loopTerminate |= 1;
+			continue;
+		}
+		/* Try to get the buffer not more than 80% filled, but don't set an impossible goal. */
+		targetFill = CLIP3(encodeContextPtr->vbvBufsize * (1 - 0.2 * finalDur), encodeContextPtr->vbvBufsize, encodeContextPtr->bufferFill - totalDuration * encodeContextPtr->vbvMaxrate * 0.5);
+		if (bufferFillCur > targetFill)
+		{
+			q--;
+			q = CLIP3(
+				sequenceControlSetPtr->staticConfig.minQpAllowed,
+				sequenceControlSetPtr->staticConfig.maxQpAllowed,
+				q);
+			loopTerminate |= 2;
+			continue;
+		}
+		break;
+	}
+	q = MAX(q0 / 2, q);
+	return (EB_U8)q;
+}
+
 void* RateControlKernel(void *inputPtr)
 {
     // Context
@@ -2435,9 +2442,8 @@ void* RateControlKernel(void *inputPtr)
                     contextPtr,
                     contextPtr->highLevelRateControlPtr);
 
-
-            }
-
+			}
+			
             // Frame level RC
             if (sequenceControlSetPtr->intraPeriodLength == -1 || sequenceControlSetPtr->staticConfig.rateControlMode == 0){
                 rateControlParamPtr = contextPtr->rateControlParamQueue[0];
@@ -2631,8 +2637,16 @@ void* RateControlKernel(void *inputPtr)
                     }
                 }
             }
-            pictureControlSetPtr->ParentPcsPtr->averageQp = 0;
-            for (lcuCodingOrder = 0; lcuCodingOrder < lcuTotalCount; ++lcuCodingOrder) {
+			pictureControlSetPtr->ParentPcsPtr->averageQp = 0;
+
+			if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize)
+			{
+				EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
+				pictureControlSetPtr->pictureQp = (EB_U8)Vbv_Buf_Calc(pictureControlSetPtr, sequenceControlSetPtr, encodeContextPtr);
+
+				EbReleaseMutex(encodeContextPtr->bufferFillMutex);
+			}
+			for (lcuCodingOrder = 0; lcuCodingOrder < lcuTotalCount; ++lcuCodingOrder) {
 
                 lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuCodingOrder];
                 lcuPtr->qp = (EB_U8)pictureControlSetPtr->pictureQp;
