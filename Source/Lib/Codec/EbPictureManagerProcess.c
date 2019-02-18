@@ -585,7 +585,7 @@ void* PictureManagerKernel(void *inputPtr)
                     availabilityFlag =
                         (availabilityFlag == EB_FALSE)          ? EB_FALSE  :   // Don't update if already False 
                         (refPoc > currentInputPoc)              ? EB_FALSE  :   // The Reference has not been received as an Input Picture yet, then its availability is false
-                        (sequenceControlSetPtr->staticConfig.rateControlMode && entryPictureControlSetPtr->sliceType != EB_I_PICTURE && entryPictureControlSetPtr->temporalLayerIndex == 0 && !referenceEntryPtr->feedbackArrived) ? EB_FALSE :
+                        (!encodeContextPtr->terminatingSequenceFlagReceived && (sequenceControlSetPtr->staticConfig.rateControlMode && entryPictureControlSetPtr->sliceType != EB_I_PICTURE && entryPictureControlSetPtr->temporalLayerIndex == 0 && !referenceEntryPtr->feedbackArrived)) ? EB_FALSE :
                         (referenceEntryPtr->referenceAvailable) ? EB_TRUE   :   // The Reference has been completed
                                                                   EB_FALSE;     // The Reference has not been completed
                 }
@@ -622,7 +622,7 @@ void* PictureManagerKernel(void *inputPtr)
                             availabilityFlag =
                                 (availabilityFlag == EB_FALSE)          ? EB_FALSE  :   // Don't update if already False 
                                 (refPoc > currentInputPoc)              ? EB_FALSE  :   // The Reference has not been received as an Input Picture yet, then its availability is false
-                                (sequenceControlSetPtr->staticConfig.rateControlMode && entryPictureControlSetPtr->sliceType != EB_I_PICTURE && entryPictureControlSetPtr->temporalLayerIndex == 0 && !referenceEntryPtr->feedbackArrived) ? EB_FALSE :
+                                (!encodeContextPtr->terminatingSequenceFlagReceived && (sequenceControlSetPtr->staticConfig.rateControlMode && entryPictureControlSetPtr->sliceType != EB_I_PICTURE && entryPictureControlSetPtr->temporalLayerIndex == 0 && !referenceEntryPtr->feedbackArrived)) ? EB_FALSE :
                                 (referenceEntryPtr->referenceAvailable) ? EB_TRUE   :   // The Reference has been completed
                                                                           EB_FALSE;     // The Reference has not been completed
                         }
