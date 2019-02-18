@@ -5296,26 +5296,26 @@ static void CodeVPS(
             // vps_num_units_in_tick
             WriteCodeCavlc(
                     bitstreamPtr,
-                    scsPtr->staticConfig.frameRateNumerator,
+                    scsPtr->staticConfig.frameRateDenominator,
                     32);
 
             // vps_time_scale
             WriteCodeCavlc(
                     bitstreamPtr,
-                    scsPtr->staticConfig.frameRateDenominator,
+                    scsPtr->staticConfig.frameRateNumerator,
                     32);
         }
         else {
             // vps_num_units_in_tick
             WriteCodeCavlc(
                     bitstreamPtr,
-                    scsPtr->frameRate > 1000 ? scsPtr->frameRate : scsPtr->frameRate << 16,
+                    1 << 16,
                     32);
 
             // vps_time_scale
             WriteCodeCavlc(
                     bitstreamPtr,
-                    1 << 16,
+                    scsPtr->frameRate > 1000 ? scsPtr->frameRate : scsPtr->frameRate << 16,
                     32);
         }
 
