@@ -348,7 +348,7 @@ static const EB_TRANSFORM_FUNC transformFunctionTableEstimate[EB_ASM_TYPE_TOTAL]
         {
             lowPrecisionTransform32x32_AVX2_INTRIN,
             lowPrecisionTransform16x16_AVX2_INTRIN,
-            Transform8x8_AVX2_INTRIN,
+            Transform8x8_SSE4_1_INTRIN,
             Transform4x4_SSE2_INTRIN,
             DstTransform4x4_SSE2_INTRIN
         },
@@ -445,7 +445,7 @@ static const EB_TRANSFORM_FUNC transformFunctionTableEncode0[EB_ASM_TYPE_TOTAL][
     {
         Transform32x32_SSE2,
         Transform16x16_SSE2,
-        Transform8x8_AVX2_INTRIN,
+        Transform8x8_SSE4_1_INTRIN,
         Transform4x4_SSE2_INTRIN,
         DstTransform4x4_SSE2_INTRIN
     },
@@ -464,7 +464,7 @@ static const EB_TRANSFORM_FUNC transformFunctionTableEncode1[EB_ASM_TYPE_TOTAL][
     {
         Transform32x32_SSE2,
         Transform16x16_SSE2,
-        Transform8x8_AVX2_INTRIN,
+        Transform8x8_SSE4_1_INTRIN,
         Transform4x4_SSE2_INTRIN,
         DstTransform4x4_SSE2_INTRIN
     },
@@ -481,7 +481,7 @@ static const EB_INVTRANSFORM_FUNC invTransformFunctionTableEstimate[EB_ASM_TYPE_
         },
         // AVX2
         {
-            EstimateInvTransform32x32_AVX2,
+            EstimateInvTransform32x32_SSE2,
             EstimateInvTransform16x16_SSE2,
             InvTransform8x8_SSE2_INTRIN,
             InvTransform4x4_SSE2_INTRIN,

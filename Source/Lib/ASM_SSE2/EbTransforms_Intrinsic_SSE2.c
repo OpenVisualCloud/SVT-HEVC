@@ -1219,6 +1219,165 @@ void PfreqEstimateInvTransform32x32_SSE2(
     Pfreq2DInvTransform32_SSE2(intermediate, 32, dst, dst_stride, 12 - addshift);
 }
 
+// 32-point inverse transform (32 rows)
+static void InvTransform32_SSE2(
+    EB_S16 *src,
+    EB_U32  src_stride,
+    EB_S16 *dst,
+    EB_U32  dst_stride,
+    EB_U32  shift)
+{
+    EB_U32 i;
+    __m128i s0 = _mm_cvtsi32_si128(shift);
+    __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
+    const __m128i *coeff32 = (const __m128i *)coeff_tbl2;
+
+    for (i = 0; i < 32; i++)
+    {
+        __m128i x0, x1, x2, x3;
+        __m128i y0, y1, y2, y3;
+        __m128i a0, a1, a2, a3, a4, a5, a6, a7;
+        __m128i b0, b1, b2, b3, b4, b5, b6, b7;
+        x0 = _mm_loadu_si128((const __m128i *)(src + i*src_stride + 0x00)); // 00 01 02 03 04 05 06 07
+        x1 = _mm_loadu_si128((const __m128i *)(src + i*src_stride + 0x08)); // 08 09 0a 0b 0c 0d 0e 0f
+        x2 = _mm_loadu_si128((const __m128i *)(src + i*src_stride + 0x10)); // 10 11 12 13 14 15 16 17
+        x3 = _mm_loadu_si128((const __m128i *)(src + i*src_stride + 0x18)); // 18 19 1a 1b 1c 1d 1e 1f
+
+        y0 = _mm_unpacklo_epi16(x0, x1); // 00 08 01 09 02 0a 03 0b
+        y1 = _mm_unpackhi_epi16(x0, x1); // 04 0c 05 0d 06 0e 07 0f
+        y2 = _mm_unpacklo_epi16(x2, x3); // 10 18
+        y3 = _mm_unpackhi_epi16(x2, x3); // 24 2c
+
+        x0 = _mm_unpacklo_epi16(y0, y1); // 00 04 08 0c 01 05 09 0d
+        x1 = _mm_unpackhi_epi16(y0, y1); // 02 06 0a 0e 03 07 0b 0f
+        x2 = _mm_unpacklo_epi16(y2, y3); // 10 14
+        x3 = _mm_unpackhi_epi16(y2, y3); // 12 16
+
+        y0 = _mm_unpacklo_epi64(x0, x2); // 00 04 08 0c 10 14 18 1c
+        y1 = _mm_unpacklo_epi64(x1, x3); // 02 06 0a 0e 12 16 1a 1e
+        y2 = _mm_unpackhi_epi16(x0, x1); // 01 03 05 07 09 0b 0d 0f
+        y3 = _mm_unpackhi_epi16(x2, x3); // 11 13 15 17 19 1b 1d 1f
+
+        x0 = y0;
+        x1 = y1;
+        x2 = y2;
+        x3 = y3;
+
+        a0 = _mm_madd_epi16(_mm_shuffle_epi32(x0, 0x00), coeff32[0]);
+        a0 = _mm_add_epi32(a0, _mm_madd_epi16(_mm_shuffle_epi32(x0, 0x55), coeff32[2]));
+        a0 = _mm_add_epi32(a0, _mm_madd_epi16(_mm_shuffle_epi32(x0, 0xaa), coeff32[4]));
+        a0 = _mm_add_epi32(a0, _mm_madd_epi16(_mm_shuffle_epi32(x0, 0xff), coeff32[6]));
+
+        a1 = _mm_madd_epi16(_mm_shuffle_epi32(x0, 0x00), coeff32[1]);
+        a1 = _mm_add_epi32(a1, _mm_madd_epi16(_mm_shuffle_epi32(x0, 0x55), coeff32[3]));
+        a1 = _mm_add_epi32(a1, _mm_madd_epi16(_mm_shuffle_epi32(x0, 0xaa), coeff32[5]));
+        a1 = _mm_add_epi32(a1, _mm_madd_epi16(_mm_shuffle_epi32(x0, 0xff), coeff32[7]));
+
+        a2 = _mm_madd_epi16(_mm_shuffle_epi32(x1, 0x00), coeff32[8]);
+        a2 = _mm_add_epi32(a2, _mm_madd_epi16(_mm_shuffle_epi32(x1, 0x55), coeff32[10]));
+        a2 = _mm_add_epi32(a2, _mm_madd_epi16(_mm_shuffle_epi32(x1, 0xaa), coeff32[12]));
+        a2 = _mm_add_epi32(a2, _mm_madd_epi16(_mm_shuffle_epi32(x1, 0xff), coeff32[14]));
+
+        a3 = _mm_madd_epi16(_mm_shuffle_epi32(x1, 0x00), coeff32[9]);
+        a3 = _mm_add_epi32(a3, _mm_madd_epi16(_mm_shuffle_epi32(x1, 0x55), coeff32[11]));
+        a3 = _mm_add_epi32(a3, _mm_madd_epi16(_mm_shuffle_epi32(x1, 0xaa), coeff32[13]));
+        a3 = _mm_add_epi32(a3, _mm_madd_epi16(_mm_shuffle_epi32(x1, 0xff), coeff32[15]));
+
+        a4 = _mm_madd_epi16(_mm_shuffle_epi32(x2, 0x00), coeff32[16]);
+        a4 = _mm_add_epi32(a4, _mm_madd_epi16(_mm_shuffle_epi32(x2, 0x55), coeff32[20]));
+        a4 = _mm_add_epi32(a4, _mm_madd_epi16(_mm_shuffle_epi32(x2, 0xaa), coeff32[24]));
+        a4 = _mm_add_epi32(a4, _mm_madd_epi16(_mm_shuffle_epi32(x2, 0xff), coeff32[28]));
+        a4 = _mm_add_epi32(a4, _mm_madd_epi16(_mm_shuffle_epi32(x3, 0x00), coeff32[32]));
+        a4 = _mm_add_epi32(a4, _mm_madd_epi16(_mm_shuffle_epi32(x3, 0x55), coeff32[36]));
+        a4 = _mm_add_epi32(a4, _mm_madd_epi16(_mm_shuffle_epi32(x3, 0xaa), coeff32[40]));
+        a4 = _mm_add_epi32(a4, _mm_madd_epi16(_mm_shuffle_epi32(x3, 0xff), coeff32[44]));
+
+        a5 = _mm_madd_epi16(_mm_shuffle_epi32(x2, 0x00), coeff32[17]);
+        a5 = _mm_add_epi32(a5, _mm_madd_epi16(_mm_shuffle_epi32(x2, 0x55), coeff32[21]));
+        a5 = _mm_add_epi32(a5, _mm_madd_epi16(_mm_shuffle_epi32(x2, 0xaa), coeff32[25]));
+        a5 = _mm_add_epi32(a5, _mm_madd_epi16(_mm_shuffle_epi32(x2, 0xff), coeff32[29]));
+        a5 = _mm_add_epi32(a5, _mm_madd_epi16(_mm_shuffle_epi32(x3, 0x00), coeff32[33]));
+        a5 = _mm_add_epi32(a5, _mm_madd_epi16(_mm_shuffle_epi32(x3, 0x55), coeff32[37]));
+        a5 = _mm_add_epi32(a5, _mm_madd_epi16(_mm_shuffle_epi32(x3, 0xaa), coeff32[41]));
+        a5 = _mm_add_epi32(a5, _mm_madd_epi16(_mm_shuffle_epi32(x3, 0xff), coeff32[45]));
+
+        a6 = _mm_madd_epi16(_mm_shuffle_epi32(x2, 0x00), coeff32[18]);
+        a6 = _mm_add_epi32(a6, _mm_madd_epi16(_mm_shuffle_epi32(x2, 0x55), coeff32[22]));
+        a6 = _mm_add_epi32(a6, _mm_madd_epi16(_mm_shuffle_epi32(x2, 0xaa), coeff32[26]));
+        a6 = _mm_add_epi32(a6, _mm_madd_epi16(_mm_shuffle_epi32(x2, 0xff), coeff32[30]));
+        a6 = _mm_add_epi32(a6, _mm_madd_epi16(_mm_shuffle_epi32(x3, 0x00), coeff32[34]));
+        a6 = _mm_add_epi32(a6, _mm_madd_epi16(_mm_shuffle_epi32(x3, 0x55), coeff32[38]));
+        a6 = _mm_add_epi32(a6, _mm_madd_epi16(_mm_shuffle_epi32(x3, 0xaa), coeff32[42]));
+        a6 = _mm_add_epi32(a6, _mm_madd_epi16(_mm_shuffle_epi32(x3, 0xff), coeff32[46]));
+
+        a7 = _mm_madd_epi16(_mm_shuffle_epi32(x2, 0x00), coeff32[19]);
+        a7 = _mm_add_epi32(a7, _mm_madd_epi16(_mm_shuffle_epi32(x2, 0x55), coeff32[23]));
+        a7 = _mm_add_epi32(a7, _mm_madd_epi16(_mm_shuffle_epi32(x2, 0xaa), coeff32[27]));
+        a7 = _mm_add_epi32(a7, _mm_madd_epi16(_mm_shuffle_epi32(x2, 0xff), coeff32[31]));
+        a7 = _mm_add_epi32(a7, _mm_madd_epi16(_mm_shuffle_epi32(x3, 0x00), coeff32[35]));
+        a7 = _mm_add_epi32(a7, _mm_madd_epi16(_mm_shuffle_epi32(x3, 0x55), coeff32[39]));
+        a7 = _mm_add_epi32(a7, _mm_madd_epi16(_mm_shuffle_epi32(x3, 0xaa), coeff32[43]));
+        a7 = _mm_add_epi32(a7, _mm_madd_epi16(_mm_shuffle_epi32(x3, 0xff), coeff32[47]));
+
+        a0 = _mm_add_epi32(a0, o0);
+        a1 = _mm_add_epi32(a1, o0);
+
+        b0 = _mm_add_epi32(a0, a2);
+        b1 = _mm_add_epi32(a1, a3);
+        b2 = _mm_sub_epi32(a0, a2);
+        b3 = _mm_sub_epi32(a1, a3);
+
+        a0 = b0;
+        a1 = b1;
+        a2 = _mm_shuffle_epi32(b3, 0x1b); // 00011011
+        a3 = _mm_shuffle_epi32(b2, 0x1b);
+
+        b0 = _mm_add_epi32(a0, a4);
+        b1 = _mm_add_epi32(a1, a5);
+        b2 = _mm_add_epi32(a2, a6);
+        b3 = _mm_add_epi32(a3, a7);
+        b4 = _mm_sub_epi32(a0, a4);
+        b5 = _mm_sub_epi32(a1, a5);
+        b6 = _mm_sub_epi32(a2, a6);
+        b7 = _mm_sub_epi32(a3, a7);
+
+        a0 = _mm_sra_epi32(b0, s0);
+        a1 = _mm_sra_epi32(b1, s0);
+        a2 = _mm_sra_epi32(b2, s0);
+        a3 = _mm_sra_epi32(b3, s0);
+        a4 = _mm_sra_epi32(_mm_shuffle_epi32(b7, 0x1b), s0);
+        a5 = _mm_sra_epi32(_mm_shuffle_epi32(b6, 0x1b), s0);
+        a6 = _mm_sra_epi32(_mm_shuffle_epi32(b5, 0x1b), s0);
+        a7 = _mm_sra_epi32(_mm_shuffle_epi32(b4, 0x1b), s0);
+
+        x0 = _mm_packs_epi32(a0, a1);
+        x1 = _mm_packs_epi32(a2, a3);
+        x2 = _mm_packs_epi32(a4, a5);
+        x3 = _mm_packs_epi32(a6, a7);
+
+        _mm_storeu_si128((__m128i *)(dst + i*dst_stride + 0x00), x0);
+        _mm_storeu_si128((__m128i *)(dst + i*dst_stride + 0x08), x1);
+        _mm_storeu_si128((__m128i *)(dst + i*dst_stride + 0x10), x2);
+        _mm_storeu_si128((__m128i *)(dst + i*dst_stride + 0x18), x3);
+    }
+}
+
+void EstimateInvTransform32x32_SSE2(
+    EB_S16 *src,
+    const EB_U32  src_stride,
+    EB_S16 *dst,
+    const EB_U32  dst_stride,
+    EB_S16 *intermediate,
+    EB_U32  addshift)
+{
+    Transpose32_SSE2(src, src_stride, intermediate, 32);
+    InvTransform32_SSE2(intermediate, 32, dst, dst_stride, 7);
+    Transpose32_SSE2(dst, dst_stride, intermediate, 32);
+    InvTransform32_SSE2(intermediate, 32, dst, dst_stride, 12 - addshift);
+}
+
+
+
 // forward 16x16 transform
 void Transform16x16_SSE2(
     EB_S16 *src,

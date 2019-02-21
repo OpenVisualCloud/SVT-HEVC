@@ -204,7 +204,7 @@ extern EB_ERRORTYPE CopyRbspBitstreamToPayload(
     EncodeContext_t         *encodeContextPtr,
     NalUnitType nalType);
 
-void EncodeQuantizedCoefficients_AVX2(
+void EncodeQuantizedCoefficients_SSE2(
     CabacEncodeContext_t         *cabacEncodeCtxPtr,
     EB_U32                        size,                 // Input: TU size
     EB_MODETYPE                   type,                 // Input: CU type (INTRA, INTER)
@@ -229,7 +229,7 @@ EB_ERRORTYPE EstimateQuantizedCoefficients_SSE2(
 	EB_U64                       *coeffBitsLong);
 
 
-EB_ERRORTYPE EstimateQuantizedCoefficients_Lossy_AVX2(
+EB_ERRORTYPE EstimateQuantizedCoefficients_Lossy_SSE2(
 	CabacCost_t                  *CabacCost,
 	CabacEncodeContext_t         *cabacEncodeCtxPtr,
 	EB_U32                        size,                 // Input: TU size
@@ -330,7 +330,7 @@ static ESTIMATE_QUANTIZED_COEFF_TYPE FUNC_TABLE EstimateQuantizedCoefficients[2]
     // C_DEFAULT
     EstimateQuantizedCoefficients_Lossy,
     // AVX2
-    EstimateQuantizedCoefficients_Lossy_AVX2,
+    EstimateQuantizedCoefficients_Lossy_SSE2,
 }
 };
 
@@ -340,7 +340,7 @@ static ENCODE_QUANTIZED_COEFF_TYPE FUNC_TABLE EncodeQuantizedCoefficientsFuncArr
 	// C_DEFAULT
     EncodeQuantizedCoefficients_generic,
 	// AVX2
-	EncodeQuantizedCoefficients_AVX2,
+	EncodeQuantizedCoefficients_SSE2,
 };
 
 

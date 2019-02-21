@@ -99,7 +99,6 @@ void ChromaInterpolationFilterTwoDOutRaw(EB_BYTE refPic, EB_U32 srcStride, EB_S1
 
 void BiPredClipping(EB_U32 puWidth, EB_U32 puHeight, EB_S16 *list0Src, EB_S16 *list1Src, EB_BYTE dst, EB_U32 dstStride, EB_S32 offset);
 void BiPredClipping16bit(EB_U32 puWidth, EB_U32 puHeight, EB_S16 *list0Src, EB_S16 *list1Src, EB_U16 *dst, EB_U32 dstStride);
-void BiPredClippingOnTheFly(EB_BYTE list0Src, EB_U32 list0SrcStride, EB_BYTE list1Src, EB_U32 list1SrcStride, EB_BYTE dst, EB_U32 dstStride, EB_U32 puWidth, EB_U32 puHeight, EB_S32 offset, EB_BOOL isLuma);
 
 void WpLumaInterpolationCopy(EB_BYTE refPic, EB_U32 srcStride, EB_BYTE dst, EB_U32 dstStride, EB_U32 puWidth, EB_U32 puHeight, EB_S16 *firstPassIFDst, EB_S16 wpWeight, EB_S16 wpOffset, EB_U8 wpDenominator);
 void WpLumaInterpolationFilterPosa(EB_BYTE refPic, EB_U32 srcStride, EB_BYTE dst, EB_U32 dstStride, EB_U32 puWidth, EB_U32 puHeight, EB_S16 *firstPassIFDst, EB_S16 wpWeight, EB_S16 wpOffset, EB_U8 wpDenominator);
