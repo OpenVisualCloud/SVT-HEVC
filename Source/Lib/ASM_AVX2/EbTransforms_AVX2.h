@@ -39,8 +39,16 @@ void QuantizeInvQuantizeNxN_AVX2_INTRIN(
 	const EB_U32     areaSize,
 	EB_U32          *nonzerocoeff);
 
+void Transform8x8_AVX2_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_stride, EB_S16 *intermediate, EB_U32 addshift);
 void lowPrecisionTransform16x16_AVX2_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_stride, EB_S16 *intermediate, EB_U32 addshift);
 void lowPrecisionTransform32x32_AVX2_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_stride, EB_S16 *intermediate, EB_U32 addshift);
+void EstimateInvTransform32x32_AVX2(
+	EB_S16 *src,
+	const EB_U32  src_stride,
+	EB_S16 *dst,
+	const EB_U32  dst_stride,
+	EB_S16 *intermediate,
+	EB_U32  addshift);
 
 void PfreqTransform32x32_AVX2_INTRIN(
 	EB_S16 *src,
