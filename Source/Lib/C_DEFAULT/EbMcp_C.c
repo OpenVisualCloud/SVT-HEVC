@@ -18,46 +18,6 @@ static const EB_S16 chromaIFCoeff[7][MaxChromaFilterTag] = {
         { -2, 10, 58, -2 },
 };
 
-
-void BiPredClippingOnTheFly(
-	EB_BYTE    list0Src,
-	EB_U32     list0SrcStride,
-	EB_BYTE    list1Src,
-	EB_U32     list1SrcStride,
-	EB_BYTE    dst,
-	EB_U32     dstStride,
-	EB_U32     puWidth,
-	EB_U32     puHeight,
-	EB_S32     offset,
-	EB_BOOL	   isLuma)
-{
-	EB_U32   rowIdx;
-	EB_U32   columnIdx;
-	EB_U32   tempBufIdx0, tempBufIdx1, tempDstIdx;
-	EB_BYTE  tempDstY;
-	EB_S16   templist0Src = 0;
-	EB_S16   templist1Src = 0;
-	EB_U32   offset6 = isLuma ? MinusOffset6 : ChromaMinusOffset6;
-
-	tempBufIdx0 = 0;
-	tempBufIdx1 = 0;
-	tempDstIdx = 0;
-	for (rowIdx = 0; rowIdx < puHeight; ++rowIdx)
-	{
-		tempDstY = dst + tempDstIdx;
-		for (columnIdx = 0; columnIdx < puWidth; ++columnIdx)
-		{
-			templist0Src = (EB_S16)(list0Src[tempBufIdx0 + columnIdx] << Shift6) - offset6;
-			templist1Src = (EB_S16)(list1Src[tempBufIdx1 + columnIdx] << Shift6) - offset6;
-			*(tempDstY + columnIdx) = (EB_U8)CLIP3(0, MAX_Sample_Value, ((templist0Src +
-				templist1Src + offset) >> Shift5));
-		}
-		tempBufIdx0 += list0SrcStride/*puWidth*/;
-		tempBufIdx1 += list1SrcStride/*puWidth*/;
-		tempDstIdx += dstStride;
-	}
-}
-
 void BiPredClipping(
     EB_U32     puWidth,
     EB_U32     puHeight,

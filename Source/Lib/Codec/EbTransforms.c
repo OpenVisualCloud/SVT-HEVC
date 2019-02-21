@@ -3474,6 +3474,7 @@ EB_ERRORTYPE EstimateInvTransform(
     }
     else {
 
+        // EstimateInvTransform32x32_SSE2(
         PfreqEstimateInvTransform32x32_SSE2(
             coeffBuffer,
             coeffStride,

@@ -1710,7 +1710,7 @@ void EncodeQuantizedCoefficients_generic(
 	return;
 }
 
-void EncodeQuantizedCoefficients_AVX2(
+void EncodeQuantizedCoefficients_SSE2(
 	CabacEncodeContext_t         *cabacEncodeCtxPtr,
 	EB_U32                        size,                 // Input: TU size
 	EB_MODETYPE                   type,                 // Input: CU type (INTRA, INTER)
@@ -1862,9 +1862,9 @@ void EncodeQuantizedCoefficients_AVX2(
 	subSetIndex = 0;
 	while (1)
 	{
-		__m256i a0, a1, a2, a3;
-		__m256i b0, b1, c0, c1, d0, d1;
-		__m256i z0;
+		__m128i a0, a1, a2, a3;
+		__m128i b0, b1, c0, c1, d0, d1;
+		__m128i z0;
 
 		// determine position of subblock within transform block
 		coeffGroupPosition = sbScans[logBlockSize - 2][subSetIndex];
@@ -1889,22 +1889,18 @@ void EncodeQuantizedCoefficients_AVX2(
  
         if(isCGin == EB_FALSE){
         
-			a0 = _mm256_setzero_si256();
-			a1 = _mm256_setzero_si256();
-			a2 = _mm256_setzero_si256();
-			a3 = _mm256_setzero_si256();
+            a0 = _mm_setzero_si128();
+		    a1 = _mm_setzero_si128();
+		    a2 = _mm_setzero_si128();
+		    a3 = _mm_setzero_si128();
 
         }
         else{
-			a0 = _mm256_setzero_si256();
-			a1 = _mm256_setzero_si256();
-			a2 = _mm256_setzero_si256();
-			a3 = _mm256_setzero_si256();
 
-			a0 = _mm256_insert_epi64(a0, *(EB_S64*)(subblockPtr + 0 * coeffStride), 0); // 00 01 02 03 -- -- -- --
-			a1 = _mm256_insert_epi64(a1, *(EB_S64*)(subblockPtr + 1 * coeffStride), 0); // 10 11 12 13 -- -- -- -- 
-			a2 = _mm256_insert_epi64(a2, *(EB_S64*)(subblockPtr + 2 * coeffStride), 0); // 20 21 22 23 -- -- -- --
-			a3 = _mm256_insert_epi64(a3, *(EB_S64*)(subblockPtr + 3 * coeffStride), 0); // 30 31 32 33 -- -- -- -- 
+            a0 = _mm_loadl_epi64((__m128i *)(subblockPtr + 0 * coeffStride)); // 00 01 02 03 -- -- -- --
+		    a1 = _mm_loadl_epi64((__m128i *)(subblockPtr + 1 * coeffStride)); // 10 11 12 13 -- -- -- --
+		    a2 = _mm_loadl_epi64((__m128i *)(subblockPtr + 2 * coeffStride)); // 20 21 22 23 -- -- -- --
+		    a3 = _mm_loadl_epi64((__m128i *)(subblockPtr + 3 * coeffStride)); // 30 31 32 33 -- -- -- --
         }
 
 		if (scanIndex == SCAN_DIAG2)
@@ -1912,47 +1908,47 @@ void EncodeQuantizedCoefficients_AVX2(
 			int v03;
 			int v30;
 
-			b0 = _mm256_unpacklo_epi64(a0, a3); // 00 01 02 03 30 31 32 33
-			b1 = _mm256_unpacklo_epi16(a1, a2); // 10 20 11 21 12 22 13 23
+			b0 = _mm_unpacklo_epi64(a0, a3); // 00 01 02 03 30 31 32 33
+			b1 = _mm_unpacklo_epi16(a1, a2); // 10 20 11 21 12 22 13 23
 
-			c0 = _mm256_unpacklo_epi16(b0, b1); // 00 10 01 20 02 11 03 21
-			c1 = _mm256_unpackhi_epi16(b1, b0); // 12 30 22 31 13 32 23 33
+			c0 = _mm_unpacklo_epi16(b0, b1); // 00 10 01 20 02 11 03 21
+			c1 = _mm_unpackhi_epi16(b1, b0); // 12 30 22 31 13 32 23 33
 
-			v03 = _mm256_extract_epi16(a0, 3);
-			v30 = _mm256_extract_epi16(a3, 0);
+			v03 = _mm_extract_epi16(a0, 3);
+			v30 = _mm_extract_epi16(a3, 0);
 
-			d0 = _mm256_shufflehi_epi16(c0, 0xe1); // 00 10 01 20 11 02 03 21
-			d1 = _mm256_shufflelo_epi16(c1, 0xb4); // 12 30 31 22 13 32 23 33
+			d0 = _mm_shufflehi_epi16(c0, 0xe1); // 00 10 01 20 11 02 03 21
+			d1 = _mm_shufflelo_epi16(c1, 0xb4); // 12 30 31 22 13 32 23 33
 
-			d0 = _mm256_insert_epi16(d0, v30, 6); // 00 10 01 20 11 02 30 21
-			d1 = _mm256_insert_epi16(d1, v03, 1); // 12 03 31 22 13 32 23 33
+			d0 = _mm_insert_epi16(d0, v30, 6); // 00 10 01 20 11 02 30 21
+			d1 = _mm_insert_epi16(d1, v03, 1); // 12 03 31 22 13 32 23 33
 		}
 		else if (scanIndex == SCAN_HOR2)
 		{
-			d0 = _mm256_unpacklo_epi64(a0, a1); // 00 01 02 03 10 11 12 13
-			d1 = _mm256_unpacklo_epi64(a2, a3); // 20 21 22 23 30 31 32 33
+			d0 = _mm_unpacklo_epi64(a0, a1); // 00 01 02 03 10 11 12 13
+			d1 = _mm_unpacklo_epi64(a2, a3); // 20 21 22 23 30 31 32 33
 		}
 		else
 		{
-			b0 = _mm256_unpacklo_epi16(a0, a2); // 00 20 01 21 02 22 03 23
-			b1 = _mm256_unpacklo_epi16(a1, a3); // 10 30 11 31 12 32 13 33
+			b0 = _mm_unpacklo_epi16(a0, a2); // 00 20 01 21 02 22 03 23
+			b1 = _mm_unpacklo_epi16(a1, a3); // 10 30 11 31 12 32 13 33
 
-			d0 = _mm256_unpacklo_epi16(b0, b1); // 00 10 20 30 01 11 21 31
-			d1 = _mm256_unpackhi_epi16(b0, b1); // 02 12 22 32 03 13 23 33
+			d0 = _mm_unpacklo_epi16(b0, b1); // 00 10 20 30 01 11 21 31
+			d1 = _mm_unpackhi_epi16(b0, b1); // 02 12 22 32 03 13 23 33
 		}
 
-		z0 = _mm256_packs_epi16(d0, d1);
-		z0 = _mm256_cmpeq_epi8(z0, _mm256_setzero_si256());
+		z0 = _mm_packs_epi16(d0, d1);
+		z0 = _mm_cmpeq_epi8(z0, _mm_setzero_si128());
 
-		sigmap = _mm256_movemask_epi8(z0) ^ 0xffffffff;
+		sigmap = _mm_movemask_epi8(z0) ^ 0xffff;
 		subblockSigmap[subSetIndex] = (EB_U16)sigmap;
 
 		if (sigmap != 0)
 		{
 			EB_U32 num;
 			lastScanSet = subSetIndex;
-			linearCoeff[2 * subSetIndex + 0] = _mm256_castsi256_si128(d0);
-			linearCoeff[2 * subSetIndex + 1] = _mm256_castsi256_si128(d1);
+			linearCoeff[2 * subSetIndex + 0] = d0;
+			linearCoeff[2 * subSetIndex + 1] = d1;
 
 			// Count number of bits set in sigmap (Hamming weight)
 			num = sigmap;
