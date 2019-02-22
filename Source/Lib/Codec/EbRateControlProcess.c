@@ -2612,6 +2612,13 @@ void* RateControlKernel(void *inputPtr)
                         pictureControlSetPtr->pictureQp);
                 }
             }
+            if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize)
+            {
+                EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
+                pictureControlSetPtr->pictureQp = (EB_U8)Vbv_Buf_Calc(pictureControlSetPtr, sequenceControlSetPtr, encodeContextPtr);
+
+                EbReleaseMutex(encodeContextPtr->bufferFillMutex);
+            }
             pictureControlSetPtr->ParentPcsPtr->pictureQp = pictureControlSetPtr->pictureQp;
             if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0 && sequenceControlSetPtr->staticConfig.lookAheadDistance != 0){
                 contextPtr->baseLayerFramesAvgQp = (3 * contextPtr->baseLayerFramesAvgQp + pictureControlSetPtr->pictureQp + 2) >> 2;
@@ -2639,13 +2646,6 @@ void* RateControlKernel(void *inputPtr)
             }
 			pictureControlSetPtr->ParentPcsPtr->averageQp = 0;
 
-			if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize)
-			{
-				EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
-				pictureControlSetPtr->pictureQp = (EB_U8)Vbv_Buf_Calc(pictureControlSetPtr, sequenceControlSetPtr, encodeContextPtr);
-
-				EbReleaseMutex(encodeContextPtr->bufferFillMutex);
-			}
 			for (lcuCodingOrder = 0; lcuCodingOrder < lcuTotalCount; ++lcuCodingOrder) {
 
                 lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuCodingOrder];
