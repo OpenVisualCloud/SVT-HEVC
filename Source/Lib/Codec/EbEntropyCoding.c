@@ -8212,7 +8212,8 @@ EB_ERRORTYPE EncodePictureTimingSEI(
 	AppPictureTimingSei_t   *picTimingSeiPtr,
 	AppVideoUsabilityInfo_t *vuiPtr,
 	EncodeContext_t         *encodeContextPtr,
-    EB_U8                    pictStruct)
+    EB_U8                    pictStruct,
+    EB_U8                    temporalId)
 
 {
 	EB_ERRORTYPE return_error = EB_ErrorNone;
@@ -8226,7 +8227,7 @@ EB_ERRORTYPE EncodePictureTimingSEI(
 	CodeNALUnitHeader(
 		outputBitstreamPtr,
 		NAL_UNIT_PREFIX_SEI,
-		0);
+		temporalId);
 
 	payloadSize = GetPictureTimingSEILength(
 		picTimingSeiPtr,

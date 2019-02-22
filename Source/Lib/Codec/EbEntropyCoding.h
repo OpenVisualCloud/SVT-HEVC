@@ -165,7 +165,8 @@ extern EB_ERRORTYPE EncodePictureTimingSEI(
     AppPictureTimingSei_t   *picTimingSeiPtr,
     AppVideoUsabilityInfo_t *vuiPtr,
     EncodeContext_t         *encodeContextPtr,
-    EB_U8                    pictStruct);
+    EB_U8                    pictStruct,
+    EB_U8                    temporalId);
 
 extern EB_ERRORTYPE EncodeActiveParameterSetsSEI(
     Bitstream_t             *bitstreamPtr,

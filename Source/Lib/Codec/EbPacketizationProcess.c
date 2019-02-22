@@ -551,7 +551,8 @@ void* PacketizationKernel(void *inputPtr)
                 &sequenceControlSetPtr->picTimingSei,
                 sequenceControlSetPtr->videoUsabilityInfoPtr,
                 sequenceControlSetPtr->encodeContextPtr,
-                pictureControlSetPtr->ParentPcsPtr->pictStruct);
+                pictureControlSetPtr->ParentPcsPtr->pictStruct,
+                pictureControlSetPtr->temporalId);
 
         }
 
