@@ -95,90 +95,6 @@
     _mm_storeu_si128((__m128i *)(predictionPtr+3*pStride), left14);\
     _mm_storeu_si128((__m128i *)(predictionPtr+3*pStride+16), left14);
 
-void IntraModeVerticalChroma_SSE2_INTRIN(
-    const EB_U32      size,                   //input parameter, denotes the size of the current PU
-    EB_U8            *refSamples,             //input parameter, pointer to the reference samples
-    EB_U8            *predictionPtr,          //output parameter, pointer to the prediction
-    const EB_U32      predictionBufferStride, //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip)                    //skip one row 
-{
-    EB_U32 pStride = predictionBufferStride;
-    EB_U32 topOffset = (size << 1) + 1;
-
-    if (!skip) {
-
-        if (size == 16) {
-            __m128i xmm0 = _mm_loadu_si128((__m128i *)(refSamples + topOffset)); 
-            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);                    
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
-            predictionPtr = predictionPtr + (pStride << 2);                         
-            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);                    
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
-            predictionPtr = predictionPtr + (pStride << 2);                         
-            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);                    
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
-            predictionPtr = predictionPtr + (pStride << 2);                         
-            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);                    
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
-        }
-        else if (size == 8) {
-            __m128i xmm0 = _mm_loadl_epi64((__m128i *)(refSamples + topOffset)); 
-            _mm_storel_epi64((__m128i *)(predictionPtr), xmm0);                  
-            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
-            predictionPtr = predictionPtr + (pStride << 2);                         
-            _mm_storel_epi64((__m128i *)predictionPtr, xmm0);                    
-            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
-        }
-        else {
-            EB_U32 top = *(EB_U32*)(refSamples + topOffset);         
-            *(EB_U32*)(predictionPtr) = top;
-            *(EB_U32*)(predictionPtr + pStride) = top;
-            *(EB_U32*)(predictionPtr + 2 * pStride) = top;
-            *(EB_U32*)(predictionPtr + 3 * pStride) = top;
-        }
-    }
-    else {
-        pStride <<= 1;
-        if (size == 16) {
-            
-            __m128i xmm0 = _mm_loadu_si128((__m128i *)(refSamples + topOffset)); 
-            _mm_storeu_si128((__m128i *)(predictionPtr), xmm0);                  
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
-            predictionPtr = predictionPtr + (pStride << 2);                         
-            _mm_storeu_si128((__m128i *)(predictionPtr), xmm0);                  
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
-        }
-        else if (size == 8) {
-            
-            __m128i xmm0 = _mm_loadl_epi64((__m128i *)(refSamples + topOffset)); 
-            _mm_storel_epi64((__m128i *)predictionPtr, xmm0);                    
-            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
-        }
-        else {
-            EB_U32 top = *(EB_U32*)(refSamples + topOffset); 
-            *(EB_U32*)(predictionPtr) = top;
-            *(EB_U32*)(predictionPtr + pStride) = top;
-        }
-    }
-}
 
 void IntraModeHorizontalLuma_SSE2_INTRIN(
     const EB_U32      size,                   //input parameter, denotes the size of the current PU
@@ -492,10 +408,91 @@ void IntraModeHorizontalChroma_SSE2_INTRIN(
 {
     EB_U32 pStride = predictionBufferStride;
     EB_U32 leftOffset = 0;
+    //Jing:
+    //Add size == 32 for 444
     
+    __m128i left0_15, left0_7, left8_15, left0_3, left4_7, left8_11, left12_15, left01, left23, left45, left67, left89, left10_11;
+    __m128i left12_13, left14_15, left0, left1, left2, left3, left4, left5, left6, left7, left8, left9, left10, left11;
+    __m128i left12, left13, left14, left15;
     if (!skip) {
+        if (size == 32) {
+            EB_U8 count;
+            for (count = 0; count < 2; ++count) {
+                left0_15 = _mm_loadu_si128((__m128i *)(refSamples + leftOffset));
+                refSamples += 16;
 
-        if (size == 16) {
+                left0_7 = _mm_unpacklo_epi8(left0_15, left0_15);
+                left8_15 = _mm_unpackhi_epi8(left0_15, left0_15);
+
+                left0_3 = _mm_unpacklo_epi16(left0_7, left0_7);
+                left4_7 = _mm_unpackhi_epi16(left0_7, left0_7);
+                left8_11 = _mm_unpacklo_epi16(left8_15, left8_15);
+                left12_15 = _mm_unpackhi_epi16(left8_15, left8_15);
+
+                left01 = _mm_unpacklo_epi32(left0_3, left0_3);
+                left23 = _mm_unpackhi_epi32(left0_3, left0_3);
+                left45 = _mm_unpacklo_epi32(left4_7, left4_7);
+                left67 = _mm_unpackhi_epi32(left4_7, left4_7);
+                left89 = _mm_unpacklo_epi32(left8_11, left8_11);
+                left10_11 = _mm_unpackhi_epi32(left8_11, left8_11);
+                left12_13 = _mm_unpacklo_epi32(left12_15, left12_15);
+                left14_15 = _mm_unpackhi_epi32(left12_15, left12_15);
+
+                left0 = _mm_unpacklo_epi64(left01, left01);
+                left1 = _mm_unpackhi_epi64(left01, left01);
+                left2 = _mm_unpacklo_epi64(left23, left23);
+                left3 = _mm_unpackhi_epi64(left23, left23);
+                left4 = _mm_unpacklo_epi64(left45, left45);
+                left5 = _mm_unpackhi_epi64(left45, left45);
+                left6 = _mm_unpacklo_epi64(left67, left67);
+                left7 = _mm_unpackhi_epi64(left67, left67);
+                left8 = _mm_unpacklo_epi64(left89, left89);
+                left9 = _mm_unpackhi_epi64(left89, left89);
+                left10 = _mm_unpacklo_epi64(left10_11, left10_11);
+                left11 = _mm_unpackhi_epi64(left10_11, left10_11);
+                left12 = _mm_unpacklo_epi64(left12_13, left12_13);
+                left13 = _mm_unpackhi_epi64(left12_13, left12_13);
+                left14 = _mm_unpacklo_epi64(left14_15, left14_15);
+                left15 = _mm_unpackhi_epi64(left14_15, left14_15);
+
+                _mm_storeu_si128((__m128i *)predictionPtr, left0);
+                _mm_storeu_si128((__m128i *)(predictionPtr + 16), left0);
+                _mm_storeu_si128((__m128i *)(predictionPtr+pStride), left1);
+                _mm_storeu_si128((__m128i *)(predictionPtr+pStride+16), left1);
+                _mm_storeu_si128((__m128i *)(predictionPtr+2*pStride), left2);
+                _mm_storeu_si128((__m128i *)(predictionPtr+2*pStride+16), left2);
+                _mm_storeu_si128((__m128i *)(predictionPtr+3*pStride), left3);
+                _mm_storeu_si128((__m128i *)(predictionPtr+3*pStride+16), left3);
+                predictionPtr += (pStride << 2);
+                _mm_storeu_si128((__m128i *)predictionPtr, left4);
+                _mm_storeu_si128((__m128i *)(predictionPtr + 16), left4);
+                _mm_storeu_si128((__m128i *)(predictionPtr+pStride), left5);
+                _mm_storeu_si128((__m128i *)(predictionPtr+pStride+16), left5);
+                _mm_storeu_si128((__m128i *)(predictionPtr+2*pStride), left6);
+                _mm_storeu_si128((__m128i *)(predictionPtr+2*pStride+16), left6);
+                _mm_storeu_si128((__m128i *)(predictionPtr+3*pStride), left7);
+                _mm_storeu_si128((__m128i *)(predictionPtr+3*pStride+16), left7);
+                predictionPtr += (pStride << 2);
+                _mm_storeu_si128((__m128i *)predictionPtr, left8);
+                _mm_storeu_si128((__m128i *)(predictionPtr + 16), left8);
+                _mm_storeu_si128((__m128i *)(predictionPtr+pStride), left9);
+                _mm_storeu_si128((__m128i *)(predictionPtr+pStride+16), left9);
+                _mm_storeu_si128((__m128i *)(predictionPtr+2*pStride), left10);
+                _mm_storeu_si128((__m128i *)(predictionPtr+2*pStride+16), left10);
+                _mm_storeu_si128((__m128i *)(predictionPtr+3*pStride), left11);
+                _mm_storeu_si128((__m128i *)(predictionPtr+3*pStride+16), left11);
+                predictionPtr += (pStride << 2);
+                _mm_storeu_si128((__m128i *)predictionPtr, left12);
+                _mm_storeu_si128((__m128i *)(predictionPtr + 16), left12);
+                _mm_storeu_si128((__m128i *)(predictionPtr+pStride), left13);
+                _mm_storeu_si128((__m128i *)(predictionPtr+pStride+16), left13);
+                _mm_storeu_si128((__m128i *)(predictionPtr+2*pStride), left14);
+                _mm_storeu_si128((__m128i *)(predictionPtr+2*pStride+16), left14);
+                _mm_storeu_si128((__m128i *)(predictionPtr+3*pStride), left15);
+                _mm_storeu_si128((__m128i *)(predictionPtr+3*pStride+16), left15);
+                predictionPtr += (pStride << 2);
+            }
+        } else if (size == 16) {
             __m128i xmm0, xmm2, xmm4, xmm6, xmm8, xmm10, xmm12, xmm14;
             xmm0 = _mm_loadu_si128((__m128i *)(refSamples+leftOffset));
             xmm8 = _mm_unpackhi_epi8(xmm0, xmm0);
@@ -570,7 +567,14 @@ void IntraModeHorizontalChroma_SSE2_INTRIN(
     else {
         pStride <<= 1;
         __m128i xmm15 = _mm_set1_epi16(0x00FF);
-        if (size == 16) {
+        if (size == 32) {
+            __m128i left0_14_even, left0_6_even, left8_14_even, left8_10, left12_14, left02, left46, skip_mask;
+            skip_mask = _mm_set1_epi16(0x00FF);
+            pStride <<= 1;
+            MACRO_HORIZONTAL_LUMA_32X16(0)
+            predictionPtr += (pStride << 2);
+            MACRO_HORIZONTAL_LUMA_32X16(16)
+        } else if (size == 16) {
             __m128i xmm0, xmm2, xmm4, xmm6;
             
             xmm0 = _mm_and_si128(_mm_loadu_si128((__m128i *)(refSamples + leftOffset)), xmm15);
@@ -619,149 +623,6 @@ void IntraModeHorizontalChroma_SSE2_INTRIN(
             *(EB_U32*)(predictionPtr) = _mm_cvtsi128_si32(xmm0);
             *(EB_U32*)(predictionPtr + pStride) = _mm_cvtsi128_si32(_mm_srli_si128(xmm0, 4));
         }     
-    }
-}
-
-void IntraModeDCChroma_SSE2_INTRIN(
-    const EB_U32      size,                       //input parameter, denotes the size of the current PU
-    EB_U8            *refSamples,                 //input parameter, pointer to the reference samples
-    EB_U8            *predictionPtr,              //output parameter, pointer to the prediction
-    const EB_U32      predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip)                       //skip one row 
-{
-    __m128i xmm0 = _mm_setzero_si128();
-    EB_U32 pStride = predictionBufferStride;
-    EB_U32 topOffset = (size << 1) + 1;
-    EB_U32 leftOffset = 0;
-    
-    if (!skip) {
-
-        if (size == 16) {
-            __m128i sum, predictionDcValue;
-            
-            sum = _mm_add_epi32(_mm_sad_epu8(_mm_loadu_si128((__m128i *)(refSamples + topOffset)), xmm0),
-                                _mm_sad_epu8(_mm_loadu_si128((__m128i *)(refSamples + leftOffset)), xmm0));
-
-            predictionDcValue = _mm_srli_epi32(_mm_add_epi32(_mm_add_epi32(_mm_srli_si128(sum, 8), sum), _mm_cvtsi32_si128(16)), 5);
-            predictionDcValue = _mm_unpacklo_epi8(predictionDcValue, predictionDcValue);
-            predictionDcValue = _mm_unpacklo_epi16(predictionDcValue, predictionDcValue);
-            predictionDcValue = _mm_unpacklo_epi32(predictionDcValue, predictionDcValue);
-            predictionDcValue = _mm_unpacklo_epi64(predictionDcValue, predictionDcValue);
-
-            _mm_storeu_si128((__m128i *)(predictionPtr), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
-            predictionPtr += (pStride << 2);
-            _mm_storeu_si128((__m128i *)(predictionPtr), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
-            predictionPtr += (pStride << 2);
-            _mm_storeu_si128((__m128i *)(predictionPtr), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
-            predictionPtr += (pStride << 2);
-            _mm_storeu_si128((__m128i *)(predictionPtr), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
-
-        }
-        else if (size == 8) {
-            __m128i sum, predictionDcValue;
- 
-            sum = _mm_add_epi32(_mm_sad_epu8(_mm_loadl_epi64((__m128i *)(refSamples + topOffset)), xmm0), 
-                                _mm_sad_epu8(_mm_loadl_epi64((__m128i *)(refSamples + leftOffset)), xmm0));
-            
-            predictionDcValue = _mm_srli_epi32(_mm_add_epi32(sum, _mm_cvtsi32_si128(8)), 4);
-            predictionDcValue = _mm_unpacklo_epi8(predictionDcValue, predictionDcValue);
-            predictionDcValue = _mm_unpacklo_epi16(predictionDcValue, predictionDcValue);
-            predictionDcValue = _mm_unpacklo_epi32(predictionDcValue, predictionDcValue);
-
-            _mm_storel_epi64((__m128i *)(predictionPtr), predictionDcValue);
-            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), predictionDcValue);
-            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
-            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
-            predictionPtr += (pStride << 2);
-            _mm_storel_epi64((__m128i *)(predictionPtr), predictionDcValue);
-            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), predictionDcValue);
-            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
-            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
-        }
-        else {
-            __m128i sum, predictionDcValue;
-            
-            sum = _mm_add_epi32(_mm_sad_epu8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + topOffset)), xmm0), 
-                                _mm_sad_epu8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + leftOffset)), xmm0));
-           
-            predictionDcValue = _mm_srli_epi32(_mm_add_epi32(sum, _mm_cvtsi32_si128(4)), 3);
-            predictionDcValue = _mm_unpacklo_epi8(predictionDcValue, predictionDcValue);
-            predictionDcValue = _mm_unpacklo_epi16(predictionDcValue, predictionDcValue);
-
-            *(EB_U32*)predictionPtr =                 _mm_cvtsi128_si32(predictionDcValue);
-            *(EB_U32*)(predictionPtr + pStride) =     _mm_cvtsi128_si32(predictionDcValue);
-            *(EB_U32*)(predictionPtr + 2 * pStride) = _mm_cvtsi128_si32(predictionDcValue);
-            *(EB_U32*)(predictionPtr + 3 * pStride) = _mm_cvtsi128_si32(predictionDcValue);
-        }
-    }
-    else {
-
-        pStride <<= 1;
-
-        if (size == 16) {
-
-            __m128i sum, predictionDcValue;
-            
-            sum = _mm_add_epi32(_mm_sad_epu8(_mm_loadu_si128((__m128i *)(refSamples + topOffset)), xmm0),  
-                                _mm_sad_epu8(_mm_loadu_si128((__m128i *)(refSamples + leftOffset)), xmm0));
-
-            predictionDcValue = _mm_srli_epi32(_mm_add_epi32(_mm_add_epi32(_mm_srli_si128(sum, 8), sum), _mm_cvtsi32_si128(16)), 5);
-            predictionDcValue = _mm_unpacklo_epi8(predictionDcValue, predictionDcValue);
-            predictionDcValue = _mm_unpacklo_epi16(predictionDcValue, predictionDcValue);
-            predictionDcValue = _mm_unpacklo_epi32(predictionDcValue, predictionDcValue);
-            predictionDcValue = _mm_unpacklo_epi64(predictionDcValue, predictionDcValue);
-
-            _mm_storeu_si128((__m128i *)(predictionPtr), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
-            predictionPtr += (pStride << 2);
-            _mm_storeu_si128((__m128i *)(predictionPtr), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
-        }
-        else if (size == 8) {
-            __m128i sum, predictionDcValue;
-            
-            sum = _mm_add_epi32(_mm_sad_epu8(_mm_loadl_epi64((__m128i *)(refSamples + topOffset)), xmm0), 
-                                _mm_sad_epu8(_mm_loadl_epi64((__m128i *)(refSamples + leftOffset)), xmm0));
-            
-            predictionDcValue = _mm_srli_epi32(_mm_add_epi32(sum, _mm_cvtsi32_si128(8)), 4);
-            predictionDcValue = _mm_unpacklo_epi8(predictionDcValue, predictionDcValue);
-            predictionDcValue = _mm_unpacklo_epi16(predictionDcValue, predictionDcValue);
-            predictionDcValue = _mm_unpacklo_epi32(predictionDcValue, predictionDcValue);
-
-            _mm_storel_epi64((__m128i *)(predictionPtr), predictionDcValue);
-            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), predictionDcValue);
-            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
-            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
-        }
-        else {
-            __m128i sum, predictionDcValue;
-            
-            sum = _mm_add_epi32(_mm_sad_epu8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + topOffset)), xmm0), 
-                                _mm_sad_epu8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + leftOffset)), xmm0));
-
-            predictionDcValue = _mm_srli_epi32(_mm_add_epi32(sum, _mm_cvtsi32_si128(4)), 3);
-            predictionDcValue = _mm_unpacklo_epi8(predictionDcValue, predictionDcValue);
-            predictionDcValue = _mm_unpacklo_epi16(predictionDcValue, predictionDcValue);
-
-            *(EB_U32*)predictionPtr =             _mm_cvtsi128_si32(predictionDcValue);
-            *(EB_U32*)(predictionPtr + pStride) = _mm_cvtsi128_si32(predictionDcValue);
-        }
     }
 }
 

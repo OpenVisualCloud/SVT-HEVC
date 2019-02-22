@@ -246,6 +246,7 @@ typedef struct EbConfig_s
     uint32_t                 injector;
     uint32_t                  speedControlFlag;
     uint32_t                 encoderBitDepth;
+    uint32_t                 encoderColorFormat;
 	uint32_t                 compressedTenBitFormat;
     uint32_t                 sourceWidth;
     uint32_t                 sourceHeight;

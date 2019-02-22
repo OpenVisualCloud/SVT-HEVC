@@ -40,17 +40,6 @@ typedef enum APPEXITCONDITIONTYPE {
     APP_ExitConditionError
 } APPEXITCONDITIONTYPE;
 
-/****************************************
-* Padding
-****************************************/
-#define LEFT_INPUT_PADDING 0
-#define RIGHT_INPUT_PADDING 0
-#define TOP_INPUT_PADDING 0
-#define BOTTOM_INPUT_PADDING 0
-
- /**********************************
- * Constructor
- **********************************/
 static void EbConfigCtor(EbConfig_t *configPtr)
 {
     configPtr->inputFile = NULL;
@@ -72,7 +61,6 @@ static void EbConfigCtor(EbConfig_t *configPtr)
 **********************************/
 static void EbConfigDtor(EbConfig_t *configPtr)
 {
-
     if (configPtr->inputFile) {
         fclose(configPtr->inputFile);
         configPtr->inputFile = (FILE *)NULL;
@@ -91,7 +79,7 @@ static void EbConfigDtor(EbConfig_t *configPtr)
     return;
 }
 
-APPEXITCONDITIONTYPE ProcessOutputReconBuffer(
+static APPEXITCONDITIONTYPE ProcessOutputReconBuffer(
     EbConfig_t             *config,
     EbAppContext_t         *appCallBack)
 {
@@ -128,7 +116,8 @@ APPEXITCONDITIONTYPE ProcessOutputReconBuffer(
     }
     return return_value;
 }
-APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
+
+static APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     EbConfig_t             *config,
     EbAppContext_t         *appCallback,
     uint8_t           picSendDone
@@ -163,40 +152,38 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     return return_value;
 }
 
-#define SIZE_OF_ONE_FRAME_IN_BYTES(width, height,is16bit) ( ( ((width)*(height)*3)>>1 )<<is16bit)
-void ReadInputFrames(
+static void ReadInputFrames(
     EbConfig_t                  *config,
     uint8_t                      is16bit,
     EB_BUFFERHEADERTYPE         *headerPtr)
 {
-
     uint64_t  readSize;
     uint32_t  inputPaddedWidth = config->inputPaddedWidth;
     uint32_t  inputPaddedHeight = config->inputPaddedHeight;
     FILE   *inputFile = config->inputFile;
     uint8_t  *ebInputPtr;
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
+    uint32_t colorFormat = (uint32_t)(config->encoderColorFormat);
+    uint32_t subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
     inputPtr->yStride  = inputPaddedWidth;
-    inputPtr->cbStride = inputPaddedWidth >> 1;
-    inputPtr->crStride = inputPaddedWidth >> 1;
+    inputPtr->cbStride = inputPaddedWidth >> subWidthCMinus1;
+    inputPtr->crStride = inputPaddedWidth >> subWidthCMinus1;
     {
         if (is16bit == 0 || (is16bit == 1 && config->compressedTenBitFormat == 0)) {
 
-            readSize = (uint64_t)SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, is16bit);
+            uint64_t lumaReadSize = (uint64_t)inputPaddedWidth*inputPaddedHeight << is16bit;
+            uint64_t chromaReadSize = lumaReadSize >> (3 - colorFormat);
+            readSize = lumaReadSize + (chromaReadSize << 1);
 
             headerPtr->nFilledLen = 0;
 
             {
-                uint64_t lumaReadSize = (uint64_t)inputPaddedWidth*inputPaddedHeight << is16bit;
                 ebInputPtr = inputPtr->luma;
                 headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize, inputFile);
                 ebInputPtr = inputPtr->cb;
-                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
+                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, chromaReadSize, inputFile);
                 ebInputPtr = inputPtr->cr;
-                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
-                inputPtr->luma = inputPtr->luma + ((config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING) << is16bit);
-                inputPtr->cb = inputPtr->cb + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)) << is16bit);
-                inputPtr->cr = inputPtr->cr + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)) << is16bit);
+                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, chromaReadSize, inputFile);
 
                  if (readSize != headerPtr->nFilledLen) {
                     config->stopEncoder = 1;
@@ -219,21 +206,12 @@ void ReadInputFrames(
             ebInputPtr = inputPtr->cr;
             headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
 
-            inputPtr->luma = inputPtr->luma + config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING;
-            inputPtr->cb = inputPtr->cb + (config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1);
-            inputPtr->cr = inputPtr->cr + (config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1);
-
-
             ebInputPtr = inputPtr->lumaExt;
             headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, nbitlumaReadSize, inputFile);
             ebInputPtr = inputPtr->cbExt;
             headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, nbitlumaReadSize >> 2, inputFile);
             ebInputPtr = inputPtr->crExt;
             headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, nbitlumaReadSize >> 2, inputFile);
-
-            inputPtr->lumaExt = inputPtr->lumaExt + ((config->inputPaddedWidth >> 2)*TOP_INPUT_PADDING + (LEFT_INPUT_PADDING >> 2));
-            inputPtr->cbExt = inputPtr->cbExt + (((config->inputPaddedWidth >> 1) >> 2)*(TOP_INPUT_PADDING >> 1) + ((LEFT_INPUT_PADDING >> 1) >> 2));
-            inputPtr->crExt = inputPtr->crExt + (((config->inputPaddedWidth >> 1) >> 2)*(TOP_INPUT_PADDING >> 1) + ((LEFT_INPUT_PADDING >> 1) >> 2));
 
             readSize = ((lumaReadSize * 3) >> 1) + ((nbitlumaReadSize * 3) >> 1);
 
@@ -251,8 +229,9 @@ void ReadInputFrames(
 
     return;
 }
+
 #define  TEST_IDR 0
-APPEXITCONDITIONTYPE ProcessInputBuffer(
+static APPEXITCONDITIONTYPE ProcessInputBuffer(
     EbConfig_t                  *config,
     EbAppContext_t              *appCallBack)
 {
@@ -299,7 +278,8 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
     return return_value;
 }
 
-static char* checkFileInput(char* input) {
+static char* checkFileInput(char* input)
+{
     if (!input) {
         return NULL;
     }
@@ -341,8 +321,8 @@ int32_t main(int32_t argc, char* argv[])
             return_error =  EB_ErrorInsufficientResources; 
         } else {
             EbConfigCtor(config);
-            if (argc != 6 && argc != 7) {
-                printf("Usage: ./HevcEncoderSimpleApp in.yuv out.265 width height bitdepth recon.yuv(optional)\n");
+            if (argc != 7 && argc != 8) {
+                printf("Usage: %s in.yuv out.265 width height bitdepth colorFormat recon.yuv(optional)\n", argv[0]);
                 return_error = EB_ErrorBadParameter;
             } else if (return_error == EB_ErrorNone) {
                 // Get info for config
@@ -391,9 +371,15 @@ int32_t main(int32_t argc, char* argv[])
                 }
                 config->encoderBitDepth = bdepth;
 
-                if (argc == 7) {
+                uint32_t chromaIdx = strtoul(argv[6], NULL, 0);
+                if (chromaIdx < EB_YUV420 || chromaIdx > EB_YUV444) {
+				    printf("Invalid chromaIdx value %d. 1: 420, 2:422, 3:444(not supported)\n", chromaIdx);
+					return_error = EB_ErrorBadParameter;
+				}
+                config->encoderColorFormat = chromaIdx;
+                if (argc == 8) {
                     FILE * frec = NULL;
-                    char* recon_file = argv[6];
+                    char* recon_file = argv[7];
                     recon_file = checkFileInput(recon_file);
                     if (recon_file) {
                         FOPEN(frec, recon_file, "wb");
@@ -446,7 +432,6 @@ int32_t main(int32_t argc, char* argv[])
 
             // DeInit Encoder
             return_error = DeInitEncoder(appCallback, 0);
-
         }
         else {
             printf("Error in configuration, could not begin encoding! ... \n");

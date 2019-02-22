@@ -51,6 +51,7 @@ typedef struct EbPictureBufferDesc_s
 	EB_U16          maxWidth;       // Luma picture width
 	EB_U16          maxHeight;      // Luma picture height
 	EB_BITDEPTH     bitDepth;       // Pixel Bit Depth
+    EB_COLOR_FORMAT colorFormat;    // Chroma subsampling format
 
 	// Buffer Parameters
 	EB_U32          lumaSize;       // Size of the luma buffer
@@ -70,6 +71,7 @@ typedef struct EbPictureBufferDescInitData_s
     EB_U16          maxWidth;
     EB_U16          maxHeight;
     EB_BITDEPTH     bitDepth;
+    EB_COLOR_FORMAT colorFormat;
     EB_U32          bufferEnableMask;
 	EB_U16          leftPadding;
 	EB_U16          rightPadding;
