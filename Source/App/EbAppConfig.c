@@ -950,7 +950,6 @@ EB_BOOL is_negative_number(
     return EB_TRUE;
 }
 
-#define SIZE_OF_ONE_FRAME_IN_BYTES(width, height,is16bit) ( ( ((width)*(height)*3)>>1 )<<is16bit)
 // Computes the number of frames in the input file
 int32_t ComputeFramesToBeEncoded(
     EbConfig_t   *config)
@@ -963,7 +962,9 @@ int32_t ComputeFramesToBeEncoded(
         fileSize = ftello64(config->inputFile);
     }
 
-    frameSize = SIZE_OF_ONE_FRAME_IN_BYTES(config->inputPaddedWidth, config->inputPaddedHeight, (uint8_t)((config->encoderBitDepth == 10) ? 1 : 0));
+    frameSize = config->inputPaddedWidth * config->inputPaddedHeight; // Luma
+    frameSize += 2 * (frameSize >> (3 - config->encoderColorFormat)); // Add Chroma
+    frameSize = frameSize << ((config->encoderBitDepth == 10) ? 1 : 0);
 
     if (frameSize == 0)
         return -1;

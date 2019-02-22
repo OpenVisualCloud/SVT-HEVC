@@ -39,8 +39,8 @@ typedef struct SequenceControlSet_s
     // Picture deminsions
 	EB_U16                      maxInputLumaWidth;
 	EB_U16                      maxInputLumaHeight;
-	EB_U16                      maxInputChromaWidth;
-	EB_U16                      maxInputChromaHeight; 
+	//EB_U16                      maxInputChromaWidth;
+	//EB_U16                      maxInputChromaHeight; 
 	EB_U16                      maxInputPadRight;
 	EB_U16                      maxInputPadBottom;
     EB_U16                      lumaWidth;

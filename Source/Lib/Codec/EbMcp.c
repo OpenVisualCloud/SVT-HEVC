@@ -59,6 +59,7 @@ EB_ERRORTYPE MotionCompensationPredictionContextCtor(
         initData.maxWidth = maxCUWidth + 16;    // +8 needed for interpolation; the rest to accommodate MCP assembly kernels
         initData.maxHeight = maxCUHeight + 16;  // +8 needed for interpolation; the rest to accommodate MCP assembly kernels
         initData.bitDepth = EB_16BIT;
+        initData.colorFormat = EB_YUV420;
 		initData.leftPadding = 0;
 		initData.rightPadding = 0;
 		initData.topPadding = 0;

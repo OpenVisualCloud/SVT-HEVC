@@ -194,8 +194,6 @@ EB_ERRORTYPE CopySequenceControlSet(
     dst->bitsForPictureOrderCount   = src->bitsForPictureOrderCount;                writeCount += sizeof(EB_U32);                     
     dst->maxInputLumaWidth          = src->maxInputLumaWidth;                       writeCount += sizeof(EB_U32);                     
     dst->maxInputLumaHeight         = src->maxInputLumaHeight;                      writeCount += sizeof(EB_U32);  
-    dst->maxInputChromaHeight       = src->maxInputChromaHeight;                    writeCount += sizeof(EB_U32);       
-    dst->maxInputChromaWidth        = src->maxInputChromaWidth;                     writeCount += sizeof(EB_U32);
     dst->maxInputPadRight           = src->maxInputPadRight;                        writeCount += sizeof(EB_U32);
     dst->maxInputPadBottom          = src->maxInputPadBottom;                       writeCount += sizeof(EB_U32);
     dst->lumaWidth                  = src->lumaWidth;                               writeCount += sizeof(EB_U32);                     

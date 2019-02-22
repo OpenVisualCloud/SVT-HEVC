@@ -4468,7 +4468,6 @@ void* PictureAnalysisKernel(void *inputPtr)
             // Jing: Do the conversion of 422/444=>420 here since it's multi-threaded kernel
             //       Reuse the Y, only add cb/cr in the newly created buffer desc
             //       NOTE: since denoise may change the src, so this part is after PicturePreProcessingOperations()
-            //       This is a bug here
             pictureControlSetPtr->chromaDownSamplePicturePtr->bufferY = inputPicturePtr->bufferY;
             DownSampleChroma(inputPicturePtr, pictureControlSetPtr->chromaDownSamplePicturePtr);
         } else {

@@ -1993,7 +1993,7 @@ void SetParamBasedOnInput(
 
         sequenceControlSetPtr->maxInputPadRight = MIN_CU_SIZE - (sequenceControlSetPtr->maxInputLumaWidth % MIN_CU_SIZE);
         sequenceControlSetPtr->maxInputLumaWidth = sequenceControlSetPtr->maxInputLumaWidth + sequenceControlSetPtr->maxInputPadRight;
-        sequenceControlSetPtr->maxInputChromaWidth = sequenceControlSetPtr->maxInputLumaWidth >> 1;
+        //sequenceControlSetPtr->maxInputChromaWidth = sequenceControlSetPtr->maxInputLumaWidth >> 1; //TODO: change here
     }
     else {
 
@@ -2003,7 +2003,7 @@ void SetParamBasedOnInput(
 
         sequenceControlSetPtr->maxInputPadBottom = MIN_CU_SIZE - (sequenceControlSetPtr->maxInputLumaHeight % MIN_CU_SIZE);
         sequenceControlSetPtr->maxInputLumaHeight = sequenceControlSetPtr->maxInputLumaHeight + sequenceControlSetPtr->maxInputPadBottom;
-        sequenceControlSetPtr->maxInputChromaHeight = sequenceControlSetPtr->maxInputLumaHeight >> 1;
+        //sequenceControlSetPtr->maxInputChromaHeight = sequenceControlSetPtr->maxInputLumaHeight >> 1; //ditto
     }
     else {
         sequenceControlSetPtr->maxInputPadBottom = 0;
@@ -2028,7 +2028,8 @@ void SetParamBasedOnInput(
 void CopyApiFromApp(
     SequenceControlSet_t       *sequenceControlSetPtr,
     EB_H265_ENC_CONFIGURATION* pComponentParameterStructure
-) {
+)
+{
 
     sequenceControlSetPtr->staticConfig.sourceWidth  = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceWidth;
     sequenceControlSetPtr->staticConfig.sourceHeight = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceHeight;

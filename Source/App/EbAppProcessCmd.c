@@ -879,22 +879,16 @@ static void ReadInputFrames(
             inputPtr->cb = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize;
             inputPtr->cr = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + chroma8bitSize;
 
+            inputPtr->lumaExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize;
+            inputPtr->cbExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize + luma2bitSize;
+            inputPtr->crExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize + luma2bitSize + chroma2bitSize;
 
-            if (is16bit) {
-                inputPtr->lumaExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize;
-                inputPtr->cbExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize + luma2bitSize;
-                inputPtr->crExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize + luma2bitSize + chroma2bitSize;
-
-
-            }
-
-            headerPtr->nFilledLen = (inputPaddedWidth*inputPaddedHeight * 3) / 2 + (inputPaddedWidth / 4 * inputPaddedHeight * 3) / 2;
+            headerPtr->nFilledLen = luma8bitSize + luma2bitSize + 2 * (chroma8bitSize + chroma2bitSize);
         } else {
             //Normal unpacked mode:yuv420p10le yuv422p10le yuv444p10le
 
             // Determine size of each plane
             const size_t lumaSize = (config->inputPaddedWidth * config->inputPaddedHeight) << is16bit;
-
             const size_t chromaSize = lumaSize >> (3 - colorFormat);
 
             EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
@@ -1093,11 +1087,12 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(EbConfig_t *config, EbAppContext_t *appC
     int64_t                  inputPaddedWidth           = config->inputPaddedWidth;
     int64_t                  inputPaddedHeight          = config->inputPaddedHeight;
     int64_t                  framesToBeEncoded          = config->framesToBeEncoded;
-	uint64_t                  frameSize                  = (uint64_t)((inputPaddedWidth*inputPaddedHeight * 3) / 2 + (inputPaddedWidth / 4 * inputPaddedHeight * 3) / 2);
     int64_t                  totalBytesToProcessCount;
     int64_t                  remainingByteCount;
     const EB_COLOR_FORMAT colorFormat = config->encoderColorFormat;
     int ret;
+    uint32_t compressed10bitFrameSize = (inputPaddedWidth*inputPaddedHeight) + 2 * ((inputPaddedWidth*inputPaddedWidth) >> (3 - colorFormat));
+    compressed10bitFrameSize += compressed10bitFrameSize / 4;
 
     if (config->injector && config->processedFrameCount)
     {
@@ -1105,7 +1100,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(EbConfig_t *config, EbAppContext_t *appC
     }
 
 	totalBytesToProcessCount = (framesToBeEncoded < 0) ? -1 : (config->encoderBitDepth == 10 && config->compressedTenBitFormat == 1) ?
-		framesToBeEncoded * (int64_t)frameSize :
+		framesToBeEncoded * compressed10bitFrameSize:
         framesToBeEncoded * SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, colorFormat, is16bit);
 
 
