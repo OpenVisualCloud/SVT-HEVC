@@ -1706,6 +1706,11 @@ void LoadDefaultBufferConfigurationSettings(
     EB_U32 inputPic = SetParentPcs(&sequenceControlSetPtr->staticConfig);
 
     unsigned int coreCount = GetNumProcessors();
+    if (sequenceControlSetPtr->staticConfig.targetSocket != -1)
+        coreCount /=2;
+    if (sequenceControlSetPtr->staticConfig.logicalProcessors != 0)
+        coreCount = sequenceControlSetPtr->staticConfig.logicalProcessors < coreCount ?
+            sequenceControlSetPtr->staticConfig.logicalProcessors : coreCount;
 
     sequenceControlSetPtr->inputOutputBufferFifoInitCount = inputPic + SCD_LAD;
     
