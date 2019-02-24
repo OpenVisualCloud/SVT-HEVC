@@ -56,6 +56,9 @@ volatile int32_t keepRunning = 1;
 void EventHandler(int32_t dummy) {
     (void)dummy;
     keepRunning = 0;
+
+    // restore default signal handler
+    signal(SIGINT, SIG_DFL);
 }
 
 void AssignAppThreadGroup(uint8_t targetSocket) {
