@@ -622,7 +622,6 @@ EB_ERRORTYPE EbSetThreadManagementParameters(
     if (processor_id_len < 0 || processor_id_len >= 128) return EB_ErrorInsufficientResources;
     if (physical_id_len < 0 || physical_id_len >= 128) return EB_ErrorInsufficientResources;
     CPU_ZERO(&groupAffinity);
-    numGroups = 1;
     typedef struct logicalProcessorGroup {
         EB_U32 num;
         EB_U32 group[1024];
