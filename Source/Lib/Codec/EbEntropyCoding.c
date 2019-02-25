@@ -5289,46 +5289,48 @@ static void CodeVPS(
     WriteFlagCavlc(
         bitstreamPtr,
         scsPtr->staticConfig.fpsInVps == 1 ? EB_TRUE : EB_FALSE);
+    if (scsPtr->staticConfig.fpsInVps == 1)
+    {
 
-    if (scsPtr->staticConfig.frameRateDenominator != 0 && scsPtr->staticConfig.frameRateNumerator != 0) {
+        if (scsPtr->staticConfig.frameRateDenominator != 0 && scsPtr->staticConfig.frameRateNumerator != 0) {
 
-        // vps_num_units_in_tick
-        WriteCodeCavlc(
+            // vps_num_units_in_tick
+            WriteCodeCavlc(
+                bitstreamPtr,
+                scsPtr->staticConfig.frameRateNumerator,
+                32);
+
+            // vps_time_scale
+            WriteCodeCavlc(
+                bitstreamPtr,
+                scsPtr->staticConfig.frameRateDenominator,
+                32);
+        }
+        else {
+            // vps_num_units_in_tick
+            WriteCodeCavlc(
+                bitstreamPtr,
+                scsPtr->frameRate > 1000 ? scsPtr->frameRate : scsPtr->frameRate << 16,
+                32);
+
+            // vps_time_scale
+            WriteCodeCavlc(
+                bitstreamPtr,
+                1 << 16,
+                32);
+        }
+
+        // vps_poc_proportional_to_timing_flag 
+        WriteFlagCavlc(
             bitstreamPtr,
-            scsPtr->staticConfig.frameRateNumerator,
-            32);
+            0);
 
-        // vps_time_scale
-        WriteCodeCavlc(
+        // vps_num_hrd_parameters 
+        WriteUvlc(
             bitstreamPtr,
-            scsPtr->staticConfig.frameRateDenominator,
-            32);
+            0);
+
     }
-    else {
-        // vps_num_units_in_tick
-        WriteCodeCavlc(
-            bitstreamPtr,
-            scsPtr->frameRate > 1000 ? scsPtr->frameRate : scsPtr->frameRate << 16,
-            32);
-
-        // vps_time_scale
-        WriteCodeCavlc(
-            bitstreamPtr,
-            1 << 16,
-            32);
-    }
-
-    // vps_poc_proportional_to_timing_flag 
-    WriteFlagCavlc(
-        bitstreamPtr,
-        0);
-
-    // vps_num_hrd_parameters 
-    WriteUvlc(
-        bitstreamPtr,
-        0);
-
-
 
 	// "vps_extension_flag"
 	WriteFlagCavlc(
