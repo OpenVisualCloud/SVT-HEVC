@@ -73,6 +73,8 @@ void InitHRD(SequenceControlSet_t *scsPtr)
             {
                 hrd->bitRateValueMinus1[i][j][k] = (scsPtr->staticConfig.vbvMaxrate >> (hrd->bitRateScale + BR_SHIFT))-1;
                 hrd->cpbSizeValueMinus1[i][j][k] = (scsPtr->staticConfig.vbvBufsize >> (hrd->cpbSizeScale + CPB_SHIFT))-1;
+                if (scsPtr->staticConfig.vbvMaxrate == scsPtr->staticConfig.targetBitRate)
+                    hrd->cbrFlag[i][j][k] = 1;
             }
     EB_U32 bitRateUnscale = ((scsPtr->staticConfig.vbvMaxrate >> (hrd->bitRateScale + BR_SHIFT)) << (hrd->bitRateScale + BR_SHIFT));
     EB_U32 cpbSizeUnscale = ((scsPtr->staticConfig.vbvBufsize >> (hrd->cpbSizeScale + CPB_SHIFT)) << (hrd->cpbSizeScale + CPB_SHIFT));
@@ -214,6 +216,7 @@ void* PacketizationKernel(void *inputPtr)
             ComputeProfileTierLevelInfo(
                 sequenceControlSetPtr);
                             
+          
 			ComputeMaxDpbBuffer(
                 sequenceControlSetPtr);
 
