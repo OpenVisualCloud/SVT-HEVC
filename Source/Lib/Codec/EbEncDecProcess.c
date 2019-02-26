@@ -3782,6 +3782,86 @@ EB_ERRORTYPE SignalDerivationEncDecKernelVmaf(
 	return return_error;
 }
 
+EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,
+    SequenceControlSet_t                       *sequenceControlSetPtr,
+    RCStatRow_t                                *rowPtr,
+    EncodeContext_t                            *rcData,
+    EB_U8                                      qpVbv)
+{
+    /* tweak quality based on difference from predicted size */
+    EB_U8 prevRowQp= qpVbv;
+    EB_U8 qpAbsoluteMax = sequenceControlSetPtr->staticConfig.maxQpAllowed;
+    EB_U8 qpAbsoluteMin = sequenceControlSetPtr->staticConfig.minQpAllowed;
+    EB_U8 lcuSizeLog2 = (EB_U8)Log2f(sequenceControlSetPtr->lcuSize);
+    EB_U8 pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + sequenceControlSetPtr->lcuSize - 1) >> lcuSizeLog2;
+    EB_U8 pictureHeightInLcu = (sequenceControlSetPtr->lumaHeight + sequenceControlSetPtr->lcuSize - 1) >> lcuSizeLog2;
+
+    EB_U8 qpMax = MIN(prevRowQp + 4, qpAbsoluteMax);
+    EB_U8 qpMin = MAX(prevRowQp - 4, qpAbsoluteMin);
+    EB_U64 bufferLeftPlanned = rcData->bufferFill - pictureControlSetPtr->frameSizePlanned;
+    double maxFrameError = MAX(0.05, 1.0 / pictureHeightInLcu);
+    if (rowPtr->rowIndex<pictureHeightInLcu+1)
+    {
+
+            double rcTol = 1*bufferLeftPlanned;
+            EB_U64 encodedBitsSoFar = 0;
+            EB_U64 accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, encodedBitsSoFar);
+
+
+            /* * Don't increase the row QPs until a sufficent amount of the bits of
+             * the frame have been processed, in case a flat area at the top of the
+             * frame was measured inaccurately. */
+            if (encodedBitsSoFar < (EB_U64)(0.05f * pictureControlSetPtr->frameSizePlanned))
+                qpMax = qpAbsoluteMax = prevRowQp;
+
+            if (pictureControlSetPtr->sliceType!= EB_I_PICTURE)
+                rcTol *= 0;
+
+                qpMin = MAX(qpMin, pictureControlSetPtr->qpNoVbv);
+
+            while (qpVbv < qpMax
+                && (((accFrameBits > pictureControlSetPtr->frameSizePlanned + rcTol) ||
+                (rcData->bufferFill - accFrameBits < (EB_U64)(bufferLeftPlanned * 0.5)) ||
+                    (accFrameBits > pictureControlSetPtr->frameSizePlanned && qpVbv < pictureControlSetPtr->qpNoVbv)
+                    )))
+            {
+                qpVbv += 1;
+                accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, encodedBitsSoFar);
+            }
+
+            while (qpVbv > qpMin
+                && (qpVbv > pictureControlSetPtr->rowStats[0]->rowQp )
+                && (((accFrameBits < (EB_U64)(pictureControlSetPtr->frameSizePlanned * 0.8f) && qpVbv <= prevRowQp)
+                    || accFrameBits < (EB_U64)((rcData->bufferFill - rcData->vbvBufsize + rcData->vbvMaxrate/pictureControlSetPtr->ParentPcsPtr->frameRate) * 1.1))
+                    ))
+            {
+                qpVbv -= 1;
+                accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, encodedBitsSoFar);
+            }
+
+            /* avoid VBV underflow */
+            while ((qpVbv < qpAbsoluteMax)
+                && (rcData->bufferFill - accFrameBits < (EB_U64)((rcData->vbvMaxrate / pictureControlSetPtr->ParentPcsPtr->frameRate) * maxFrameError))
+                )
+            {
+                qpVbv += 1;
+                accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, encodedBitsSoFar);
+            }
+
+            pictureControlSetPtr->frameSizeEstimated = accFrameBits;
+
+            /* If the current row was large enough to cause a large QP jump */
+            if (qpVbv > qpMax && prevRowQp < qpMax)
+            {
+                /* Bump QP to halfway in between... close enough. */
+                qpVbv = CLIP3(prevRowQp, qpMax, (EB_U8)((prevRowQp + qpVbv) * 0.5));
+            }
+
+    }
+
+    return qpVbv;
+}
+
 /******************************************************
  * EncDec Kernel
  ******************************************************/
@@ -3845,6 +3925,7 @@ void* EncDecKernel(void *inputPtr)
     EB_U32                   tempWrittenBitsBeforeQuantizedCoeff;
     EB_U32                   tempWrittenBitsAfterQuantizedCoeff;
     EB_U32                   bestOisCuIndex = 0;
+    EB_U8                    baseQp;
 
     for (;;) {
 
@@ -4000,6 +4081,8 @@ void* EncDecKernel(void *inputPtr)
                         // If current block is at row diagonal checkpoint, call vbv ratecontrol.
                         if (yLcuIndex == xLcuIndex && !pictureControlSetPtr->firstRowOfPicture)
                         {
+                            baseQp=RowVbvRateControl(pictureControlSetPtr,sequenceControlSetPtr, rowPtr, sequenceControlSetPtr->encodeContextPtr, lcuPtr->qp);
+                            lcuPtr->qp = CLIP3(sequenceControlSetPtr->staticConfig.minQpAllowed,sequenceControlSetPtr->staticConfig.maxQpAllowed, baseQp);
 
                         }
 

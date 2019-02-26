@@ -289,6 +289,10 @@ typedef struct PictureControlSet_s
     RCStatRow_t                           **rowStats;
     EB_BOOL                               firstRowOfPicture;
 
+    EB_U64                                frameSizePlanned;
+    EB_U64                                frameSizeEstimated;
+    EB_U8                                 qpNoVbv;
+
 } PictureControlSet_t;
 
 

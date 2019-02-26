@@ -2391,6 +2391,10 @@ void* RateControlKernel(void *inputPtr)
     EB_U32                       bestOisCuIndex = 0;
 
     RATE_CONTROL_TASKTYPES       taskType;
+    EB_U32                             queueEntryIndexTemp2;
+    EB_U32                             queueEntryIndexHeadTemp;
+    HlRateControlHistogramEntry_t      *hlRateControlHistogramPtrTemp;
+
 
     for (;;) {
 
@@ -2640,8 +2644,19 @@ void* RateControlKernel(void *inputPtr)
             if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize)
             {
                 EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
+                pictureControlSetPtr->qpNoVbv = pictureControlSetPtr->pictureQp;
                 pictureControlSetPtr->pictureQp = (EB_U8)Vbv_Buf_Calc(pictureControlSetPtr, sequenceControlSetPtr, encodeContextPtr);
+                queueEntryIndexHeadTemp = (EB_S32)(pictureControlSetPtr->pictureNumber - encodeContextPtr->hlRateControlHistorgramQueue[encodeContextPtr->hlRateControlHistorgramQueueHeadIndex]->pictureNumber);
+                queueEntryIndexHeadTemp += encodeContextPtr->hlRateControlHistorgramQueueHeadIndex;
+                queueEntryIndexHeadTemp = (queueEntryIndexHeadTemp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ?
+                    queueEntryIndexHeadTemp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
+                    queueEntryIndexHeadTemp;
 
+                queueEntryIndexTemp2 = queueEntryIndexHeadTemp;
+
+                EB_U32 currentInd = (queueEntryIndexTemp2 > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ? queueEntryIndexTemp2 - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH : queueEntryIndexTemp2;
+                hlRateControlHistogramPtrTemp = encodeContextPtr->hlRateControlHistorgramQueue[currentInd];
+                pictureControlSetPtr->frameSizePlanned = predictBits(sequenceControlSetPtr, encodeContextPtr, hlRateControlHistogramPtrTemp, pictureControlSetPtr->pictureQp);
                 EbReleaseMutex(encodeContextPtr->bufferFillMutex);
             }
             pictureControlSetPtr->ParentPcsPtr->pictureQp = pictureControlSetPtr->pictureQp;
