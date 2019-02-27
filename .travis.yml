@@ -4,51 +4,87 @@ dist: xenial
 addons:
   apt:
     packages:
-     - cmake
-     - yasm
+      - cmake
+      - yasm
   homebrew:
     packages:
       - yasm
-
-jobs:
+matrix:
+  allow_failures:
+    - os: windows
+    - name: FFmpeg patch
+    - name: macOS build
+  fast_finish: true
   include:
-   # General Linux build job
-   - name: Build
-     script:
-     - cd Build/linux
-     - ./build.sh release
-   # General macOS build job
-   - name: macOS build
-     os: osx
-     script:
-     - cd Build/linux
-     - ./build.sh release    
-   # Coveralls test job
-   - name: Test & Coveralls
-     before_install:
-     - pip install --user cpp-coveralls
-     script:
-     - cd Build/linux
-     - ./build.sh release
-     after_success:
-     - coveralls
-     
-   # FFmpeg interation build
-   - name: FFmpeg patch
-     script:
-     # Build and install SVT-HEVC
-     - cd $TRAVIS_BUILD_DIR
-     - cd Build
-     - cmake ..
-     - make -j$(nproc)
-     - sudo make install
-     # Apply SVT-HEVC plugin and enable libsvthevc to FFmpeg
-     - git clone https://github.com/FFmpeg/FFmpeg ffmpeg
-     - cd ffmpeg
-     - git checkout release/4.1
-     - git apply $TRAVIS_BUILD_DIR/ffmpeg_plugin/0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch
-     - git apply $TRAVIS_BUILD_DIR/ffmpeg_plugin/0002-doc-Add-libsvt_hevc-encoder-docs.patch
-     - export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
-     - export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
-     - ./configure --enable-libsvthevc
-     - make --quiet -j$(nproc)
+    # General Linux build job
+    - Linux & Coveralls:
+      before_script: pip install --user cpp-coveralls
+      name: Linux & Coveralls build
+      env: CMAKE_ASSEMBLER=yasm GCC_COMPILER=gcc AR_COMPILER=gcc-ar RANLIB_COMPILER=gcc-ranlib CMAKE_COMPILER=$GCC_COMPILER
+      script:
+        - cd Build
+        - PATH=$PATH:/usr/local/bin/
+        - cmake $TRAVIS_BUILD_DIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=$CMAKE_COMPILER -DCMAKE_ASM_NASM_COMPILER=$CMAKE_ASSEMBLER -DCMAKE_AR=`which $AR_COMPILER` -DCMAKE_RANLIB=`which $RANLIB_COMPILER`
+        - make -j SvtHevcEncApp
+        - $TRAVIS_BUILD_DIR/Bin/Release/SvtHevcEncApp -help
+      after_success: coveralls
+    # General macOS build job
+    - MacOS:
+      name: macOS build
+      os: osx
+      env: CMAKE_ASSEMBLER=yasm GCC_COMPILER=gcc AR_COMPILER=gcc-ar RANLIB_COMPILER=gcc-ranlib CMAKE_COMPILER=$GCC_COMPILER
+      script:
+        - cd Build
+        - PATH=$PATH:/usr/local/bin/
+        - cmake $TRAVIS_BUILD_DIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=$CMAKE_COMPILER -DCMAKE_ASM_NASM_COMPILER=$CMAKE_ASSEMBLER -DCMAKE_AR=`which $AR_COMPILER` -DCMAKE_RANLIB=`which $RANLIB_COMPILER`
+        - make -j SvtHevcEncApp
+        - $TRAVIS_BUILD_DIR/Bin/Release/SvtHevcEncApp -help
+    # Windows Ninja build
+    - Windows GCC:
+      name: windows mingw-gcc build
+      os: windows
+      before_install:
+        - choco install -y yasm ninja
+      script:
+        - cd Build
+        - cmake $TRAVIS_BUILD_DIR -G"Ninja" -DCMAKE_BUILD_TYPE=Release
+        - ninja -j0
+        - $TRAVIS_BUILD_DIR/Bin/Release/Release/SvtHevcEncApp.exe -help
+      after_failure: cat $TRAVIS_BUILD_DIR/Build/windows/CMakeFiles/CMakeOutput.log
+    - Windows Clang:
+      name: windows mingw-clang build
+      os: windows
+      cache:
+        directories:
+          - $TRAVIS_BUILD_DIR/msys64/var/cache
+      before_install:
+        - curl http://repo.msys2.org/distrib/msys2-x86_64-latest.tar.xz -o $TRAVIS_BUILD_DIR/msys2-base.tar.xz
+        - 7z x -aoa $TRAVIS_BUILD_DIR/msys2-base.tar.xz
+        - tar -xf $TRAVIS_BUILD_DIR/msys2-base.tar
+        - echo -e "Start-Process -NoNewWindow -Wait -FilePath \$env:TRAVIS_BUILD_DIR/msys64/usr/bin/bash.exe -ArgumentList \"-lc exit\".Split(' ')\nStart-Process -NoNewWindow -Wait -FilePath \$env:TRAVIS_BUILD_DIR/msys64/usr/bin/bash.exe -ArgumentList  \"-lc 'pacman -Syyu --noconfirm --ask=20 --needed'\".Split(' ')\nStart-Process -NoNewWindow -Wait -FilePath \$env:TRAVIS_BUILD_DIR/msys64/usr/bin/bash.exe -ArgumentList  \"-lc 'pacman -S --noconfirm --ask=20 --needed mingw-w64-x86_64-toolchain bsdtar coreutils glib2 icu libpcre32 libpcrecpp libpcreposix pcre mingw-w64-x86_64-clang mingw-w64-x86_64-yasm'\".Split(' ')"> $TRAVIS_BUILD_DIR/bash.ps1
+        - powershell -NoProfile -NoLogo -ExecutionPolicy bypass $TRAVIS_BUILD_DIR/bash.ps1
+        - PATH=$TRAVIS_BUILD_DIR/msys64/mingw64/bin:$PATH
+      script:
+        - cd Build
+        - cmake $TRAVIS_BUILD_DIR -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_MAKE_PROGRAM=mingw32-make.exe
+        - mingw32-make -j
+        - $TRAVIS_BUILD_DIR/Bin/Release/Release/SvtHevcEncApp.exe -help
+      after_failure: cat $TRAVIS_BUILD_DIR/Build/windows/CMakeFiles/CMakeOutput.log
+    # FFmpeg interation build
+    - FFmpeg:
+      name: FFmpeg patch
+      script:
+        # Build and install SVT-HEVC
+        - cd $TRAVIS_BUILD_DIR/Build
+        - cmake ..
+        - make -j$(nproc)
+        - sudo make install
+        # Apply SVT-HEVC plugin and enable libsvtHEVC to FFmpeg
+        - git clone https://github.com/FFmpeg/FFmpeg ffmpeg && cd ffmpeg
+        - git checkout release/4.1
+        - git apply $TRAVIS_BUILD_DIR/ffmpeg_plugin/0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch
+        - git apply $TRAVIS_BUILD_DIR/ffmpeg_plugin/0002-doc-Add-libsvt_hevc-encoder-docs.patch
+        - export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
+        - export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
+        - ./configure --enable-libsvtHEVC
+        - make --quiet -j$(nproc)
