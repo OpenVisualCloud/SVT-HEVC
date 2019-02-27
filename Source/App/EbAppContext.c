@@ -208,9 +208,9 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.encoderColorFormat = config->encoderColorFormat;
     callbackData->ebEncParameters.compressedTenBitFormat = config->compressedTenBitFormat;
     callbackData->ebEncParameters.profile = config->profile;
-    if((config->encoderColorFormat >= EB_YUV422 || config->encoderBitDepth > 8) && config->profile != 4)
+    if(config->encoderColorFormat >= EB_YUV422 && config->profile != 4)
     {
-        printf("\nWarning: input profile is not correct, force converting it from %d to MainREXT \n", config->profile);
+        printf("\nWarning: input profile is not correct, force converting it from %d to MainREXT for YUV422 or YUV444 cases \n", config->profile);
         callbackData->ebEncParameters.profile = 4;
     }
     callbackData->ebEncParameters.tier = config->tier;

@@ -172,9 +172,9 @@ static EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.sourceHeight      = config->sourceHeight;
     callbackData->ebEncParameters.encoderBitDepth   = config->encoderBitDepth;
     callbackData->ebEncParameters.encoderColorFormat       = config->encoderColorFormat;
-    if((config->encoderColorFormat >= EB_YUV422 || config->encoderBitDepth > 8) && config->profile != 4)
+    if(config->encoderColorFormat >= EB_YUV422 && config->profile != 4)
     {
-        printf("\nWarning: force profile to be 4 or MainREXT for YUV422/YUV44/10Bits\n");
+        printf("\nWarning: force profile to be MainREXT for YUV422 or YUV44 cases\n");
         callbackData->ebEncParameters.profile = 4;
     }
     callbackData->ebEncParameters.codeVpsSpsPps     = 0;

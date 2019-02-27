@@ -2558,9 +2558,9 @@ static EB_ERRORTYPE VerifySettings(\
 		return_error = EB_ErrorBadParameter;
 	} 
 
-    if((config->encoderColorFormat >= EB_YUV422 || config->encoderBitDepth > 8) && config->profile != 4)
+    if(config->encoderColorFormat >= EB_YUV422 && config->profile != 4)
     {
-        SVT_LOG("SVT [Error]: Instance %u: The input profile is not correct, should be 4 or MainREXT for YUV422/YUV444/10Bits\n",channelNumber+1);
+        SVT_LOG("SVT [Error]: Instance %u: The input profile is not correct, should be 4 or MainREXT for YUV422 or YUV444 cases\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     }
 
