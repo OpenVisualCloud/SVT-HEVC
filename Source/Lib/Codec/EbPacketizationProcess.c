@@ -148,7 +148,8 @@ void* PacketizationKernel(void *inputPtr)
        
     EB_PICTURE                        sliceType;
     
-    EB_U64                          prevBPpictureNumber =0;
+    EB_U64                          prevBPpictureNumber;
+    EB_U64                          lastBpnumber;
     for(;;) {
     
         // Get EntropyCoding Results
@@ -517,7 +518,7 @@ void* PacketizationKernel(void *inputPtr)
 
         // Parsing the linked list and find the user data SEI msgs and code them
         sequenceControlSetPtr->picTimingSei.picStruct = 0;
-
+        prevBPpictureNumber = pictureControlSetPtr->pictureNumber == 0 ? 0 : lastBpnumber;
         if( sequenceControlSetPtr->staticConfig.bufferingPeriodSEI && 
             pictureControlSetPtr->sliceType == EB_I_PICTURE && 
             sequenceControlSetPtr->staticConfig.videoUsabilityInfo &&
@@ -527,7 +528,7 @@ void* PacketizationKernel(void *inputPtr)
             if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
             {
                 HrdFullness(sequenceControlSetPtr, pictureControlSetPtr, &sequenceControlSetPtr->bufferingPeriod);
-                prevBPpictureNumber = pictureControlSetPtr->ParentPcsPtr->decodeOrder;
+                lastBpnumber= pictureControlSetPtr->ParentPcsPtr->decodeOrder;
             }
             EncodeBufferingPeriodSEI(
                 pictureControlSetPtr->bitstreamPtr,
@@ -546,7 +547,7 @@ void* PacketizationKernel(void *inputPtr)
                 const AppVideoUsabilityInfo_t* vui = sequenceControlSetPtr->videoUsabilityInfoPtr;
                 const AppHrdParameters_t* hrd = vui->hrdParametersPtr;
                 sequenceControlSetPtr->picTimingSei.auCpbRemovalDelayMinus1 = (EB_U32)((MIN(MAX(1, (EB_S32)pictureControlSetPtr->ParentPcsPtr->decodeOrder - (EB_S32)prevBPpictureNumber), (1 << hrd->auCpbRemovalDelayLengthMinus1)))-1);
-                sequenceControlSetPtr->picTimingSei.picDpbOutputDelay = (EB_U32)(sequenceControlSetPtr->maxDpbSize + pictureControlSetPtr->pictureNumber - pictureControlSetPtr->ParentPcsPtr->decodeOrder);
+                sequenceControlSetPtr->picTimingSei.picDpbOutputDelay = (EB_U32)((sequenceControlSetPtr->maxDpbSize-1) + pictureControlSetPtr->pictureNumber - pictureControlSetPtr->ParentPcsPtr->decodeOrder);
             }
 
             EncodePictureTimingSEI(
