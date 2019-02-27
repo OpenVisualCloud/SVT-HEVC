@@ -49,7 +49,7 @@ matrix:
         - cd Build
         - cmake $TRAVIS_BUILD_DIR -G"Ninja" -DCMAKE_BUILD_TYPE=Release
         - ninja -j0
-        - $TRAVIS_BUILD_DIR/Bin/Release/Release/SvtHevcEncApp.exe -help
+        - $TRAVIS_BUILD_DIR/Bin/Release/SvtHevcEncApp.exe -help
       after_failure: cat $TRAVIS_BUILD_DIR/Build/windows/CMakeFiles/CMakeOutput.log
     - Windows Clang:
       name: windows mingw-clang build
@@ -68,7 +68,7 @@ matrix:
         - cd Build
         - cmake $TRAVIS_BUILD_DIR -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_MAKE_PROGRAM=mingw32-make.exe
         - mingw32-make -j
-        - $TRAVIS_BUILD_DIR/Bin/Release/Release/SvtHevcEncApp.exe -help
+        - $TRAVIS_BUILD_DIR/Bin/Release/SvtHevcEncApp.exe -help
       after_failure: cat $TRAVIS_BUILD_DIR/Build/windows/CMakeFiles/CMakeOutput.log
     # FFmpeg interation build
     - FFmpeg:
