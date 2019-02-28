@@ -891,6 +891,7 @@ static void EncodeLoop(
     if ((componentMask & PICTURE_BUFFER_DESC_CHROMA_MASK) && secondChroma) {
         tuPtr->nzCoefCount2[0] = (EB_U16)countNonZeroCoeffs[1];
         tuPtr->nzCoefCount2[1] = (EB_U16)countNonZeroCoeffs[2];
+	    tuPtr->transCoeffShapeChroma2 = contextPtr->transCoeffShapeChroma;
     } else {
 	    tuPtr->transCoeffShapeLuma   = contextPtr->transCoeffShapeLuma;
 	    tuPtr->transCoeffShapeChroma = contextPtr->transCoeffShapeChroma;
@@ -1005,7 +1006,7 @@ static void EncodeGenerateRecon(
 		//********************************** 
 		if (cbCbf== EB_TRUE && cuPtr->skipFlag == EB_FALSE) {
 			EncodeInvTransform(
-				(tuSize==MIN_PU_SIZE)?EB_FALSE:(tuPtr->transCoeffShapeChroma == ONLY_DC_SHAPE || (secondChroma?tuPtr->isOnlyDc2[0]:tuPtr->isOnlyDc[1])),
+				(tuSize==MIN_PU_SIZE)?EB_FALSE:(secondChroma ? (tuPtr->transCoeffShapeChroma2 == ONLY_DC_SHAPE || tuPtr->isOnlyDc2[0]) : (tuPtr->transCoeffShapeChroma == ONLY_DC_SHAPE || tuPtr->isOnlyDc[1])),
 				((EB_S16*)residual16bit->bufferCb) + scratchChromaOffset,
 				residual16bit->strideCb,
 				((EB_S16*)residual16bit->bufferCb) + scratchChromaOffset,
@@ -1038,7 +1039,7 @@ static void EncodeGenerateRecon(
 
 		if (crCbf == EB_TRUE && cuPtr->skipFlag == EB_FALSE) {
 			EncodeInvTransform(
-				(tuSize==MIN_PU_SIZE)?EB_FALSE:(tuPtr->transCoeffShapeChroma == ONLY_DC_SHAPE || (secondChroma?tuPtr->isOnlyDc2[1]:tuPtr->isOnlyDc[2])),
+				(tuSize==MIN_PU_SIZE)?EB_FALSE:(secondChroma ? (tuPtr->transCoeffShapeChroma2 == ONLY_DC_SHAPE || tuPtr->isOnlyDc2[1]) : (tuPtr->transCoeffShapeChroma == ONLY_DC_SHAPE || tuPtr->isOnlyDc[2])),
 				((EB_S16*)residual16bit->bufferCr) + scratchChromaOffset,
 				residual16bit->strideCr,
 				((EB_S16*)residual16bit->bufferCr) + scratchChromaOffset,
@@ -1466,6 +1467,7 @@ static void EncodeLoop16bit(
     if ((componentMask & PICTURE_BUFFER_DESC_CHROMA_MASK) && secondChroma) {
         tuPtr->nzCoefCount2[0] = (EB_U16)countNonZeroCoeffs[1];
         tuPtr->nzCoefCount2[1] = (EB_U16)countNonZeroCoeffs[2];
+	    tuPtr->transCoeffShapeChroma2 = contextPtr->transCoeffShapeChroma;
     } else {
 	    tuPtr->transCoeffShapeLuma   = contextPtr->transCoeffShapeLuma;
 	    tuPtr->transCoeffShapeChroma = contextPtr->transCoeffShapeChroma;
@@ -1579,7 +1581,7 @@ static void EncodeGenerateRecon16bit(
 		//********************************** 
 		if (cbCbf== EB_TRUE && cuPtr->skipFlag == EB_FALSE) {
 			EncodeInvTransform(
-				(tuSize==MIN_PU_SIZE)?EB_FALSE:(tuPtr->transCoeffShapeChroma == ONLY_DC_SHAPE || (secondChroma?tuPtr->isOnlyDc2[0]:tuPtr->isOnlyDc[1])),
+				(tuSize==MIN_PU_SIZE)?EB_FALSE:(secondChroma ? (tuPtr->transCoeffShapeChroma2 == ONLY_DC_SHAPE || tuPtr->isOnlyDc2[0]) : (tuPtr->transCoeffShapeChroma == ONLY_DC_SHAPE || tuPtr->isOnlyDc[1])),
 				((EB_S16*)residual16bit->bufferCb) + scratchChromaOffset,
 				residual16bit->strideCb,
 				((EB_S16*)residual16bit->bufferCb) + scratchChromaOffset,
@@ -1612,7 +1614,7 @@ static void EncodeGenerateRecon16bit(
 
 		if (crCbf == EB_TRUE && cuPtr->skipFlag == EB_FALSE) {
 			EncodeInvTransform(
-				(tuSize==MIN_PU_SIZE)?EB_FALSE:(tuPtr->transCoeffShapeChroma == ONLY_DC_SHAPE || (secondChroma?tuPtr->isOnlyDc2[1]:tuPtr->isOnlyDc[2])),
+				(tuSize==MIN_PU_SIZE)?EB_FALSE:(secondChroma ? (tuPtr->transCoeffShapeChroma2 == ONLY_DC_SHAPE || tuPtr->isOnlyDc2[1]) : (tuPtr->transCoeffShapeChroma == ONLY_DC_SHAPE || tuPtr->isOnlyDc[2])),
 				((EB_S16*)residual16bit->bufferCr) + scratchChromaOffset,
 				residual16bit->strideCr,
 				((EB_S16*)residual16bit->bufferCr) + scratchChromaOffset,
