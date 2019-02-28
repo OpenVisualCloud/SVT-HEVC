@@ -149,7 +149,7 @@ void* PacketizationKernel(void *inputPtr)
     EB_PICTURE                        sliceType;
     
     EB_U64                          prevBPpictureNumber;
-    EB_U64                          lastBpnumber;
+    EB_U64                          lastBpnumber=0;
     for(;;) {
     
         // Get EntropyCoding Results
