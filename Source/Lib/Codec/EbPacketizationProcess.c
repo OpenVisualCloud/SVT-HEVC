@@ -147,9 +147,8 @@ void* PacketizationKernel(void *inputPtr)
     EB_U32                          packetizationQp;
        
     EB_PICTURE                        sliceType;
-    
-    EB_U64                          prevBPpictureNumber;
-    EB_U64                          lastBpnumber=0;
+    EB_U32                            refDecOrder;
+
     for(;;) {
     
         // Get EntropyCoding Results
@@ -518,7 +517,6 @@ void* PacketizationKernel(void *inputPtr)
 
         // Parsing the linked list and find the user data SEI msgs and code them
         sequenceControlSetPtr->picTimingSei.picStruct = 0;
-        prevBPpictureNumber = pictureControlSetPtr->pictureNumber == 0 ? 0 : lastBpnumber;
         if( sequenceControlSetPtr->staticConfig.bufferingPeriodSEI && 
             pictureControlSetPtr->sliceType == EB_I_PICTURE && 
             sequenceControlSetPtr->staticConfig.videoUsabilityInfo &&
@@ -528,7 +526,6 @@ void* PacketizationKernel(void *inputPtr)
             if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
             {
                 HrdFullness(sequenceControlSetPtr, pictureControlSetPtr, &sequenceControlSetPtr->bufferingPeriod);
-                lastBpnumber= pictureControlSetPtr->ParentPcsPtr->decodeOrder;
             }
             EncodeBufferingPeriodSEI(
                 pictureControlSetPtr->bitstreamPtr,
@@ -546,7 +543,20 @@ void* PacketizationKernel(void *inputPtr)
                 // buffering period SEI message
                 const AppVideoUsabilityInfo_t* vui = sequenceControlSetPtr->videoUsabilityInfoPtr;
                 const AppHrdParameters_t* hrd = vui->hrdParametersPtr;
-                sequenceControlSetPtr->picTimingSei.auCpbRemovalDelayMinus1 = (EB_U32)((MIN(MAX(1, (EB_S32)pictureControlSetPtr->ParentPcsPtr->decodeOrder - (EB_S32)prevBPpictureNumber), (1 << hrd->auCpbRemovalDelayLengthMinus1)))-1);
+                if (sequenceControlSetPtr->intraRefreshType == CRA_REFRESH)
+                {
+                    if (pictureControlSetPtr->sliceType == EB_I_PICTURE)
+                        refDecOrder = (EB_S64)((pictureControlSetPtr->pictureNumber - (sequenceControlSetPtr->intraPeriodLength + 1) - ((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) - 1))) < 0 ? 
+                        0 : (EB_U32)((pictureControlSetPtr->pictureNumber - (sequenceControlSetPtr->intraPeriodLength + 1) - ((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) - 1)));
+                    else
+                        refDecOrder = (EB_S64)((((pictureControlSetPtr->pictureNumber + ((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) - 1)) / (sequenceControlSetPtr->intraPeriodLength + 1) * (sequenceControlSetPtr->intraPeriodLength + 1))) - ((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) - 1)) < 0 ?
+                        0: (EB_U32)((((pictureControlSetPtr->pictureNumber + ((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) - 1)) / (sequenceControlSetPtr->intraPeriodLength + 1) * (sequenceControlSetPtr->intraPeriodLength + 1))) - ((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) - 1));
+                }
+                else
+                {
+                        refDecOrder = (EB_U32)pictureControlSetPtr->ParentPcsPtr->lastIdrPictureOrder;
+                }
+                sequenceControlSetPtr->picTimingSei.auCpbRemovalDelayMinus1 = (EB_U32)((MIN(MAX(1, (EB_S32)(pictureControlSetPtr->ParentPcsPtr->decodeOrder - refDecOrder)), (1 << hrd->auCpbRemovalDelayLengthMinus1)))-1);
                 sequenceControlSetPtr->picTimingSei.picDpbOutputDelay = (EB_U32)((sequenceControlSetPtr->maxDpbSize-1) + pictureControlSetPtr->pictureNumber - pictureControlSetPtr->ParentPcsPtr->decodeOrder);
             }
 

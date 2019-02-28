@@ -179,7 +179,7 @@ EB_ERRORTYPE EncodeContextCtor(
     encodeContextPtr->initialPicture                                    = EB_TRUE;
 
     encodeContextPtr->lastIdrPicture                                    = 0;
-
+    encodeContextPtr->lastIdrPictureOrder                               = 0;
     // Sequence Termination Flags
     encodeContextPtr->terminatingPictureNumber                          = ~0u;
     encodeContextPtr->terminatingSequenceFlagReceived                   = EB_FALSE;
