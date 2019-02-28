@@ -2543,8 +2543,8 @@ static EB_ERRORTYPE VerifySettings(\
     }
     }
 
-	if(config->profile > 3){
-        SVT_LOG("SVT [Error]: Instance %u: The maximum allowed Profile number is 3 \n",channelNumber+1);
+	if(config->profile > 4){
+        SVT_LOG("SVT [Error]: Instance %u: The maximum allowed Profile number is 4 or MAINEXT \n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -2557,6 +2557,12 @@ static EB_ERRORTYPE VerifySettings(\
         SVT_LOG("SVT [Error]: Instance %u: The Main Still Picture Profile is not supported \n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	} 
+
+    if(config->encoderColorFormat >= EB_YUV422 && config->profile != 4)
+    {
+        SVT_LOG("SVT [Error]: Instance %u: The input profile is not correct, should be 4 or MainREXT for YUV422 or YUV444 cases\n",channelNumber+1);
+        return_error = EB_ErrorBadParameter;
+    }
 
     // Check if the current input video is conformant with the Level constraint
     if(config->frameRate > (240<<16)){
@@ -2879,8 +2885,10 @@ static void PrintLibParams(
     SVT_LOG("------------------------------------------- ");
     if (config->profile == 1)
         SVT_LOG("\nSVT [config]: Main Profile\t");
-    else
+    else if (config->profile == 2)
         SVT_LOG("\nSVT [config]: Main10 Profile\t");
+    else
+        SVT_LOG("\nSVT [config]: MainEXT Profile\t");
     
     if (config->tier != 0 && config->level !=0)
         SVT_LOG("Tier %d\tLevel %.1f\t", config->tier, (float)(config->level / 10));

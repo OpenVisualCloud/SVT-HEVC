@@ -4935,11 +4935,99 @@ static void CodeProfileTier(
 		bitstreamPtr,
 		scsPtr->generalFrameOnlyConstraintFlag);
 
-	// "XXX_reserved_zero_44bits[0..15]"
-	WriteCodeCavlc(
-		bitstreamPtr,
-		0,
-		16);
+    if(scsPtr->profileIdc < 4)
+    {
+	    // "XXX_reserved_zero_44bits[0..15]"
+	    WriteCodeCavlc(
+	        bitstreamPtr,
+	        0,
+	        16);
+    } else
+    {
+        // "general_max_12bit_constraint_flag"
+        WriteFlagCavlc(
+           bitstreamPtr,
+           1);
+
+        // "general_max_10bit_constraint_flag"
+        if(scsPtr->encoderBitDepth <= EB_10BIT || scsPtr->staticConfig.constrainedIntra == EB_TRUE)
+        {
+            WriteFlagCavlc(
+               bitstreamPtr,
+               1);
+        } else
+        {
+            WriteFlagCavlc(
+               bitstreamPtr,
+               0);
+        }
+
+        // "general_max_8bit_constraint_flag"
+        //if(scsPtr->encoderBitDepth == EB_8BIT)
+        if(scsPtr->encoderBitDepth == EB_8BIT && (scsPtr->chromaFormatIdc == EB_YUV444 || scsPtr->staticConfig.constrainedIntra == EB_TRUE))
+        {
+            WriteFlagCavlc(
+               bitstreamPtr,
+               1);
+        } else
+        {
+            WriteFlagCavlc(
+               bitstreamPtr,
+               0);
+        }
+
+        // "general_max_422chroma_constraint_flag"
+        if(scsPtr->chromaFormatIdc == EB_YUV422 || (scsPtr->chromaFormatIdc == EB_YUV420 && scsPtr->staticConfig.constrainedIntra == EB_TRUE))
+        {
+            WriteFlagCavlc(
+               bitstreamPtr,
+               1);
+        } else
+        {
+            WriteFlagCavlc(
+               bitstreamPtr,
+               0);
+        }
+
+        // "general_max_420chroma_constraint_flag"
+        if(scsPtr->chromaFormatIdc == EB_YUV420)
+        {
+            WriteFlagCavlc(
+               bitstreamPtr,
+               1);
+        } else
+        {
+            WriteFlagCavlc(
+               bitstreamPtr,
+               0);
+        }
+
+        // "general_max_monochrome_constraint_flag"
+        WriteFlagCavlc(
+           bitstreamPtr,
+           0);
+
+        // "general_intra_constraint_flag"
+        WriteFlagCavlc(
+           bitstreamPtr,
+           (scsPtr->staticConfig.constrainedIntra == EB_TRUE));
+
+        // "general_one_picture_only_constraint_flag"
+        WriteFlagCavlc(
+           bitstreamPtr,
+           0);
+
+        // "general_lower_bit_rate_constraint_flag"
+        WriteFlagCavlc(
+           bitstreamPtr,
+           1);
+
+        // "XXX_reserved_zero_44bits[9..15]"
+        WriteCodeCavlc(
+           bitstreamPtr,
+           0,
+           7);
+    }
 
 	// "XXX_reserved_zero_44bits[16..31]"
 	WriteCodeCavlc(
