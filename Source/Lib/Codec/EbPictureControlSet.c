@@ -598,7 +598,7 @@ EB_ERRORTYPE PictureParentControlSetCtor(
         EbPictureBufferDescInitData_t inputPictureBufferDescInitData;
         inputPictureBufferDescInitData.maxWidth     = initDataPtr->pictureWidth;
         inputPictureBufferDescInitData.maxHeight    = initDataPtr->pictureHeight;
-        inputPictureBufferDescInitData.bitDepth     = 8; //Should be 8bit
+        inputPictureBufferDescInitData.bitDepth     = EB_8BIT; // Should be 8bit
         inputPictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_CHROMA_MASK;
         inputPictureBufferDescInitData.leftPadding  = initDataPtr->leftPadding;
         inputPictureBufferDescInitData.rightPadding = initDataPtr->rightPadding;

@@ -205,7 +205,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.recoveryPointSeiFlag = config->recoveryPointSeiFlag;
     callbackData->ebEncParameters.enableTemporalId = config->enableTemporalId;
     callbackData->ebEncParameters.encoderBitDepth = config->encoderBitDepth;
-    callbackData->ebEncParameters.encoderColorFormat = config->encoderColorFormat;
+    callbackData->ebEncParameters.encoderColorFormat = (EB_COLOR_FORMAT)config->encoderColorFormat;
     callbackData->ebEncParameters.compressedTenBitFormat = config->compressedTenBitFormat;
     callbackData->ebEncParameters.profile = config->profile;
     if(config->encoderColorFormat >= EB_YUV422 && config->profile != 4)
@@ -253,7 +253,7 @@ EB_ERRORTYPE AllocateFrameBuffer(
     EB_ERRORTYPE   return_error = EB_ErrorNone;
 
     const int32_t tenBitPackedMode = (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
-    const EB_COLOR_FORMAT colorFormat = config->encoderColorFormat;    // Chroma subsampling
+    const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)config->encoderColorFormat;    // Chroma subsampling
     const uint8_t subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
 
     // Determine size of each plane

@@ -627,7 +627,7 @@ void ProcessInputFieldStandardMode(
 {
     const int64_t inputPaddedWidth  = config->inputPaddedWidth;
     const int64_t inputPaddedHeight = config->inputPaddedHeight;
-    const EB_COLOR_FORMAT colorFormat = config->encoderColorFormat;
+    const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)config->encoderColorFormat;
     const uint8_t subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
     const uint8_t subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
     //const uint8_t is16bit = (config->encoderBitDepth > 8) ? 1 : 0;
@@ -764,7 +764,7 @@ static void ReadInputFrames(
     const uint32_t  inputPaddedHeight = config->inputPaddedHeight;
     FILE   *inputFile = config->inputFile;
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
-    const EB_COLOR_FORMAT colorFormat = config->encoderColorFormat;
+    const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)config->encoderColorFormat;
     const uint8_t subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
     const uint8_t subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
     //const uint8_t is16bit = (config->encoderBitDepth > 8) ? 1 : 0;
@@ -1089,7 +1089,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(EbConfig_t *config, EbAppContext_t *appC
     int64_t                  framesToBeEncoded          = config->framesToBeEncoded;
     int64_t                  totalBytesToProcessCount;
     int64_t                  remainingByteCount;
-    const EB_COLOR_FORMAT colorFormat = config->encoderColorFormat;
+    const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)config->encoderColorFormat;
     int ret;
     uint32_t compressed10bitFrameSize = (inputPaddedWidth*inputPaddedHeight) + 2 * ((inputPaddedWidth*inputPaddedWidth) >> (3 - colorFormat));
     compressed10bitFrameSize += compressed10bitFrameSize / 4;
