@@ -25,6 +25,7 @@ typedef struct TransformUnit_s {
     unsigned                lumaCbf               : 1;
 	unsigned                transCoeffShapeLuma   : 2;
 	unsigned                transCoeffShapeChroma : 2;
+	unsigned                transCoeffShapeChroma2 : 2;
 
     unsigned                cbCbf2                : 1;
     unsigned                crCbf2                : 1;
