@@ -1,4 +1,4 @@
-From c22efb79bf2a55005595054432b21aa75e3c6a19 Mon Sep 17 00:00:00 2001
+From b2e7e1460019b2104d0d7a6a810c21e00a024db7 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH 1/2] lavc/svt_hevc: add libsvt hevc encoder wrapper.
@@ -9,6 +9,7 @@ V4: - Fix the build error with new API in PR#52
     - Fix the encoding hang issue by API change in PR#52
     - Fix the last frame dropping issue
     - Fix the invalid parameter causing segmentation fault issue
+    - Add the support to svt hevc and av1 plugins coexistance
 
 V3: - Fix the build error with new API
 
@@ -38,7 +39,7 @@ Signed-off-by: Jing SUN <jing.a.sun@intel.com>
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index a70c5f9..06d5e8e 100755
+index a70c5f9..52bfff2 100755
 --- a/configure
 +++ b/configure
 @@ -262,6 +262,7 @@ External library support:
@@ -69,7 +70,7 @@ index a70c5f9..06d5e8e 100755
  enabled libssh            && require_pkg_config libssh libssh libssh/sftp.h sftp_init
  enabled libspeex          && require_pkg_config libspeex speex speex/speex.h speex_decoder_init
  enabled libsrt            && require_pkg_config libsrt "srt >= 1.3.0" srt/srt.h srt_socket
-+enabled libsvthevc        && require_pkg_config libsvthevc SvtHevcEnc EbApi.h EbInitHandle
++enabled libsvthevc        && require_pkg_config libsvthevc SvtHevcEnc svt-hevc/EbApi.h EbInitHandle
  enabled libtensorflow     && require libtensorflow tensorflow/c/c_api.h TF_Version -ltensorflow
  enabled libtesseract      && require_pkg_config libtesseract tesseract tesseract/capi.h TessBaseAPICreate
  enabled libtheora         && require libtheora theora/theoraenc.h th_info_init -ltheoraenc -ltheoradec -logg
@@ -99,7 +100,7 @@ index 1b8144a..5739d53 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000..d08f492
+index 0000000..2054668
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
 @@ -0,0 +1,535 @@
@@ -125,9 +126,9 @@ index 0000000..d08f492
 +* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 +*/
 +
-+#include "EbErrorCodes.h"
-+#include "EbTime.h"
-+#include "EbApi.h"
++#include "svt-hevc/EbErrorCodes.h"
++#include "svt-hevc/EbTime.h"
++#include "svt-hevc/EbApi.h"
 +
 +#include "libavutil/common.h"
 +#include "libavutil/frame.h"
