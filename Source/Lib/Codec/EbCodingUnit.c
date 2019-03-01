@@ -9,6 +9,7 @@
 #include "EbUtility.h"
 #include "EbTransformUnit.h"
 #include "EbPictureControlSet.h"
+#include "EbThreads.h"
 
 /*
 Tasks & Questions

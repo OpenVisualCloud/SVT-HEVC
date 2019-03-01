@@ -3782,7 +3782,7 @@ EB_ERRORTYPE SignalDerivationEncDecKernelVmaf(
 	return return_error;
 }
 
-EB_U64 predBits(PictureControlSet_t* pictureControlSetPtr, SequenceControlSet_t* sequenceControlSetPtr, EB_U64 distortion, EB_U8 qpVbv, EB_BOOL useIntraSadFlag)
+EB_U64 predBits(PictureControlSet_t* pictureControlSetPtr, SequenceControlSet_t* sequenceControlSetPtr, EB_U8 qpVbv, EB_U64 distortion, EB_BOOL useIntraSadFlag)
 {
     EB_U16 sadIntervalIndex = 0;
     EB_U64 sadBits = 0;
@@ -4202,7 +4202,7 @@ void* EncDecKernel(void *inputPtr)
                         {
                             baseQp=RowVbvRateControl(pictureControlSetPtr,sequenceControlSetPtr, rowPtr, sequenceControlSetPtr->encodeContextPtr, lcuPtr->qp);
                             lcuPtr->qp = CLIP3(sequenceControlSetPtr->staticConfig.minQpAllowed,sequenceControlSetPtr->staticConfig.maxQpAllowed, baseQp);
-
+                            rowPtr->rowQp = lcuPtr->qp;
                         }
 
                     }
@@ -4338,30 +4338,34 @@ void* EncDecKernel(void *inputPtr)
                         lcuPtr->qp,
                         enableSaoFlag,
                         contextPtr);
+                    if (sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate)
+                    {
+                        /*Entropy Estimation for LCU*/
+                        tempWrittenBitsBeforeQuantizedCoeff = ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->tempEntropyCoderPtr))->writtenBitsCount +
+                            32 - ((CabacEncodeContext_t*)pictureControlSetPtr->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
+                            (((CabacEncodeContext_t*)pictureControlSetPtr->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum << 3);
+                        EncodeLcu(
+                            lcuPtr,
+                            lcuOriginX,
+                            lcuOriginY,
+                            pictureControlSetPtr,
+                            sequenceControlSetPtr->lcuSize,
+                            pictureControlSetPtr->tempEntropyCoderPtr,
+                            tempCoeffPicturePtr,
+                            pictureControlSetPtr->tempModeTypeNeighborArray,
+                            pictureControlSetPtr->tempLeafDepthNeighborArray,
+                            pictureControlSetPtr->tempIntraLumaModeNeighborArray,
+                            pictureControlSetPtr->tempSkipFlagNeighborArray,
+                            0,
+                            0);
 
-                    /*Entropy Estimation for LCU*/
-                    tempWrittenBitsBeforeQuantizedCoeff = ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->tempEntropyCoderPtr))->writtenBitsCount +
-                        32 - ((CabacEncodeContext_t*)pictureControlSetPtr->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
-                        (((CabacEncodeContext_t*)pictureControlSetPtr->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum << 3);
-                    EncodeLcu(
-                        lcuPtr,
-                        lcuOriginX,
-                        lcuOriginY,
-                        pictureControlSetPtr,
-                        sequenceControlSetPtr->lcuSize,
-                        pictureControlSetPtr->tempEntropyCoderPtr,
-                        tempCoeffPicturePtr,
-                        pictureControlSetPtr->tempModeTypeNeighborArray,
-                        pictureControlSetPtr->tempLeafDepthNeighborArray,
-                        pictureControlSetPtr->tempIntraLumaModeNeighborArray,
-                        pictureControlSetPtr->tempSkipFlagNeighborArray,
-                        0,
-                        0);
-                    tempWrittenBitsAfterQuantizedCoeff = ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->tempEntropyCoderPtr))->writtenBitsCount +
-                        32 - ((CabacEncodeContext_t*)pictureControlSetPtr->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
-                        (((CabacEncodeContext_t*)pictureControlSetPtr->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum << 3);
-                    lcuPtr->proxytotalBits = tempWrittenBitsAfterQuantizedCoeff - tempWrittenBitsBeforeQuantizedCoeff;
-                    rowPtr->numEncodedCUs = lcuPtr->rowInd;
+                        tempWrittenBitsAfterQuantizedCoeff = ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->tempEntropyCoderPtr))->writtenBitsCount +
+                            32 - ((CabacEncodeContext_t*)pictureControlSetPtr->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
+                            (((CabacEncodeContext_t*)pictureControlSetPtr->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum << 3);
+                        lcuPtr->proxytotalBits = tempWrittenBitsAfterQuantizedCoeff - tempWrittenBitsBeforeQuantizedCoeff;
+                        //Update CU Stats for row level vbv control
+                        rowPtr->numEncodedCUs = lcuPtr->rowInd;
+                    }
                     if (pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr != NULL){
                         ((EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr)->intraCodedAreaLCU[lcuIndex] = (EB_U8)((100 * contextPtr->intraCodedAreaLCU[lcuIndex]) / (64 * 64));
                     }
