@@ -31,6 +31,8 @@ EB_ERRORTYPE PictureControlSetCtor(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
     EB_BOOL is16bit = initDataPtr->is16bit;
+    EB_U16 subWidthCMinus1 = (initDataPtr->colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    EB_U16 subHeightCMinus1 = (initDataPtr->colorFormat >= EB_YUV422 ? 1 : 2) - 1;
 
     EB_MALLOC(PictureControlSet_t*, objectPtr, sizeof(PictureControlSet_t), EB_N_PTR);
   
@@ -38,6 +40,7 @@ EB_ERRORTYPE PictureControlSetCtor(
     inputPictureBufferDescInitData.maxWidth            = initDataPtr->pictureWidth;
     inputPictureBufferDescInitData.maxHeight           = initDataPtr->pictureHeight;
     inputPictureBufferDescInitData.bitDepth            = initDataPtr->bitDepth;
+    inputPictureBufferDescInitData.colorFormat         = initDataPtr->colorFormat;
     inputPictureBufferDescInitData.bufferEnableMask    = PICTURE_BUFFER_DESC_FULL_MASK;
 	inputPictureBufferDescInitData.leftPadding			= 0;
 	inputPictureBufferDescInitData.rightPadding		= 0;
@@ -48,6 +51,7 @@ EB_ERRORTYPE PictureControlSetCtor(
     coeffBufferDescInitData.maxWidth                            = initDataPtr->pictureWidth;
     coeffBufferDescInitData.maxHeight                           = initDataPtr->pictureHeight;
     coeffBufferDescInitData.bitDepth                            = EB_16BIT;
+    coeffBufferDescInitData.colorFormat                         = initDataPtr->colorFormat;
     coeffBufferDescInitData.bufferEnableMask                    = PICTURE_BUFFER_DESC_FULL_MASK;
 	coeffBufferDescInitData.leftPadding							= 0;
 	coeffBufferDescInitData.rightPadding						= 0;
@@ -60,6 +64,7 @@ EB_ERRORTYPE PictureControlSetCtor(
     
     objectPtr->sequenceControlSetWrapperPtr     = (EbObjectWrapper_t *)EB_NULL;
 
+    objectPtr->colorFormat          =  initDataPtr->colorFormat;
     objectPtr->reconPicture16bitPtr =  (EbPictureBufferDesc_t *)EB_NULL;
     objectPtr->reconPicturePtr      =  (EbPictureBufferDesc_t *)EB_NULL;
     // Reconstructed Picture Buffer
@@ -383,8 +388,8 @@ EB_ERRORTYPE PictureControlSetCtor(
     }
     return_error = NeighborArrayUnitCtor(
         &objectPtr->epCbReconNeighborArray,
-        MAX_PICTURE_WIDTH_SIZE >> 1,
-        MAX_PICTURE_HEIGHT_SIZE >> 1,
+        MAX_PICTURE_WIDTH_SIZE >> subWidthCMinus1,
+        MAX_PICTURE_HEIGHT_SIZE >> subHeightCMinus1,
         sizeof(EB_U8),
         SAMPLE_NEIGHBOR_ARRAY_GRANULARITY,
         SAMPLE_NEIGHBOR_ARRAY_GRANULARITY,
@@ -395,8 +400,8 @@ EB_ERRORTYPE PictureControlSetCtor(
     }
     return_error = NeighborArrayUnitCtor(
         &objectPtr->epCrReconNeighborArray,
-        MAX_PICTURE_WIDTH_SIZE >> 1,
-        MAX_PICTURE_HEIGHT_SIZE >> 1,
+        MAX_PICTURE_WIDTH_SIZE >> subWidthCMinus1,
+        MAX_PICTURE_HEIGHT_SIZE >> subHeightCMinus1,
         sizeof(EB_U8),
         SAMPLE_NEIGHBOR_ARRAY_GRANULARITY,
         SAMPLE_NEIGHBOR_ARRAY_GRANULARITY,
@@ -421,8 +426,8 @@ EB_ERRORTYPE PictureControlSetCtor(
         }
         return_error = NeighborArrayUnitCtor(
             &objectPtr->epCbReconNeighborArray16bit,
-            MAX_PICTURE_WIDTH_SIZE >> 1,
-            MAX_PICTURE_HEIGHT_SIZE >> 1,
+            MAX_PICTURE_WIDTH_SIZE >> subWidthCMinus1,
+            MAX_PICTURE_HEIGHT_SIZE >> subHeightCMinus1,
              sizeof(EB_U16),
             SAMPLE_NEIGHBOR_ARRAY_GRANULARITY,
             SAMPLE_NEIGHBOR_ARRAY_GRANULARITY,
@@ -433,8 +438,8 @@ EB_ERRORTYPE PictureControlSetCtor(
         }
         return_error = NeighborArrayUnitCtor(
             &objectPtr->epCrReconNeighborArray16bit,
-            MAX_PICTURE_WIDTH_SIZE >> 1,
-            MAX_PICTURE_HEIGHT_SIZE >> 1,
+            MAX_PICTURE_WIDTH_SIZE >> subWidthCMinus1,
+            MAX_PICTURE_HEIGHT_SIZE >> subHeightCMinus1,
             sizeof(EB_U16),
             SAMPLE_NEIGHBOR_ARRAY_GRANULARITY,
             SAMPLE_NEIGHBOR_ARRAY_GRANULARITY,
@@ -589,6 +594,29 @@ EB_ERRORTYPE PictureParentControlSetCtor(
     objectPtr->sequenceControlSetWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
     objectPtr->inputPictureWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
     objectPtr->referencePictureWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
+    if (initDataPtr->colorFormat >= EB_YUV422) {
+        EbPictureBufferDescInitData_t inputPictureBufferDescInitData;
+        inputPictureBufferDescInitData.maxWidth     = initDataPtr->pictureWidth;
+        inputPictureBufferDescInitData.maxHeight    = initDataPtr->pictureHeight;
+        inputPictureBufferDescInitData.bitDepth     = 8; //Should be 8bit
+        inputPictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_CHROMA_MASK;
+        inputPictureBufferDescInitData.leftPadding  = initDataPtr->leftPadding;
+        inputPictureBufferDescInitData.rightPadding = initDataPtr->rightPadding;
+        inputPictureBufferDescInitData.topPadding   = initDataPtr->topPadding;
+        inputPictureBufferDescInitData.botPadding   = initDataPtr->botPadding;
+        inputPictureBufferDescInitData.colorFormat  = EB_YUV420;
+        inputPictureBufferDescInitData.splitMode    = EB_FALSE;
+        return_error = EbPictureBufferDescCtor(
+                (EB_PTR*) &(objectPtr->chromaDownSamplePicturePtr),
+                (EB_PTR ) &inputPictureBufferDescInitData);
+        if (return_error == EB_ErrorInsufficientResources){
+            return EB_ErrorInsufficientResources;
+        }
+    } else if(initDataPtr->colorFormat == EB_YUV420) {
+        objectPtr->chromaDownSamplePicturePtr = NULL;
+    } else {
+        return EB_ErrorBadParameter;
+    }
 
     // GOP
     objectPtr->predStructIndex      = 0;

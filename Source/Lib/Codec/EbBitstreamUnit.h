@@ -57,7 +57,8 @@ extern EB_ERRORTYPE OutputBitstreamRBSPToPayload(
     EB_BYTE                outputBuffer,
     EB_U32                *outputBufferIndex,
     EB_U32                *outputBufferSize,
-    EB_U32                 startLocation);
+    EB_U32                 startLocation,
+    NalUnitType            nalType);
 #ifdef __cplusplus
 }
 #endif

@@ -2623,7 +2623,7 @@ EB_ERRORTYPE EncodeTuCalcCost(
 
 
 	// **Compute distortion
-	if (componentMask == PICTURE_BUFFER_DESC_LUMA_MASK || componentMask == PICTURE_BUFFER_DESC_FULL_MASK){
+	if (componentMask & PICTURE_BUFFER_DESC_LUMA_MASK) {
         // Non Zero Distortion
 		// *Note - As of Oct 2011, the JCT-VC uses the PSNR forumula
 		//  PSNR = (LUMA_WEIGHT * PSNRy + PSNRu + PSNRv) / (2+LUMA_WEIGHT)

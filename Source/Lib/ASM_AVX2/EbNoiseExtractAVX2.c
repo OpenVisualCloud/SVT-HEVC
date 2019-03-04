@@ -741,30 +741,35 @@ void noiseExtractChromaStrong_AVX2_INTRIN(
 	EB_U8 *ptrDenoised, *ptrDenoisedInterm, *ptrDenoisedCr, *ptrDenoisedIntermCr;
 
 	EB_U32 strideOut, strideOutCr;
+
+    EB_U32 colorFormat=inputPicturePtr->colorFormat;
+    EB_U16 subWidthCMinus1 = (colorFormat==EB_YUV444?1:2)-1;
+    EB_U16 subHeightCMinus1 = (colorFormat>=EB_YUV422?1:2)-1;
+
 	__m256i top, curr, bottom, currPrev, currNext, topPrev, topNext, bottomPrev, bottomNext,
 		topCr, currCr, bottomCr, currPrevCr, currNextCr, topPrevCr, topNextCr, bottomPrevCr, bottomNextCr;
 	(void)lcuOriginX;
 	{
-		picHeight = inputPicturePtr->height / 2;
-		picWidth = inputPicturePtr->width / 2;
-		lcuHeight = MIN(MAX_LCU_SIZE / 2, picHeight - lcuOriginY);
+		picHeight = inputPicturePtr->height >> subHeightCMinus1;
+		picWidth = inputPicturePtr->width >> subWidthCMinus1;
+        lcuHeight = MIN(MAX_LCU_SIZE >> subHeightCMinus1, picHeight - lcuOriginY);
 
-		lcuHeight = ((lcuOriginY + MAX_LCU_SIZE / 2 >= picHeight) || (lcuOriginY == 0)) ? lcuHeight - 1 : lcuHeight;
+        lcuHeight = ((lcuOriginY + (MAX_LCU_SIZE >> subHeightCMinus1) >= picHeight) || (lcuOriginY == 0)) ? lcuHeight - 1 : lcuHeight;
 
 		strideIn = inputPicturePtr->strideCb;
-		inputOriginIndex = inputPicturePtr->originX / 2 + (inputPicturePtr->originY / 2 + lcuOriginY)  * inputPicturePtr->strideCb;
+        inputOriginIndex = (inputPicturePtr->originX >> subWidthCMinus1) + ((inputPicturePtr->originY >> subHeightCMinus1) + lcuOriginY)  * inputPicturePtr->strideCb;
 		ptrIn = &(inputPicturePtr->bufferCb[inputOriginIndex]);
 
-		inputOriginIndexPad = denoisedPicturePtr->originX / 2 + (denoisedPicturePtr->originY / 2 + lcuOriginY)  * denoisedPicturePtr->strideCb;
+        inputOriginIndexPad = (denoisedPicturePtr->originX >> subWidthCMinus1) + ((denoisedPicturePtr->originY >> subHeightCMinus1) + lcuOriginY)  * denoisedPicturePtr->strideCb;
 		strideOut = denoisedPicturePtr->strideCb;
 		ptrDenoised = &(denoisedPicturePtr->bufferCb[inputOriginIndexPad]);
 		ptrDenoisedInterm = ptrDenoised;
 
 		strideInCr = inputPicturePtr->strideCr;
-		inputOriginIndex = inputPicturePtr->originX / 2 + (inputPicturePtr->originY / 2 + lcuOriginY)  * inputPicturePtr->strideCr;
+        inputOriginIndex = (inputPicturePtr->originX >> subWidthCMinus1) + ((inputPicturePtr->originY >> subHeightCMinus1) + lcuOriginY)  * inputPicturePtr->strideCr;
 		ptrInCr = &(inputPicturePtr->bufferCr[inputOriginIndex]);
 
-		inputOriginIndexPad = denoisedPicturePtr->originX / 2 + (denoisedPicturePtr->originY / 2 + lcuOriginY)  * denoisedPicturePtr->strideCr;
+        inputOriginIndexPad = (denoisedPicturePtr->originX >> subWidthCMinus1) + ((denoisedPicturePtr->originY >> subHeightCMinus1) + lcuOriginY)  * denoisedPicturePtr->strideCr;
 		strideOutCr = denoisedPicturePtr->strideCr;
 		ptrDenoisedCr = &(denoisedPicturePtr->bufferCr[inputOriginIndexPad]);
 		ptrDenoisedIntermCr = ptrDenoisedCr;
@@ -879,7 +884,7 @@ void noiseExtractChromaStrong_AVX2_INTRIN(
 
 		}
 
-		lcuHeight = MIN(MAX_LCU_SIZE / 2, picHeight - lcuOriginY);
+        lcuHeight = MIN(MAX_LCU_SIZE >> subHeightCMinus1, picHeight - lcuOriginY);
 
 		for (jj = 0; jj < lcuHeight; jj++){
 			for (ii = 0; ii < picWidth; ii++){
@@ -919,36 +924,42 @@ void noiseExtractChromaWeak_AVX2_INTRIN(
 
 	EB_U32 strideOut, strideOutCr;
 
+    EB_U32 colorFormat=inputPicturePtr->colorFormat;
+    EB_U16 subWidthCMinus1 = (colorFormat==EB_YUV444?1:2)-1;
+    EB_U16 subHeightCMinus1 = (colorFormat>=EB_YUV422?1:2)-1;
+
 	__m256i top, curr, bottom, currPrev, currNext, topPrev, topNext, bottomPrev, bottomNext,
 		topCr, currCr, bottomCr, currPrevCr, currNextCr, topPrevCr, topNextCr, bottomPrevCr, bottomNextCr;
 	(void)lcuOriginX;
+
 	////gaussian matrix(Chroma)
 	//a = (1 * p[0] + 2 * p[1] + 1 * p[2] +
 	//	2 * p[0 + stride] + 4 * p[1 + stride] + 2 * p[2 + stride] +
 	//	1 * p[0 + 2 * stride] + 2 * p[1 + 2 * stride] + 1 * p[2 + 2 * stride]) / 16;
 
 	{
-		picHeight = inputPicturePtr->height / 2;
-		picWidth = inputPicturePtr->width / 2;
+        picHeight = inputPicturePtr->height >> subHeightCMinus1;
+        picWidth = inputPicturePtr->width >> subWidthCMinus1 ;
 
-		lcuHeight = MIN(MAX_LCU_SIZE / 2, picHeight - lcuOriginY);
 
-		lcuHeight = ((lcuOriginY + MAX_LCU_SIZE / 2 >= picHeight) || (lcuOriginY == 0)) ? lcuHeight - 1 : lcuHeight;
+        lcuHeight = MIN(MAX_LCU_SIZE >> subHeightCMinus1, picHeight - lcuOriginY);
+
+        lcuHeight = ((lcuOriginY + (MAX_LCU_SIZE >> subHeightCMinus1) >= picHeight) || (lcuOriginY == 0)) ? lcuHeight - 1 : lcuHeight;
 		strideIn = inputPicturePtr->strideCb;
-		inputOriginIndex = inputPicturePtr->originX / 2 + (inputPicturePtr->originY / 2 + lcuOriginY)* inputPicturePtr->strideCb;
+        inputOriginIndex = (inputPicturePtr->originX >> subWidthCMinus1) + ((inputPicturePtr->originY >> subHeightCMinus1) + lcuOriginY)* inputPicturePtr->strideCb;
 		ptrIn = &(inputPicturePtr->bufferCb[inputOriginIndex]);
 
-		inputOriginIndexPad = denoisedPicturePtr->originX / 2 + (denoisedPicturePtr->originY / 2 + lcuOriginY)* denoisedPicturePtr->strideCb;
+        inputOriginIndexPad = (denoisedPicturePtr->originX >> subWidthCMinus1) + ((denoisedPicturePtr->originY >> subHeightCMinus1) + lcuOriginY)* denoisedPicturePtr->strideCb;
 		strideOut = denoisedPicturePtr->strideCb;
 		ptrDenoised = &(denoisedPicturePtr->bufferCb[inputOriginIndexPad]);
 		ptrDenoisedInterm = ptrDenoised;
 
 
 		strideInCr = inputPicturePtr->strideCr;
-		inputOriginIndex = inputPicturePtr->originX / 2 + (inputPicturePtr->originY / 2 + lcuOriginY)  * inputPicturePtr->strideCr;
+        inputOriginIndex = (inputPicturePtr->originX >> subWidthCMinus1) + ((inputPicturePtr->originY >> subHeightCMinus1) + lcuOriginY)  * inputPicturePtr->strideCr;
 		ptrInCr = &(inputPicturePtr->bufferCr[inputOriginIndex]);
 
-		inputOriginIndexPad = denoisedPicturePtr->originX / 2 + (denoisedPicturePtr->originY / 2 + lcuOriginY)  * denoisedPicturePtr->strideCr;
+        inputOriginIndexPad = (denoisedPicturePtr->originX >> subWidthCMinus1) + ((denoisedPicturePtr->originY >> subHeightCMinus1) + lcuOriginY)  * denoisedPicturePtr->strideCr;
 		strideOutCr = denoisedPicturePtr->strideCr;
 		ptrDenoisedCr = &(denoisedPicturePtr->bufferCr[inputOriginIndexPad]);
 		ptrDenoisedIntermCr = ptrDenoisedCr;
@@ -1059,7 +1070,7 @@ void noiseExtractChromaWeak_AVX2_INTRIN(
 		}
 
 
-		lcuHeight = MIN(MAX_LCU_SIZE / 2, picHeight - lcuOriginY);
+        lcuHeight = MIN(MAX_LCU_SIZE >> subHeightCMinus1, picHeight - lcuOriginY);
 		for (jj = 0; jj < lcuHeight; jj++){
 			for (ii = 0; ii < picWidth; ii++){
 

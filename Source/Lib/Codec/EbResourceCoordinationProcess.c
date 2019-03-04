@@ -487,6 +487,9 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
 	EB_U32							inputSize = 0;
 	EbObjectWrapper_t              *prevPictureControlSetWrapperPtr = 0;
+    EB_U32                          chromaFormat = EB_YUV420;
+    EB_U32                          subWidthCMinus1 = 1;
+    EB_U32                          subHeightCMinus1 = 1;
     
     for(;;) {
 
@@ -504,6 +507,9 @@ void* ResourceCoordinationKernel(void *inputPtr)
         // Get source video bit depth
         is16BitInput =  (EB_BOOL)(sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
 
+        chromaFormat = sequenceControlSetPtr->chromaFormatIdc;
+        subWidthCMinus1 = (chromaFormat == EB_YUV444 ? 1 : 2) - 1;
+        subHeightCMinus1 = (chromaFormat >= EB_YUV422 ? 1 : 2) - 1;
         // If config changes occured since the last picture began encoding, then
         //   prepare a new sequenceControlSetPtr containing the new changes and update the state
         //   of the previous Active SequenceControlSet
@@ -516,8 +522,8 @@ void* ResourceCoordinationKernel(void *inputPtr)
             {
                 contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lumaWidth = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaWidth;
                 contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lumaHeight = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaHeight;
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaWidth = (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaWidth >> 1);
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaHeight = (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaHeight >> 1);
+                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaWidth = (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaWidth >> subWidthCMinus1);
+                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaHeight = (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaHeight >> subHeightCMinus1);
 
                 
                 contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->padRight = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputPadRight;
@@ -627,8 +633,8 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
         // Copy data from the buffer to the input frame
         // *Note - Assumes 4:2:0 planar
-        inputPictureWrapperPtr  = 0;
-        inputPicturePtr         = 0;
+        inputPictureWrapperPtr  = NULL;
+        inputPicturePtr         = NULL;
 
         // assign the input picture
         pictureControlSetPtr->enhancedPicturePtr = (EbPictureBufferDesc_t*)ebInputPtr->pBuffer;
@@ -651,12 +657,12 @@ void* ResourceCoordinationKernel(void *inputPtr)
         inputPicturePtr->lumaSize           =
 			((sequenceControlSetPtr->maxInputLumaWidth - sequenceControlSetPtr->maxInputPadRight) + sequenceControlSetPtr->leftPadding + sequenceControlSetPtr->rightPadding) *
 			((sequenceControlSetPtr->maxInputLumaHeight - sequenceControlSetPtr->maxInputPadBottom) + sequenceControlSetPtr->topPadding + sequenceControlSetPtr->botPadding);
-        inputPicturePtr->chromaSize         = inputPicturePtr->lumaSize >> 2;       
+        inputPicturePtr->chromaSize         = inputPicturePtr->lumaSize >> (3 - chromaFormat);
 
         inputPicturePtr->width              = sequenceControlSetPtr->lumaWidth;
         inputPicturePtr->height             = sequenceControlSetPtr->lumaHeight;
         inputPicturePtr->strideY            = sequenceControlSetPtr->lumaWidth + sequenceControlSetPtr->leftPadding + sequenceControlSetPtr->rightPadding;
-        inputPicturePtr->strideCb           = inputPicturePtr->strideCr = inputPicturePtr->strideY >> 1;
+        inputPicturePtr->strideCb           = inputPicturePtr->strideCr = inputPicturePtr->strideY >> subWidthCMinus1;
 
 		inputPicturePtr->strideBitIncY      = inputPicturePtr->strideY;
 		inputPicturePtr->strideBitIncCb     = inputPicturePtr->strideCb;

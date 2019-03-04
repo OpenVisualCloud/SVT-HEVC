@@ -1860,3 +1860,372 @@ void IntraModeAngular_34_AVX2_INTRIN(
         }
     }
 }
+
+void IntraModeVerticalChroma_AVX2_INTRIN(
+    const EB_U32      size,                   //input parameter, denotes the size of the current PU
+    EB_U8            *refSamples,             //input parameter, pointer to the reference samples
+    EB_U8            *predictionPtr,          //output parameter, pointer to the prediction
+    const EB_U32      predictionBufferStride, //input parameter, denotes the stride for the prediction ptr
+    const EB_BOOL     skip)                    //skip one row 
+{
+    EB_U32 pStride = predictionBufferStride;
+    EB_U32 topOffset = (size << 1) + 1;
+
+    // Jing: 
+    // TODO: add size == 32 for 444
+    if (!skip) {
+        if (size == 32) {
+            __m256i xmm0;
+            EB_U64 size_to_write;
+            EB_U32 count;
+
+            // Each storeu calls stores 32 bytes. Hence each iteration stores 8 * 32 bytes.
+            // Depending on skip, we need 4 or 2 iterations to store 32x32 bytes.
+            size_to_write = 4 >> (skip ? 1 : 0);
+            pStride = pStride << (skip ? 1 : 0);
+
+            xmm0 = _mm256_loadu_si256((__m256i *)(refSamples + topOffset));
+
+            for (count = 0; count < size_to_write; count ++) {
+                _mm256_storeu_si256((__m256i *)(predictionPtr), xmm0);                    
+                _mm256_storeu_si256((__m256i *)(predictionPtr + pStride), xmm0);          
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm0);      
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm0);         
+
+                predictionPtr += (pStride << 2);                                          
+                _mm256_storeu_si256((__m256i *)(predictionPtr), xmm0);                    
+                _mm256_storeu_si256((__m256i *)(predictionPtr + pStride), xmm0);          
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm0);      
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm0);         
+
+                predictionPtr += (pStride << 2);                                          
+            }
+        } else if (size == 16) {
+            __m128i xmm0 = _mm_loadu_si128((__m128i *)(refSamples + topOffset)); 
+            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);                    
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
+            predictionPtr = predictionPtr + (pStride << 2);                         
+            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);                    
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
+            predictionPtr = predictionPtr + (pStride << 2);                         
+            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);                    
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
+            predictionPtr = predictionPtr + (pStride << 2);                         
+            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);                    
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
+        }
+        else if (size == 8) {
+            __m128i xmm0 = _mm_loadl_epi64((__m128i *)(refSamples + topOffset)); 
+            _mm_storel_epi64((__m128i *)(predictionPtr), xmm0);                  
+            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), xmm0);        
+            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
+            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
+            predictionPtr = predictionPtr + (pStride << 2);                         
+            _mm_storel_epi64((__m128i *)predictionPtr, xmm0);                    
+            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), xmm0);        
+            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
+            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
+        }
+        else {
+            EB_U32 top = *(EB_U32*)(refSamples + topOffset);         
+            *(EB_U32*)(predictionPtr) = top;
+            *(EB_U32*)(predictionPtr + pStride) = top;
+            *(EB_U32*)(predictionPtr + 2 * pStride) = top;
+            *(EB_U32*)(predictionPtr + 3 * pStride) = top;
+        }
+    }
+    else {
+        pStride <<= 1;
+        if (size == 32) {
+            EB_U32 columnIndex, rowIndex;
+            EB_U32 writeIndex;
+            EB_U32 topOffset = (size << 1) + 1;
+            EB_U32 rowStride = skip ? 2 : 1;
+
+            for (columnIndex = 0; columnIndex < size; ++columnIndex) {
+                writeIndex = columnIndex;
+                for (rowIndex = 0; rowIndex < size; rowIndex += rowStride) {
+                    predictionPtr[writeIndex] = refSamples[topOffset + columnIndex];
+                    writeIndex += rowStride * predictionBufferStride;
+                }
+            }
+        } else if (size == 16) {
+            
+            __m128i xmm0 = _mm_loadu_si128((__m128i *)(refSamples + topOffset)); 
+            _mm_storeu_si128((__m128i *)(predictionPtr), xmm0);                  
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
+            predictionPtr = predictionPtr + (pStride << 2);                         
+            _mm_storeu_si128((__m128i *)(predictionPtr), xmm0);                  
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
+        }
+        else if (size == 8) {
+            
+            __m128i xmm0 = _mm_loadl_epi64((__m128i *)(refSamples + topOffset)); 
+            _mm_storel_epi64((__m128i *)predictionPtr, xmm0);                    
+            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), xmm0);        
+            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
+            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
+        }
+        else {
+            EB_U32 top = *(EB_U32*)(refSamples + topOffset); 
+            *(EB_U32*)(predictionPtr) = top;
+            *(EB_U32*)(predictionPtr + pStride) = top;
+        }
+    }
+}
+
+void IntraModeDCChroma_AVX2_INTRIN(
+    const EB_U32      size,                       //input parameter, denotes the size of the current PU
+    EB_U8            *refSamples,                 //input parameter, pointer to the reference samples
+    EB_U8            *predictionPtr,              //output parameter, pointer to the prediction
+    const EB_U32      predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
+    const EB_BOOL     skip)                       //skip one row 
+{
+    __m128i xmm0 = _mm_setzero_si128();
+    EB_U32 pStride = predictionBufferStride;
+    EB_U32 topOffset = (size << 1) + 1;
+    EB_U32 leftOffset = 0;
+    
+    //Jing:
+    //TODO: add size == 32 for 444
+    if (!skip) {
+        if (size == 32) {
+            __m256i xmm_sum,xmm_sadleft,xmm_sadtop,xmm_toptmp,xmm_lefttmp ,xmm_set,xmm_sum128_2,xmm_sum256,xmm_predictionDcValue;
+            __m256i xmm1 = _mm256_setzero_si256();
+            __m128i xmm_sumhi,xmm_sumlo,xmm_sum1,xmm_sum128,xmm_sumhitmp,xmm_sumlotmp,xmm_movelotmp,xmm_movehitmp;
+
+            xmm_sumhi = xmm_sumlo = xmm_sum128 = xmm_sumhitmp = xmm_sumlotmp = _mm_setzero_si128();
+            xmm_sum = xmm_sadleft = xmm_sadtop =  xmm_toptmp = xmm_lefttmp  = _mm256_setzero_si256();
+
+            xmm_toptmp  =_mm256_sad_epu8( _mm256_set_m128i ( _mm_loadu_si128( (__m128i *)(refSamples + topOffset +16) ),_mm_loadu_si128((__m128i *)(refSamples + topOffset))),xmm1);
+            xmm_lefttmp =_mm256_sad_epu8( _mm256_set_m128i( _mm_loadu_si128((__m128i *)(refSamples + leftOffset+16)),_mm_loadu_si128((__m128i *)(refSamples + leftOffset))),xmm1);
+
+            xmm_sum = _mm256_add_epi32(xmm_toptmp, xmm_lefttmp  ) ;
+            xmm_sum = _mm256_hadd_epi32 (xmm_sum,xmm_sum);
+            xmm_sumlo =  _mm256_extracti128_si256(xmm_sum,0);
+            xmm_sumhi =  _mm256_extracti128_si256(xmm_sum,1);
+
+            xmm_movelotmp = _mm_move_epi64 (xmm_sumlo);
+            xmm_movehitmp = _mm_move_epi64 (xmm_sumhi);
+
+            xmm_sum1 =   _mm_add_epi32(xmm_movelotmp,xmm_movehitmp);
+
+            xmm_sum1 = _mm_hadd_epi32(xmm_sum1,xmm_sum1);
+
+            xmm_sum256 = _mm256_castsi128_si256(xmm_sum1);
+
+            xmm_set = _mm256_castsi128_si256(_mm_set1_epi32(32));
+
+            xmm_sum128_2 = _mm256_add_epi32(xmm_sum256, xmm_set); // add offset
+            xmm_predictionDcValue = _mm256_srli_epi32(xmm_sum128_2,6); //_mm256_srli_epi32
+
+
+            __m128i dc128      = _mm256_castsi256_si128(xmm_predictionDcValue); 
+
+            EB_U8 dc         = _mm_cvtsi128_si32 (dc128);
+            xmm_predictionDcValue = _mm256_set1_epi8(dc);//_mm_broadcastb_epi8
+
+
+            EB_U32 count;
+
+            for (count = 0; count < 2; ++count) {
+
+                _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);         
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 1 * pStride), xmm_predictionDcValue);
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm_predictionDcValue);
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm_predictionDcValue);
+
+                predictionPtr += (pStride << 2);
+
+                _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);  
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 1 * pStride), xmm_predictionDcValue);
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm_predictionDcValue);
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm_predictionDcValue);
+
+                predictionPtr += (pStride << 2);
+
+                _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);         
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 1 * pStride), xmm_predictionDcValue);
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm_predictionDcValue);
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm_predictionDcValue);
+
+                predictionPtr += (pStride << 2);
+
+                _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);  
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 1 * pStride), xmm_predictionDcValue);
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm_predictionDcValue);
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm_predictionDcValue);
+
+                predictionPtr += (pStride << 2);
+            }
+        } else if (size == 16) {
+            __m128i sum, predictionDcValue;
+            
+            sum = _mm_add_epi32(_mm_sad_epu8(_mm_loadu_si128((__m128i *)(refSamples + topOffset)), xmm0),
+                                _mm_sad_epu8(_mm_loadu_si128((__m128i *)(refSamples + leftOffset)), xmm0));
+
+            predictionDcValue = _mm_srli_epi32(_mm_add_epi32(_mm_add_epi32(_mm_srli_si128(sum, 8), sum), _mm_cvtsi32_si128(16)), 5);
+            predictionDcValue = _mm_unpacklo_epi8(predictionDcValue, predictionDcValue);
+            predictionDcValue = _mm_unpacklo_epi16(predictionDcValue, predictionDcValue);
+            predictionDcValue = _mm_unpacklo_epi32(predictionDcValue, predictionDcValue);
+            predictionDcValue = _mm_unpacklo_epi64(predictionDcValue, predictionDcValue);
+
+            _mm_storeu_si128((__m128i *)(predictionPtr), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
+            predictionPtr += (pStride << 2);
+            _mm_storeu_si128((__m128i *)(predictionPtr), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
+            predictionPtr += (pStride << 2);
+            _mm_storeu_si128((__m128i *)(predictionPtr), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
+            predictionPtr += (pStride << 2);
+            _mm_storeu_si128((__m128i *)(predictionPtr), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
+
+        }
+        else if (size == 8) {
+            __m128i sum, predictionDcValue;
+ 
+            sum = _mm_add_epi32(_mm_sad_epu8(_mm_loadl_epi64((__m128i *)(refSamples + topOffset)), xmm0), 
+                                _mm_sad_epu8(_mm_loadl_epi64((__m128i *)(refSamples + leftOffset)), xmm0));
+            
+            predictionDcValue = _mm_srli_epi32(_mm_add_epi32(sum, _mm_cvtsi32_si128(8)), 4);
+            predictionDcValue = _mm_unpacklo_epi8(predictionDcValue, predictionDcValue);
+            predictionDcValue = _mm_unpacklo_epi16(predictionDcValue, predictionDcValue);
+            predictionDcValue = _mm_unpacklo_epi32(predictionDcValue, predictionDcValue);
+
+            _mm_storel_epi64((__m128i *)(predictionPtr), predictionDcValue);
+            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), predictionDcValue);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
+            predictionPtr += (pStride << 2);
+            _mm_storel_epi64((__m128i *)(predictionPtr), predictionDcValue);
+            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), predictionDcValue);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
+        }
+        else {
+            __m128i sum, predictionDcValue;
+            
+            sum = _mm_add_epi32(_mm_sad_epu8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + topOffset)), xmm0), 
+                                _mm_sad_epu8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + leftOffset)), xmm0));
+           
+            predictionDcValue = _mm_srli_epi32(_mm_add_epi32(sum, _mm_cvtsi32_si128(4)), 3);
+            predictionDcValue = _mm_unpacklo_epi8(predictionDcValue, predictionDcValue);
+            predictionDcValue = _mm_unpacklo_epi16(predictionDcValue, predictionDcValue);
+
+            *(EB_U32*)predictionPtr =                 _mm_cvtsi128_si32(predictionDcValue);
+            *(EB_U32*)(predictionPtr + pStride) =     _mm_cvtsi128_si32(predictionDcValue);
+            *(EB_U32*)(predictionPtr + 2 * pStride) = _mm_cvtsi128_si32(predictionDcValue);
+            *(EB_U32*)(predictionPtr + 3 * pStride) = _mm_cvtsi128_si32(predictionDcValue);
+        }
+    }
+    else {
+
+        pStride <<= 1;
+        if (size == 32) {
+            EB_U32 sum = 0;
+            EB_U32 index;
+            EB_U32 columnIndex, rowIndex;
+            EB_U32 writeIndex;
+            EB_U32 leftOffset = 0;
+            EB_U32 topOffset = (size << 1) + 1;
+            EB_U32 predictionDcValue = 128; // needs to be changed to a macro based on bit depth
+            EB_U32 rowStride = skip ? 2 : 1;
+
+            // top reference samples
+            for (index = 0; index< size; index++) {
+                sum += refSamples[topOffset + index];
+            }
+
+            // left reference samples
+            for (index = 0; index< size; index++) {
+                sum += refSamples[leftOffset + index];
+            }
+
+            predictionDcValue = (EB_U8)((sum + size) >> Log2f(size << 1));
+
+            // Generate the prediction
+            for (rowIndex = 0; rowIndex < size; rowIndex += rowStride) {
+                writeIndex = rowIndex * predictionBufferStride;
+                for (columnIndex = 0; columnIndex < size; ++columnIndex) {
+                    predictionPtr[writeIndex] = (EB_U8)predictionDcValue;
+                    ++writeIndex;
+                }
+            }
+
+        } else if (size == 16) {
+
+            __m128i sum, predictionDcValue;
+            
+            sum = _mm_add_epi32(_mm_sad_epu8(_mm_loadu_si128((__m128i *)(refSamples + topOffset)), xmm0),  
+                                _mm_sad_epu8(_mm_loadu_si128((__m128i *)(refSamples + leftOffset)), xmm0));
+
+            predictionDcValue = _mm_srli_epi32(_mm_add_epi32(_mm_add_epi32(_mm_srli_si128(sum, 8), sum), _mm_cvtsi32_si128(16)), 5);
+            predictionDcValue = _mm_unpacklo_epi8(predictionDcValue, predictionDcValue);
+            predictionDcValue = _mm_unpacklo_epi16(predictionDcValue, predictionDcValue);
+            predictionDcValue = _mm_unpacklo_epi32(predictionDcValue, predictionDcValue);
+            predictionDcValue = _mm_unpacklo_epi64(predictionDcValue, predictionDcValue);
+
+            _mm_storeu_si128((__m128i *)(predictionPtr), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
+            predictionPtr += (pStride << 2);
+            _mm_storeu_si128((__m128i *)(predictionPtr), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
+        }
+        else if (size == 8) {
+            __m128i sum, predictionDcValue;
+            
+            sum = _mm_add_epi32(_mm_sad_epu8(_mm_loadl_epi64((__m128i *)(refSamples + topOffset)), xmm0), 
+                                _mm_sad_epu8(_mm_loadl_epi64((__m128i *)(refSamples + leftOffset)), xmm0));
+            
+            predictionDcValue = _mm_srli_epi32(_mm_add_epi32(sum, _mm_cvtsi32_si128(8)), 4);
+            predictionDcValue = _mm_unpacklo_epi8(predictionDcValue, predictionDcValue);
+            predictionDcValue = _mm_unpacklo_epi16(predictionDcValue, predictionDcValue);
+            predictionDcValue = _mm_unpacklo_epi32(predictionDcValue, predictionDcValue);
+
+            _mm_storel_epi64((__m128i *)(predictionPtr), predictionDcValue);
+            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), predictionDcValue);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), predictionDcValue);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), predictionDcValue);
+        }
+        else {
+            __m128i sum, predictionDcValue;
+            
+            sum = _mm_add_epi32(_mm_sad_epu8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + topOffset)), xmm0), 
+                                _mm_sad_epu8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + leftOffset)), xmm0));
+
+            predictionDcValue = _mm_srli_epi32(_mm_add_epi32(sum, _mm_cvtsi32_si128(4)), 3);
+            predictionDcValue = _mm_unpacklo_epi8(predictionDcValue, predictionDcValue);
+            predictionDcValue = _mm_unpacklo_epi16(predictionDcValue, predictionDcValue);
+
+            *(EB_U32*)predictionPtr =             _mm_cvtsi128_si32(predictionDcValue);
+            *(EB_U32*)(predictionPtr + pStride) = _mm_cvtsi128_si32(predictionDcValue);
+        }
+    }
+}
+

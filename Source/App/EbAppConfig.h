@@ -174,10 +174,18 @@ extern rsize_t strnlen_ss(const char *s, rsize_t smax);
 #define MAX_CHANNEL_NUMBER      6
 #define MAX_NUM_TOKENS          200
 
+#define MAX_STRING_LENGTH       1024
+
 #ifdef _MSC_VER
 #define FOPEN(f,s,m) fopen_s(&f,s,m)
 #else
 #define FOPEN(f,s,m) f=fopen(s,m)
+#endif
+
+#ifdef _MSC_VER
+#define EB_STRTOK(str,delim,next) strtok_s((char*)str,(const char*)delim,(char**)next)
+#else
+#define EB_STRTOK(str,delim,next) strtok_r((char*)str,(const char*)delim,(char**)next)
 #endif
 
 /****************************************
@@ -238,6 +246,7 @@ typedef struct EbConfig_s
     uint32_t                 injector;
     uint32_t                  speedControlFlag;
     uint32_t                 encoderBitDepth;
+    uint32_t                 encoderColorFormat;
 	uint32_t                 compressedTenBitFormat;
     uint32_t                 sourceWidth;
     uint32_t                 sourceHeight;
@@ -368,6 +377,25 @@ typedef struct EbConfig_s
 
     uint64_t  processedFrameCount;
     uint64_t  processedByteCount;
+
+    /****************************************
+    * SEI parameters
+    ****************************************/
+    uint16_t     maxCLL;
+    uint16_t     maxFALL;
+    EB_BOOL      useMasteringDisplayColorVolume;
+    char         masteringDisplayColorVolumeString[MAX_STRING_LENGTH];
+    uint32_t     dolbyVisionProfile;
+    FILE*        dolbyVisionRpuFile;
+    EB_BOOL      useNaluFile;
+    FILE*        naluFile;
+
+    // Master Display Color Volume Parameters
+    uint16_t     displayPrimaryX[3];
+    uint16_t     displayPrimaryY[3];
+    uint16_t     whitePointX, whitePointY;
+    uint32_t     maxDisplayMasteringLuminance;
+    uint32_t     minDisplayMasteringLuminance;
 
 } EbConfig_t;
 

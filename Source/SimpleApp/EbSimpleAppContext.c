@@ -9,22 +9,17 @@
 #define INPUT_SIZE_1080p_TH				0x1AB3F0	// 1.75 Million
 #define INPUT_SIZE_4K_TH				0x29F630	// 2.75 Million
 #define EB_OUTPUTSTREAMBUFFERSIZE_MACRO(ResolutionSize)                ((ResolutionSize) < (INPUT_SIZE_1080i_TH) ? 0x1E8480 : (ResolutionSize) < (INPUT_SIZE_1080p_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_4K_TH) ? 0x2DC6C0 : 0x2DC6C0  )
-EB_ERRORTYPE AllocateFrameBuffer(
-    EbConfig_t        *config,
-    uint8_t           *pBuffer)
+
+static EB_ERRORTYPE AllocateFrameBuffer(EbConfig_t *config, uint8_t *pBuffer)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
     const int32_t tenBitPackedMode = (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
 
     // Determine size of each plane
-    const size_t luma8bitSize =
-        config->inputPaddedWidth    *
-        config->inputPaddedHeight   *
-        (1 << tenBitPackedMode);
-
-    const size_t chroma8bitSize = luma8bitSize >> 2;
-    const size_t luma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? luma8bitSize : 0;
-    const size_t chroma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? chroma8bitSize : 0;
+    const uint32_t luma8bitSize = config->inputPaddedWidth * config->inputPaddedHeight * (1 << tenBitPackedMode);
+    const uint32_t chroma8bitSize = luma8bitSize >> (3- config->encoderColorFormat);
+    const uint32_t luma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? luma8bitSize : 0;
+    const uint32_t chroma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? chroma8bitSize : 0;
 
     // Determine
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)pBuffer;
@@ -73,12 +68,11 @@ EB_ERRORTYPE AllocateFrameBuffer(
     }
     return return_error;
 }
+
 /***********************************
  * AppContext Constructor
  ***********************************/
-EB_ERRORTYPE EbAppContextCtor(
-    EbAppContext_t *contextPtr,
-    EbConfig_t     *config)
+EB_ERRORTYPE EbAppContextCtor(EbAppContext_t *contextPtr, EbConfig_t *config)
 {
     EB_ERRORTYPE   return_error = EB_ErrorInsufficientResources;
 
@@ -113,13 +107,11 @@ EB_ERRORTYPE EbAppContextCtor(
     if (config->reconFile) {
         contextPtr->reconBuffer = (EB_BUFFERHEADERTYPE*)malloc(sizeof(EB_BUFFERHEADERTYPE));
         if (!contextPtr->reconBuffer) return return_error;
-        const size_t lumaSize =
-            config->inputPaddedWidth    *
-            config->inputPaddedHeight;
+        const uint32_t lumaSize = config->inputPaddedWidth * config->inputPaddedHeight;
         // both u and v
-        const size_t chromaSize = lumaSize >> 1;
-        const size_t tenBit = (config->encoderBitDepth > 8);
-        const size_t frameSize = (lumaSize + chromaSize) << tenBit;
+        const uint32_t chromaSize = lumaSize >> (3 - config->encoderColorFormat);
+        const uint32_t tenBit = (config->encoderBitDepth > 8);
+        const uint32_t frameSize = (lumaSize + 2 * chromaSize) << tenBit;
 
         // Initialize Header
         contextPtr->reconBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
@@ -129,17 +121,16 @@ EB_ERRORTYPE EbAppContextCtor(
 
         contextPtr->reconBuffer->nAllocLen = (uint32_t)frameSize;
         contextPtr->reconBuffer->pAppPrivate = NULL;
-    }
-    else
+    } else {
         contextPtr->reconBuffer = NULL;
+    }
     return EB_ErrorNone;
 }
 
 /***********************************
  * AppContext Destructor
  ***********************************/
-void EbAppContextDtor(
-    EbAppContext_t *contextPtr)
+void EbAppContextDtor(EbAppContext_t *contextPtr)
 {
     EB_H265_ENC_INPUT *inputPtr = NULL;
     if (contextPtr->inputPictureBuffer) {
@@ -156,8 +147,9 @@ void EbAppContextDtor(
     free(contextPtr->outputStreamBuffer->pBuffer);
     free(contextPtr->inputPictureBuffer);
     free(contextPtr->outputStreamBuffer);
-    if(contextPtr->reconBuffer)
+    if(contextPtr->reconBuffer) {
         free(contextPtr->reconBuffer);
+    }
 }
 
 /***********************************************
@@ -165,7 +157,7 @@ void EbAppContextDtor(
 *  The config structure, to the
 *  callback structure to send to the library
 ***********************************************/
-EB_ERRORTYPE CopyConfigurationParameters(
+static EB_ERRORTYPE CopyConfigurationParameters(
     EbConfig_t				*config,
     EbAppContext_t			*callbackData,
     uint32_t                 instanceIdx)
@@ -179,6 +171,12 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.sourceWidth       = config->sourceWidth;
     callbackData->ebEncParameters.sourceHeight      = config->sourceHeight;
     callbackData->ebEncParameters.encoderBitDepth   = config->encoderBitDepth;
+    callbackData->ebEncParameters.encoderColorFormat       = config->encoderColorFormat;
+    if(config->encoderColorFormat >= EB_YUV422 && config->profile != 4)
+    {
+        printf("\nWarning: force profile to be MainREXT for YUV422 or YUV44 cases\n");
+        callbackData->ebEncParameters.profile = 4;
+    }
     callbackData->ebEncParameters.codeVpsSpsPps     = 0;
     callbackData->ebEncParameters.codeEosNal        = 1;
     callbackData->ebEncParameters.reconEnabled      = config->reconFile ? 1 : 0;
@@ -228,9 +226,7 @@ EB_ERRORTYPE InitEncoder(
 /***********************************
  * Deinit Components
  ***********************************/
-EB_ERRORTYPE DeInitEncoder(
-    EbAppContext_t *callbackDataPtr,
-    uint32_t        instanceIndex)
+EB_ERRORTYPE DeInitEncoder(EbAppContext_t *callbackDataPtr, uint32_t instanceIndex)
 {
     (void)instanceIndex;
     EB_ERRORTYPE return_error = EB_ErrorNone;
@@ -240,7 +236,9 @@ EB_ERRORTYPE DeInitEncoder(
     }
 
     // Destruct the buffer memory pool
-    if (return_error != EB_ErrorNone) { return return_error; }
+    if (return_error != EB_ErrorNone) {
+        return return_error;
+    }
 
     // Destruct the component
     EbDeinitHandle(callbackDataPtr->svtEncoderHandle);

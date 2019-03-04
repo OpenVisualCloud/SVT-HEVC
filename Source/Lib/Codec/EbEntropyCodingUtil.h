@@ -52,7 +52,9 @@ enum COMPONENT_TYPE
     COMPONENT_CHROMA = 1,            // chroma (Cb+Cr)
     COMPONENT_CHROMA_CB = 2,            // chroma Cb
     COMPONENT_CHROMA_CR = 3,            // chroma Cr
-    COMPONENT_ALL = 4,            // Y+Cb+Cr
+    COMPONENT_CHROMA_CB2 = 4,   // chroma 2nd CB for 422
+    COMPONENT_CHROMA_CR2 = 5,   // chroma 2nd CR for 422
+    COMPONENT_ALL = 6,          // Y+Cb+Cr
     COMPONENT_NONE = 15
 };
 
@@ -184,6 +186,7 @@ typedef struct BacEncContext_s {
 typedef struct CabacEncodeContext_s {
     BacEncContext_t            bacEncContext;
     ContextModelEncContext_t   contextModelEncContext;
+    EB_COLOR_FORMAT colorFormat;
 } CabacEncodeContext_t;
 
 /**************************************

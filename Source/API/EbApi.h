@@ -64,6 +64,15 @@ extern "C" {
 
         // pic flags
         uint32_t nFlags;
+
+        // nalu info
+        uint8_t  naluFound;
+        uint32_t naluPOC;
+        uint32_t naluPrefix;
+        uint32_t naluNalType;
+        uint32_t naluPayloadType;
+        uint8_t* naluBase64Encode;
+
     } EB_BUFFERHEADERTYPE;
 
     typedef struct EB_COMPONENTTYPE
@@ -92,6 +101,21 @@ extern "C" {
 
 #define EB_BUFFERFLAG_EOS 0x00000001
 
+typedef struct EB_SEI_MESSAGE
+{
+    uint32_t  payloadSize;
+    unsigned char  *payload;
+    uint32_t  payloadType;
+
+}EB_SEI_MESSAGE;
+
+typedef enum EB_COLOR_FORMAT {
+    EB_YUV400,
+    EB_YUV420,
+    EB_YUV422,
+    EB_YUV444
+} EB_COLOR_FORMAT;
+
 /* For 8-bit and 10-bit packed inputs, the luma, cb, and cr fields should be used
  * for the three input picture planes. However, for 10-bit unpacked planes the
  * lumaExt, cbExt, and crExt fields should be used hold the extra 2-bits of
@@ -111,6 +135,7 @@ typedef struct EB_H265_ENC_INPUT
     uint32_t yStride;
     uint32_t crStride;
     uint32_t cbStride;
+    EB_SEI_MESSAGE    dolbyVisionRpu;
 
 } EB_H265_ENC_INPUT;
 
@@ -240,6 +265,8 @@ typedef struct EB_H265_ENC_CONFIGURATION
      *
      * Default is 8. */
     uint32_t                encoderBitDepth;
+
+	EB_COLOR_FORMAT         encoderColorFormat;
 
     /* Offline packing of the 2bits: requires two bits packed input.
      *
@@ -546,6 +573,21 @@ typedef struct EB_H265_ENC_CONFIGURATION
      *
      * Default is 0. */
     uint32_t                reconEnabled;
+
+    // SEI
+    uint16_t                maxCLL;
+    uint16_t                maxFALL;
+
+    uint8_t                 useMasteringDisplayColorVolume;
+    uint8_t                 useNaluFile;
+    uint32_t                dolbyVisionProfile;
+
+    // Master Display Color Volume Parameters
+    uint16_t                displayPrimaryX[3];
+    uint16_t                displayPrimaryY[3];
+    uint16_t                whitePointX, whitePointY;
+    uint32_t                maxDisplayMasteringLuminance;
+    uint32_t                minDisplayMasteringLuminance;
 
 } EB_H265_ENC_CONFIGURATION;
 
