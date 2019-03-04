@@ -819,7 +819,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
 		inputData.topPadding		= encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->topPadding;
 		inputData.botPadding		= encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->botPadding;
         inputData.bitDepth          = EB_8BIT;
-        inputData.colorFormat       = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaFormatIdc;
+        inputData.colorFormat       = (EB_COLOR_FORMAT)encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaFormatIdc;
         inputData.lcuSize           = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lcuSize;
         inputData.maxDepth          = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxLcuDepth;
         inputData.is16bit           = is16bit;
@@ -871,7 +871,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         referencePictureBufferDescInitData.maxWidth               =  encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaWidth;
         referencePictureBufferDescInitData.maxHeight              =  encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaHeight;
         referencePictureBufferDescInitData.bitDepth               =  encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->inputBitdepth;
-        referencePictureBufferDescInitData.colorFormat            =  encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaFormatIdc;
+        referencePictureBufferDescInitData.colorFormat            =  (EB_COLOR_FORMAT)encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaFormatIdc;
         referencePictureBufferDescInitData.bufferEnableMask       =  PICTURE_BUFFER_DESC_FULL_MASK;
 		referencePictureBufferDescInitData.leftPadding			  =  MAX_LCU_SIZE + MCPXPaddingOffset;
 		referencePictureBufferDescInitData.rightPadding			  =  MAX_LCU_SIZE + MCPXPaddingOffset;
