@@ -206,7 +206,7 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
 endif()
 
 if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
-    set(CMAKE_INSTALL_INCLUDEDIR "include/svt-hevc")
+    set(CMAKE_INSTALL_INCLUDEDIR "include")
 endif()
 
 configure_file(../pkg-config.pc.in ${CMAKE_BINARY_DIR}/SvtHevcEnc.pc @ONLY)
