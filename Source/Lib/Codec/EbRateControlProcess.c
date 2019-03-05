@@ -2247,9 +2247,8 @@ EB_U8 Vbv_Buf_Calc(PictureControlSet_t *pictureControlSetPtr, SequenceControlSet
 	EB_U32                             queueEntryIndexTemp;
 	EB_U32                             queueEntryIndexTemp2;
 	EB_U32                             queueEntryIndexHeadTemp;
-	EB_BOOL                             endOfSequenceFlag = EB_TRUE;
-
 	HlRateControlHistogramEntry_t      *hlRateControlHistogramPtrTemp;
+	EB_BOOL								bitrateFlag;
 
 	/* Lookahead VBV: If lookahead is done, raise the quantizer as necessary
 				* such that no frames in the lookahead overflow and such that the buffer
@@ -2262,7 +2261,7 @@ EB_U8 Vbv_Buf_Calc(PictureControlSet_t *pictureControlSetPtr, SequenceControlSet
 		queueEntryIndexHeadTemp;
 
 	queueEntryIndexTemp = queueEntryIndexHeadTemp;
-
+	bitrateFlag = encodeContextPtr->vbvMaxrate <= encodeContextPtr->availableTargetBitRate;
 	EB_S32 currentInd = (queueEntryIndexTemp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ? queueEntryIndexTemp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH : queueEntryIndexTemp;
 
 
@@ -2282,11 +2281,8 @@ EB_U8 Vbv_Buf_Calc(PictureControlSet_t *pictureControlSetPtr, SequenceControlSet
 		{
 			queueEntryIndexTemp2 = (queueEntryIndexTemp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ? queueEntryIndexTemp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH : queueEntryIndexTemp;
 			hlRateControlHistogramPtrTemp = (encodeContextPtr->hlRateControlHistorgramQueue[queueEntryIndexTemp2]);
-			/* This is set to false, so the last frame would go inside the loop */
-			endOfSequenceFlag = EB_FALSE;
 
-			if ((endOfSequenceFlag ||
-				queueEntryIndexTemp >= (currentInd + sequenceControlSetPtr->staticConfig.lookAheadDistance)) ||
+			if ((queueEntryIndexTemp >= (currentInd + sequenceControlSetPtr->staticConfig.lookAheadDistance)) ||
 				(queueEntryIndexTemp >= sequenceControlSetPtr->staticConfig.framesToBeEncoded)
 				|| (totalDuration >= 1.0))
 				break;
@@ -2314,7 +2310,7 @@ EB_U8 Vbv_Buf_Calc(PictureControlSet_t *pictureControlSetPtr, SequenceControlSet
 		}
 		/* Try to get the buffer not more than 80% filled, but don't set an impossible goal. */
 		targetFill = CLIP3(encodeContextPtr->vbvBufsize * (1 - 0.2 * finalDur), encodeContextPtr->vbvBufsize, encodeContextPtr->bufferFill - totalDuration * encodeContextPtr->vbvMaxrate * 0.5);
-		if (bufferFillCur > targetFill)
+		if ((bitrateFlag) && (bufferFillCur > targetFill))
 		{
 			q--;
 			q = CLIP3(
