@@ -646,6 +646,8 @@ static EB_SPATIALFULLDIST_TYPE FUNC_TABLE SpatialFullDistortionKernel_funcPtrArr
         // 16x16
         SpatialFullDistortionKernel,
         // 32x32
+        SpatialFullDistortionKernel,
+        // 64x64
         SpatialFullDistortionKernel
     },
     // ASM_AVX2
