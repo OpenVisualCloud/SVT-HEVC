@@ -263,20 +263,18 @@ void* PacketizationKernel(void *inputPtr)
                     pictureControlSetPtr->bitstreamPtr,
                     &sequenceControlSetPtr->activeParameterSet);
             }
-            //        // Flush the Bitstream
-            //        FlushBitstream(
-            //            pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
-            //        
-            //        // Copy SPS & PPS to the Output Bitstream
-            //        CopyRbspBitstreamToPayload(
-            //            pictureControlSetPtr->bitstreamPtr,
-            //            outputStreamPtr->pBuffer,
-            //            (EB_U32*) &(outputStreamPtr->nFilledLen),
-            //            (EB_U32*) &(outputStreamPtr->nAllocLen),
-                        //encodeContextPtr);
-            //    }
-
-        }
+                    // Flush the Bitstream
+                    FlushBitstream(
+                        pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+                    
+                    // Copy SPS & PPS to the Output Bitstream
+                    CopyRbspBitstreamToPayload(
+                        pictureControlSetPtr->bitstreamPtr,
+                        outputStreamPtr->pBuffer,
+                        (EB_U32*) &(outputStreamPtr->nFilledLen),
+                        (EB_U32*) &(outputStreamPtr->nAllocLen),
+                        encodeContextPtr);
+                }
         // Bitstream Written Loop
         // This loop writes the result of entropy coding into the bitstream
         {
@@ -500,8 +498,8 @@ void* PacketizationKernel(void *inputPtr)
 			}
         }
 
-        //// Reset the bitstream
-        //ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+        // Reset the bitstream
+        ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
 
         // Encode slice header and write it into the bitstream.
         packetizationQp = pictureControlSetPtr->pictureQp;
@@ -693,22 +691,25 @@ void* PacketizationKernel(void *inputPtr)
                 FlushBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
                 OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)queueEntryPtr->bitStreamPtr2->outputBitstreamPtr;
                 EB_U32  bufferWrittenBytesCount = outputBitstreamPtr->writtenBitsCount >> 3;
-                EB_U32  startinBytes = queueEntryPtr->startSplicing >> 3;
-                EB_U32  totalBytes = outputStreamPtr->nAllocLen;
+                EB_U32  startinBytes = queueEntryPtr->startSplicing;
+                EB_U32  totalBytes = outputStreamPtr->nFilledLen;
                 for (EB_U32 i = 0; i < bufferWrittenBytesCount; i++)
                 {
-                    for (EB_U32 j = totalBytes; j > totalBytes; j--)
+                    for (EB_U32 j = totalBytes; j > startinBytes; j--)
                     {
-                        outputStreamPtr->pBuffer[totalBytes + 1] = outputStreamPtr->pBuffer[totalBytes];
+                        outputStreamPtr->pBuffer[j] = outputStreamPtr->pBuffer[j-1];
                     }
+                    totalBytes++;
+                    startinBytes++;
                 }
                 // Copy SPS & PPS to the Output Bitstream
                 CopyRbspBitstreamToPayload(
                     queueEntryPtr->bitStreamPtr2,
                     outputStreamPtr->pBuffer,
-                    (EB_U32*) &(startinBytes),
+                    (EB_U32*) &(queueEntryPtr->startSplicing),
                     (EB_U32*) &(outputStreamPtr->nAllocLen),
-                    ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr);
+                    sequenceControlSetPtr->encodeContextPtr);
+                outputStreamPtr->nFilledLen += bufferWrittenBytesCount;
             }
 
             if (queueEntryPtr->sliceType == EB_I_PICTURE)
