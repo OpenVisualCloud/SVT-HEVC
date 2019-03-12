@@ -147,8 +147,7 @@ void* PacketizationKernel(void *inputPtr)
     EB_U32                          packetizationQp;
        
     EB_PICTURE                        sliceType;
-    EB_U32                            refDecOrder;
-
+    EB_U64                            refDecOrder = 0;
     for(;;) {
     
         // Get EntropyCoding Results
@@ -534,42 +533,17 @@ void* PacketizationKernel(void *inputPtr)
                 sequenceControlSetPtr->encodeContextPtr);    
         }
 
-        if(sequenceControlSetPtr->staticConfig.pictureTimingSEI) {
+        if (sequenceControlSetPtr->staticConfig.pictureTimingSEI) {
             if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
             {
-                // The aucpbremoval delay specifies how many clock ticks the
-                // access unit associated with the picture timing SEI message has to
-                // wait after removal of the access unit with the most recent
-                // buffering period SEI message
-                const AppVideoUsabilityInfo_t* vui = sequenceControlSetPtr->videoUsabilityInfoPtr;
-                const AppHrdParameters_t* hrd = vui->hrdParametersPtr;
-                if (sequenceControlSetPtr->intraRefreshType == CRA_REFRESH)
-                {
-                    if (pictureControlSetPtr->sliceType == EB_I_PICTURE)
-                        refDecOrder = (EB_S64)((pictureControlSetPtr->pictureNumber - (sequenceControlSetPtr->intraPeriodLength + 1) - ((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) - 1))) < 0 ? 
-                        0 : (EB_U32)((pictureControlSetPtr->pictureNumber - (sequenceControlSetPtr->intraPeriodLength + 1) - ((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) - 1)));
-                    else
-                        refDecOrder = (EB_S64)((((pictureControlSetPtr->pictureNumber + ((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) - 1)) / (sequenceControlSetPtr->intraPeriodLength + 1) * (sequenceControlSetPtr->intraPeriodLength + 1))) - ((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) - 1)) < 0 ?
-                        0: (EB_U32)((((pictureControlSetPtr->pictureNumber + ((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) - 1)) / (sequenceControlSetPtr->intraPeriodLength + 1) * (sequenceControlSetPtr->intraPeriodLength + 1))) - ((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) - 1));
-                }
-                else
-                {
-                        refDecOrder = (EB_U32)pictureControlSetPtr->ParentPcsPtr->lastIdrPictureOrder;
-                }
-                sequenceControlSetPtr->picTimingSei.auCpbRemovalDelayMinus1 = (EB_U32)((MIN(MAX(1, (EB_S32)(pictureControlSetPtr->ParentPcsPtr->decodeOrder - refDecOrder)), (1 << hrd->auCpbRemovalDelayLengthMinus1)))-1);
-                sequenceControlSetPtr->picTimingSei.picDpbOutputDelay = (EB_U32)((sequenceControlSetPtr->maxDpbSize-1) + pictureControlSetPtr->pictureNumber - pictureControlSetPtr->ParentPcsPtr->decodeOrder);
+                queueEntryPtr->picTimingEntry->decodeOrder = pictureControlSetPtr->ParentPcsPtr->decodeOrder;
+                queueEntryPtr->picTimingEntry->picStruct = pictureControlSetPtr->ParentPcsPtr->pictStruct;
+                queueEntryPtr->picTimingEntry->temporalId = pictureControlSetPtr->temporalId;
+                queueEntryPtr->sliceType = pictureControlSetPtr->sliceType;
+                queueEntryPtr->picTimingEntry->poc = pictureControlSetPtr->pictureNumber;
             }
 
-            EncodePictureTimingSEI(
-                pictureControlSetPtr->bitstreamPtr,
-                &sequenceControlSetPtr->picTimingSei,
-                sequenceControlSetPtr->videoUsabilityInfoPtr,
-                sequenceControlSetPtr->encodeContextPtr,
-                pictureControlSetPtr->ParentPcsPtr->pictStruct,
-                pictureControlSetPtr->temporalId);
-
         }
-
         if(sequenceControlSetPtr->staticConfig.recoveryPointSeiFlag){
             EncodeRecoveryPointSEI(
                 pictureControlSetPtr->bitstreamPtr,
@@ -675,8 +649,34 @@ void* PacketizationKernel(void *inputPtr)
                 finishTimeSeconds,
                 finishTimeuSeconds,
                 &latency);
-
+            //Block to update decode order of the lsat 
+            if (queueEntryPtr->sliceType == EB_I_PICTURE)
+            {
+                refDecOrder = queueEntryPtr->pictureNumber;
+            }
             outputStreamPtr->nTickCount = (EB_U32)latency;
+            if (sequenceControlSetPtr->staticConfig.pictureTimingSEI) {
+                if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
+                {
+                    // The aucpbremoval delay specifies how many clock ticks the
+                    // access unit associated with the picture timing SEI message has to
+                    // wait after removal of the access unit with the most recent
+                    // buffering period SEI message
+                    const AppVideoUsabilityInfo_t* vui = sequenceControlSetPtr->videoUsabilityInfoPtr;
+                    const AppHrdParameters_t* hrd = vui->hrdParametersPtr;
+                    sequenceControlSetPtr->picTimingSei.auCpbRemovalDelayMinus1 = (EB_U32)((MIN(MAX(1, (EB_S32)(queueEntryPtr->picTimingEntry->decodeOrder - refDecOrder)), (1 << hrd->auCpbRemovalDelayLengthMinus1))) - 1);
+                    sequenceControlSetPtr->picTimingSei.picDpbOutputDelay = (EB_U32)((sequenceControlSetPtr->maxDpbSize - 1) + queueEntryPtr->picTimingEntry->poc - queueEntryPtr->picTimingEntry->decodeOrder);
+                }
+
+/*                EncodePictureTimingSEI(
+                    queueEntryPtr->bitStreamPtr2,
+                    &sequenceControlSetPtr->picTimingSei,
+                    sequenceControlSetPtr->videoUsabilityInfoPtr,
+                    sequenceControlSetPtr->encodeContextPtr,
+                    queueEntryPtr->picTimingEntry->picStruct,
+                    queueEntryPtr->picTimingEntry->temporalId);*/
+
+            }
 			EbPostFullObject(outputStreamWrapperPtr);
             /* update VBV plan */
             EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
