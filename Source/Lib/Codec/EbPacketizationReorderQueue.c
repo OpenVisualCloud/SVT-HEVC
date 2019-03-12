@@ -32,6 +32,7 @@ EB_ERRORTYPE PacketizationReorderEntryCtor(
         PACKETIZATION_PROCESS_BUFFER_SIZE);
     (*entryDblPtr)->pictureNumber                   = pictureNumber;
     (*entryDblPtr)->outputStreamWrapperPtr          = (EbObjectWrapper_t *)EB_NULL;
+    (*entryDblPtr)->startSplicing = 0;
     return EB_ErrorNone;
 }
 

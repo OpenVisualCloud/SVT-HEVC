@@ -263,20 +263,20 @@ void* PacketizationKernel(void *inputPtr)
                     pictureControlSetPtr->bitstreamPtr,
                     &sequenceControlSetPtr->activeParameterSet);
             }
-            // Flush the Bitstream
-            FlushBitstream(
-                pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
-            
-            // Copy SPS & PPS to the Output Bitstream
-            CopyRbspBitstreamToPayload(
-                pictureControlSetPtr->bitstreamPtr,
-                outputStreamPtr->pBuffer,
-                (EB_U32*) &(outputStreamPtr->nFilledLen),
-                (EB_U32*) &(outputStreamPtr->nAllocLen),
-				encodeContextPtr);
+            //        // Flush the Bitstream
+            //        FlushBitstream(
+            //            pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+            //        
+            //        // Copy SPS & PPS to the Output Bitstream
+            //        CopyRbspBitstreamToPayload(
+            //            pictureControlSetPtr->bitstreamPtr,
+            //            outputStreamPtr->pBuffer,
+            //            (EB_U32*) &(outputStreamPtr->nFilledLen),
+            //            (EB_U32*) &(outputStreamPtr->nAllocLen),
+                        //encodeContextPtr);
+            //    }
+
         }
-        
-        
         // Bitstream Written Loop
         // This loop writes the result of entropy coding into the bitstream
         {
@@ -500,8 +500,8 @@ void* PacketizationKernel(void *inputPtr)
 			}
         }
 
-        // Reset the bitstream
-        ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+        //// Reset the bitstream
+        //ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
 
         // Encode slice header and write it into the bitstream.
         packetizationQp = pictureControlSetPtr->pictureQp;
@@ -533,6 +533,18 @@ void* PacketizationKernel(void *inputPtr)
                 sequenceControlSetPtr->encodeContextPtr);    
         }
 
+        // Flush the Bitstream
+        FlushBitstream(
+            pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+
+        // Copy Slice Header to the Output Bitstream
+        CopyRbspBitstreamToPayload(
+            pictureControlSetPtr->bitstreamPtr,
+            outputStreamPtr->pBuffer,
+            (EB_U32*) &(outputStreamPtr->nFilledLen),
+            (EB_U32*) &(outputStreamPtr->nAllocLen),
+            encodeContextPtr);
+        queueEntryPtr->startSplicing = outputStreamPtr->nFilledLen;
         if (sequenceControlSetPtr->staticConfig.pictureTimingSEI) {
             if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
             {
@@ -544,6 +556,9 @@ void* PacketizationKernel(void *inputPtr)
             }
 
         }
+        // Reset the bitstream
+        ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+
         if(sequenceControlSetPtr->staticConfig.recoveryPointSeiFlag){
             EncodeRecoveryPointSEI(
                 pictureControlSetPtr->bitstreamPtr,
@@ -650,10 +665,6 @@ void* PacketizationKernel(void *inputPtr)
                 finishTimeuSeconds,
                 &latency);
             //Block to update decode order of the lsat 
-            if (queueEntryPtr->sliceType == EB_I_PICTURE)
-            {
-                refDecOrder = queueEntryPtr->pictureNumber;
-            }
             outputStreamPtr->nTickCount = (EB_U32)latency;
             if (sequenceControlSetPtr->staticConfig.pictureTimingSEI) {
                 if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
@@ -667,15 +678,42 @@ void* PacketizationKernel(void *inputPtr)
                     sequenceControlSetPtr->picTimingSei.auCpbRemovalDelayMinus1 = (EB_U32)((MIN(MAX(1, (EB_S32)(queueEntryPtr->picTimingEntry->decodeOrder - refDecOrder)), (1 << hrd->auCpbRemovalDelayLengthMinus1))) - 1);
                     sequenceControlSetPtr->picTimingSei.picDpbOutputDelay = (EB_U32)((sequenceControlSetPtr->maxDpbSize - 1) + queueEntryPtr->picTimingEntry->poc - queueEntryPtr->picTimingEntry->decodeOrder);
                 }
+                // Reset the bitstream
+                ResetBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
 
-/*                EncodePictureTimingSEI(
+                EncodePictureTimingSEI(
                     queueEntryPtr->bitStreamPtr2,
                     &sequenceControlSetPtr->picTimingSei,
                     sequenceControlSetPtr->videoUsabilityInfoPtr,
                     sequenceControlSetPtr->encodeContextPtr,
                     queueEntryPtr->picTimingEntry->picStruct,
-                    queueEntryPtr->picTimingEntry->temporalId);*/
+                    queueEntryPtr->picTimingEntry->temporalId);
 
+                // Flush the Bitstream
+                FlushBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)queueEntryPtr->bitStreamPtr2->outputBitstreamPtr;
+                EB_U32  bufferWrittenBytesCount = outputBitstreamPtr->writtenBitsCount >> 3;
+                EB_U32  startinBytes = queueEntryPtr->startSplicing >> 3;
+                EB_U32  totalBytes = outputStreamPtr->nAllocLen;
+                for (EB_U32 i = 0; i < bufferWrittenBytesCount; i++)
+                {
+                    for (EB_U32 j = totalBytes; j > totalBytes; j--)
+                    {
+                        outputStreamPtr->pBuffer[totalBytes + 1] = outputStreamPtr->pBuffer[totalBytes];
+                    }
+                }
+                // Copy SPS & PPS to the Output Bitstream
+                CopyRbspBitstreamToPayload(
+                    queueEntryPtr->bitStreamPtr2,
+                    outputStreamPtr->pBuffer,
+                    (EB_U32*) &(startinBytes),
+                    (EB_U32*) &(outputStreamPtr->nAllocLen),
+                    ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr);
+            }
+
+            if (queueEntryPtr->sliceType == EB_I_PICTURE)
+            {
+                refDecOrder = queueEntryPtr->pictureNumber;
             }
 			EbPostFullObject(outputStreamWrapperPtr);
             /* update VBV plan */
