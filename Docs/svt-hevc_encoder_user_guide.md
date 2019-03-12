@@ -250,7 +250,6 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **QpFile** | -qp-file | any string | null | Path to qp file |
 | **EncoderMode** | -encMode | [0 - 12] | 9 | A preset defining the quality vs density tradeoff point that the encoding is to be performed at. (e.g. 0 is the highest quality mode, 12 is the highest density mode). Section 3.4 outlines the preset availability per resolution |
 | **Tune** | -tune | [0, 1, 2] | 1 | 0 = SQ - visually optimized mode, 1 = OQ - PSNR / SSIM optimized mode, 2 = VMAF - VMAF optimized mode |
-| **LatencyMode** | -latency-mode | [0, 1] | 0 | For lower latency (0: Normal Latency, 1: Low Latency) |
 | **EncoderBitDepth** | -bit-depth | [8, 10] | 8 | Specifies the bit depth of input video |
 | **EncoderColorFormat** | -color-format | [1, 2, 3] | 1 | Specifies the chroma subsampling of input video(1: 420, 2: 422, 3: 444) |
 | **CompressedTenBitFormat** | -compressed-ten-bit-format | [0, 1] | 0 | Offline packing of the 2bits: requires two bits packed input (0: OFF, 1: ON) |
