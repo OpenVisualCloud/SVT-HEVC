@@ -246,19 +246,20 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **StreamFile** | -b | any string | null | Output bitstream file path and name |
 | **ErrorFile** | -errlog | any string | stderr | Error log displaying configuration or encode errors |
 | **ReconFile** | -o | any string | null | Output reconstructed yuv used for debug purposes. **Note:** using this feature will affect the speed of the encoder significantly. This should only be used for debugging purposes. |
-| **UseQpFile** | -use-q-file | [0,1] | 0 | When set to 1, overwrite the picture qp assignment using qp values in QpFile |
+| **UseQpFile** | -use-q-file | [0, 1] | 0 | When set to 1, overwrite the picture qp assignment using qp values in QpFile |
 | **QpFile** | -qp-file | any string | null | Path to qp file |
 | **EncoderMode** | -encMode | [0 - 12] | 9 | A preset defining the quality vs density tradeoff point that the encoding is to be performed at. (e.g. 0 is the highest quality mode, 12 is the highest density mode). Section 3.4 outlines the preset availability per resolution |
-| **Tune** | -tune | [0,2] | 1 | 0 = SQ - visually optimized mode, 1 = OQ - PSNR / SSIM optimized mode, 2 = VMAF - VMAF optimized mode |
-| **LatencyMode** | -latency-mode | [0,1] | 0 | For lower latency (0: Normal Latency, 1: Low Latency) |
-| **EncoderBitDepth** | -bit-depth | [8 , 10] | 8 | specifies the bit depth of the input video |
-| **CompressedTenBitFormat** | -compressed-ten-bit-format | [0,1] | 0 | Offline packing of the 2bits: requires two bits packed input (0: OFF, 1: ON) |
+| **Tune** | -tune | [0, 1, 2] | 1 | 0 = SQ - visually optimized mode, 1 = OQ - PSNR / SSIM optimized mode, 2 = VMAF - VMAF optimized mode |
+| **LatencyMode** | -latency-mode | [0, 1] | 0 | For lower latency (0: Normal Latency, 1: Low Latency) |
+| **EncoderBitDepth** | -bit-depth | [8, 10] | 8 | Specifies the bit depth of input video |
+| **EncoderColorFormat** | -color-format | [1, 2, 3] | 1 | Specifies the chroma subsampling of input video(1: 420, 2: 422, 3: 444) |
+| **CompressedTenBitFormat** | -compressed-ten-bit-format | [0, 1] | 0 | Offline packing of the 2bits: requires two bits packed input (0: OFF, 1: ON) |
 | **SourceWidth** | -w | [64 - 8192] | 0 | Input source width |
 | **SourceHeight** | -h | [64 - 4320] | 0 | Input source height |
 | **FrameToBeEncoded** | -n | [0 - 2^31 -1] | 0 | Number of frames to be encoded, if number of frames is > number of frames in file, the encoder will loop to the beginning and continue the encode. 0 encodes the full clip. |
 | **BufferedInput** | -nb | [-1, 1 to 2^31 -1] | -1 | number of frames to preload to the RAM before the start of the encode. If -nb = 100 and –n 1000 --> the encoder will encode the first 100 frames of the video 10 times. Use -1 to not preload any frames. |
 | **Profile** | -profile | [1,2] | 2 | 1: Main, 2: Main 10 |
-| **Tier** | -tier | [0,1] | 0 | 0: Main, 1: High |
+| **Tier** | -tier | [0, 1] | 0 | 0: Main, 1: High |
 | **Level** | -level | [1, 2, 2.1,3, 3.1, 4, 4.1, 5, 5.1, 5.2, 6, 6.1, 6.2] | 0 | 0 to 6.2 [0 for auto determine Level] |
 | **FrameRate** | -fps | [0 - 2^64 -1] | 25 | If the number is less than 1000, the input frame rate is an integer number between 1 and 60, else the input number is in Q16 format (shifted by 16 bits) [Max allowed is 240 fps]. If FrameRateNumerator and FrameRateDenominator are both !=0 the encoder will ignore this parameter |
 | **FrameRateNumerator** | -fps-num | [0 - 2^64 -1] | 0 | Frame rate numerator e.g. 6000When zero, the encoder will use –fps if FrameRateDenominator is also zero, otherwise an error is returned |
@@ -274,9 +275,9 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **IntraPeriod** | -intra-period | [-2 - 255] | -2 | Distance Between Intra Frame inserted. -1 denotes no intra update. -2 denotes auto. |
 | **IntraRefreshType** | -irefresh-type | [1,2] | 1 | 1: CRA (Open GOP)2: IDR (Closed GOP) |
 | **QP** | -q | [0 - 51] | 25 | Initial quantization parameter for the Intra pictures used when RateControlMode 0 (CQP) |
-| **LoopFilterDisable** | -dlf | [0,1] | 0 | When set to 1 disables the Deblocking Loop Filtering |
+| **LoopFilterDisable** | -dlf | [0, 1] | 0 | When set to 1 disables the Deblocking Loop Filtering |
 | **SAO** | -sao | [0,1] | 1 | When set to 0 the encoder will not use the Sample Adaptive Filter |
-| **UseDefaultMeHme** | -use-default-me-hme | [0,1] | 1 | 0 : Overwrite Default ME HME parameters<br>1 : Use default ME HME parameters, dependent on width and height |
+| **UseDefaultMeHme** | -use-default-me-hme | [0, 1] | 1 | 0 : Overwrite Default ME HME parameters<br>1 : Use default ME HME parameters, dependent on width and height |
 | **HME** | -hme | [0,1] | 1 | Enable HME, 0 = OFF, 1 = ON |
 | **SearchAreaWidth** | -search-w | [1 - 256] | Depends on input resolution | Search Area in Width |
 | **SearchAreaHeight** | -search-h | [1 - 256] | Depends on input resolution | Search Area in Height |
