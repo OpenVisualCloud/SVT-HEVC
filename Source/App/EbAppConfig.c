@@ -284,7 +284,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, FRAME_RATE_NUMERATOR_TOKEN, "FrameRateNumerator", SetFrameRateNumerator },
     { SINGLE_INPUT, FRAME_RATE_DENOMINATOR_TOKEN, "FrameRateDenominator", SetFrameRateDenominator },
     { SINGLE_INPUT, ENCODER_BIT_DEPTH, "EncoderBitDepth", SetEncoderBitDepth },
-    { SINGLE_INPUT, ENCODER_COLOR_FORMAT, "420:1, 422:2, 444:3", SetEncoderColorFormat},
+    { SINGLE_INPUT, ENCODER_COLOR_FORMAT, "EncoderColorFormat", SetEncoderColorFormat},
 	{ SINGLE_INPUT, INPUT_COMPRESSED_TEN_BIT_FORMAT, "CompressedTenBitFormat", SetcompressedTenBitFormat },
 	{ SINGLE_INPUT, HIERARCHICAL_LEVELS_TOKEN, "HierarchicalLevels", SetHierarchicalLevels },
 
