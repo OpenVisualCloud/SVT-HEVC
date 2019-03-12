@@ -6358,8 +6358,6 @@ static void CodePPS(
 	return;
 }
 
-#define DECODED_PICTURE_HASH 132
-
 static void CodeSliceHeader(
 	EB_U32         firstLcuAddr,
 	EB_U32         pictureQp,
