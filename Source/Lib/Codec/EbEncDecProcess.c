@@ -4189,27 +4189,6 @@ void* EncDecKernel(void *inputPtr)
                     // Derive restrictIntraGlobalMotion Flag
                     contextPtr->mdContext->restrictIntraGlobalMotion = ((pictureControlSetPtr->ParentPcsPtr->isPan || pictureControlSetPtr->ParentPcsPtr->isTilt) && pictureControlSetPtr->ParentPcsPtr->nonMovingIndexArray[lcuIndex] < INTRA_GLOBAL_MOTION_NON_MOVING_INDEX_TH && pictureControlSetPtr->ParentPcsPtr->yMean[lcuIndex][RASTER_SCAN_CU_INDEX_64x64] < INTRA_GLOBAL_MOTION_DARK_LCU_TH);
 
-                    //Block level vbv tuning starts here
-                    if (sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate)
-                    {
-                        if (pictureControlSetPtr->firstRowOfPicture)
-                            pictureControlSetPtr->rowStats[rowIndex]->rowQp=pictureControlSetPtr->pictureQp;
-
-                        //Assign the base qp for the LCU
-                        if (xLcuIndex <= yLcuIndex && yLcuIndex)
-                            lcuPtr->qp = pictureControlSetPtr->lcuPtrArray[lcuIndex - pictureWidthInLcu]->qp;
-                        else 
-                            lcuPtr->qp = pictureControlSetPtr->rowStats[rowPtr->rowIndex]->rowQp;
-
-                        // If current block is at row diagonal checkpoint, call vbv ratecontrol.
-                        if (yLcuIndex == xLcuIndex && !pictureControlSetPtr->firstRowOfPicture)
-                        {
-                            baseQp=RowVbvRateControl(pictureControlSetPtr,sequenceControlSetPtr, rowPtr, sequenceControlSetPtr->encodeContextPtr, lcuPtr->qp);
-                            lcuPtr->qp = CLIP3(sequenceControlSetPtr->staticConfig.minQpAllowed,sequenceControlSetPtr->staticConfig.maxQpAllowed, baseQp);
-                            rowPtr->rowQp = lcuPtr->qp;
-                        }
-
-                    }
 					// Configure the LCU
                     ModeDecisionConfigureLcu(  // HT done
                         contextPtr->mdContext,
@@ -4320,6 +4299,31 @@ void* EncDecKernel(void *inputPtr)
                         }
 
                     }
+                    //Block level vbv tuning starts here
+                    if (sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate)
+                    {
+                        EbBlockOnMutex(pictureControlSetPtr->rowStats[yLcuIndex]->rowUpdateMutex);
+                        rowPtr = pictureControlSetPtr->rowStats[yLcuIndex];
+                        rowPtr->rowIndex = yLcuIndex;
+                        lcuPtr->rowInd = yLcuIndex;
+                        if (!yLcuIndex)
+                            pictureControlSetPtr->rowStats[rowPtr->rowIndex]->rowQp = pictureControlSetPtr->pictureQp;
+
+                        //Assign the base qp for the LCU
+                        if (xLcuIndex <= yLcuIndex && yLcuIndex)
+                            lcuPtr->qp = pictureControlSetPtr->lcuPtrArray[lcuIndex - pictureWidthInLcu]->qp;
+                        else
+                            lcuPtr->qp = pictureControlSetPtr->rowStats[rowPtr->rowIndex]->rowQp;
+
+                        // If current block is at row diagonal checkpoint, call vbv ratecontrol.
+                        if (xLcuIndex == yLcuIndex && yLcuIndex)
+                        {
+                            baseQp = RowVbvRateControl(pictureControlSetPtr, sequenceControlSetPtr, rowPtr, sequenceControlSetPtr->encodeContextPtr, lcuPtr->qp);
+                            lcuPtr->qp = CLIP3(sequenceControlSetPtr->staticConfig.minQpAllowed, sequenceControlSetPtr->staticConfig.maxQpAllowed, baseQp);
+                            rowPtr->rowQp = lcuPtr->qp;
+                        }
+                        EbReleaseMutex(pictureControlSetPtr->rowStats[yLcuIndex]->rowUpdateMutex);
+                    }
 
                     // Configure the LCU
                     EncDecConfigureLcu(         // HT done
@@ -4348,7 +4352,7 @@ void* EncDecKernel(void *inputPtr)
                         tempWrittenBitsBeforeQuantizedCoeff = ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->tempEntropyCoderPtr))->writtenBitsCount +
                             32 - ((CabacEncodeContext_t*)pictureControlSetPtr->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
                             (((CabacEncodeContext_t*)pictureControlSetPtr->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum << 3);
-                        EncodeLcu(
+						  EstimateLcu(
                             lcuPtr,
                             lcuOriginX,
                             lcuOriginY,
