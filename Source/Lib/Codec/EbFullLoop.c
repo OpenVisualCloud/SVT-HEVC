@@ -147,7 +147,7 @@ void ProductUnifiedQuantizeInvQuantizeMd(
 	}
 	else{
 
-	    QiQ_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][areaSize >> 3](
+	    QiQ_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][areaSize >> 3](
 		    coeff,
 		    coeffStride,
 		    quantCoeff,
@@ -537,7 +537,7 @@ void UnifiedQuantizeInvQuantize_R(
             rdoqPmCoreMethod);
 	}else{
 
-		QiQ_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][areaSize >> 3](
+		QiQ_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][areaSize >> 3](
 			coeff,
 			coeffStride,
 			quantCoeff,

@@ -286,7 +286,7 @@ EB_ERRORTYPE PictureFastDistortion(
     // Y
     if (componentMask & PICTURE_BUFFER_DESC_Y_FLAG) {
 
-        lumaDistortion[DIST_CALC_RESIDUAL] += NxMSadKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][size >> 3](
+        lumaDistortion[DIST_CALC_RESIDUAL] += NxMSadKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][size >> 3](
             &(input->bufferY[inputLumaOriginIndex]),
             input->strideY,
             &(pred->bufferY[predLumaOriginIndex]),
@@ -298,7 +298,7 @@ EB_ERRORTYPE PictureFastDistortion(
     // Cb
     if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
 
-        chromaDistortion[DIST_CALC_RESIDUAL] += NxMSadKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][chromaSize >> 3]( // Always SAD without weighting
+        chromaDistortion[DIST_CALC_RESIDUAL] += NxMSadKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][chromaSize >> 3]( // Always SAD without weighting
             &(input->bufferCb[inputChromaOriginIndex]),
             input->strideCb,
             &(pred->bufferCb[predChromaOriginIndex]),
@@ -310,7 +310,7 @@ EB_ERRORTYPE PictureFastDistortion(
     // Cr
     if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
 
-        chromaDistortion[DIST_CALC_RESIDUAL] += NxMSadKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][chromaSize >> 3]( // Always SAD without weighting
+        chromaDistortion[DIST_CALC_RESIDUAL] += NxMSadKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][chromaSize >> 3]( // Always SAD without weighting
             &(input->bufferCr[inputChromaOriginIndex]),
             input->strideCr,
             &(pred->bufferCr[predChromaOriginIndex]),
@@ -454,7 +454,7 @@ void UnpackL0L1Avg(
         EB_U32  height)
  {
  
-     UnPackAvg_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+     UnPackAvg_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
         ref16L0,
         refL0Stride,
         ref16L1,
@@ -476,7 +476,7 @@ void Extract8BitdataSafeSub(
     )
 {
 
-    UnPack8BITSafeSub_funcPtrArray_16Bit[(ASM_TYPES & AVX2_MASK) && 1](
+    UnPack8BITSafeSub_funcPtrArray_16Bit[!!(ASM_TYPES & AVX2_MASK)](
         in16BitBuffer,
         inStride,
         out8BitBuffer,    
@@ -497,7 +497,7 @@ void UnpackL0L1AvgSafeSub(
  {
      //fix C
 
-     UnPackAvgSafeSub_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+     UnPackAvgSafeSub_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
         ref16L0,
         refL0Stride,
         ref16L1,
@@ -523,7 +523,7 @@ void UnPack2D(
 #ifndef NON_AVX512_SUPPORT
     UnPack2D_funcPtrArray_16Bit[((width & 3) == 0) && ((height & 1)== 0)][(ASM_TYPES & AVX512_MASK) && 1](
 #else
-    UnPack2D_funcPtrArray_16Bit[((width & 3) == 0) && ((height & 1) == 0)][(ASM_TYPES & AVX2_MASK) && 1](
+    UnPack2D_funcPtrArray_16Bit[((width & 3) == 0) && ((height & 1) == 0)][!!(ASM_TYPES & AVX2_MASK)](
 #endif
         in16BitBuffer,
         inStride,
@@ -547,7 +547,7 @@ void Pack2D_SRC(
    )
 {
 	 
-    Pack2D_funcPtrArray_16Bit_SRC[((width & 3) == 0) && ((height & 1)== 0)][(ASM_TYPES & AVX2_MASK) && 1](
+    Pack2D_funcPtrArray_16Bit_SRC[((width & 3) == 0) && ((height & 1)== 0)][!!(ASM_TYPES & AVX2_MASK)](
         in8BitBuffer,
         in8Stride,
         innBitBuffer,
@@ -570,7 +570,7 @@ void CompressedPackLcu(
 )
 {
 
-    CompressedPack_funcPtrArray[((width == 64 || width == 32) ? ((ASM_TYPES & AVX2_MASK) && 1) : EB_ASM_C)](
+    CompressedPack_funcPtrArray[((width == 64 || width == 32) ? (!!(ASM_TYPES & AVX2_MASK)) : EB_ASM_C)](
         in8BitBuffer,
         in8Stride,
         innBitBuffer,
@@ -595,7 +595,7 @@ void CompressedPackBlk(
 {
 
 
-	CompressedPack_funcPtrArray[((width == 64 || width == 32 || width == 16 || width == 8) ? ((ASM_TYPES & AVX2_MASK) && 1) : EB_ASM_C)](
+	CompressedPack_funcPtrArray[((width == 64 || width == 32 || width == 16 || width == 8) ? (!!(ASM_TYPES & AVX2_MASK)) : EB_ASM_C)](
 		in8BitBuffer,
 		in8Stride,
 		innBitBuffer,
@@ -617,7 +617,7 @@ void Conv2bToCPackLcu(
 	EB_U32     height)
 {
 
-	Convert_Unpack_CPack_funcPtrArray[((width == 64 || width == 32) ? ((ASM_TYPES & AVX2_MASK) && 1) : EB_ASM_C)](
+	Convert_Unpack_CPack_funcPtrArray[((width == 64 || width == 32) ? (!!(ASM_TYPES & AVX2_MASK)) : EB_ASM_C)](
 		innBitBuffer,
 		innStride,
 		inCompnBitBuffer,

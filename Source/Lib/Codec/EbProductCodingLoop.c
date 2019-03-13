@@ -2036,7 +2036,7 @@ void ProductPerformFastLoop(
 					lumaFastDistortion = candidatePtr->meDistortion;
 				else
 					// Y
-					lumaFastDistortion += (NxMSadKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][cuSize >> 3] ( 
+					lumaFastDistortion += (NxMSadKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][cuSize >> 3] ( 
 						inputBufferY,
 						inputStrideY,
 						predBufferY,
@@ -2050,7 +2050,7 @@ void ProductPerformFastLoop(
                     EB_U8 * const inputBufferCb = inputPicturePtr->bufferCb + inputCbOriginIndex;
                     EB_U8 *  const predBufferCb = candidateBuffer->predictionPtr->bufferCb + cuChromaOriginIndex;
 
-					chromaFastDistortion += NxMSadKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][cuSize >> 4] ( 
+					chromaFastDistortion += NxMSadKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][cuSize >> 4] ( 
 						inputBufferCb,
 						inputPicturePtr->strideCb,
 						predBufferCb,
@@ -2062,7 +2062,7 @@ void ProductPerformFastLoop(
                     EB_U8 * const inputBufferCr = inputPicturePtr->bufferCr + inputCrOriginIndex;
                     EB_U8 * const predBufferCr = candidateBuffer->predictionPtr->bufferCr + cuChromaOriginIndex;
 
-                    chromaFastDistortion += NxMSadKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][cuSize >> 4] (
+                    chromaFastDistortion += NxMSadKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][cuSize >> 4] (
                         inputBufferCr,
                         inputPicturePtr->strideCb ,
                         predBufferCr,

@@ -683,7 +683,7 @@ static void EncodeLoop(
 
 		// For the case that DC path chosen for chroma, we check the DC values and determine to use DC or N2Shape for chroma. Since there is only one flag for ChromaShaping, we do the prediction of Cr and Cb and decide on the chroma shaping
 		if (tuSize > MIN_PU_SIZE && contextPtr->transCoeffShapeChroma == ONLY_DC_SHAPE) {
-			EB_S64 sumResidual = SumResidual_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+			EB_S64 sumResidual = SumResidual_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 					((EB_S16*)residual16bit->bufferCb) + scratchCbOffset,
 					tuSize >> subWidthCMinus1,
 					residual16bit->strideCb);
@@ -793,7 +793,7 @@ static void EncodeLoop(
 				tuSize > MIN_PU_SIZE? (tuSize >> subWidthCMinus1): tuSize);
 
 		if (tuSize > MIN_PU_SIZE && contextPtr->transCoeffShapeChroma == ONLY_DC_SHAPE) {
-			EB_S64 sumResidual = SumResidual_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+			EB_S64 sumResidual = SumResidual_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 					((EB_S16*)residual16bit->bufferCr) + scratchCrOffset,
 					tuSize >> subWidthCMinus1,
 					residual16bit->strideCr);
@@ -1255,7 +1255,7 @@ static void EncodeLoop16bit(
 
 		// For the case that DC path chosen for chroma, we check the DC values and determine to use DC or N2Shape for chroma. Since there is only one flag for ChromaShaping, we do the prediction of Cr and Cb and decide on the chroma shaping
 		if (tuSize > MIN_PU_SIZE && contextPtr->transCoeffShapeChroma == ONLY_DC_SHAPE) {
-			EB_S64 sumResidual = SumResidual_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+			EB_S64 sumResidual = SumResidual_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 					((EB_S16*)residual16bit->bufferCb) + scratchCbOffset,
 					tuSize >> subWidthCMinus1,
 					residual16bit->strideCb);
@@ -1364,7 +1364,7 @@ static void EncodeLoop16bit(
 				tuSize > MIN_PU_SIZE? (tuSize >> subWidthCMinus1): tuSize);
 
 		if (tuSize > MIN_PU_SIZE && contextPtr->transCoeffShapeChroma == ONLY_DC_SHAPE) {
-			EB_S64 sumResidual = SumResidual_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+			EB_S64 sumResidual = SumResidual_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 					((EB_S16*)residual16bit->bufferCr) + scratchCrOffset,
 					tuSize >> subWidthCMinus1,
 					residual16bit->strideCr);
