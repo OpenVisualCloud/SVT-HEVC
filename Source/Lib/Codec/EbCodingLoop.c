@@ -977,7 +977,7 @@ static void EncodeGenerateRecon(
 				BIT_INCREMENT_8BIT,
 				(EB_BOOL)(tuSize == MIN_PU_SIZE));
 
-			AdditionKernel_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][tuSize >> 3](
+			AdditionKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][tuSize >> 3](
 				predSamples->bufferY + predLumaOffset,
 				predSamples->strideY,
 				((EB_S16*)residual16bit->bufferY) + scratchLumaOffset,
@@ -1016,7 +1016,7 @@ static void EncodeGenerateRecon(
 				BIT_INCREMENT_8BIT,
 				EB_FALSE);
 
-			AdditionKernel_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][tuSize >> (3 + shift_bit)](
+			AdditionKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][tuSize >> (3 + shift_bit)](
 				predSamples->bufferCb + predChromaOffset,
 				predSamples->strideCb,
 				((EB_S16*)residual16bit->bufferCb) + scratchChromaOffset,
@@ -1049,7 +1049,7 @@ static void EncodeGenerateRecon(
 				BIT_INCREMENT_8BIT,
 				EB_FALSE);
 
-			AdditionKernel_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][tuSize >> (3 + shift_bit)](
+			AdditionKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][tuSize >> (3 + shift_bit)](
 				predSamples->bufferCr + predChromaOffset,
 				predSamples->strideCr,
 				((EB_S16*)residual16bit->bufferCr) + scratchChromaOffset,
@@ -1552,7 +1552,7 @@ static void EncodeGenerateRecon16bit(
 				BIT_INCREMENT_10BIT,
 				(EB_BOOL)(tuSize == MIN_PU_SIZE));
 
-            AdditionKernel_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+            AdditionKernel_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
                 (EB_U16*)predSamples->bufferY + predLumaOffset,
                 predSamples->strideY,
                 ((EB_S16*)residual16bit->bufferY) + scratchLumaOffset,
@@ -1591,7 +1591,7 @@ static void EncodeGenerateRecon16bit(
 				BIT_INCREMENT_10BIT,
 				EB_FALSE);
 
-            AdditionKernel_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+            AdditionKernel_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
                 (EB_U16*)predSamples->bufferCb + predChromaOffset,
 				predSamples->strideCb,
 				((EB_S16*)residual16bit->bufferCb) + scratchChromaOffset,
@@ -1624,7 +1624,7 @@ static void EncodeGenerateRecon16bit(
 				BIT_INCREMENT_10BIT,
 				EB_FALSE);
 
-            AdditionKernel_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+            AdditionKernel_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
                 (EB_U16*)predSamples->bufferCr + predChromaOffset,
 				predSamples->strideCr,
 				((EB_S16*)residual16bit->bufferCr) + scratchChromaOffset,

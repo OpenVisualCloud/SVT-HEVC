@@ -3599,7 +3599,7 @@ void SubSampleLumaGeneratePixelIntensityHistogramBins(
 
 
 			// Initialize bins to 1
-			InitializeBuffer_32bits_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1](pictureControlSetPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex][0], 64, 0, 1);
+			InitializeBuffer_32bits_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](pictureControlSetPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex][0], 64, 0, 1);
 
 			regionWidthOffset = (regionInPictureWidthIndex == sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerWidth - 1) ?
 				inputPicturePtr->width - (sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerWidth * regionWidth) :
@@ -3658,8 +3658,8 @@ void SubSampleChromaGeneratePixelIntensityHistogramBins(
 
 
             // Initialize bins to 1
-			InitializeBuffer_32bits_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1](pictureControlSetPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex][1], 64, 0, 1);
-			InitializeBuffer_32bits_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1](pictureControlSetPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex][2], 64, 0, 1);
+			InitializeBuffer_32bits_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](pictureControlSetPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex][1], 64, 0, 1);
+			InitializeBuffer_32bits_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](pictureControlSetPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex][2], 64, 0, 1);
 
             regionWidthOffset = (regionInPictureWidthIndex == sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerWidth - 1) ?
                 inputPicturePtr->width - (sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerWidth * regionWidth) :

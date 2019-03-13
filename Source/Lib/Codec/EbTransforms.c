@@ -2547,7 +2547,7 @@ void PerformTwoStagePm(
 						EB_U64 sse[2];
                         EB_U64 coeffBits = 0;
 
-						FullDistortionIntrinsic_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][pmCand->nzCoeff != 0][1][blkAreaSize >> 3](
+						FullDistortionIntrinsic_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][pmCand->nzCoeff != 0][1][blkAreaSize >> 3](
                             &coeff[blkOffset],
                             coeffStride,
                             pmCand->iqCoeff,
@@ -2561,7 +2561,7 @@ void PerformTwoStagePm(
                         sse[DIST_CALC_RESIDUAL] = (sse[DIST_CALC_RESIDUAL] + (EB_U64)(1 << (shift - 1))) >> shift;
 
 						if (pmCand->nzCoeff)						
-							CoeffRateEst4x4_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][componentType != COMPONENT_LUMA](
+							CoeffRateEst4x4_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][componentType != COMPONENT_LUMA](
 								pictureControlSetPtr->cabacCost,
 								NULL,
 								4,
@@ -2709,7 +2709,7 @@ void DecoupledQuantizeInvQuantizeLoops(
 								if (!first_non_zero_coef_done) {
 									first_non_zero_coef_done = EB_TRUE;
 
-									EstimateQuantizedCoefficients[1][(ASM_TYPES & PREAVX2_MASK) && 1](
+									EstimateQuantizedCoefficients[1][!!(ASM_TYPES & PREAVX2_MASK)](
 										CabacCost,
 										cabacEncodeCtxPtr,
 										areaSize,
@@ -2731,7 +2731,7 @@ void DecoupledQuantizeInvQuantizeLoops(
 						}
 						else {
 							if (*nonzerocoeff) {
-								EstimateQuantizedCoefficients[1][(ASM_TYPES & PREAVX2_MASK) && 1](
+								EstimateQuantizedCoefficients[1][!!(ASM_TYPES & PREAVX2_MASK)](
 									CabacCost,
 									cabacEncodeCtxPtr,
 									areaSize,
@@ -2882,7 +2882,7 @@ void DecoupledQuantizeInvQuantizeLoops(
 						EB_U64 sse[2];
 						EB_U64 coeffBits = 0;
 
-						FullDistortionIntrinsic_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][pmCand->nzCoeff != 0][1][blkAreaSize >> 3](
+						FullDistortionIntrinsic_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][pmCand->nzCoeff != 0][1][blkAreaSize >> 3](
 							&coeff[blkOffset],
 							coeffStride,
 							pmCand->iqCoeff,
@@ -2896,7 +2896,7 @@ void DecoupledQuantizeInvQuantizeLoops(
 						sse[DIST_CALC_RESIDUAL] = (sse[DIST_CALC_RESIDUAL] + (EB_U64)(1 << (shift - 1))) >> shift;
 
 						if (pmCand->nzCoeff)
-							CoeffRateEst4x4_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][componentType != COMPONENT_LUMA](
+							CoeffRateEst4x4_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][componentType != COMPONENT_LUMA](
 							CabacCost,
 							NULL,
 							4,
@@ -3349,7 +3349,7 @@ EB_ERRORTYPE EncodeTransform(
 
     if (transCoeffShape == DEFAULT_SHAPE) {
         if (!((!!(ASM_TYPES & AVX2_MASK)))) { // C Only
-            (*transformFunctionTableEncode0[((ASM_TYPES & PREAVX2_MASK) && 1)][transformSizeFlag + dstTransformFlag])(
+            (*transformFunctionTableEncode0[(!!(ASM_TYPES & PREAVX2_MASK))][transformSizeFlag + dstTransformFlag])(
                 residualBuffer,
                 residualStride,
                 coeffBuffer,
@@ -3359,7 +3359,7 @@ EB_ERRORTYPE EncodeTransform(
                 );
         }
         else {
-            (*transformFunctionTableEncode1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_C : ((ASM_TYPES & PREAVX2_MASK) && 1))][transformSizeFlag + dstTransformFlag])(
+            (*transformFunctionTableEncode1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_C : (!!(ASM_TYPES & PREAVX2_MASK)))][transformSizeFlag + dstTransformFlag])(
                 residualBuffer,
                 residualStride,
                 coeffBuffer,
@@ -3464,7 +3464,7 @@ EB_ERRORTYPE EstimateInvTransform(
     //   but in order to avoid extra copying, it is overwritten in place. The
     //   input(residualBuffer) is the LCU residual buffer
     if (partialFrequencyN2Flag == EB_FALSE) {
-		(*invTransformFunctionTableEstimate[(ASM_TYPES & PREAVX2_MASK) && 1][transformSizeFlag + dstTransformFlag])(
+		(*invTransformFunctionTableEstimate[!!(ASM_TYPES & PREAVX2_MASK)][transformSizeFlag + dstTransformFlag])(
             coeffBuffer,
             coeffStride,
             reconBuffer,
@@ -3534,7 +3534,7 @@ EB_ERRORTYPE EncodeInvTransform(
         // The input of this function is the quantized_inversequantized transformed residual
         //   but in order to avoid extra copying, it is overwritten in place. The
         //   input(residualBuffer) is the LCU residual buffer
-		(*invTransformFunctionTableEncode[(ASM_TYPES & PREAVX2_MASK) && 1][transformSizeFlag + dstTransformFlag])(
+		(*invTransformFunctionTableEncode[!!(ASM_TYPES & PREAVX2_MASK)][transformSizeFlag + dstTransformFlag])(
             coeffBuffer,
             coeffStride,
             reconBuffer,
@@ -3621,21 +3621,21 @@ void PfZeroOutUselessQuadrants(
     EB_U32  transformCoeffStride,
     EB_U32  quadrantSize) {
 
-    PicZeroOutCoef_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][quadrantSize >> 3](
+    PicZeroOutCoef_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][quadrantSize >> 3](
         transformCoeffBuffer,
         transformCoeffStride,
         quadrantSize,
         quadrantSize,
         quadrantSize);
 
-    PicZeroOutCoef_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][quadrantSize >> 3](
+    PicZeroOutCoef_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][quadrantSize >> 3](
         transformCoeffBuffer,
         transformCoeffStride,
         quadrantSize * transformCoeffStride,
         quadrantSize,
         quadrantSize);
 
-    PicZeroOutCoef_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][quadrantSize >> 3](
+    PicZeroOutCoef_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][quadrantSize >> 3](
         transformCoeffBuffer,
         transformCoeffStride,
         quadrantSize * transformCoeffStride + quadrantSize,
