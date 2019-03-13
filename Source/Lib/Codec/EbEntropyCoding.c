@@ -8402,6 +8402,23 @@ EB_ERRORTYPE EncodeActiveParameterSetsSEI(
     return return_error;
 }
 
+EB_ERRORTYPE EncodeFillerData(
+    Bitstream_t             *bitstreamPtr,
+    EB_U32                   fillerBytes,
+    EB_U8                    temporalId)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    unsigned payloadType = FILLER_PAYLOAD;
+
+    OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
+
+    CodeNALUnitHeader(
+        outputBitstreamPtr,
+        NAL_UNIT_FILLER_DATA,
+        temporalId);
+    return return_error;
+}
+
 EB_ERRORTYPE EncodeRegUserDataSEI(
 	Bitstream_t             *bitstreamPtr,
 	RegistedUserData_t      *regUserDataSeiPtr)

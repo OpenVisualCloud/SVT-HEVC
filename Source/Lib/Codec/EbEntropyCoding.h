@@ -172,6 +172,10 @@ extern EB_ERRORTYPE EncodeActiveParameterSetsSEI(
     Bitstream_t             *bitstreamPtr,
     AppActiveparameterSetSei_t *activeParameterSet);
 
+extern EB_ERRORTYPE EncodeFillerData(
+    Bitstream_t             *bitstreamPtr,
+    EB_U32                   fillerBytes,
+    EB_U8                    temporalId);
 
 extern EB_ERRORTYPE EncodeRegUserDataSEI(
     Bitstream_t             *bitstreamPtr,

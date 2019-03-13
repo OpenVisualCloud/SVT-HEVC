@@ -148,6 +148,8 @@ void* PacketizationKernel(void *inputPtr)
        
     EB_PICTURE                        sliceType;
     EB_U64                            refDecOrder = 0;
+    EB_U64                            filler;
+    EB_U32                            fillerBytes;
     for(;;) {
     
         // Get EntropyCoding Results
@@ -657,6 +659,8 @@ void* PacketizationKernel(void *inputPtr)
             EB_U32  bufferWrittenBytesCount = 0;
             EB_U32  startinBytes = 0;
             EB_U32  totalBytes = 0;
+            EB_U64 buffer=0;
+            EB_U64 bufferRate = 0;
             EbFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
 
             EbComputeOverallElapsedTimeMs(
@@ -712,7 +716,6 @@ void* PacketizationKernel(void *inputPtr)
             {
                 refDecOrder = queueEntryPtr->pictureNumber;
             }
-			EbPostFullObject(outputStreamWrapperPtr);
             /* update VBV plan */
             EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
             if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize)
@@ -721,13 +724,79 @@ void* PacketizationKernel(void *inputPtr)
 
                 bufferfill_temp -= queueEntryPtr->actualBits;
                 bufferfill_temp = MAX(bufferfill_temp, 0);
-                bufferfill_temp = (EB_S64)(bufferfill_temp + (encodeContextPtr->vbvMaxrate * (1.0 / (sequenceControlSetPtr->frameRate >> RC_PRECISION))));
+                buffer=bufferfill_temp = (EB_S64)(bufferfill_temp + (encodeContextPtr->vbvMaxrate * (1.0 / (sequenceControlSetPtr->frameRate >> RC_PRECISION))));
                 bufferfill_temp = MIN(bufferfill_temp, encodeContextPtr->vbvBufsize);
                 encodeContextPtr->bufferFill = (EB_U64)(bufferfill_temp);
+                EbReleaseMutex(encodeContextPtr->bufferFillMutex);
+                bufferRate = encodeContextPtr->vbvMaxrate / (sequenceControlSetPtr->staticConfig.frameRate >> 16);
+                //Block to write filler data to prevent cpb overflow
+                if ((sequenceControlSetPtr->staticConfig.vbvMaxrate == sequenceControlSetPtr->staticConfig.targetBitRate)&& !(outputStreamPtr->nFlags & EB_BUFFERFLAG_EOS))
+                {
+                    if (buffer > encodeContextPtr->vbvBufsize)
+                    {
+                        filler = buffer - encodeContextPtr->vbvBufsize;
+                        fillerBytes = ((EB_U32)(filler >> 3)) - FILLER_DATA_OVERHEAD;
+                        // Reset the bitstream
+                        ResetBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
 
+                        EncodeFillerData(queueEntryPtr->bitStreamPtr2, fillerBytes, queueEntryPtr->picTimingEntry->temporalId);
+
+                        // Flush the Bitstream
+                        FlushBitstream(
+                            queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+
+                        // Copy filler bits to the Output Bitstream
+                        CopyRbspBitstreamToPayload(
+                            queueEntryPtr->bitStreamPtr2,
+                            outputStreamPtr->pBuffer,
+                            (EB_U32*) &(outputStreamPtr->nFilledLen),
+                            (EB_U32*) &(outputStreamPtr->nAllocLen),
+                            encodeContextPtr);
+
+                        for (EB_U32 i = 0; i < fillerBytes; i++)
+                        {
+                            ResetBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                            // Flush the Bitstream
+                            OutputBitstreamWrite(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr, 0xff, 8);
+                            FlushBitstream(
+                                queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                            CopyRbspBitstreamToPayload(
+                                queueEntryPtr->bitStreamPtr2,
+                                outputStreamPtr->pBuffer,
+                                (EB_U32*) &(outputStreamPtr->nFilledLen),
+                                (EB_U32*) &(outputStreamPtr->nAllocLen),
+                                encodeContextPtr);
+                        }
+                        ResetBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                        // Byte Align the Bitstream: rbsp_trailing_bits
+                        OutputBitstreamWrite(
+                            queueEntryPtr->bitStreamPtr2->outputBitstreamPtr,
+                            1,
+                            1);
+                        FlushBitstream(
+                            queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                        CopyRbspBitstreamToPayload(
+                            queueEntryPtr->bitStreamPtr2,
+                            outputStreamPtr->pBuffer,
+                            (EB_U32*) &(outputStreamPtr->nFilledLen),
+                            (EB_U32*) &(outputStreamPtr->nAllocLen),
+                            encodeContextPtr);
+                        ResetBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                        OutputBitstreamWriteAlignZero(
+                            queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                        // Flush the Bitstream
+                        FlushBitstream(
+                            queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                        CopyRbspBitstreamToPayload(
+                            queueEntryPtr->bitStreamPtr2,
+                            outputStreamPtr->pBuffer,
+                            (EB_U32*) &(outputStreamPtr->nFilledLen),
+                            (EB_U32*) &(outputStreamPtr->nAllocLen),
+                            encodeContextPtr);
+                    }
+                }
             }
-            EbReleaseMutex(encodeContextPtr->bufferFillMutex);
-
+            EbPostFullObject(outputStreamWrapperPtr);
             // Reset the Reorder Queue Entry
             queueEntryPtr->pictureNumber    += PACKETIZATION_REORDER_QUEUE_MAX_DEPTH;            
             queueEntryPtr->outputStreamWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
