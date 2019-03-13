@@ -521,7 +521,7 @@ void UnPack2D(
     )
 {
 #ifndef NON_AVX512_SUPPORT
-    UnPack2D_funcPtrArray_16Bit[((width & 3) == 0) && ((height & 1)== 0)][(ASM_TYPES & AVX512_MASK) && 1](
+    UnPack2D_funcPtrArray_16Bit[((width & 3) == 0) && ((height & 1)== 0)][!!(ASM_TYPES & AVX512_MASK)](
 #else
     UnPack2D_funcPtrArray_16Bit[((width & 3) == 0) && ((height & 1) == 0)][!!(ASM_TYPES & AVX2_MASK)](
 #endif

@@ -604,7 +604,7 @@ static void FullPelSearch_LCU(
 
 			//this function will do:  xSearchIndex, +1, +2, ..., +7
 #ifndef NON_AVX512_SUPPORT
-			GetEightHorizontalSearchPointResultsAll85PUs_funcPtrArray[ (ASM_TYPES & AVX512_MASK) && 1 ](
+			GetEightHorizontalSearchPointResultsAll85PUs_funcPtrArray[ !!(ASM_TYPES & AVX512_MASK) ](
 #else
             GetEightHorizontalSearchPointResultsAll85PUs_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 #endif
@@ -1935,7 +1935,7 @@ void HmeOneQuadrantLevel0(
 			searchAreaWidth = (EB_S16)((double)((searchAreaWidth >> 4) << 4));
 		}
 #ifndef NON_AVX512_SUPPORT
-	    if (((searchAreaWidth & 15) == 0) && ((ASM_TYPES & AVX512_MASK) && 1))
+	    if (((searchAreaWidth & 15) == 0) && (!!(ASM_TYPES & AVX512_MASK)))
 #else
         if (((searchAreaWidth & 15) == 0) && (!!(ASM_TYPES & AVX2_MASK)))
 #endif
@@ -2104,7 +2104,7 @@ void HmeLevel0(
 	if (((lcuWidth  & 7) == 0) || (lcuWidth == 4))
 	{
 #ifndef NON_AVX512_SUPPORT
-        if (((searchAreaWidth & 15) == 0) && ((ASM_TYPES & AVX512_MASK) && 1))
+        if (((searchAreaWidth & 15) == 0) && (!!(ASM_TYPES & AVX512_MASK)))
 #else
         if (((searchAreaWidth & 15) == 0) && (!!(ASM_TYPES & AVX2_MASK)))
 #endif

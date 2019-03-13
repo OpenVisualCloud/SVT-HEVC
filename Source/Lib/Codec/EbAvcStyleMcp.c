@@ -384,7 +384,7 @@ void BiPredIFreeRef8Bit(
 		if ( (fracPosL0 == 0) && (fracPosL1 == 0) )	 
 		{
 #ifndef NON_AVX512_SUPPORT
-			BiPredAverageKernel_funcPtrArray[(ASM_TYPES & AVX512_MASK) && 1 ](
+			BiPredAverageKernel_funcPtrArray[!!(ASM_TYPES & AVX512_MASK) ](
 #else
             BiPredAverageKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 #endif
@@ -496,7 +496,7 @@ void BiPredIFreeRef8Bit(
 		if ((fracPosL0 == 0) && (fracPosL1 == 0))
 		{
 #ifndef NON_AVX512_SUPPORT
-            BiPredAverageKernel_funcPtrArray[(ASM_TYPES & AVX512_MASK) && 1](
+            BiPredAverageKernel_funcPtrArray[!!(ASM_TYPES & AVX512_MASK)](
 #else
             BiPredAverageKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 #endif
@@ -510,7 +510,7 @@ void BiPredIFreeRef8Bit(
 				chromaPuHeight);
 
 #ifndef NON_AVX512_SUPPORT
-            BiPredAverageKernel_funcPtrArray[(ASM_TYPES & AVX512_MASK) && 1](
+            BiPredAverageKernel_funcPtrArray[!!(ASM_TYPES & AVX512_MASK)](
 #else
             BiPredAverageKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 #endif
