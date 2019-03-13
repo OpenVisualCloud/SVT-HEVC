@@ -535,7 +535,7 @@ void* PacketizationKernel(void *inputPtr)
         FlushBitstream(
             pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
 
-        // Copy Slice Header to the Output Bitstream
+        // Copy Buffering Period SEI to the Output Bitstream
         CopyRbspBitstreamToPayload(
             pictureControlSetPtr->bitstreamPtr,
             outputStreamPtr->pBuffer,
@@ -654,6 +654,9 @@ void* PacketizationKernel(void *inputPtr)
             double latency = 0.0;
             EB_U64 finishTimeSeconds = 0;
             EB_U64 finishTimeuSeconds = 0;
+            EB_U32  bufferWrittenBytesCount = 0;
+            EB_U32  startinBytes = 0;
+            EB_U32  totalBytes = 0;
             EbFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
 
             EbComputeOverallElapsedTimeMs(
@@ -690,19 +693,12 @@ void* PacketizationKernel(void *inputPtr)
                 // Flush the Bitstream
                 FlushBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
                 OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)queueEntryPtr->bitStreamPtr2->outputBitstreamPtr;
-                EB_U32  bufferWrittenBytesCount = outputBitstreamPtr->writtenBitsCount >> 3;
-                EB_U32  startinBytes = queueEntryPtr->startSplicing;
-                EB_U32  totalBytes = outputStreamPtr->nFilledLen;
-                for (EB_U32 i = 0; i < bufferWrittenBytesCount; i++)
-                {
-                    for (EB_U32 j = totalBytes; j > startinBytes; j--)
-                    {
-                        outputStreamPtr->pBuffer[j] = outputStreamPtr->pBuffer[j-1];
-                    }
-                    totalBytes++;
-                    startinBytes++;
-                }
-                // Copy SPS & PPS to the Output Bitstream
+                bufferWrittenBytesCount = outputBitstreamPtr->writtenBitsCount >> 3;
+                startinBytes = queueEntryPtr->startSplicing;
+                totalBytes = outputStreamPtr->nFilledLen;
+                //Shift the bitstream by size of picture timing SEI
+                memcpy(outputStreamPtr->pBuffer + startinBytes + bufferWrittenBytesCount, outputStreamPtr->pBuffer + startinBytes, totalBytes - startinBytes);
+                // Copy Picture Timing SEI to the Output Bitstream
                 CopyRbspBitstreamToPayload(
                     queueEntryPtr->bitStreamPtr2,
                     outputStreamPtr->pBuffer,
