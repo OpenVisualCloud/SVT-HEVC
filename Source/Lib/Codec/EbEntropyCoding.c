@@ -8408,7 +8408,6 @@ EB_ERRORTYPE EncodeFillerData(
     EB_U8                    temporalId)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
-    unsigned payloadType = FILLER_PAYLOAD;
 
     OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
 
