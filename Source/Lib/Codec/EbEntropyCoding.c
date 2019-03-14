@@ -1252,10 +1252,15 @@ void EncodeQuantizedCoefficients_generic(
                  numNonZeroCoeffs = (componentType == COMPONENT_CHROMA_CB2) ? tuPtr->nzCoefCount2[0] :
                                     (componentType == COMPONENT_CHROMA_CR2) ? tuPtr->nzCoefCount2[1] : numNonZeroCoeffs;
 
+    EB_BOOL secondChroma = componentType == COMPONENT_CHROMA_CB2 || componentType == COMPONENT_CHROMA_CR2;
     // zerout the buffer to support N2_SHAPE & N4_SHAPE
-    EB_U32  transCoeffShape = (componentType == COMPONENT_LUMA) ? tuPtr->transCoeffShapeLuma : tuPtr->transCoeffShapeChroma ;
+    EB_U32  transCoeffShape = ((componentType == COMPONENT_LUMA) ? tuPtr->transCoeffShapeLuma    :
+                                                    secondChroma ? tuPtr->transCoeffShapeChroma2 : tuPtr->transCoeffShapeChroma);
+    EB_U32  isOnlyDc = (componentType == COMPONENT_LUMA) ? tuPtr->isOnlyDc[0] :
+                                            secondChroma ? tuPtr->isOnlyDc2[(componentType == COMPONENT_CHROMA_CB2) ? 0 : 1] :
+                                                           tuPtr->isOnlyDc[(componentType == COMPONENT_CHROMA_CB) ? 1 : 2];
 
-    if (transCoeffShape && tuPtr->isOnlyDc[(componentType == COMPONENT_LUMA) ? 0 : (componentType == COMPONENT_CHROMA_CB) ? 1 : 2] == EB_FALSE) {
+    if (transCoeffShape && isOnlyDc == EB_FALSE) {
         PicZeroOutCoef_funcPtrArray[(EB_ASM_C & PREAVX2_MASK) && 1][(size >> 1) >> 3](
             coeffBufferPtr,
             coeffStride,
@@ -1788,6 +1793,7 @@ void EncodeQuantizedCoefficients_SSE2(
 	EB_S32 index, index2;
 	EB_U32 contextSet;
 	EB_S32 numCoeffWithCodedGt1Flag; // Number of coefficients for which >1 flag is coded
+    EB_U32  transCoeffShapeChroma = (componentType == COMPONENT_CHROMA_CB2 || componentType == COMPONENT_CHROMA_CR2) ? tuPtr->transCoeffShapeChroma2 : tuPtr->transCoeffShapeChroma;
 
 
 	// DC-only fast track
@@ -1894,7 +1900,7 @@ void EncodeQuantizedCoefficients_SSE2(
         if(isChroma==EB_FALSE){        
             isCGin  =  ((EB_U32)coeffGroupPositionY < (size >>(tuPtr->transCoeffShapeLuma+2))) && ((EB_U32)coeffGroupPositionX < (size >>(tuPtr->transCoeffShapeLuma+2)));
         }else{
-            isCGin  =  ((EB_U32)coeffGroupPositionY < (size >>(tuPtr->transCoeffShapeChroma+2))) && ((EB_U32)coeffGroupPositionX < (size >>(tuPtr->transCoeffShapeChroma+2)));
+            isCGin  =  ((EB_U32)coeffGroupPositionY < (size >>(transCoeffShapeChroma+2))) && ((EB_U32)coeffGroupPositionX < (size >>(transCoeffShapeChroma+2)));
         }
  
         if(isCGin == EB_FALSE){
@@ -4935,11 +4941,99 @@ static void CodeProfileTier(
 		bitstreamPtr,
 		scsPtr->generalFrameOnlyConstraintFlag);
 
-	// "XXX_reserved_zero_44bits[0..15]"
-	WriteCodeCavlc(
-		bitstreamPtr,
-		0,
-		16);
+    if(scsPtr->profileIdc < 4)
+    {
+	    // "XXX_reserved_zero_44bits[0..15]"
+	    WriteCodeCavlc(
+	        bitstreamPtr,
+	        0,
+	        16);
+    } else
+    {
+        // "general_max_12bit_constraint_flag"
+        WriteFlagCavlc(
+           bitstreamPtr,
+           1);
+
+        // "general_max_10bit_constraint_flag"
+        if(scsPtr->encoderBitDepth <= EB_10BIT || scsPtr->staticConfig.constrainedIntra == EB_TRUE)
+        {
+            WriteFlagCavlc(
+               bitstreamPtr,
+               1);
+        } else
+        {
+            WriteFlagCavlc(
+               bitstreamPtr,
+               0);
+        }
+
+        // "general_max_8bit_constraint_flag"
+        //if(scsPtr->encoderBitDepth == EB_8BIT)
+        if(scsPtr->encoderBitDepth == EB_8BIT && (scsPtr->chromaFormatIdc == EB_YUV444 || scsPtr->staticConfig.constrainedIntra == EB_TRUE))
+        {
+            WriteFlagCavlc(
+               bitstreamPtr,
+               1);
+        } else
+        {
+            WriteFlagCavlc(
+               bitstreamPtr,
+               0);
+        }
+
+        // "general_max_422chroma_constraint_flag"
+        if(scsPtr->chromaFormatIdc == EB_YUV422 || (scsPtr->chromaFormatIdc == EB_YUV420 && scsPtr->staticConfig.constrainedIntra == EB_TRUE))
+        {
+            WriteFlagCavlc(
+               bitstreamPtr,
+               1);
+        } else
+        {
+            WriteFlagCavlc(
+               bitstreamPtr,
+               0);
+        }
+
+        // "general_max_420chroma_constraint_flag"
+        if(scsPtr->chromaFormatIdc == EB_YUV420)
+        {
+            WriteFlagCavlc(
+               bitstreamPtr,
+               1);
+        } else
+        {
+            WriteFlagCavlc(
+               bitstreamPtr,
+               0);
+        }
+
+        // "general_max_monochrome_constraint_flag"
+        WriteFlagCavlc(
+           bitstreamPtr,
+           0);
+
+        // "general_intra_constraint_flag"
+        WriteFlagCavlc(
+           bitstreamPtr,
+           (scsPtr->staticConfig.constrainedIntra == EB_TRUE));
+
+        // "general_one_picture_only_constraint_flag"
+        WriteFlagCavlc(
+           bitstreamPtr,
+           0);
+
+        // "general_lower_bit_rate_constraint_flag"
+        WriteFlagCavlc(
+           bitstreamPtr,
+           1);
+
+        // "XXX_reserved_zero_44bits[9..15]"
+        WriteCodeCavlc(
+           bitstreamPtr,
+           0,
+           7);
+    }
 
 	// "XXX_reserved_zero_44bits[16..31]"
 	WriteCodeCavlc(

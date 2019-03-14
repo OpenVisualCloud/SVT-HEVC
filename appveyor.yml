@@ -1,0 +1,24 @@
+image: Visual Studio 2017
+configuration: Release
+
+install:
+    - git submodule update --init
+    - appveyor DownloadFile http://www.tortall.net/projects/yasm/releases/yasm-1.3.0-win64.exe -FileName yasm.exe
+    - set PATH=%PATH%;%APPVEYOR_BUILD_FOLDER%
+    - cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_ASM_NASM_COMPILER="yasm.exe"
+
+build:
+  project: svt-hevc.sln
+
+artifacts:
+    - path: bin\Release\*.*
+      name: $(APPVEYOR_PROJECT_NAME)
+
+deploy:
+  - provider: GitHub
+    artifact: $(APPVEYOR_PROJECT_NAME)
+    auth_token:
+      secure: 'hY5Mk6KOwgQ97TzEBsM7Woqr1ZIm5QTvHg8EvxMV1x8j3wk/3mNBMqWFFbEIBK0i'
+    prerelease: true
+    on:
+      appveyor_repo_tag: true

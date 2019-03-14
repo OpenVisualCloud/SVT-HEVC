@@ -50,7 +50,7 @@
 #define PROFILE_TOKEN                   "-profile"
 #define TIER_TOKEN                      "-tier"
 #define LEVEL_TOKEN                     "-level"
-#define LATENCY_MODE                    "-latency-mode" // no Eval
+//#define LATENCY_MODE                    "-latency-mode" // no Eval
 #define INTERLACED_VIDEO_TOKEN          "-interlaced-video"
 #define SEPERATE_FILDS_TOKEN            "-separate-fields"
 #define INTRA_REFRESH_TYPE_TOKEN        "-irefresh-type" // no Eval
@@ -231,7 +231,7 @@ static void SetInjectorFrameRate                (const char *value, EbConfig_t *
         cfg->injectorFrameRate = cfg->injectorFrameRate << 16;
     }
 }
-static void SetLatencyMode                      (const char *value, EbConfig_t *cfg)  {cfg->latencyMode                     = (uint8_t)strtol(value, NULL, 0);};
+//static void SetLatencyMode                      (const char *value, EbConfig_t *cfg)  {cfg->latencyMode                     = (uint8_t)strtol(value, NULL, 0);};
 static void SetAsmType                          (const char *value, EbConfig_t *cfg)  {cfg->asmType                         = (uint32_t)strtoul(value, NULL, 0); };
 static void SetLogicalProcessors                (const char *value, EbConfig_t *cfg)  {cfg->logicalProcessors               = (uint32_t)strtoul(value, NULL, 0);};
 static void SetTargetSocket                     (const char *value, EbConfig_t *cfg)  {cfg->targetSocket                    = (int32_t)strtol(value, NULL, 0);};
@@ -284,7 +284,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, FRAME_RATE_NUMERATOR_TOKEN, "FrameRateNumerator", SetFrameRateNumerator },
     { SINGLE_INPUT, FRAME_RATE_DENOMINATOR_TOKEN, "FrameRateDenominator", SetFrameRateDenominator },
     { SINGLE_INPUT, ENCODER_BIT_DEPTH, "EncoderBitDepth", SetEncoderBitDepth },
-    { SINGLE_INPUT, ENCODER_COLOR_FORMAT, "420:1, 422:2, 444:3", SetEncoderColorFormat},
+    { SINGLE_INPUT, ENCODER_COLOR_FORMAT, "EncoderColorFormat", SetEncoderColorFormat},
 	{ SINGLE_INPUT, INPUT_COMPRESSED_TEN_BIT_FORMAT, "CompressedTenBitFormat", SetcompressedTenBitFormat },
 	{ SINGLE_INPUT, HIERARCHICAL_LEVELS_TOKEN, "HierarchicalLevels", SetHierarchicalLevels },
 
@@ -359,7 +359,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, PROFILE_TOKEN, "Profile", SetProfile },
     { SINGLE_INPUT, TIER_TOKEN, "Tier", SetTier },
     { SINGLE_INPUT, LEVEL_TOKEN, "Level", SetLevel },
-    { SINGLE_INPUT, LATENCY_MODE, "LatencyMode", SetLatencyMode },
+//    { SINGLE_INPUT, LATENCY_MODE, "LatencyMode", SetLatencyMode },
 
     // Asm Type
     { SINGLE_INPUT, ASM_TYPE_TOKEN, "AsmType", SetAsmType },

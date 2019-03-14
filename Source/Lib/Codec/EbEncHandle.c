@@ -669,7 +669,6 @@ void EbSetThreadManagementParameters(
     }
 #elif defined(__linux__)
     CPU_ZERO(&groupAffinity);
-
     if (numGroups == 1) {
         EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
             configPtr->logicalProcessors < numLogicProcessors ? configPtr->logicalProcessors : numLogicProcessors;
@@ -825,7 +824,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
 		inputData.topPadding		= encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->topPadding;
 		inputData.botPadding		= encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->botPadding;
         inputData.bitDepth          = EB_8BIT;
-        inputData.colorFormat       = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaFormatIdc;
+        inputData.colorFormat       = (EB_COLOR_FORMAT)encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaFormatIdc;
         inputData.lcuSize           = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lcuSize;
         inputData.maxDepth          = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxLcuDepth;
         inputData.is16bit           = is16bit;
@@ -877,7 +876,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         referencePictureBufferDescInitData.maxWidth               =  encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaWidth;
         referencePictureBufferDescInitData.maxHeight              =  encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaHeight;
         referencePictureBufferDescInitData.bitDepth               =  encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->inputBitdepth;
-        referencePictureBufferDescInitData.colorFormat            =  encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaFormatIdc;
+        referencePictureBufferDescInitData.colorFormat            =  (EB_COLOR_FORMAT)encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaFormatIdc;
         referencePictureBufferDescInitData.bufferEnableMask       =  PICTURE_BUFFER_DESC_FULL_MASK;
 		referencePictureBufferDescInitData.leftPadding			  =  MAX_LCU_SIZE + MCPXPaddingOffset;
 		referencePictureBufferDescInitData.rightPadding			  =  MAX_LCU_SIZE + MCPXPaddingOffset;
@@ -2160,7 +2159,8 @@ void CopyApiFromApp(
 
     sequenceControlSetPtr->staticConfig.injectorFrameRate   = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->injectorFrameRate;
     sequenceControlSetPtr->staticConfig.speedControlFlag    = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->speedControlFlag;
-    sequenceControlSetPtr->staticConfig.latencyMode         = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->latencyMode;    
+    //sequenceControlSetPtr->staticConfig.latencyMode         = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->latencyMode;    
+    sequenceControlSetPtr->staticConfig.latencyMode         = 0;
     sequenceControlSetPtr->staticConfig.asmType = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->asmType;
     sequenceControlSetPtr->staticConfig.channelId = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->channelId;
     sequenceControlSetPtr->staticConfig.activeChannelCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->activeChannelCount;
@@ -2568,8 +2568,8 @@ static EB_ERRORTYPE VerifySettings(\
     }
     }
 
-	if(config->profile > 3){
-        SVT_LOG("SVT [Error]: Instance %u: The maximum allowed Profile number is 3 \n",channelNumber+1);
+	if(config->profile > 4){
+        SVT_LOG("SVT [Error]: Instance %u: The maximum allowed Profile number is 4 or MAINEXT \n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -2582,6 +2582,12 @@ static EB_ERRORTYPE VerifySettings(\
         SVT_LOG("SVT [Error]: Instance %u: The Main Still Picture Profile is not supported \n",channelNumber+1);
 		return_error = EB_ErrorBadParameter;
 	} 
+
+    if(config->encoderColorFormat >= EB_YUV422 && config->profile != 4)
+    {
+        SVT_LOG("SVT [Error]: Instance %u: The input profile is not correct, should be 4 or MainREXT for YUV422 or YUV444 cases\n",channelNumber+1);
+        return_error = EB_ErrorBadParameter;
+    }
 
     // Check if the current input video is conformant with the Level constraint
     if(config->frameRate > (240<<16)){
@@ -2757,8 +2763,8 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->latencyMode > 1) {
-        SVT_LOG("SVT [Error]: Instance %u: Invalid Latency Mode flag [0 - 1]\n", channelNumber + 1);
+    if (config->latencyMode > 0) {
+        SVT_LOG("SVT [Error]: Instance %u: Latency Mode flag deprecated\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }    
 
@@ -2904,8 +2910,10 @@ static void PrintLibParams(
     SVT_LOG("------------------------------------------- ");
     if (config->profile == 1)
         SVT_LOG("\nSVT [config]: Main Profile\t");
-    else
+    else if (config->profile == 2)
         SVT_LOG("\nSVT [config]: Main10 Profile\t");
+    else
+        SVT_LOG("\nSVT [config]: MainEXT Profile\t");
     
     if (config->tier != 0 && config->level !=0)
         SVT_LOG("Tier %d\tLevel %.1f\t", config->tier, (float)(config->level / 10));
@@ -2923,7 +2931,7 @@ static void PrintLibParams(
         
     }
 
-    SVT_LOG("\nSVT [config]: EncoderMode / LatencyMode / Tune\t\t\t\t\t: %d / %d / %d ", config->encMode, config->latencyMode, config->tune);
+    SVT_LOG("\nSVT [config]: EncoderMode / Tune\t\t\t\t\t: %d / %d ", config->encMode, config->tune);
     SVT_LOG("\nSVT [config]: EncoderBitDepth / CompressedTenBitFormat / EncoderColorFormat \t: %d / %d / %d", config->encoderBitDepth, config->compressedTenBitFormat, config->encoderColorFormat);
     SVT_LOG("\nSVT [config]: SourceWidth / SourceHeight\t\t\t\t\t: %d / %d ", config->sourceWidth, config->sourceHeight);
     if (config->frameRateDenominator != 0 && config->frameRateNumerator != 0)
