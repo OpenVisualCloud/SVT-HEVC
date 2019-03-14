@@ -1877,6 +1877,8 @@ EB_U8 ProductFullModeDecision(
 		tuPtr->lumaCbf = (EB_BOOL)(((candidatePtr->yCbf)  & (1 << tuIndex)) > 0);
 		tuPtr->cbCbf = (EB_BOOL)(((candidatePtr->cbCbf) & (1 << (tuIndex))) > 0);
 		tuPtr->crCbf = (EB_BOOL)(((candidatePtr->crCbf) & (1 << (tuIndex))) > 0);
+		tuPtr->cbCbf2 = EB_FALSE;
+		tuPtr->crCbf2 = EB_FALSE;
 		
         //CHKN tuPtr->chromaCbfContext = (tuIndex == 0 || (cuPtr->partitionMode == SIZE_NxN)) ? 0 : (cuSizeLog2 - Log2f(tuSize)); //at TU level 
         tuPtr->chromaCbfContext = (tuIndex == 0 || (0)) ? 0 : (cuSizeLog2 - Log2f(tuSize)); //at TU level 
