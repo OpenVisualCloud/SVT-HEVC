@@ -628,7 +628,6 @@ void EbSetThreadManagementParameters(
     EB_H265_ENC_CONFIGURATION   *configPtr)
 {
     EB_U32 numLogicProcessors = GetNumProcessors();
-    EB_ERRORTYPE return_error = EB_ErrorNone;
 
     if (configPtr->switchThreadsToRtPriority == 1) {
         SwitchToRealTime();
