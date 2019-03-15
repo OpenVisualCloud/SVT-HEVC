@@ -124,8 +124,14 @@ EB_U8                           numGroups = 0;
 #ifdef _WIN32
 GROUP_AFFINITY                  groupAffinity;
 EB_BOOL                         alternateGroups = 0;
-#else
+#elif defined(__linux__)
 cpu_set_t                       groupAffinity;
+typedef struct logicalProcessorGroup {
+    uint32_t num;
+    uint32_t group[1024];
+}processorGroup;
+#define MAX_PROCESSOR_GROUP 16
+processorGroup                   lpGroup[MAX_PROCESSOR_GROUP];
 #endif
 
 /**************************************
@@ -367,12 +373,56 @@ static EB_U32 EncDecPortTotalCount(void)
     return totalCount;
 }
 
-void InitThreadManagmentParams(){
+EB_ERRORTYPE InitThreadManagmentParams(){
 #ifdef _WIN32
     // Initialize groupAffinity structure with Current thread info
     GetThreadGroupAffinity(GetCurrentThread(),&groupAffinity);
     numGroups = (EB_U8) GetActiveProcessorGroupCount();
+#elif defined(__linux__)
+    const char* PROCESSORID = "processor";
+    const char* PHYSICALID = "physical id";
+    int processor_id_len = strnlen_ss(PROCESSORID, 128);
+    int physical_id_len = strnlen_ss(PHYSICALID, 128);
+    if (processor_id_len < 0 || processor_id_len >= 128) return EB_ErrorInsufficientResources;
+    if (physical_id_len < 0 || physical_id_len >= 128) return EB_ErrorInsufficientResources;
+    memset(lpGroup, 0, 16* sizeof(processorGroup));
+
+    int fd = open("/proc/cpuinfo", O_RDONLY | O_NOFOLLOW, "rt");
+    struct stat file_stat;
+    if (fd >= 0) {
+        if (fstat(fd, &file_stat) != -1 && S_ISREG(file_stat.st_mode) != 0) {
+            int processor_id = 0, socket_id = 0;
+            char line[128];
+            int bytes = 1;
+            while (bytes > 0) {
+                bytes = read(fd, line, 128);
+                if (bytes > 0) {
+                    if (strncmp(line, PROCESSORID, processor_id_len) == 0) {
+                        char* p = line + processor_id_len;
+                        while (*p < '0' || *p > '9') p++;
+                        processor_id = strtol(p, NULL, 0);
+                    }
+                    if (strncmp(line, PHYSICALID, physical_id_len) == 0) {
+                        char* p = line + physical_id_len;
+                        while (*p < '0' || *p > '9') p++;
+                        socket_id = strtol(p, NULL, 0);
+                        if (socket_id < 0 || socket_id > 15) {
+                            close(fd);
+                            return EB_ErrorInsufficientResources;
+                        }
+                        if (socket_id + 1 > numGroups)
+                            numGroups = socket_id + 1;
+                        lpGroup[socket_id].group[lpGroup[socket_id].num++] = processor_id;
+                    }
+                    lseek(fd, -bytes + 1, SEEK_CUR);
+                    while (line[0] != '\n' && bytes > 0) bytes = read(fd, line, 1);
+                }
+            }
+        }
+        close(fd);
+    }
 #endif
+    return EB_ErrorNone;
 }
 void libSvtEncoderSendErrorExit(
     EB_HANDLETYPE          hComponent,
@@ -410,7 +460,10 @@ static EB_ERRORTYPE EbEncHandleCtor(
         return EB_ErrorInsufficientResources;
     }
 
-    InitThreadManagmentParams();
+    return_error = InitThreadManagmentParams();
+    if (return_error == EB_ErrorInsufficientResources) {
+        return EB_ErrorInsufficientResources;
+    }
     
     encHandlePtr->encodeInstanceTotalCount                          = EB_EncodeInstancesTotalCount;
 
@@ -571,7 +624,7 @@ void SwitchToRealTime()
 #endif
 }
 
-EB_ERRORTYPE EbSetThreadManagementParameters(
+void EbSetThreadManagementParameters(
     EB_H265_ENC_CONFIGURATION   *configPtr)
 {
     EB_U32 numLogicProcessors = GetNumProcessors();
@@ -614,68 +667,21 @@ EB_ERRORTYPE EbSetThreadManagementParameters(
             }
         }
     }
-#else
-    const char* PROCESSORID = "processor";
-    const char* PHYSICALID = "physical id";
-    int processor_id_len = strnlen_ss(PROCESSORID, 128);
-    int physical_id_len = strnlen_ss(PHYSICALID, 128);
-    if (processor_id_len < 0 || processor_id_len >= 128) return EB_ErrorInsufficientResources;
-    if (physical_id_len < 0 || physical_id_len >= 128) return EB_ErrorInsufficientResources;
+#elif defined(__linux__)
     CPU_ZERO(&groupAffinity);
-    numGroups = 1;
-    typedef struct logicalProcessorGroup {
-        EB_U32 num;
-        EB_U32 group[1024];
-    }processorGroup;
-    processorGroup lpgroup[16];
-    memset(lpgroup, 0, 16* sizeof(processorGroup));
 
-    int fd = open("/proc/cpuinfo", O_RDONLY | O_NOFOLLOW, "rt");
-    struct stat file_stat;
-    if (fd >= 0) {
-        if (fstat(fd, &file_stat) != -1 && S_ISREG(file_stat.st_mode) != 0) {
-            int processor_id = 0, socket_id = 0;
-            char line[128];
-            int bytes = 1;
-            while (bytes > 0) {
-                bytes = read(fd, line, 128);
-                if (bytes > 0) {
-                    if (strncmp(line, PROCESSORID, processor_id_len) == 0) {
-                        char* p = line + processor_id_len;
-                        while (*p < '0' || *p > '9') p++;
-                        processor_id = strtol(p, NULL, 0);
-                    }
-                    if (strncmp(line, PHYSICALID, physical_id_len) == 0) {
-                        char* p = line + physical_id_len;
-                        while (*p < '0' || *p > '9') p++;
-                        socket_id = strtol(p, NULL, 0);
-                        if (socket_id < 0 || socket_id > 15) {
-                            close(fd);
-                            return EB_ErrorInsufficientResources;
-                        }
-                        if (socket_id + 1 > numGroups)
-                            numGroups = socket_id + 1;
-                        lpgroup[socket_id].group[lpgroup[socket_id].num++] = processor_id;
-                    }
-                    lseek(fd, -bytes + 1, SEEK_CUR);
-                    while (line[0] != '\n' && bytes > 0) bytes = read(fd, line, 1);
-                }
-            }
-        }
-        close(fd);
-    }
     if (numGroups == 1) {
         EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
             configPtr->logicalProcessors < numLogicProcessors ? configPtr->logicalProcessors : numLogicProcessors;
         for(EB_U32 i=0; i<lps; i++)
-            CPU_SET(lpgroup[0].group[i], &groupAffinity);
+            CPU_SET(lpGroup[0].group[i], &groupAffinity);
     }
     else if (numGroups > 1) {
         EB_U32 numLpPerGroup = numLogicProcessors / numGroups;
         if (configPtr->logicalProcessors == 0) {
             if (configPtr->targetSocket != -1) {
-                for(EB_U32 i=0; i<lpgroup[configPtr->targetSocket].num; i++)
-                    CPU_SET(lpgroup[configPtr->targetSocket].group[i], &groupAffinity);
+                for(EB_U32 i=0; i<lpGroup[configPtr->targetSocket].num; i++)
+                    CPU_SET(lpGroup[configPtr->targetSocket].group[i], &groupAffinity);
             }
         }
         else {
@@ -683,26 +689,25 @@ EB_ERRORTYPE EbSetThreadManagementParameters(
                 EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
                     configPtr->logicalProcessors < numLogicProcessors ? configPtr->logicalProcessors : numLogicProcessors;
                 if(lps > numLpPerGroup) {
-                    for(EB_U32 i=0; i<lpgroup[0].num; i++)
-                        CPU_SET(lpgroup[0].group[i], &groupAffinity);
-                    for(EB_U32 i=0; i< (lps -lpgroup[0].num); i++)
-                        CPU_SET(lpgroup[1].group[i], &groupAffinity);
+                    for(EB_U32 i=0; i<lpGroup[0].num; i++)
+                        CPU_SET(lpGroup[0].group[i], &groupAffinity);
+                    for(EB_U32 i=0; i< (lps -lpGroup[0].num); i++)
+                        CPU_SET(lpGroup[1].group[i], &groupAffinity);
                 }
                 else {
                     for(EB_U32 i=0; i<lps; i++)
-                        CPU_SET(lpgroup[0].group[i], &groupAffinity);
+                        CPU_SET(lpGroup[0].group[i], &groupAffinity);
                 }
             }
             else {
                 EB_U32 lps = configPtr->logicalProcessors == 0 ? numLpPerGroup :
                     configPtr->logicalProcessors < numLpPerGroup ? configPtr->logicalProcessors : numLpPerGroup;
                 for(EB_U32 i=0; i<lps; i++)
-                    CPU_SET(lpgroup[configPtr->targetSocket].group[i], &groupAffinity);
+                    CPU_SET(lpGroup[configPtr->targetSocket].group[i], &groupAffinity);
             }
         }
     }
 #endif
-    return return_error;
 }
 
 /**********************************
@@ -1456,11 +1461,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
      * Thread Handles
      ************************************/
     EB_H265_ENC_CONFIGURATION   *configPtr = &encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig;
-    return_error = EbSetThreadManagementParameters(configPtr);
 
-    if (return_error == EB_ErrorInsufficientResources) {
-        return EB_ErrorInsufficientResources;
-    }
+    EbSetThreadManagementParameters(configPtr);
 
     // Resource Coordination
     EB_CREATETHREAD(EB_HANDLE, encHandlePtr->resourceCoordinationThreadHandle, sizeof(EB_HANDLE), EB_THREAD, ResourceCoordinationKernel, encHandlePtr->resourceCoordinationContextPtr);
@@ -1705,12 +1707,29 @@ void LoadDefaultBufferConfigurationSettings(
 
     EB_U32 inputPic = SetParentPcs(&sequenceControlSetPtr->staticConfig);
 
-    unsigned int coreCount = GetNumProcessors();
+    unsigned int lpCount = GetNumProcessors();
+    unsigned int coreCount = lpCount;
+#if defined(_WIN32) || defined(__linux__)
     if (sequenceControlSetPtr->staticConfig.targetSocket != -1)
-        coreCount /=2;
+        coreCount /= numGroups;
     if (sequenceControlSetPtr->staticConfig.logicalProcessors != 0)
         coreCount = sequenceControlSetPtr->staticConfig.logicalProcessors < coreCount ?
-            sequenceControlSetPtr->staticConfig.logicalProcessors : coreCount;
+            sequenceControlSetPtr->staticConfig.logicalProcessors: coreCount;
+#endif
+
+#ifdef _WIN32
+    //Handle special case on Windows
+    //By default, on Windows an application is constrained to a single group
+    if (sequenceControlSetPtr->staticConfig.targetSocket == -1 &&
+        sequenceControlSetPtr->staticConfig.logicalProcessors == 0)
+        coreCount /= numGroups;
+
+    //Affininty can only be set by group on Windows.
+    //Run on both sockets if -lp is larger than logical processor per group.
+    if (sequenceControlSetPtr->staticConfig.targetSocket == -1 &&
+        sequenceControlSetPtr->staticConfig.logicalProcessors > lpCount / numGroups)
+        coreCount = lpCount;
+#endif
 
     sequenceControlSetPtr->inputOutputBufferFifoInitCount = inputPic + SCD_LAD;
     
