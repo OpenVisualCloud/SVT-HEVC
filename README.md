@@ -43,7 +43,7 @@ Scalable Video Technology is licensed under the OSI-approved BSD+Patent license.
 # Documentation
 
 More details about the encoder usage can be found under:
--   [SVT-HEVC Encoder User Guide](Docs/svt-hevc_encoder_user_guide.md)
+-   [svt-hevc-encoder-user-guide](Docs/svt-hevc_encoder_user_guide.md)
 
 # System Requirements
 
