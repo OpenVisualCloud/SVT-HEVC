@@ -4300,7 +4300,7 @@ void* EncDecKernel(void *inputPtr)
 
                     }
                     //Block level vbv tuning starts here
-                    if (sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate)
+                    if (sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate && sequenceControlSetPtr->staticConfig.lowLevelVbv)
                     {
                         EbBlockOnMutex(pictureControlSetPtr->rowStats[yLcuIndex]->rowUpdateMutex);
                         rowPtr = pictureControlSetPtr->rowStats[yLcuIndex];
@@ -4346,7 +4346,7 @@ void* EncDecKernel(void *inputPtr)
                         lcuPtr->qp,
                         enableSaoFlag,
                         contextPtr);
-                    if (sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate)
+                    if (sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate && sequenceControlSetPtr->staticConfig.lowLevelVbv)
                     {
                         /*Entropy Estimation for LCU*/
                         tempWrittenBitsBeforeQuantizedCoeff = ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->tempEntropyCoderPtr))->writtenBitsCount +

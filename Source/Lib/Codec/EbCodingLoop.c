@@ -2954,7 +2954,7 @@ EB_EXTERN void EncodePass(
             }
         }
     }
-    if (sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate) {
+    if (sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate && sequenceControlSetPtr->staticConfig.lowLevelVbv) {
         contextPtr->skipQpmFlag = EB_TRUE;
     }
     else
@@ -2986,11 +2986,11 @@ EB_EXTERN void EncodePass(
     }
 
 
-    EB_BOOL useDeltaQp = (EB_BOOL)(sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction ||(sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate));
+    EB_BOOL useDeltaQp = (EB_BOOL)(sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction ||(sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate && sequenceControlSetPtr->staticConfig.lowLevelVbv));
 
     EB_BOOL singleSegment = (sequenceControlSetPtr->encDecSegmentColCountArray[pictureControlSetPtr->temporalLayerIndex] == 1) && (sequenceControlSetPtr->encDecSegmentRowCountArray[pictureControlSetPtr->temporalLayerIndex] == 1);
 
-    EB_BOOL useDeltaQpSegments = singleSegment ? 0 : (EB_BOOL)(sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction||(sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate));
+    EB_BOOL useDeltaQpSegments = singleSegment ? 0 : (EB_BOOL)(sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction||(sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate && sequenceControlSetPtr->staticConfig.lowLevelVbv));
 
     if (is16bit) {
         EncodePassPackLcu(
@@ -3032,9 +3032,9 @@ EB_EXTERN void EncodePass(
 
             cuPtr->deltaQp = 0;
 
-			cuPtr->qp = (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction) && !(sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate) ? 
+			cuPtr->qp = (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction) && !(sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate && sequenceControlSetPtr->staticConfig.lowLevelVbv) ?
                 contextPtr->qpmQp : lcuPtr->qp;
-			lcuPtr->qp = (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction) && !(sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate) ?
+			lcuPtr->qp = (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction) && !(sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate && sequenceControlSetPtr->staticConfig.lowLevelVbv) ?
                 contextPtr->qpmQp : lcuPtr->qp;
 			cuPtr->orgDeltaQp = cuPtr->deltaQp;
 
@@ -3502,7 +3502,7 @@ EB_EXTERN void EncodePass(
                     
                     // Encode Transform Unit -INTRA-
 
-                    contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag && !(sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate)) ?
+                    contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag && !(sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate && sequenceControlSetPtr->staticConfig.lowLevelVbv)) ?
                         EB_FALSE :
                         lcuPtr->pictureLeftEdgeFlag && ((contextPtr->cuOriginX & (63)) == 0) && (contextPtr->cuOriginY == lcuOriginY);
 
@@ -3978,7 +3978,7 @@ EB_EXTERN void EncodePass(
                         cuPtr->transformUnitArray[contextPtr->tuItr].cbCbf2 = EB_FALSE;
                         cuPtr->transformUnitArray[contextPtr->tuItr].crCbf2 = EB_FALSE;
                     } else if (cuPtr->predictionUnitArray[0].mergeFlag == EB_TRUE) {
-                        contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag && !(sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate)) ?
+                        contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag && !(sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate && sequenceControlSetPtr->staticConfig.lowLevelVbv)) ?
                             EB_FALSE :
                             (tuOriginX == 0) && (tuOriginY == lcuOriginY);
 
@@ -3988,7 +3988,6 @@ EB_EXTERN void EncodePass(
                                 tbAddr,
                                 lcuStatPtr->stationaryEdgeOverTimeFlag,
                                 pictureControlSetPtr->temporalLayerIndex > 0 ? lcuStatPtr->pmStationaryEdgeOverTimeFlag : lcuStatPtr->stationaryEdgeOverTimeFlag);
-
                         // Set Fast El coef shaping method 
                         contextPtr->transCoeffShapeLuma     = DEFAULT_SHAPE;
                         contextPtr->transCoeffShapeChroma   = DEFAULT_SHAPE;                    
