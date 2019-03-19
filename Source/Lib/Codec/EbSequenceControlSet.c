@@ -72,7 +72,7 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     sequenceControlSetPtr->profileIdc                                       = 0;
     sequenceControlSetPtr->levelIdc                                         = 0;
     sequenceControlSetPtr->tierIdc                                          = 0;
-    sequenceControlSetPtr->chromaFormatIdc                                  = 1; // EB_YUV420
+    sequenceControlSetPtr->chromaFormatIdc                                  = EB_YUV420;
     sequenceControlSetPtr->maxTemporalLayers                                = 1;
     
     sequenceControlSetPtr->bitsForPictureOrderCount                         = 16;
@@ -149,9 +149,25 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     EbRecoveryPointSeiCtor(
         &sequenceControlSetPtr->recoveryPoint);
 
-	// Initialize LCU params
-	LcuParamsCtor(
-		sequenceControlSetPtr);
+    // Initialize Content Light Level SEI
+    EbContentLightLevelCtor(
+        &sequenceControlSetPtr->contentLightLevel);
+
+    // Initialize Mastering Color Volume SEI
+    EbMasteringDisplayColorVolumeCtor(
+        &sequenceControlSetPtr->masteringDisplayColorVolume);
+
+    // Initialize Registered User Data SEI
+    EbRegUserDataSEICtor(
+        &sequenceControlSetPtr->regUserDataSeiPtr);
+
+    // Initialize Un-Registered User Data SEI
+    EbUnRegUserDataSEICtor(
+        &sequenceControlSetPtr->unRegUserDataSeiPtr);
+
+    // Initialize LCU params
+    LcuParamsCtor(
+        sequenceControlSetPtr);
 
     sequenceControlSetPtr->maxDpbSize	= 0;
     
@@ -182,8 +198,6 @@ EB_ERRORTYPE CopySequenceControlSet(
     dst->bitsForPictureOrderCount   = src->bitsForPictureOrderCount;                writeCount += sizeof(EB_U32);                     
     dst->maxInputLumaWidth          = src->maxInputLumaWidth;                       writeCount += sizeof(EB_U32);                     
     dst->maxInputLumaHeight         = src->maxInputLumaHeight;                      writeCount += sizeof(EB_U32);  
-    dst->maxInputChromaHeight       = src->maxInputChromaHeight;                    writeCount += sizeof(EB_U32);       
-    dst->maxInputChromaWidth        = src->maxInputChromaWidth;                     writeCount += sizeof(EB_U32);
     dst->maxInputPadRight           = src->maxInputPadRight;                        writeCount += sizeof(EB_U32);
     dst->maxInputPadBottom          = src->maxInputPadBottom;                       writeCount += sizeof(EB_U32);
     dst->lumaWidth                  = src->lumaWidth;                               writeCount += sizeof(EB_U32);                     
@@ -255,11 +269,39 @@ EB_ERRORTYPE CopySequenceControlSet(
     writeCount += sizeof(AppRecoveryPoint_t);
 
     EB_MEMCPY(
+        &dst->contentLightLevel,
+        &src->contentLightLevel,
+        sizeof(AppContentLightLevelSei_t));
+
+    writeCount += sizeof(AppContentLightLevelSei_t);
+
+    EB_MEMCPY(
+        &dst->masteringDisplayColorVolume,
+        &src->masteringDisplayColorVolume,
+        sizeof(AppMasteringDisplayColorVolumeSei_t));
+
+    writeCount += sizeof(AppMasteringDisplayColorVolumeSei_t);
+
+    EB_MEMCPY(
         &dst->picTimingSei,
         &src->picTimingSei,
         sizeof(AppPictureTimingSei_t));
 
     writeCount += sizeof(AppPictureTimingSei_t);
+
+    EB_MEMCPY(
+        &dst->regUserDataSeiPtr,
+        &src->regUserDataSeiPtr,
+        sizeof(RegistedUserData_t));
+
+    writeCount += sizeof(RegistedUserData_t);
+
+    EB_MEMCPY(
+        &dst->unRegUserDataSeiPtr,
+        &src->unRegUserDataSeiPtr,
+        sizeof(UnregistedUserData_t));
+
+    writeCount += sizeof(UnregistedUserData_t);
 
     EbVideoUsabilityInfoCopy(
         dst->videoUsabilityInfoPtr,

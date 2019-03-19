@@ -1141,10 +1141,7 @@ void SetNmm(
             if (contextPtr->cuSize == 32)
                 contextPtr->mvMergeSkipModeCount = 3;
             else
-                if (contextPtr->cuSize == 32)
-                    contextPtr->mvMergeSkipModeCount = 3;
-                else
-                    contextPtr->mvMergeSkipModeCount = 2;           
+                contextPtr->mvMergeSkipModeCount = 2;           
         }
         else {
             contextPtr->mvMergeSkipModeCount = 2;
@@ -2209,6 +2206,8 @@ extern void GenerateIntraChromaReferenceSamplesMd(
 			contextPtr->cbReconNeighborArray,
 			contextPtr->crReconNeighborArray,
 			contextPtr->intraRefPtr,
+            EB_YUV420,
+            EB_FALSE,
 			EB_FALSE,
 			EB_FALSE,
 			EB_FALSE);
@@ -2593,6 +2592,8 @@ static void Intra4x4InitFastLoop(
 			contextPtr->cbReconNeighborArray,
 			contextPtr->crReconNeighborArray,
 			contextPtr->intraRefPtr,
+            EB_YUV420,
+            EB_FALSE,
 			EB_FALSE,
 			EB_FALSE,
 			EB_FALSE);
@@ -2698,7 +2699,8 @@ EB_EXTERN EB_ERRORTYPE PerformIntra4x4Search(
 	EbPictureBufferDesc_t   *tuTransCoeffTmpPtr;
 	EbPictureBufferDesc_t   *tuQuantCoeffTmpPtr;
 	EbPictureBufferDesc_t   *transformBuffer;
-    EbPictureBufferDesc_t   *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
+    EbPictureBufferDesc_t   *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->chromaDownSamplePicturePtr;
+
 
     EB_U32                   inputOriginIndex;
 	EB_U32                   puOriginIndex;
@@ -2723,7 +2725,7 @@ EB_EXTERN EB_ERRORTYPE PerformIntra4x4Search(
 	EB_U32                   chromaShift;
     
     if (contextPtr->coeffCabacUpdate)
-        memcpy(&(contextPtr->i4x4CoeffCtxModel), &(contextPtr->latestValidCoeffCtxModel), sizeof(CoeffCtxtMdl_t));
+        EB_MEMCPY(&(contextPtr->i4x4CoeffCtxModel), &(contextPtr->latestValidCoeffCtxModel), sizeof(CoeffCtxtMdl_t));
 
     for (partitionIndex = 0; partitionIndex < 4; partitionIndex++) {
 
@@ -4692,7 +4694,8 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
 	EB_U32                                  cuIdx;
 
 	// Input  
-	EbPictureBufferDesc_t                  *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
+    EbPictureBufferDesc_t                  *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->chromaDownSamplePicturePtr;
+
 
 	// Mode Decision Candidate Buffers
 	EB_U32                                  bufferTotalCount;
@@ -5173,7 +5176,8 @@ EB_EXTERN EB_ERRORTYPE BdpPillar(
 	EB_U32                                  cuIdx;
 
 	// Input   
-	EbPictureBufferDesc_t                  *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
+    EbPictureBufferDesc_t                  *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->chromaDownSamplePicturePtr;
+
 
 	// Mode Decision Candidate Buffers
 	EB_U32                                  bufferTotalCount;
@@ -5575,7 +5579,7 @@ EB_EXTERN EB_ERRORTYPE Bdp64x64vs32x32RefinementProcess(
     EB_ERRORTYPE                            return_error = EB_ErrorNone;
 
     // Input      
-	EbPictureBufferDesc_t                  *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
+    EbPictureBufferDesc_t                  *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->chromaDownSamplePicturePtr;
 
     // Mode Decision Candidate Buffers
     EB_U32                                  bufferTotalCount;
@@ -5852,7 +5856,7 @@ EB_EXTERN EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
     EB_ERRORTYPE                            return_error = EB_ErrorNone;
 
     // Input    
-	EbPictureBufferDesc_t                  *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
+    EbPictureBufferDesc_t                  *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->chromaDownSamplePicturePtr;
 
     // Mode Decision Candidate Buffers
     EB_U32                                  bufferTotalCount;
@@ -5898,12 +5902,11 @@ EB_EXTERN EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
     
     while (parentLeafIndex < CU_MAX_COUNT) {
 
-        EB_U8  parentDepthOffset    = DepthOffset[GetCodedUnitStats(parentLeafIndex)->depth];
-        EB_U8  childDepthOffset     = DepthOffset[GetCodedUnitStats(parentLeafIndex)->depth + 1];
-
         if (lcuPtr->codedLeafArrayPtr[parentLeafIndex]->splitFlag == EB_FALSE) {
-            EB_BOOL cu16x16RefinementFlag;  
 
+            EB_U8  parentDepthOffset = DepthOffset[GetCodedUnitStats(parentLeafIndex)->depth];
+            EB_U8  childDepthOffset = DepthOffset[GetCodedUnitStats(parentLeafIndex)->depth + 1];
+            EB_BOOL cu16x16RefinementFlag;  
 
 			if (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_LIGHT_BDP_DEPTH_MODE || (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_LCU_SWITCH_DEPTH_MODE  && (pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuAddr] == LCU_LIGHT_BDP_DEPTH_MODE))){
 
@@ -6302,7 +6305,7 @@ EB_EXTERN EB_ERRORTYPE BdpMvMergePass(
 {
     EB_ERRORTYPE                            return_error = EB_ErrorNone;
     // Input       
-    EbPictureBufferDesc_t                  *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
+    EbPictureBufferDesc_t                  *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->chromaDownSamplePicturePtr;
 
     // Mode Decision Candidate Buffers
     EB_U32                                  bufferTotalCount;

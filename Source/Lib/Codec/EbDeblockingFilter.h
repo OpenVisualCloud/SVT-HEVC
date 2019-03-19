@@ -21,7 +21,7 @@ extern "C" {
 #define GET_LUMA_4X4BLK_ADDR(lumaLcuWise4x4BlkPos_x, lumaLcuWise4x4BlkPos_y, logMaxLcuSizeIn4x4blk)           (((lumaLcuWise4x4BlkPos_x)>>2) + (((lumaLcuWise4x4BlkPos_y)>>2) << (logMaxLcuSizeIn4x4blk)))
 #define GET_CHROMA_4X4BLK_ADDR(chromaLcuWise2x2BlkPos_x, chromaLcuWise2x2BlkPos_y, logMaxLcuSizeIn4x4blk)     (((chromaLcuWise2x2BlkPos_x)>>1) + (((chromaLcuWise2x2BlkPos_y)>>1) << (logMaxLcuSizeIn4x4blk)))
 #define LUMA_SAMPLE_PIC_WISE_LOCATION_TO_QP_ARRAY_IDX(pos_x, pos_y, qpArrayStride)                            (((pos_x) >> LOG_MIN_CU_SIZE) + ((pos_y) >> LOG_MIN_CU_SIZE) * (qpArrayStride))
-#define CHROMA_SAMPLE_PIC_WISE_LOCATION_TO_QP_ARRAY_IDX(pos_x, pos_y, qpArrayStride)                          ((2*(pos_x) >> LOG_MIN_CU_SIZE) + (2*(pos_y) >> LOG_MIN_CU_SIZE) * (qpArrayStride))
+#define CHROMA_SAMPLE_PIC_WISE_LOCATION_TO_QP_ARRAY_IDX(subw, subh, pos_x, pos_y, qpArrayStride)                          (((subw*(EB_S32)(pos_x)) >> LOG_MIN_CU_SIZE) + ((subh*(EB_S32)(pos_y)) >> LOG_MIN_CU_SIZE) * (qpArrayStride))
 #define CHECK_MV_COMPONENT_EQUAL_OR_GREATER_THAN_4(pu1Ptr, pu2Ptr, pu1RefList, pu2RefList)                    (                         \
                             EB_ABS_DIFF((pu1Ptr)->mv[(pu1RefList)].x, (pu2Ptr)->mv[(pu2RefList)].x) >= 4 ||         \
                             EB_ABS_DIFF((pu1Ptr)->mv[(pu1RefList)].y, (pu2Ptr)->mv[(pu2RefList)].y) >= 4            \

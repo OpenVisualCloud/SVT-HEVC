@@ -288,6 +288,51 @@ void EbRecoveryPointSeiCtor(
     return;
 }
 
+void EbContentLightLevelCtor(
+    AppContentLightLevelSei_t    *contentLightLevelPtr)
+{
+    contentLightLevelPtr->maxContentLightLevel = 0;
+    contentLightLevelPtr->maxPicAverageLightLevel = 0;
+}
+
+void EbMasteringDisplayColorVolumeCtor(
+    AppMasteringDisplayColorVolumeSei_t    *masteringDisplayPtr)
+{
+
+    EB_MEMSET(
+        masteringDisplayPtr->displayPrimaryX,
+        0,
+        sizeof(EB_U16) * 3);
+    EB_MEMSET(
+        masteringDisplayPtr->displayPrimaryY,
+        0,
+        sizeof(EB_U16) * 3);
+
+    masteringDisplayPtr->whitePointX = 0;
+    masteringDisplayPtr->whitePointY= 0 ;
+    masteringDisplayPtr->maxDisplayMasteringLuminance = 0;
+    masteringDisplayPtr->minDisplayMasteringLuminance = 0;
+}
+
+void EbRegUserDataSEICtor(
+    RegistedUserData_t* regUserDataSeiPtr) {
+
+    regUserDataSeiPtr->userData = NULL;
+    regUserDataSeiPtr->userDataSize = 0;
+}
+
+void EbUnRegUserDataSEICtor(
+    UnregistedUserData_t* UnRegUserDataPtr) {
+
+    UnRegUserDataPtr->userData = NULL;
+    UnRegUserDataPtr->userDataSize = 0;
+    EB_MEMSET(
+        UnRegUserDataPtr->uuidIsoIec_11578,
+        0,
+        sizeof(EB_U8) * 16);
+}
+
+
 /**************************************************
  * GetUvlcCodeLength
  **************************************************/
@@ -487,6 +532,39 @@ EB_U32 GetRecoveryPointSEILength(
 
     // broken_link_flag
     seiLength += 1;
+
+    seiLength = (seiLength + 7) >> 3;
+
+    return seiLength;
+}
+
+EB_U32 GetContentLightLevelSEILength()
+{
+    EB_U32    seiLength = 0;
+
+    // max_content_light_level
+    seiLength += 16;
+
+    // max_pixel_average_light_level
+    seiLength += 16;
+
+    seiLength = (seiLength + 7) >> 3;
+
+    return seiLength;
+}
+
+EB_U32 GetMasteringDisplayColorVolumeSEILength()
+{
+    EB_U32    seiLength = 0;
+
+    // R, G, B Primaries
+    seiLength += 2 * 16 + 2 * 16 + 2 * 16;
+
+    // White Point Co-Ordinates
+    seiLength += 2 * 16;
+
+    // min & max luminance values
+    seiLength += 2 * 32;
 
     seiLength = (seiLength + 7) >> 3;
 

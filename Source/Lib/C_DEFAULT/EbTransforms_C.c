@@ -135,23 +135,23 @@ void QuantizeInvQuantize(
 #define EB_INTRA_CHROMA_DM          4
 #define MAX_TU_SIZE					32
 
-enum COMPONENT_TYPE
-{
-	COMPONENT_LUMA = 0,			// luma
-	COMPONENT_CHROMA = 1,		// chroma (Cb+Cr)
-	COMPONENT_CHROMA_CB = 2,	// chroma Cb
-	COMPONENT_CHROMA_CR = 3,	// chroma Cr
-	COMPONENT_ALL = 4,			// Y+Cb+Cr
-	COMPONENT_NONE = 15
-};
-
-
-enum COEFF_SCAN_TYPE2
-{
-	SCAN_DIAG2 = 0,				// diagonal scan
-	SCAN_HOR2,					// first scan is horizontal
-	SCAN_VER2					// first scan is vertical
-};
+//enum COMPONENT_TYPE
+//{
+//	COMPONENT_LUMA = 0,			// luma
+//	COMPONENT_CHROMA = 1,		// chroma (Cb+Cr)
+//	COMPONENT_CHROMA_CB = 2,	// chroma Cb
+//	COMPONENT_CHROMA_CR = 3,	// chroma Cr
+//	COMPONENT_ALL = 4,			// Y+Cb+Cr
+//	COMPONENT_NONE = 15
+//};
+//
+//
+//enum COEFF_SCAN_TYPE2
+//{
+//	SCAN_DIAG2 = 0,				// diagonal scan
+//	SCAN_HOR2,					// first scan is horizontal
+//	SCAN_VER2					// first scan is vertical
+//};
 
 /**************************************
 * Static Arrays

@@ -22,13 +22,6 @@ extern void IntraModeVerticalLuma16bit_SSE2_INTRIN(
     const EB_U32   predictionBufferStride,
     const EB_BOOL  skip);
 
-extern void IntraModeVerticalChroma_SSE2_INTRIN(
-    const EB_U32      size,                   //input parameter, denotes the size of the current PU
-    EB_U8            *refSamples,             //input parameter, pointer to the reference samples
-    EB_U8            *predictionPtr,          //output parameter, pointer to the prediction
-    const EB_U32      predictionBufferStride, //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip                    //skip one row 
-    );
 
 
 extern void IntraModeVerticalChroma16bit_SSE2_INTRIN(
@@ -75,13 +68,6 @@ void IntraModePlanar16bit_SSE2_INTRIN(
     EB_U16         *predictionPtr,              //output parameter, pointer to the prediction
     const EB_U32   predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
     const EB_BOOL  skip);                       //skip half rows
-
-extern void IntraModeDCChroma_SSE2_INTRIN(
-    const EB_U32      size,                       //input parameter, denotes the size of the current PU
-    EB_U8            *refSamples,                 //input parameter, pointer to the reference samples
-    EB_U8            *predictionPtr,              //output parameter, pointer to the prediction
-    const EB_U32      predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip);               //skip one row 
 
 extern void IntraModeAngular16bit_34_SSE2_INTRIN(
     const EB_U32   size,                       //input parameter, denotes the size of the current PU

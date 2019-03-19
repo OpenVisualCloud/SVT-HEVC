@@ -27,20 +27,25 @@ EB_ERRORTYPE EbPictureBufferDescCtor(
     // Allocate the PictureBufferDesc Object
     *objectDblPtr       = (EB_PTR) pictureBufferDescPtr;
 
+    if (pictureBufferDescInitDataPtr->colorFormat < EB_YUV420 || pictureBufferDescInitDataPtr->colorFormat > EB_YUV444) {
+        pictureBufferDescInitDataPtr->colorFormat = EB_YUV420;
+    }
+    EB_U32 subWidthCMinus1 = (pictureBufferDescInitDataPtr->colorFormat == EB_YUV444 ? 1 : 2) - 1;
     // Set the Picture Buffer Static variables
     pictureBufferDescPtr->maxWidth      = pictureBufferDescInitDataPtr->maxWidth;
     pictureBufferDescPtr->maxHeight     = pictureBufferDescInitDataPtr->maxHeight;
     pictureBufferDescPtr->width         = pictureBufferDescInitDataPtr->maxWidth;
     pictureBufferDescPtr->height        = pictureBufferDescInitDataPtr->maxHeight;
     pictureBufferDescPtr->bitDepth      = pictureBufferDescInitDataPtr->bitDepth;
+    pictureBufferDescPtr->colorFormat   = pictureBufferDescInitDataPtr->colorFormat;
 	pictureBufferDescPtr->strideY		= pictureBufferDescInitDataPtr->maxWidth + pictureBufferDescInitDataPtr->leftPadding + pictureBufferDescInitDataPtr->rightPadding;
-    pictureBufferDescPtr->strideCb      = pictureBufferDescPtr->strideCr = pictureBufferDescPtr->strideY >> 1;
+    pictureBufferDescPtr->strideCb      = pictureBufferDescPtr->strideCr = pictureBufferDescPtr->strideY >> subWidthCMinus1;
 	pictureBufferDescPtr->originX		= pictureBufferDescInitDataPtr->leftPadding;
 	pictureBufferDescPtr->originY		= pictureBufferDescInitDataPtr->topPadding;
 
 	pictureBufferDescPtr->lumaSize		= (pictureBufferDescInitDataPtr->maxWidth + pictureBufferDescInitDataPtr->leftPadding + pictureBufferDescInitDataPtr->rightPadding) *
 										  (pictureBufferDescInitDataPtr->maxHeight + pictureBufferDescInitDataPtr->topPadding + pictureBufferDescInitDataPtr->botPadding);
-    pictureBufferDescPtr->chromaSize    = pictureBufferDescPtr->lumaSize >> 2;
+    pictureBufferDescPtr->chromaSize    = pictureBufferDescPtr->lumaSize >> (3 - pictureBufferDescInitDataPtr->colorFormat);
     pictureBufferDescPtr->packedFlag    = EB_FALSE;
 
     if(pictureBufferDescInitDataPtr->splitMode == EB_TRUE) {
@@ -121,20 +126,22 @@ EB_ERRORTYPE EbReconPictureBufferDescCtor(
     // Allocate the PictureBufferDesc Object
     *objectDblPtr       = (EB_PTR) pictureBufferDescPtr;
 
+    EB_U32 subWidthCMinus1 = (pictureBufferDescInitDataPtr->colorFormat == EB_YUV444 ? 1 : 2) - 1;
     // Set the Picture Buffer Static variables
     pictureBufferDescPtr->maxWidth      = pictureBufferDescInitDataPtr->maxWidth;
     pictureBufferDescPtr->maxHeight     = pictureBufferDescInitDataPtr->maxHeight;
     pictureBufferDescPtr->width         = pictureBufferDescInitDataPtr->maxWidth;
     pictureBufferDescPtr->height        = pictureBufferDescInitDataPtr->maxHeight;
     pictureBufferDescPtr->bitDepth      = pictureBufferDescInitDataPtr->bitDepth;
+    pictureBufferDescPtr->colorFormat   = pictureBufferDescInitDataPtr->colorFormat;
 	pictureBufferDescPtr->strideY		= pictureBufferDescInitDataPtr->maxWidth + pictureBufferDescInitDataPtr->leftPadding + pictureBufferDescInitDataPtr->rightPadding;
-    pictureBufferDescPtr->strideCb      = pictureBufferDescPtr->strideCr = pictureBufferDescPtr->strideY >> 1;
+    pictureBufferDescPtr->strideCb      = pictureBufferDescPtr->strideCr = pictureBufferDescPtr->strideY >> subWidthCMinus1;
 	pictureBufferDescPtr->originX		= pictureBufferDescInitDataPtr->leftPadding;
 	pictureBufferDescPtr->originY		= pictureBufferDescInitDataPtr->topPadding;
 
 	pictureBufferDescPtr->lumaSize		= (pictureBufferDescInitDataPtr->maxWidth + pictureBufferDescInitDataPtr->leftPadding + pictureBufferDescInitDataPtr->rightPadding) *
 									      (pictureBufferDescInitDataPtr->maxHeight + pictureBufferDescInitDataPtr->topPadding + pictureBufferDescInitDataPtr->botPadding);
-    pictureBufferDescPtr->chromaSize    = pictureBufferDescPtr->lumaSize >> 2;
+    pictureBufferDescPtr->chromaSize    = pictureBufferDescPtr->lumaSize >> (3 - pictureBufferDescInitDataPtr->colorFormat);
     pictureBufferDescPtr->packedFlag    = EB_FALSE;
 
     pictureBufferDescPtr->strideBitIncY  = 0;

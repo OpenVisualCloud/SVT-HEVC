@@ -139,6 +139,7 @@ EB_ERRORTYPE ModeDecisionCandidateBufferCtor(
 	pictureBufferDescInitData.maxHeight = lcuMaxSize;
 	pictureBufferDescInitData.bitDepth = maxBitdepth;
 	pictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
+    pictureBufferDescInitData.colorFormat = EB_YUV420;
 	pictureBufferDescInitData.leftPadding = 0;
 	pictureBufferDescInitData.rightPadding = 0;
 	pictureBufferDescInitData.topPadding = 0;
@@ -149,6 +150,7 @@ EB_ERRORTYPE ModeDecisionCandidateBufferCtor(
 	doubleWidthPictureBufferDescInitData.maxHeight = lcuMaxSize;
 	doubleWidthPictureBufferDescInitData.bitDepth = EB_16BIT;
 	doubleWidthPictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
+    doubleWidthPictureBufferDescInitData.colorFormat = EB_YUV420;
 	doubleWidthPictureBufferDescInitData.leftPadding = 0;
 	doubleWidthPictureBufferDescInitData.rightPadding = 0;
 	doubleWidthPictureBufferDescInitData.topPadding = 0;
@@ -1848,31 +1850,16 @@ EB_U8 ProductFullModeDecision(
 		tuPtr->splitFlag = EB_TRUE;
 		tuPtr->cbCbf = EB_FALSE;
 		tuPtr->crCbf = EB_FALSE;
-		tuPtr->chromaCbfContext = 0; //at TU level 
-	}
-	else {
-		tuTotalCount = 1;
-		tuIndex = 0;
-		tuItr = 0;
-	}
 
-	{
 		// Set TU variables
-		if (cuSize == MAX_LCU_SIZE){
-			tuTotalCount = 4;
-			tuIndex = 1;
-			tuItr = 0;
-			tuPtr = &cuPtr->transformUnitArray[0];
-			tuPtr->splitFlag = EB_TRUE;
-			tuPtr->cbCbf = EB_FALSE;
-			tuPtr->crCbf = EB_FALSE;
+        tuPtr->cbCbf2 = EB_FALSE;
+        tuPtr->crCbf2 = EB_FALSE;
 			tuPtr->chromaCbfContext = 0; //at TU level 
 		}
 		else {
 			tuTotalCount = 1;
 			tuIndex = 0;
 			tuItr = 0;
-		}
 	}
 
 	//cuPtr->forceSmallTu = candidatePtr->forceSmallTu;
@@ -1890,6 +1877,8 @@ EB_U8 ProductFullModeDecision(
 		tuPtr->lumaCbf = (EB_BOOL)(((candidatePtr->yCbf)  & (1 << tuIndex)) > 0);
 		tuPtr->cbCbf = (EB_BOOL)(((candidatePtr->cbCbf) & (1 << (tuIndex))) > 0);
 		tuPtr->crCbf = (EB_BOOL)(((candidatePtr->crCbf) & (1 << (tuIndex))) > 0);
+		tuPtr->cbCbf2 = EB_FALSE;
+		tuPtr->crCbf2 = EB_FALSE;
 		
         //CHKN tuPtr->chromaCbfContext = (tuIndex == 0 || (cuPtr->partitionMode == SIZE_NxN)) ? 0 : (cuSizeLog2 - Log2f(tuSize)); //at TU level 
         tuPtr->chromaCbfContext = (tuIndex == 0 || (0)) ? 0 : (cuSizeLog2 - Log2f(tuSize)); //at TU level 

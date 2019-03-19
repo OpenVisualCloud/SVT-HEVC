@@ -258,6 +258,21 @@ void* PacketizationKernel(void *inputPtr)
                     contextPtr->ppsConfig);
             }
 
+
+			if (sequenceControlSetPtr->staticConfig.maxCLL || sequenceControlSetPtr->staticConfig.maxFALL) {
+				sequenceControlSetPtr->contentLightLevel.maxContentLightLevel = sequenceControlSetPtr->staticConfig.maxCLL;
+				sequenceControlSetPtr->contentLightLevel.maxPicAverageLightLevel = sequenceControlSetPtr->staticConfig.maxFALL;
+				EncodeContentLightLevelSEI(
+					pictureControlSetPtr->bitstreamPtr,
+					&sequenceControlSetPtr->contentLightLevel);
+			}
+
+			if (sequenceControlSetPtr->staticConfig.useMasteringDisplayColorVolume) {
+				EncodeMasteringDisplayColorVolumeSEI(
+					pictureControlSetPtr->bitstreamPtr,
+					&sequenceControlSetPtr->masteringDisplayColorVolume);
+			}
+			
             if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
             {
                 sequenceControlSetPtr->activeParameterSet.selfContainedCvsFlag = EB_TRUE;
@@ -276,8 +291,10 @@ void* PacketizationKernel(void *inputPtr)
                         outputStreamPtr->pBuffer,
                         (EB_U32*) &(outputStreamPtr->nFilledLen),
                         (EB_U32*) &(outputStreamPtr->nAllocLen),
-                        encodeContextPtr);
+						encodeContextPtr,
+						NAL_UNIT_INVALID);
                 }
+
         // Bitstream Written Loop
         // This loop writes the result of entropy coding into the bitstream
         {
@@ -544,7 +561,8 @@ void* PacketizationKernel(void *inputPtr)
             outputStreamPtr->pBuffer,
             (EB_U32*) &(outputStreamPtr->nFilledLen),
             (EB_U32*) &(outputStreamPtr->nAllocLen),
-            encodeContextPtr);
+            encodeContextPtr,
+			NAL_UNIT_INVALID);
         queueEntryPtr->startSplicing = outputStreamPtr->nFilledLen;
         if (sequenceControlSetPtr->staticConfig.pictureTimingSEI) {
             if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
@@ -565,7 +583,25 @@ void* PacketizationKernel(void *inputPtr)
                 pictureControlSetPtr->bitstreamPtr,
                 &sequenceControlSetPtr->recoveryPoint);
         }
-    
+
+        if (sequenceControlSetPtr->staticConfig.useNaluFile && pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadSize) {
+            if (pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadType == USER_DATA_REGISTERED_ITU_T_T35) {
+                sequenceControlSetPtr->regUserDataSeiPtr.userDataSize = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadSize;
+                sequenceControlSetPtr->regUserDataSeiPtr.userData = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payload;
+                EncodeRegUserDataSEI(
+                    pictureControlSetPtr->bitstreamPtr,
+                    &sequenceControlSetPtr->regUserDataSeiPtr);
+            }
+            if (pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadType == USER_DATA_UNREGISTERED) {
+                sequenceControlSetPtr->unRegUserDataSeiPtr.userDataSize = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payloadSize;
+                sequenceControlSetPtr->unRegUserDataSeiPtr.userData = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->userSeiMsg.payload;
+                EncodeUnregUserDataSEI(
+                    pictureControlSetPtr->bitstreamPtr,
+                    &sequenceControlSetPtr->unRegUserDataSeiPtr,
+                    encodeContextPtr);
+            }
+        }
+
         EncodeSliceHeader(
             0,
             packetizationQp,
@@ -582,7 +618,8 @@ void* PacketizationKernel(void *inputPtr)
             outputStreamPtr->pBuffer,
             (EB_U32*) &(outputStreamPtr->nFilledLen),
             (EB_U32*) &(outputStreamPtr->nAllocLen),
-			encodeContextPtr);
+            encodeContextPtr,
+			NAL_UNIT_INVALID);
 
         // Reset the bitstream
         ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
@@ -597,7 +634,9 @@ void* PacketizationKernel(void *inputPtr)
             outputStreamPtr->pBuffer,
             (EB_U32*) &(outputStreamPtr->nFilledLen),
             (EB_U32*) &(outputStreamPtr->nAllocLen),
-			encodeContextPtr);
+			encodeContextPtr,
+			NAL_UNIT_INVALID);
+
         bufferRate = encodeContextPtr->vbvMaxrate / (sequenceControlSetPtr->staticConfig.frameRate >> 16);
         if ((sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate) && (sequenceControlSetPtr->staticConfig.vbvMaxrate == sequenceControlSetPtr->staticConfig.targetBitRate))
     {
@@ -627,7 +666,8 @@ void* PacketizationKernel(void *inputPtr)
                     outputStreamPtr->pBuffer,
                     (EB_U32*) &(outputStreamPtr->nFilledLen),
                     (EB_U32*) &(outputStreamPtr->nAllocLen),
-                    encodeContextPtr);
+					encodeContextPtr,
+					NAL_UNIT_INVALID);
 
                 for (EB_U32 i = 0; i < fillerBytes; i++)
                 {
@@ -641,7 +681,8 @@ void* PacketizationKernel(void *inputPtr)
                         outputStreamPtr->pBuffer,
                         (EB_U32*) &(outputStreamPtr->nFilledLen),
                         (EB_U32*) &(outputStreamPtr->nAllocLen),
-                        encodeContextPtr);
+						encodeContextPtr,
+						NAL_UNIT_INVALID);
                 }
                 ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
                 // Byte Align the Bitstream: rbsp_trailing_bits
@@ -660,12 +701,39 @@ void* PacketizationKernel(void *inputPtr)
                     outputStreamPtr->pBuffer,
                     (EB_U32*) &(outputStreamPtr->nFilledLen),
                     (EB_U32*) &(outputStreamPtr->nAllocLen),
-                    encodeContextPtr);
+					encodeContextPtr,
+					NAL_UNIT_INVALID);
             }
         }
+
         // Send the number of bytes per frame to RC
         pictureControlSetPtr->ParentPcsPtr->totalNumBits = outputStreamPtr->nFilledLen << 3;    
+
         queueEntryPtr->actualBits = pictureControlSetPtr->ParentPcsPtr->totalNumBits;
+
+        // Copy Dolby Vision RPU metadata to the output bitstream
+        if (sequenceControlSetPtr->staticConfig.dolbyVisionProfile == 81 && pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->dolbyVisionRpu.payloadSize) {
+            // Reset the bitstream
+            ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+
+            CodeDolbyVisionRpuMetadata(
+                pictureControlSetPtr->bitstreamPtr,
+                pictureControlSetPtr
+            );
+
+            // Flush the Bitstream
+            FlushBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+
+            // Copy payload to the Output Bitstream
+            CopyRbspBitstreamToPayload(
+                pictureControlSetPtr->bitstreamPtr,
+                outputStreamPtr->pBuffer,
+                (EB_U32*) &(outputStreamPtr->nFilledLen),
+                (EB_U32*) &(outputStreamPtr->nAllocLen),
+                ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr,
+                NAL_UNIT_UNSPECIFIED_62);
+        }
+
         // Code EOS NUT
         if (outputStreamPtr->nFlags & EB_BUFFERFLAG_EOS && sequenceControlSetPtr->staticConfig.codeEosNal == 1) 
         {
@@ -683,7 +751,8 @@ void* PacketizationKernel(void *inputPtr)
                 outputStreamPtr->pBuffer,
                 (EB_U32*) &(outputStreamPtr->nFilledLen),
                 (EB_U32*) &(outputStreamPtr->nAllocLen),
-                ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr);
+                ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr,
+				NAL_UNIT_INVALID);
         }
         
         //Store the buffer in the Queue
@@ -771,7 +840,8 @@ void* PacketizationKernel(void *inputPtr)
                     outputStreamPtr->pBuffer,
                     (EB_U32*) &(queueEntryPtr->startSplicing),
                     (EB_U32*) &(outputStreamPtr->nAllocLen),
-                    sequenceControlSetPtr->encodeContextPtr);
+                    sequenceControlSetPtr->encodeContextPtr,
+					NAL_UNIT_INVALID);
                 outputStreamPtr->nFilledLen += bufferWrittenBytesCount;
             }
 

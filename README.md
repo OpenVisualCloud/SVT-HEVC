@@ -1,34 +1,40 @@
-﻿
 # Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/intel/SVT-HEVC?branch=master&svg=true)](https://ci.appveyor.com/project/intel/SVT-HEVC)
+[![Travis Build Status](https://travis-ci.com/intel/SVT-HEVC.svg?branch=master)](https://travis-ci.com/intel/SVT-HEVC)
+[![Coverage Status](https://coveralls.io/repos/github/intel/SVT-HEVC/badge.svg?branch=master)](https://coveralls.io/github/intel/SVT-HEVC?branch=master)
 
 The Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder) is an HEVC-compliant encoder library core that achieves excellent density-quality tradeoffs, and is highly optimized for Intel® Xeon™ Scalable Processor and Xeon™ D processors.
 
+The whitepaper for SVT-HEVC can be found here: https://01.org/svt
+
 This encoder has been optimized to achieve excellent performance levels using 13 density-quality presets (please refer to the user guide for more details) on a system with a dual Intel® Xeon® Scalable CPU targeting:
 
--  Real-time encoding of up to one 8Kp60/10-bit streams on the Platinum 8180 with M11 in the subjective quality mode
+-  Real-time encoding of up to one 8Kp60/10-bit streams on the Platinum 8180 with M11 in the visual quality mode
 
--  Real-time encoding of up to two 8Kp50/10-bit streams on the Platinum 8180 with M12 in the subjective quality mode
+-  Real-time encoding of up to two 8Kp50/10-bit streams on the Platinum 8180 with M12 in the visual quality mode
 
--  Real-time encoding of up to four 4Kp60/10-bit streams on the Gold 6148 with M12 in the subjective quality mode
+-  Real-time encoding of up to four 4Kp60/10-bit streams on the Gold 6148 with M12 in the visual quality mode
 
--  Real-time encoding of up to six 4Kp60/10-bit streams on the Platinum 8180 with M12 in the subjective quality mode
+-  Real-time encoding of up to six 4Kp60/10-bit streams on the Platinum 8180 with M12 in the visual quality mode
 
-SVT-HEVC Encoder also supports 2 modes:
+SVT-HEVC Encoder also supports 3 modes:
 
--  A Subjectively optimized mode (-tune 0)
+-  A visually optimized mode for visual quality (-tune 0)
 
--  An Objectively optimized mode for PSNR / SSIM / VMAF benchmarking (-tune 1 (Default setting))
+-  An PSNR/SSIM optimized mode for PSNR / SSIM benchmarking (-tune 1 (Default setting))
+
+-  An VMAF optimized mode for VMAF benchmarking (-tune 2)
 
 The encoder can also run the ABR profile below on one Intel® Xeon-D™ D-2191:
 
 
-|		ABR Profile 		| 
+|       ABR Profile         | 
 |---------------------------------------|
-|	1 x 4kp60/10-bit Stream	(@M11)	|
-|	1 x 1080p60/10-bit Stream (@M10)	|
-|	1 x 720p60/8-bit Stream	(@M9)	|
-|	1 x 480p60/8-bit Stream	(@M9)	|
-|	1 x 360p60/8-bit Stream	(@M9)	|
+|   1 x 4kp60/10-bit Stream	(@M11)      |
+|   1 x 1080p60/10-bit Stream (@M10)    |
+|   1 x 720p60/8-bit Stream	(@M9)       |
+|   1 x 480p60/8-bit Stream	(@M9)       |
+|   1 x 360p60/8-bit Stream	(@M9)       |
 
 # License
 
@@ -37,7 +43,7 @@ Scalable Video Technology is licensed under the OSI-approved BSD+Patent license.
 # Documentation
 
 More details about the encoder usage can be found under:
--   [SVT-HEVC Encoder User Guide](Docs/SVT-HEVC_Encoder_User_Guide.pdf)
+-   [SVT-HEVC Encoder User Guide](Docs/svt-hevc_encoder_user_guide.md)
 
 # System Requirements
 
@@ -47,13 +53,13 @@ SVT-HEVC may run on any Windows* or Linux* 64 bit operating systems. The list be
 
 * __Windows* Operating Systems (64-bit):__
 
-	-  Windows* Server 2016
+    -  Windows* Server 2016
 
 * __Linux* Operating Systems (64-bit):__
 
-	-  Ubuntu* 16.04 Server LTS
+    -  Ubuntu* 16.04 Server LTS
 
-	-  Ubuntu* 18.04 Server LTS
+    -  Ubuntu* 18.04 Server LTS
 
 ## Hardware
 
@@ -68,67 +74,65 @@ In order to achieve the performance targeted by the encoder, the specific CPU mo
 In order to run the highest resolution supported by the encoder, at least 64GB of RAM is required to run a single 8kp50/10-bit encode. The encoder application will display an error if the system does not have enough RAM to support such. The following table shows the minimum amount of RAM required for some standard resolutions of 10bit video per stream:
 
 
-|		Resolution 		| Minimum Footprint (GB)|
+|       Resolution      | Minimum Footprint (GB)|
 |-----------------------|-----------------------|
-|		8k 			|                   64		|
-|		4k 			|                   16		|
-|		1080p 			|                   6           |
-|		720p/1080i 		|                   4           |
-|		480p 			|                   3           |
+|      8k               |           64          |
+|      4k               |           16          |
+|      1080p            |           6           |
+|      720p/1080i       |           4           |
+|      480p             |           3           |
 
 # Build and Install
 
 ## Windows* Operating Systems (64-bit):
 
 * __Build Requirements__
-	-	Visual Studio* 2017 (can be downloaded [here](https://www.visualstudio.com/vs/older-downloads/))
-	-	CMake 3.5 or later (can be downloaded [here](https://github.com/Kitware/CMake/releases/download/v3.13.0/cmake-3.13.0-win64-x64.msi))
-	-   YASM Assembler version 1.2.0 or later
-	-	Download the yasm exe from the following [link](http://www.tortall.net/projects/yasm/releases/yasm-1.3.0-win64.exe)
-	-	Rename yasm-1.3.0-win64.exe to yasm.exe
-	-   Copy yasm.exe into a location that is in the PATH environment variable
+    -   Visual Studio* 2017 (can be downloaded [here](https://www.visualstudio.com/vs/older-downloads/))
+    -   CMake 3.5 or later (can be downloaded [here](https://github.com/Kitware/CMake/releases/download/v3.13.0/cmake-3.13.0-win64-x64.msi))
+    -   YASM Assembler version 1.2.0 or later
+    -   Download the yasm exe from the following [link](http://www.tortall.net/projects/yasm/releases/yasm-1.3.0-win64.exe)
+    -   Rename yasm-1.3.0-win64.exe to yasm.exe
+    -   Copy yasm.exe into a location that is in the PATH environment variable
 
 * __Build Instructions__
-	-	Generate the Visual Studio* 2017 project files by following the steps below in a windows command line prompt:
-		-   cd Build\windows
-		-   generate_vs17.bat
-	-   Open "svt-hevc.sln" using Visual Studio* 2017 and build the solution
+    -   Generate the Visual Studio* 2017 project files by following the steps below in a windows command line prompt:
+        -   In the main repository directory go under the <repo dir>\Build\windows location
+        -   Run generate_vs17.bat [such would generate the visual studio project files]
+    -   Open the "svt-hevc.sln" using Visual Studio* 2017 and click on Build -- > Build Solution
 
 * __Binaries Location__
-	-	Post build, binaries can be found under Bin/Release and / or Bin/Debug
+    -   Binaries can be found under <repo dir>\Bin/Release or <repo dir>\Bin/Debug, depending on whether Debug or Release were selected in the build mode
 
 * __Installation__
--	For the binaries to operate properly on your system, the following conditions have to be met:
-	-	On any of the Windows* Operating Systems listed in the OS requirements section, install Visual Studio* 2017
-	-	Once the installation is complete, copy the binaries to a location making sure that both the sample application "SvtHevcEncApp.exe” and library "SvtHevcEnc.dll” are in the same folder.
-	-	Open the command prompt window at the chosen location and run the sample application to encode. SvtHevcEncApp.exe -i [in.yuv] -w [width] -h [height] -b [out.265].
-	-	Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | SvtHevcEncApp.exe -i stdin -n [number_of_frames_to_encode] -w [width] -h [height].
+    For the binaries to operate properly on your system, the following conditions have to be met:
+    -   On any of the Windows* Operating Systems listed in the OS requirements section, install Visual Studio* 2017
+    -   Once the installation is complete, copy the binaries to a location making sure that both the sample application "SvtHevcEncApp.exe” and library "SvtHevcEnc.dll” are in the same folder.
+    -   Open the command prompt window at the chosen location and run the sample application to encode. SvtHevcEncApp.exe -i [in.yuv] -w [width] -h [height] -b [out.265].
+    -   Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | SvtHevcEncApp.exe -i stdin -n [number_of_frames_to_encode] -w [width] -h [height].
 
 ## Linux* Operating Systems (64-bit):
 
 * __Build Requirements__
-	 -	GCC 5.4.0 or later
-	 -	CMake 3.5.1 or later
-	 -	YASM Assembler version 1.2.0 or later
+    -   GCC 5.4.0 or later
+    -   CMake 3.5.1 or later
+    -   YASM Assembler version 1.2.0 or later
 
 * __Build Instructions__
-	 -	cd Build/linux
-	 -	./build.sh <release | debug> (if none specified, both release and debug will be built)
+    -   In the main repository, run
+        -   mkdir build && cd build && cmake .. && make -j ```nproc``` && sudo make install
 
 * __Sample Binaries location__
-	 -	Binaries can be found under Bin/Release and / or Bin/Debug
+    -   Binaries can be found under Bin/Release
 
 * __Installation__
 For the binaries to operate properly on your system, the following conditions have to be met:
-	-	On any of the Linux* Operating Systems listed above, copy the binaries under a location of your choice.
-	-	Change the permissions on the sample application “SvtHevcEncApp” executable by running the command: 				chmod +x SvtHevcEncApp
-	-	cd into your chosen location
-	-	Run the sample application to encode. ./SvtHevcEncApp -i [in.yuv] -w [width] -h [height] -b [out.265].
-	-	Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | ./SvtHevcEncApp -i stdin -n [number_of_frames_to_encode] -w [width] -h [height].
+    -   On any of the Linux* Operating Systems listed above, copy the binaries under a location of your choice.
+    -   Change the permissions on the sample application “SvtHevcEncApp” executable by running the command:                 chmod +x SvtHevcEncApp
+    -   cd into your chosen location
+    -   Run the sample application to encode. ./SvtHevcEncApp -i [in.yuv] -w [width] -h [height] -b [out.265].
+    -   Sample application supports reading from pipe. E.g. ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | ./SvtHevcEncApp -i stdin -n [number_of_frames_to_encode] -w [width] -h [height].
 
 # Demo features and limitations
-
--  **Resolution support:** This version supports only multiple-of-8 resolutions in width for 8-bit video input and in width and height for 10-bit video input.
 
 -  **VBR BRC mode:** The VBR functionality implemented in SVT-HEVC Encoder is a demo feature to allow for an easier integration of product level BRC. The algorithm implemented would allow the encoder to generate an output bit stream matching, with a best effort, the target bitrate. The algorithm does not guarantee a certain maximum bitrate or maximum buffer size [does not follow HRD compliance]. When set to encode in VBR mode, the encoder does not produce a bit-exact output from one run to another.
 
@@ -136,11 +140,9 @@ For the binaries to operate properly on your system, the following conditions ha
 
 -  **Multi-instance support:** The multi-instance functionality is a demo feature implemented in the SVT-HEVC Encoder sample application as an example of one sample application using multiple encoding libraries. Encoding using the multi-instance support is limited to only 6 simultaneous streams. For example two channels encoding on Windows: SvtHevcEncApp.exe -nch 2 -c firstchannel.cfg secondchannel.cfg
 
--  **Separate Fields:** Using the separate fields functionality migh result in a corrupted video output.
-
 # How to Contribute
 
-We welcome community contributions to the Scalable Video Technology. Thank you for your time! By contributing to the project, you agree to the license and copyright terms therein and to the release of your contribution under these terms.
+We welcome community contributions to the SVT-HEVC Encoder. Thank you for your time! By contributing to the project, you agree to the license and copyright terms therein and to the release of your contribution under these terms.
 
 ## Contribution process
 
@@ -153,3 +155,7 @@ We welcome community contributions to the Scalable Video Technology. Thank you f
 # How to Report Bugs and Provide Feedback
 
 Use the "Issues" tab on Github
+
+# Notices and Disclaimers
+
+The notices and disclaimers can be found [here](NOTICES.md)
