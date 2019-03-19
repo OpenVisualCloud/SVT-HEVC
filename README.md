@@ -1,6 +1,6 @@
 # Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/openvisualcloud/SVT-HEVC?branch=master&svg=true)](https://ci.appveyor.com/project/openvisualcloud/SVT-HEVC)
-[![Travis Build Status](https://travis-ci.com/openvisualcloud/SVT-HEVC.svg?branch=master)](https://travis-ci.com/openvisualcloud/SVT-HEVC)
+[![Travis Build Status](https://travis-ci.com/OpenVisualCloud/SVT-HEVC.svg?branch=master)](https://travis-ci.com/OpenVisualCloud/SVT-HEVC)
 [![Coverage Status](https://coveralls.io/repos/github/openvisualcloud/SVT-HEVC/badge.svg?branch=master)](https://coveralls.io/github/openvisualcloud/SVT-HEVC?branch=master)
 
 The Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder) is an HEVC-compliant encoder library core that achieves excellent density-quality tradeoffs, and is highly optimized for Intel® Xeon™ Scalable Processor and Xeon™ D processors.
