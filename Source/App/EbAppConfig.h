@@ -347,6 +347,7 @@ typedef struct EbConfig_s
     EB_BOOL                switchThreadsToRtPriority;
     EB_BOOL                fpsInVps;
     uint32_t                 hrdFlag;
+    EB_BOOL                  lowLevelVbv;
 
     /****************************************
      * Annex A Parameters

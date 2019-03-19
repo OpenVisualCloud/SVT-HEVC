@@ -2104,6 +2104,7 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.vbvBufInit = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->vbvBufInit;
     sequenceControlSetPtr->staticConfig.vbvBufEnd = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->vbvBufEnd;
     sequenceControlSetPtr->staticConfig.vbvEndFrameAdjust = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->vbvEndFrameAdjust;
+    sequenceControlSetPtr->staticConfig.lowLevelVbv= ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->lowLevelVbv;
     sequenceControlSetPtr->staticConfig.lookAheadDistance = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->lookAheadDistance;
     sequenceControlSetPtr->staticConfig.framesToBeEncoded = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->framesToBeEncoded;
     
@@ -2844,6 +2845,11 @@ static EB_ERRORTYPE VerifySettings(\
     }
     if (config->vbvEndFrameAdjust > 100) {
         printf("Error instance %u: Invalid vbvEndFrameAdjust [0 - 100]\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->lowLevelVbv > 1) {
+        SVT_LOG("SVT [Error]: Instance %u : Invalid lowLevelVbv flag [0 - 1]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
     return return_error;

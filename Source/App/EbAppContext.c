@@ -185,6 +185,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.vbvBufInit = config->vbvBufInit;
     callbackData->ebEncParameters.vbvBufEnd = config->vbvBufEnd;
     callbackData->ebEncParameters.vbvEndFrameAdjust = config->vbvEndFrameAdjust;
+    callbackData->ebEncParameters.lowLevelVbv = config->lowLevelVbv;
     callbackData->ebEncParameters.useQpFile = (EB_BOOL)config->useQpFile;
     callbackData->ebEncParameters.disableDlfFlag = (EB_BOOL)config->disableDlfFlag;
     callbackData->ebEncParameters.enableSaoFlag = (EB_BOOL)config->enableSaoFlag;

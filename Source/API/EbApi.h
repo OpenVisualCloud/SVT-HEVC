@@ -519,7 +519,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
     /* Active channel count. */
     uint32_t                activeChannelCount;
-
+    uint8_t                 lowLevelVbv;
 
     // Threads management
 

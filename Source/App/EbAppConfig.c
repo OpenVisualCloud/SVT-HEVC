@@ -85,6 +85,7 @@
 #define VBV_BUFFER_INIT_TOKEN           "-vbv-init"
 #define VBV_BUFFER_END_TOKEN            "-vbv-end"
 #define VBV_END_FRAME_ADJUST_TOKEN      "-vbv-end-fr-adj"
+#define ENABLE_LOW_LEVEL_VBV_TOKEN      "-low-level-vbv"
 #define HRD_TOKEN                       "-hrd"
 #define MAX_QP_TOKEN                    "-max-qp"
 #define MIN_QP_TOKEN                    "-min-qp"
@@ -206,6 +207,7 @@ static void SetVbvBufsize                       (const char *value, EbConfig_t *
 static void SetVbvBufInit                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufInit = strtoul(value, NULL, 0); };
 static void SetVbvEndFrameAdjust                (const char *value, EbConfig_t *cfg) { cfg->vbvEndFrameAdjust = strtoul(value, NULL, 0); };
 static void SetVbvBufEnd                        (const char *value, EbConfig_t *cfg) { cfg->vbvBufEnd = strtoul(value, NULL, 0); };
+static void SetLowLevelVbv                      (const char *value, EbConfig_t *cfg) { cfg->lowLevelVbv = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetHrdFlag                          (const char *value, EbConfig_t *cfg) { cfg->hrdFlag = strtoul(value, NULL, 0); };
 static void SetVideoUsabilityInfo               (const char *value, EbConfig_t *cfg) {cfg->videoUsabilityInfo               = strtol(value,  NULL, 0);};
 static void SetHighDynamicRangeInput            (const char *value, EbConfig_t *cfg) {cfg->highDynamicRangeInput            = strtol(value,  NULL, 0);};
@@ -297,10 +299,10 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, FRAME_RATE_DENOMINATOR_TOKEN, "FrameRateDenominator", SetFrameRateDenominator },
     { SINGLE_INPUT, ENCODER_BIT_DEPTH, "EncoderBitDepth", SetEncoderBitDepth },
     { SINGLE_INPUT, ENCODER_COLOR_FORMAT, "EncoderColorFormat", SetEncoderColorFormat},
-	{ SINGLE_INPUT, INPUT_COMPRESSED_TEN_BIT_FORMAT, "CompressedTenBitFormat", SetcompressedTenBitFormat },
-	{ SINGLE_INPUT, HIERARCHICAL_LEVELS_TOKEN, "HierarchicalLevels", SetHierarchicalLevels },
+    { SINGLE_INPUT, INPUT_COMPRESSED_TEN_BIT_FORMAT, "CompressedTenBitFormat", SetcompressedTenBitFormat },
+    { SINGLE_INPUT, HIERARCHICAL_LEVELS_TOKEN, "HierarchicalLevels", SetHierarchicalLevels },
 
-	{ SINGLE_INPUT, PRED_STRUCT_TOKEN, "PredStructure", SetCfgPredStructure },
+    { SINGLE_INPUT, PRED_STRUCT_TOKEN, "PredStructure", SetCfgPredStructure },
 
 
     // Rate Control
@@ -321,6 +323,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, VBV_BUFFER_END_TOKEN, "vbvBufEnd", SetVbvBufEnd},
     { SINGLE_INPUT, VBV_END_FRAME_ADJUST_TOKEN, "vbvEndFrameAdjustToken", SetVbvEndFrameAdjust},
 
+    { SINGLE_INPUT, ENABLE_LOW_LEVEL_VBV_TOKEN,"lowLevelVbv",SetLowLevelVbv},
 
     // DLF
     { SINGLE_INPUT, LOOP_FILTER_DISABLE_TOKEN, "LoopFilterDisable", SetDisableDlfFlag },
@@ -435,6 +438,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->vbvBufEnd                            = 0;
     configPtr->vbvEndFrameAdjust                    = 0;
     configPtr->hrdFlag                              =  0;
+    configPtr->lowLevelVbv                          = 0;
     configPtr->intraPeriod                          = -2;
     configPtr->intraRefreshType                     = 1;
 	  configPtr->hierarchicalLevels					          = 3;
