@@ -147,7 +147,7 @@ void ProductUnifiedQuantizeInvQuantizeMd(
 	}
 	else{
 
-	    QiQ_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][areaSize >> 3](
+	    QiQ_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][areaSize >> 3](
 		    coeff,
 		    coeffStride,
 		    quantCoeff,
@@ -353,7 +353,7 @@ void ProductFullLoop(
 					cuStatsPtr->size < 32 ? PF_OFF : contextPtr->pfMdMode);
 
                 if ((cuStatsPtr->size >> 3) < 9)
-				    AdditionKernel_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][cuStatsPtr->size >> 3](
+				    AdditionKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][cuStatsPtr->size >> 3](
 					    &(candidateBuffer->predictionPtr->bufferY[tuOriginIndex]),
 					    64,
 					    &(((EB_S16*)(contextPtr->transQuantBuffersPtr->tuTransCoeff2Nx2NPtr->bufferY))[tuOriginIndex]),
@@ -380,7 +380,7 @@ void ProductFullLoop(
 					PICTURE_BUFFER_DESC_Y_FLAG);
 			}
 
-			tuFullDistortion[0][DIST_CALC_RESIDUAL] = SpatialFullDistortionKernel_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][Log2f(cuStatsPtr->size) - 2](
+			tuFullDistortion[0][DIST_CALC_RESIDUAL] = SpatialFullDistortionKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][Log2f(cuStatsPtr->size) - 2](
 				&(inputPicturePtr->bufferY[inputOriginIndex]),
 				inputPicturePtr->strideY,
 				&(candidateBuffer->reconPtr->bufferY[tuOriginIndex]),
@@ -388,7 +388,7 @@ void ProductFullLoop(
 				cuStatsPtr->size,
 				cuStatsPtr->size);
 
-			tuFullDistortion[0][DIST_CALC_PREDICTION] = SpatialFullDistortionKernel_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][Log2f(cuStatsPtr->size) - 2](
+			tuFullDistortion[0][DIST_CALC_PREDICTION] = SpatialFullDistortionKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][Log2f(cuStatsPtr->size) - 2](
 				&(inputPicturePtr->bufferY[inputOriginIndex]),
 				inputPicturePtr->strideY,
 				&(candidateBuffer->predictionPtr->bufferY[tuOriginIndex]),
@@ -537,7 +537,7 @@ void UnifiedQuantizeInvQuantize_R(
             rdoqPmCoreMethod);
 	}else{
 
-		QiQ_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][areaSize >> 3](
+		QiQ_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][areaSize >> 3](
 			coeff,
 			coeffStride,
 			quantCoeff,
@@ -945,7 +945,7 @@ void CuFullDistortionFastTuMode_R (
 
             if (contextPtr->spatialSseFullLoop == EB_TRUE) {
 
-                tuFullDistortion[1][DIST_CALC_RESIDUAL] = SpatialFullDistortionKernel_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][Log2f(chromaTuSize) - 2](
+                tuFullDistortion[1][DIST_CALC_RESIDUAL] = SpatialFullDistortionKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][Log2f(chromaTuSize) - 2](
                     &(inputPicturePtr->bufferCb[inputCbOriginIndex]),
                     inputPicturePtr->strideCb,
                     &(candidateBuffer->reconPtr->bufferCb[tuChromaOriginIndex]),
@@ -954,7 +954,7 @@ void CuFullDistortionFastTuMode_R (
                     chromaTuSize);
 
 
-                tuFullDistortion[1][DIST_CALC_PREDICTION] = SpatialFullDistortionKernel_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][Log2f(chromaTuSize) - 2](
+                tuFullDistortion[1][DIST_CALC_PREDICTION] = SpatialFullDistortionKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][Log2f(chromaTuSize) - 2](
                     &(inputPicturePtr->bufferCb[inputCbOriginIndex]),
                     inputPicturePtr->strideCb,
                     &(candidateBuffer->predictionPtr->bufferCb[tuChromaOriginIndex]),
@@ -962,7 +962,7 @@ void CuFullDistortionFastTuMode_R (
                     chromaTuSize,
                     chromaTuSize);
 
-                tuFullDistortion[2][DIST_CALC_RESIDUAL] = SpatialFullDistortionKernel_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][Log2f(chromaTuSize) - 2](
+                tuFullDistortion[2][DIST_CALC_RESIDUAL] = SpatialFullDistortionKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][Log2f(chromaTuSize) - 2](
                     &(inputPicturePtr->bufferCr[inputCbOriginIndex]),
                     inputPicturePtr->strideCr,
                     &(candidateBuffer->reconPtr->bufferCr[tuChromaOriginIndex]),
@@ -970,7 +970,7 @@ void CuFullDistortionFastTuMode_R (
                     chromaTuSize,
                     chromaTuSize);
 
-                tuFullDistortion[2][DIST_CALC_PREDICTION] = SpatialFullDistortionKernel_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][Log2f(chromaTuSize) - 2](
+                tuFullDistortion[2][DIST_CALC_PREDICTION] = SpatialFullDistortionKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][Log2f(chromaTuSize) - 2](
                     &(inputPicturePtr->bufferCr[inputCbOriginIndex]),
                     inputPicturePtr->strideCr,
                     &(candidateBuffer->predictionPtr->bufferCr[tuChromaOriginIndex]),

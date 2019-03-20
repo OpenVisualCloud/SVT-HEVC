@@ -683,7 +683,7 @@ static void EncodeLoop(
 
 		// For the case that DC path chosen for chroma, we check the DC values and determine to use DC or N2Shape for chroma. Since there is only one flag for ChromaShaping, we do the prediction of Cr and Cb and decide on the chroma shaping
 		if (tuSize > MIN_PU_SIZE && contextPtr->transCoeffShapeChroma == ONLY_DC_SHAPE) {
-			EB_S64 sumResidual = SumResidual_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+			EB_S64 sumResidual = SumResidual_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 					((EB_S16*)residual16bit->bufferCb) + scratchCbOffset,
 					tuSize >> subWidthCMinus1,
 					residual16bit->strideCb);
@@ -793,7 +793,7 @@ static void EncodeLoop(
 				tuSize > MIN_PU_SIZE? (tuSize >> subWidthCMinus1): tuSize);
 
 		if (tuSize > MIN_PU_SIZE && contextPtr->transCoeffShapeChroma == ONLY_DC_SHAPE) {
-			EB_S64 sumResidual = SumResidual_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+			EB_S64 sumResidual = SumResidual_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 					((EB_S16*)residual16bit->bufferCr) + scratchCrOffset,
 					tuSize >> subWidthCMinus1,
 					residual16bit->strideCr);
@@ -977,7 +977,7 @@ static void EncodeGenerateRecon(
 				BIT_INCREMENT_8BIT,
 				(EB_BOOL)(tuSize == MIN_PU_SIZE));
 
-			AdditionKernel_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][tuSize >> 3](
+			AdditionKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][tuSize >> 3](
 				predSamples->bufferY + predLumaOffset,
 				predSamples->strideY,
 				((EB_S16*)residual16bit->bufferY) + scratchLumaOffset,
@@ -1016,7 +1016,7 @@ static void EncodeGenerateRecon(
 				BIT_INCREMENT_8BIT,
 				EB_FALSE);
 
-			AdditionKernel_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][tuSize >> (3 + shift_bit)](
+			AdditionKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][tuSize >> (3 + shift_bit)](
 				predSamples->bufferCb + predChromaOffset,
 				predSamples->strideCb,
 				((EB_S16*)residual16bit->bufferCb) + scratchChromaOffset,
@@ -1049,7 +1049,7 @@ static void EncodeGenerateRecon(
 				BIT_INCREMENT_8BIT,
 				EB_FALSE);
 
-			AdditionKernel_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][tuSize >> (3 + shift_bit)](
+			AdditionKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][tuSize >> (3 + shift_bit)](
 				predSamples->bufferCr + predChromaOffset,
 				predSamples->strideCr,
 				((EB_S16*)residual16bit->bufferCr) + scratchChromaOffset,
@@ -1255,7 +1255,7 @@ static void EncodeLoop16bit(
 
 		// For the case that DC path chosen for chroma, we check the DC values and determine to use DC or N2Shape for chroma. Since there is only one flag for ChromaShaping, we do the prediction of Cr and Cb and decide on the chroma shaping
 		if (tuSize > MIN_PU_SIZE && contextPtr->transCoeffShapeChroma == ONLY_DC_SHAPE) {
-			EB_S64 sumResidual = SumResidual_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+			EB_S64 sumResidual = SumResidual_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 					((EB_S16*)residual16bit->bufferCb) + scratchCbOffset,
 					tuSize >> subWidthCMinus1,
 					residual16bit->strideCb);
@@ -1364,7 +1364,7 @@ static void EncodeLoop16bit(
 				tuSize > MIN_PU_SIZE? (tuSize >> subWidthCMinus1): tuSize);
 
 		if (tuSize > MIN_PU_SIZE && contextPtr->transCoeffShapeChroma == ONLY_DC_SHAPE) {
-			EB_S64 sumResidual = SumResidual_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+			EB_S64 sumResidual = SumResidual_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 					((EB_S16*)residual16bit->bufferCr) + scratchCrOffset,
 					tuSize >> subWidthCMinus1,
 					residual16bit->strideCr);
@@ -1552,7 +1552,7 @@ static void EncodeGenerateRecon16bit(
 				BIT_INCREMENT_10BIT,
 				(EB_BOOL)(tuSize == MIN_PU_SIZE));
 
-            AdditionKernel_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+            AdditionKernel_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
                 (EB_U16*)predSamples->bufferY + predLumaOffset,
                 predSamples->strideY,
                 ((EB_S16*)residual16bit->bufferY) + scratchLumaOffset,
@@ -1591,7 +1591,7 @@ static void EncodeGenerateRecon16bit(
 				BIT_INCREMENT_10BIT,
 				EB_FALSE);
 
-            AdditionKernel_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+            AdditionKernel_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
                 (EB_U16*)predSamples->bufferCb + predChromaOffset,
 				predSamples->strideCb,
 				((EB_S16*)residual16bit->bufferCb) + scratchChromaOffset,
@@ -1624,7 +1624,7 @@ static void EncodeGenerateRecon16bit(
 				BIT_INCREMENT_10BIT,
 				EB_FALSE);
 
-            AdditionKernel_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+            AdditionKernel_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
                 (EB_U16*)predSamples->bufferCr + predChromaOffset,
 				predSamples->strideCr,
 				((EB_S16*)residual16bit->bufferCr) + scratchChromaOffset,

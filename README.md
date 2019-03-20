@@ -1,7 +1,7 @@
 # Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/intel/SVT-HEVC?branch=master&svg=true)](https://ci.appveyor.com/project/intel/SVT-HEVC)
-[![Travis Build Status](https://travis-ci.com/intel/SVT-HEVC.svg?branch=master)](https://travis-ci.com/intel/SVT-HEVC)
-[![Coverage Status](https://coveralls.io/repos/github/intel/SVT-HEVC/badge.svg?branch=master)](https://coveralls.io/github/intel/SVT-HEVC?branch=master)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/openvisualcloud/SVT-HEVC?branch=master&svg=true)](https://ci.appveyor.com/project/openvisualcloud/SVT-HEVC)
+[![Travis Build Status](https://travis-ci.com/OpenVisualCloud/SVT-HEVC.svg?branch=master)](https://travis-ci.com/OpenVisualCloud/SVT-HEVC)
+[![Coverage Status](https://coveralls.io/repos/github/openvisualcloud/SVT-HEVC/badge.svg?branch=master)](https://coveralls.io/github/openvisualcloud/SVT-HEVC?branch=master)
 
 The Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder) is an HEVC-compliant encoder library core that achieves excellent density-quality tradeoffs, and is highly optimized for Intel® Xeon™ Scalable Processor and Xeon™ D processors.
 
@@ -43,7 +43,7 @@ Scalable Video Technology is licensed under the OSI-approved BSD+Patent license.
 # Documentation
 
 More details about the encoder usage can be found under:
--   [SVT-HEVC Encoder User Guide](Docs/svt-hevc_encoder_user_guide.md)
+-   [svt-hevc-encoder-user-guide](Docs/svt-hevc_encoder_user_guide.md)
 
 # System Requirements
 

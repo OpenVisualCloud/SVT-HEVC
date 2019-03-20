@@ -128,7 +128,7 @@ void UniPredHevcInterpolationMd(
 		fracPosx = posX & 0x03;
 		fracPosy = posY & 0x03;
 
-		uniPredLumaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 2)](
+		uniPredLumaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 2)](
 			is16bit ? refPic->bufferY + 4 + 4 * refPic->strideY : refPic->bufferY + integPosx + integPosy*refPic->strideY,
 			refPic->strideY,
 			dst->bufferY + dstLumaIndex,
@@ -147,7 +147,7 @@ void UniPredHevcInterpolationMd(
 		fracPosy = posY & 0x07;
 
 
-		uniPredChromaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+		uniPredChromaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 3)](
 			is16bit ? refPic->bufferCb + 2 + 2 * refPic->strideCb : refPic->bufferCb + integPosx + integPosy * refPic->strideCb,
 			refPic->strideCb,
 			dst->bufferCb + dstChromaIndex,
@@ -159,7 +159,7 @@ void UniPredHevcInterpolationMd(
 			fracPosy);
 
 		//doing the chroma Cr interpolation
-		uniPredChromaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+		uniPredChromaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 3)](
 			is16bit ? refPic->bufferCr + 2 + 2 * refPic->strideCr : refPic->bufferCr + integPosx + integPosy * refPic->strideCr,
 			refPic->strideCr,
 			dst->bufferCr + dstChromaIndex,
@@ -205,7 +205,7 @@ void EncodeUniPredInterpolation(
     fracPosx  = posX & 0x03;
     fracPosy  = posY & 0x03;
 
-	uniPredLumaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 2)](
+	uniPredLumaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 2)](
 		refPic->bufferY + integPosx + integPosy*refPic->strideY,
 		refPic->strideY,
 		dst->bufferY + dstLumaIndex,
@@ -222,7 +222,7 @@ void EncodeUniPredInterpolation(
     fracPosy  = (posY & (0x07 >> (1-subHeightCMinus1))) << (1-subHeightCMinus1);
 
         
-	uniPredChromaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+	uniPredChromaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 3)](
 		refPic->bufferCb + integPosx + integPosy*refPic->strideCb,
 		refPic->strideCb,
 		dst->bufferCb + dstChromaIndex,
@@ -234,7 +234,7 @@ void EncodeUniPredInterpolation(
 		fracPosy);
 
 	//doing the chroma Cr interpolation
-	uniPredChromaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+	uniPredChromaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 3)](
 		refPic->bufferCr + integPosx + integPosy*refPic->strideCr,
 		refPic->strideCr,
 		dst->bufferCr + dstChromaIndex,
@@ -278,7 +278,7 @@ void UniPredInterpolation16bit(
     fracPosx = posX & 0x03;
     fracPosy = posY & 0x03;
 
-	uniPredLuma16bitIFFunctionPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 2)](
+	uniPredLuma16bitIFFunctionPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 2)](
 		(EB_U16 *)fullPelBlock->bufferY + 4 + 4 * fullPelBlock->strideY,
 		fullPelBlock->strideY,
 		(EB_U16*)(dst->bufferY) + dstLumaIndex,
@@ -294,7 +294,7 @@ void UniPredInterpolation16bit(
     fracPosx  = (posX & (0x07 >> (1 - subWidthCMinus1))) << (1 - subWidthCMinus1);
     fracPosy  = (posY & (0x07 >> (1 - subHeightCMinus1))) << (1 - subHeightCMinus1);
 
-	uniPredChromaIFFunctionPtrArrayNew16bit[(ASM_TYPES & AVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+	uniPredChromaIFFunctionPtrArrayNew16bit[!!(ASM_TYPES & AVX2_MASK)][fracPosx + (fracPosy << 3)](
 		(EB_U16 *)fullPelBlock->bufferCb + 2 + 2 * fullPelBlock->strideCb,
 		fullPelBlock->strideCb,
 		(EB_U16*)(dst->bufferCb) + dstChromaIndex,
@@ -305,7 +305,7 @@ void UniPredInterpolation16bit(
 		fracPosx,
 		fracPosy);
 
-	uniPredChromaIFFunctionPtrArrayNew16bit[(ASM_TYPES & AVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+	uniPredChromaIFFunctionPtrArrayNew16bit[!!(ASM_TYPES & AVX2_MASK)][fracPosx + (fracPosy << 3)](
 		(EB_U16 *)fullPelBlock->bufferCr + 2 + 2 * fullPelBlock->strideCr,
 		fullPelBlock->strideCr,
 		(EB_U16*)(dst->bufferCr) + dstChromaIndex,
@@ -393,7 +393,7 @@ void BiPredHevcInterpolationMd(
 			// Note: SSSE3 Interpolation can only be enabled if 
 			//       SSSE3 clipping functions are enabled
 			//doing the luma interpolation
-			biPredLumaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 2)](
+			biPredLumaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 2)](
 				is16Bit ? refPicList0->bufferY + 4 + 4 * refPicList0->strideY : refPicList0->bufferY + integPosx + integPosy*refPicList0->strideY,
 				refPicList0->strideY,
 				refList0TempDst,
@@ -409,7 +409,7 @@ void BiPredHevcInterpolationMd(
 			fracPosy = refList1PosY & 0x03;
 
 			//doing the luma interpolation
-			biPredLumaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 2)](
+			biPredLumaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 2)](
 				is16Bit ? refPicList1->bufferY + 4 + 4 * refPicList1->strideY : refPicList1->bufferY + integPosx + integPosy*refPicList1->strideY,
 				refPicList1->strideY,
 				refList1TempDst,
@@ -418,7 +418,7 @@ void BiPredHevcInterpolationMd(
 				fistPassIFTempDst);
 
 			// bi-pred luma clipping
-			biPredClippingFuncPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+			biPredClippingFuncPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
 				puWidth,
 				puHeight,
 				refList0TempDst,
@@ -482,7 +482,7 @@ void BiPredHevcInterpolationMd(
 			fracPosy = refList0PosY & 0x07;
 
 			//doing the chroma Cb interpolation
-			biPredChromaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+			biPredChromaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 3)](
 				is16Bit ? refPicList0->bufferCb + 2 + 2 * refPicList0->strideCb : refPicList0->bufferCb + integPosx + integPosy*refPicList0->strideCb,
 				refPicList0->strideCb,
 				refList0TempDst + lumaTempBufSize,
@@ -493,7 +493,7 @@ void BiPredHevcInterpolationMd(
 				fracPosy);
 
 			//doing the chroma Cr interpolation
-			biPredChromaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+			biPredChromaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 3)](
 				is16Bit ? refPicList0->bufferCr + 2 + 2 * refPicList0->strideCr : refPicList0->bufferCr + integPosx + integPosy*refPicList0->strideCr,
 				refPicList0->strideCr,
 				refList0TempDst + lumaTempBufSize + chromaTempBufSize,
@@ -512,7 +512,7 @@ void BiPredHevcInterpolationMd(
 			fracPosy = refList1PosY & 0x07;
 
 			//doing the chroma Cb interpolation
-			biPredChromaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+			biPredChromaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 3)](
 				is16Bit ? refPicList1->bufferCb + 2 + 2 * refPicList1->strideCb : refPicList1->bufferCb + integPosx + integPosy*refPicList1->strideCb,
 				refPicList1->strideCb,
 				refList1TempDst + lumaTempBufSize,
@@ -523,7 +523,7 @@ void BiPredHevcInterpolationMd(
 				fracPosy);
 
 			//doing the chroma Cr interpolation
-			biPredChromaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+			biPredChromaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 3)](
 				is16Bit ? refPicList1->bufferCr + 2 + 2 * refPicList1->strideCr : refPicList1->bufferCr + integPosx + integPosy*refPicList1->strideCr,
 				refPicList1->strideCr,
 				refList1TempDst + lumaTempBufSize + chromaTempBufSize,
@@ -534,7 +534,7 @@ void BiPredHevcInterpolationMd(
 				fracPosy);
 
 			// bi-pred chroma clipping
-			biPredClippingFuncPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+			biPredClippingFuncPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
 				chromaPuWidth,
 				chromaPuHeight,
 				refList0TempDst + lumaTempBufSize,
@@ -542,7 +542,7 @@ void BiPredHevcInterpolationMd(
 				biDst->bufferCb + dstChromaIndex,
 				biDst->strideCb,
 				ChromaOffset5);
-			biPredClippingFuncPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+			biPredClippingFuncPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
 				chromaPuWidth,
 				chromaPuHeight,
 				refList0TempDst + lumaTempBufSize + chromaTempBufSize,
@@ -634,7 +634,7 @@ void EncodeBiPredInterpolation(
 		// Note: SSSE3 Interpolation can only be enabled if 
 		//       SSSE3 clipping functions are enabled
 		//doing the luma interpolation
-		biPredLumaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 2)](
+		biPredLumaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 2)](
 			refPicList0->bufferY + integPosx + integPosy*refPicList0->strideY,
 			refPicList0->strideY,
 			refList0TempDst,
@@ -650,7 +650,7 @@ void EncodeBiPredInterpolation(
 		fracPosy = refList1PosY & 0x03;
 
 		//doing the luma interpolation
-		biPredLumaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 2)](
+		biPredLumaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 2)](
 			refPicList1->bufferY + integPosx + integPosy*refPicList1->strideY,
 			refPicList1->strideY,
 			refList1TempDst,
@@ -659,7 +659,7 @@ void EncodeBiPredInterpolation(
 			fistPassIFTempDst);
 
 		// bi-pred luma clipping
-		biPredClippingFuncPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+		biPredClippingFuncPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
 			puWidth,
 			puHeight,
 			refList0TempDst,
@@ -722,7 +722,7 @@ void EncodeBiPredInterpolation(
 		fracPosy = (refList0PosY & (0x07 >> (1-subHeightCMinus1))) << (1-subHeightCMinus1);
 
 		//doing the chroma Cb interpolation
-		biPredChromaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+		biPredChromaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 3)](
 			refPicList0->bufferCb + integPosx + integPosy*refPicList0->strideCb,
 			refPicList0->strideCb,
 			refList0TempDst + lumaTempBufSize,
@@ -733,7 +733,7 @@ void EncodeBiPredInterpolation(
 			fracPosy);
 
 		//doing the chroma Cr interpolation
-		biPredChromaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+		biPredChromaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 3)](
 			refPicList0->bufferCr + integPosx + integPosy*refPicList0->strideCr,
 			refPicList0->strideCr,
 			refList0TempDst + lumaTempBufSize + chromaTempBufSize,
@@ -757,7 +757,7 @@ void EncodeBiPredInterpolation(
 		fracPosy = (refList1PosY & (0x07 >> (1-subHeightCMinus1))) << (1-subHeightCMinus1);
 
 		//doing the chroma Cb interpolation
-		biPredChromaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+		biPredChromaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 3)](
 			refPicList1->bufferCb + integPosx + integPosy*refPicList1->strideCb,
 			refPicList1->strideCb,
 			refList1TempDst + lumaTempBufSize,
@@ -768,7 +768,7 @@ void EncodeBiPredInterpolation(
 			fracPosy);
 
 		//doing the chroma Cr interpolation
-		biPredChromaIFFunctionPtrArrayNew[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+		biPredChromaIFFunctionPtrArrayNew[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 3)](
 			refPicList1->bufferCr + integPosx + integPosy*refPicList1->strideCr,
 			refPicList1->strideCr,
 			refList1TempDst + lumaTempBufSize + chromaTempBufSize,
@@ -779,7 +779,7 @@ void EncodeBiPredInterpolation(
 			fracPosy);
 
 		// bi-pred chroma clipping
-		biPredClippingFuncPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+		biPredClippingFuncPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
 			chromaPuWidth,
 			chromaPuHeight,
 			refList0TempDst + lumaTempBufSize,
@@ -787,7 +787,7 @@ void EncodeBiPredInterpolation(
 			biDst->bufferCb + dstChromaIndex,
 			biDst->strideCb,
 			ChromaOffset5);
-		biPredClippingFuncPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+		biPredClippingFuncPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
 			chromaPuWidth,
 			chromaPuHeight,
 			refList0TempDst + lumaTempBufSize + chromaTempBufSize,
@@ -865,7 +865,7 @@ void BiPredInterpolation16bit(
 		fracPosx = refList0PosX & 0x03;
 		fracPosy = refList0PosY & 0x03;
 
-		biPredLumaIFFunctionPtrArrayNew16bit[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 2)](
+		biPredLumaIFFunctionPtrArrayNew16bit[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 2)](
 			(EB_U16 *)fullPelBlockL0->bufferY + 4 + 4 * fullPelBlockL0->strideY,
 			fullPelBlockL0->strideY,
 			refList0TempDst,
@@ -879,7 +879,7 @@ void BiPredInterpolation16bit(
 		fracPosx = refList1PosX & 0x03;
 		fracPosy = refList1PosY & 0x03;
 
-		biPredLumaIFFunctionPtrArrayNew16bit[(ASM_TYPES & PREAVX2_MASK) && 1][fracPosx + (fracPosy << 2)](
+		biPredLumaIFFunctionPtrArrayNew16bit[!!(ASM_TYPES & PREAVX2_MASK)][fracPosx + (fracPosy << 2)](
 			(EB_U16 *)fullPelBlockL1->bufferY + 4 + 4 * fullPelBlockL1->strideY,
 			fullPelBlockL1->strideY,
 			refList1TempDst,
@@ -887,7 +887,7 @@ void BiPredInterpolation16bit(
 			puHeight,
 			fistPassIFTempDst);
 
-		biPredClipping16bitFuncPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+		biPredClipping16bitFuncPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
 			puWidth,
 			puHeight,
 			refList0TempDst,
@@ -936,7 +936,7 @@ void BiPredInterpolation16bit(
 		fracPosx = (refList0PosX & (0x07 >> (1-subWidthCMinus1))) << (1-subWidthCMinus1);
 		fracPosy = (refList0PosY & (0x07 >> (1-subHeightCMinus1))) << (1-subHeightCMinus1);
 
-		biPredChromaIFFunctionPtrArrayNew16bit[(ASM_TYPES & AVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+		biPredChromaIFFunctionPtrArrayNew16bit[!!(ASM_TYPES & AVX2_MASK)][fracPosx + (fracPosy << 3)](
 			(EB_U16 *)fullPelBlockL0->bufferCb + 2 + 2 * fullPelBlockL0->strideCb,
 			fullPelBlockL0->strideCb,
 			refList0TempDst + lumaTempBufSize,
@@ -946,7 +946,7 @@ void BiPredInterpolation16bit(
 			fracPosx,
 			fracPosy);
 
-		biPredChromaIFFunctionPtrArrayNew16bit[(ASM_TYPES & AVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+		biPredChromaIFFunctionPtrArrayNew16bit[!!(ASM_TYPES & AVX2_MASK)][fracPosx + (fracPosy << 3)](
 			(EB_U16 *)fullPelBlockL0->bufferCr + 2 + 2 * fullPelBlockL0->strideCr,
 			fullPelBlockL0->strideCr,
 			refList0TempDst + lumaTempBufSize + chromaTempBufSize,
@@ -967,7 +967,7 @@ void BiPredInterpolation16bit(
 		fracPosx = (refList1PosX & (0x07 >> (1-subWidthCMinus1))) << (1-subWidthCMinus1);
 		fracPosy = (refList1PosY & (0x07 >> (1-subHeightCMinus1))) << (1-subHeightCMinus1);
 
-		biPredChromaIFFunctionPtrArrayNew16bit[(ASM_TYPES & AVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+		biPredChromaIFFunctionPtrArrayNew16bit[!!(ASM_TYPES & AVX2_MASK)][fracPosx + (fracPosy << 3)](
 			(EB_U16 *)fullPelBlockL1->bufferCb + 2 + 2 * fullPelBlockL1->strideCb,
 			fullPelBlockL1->strideCb,
 			refList1TempDst + lumaTempBufSize,
@@ -977,7 +977,7 @@ void BiPredInterpolation16bit(
 			fracPosx,
 			fracPosy);
 
-		biPredChromaIFFunctionPtrArrayNew16bit[(ASM_TYPES & AVX2_MASK) && 1][fracPosx + (fracPosy << 3)](
+		biPredChromaIFFunctionPtrArrayNew16bit[!!(ASM_TYPES & AVX2_MASK)][fracPosx + (fracPosy << 3)](
 			(EB_U16 *)fullPelBlockL1->bufferCr + 2 + 2 * fullPelBlockL1->strideCr,
 			fullPelBlockL1->strideCr,
 			refList1TempDst + lumaTempBufSize + chromaTempBufSize,
@@ -991,7 +991,7 @@ void BiPredInterpolation16bit(
 		//***********************
 		//      L0+L1
 		//***********************    
-		biPredClipping16bitFuncPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+		biPredClipping16bitFuncPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
 			chromaPuWidth,
 			chromaPuHeight,
 			refList0TempDst + lumaTempBufSize,
@@ -999,7 +999,7 @@ void BiPredInterpolation16bit(
 			(EB_U16*)biDst->bufferCb + dstChromaIndex,
 			biDst->strideCb);
 
-		biPredClipping16bitFuncPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+		biPredClipping16bitFuncPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
 			chromaPuWidth,
 			chromaPuHeight,
 			refList0TempDst + lumaTempBufSize + chromaTempBufSize,

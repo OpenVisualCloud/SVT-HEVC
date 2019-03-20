@@ -1071,7 +1071,7 @@ static void Luma8x8blkDLFCore(
 		edgeStartFilteredSamplePtr = reconPic->bufferY + reconPic->originX + reconPic->originY * reconPic->strideY + (centerSamplePos_y - 4) * reconLumaPicStride + centerSamplePos_x;
 
 		// luma 4 sample edge DLF core
-		Luma4SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+		Luma4SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartFilteredSamplePtr,
 			reconLumaPicStride,
 			EB_TRUE,
@@ -1110,7 +1110,7 @@ static void Luma8x8blkDLFCore(
 
 
 		// luma 4 sample edge DLF core
-		Luma4SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+		Luma4SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartFilteredSamplePtr,
 			reconLumaPicStride,
 			EB_TRUE,
@@ -1148,7 +1148,7 @@ static void Luma8x8blkDLFCore(
 		edgeStartFilteredSamplePtr = reconPic->bufferY + reconPic->originX + reconPic->originY * reconPic->strideY + centerSamplePos_y * reconLumaPicStride + (centerSamplePos_x - 4);
 
 		// luma 4 sample edge DLF core
-		Luma4SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+		Luma4SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartFilteredSamplePtr,
 			reconLumaPicStride,
 			EB_FALSE,
@@ -1186,7 +1186,7 @@ static void Luma8x8blkDLFCore(
 		edgeStartFilteredSamplePtr = reconPic->bufferY + reconPic->originX + reconPic->originY * reconPic->strideY + centerSamplePos_y * reconLumaPicStride + centerSamplePos_x;
 
 		// luma 4 sample edge DLF core
-		Luma4SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+		Luma4SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartFilteredSamplePtr,
 			reconLumaPicStride,
 			EB_FALSE,
@@ -1253,7 +1253,7 @@ void Luma8x8blkDLFCore16bit(
 		edgeStartFilteredSamplePtr = (EB_U16*)reconPic->bufferY + reconPic->originX + reconPic->originY * reconPic->strideY + (centerSamplePos_y - 4) * reconLumaPicStride + centerSamplePos_x;
 
 		// luma 4 sample edge DLF core
-		lumaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+		lumaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartFilteredSamplePtr,
 			reconLumaPicStride,
 			EB_TRUE,
@@ -1296,7 +1296,7 @@ void Luma8x8blkDLFCore16bit(
 		edgeStartFilteredSamplePtr = (EB_U16*)reconPic->bufferY + reconPic->originX + reconPic->originY * reconPic->strideY + centerSamplePos_y  * reconLumaPicStride + centerSamplePos_x;
 
 		// luma 4 sample edge DLF core
-		lumaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+		lumaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartFilteredSamplePtr,
 			reconLumaPicStride,
 			EB_TRUE,
@@ -1338,7 +1338,7 @@ void Luma8x8blkDLFCore16bit(
 		edgeStartFilteredSamplePtr = (EB_U16*)reconPic->bufferY + reconPic->originX + reconPic->originY * reconPic->strideY + centerSamplePos_y * reconLumaPicStride + (centerSamplePos_x - 4);
 
 		// luma 4 sample edge DLF core
-		lumaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+		lumaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartFilteredSamplePtr,
 			reconLumaPicStride,
 			EB_FALSE,
@@ -1379,7 +1379,7 @@ void Luma8x8blkDLFCore16bit(
 		edgeStartFilteredSamplePtr = (EB_U16*)reconPic->bufferY + reconPic->originX + reconPic->originY * reconPic->strideY + centerSamplePos_y * reconLumaPicStride + centerSamplePos_x;
 
 		// luma 4 sample edge DLF core
-		lumaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+		lumaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartFilteredSamplePtr,
 			reconLumaPicStride,
 			EB_FALSE,
@@ -1479,7 +1479,7 @@ static void chroma8x8blkDLFCore(
 		edgeStartSampleCb = reconPic->bufferCb + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCb + (centerSamplePos_y - 4) * reconChromaPicStride + centerSamplePos_x;
 		edgeStartSampleCr = reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + (centerSamplePos_y - 4) * reconChromaPicStride + centerSamplePos_x;
 
-		Chroma2SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+		Chroma2SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartSampleCb,
 			edgeStartSampleCr,
 			reconChromaPicStride,
@@ -1522,7 +1522,7 @@ static void chroma8x8blkDLFCore(
 		edgeStartSampleCr = reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + (centerSamplePos_y - 2) * reconChromaPicStride + centerSamplePos_x;
 
 
-		Chroma2SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+		Chroma2SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartSampleCb,
 			edgeStartSampleCr,
 			reconChromaPicStride,
@@ -1568,7 +1568,7 @@ static void chroma8x8blkDLFCore(
 		edgeStartSampleCr = reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + centerSamplePos_y * reconChromaPicStride + centerSamplePos_x;
 
 
-		Chroma2SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+		Chroma2SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartSampleCb,
 			edgeStartSampleCr,
 			reconChromaPicStride,
@@ -1611,7 +1611,7 @@ static void chroma8x8blkDLFCore(
 		edgeStartSampleCb = reconPic->bufferCb + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCb + (centerSamplePos_y + 2) * reconChromaPicStride + centerSamplePos_x;
 		edgeStartSampleCr = reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + (centerSamplePos_y + 2) * reconChromaPicStride + centerSamplePos_x;
 
-		Chroma2SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+		Chroma2SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartSampleCb,
 			edgeStartSampleCr,
 			reconChromaPicStride,
@@ -1654,7 +1654,7 @@ static void chroma8x8blkDLFCore(
 		edgeStartSampleCb = reconPic->bufferCb + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCb + centerSamplePos_y * reconChromaPicStride + (centerSamplePos_x - 4);
 		edgeStartSampleCr = reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + centerSamplePos_y * reconChromaPicStride + (centerSamplePos_x - 4);
 
-		Chroma2SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+		Chroma2SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartSampleCb,
 			edgeStartSampleCr,
 			reconChromaPicStride,
@@ -1697,7 +1697,7 @@ static void chroma8x8blkDLFCore(
 		edgeStartSampleCb = reconPic->bufferCb + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCb + centerSamplePos_y * reconChromaPicStride + (centerSamplePos_x - 2);
 		edgeStartSampleCr = reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + centerSamplePos_y * reconChromaPicStride + (centerSamplePos_x - 2);
 
-		Chroma2SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+		Chroma2SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartSampleCb,
 			edgeStartSampleCr,
 			reconChromaPicStride,
@@ -1741,7 +1741,7 @@ static void chroma8x8blkDLFCore(
 		edgeStartSampleCb = reconPic->bufferCb + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCb + centerSamplePos_y * reconChromaPicStride + centerSamplePos_x;
 		edgeStartSampleCr = reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + centerSamplePos_y * reconChromaPicStride + centerSamplePos_x;
 
-		Chroma2SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+		Chroma2SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartSampleCb,
 			edgeStartSampleCr,
 			reconChromaPicStride,
@@ -1784,7 +1784,7 @@ static void chroma8x8blkDLFCore(
 		edgeStartSampleCb = reconPic->bufferCb + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCb + centerSamplePos_y * reconChromaPicStride + (centerSamplePos_x + 2);
 		edgeStartSampleCr = reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + centerSamplePos_y * reconChromaPicStride + (centerSamplePos_x + 2);
 
-		Chroma2SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+		Chroma2SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartSampleCb,
 			edgeStartSampleCr,
 			reconChromaPicStride,
@@ -1862,7 +1862,7 @@ static void chroma8x8blkDLFCore16bit(
         edgeStartSampleCb = (EB_U16*)reconPic->bufferCb + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCb + (centerSamplePos_y - 4) * reconChromaPicStride + centerSamplePos_x;
         edgeStartSampleCr = (EB_U16*)reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + (centerSamplePos_y - 4) * reconChromaPicStride + centerSamplePos_x;
 
-		chromaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+		chromaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartSampleCb,
 			edgeStartSampleCr,
 			reconChromaPicStride,
@@ -1909,7 +1909,7 @@ static void chroma8x8blkDLFCore16bit(
 		edgeStartSampleCb = (EB_U16*)reconPic->bufferCb + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCb + (centerSamplePos_y - 2) * reconChromaPicStride + centerSamplePos_x;
 		edgeStartSampleCr = (EB_U16*)reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + (centerSamplePos_y - 2) * reconChromaPicStride + centerSamplePos_x;
 
-		chromaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+		chromaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartSampleCb,
 			edgeStartSampleCr,
 			reconChromaPicStride,
@@ -1959,7 +1959,7 @@ static void chroma8x8blkDLFCore16bit(
 		edgeStartSampleCb = (EB_U16*)reconPic->bufferCb + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCb + centerSamplePos_y * reconChromaPicStride + centerSamplePos_x;
 		edgeStartSampleCr = (EB_U16*)reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + centerSamplePos_y * reconChromaPicStride + centerSamplePos_x;
 
-		chromaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+		chromaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartSampleCb,
 			edgeStartSampleCr,
 			reconChromaPicStride,
@@ -2006,7 +2006,7 @@ static void chroma8x8blkDLFCore16bit(
 		edgeStartSampleCr = (EB_U16*)reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + (centerSamplePos_y + 2) * reconChromaPicStride + centerSamplePos_x;
 
 
-		chromaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+		chromaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartSampleCb,
 			edgeStartSampleCr,
 			reconChromaPicStride,
@@ -2055,7 +2055,7 @@ static void chroma8x8blkDLFCore16bit(
 		edgeStartSampleCb = (EB_U16*)reconPic->bufferCb + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCb + centerSamplePos_y * reconChromaPicStride + (centerSamplePos_x - 4);
 		edgeStartSampleCr = (EB_U16*)reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + centerSamplePos_y * reconChromaPicStride + (centerSamplePos_x - 4);
 
-		chromaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+		chromaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartSampleCb,
 			edgeStartSampleCr,
 			reconChromaPicStride,
@@ -2103,7 +2103,7 @@ static void chroma8x8blkDLFCore16bit(
 		edgeStartSampleCr = (EB_U16*)reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + centerSamplePos_y * reconChromaPicStride + (centerSamplePos_x - 2);
 
 
-		chromaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+		chromaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartSampleCb,
 			edgeStartSampleCr,
 			reconChromaPicStride,
@@ -2152,7 +2152,7 @@ static void chroma8x8blkDLFCore16bit(
 		edgeStartSampleCr = (EB_U16*)reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + centerSamplePos_y * reconChromaPicStride + centerSamplePos_x;
 
 
-		chromaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+		chromaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartSampleCb,
 			edgeStartSampleCr,
 			reconChromaPicStride,
@@ -2199,7 +2199,7 @@ static void chroma8x8blkDLFCore16bit(
 		edgeStartSampleCb = (EB_U16*)reconPic->bufferCb + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCb + centerSamplePos_y * reconChromaPicStride + (centerSamplePos_x + 2);
 		edgeStartSampleCr = (EB_U16*)reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + centerSamplePos_y * reconChromaPicStride + (centerSamplePos_x + 2);
 
-		chromaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+		chromaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 			edgeStartSampleCb,
 			edgeStartSampleCr,
 			reconChromaPicStride,
@@ -2326,7 +2326,7 @@ EB_ERRORTYPE LCUInternalAreaDLFCore(
 				edgeStartFilteredSamplePtr = reconpicture->bufferY + reconpicture->originX + reconpicture->originY * reconpicture->strideY + (fourSampleEdgeStartSamplePos_y + lcuPos_y) * reconpicture->strideY + fourSampleEdgeStartSamplePos_x + lcuPos_x;
 
 				// 4 sample edge DLF core
-				Luma4SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+				Luma4SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 					edgeStartFilteredSamplePtr,
 					reconpicture->strideY,
 					EB_TRUE,
@@ -2377,7 +2377,7 @@ EB_ERRORTYPE LCUInternalAreaDLFCore(
 				edgeStartFilteredSamplePtr = reconpicture->bufferY + reconpicture->originX + reconpicture->originY * reconpicture->strideY + (fourSampleEdgeStartSamplePos_y + lcuPos_y) * reconpicture->strideY + fourSampleEdgeStartSamplePos_x + lcuPos_x;
 
 				// 4 sample edge DLF core
-				Luma4SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+				Luma4SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 					edgeStartFilteredSamplePtr,
 					reconpicture->strideY,
 					EB_FALSE,
@@ -2432,7 +2432,7 @@ EB_ERRORTYPE LCUInternalAreaDLFCore(
 				edgeStartSampleCb = reconpicture->bufferCb + (reconpicture->originX >> subWidthCMinus1) + (reconpicture->originY >> subHeightCMinus1) * reconpicture->strideCb + (twoSampleEdgeStartSamplePos_y + chromaLcuPos_y) * reconpicture->strideCb + (twoSampleEdgeStartSamplePos_x + chromaLcuPos_x);
 				edgeStartSampleCr = reconpicture->bufferCr + (reconpicture->originX >> subWidthCMinus1) + (reconpicture->originY >> subHeightCMinus1) * reconpicture->strideCr + (twoSampleEdgeStartSamplePos_y + chromaLcuPos_y) * reconpicture->strideCr + (twoSampleEdgeStartSamplePos_x + chromaLcuPos_x);
 
-				Chroma2SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+				Chroma2SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 					edgeStartSampleCb,
 					edgeStartSampleCr,
 					reconpicture->strideCb,
@@ -2488,7 +2488,7 @@ EB_ERRORTYPE LCUInternalAreaDLFCore(
 				edgeStartSampleCb = reconpicture->bufferCb + (reconpicture->originX >> subWidthCMinus1) + (reconpicture->originY >> subHeightCMinus1) * reconpicture->strideCb + (twoSampleEdgeStartSamplePos_y + chromaLcuPos_y) * reconpicture->strideCb + (twoSampleEdgeStartSamplePos_x + chromaLcuPos_x);
 				edgeStartSampleCr = reconpicture->bufferCr + (reconpicture->originX >> subWidthCMinus1) + (reconpicture->originY >> subHeightCMinus1) * reconpicture->strideCr + (twoSampleEdgeStartSamplePos_y + chromaLcuPos_y) * reconpicture->strideCr + (twoSampleEdgeStartSamplePos_x + chromaLcuPos_x);
 
-				Chroma2SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+				Chroma2SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 					edgeStartSampleCb,
 					edgeStartSampleCr,
 					reconpicture->strideCb,
@@ -2629,7 +2629,7 @@ EB_ERRORTYPE LCUInternalAreaDLFCore16bit(
 				edgeStartFilteredSamplePtr = (EB_U16*)reconpicture->bufferY + reconpicture->originX + reconpicture->originY * reconpicture->strideY + (fourSampleEdgeStartSamplePos_y + lcuPos_y) * reconpicture->strideY + fourSampleEdgeStartSamplePos_x + lcuPos_x;
 
 				// 4 sample edge DLF core
-				lumaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+				lumaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 					edgeStartFilteredSamplePtr,
 					reconpicture->strideY,
 					EB_TRUE,
@@ -2684,7 +2684,7 @@ EB_ERRORTYPE LCUInternalAreaDLFCore16bit(
 				edgeStartFilteredSamplePtr = (EB_U16*)reconpicture->bufferY + reconpicture->originX + reconpicture->originY * reconpicture->strideY + (fourSampleEdgeStartSamplePos_y + lcuPos_y) * reconpicture->strideY + fourSampleEdgeStartSamplePos_x + lcuPos_x;
 
 				// 4 sample edge DLF core
-				lumaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+				lumaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 					edgeStartFilteredSamplePtr,
 					reconpicture->strideY,
 					EB_FALSE,
@@ -2743,7 +2743,7 @@ EB_ERRORTYPE LCUInternalAreaDLFCore16bit(
 				edgeStartSampleCr = (EB_U16*)reconpicture->bufferCr + (reconpicture->originX >> subWidthCMinus1) + (reconpicture->originY >> subHeightCMinus1) * reconpicture->strideCr + (twoSampleEdgeStartSamplePos_y + chromaLcuPos_y) * reconpicture->strideCr + (twoSampleEdgeStartSamplePos_x + chromaLcuPos_x);
 
 
-				chromaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+				chromaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 					edgeStartSampleCb,
 					edgeStartSampleCr,
 					reconpicture->strideCb,
@@ -2802,7 +2802,7 @@ EB_ERRORTYPE LCUInternalAreaDLFCore16bit(
 				edgeStartSampleCb = (EB_U16*)reconpicture->bufferCb + (reconpicture->originX >> subWidthCMinus1) + (reconpicture->originY >> subHeightCMinus1) * reconpicture->strideCb + (twoSampleEdgeStartSamplePos_y + chromaLcuPos_y) * reconpicture->strideCb + (twoSampleEdgeStartSamplePos_x + chromaLcuPos_x);
 				edgeStartSampleCr = (EB_U16*)reconpicture->bufferCr + (reconpicture->originX >> subWidthCMinus1) + (reconpicture->originY >> subHeightCMinus1) * reconpicture->strideCr + (twoSampleEdgeStartSamplePos_y + chromaLcuPos_y) * reconpicture->strideCr + (twoSampleEdgeStartSamplePos_x + chromaLcuPos_x);
 
-				chromaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+				chromaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 					edgeStartSampleCb,
 					edgeStartSampleCr,
 					reconpicture->strideCb,
@@ -3624,7 +3624,7 @@ void LCUPictureEdgeDLFCore(
 				edgeStartFilteredSamplePtr = reconPic->bufferY + reconPic->originX + reconPic->originY * reconPic->strideY + fourSampleEdgeStartSamplePos_y * reconPic->strideY + fourSampleEdgeStartSamplePos_x;
 
 				// 4 sample luma edge filter core
-				Luma4SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+				Luma4SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 					edgeStartFilteredSamplePtr,
 					reconPic->strideY,
 					EB_FALSE,
@@ -3684,7 +3684,7 @@ void LCUPictureEdgeDLFCore(
 					edgeStartSampleCb = reconPic->bufferCb + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCb + fourSampleEdgeStartSamplePos_y * reconPic->strideCb + fourSampleEdgeStartSamplePos_x;
 					edgeStartSampleCr = reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + fourSampleEdgeStartSamplePos_y * reconPic->strideCr + fourSampleEdgeStartSamplePos_x;
 
-					Chroma2SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+					Chroma2SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 						edgeStartSampleCb,
 						edgeStartSampleCr,
 						reconPic->strideCb,
@@ -3733,7 +3733,7 @@ void LCUPictureEdgeDLFCore(
 					edgeStartSampleCb = reconPic->bufferCb + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCb + fourSampleEdgeStartSamplePos_y * reconPic->strideCb + (fourSampleEdgeStartSamplePos_x + 2);
 					edgeStartSampleCr = reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + fourSampleEdgeStartSamplePos_y * reconPic->strideCr + (fourSampleEdgeStartSamplePos_x + 2);
 
-					Chroma2SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+					Chroma2SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 						edgeStartSampleCb,
 						edgeStartSampleCr,
 						reconPic->strideCb,
@@ -3793,7 +3793,7 @@ void LCUPictureEdgeDLFCore(
 				edgeStartFilteredSamplePtr = reconPic->bufferY + reconPic->originX + reconPic->originY * reconPic->strideY + fourSampleEdgeStartSamplePos_y * reconPic->strideY + fourSampleEdgeStartSamplePos_x;
 
 				// 4 sample edge luma filter core
-				Luma4SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+				Luma4SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 					edgeStartFilteredSamplePtr,
 					reconPic->strideY,
 					EB_TRUE,
@@ -3855,7 +3855,7 @@ void LCUPictureEdgeDLFCore(
 					edgeStartSampleCr = reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + fourSampleEdgeStartSamplePos_y * reconPic->strideCr + fourSampleEdgeStartSamplePos_x;
 
 
-					Chroma2SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+					Chroma2SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 						edgeStartSampleCb,
 						edgeStartSampleCr,
 						reconPic->strideCb,
@@ -3903,7 +3903,7 @@ void LCUPictureEdgeDLFCore(
 					edgeStartSampleCr = reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + (fourSampleEdgeStartSamplePos_y + 2) * reconPic->strideCr + fourSampleEdgeStartSamplePos_x;
 
 
-					Chroma2SampleEdgeDLFCore_Table[(ASM_TYPES & PREAVX2_MASK) && 1](
+					Chroma2SampleEdgeDLFCore_Table[!!(ASM_TYPES & PREAVX2_MASK)](
 						edgeStartSampleCb,
 						edgeStartSampleCr,
 						reconPic->strideCb,
@@ -4033,7 +4033,7 @@ void LCUPictureEdgeDLFCore16bit(
 				edgeStartFilteredSamplePtr = (EB_U16*)reconPic->bufferY + reconPic->originX + reconPic->originY * reconPic->strideY + fourSampleEdgeStartSamplePos_y * reconPic->strideY + fourSampleEdgeStartSamplePos_x;
 
 				// 4 sample luma edge filter core
-				lumaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+				lumaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 					edgeStartFilteredSamplePtr,
 					reconPic->strideY,
 					EB_FALSE,
@@ -4096,7 +4096,7 @@ void LCUPictureEdgeDLFCore16bit(
 					edgeStartSampleCb = ((EB_U16*)reconPic->bufferCb) + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCb + fourSampleEdgeStartSamplePos_y * reconPic->strideCb + fourSampleEdgeStartSamplePos_x;
 					edgeStartSampleCr = ((EB_U16*)reconPic->bufferCr) + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + fourSampleEdgeStartSamplePos_y * reconPic->strideCr + fourSampleEdgeStartSamplePos_x;
 
-					chromaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+					chromaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 						edgeStartSampleCb,
 						edgeStartSampleCr,
 						reconPic->strideCb,
@@ -4149,7 +4149,7 @@ void LCUPictureEdgeDLFCore16bit(
 					edgeStartSampleCb = ((EB_U16*)reconPic->bufferCb) + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCb + fourSampleEdgeStartSamplePos_y * reconPic->strideCb + (fourSampleEdgeStartSamplePos_x + 2);
 					edgeStartSampleCr = ((EB_U16*)reconPic->bufferCr) + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + fourSampleEdgeStartSamplePos_y * reconPic->strideCr + (fourSampleEdgeStartSamplePos_x + 2);
 
-					chromaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+					chromaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 						edgeStartSampleCb,
 						edgeStartSampleCr,
 						reconPic->strideCb,
@@ -4211,7 +4211,7 @@ void LCUPictureEdgeDLFCore16bit(
 				edgeStartFilteredSamplePtr = (EB_U16*)reconPic->bufferY + reconPic->originX + reconPic->originY * reconPic->strideY + fourSampleEdgeStartSamplePos_y * reconPic->strideY + fourSampleEdgeStartSamplePos_x;
 
 				// 4 sample edge luma filter core
-				lumaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+				lumaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 					edgeStartFilteredSamplePtr,
 					reconPic->strideY,
 					EB_TRUE,
@@ -4274,7 +4274,7 @@ void LCUPictureEdgeDLFCore16bit(
 					edgeStartSampleCr = (EB_U16*)reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + fourSampleEdgeStartSamplePos_y * reconPic->strideCr + fourSampleEdgeStartSamplePos_x;
 
 
-					chromaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+					chromaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 						edgeStartSampleCb,
 						edgeStartSampleCr,
 						reconPic->strideCb,
@@ -4325,7 +4325,7 @@ void LCUPictureEdgeDLFCore16bit(
 					edgeStartSampleCb = (EB_U16*)reconPic->bufferCb + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCb + (fourSampleEdgeStartSamplePos_y + 2) * reconPic->strideCb + fourSampleEdgeStartSamplePos_x;
 					edgeStartSampleCr = (EB_U16*)reconPic->bufferCr + (reconPic->originX >> subWidthCMinus1) + (reconPic->originY >> subHeightCMinus1) * reconPic->strideCr + (fourSampleEdgeStartSamplePos_y + 2) * reconPic->strideCr + fourSampleEdgeStartSamplePos_x;
 
-					chromaDlf_funcPtrArray16bit[(ASM_TYPES & PREAVX2_MASK) && 1](
+					chromaDlf_funcPtrArray16bit[!!(ASM_TYPES & PREAVX2_MASK)](
 						edgeStartSampleCb,
 						edgeStartSampleCr,
 						reconPic->strideCb,
