@@ -286,7 +286,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
         }
 
 
-        SaoFunctionTableEO_0_90[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
+        SaoFunctionTableEO_0_90[!!(ASM_TYPES & PREAVX2_MASK)][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
             reconSamplePtr,
             reconStride,
             temporalBufferLeft,
@@ -326,7 +326,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
                 tmp[i] = reconSamplePtr[i + reconStride*(lcuHeight - 1)];
             }
         }
-        SaoFunctionTableEO_0_90[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
+        SaoFunctionTableEO_0_90[!!(ASM_TYPES & PREAVX2_MASK)][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
             reconSamplePtr,
             reconStride,
             temporalBufferUpper,
@@ -382,7 +382,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
             }
         }
 
-        SaoFunctionTableEO_135_45[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 3][(lcuHeight == MAX_LCU_SIZE_REMAINING) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
+        SaoFunctionTableEO_135_45[!!(ASM_TYPES & PREAVX2_MASK)][(saoPtr->saoTypeIndex[isChroma]) - 3][(lcuHeight == MAX_LCU_SIZE_REMAINING) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
             reconSamplePtr,
             reconStride,
             temporalBufferLeft,
@@ -448,7 +448,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
             }
         }
 
-        SaoFunctionTableEO_135_45[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 3][(lcuHeight == MAX_LCU_SIZE_REMAINING) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
+        SaoFunctionTableEO_135_45[!!(ASM_TYPES & PREAVX2_MASK)][(saoPtr->saoTypeIndex[isChroma]) - 3][(lcuHeight == MAX_LCU_SIZE_REMAINING) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
             reconSamplePtr,
             reconStride,
             temporalBufferLeft,
@@ -483,7 +483,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
 
     case 5: // BO
 
-        SaoFunctionTableBo[(ASM_TYPES & PREAVX2_MASK) && 1][((lcuWidth & 15) == 0 && (lcuHeight != MAX_LCU_SIZE_REMAINING))](
+        SaoFunctionTableBo[!!(ASM_TYPES & PREAVX2_MASK)][((lcuWidth & 15) == 0 && (lcuHeight != MAX_LCU_SIZE_REMAINING))](
             reconSamplePtr,
             reconStride,
             saoPtr->saoBandPosition[videoComponent],
@@ -813,7 +813,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
         }
 
 
-        SaoFunctionTableEO_0_90_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
+        SaoFunctionTableEO_0_90_16bit[!!(ASM_TYPES & PREAVX2_MASK)][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
             reconSamplePtr,
             reconStride,
             temporalBufferLeft,
@@ -854,7 +854,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
             }
         }
 
-        SaoFunctionTableEO_0_90_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
+        SaoFunctionTableEO_0_90_16bit[!!(ASM_TYPES & PREAVX2_MASK)][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
             reconSamplePtr,
             reconStride,
             temporalBufferUpper,
@@ -910,7 +910,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
             }
         }
 
-        SaoFunctionTableEO_135_45_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 3][((lcuWidth & 15) == 0) && (lcuWidth >= 32) && ((lcuHeight & 7) == 0) && (lcuHeight >= 8)](
+        SaoFunctionTableEO_135_45_16bit[!!(ASM_TYPES & PREAVX2_MASK)][(saoPtr->saoTypeIndex[isChroma]) - 3][((lcuWidth & 15) == 0) && (lcuWidth >= 32) && ((lcuHeight & 7) == 0) && (lcuHeight >= 8)](
             reconSamplePtr,
             reconStride,
             temporalBufferLeft,
@@ -976,7 +976,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
             }
         }
 
-        SaoFunctionTableEO_135_45_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 3][((lcuWidth & 15) == 0) && (lcuWidth >= 32) && ((lcuHeight & 7) == 0) && (lcuHeight >= 8)](
+        SaoFunctionTableEO_135_45_16bit[!!(ASM_TYPES & PREAVX2_MASK)][(saoPtr->saoTypeIndex[isChroma]) - 3][((lcuWidth & 15) == 0) && (lcuWidth >= 32) && ((lcuHeight & 7) == 0) && (lcuHeight >= 8)](
             reconSamplePtr,
             reconStride,
             temporalBufferLeft,
@@ -1011,7 +1011,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
 
     case 5: // BO
 
-        SaoFunctionTableBo_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][((lcuWidth & 15) == 0)](
+        SaoFunctionTableBo_16bit[!!(ASM_TYPES & PREAVX2_MASK)][((lcuWidth & 15) == 0)](
             reconSamplePtr,
             reconStride,
             saoPtr->saoBandPosition[videoComponent],

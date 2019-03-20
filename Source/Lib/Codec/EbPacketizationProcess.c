@@ -295,6 +295,7 @@ void* PacketizationKernel(void *inputPtr)
 						NAL_UNIT_INVALID);
                 }
 
+
         // Bitstream Written Loop
         // This loop writes the result of entropy coding into the bitstream
         {

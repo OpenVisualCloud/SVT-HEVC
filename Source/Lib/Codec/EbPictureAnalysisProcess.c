@@ -253,89 +253,89 @@ EB_U64 ComputeVariance32x32(
 	// (0,0)
 	blockIndex = inputLumaOriginIndex;
 
-	meanOf8x8Blocks[0] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[0] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[0] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[0] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	// (0,1)
 	blockIndex = blockIndex + 8;
-	meanOf8x8Blocks[1] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[1] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[1] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[1] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	// (0,2)
 	blockIndex = blockIndex + 8;
-	meanOf8x8Blocks[2] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[2] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[2] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[2] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	// (0,3)
 	blockIndex = blockIndex + 8;
-	meanOf8x8Blocks[3] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[3] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[3] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[3] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	
 
 	// (1,0)
 	blockIndex = inputLumaOriginIndex + (inputPaddedPicturePtr->strideY << 3);
-	meanOf8x8Blocks[4] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[4] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[4] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[4] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	// (1,1)
 	blockIndex = blockIndex + 8;
-	meanOf8x8Blocks[5] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[5] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[5] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[5] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	// (1,2)
 	blockIndex = blockIndex + 8;
-	meanOf8x8Blocks[6] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[6] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[6] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[6] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	// (1,3)
 	blockIndex = blockIndex + 8;
-	meanOf8x8Blocks[7] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[7] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[7] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[7] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	
 
 	// (2,0)
 	blockIndex = inputLumaOriginIndex + (inputPaddedPicturePtr->strideY << 4);
-	meanOf8x8Blocks[8] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[8] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[8] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[8] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	// (2,1)
 	blockIndex = blockIndex + 8;
-	meanOf8x8Blocks[9] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[9] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[9] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[9] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	// (2,2)
 	blockIndex = blockIndex + 8;
-	meanOf8x8Blocks[10] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[10] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[10] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[10] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	// (2,3)
 	blockIndex = blockIndex + 8;
-	meanOf8x8Blocks[11] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[11] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[11] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[11] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	
 
 	// (3,0)
 	blockIndex = inputLumaOriginIndex + (inputPaddedPicturePtr->strideY << 3) + (inputPaddedPicturePtr->strideY << 4);
-	meanOf8x8Blocks[12] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[12] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[12] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[12] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	// (3,1)
 	blockIndex = blockIndex + 8;
-	meanOf8x8Blocks[13] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[13] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[13] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[13] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	// (3,2)
 	blockIndex = blockIndex + 8;
-	meanOf8x8Blocks[14] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[14] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[14] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[14] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	// (3,3)
 	blockIndex = blockIndex + 8;
-	meanOf8x8Blocks[15] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[15] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[15] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[15] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 
 	/////////////////////////////////////////////
@@ -396,23 +396,23 @@ EB_U64 ComputeVariance16x16(
 	// (0,0)
 	blockIndex = inputLumaOriginIndex;
 
-	meanOf8x8Blocks[0] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[0] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[0] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[0] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	// (0,1)
 	blockIndex = blockIndex + 8;
-	meanOf8x8Blocks[1] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[1] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[1] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[1] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	// (1,0)
 	blockIndex = inputLumaOriginIndex + (inputPaddedPicturePtr->strideY << 3);
-	meanOf8x8Blocks[2] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[2] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[2] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[2] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	// (1,1)
 	blockIndex = blockIndex + 8;
-	meanOf8x8Blocks[3] = ComputeMeanFunc[0][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
-	meanOf8x8SquaredValuesBlocks[3] = ComputeMeanFunc[1][(ASM_TYPES & AVX2_MASK) && 1](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8Blocks[3] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
+	meanOf8x8SquaredValuesBlocks[3] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
 	variance8x8[0] = meanOf8x8SquaredValuesBlocks[0] - (meanOf8x8Blocks[0] * meanOf8x8Blocks[0]);
 	variance8x8[1] = meanOf8x8SquaredValuesBlocks[1] - (meanOf8x8Blocks[1] * meanOf8x8Blocks[1]);
@@ -458,7 +458,7 @@ EB_U64 ComputeVariance64x64(
 	blockIndex = inputLumaOriginIndex;
 	const EB_U16 strideY = inputPaddedPicturePtr->strideY;
 
-    if ((ASM_TYPES & AVX2_MASK) && 1) {
+    if (!!(ASM_TYPES & AVX2_MASK)) {
 
         ComputeIntermVarFour8x8_AVX2_INTRIN(&(inputPaddedPicturePtr->bufferY[blockIndex]), strideY, &meanOf8x8Blocks[0], &meanOf8x8SquaredValuesBlocks[0]);
 
@@ -1863,7 +1863,7 @@ EB_ERRORTYPE ComputeBlockMeanComputeVariance(
 
     const EB_U16 strideY = inputPaddedPicturePtr->strideY;
 
-    if ((ASM_TYPES & AVX2_MASK) && 1){
+    if (!!(ASM_TYPES & AVX2_MASK)){
 
         ComputeIntermVarFour8x8_AVX2_INTRIN(&(inputPaddedPicturePtr->bufferY[blockIndex]), strideY, &meanOf8x8Blocks[0], &meanOf8x8SquaredValuesBlocks[0]);
 
@@ -2569,7 +2569,7 @@ EB_ERRORTYPE DenoiseInputPicture(
 
 
 			if (lcuOriginX == 0)
-				StrongLumaFilter_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+				StrongLumaFilter_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 				inputPicturePtr,
 				denoisedPicturePtr,
 				lcuOriginY,
@@ -2602,7 +2602,7 @@ EB_ERRORTYPE DenoiseInputPicture(
             lcuOriginY = lcuParams->originY;
 
 			if (lcuOriginX == 0)
-				StrongChromaFilter_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+				StrongChromaFilter_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 				inputPicturePtr,
 				denoisedPicturePtr,
 				lcuOriginY >> subHeightCMinus1,
@@ -2655,7 +2655,7 @@ EB_ERRORTYPE DenoiseInputPicture(
             lcuOriginY = lcuParams->originY;
 
 			if (lcuOriginX == 0)
-				WeakChromaFilter_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+				WeakChromaFilter_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 				inputPicturePtr,
 				denoisedPicturePtr,
 				lcuOriginY >> subHeightCMinus1,
@@ -2758,7 +2758,7 @@ EB_ERRORTYPE DetectInputPictureNoise(
 		EB_U32  noiseOriginIndex = noisePicturePtr->originX + lcuOriginX + noisePicturePtr->originY * noisePicturePtr->strideY;
 
 		if (lcuOriginX == 0)
-			WeakLumaFilter_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+			WeakLumaFilter_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 			inputPicturePtr,
 			denoisedPicturePtr,
 			noisePicturePtr,
@@ -2930,7 +2930,7 @@ EB_ERRORTYPE SubSampleFilterNoise(
             lcuOriginY = lcuParams->originY;
 
 			if (lcuOriginX == 0)
-				WeakLumaFilter_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+				WeakLumaFilter_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 				inputPicturePtr,
 				denoisedPicturePtr,
 				noisePicturePtr,
@@ -2964,7 +2964,7 @@ EB_ERRORTYPE SubSampleFilterNoise(
             lcuOriginY = lcuParams->originY;
 
 			if (lcuOriginX == 0)
-				WeakChromaFilter_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+				WeakChromaFilter_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 				inputPicturePtr,
 				denoisedPicturePtr,
 				lcuOriginY >> subHeightCMinus1,
@@ -3010,7 +3010,7 @@ EB_ERRORTYPE SubSampleFilterNoise(
 			if (lcuParams->isCompleteLcu && pictureControlSetPtr->lcuFlatNoiseArray[lcuIndex] == 1)
 			{
 
-				WeakLumaFilterLcu_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+				WeakLumaFilterLcu_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 					inputPicturePtr,
 					denoisedPicturePtr,
 					noisePicturePtr,
@@ -3131,7 +3131,7 @@ EB_ERRORTYPE QuarterSampleDetectNoise(
 			block64x64Y = vert64x64Index * 64;
 
 			if (block64x64X == 0)
-				WeakLumaFilter_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+				WeakLumaFilter_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 				quarterDecimatedPicturePtr,
 				denoisedPicturePtr,
 				noisePicturePtr,
@@ -3275,7 +3275,7 @@ EB_ERRORTYPE SubSampleDetectNoise(
 			block64x64Y = vert64x64Index * 64;
 
 			if (block64x64X == 0)
-				WeakLumaFilter_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+				WeakLumaFilter_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 				sixteenthDecimatedPicturePtr,
 				denoisedPicturePtr,
 				noisePicturePtr,
@@ -3599,7 +3599,7 @@ void SubSampleLumaGeneratePixelIntensityHistogramBins(
 
 
 			// Initialize bins to 1
-			InitializeBuffer_32bits_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1](pictureControlSetPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex][0], 64, 0, 1);
+			InitializeBuffer_32bits_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](pictureControlSetPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex][0], 64, 0, 1);
 
 			regionWidthOffset = (regionInPictureWidthIndex == sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerWidth - 1) ?
 				inputPicturePtr->width - (sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerWidth * regionWidth) :
@@ -3658,8 +3658,8 @@ void SubSampleChromaGeneratePixelIntensityHistogramBins(
 
 
             // Initialize bins to 1
-			InitializeBuffer_32bits_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1](pictureControlSetPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex][1], 64, 0, 1);
-			InitializeBuffer_32bits_funcPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1](pictureControlSetPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex][2], 64, 0, 1);
+			InitializeBuffer_32bits_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](pictureControlSetPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex][1], 64, 0, 1);
+			InitializeBuffer_32bits_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](pictureControlSetPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex][2], 64, 0, 1);
 
             regionWidthOffset = (regionInPictureWidthIndex == sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerWidth - 1) ?
                 inputPicturePtr->width - (sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerWidth * regionWidth) :
