@@ -94,7 +94,7 @@ void intraSearchTheseModesOutputBest(
         const EB_U32 puOriginIndex = (contextPtr->cuOriginY & 63) * 64 + (contextPtr->cuOriginX & 63);
 
         //Distortion
-        sadCurr  = (EB_U32)NxMSadKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][cuSize >> 3](
+        sadCurr  = (EB_U32)NxMSadKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][cuSize >> 3](
             src,
             srcStride,
             &(contextPtr->predictionBuffer->bufferY[puOriginIndex]),

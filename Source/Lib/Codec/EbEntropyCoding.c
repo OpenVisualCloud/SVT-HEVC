@@ -4094,7 +4094,7 @@ static EB_ERRORTYPE EncodeCoeff(
 	coeffBuffer = (EB_S16*)&coeffPtr->bufferY[coeffLocation * sizeof(EB_S16)];
 
 	if (tuPtr->lumaCbf) {
-		EncodeQuantizedCoefficientsFuncArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+		EncodeQuantizedCoefficientsFuncArray[!!(ASM_TYPES & PREAVX2_MASK)](
 			cabacEncodeCtxPtr,
 			tuSize,
 			(EB_MODETYPE)cuPtr->predictionModeFlag,
@@ -4116,7 +4116,7 @@ static EB_ERRORTYPE EncodeCoeff(
 
 	if (tuSize > 4){
 		if (tuPtr->cbCbf) {
-			EncodeQuantizedCoefficientsFuncArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+			EncodeQuantizedCoefficientsFuncArray[!!(ASM_TYPES & PREAVX2_MASK)](
 				cabacEncodeCtxPtr,
 				tuChromaSize,
 				(EB_MODETYPE)cuPtr->predictionModeFlag,
@@ -4131,7 +4131,7 @@ static EB_ERRORTYPE EncodeCoeff(
         if (cabacEncodeCtxPtr->colorFormat == EB_YUV422 && tuPtr->cbCbf2) {
             coeffLocation = (tuOriginX >> 1) + ((tuOriginY+tuChromaSize) * coeffPtr->strideCb);
 	        coeffBuffer = (EB_S16*)&coeffPtr->bufferCb[coeffLocation * sizeof(EB_S16)];
-			EncodeQuantizedCoefficientsFuncArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+			EncodeQuantizedCoefficientsFuncArray[!!(ASM_TYPES & PREAVX2_MASK)](
 				cabacEncodeCtxPtr,
 				tuChromaSize,
 				(EB_MODETYPE)cuPtr->predictionModeFlag,
@@ -4145,7 +4145,7 @@ static EB_ERRORTYPE EncodeCoeff(
 	} else if (tuPtr->tuIndex - ((tuPtr->tuIndex >> 2) << 2) == 0) {
         // Never be here
 		if (tuPtr->cbCbf) {
-			EncodeQuantizedCoefficientsFuncArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+			EncodeQuantizedCoefficientsFuncArray[!!(ASM_TYPES & PREAVX2_MASK)](
 				cabacEncodeCtxPtr,
 				tuChromaSize,
 				(EB_MODETYPE)cuPtr->predictionModeFlag,
@@ -4165,7 +4165,7 @@ static EB_ERRORTYPE EncodeCoeff(
 
 	if (tuSize > 4){
 		if (tuPtr->crCbf) {
-			EncodeQuantizedCoefficientsFuncArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+			EncodeQuantizedCoefficientsFuncArray[!!(ASM_TYPES & PREAVX2_MASK)](
 				cabacEncodeCtxPtr,
 				tuChromaSize,
 				(EB_MODETYPE)cuPtr->predictionModeFlag,
@@ -4180,7 +4180,7 @@ static EB_ERRORTYPE EncodeCoeff(
         if (cabacEncodeCtxPtr->colorFormat == EB_YUV422 && tuPtr->crCbf2) {
             coeffLocation = (tuOriginX >> 1) + ((tuOriginY+tuChromaSize) * coeffPtr->strideCr);
 	        coeffBuffer = (EB_S16*)&coeffPtr->bufferCr[coeffLocation * sizeof(EB_S16)];
-			EncodeQuantizedCoefficientsFuncArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+			EncodeQuantizedCoefficientsFuncArray[!!(ASM_TYPES & PREAVX2_MASK)](
 				cabacEncodeCtxPtr,
 				tuChromaSize,
 				(EB_MODETYPE)cuPtr->predictionModeFlag,
@@ -4195,7 +4195,7 @@ static EB_ERRORTYPE EncodeCoeff(
 	else if (tuPtr->tuIndex - ((tuPtr->tuIndex >> 2) << 2) == 0) {
 
 		if (tuPtr->crCbf) {
-			EncodeQuantizedCoefficientsFuncArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+			EncodeQuantizedCoefficientsFuncArray[!!(ASM_TYPES & PREAVX2_MASK)](
 				cabacEncodeCtxPtr,
 				tuChromaSize,
 				(EB_MODETYPE)cuPtr->predictionModeFlag,
@@ -6358,8 +6358,6 @@ static void CodePPS(
 	return;
 }
 
-#define DECODED_PICTURE_HASH 132
-
 static void CodeSliceHeader(
 	EB_U32         firstLcuAddr,
 	EB_U32         pictureQp,
@@ -6920,7 +6918,7 @@ static EB_ERRORTYPE Intra4x4EncodeLumaCoeff(
 			MIN_PU_SIZE,
 			&countNonZeroCoeffs);
 
-		EncodeQuantizedCoefficientsFuncArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+		EncodeQuantizedCoefficientsFuncArray[!!(ASM_TYPES & PREAVX2_MASK)](
 			cabacEncodeCtxPtr,
 			MIN_PU_SIZE,
 			(EB_MODETYPE)cuPtr->predictionModeFlag,
@@ -6968,7 +6966,7 @@ static EB_ERRORTYPE Intra4x4EncodeChromaCoeff(
                     MIN_PU_SIZE,
                     &countNonZeroCoeffs);
 
-            EncodeQuantizedCoefficientsFuncArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+            EncodeQuantizedCoefficientsFuncArray[!!(ASM_TYPES & PREAVX2_MASK)](
                     cabacEncodeCtxPtr,
                     MIN_PU_SIZE,
                     (EB_MODETYPE)cuPtr->predictionModeFlag,
@@ -6996,7 +6994,7 @@ static EB_ERRORTYPE Intra4x4EncodeChromaCoeff(
                     MIN_PU_SIZE,
                     &countNonZeroCoeffs);
 
-            EncodeQuantizedCoefficientsFuncArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+            EncodeQuantizedCoefficientsFuncArray[!!(ASM_TYPES & PREAVX2_MASK)](
                     cabacEncodeCtxPtr,
                     MIN_PU_SIZE,
                     (EB_MODETYPE)cuPtr->predictionModeFlag,
@@ -7677,7 +7675,7 @@ EB_ERRORTYPE TuEstimateCoeffBitsEncDec(
 
 		if (countNonZeroCoeffs[0]) {
 
-			EstimateQuantizedCoefficients[1][(ASM_TYPES & PREAVX2_MASK) && 1](
+			EstimateQuantizedCoefficients[1][!!(ASM_TYPES & PREAVX2_MASK)](
 				CabacCost,
 				cabacEncodeCtxPtr,
 				transformSize,
@@ -7701,7 +7699,7 @@ EB_ERRORTYPE TuEstimateCoeffBitsEncDec(
 
 		if (countNonZeroCoeffs[1]) {
 
-			EstimateQuantizedCoefficients[1][(ASM_TYPES & PREAVX2_MASK) && 1](
+			EstimateQuantizedCoefficients[1][!!(ASM_TYPES & PREAVX2_MASK)](
 				CabacCost,
 				cabacEncodeCtxPtr,
 				transformChromaSize,
@@ -7724,7 +7722,7 @@ EB_ERRORTYPE TuEstimateCoeffBitsEncDec(
 
 		if (countNonZeroCoeffs[2]) {
 
-			EstimateQuantizedCoefficients[1][(ASM_TYPES & PREAVX2_MASK) && 1](
+			EstimateQuantizedCoefficients[1][!!(ASM_TYPES & PREAVX2_MASK)](
 				CabacCost,
 				cabacEncodeCtxPtr,
 				transformChromaSize,
@@ -7772,7 +7770,7 @@ EB_ERRORTYPE TuEstimateCoeffBitsLuma(
 	if (yCountNonZeroCoeffs) {
 
         if(coeffCabacUpdate)
-            EstimateQuantizedCoefficientsUpdate[(ASM_TYPES & PREAVX2_MASK) && 1](
+            EstimateQuantizedCoefficientsUpdate[!!(ASM_TYPES & PREAVX2_MASK)](
                 updatedCoeffCtxModel,
                 CabacCost,
                 cabacEncodeCtxPtr,
@@ -7786,7 +7784,7 @@ EB_ERRORTYPE TuEstimateCoeffBitsLuma(
                 yCountNonZeroCoeffs,
                 yTuCoeffBits);
         else
-		    EstimateQuantizedCoefficients[1][(ASM_TYPES & PREAVX2_MASK) && 1](
+		    EstimateQuantizedCoefficients[1][!!(ASM_TYPES & PREAVX2_MASK)](
 			    CabacCost,
 			    cabacEncodeCtxPtr,
 			    (transformSize >> partialFrequencyN2Flag),
@@ -7848,7 +7846,7 @@ EB_ERRORTYPE TuEstimateCoeffBits_R(
 		if (yCountNonZeroCoeffs) {
 
 			if (coeffCabacUpdate)
-				EstimateQuantizedCoefficientsUpdate[(ASM_TYPES & PREAVX2_MASK) && 1](
+				EstimateQuantizedCoefficientsUpdate[!!(ASM_TYPES & PREAVX2_MASK)](
 					updatedCoeffCtxModel,
 					CabacCost,
 					cabacEncodeCtxPtr,
@@ -7864,7 +7862,7 @@ EB_ERRORTYPE TuEstimateCoeffBits_R(
 
             else
 
-			    EstimateQuantizedCoefficients[encoderModeIndex][(ASM_TYPES & PREAVX2_MASK) && 1](
+			    EstimateQuantizedCoefficients[encoderModeIndex][!!(ASM_TYPES & PREAVX2_MASK)](
 				    CabacCost,
 				    cabacEncodeCtxPtr,
 				    (transformSize >> partialFrequencyN2Flag),
@@ -7889,7 +7887,7 @@ EB_ERRORTYPE TuEstimateCoeffBits_R(
 		if (cbCountNonZeroCoeffs) {
 
 			if (coeffCabacUpdate)
-				EstimateQuantizedCoefficientsUpdate[(ASM_TYPES & PREAVX2_MASK) && 1](
+				EstimateQuantizedCoefficientsUpdate[!!(ASM_TYPES & PREAVX2_MASK)](
 					updatedCoeffCtxModel,
 					CabacCost,
 					cabacEncodeCtxPtr,
@@ -7904,7 +7902,7 @@ EB_ERRORTYPE TuEstimateCoeffBits_R(
 					cbTuCoeffBits);
             else
 
-			    EstimateQuantizedCoefficients[encoderModeIndex][(ASM_TYPES & PREAVX2_MASK) && 1](
+			    EstimateQuantizedCoefficients[encoderModeIndex][!!(ASM_TYPES & PREAVX2_MASK)](
 				    CabacCost,
 				    cabacEncodeCtxPtr,
 				    (transformChromaSize >> partialFrequencyN2Flag),
@@ -7929,7 +7927,7 @@ EB_ERRORTYPE TuEstimateCoeffBits_R(
 		if (crCountNonZeroCoeffs) {
 
             if (coeffCabacUpdate) 
-                EstimateQuantizedCoefficientsUpdate[(ASM_TYPES & PREAVX2_MASK) && 1](
+                EstimateQuantizedCoefficientsUpdate[!!(ASM_TYPES & PREAVX2_MASK)](
                     updatedCoeffCtxModel,
                     CabacCost,
                     cabacEncodeCtxPtr,
@@ -7945,7 +7943,7 @@ EB_ERRORTYPE TuEstimateCoeffBits_R(
 
             else
 
-			    EstimateQuantizedCoefficients[encoderModeIndex][(ASM_TYPES & PREAVX2_MASK) && 1](
+			    EstimateQuantizedCoefficients[encoderModeIndex][!!(ASM_TYPES & PREAVX2_MASK)](
 				    CabacCost,
 				    cabacEncodeCtxPtr,
                     (transformChromaSize >> partialFrequencyN2Flag),

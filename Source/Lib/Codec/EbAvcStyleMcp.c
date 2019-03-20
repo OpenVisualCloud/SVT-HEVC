@@ -213,7 +213,7 @@ void UniPredIFreeRef8Bit(
    if (componentMask & PICTURE_BUFFER_DESC_LUMA_MASK) 
    {
 	   //doing the luma interpolation
-       AvcStyleUniPredLumaIFFunctionPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][0](
+       AvcStyleUniPredLumaIFFunctionPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][0](
 		   refPic->bufferY + integPosx + integPosy*refPic->strideY, refPic->strideY,
 		   dst->bufferY + dstLumaIndex, lumaStride,
 		   puWidth, puHeight,
@@ -242,7 +242,7 @@ void UniPredIFreeRef8Bit(
         // Note: chromaPuWidth equals 4 is only supported in Intrinsic 
 	   //       for integer positions ( mappedFracPosx + (mappedFracPosy << 3) equals 0 )
 	   //doing the chroma Cb interpolation
-       AvcStyleUniPredLumaIFFunctionPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][0](
+       AvcStyleUniPredLumaIFFunctionPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][0](
 		   refPic->bufferCb + integPosx + integPosy*refPic->strideCb,
 		   refPic->strideCb,
 		   dst->bufferCb + dstChromaIndex,
@@ -253,7 +253,7 @@ void UniPredIFreeRef8Bit(
 		   mappedFracPosx ? mappedFracPosx : mappedFracPosy);
 
 	   //doing the chroma Cr interpolation
-       AvcStyleUniPredLumaIFFunctionPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][0](
+       AvcStyleUniPredLumaIFFunctionPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][0](
 		   refPic->bufferCr + integPosx + integPosy*refPic->strideCr,
 		   refPic->strideCr,
 		   dst->bufferCr + dstChromaIndex,
@@ -384,9 +384,9 @@ void BiPredIFreeRef8Bit(
 		if ( (fracPosL0 == 0) && (fracPosL1 == 0) )	 
 		{
 #ifndef NON_AVX512_SUPPORT
-			BiPredAverageKernel_funcPtrArray[(ASM_TYPES & AVX512_MASK) && 1 ](
+			BiPredAverageKernel_funcPtrArray[!!(ASM_TYPES & AVX512_MASK) ](
 #else
-            BiPredAverageKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+            BiPredAverageKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 #endif
 				refPicList0->bufferY + integPosL0x + integPosL0y * refLumaStride,
 				refLumaStride,
@@ -416,7 +416,7 @@ void BiPredIFreeRef8Bit(
 			integPosx += IntegerPosoffsetTabX[fracPos];
 			integPosy += IntegerPosoffsetTabY[fracPos];
 
-            AvcStyleUniPredLumaIFFunctionPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][0](
+            AvcStyleUniPredLumaIFFunctionPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][0](
 				refPicList0->bufferY + integPosx + integPosy*refLumaStride, refLumaStride,
 				refList0TempDst, puWidth,
 				puWidth, puHeight,
@@ -441,7 +441,7 @@ void BiPredIFreeRef8Bit(
 			integPosy += IntegerPosoffsetTabY[fracPos];
 
 			//doing the luma interpolation
-            AvcStyleUniPredLumaIFFunctionPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][0](
+            AvcStyleUniPredLumaIFFunctionPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][0](
 				refPicList1->bufferY + integPosx + integPosy*refLumaStride, refLumaStride,
 				refList1TempDst, puWidth,
 				puWidth, puHeight,
@@ -450,7 +450,7 @@ void BiPredIFreeRef8Bit(
 
 
 			// bi-pred luma
-			PictureAverageArray[(ASM_TYPES & PREAVX2_MASK) && 1](refList0TempDst, puWidth , refList1TempDst, puWidth , biDst->bufferY + dstLumaIndex, lumaStride , puWidth, puHeight );
+			PictureAverageArray[!!(ASM_TYPES & PREAVX2_MASK)](refList0TempDst, puWidth , refList1TempDst, puWidth , biDst->bufferY + dstLumaIndex, lumaStride , puWidth, puHeight );
 		}
 
 	}
@@ -496,9 +496,9 @@ void BiPredIFreeRef8Bit(
 		if ((fracPosL0 == 0) && (fracPosL1 == 0))
 		{
 #ifndef NON_AVX512_SUPPORT
-            BiPredAverageKernel_funcPtrArray[(ASM_TYPES & AVX512_MASK) && 1](
+            BiPredAverageKernel_funcPtrArray[!!(ASM_TYPES & AVX512_MASK)](
 #else
-            BiPredAverageKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+            BiPredAverageKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 #endif
 				refPicList0->bufferCb + integPosL0x + integPosL0y * refPicList0->strideCb,
 				refPicList0->strideCb,
@@ -510,9 +510,9 @@ void BiPredIFreeRef8Bit(
 				chromaPuHeight);
 
 #ifndef NON_AVX512_SUPPORT
-            BiPredAverageKernel_funcPtrArray[(ASM_TYPES & AVX512_MASK) && 1](
+            BiPredAverageKernel_funcPtrArray[!!(ASM_TYPES & AVX512_MASK)](
 #else
-            BiPredAverageKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
+            BiPredAverageKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 #endif
 				refPicList0->bufferCr + integPosL0x + integPosL0y * refPicList0->strideCr,
 				refPicList0->strideCr,
@@ -544,7 +544,7 @@ void BiPredIFreeRef8Bit(
 			if (fracPosy > 4)
 				integPosy++;
 
-            AvcStyleUniPredLumaIFFunctionPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][0](
+            AvcStyleUniPredLumaIFFunctionPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][0](
 				refPicList0->bufferCb + integPosx + integPosy*refPicList0->strideCb,
 				refPicList0->strideCb,
 				refList0TempDst,
@@ -569,7 +569,7 @@ void BiPredIFreeRef8Bit(
 			if (fracPosy > 4)
 				integPosy++;
 
-            AvcStyleUniPredLumaIFFunctionPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][0](
+            AvcStyleUniPredLumaIFFunctionPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][0](
 				refPicList1->bufferCb + integPosx + integPosy*refPicList1->strideCb,
 				refPicList1->strideCb,
 				refList1TempDst,
@@ -580,7 +580,7 @@ void BiPredIFreeRef8Bit(
 				mappedFracPosx ? mappedFracPosx : mappedFracPosy);
 
 			// bi-pred Chroma Cb
-			PictureAverageArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+			PictureAverageArray[!!(ASM_TYPES & PREAVX2_MASK)](
 				refList0TempDst,
 				chromaPuWidth << shift,
 				refList1TempDst,
@@ -609,7 +609,7 @@ void BiPredIFreeRef8Bit(
 			if (fracPosy > 4)
 				integPosy++;
 
-            AvcStyleUniPredLumaIFFunctionPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][0](
+            AvcStyleUniPredLumaIFFunctionPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][0](
 				refPicList0->bufferCr + integPosx + integPosy*refPicList0->strideCr,
 				refPicList0->strideCr,
 				refList0TempDst,
@@ -634,7 +634,7 @@ void BiPredIFreeRef8Bit(
 			if (fracPosy > 4)
 				integPosy++;
 
-            AvcStyleUniPredLumaIFFunctionPtrArray[(ASM_TYPES & PREAVX2_MASK) && 1][0](
+            AvcStyleUniPredLumaIFFunctionPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][0](
 				refPicList1->bufferCr + integPosx + integPosy*refPicList1->strideCr,
 				refPicList1->strideCr,
 				refList1TempDst,
@@ -645,7 +645,7 @@ void BiPredIFreeRef8Bit(
 				mappedFracPosx ? mappedFracPosx : mappedFracPosy);
 
 			// bi-pred Chroma Cr
-			PictureAverageArray[(ASM_TYPES & PREAVX2_MASK) && 1](
+			PictureAverageArray[!!(ASM_TYPES & PREAVX2_MASK)](
 				refList0TempDst,
 				chromaPuWidth << shift,
 				refList1TempDst,
