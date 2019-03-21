@@ -147,6 +147,8 @@ typedef struct EncodeContext_s
     EB_U32                               vbvMaxrate;
     EB_U32                               vbvBufsize;
     EB_U64                               bufferFill;
+    EB_S64                               fillerBitError;
+    EB_HANDLE                            fillerBitMutex;
     EB_HANDLE                            bufferFillMutex;
 
     EB_U32								 previousSelectedRefQp;

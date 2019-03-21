@@ -35,6 +35,8 @@ typedef struct PacketizationReorderEntry_s {
     Bitstream_t                     *bitStreamPtr2;
     Bitstream_t                     *bitStreamPtr3;
     EB_U32                          startSplicing;
+    EB_U32                          fillerBitsSent;
+    EB_U32                          fillerBitsFinal;
 } PacketizationReorderEntry_t;   
 
 extern EB_ERRORTYPE PacketizationReorderEntryCtor(   

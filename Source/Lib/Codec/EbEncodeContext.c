@@ -209,6 +209,7 @@ EB_ERRORTYPE EncodeContextCtor(
     encodeContextPtr->bufferFill                                        = 0;
     encodeContextPtr->vbvBufsize                                        = 0;
     encodeContextPtr->vbvMaxrate                                        = 0;
+    encodeContextPtr->fillerBitError                                    = 0;
 
     // Rate Control Bit Tables
     EB_MALLOC(RateControlTables_t*, encodeContextPtr->rateControlTablesArray, sizeof(RateControlTables_t) * TOTAL_NUMBER_OF_INITIAL_RC_TABLES_ENTRY, EB_N_PTR);
@@ -229,7 +230,7 @@ EB_ERRORTYPE EncodeContextCtor(
     encodeContextPtr->encMode = SPEED_CONTROL_INIT_MOD;
 
     EB_CREATEMUTEX(EB_HANDLE, encodeContextPtr->bufferFillMutex, sizeof(EB_HANDLE), EB_MUTEX);
-
+    EB_CREATEMUTEX(EB_HANDLE,encodeContextPtr->fillerBitMutex,sizeof(EB_HANDLE),EB_MUTEX)
     encodeContextPtr->previousSelectedRefQp = 32;
     encodeContextPtr->maxCodedPoc = 0;
     encodeContextPtr->maxCodedPocSelectedRefQp = 32;
