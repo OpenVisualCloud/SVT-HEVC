@@ -1,7 +1,7 @@
-From dee4d70593c7917a735f8bf74f12dd9067550354 Mon Sep 17 00:00:00 2001
+From 421c40a70a6bf1fa37085acca7297521508ca72a Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
-Subject: [PATCH v9 1/2] lavc/svt_hevc: add libsvt hevc encoder wrapper
+Subject: [PATCH 1/2] lavc/svt_hevc: add libsvt hevc encoder wrapper
 
 Signed-off-by: Zhengxu Huang <zhengxu.huang@intel.com>
 Signed-off-by: Hassene Tmar <hassene.tmar@intel.com>
@@ -11,8 +11,8 @@ Signed-off-by: Jing Sun <jing.a.sun@intel.com>
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 501 +++++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 507 insertions(+)
+ libavcodec/libsvt_hevc.c | 534 +++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 540 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
@@ -77,10 +77,10 @@ index b26aeca..e93f66f 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000..819979a
+index 0000000..c0f62e2
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,501 @@
+@@ -0,0 +1,534 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -225,8 +225,10 @@ index 0000000..819979a
 +    param->sourceHeight    = avctx->height;
 +    param->encoderBitDepth = 8;
 +
-+    if (avctx->pix_fmt == AV_PIX_FMT_YUV420P10LE) {
-+        av_log(avctx, AV_LOG_DEBUG , "Encoder 10 bits depth input\n");
++    if ((avctx->pix_fmt == AV_PIX_FMT_YUV420P10) ||
++        (avctx->pix_fmt == AV_PIX_FMT_YUV422P10) ||
++        (avctx->pix_fmt == AV_PIX_FMT_YUV444P10)) {
++        av_log(avctx, AV_LOG_DEBUG, "Encoder 10 bits depth input\n");
 +
 +        // Encoding the source frames of the compressed 10-bit format
 +        // supported by SVT-HEVC requires an extra conversion operation
@@ -235,7 +237,16 @@ index 0000000..819979a
 +        param->compressedTenBitFormat = 0;
 +        param->encoderBitDepth        = 10;
 +    }
-+    param->encoderColorFormat = EB_YUV420;
++
++    if ((avctx->pix_fmt == AV_PIX_FMT_YUV420P) ||
++        (avctx->pix_fmt == AV_PIX_FMT_YUV420P10))
++        param->encoderColorFormat = EB_YUV420;
++    else if ((avctx->pix_fmt == AV_PIX_FMT_YUV422P) ||
++             (avctx->pix_fmt == AV_PIX_FMT_YUV422P10))
++        param->encoderColorFormat = EB_YUV422;
++    else
++        param->encoderColorFormat = EB_YUV444;
++
 +
 +    // Update param from options
 +    param->hierarchicalLevels     = svt_enc->hierarchical_level - 1;
@@ -249,6 +260,17 @@ index 0000000..819979a
 +    param->baseLayerSwitchMode    = svt_enc->base_layer_switch_mode;
 +    param->qp                     = svt_enc->qp;
 +    param->accessUnitDelimiter    = svt_enc->aud;
++
++    if (param->profile == FF_PROFILE_HEVC_MAIN_STILL_PICTURE) {
++        av_log(avctx, AV_LOG_ERROR, "Main Still Picture Profile not supported!\n");
++        return EB_ErrorBadParameter;
++    }
++
++    if ((param->encoderColorFormat >= EB_YUV422) &&
++        (param->profile != FF_PROFILE_HEVC_REXT)) {
++        av_log(avctx, AV_LOG_WARNING, "Rext Profile forced for 422 or 444!\n");
++        param->profile = FF_PROFILE_HEVC_REXT;
++    }
 +
 +    param->targetBitRate          = avctx->bit_rate;
 +    if (avctx->gop_size > 0)
@@ -313,7 +335,14 @@ index 0000000..819979a
 +    in_data->cbStride = frame->linesize[1] >> is16bit;
 +    in_data->crStride = frame->linesize[2] >> is16bit;
 +
-+    header_ptr->nFilledLen   += luma_size * 3/2u;
++    if (config->encoderColorFormat == EB_YUV420)
++        luma_size *= 3/2u;
++    else if (config->encoderColorFormat == EB_YUV422)
++        luma_size *= 2u;
++    else
++        luma_size *= 3u;
++
++    header_ptr->nFilledLen += luma_size;
 +}
 +
 +static av_cold int eb_enc_init(AVCodecContext *avctx)
@@ -506,7 +535,7 @@ index 0000000..819979a
 +      OFFSET(enc_mode), AV_OPT_TYPE_INT, { .i64 = 9 }, 0, 12, VE },
 +
 +    { "profile", "Profile setting, Main Still Picture Profile not supported", OFFSET(profile),
-+      AV_OPT_TYPE_INT, { .i64 = FF_PROFILE_HEVC_MAIN_10 }, FF_PROFILE_HEVC_MAIN, FF_PROFILE_HEVC_MAIN_10, VE, "profile"},
++      AV_OPT_TYPE_INT, { .i64 = FF_PROFILE_HEVC_MAIN_10 }, FF_PROFILE_HEVC_MAIN, FF_PROFILE_HEVC_REXT, VE, "profile"},
 +
 +    { "tier", "Set tier (general_tier_flag)", OFFSET(tier),
 +      AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, VE, "tier" },
@@ -576,6 +605,10 @@ index 0000000..819979a
 +    .capabilities   = AV_CODEC_CAP_DELAY | AV_CODEC_CAP_AUTO_THREADS,
 +    .pix_fmts       = (const enum AVPixelFormat[]){ AV_PIX_FMT_YUV420P,
 +                                                    AV_PIX_FMT_YUV420P10,
++                                                    AV_PIX_FMT_YUV422P,
++                                                    AV_PIX_FMT_YUV420P10,
++                                                    AV_PIX_FMT_YUV444P,
++                                                    AV_PIX_FMT_YUV444P10,
 +                                                    AV_PIX_FMT_NONE },
 +    .priv_class     = &class,
 +    .defaults       = eb_enc_defaults,
