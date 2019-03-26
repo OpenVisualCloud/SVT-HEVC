@@ -113,7 +113,6 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     sequenceControlSetPtr->enableStrongIntraSmoothing                       = EB_TRUE;
     
     // Rate Control
-    sequenceControlSetPtr->rateControlMode                                  = 0; 
     sequenceControlSetPtr->targetBitrate                                    = 0x1000; 
     sequenceControlSetPtr->availableBandwidth                               = 0x1000;
     

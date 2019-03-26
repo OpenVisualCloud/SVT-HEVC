@@ -526,7 +526,35 @@ void* PictureManagerKernel(void *inputPtr)
             EbReleaseObject(inputPictureDemuxPtr->sequenceControlSetWrapperPtr);
                 
             break;
-            
+#if PACK_FEEDBACK
+        case EB_PIC_FEEDBACK:
+
+            sequenceControlSetPtr = (SequenceControlSet_t*)inputPictureDemuxPtr->sequenceControlSetWrapperPtr->objectPtr;
+            encodeContextPtr = sequenceControlSetPtr->encodeContextPtr;
+
+            referenceQueueIndex = encodeContextPtr->referencePictureQueueHeadIndex;
+            // Find the Reference in the Reference Queue
+            do {
+
+                referenceEntryPtr = encodeContextPtr->referencePictureQueue[referenceQueueIndex];
+
+                if (referenceEntryPtr->pictureNumber == inputPictureDemuxPtr->pictureNumber) {
+
+                    // Set the feedback arrived
+                    referenceEntryPtr->feedbackArrived = EB_TRUE;
+                }
+
+                // Increment the referenceQueueIndex Iterator
+                referenceQueueIndex = (referenceQueueIndex == REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : referenceQueueIndex + 1;
+
+            } while ((referenceQueueIndex != encodeContextPtr->referencePictureQueueTailIndex) && (referenceEntryPtr->pictureNumber != inputPictureDemuxPtr->pictureNumber));
+
+            //keep the relase of SCS here because we still need the encodeContext strucutre here
+            // Release the Reference's SequenceControlSet    
+            EbReleaseObject(inputPictureDemuxPtr->sequenceControlSetWrapperPtr);
+
+            break;
+#endif
         default:
            
             sequenceControlSetPtr   = (SequenceControlSet_t*) inputPictureDemuxPtr->sequenceControlSetWrapperPtr->objectPtr;
@@ -585,7 +613,7 @@ void* PictureManagerKernel(void *inputPtr)
                     availabilityFlag =
                         (availabilityFlag == EB_FALSE)          ? EB_FALSE  :   // Don't update if already False 
                         (refPoc > currentInputPoc)              ? EB_FALSE  :   // The Reference has not been received as an Input Picture yet, then its availability is false
-                        (!encodeContextPtr->terminatingSequenceFlagReceived && (sequenceControlSetPtr->staticConfig.rateControlMode && entryPictureControlSetPtr->sliceType != EB_I_PICTURE && entryPictureControlSetPtr->temporalLayerIndex == 0 && !referenceEntryPtr->feedbackArrived)) ? EB_FALSE :
+                        (!encodeContextPtr->terminatingSequenceFlagReceived && (entrySequenceControlSetPtr->staticConfig.rateControlMode && entryPictureControlSetPtr->sliceType != EB_I_PICTURE && entryPictureControlSetPtr->temporalLayerIndex == 0 && !referenceEntryPtr->feedbackArrived)) ? EB_FALSE :
                         (referenceEntryPtr->referenceAvailable) ? EB_TRUE   :   // The Reference has been completed
                                                                   EB_FALSE;     // The Reference has not been completed
                 }
@@ -622,7 +650,7 @@ void* PictureManagerKernel(void *inputPtr)
                             availabilityFlag =
                                 (availabilityFlag == EB_FALSE)          ? EB_FALSE  :   // Don't update if already False 
                                 (refPoc > currentInputPoc)              ? EB_FALSE  :   // The Reference has not been received as an Input Picture yet, then its availability is false
-                                (!encodeContextPtr->terminatingSequenceFlagReceived && (sequenceControlSetPtr->staticConfig.rateControlMode && entryPictureControlSetPtr->sliceType != EB_I_PICTURE && entryPictureControlSetPtr->temporalLayerIndex == 0 && !referenceEntryPtr->feedbackArrived)) ? EB_FALSE :
+                                (!encodeContextPtr->terminatingSequenceFlagReceived && (entrySequenceControlSetPtr->staticConfig.rateControlMode && entryPictureControlSetPtr->sliceType != EB_I_PICTURE && entryPictureControlSetPtr->temporalLayerIndex == 0 && !referenceEntryPtr->feedbackArrived)) ? EB_FALSE :
                                 (referenceEntryPtr->referenceAvailable) ? EB_TRUE   :   // The Reference has been completed
                                                                           EB_FALSE;     // The Reference has not been completed
                         }
@@ -718,7 +746,7 @@ void* PictureManagerKernel(void *inputPtr)
 					ChildPictureControlSetPtr->useDeltaQp = (EB_U8)(entrySequenceControlSetPtr->staticConfig.improveSharpness || entrySequenceControlSetPtr->staticConfig.bitRateReduction);
 
                     // Check resolution
-                    if (sequenceControlSetPtr->inputResolution < INPUT_SIZE_1080p_RANGE)
+                    if (entrySequenceControlSetPtr->inputResolution < INPUT_SIZE_1080p_RANGE)
                         ChildPictureControlSetPtr->difCuDeltaQpDepth = 2;
                     else
                         ChildPictureControlSetPtr->difCuDeltaQpDepth = 3;

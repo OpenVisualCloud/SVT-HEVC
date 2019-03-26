@@ -10,7 +10,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+#define PACK_FEEDBACK 1
 // Internal Marcos
 #define NON_AVX512_SUPPORT
 

@@ -90,7 +90,6 @@ typedef struct SequenceControlSet_s
     EB_U32                      generalFrameOnlyConstraintFlag;
     
     // Rate Control
-    EB_U32                      rateControlMode;
     EB_U32                      targetBitrate;
     EB_U32                      availableBandwidth;          
     
