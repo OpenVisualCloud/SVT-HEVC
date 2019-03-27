@@ -588,7 +588,6 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
         }
         EbReleaseMutex(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->configMutex);
-#if PACK_FEEDBACK
         if (sequenceControlSetPtr->staticConfig.rateControlMode) {
             // Sequence Control Set is released by Rate Control after passing through MDC->MD->ENCDEC->Packetization->RateControl
             //   ,in the PictureManager after receiving the reference and in PictureManager after receiving the feedback
@@ -604,13 +603,6 @@ void* ResourceCoordinationKernel(void *inputPtr)
                 2);
 
         }
-#else
-        // Sequence Control Set is released by Rate Control after passing through MDC->MD->ENCDEC->Packetization->RateControl
-        //   and in the PictureManager
-        EbObjectIncLiveCount(
-            contextPtr->sequenceControlSetActiveArray[instanceIndex],
-            2);
-#endif
         // Set the current SequenceControlSet
         sequenceControlSetPtr   = (SequenceControlSet_t*) contextPtr->sequenceControlSetActiveArray[instanceIndex]->objectPtr;
         

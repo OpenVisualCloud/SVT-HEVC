@@ -526,7 +526,6 @@ void* PictureManagerKernel(void *inputPtr)
             EbReleaseObject(inputPictureDemuxPtr->sequenceControlSetWrapperPtr);
                 
             break;
-#if PACK_FEEDBACK
         case EB_PIC_FEEDBACK:
 
             sequenceControlSetPtr = (SequenceControlSet_t*)inputPictureDemuxPtr->sequenceControlSetWrapperPtr->objectPtr;
@@ -550,7 +549,6 @@ void* PictureManagerKernel(void *inputPtr)
             EbReleaseObject(inputPictureDemuxPtr->sequenceControlSetWrapperPtr);
 
             break;
-#endif
         default:
            
             sequenceControlSetPtr   = (SequenceControlSet_t*) inputPictureDemuxPtr->sequenceControlSetWrapperPtr->objectPtr;
