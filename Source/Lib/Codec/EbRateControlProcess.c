@@ -1922,7 +1922,7 @@ void FrameLevelRcFeedbackPictureMode2(
                 EbBlockOnMutex(sequenceControlSetPtr->encodeContextPtr->fillerBitMutex);
                 rateControlParamPtr->virtualBufferLevel =
                     (EB_S64)rateControlParamPtr->previousVirtualBufferLevel +
-                    ((EB_S64)previousFrameBitActual + sequenceControlSetPtr->encodeContextPtr->fillerBitError) - (EB_S64)rateControlLayerPtr->channelBitRate;
+                    (EB_S64)previousFrameBitActual - (EB_S64)rateControlLayerPtr->channelBitRate;
                 contextPtr->extraBitsGen -= ((EB_S64)previousFrameBitActual + sequenceControlSetPtr->encodeContextPtr->fillerBitError) - (EB_S64)rateControlLayerPtr->channelBitRate;
                 EbReleaseMutex(sequenceControlSetPtr->encodeContextPtr->fillerBitMutex);
             }
