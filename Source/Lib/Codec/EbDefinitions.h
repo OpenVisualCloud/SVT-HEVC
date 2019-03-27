@@ -51,6 +51,17 @@ extern "C" {
     typedef int errno_t;
 #endif  /* _ERRNO_T_DEFINED */
 
+
+#define  TILES    1  //enable TILES.
+
+
+
+#if TILES
+#define EB_TILE_COLUMN_MAX_COUNT                    16
+#define EB_TILE_ROW_MAX_COUNT                       16
+#define EB_TILE_MAX_COUNT                           32
+#endif
+
 #define EB_MIN(a,b)             (((a) < (b)) ? (a) : (b))
 
 #ifdef _WIN32 

@@ -2094,6 +2094,11 @@ void CopyApiFromApp(
     sequenceControlSetPtr->qp = sequenceControlSetPtr->staticConfig.qp = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->qp;
     sequenceControlSetPtr->staticConfig.useQpFile = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->useQpFile;
 
+#if TILES
+    sequenceControlSetPtr->staticConfig.tileRowCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileRowCount;
+    sequenceControlSetPtr->staticConfig.tileColumnCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileColumnCount;
+#endif
+
     // Deblock Filter
     sequenceControlSetPtr->staticConfig.disableDlfFlag = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->disableDlfFlag;
 
@@ -2820,6 +2825,10 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->interlacedVideo = EB_FALSE;
     configPtr->qp = 32;
     configPtr->useQpFile = EB_FALSE;
+#if TILES    
+    configPtr->tileRowCount = 1;
+    configPtr->tileColumnCount = 1;
+#endif
     configPtr->sceneChangeDetection = 1;
     configPtr->rateControlMode = 0;
     configPtr->lookAheadDistance = (EB_U32)~0;

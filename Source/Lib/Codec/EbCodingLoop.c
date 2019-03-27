@@ -1830,6 +1830,10 @@ static void EncodePassUpdateQp(
     EB_U32                   difCuDeltaQpDepth,
     EB_U8                   *prevCodedQp,
     EB_U8                   *prevQuantGroupCodedQp,
+#if TILES
+    EB_U32                   tileOriginX,
+    EB_U32                   tileOriginY,
+#endif
     EB_U32                   lcuQp
     )
 {
@@ -1870,7 +1874,11 @@ static void EncodePassUpdateQp(
         *prevCodedQp = *prevQuantGroupCodedQp;
     }
 
+#if TILES
+    if ((quantGroupY > tileOriginY) && sameLcuCheckTop) {
+#else
     if (sameLcuCheckTop)  {
+#endif
         qpTopNeighborIndex =
             LUMA_SAMPLE_PIC_WISE_LOCATION_TO_QP_ARRAY_IDX(
             quantGroupX,
@@ -1882,7 +1890,11 @@ static void EncodePassUpdateQp(
         qpTopNeighbor = *prevCodedQp;
     }
 
+#if TILES
+    if ((quantGroupX > tileOriginX) && sameLcuCheckLeft) {
+#else
     if (sameLcuCheckLeft)  {
+#endif
         qpLeftNeighborIndex =
             LUMA_SAMPLE_PIC_WISE_LOCATION_TO_QP_ARRAY_IDX(
             quantGroupX - 1,
@@ -2406,8 +2418,8 @@ EB_ERRORTYPE EncQpmDeriveDeltaQPForEachLeafLcu(
 
         deltaQp -= contextPtr->grassEnhancementFlag ? 3 : 0;
 		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE)
-			deltaQp = ((deltaQp < 0 && sequenceControlSetPtr->staticConfig.bitRateReduction && !sequenceControlSetPtr->staticConfig.improveSharpness) ||
-				(deltaQp > 0 && sequenceControlSetPtr->staticConfig.improveSharpness && !sequenceControlSetPtr->staticConfig.bitRateReduction)) ? 0 : deltaQp;
+		deltaQp = ((deltaQp < 0 && sequenceControlSetPtr->staticConfig.bitRateReduction && !sequenceControlSetPtr->staticConfig.improveSharpness) ||
+			(deltaQp > 0 && sequenceControlSetPtr->staticConfig.improveSharpness && !sequenceControlSetPtr->staticConfig.bitRateReduction)) ? 0 : deltaQp;
 		else
 			deltaQp = (deltaQp > 0 && sequenceControlSetPtr->staticConfig.improveSharpness) ? 0 : deltaQp;
 		if (sequenceControlSetPtr->staticConfig.rateControlMode == 1 || sequenceControlSetPtr->staticConfig.rateControlMode == 2){
@@ -2903,7 +2915,7 @@ EB_EXTERN void EncodePass(
         (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag ||
         sequenceControlSetPtr->staticConfig.reconEnabled);
 
-    dlfEnableFlag = contextPtr->allowEncDecMismatch ? EB_FALSE : dlfEnableFlag;
+    dlfEnableFlag =  contextPtr->allowEncDecMismatch ? EB_FALSE : dlfEnableFlag;
 
     const EB_BOOL isIntraLCU = contextPtr->mdContext->limitIntra ? isIntraPresent(lcuPtr) : EB_TRUE;
 
@@ -3031,7 +3043,7 @@ EB_EXTERN void EncodePass(
 
 			cuPtr->qp = (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction) ? contextPtr->qpmQp : pictureControlSetPtr->pictureQp;
 			lcuPtr->qp = (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction) ? contextPtr->qpmQp : pictureControlSetPtr->pictureQp;
-			cuPtr->orgDeltaQp = cuPtr->deltaQp;
+            cuPtr->orgDeltaQp = cuPtr->deltaQp;
 
 			if (!contextPtr->skipQpmFlag &&
                     (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction) &&
@@ -3089,6 +3101,13 @@ EB_EXTERN void EncodePass(
                         epIntraLumaModeNeighborArray,
                         epModeTypeNeighborArray);
 
+
+#if TILES
+                    EB_BOOL  tileLeftBoundary = (lcuPtr->tileLeftEdgeFlag == EB_TRUE && ((contextPtr->cuOriginX & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+                    EB_BOOL  tileTopBoundary = (lcuPtr->tileTopEdgeFlag == EB_TRUE && ((contextPtr->cuOriginY & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+                    EB_BOOL  tileRightBoundary = (lcuPtr->tileRightEdgeFlag == EB_TRUE && (((contextPtr->cuOriginX + cuStats->size) & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+
+#endif
                     // Transform Loop (not supported)
                     {
                         // Generate Intra Reference Samples  
@@ -3107,10 +3126,15 @@ EB_EXTERN void EncodePass(
                                     epCrReconNeighborArray,
                                     is16bit ? (void*)contextPtr->intraRefPtr16 : (void*)contextPtr->intraRefPtr,
                                     colorFormat,
+#if TILES
+                                    tileLeftBoundary, tileTopBoundary, tileRightBoundary);
+#else
                                     (contextPtr->cuOriginX == 0),
                                     (contextPtr->cuOriginY == 0),
                                     (contextPtr->cuOriginX + cuStats->size) == sequenceControlSetPtr->lumaWidth ? EB_TRUE : EB_FALSE);
+#endif
                         } else if (colorFormat == EB_YUV422 || colorFormat == EB_YUV444) {
+                            //Jing: TODO, add tiles support
                             GenerateLumaIntraReferenceSamplesFuncTable[is16bit](
                                     constrainedIntraFlag,
                                     enableStrongIntraSmoothing,
@@ -3124,9 +3148,13 @@ EB_EXTERN void EncodePass(
                                     epCbReconNeighborArray,
                                     epCrReconNeighborArray,
                                     is16bit ? (void*)contextPtr->intraRefPtr16 : (void*)contextPtr->intraRefPtr,
+#if TILES
+                                    tileLeftBoundary, tileTopBoundary, tileRightBoundary);
+#else
                                     (contextPtr->cuOriginX == 0),
                                     (contextPtr->cuOriginY == 0),
                                     (contextPtr->cuOriginX + cuStats->size) == sequenceControlSetPtr->lumaWidth ? EB_TRUE : EB_FALSE);
+#endif
 
 						    GenerateChromaIntraReferenceSamplesFuncTable[is16bit](
                                     constrainedIntraFlag,
@@ -3143,9 +3171,13 @@ EB_EXTERN void EncodePass(
                                     is16bit ? (void*)contextPtr->intraRefPtr16 : (void*)contextPtr->intraRefPtr,
                                     colorFormat,
                                     EB_FALSE,
+#if TILES
+                                    tileLeftBoundary, tileTopBoundary, tileRightBoundary);
+#else
                                     (contextPtr->cuOriginX == 0),
                                     (contextPtr->cuOriginY == 0),
                                     (contextPtr->cuOriginX + cuStats->size) == sequenceControlSetPtr->lumaWidth ? EB_TRUE : EB_FALSE);
+#endif
                         }
 
                         // Prediction  
@@ -3163,9 +3195,15 @@ EB_EXTERN void EncodePass(
                             PICTURE_BUFFER_DESC_FULL_MASK );
                         // Encode Transform Unit -INTRA-
                         {
+#if TILES
+                            contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag) ?
+                                EB_FALSE :
+                                lcuPtr->tileLeftEdgeFlag && ((contextPtr->cuOriginX & (63)) == 0) && (contextPtr->cuOriginY == lcuOriginY);                           
+#else
                             contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag) ?
                                 EB_FALSE :
                                 lcuPtr->pictureLeftEdgeFlag && ((contextPtr->cuOriginX & (63)) == 0) && (contextPtr->cuOriginY == lcuOriginY);
+#endif
 
                             SetPmEncDecMode(
                                 pictureControlSetPtr,
@@ -3264,9 +3302,13 @@ EB_EXTERN void EncodePass(
 								is16bit ? (void*)contextPtr->intraRefPtr16 : (void*)contextPtr->intraRefPtr,
 								colorFormat,
                                 EB_TRUE,
+#if TILES
+                                tileLeftBoundary, EB_FALSE, tileRightBoundary);
+#else
 								(contextPtr->cuOriginX == 0),
 								EB_FALSE,
 								(contextPtr->cuOriginX + cuStats->size) == sequenceControlSetPtr->lumaWidth ? EB_TRUE : EB_FALSE);
+#endif
 
 						// Prediction
 						EncodePassIntraPredictionFuncTable[is16bit](
@@ -3385,13 +3427,15 @@ EB_EXTERN void EncodePass(
                     EB_U16 partitionOriginX = contextPtr->cuOriginX + INTRA_4x4_OFFSET_X[partitionIndex];
                     EB_U16 partitionOriginY = contextPtr->cuOriginY + INTRA_4x4_OFFSET_Y[partitionIndex];
 
-                    EB_BOOL pictureLeftBoundary =
-                        (lcuPtr->pictureLeftEdgeFlag == EB_TRUE && ((partitionOriginX & (MAX_LCU_SIZE - 1)) == 0)) ? EB_TRUE : EB_FALSE;
-                    EB_BOOL pictureTopBoundary =
-                        (lcuPtr->pictureTopEdgeFlag == EB_TRUE && ((partitionOriginY & (MAX_LCU_SIZE - 1)) == 0)) ? EB_TRUE : EB_FALSE;
-                    EB_BOOL pictureRightBoundary =
-                        (lcuPtr->pictureRightEdgeFlag == EB_TRUE && (((partitionOriginX + MIN_PU_SIZE) & (MAX_LCU_SIZE - 1)) == 0)) ? EB_TRUE : EB_FALSE;
-
+#if TILES
+                    EB_BOOL pictureLeftBoundary = (lcuPtr->tileLeftEdgeFlag == EB_TRUE && ((partitionOriginX & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+                    EB_BOOL pictureTopBoundary = (lcuPtr->tileTopEdgeFlag == EB_TRUE && ((partitionOriginY & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+                    EB_BOOL pictureRightBoundary = (lcuPtr->tileRightEdgeFlag == EB_TRUE && (((partitionOriginX + MIN_PU_SIZE) & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+#else
+                    EB_BOOL pictureLeftBoundary = (lcuPtr->pictureLeftEdgeFlag == EB_TRUE && ((partitionOriginX & (MAX_LCU_SIZE - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+                    EB_BOOL pictureTopBoundary = (lcuPtr->pictureTopEdgeFlag == EB_TRUE && ((partitionOriginY & (MAX_LCU_SIZE - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+                    EB_BOOL pictureRightBoundary = (lcuPtr->pictureRightEdgeFlag == EB_TRUE && (((partitionOriginX + MIN_PU_SIZE) & (MAX_LCU_SIZE - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+#endif
                     EB_U8   intraLumaMode = lcuPtr->intra4x4Mode[((MD_SCAN_TO_RASTER_SCAN[cuItr] - 21) << 2) + partitionIndex];
                     EB_U8   intraLumaModeForChroma = lcuPtr->intra4x4Mode[((MD_SCAN_TO_RASTER_SCAN[cuItr] - 21) << 2)];
 
@@ -3437,9 +3481,17 @@ EB_EXTERN void EncodePass(
                         //   only the right picture edge check and not the left or top boundary checks as the block size
                         //   has no influence on those checks.  
                         if (colorFormat == EB_YUV444) {
+#if TILES
+                            pictureRightBoundary = (lcuPtr->tileRightEdgeFlag == EB_TRUE && (((partitionOriginX + MIN_PU_SIZE) & (MAX_LCU_SIZE - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+#else
                             pictureRightBoundary = (lcuPtr->pictureRightEdgeFlag == EB_TRUE && (((partitionOriginX + MIN_PU_SIZE) & (MAX_LCU_SIZE - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+#endif
                         } else {
+#if TILES
+                            pictureRightBoundary = (lcuPtr->tileRightEdgeFlag == EB_TRUE && ((((partitionOriginX / 2) + MIN_PU_SIZE) & ((MAX_LCU_SIZE / 2) - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+#else
                             pictureRightBoundary = (lcuPtr->pictureRightEdgeFlag == EB_TRUE && ((((partitionOriginX / 2) + MIN_PU_SIZE) & ((MAX_LCU_SIZE / 2) - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+#endif
                         }
                         componentMask = PICTURE_BUFFER_DESC_FULL_MASK;
 						GenerateChromaIntraReferenceSamplesFuncTable[is16bit](
@@ -3498,7 +3550,7 @@ EB_EXTERN void EncodePass(
                     // Encode Transform Unit -INTRA-
                     contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag) ?
                         EB_FALSE :
-                        lcuPtr->pictureLeftEdgeFlag && ((contextPtr->cuOriginX & (63)) == 0) && (contextPtr->cuOriginY == lcuOriginY);
+                        lcuPtr->tileLeftEdgeFlag && ((contextPtr->cuOriginX & (63)) == 0) && (contextPtr->cuOriginY == lcuOriginY);
 
                     SetPmEncDecMode(
                         pictureControlSetPtr,
@@ -3630,8 +3682,11 @@ EB_EXTERN void EncodePass(
                 //if QPM and Segments are used, First Cu in LCU row should have at least one coeff. 
                 EB_BOOL isFirstCUinRow = (useDeltaQp == 1) &&
                     !singleSegment &&
+#if TILES
+                     lcuPtr->tileLeftEdgeFlag && ((contextPtr->cuOriginX & (63)) == 0) && (contextPtr->cuOriginY == lcuOriginY) ? EB_TRUE : EB_FALSE;;
+#else
                     (contextPtr->cuOriginX == 0 && contextPtr->cuOriginY == lcuOriginY) ? EB_TRUE : EB_FALSE;
-
+#endif
                 //Motion Compensation could be avoided in the case below
                 EB_BOOL doMC = EB_TRUE;
 
@@ -3783,9 +3838,15 @@ EB_EXTERN void EncodePass(
                         }
 
                         //TU LOOP for MV mode + Luma CBF decision. 
+#if TILES
+                        contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag) ?
+                            EB_FALSE :
+                            lcuPtr->tileLeftEdgeFlag && ((tuOriginX & 63) == 0) && (tuOriginY == lcuOriginY);
+#else
                         contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag) ?
                             EB_FALSE :
                             (tuOriginX == 0) && (tuOriginY == lcuOriginY);
+#endif
 
                         SetPmEncDecMode(
                                 pictureControlSetPtr,
@@ -3972,9 +4033,15 @@ EB_EXTERN void EncodePass(
                         cuPtr->transformUnitArray[contextPtr->tuItr].cbCbf2 = EB_FALSE;
                         cuPtr->transformUnitArray[contextPtr->tuItr].crCbf2 = EB_FALSE;
                     } else if (cuPtr->predictionUnitArray[0].mergeFlag == EB_TRUE) {
+#if TILES
+                        contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag) ?
+                            EB_FALSE :
+                            lcuPtr->tileLeftEdgeFlag && ((tuOriginX & 63) == 0) && (tuOriginY == lcuOriginY);
+#else
                         contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag) ?
                             EB_FALSE :
                             (tuOriginX == 0) && (tuOriginY == lcuOriginY);
+#endif
 
                         SetPmEncDecMode(
                                 pictureControlSetPtr,
@@ -4070,6 +4137,15 @@ EB_EXTERN void EncodePass(
                         cuPtr->transformUnitArray[0].cbCbf2 = EB_TRUE;
                     }
 
+#if TILES
+                    contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag) ?
+                        EB_FALSE :
+                        lcuPtr->tileLeftEdgeFlag && ((tuOriginX & 63) == 0) && (tuOriginY == lcuOriginY);
+#else
+                    contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag) ?
+                        EB_FALSE :
+                        (tuOriginX == 0) && (tuOriginY == lcuOriginY);
+#endif
 
                     if (cuPtr->transformUnitArray[contextPtr->tuItr].crCbf) {
                         cuPtr->transformUnitArray[0].crCbf = EB_TRUE;
@@ -4253,6 +4329,22 @@ EB_EXTERN void EncodePass(
                 }
 
 
+#if TILES
+                EB_U32 tileOriginX = 0;
+                EB_U32 tileOriginY = 0;
+                {
+                    unsigned i = 0, j = 0;
+
+                    while (i < pictureControlSetPtr->tileColumnCount && tileOriginX + pictureControlSetPtr->tileColumnArray[i] * MAX_LCU_SIZE < lcuOriginX) {
+                        tileOriginX += pictureControlSetPtr->tileColumnArray[i++] * MAX_LCU_SIZE;
+                    }
+
+                    while (j < pictureControlSetPtr->tileRowCount && tileOriginY + pictureControlSetPtr->tileRowArray[j] * MAX_LCU_SIZE < lcuOriginY) {
+                        tileOriginY += pictureControlSetPtr->tileRowArray[j++] * MAX_LCU_SIZE;
+                    }
+
+                }
+#endif
                 // Assign the LCU-level QP
                 EncodePassUpdateQp(
                     pictureControlSetPtr,
@@ -4263,6 +4355,10 @@ EB_EXTERN void EncodePass(
                     pictureControlSetPtr->difCuDeltaQpDepth,
                     &(pictureControlSetPtr->encPrevCodedQp[singleSegment ? 0 : lcuRowIndex]),
                     &(pictureControlSetPtr->encPrevQuantGroupCodedQp[singleSegment ? 0 : lcuRowIndex]),
+#if TILES
+                    tileOriginX,
+                    tileOriginY,
+#endif
                     lcuQp);
 
                 // Assign DLF QP

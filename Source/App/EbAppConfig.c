@@ -36,6 +36,10 @@
 #define BASE_LAYER_SWITCH_MODE_TOKEN    "-base-layer-switch-mode" // no Eval
 #define QP_TOKEN                        "-q"
 #define USE_QP_FILE_TOKEN               "-use-q-file"
+#if 1//TILES
+#define TILE_ROW_COUNT_TOKEN            "-tile_row_cnt"
+#define TILE_COL_COUNT_TOKEN            "-tile_col_cnt"
+#endif
 #define TUNE_TOKEN                      "-tune"
 #define FRAME_RATE_TOKEN                "-fps"
 #define FRAME_RATE_NUMERATOR_TOKEN      "-fps-num"
@@ -179,6 +183,10 @@ static void SetHierarchicalLevels               (const char *value, EbConfig_t *
 static void SetCfgPredStructure                 (const char *value, EbConfig_t *cfg) {cfg->predStructure                    = strtol(value, NULL, 0); };
 static void SetCfgQp                            (const char *value, EbConfig_t *cfg) {cfg->qp                               = strtoul(value, NULL, 0);};
 static void SetCfgUseQpFile                     (const char *value, EbConfig_t *cfg) {cfg->useQpFile                        = (EB_BOOL)strtol(value, NULL, 0); };
+#if 1//TILES
+static void SetCfgTileColumnCount               (const char *value, EbConfig_t *cfg) { cfg->tileColumnCount                 = (EB_BOOL)strtol(value, NULL, 0); };
+static void SetCfgTileRowCount                  (const char *value, EbConfig_t *cfg) { cfg->tileRowCount                    = (EB_BOOL)strtol(value, NULL, 0); };
+#endif
 static void SetDisableDlfFlag                   (const char *value, EbConfig_t *cfg) {cfg->disableDlfFlag                   = (EB_BOOL)strtoul(value, NULL, 0);};
 static void SetEnableSaoFlag                    (const char *value, EbConfig_t *cfg) {cfg->enableSaoFlag                    = (EB_BOOL)strtoul(value, NULL, 0);};
 static void SetEnableHmeFlag                    (const char *value, EbConfig_t *cfg) {cfg->enableHmeFlag                    = (EB_BOOL)strtoul(value, NULL, 0);};
@@ -296,6 +304,10 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, QP_TOKEN, "QP", SetCfgQp },
 
     { SINGLE_INPUT, USE_QP_FILE_TOKEN, "UseQpFile", SetCfgUseQpFile },
+#if 1//TILES
+     { SINGLE_INPUT, TILE_ROW_COUNT_TOKEN, "TileRowCount", SetCfgTileRowCount },
+     { SINGLE_INPUT, TILE_COL_COUNT_TOKEN, "TileColumnCount", SetCfgTileColumnCount },
+#endif
 
     { SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "RateControlMode", SetRateControlMode },
     { SINGLE_INPUT, LOOK_AHEAD_DIST_TOKEN, "LookAheadDistance",                             SetLookAheadDistance},
@@ -401,7 +413,10 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->separateFields                       = EB_FALSE;
     configPtr->qp                                   = 32;
     configPtr->useQpFile                            = EB_FALSE;
-
+#if 1//TILES
+    configPtr->tileColumnCount = 1;
+    configPtr->tileRowCount = 1;
+#endif
     configPtr->sceneChangeDetection                 = 1;
     configPtr->rateControlMode                      = 0;
     configPtr->lookAheadDistance                    = (uint32_t)~0;
@@ -798,6 +813,58 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Could not find QP file, UseQpFile is set to 1\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
+
+#if 1//TILES
+
+    //TODO: move this to appropriate location
+#define EB_TILE_COLUMN_MAX_COUNT                    16
+#define EB_TILE_ROW_MAX_COUNT                       16
+#define EB_TILE_MAX_COUNT                           32
+#define MAX_LCU_SIZE                                64
+    
+    int32_t pictureWidthInLcu, pictureHeightInLcu;
+    int32_t horizontalTileIndex, verticalTileIndex;
+
+    pictureWidthInLcu = (config->sourceWidth + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE; 
+    pictureHeightInLcu = (config->sourceHeight + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE; 
+
+    if (config->tileColumnCount > EB_TILE_COLUMN_MAX_COUNT) {
+        printf("Error Instance %u: Invalid TileColumnCount. TileColumnCount range should be 1 to 16. In order to specify more than 16 tile columns, please increase the value of the macro EB_TILE_COLUMN_MAX_COUNT defined in EbDefinitions.h\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->tileRowCount > EB_TILE_ROW_MAX_COUNT) {
+        printf("Error Instance %u: Invalid TileRowCount. TileRowCount range should be 1 to 16. In order to specify more than 16 tile rows, please increase the value of the macro EB_TILE_ROW_MAX_COUNT defined in EbDefinitions.h\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->tileColumnCount * config->tileRowCount > EB_TILE_MAX_COUNT) {
+        printf("Error Instance %u: The number of tiles exceeds the allowed maximum number of tiles\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+        
+
+    {
+        for (horizontalTileIndex = 0; horizontalTileIndex < (config->tileColumnCount - 1); ++horizontalTileIndex) {
+            if (((horizontalTileIndex + 1) * pictureWidthInLcu / config->tileColumnCount -
+                horizontalTileIndex * pictureWidthInLcu / config->tileColumnCount) * MAX_LCU_SIZE < 256) { // 256 samples
+                printf("Error Instance %u: TileColumnCount must be chosen such that each tile has a minimum width of 256 luma samples\n", channelNumber + 1);
+                return_error = EB_ErrorBadParameter;
+                break;
+            }
+        }
+        for (verticalTileIndex = 0; verticalTileIndex < (config->tileRowCount - 1); ++verticalTileIndex) {
+            if (((verticalTileIndex + 1) * pictureHeightInLcu / config->tileRowCount -
+                verticalTileIndex * pictureHeightInLcu / config->tileRowCount) * MAX_LCU_SIZE < 64) { // 64 samples
+                printf("Error Instance %u: TileRowCount must be chosen such that each tile has a minimum height of 64 luma samples\n", channelNumber + 1);
+                return_error = EB_ErrorBadParameter;
+                break;
+
+            }
+        }
+
+    }   
+#endif
 
     if (config->separateFields > 1) {
         fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid SeperateFields Input\n", channelNumber + 1);
