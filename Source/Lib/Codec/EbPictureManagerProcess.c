@@ -526,7 +526,6 @@ void* PictureManagerKernel(void *inputPtr)
             EbReleaseObject(inputPictureDemuxPtr->sequenceControlSetWrapperPtr);
                 
             break;
-#if PACK_FEEDBACK
         case EB_PIC_FEEDBACK:
 
             sequenceControlSetPtr = (SequenceControlSet_t*)inputPictureDemuxPtr->sequenceControlSetWrapperPtr->objectPtr;
@@ -535,18 +534,14 @@ void* PictureManagerKernel(void *inputPtr)
             referenceQueueIndex = encodeContextPtr->referencePictureQueueHeadIndex;
             // Find the Reference in the Reference Queue
             do {
-
                 referenceEntryPtr = encodeContextPtr->referencePictureQueue[referenceQueueIndex];
-
                 if (referenceEntryPtr->pictureNumber == inputPictureDemuxPtr->pictureNumber) {
 
                     // Set the feedback arrived
                     referenceEntryPtr->feedbackArrived = EB_TRUE;
                 }
-
                 // Increment the referenceQueueIndex Iterator
                 referenceQueueIndex = (referenceQueueIndex == REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : referenceQueueIndex + 1;
-
             } while ((referenceQueueIndex != encodeContextPtr->referencePictureQueueTailIndex) && (referenceEntryPtr->pictureNumber != inputPictureDemuxPtr->pictureNumber));
 
             //keep the relase of SCS here because we still need the encodeContext strucutre here
@@ -554,7 +549,6 @@ void* PictureManagerKernel(void *inputPtr)
             EbReleaseObject(inputPictureDemuxPtr->sequenceControlSetWrapperPtr);
 
             break;
-#endif
         default:
            
             sequenceControlSetPtr   = (SequenceControlSet_t*) inputPictureDemuxPtr->sequenceControlSetWrapperPtr->objectPtr;

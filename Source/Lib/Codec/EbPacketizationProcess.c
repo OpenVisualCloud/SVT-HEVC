@@ -17,9 +17,7 @@
 #include "EbRateControlTasks.h"
 #include "EbRateControlProcess.h"
 #include "EbTime.h"
-#if PACK_FEEDBACK
 #include "EbPictureDemuxResults.h"
-#endif
 
 void HrdFullness(SequenceControlSet_t *sequenceControlSetPtr, PictureControlSet_t *pictureControlSetptr, AppBufferingPeriodSei_t *seiBP)
 {
@@ -98,10 +96,8 @@ void InitHRD(SequenceControlSet_t *scsPtr)
 EB_ERRORTYPE PacketizationContextCtor(
     PacketizationContext_t **contextDblPtr,
     EbFifo_t                *entropyCodingInputFifoPtr,
-    EbFifo_t                *rateControlTasksOutputFifoPtr
-#if PACK_FEEDBACK
-    ,EbFifo_t                *pictureManagerOutputFifoPtr
-#endif
+    EbFifo_t                *rateControlTasksOutputFifoPtr,
+    EbFifo_t                *pictureManagerOutputFifoPtr
 )
 {
     PacketizationContext_t *contextPtr;
@@ -110,9 +106,7 @@ EB_ERRORTYPE PacketizationContextCtor(
         
     contextPtr->entropyCodingInputFifoPtr      = entropyCodingInputFifoPtr;
     contextPtr->rateControlTasksOutputFifoPtr  = rateControlTasksOutputFifoPtr;
-#if PACK_FEEDBACK
     contextPtr->pictureManagerOutputFifoPtr    = pictureManagerOutputFifoPtr;
-#endif
 
     EB_MALLOC(EbPPSConfig_t*, contextPtr->ppsConfig, sizeof(EbPPSConfig_t), EB_N_PTR);
     
@@ -141,10 +135,8 @@ void* PacketizationKernel(void *inputPtr)
     EB_BUFFERHEADERTYPE           *outputStreamPtr;
     EbObjectWrapper_t              *rateControlTasksWrapperPtr;
     RateControlTasks_t             *rateControlTasksPtr;
-#if PACK_FEEDBACK
     EbObjectWrapper_t               *pictureManagerResultsWrapperPtr;
     PictureDemuxResults_t       	*pictureManagerResultPtr;
-#endif
     // Bitstream copy to output buffer
     Bitstream_t                     bitstream;
     
@@ -211,7 +203,6 @@ void* PacketizationKernel(void *inputPtr)
         rateControlTasksPtr->pictureControlSetWrapperPtr    = pictureControlSetPtr->PictureParentControlSetWrapperPtr;
         rateControlTasksPtr->taskType                       = RC_PACKETIZATION_FEEDBACK_RESULT;
 
-#if PACK_FEEDBACK
         if (sequenceControlSetPtr->staticConfig.rateControlMode) {
             // Get Empty Results Object
             EbGetEmptyObject(
@@ -228,7 +219,6 @@ void* PacketizationKernel(void *inputPtr)
             (void) pictureManagerResultPtr;
             (void)pictureManagerResultsWrapperPtr;
         }
-#endif        
         sliceType = pictureControlSetPtr->sliceType;
         
         if(pictureControlSetPtr->pictureNumber == 0 && sequenceControlSetPtr->staticConfig.codeVpsSpsPps == 1) {
@@ -749,12 +739,10 @@ void* PacketizationKernel(void *inputPtr)
         // Post Rate Control Taks            
         EbPostFullObject(rateControlTasksWrapperPtr);    
 
-#if PACK_FEEDBACK
         if (sequenceControlSetPtr->staticConfig.rateControlMode) {
             // Post the Full Results Object
             EbPostFullObject(pictureManagerResultsWrapperPtr);
         }
-#endif
         //Release the Parent PCS then the Child PCS
         EbReleaseObject(entropyCodingResultsPtr->pictureControlSetWrapperPtr);//Child
 
