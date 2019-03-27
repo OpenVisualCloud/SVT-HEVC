@@ -5,10 +5,11 @@ install:
     - git submodule update --init
     - appveyor DownloadFile http://www.tortall.net/projects/yasm/releases/yasm-1.3.0-win64.exe -FileName yasm.exe
     - set PATH=%PATH%;%APPVEYOR_BUILD_FOLDER%
-    - cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_ASM_NASM_COMPILER="yasm.exe"
+    - cd Build
+    - cmake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_ASM_NASM_COMPILER=yasm
 
 build:
-  project: svt-hevc.sln
+  project: Build\svt-hevc.sln
 
 artifacts:
     - path: bin\Release\*.*
