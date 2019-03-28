@@ -1563,8 +1563,8 @@ void ProductMergeSkip2Nx2NCandidatesInjection(
             }
 
 
-            if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector  && mvMergeDuplicateFlag == EB_FALSE ||
-                !sequenceControlSetPtr->staticConfig.unrestrictedMotionVector && mvMergeDuplicateFlag == EB_FALSE && mvOutOfPicFlag == EB_FALSE) {
+            if ((sequenceControlSetPtr->staticConfig.unrestrictedMotionVector && mvMergeDuplicateFlag == EB_FALSE) ||
+                (!sequenceControlSetPtr->staticConfig.unrestrictedMotionVector && mvMergeDuplicateFlag == EB_FALSE && mvOutOfPicFlag == EB_FALSE)) {
                 mdCandidatePtr->type = INTER_MODE;
                 mdCandidatePtr->distortionReady = 0;
                 //EB_MEMCPY(&mdCandidatePtr->MVs, &candidateMv[REF_LIST_0].x, 8);
