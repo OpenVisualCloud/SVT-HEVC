@@ -837,9 +837,9 @@ void* PacketizationKernel(void *inputPtr)
                 refDecOrder = queueEntryPtr->pictureNumber;
             }
             /* update VBV plan */
-            EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
             if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize)
-            {
+            {   
+                EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
                 EB_S64 bufferfill_temp = (EB_S64)(encodeContextPtr->bufferFill);
                 bufferfill_temp -= queueEntryPtr->actualBits;
                 bufferfill_temp = MAX(bufferfill_temp, 0);
