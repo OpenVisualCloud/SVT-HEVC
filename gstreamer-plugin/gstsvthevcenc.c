@@ -742,6 +742,8 @@ set_default_svt_configuration (EB_H265_ENC_CONFIGURATION * svt_config)
   svt_config->fpsInVps = TRUE;
   svt_config->codeEosNal = FALSE;
   svt_config->asmType = 1;
+  svt_config->tileColumnCount = 1;
+  svt_config->tileRowCount = 1;
 }
 
 GstFlowReturn
