@@ -856,7 +856,7 @@ void* PacketizationKernel(void *inputPtr)
                         // Reset the bitstream
                         ResetBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
 
-                        EncodeFillerData(queueEntryPtr->bitStreamPtr2, fillerBytes, queueEntryPtr->picTimingEntry->temporalId);
+                        EncodeFillerData(queueEntryPtr->bitStreamPtr2, queueEntryPtr->picTimingEntry->temporalId);
 
                         // Flush the Bitstream
                         FlushBitstream(

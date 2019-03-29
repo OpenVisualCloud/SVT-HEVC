@@ -8647,7 +8647,6 @@ EB_ERRORTYPE EncodeActiveParameterSetsSEI(
 
 EB_ERRORTYPE EncodeFillerData(
     Bitstream_t             *bitstreamPtr,
-    EB_U32                   fillerBytes,
     EB_U8                    temporalId)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;

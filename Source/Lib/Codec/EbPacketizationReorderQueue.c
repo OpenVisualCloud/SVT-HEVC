@@ -33,6 +33,6 @@ EB_ERRORTYPE PacketizationReorderEntryCtor(
     (*entryDblPtr)->pictureNumber                   = pictureNumber;
     (*entryDblPtr)->outputStreamWrapperPtr          = (EbObjectWrapper_t *)EB_NULL;
     (*entryDblPtr)->startSplicing = 0;
-    return EB_ErrorNone;
+    return return_error;
 }
 
