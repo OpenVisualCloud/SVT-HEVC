@@ -299,7 +299,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **RecoveryPoint** | -recovery-point | [0,1] | 0 | SEI message, 0 = OFF, 1 = ON |
 | **TemporalId** | -temporal-id | [0,1] | 1 | 0 = OFF, 1 = Insert temporal ID in NAL units |
 | **AsmType** | -asm | [0,1] | 1 | Assembly instruction set <br>(0: C Only, 1: Automatically select highest assembly instruction set supported) |
-| **LogicalProcessorNumber** | -lp | [0, total number of logical processor] | 0 | The number of logical processor which encoder threads run on.Refer to Appendix A.2 |
+| **LogicalProcessors** | -lp | [0, total number of logical processor] | 0 | The number of logical processor which encoder threads run on.Refer to Appendix A.2 |
 | **TargetSocket** | -ss | [-1,1] | -1 | For dual socket systems, this can specify which socket the encoder runs on.Refer to Appendix A.2 |
 | **SwitchThreadsToRtPriority** | -rt | [0,1] | 1 | Enables or disables threads to real time priority, 0 = OFF, 1 = ON (only works on Linux) |
 | **FPSInVPS** | -fpsinvps | [0,1] | 0 | Enables or disables the VPS timing info, 0 = OFF, 1 = ON |
@@ -363,7 +363,7 @@ The above section is not needed for Windows\* as it does not perform the CPU uti
 
 The SVT-HEVC encoder achieves the best performance when restricting each channel to only one socket on either Windows\* or Linux\* operating systems. For example, when running four channels on a dual socket system, it&#39;s best to pin two channels to each socket and not split every channel on both sockets.
 
-LogicalProcessorNumber (-lp) and TargetSocket (-ss) parameters can be used to management the threads. Or you can use OS commands like below.
+LogicalProcessors (-lp) and TargetSocket (-ss) parameters can be used to management the threads. Or you can use OS commands like below.
 
 For example, in order to run a 6-stream 4kp60 simultaneous encode on a Xeon Platinum 8180 system the following command lines should be used:
 
@@ -437,13 +437,13 @@ In the SVT-HEVC code, the GOP structure is constructed in the Picture Decision p
 
 ### 2. Thread management parameters
 
-LogicalProcessorNumber (-lp) and TargetSocket (-ss) parameters are used to management thread affinity on Windows and Ubuntu OS. These are some examples how you use them together.
+LogicalProcessors (-lp) and TargetSocket (-ss) parameters are used to management thread affinity on Windows and Ubuntu OS. These are some examples how you use them together.
 
-If LogicalProcessorNumber and TargetSocket are not set, threads are managed by OS thread scheduler.
+If LogicalProcessors and TargetSocket are not set, threads are managed by OS thread scheduler.
 
 >SvtHevcEncApp.exe -i in.yuv -w 3840 -h 2160 –lp 40
 
-If only LogicalProcessorNumber is set, threads run on 40 logical processors. Threads may run on dual sockets if 40 is larger than logical processor number of a socket.
+If only LogicalProcessors is set, threads run on 40 logical processors. Threads may run on dual sockets if 40 is larger than logical processor number of a socket.
 
 NOTE: On Windows, thread affinity can be set only by group on system with more than 64 logical processors. So, if 40 is larger than logical processor number of a single socket, threads run on all logical processors of both sockets.
 
@@ -453,7 +453,7 @@ If only TargetSocket is set, threads run on all the logical processors of socket
 
 >SvtHevcEncApp.exe -i in.yuv -w 3840 -h 2160 –lp 20 –ss 0
 
-If both LogicalProcessorNumber and TargetSocket are set, threads run on 20 logical processors of socket 0. Threads guaranteed to run only on socket 0 if 20 is larger than logical processor number of socket 0.
+If both LogicalProcessors and TargetSocket are set, threads run on 20 logical processors of socket 0. Threads guaranteed to run only on socket 0 if 20 is larger than logical processor number of socket 0.
 
 
 
