@@ -226,10 +226,10 @@ static void SetEnableTemporalId                 (const char *value, EbConfig_t *
 static void SetProfile                          (const char *value, EbConfig_t *cfg) {cfg->profile                          = strtol(value,  NULL, 0);};
 static void SetTier                             (const char *value, EbConfig_t *cfg) {cfg->tier                             = strtol(value,  NULL, 0);};
 static void SetLevel                            (const char *value, EbConfig_t *cfg) {
-	if (strtoul( value, NULL,0) != 0 || EB_STRCMP(value, "0") == 0 )
-		cfg->level = (uint32_t)(10*strtod(value,  NULL));
-	else
-		cfg->level = 9999999;
+    if (strtoul( value, NULL,0) != 0 || EB_STRCMP(value, "0") == 0 )
+        cfg->level = (uint32_t)(10*strtod(value,  NULL));
+    else
+        cfg->level = 9999999;
 };
 static void SetInjector                         (const char *value, EbConfig_t *cfg) {cfg->injector                         = strtol(value,  NULL, 0);};
 static void SpeedControlFlag                    (const char *value, EbConfig_t *cfg) {cfg->speedControlFlag                 = strtol(value, NULL, 0); };
@@ -285,7 +285,7 @@ config_entry_t config_entry[] = {
 
     // Bit-depth
     { SINGLE_INPUT, ENCODER_BIT_DEPTH, "EncoderBitDepth", SetEncoderBitDepth },
-	{ SINGLE_INPUT, INPUT_COMPRESSED_TEN_BIT_FORMAT, "CompressedTenBitFormat", SetcompressedTenBitFormat },
+    { SINGLE_INPUT, INPUT_COMPRESSED_TEN_BIT_FORMAT, "CompressedTenBitFormat", SetcompressedTenBitFormat },
     { SINGLE_INPUT, ENCODER_COLOR_FORMAT, "EncoderColorFormat", SetEncoderColorFormat },
 
     // Source Definitions
@@ -311,9 +311,9 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, SEPERATE_FILDS_TOKEN, "SeperateFields", SetSeperateFields },
 
     // Coding Structure
-	{ SINGLE_INPUT, HIERARCHICAL_LEVELS_TOKEN, "HierarchicalLevels", SetHierarchicalLevels },
+    { SINGLE_INPUT, HIERARCHICAL_LEVELS_TOKEN, "HierarchicalLevels", SetHierarchicalLevels },
     { SINGLE_INPUT, BASE_LAYER_SWITCH_MODE_TOKEN, "BaseLayerSwitchMode", SetBaseLayerSwitchMode },
-	{ SINGLE_INPUT, PRED_STRUCT_TOKEN, "PredStructure", SetCfgPredStructure },
+    { SINGLE_INPUT, PRED_STRUCT_TOKEN, "PredStructure", SetCfgPredStructure },
     { SINGLE_INPUT, INTRA_PERIOD_TOKEN, "IntraPeriod", SetCfgIntraPeriod },
     { SINGLE_INPUT, INTRA_REFRESH_TYPE_TOKEN, "IntraRefreshType", SetCfgIntraRefreshType },
 
@@ -349,7 +349,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, TUNE_TOKEN, "Tune", SetCfgTune },
 
     // Adaptive QP Params
-	{ SINGLE_INPUT, BITRATE_REDUCTION_TOKEN, "BitRateReduction", SetBitRateReduction },
+    { SINGLE_INPUT, BITRATE_REDUCTION_TOKEN, "BitRateReduction", SetBitRateReduction },
     { SINGLE_INPUT, IMPROVE_SHARPNESS_TOKEN,"ImproveSharpness", SetImproveSharpness },
 
     // Optional Features
@@ -401,7 +401,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
 #endif
 
     // Encoding Presets
-	configPtr->encMode								    = 9;
+    configPtr->encMode								    = 9;
     //configPtr->latencyMode                              = 0; // Deprecated
     configPtr->speedControlFlag                         = 0;
 
@@ -433,9 +433,9 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->separateFields                           = EB_FALSE;
 
     // Coding Structure
-	configPtr->hierarchicalLevels					    = 3;
+    configPtr->hierarchicalLevels					    = 3;
     configPtr->baseLayerSwitchMode                      = 0;
-	configPtr->predStructure						    = 2;
+    configPtr->predStructure						    = 2;
     configPtr->intraPeriod                              = -2;
     configPtr->intraRefreshType                         = 1;
 
@@ -513,7 +513,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
 
     // Testing
     configPtr->testUserData                             = 0;
-	configPtr->eosFlag                                  = EB_FALSE;
+    configPtr->eosFlag                                  = EB_FALSE;
 
     // Computational Performance Parameters
     configPtr->performanceContext.libStartTime[0]       = 0;
@@ -581,10 +581,10 @@ void EbConfigDtor(EbConfig_t *configPtr)
         configPtr->naluFile = (FILE *)NULL;
     }
 
-	if (configPtr->dolbyVisionRpuFile) {
-		fclose(configPtr->dolbyVisionRpuFile);
-		configPtr->dolbyVisionRpuFile = (FILE *)NULL;
-	}
+    if (configPtr->dolbyVisionRpuFile) {
+        fclose(configPtr->dolbyVisionRpuFile);
+        configPtr->dolbyVisionRpuFile = (FILE *)NULL;
+    }
 
     return;
 }
@@ -656,145 +656,145 @@ static void lineSplit(
 * Set Config Value
 **********************************/
 static void SetConfigValue(
-	EbConfig_t *config,
-	char       *name,
-	char       *value)
+    EbConfig_t *config,
+    char       *name,
+    char       *value)
 {
-	int32_t i=0;
+    int32_t i=0;
 
-	while(config_entry[i].name != NULL) {
-		if(EB_STRCMP(config_entry[i].name, name) == 0)  {
-			(*config_entry[i].scf)((const char *) value, config);
-		}
-		++i;
-	}
+    while(config_entry[i].name != NULL) {
+        if(EB_STRCMP(config_entry[i].name, name) == 0)  {
+            (*config_entry[i].scf)((const char *) value, config);
+        }
+        ++i;
+    }
 
-	return;
+    return;
 }
 
 /**********************************
 * Parse Config File
 **********************************/
 static void ParseConfigFile(
-	EbConfig_t *config,
-	char       *buffer,
-	int32_t         size)
+    EbConfig_t *config,
+    char       *buffer,
+    int32_t         size)
 {
-	uint32_t argc;
-	char *argv[CONFIG_FILE_MAX_ARG_COUNT];
-	uint32_t argLen[CONFIG_FILE_MAX_ARG_COUNT];
+    uint32_t argc;
+    char *argv[CONFIG_FILE_MAX_ARG_COUNT];
+    uint32_t argLen[CONFIG_FILE_MAX_ARG_COUNT];
 
-	char varName[CONFIG_FILE_MAX_VAR_LEN];
-	char varValue[CONFIG_FILE_MAX_ARG_COUNT][CONFIG_FILE_MAX_VAR_LEN];
+    char varName[CONFIG_FILE_MAX_VAR_LEN];
+    char varValue[CONFIG_FILE_MAX_ARG_COUNT][CONFIG_FILE_MAX_VAR_LEN];
 
-	uint32_t valueIndex;
+    uint32_t valueIndex;
 
-	uint32_t commentSectionFlag = 0;
-	uint32_t newLineFlag = 0;
+    uint32_t commentSectionFlag = 0;
+    uint32_t newLineFlag = 0;
 
-	// Keep looping until we process the entire file
-	while(size--) {
-		commentSectionFlag = ((*buffer == CONFIG_FILE_COMMENT_CHAR) || (commentSectionFlag != 0)) ? 1 : commentSectionFlag;
+    // Keep looping until we process the entire file
+    while(size--) {
+        commentSectionFlag = ((*buffer == CONFIG_FILE_COMMENT_CHAR) || (commentSectionFlag != 0)) ? 1 : commentSectionFlag;
 
-		// At the beginning of each line
-		if ((newLineFlag == 1) && (commentSectionFlag == 0)) {
-			// Do an argc/argv split for the line
-			lineSplit(&argc, argv, argLen, buffer);
+        // At the beginning of each line
+        if ((newLineFlag == 1) && (commentSectionFlag == 0)) {
+            // Do an argc/argv split for the line
+            lineSplit(&argc, argv, argLen, buffer);
 
-			if ((argc > 2) && (*argv[1] == CONFIG_FILE_VALUE_SPLIT)) {
-				// ***NOTE - We're assuming that the variable name is the first arg and
-				// the variable value is the third arg.
+            if ((argc > 2) && (*argv[1] == CONFIG_FILE_VALUE_SPLIT)) {
+                // ***NOTE - We're assuming that the variable name is the first arg and
+                // the variable value is the third arg.
 
-				// Cap the length of the variable name
-				argLen[0] = (argLen[0] > CONFIG_FILE_MAX_VAR_LEN - 1) ? CONFIG_FILE_MAX_VAR_LEN - 1 : argLen[0];
-				// Copy the variable name
-				EB_STRNCPY(varName, argv[0], argLen[0]);
-				// Null terminate the variable name
-				varName[argLen[0]] = CONFIG_FILE_NULL_CHAR;
+                // Cap the length of the variable name
+                argLen[0] = (argLen[0] > CONFIG_FILE_MAX_VAR_LEN - 1) ? CONFIG_FILE_MAX_VAR_LEN - 1 : argLen[0];
+                // Copy the variable name
+                EB_STRNCPY(varName, argv[0], argLen[0]);
+                // Null terminate the variable name
+                varName[argLen[0]] = CONFIG_FILE_NULL_CHAR;
 
-				for(valueIndex=0; (valueIndex < CONFIG_FILE_MAX_ARG_COUNT - 2) && (valueIndex < (argc - 2)); ++valueIndex) {
+                for(valueIndex=0; (valueIndex < CONFIG_FILE_MAX_ARG_COUNT - 2) && (valueIndex < (argc - 2)); ++valueIndex) {
 
-					// Cap the length of the variable
-					argLen[valueIndex+2] = (argLen[valueIndex+2] > CONFIG_FILE_MAX_VAR_LEN - 1) ? CONFIG_FILE_MAX_VAR_LEN - 1 : argLen[valueIndex+2];
-					// Copy the variable name
-					EB_STRNCPY(varValue[valueIndex], argv[valueIndex+2], argLen[valueIndex+2]);
-					// Null terminate the variable name
-					varValue[valueIndex][argLen[valueIndex+2]] = CONFIG_FILE_NULL_CHAR;
+                    // Cap the length of the variable
+                    argLen[valueIndex+2] = (argLen[valueIndex+2] > CONFIG_FILE_MAX_VAR_LEN - 1) ? CONFIG_FILE_MAX_VAR_LEN - 1 : argLen[valueIndex+2];
+                    // Copy the variable name
+                    EB_STRNCPY(varValue[valueIndex], argv[valueIndex+2], argLen[valueIndex+2]);
+                    // Null terminate the variable name
+                    varValue[valueIndex][argLen[valueIndex+2]] = CONFIG_FILE_NULL_CHAR;
 
-					SetConfigValue(config, varName, varValue[valueIndex]);
-				}
-			}
-		}
+                    SetConfigValue(config, varName, varValue[valueIndex]);
+                }
+            }
+        }
 
-		commentSectionFlag = (*buffer == CONFIG_FILE_NEWLINE_CHAR) ? 0 : commentSectionFlag;
-		newLineFlag = (*buffer == CONFIG_FILE_NEWLINE_CHAR) ? 1 : 0;
-		++buffer;
-	}
+        commentSectionFlag = (*buffer == CONFIG_FILE_NEWLINE_CHAR) ? 0 : commentSectionFlag;
+        newLineFlag = (*buffer == CONFIG_FILE_NEWLINE_CHAR) ? 1 : 0;
+        ++buffer;
+    }
 
-	return;
+    return;
 }
 
 /******************************************
 * Find Token
 ******************************************/
 static int32_t FindToken(
-	int32_t         argc,
-	char * const    argv[],
-	char const *    token,
-	char*           configStr)
+    int32_t         argc,
+    char * const    argv[],
+    char const *    token,
+    char*           configStr)
 {
-	int32_t return_error = -1;
+    int32_t return_error = -1;
 
-	while((argc > 0) && (return_error != 0)) {
-		return_error = EB_STRCMP(argv[--argc], token);
-		if (return_error == 0) {
-			EB_STRCPY(configStr, COMMAND_LINE_MAX_SIZE, argv[argc + 1]);
-		}
-	}
+    while((argc > 0) && (return_error != 0)) {
+        return_error = EB_STRCMP(argv[--argc], token);
+        if (return_error == 0) {
+            EB_STRCPY(configStr, COMMAND_LINE_MAX_SIZE, argv[argc + 1]);
+        }
+    }
 
-	return return_error;
+    return return_error;
 }
 
 /**********************************
 * Read Config File
 **********************************/
 static int32_t ReadConfigFile(
-	EbConfig_t  *config,
-	char		*configPath,
-	uint32_t     instanceIdx)
+    EbConfig_t  *config,
+    char		*configPath,
+    uint32_t     instanceIdx)
 {
-	int32_t return_error = 0;
+    int32_t return_error = 0;
 
-	// Open the config file
-	FOPEN(config->configFile, configPath, "rb");
+    // Open the config file
+    FOPEN(config->configFile, configPath, "rb");
 
-	if (config->configFile != (FILE*) NULL) {
-		int32_t configFileSize = findFileSize(config->configFile);
-		char *configFileBuffer = (char*) malloc(configFileSize);
+    if (config->configFile != (FILE*) NULL) {
+        int32_t configFileSize = findFileSize(config->configFile);
+        char *configFileBuffer = (char*) malloc(configFileSize);
 
-		if (configFileBuffer != (char *) NULL) {
-			int32_t resultSize = (int32_t) fread(configFileBuffer, 1, configFileSize, config->configFile);
+        if (configFileBuffer != (char *) NULL) {
+            int32_t resultSize = (int32_t) fread(configFileBuffer, 1, configFileSize, config->configFile);
 
-			if (resultSize == configFileSize) {
-				ParseConfigFile(config, configFileBuffer, configFileSize);
-			} else {
-				printf("Error channel %u: File Read Failed\n",instanceIdx+1);
-				return_error = -1;
-			}
-		} else {
-			printf("Error channel %u: Memory Allocation Failed\n",instanceIdx+1);
-			return_error = -1;
-		}
+            if (resultSize == configFileSize) {
+                ParseConfigFile(config, configFileBuffer, configFileSize);
+            } else {
+                printf("Error channel %u: File Read Failed\n",instanceIdx+1);
+                return_error = -1;
+            }
+        } else {
+            printf("Error channel %u: Memory Allocation Failed\n",instanceIdx+1);
+            return_error = -1;
+        }
 
-		free(configFileBuffer);
-		fclose(config->configFile);
-		config->configFile = (FILE*) NULL;
-	} else {
-		printf("Error channel %u: Couldn't open Config File: %s\n", instanceIdx+1,configPath);
-		return_error = -1;
-	}
+        free(configFileBuffer);
+        fclose(config->configFile);
+        config->configFile = (FILE*) NULL;
+    } else {
+        printf("Error channel %u: Couldn't open Config File: %s\n", instanceIdx+1,configPath);
+        return_error = -1;
+    }
 
-	return return_error;
+    return return_error;
 }
 
 /******************************************
@@ -802,18 +802,18 @@ static int32_t ReadConfigFile(
 ******************************************/
 static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
 {
-	EB_ERRORTYPE return_error = EB_ErrorNone;
+    EB_ERRORTYPE return_error = EB_ErrorNone;
 
-	// Check Input File
-	if(config->inputFile == (FILE*) NULL) {
-		fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid Input File\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
-	}
+    // Check Input File
+    if(config->inputFile == (FILE*) NULL) {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid Input File\n",channelNumber+1);
+        return_error = EB_ErrorBadParameter;
+    }
 
     if (config->framesToBeEncoded <= -1) {
-		fprintf(config->errorLogFile, "SVT [Error]: Instance %u: FrameToBeEncoded must be greater than 0\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
-	}
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: FrameToBeEncoded must be greater than 0\n",channelNumber+1);
+        return_error = EB_ErrorBadParameter;
+    }
 
     if (config->framesToBeEncoded >= LLONG_MAX) {
         fprintf(config->errorLogFile, "SVT [Error]: Instance %u: FrameToBeEncoded must be less than 2^64 - 1\n", channelNumber + 1);
@@ -825,10 +825,10 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         return_error = EB_ErrorBadParameter;
     }
 
-	if (config->bufferedInput > config->framesToBeEncoded) {
-		fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid BufferedInput. BufferedInput must be less or equal to the number of frames to be encoded\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
-	}
+    if (config->bufferedInput > config->framesToBeEncoded) {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid BufferedInput. BufferedInput must be less or equal to the number of frames to be encoded\n",channelNumber+1);
+        return_error = EB_ErrorBadParameter;
+    }
 
     if (config->useQpFile == EB_TRUE && config->qpFile == NULL) {
         fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Could not find QP file, UseQpFile is set to 1\n", channelNumber + 1);
@@ -934,44 +934,44 @@ int32_t FindTokenMultipleInputs(
     int32_t         argc,
     char* const     argv[],
     const char*     token,
-	char**          configStr)
+    char**          configStr)
 {
-	int32_t return_error = -1;
-	int32_t done = 0;
-	while((argc > 0) && (return_error != 0)) {
-		return_error = EB_STRCMP(argv[--argc], token);
-		if (return_error == 0) {
-			int32_t count;
-			for (count=0; count < MAX_CHANNEL_NUMBER  ; ++count){
-				if (done ==0){
-					if (argv[argc + count + 1] ){
-						if (strtoul(argv[argc + count + 1], NULL,0) != 0 || EB_STRCMP(argv[argc + count + 1], "0") == 0 ){
-							EB_STRCPY(configStr[count], COMMAND_LINE_MAX_SIZE, argv[argc + count + 1]);
-						}else if (argv[argc + count + 1][0] != '-'){
-							EB_STRCPY(configStr[count], COMMAND_LINE_MAX_SIZE, argv[argc + count + 1]);
-						}else {
-							EB_STRCPY(configStr[count], COMMAND_LINE_MAX_SIZE," ");
-							done = 1;
-						}
-					}else{
-						EB_STRCPY(configStr[count], COMMAND_LINE_MAX_SIZE, " ");
-						done =1;
-						//return return_error;
-					}
-				}else
-					EB_STRCPY(configStr[count], COMMAND_LINE_MAX_SIZE, " ");
-			}
-		}
-	}
+    int32_t return_error = -1;
+    int32_t done = 0;
+    while((argc > 0) && (return_error != 0)) {
+        return_error = EB_STRCMP(argv[--argc], token);
+        if (return_error == 0) {
+            int32_t count;
+            for (count=0; count < MAX_CHANNEL_NUMBER  ; ++count){
+                if (done ==0){
+                    if (argv[argc + count + 1] ){
+                        if (strtoul(argv[argc + count + 1], NULL,0) != 0 || EB_STRCMP(argv[argc + count + 1], "0") == 0 ){
+                            EB_STRCPY(configStr[count], COMMAND_LINE_MAX_SIZE, argv[argc + count + 1]);
+                        }else if (argv[argc + count + 1][0] != '-'){
+                            EB_STRCPY(configStr[count], COMMAND_LINE_MAX_SIZE, argv[argc + count + 1]);
+                        }else {
+                            EB_STRCPY(configStr[count], COMMAND_LINE_MAX_SIZE," ");
+                            done = 1;
+                        }
+                    }else{
+                        EB_STRCPY(configStr[count], COMMAND_LINE_MAX_SIZE, " ");
+                        done =1;
+                        //return return_error;
+                    }
+                }else
+                    EB_STRCPY(configStr[count], COMMAND_LINE_MAX_SIZE, " ");
+            }
+        }
+    }
 
-	return return_error;
+    return return_error;
 }
 
 uint32_t GetHelp(
     int32_t     argc,
     char *const argv[])
 {
-	char config_string[COMMAND_LINE_MAX_SIZE];
+    char config_string[COMMAND_LINE_MAX_SIZE];
     if (FindToken(argc, argv, HELP_TOKEN, config_string) == 0) {
         int32_t token_index = -1;
 
@@ -995,20 +995,20 @@ uint32_t GetNumberOfChannels(
     int32_t     argc,
     char *const argv[])
 {
-	char config_string[COMMAND_LINE_MAX_SIZE];
-	uint32_t channelNumber;
-	if (FindToken(argc, argv, CHANNEL_NUMBER_TOKEN, config_string) == 0) {
+    char config_string[COMMAND_LINE_MAX_SIZE];
+    uint32_t channelNumber;
+    if (FindToken(argc, argv, CHANNEL_NUMBER_TOKEN, config_string) == 0) {
 
-		// Set the input file
-		channelNumber = strtol(config_string,  NULL, 0);
-		if ((channelNumber > (uint32_t) MAX_CHANNEL_NUMBER) || channelNumber == 0){
-			printf("Error: The number of channels has to be within the range [1,%u]\n",(uint32_t) MAX_CHANNEL_NUMBER);
-			return 0;
-		}else{
-			return channelNumber;
-		}
-	}
-	return 1;
+        // Set the input file
+        channelNumber = strtol(config_string,  NULL, 0);
+        if ((channelNumber > (uint32_t) MAX_CHANNEL_NUMBER) || channelNumber == 0){
+            printf("Error: The number of channels has to be within the range [1,%u]\n",(uint32_t) MAX_CHANNEL_NUMBER);
+            return 0;
+        }else{
+            return channelNumber;
+        }
+    }
+    return 1;
 }
 
 void mark_token_as_read(
@@ -1106,11 +1106,11 @@ static EB_ERRORTYPE ParseMasteringDisplayColorVolumeSEI(
 * Read Command Line
 ******************************************/
 EB_ERRORTYPE ReadCommandLine(
-	int32_t        argc,
-	char *const    argv[],
-	EbConfig_t   **configs,
-	uint32_t       numChannels,
-	EB_ERRORTYPE  *return_errors)
+    int32_t        argc,
+    char *const    argv[],
+    EbConfig_t   **configs,
+    uint32_t       numChannels,
+    EB_ERRORTYPE  *return_errors)
 {
 
     EB_ERRORTYPE return_error = EB_ErrorBadParameter;
@@ -1126,7 +1126,7 @@ EB_ERRORTYPE ReadCommandLine(
     }
 
     // Copy tokens (except for CHANNEL_NUMBER_TOKEN ) into a temp token buffer hosting all tokens that are passed through the command line
-	size_t len = EB_STRLEN(CHANNEL_NUMBER_TOKEN, COMMAND_LINE_MAX_SIZE);
+    size_t len = EB_STRLEN(CHANNEL_NUMBER_TOKEN, COMMAND_LINE_MAX_SIZE);
     for (token_index = 0; token_index < argc; ++token_index) {
         if ((argv[token_index][0] == '-') && strncmp(argv[token_index], CHANNEL_NUMBER_TOKEN, len) && !is_negative_number(argv[token_index])) {
                 cmd_copy[cmd_token_cnt++] = argv[token_index];
