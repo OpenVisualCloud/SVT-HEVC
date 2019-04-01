@@ -825,9 +825,9 @@ void* PacketizationKernel(void *inputPtr)
                 refDecOrder = queueEntryPtr->pictureNumber;
             }
             /* update VBV plan */
-            EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
             if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize)
-            {
+            {   
+                EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
                 EB_S64 bufferfill_temp = (EB_S64)(encodeContextPtr->bufferFill);
                 bufferfill_temp -= queueEntryPtr->actualBits;
                 bufferfill_temp = MAX(bufferfill_temp, 0);
@@ -844,7 +844,7 @@ void* PacketizationKernel(void *inputPtr)
                         // Reset the bitstream
                         ResetBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
 
-                        EncodeFillerData(queueEntryPtr->bitStreamPtr2, fillerBytes, queueEntryPtr->picTimingEntry->temporalId);
+                        EncodeFillerData(queueEntryPtr->bitStreamPtr2, queueEntryPtr->picTimingEntry->temporalId);
 
                         // Flush the Bitstream
                         FlushBitstream(
