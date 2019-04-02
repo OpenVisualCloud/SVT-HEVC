@@ -391,6 +391,43 @@ EB_ERRORTYPE PreModeDecision(
 	return return_error;
 }
 
+void LimitMvOverBound(
+    EB_S16 *mvx,
+    EB_S16 *mvy,
+    ModeDecisionContext_t           *ctxtPtr,
+    const SequenceControlSet_t      *sCSet)
+{
+    EB_S32 mvxF, mvyF;
+
+    //L0
+    mvxF = *mvx;
+    mvyF = *mvy;
+
+    EB_S32 cuOriginX = (EB_S32)ctxtPtr->cuOriginX << 2;
+    EB_S32 cuOriginY = (EB_S32)ctxtPtr->cuOriginY << 2;
+    EB_S32 lumaWidth = (EB_S32)sCSet->lumaWidth << 2;
+    EB_S32 lumaHeight = (EB_S32)sCSet->lumaHeight << 2;
+    EB_S32 cuSize = (EB_S32)ctxtPtr->cuStats->size << 2;
+    EB_S32 pad = 4 << 2;
+
+
+    if (cuOriginX + mvxF + cuSize > (lumaWidth - pad)) {
+        *mvx = lumaWidth - pad - cuSize - cuOriginX;
+    }
+
+    if (cuOriginY + mvyF + cuSize > (lumaHeight - pad)) {
+        *mvy = lumaHeight - pad - cuSize - cuOriginY;
+    }
+
+    if (cuOriginX + mvxF < pad) {
+        *mvx = pad - cuOriginX;
+    }
+
+    if (cuOriginY + mvyF < pad) {
+        *mvy = pad - cuOriginY;
+    }
+}
+
 void Me2Nx2NCandidatesInjection(
     PictureControlSet_t            *pictureControlSetPtr,
     ModeDecisionContext_t          *contextPtr,
@@ -429,6 +466,37 @@ void Me2Nx2NCandidatesInjection(
         if (pictureControlSetPtr->ParentPcsPtr->useSubpelFlag == 0){
             RoundMv(candidateArray,
                 canTotalCnt);
+        }
+
+        //constrain mv
+        if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0) {
+            if (interDirection == UNI_PRED_LIST_0) {
+                LimitMvOverBound(
+                    &candidateArray[canTotalCnt].motionVector_x_L0,
+                    &candidateArray[canTotalCnt].motionVector_y_L0,
+                    contextPtr,
+                    sequenceControlSetPtr);
+            }
+            else if (interDirection == UNI_PRED_LIST_1) {
+                LimitMvOverBound(
+                    &candidateArray[canTotalCnt].motionVector_x_L1,
+                    &candidateArray[canTotalCnt].motionVector_y_L1,
+                    contextPtr,
+                    sequenceControlSetPtr);
+            }
+            else {
+                LimitMvOverBound(
+                    &candidateArray[canTotalCnt].motionVector_x_L0,
+                    &candidateArray[canTotalCnt].motionVector_y_L0,
+                    contextPtr,
+                    sequenceControlSetPtr);
+
+                LimitMvOverBound(
+                    &candidateArray[canTotalCnt].motionVector_x_L1,
+                    &candidateArray[canTotalCnt].motionVector_y_L1,
+                    contextPtr,
+                    sequenceControlSetPtr);
+            }
         }
 
 		candidateArray[canTotalCnt].meDistortion = mePuResult->distortionDirection[meCandidateIndex].distortion;
@@ -1356,6 +1424,74 @@ void  ProductIntraCandidateInjection(
     return;
 }
 
+EB_BOOL CheckForMvOverBound(
+    EB_S16 mvx,
+    EB_S16 mvy,
+    ModeDecisionContext_t           *ctxtPtr,
+    const SequenceControlSet_t      *sCSet)
+{
+    EB_S32 mvxF, mvyF;
+
+    //L0
+    mvxF = (EB_S32)mvx;
+    mvyF = (EB_S32)mvy;
+
+    EB_S32 cuOriginX = (EB_S32)ctxtPtr->cuOriginX << 2;
+    EB_S32 cuOriginY = (EB_S32)ctxtPtr->cuOriginY << 2;
+    EB_S32 lumaWidth = (EB_S32)sCSet->lumaWidth << 2;
+    EB_S32 lumaHeight = (EB_S32)sCSet->lumaHeight << 2;
+    EB_S32 cuSize = (EB_S32)ctxtPtr->cuStats->size << 2;
+    EB_S32 pad = 4 << 2;
+
+
+    if (cuOriginX + mvxF + cuSize > (lumaWidth - pad)) {
+
+        if (cuOriginX + mvxF + cuSize > lumaWidth) {
+            return EB_TRUE;
+        }
+        else {
+            if (mvxF % 4 != 0 || mvxF % 8 != 0) {
+                return EB_TRUE;
+            }
+        }
+    }
+
+    if (cuOriginY + mvyF + cuSize > (lumaHeight - pad)) {
+        if (cuOriginY + mvyF + cuSize > lumaHeight) {
+            return EB_TRUE;
+        }
+        else {
+            if (mvyF % 4 != 0 || mvyF % 8 != 0) {
+                return EB_TRUE;
+            }
+        }
+    }
+
+    if (cuOriginX + mvxF < pad) {
+        if (cuOriginX + mvxF < 0) {
+            return EB_TRUE;
+        }
+        else {
+            if (mvxF % 4 != 0 || mvxF % 8 != 0) {
+                return EB_TRUE;
+            }
+        }
+    }
+
+    if (cuOriginY + mvyF < pad) {
+        if (cuOriginY + mvyF < 0) {
+            return EB_TRUE;
+        }
+        else {
+            if (mvyF % 4 != 0 || mvyF % 8 != 0) {
+                return EB_TRUE;
+            }
+        }
+    }
+
+    return EB_FALSE;
+}
+
 void ProductMergeSkip2Nx2NCandidatesInjection(
     ModeDecisionContext_t          *contextPtr,
     const SequenceControlSet_t     *sequenceControlSetPtr,
@@ -1369,6 +1505,7 @@ void ProductMergeSkip2Nx2NCandidatesInjection(
     EB_U8                    modeDecisionCandidateIndex = 0;
     EB_U32                   duplicateIndex;
     EB_BOOL                  mvMergeDuplicateFlag       = EB_FALSE;
+    EB_BOOL                  mvOutOfPicFlag             = EB_FALSE;
     (void)sequenceControlSetPtr;
     ModeDecisionCandidate_t	*candidateArray             = contextPtr->fastCandidateArray;
 
@@ -1383,6 +1520,7 @@ void ProductMergeSkip2Nx2NCandidatesInjection(
 
             // add a duplicate detector to mode decision array
             mvMergeDuplicateFlag    = EB_FALSE;
+            mvOutOfPicFlag          = EB_FALSE;
             duplicateIndex          = modeDecisionCandidateIndex;
             EB_BOOL duplicateFlags[EB_PREDDIRECTION_TOTAL];
             while ((duplicateIndex > 0) && (mvMergeDuplicateFlag == EB_FALSE)) {
@@ -1395,8 +1533,38 @@ void ProductMergeSkip2Nx2NCandidatesInjection(
                 mvMergeDuplicateFlag = (EB_BOOL)(mvMergeCandidatePtr->predictionDirection == interPredictionPtr->mvMergeCandidateArray[duplicateIndex].predictionDirection && duplicateFlags[mvMergeCandidatePtr->predictionDirection]);
             }
 
-      
-            if (mvMergeDuplicateFlag == EB_FALSE){
+            if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0) {
+                if (mvMergeCandidatePtr->predictionDirection == UNI_PRED_LIST_0) {
+                    mvOutOfPicFlag = CheckForMvOverBound(
+                        candidateMv[REF_LIST_0].x,
+                        candidateMv[REF_LIST_0].y,
+                        contextPtr,
+                        sequenceControlSetPtr);
+                }
+                else if (mvMergeCandidatePtr->predictionDirection == UNI_PRED_LIST_1) {
+                    mvOutOfPicFlag = CheckForMvOverBound(
+                        candidateMv[REF_LIST_1].x,
+                        candidateMv[REF_LIST_1].y,
+                        contextPtr,
+                        sequenceControlSetPtr);
+                }
+                else {
+                    mvOutOfPicFlag = CheckForMvOverBound(
+                        candidateMv[REF_LIST_0].x,
+                        candidateMv[REF_LIST_0].y,
+                        contextPtr,
+                        sequenceControlSetPtr);
+                    mvOutOfPicFlag += CheckForMvOverBound(
+                        candidateMv[REF_LIST_1].x,
+                        candidateMv[REF_LIST_1].y,
+                        contextPtr,
+                        sequenceControlSetPtr);
+                }
+            }
+
+
+            if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector  && mvMergeDuplicateFlag == EB_FALSE ||
+                !sequenceControlSetPtr->staticConfig.unrestrictedMotionVector && mvMergeDuplicateFlag == EB_FALSE && mvOutOfPicFlag == EB_FALSE) {
                 mdCandidatePtr->type = INTER_MODE;
                 mdCandidatePtr->distortionReady = 0;
                 //EB_MEMCPY(&mdCandidatePtr->MVs, &candidateMv[REF_LIST_0].x, 8);
