@@ -569,6 +569,13 @@ typedef struct EB_H265_ENC_CONFIGURATION
      * Default is 60. */
     int32_t                 injectorFrameRate;
 
+    /* Flag to constrain motion vectors.
+    *
+    * 1: Motion vectors are allowed to point outside frame boundary.
+    * 0: Motion vectors are NOT allowed to point outside frame boundary.
+    *
+    * Default is 1. */
+    uint8_t                 unrestrictedMotionVector;
 
     // Debug tools
 
