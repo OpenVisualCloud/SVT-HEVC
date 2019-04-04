@@ -2792,6 +2792,16 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
+    if (config->tileColumnCount < 1) {
+        SVT_LOG("SVT [Error]: Instance %u : Invalid tile column count\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->tileRowCount < 1) {
+        SVT_LOG("SVT [Error]: Instance %u : Invalid tile row count\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
     return return_error;
 }
 
