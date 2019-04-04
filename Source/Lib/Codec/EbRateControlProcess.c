@@ -2295,9 +2295,8 @@ EB_U8 Vbv_Buf_Calc(PictureControlSet_t *pictureControlSetPtr, SequenceControlSet
 			bufferFillCur -= curBits;
 			queueEntryIndexTemp++;
 		}
-		/* Try to get the buffer at least 50% filled, but don't set an impossible goal. */
-		double finalDur = 1;
-		targetFill = MIN(encodeContextPtr->bufferFill + totalDuration * encodeContextPtr->vbvMaxrate * 0.5, encodeContextPtr->vbvBufsize * (1 - 0.5 * finalDur));
+		
+		targetFill = MIN(encodeContextPtr->bufferFill + totalDuration * encodeContextPtr->vbvMaxrate * 0.5, encodeContextPtr->vbvBufsize * (1 - 0.5));
 		if (bufferFillCur < targetFill)
 		{
 			q++;
@@ -2308,8 +2307,8 @@ EB_U8 Vbv_Buf_Calc(PictureControlSet_t *pictureControlSetPtr, SequenceControlSet
 			loopTerminate |= 1;
 			continue;
 		}
-		/* Try to get the buffer not more than 80% filled, but don't set an impossible goal. */
-		targetFill = CLIP3(encodeContextPtr->vbvBufsize * (1 - 0.2 * finalDur), encodeContextPtr->vbvBufsize, encodeContextPtr->bufferFill - totalDuration * encodeContextPtr->vbvMaxrate * 0.5);
+		
+		targetFill = CLIP3(encodeContextPtr->vbvBufsize * (1 - 0.05), encodeContextPtr->vbvBufsize, encodeContextPtr->bufferFill - totalDuration * encodeContextPtr->vbvMaxrate * 0.5);
 		if ((bitrateFlag) && (bufferFillCur > targetFill))
 		{
 			q--;
