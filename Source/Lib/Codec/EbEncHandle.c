@@ -402,10 +402,10 @@ EB_ERRORTYPE InitThreadManagmentParams(){
                 if (socket_id < 0 || socket_id > 15) {
                     fclose(fin);
                     return EB_ErrorInsufficientResources;
-                    if (socket_id + 1 > numGroups)
-                        numGroups = socket_id + 1;
-                    lpGroup[socket_id].group[lpGroup[socket_id].num++] = processor_id;
                 }
+                if (socket_id + 1 > numGroups)
+                    numGroups = socket_id + 1;
+                lpGroup[socket_id].group[lpGroup[socket_id].num++] = processor_id;
             }
         }
         fclose(fin);
