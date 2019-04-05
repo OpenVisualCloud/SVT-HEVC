@@ -91,4 +91,3 @@ endif()
 # Add Subdirectories
 add_subdirectory (Source/Lib)
 add_subdirectory (Source/App)
-add_subdirectory (Source/SimpleApp)
