@@ -83,6 +83,8 @@
 #define VBV_MAX_RATE_TOKEN              "-vbv-maxrate"
 #define VBV_BUFFER_SIZE_TOKEN           "-vbv-bufsize"
 #define VBV_BUFFER_INIT_TOKEN           "-vbv-init"
+#define VBV_BUFFER_END_TOKEN            "-vbv-end"
+#define VBV_END_FRAME_ADJUST_TOKEN      "-vbv-end-fr-adj"
 #define HRD_TOKEN                       "-hrd"
 #define MAX_QP_TOKEN                    "-max-qp"
 #define MIN_QP_TOKEN                    "-min-qp"
@@ -202,6 +204,8 @@ static void SetImproveSharpness                 (const char *value, EbConfig_t *
 static void SetVbvMaxrate                       (const char *value, EbConfig_t *cfg) { cfg->vbvMaxRate = strtoul(value, NULL, 0); };
 static void SetVbvBufsize                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufsize = strtoul(value, NULL, 0); };
 static void SetVbvBufInit                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufInit = strtoul(value, NULL, 0); };
+static void SetVbvEndFrameAdjust                (const char *value, EbConfig_t *cfg) { cfg->vbvEndFrameAdjust = strtoul(value, NULL, 0); };
+static void SetVbvBufEnd                        (const char *value, EbConfig_t *cfg) { cfg->vbvBufEnd = strtoul(value, NULL, 0); };
 static void SetHrdFlag                          (const char *value, EbConfig_t *cfg) { cfg->hrdFlag = strtoul(value, NULL, 0); };
 static void SetVideoUsabilityInfo               (const char *value, EbConfig_t *cfg) {cfg->videoUsabilityInfo               = strtol(value,  NULL, 0);};
 static void SetHighDynamicRangeInput            (const char *value, EbConfig_t *cfg) {cfg->highDynamicRangeInput            = strtol(value,  NULL, 0);};
@@ -314,6 +318,9 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, VBV_BUFFER_SIZE_TOKEN, "vbvBufsize", SetVbvBufsize },
     { SINGLE_INPUT, HRD_TOKEN, "hrd", SetHrdFlag },
     { SINGLE_INPUT, VBV_BUFFER_INIT_TOKEN, "vbvBufInit", SetVbvBufInit},
+    { SINGLE_INPUT, VBV_BUFFER_END_TOKEN, "vbvBufEnd", SetVbvBufEnd},
+    { SINGLE_INPUT, VBV_END_FRAME_ADJUST_TOKEN, "vbvEndFrameAdjustToken", SetVbvEndFrameAdjust},
+
 
     // DLF
     { SINGLE_INPUT, LOOP_FILTER_DISABLE_TOKEN, "LoopFilterDisable", SetDisableDlfFlag },
@@ -425,6 +432,8 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->vbvMaxRate                           = 0;
     configPtr->vbvBufsize                           = 0;
     configPtr->vbvBufInit                           = 90;
+    configPtr->vbvBufEnd                            = 0;
+    configPtr->vbvEndFrameAdjust                    = 0;
     configPtr->hrdFlag                              =  0;
     configPtr->intraPeriod                          = -2;
     configPtr->intraRefreshType                     = 1;

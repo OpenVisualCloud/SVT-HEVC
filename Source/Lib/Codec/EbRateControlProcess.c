@@ -2296,32 +2296,63 @@ EB_U8 Vbv_Buf_Calc(PictureControlSet_t *pictureControlSetPtr, SequenceControlSet
 			queueEntryIndexTemp++;
 		}
 		
-		targetFill = MIN(encodeContextPtr->bufferFill + totalDuration * encodeContextPtr->vbvMaxrate * 0.5, encodeContextPtr->vbvBufsize * (1 - 0.5));
-		if (bufferFillCur < targetFill)
-		{
-			q++;
-			q = CLIP3(
-				sequenceControlSetPtr->staticConfig.minQpAllowed,
-				sequenceControlSetPtr->staticConfig.maxQpAllowed,
-				q);
-			loopTerminate |= 1;
-			continue;
-		}
-		
-		targetFill = CLIP3(encodeContextPtr->vbvBufsize * (1 - 0.05), encodeContextPtr->vbvBufsize, encodeContextPtr->bufferFill - totalDuration * encodeContextPtr->vbvMaxrate * 0.5);
-		if ((bitrateFlag) && (bufferFillCur > targetFill))
-		{
-			q--;
-			q = CLIP3(
-				sequenceControlSetPtr->staticConfig.minQpAllowed,
-				sequenceControlSetPtr->staticConfig.maxQpAllowed,
-				q);
-			loopTerminate |= 2;
-			continue;
-		}
-		break;
-	}
-	q = MAX(q0 / 2, q);
+        if (encodeContextPtr->vbvEndEmptiness && pictureControlSetPtr->ParentPcsPtr->decodeOrder >= (EB_U32)((sequenceControlSetPtr->staticConfig.vbvEndFrameAdjust / 100.0) * sequenceControlSetPtr->staticConfig.framesToBeEncoded))
+        {
+            EB_BOOL loopBreak = EB_FALSE;
+            double bufferDiff = (encodeContextPtr->vbvEndEmptiness / 100.0) - ((double)encodeContextPtr->bufferFill / (double)encodeContextPtr->vbvBufsize);
+            targetFill = encodeContextPtr->bufferFill + encodeContextPtr->vbvBufsize * (bufferDiff / (sequenceControlSetPtr->staticConfig.framesToBeEncoded - pictureControlSetPtr->ParentPcsPtr->decodeOrder));
+            if (bufferFillCur < targetFill)
+            {
+                q++;
+                q = CLIP3(
+                    sequenceControlSetPtr->staticConfig.minQpAllowed,
+                    sequenceControlSetPtr->staticConfig.maxQpAllowed,
+                    q);
+                loopTerminate |= 1;
+                loopBreak = EB_TRUE;
+            }
+            if (bufferFillCur > ((encodeContextPtr->vbvEndEmptiness / 100.0) * encodeContextPtr->vbvBufsize))
+            {
+                q--;
+                q = CLIP3(
+                    sequenceControlSetPtr->staticConfig.minQpAllowed,
+                    sequenceControlSetPtr->staticConfig.maxQpAllowed,
+                    q);
+                loopTerminate |= 2;
+                loopBreak = EB_TRUE;
+            }
+            if (!loopBreak)
+                break;
+        }
+
+        else {
+            targetFill = MIN(encodeContextPtr->bufferFill + totalDuration * encodeContextPtr->vbvMaxrate * 0.5, encodeContextPtr->vbvBufsize * (1 - 0.5));
+            if (bufferFillCur < targetFill)
+            {
+                q++;
+                q = CLIP3(
+                    sequenceControlSetPtr->staticConfig.minQpAllowed,
+                    sequenceControlSetPtr->staticConfig.maxQpAllowed,
+                    q);
+                loopTerminate |= 1;
+                continue;
+            }
+
+            targetFill = CLIP3(encodeContextPtr->vbvBufsize * (1 - 0.05), encodeContextPtr->vbvBufsize, encodeContextPtr->bufferFill - totalDuration * encodeContextPtr->vbvMaxrate * 0.5);
+            if ((bitrateFlag) && (bufferFillCur > targetFill))
+            {
+                q--;
+                q = CLIP3(
+                    sequenceControlSetPtr->staticConfig.minQpAllowed,
+                    sequenceControlSetPtr->staticConfig.maxQpAllowed,
+                    q);
+                loopTerminate |= 2;
+                continue;
+            }
+            break;
+        }
+    }
+    q = MAX(q0 / 2, q);
 	return (EB_U8)q;
 }
 
@@ -2393,6 +2424,7 @@ void* RateControlKernel(void *inputPtr)
                 contextPtr->highLevelRateControlPtr->channelBitRatePerSw            = contextPtr->highLevelRateControlPtr->channelBitRatePerFrame * (sequenceControlSetPtr->staticConfig.lookAheadDistance + 1);
                 contextPtr->highLevelRateControlPtr->bitConstraintPerSw             = contextPtr->highLevelRateControlPtr->channelBitRatePerSw;
                 encodeContextPtr->bufferFill = (EB_U64)(sequenceControlSetPtr->staticConfig.vbvBufsize * sequenceControlSetPtr->staticConfig.vbvBufInit / 100);
+                encodeContextPtr->vbvEndEmptiness = sequenceControlSetPtr->staticConfig.vbvBufEnd;
 #if RC_UPDATE_TARGET_RATE
                 contextPtr->highLevelRateControlPtr->previousUpdatedBitConstraintPerSw = contextPtr->highLevelRateControlPtr->channelBitRatePerSw;
 #endif

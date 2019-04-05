@@ -511,7 +511,8 @@ typedef struct EB_H265_ENC_CONFIGURATION
     uint32_t                vbvBufsize;
     uint32_t                hrdFlag;
     uint64_t                vbvBufInit;
-
+    uint64_t                vbvBufEnd;
+    uint64_t                vbvEndFrameAdjust;
     /* ID assigned to each channel when multiple instances are running within the
      * same application. */
     uint32_t                channelId;
