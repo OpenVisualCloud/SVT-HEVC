@@ -922,12 +922,12 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
     pictureWidthInLcu = (config->sourceWidth + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE; 
     pictureHeightInLcu = (config->sourceHeight + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE; 
 
-    if (config->tileColumnCount > EB_TILE_COLUMN_MAX_COUNT) {
+    if (config->tileColumnCount < 1 || config->tileColumnCount > EB_TILE_COLUMN_MAX_COUNT) {
         printf("Error Instance %u: Invalid TileColumnCount. TileColumnCount range should be 1 to 16. In order to specify more than 16 tile columns, please increase the value of the macro EB_TILE_COLUMN_MAX_COUNT defined in EbDefinitions.h\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->tileRowCount > EB_TILE_ROW_MAX_COUNT) {
+    if (config->tileRowCount < 1 || config->tileRowCount > EB_TILE_ROW_MAX_COUNT) {
         printf("Error Instance %u: Invalid TileRowCount. TileRowCount range should be 1 to 16. In order to specify more than 16 tile rows, please increase the value of the macro EB_TILE_ROW_MAX_COUNT defined in EbDefinitions.h\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }

@@ -2793,6 +2793,16 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
+    if (config->tileColumnCount < 1) {
+        SVT_LOG("SVT [Error]: Instance %u : Invalid tile column count\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->tileRowCount < 1) {
+        SVT_LOG("SVT [Error]: Instance %u : Invalid tile row count\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
     if (config->unrestrictedMotionVector > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid Unrestricted Motion Vector flag [0 - 1]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
