@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright(c) 2018 Intel Corporation 
+# Copyright(c) 2018 Intel Corporation
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 
 function clean {
@@ -24,8 +24,6 @@ function debug {
 
 	# Compile the App
 	make -j SvtHevcEncApp
-	# Compile the Simple App
-	make -j SvtHevcEncSimpleApp
 	cd ..
 }
 
@@ -43,9 +41,7 @@ function release {
 
 	# Compile the App
 	make -j SvtHevcEncApp
-	# Compile the Simple App
-	make -j SvtHevcEncSimpleApp
-	cd ..	
+	cd ..
 }
 
 # Defines
@@ -73,4 +69,3 @@ else
 fi
 
 exit
- 
