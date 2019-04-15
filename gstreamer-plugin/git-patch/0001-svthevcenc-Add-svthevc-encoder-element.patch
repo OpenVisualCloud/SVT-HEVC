@@ -1,4 +1,4 @@
-From 8436b4b6e13f132a8c6ddee1097e444057a8c0d1 Mon Sep 17 00:00:00 2001
+From 3bb9914d6393f7cd0d05609c38da48637728cb95 Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -8,14 +8,14 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  ext/Makefile.am                   |   12 +-
  ext/meson.build                   |    1 +
  ext/svthevc/Makefile.am           |   16 +
- ext/svthevc/gstsvthevcenc.c       | 1430 +++++++++++++++++++++++++++++++++++++
- ext/svthevc/gstsvthevcenc.h       |  116 +++
+ ext/svthevc/gstsvthevcenc.c       | 1463 +++++++++++++++++++++++++++++++++++++
+ ext/svthevc/gstsvthevcenc.h       |  118 +++
  ext/svthevc/meson.build           |   16 +
  tests/check/Makefile.am           |    7 +
  tests/check/elements/.gitignore   |    1 +
  tests/check/elements/svthevcenc.c |  228 ++++++
  tests/check/meson.build           |    1 +
- 11 files changed, 1834 insertions(+), 2 deletions(-)
+ 11 files changed, 1869 insertions(+), 2 deletions(-)
  create mode 100644 ext/svthevc/Makefile.am
  create mode 100644 ext/svthevc/gstsvthevcenc.c
  create mode 100644 ext/svthevc/gstsvthevcenc.h
@@ -124,10 +124,10 @@ index 0000000..7d0e618
 +noinst_HEADERS = gstsvthevcenc.h
 diff --git a/ext/svthevc/gstsvthevcenc.c b/ext/svthevc/gstsvthevcenc.c
 new file mode 100644
-index 0000000..d71b851
+index 0000000..c0e725b
 --- /dev/null
 +++ b/ext/svthevc/gstsvthevcenc.c
-@@ -0,0 +1,1430 @@
+@@ -0,0 +1,1463 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 + *
@@ -193,6 +193,8 @@ index 0000000..d71b851
 +  PROP_INTRA_REFRESH,
 +  PROP_CORES,
 +  PROP_SOCKET,
++  PROP_TILE_ROW,
++  PROP_TILE_COL,
 +};
 +
 +#define PROP_INSERT_VUI_DEFAULT             FALSE
@@ -213,6 +215,8 @@ index 0000000..d71b851
 +#define PROP_INTRA_REFRESH_DEFAULT          1
 +#define PROP_CORES_DEFAULT                  0
 +#define PROP_SOCKET_DEFAULT                 -1
++#define PROP_TILE_ROW_DEFAULT               1
++#define PROP_TILE_COL_DEFAULT               1
 +
 +#define PROFILE_DEFAULT                     2
 +#define LEVEL_DEFAULT                       0
@@ -445,6 +449,18 @@ index 0000000..d71b851
 +          -1, 1, PROP_SOCKET_DEFAULT,
 +          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 +
++  g_object_class_install_property (gobject_class, PROP_TILE_ROW,
++      g_param_spec_uint ("tile-row", "Tile Row Count",
++          "Tile count in the Row",
++          1, 16, PROP_TILE_ROW_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_TILE_COL,
++      g_param_spec_uint ("tile-col", "Tile Column Count",
++          "Tile count in the Column",
++          1, 16, PROP_TILE_COL_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
 +  gst_element_class_set_static_metadata (element_class,
 +      "svthevcenc", "Codec/Encoder/Video", "H265 Encoder",
 +      "Yeongjin Jeong <yeongjin.jeong@navercorp.com>");
@@ -491,6 +507,8 @@ index 0000000..d71b851
 +  encoder->intra_refresh = PROP_INTRA_REFRESH_DEFAULT;
 +  encoder->cores = PROP_CORES_DEFAULT;
 +  encoder->socket = PROP_SOCKET_DEFAULT;
++  encoder->tile_row = PROP_TILE_ROW_DEFAULT;
++  encoder->tile_col = PROP_TILE_COL_DEFAULT;
 +
 +  encoder->profile = PROFILE_DEFAULT;
 +  encoder->tier = TIER_DEFAULT;
@@ -680,6 +698,9 @@ index 0000000..d71b851
 +  param->intraRefreshType = encoder->intra_refresh;
 +  param->logicalProcessors = encoder->cores;
 +  param->targetSocket = encoder->socket;
++
++  param->tileRowCount = encoder->tile_row;
++  param->tileColumnCount = encoder->tile_col;
 +
 +  /* Send VPS, SPS and PPS Insertion in first IDR frame */
 +  param->codeVpsSpsPps = 1;
@@ -1456,6 +1477,12 @@ index 0000000..d71b851
 +    case PROP_SOCKET:
 +      encoder->socket = g_value_get_int (value);
 +      break;
++    case PROP_TILE_ROW:
++      encoder->tile_row = g_value_get_uint (value);
++      break;
++    case PROP_TILE_COL:
++      encoder->tile_col = g_value_get_uint (value);
++      break;
 +    default:
 +      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 +      break;
@@ -1536,6 +1563,12 @@ index 0000000..d71b851
 +    case PROP_SOCKET:
 +      g_value_set_int (value, encoder->socket);
 +      break;
++    case PROP_TILE_ROW:
++      g_value_set_uint (value, encoder->tile_row);
++      break;
++    case PROP_TILE_COL:
++      g_value_set_uint (value, encoder->tile_col);
++      break;
 +    default:
 +      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 +      break;
@@ -1560,10 +1593,10 @@ index 0000000..d71b851
 +    plugin_init, VERSION, "GPL", GST_PACKAGE_NAME, GST_PACKAGE_ORIGIN)
 diff --git a/ext/svthevc/gstsvthevcenc.h b/ext/svthevc/gstsvthevcenc.h
 new file mode 100644
-index 0000000..a85a470
+index 0000000..be1d492
 --- /dev/null
 +++ b/ext/svthevc/gstsvthevcenc.h
-@@ -0,0 +1,116 @@
+@@ -0,0 +1,118 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 + *
@@ -1654,6 +1687,8 @@ index 0000000..a85a470
 +  guint intra_refresh;
 +  guint cores;
 +  gint socket;
++  guint tile_row;
++  guint tile_col;
 +
 +  guint profile;
 +  guint tier;
