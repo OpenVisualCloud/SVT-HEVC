@@ -2275,7 +2275,7 @@ EB_U8 Vbv_Buf_Calc(PictureControlSet_t *pictureControlSetPtr, SequenceControlSet
 		double fps = 1.0 / (sequenceControlSetPtr->frameRate >> RC_PRECISION);
 		double totalDuration = fps;
 		queueEntryIndexTemp = currentInd;
-
+        queueEntryIndexTemp++;
 		/* Loop over the planned future frames. */
 		for (EB_S32 j = 0; bufferFillCur >= 0; j++)
 		{
