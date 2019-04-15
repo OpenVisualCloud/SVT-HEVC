@@ -1,4 +1,4 @@
-From 3bb9914d6393f7cd0d05609c38da48637728cb95 Mon Sep 17 00:00:00 2001
+From 19f59d2c7fff74a8828231ebdc1a4196dfdd3d50 Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -7,15 +7,15 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  configure.ac                      |    8 +
  ext/Makefile.am                   |   12 +-
  ext/meson.build                   |    1 +
- ext/svthevc/Makefile.am           |   16 +
- ext/svthevc/gstsvthevcenc.c       | 1463 +++++++++++++++++++++++++++++++++++++
+ ext/svthevc/Makefile.am           |   18 +
+ ext/svthevc/gstsvthevcenc.c       | 1561 +++++++++++++++++++++++++++++++++++++
  ext/svthevc/gstsvthevcenc.h       |  118 +++
  ext/svthevc/meson.build           |   16 +
  tests/check/Makefile.am           |    7 +
  tests/check/elements/.gitignore   |    1 +
  tests/check/elements/svthevcenc.c |  228 ++++++
  tests/check/meson.build           |    1 +
- 11 files changed, 1869 insertions(+), 2 deletions(-)
+ 11 files changed, 1969 insertions(+), 2 deletions(-)
  create mode 100644 ext/svthevc/Makefile.am
  create mode 100644 ext/svthevc/gstsvthevcenc.c
  create mode 100644 ext/svthevc/gstsvthevcenc.h
@@ -102,21 +102,23 @@ index cd193b7..918980d 100644
 +subdir('svthevc')
 diff --git a/ext/svthevc/Makefile.am b/ext/svthevc/Makefile.am
 new file mode 100644
-index 0000000..7d0e618
+index 0000000..a405882
 --- /dev/null
 +++ b/ext/svthevc/Makefile.am
-@@ -0,0 +1,16 @@
+@@ -0,0 +1,18 @@
 +plugin_LTLIBRARIES = libgstsvthevc.la
 +
 +libgstsvthevc_la_SOURCES = gstsvthevcenc.c
 +libgstsvthevc_la_CFLAGS = \
 +	$(GST_PLUGINS_BASE_CFLAGS) \
++	$(GST_BASE_CFLAGS) \
 +	$(GST_CFLAGS) \
 +	$(SVTHEVC_CFLAGS)
 +libgstsvthevc_la_LIBADD = \
 +	$(GST_PLUGINS_BASE_LIBS) \
 +	-lgstvideo-$(GST_API_VERSION) \
 +	-lgstpbutils-$(GST_API_VERSION) \
++	$(GST_BASE_LIBS) \
 +	$(GST_LIBS) \
 +	$(SVTHEVC_LIBS)
 +libgstsvthevc_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
@@ -124,10 +126,10 @@ index 0000000..7d0e618
 +noinst_HEADERS = gstsvthevcenc.h
 diff --git a/ext/svthevc/gstsvthevcenc.c b/ext/svthevc/gstsvthevcenc.c
 new file mode 100644
-index 0000000..c0e725b
+index 0000000..9803fca
 --- /dev/null
 +++ b/ext/svthevc/gstsvthevcenc.c
-@@ -0,0 +1,1463 @@
+@@ -0,0 +1,1561 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 + *
@@ -165,6 +167,7 @@ index 0000000..c0e725b
 +#include <gst/video/video.h>
 +#include <gst/video/gstvideometa.h>
 +#include <gst/video/gstvideopool.h>
++#include <gst/base/gstbitreader.h>
 +
 +#include <string.h>
 +#include <stdlib.h>
@@ -223,9 +226,9 @@ index 0000000..c0e725b
 +#define TIER_DEFAULT                        0
 +
 +#if G_BYTE_ORDER == G_LITTLE_ENDIAN
-+#define FORMATS "I420, I420_10LE"
++#define FORMATS "I420, Y444, I420_10LE, Y444_10LE"
 +#else
-+#define FORMATS "I420, I420_10BE"
++#define FORMATS "I420, Y444, I420_10BE, Y444_10BE"
 +#endif
 +
 +static GstStaticPadTemplate sink_factory = GST_STATIC_PAD_TEMPLATE ("sink",
@@ -244,7 +247,8 @@ index 0000000..c0e725b
 +        "framerate = (fraction) [0/1, MAX], "
 +        "width = (int) [ 64, 8192 ], " "height = (int) [ 64, 4320 ], "
 +        "stream-format = (string) byte-stream, "
-+        "alignment = (string) au, " "profile = (string) { main, main-10 }")
++        "alignment = (string) au, "
++        "profile = (string) { main, main-10, main-4:4:4 }")
 +    );
 +
 +static void gst_svthevc_enc_finalize (GObject * object);
@@ -643,6 +647,29 @@ index 0000000..c0e725b
 +  G_OBJECT_CLASS (parent_class)->finalize (object);
 +}
 +
++static gint
++gst_svthevc_enc_gst_to_svthevc_video_format (GstVideoFormat format,
++    gint * nplanes)
++{
++  switch (format) {
++    case GST_VIDEO_FORMAT_I420:
++    case GST_VIDEO_FORMAT_YV12:
++    case GST_VIDEO_FORMAT_I420_10LE:
++    case GST_VIDEO_FORMAT_I420_10BE:
++      if (nplanes)
++        *nplanes = 3;
++      return EB_YUV420;
++    case GST_VIDEO_FORMAT_Y444:
++    case GST_VIDEO_FORMAT_Y444_10LE:
++    case GST_VIDEO_FORMAT_Y444_10BE:
++      if (nplanes)
++        *nplanes = 3;
++      return EB_YUV444;
++    default:
++      g_return_val_if_reached (GST_VIDEO_FORMAT_UNKNOWN);
++  }
++}
++
 +static void
 +config_enc_params (GstSvtHevcEnc * encoder, EB_H265_ENC_CONFIGURATION * param)
 +{
@@ -655,7 +682,9 @@ index 0000000..c0e725b
 +  param->sourceHeight = info->height;
 +
 +  if (info->finfo->format == GST_VIDEO_FORMAT_I420_10LE ||
-+      info->finfo->format == GST_VIDEO_FORMAT_I420_10BE) {
++      info->finfo->format == GST_VIDEO_FORMAT_I420_10BE ||
++      info->finfo->format == GST_VIDEO_FORMAT_Y444_10LE ||
++      info->finfo->format == GST_VIDEO_FORMAT_Y444_10BE) {
 +    GST_DEBUG_OBJECT (encoder, "Encoder 10 bits depth input");
 +    /* Disable Compressed 10-bit format default.
 +     * SVT-HEVC support a compressed 10-bit format allowing the
@@ -720,6 +749,9 @@ index 0000000..c0e725b
 +  if (ten_bits) {
 +    param->encoderBitDepth = 10;
 +  }
++
++  param->encoderColorFormat =
++      gst_svthevc_enc_gst_to_svthevc_video_format (info->finfo->format, NULL);
 +}
 +
 +static void
@@ -866,6 +898,56 @@ index 0000000..c0e725b
 +  g_free (nal);
 +}
 +
++static const gchar *
++gst_svthevc_h265_get_format_range_ext_profile (guint16 val)
++{
++  GST_LOG ("format-range-extensions-profile : 0x%x", val);
++
++  switch (val) {
++    case 0x1c1:
++      return "main-4:4:4";
++    case 0x181:
++      return "main-4:4:4-10";
++    default:
++      break;
++  }
++
++  return NULL;
++}
++
++static const gchar *
++gst_svthevc_h265_get_profile (const guint8 * profile_tier_level, guint len)
++{
++  const gchar *profile = NULL;
++  gint profile_idc;
++
++  g_return_val_if_fail (profile_tier_level != NULL, NULL);
++
++  if (len < 2)
++    return NULL;
++
++  profile_idc = (profile_tier_level[0] & 0x1f);
++
++  if (profile_idc == 1)
++    profile = "main";
++  else if (profile_idc == 2)
++    profile = "main-10";
++  else if (profile_idc == 3)
++    profile = "main-still-picture";
++  else if (profile_idc == 4 && len >= 11) {
++    GstBitReader br = GST_BIT_READER_INIT (profile_tier_level, len);
++    guint16 range_ext;
++    if (!gst_bit_reader_skip (&br, 44))
++      return NULL;
++    if (!gst_bit_reader_get_bits_uint16 (&br, &range_ext, 9))
++      return NULL;
++    profile = gst_svthevc_h265_get_format_range_ext_profile (range_ext);
++  } else
++    profile = NULL;
++
++  return profile;
++}
++
 +static gboolean
 +gst_svthevc_enc_set_level_tier_and_profile (GstSvtHevcEnc * encoder,
 +    GstCaps * caps)
@@ -873,6 +955,7 @@ index 0000000..c0e725b
 +  EB_BUFFERHEADERTYPE *headerPtr = NULL, *nal = NULL;
 +  EB_ERRORTYPE svt_ret;
 +  gboolean ret = TRUE;
++  const gchar *level, *tier, *profile;
 +
 +  GST_DEBUG_OBJECT (encoder, "set profile, level and tier");
 +
@@ -888,12 +971,27 @@ index 0000000..c0e725b
 +
 +  nal = gst_svthevc_enc_bytestream_to_nal (encoder, headerPtr);
 +
-+  if (!gst_codec_utils_h265_caps_set_level_tier_and_profile (caps,
-+          nal->pBuffer + 6, nal->nFilledLen - 6)) {
-+    GST_ELEMENT_ERROR (encoder, STREAM, ENCODE, ("Encode svthevc failed."),
-+        ("Failed to find correct level, tier or profile in VPS"));
-+    ret = FALSE;
-+  }
++  level =
++      gst_codec_utils_h265_get_level (nal->pBuffer + 6, nal->nFilledLen - 6);
++  if (level != NULL)
++    gst_caps_set_simple (caps, "level", G_TYPE_STRING, level, NULL);
++
++  tier = gst_codec_utils_h265_get_tier (nal->pBuffer + 6, nal->nFilledLen - 6);
++  if (tier != NULL)
++    gst_caps_set_simple (caps, "tier", G_TYPE_STRING, tier, NULL);
++
++  /* codec_utils does not support h265 range extension profile yet.
++   * If GStreamer supports this, it will be better handle the profile data.
++   * https://gitlab.freedesktop.org/gstreamer/gst-plugins-base/issues/299
++   */
++  profile =
++      gst_svthevc_h265_get_profile (nal->pBuffer + 6, nal->nFilledLen - 6);
++  if (profile != NULL)
++    gst_caps_set_simple (caps, "profile", G_TYPE_STRING, profile, NULL);
++
++  GST_DEBUG_OBJECT (encoder, "profile : %s", (profile) ? profile : "---");
++  GST_DEBUG_OBJECT (encoder, "tier    : %s", (tier) ? tier : "---");
++  GST_DEBUG_OBJECT (encoder, "level   : %s", (level) ? level : "---");
 +
 +  svthevc_nal_free (nal);
 +
@@ -1039,6 +1137,8 @@ index 0000000..c0e725b
 +    if (profile) {
 +      if (g_str_has_prefix (profile, "main-10")) {
 +        encoder->profile = 2;
++      } else if (g_str_has_prefix (profile, "main-4:4:4")) {
++        encoder->profile = 4;
 +      } else if (g_str_has_prefix (profile, "main")) {
 +        encoder->profile = 1;
 +      } else {
@@ -1717,7 +1817,7 @@ index 0000000..be1d492
 +#endif /* __GST_SVTHEVC_ENC_H__ */
 diff --git a/ext/svthevc/meson.build b/ext/svthevc/meson.build
 new file mode 100644
-index 0000000..fadcd69
+index 0000000..5fdef45
 --- /dev/null
 +++ b/ext/svthevc/meson.build
 @@ -0,0 +1,16 @@
@@ -1732,7 +1832,7 @@ index 0000000..fadcd69
 +    svthevc_sources,
 +    c_args : gst_plugins_bad_args,
 +    include_directories : [configinc],
-+    dependencies : [gstpbutils_dep, gstvideo_dep, svthevc_dep],
++    dependencies : [gstbase_dep, gstpbutils_dep, gstvideo_dep, svthevc_dep],
 +    install : true,
 +    install_dir : plugins_install_dir,
 +  )
