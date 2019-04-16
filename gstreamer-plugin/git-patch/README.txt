@@ -11,13 +11,13 @@
 - git checkout 1.14
 - meson build
 - cd subprojects/gst-plugins-bad
-- git apply ../SVT-HEVC/gstreamer_plugin/0001-svth265enc-Add-svth265-encoder-element.patch
+- git apply ../SVT-HEVC/gstreamer-plugin/git-patch/0001-svthevcenc-Add-svthevc-encoder-element.patch
 - cd ../../gst-build
 - meson build --reconfigure
 - ninja -C build
 
 3. Verify
 >> Gstreamer is now built with svt-hevc, sample command line:
-gst-launch-1.0 videotestsrc ! svth265enc ! fakesink
-gst-launch-1.0 videotestsrc num-buffers=100 ! svth265enc ! h265parse ! qtmux ! filesink location=test.mp4
+- gst-launch-1.0 videotestsrc ! svthevcenc ! fakesink
+- gst-launch-1.0 videotestsrc num-buffers=100 ! svthevcenc ! h265parse ! qtmux ! filesink location=test.mp4
 
