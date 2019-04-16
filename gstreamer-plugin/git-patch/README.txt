@@ -20,4 +20,6 @@
 >> Gstreamer is now built with svt-hevc, sample command line:
 - gst-launch-1.0 videotestsrc ! svthevcenc ! fakesink
 - gst-launch-1.0 videotestsrc num-buffers=100 ! svthevcenc ! h265parse ! qtmux ! filesink location=test.mp4
+>> If you have Gstreamer already installed, run the 'gst-uninstalled' script that lets you enter an uninstalled development environment before using the command line: 
+- ninja -C build uninstalled
 
