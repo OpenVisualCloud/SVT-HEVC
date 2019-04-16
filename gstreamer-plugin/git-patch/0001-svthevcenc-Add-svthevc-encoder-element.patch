@@ -1,4 +1,4 @@
-From 19f59d2c7fff74a8828231ebdc1a4196dfdd3d50 Mon Sep 17 00:00:00 2001
+From 83342723b8c00ce56fd6f5dcfc6af9e21fd20df3 Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -1874,7 +1874,7 @@ index 5265a88..add5ee8 100644
  zbar
 diff --git a/tests/check/elements/svthevcenc.c b/tests/check/elements/svthevcenc.c
 new file mode 100644
-index 0000000..f0c1631
+index 0000000..0545b3c
 --- /dev/null
 +++ b/tests/check/elements/svthevcenc.c
 @@ -0,0 +1,228 @@
@@ -1903,16 +1903,16 @@ index 0000000..f0c1631
 +    GST_PAD_SINK,
 +    GST_PAD_ALWAYS,
 +    GST_STATIC_CAPS ("video/x-h265, "
-+        "width = (int) [1, MAX], "
-+        "height = (int) [1, MAX], " "framerate = (fraction) [0, MAX]"));
++        "width = (int) [ 64, 8192 ], "
++        "height = (int) [ 64, 4320 ], " "framerate = (fraction) [0, MAX]"));
 +
 +static GstStaticPadTemplate srctemplate = GST_STATIC_PAD_TEMPLATE ("src",
 +    GST_PAD_SRC,
 +    GST_PAD_ALWAYS,
 +    GST_STATIC_CAPS ("video/x-raw, "
 +        "format = (string) I420, "
-+        "width = (int) [1, MAX], "
-+        "height = (int) [1, MAX], " "framerate = (fraction) [0, MAX]"));
++        "width = (int) [ 64, 8192 ], "
++        "height = (int) [ 64, 4320 ], " "framerate = (fraction) [0, MAX]"));
 +
 +static GstPad *sinkpad, *srcpad;
 +
