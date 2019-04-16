@@ -1,4 +1,4 @@
-From 83342723b8c00ce56fd6f5dcfc6af9e21fd20df3 Mon Sep 17 00:00:00 2001
+From 8b546312e48f4b75ba7b6d73f40c99370fcfa612 Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -7,33 +7,33 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  configure.ac                      |    8 +
  ext/Makefile.am                   |   12 +-
  ext/meson.build                   |    1 +
- ext/svthevc/Makefile.am           |   18 +
- ext/svthevc/gstsvthevcenc.c       | 1561 +++++++++++++++++++++++++++++++++++++
- ext/svthevc/gstsvthevcenc.h       |  118 +++
- ext/svthevc/meson.build           |   16 +
+ ext/svthevcenc/Makefile.am        |   18 +
+ ext/svthevcenc/gstsvthevcenc.c    | 1561 +++++++++++++++++++++++++++++++++++++
+ ext/svthevcenc/gstsvthevcenc.h    |  118 +++
+ ext/svthevcenc/meson.build        |   16 +
  tests/check/Makefile.am           |    7 +
  tests/check/elements/.gitignore   |    1 +
  tests/check/elements/svthevcenc.c |  228 ++++++
  tests/check/meson.build           |    1 +
  11 files changed, 1969 insertions(+), 2 deletions(-)
- create mode 100644 ext/svthevc/Makefile.am
- create mode 100644 ext/svthevc/gstsvthevcenc.c
- create mode 100644 ext/svthevc/gstsvthevcenc.h
- create mode 100644 ext/svthevc/meson.build
+ create mode 100644 ext/svthevcenc/Makefile.am
+ create mode 100644 ext/svthevcenc/gstsvthevcenc.c
+ create mode 100644 ext/svthevcenc/gstsvthevcenc.h
+ create mode 100644 ext/svthevcenc/meson.build
  create mode 100644 tests/check/elements/svthevcenc.c
 
 diff --git a/configure.ac b/configure.ac
-index 943412c..c8714e7 100644
+index 943412c..ff91d62 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -2310,6 +2310,12 @@ AG_GST_CHECK_FEATURE(WEBRTC, [WebRTC], webrtc, [
    ])
  ])
  
-+dnl *** svthevc : works with libSVT-HEVC 1.3.0 ***
-+translit(dnm, m, l) AM_CONDITIONAL(USE_SVTHEVC, true)
-+AG_GST_CHECK_FEATURE(SVTHEVC, [svthevc plug-in], svthevc, [
-+  AG_GST_PKG_CHECK_MODULES(SVTHEVC, SvtHevcEnc >= 1.3.0)
++dnl *** svthevcenc : works with libSVT-HEVC 1.3.0 ***
++translit(dnm, m, l) AM_CONDITIONAL(USE_SVTHEVCENC, true)
++AG_GST_CHECK_FEATURE(SVTHEVCENC, [svthevcenc plug-in], svthevcenc, [
++  AG_GST_PKG_CHECK_MODULES(SVTHEVCENC, SvtHevcEnc >= 1.3.0)
 +])
 +
  else
@@ -43,7 +43,7 @@ index 943412c..c8714e7 100644
  AM_CONDITIONAL(USE_DTLS, false)
  AM_CONDITIONAL(USE_VULKAN, false)
  AM_CONDITIONAL(USE_TTML, false)
-+AM_CONDITIONAL(USE_SVTHEVC, false)
++AM_CONDITIONAL(USE_SVTHEVCENC, false)
  
  fi dnl of EXT plugins
  
@@ -51,22 +51,22 @@ index 943412c..c8714e7 100644
  ext/webrtc/Makefile
  ext/webrtcdsp/Makefile
  ext/ttml/Makefile
-+ext/svthevc/Makefile
++ext/svthevcenc/Makefile
  po/Makefile.in
  docs/Makefile
  docs/plugins/Makefile
 diff --git a/ext/Makefile.am b/ext/Makefile.am
-index 4de9214..d3ed2bb 100644
+index 4de9214..be87785 100644
 --- a/ext/Makefile.am
 +++ b/ext/Makefile.am
 @@ -400,6 +400,12 @@ else
  TTML_DIR=
  endif
  
-+if USE_SVTHEVC
-+SVTHEVC_DIR=svthevc
++if USE_SVTHEVCENC
++SVTHEVCENC_DIR=svthevcenc
 +else
-+SVTHEVC_DIR=
++SVTHEVCENC_DIR=
 +endif
 +
  SUBDIRS=\
@@ -78,7 +78,7 @@ index 4de9214..d3ed2bb 100644
  	$(TTML_DIR) \
 -	$(WEBRTC_DIR)
 +	$(WEBRTC_DIR) \
-+	$(SVTHEVC_DIR)
++	$(SVTHEVCENC_DIR)
  
  DIST_SUBDIRS = \
  	assrender \
@@ -88,47 +88,47 @@ index 4de9214..d3ed2bb 100644
  	ttml \
 -	webrtc
 +	webrtc \
-+	svthevc
++	svthevcenc
  
  include $(top_srcdir)/common/parallel-subdirs.mak
 diff --git a/ext/meson.build b/ext/meson.build
-index cd193b7..918980d 100644
+index cd193b7..1ec91da 100644
 --- a/ext/meson.build
 +++ b/ext/meson.build
 @@ -67,3 +67,4 @@ subdir('webrtc')
  subdir('webp')
  subdir('x265')
  subdir('zbar')
-+subdir('svthevc')
-diff --git a/ext/svthevc/Makefile.am b/ext/svthevc/Makefile.am
++subdir('svthevcenc')
+diff --git a/ext/svthevcenc/Makefile.am b/ext/svthevcenc/Makefile.am
 new file mode 100644
-index 0000000..a405882
+index 0000000..6d7f55a
 --- /dev/null
-+++ b/ext/svthevc/Makefile.am
++++ b/ext/svthevcenc/Makefile.am
 @@ -0,0 +1,18 @@
-+plugin_LTLIBRARIES = libgstsvthevc.la
++plugin_LTLIBRARIES = libgstsvthevcenc.la
 +
-+libgstsvthevc_la_SOURCES = gstsvthevcenc.c
-+libgstsvthevc_la_CFLAGS = \
++libgstsvthevcenc_la_SOURCES = gstsvthevcenc.c
++libgstsvthevcenc_la_CFLAGS = \
 +	$(GST_PLUGINS_BASE_CFLAGS) \
 +	$(GST_BASE_CFLAGS) \
 +	$(GST_CFLAGS) \
-+	$(SVTHEVC_CFLAGS)
-+libgstsvthevc_la_LIBADD = \
++	$(SVTHEVCENC_CFLAGS)
++libgstsvthevcenc_la_LIBADD = \
 +	$(GST_PLUGINS_BASE_LIBS) \
 +	-lgstvideo-$(GST_API_VERSION) \
 +	-lgstpbutils-$(GST_API_VERSION) \
 +	$(GST_BASE_LIBS) \
 +	$(GST_LIBS) \
-+	$(SVTHEVC_LIBS)
-+libgstsvthevc_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
++	$(SVTHEVCENC_LIBS)
++libgstsvthevcenc_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 +
 +noinst_HEADERS = gstsvthevcenc.h
-diff --git a/ext/svthevc/gstsvthevcenc.c b/ext/svthevc/gstsvthevcenc.c
+diff --git a/ext/svthevcenc/gstsvthevcenc.c b/ext/svthevcenc/gstsvthevcenc.c
 new file mode 100644
-index 0000000..9803fca
+index 0000000..75b3f8d
 --- /dev/null
-+++ b/ext/svthevc/gstsvthevcenc.c
++++ b/ext/svthevcenc/gstsvthevcenc.c
 @@ -0,0 +1,1561 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
@@ -1688,14 +1688,14 @@ index 0000000..9803fca
 +
 +GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
 +    GST_VERSION_MINOR,
-+    svthevc,
-+    "svt-hevc based H265 plugins",
++    svthevcenc,
++    "svt-hevc encoder based H265 plugins",
 +    plugin_init, VERSION, "GPL", GST_PACKAGE_NAME, GST_PACKAGE_ORIGIN)
-diff --git a/ext/svthevc/gstsvthevcenc.h b/ext/svthevc/gstsvthevcenc.h
+diff --git a/ext/svthevcenc/gstsvthevcenc.h b/ext/svthevcenc/gstsvthevcenc.h
 new file mode 100644
 index 0000000..be1d492
 --- /dev/null
-+++ b/ext/svthevc/gstsvthevcenc.h
++++ b/ext/svthevcenc/gstsvthevcenc.h
 @@ -0,0 +1,118 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
@@ -1815,37 +1815,37 @@ index 0000000..be1d492
 +
 +G_END_DECLS
 +#endif /* __GST_SVTHEVC_ENC_H__ */
-diff --git a/ext/svthevc/meson.build b/ext/svthevc/meson.build
+diff --git a/ext/svthevcenc/meson.build b/ext/svthevcenc/meson.build
 new file mode 100644
-index 0000000..5fdef45
+index 0000000..bac7572
 --- /dev/null
-+++ b/ext/svthevc/meson.build
++++ b/ext/svthevcenc/meson.build
 @@ -0,0 +1,16 @@
-+svthevc_sources = [
++svthevcenc_sources = [
 +  'gstsvthevcenc.c',
 +]
 +
-+svthevc_dep = dependency('SvtHevcEnc', required: false)
++svthevcenc_dep = dependency('SvtHevcEnc', required: false)
 +
-+if svthevc_dep.found()
-+  gstsvthevc = library('gstsvthevc',
-+    svthevc_sources,
++if svthevcenc_dep.found()
++  gstsvthevcenc = library('gstsvthevcenc',
++    svthevcenc_sources,
 +    c_args : gst_plugins_bad_args,
 +    include_directories : [configinc],
-+    dependencies : [gstbase_dep, gstpbutils_dep, gstvideo_dep, svthevc_dep],
++    dependencies : [gstbase_dep, gstpbutils_dep, gstvideo_dep, svthevcenc_dep],
 +    install : true,
 +    install_dir : plugins_install_dir,
 +  )
 +endif
 diff --git a/tests/check/Makefile.am b/tests/check/Makefile.am
-index 163ef06..8c5456d 100644
+index 163ef06..e67d699 100644
 --- a/tests/check/Makefile.am
 +++ b/tests/check/Makefile.am
 @@ -216,6 +216,12 @@ else
  check_msdk=
  endif
  
-+if USE_SVTHEVC
++if USE_SVTHEVCENC
 +check_svthevcenc=elements/svthevcenc
 +else
 +check_svthevcenc=
@@ -2107,14 +2107,14 @@ index 0000000..0545b3c
 +
 +GST_CHECK_MAIN (svthevcenc);
 diff --git a/tests/check/meson.build b/tests/check/meson.build
-index 9bfac48..d2ea6cb 100644
+index 9bfac48..51ae520 100644
 --- a/tests/check/meson.build
 +++ b/tests/check/meson.build
 @@ -57,6 +57,7 @@ base_tests = [
    [['elements/x265enc.c'], not x265_dep.found(), [x265_dep]],
    [['elements/zbar.c'], not zbar_dep.found(), [zbar_dep]],
    [['elements/msdkh264enc.c'], not have_msdk, [msdk_dep]],
-+  [['elements/svthevcenc.c'], not svthevc_dep.found(), [svthevc_dep]],
++  [['elements/svthevcenc.c'], not svthevcenc_dep.found(), [svthevcenc_dep]],
    [['libs/h264parser.c'], false, [gstcodecparsers_dep]],
    [['libs/h265parser.c'], false, [gstcodecparsers_dep]],
    [['libs/insertbin.c'], false, [gstinsertbin_dep]],
