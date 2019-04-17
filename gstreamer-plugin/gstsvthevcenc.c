@@ -78,48 +78,49 @@ gint compare_video_code_frame_and_pts (const void *video_codec_frame_ptr,
 enum
 {
   PROP_0,
+  PROP_INSERT_VUI,
   PROP_ENCMODE,
   PROP_TUNE,
-  PROP_LOWLATENCY,
-  PROP_SPEEDCONTROL,
+  PROP_LATENCY_MODE,
   PROP_B_PYRAMID,
-  PROP_P_FRAMES,
+  PROP_BASE_LAYER_SWITCH_MODE,
   PROP_PRED_STRUCTURE,
-  PROP_GOP_SIZE,
+  PROP_KEY_INT_MAX,
   PROP_INTRA_REFRESH,
   PROP_QP,
+  PROP_QP_MAX,
+  PROP_QP_MIN,
   PROP_DEBLOCKING,
   PROP_SAO,
   PROP_CONSTRAINED_INTRA,
   PROP_RC_MODE,
   PROP_BITRATE,
-  PROP_QP_MAX,
-  PROP_QP_MIN,
   PROP_LOOKAHEAD,
   PROP_SCD,
   PROP_AUD,
   PROP_CORES,
-  PROP_SOCKET
+  PROP_SOCKET,
+  PROP_TILE_ROW,
+  PROP_TILE_COL,
 };
 
-#define PROP_RC_MODE_CQP 0
-#define PROP_RC_MODE_VBR 1
-
+#define PROP_RC_MODE_CQP                    0
+#define PROP_RC_MODE_VBR                    1
+#define PROP_INSERT_VUI_DEFAULT             FALSE
 #define PROP_ENCMODE_DEFAULT                9
 #define PROP_TUNE_DEFAULT                   1
-#define PROP_LOWLATENCY_DEFAULT             FALSE
-#define PROP_SPEEDCONTROL_DEFAULT           0
+#define PROP_LATENCY_MODE_DEFAULT           0
 #define PROP_B_PYRAMID_DEFAULT              3
-#define PROP_P_FRAMES_DEFAULT               FALSE
+#define PROP_BASE_LAYER_SWITCH_MODE_DEFAULT 0
 #define PROP_PRED_STRUCTURE_DEFAULT         2
-#define PROP_GOP_SIZE_DEFAULT               -1
+#define PROP_KEY_INT_MAX_DEFAULT            -2
 #define PROP_INTRA_REFRESH_DEFAULT          1
 #define PROP_QP_DEFAULT                     25
 #define PROP_DEBLOCKING_DEFAULT             TRUE
 #define PROP_SAO_DEFAULT                    TRUE
 #define PROP_CONSTRAINED_INTRA_DEFAULT      FALSE
 #define PROP_RC_MODE_DEFAULT                PROP_RC_MODE_CQP
-#define PROP_BITRATE_DEFAULT                7000000
+#define PROP_BITRATE_DEFAULT                7000
 #define PROP_QP_MAX_DEFAULT                 48
 #define PROP_QP_MIN_DEFAULT                 10
 #define PROP_LOOKAHEAD_DEFAULT              (unsigned int)-1
@@ -127,27 +128,36 @@ enum
 #define PROP_AUD_DEFAULT                    FALSE
 #define PROP_CORES_DEFAULT                  0
 #define PROP_SOCKET_DEFAULT                 -1
+#define PROP_TILE_ROW_DEFAULT               1
+#define PROP_TILE_COL_DEFAULT               1
+
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
+#define FORMATS "I420, Y444, I420_10LE, Y444_10LE"
+#else
+#define FORMATS "I420, Y444, I420_10BE, Y444_10BE"
+#endif
 
 /* pad templates */
 static GstStaticPadTemplate gst_svthevcenc_sink_pad_template =
 GST_STATIC_PAD_TEMPLATE ("sink",
     GST_PAD_SINK,
     GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("video/x-raw, "
-        "format = (string) {I420, I420_10LE}, "
-        "width = (int) [64, 8192], "
-        "height = (int) [64, 4320], " "framerate = (fraction) [0, MAX]")
+    GST_STATIC_CAPS("video/x-raw, "
+        "format = (string) { " FORMATS " }, "
+        "framerate = (fraction) [0, MAX], "
+        "width = (int) [ 64, 8192 ], " "height = (int) [ 64, 4320 ]")
     );
 
 static GstStaticPadTemplate gst_svthevcenc_src_pad_template =
 GST_STATIC_PAD_TEMPLATE ("src",
     GST_PAD_SRC,
     GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("video/x-h265, "
+    GST_STATIC_CAPS("video/x-h265, "
+        "framerate = (fraction) [0/1, MAX], "
+        "width = (int) [ 64, 8192 ], " "height = (int) [ 64, 4320 ], "
         "stream-format = (string) byte-stream, "
         "alignment = (string) au, "
-        "width = (int) [64, 8192], "
-        "height = (int) [64, 4320], " "framerate = (fraction) [0, MAX]")
+        "profile = (string) { main, main-10}")
     );
 
 /* class initialization */
@@ -164,14 +174,14 @@ gst_svthevcenc_class_init (GstSvtHevcEncClass * klass)
   GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
   GstVideoEncoderClass *video_encoder_class = GST_VIDEO_ENCODER_CLASS (klass);
 
+  gst_element_class_add_static_pad_template(GST_ELEMENT_CLASS(klass),
+      &gst_svthevcenc_sink_pad_template);
+
   gst_element_class_add_static_pad_template (GST_ELEMENT_CLASS (klass),
       &gst_svthevcenc_src_pad_template);
 
-  gst_element_class_add_static_pad_template (GST_ELEMENT_CLASS (klass),
-      &gst_svthevcenc_sink_pad_template);
-
   gst_element_class_set_static_metadata (GST_ELEMENT_CLASS (klass),
-      "SvtHevcEnc", "Codec/Encoder/Video",
+      "svthevcenc", "Codec/Encoder/Video",
       "Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder)",
       "Xavier Hallade <xavier.hallade@intel.com> Jun Tian <jun.tian@intel.com>");
 
@@ -200,6 +210,10 @@ gst_svthevcenc_class_init (GstSvtHevcEncClass * klass)
       GST_DEBUG_FUNCPTR (gst_svthevcenc_propose_allocation);
   video_encoder_class->flush = GST_DEBUG_FUNCPTR (gst_svthevcenc_flush);
 
+  g_object_class_install_property(gobject_class, PROP_INSERT_VUI,
+      g_param_spec_boolean("insert-vui", "Insert VUI",
+          "Insert VUI NAL in stream",
+          PROP_INSERT_VUI_DEFAULT, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_ENCMODE,
       g_param_spec_uint ("speed", "speed (Encoder Mode)",
@@ -213,18 +227,13 @@ gst_svthevcenc_class_init (GstSvtHevcEncClass * klass)
       g_param_spec_uint ("tune", "Tune",
           "0 gives a visually optimized mode."
           " Set to 1 to tune for PSNR/SSIM, 2 for VMAF.",
-          0, 2, PROP_TUNE_DEFAULT, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+          0, 2, PROP_TUNE_DEFAULT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
-  g_object_class_install_property (gobject_class, PROP_LOWLATENCY,
-      g_param_spec_boolean ("low-latency", "Low latency",
-          "Set to true for lower latency",
-          PROP_LOWLATENCY_DEFAULT, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-
-  g_object_class_install_property (gobject_class, PROP_SPEEDCONTROL,
-      g_param_spec_uint ("speed-control", "Speed Control (in fps)",
-          "Dynamically change the encoding speed preset"
-          " to meet this defined average encoding speed (in fps)",
-          0, 240, PROP_SPEEDCONTROL_DEFAULT,
+  g_object_class_install_property (gobject_class, PROP_LATENCY_MODE,
+      g_param_spec_uint ("latency-mode", "Latency Mode",
+          "0=Normal Latency, 1=Low Latency",
+          0, 1, PROP_LATENCY_MODE_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_B_PYRAMID,
@@ -234,45 +243,62 @@ gst_svthevcenc_class_init (GstSvtHevcEncClass * klass)
           0, 3, PROP_B_PYRAMID_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
-  g_object_class_install_property (gobject_class, PROP_P_FRAMES,
-      g_param_spec_boolean ("p-frames", "P Frames",
-          "Use P-frames in the base layer",
-          PROP_P_FRAMES_DEFAULT, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+  g_object_class_install_property (gobject_class, PROP_BASE_LAYER_SWITCH_MODE_DEFAULT,
+      g_param_spec_uint ("baselayer-mode", "Base Layer Switch Mode",
+          "Random Access Prediction Structure type setting: "
+          "0=Use B-frames in the base layer pointing to the same past picture, 1=Use P-frames in the base layer",
+          0, 1, PROP_BASE_LAYER_SWITCH_MODE_DEFAULT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_PRED_STRUCTURE,
       g_param_spec_uint ("pred-struct", "Prediction Structure",
-          "0 : Low Delay P, 1 : Low Delay B"
-          ", 2 : Random Access",
+          "0 : Low Delay P, 1 : Low Delay B, 2 : Random Access",
           0, 2, PROP_PRED_STRUCTURE_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
-  g_object_class_install_property (gobject_class, PROP_GOP_SIZE,
-      g_param_spec_int ("gop-size", "GOP size",
-          "Period of Intra Frames insertion (-1 is auto)",
-          -1, 251, PROP_GOP_SIZE_DEFAULT,
+  g_object_class_install_property (gobject_class, PROP_KEY_INT_MAX,
+      g_param_spec_int ("key-int-max", "Key-frame maximal interval (gop size)",
+          "Distance Between Intra Frame inserted: -1=no intra update. -2=auto",
+          -2, 255, PROP_KEY_INT_MAX_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property(gobject_class, PROP_INTRA_REFRESH,
-      g_param_spec_int("intra-refresh", "Intra refresh type",
-          "CRA (open GOP)"
-          "or IDR frames (closed GOP)",
+      g_param_spec_int ("intra-refresh", "Intra refresh type",
+          "1=CRA (Open GOP), 2=IDR (Closed GOP)",
           1, 2, PROP_INTRA_REFRESH_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_QP,
       g_param_spec_uint ("qp", "Quantization parameter",
           "Initial quantization parameter for the Intra pictures in CQP mode",
-          0, 51, PROP_QP_DEFAULT, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+          0, 51, PROP_QP_DEFAULT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property(gobject_class, PROP_QP_MAX,
+      g_param_spec_uint ("max-qp", "Max Quantization parameter",
+          "Maximum QP value allowed for rate control use"
+          " Only used in VBR mode.",
+          0, 51, PROP_QP_MAX_DEFAULT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property(gobject_class, PROP_QP_MIN,
+      g_param_spec_uint ("min-qp", "Min Quantization parameter",
+          "Minimum QP value allowed for rate control use"
+          " Only used in VBR mode.",
+          0, 50, PROP_QP_MIN_DEFAULT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_DEBLOCKING,
       g_param_spec_boolean ("deblocking", "Deblocking Loop Filtering",
           "Enable Deblocking Loop Filtering",
-          PROP_DEBLOCKING_DEFAULT, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+          PROP_DEBLOCKING_DEFAULT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_SAO,
       g_param_spec_boolean ("sao", "Sample Adaptive Filter",
           "Enable Sample Adaptive Filtering",
-          PROP_SAO_DEFAULT, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+          PROP_SAO_DEFAULT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_CONSTRAINED_INTRA,
       g_param_spec_boolean ("constrained-intra", "Constrained Intra",
@@ -287,25 +313,10 @@ gst_svthevcenc_class_init (GstSvtHevcEncClass * klass)
           0, 1, PROP_RC_MODE_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
-  /* TODO: add GST_PARAM_MUTABLE_PLAYING property and handle it? */
   g_object_class_install_property (gobject_class, PROP_BITRATE,
       g_param_spec_uint ("bitrate", "Target bitrate",
-          "Target bitrate in bits/sec. Only used when in VBR mode",
-          1, G_MAXUINT, PROP_BITRATE_DEFAULT,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-
-  g_object_class_install_property (gobject_class, PROP_QP_MAX,
-      g_param_spec_uint ("max-qp", "Max Quantization parameter",
-          "Maximum QP value allowed for rate control use"
-          " Only used in VBR mode.",
-          0, 51, PROP_QP_MAX_DEFAULT,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-
-  g_object_class_install_property (gobject_class, PROP_QP_MIN,
-      g_param_spec_uint ("min-qp", "Min Quantization parameter",
-          "Minimum QP value allowed for rate control use"
-          " Only used in VBR mode.",
-          0, 50, PROP_QP_MIN_DEFAULT,
+          "Target bitrate in kbits/sec. Only used when in VBR mode",
+          1, UINT_MAX, PROP_BITRATE_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_LOOKAHEAD,
@@ -317,12 +328,14 @@ gst_svthevcenc_class_init (GstSvtHevcEncClass * klass)
   g_object_class_install_property (gobject_class, PROP_SCD,
       g_param_spec_boolean ("scd", "Scene Change Detection",
           "Enable Scene Change Detection algorithm",
-          PROP_SCD_DEFAULT, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+          PROP_SCD_DEFAULT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_AUD,
       g_param_spec_boolean ("aud", "Access Unit Delimiters",
           "Insert Access Unit Delimiters in the bitstream",
-          PROP_AUD_DEFAULT, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+          PROP_AUD_DEFAULT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_CORES,
       g_param_spec_uint ("cores", "Number of logical cores",
@@ -334,6 +347,18 @@ gst_svthevcenc_class_init (GstSvtHevcEncClass * klass)
       g_param_spec_int ("socket", "Target socket",
           "Target socket to run on. -1: all available",
           -1, 15, PROP_SOCKET_DEFAULT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property(gobject_class, PROP_TILE_ROW,
+      g_param_spec_uint("tile-row", "Tile Row Count",
+          "Tile count in the Row",
+          1, 16, PROP_TILE_ROW_DEFAULT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property(gobject_class, PROP_TILE_COL,
+      g_param_spec_uint("tile-col", "Tile Column Count",
+          "Tile count in the Column",
+          1, 16, PROP_TILE_COL_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 }
 
@@ -385,35 +410,35 @@ gst_svthevcenc_set_property (GObject * object, guint property_id,
     case PROP_TUNE:
       svthevcenc->svt_config->tune = g_value_get_uint (value);
       break;
-    case PROP_LOWLATENCY:
-      svthevcenc->svt_config->latencyMode = g_value_get_boolean (value);
-      break;
-    case PROP_SPEEDCONTROL:
-      if (g_value_get_uint (value) > 0) {
-        svthevcenc->svt_config->injectorFrameRate = g_value_get_uint (value);
-        svthevcenc->svt_config->speedControlFlag = 1;
-      } else {
-        svthevcenc->svt_config->injectorFrameRate = 60 << 16;
-        svthevcenc->svt_config->speedControlFlag = 0;
-      }
+    case PROP_LATENCY_MODE:
+      svthevcenc->svt_config->latencyMode = g_value_get_uint (value);
       break;
     case PROP_B_PYRAMID:
       svthevcenc->svt_config->hierarchicalLevels = g_value_get_uint (value);
       break;
-    case PROP_P_FRAMES:
-      svthevcenc->svt_config->baseLayerSwitchMode = g_value_get_boolean (value);
+    case PROP_BASE_LAYER_SWITCH_MODE:
+      svthevcenc->svt_config->baseLayerSwitchMode = g_value_get_uint (value);
       break;
     case PROP_PRED_STRUCTURE:
       svthevcenc->svt_config->predStructure = g_value_get_uint (value);
       break;
-    case PROP_GOP_SIZE:
-      svthevcenc->svt_config->intraPeriodLength = g_value_get_int (value) - 1;
+    case PROP_KEY_INT_MAX:
+    {
+      int gop = g_value_get_int (value);
+      svthevcenc->svt_config->intraPeriodLength = gop > 0 ? gop - 1 : gop;
       break;
+    }
     case PROP_INTRA_REFRESH:
       svthevcenc->svt_config->intraRefreshType = g_value_get_int(value);
       break;
     case PROP_QP:
       svthevcenc->svt_config->qp = g_value_get_uint (value);
+      break;
+    case PROP_QP_MAX:
+      svthevcenc->svt_config->maxQpAllowed = g_value_get_uint (value);
+      break;
+    case PROP_QP_MIN:
+      svthevcenc->svt_config->minQpAllowed = g_value_get_uint (value);
       break;
     case PROP_DEBLOCKING:
       svthevcenc->svt_config->disableDlfFlag = !g_value_get_boolean (value);
@@ -430,12 +455,6 @@ gst_svthevcenc_set_property (GObject * object, guint property_id,
     case PROP_BITRATE:
       svthevcenc->svt_config->targetBitRate = g_value_get_uint (value) * 1024;
       break;
-    case PROP_QP_MAX:
-      svthevcenc->svt_config->maxQpAllowed = g_value_get_uint (value);
-      break;
-    case PROP_QP_MIN:
-      svthevcenc->svt_config->minQpAllowed = g_value_get_uint (value);
-      break;
     case PROP_LOOKAHEAD:
       svthevcenc->svt_config->lookAheadDistance =
           (unsigned int) g_value_get_int (value);
@@ -447,11 +466,20 @@ gst_svthevcenc_set_property (GObject * object, guint property_id,
     case PROP_AUD:
       svthevcenc->svt_config->accessUnitDelimiter = g_value_get_boolean (value);
       break;
+    case PROP_INSERT_VUI:
+        svthevcenc->svt_config->videoUsabilityInfo = g_value_get_boolean (value);
+      break;
     case PROP_CORES:
       svthevcenc->svt_config->logicalProcessors = g_value_get_uint (value);
       break;
     case PROP_SOCKET:
       svthevcenc->svt_config->targetSocket = g_value_get_int (value);
+      break;
+    case PROP_TILE_ROW:
+      svthevcenc->svt_config->tileRowCount = g_value_get_uint (value);
+      break;
+    case PROP_TILE_COL:
+      svthevcenc->svt_config->tileColumnCount = g_value_get_uint (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -466,7 +494,7 @@ gst_svthevcenc_get_property (GObject * object, guint property_id,
   GstSvtHevcEnc *svthevcenc = GST_SVTHEVCENC (object);
 
   GST_LOG_OBJECT (svthevcenc, "getting property %u", property_id);
-
+  GST_OBJECT_LOCK (svthevcenc);
   switch (property_id) {
     case PROP_ENCMODE:
       g_value_set_uint (value, svthevcenc->svt_config->encMode);
@@ -474,37 +502,36 @@ gst_svthevcenc_get_property (GObject * object, guint property_id,
     case PROP_TUNE:
       g_value_set_uint (value, svthevcenc->svt_config->tune);
       break;
-    case PROP_LOWLATENCY:
-      g_value_set_boolean (value, svthevcenc->svt_config->latencyMode == 1);
-      break;
-    case PROP_SPEEDCONTROL:
-      if (svthevcenc->svt_config->speedControlFlag) {
-        g_value_set_uint (value, svthevcenc->svt_config->injectorFrameRate);
-      } else {
-        g_value_set_uint (value, 0);
-      }
+    case PROP_LATENCY_MODE:
+        g_value_set_uint (value, svthevcenc->svt_config->latencyMode);
       break;
     case PROP_B_PYRAMID:
       g_value_set_uint (value, svthevcenc->svt_config->hierarchicalLevels);
       break;
-    case PROP_P_FRAMES:
-      g_value_set_boolean (value,
-          svthevcenc->svt_config->baseLayerSwitchMode == 1);
+    case PROP_BASE_LAYER_SWITCH_MODE:
+        g_value_set_uint (value,
+          svthevcenc->svt_config->baseLayerSwitchMode);
       break;
     case PROP_PRED_STRUCTURE:
       g_value_set_uint (value, svthevcenc->svt_config->predStructure);
       break;
-    case PROP_GOP_SIZE:
+    case PROP_KEY_INT_MAX:
       g_value_set_int (value, svthevcenc->svt_config->intraPeriodLength + 1);
       break;
     case PROP_INTRA_REFRESH:
-      g_value_set_int(value, svthevcenc->svt_config->intraRefreshType);
+      g_value_set_int (value, svthevcenc->svt_config->intraRefreshType);
       break;
     case PROP_QP:
       g_value_set_uint (value, svthevcenc->svt_config->qp);
       break;
+    case PROP_QP_MAX:
+      g_value_set_uint (value, svthevcenc->svt_config->maxQpAllowed);
+      break;
+    case PROP_QP_MIN:
+      g_value_set_uint (value, svthevcenc->svt_config->minQpAllowed);
+      break;
     case PROP_DEBLOCKING:
-      g_value_set_boolean (value, svthevcenc->svt_config->disableDlfFlag == 0);
+      g_value_set_boolean (value, svthevcenc->svt_config->disableDlfFlag == 1);
       break;
     case PROP_SAO:
       g_value_set_boolean (value, svthevcenc->svt_config->enableSaoFlag == 1);
@@ -519,12 +546,6 @@ gst_svthevcenc_get_property (GObject * object, guint property_id,
     case PROP_BITRATE:
       g_value_set_uint (value, svthevcenc->svt_config->targetBitRate / 1024);
       break;
-    case PROP_QP_MAX:
-      g_value_set_uint (value, svthevcenc->svt_config->maxQpAllowed);
-      break;
-    case PROP_QP_MIN:
-      g_value_set_uint (value, svthevcenc->svt_config->minQpAllowed);
-      break;
     case PROP_LOOKAHEAD:
       g_value_set_int (value, (int) svthevcenc->svt_config->lookAheadDistance);
       break;
@@ -536,16 +557,27 @@ gst_svthevcenc_get_property (GObject * object, guint property_id,
       g_value_set_boolean (value,
           svthevcenc->svt_config->accessUnitDelimiter == 1);
       break;
+    case PROP_INSERT_VUI:
+      g_value_set_boolean (value,
+          svthevcenc->svt_config->videoUsabilityInfo == 1);
+      break;
     case PROP_CORES:
       g_value_set_uint (value, svthevcenc->svt_config->logicalProcessors);
       break;
     case PROP_SOCKET:
       g_value_set_int (value, svthevcenc->svt_config->targetSocket);
       break;
+    case PROP_TILE_ROW:
+      g_value_set_uint (value, svthevcenc->svt_config->tileRowCount);
+      break;
+    case PROP_TILE_COL:
+      g_value_set_uint (value, svthevcenc->svt_config->tileColumnCount);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
   }
+  GST_OBJECT_UNLOCK (svthevcenc);
 }
 
 void
@@ -612,6 +644,24 @@ gst_svthevenc_deallocate_svt_buffers (GstSvtHevcEnc * svthevcenc)
   }
 }
 
+static gint
+gst_svthevcenc_gst_to_svthevc_video_format(GstVideoFormat format)
+{
+  switch (format) {
+  case GST_VIDEO_FORMAT_I420:
+  case GST_VIDEO_FORMAT_YV12:
+  case GST_VIDEO_FORMAT_I420_10LE:
+  case GST_VIDEO_FORMAT_I420_10BE:
+    return EB_YUV420;
+  case GST_VIDEO_FORMAT_Y444:
+  case GST_VIDEO_FORMAT_Y444_10LE:
+  case GST_VIDEO_FORMAT_Y444_10BE:
+    return EB_YUV444;
+  default:
+    g_return_val_if_reached(GST_VIDEO_FORMAT_UNKNOWN);
+  }
+}
+
 gboolean
 gst_svthevcenc_configure_svt (GstSvtHevcEnc * svthevcenc)
 {
@@ -631,6 +681,8 @@ gst_svthevcenc_configure_svt (GstSvtHevcEnc * svthevcenc)
   svthevcenc->svt_config->frameRate =
       svthevcenc->svt_config->frameRateNumerator /
       svthevcenc->svt_config->frameRateDenominator;
+  svthevcenc->svt_config->encoderColorFormat =
+      gst_svthevcenc_gst_to_svthevc_video_format(info->finfo->format);
 
   /* pick a default value for the look ahead distance
    * in CQP mode:2*minigop+1. in VBR:  intra Period */
@@ -686,9 +738,9 @@ set_default_svt_configuration (EB_H265_ENC_CONFIGURATION * svt_config)
   svt_config->sourceWidth = 64;
   svt_config->sourceHeight = 64;
   svt_config->interlacedVideo = FALSE;
-  svt_config->intraPeriodLength = PROP_GOP_SIZE_DEFAULT - 1;
+  svt_config->intraPeriodLength = PROP_KEY_INT_MAX_DEFAULT;
   svt_config->intraRefreshType = PROP_INTRA_REFRESH_DEFAULT;
-  svt_config->baseLayerSwitchMode = PROP_P_FRAMES_DEFAULT;
+  svt_config->baseLayerSwitchMode = PROP_BASE_LAYER_SWITCH_MODE_DEFAULT;
   svt_config->encMode = PROP_ENCMODE_DEFAULT;
   svt_config->frameRate = 60;
   svt_config->frameRateDenominator = 1;
@@ -712,6 +764,7 @@ set_default_svt_configuration (EB_H265_ENC_CONFIGURATION * svt_config)
   svt_config->searchAreaHeight = 7;
   svt_config->constrainedIntra = PROP_CONSTRAINED_INTRA_DEFAULT;
   svt_config->tune = PROP_TUNE_DEFAULT;
+  svt_config->videoUsabilityInfo = PROP_INSERT_VUI_DEFAULT;
   svt_config->channelId = 0;
   svt_config->activeChannelCount = 1;
   svt_config->logicalProcessors = PROP_CORES_DEFAULT;
@@ -731,19 +784,18 @@ set_default_svt_configuration (EB_H265_ENC_CONFIGURATION * svt_config)
   svt_config->encoderBitDepth = 8;
   svt_config->encoderColorFormat = EB_YUV420;
   svt_config->compressedTenBitFormat = FALSE;
-  svt_config->profile = 1;
+  svt_config->profile = 2;
   svt_config->tier = 0;
   svt_config->level = 0;
-  svt_config->injectorFrameRate =
-      (PROP_SPEEDCONTROL_DEFAULT > 0) ? PROP_SPEEDCONTROL_DEFAULT : 60 << 16;
-  svt_config->speedControlFlag = (PROP_SPEEDCONTROL_DEFAULT > 0);
-  svt_config->latencyMode = PROP_LOWLATENCY_DEFAULT;
+  svt_config->injectorFrameRate = 60 << 16;
+  svt_config->speedControlFlag = 0;
+  svt_config->latencyMode = PROP_LATENCY_MODE_DEFAULT;
   svt_config->codeVpsSpsPps = 1;
   svt_config->fpsInVps = TRUE;
   svt_config->codeEosNal = FALSE;
   svt_config->asmType = 1;
-  svt_config->tileColumnCount = 1;
-  svt_config->tileRowCount = 1;
+  svt_config->tileRowCount = PROP_TILE_ROW_DEFAULT;
+  svt_config->tileColumnCount = PROP_TILE_COL_DEFAULT;
 }
 
 GstFlowReturn
@@ -1192,7 +1244,9 @@ gst_svthevcenc_propose_allocation (GstVideoEncoder * encoder, GstQuery * query)
 static gboolean
 plugin_init (GstPlugin * plugin)
 {
-  return gst_element_register (plugin, "svthevcenc", GST_RANK_SECONDARY,
+  GST_DEBUG_CATEGORY_INIT(gst_svthevcenc_debug_category, "svthevcenc", 0,
+      "H265 encoding element");
+  return gst_element_register (plugin, "svthevcenc", GST_RANK_PRIMARY,
       GST_TYPE_SVTHEVCENC);
 }
 
@@ -1213,4 +1267,4 @@ GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
     GST_VERSION_MINOR,
     svthevcenc,
     "Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder)",
-    plugin_init, VERSION, "LGPL", PACKAGE_NAME, GST_PACKAGE_ORIGIN)
+    plugin_init, VERSION, "GPL", PACKAGE_NAME, GST_PACKAGE_ORIGIN)
