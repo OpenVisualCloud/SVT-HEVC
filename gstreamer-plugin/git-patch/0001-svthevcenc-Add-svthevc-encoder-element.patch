@@ -1,4 +1,4 @@
-From 1928be9ce717c77f24488b861d62fb707e643945 Mon Sep 17 00:00:00 2001
+From eb05f185ca8a03b93a881b28268ba37e5654a4f3 Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -8,14 +8,14 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  ext/Makefile.am                   |   12 +-
  ext/meson.build                   |    1 +
  ext/svthevcenc/Makefile.am        |   18 +
- ext/svthevcenc/gstsvthevcenc.c    | 1562 +++++++++++++++++++++++++++++++++++++
+ ext/svthevcenc/gstsvthevcenc.c    | 1563 +++++++++++++++++++++++++++++++++++++
  ext/svthevcenc/gstsvthevcenc.h    |  118 +++
  ext/svthevcenc/meson.build        |   16 +
  tests/check/Makefile.am           |    7 +
  tests/check/elements/.gitignore   |    1 +
  tests/check/elements/svthevcenc.c |  228 ++++++
  tests/check/meson.build           |    1 +
- 11 files changed, 1970 insertions(+), 2 deletions(-)
+ 11 files changed, 1971 insertions(+), 2 deletions(-)
  create mode 100644 ext/svthevcenc/Makefile.am
  create mode 100644 ext/svthevcenc/gstsvthevcenc.c
  create mode 100644 ext/svthevcenc/gstsvthevcenc.h
@@ -126,10 +126,10 @@ index 0000000..6d7f55a
 +noinst_HEADERS = gstsvthevcenc.h
 diff --git a/ext/svthevcenc/gstsvthevcenc.c b/ext/svthevcenc/gstsvthevcenc.c
 new file mode 100644
-index 0000000..a393043
+index 0000000..78f38d5
 --- /dev/null
 +++ b/ext/svthevcenc/gstsvthevcenc.c
-@@ -0,0 +1,1562 @@
+@@ -0,0 +1,1563 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 + *
@@ -467,7 +467,8 @@ index 0000000..a393043
 +          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 +
 +  gst_element_class_set_static_metadata (element_class,
-+      "svthevcenc", "Codec/Encoder/Video", "H265 Encoder",
++      "svthevcenc", "Codec/Encoder/Video",
++      "Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder)",
 +      "Yeongjin Jeong <yeongjin.jeong@navercorp.com>");
 +
 +  gst_element_class_add_static_pad_template (element_class, &sink_factory);
