@@ -3973,7 +3973,7 @@ EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,///mutex to
             while (qpVbv > qpMin
                 && (qpVbv > pictureControlSetPtr->rowStats[0]->rowQp )
                 && (((accFrameBits < (EB_U64)(pictureControlSetPtr->frameSizePlanned * 0.8f) && qpVbv <= prevRowQp)
-                    || accFrameBits < (EB_U64)((pictureControlSetPtr->bufferFillPerFrame - rcData->vbvBufsize + rcData->vbvMaxrate/pictureControlSetPtr->ParentPcsPtr->frameRate) * 1.1))
+                    || accFrameBits < (EB_U64)((pictureControlSetPtr->bufferFillPerFrame - rcData->vbvMaxrate / (sequenceControlSetPtr->staticConfig.frameRate >> 16)) * 1.1))
                     ))
             {
                 qpVbv -= 1;
