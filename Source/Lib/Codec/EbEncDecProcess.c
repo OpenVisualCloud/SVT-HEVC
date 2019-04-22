@@ -3938,7 +3938,7 @@ EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,///mutex to
 
     EB_U8 qpMax = MIN(prevRowQp + 4, qpAbsoluteMax);
     EB_U8 qpMin = MAX(prevRowQp - 4, qpAbsoluteMin);
-    EB_U64 bufferLeftPlanned = rcData->bufferFill - pictureControlSetPtr->frameSizePlanned;
+    EB_U64 bufferLeftPlanned = pictureControlSetPtr->bufferFillPerFrame - pictureControlSetPtr->frameSizePlanned;
     double maxFrameError = MAX(0.05, 1.0 / pictureHeightInLcu);
     if (rowPtr->rowIndex<pictureHeightInLcu+1)
     {
@@ -3962,7 +3962,7 @@ EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,///mutex to
 
             while (qpVbv < qpMax
                 && (((accFrameBits > pictureControlSetPtr->frameSizePlanned + rcTol) ||
-                (rcData->bufferFill - accFrameBits < (EB_U64)(bufferLeftPlanned * 0.5)) ||
+                (pictureControlSetPtr->bufferFillPerFrame - accFrameBits < (EB_U64)(bufferLeftPlanned * 0.5)) ||
                     (accFrameBits > pictureControlSetPtr->frameSizePlanned && qpVbv < pictureControlSetPtr->qpNoVbv)
                     )))
             {
@@ -3973,7 +3973,7 @@ EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,///mutex to
             while (qpVbv > qpMin
                 && (qpVbv > pictureControlSetPtr->rowStats[0]->rowQp )
                 && (((accFrameBits < (EB_U64)(pictureControlSetPtr->frameSizePlanned * 0.8f) && qpVbv <= prevRowQp)
-                    || accFrameBits < (EB_U64)((rcData->bufferFill - rcData->vbvBufsize + rcData->vbvMaxrate/pictureControlSetPtr->ParentPcsPtr->frameRate) * 1.1))
+                    || accFrameBits < (EB_U64)((pictureControlSetPtr->bufferFillPerFrame - rcData->vbvBufsize + rcData->vbvMaxrate/pictureControlSetPtr->ParentPcsPtr->frameRate) * 1.1))
                     ))
             {
                 qpVbv -= 1;

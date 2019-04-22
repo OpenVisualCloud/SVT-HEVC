@@ -291,6 +291,7 @@ typedef struct PictureControlSet_s
 
     EB_U64                                frameSizePlanned;
     EB_U64                                frameSizeEstimated;
+    EB_U64                                bufferFillPerFrame;
     EB_U8                                 qpNoVbv;
 
 } PictureControlSet_t;

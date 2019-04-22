@@ -2645,6 +2645,7 @@ void* RateControlKernel(void *inputPtr)
             {
                 EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
                 pictureControlSetPtr->qpNoVbv = pictureControlSetPtr->pictureQp;
+                pictureControlSetPtr->bufferFillPerFrame = encodeContextPtr->bufferFill;
                 pictureControlSetPtr->pictureQp = (EB_U8)Vbv_Buf_Calc(pictureControlSetPtr, sequenceControlSetPtr, encodeContextPtr);
                 queueEntryIndexHeadTemp = (EB_S32)(pictureControlSetPtr->pictureNumber - encodeContextPtr->hlRateControlHistorgramQueue[encodeContextPtr->hlRateControlHistorgramQueueHeadIndex]->pictureNumber);
                 queueEntryIndexHeadTemp += encodeContextPtr->hlRateControlHistorgramQueueHeadIndex;
