@@ -199,10 +199,10 @@ static void SetEnableConstrainedIntra           (const char *value, EbConfig_t *
 static void SetCfgTune                          (const char *value, EbConfig_t *cfg) {cfg->tune                             = (uint8_t)strtoul(value, NULL, 0); };
 static void SetBitRateReduction                 (const char *value, EbConfig_t *cfg) {cfg->bitRateReduction                 = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetImproveSharpness                 (const char *value, EbConfig_t *cfg) {cfg->improveSharpness                 = (EB_BOOL)strtol(value,  NULL, 0);};
-static void SetVbvMaxrate                       (const char *value, EbConfig_t *cfg) { cfg->vbvMaxRate = strtoul(value, NULL, 0); };
-static void SetVbvBufsize                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufsize = strtoul(value, NULL, 0); };
-static void SetVbvBufInit                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufInit = strtoul(value, NULL, 0); };
-static void SetHrdFlag                          (const char *value, EbConfig_t *cfg) { cfg->hrdFlag = strtoul(value, NULL, 0); };
+static void SetVbvMaxrate                       (const char *value, EbConfig_t *cfg) { cfg->vbvMaxRate						= strtoul(value, NULL, 0); };
+static void SetVbvBufsize                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufsize						= strtoul(value, NULL, 0); };
+static void SetVbvBufInit                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufInit						= strtoul(value, NULL, 0); };
+static void SetHrdFlag                          (const char *value, EbConfig_t *cfg) { cfg->hrdFlag							= strtoul(value, NULL, 0); };
 static void SetVideoUsabilityInfo               (const char *value, EbConfig_t *cfg) {cfg->videoUsabilityInfo               = strtol(value,  NULL, 0);};
 static void SetHighDynamicRangeInput            (const char *value, EbConfig_t *cfg) {cfg->highDynamicRangeInput            = strtol(value,  NULL, 0);};
 static void SetAccessUnitDelimiter              (const char *value, EbConfig_t *cfg) {cfg->accessUnitDelimiter              = strtol(value,  NULL, 0);};

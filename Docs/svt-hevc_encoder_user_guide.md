@@ -283,6 +283,10 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **ConstrainedIntra** | -constrd-intra | [0,1] | 0 | Allow the use of Constrained Intra, when enabled, this features yields to sending two PPSs in the HEVC Elementary streams <br>0 = OFF, 1 = ON |
 | **RateControlMode** | -rc | [0,1] | 0 | 0 : CQP , 1 : VBR |
 | **TargetBitRate** | -tbr | Any Number | 7000000 | Target bitrate in bits / second. Only used when RateControlMode is set to 1 |
+| **vbvMaxrate** | -vbv-maxrate | Any Number | 0 | VBVMaxrate in bits / second. Only used when RateControlMode is set to 1 |
+| **vbvBufsize** | -vbv-bufsize | Any Number | 0 | VBV BufferSize in bits / second. Only used when RateControlMode is set to 1 |
+| **vbvBufInit** | -vbv-init | [0 - 100] | 90 | Sets how full the VBV buffer to be|
+| **hrdFlag** | -hrd | [0,1] | 0 | HRD Flag, 0 = OFF, 1 = ON |When hrdFlag is set to 1 it requires vbvMaxrate and vbvBufsize to be greater than 0 |
 | **MaxQpAllowed** | -max-qp | [0 - 51] | 48 | Maximum QP value allowed for rate control use. Only used when RateControlMode is set to 1. Has to be >= MinQpAllowed |
 | **MinQpAllowed** | -min-qp | [0 - 50] | 10 | Minimum QP value allowed for rate control use. Only used when RateControlMode is set to 1. Has to be < MaxQpAllowed |
 | **LookAheadDistance** | -lad | [0 - 250] | Depending on BRC mode | When RateControlMode is set to 1 it&#39;s best to set this parameter to be equal to the Intra period value (such is the default set by the encoder), When CQP is chosen, then a (2 \* minigopsize +1) look ahead is recommended. |

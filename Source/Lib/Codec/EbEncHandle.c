@@ -2151,41 +2151,7 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.frameRateNumerator = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRateNumerator;
     sequenceControlSetPtr->staticConfig.reconEnabled = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->reconEnabled;
     sequenceControlSetPtr->staticConfig.hrdFlag = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hrdFlag;
-
-    sequenceControlSetPtr->staticConfig.maxCLL = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxCLL;
-    sequenceControlSetPtr->staticConfig.maxFALL = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxFALL;
-
-    sequenceControlSetPtr->staticConfig.useMasteringDisplayColorVolume = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->useMasteringDisplayColorVolume;
-    sequenceControlSetPtr->staticConfig.useNaluFile = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->useNaluFile;
-    sequenceControlSetPtr->staticConfig.displayPrimaryX[0] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryX[0];
-    sequenceControlSetPtr->staticConfig.displayPrimaryX[1] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryX[1];
-    sequenceControlSetPtr->staticConfig.displayPrimaryX[2] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryX[2];
-    sequenceControlSetPtr->staticConfig.displayPrimaryY[0] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryY[0];
-    sequenceControlSetPtr->staticConfig.displayPrimaryY[1] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryY[1];
-    sequenceControlSetPtr->staticConfig.displayPrimaryY[2] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryY[2];
-    sequenceControlSetPtr->staticConfig.whitePointX = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->whitePointX;
-    sequenceControlSetPtr->staticConfig.whitePointY = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->whitePointY;
-    sequenceControlSetPtr->staticConfig.maxDisplayMasteringLuminance = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxDisplayMasteringLuminance;
-    sequenceControlSetPtr->staticConfig.minDisplayMasteringLuminance = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->minDisplayMasteringLuminance;
-    sequenceControlSetPtr->staticConfig.dolbyVisionProfile = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->dolbyVisionProfile;
-
-    // Copying to masteringDisplayColorVolume structure
-    sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryX[0] = sequenceControlSetPtr->staticConfig.displayPrimaryX[0];
-    sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryX[1] = sequenceControlSetPtr->staticConfig.displayPrimaryX[1];
-    sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryX[2] = sequenceControlSetPtr->staticConfig.displayPrimaryX[2];
-    sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryY[0] = sequenceControlSetPtr->staticConfig.displayPrimaryY[0];
-    sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryY[1] = sequenceControlSetPtr->staticConfig.displayPrimaryY[1];
-    sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryY[2] = sequenceControlSetPtr->staticConfig.displayPrimaryY[2];
-    sequenceControlSetPtr->masteringDisplayColorVolume.whitePointX = sequenceControlSetPtr->staticConfig.whitePointX;
-    sequenceControlSetPtr->masteringDisplayColorVolume.whitePointY = sequenceControlSetPtr->staticConfig.whitePointY;
-    sequenceControlSetPtr->masteringDisplayColorVolume.maxDisplayMasteringLuminance = sequenceControlSetPtr->staticConfig.maxDisplayMasteringLuminance;
-    sequenceControlSetPtr->masteringDisplayColorVolume.minDisplayMasteringLuminance = sequenceControlSetPtr->staticConfig.minDisplayMasteringLuminance;
-
-    // if dolby Profile is set HDR should be set to 1
-    if (sequenceControlSetPtr->staticConfig.dolbyVisionProfile == 81) {
-        sequenceControlSetPtr->staticConfig.highDynamicRangeInput = 1;
-    }
-
+	
     sequenceControlSetPtr->staticConfig.maxCLL = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxCLL;
     sequenceControlSetPtr->staticConfig.maxFALL = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxFALL;
 
