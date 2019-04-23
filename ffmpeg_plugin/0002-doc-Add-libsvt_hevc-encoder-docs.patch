@@ -1,23 +1,24 @@
-From 0bb8d7cd4131b1c6d29d57c709ce6f3a6b246031 Mon Sep 17 00:00:00 2001
-From: Jun Zhao <mypopydev@gmail.com>
-Date: Sat, 8 Dec 2018 15:43:05 +0800
+From 03dfa1058c3b1362451d9a241f1eef240d8fff5b Mon Sep 17 00:00:00 2001
+From: Jing Sun <jing.a.sun@intel.com>
+Date: Tue, 5 Mar 2019 15:04:58 +0800
 Subject: [PATCH 2/2] doc: Add libsvt_hevc encoder docs
 
 Add docs for libsvt_hevc encoder in encoders.texi and general.texi
 
 Signed-off-by: Jun Zhao <jun.zhao@intel.com>
-Signed-off-by: Huang, Zhengxu <zhengxu.huang@intel.com>
-Signed-off-by: hassene <hassene.tmar@intel.com>
+Signed-off-by: Zhengxu Huang <zhengxu.huang@intel.com>
+Signed-off-by: Hassene Tmar <hassene.tmar@intel.com>
+Signed-off-by: Jing Sun <jing.a.sun@intel.com>
 ---
- doc/encoders.texi | 157 ++++++++++++++++++++++++++++++++++++++++++++++
+ doc/encoders.texi | 145 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
  doc/general.texi  |   8 +++
- 2 files changed, 165 insertions(+)
+ 2 files changed, 153 insertions(+)
 
 diff --git a/doc/encoders.texi b/doc/encoders.texi
-index 899faac49b..0a19596299 100644
+index 899faac..4030f6d 100644
 --- a/doc/encoders.texi
 +++ b/doc/encoders.texi
-@@ -1457,6 +1457,163 @@ Set maximum NAL size in bytes.
+@@ -1457,6 +1457,151 @@ Set maximum NAL size in bytes.
  Allow skipping frames to hit the target bitrate if set to 1.
  @end table
  
@@ -42,12 +43,8 @@ index 899faac49b..0a19596299 100644
 +@item b  (@emph{bitrate})
 +Set the bitrate (as a number of bits per second). Default is 7M.
 +
-+@item refs (@emph{ref})
-+Number of reference frames each P-frame can use. The range is from @var{0-16}.
-+Default is 0(disabled).
-+
 +@item g  / @option{gop_size}
-+Set the GOP size. Default is 64.
++Set the GOP size. Default is -2 (unspecified).
 +
 +@item flags +cgop
 +Enable closed GOP.
@@ -59,7 +56,7 @@ index 899faac49b..0a19596299 100644
 +Defaults 48
 +
 +Set minimum/maximum quantisation values.  Valid range is from 0 to 51
-+(Only used when bit rate control mode @option{rc} is set to 0(cqp) mode.
++(Only used when bit rate control mode @option{rc} is set to 1(vbr) mode.
 +Has to be qmax > = qmin).
 +
 +@item profile (@emph{profile})
@@ -76,10 +73,8 @@ index 899faac49b..0a19596299 100644
 +
 +@item level
 +
-+@option{profile} sets the value of @emph{profile_idc} and the @emph{constraint_set*_flag}s.
-+@option{level} sets the value of @emph{level_idc}.
-+
-+@end table
++@option{profile} sets the value of @emph{profile}.
++@option{level} sets the value of @emph{level}.
 +
 +The encoder also has its own specific options:
 +
@@ -112,18 +107,6 @@ index 899faac49b..0a19596299 100644
 +bit rate control mode is set to vbr it's best to set this parameter to be
 +equal to the intra period value (such is the default set by the encoder),
 +when cqp is chosen, then a look ahead is recommended. The range is from @var{0-256}.
-+
-+@item intra_ref_type
-+Set intra refesh type. Can assume one of the following possible values:
-+
-+Default is 2 (idr).
-+
-+@table @samp
-+@item cra
-+open group of pictures
-+@item idr
-+closed group of pictures
-+@end table
 +
 +@item preset
 +A preset defining the quality vs density tradeoff point that the
@@ -165,29 +148,35 @@ index 899faac49b..0a19596299 100644
 +@item tune
 +Set quality tuning mode. Can assume one of the following possible values:
 +
-+Default is 1 (objective).
++Default is 1 (oq).
 +
 +@table @samp
-+@item subjective
-+Subjective quality mode
-+@item objective
-+Objective quality mode for PSNR / SSIM / VMAF benchmarking
++@item sq
++Visually optimized mode
++@item oq
++PSNR / SSIM optimized mode
++@item vmaf
++VMAF optimized mode
 +@end table
 +
 +@item bl_mode
 +Enables or disables Random Access Prediction. Default is 0 (disable).
 +@end table
 +
++@item hdr
++High dynamic range input. Default is 0 (disable).
++@end table
++
  @section libtheora
  
  libtheora Theora encoder wrapper.
 diff --git a/doc/general.texi b/doc/general.texi
-index 2b015f143a..070997aa6f 100644
+index 2b015f1..e82afb3 100644
 --- a/doc/general.texi
 +++ b/doc/general.texi
-@@ -280,6 +280,14 @@ The dispatcher is open source and can be downloaded from
- with the @code{--enable-libmfx} option and @code{pkg-config} needs to be able to
- locate the dispatcher's @code{.pc} files.
+@@ -114,6 +114,14 @@ Go to @url{http://lame.sourceforge.net/} and follow the
+ instructions for installing the library.
+ Then pass @code{--enable-libmp3lame} to configure to enable it.
  
 +@section Scalable Video Technology for HEVC
 +
@@ -197,9 +186,9 @@ index 2b015f143a..070997aa6f 100644
 +for installing the library. Pass @code{--enable-libsvthevc} to configure to
 +enable it.
 +
- @section AMD VCE
+ @section TwoLAME
  
- FFmpeg can use the AMD Advanced Media Framework library for accelerated H.264
+ FFmpeg can make use of the TwoLAME library for MP2 encoding.
 -- 
-2.17.1
+1.8.3.1
 

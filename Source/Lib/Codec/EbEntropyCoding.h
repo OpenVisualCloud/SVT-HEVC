@@ -44,6 +44,11 @@ extern EB_ERRORTYPE EncodeLcu(
     EB_U32                   pictureOriginX,
 	EB_U32                   pictureOriginY);
 
+#if TILES
+extern EB_ERRORTYPE EncodeTileFinish(
+    EntropyCoder_t        *entropyCoderPtr);
+#endif
+
 extern EB_ERRORTYPE EncodeLcuSaoParameters(
     LargestCodingUnit_t     *tbPtr,
     EntropyCoder_t          *entropyCoderPtr,

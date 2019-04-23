@@ -277,6 +277,14 @@ typedef struct PictureControlSet_s
 
     EB_BOOL                               bdpPresentFlag;
     EB_BOOL                               mdPresentFlag;
+#if TILES
+    // Tiles
+    EB_U32                                tileTotalCount;
+    EB_U32                                tileColumnCount;
+    EB_U32                                tileRowCount;
+    EB_U16                                tileColumnArray[EB_TILE_COLUMN_MAX_COUNT];
+    EB_U16                                tileRowArray[EB_TILE_ROW_MAX_COUNT];
+#endif
 
 } PictureControlSet_t;
 

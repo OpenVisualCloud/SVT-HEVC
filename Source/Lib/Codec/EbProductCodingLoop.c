@@ -270,24 +270,37 @@ extern void GenerateIntraLumaReferenceSamplesMd(
 	ModeDecisionContext_t      *contextPtr,
 	EbPictureBufferDesc_t      *inputPicturePtr) {
 
+
+#if TILES
+    EB_BOOL pictureLeftBoundary = (contextPtr->lcuPtr->tileLeftEdgeFlag == EB_TRUE && ((contextPtr->cuOriginX & (contextPtr->lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+    EB_BOOL pictureTopBoundary = (contextPtr->lcuPtr->tileTopEdgeFlag == EB_TRUE && ((contextPtr->cuOriginY & (contextPtr->lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+    EB_BOOL pictureRightBoundary = (contextPtr->lcuPtr->tileRightEdgeFlag == EB_TRUE && (((contextPtr->cuOriginX + contextPtr->cuStats->size) & (contextPtr->lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+#endif
+
 	if (contextPtr->intraMdOpenLoopFlag == EB_FALSE) {
 
-		GenerateLumaIntraReferenceSamplesEncodePass(
-			EB_FALSE,
-			EB_TRUE,
-			contextPtr->cuOriginX,
-			contextPtr->cuOriginY,
+        GenerateLumaIntraReferenceSamplesEncodePass(
+            EB_FALSE,
+            EB_TRUE,
+            contextPtr->cuOriginX,
+            contextPtr->cuOriginY,
             contextPtr->cuStats->size,
             MAX_LCU_SIZE,
             contextPtr->cuStats->depth,
-			contextPtr->modeTypeNeighborArray,
-			contextPtr->lumaReconNeighborArray,
+            contextPtr->modeTypeNeighborArray,
+            contextPtr->lumaReconNeighborArray,
             (NeighborArrayUnit_t *) EB_NULL,
             (NeighborArrayUnit_t *) EB_NULL,
-			contextPtr->intraRefPtr,
+            contextPtr->intraRefPtr,
+#if TILES
+            pictureLeftBoundary,
+            pictureTopBoundary,
+            pictureRightBoundary);
+#else
 			EB_FALSE,
 			EB_FALSE,
 			EB_FALSE);
+#endif
 
 		contextPtr->lumaIntraRefSamplesGenDone = EB_TRUE;
 

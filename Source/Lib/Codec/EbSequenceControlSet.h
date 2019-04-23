@@ -21,6 +21,15 @@ extern "C" {
 typedef struct SequenceControlSet_s
 {        
     EB_H265_ENC_CONFIGURATION   staticConfig;
+
+#if TILES
+    // Tiles
+    EB_U32              tileUniformSpacing;
+    EB_U32              tileColumnCount;
+    EB_U32              tileRowCount;
+    EB_U32              tileColumnWidthArray[EB_TILE_COLUMN_MAX_COUNT];
+    EB_U32              tileRowHeightArray[EB_TILE_ROW_MAX_COUNT];
+#endif
     
     // Encoding Context
     EncodeContext_t            *encodeContextPtr;

@@ -194,6 +194,14 @@ typedef struct LargestCodingUnit_s {
 	EB_U8							chromaEncodeMode;
 
     EB_INTRA4x4_SEARCH_METHOD       intra4x4SearchMethod;
+#if TILES
+    // Tiles
+    EB_BOOL                         tileLeftEdgeFlag;
+    EB_BOOL                         tileTopEdgeFlag;
+    EB_BOOL                         tileRightEdgeFlag;
+    EB_U32                          tileOriginX;
+    EB_U32                          tileOriginY;
+#endif
 
 } LargestCodingUnit_t;
 
