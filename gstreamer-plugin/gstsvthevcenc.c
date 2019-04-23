@@ -157,7 +157,7 @@ GST_STATIC_PAD_TEMPLATE ("src",
         "width = (int) [ 64, 8192 ], " "height = (int) [ 64, 4320 ], "
         "stream-format = (string) byte-stream, "
         "alignment = (string) au, "
-        "profile = (string) { main, main-10}")
+        "profile = (string) { main, main-10, main-4:4:4}")
     );
 
 /* class initialization */
@@ -516,7 +516,8 @@ gst_svthevcenc_get_property (GObject * object, guint property_id,
       g_value_set_uint (value, svthevcenc->svt_config->predStructure);
       break;
     case PROP_KEY_INT_MAX:
-      g_value_set_int (value, svthevcenc->svt_config->intraPeriodLength + 1);
+      g_value_set_int (value, svthevcenc->svt_config->intraPeriodLength < 0 ?
+              svthevcenc->svt_config->intraPeriodLength : svthevcenc->svt_config->intraPeriodLength + 1);
       break;
     case PROP_INTRA_REFRESH:
       g_value_set_int (value, svthevcenc->svt_config->intraRefreshType);
@@ -531,7 +532,7 @@ gst_svthevcenc_get_property (GObject * object, guint property_id,
       g_value_set_uint (value, svthevcenc->svt_config->minQpAllowed);
       break;
     case PROP_DEBLOCKING:
-      g_value_set_boolean (value, svthevcenc->svt_config->disableDlfFlag == 1);
+      g_value_set_boolean (value, svthevcenc->svt_config->disableDlfFlag == 0);
       break;
     case PROP_SAO:
       g_value_set_boolean (value, svthevcenc->svt_config->enableSaoFlag == 1);
