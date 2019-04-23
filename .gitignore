@@ -8,7 +8,7 @@
 Bin
 Build
 !Build/linux/build.sh
-!Build/windows/generate.bat
+!Build/windows/build.bat
 
 # Visual Studio user-specific files
 *.rsuser
