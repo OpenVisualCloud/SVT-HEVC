@@ -2797,6 +2797,28 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
+#if TILES
+    //Check tiles
+    //TODO: Check maxTileCol/maxTileRow according to profile/level later
+    uint32_t pictureWidthInLcu = (config->sourceWidth + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE;
+    uint32_t pictureHeightInLcu = (config->sourceHeight + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE;
+    for (int horizontalTileIndex = 0; horizontalTileIndex < (config->tileColumnCount - 1); ++horizontalTileIndex) {
+        if (((horizontalTileIndex + 1) * pictureWidthInLcu / config->tileColumnCount -
+                    horizontalTileIndex * pictureWidthInLcu / config->tileColumnCount) * MAX_LCU_SIZE < 256) { // 256 samples
+            SVT_LOG("SVT [Error]: Instance %u: TileColumnCount must be chosen such that each tile has a minimum width of 256 luma samples\n", channelNumber + 1);
+            return_error = EB_ErrorBadParameter;
+            break;
+        }
+    }
+    for (int verticalTileIndex = 0; verticalTileIndex < (config->tileRowCount - 1); ++verticalTileIndex) {
+        if (((verticalTileIndex + 1) * pictureHeightInLcu / config->tileRowCount -
+                    verticalTileIndex * pictureHeightInLcu / config->tileRowCount) * MAX_LCU_SIZE < 64) { // 64 samples
+            SVT_LOG("SVT [Error]: Instance %u: TileRowCount must be chosen such that each tile has a minimum height of 64 luma samples\n", channelNumber + 1);
+            return_error = EB_ErrorBadParameter;
+            break;
+        }
+    }
+#endif
     return return_error;
 }
 
