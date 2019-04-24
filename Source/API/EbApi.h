@@ -511,22 +511,30 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
     // VBV Parameters
 	/* Sets the maximum rate the VBV buffer should be assumed to refill at
-		 * Default is zero */
+	 * 
+	 * Default is 0. */
     uint32_t                vbvMaxrate;
+
 	/* Sets the size of the VBV buffer in bits. 
-	    * Default is zero */
+	 *
+	 * Default is 0. */
     uint32_t                vbvBufsize;
+
 	/* Sets how full the VBV buffer must be before playback starts. If picture
-		 * number is 0, then the initial fill is vbv-init * vbvBufferSize. 
-		 * Otherwise, it is interpreted as the initial fill in bits. 
-		 * Default is 90 */
+	 * number is 0, then the initial fill is vbv-init * vbvBufferSize. 
+	 * Otherwise, it is interpreted as the initial fill in bits. 
+	 *
+	 * Default is 90. */
     uint64_t                vbvBufInit;
 
 	/* Enables the buffering period SEI and picture timing SEI to signal the HRD
 	 * parameters. 
-	 *Default is disabled */
+	 *
+	 * 0 = disable.
+	 * 1 = enable.
+	 *
+	 * Default is 0. */
 	uint32_t                hrdFlag;
-
 
     /* ID assigned to each channel when multiple instances are running within the
      * same application. */
@@ -552,7 +560,6 @@ typedef struct EB_H265_ENC_CONFIGURATION
      *
      * Default is -1. */
     int32_t                 targetSocket;
-
 
     /* Flag to enable threads to real time priority. Running with sudo privilege
      * utilizes full resource. Only applicable to Linux.

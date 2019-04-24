@@ -520,7 +520,7 @@ void* PictureManagerKernel(void *inputPtr)
 			   referenceEntryPtr->releaseEnable = EB_TRUE;
 			   referenceEntryPtr->referenceAvailable = EB_FALSE;
 			   referenceEntryPtr->isUsedAsReferenceFlag = pictureControlSetPtr->isUsedAsReferenceFlag;
-               referenceEntryPtr->feedbackArrived = EB_FALSE;
+			   referenceEntryPtr->feedbackArrived = EB_FALSE;
 			   encodeContextPtr->referencePictureQueueTailIndex =
 				   (encodeContextPtr->referencePictureQueueTailIndex == REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : encodeContextPtr->referencePictureQueueTailIndex + 1;
 

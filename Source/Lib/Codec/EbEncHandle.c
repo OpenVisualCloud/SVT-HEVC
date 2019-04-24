@@ -2224,9 +2224,8 @@ void CopyApiFromApp(
     }
 
     //Set required flags to signal vbv status when hrd is enabled
-    if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
-    {
-        sequenceControlSetPtr->staticConfig.videoUsabilityInfo = 1;
+    if (sequenceControlSetPtr->staticConfig.hrdFlag == 1) {
+		sequenceControlSetPtr->staticConfig.videoUsabilityInfo = 1;
         sequenceControlSetPtr->videoUsabilityInfoPtr->vuiHrdParametersPresentFlag = 1;
         sequenceControlSetPtr->staticConfig.bufferingPeriodSEI = 1;
         sequenceControlSetPtr->staticConfig.pictureTimingSEI = 1;
@@ -2521,13 +2520,13 @@ static EB_ERRORTYPE VerifySettings(\
 
     if (config->hrdFlag > 1)
     {
-        printf("Error Instance %u: hrdFlag must be [0 - 1]\n", channelNumber + 1);
+        printf("SVT [Error]: Instance %u: hrdFlag must be [0 - 1]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->hrdFlag == 1 && ((config->vbvBufsize <= 0) || (config->vbvMaxrate <= 0)))
     {
-        printf("Error instance %u: hrd requires vbv max rate and vbv bufsize to be greater than 0 ", channelNumber + 1);
+        printf("SVT [Error]: Instance %u: hrd requires vbv max rate and vbv bufsize to be greater than 0 ", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -2546,13 +2545,11 @@ static EB_ERRORTYPE VerifySettings(\
 	if ((config->searchAreaWidth > 256) || (config->searchAreaWidth == 0)){
         SVT_LOG("SVT [Error]: Instance %u: Invalid SearchAreaWidth. SearchAreaWidth must be [1 - 256]\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
-
     }
 
 	 if((config->searchAreaHeight > 256) || (config->searchAreaHeight == 0)) {
         SVT_LOG("SVT [Error]: Instance %u: Invalid SearchAreaHeight. SearchAreaHeight must be [1 - 256]\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
-
     }
 
     if (levelIdx < 13) {
@@ -2724,27 +2721,27 @@ static EB_ERRORTYPE VerifySettings(\
     }
 
 	if ((config->maxCLL && !config->highDynamicRangeInput) || (config->maxFALL && !config->highDynamicRangeInput)) {
-		SVT_LOG("Error Instance %u: maxCLL or maxFALL should be used only with high dynamic range input; set highDynamicRangeInput to 1\n", channelNumber);
+		SVT_LOG("SVT [Error]: Instance %u: maxCLL or maxFALL should be used only with high dynamic range input; set highDynamicRangeInput to 1\n", channelNumber);
 		return_error = EB_ErrorBadParameter;
 	}
 
 	if (config->useMasteringDisplayColorVolume && !config->highDynamicRangeInput) {
-		SVT_LOG("Error Instance %u: MasterDisplay should be used only with high dynamic range input; set highDynamicRangeInput to 1\n", channelNumber);
+		SVT_LOG("SVT [Error]: Instance %u: MasterDisplay should be used only with high dynamic range input; set highDynamicRangeInput to 1\n", channelNumber);
 		return_error = EB_ErrorBadParameter;
 	}
 
 	if (config->dolbyVisionProfile != 0 && config->dolbyVisionProfile != 81) {
-		SVT_LOG("Error Instance %u: Only Dolby Vision Profile 8.1 is supported \n", channelNumber);
+		SVT_LOG("SVT [Error]: Instance %u: Only Dolby Vision Profile 8.1 is supported \n", channelNumber);
 		return_error = EB_ErrorBadParameter;
 	}
 
 	if (config->dolbyVisionProfile == 81 && config->encoderBitDepth != 10) {
-		SVT_LOG("Error Instance %u: Dolby Vision Profile 8.1 work only with main10 input \n", channelNumber);
+		SVT_LOG("SVT [Error]: Instance %u: Dolby Vision Profile 8.1 work only with main10 input \n", channelNumber);
 		return_error = EB_ErrorBadParameter;
 	}
 
 	if (config->dolbyVisionProfile == 81 && !config->useMasteringDisplayColorVolume) {
-		SVT_LOG("Error Instance %u: Dolby Vision Profile 8.1 requires mastering display color volume information \n", channelNumber);
+		SVT_LOG("SVT [Error]: Instance %u: Dolby Vision Profile 8.1 requires mastering display color volume information \n", channelNumber);
 		return_error = EB_ErrorBadParameter;
 	}
 
@@ -2807,7 +2804,7 @@ static EB_ERRORTYPE VerifySettings(\
     }
 
     if (config->vbvBufInit > 100) {
-        printf("Error instance %u: Invalid vbvBufInit [0 - 100]\n", channelNumber + 1);
+        printf("SVT [Error]: Instance %u: Invalid vbvBufInit [0 - 100]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 

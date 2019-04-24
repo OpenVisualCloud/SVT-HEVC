@@ -4094,7 +4094,6 @@ static EB_ERRORTYPE EncodeCoeff(
 	coeffBuffer = (EB_S16*)&coeffPtr->bufferY[coeffLocation * sizeof(EB_S16)];
 
 	if (tuPtr->lumaCbf) {
-
 		EncodeQuantizedCoefficientsFuncArray[!!(ASM_TYPES & PREAVX2_MASK)](
 			cabacEncodeCtxPtr,
 			tuSize,
@@ -4132,7 +4131,6 @@ static EB_ERRORTYPE EncodeCoeff(
         if (cabacEncodeCtxPtr->colorFormat == EB_YUV422 && tuPtr->cbCbf2) {
             coeffLocation = (tuOriginX >> 1) + ((tuOriginY+tuChromaSize) * coeffPtr->strideCb);
 	        coeffBuffer = (EB_S16*)&coeffPtr->bufferCb[coeffLocation * sizeof(EB_S16)];
-
 			EncodeQuantizedCoefficientsFuncArray[!!(ASM_TYPES & PREAVX2_MASK)](
 				cabacEncodeCtxPtr,
 				tuChromaSize,
@@ -4182,7 +4180,6 @@ static EB_ERRORTYPE EncodeCoeff(
         if (cabacEncodeCtxPtr->colorFormat == EB_YUV422 && tuPtr->crCbf2) {
             coeffLocation = (tuOriginX >> 1) + ((tuOriginY+tuChromaSize) * coeffPtr->strideCr);
 	        coeffBuffer = (EB_S16*)&coeffPtr->bufferCr[coeffLocation * sizeof(EB_S16)];
-
 			EncodeQuantizedCoefficientsFuncArray[!!(ASM_TYPES & PREAVX2_MASK)](
 				cabacEncodeCtxPtr,
 				tuChromaSize,
@@ -5449,8 +5446,7 @@ static void CodeVPS(
     WriteFlagCavlc(
         bitstreamPtr,
         scsPtr->staticConfig.fpsInVps == 1 ? EB_TRUE : EB_FALSE);
-    if (scsPtr->staticConfig.fpsInVps == 1)
-    {
+    if (scsPtr->staticConfig.fpsInVps == 1) {
 
         if (scsPtr->staticConfig.frameRateDenominator != 0 && scsPtr->staticConfig.frameRateNumerator != 0) {
 
@@ -7072,7 +7068,6 @@ static EB_ERRORTYPE Intra4x4EncodeChromaCoeff(
                     MIN_PU_SIZE,
                     &countNonZeroCoeffs);
 
-
             EncodeQuantizedCoefficientsFuncArray[!!(ASM_TYPES & PREAVX2_MASK)](
                     cabacEncodeCtxPtr,
                     MIN_PU_SIZE,
@@ -7100,7 +7095,6 @@ static EB_ERRORTYPE Intra4x4EncodeChromaCoeff(
                     coeffPtr->strideCr,
                     MIN_PU_SIZE,
                     &countNonZeroCoeffs);
-
 
             EncodeQuantizedCoefficientsFuncArray[!!(ASM_TYPES & PREAVX2_MASK)](
                     cabacEncodeCtxPtr,
