@@ -41,6 +41,7 @@ typedef struct _GstSvtHevcEnc
 
   long long int frame_count;
   int dts_offset;
+  const gchar *svt_version;
 } GstSvtHevcEnc;
 
 typedef struct _GstSvtHevcEncClass

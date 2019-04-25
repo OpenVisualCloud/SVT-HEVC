@@ -24,6 +24,8 @@
 #include <gst/gst.h>
 #include <gst/video/video.h>
 #include <gst/video/gstvideoencoder.h>
+#include <gst/pbutils/codec-utils.h>
+#include <gst/base/gstbitreader.h>
 #include "gstsvthevcenc.h"
 
 GST_DEBUG_CATEGORY_STATIC (gst_svthevcenc_debug_category);
@@ -132,9 +134,9 @@ enum
 #define PROP_TILE_COL_DEFAULT               1
 
 #if G_BYTE_ORDER == G_LITTLE_ENDIAN
-#define FORMATS "I420, Y444, I420_10LE, Y444_10LE"
+#define FORMATS "I420, Y444, I420_10LE, I422_10LE, Y444_10LE"
 #else
-#define FORMATS "I420, Y444, I420_10BE, Y444_10BE"
+#define FORMATS "I420, Y444, I420_10BE, I422_10BE, Y444_10BE"
 #endif
 
 /* pad templates */
@@ -376,6 +378,12 @@ gst_svthevcenc_init (GstSvtHevcEnc * svthevcenc)
   svthevcenc->frame_count = 0;
   svthevcenc->dts_offset = 0;
 
+  GString *string;
+  string = g_string_new (NULL);
+  g_string_printf (string, "%d.%d.%d", SVT_VERSION_MAJOR, SVT_VERSION_MINOR,
+    SVT_VERSION_PATCHLEVEL);
+  svthevcenc->svt_version = (const gchar *)g_string_free(string, FALSE);
+
   EB_ERRORTYPE res =
       EbInitHandle (&svthevcenc->svt_encoder, NULL, svthevcenc->svt_config);
   if (res != EB_ErrorNone) {
@@ -607,6 +615,7 @@ gst_svthevcenc_finalize (GObject * object)
   EbDeinitHandle (svthevcenc->svt_encoder);
   svthevcenc->svt_encoder = NULL;
   g_free (svthevcenc->svt_config);
+  g_free ((gpointer)svthevcenc->svt_version);
   GST_OBJECT_UNLOCK (svthevcenc);
 
   G_OBJECT_CLASS (gst_svthevcenc_parent_class)->finalize (object);
@@ -654,6 +663,9 @@ gst_svthevcenc_gst_to_svthevc_video_format(GstVideoFormat format)
   case GST_VIDEO_FORMAT_I420_10LE:
   case GST_VIDEO_FORMAT_I420_10BE:
     return EB_YUV420;
+  case GST_VIDEO_FORMAT_I422_10LE:
+  case GST_VIDEO_FORMAT_I422_10BE:
+    return EB_YUV422;
   case GST_VIDEO_FORMAT_Y444:
   case GST_VIDEO_FORMAT_Y444_10LE:
   case GST_VIDEO_FORMAT_Y444_10BE:
@@ -701,11 +713,57 @@ gst_svthevcenc_configure_svt (GstSvtHevcEnc * svthevcenc)
     svthevcenc->svt_config->highDynamicRangeInput = TRUE;
   }
 
-  /* TODO: set profile and tier depending on negotiated caps */
-  if (GST_VIDEO_INFO_COMP_DEPTH (info, 0) == 8)
+  // Allow downstream to specify profile constraints and forward them upstream to handle
+  GstCaps *allowed_caps;
+  allowed_caps = gst_pad_get_allowed_caps (GST_VIDEO_ENCODER_SRC_PAD(svthevcenc));
+
+  if (!allowed_caps || gst_caps_is_empty (allowed_caps) || gst_caps_is_any (allowed_caps)) {
+    gst_caps_unref(allowed_caps);
+  } else {
+    GstStructure *s;
+    const gchar *profile;
+
+    allowed_caps = gst_caps_make_writable (allowed_caps);
+    allowed_caps = gst_caps_fixate (allowed_caps);
+    s = gst_caps_get_structure (allowed_caps, 0);
+
+    profile = gst_structure_get_string (s, "profile");
+    if (profile) {
+      if (g_str_has_prefix (profile, "main-10")) {
+        svthevcenc->svt_config->profile = 2;
+      }
+      else if (g_str_has_prefix (profile, "main-4:4:4")) {
+        svthevcenc->svt_config->profile = 4;
+      }
+      else if (g_str_has_prefix (profile, "main")) {
+        svthevcenc->svt_config->profile = 1;
+      }
+      else {
+        g_assert_not_reached ();
+      }
+    }
+
+    GST_DEBUG_OBJECT (svthevcenc, "downstream ask for profile %s", profile);
+  }
+
+  // Set profile from input format
+  if (GST_VIDEO_INFO_COMP_DEPTH(info, 0) == 8)
     svthevcenc->svt_config->profile = 1;
   else
     svthevcenc->svt_config->profile = 2;
+
+  if (GST_VIDEO_INFO_FORMAT(info) == GST_VIDEO_FORMAT_Y444 ||
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
+    GST_VIDEO_INFO_FORMAT(info) == GST_VIDEO_FORMAT_Y444_10LE ||
+    GST_VIDEO_INFO_FORMAT(info) == GST_VIDEO_FORMAT_I422_10LE
+#else
+    GST_VIDEO_INFO_FORMAT(info) == GST_VIDEO_FORMAT_Y444_10BE ||
+    GST_VIDEO_INFO_FORMAT(info) == GST_VIDEO_FORMAT_I422_10BE
+#endif
+    ) {
+    svthevcenc->svt_config->profile = 4;
+  }
+  GST_DEBUG_OBJECT (svthevcenc, "upstream set profile %d", svthevcenc->svt_config->profile);
 
   EB_ERRORTYPE res =
       EbH265EncSetParameter (svthevcenc->svt_encoder, svthevcenc->svt_config);
@@ -1080,20 +1138,128 @@ gst_svthevcenc_stop (GstVideoEncoder * encoder)
   return TRUE;
 }
 
+static EB_BUFFERHEADERTYPE *
+gst_svthevc_enc_bytestream_to_nal (GstSvtHevcEnc * encoder,
+  EB_BUFFERHEADERTYPE * input)
+{
+  EB_BUFFERHEADERTYPE *output;
+  int i, j, zeros;
+  int offset = 4;
+
+  output = g_malloc (sizeof(EB_BUFFERHEADERTYPE));
+
+  /* skip access unit delimiter */
+  if (encoder->svt_config->accessUnitDelimiter)
+    offset += 7;
+
+  output->pBuffer = g_malloc (input->nFilledLen - offset);
+  output->nFilledLen = input->nFilledLen - offset;
+
+  zeros = 0;
+  for (i = offset, j = 0; i < input->nFilledLen; (i++, j++)) {
+    if (input->pBuffer[i] == 0x00) {
+      zeros++;
+    }
+    else if (input->pBuffer[i] == 0x03 && zeros == 2) {
+      zeros = 0;
+      j--;
+      output->nFilledLen--;
+      continue;
+    }
+    else {
+      zeros = 0;
+    }
+    output->pBuffer[j] = input->pBuffer[i];
+  }
+
+  return output;
+}
+
+static gboolean
+gst_svthevc_enc_set_level_tier_and_profile (GstSvtHevcEnc * encoder,
+  GstCaps * caps)
+{
+  EB_BUFFERHEADERTYPE *headerPtr = NULL, *nal = NULL;
+  EB_ERRORTYPE svt_ret;
+  gboolean ret = TRUE;
+
+  svt_ret = EbH265EncStreamHeader (encoder->svt_encoder, &headerPtr);
+  if (svt_ret != EB_ErrorNone) {
+    GST_ELEMENT_ERROR(encoder, STREAM, ENCODE,
+      ("Encode svthevc header failed."),
+      ("EbH265EncStreamHeader return code=%d", svt_ret));
+    return FALSE;
+  }
+
+  GST_MEMDUMP("ENCODER_HEADER", headerPtr->pBuffer, headerPtr->nFilledLen);
+  nal = gst_svthevc_enc_bytestream_to_nal (encoder, headerPtr);
+
+  gst_codec_utils_h265_caps_set_level_tier_and_profile (caps,
+    nal->pBuffer + 6, nal->nFilledLen - 6);
+  GST_DEBUG_OBJECT(encoder, "caps: %" GST_PTR_FORMAT, caps);
+
+  g_free (nal->pBuffer);
+  g_free (nal);
+
+  return ret;
+}
+
+/* gst_svthevc_enc_set_src_caps
+ * Returns: TRUE on success.
+ */
+static gboolean
+gst_svthevc_enc_set_src_caps (GstSvtHevcEnc * encoder, GstCaps * caps)
+{
+  GstCaps *outcaps;
+  GstStructure *structure;
+  GstVideoCodecState *state;
+  GstTagList *tags;
+
+  outcaps = gst_caps_new_empty_simple ("video/x-h265");
+  structure = gst_caps_get_structure (outcaps, 0);
+
+  gst_structure_set (structure, "stream-format", G_TYPE_STRING, "byte-stream",
+    NULL);
+  gst_structure_set (structure, "alignment", G_TYPE_STRING, "au", NULL);
+
+  if (!gst_svthevc_enc_set_level_tier_and_profile (encoder, outcaps)) {
+    gst_caps_unref(outcaps);
+    return FALSE;
+  }
+
+  state = gst_video_encoder_set_output_state (GST_VIDEO_ENCODER(encoder),
+    outcaps, encoder->state);
+  GST_DEBUG_OBJECT (encoder, "output caps: %" GST_PTR_FORMAT, state->caps);
+  gst_video_codec_state_unref (state);
+
+  tags = gst_tag_list_new_empty ();
+  gst_tag_list_add (tags, GST_TAG_MERGE_REPLACE, GST_TAG_ENCODER, "svthevc",
+    GST_TAG_ENCODER_VERSION, encoder->svt_version, NULL);
+  gst_video_encoder_merge_tags (GST_VIDEO_ENCODER(encoder), tags,
+    GST_TAG_MERGE_REPLACE);
+  gst_tag_list_unref (tags);
+
+  return TRUE;
+}
+
 static gboolean
 gst_svthevcenc_set_format (GstVideoEncoder * encoder,
     GstVideoCodecState * state)
 {
   GstSvtHevcEnc *svthevcenc = GST_SVTHEVCENC (encoder);
   GstClockTime min_latency_frames = 0;
-  GstCaps *src_caps = NULL;
   GST_DEBUG_OBJECT (svthevcenc, "set_format");
 
   /* TODO: handle configuration changes while encoder is running
    * and if there was already a state. */
   svthevcenc->state = gst_video_codec_state_ref (state);
 
-  gst_svthevcenc_configure_svt (svthevcenc);
+  if(!gst_svthevcenc_configure_svt (svthevcenc))
+    return FALSE;
+
+  if (!gst_svthevc_enc_set_src_caps (svthevcenc, state->caps))
+    return FALSE;
+
   gst_svthevcenc_allocate_svt_buffers (svthevcenc);
   gst_svthevcenc_start_svt (svthevcenc);
 
@@ -1116,15 +1282,6 @@ gst_svthevcenc_set_format (GstVideoEncoder * encoder,
   gst_video_encoder_set_latency (encoder,
       min_latency_frames * GST_SECOND / svthevcenc->svt_config->frameRate,
       3 * GST_SECOND);
-
-  src_caps =
-      gst_static_pad_template_get_caps (&gst_svthevcenc_src_pad_template);
-  gst_video_encoder_set_output_state (GST_VIDEO_ENCODER (encoder), src_caps,
-      svthevcenc->state);
-  gst_caps_unref (src_caps);
-
-  GST_DEBUG_OBJECT (encoder, "output caps: %" GST_PTR_FORMAT,
-      svthevcenc->state->caps);
 
   return TRUE;
 }
