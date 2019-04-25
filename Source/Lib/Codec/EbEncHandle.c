@@ -2518,15 +2518,13 @@ static EB_ERRORTYPE VerifySettings(\
 	   return_error = EB_ErrorBadParameter;
     }
 
-    if (config->hrdFlag > 1)
-    {
-        printf("SVT [Error]: Instance %u: hrdFlag must be [0 - 1]\n", channelNumber + 1);
+    if (config->hrdFlag > 1) {
+		SVT_LOG("SVT [Error]: Instance %u: hrdFlag must be [0 - 1]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->hrdFlag == 1 && ((config->vbvBufsize <= 0) || (config->vbvMaxrate <= 0)))
-    {
-        printf("SVT [Error]: Instance %u: hrd requires vbv max rate and vbv bufsize to be greater than 0 ", channelNumber + 1);
+    if (config->hrdFlag == 1 && ((config->vbvBufsize <= 0) || (config->vbvMaxrate <= 0))) {
+		SVT_LOG("SVT [Error]: Instance %u: hrd requires vbv max rate and vbv bufsize to be greater than 0 ", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -2767,8 +2765,7 @@ static EB_ERRORTYPE VerifySettings(\
 			return_error = EB_ErrorBadParameter;
 	}
 
-	if (config->compressedTenBitFormat > 1)
-	{
+	if (config->compressedTenBitFormat > 1)	{
         SVT_LOG("SVT [Error]: Instance %u: Invalid Compressed Ten Bit Format shall be only [0 - 1] \n", channelNumber + 1);
 		return_error = EB_ErrorBadParameter;
 	}
@@ -2804,7 +2801,7 @@ static EB_ERRORTYPE VerifySettings(\
     }
 
     if (config->vbvBufInit > 100) {
-        printf("SVT [Error]: Instance %u: Invalid vbvBufInit [0 - 100]\n", channelNumber + 1);
+		SVT_LOG("SVT [Error]: Instance %u: Invalid vbvBufInit [0 - 100]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
