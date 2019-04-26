@@ -1,4 +1,4 @@
-From e5e7ee87757c6c98438f40136fc0a4c5abe1efbb Mon Sep 17 00:00:00 2001
+From 9cc56f5bc2d6efa5d8faa263c02860c65e42e810 Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -8,14 +8,14 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  ext/Makefile.am                   |   12 +-
  ext/meson.build                   |    1 +
  ext/svthevcenc/Makefile.am        |   18 +
- ext/svthevcenc/gstsvthevcenc.c    | 1566 +++++++++++++++++++++++++++++++++++++
+ ext/svthevcenc/gstsvthevcenc.c    | 1590 +++++++++++++++++++++++++++++++++++++
  ext/svthevcenc/gstsvthevcenc.h    |  118 +++
  ext/svthevcenc/meson.build        |   16 +
  tests/check/Makefile.am           |    7 +
  tests/check/elements/.gitignore   |    1 +
  tests/check/elements/svthevcenc.c |  228 ++++++
  tests/check/meson.build           |    1 +
- 11 files changed, 1974 insertions(+), 2 deletions(-)
+ 11 files changed, 1998 insertions(+), 2 deletions(-)
  create mode 100644 ext/svthevcenc/Makefile.am
  create mode 100644 ext/svthevcenc/gstsvthevcenc.c
  create mode 100644 ext/svthevcenc/gstsvthevcenc.h
@@ -126,10 +126,10 @@ index 0000000..6d7f55a
 +noinst_HEADERS = gstsvthevcenc.h
 diff --git a/ext/svthevcenc/gstsvthevcenc.c b/ext/svthevcenc/gstsvthevcenc.c
 new file mode 100644
-index 0000000..3310c97
+index 0000000..30815ac
 --- /dev/null
 +++ b/ext/svthevcenc/gstsvthevcenc.c
-@@ -0,0 +1,1566 @@
+@@ -0,0 +1,1590 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 + *
@@ -1096,6 +1096,7 @@ index 0000000..3310c97
 +{
 +  GstSvtHevcEnc *encoder = GST_SVTHEVC_ENC (video_enc);
 +  GstVideoInfo *info = &state->info;
++  GstCaps *template_caps;
 +  GstCaps *allowed_caps;
 +
 +  /* If the encoder is initialized, do not reinitialize it again if not
@@ -1120,8 +1121,29 @@ index 0000000..3310c97
 +    gst_video_codec_state_unref (encoder->input_state);
 +  encoder->input_state = gst_video_codec_state_ref (state);
 +
++  template_caps = gst_static_pad_template_get_caps (&src_factory);
 +  allowed_caps = gst_pad_get_allowed_caps (GST_VIDEO_ENCODER_SRC_PAD (encoder));
-+  if (allowed_caps) {
++
++  if (allowed_caps == template_caps) {
++    GST_INFO_OBJECT (encoder, "downstream has ANY caps");
++
++    /* SVT-HEVC encoder does not yet support auto profile selecting.
++     * So we should be set the profile from input format */
++    encoder->profile = GST_VIDEO_INFO_COMP_DEPTH (info, 0) == 8 ? 1 : 2;
++    switch (GST_VIDEO_INFO_FORMAT (info)) {
++      case GST_VIDEO_FORMAT_Y42B:
++      case GST_VIDEO_FORMAT_I422_10LE:
++      case GST_VIDEO_FORMAT_I422_10BE:
++      case GST_VIDEO_FORMAT_Y444:
++      case GST_VIDEO_FORMAT_Y444_10LE:
++      case GST_VIDEO_FORMAT_Y444_10BE:
++        encoder->profile = 4;
++      default:
++        break;
++    }
++
++    gst_caps_unref (allowed_caps);
++  } else if (allowed_caps) {
 +    GstStructure *s;
 +    const gchar *profile;
 +    const gchar *level;
@@ -1130,6 +1152,7 @@ index 0000000..3310c97
 +    GST_LOG_OBJECT (encoder, "allowed caps %" GST_PTR_FORMAT, allowed_caps);
 +
 +    if (gst_caps_is_empty (allowed_caps)) {
++      gst_caps_unref (template_caps);
 +      gst_caps_unref (allowed_caps);
 +      return FALSE;
 +    }
@@ -1195,11 +1218,12 @@ index 0000000..3310c97
 +      }
 +    }
 +
-+    GST_DEBUG_OBJECT (encoder, "Using profile %d, tier %d, level %d",
-+        encoder->profile, encoder->tier, encoder->level);
-+
 +    gst_caps_unref (allowed_caps);
 +  }
++  gst_caps_unref (template_caps);
++
++  GST_DEBUG_OBJECT (encoder, "Using profile %d, tier %d, level %d",
++      encoder->profile, encoder->tier, encoder->level);
 +
 +  if (!gst_svthevc_enc_init_encoder (encoder))
 +    return FALSE;
