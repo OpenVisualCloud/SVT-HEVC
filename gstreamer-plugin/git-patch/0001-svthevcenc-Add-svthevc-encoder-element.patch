@@ -1,4 +1,4 @@
-From 56090c6337e24a0b2421fcba36134cdd1fa60423 Mon Sep 17 00:00:00 2001
+From e5e7ee87757c6c98438f40136fc0a4c5abe1efbb Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -8,14 +8,14 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  ext/Makefile.am                   |   12 +-
  ext/meson.build                   |    1 +
  ext/svthevcenc/Makefile.am        |   18 +
- ext/svthevcenc/gstsvthevcenc.c    | 1560 +++++++++++++++++++++++++++++++++++++
+ ext/svthevcenc/gstsvthevcenc.c    | 1566 +++++++++++++++++++++++++++++++++++++
  ext/svthevcenc/gstsvthevcenc.h    |  118 +++
  ext/svthevcenc/meson.build        |   16 +
  tests/check/Makefile.am           |    7 +
  tests/check/elements/.gitignore   |    1 +
  tests/check/elements/svthevcenc.c |  228 ++++++
  tests/check/meson.build           |    1 +
- 11 files changed, 1968 insertions(+), 2 deletions(-)
+ 11 files changed, 1974 insertions(+), 2 deletions(-)
  create mode 100644 ext/svthevcenc/Makefile.am
  create mode 100644 ext/svthevcenc/gstsvthevcenc.c
  create mode 100644 ext/svthevcenc/gstsvthevcenc.h
@@ -126,10 +126,10 @@ index 0000000..6d7f55a
 +noinst_HEADERS = gstsvthevcenc.h
 diff --git a/ext/svthevcenc/gstsvthevcenc.c b/ext/svthevcenc/gstsvthevcenc.c
 new file mode 100644
-index 0000000..990a1a4
+index 0000000..3310c97
 --- /dev/null
 +++ b/ext/svthevcenc/gstsvthevcenc.c
-@@ -0,0 +1,1560 @@
+@@ -0,0 +1,1566 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 + *
@@ -226,9 +226,9 @@ index 0000000..990a1a4
 +#define TIER_DEFAULT                        0
 +
 +#if G_BYTE_ORDER == G_LITTLE_ENDIAN
-+#define FORMATS "I420, Y444, I420_10LE, Y444_10LE"
++#define FORMATS "I420, Y42B, Y444, I420_10LE, I422_10LE, Y444_10LE"
 +#else
-+#define FORMATS "I420, Y444, I420_10BE, Y444_10BE"
++#define FORMATS "I420, Y42B, Y444, I420_10BE, I422_10BE, Y444_10BE"
 +#endif
 +
 +static GstStaticPadTemplate sink_factory = GST_STATIC_PAD_TEMPLATE ("sink",
@@ -661,6 +661,12 @@ index 0000000..990a1a4
 +      if (nplanes)
 +        *nplanes = 3;
 +      return EB_YUV420;
++    case GST_VIDEO_FORMAT_Y42B:
++    case GST_VIDEO_FORMAT_I422_10LE:
++    case GST_VIDEO_FORMAT_I422_10BE:
++      if (nplanes)
++        *nplanes = 3;
++      return EB_YUV422;
 +    case GST_VIDEO_FORMAT_Y444:
 +    case GST_VIDEO_FORMAT_Y444_10LE:
 +    case GST_VIDEO_FORMAT_Y444_10BE:
