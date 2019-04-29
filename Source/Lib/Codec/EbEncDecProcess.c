@@ -3967,27 +3967,29 @@ EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,///mutex to
                     )))
             {
                 qpVbv += 1;
+                encodedBitsSoFar = 0;
                 accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, &encodedBitsSoFar);
             }
 
             while (qpVbv > qpMin
                 && (qpVbv > pictureControlSetPtr->rowStats[0]->rowQp )
                 && (((accFrameBits < (EB_U64)(pictureControlSetPtr->frameSizePlanned * 0.8f) && qpVbv <= prevRowQp)
-                    || accFrameBits < (EB_U64)((pictureControlSetPtr->bufferFillPerFrame - rcData->vbvMaxrate / (sequenceControlSetPtr->staticConfig.frameRate >> 16)) * 1.1))
+                    || accFrameBits < (EB_U64)((pictureControlSetPtr->bufferFillPerFrame - rcData->vbvBufsize + rcData->vbvMaxrate / (sequenceControlSetPtr->staticConfig.frameRate >> 16)) * 1.1))
                     ))
             {
                 qpVbv -= 1;
+                encodedBitsSoFar = 0;
                 accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, &encodedBitsSoFar);
             }
 
             pictureControlSetPtr->frameSizeEstimated = accFrameBits;
 
-            /* If the current row was large enough to cause a large QP jump */
-            if (qpVbv > qpMax && prevRowQp < qpMax)
-            {
-                /* Bump QP to halfway in between... close enough. */
-                qpVbv = CLIP3(prevRowQp, qpMax, (EB_U8)((prevRowQp + qpVbv) * 0.5));
-            }
+            ///* If the current row was large enough to cause a large QP jump */
+            //if (qpVbv > qpMax && prevRowQp < qpMax)
+            //{
+            //    /* Bump QP to halfway in between... close enough. */
+            //    qpVbv = CLIP3(prevRowQp, qpMax, (EB_U8)((prevRowQp + qpVbv) * 0.5));
+            //}
 
     }
 
