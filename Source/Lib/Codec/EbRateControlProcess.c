@@ -2393,7 +2393,7 @@ void* RateControlKernel(void *inputPtr)
             }
 
             // Frame level RC
-            if (sequenceControlSetPtr->intraPeriodLength == -1 || sequenceControlSetPtr->staticConfig.rateControlMode == 0){
+            if (sequenceControlSetPtr->intraPeriodLength == -1 || sequenceControlSetPtr->staticConfig.rateControlMode == 0 || sequenceControlSetPtr->staticConfig.rateControlMode == 2){
                 rateControlParamPtr = contextPtr->rateControlParamQueue[0];
                 prevGopRateControlParamPtr = contextPtr->rateControlParamQueue[0];
                 nextGopRateControlParamPtr = contextPtr->rateControlParamQueue[0];
@@ -2628,7 +2628,7 @@ void* RateControlKernel(void *inputPtr)
             parentPictureControlSetPtr = (PictureParentControlSet_t*)rateControlTasksPtr->pictureControlSetWrapperPtr->objectPtr;
             sequenceControlSetPtr = (SequenceControlSet_t*)parentPictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
             // Frame level RC
-            if (sequenceControlSetPtr->intraPeriodLength == -1 || sequenceControlSetPtr->staticConfig.rateControlMode == 0){
+            if (sequenceControlSetPtr->intraPeriodLength == -1 || sequenceControlSetPtr->staticConfig.rateControlMode == 0 || sequenceControlSetPtr->staticConfig.rateControlMode == 2){
                 rateControlParamPtr = contextPtr->rateControlParamQueue[0];
                 prevGopRateControlParamPtr = contextPtr->rateControlParamQueue[0];
                 if (parentPictureControlSetPtr->sliceType == EB_I_PICTURE){
