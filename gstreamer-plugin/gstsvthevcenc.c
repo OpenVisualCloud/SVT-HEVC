@@ -44,7 +44,6 @@ void gst_svthevenc_deallocate_svt_buffers (GstSvtHevcEnc * svthevcenc);
 static gboolean gst_svthevcenc_configure_svt (GstSvtHevcEnc * svthevcenc);
 static GstFlowReturn gst_svthevcenc_encode (GstSvtHevcEnc * svthevcenc,
     GstVideoCodecFrame * frame);
-static gboolean gst_svthevcenc_send_eos (GstSvtHevcEnc * svthevcenc);
 static GstFlowReturn gst_svthevcenc_dequeue_encoded_frames (GstSvtHevcEnc *
     svthevcenc, gboolean closing_encoder, gboolean output_frames);
 
@@ -59,7 +58,7 @@ static GstFlowReturn gst_svthevcenc_handle_frame (GstVideoEncoder * encoder,
 static GstFlowReturn gst_svthevcenc_finish (GstVideoEncoder * encoder);
 static GstFlowReturn gst_svthevcenc_pre_push (GstVideoEncoder * encoder,
     GstVideoCodecFrame * frame);
-static GstCaps *gst_svthevcenc_getcaps (GstVideoEncoder * encoder,
+static GstCaps *gst_svthevcenc_sink_getcaps(GstVideoEncoder * encoder,
     GstCaps * filter);
 static gboolean gst_svthevcenc_sink_event (GstVideoEncoder * encoder,
     GstEvent * event);
@@ -134,9 +133,9 @@ enum
 #define PROP_TILE_COL_DEFAULT               1
 
 #if G_BYTE_ORDER == G_LITTLE_ENDIAN
-#define FORMATS "I420, Y444, I420_10LE, I422_10LE, Y444_10LE"
+#define FORMATS "I420, Y42B, Y444, I420_10LE, I422_10LE, Y444_10LE"
 #else
-#define FORMATS "I420, Y444, I420_10BE, I422_10BE, Y444_10BE"
+#define FORMATS "I420, Y42B, Y444, I420_10BE, I422_10BE, Y444_10BE"
 #endif
 
 /* pad templates */
@@ -159,7 +158,7 @@ GST_STATIC_PAD_TEMPLATE ("src",
         "width = (int) [ 64, 8192 ], " "height = (int) [ 64, 4320 ], "
         "stream-format = (string) byte-stream, "
         "alignment = (string) au, "
-        "profile = (string) { main, main-10, main-4:4:4}")
+        "profile = (string) { main, main-10, main-4:4:4, main-4:4:4-10 }")
     );
 
 /* class initialization */
@@ -201,7 +200,7 @@ gst_svthevcenc_class_init (GstSvtHevcEncClass * klass)
       GST_DEBUG_FUNCPTR (gst_svthevcenc_handle_frame);
   video_encoder_class->finish = GST_DEBUG_FUNCPTR (gst_svthevcenc_finish);
   video_encoder_class->pre_push = GST_DEBUG_FUNCPTR (gst_svthevcenc_pre_push);
-  video_encoder_class->getcaps = GST_DEBUG_FUNCPTR (gst_svthevcenc_getcaps);
+  video_encoder_class->getcaps = GST_DEBUG_FUNCPTR (gst_svthevcenc_sink_getcaps);
   video_encoder_class->sink_event =
       GST_DEBUG_FUNCPTR (gst_svthevcenc_sink_event);
   video_encoder_class->src_event = GST_DEBUG_FUNCPTR (gst_svthevcenc_src_event);
@@ -377,6 +376,7 @@ gst_svthevcenc_init (GstSvtHevcEnc * svthevcenc)
   memset (&svthevcenc->svt_encoder, 0, sizeof (svthevcenc->svt_encoder));
   svthevcenc->frame_count = 0;
   svthevcenc->dts_offset = 0;
+  svthevcenc->inited = FALSE;
 
   GString *string;
   string = g_string_new (NULL);
@@ -663,6 +663,7 @@ gst_svthevcenc_gst_to_svthevc_video_format(GstVideoFormat format)
   case GST_VIDEO_FORMAT_I420_10LE:
   case GST_VIDEO_FORMAT_I420_10BE:
     return EB_YUV420;
+  case GST_VIDEO_FORMAT_Y42B:
   case GST_VIDEO_FORMAT_I422_10LE:
   case GST_VIDEO_FORMAT_I422_10BE:
     return EB_YUV422;
@@ -692,33 +693,47 @@ gst_svthevcenc_configure_svt (GstSvtHevcEnc * svthevcenc)
   svthevcenc->svt_config->frameRateNumerator = GST_VIDEO_INFO_FPS_N (info) > 0 ? GST_VIDEO_INFO_FPS_N (info) : 1;
   svthevcenc->svt_config->frameRateDenominator = GST_VIDEO_INFO_FPS_D (info) > 0 ? GST_VIDEO_INFO_FPS_D (info) : 1;
   svthevcenc->svt_config->frameRate =
-      svthevcenc->svt_config->frameRateNumerator /
-      svthevcenc->svt_config->frameRateDenominator;
+    svthevcenc->svt_config->frameRateNumerator /
+    svthevcenc->svt_config->frameRateDenominator;
   svthevcenc->svt_config->encoderColorFormat =
-      gst_svthevcenc_gst_to_svthevc_video_format(info->finfo->format);
+    gst_svthevcenc_gst_to_svthevc_video_format(info->finfo->format);
 
   /* pick a default value for the look ahead distance
    * in CQP mode:2*minigop+1. in VBR:  intra Period */
   if (svthevcenc->svt_config->lookAheadDistance == (unsigned int) -1) {
     svthevcenc->svt_config->lookAheadDistance =
-        (svthevcenc->svt_config->rateControlMode == PROP_RC_MODE_VBR) ?
-        svthevcenc->svt_config->intraPeriodLength :
-        2 * (1 << svthevcenc->svt_config->hierarchicalLevels) + 1;
+      (svthevcenc->svt_config->rateControlMode == PROP_RC_MODE_VBR) ?
+      svthevcenc->svt_config->intraPeriodLength :
+      2 * (1 << svthevcenc->svt_config->hierarchicalLevels) + 1;
   }
 
   /* TODO: better handle HDR metadata when GStreamer will have such support
    * https://gitlab.freedesktop.org/gstreamer/gst-plugins-base/issues/400 */
   if (GST_VIDEO_INFO_COLORIMETRY (info).matrix == GST_VIDEO_COLOR_MATRIX_BT2020
-      && GST_VIDEO_INFO_COMP_DEPTH (info, 0) > 8) {
+    && GST_VIDEO_INFO_COMP_DEPTH (info, 0) > 8) {
     svthevcenc->svt_config->highDynamicRangeInput = TRUE;
   }
 
   // Allow downstream to specify profile constraints and forward them upstream to handle
   GstCaps *allowed_caps;
-  allowed_caps = gst_pad_get_allowed_caps (GST_VIDEO_ENCODER_SRC_PAD(svthevcenc));
+  allowed_caps = gst_pad_get_allowed_caps (GST_VIDEO_ENCODER_SRC_PAD (svthevcenc));
 
   if (!allowed_caps || gst_caps_is_empty (allowed_caps) || gst_caps_is_any (allowed_caps)) {
-    gst_caps_unref(allowed_caps);
+    GST_DEBUG_OBJECT (svthevcenc, "downstream has ANY/empty caps");
+    // Set profile from input format
+    svthevcenc->svt_config->profile = GST_VIDEO_INFO_COMP_DEPTH(info, 0) == 8 ? 1 : 2;
+    switch (GST_VIDEO_INFO_FORMAT(info)) {
+    case GST_VIDEO_FORMAT_Y42B:
+    case GST_VIDEO_FORMAT_I422_10LE:
+    case GST_VIDEO_FORMAT_I422_10BE:
+    case GST_VIDEO_FORMAT_Y444:
+    case GST_VIDEO_FORMAT_Y444_10LE:
+    case GST_VIDEO_FORMAT_Y444_10BE:
+      svthevcenc->svt_config->profile = 4;
+    default:
+      break;
+    }
+    GST_DEBUG_OBJECT(svthevcenc, "upstream set profile %d", svthevcenc->svt_config->profile);
   } else {
     GstStructure *s;
     const gchar *profile;
@@ -732,7 +747,7 @@ gst_svthevcenc_configure_svt (GstSvtHevcEnc * svthevcenc)
       if (g_str_has_prefix (profile, "main-10")) {
         svthevcenc->svt_config->profile = 2;
       }
-      else if (g_str_has_prefix (profile, "main-4:4:4")) {
+      else if (g_str_has_prefix (profile, "main-4:4:4") || g_str_has_prefix (profile, "main-4:4:4-10")) {
         svthevcenc->svt_config->profile = 4;
       }
       else if (g_str_has_prefix (profile, "main")) {
@@ -746,30 +761,13 @@ gst_svthevcenc_configure_svt (GstSvtHevcEnc * svthevcenc)
     GST_DEBUG_OBJECT (svthevcenc, "downstream ask for profile %s", profile);
   }
 
-  // Set profile from input format
-  if (GST_VIDEO_INFO_COMP_DEPTH(info, 0) == 8)
-    svthevcenc->svt_config->profile = 1;
-  else
-    svthevcenc->svt_config->profile = 2;
+  gst_caps_unref(allowed_caps);
 
-  if (GST_VIDEO_INFO_FORMAT(info) == GST_VIDEO_FORMAT_Y444 ||
-#if G_BYTE_ORDER == G_LITTLE_ENDIAN
-    GST_VIDEO_INFO_FORMAT(info) == GST_VIDEO_FORMAT_Y444_10LE ||
-    GST_VIDEO_INFO_FORMAT(info) == GST_VIDEO_FORMAT_I422_10LE
-#else
-    GST_VIDEO_INFO_FORMAT(info) == GST_VIDEO_FORMAT_Y444_10BE ||
-    GST_VIDEO_INFO_FORMAT(info) == GST_VIDEO_FORMAT_I422_10BE
-#endif
-    ) {
-    svthevcenc->svt_config->profile = 4;
-  }
-  GST_DEBUG_OBJECT (svthevcenc, "upstream set profile %d", svthevcenc->svt_config->profile);
 
   EB_ERRORTYPE res =
       EbH265EncSetParameter (svthevcenc->svt_encoder, svthevcenc->svt_config);
   if (res != EB_ErrorNone) {
-    GST_ERROR_OBJECT (svthevcenc, "EbH265EncSetParameter failed with error %d",
-        res);
+    GST_ERROR_OBJECT (svthevcenc, "EbH265EncSetParameter failed with error %d", res);
     return FALSE;
   }
   return TRUE;
@@ -787,6 +785,7 @@ gst_svthevcenc_start_svt (GstSvtHevcEnc * svthevcenc)
         res);
     return FALSE;
   }
+  svthevcenc->inited = TRUE;
   return TRUE;
 }
 
@@ -916,6 +915,9 @@ gst_svthevcenc_encode (GstSvtHevcEnc * svthevcenc, GstVideoCodecFrame * frame)
 gboolean
 gst_svthevcenc_send_eos (GstSvtHevcEnc * svthevcenc)
 {
+  if (svthevcenc->inited == FALSE)
+    return EB_ErrorNone;
+
   EB_ERRORTYPE ret = EB_ErrorNone;
 
   EB_BUFFERHEADERTYPE input_buffer;
@@ -958,6 +960,9 @@ GstFlowReturn
 gst_svthevcenc_dequeue_encoded_frames (GstSvtHevcEnc * svthevcenc,
     gboolean done_sending_pics, gboolean output_frames)
 {
+  if (svthevcenc->inited == FALSE)
+    return GST_FLOW_OK;
+
   GstFlowReturn ret = GST_FLOW_OK;
   EB_ERRORTYPE res = EB_ErrorNone;
   gboolean encode_at_eos = FALSE;
@@ -973,8 +978,7 @@ gst_svthevcenc_dequeue_encoded_frames (GstSvtHevcEnc * svthevcenc,
         done_sending_pics);
 
     if (output_buf != NULL)
-      encode_at_eos =
-          ((output_buf->nFlags & EB_BUFFERFLAG_EOS) == EB_BUFFERFLAG_EOS);
+      encode_at_eos = (output_buf->nFlags == EB_BUFFERFLAG_EOS);
 
     if (res == EB_ErrorMax) {
       GST_ERROR_OBJECT (svthevcenc, "Error while encoding, return\n");
@@ -1294,11 +1298,11 @@ gst_svthevcenc_handle_frame (GstVideoEncoder * encoder,
   GstFlowReturn ret = GST_FLOW_OK;
 
   GST_DEBUG_OBJECT (svthevcenc, "handle_frame");
-
+  
   ret = gst_svthevcenc_encode (svthevcenc, frame);
   if (ret != GST_FLOW_OK) {
     GST_DEBUG_OBJECT (encoder, "gst_svthevcenc_encode returned %d", ret);
-    return ret;
+      return ret;
   }
 
   return gst_svthevcenc_dequeue_encoded_frames (svthevcenc, FALSE, TRUE);
@@ -1326,21 +1330,174 @@ gst_svthevcenc_pre_push (GstVideoEncoder * encoder, GstVideoCodecFrame * frame)
   return GST_FLOW_OK;
 }
 
-static GstCaps *
-gst_svthevcenc_getcaps (GstVideoEncoder * encoder, GstCaps * filter)
+static void
+check_formats (const gchar * str, gboolean * has_420, gboolean * has_420_10,
+  gboolean * has_422, gboolean * has_422_10, gboolean * has_444, gboolean * has_444_10)
 {
-  GstSvtHevcEnc *svthevcenc = GST_SVTHEVCENC (encoder);
+  if (g_str_has_prefix (str, "main-10"))
+    *has_420 = *has_420_10 = TRUE;
+  else if (g_str_has_prefix(str, "main-4:4:4-10"))
+    *has_422 = *has_444 = *has_422_10 = *has_444_10 = TRUE;
+  else if (g_str_has_prefix (str, "main-4:4:4"))
+    *has_422 = *has_444 = TRUE;
+  else if (g_str_has_prefix (str, "main"))
+    *has_420 = TRUE;
+}
 
-  GST_DEBUG_OBJECT (svthevcenc, "getcaps");
+static gboolean
+gst_svthevc_enc_add_chroma_format (GstStructure * s, gboolean allow_420,
+  gboolean allow_420_10, gboolean allow_422, gboolean allow_422_10, gboolean allow_444, gboolean allow_444_10)
+{
+  GValue fmts = G_VALUE_INIT;
+  GValue fmt = G_VALUE_INIT;
+  gboolean ret = FALSE;
 
-  GstCaps *sink_caps =
-      gst_static_pad_template_get_caps (&gst_svthevcenc_sink_pad_template);
-  GstCaps *ret =
-      gst_video_encoder_proxy_getcaps (GST_VIDEO_ENCODER (svthevcenc),
-      sink_caps, filter);
-  gst_caps_unref (sink_caps);
+  g_value_init (&fmts, GST_TYPE_LIST);
+  g_value_init (&fmt, G_TYPE_STRING);
 
+  if (allow_420) {
+    g_value_set_string (&fmt, "I420");
+    gst_value_list_append_value (&fmts, &fmt);
+  }
+
+  if (allow_420_10) {
+    if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
+      g_value_set_string (&fmt, "I420_10LE");
+    else
+      g_value_set_string (&fmt, "I420_10BE");
+
+    gst_value_list_append_value (&fmts, &fmt);
+  }
+
+  if (allow_422) {
+    g_value_set_string (&fmt, "Y42B");
+    gst_value_list_append_value (&fmts, &fmt);
+  }
+
+  if (allow_422_10) {
+    if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
+      g_value_set_string (&fmt, "I422_10LE");
+    else
+      g_value_set_string (&fmt, "I422_10BE");
+
+    gst_value_list_append_value (&fmts, &fmt);
+  }
+
+  if (allow_444) {
+    g_value_set_string (&fmt, "Y444");
+    gst_value_list_append_value (&fmts, &fmt);
+  }
+
+  if (allow_444_10) {
+    if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
+      g_value_set_string (&fmt, "Y444_10LE");
+    else
+      g_value_set_string (&fmt, "Y444_10BE");
+
+    gst_value_list_append_value (&fmts, &fmt);
+  }
+
+  if (gst_value_list_get_size (&fmts) != 0) {
+    gst_structure_take_value (s, "format", &fmts);
+    ret = TRUE;
+  }
+  else {
+    g_value_unset (&fmts);
+  }
+
+  g_value_unset (&fmt);
   return ret;
+}
+
+
+
+static GstCaps *
+gst_svthevcenc_sink_getcaps(GstVideoEncoder * encoder, GstCaps * filter)
+{
+  GstCaps *supported_incaps;
+  GstCaps *allowed_caps;
+  GstCaps *filter_caps, *fcaps;
+  gint i, j, k;
+
+  supported_incaps = gst_static_pad_template_get_caps (&gst_svthevcenc_sink_pad_template);
+
+  allowed_caps = gst_pad_get_allowed_caps (GST_VIDEO_ENCODER_SRC_PAD(encoder));
+
+  if (!allowed_caps || gst_caps_is_empty (allowed_caps)
+    || gst_caps_is_any (allowed_caps)) {
+    fcaps = supported_incaps;
+    goto done;
+  }
+
+  GST_LOG_OBJECT(encoder, "template caps %" GST_PTR_FORMAT, supported_incaps);
+  GST_LOG_OBJECT(encoder, "allowed caps %" GST_PTR_FORMAT, allowed_caps);
+
+  filter_caps = gst_caps_new_empty ();
+
+  for (i = 0; i < gst_caps_get_size (supported_incaps); i++) {
+    GQuark q_name =
+      gst_structure_get_name_id (gst_caps_get_structure (supported_incaps, i));
+
+    for (j = 0; j < gst_caps_get_size (allowed_caps); j++) {
+      const GstStructure *allowed_s = gst_caps_get_structure (allowed_caps, j);
+      const GValue *val;
+      GstStructure *s;
+
+      s = gst_structure_new_id_empty (q_name);
+      if ((val = gst_structure_get_value (allowed_s, "width")))
+        gst_structure_set_value (s, "width", val);
+      if ((val = gst_structure_get_value (allowed_s, "height")))
+        gst_structure_set_value (s, "height", val);
+
+      if ((val = gst_structure_get_value (allowed_s, "profile"))) {
+        gboolean has_420 = FALSE;
+        gboolean has_420_10 = FALSE;
+        gboolean has_422 = FALSE;
+        gboolean has_422_10 = FALSE;
+        gboolean has_444 = FALSE;
+        gboolean has_444_10 = FALSE;
+
+        if (G_VALUE_HOLDS_STRING (val)) {
+          check_formats (g_value_get_string (val), &has_420, &has_420_10,
+            &has_422, &has_422_10, &has_444, &has_444_10);
+        }
+        else if (GST_VALUE_HOLDS_LIST (val)) {
+          for (k = 0; k < gst_value_list_get_size (val); k++) {
+            const GValue *vlist = gst_value_list_get_value (val, k);
+
+            if (G_VALUE_HOLDS_STRING (vlist))
+              check_formats (g_value_get_string (vlist), &has_420, &has_420_10,
+                &has_422, &has_422_10, &has_444, &has_444);
+          }
+        }
+
+        gst_svthevc_enc_add_chroma_format (s, has_420, has_420_10,
+          has_422, has_422_10, has_444, has_444_10);
+      }
+
+      filter_caps = gst_caps_merge_structure (filter_caps, s);
+      GST_LOG_OBJECT(encoder, "filter caps %" GST_PTR_FORMAT, filter_caps);
+    }
+  }
+
+  fcaps = gst_caps_intersect (filter_caps, supported_incaps);
+  gst_caps_unref (filter_caps);
+  gst_caps_unref (supported_incaps);
+
+  if (filter) {
+    GST_LOG_OBJECT (encoder, "intersecting with %" GST_PTR_FORMAT, filter);
+    filter_caps = gst_caps_intersect (fcaps, filter);
+    gst_caps_unref (fcaps);
+    fcaps = filter_caps;
+  }
+
+done:
+  if (allowed_caps)
+    gst_caps_unref (allowed_caps);
+
+  GST_LOG_OBJECT (encoder, "proxy caps %" GST_PTR_FORMAT, fcaps);
+
+  return fcaps;
 }
 
 static gboolean
