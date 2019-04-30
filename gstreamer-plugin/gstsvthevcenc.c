@@ -715,11 +715,13 @@ gst_svthevcenc_configure_svt (GstSvtHevcEnc * svthevcenc)
   }
 
   // Allow downstream to specify profile constraints and forward them upstream to handle
-  GstCaps *allowed_caps;
+  GstCaps *template_caps;
+  GstCaps *allowed_caps = NULL;
+  template_caps = gst_static_pad_template_get_caps (&gst_svthevcenc_src_pad_template);
   allowed_caps = gst_pad_get_allowed_caps (GST_VIDEO_ENCODER_SRC_PAD (svthevcenc));
 
-  if (!allowed_caps || gst_caps_is_empty (allowed_caps) || gst_caps_is_any (allowed_caps)) {
-    GST_DEBUG_OBJECT (svthevcenc, "downstream has ANY/empty caps");
+  if(gst_caps_is_equal (template_caps, allowed_caps)) {
+    GST_DEBUG_OBJECT (svthevcenc, "downstream has ANY caps");
     // Set profile from input format
     svthevcenc->svt_config->profile = GST_VIDEO_INFO_COMP_DEPTH(info, 0) == 8 ? 1 : 2;
     switch (GST_VIDEO_INFO_FORMAT(info)) {
@@ -735,6 +737,11 @@ gst_svthevcenc_configure_svt (GstSvtHevcEnc * svthevcenc)
     }
     GST_DEBUG_OBJECT(svthevcenc, "upstream set profile %d", svthevcenc->svt_config->profile);
   } else {
+    if (gst_caps_is_empty (allowed_caps)) {
+      gst_caps_unref(allowed_caps);
+      gst_caps_unref(template_caps);
+      return FALSE;
+    }
     GstStructure *s;
     const gchar *profile;
 
@@ -760,9 +767,8 @@ gst_svthevcenc_configure_svt (GstSvtHevcEnc * svthevcenc)
 
     GST_DEBUG_OBJECT (svthevcenc, "downstream ask for profile %s", profile);
   }
-
   gst_caps_unref(allowed_caps);
-
+  gst_caps_unref(template_caps);
 
   EB_ERRORTYPE res =
       EbH265EncSetParameter (svthevcenc->svt_encoder, svthevcenc->svt_config);
@@ -1467,7 +1473,7 @@ gst_svthevcenc_sink_getcaps(GstVideoEncoder * encoder, GstCaps * filter)
 
             if (G_VALUE_HOLDS_STRING (vlist))
               check_formats (g_value_get_string (vlist), &has_420, &has_420_10,
-                &has_422, &has_422_10, &has_444, &has_444);
+                &has_422, &has_422_10, &has_444, &has_444_10);
           }
         }
 
