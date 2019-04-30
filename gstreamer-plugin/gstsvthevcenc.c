@@ -1343,9 +1343,9 @@ check_formats (const gchar * str, gboolean * has_420, gboolean * has_420_10,
   if (g_str_has_prefix (str, "main-10"))
     *has_420 = *has_420_10 = TRUE;
   else if (g_str_has_prefix(str, "main-4:4:4-10"))
-    *has_422 = *has_444 = *has_422_10 = *has_444_10 = TRUE;
+    *has_420 = *has_422 = *has_444 = *has_420_10 = *has_422_10 = *has_444_10 = TRUE;
   else if (g_str_has_prefix (str, "main-4:4:4"))
-    *has_422 = *has_444 = TRUE;
+    *has_420 = *has_422 = *has_444 = TRUE;
   else if (g_str_has_prefix (str, "main"))
     *has_420 = TRUE;
 }
