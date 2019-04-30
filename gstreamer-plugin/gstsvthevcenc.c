@@ -1304,11 +1304,11 @@ gst_svthevcenc_handle_frame (GstVideoEncoder * encoder,
   GstFlowReturn ret = GST_FLOW_OK;
 
   GST_DEBUG_OBJECT (svthevcenc, "handle_frame");
-  
+
   ret = gst_svthevcenc_encode (svthevcenc, frame);
   if (ret != GST_FLOW_OK) {
     GST_DEBUG_OBJECT (encoder, "gst_svthevcenc_encode returned %d", ret);
-      return ret;
+    return ret;
   }
 
   return gst_svthevcenc_dequeue_encoded_frames (svthevcenc, FALSE, TRUE);
