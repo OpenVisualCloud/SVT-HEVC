@@ -5510,7 +5510,7 @@ EB_ERRORTYPE IntraPredictionOl(
 		}
 
 		// The chromaMode is always DM
-		EB_U32 chromaMode = (EB_U32)funcIndex;
+		EB_U32 chromaMode = (EB_U32)openLoopIntraCandidateIndex;
 
         EB_U32 puChromaOriginIndex = (((puOriginY & (63)) * 32) + (puOriginX & (63)))>>1;
 		EB_U32 chromaPuSize = puWidth >> 1;
