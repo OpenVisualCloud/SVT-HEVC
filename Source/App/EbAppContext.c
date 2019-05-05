@@ -185,6 +185,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
 #if 1//TILES
     callbackData->ebEncParameters.tileColumnCount = (EB_BOOL)config->tileColumnCount;
     callbackData->ebEncParameters.tileRowCount = (EB_BOOL)config->tileRowCount;
+    callbackData->ebEncParameters.tileSliceMode = (EB_BOOL)config->tileSliceMode;
 #endif
     callbackData->ebEncParameters.disableDlfFlag = (EB_BOOL)config->disableDlfFlag;
     callbackData->ebEncParameters.enableSaoFlag = (EB_BOOL)config->enableSaoFlag;

@@ -4109,41 +4109,95 @@ EB_ERRORTYPE MotionEstimateLcu(
 				}
             }
 
-			// Correct the left edge of the Search Area if it is not on the reference Picture
-			xSearchAreaOrigin = ((originX + xSearchAreaOrigin) < -padWidth) ?
-				-padWidth - originX :
-				xSearchAreaOrigin;
+#if TILES
+            if (sequenceControlSetPtr->tileColumnCount * sequenceControlSetPtr->tileRowCount > 1)
+            {
+                EB_U32 tileStartX = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileStartX;
+                EB_U32 tileEndX   = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileEndX;
 
-			searchAreaWidth = ((originX + xSearchAreaOrigin) < -padWidth) ?
-				searchAreaWidth - (-padWidth - (originX + xSearchAreaOrigin)) :
-				searchAreaWidth;
+                // Correct the left edge of the Search Area if it is not on the reference Picture
+                xSearchAreaOrigin = ((originX + xSearchAreaOrigin) < tileStartX) ?
+                    tileStartX - originX :
+                    xSearchAreaOrigin;
 
-			// Correct the right edge of the Search Area if its not on the reference Picture
-			xSearchAreaOrigin = ((originX + xSearchAreaOrigin) > pictureWidth - 1) ?
-				xSearchAreaOrigin - ((originX + xSearchAreaOrigin) - (pictureWidth - 1)) :
-				xSearchAreaOrigin;
+                searchAreaWidth = ((originX + xSearchAreaOrigin) < tileStartX) ?
+                    searchAreaWidth - (tileStartX - (originX + xSearchAreaOrigin)) :
+                    searchAreaWidth;
 
-			searchAreaWidth = ((originX + xSearchAreaOrigin + searchAreaWidth) > pictureWidth) ?
-				MAX(1, searchAreaWidth - ((originX + xSearchAreaOrigin + searchAreaWidth) - pictureWidth)) :
-				searchAreaWidth;
+                // Correct the right edge of the Search Area if its not on the reference Picture
+                xSearchAreaOrigin = ((originX + xSearchAreaOrigin) > tileEndX - 1) ?
+                    xSearchAreaOrigin - ((originX + xSearchAreaOrigin) - (tileEndX - 1)) :
+                    xSearchAreaOrigin;
 
-			// Correct the top edge of the Search Area if it is not on the reference Picture
-            ySearchAreaOrigin = ((originY + ySearchAreaOrigin) < -padHeight) ?
-                -padHeight - originY :
-                ySearchAreaOrigin;
+                searchAreaWidth = ((originX + xSearchAreaOrigin + searchAreaWidth) > tileEndX) ?
+                    MAX(1, searchAreaWidth - ((originX + xSearchAreaOrigin + searchAreaWidth) - tileEndX)) :
+                    searchAreaWidth;
+            } else
+#endif
+            {
+                // Correct the left edge of the Search Area if it is not on the reference Picture
+			    xSearchAreaOrigin = ((originX + xSearchAreaOrigin) < -padWidth) ?
+			    	-padWidth - originX :
+			    	xSearchAreaOrigin;
 
-			searchAreaHeight = ((originY + ySearchAreaOrigin) < -padHeight) ?
-				searchAreaHeight - (-padHeight - (originY + ySearchAreaOrigin)) :
-				searchAreaHeight;
+			    searchAreaWidth = ((originX + xSearchAreaOrigin) < -padWidth) ?
+			    	searchAreaWidth - (-padWidth - (originX + xSearchAreaOrigin)) :
+			    	searchAreaWidth;
 
-			// Correct the bottom edge of the Search Area if its not on the reference Picture
-			ySearchAreaOrigin = ((originY + ySearchAreaOrigin) > pictureHeight - 1) ?
-				ySearchAreaOrigin - ((originY + ySearchAreaOrigin) - (pictureHeight - 1)) :
-				ySearchAreaOrigin;
+			    // Correct the right edge of the Search Area if its not on the reference Picture
+			    xSearchAreaOrigin = ((originX + xSearchAreaOrigin) > pictureWidth - 1) ?
+			    	xSearchAreaOrigin - ((originX + xSearchAreaOrigin) - (pictureWidth - 1)) :
+			    	xSearchAreaOrigin;
 
-			searchAreaHeight = (originY + ySearchAreaOrigin + searchAreaHeight > pictureHeight) ?
-				MAX(1, searchAreaHeight - ((originY + ySearchAreaOrigin + searchAreaHeight) - pictureHeight)) :
-				searchAreaHeight;
+                searchAreaWidth = ((originX + xSearchAreaOrigin + searchAreaWidth) > pictureWidth) ?
+                    MAX(1, searchAreaWidth - ((originX + xSearchAreaOrigin + searchAreaWidth) - pictureWidth)) :
+                    searchAreaWidth;
+            }
+
+#if TILES
+            if (sequenceControlSetPtr->tileColumnCount * sequenceControlSetPtr->tileRowCount > 1)
+            {
+                EB_U32 tileStartY = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileStartY;
+                EB_U32 tileEndY   = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileEndY;
+
+                // Correct the top edge of the Search Area if it is not on the reference Picture
+                ySearchAreaOrigin = ((originY + ySearchAreaOrigin) < tileStartY) ?
+                    tileStartY - originY :
+                    ySearchAreaOrigin;
+
+                searchAreaHeight = ((originY + ySearchAreaOrigin) < tileStartY) ?
+                    searchAreaHeight - (tileStartY - (originY + ySearchAreaOrigin)) :
+                    searchAreaHeight;
+
+                // Correct the bottom edge of the Search Area if its not on the reference Picture
+                ySearchAreaOrigin = ((originY + ySearchAreaOrigin) > tileEndY - 1) ?
+                    ySearchAreaOrigin - ((originY + ySearchAreaOrigin) - (tileEndY - 1)) :
+                    ySearchAreaOrigin;
+
+                searchAreaHeight = (originY + ySearchAreaOrigin + searchAreaHeight > tileEndY) ?
+                    MAX(1, searchAreaHeight - ((originY + ySearchAreaOrigin + searchAreaHeight) - tileEndY)) :
+                    searchAreaHeight;
+            } else
+#endif
+            {
+			    // Correct the top edge of the Search Area if it is not on the reference Picture
+                ySearchAreaOrigin = ((originY + ySearchAreaOrigin) < -padHeight) ?
+                    -padHeight - originY :
+                    ySearchAreaOrigin;
+
+			    searchAreaHeight = ((originY + ySearchAreaOrigin) < -padHeight) ?
+			    	searchAreaHeight - (-padHeight - (originY + ySearchAreaOrigin)) :
+			    	searchAreaHeight;
+
+			    // Correct the bottom edge of the Search Area if its not on the reference Picture
+			    ySearchAreaOrigin = ((originY + ySearchAreaOrigin) > pictureHeight - 1) ?
+			    	ySearchAreaOrigin - ((originY + ySearchAreaOrigin) - (pictureHeight - 1)) :
+			    	ySearchAreaOrigin;
+
+			    searchAreaHeight = (originY + ySearchAreaOrigin + searchAreaHeight > pictureHeight) ?
+			    	MAX(1, searchAreaHeight - ((originY + ySearchAreaOrigin + searchAreaHeight) - pictureHeight)) :
+			    	searchAreaHeight;
+            }
 
 			contextPtr->xSearchAreaOrigin[listIndex][0] = xSearchAreaOrigin;
 			contextPtr->ySearchAreaOrigin[listIndex][0] = ySearchAreaOrigin;

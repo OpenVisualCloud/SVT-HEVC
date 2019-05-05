@@ -2085,6 +2085,7 @@ void CopyApiFromApp(
 #if TILES
     sequenceControlSetPtr->staticConfig.tileRowCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileRowCount;
     sequenceControlSetPtr->staticConfig.tileColumnCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileColumnCount;
+    sequenceControlSetPtr->staticConfig.tileSliceMode = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileSliceMode;
 #endif
 
     // Deblock Filter
@@ -2792,6 +2793,11 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
+    if (config->tileSliceMode > 1 || (config->tileRowCount * config->tileColumnCount == 1 && config->tileSliceMode == 1)) {
+        SVT_LOG("SVT [Error]: Instance %u : Invalid tile slice mode\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
     if (config->unrestrictedMotionVector > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid Unrestricted Motion Vector flag [0 - 1]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
@@ -2855,6 +2861,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
 #if TILES
     configPtr->tileRowCount = 1;
     configPtr->tileColumnCount = 1;
+    configPtr->tileSliceMode = 0;
 #endif
     configPtr->sceneChangeDetection = 1;
     configPtr->rateControlMode = 0;

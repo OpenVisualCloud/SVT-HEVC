@@ -4335,12 +4335,12 @@ EB_EXTERN void EncodePass(
                 {
                     unsigned i = 0, j = 0;
 
-                    while (i < pictureControlSetPtr->tileColumnCount && tileOriginX + pictureControlSetPtr->tileColumnArray[i] * MAX_LCU_SIZE < lcuOriginX) {
-                        tileOriginX += pictureControlSetPtr->tileColumnArray[i++] * MAX_LCU_SIZE;
+                    while (i < sequenceControlSetPtr->tileColumnCount && tileOriginX + sequenceControlSetPtr->tileColumnArray[i] * MAX_LCU_SIZE < lcuOriginX) {
+                        tileOriginX += sequenceControlSetPtr->tileColumnArray[i++] * MAX_LCU_SIZE;
                     }
 
-                    while (j < pictureControlSetPtr->tileRowCount && tileOriginY + pictureControlSetPtr->tileRowArray[j] * MAX_LCU_SIZE < lcuOriginY) {
-                        tileOriginY += pictureControlSetPtr->tileRowArray[j++] * MAX_LCU_SIZE;
+                    while (j < sequenceControlSetPtr->tileRowCount && tileOriginY + sequenceControlSetPtr->tileRowArray[j] * MAX_LCU_SIZE < lcuOriginY) {
+                        tileOriginY += sequenceControlSetPtr->tileRowArray[j++] * MAX_LCU_SIZE;
                     }
 
                 }
