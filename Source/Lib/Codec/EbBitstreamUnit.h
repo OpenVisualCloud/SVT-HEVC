@@ -13,7 +13,7 @@ extern "C" {
 #endif
 // Bistream Slice Buffer Size
 #define EB_BITSTREAM_SLICE_BUFFER_SIZE          0x300000
-#define SLICE_HEADER_COUNT                         256
+#define SLICE_HEADER_COUNT                         1800
 
 /**********************************
  * Bitstream Unit Types
