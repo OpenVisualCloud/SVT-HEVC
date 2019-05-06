@@ -4112,8 +4112,8 @@ EB_ERRORTYPE MotionEstimateLcu(
 #if TILES
             if (sequenceControlSetPtr->tileColumnCount * sequenceControlSetPtr->tileRowCount > 1)
             {
-                EB_U32 tileStartX = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileStartX;
-                EB_U32 tileEndX   = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileEndX;
+                int tileStartX = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileStartX;
+                int tileEndX   = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileEndX;
 
                 // Correct the left edge of the Search Area if it is not on the reference Picture
                 xSearchAreaOrigin = ((originX + xSearchAreaOrigin) < tileStartX) ?
@@ -4157,8 +4157,8 @@ EB_ERRORTYPE MotionEstimateLcu(
 #if TILES
             if (sequenceControlSetPtr->tileColumnCount * sequenceControlSetPtr->tileRowCount > 1)
             {
-                EB_U32 tileStartY = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileStartY;
-                EB_U32 tileEndY   = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileEndY;
+                int tileStartY = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileStartY;
+                int tileEndY   = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileEndY;
 
                 // Correct the top edge of the Search Area if it is not on the reference Picture
                 ySearchAreaOrigin = ((originY + ySearchAreaOrigin) < tileStartY) ?

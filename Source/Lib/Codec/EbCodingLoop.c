@@ -4330,8 +4330,8 @@ EB_EXTERN void EncodePass(
 
 
 #if TILES
-                EB_U32 tileOriginX = 0;
-                EB_U32 tileOriginY = 0;
+                EB_U16 tileOriginX = 0;
+                EB_U16 tileOriginY = 0;
                 {
                     unsigned i = 0, j = 0;
 
