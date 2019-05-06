@@ -527,9 +527,7 @@ extern EB_ERRORTYPE LcuParamsInit(
 	sequenceControlSetPtr->lcuTotalCount = pictureLcuWidth * pictureLcuHeight;
 
 #if TILES
-    if (sequenceControlSetPtr->tileColumnCount * sequenceControlSetPtr->tileRowCount > 1) {
-        ConfigureTiles(sequenceControlSetPtr);
-    }
+    ConfigureTiles(sequenceControlSetPtr);
 #endif
 
 	return return_error;
