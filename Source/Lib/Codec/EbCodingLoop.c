@@ -2248,7 +2248,7 @@ EB_ERRORTYPE EncQpmDeriveDeltaQPForEachLeafLcu(
 	EB_U8                           qpmQp = contextPtr->qpmQp;
 	EB_U8                           minQpAllowed = (EB_U8)sequenceControlSetPtr->staticConfig.minQpAllowed;
 	EB_U8                           maxQpAllowed = (EB_U8)sequenceControlSetPtr->staticConfig.maxQpAllowed;
-	EB_U8                           cuQP;
+	EB_S16                          cuQP;
 
     EB_BOOL  skipOis8x8  = (pictureControlSetPtr->ParentPcsPtr->skipOis8x8 && cuSize == 8);
 
@@ -2428,7 +2428,7 @@ EB_ERRORTYPE EncQpmDeriveDeltaQPForEachLeafLcu(
 				deltaQp = MIN(0, deltaQp);
 			}
 
-			cuQP = (EB_U32)(qpmQp + deltaQp);
+			cuQP = (qpmQp + deltaQp);
 
 
 			if ((qpmQp <= RC_QPMOD_MAXQP)){
@@ -2439,7 +2439,7 @@ EB_ERRORTYPE EncQpmDeriveDeltaQPForEachLeafLcu(
 			}
 		}
 		else{
-            cuQP = (EB_U8)(qpmQp + deltaQp);
+            cuQP = (qpmQp + deltaQp);
 		}
 
 		cuQP = (EB_U8)CLIP3(
