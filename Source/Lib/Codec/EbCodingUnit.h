@@ -199,8 +199,10 @@ typedef struct LargestCodingUnit_s {
     EB_BOOL                         tileLeftEdgeFlag;
     EB_BOOL                         tileTopEdgeFlag;
     EB_BOOL                         tileRightEdgeFlag;
-    EB_U32                          tileOriginX;
-    EB_U32                          tileOriginY;
+    EB_U16                          tileOriginX;
+    EB_U16                          tileOriginY;
+    EB_U16                          tileEndX;
+    EB_U16                          tileEndY;
 #endif
 
 } LargestCodingUnit_t;

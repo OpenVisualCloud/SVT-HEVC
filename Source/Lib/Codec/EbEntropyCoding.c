@@ -6320,7 +6320,7 @@ static void CodePPS(
 
         if (scsPtr->tileUniformSpacing == 0) {
 
-            unsigned syntaxItr;
+            int syntaxItr;
 
             // Tile Column Width
             for (syntaxItr = 0; syntaxItr < (scsPtr->tileColumnCount - 1); ++syntaxItr) {

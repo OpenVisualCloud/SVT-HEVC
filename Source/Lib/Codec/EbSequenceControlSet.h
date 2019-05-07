@@ -12,9 +12,12 @@
 #include "EbEncodeContext.h"
 #include "EbPredictionStructure.h"
 #include "EbSei.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
 /************************************
  * Sequence Control Set
  ************************************/
@@ -24,11 +27,15 @@ typedef struct SequenceControlSet_s
 
 #if TILES
     // Tiles
+    // Better to put into PictureControlSet
     EB_U32              tileUniformSpacing;
-    EB_U32              tileColumnCount;
-    EB_U32              tileRowCount;
-    EB_U32              tileColumnWidthArray[EB_TILE_COLUMN_MAX_COUNT];
-    EB_U32              tileRowHeightArray[EB_TILE_ROW_MAX_COUNT];
+    EB_U16              tileColumnCount;
+    EB_U16              tileRowCount;
+    EB_U8               tileSliceMode;
+    EB_U16              tileColumnWidthArray[EB_TILE_COLUMN_MAX_COUNT];
+    EB_U16              tileRowHeightArray[EB_TILE_ROW_MAX_COUNT];
+    EB_U16              tileColumnArray[EB_TILE_COLUMN_MAX_COUNT];
+    EB_U16              tileRowArray[EB_TILE_ROW_MAX_COUNT];
 #endif
     
     // Encoding Context

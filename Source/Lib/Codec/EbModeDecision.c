@@ -405,26 +405,36 @@ void LimitMvOverBound(
 
     EB_S32 cuOriginX = (EB_S32)ctxtPtr->cuOriginX << 2;
     EB_S32 cuOriginY = (EB_S32)ctxtPtr->cuOriginY << 2;
-    EB_S32 lumaWidth = (EB_S32)sCSet->lumaWidth << 2;
-    EB_S32 lumaHeight = (EB_S32)sCSet->lumaHeight << 2;
+    EB_S32 startX = 0;
+    EB_S32 startY = 0;
+    EB_S32 endX   = (EB_S32)sCSet->lumaWidth << 2;
+    EB_S32 endY   = (EB_S32)sCSet->lumaHeight << 2;
     EB_S32 cuSize = (EB_S32)ctxtPtr->cuStats->size << 2;
     EB_S32 pad = 4 << 2;
+#if TILES
+    if ((sCSet->tileRowCount * sCSet->tileColumnCount) > 1) {
+        const unsigned lcuIndex = ctxtPtr->cuOriginX/sCSet->lcuSize + (ctxtPtr->cuOriginY/sCSet->lcuSize) * sCSet->pictureWidthInLcu;
+        startX = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartX << 2;
+        startY = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartY << 2;
+        endX   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndX << 2;
+        endY   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndY << 2;
+    }
+#endif
 
-
-    if (cuOriginX + mvxF + cuSize > (lumaWidth - pad)) {
-        *mvx = lumaWidth - pad - cuSize - cuOriginX;
+    if (cuOriginX + mvxF + cuSize > (endX - pad)) {
+        *mvx = endX - pad - cuSize - cuOriginX;
     }
 
-    if (cuOriginY + mvyF + cuSize > (lumaHeight - pad)) {
-        *mvy = lumaHeight - pad - cuSize - cuOriginY;
+    if (cuOriginY + mvyF + cuSize > (endY - pad)) {
+        *mvy = endY - pad - cuSize - cuOriginY;
     }
 
-    if (cuOriginX + mvxF < pad) {
-        *mvx = pad - cuOriginX;
+    if (cuOriginX + mvxF < (startX + pad)) {
+        *mvx = startX + pad - cuOriginX;
     }
 
-    if (cuOriginY + mvyF < pad) {
-        *mvy = pad - cuOriginY;
+    if (cuOriginY + mvyF < (startY + pad)) {
+        *mvy = startY + pad - cuOriginY;
     }
 }
 
@@ -1438,15 +1448,25 @@ EB_BOOL CheckForMvOverBound(
 
     EB_S32 cuOriginX = (EB_S32)ctxtPtr->cuOriginX << 2;
     EB_S32 cuOriginY = (EB_S32)ctxtPtr->cuOriginY << 2;
-    EB_S32 lumaWidth = (EB_S32)sCSet->lumaWidth << 2;
-    EB_S32 lumaHeight = (EB_S32)sCSet->lumaHeight << 2;
+    EB_S32 startX = 0;
+    EB_S32 startY = 0;
+    EB_S32 endX   = (EB_S32)sCSet->lumaWidth << 2;
+    EB_S32 endY   = (EB_S32)sCSet->lumaHeight << 2;
     EB_S32 cuSize = (EB_S32)ctxtPtr->cuStats->size << 2;
     EB_S32 pad = 4 << 2;
+#if TILES
+    if ((sCSet->tileRowCount * sCSet->tileColumnCount) > 1) {
+        const unsigned lcuIndex = ctxtPtr->cuOriginX/sCSet->lcuSize + (ctxtPtr->cuOriginY/sCSet->lcuSize) * sCSet->pictureWidthInLcu;
+        startX = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartX << 2;
+        startY = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartY << 2;
+        endX   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndX << 2;
+        endY   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndY << 2;
+    }
+#endif
 
+    if (cuOriginX + mvxF + cuSize > (endX - pad)) {
 
-    if (cuOriginX + mvxF + cuSize > (lumaWidth - pad)) {
-
-        if (cuOriginX + mvxF + cuSize > lumaWidth) {
+        if (cuOriginX + mvxF + cuSize > endX) {
             return EB_TRUE;
         }
         else {
@@ -1456,8 +1476,8 @@ EB_BOOL CheckForMvOverBound(
         }
     }
 
-    if (cuOriginY + mvyF + cuSize > (lumaHeight - pad)) {
-        if (cuOriginY + mvyF + cuSize > lumaHeight) {
+    if (cuOriginY + mvyF + cuSize > (endY - pad)) {
+        if (cuOriginY + mvyF + cuSize > endY) {
             return EB_TRUE;
         }
         else {
@@ -1467,8 +1487,8 @@ EB_BOOL CheckForMvOverBound(
         }
     }
 
-    if (cuOriginX + mvxF < pad) {
-        if (cuOriginX + mvxF < 0) {
+    if (cuOriginX + mvxF < (startX + pad)) {
+        if (cuOriginX + mvxF < startX) {
             return EB_TRUE;
         }
         else {
@@ -1478,8 +1498,8 @@ EB_BOOL CheckForMvOverBound(
         }
     }
 
-    if (cuOriginY + mvyF < pad) {
-        if (cuOriginY + mvyF < 0) {
+    if (cuOriginY + mvyF < (startY + pad)) {
+        if (cuOriginY + mvyF < startY) {
             return EB_TRUE;
         }
         else {
@@ -1561,7 +1581,6 @@ void ProductMergeSkip2Nx2NCandidatesInjection(
                         sequenceControlSetPtr);
                 }
             }
-
 
             if ((sequenceControlSetPtr->staticConfig.unrestrictedMotionVector && mvMergeDuplicateFlag == EB_FALSE) ||
                 (!sequenceControlSetPtr->staticConfig.unrestrictedMotionVector && mvMergeDuplicateFlag == EB_FALSE && mvOutOfPicFlag == EB_FALSE)) {

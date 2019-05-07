@@ -39,6 +39,7 @@
 #if 1//TILES
 #define TILE_ROW_COUNT_TOKEN            "-tile_row_cnt"
 #define TILE_COL_COUNT_TOKEN            "-tile_col_cnt"
+#define TILE_SLICE_MODE_TOKEN           "-tile_slice_mode"
 #endif
 #define TUNE_TOKEN                      "-tune"
 #define FRAME_RATE_TOKEN                "-fps"
@@ -187,6 +188,7 @@ static void SetCfgUseQpFile                     (const char *value, EbConfig_t *
 #if 1//TILES
 static void SetCfgTileColumnCount               (const char *value, EbConfig_t *cfg) { cfg->tileColumnCount                 = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetCfgTileRowCount                  (const char *value, EbConfig_t *cfg) { cfg->tileRowCount                    = (EB_BOOL)strtol(value, NULL, 0); };
+static void SetCfgTileSliceMode                 (const char *value, EbConfig_t *cfg) { cfg->tileSliceMode                   = (EB_BOOL)strtol(value, NULL, 0); };
 #endif
 static void SetDisableDlfFlag                   (const char *value, EbConfig_t *cfg) {cfg->disableDlfFlag                   = (EB_BOOL)strtoul(value, NULL, 0);};
 static void SetEnableSaoFlag                    (const char *value, EbConfig_t *cfg) {cfg->enableSaoFlag                    = (EB_BOOL)strtoul(value, NULL, 0);};
@@ -278,6 +280,7 @@ config_entry_t config_entry[] = {
 #if 1//TILES
      { SINGLE_INPUT, TILE_ROW_COUNT_TOKEN, "TileRowCount", SetCfgTileRowCount },
      { SINGLE_INPUT, TILE_COL_COUNT_TOKEN, "TileColumnCount", SetCfgTileColumnCount },
+     { SINGLE_INPUT, TILE_SLICE_MODE_TOKEN, "TileSliceMode", SetCfgTileSliceMode },
 #endif
 
     // Encoding Presets
@@ -415,6 +418,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
 #if 1//TILES
     configPtr->tileColumnCount                          = 1;
     configPtr->tileRowCount                             = 1;
+    configPtr->tileSliceMode                            = 0;
 #endif
     configPtr->sceneChangeDetection                 = 1;
     configPtr->rateControlMode                      = 0;
@@ -910,39 +914,38 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
 
 #if 1//TILES
 
-    //TODO: move this to appropriate location
-#define EB_TILE_COLUMN_MAX_COUNT                    16
-#define EB_TILE_ROW_MAX_COUNT                       32
-#define EB_TILE_MAX_COUNT                           512
 #define MAX_LCU_SIZE                                64
     
-    int32_t pictureWidthInLcu, pictureHeightInLcu;
+    int32_t pictureWidthInLcu = (config->sourceWidth + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE;
+    int32_t pictureHeightInLcu = (config->sourceHeight + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE;
+    int32_t maxTileColumnCount = (pictureWidthInLcu + 3) / 4;
+    int32_t maxTileRowCount = pictureHeightInLcu;
     int32_t horizontalTileIndex, verticalTileIndex;
 
-    pictureWidthInLcu = (config->sourceWidth + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE; 
-    pictureHeightInLcu = (config->sourceHeight + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE; 
 
-    if (config->tileColumnCount < 1 || config->tileColumnCount > EB_TILE_COLUMN_MAX_COUNT) {
-        printf("Error Instance %u: Invalid TileColumnCount. TileColumnCount range should be 1 to 32. In order to specify more than 16 tile columns, please increase the value of the macro EB_TILE_COLUMN_MAX_COUNT defined in EbDefinitions.h\n", channelNumber + 1);
+    if (config->tileColumnCount < 1 || config->tileColumnCount > maxTileColumnCount) {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid TileColumnCount. Maximum TileColumnCount for width %d is %d\n",
+                channelNumber + 1, config->sourceWidth, maxTileColumnCount);
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->tileRowCount < 1 || config->tileRowCount > EB_TILE_ROW_MAX_COUNT) {
-        printf("Error Instance %u: Invalid TileRowCount. TileRowCount range should be 1 to 16. In order to specify more than 16 tile rows, please increase the value of the macro EB_TILE_ROW_MAX_COUNT defined in EbDefinitions.h\n", channelNumber + 1);
+    if (config->tileRowCount < 1 || config->tileRowCount > maxTileRowCount) {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid TileRowCount. Maximum TileRowCount for height %d is %d\n",
+                channelNumber + 1, config->sourceHeight, maxTileRowCount);
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->tileColumnCount * config->tileRowCount > EB_TILE_MAX_COUNT) {
-        printf("Error Instance %u: The number of tiles exceeds the allowed maximum number of tiles\n", channelNumber + 1);
+    if ((config->tileColumnCount * config->tileRowCount) <= 1 && config->tileSliceMode) {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid TileSliceMode. TileSliceMode could be 1 for multi tile mode, please set it to 0 for single tile mode\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
-        
+
 
     {
         for (horizontalTileIndex = 0; horizontalTileIndex < (config->tileColumnCount - 1); ++horizontalTileIndex) {
             if (((horizontalTileIndex + 1) * pictureWidthInLcu / config->tileColumnCount -
                 horizontalTileIndex * pictureWidthInLcu / config->tileColumnCount) * MAX_LCU_SIZE < 256) { // 256 samples
-                printf("Error Instance %u: TileColumnCount must be chosen such that each tile has a minimum width of 256 luma samples\n", channelNumber + 1);
+                fprintf(config->errorLogFile, "SVT [Error]: Instance %u: TileColumnCount must be chosen such that each tile has a minimum width of 256 luma samples\n", channelNumber + 1);
                 return_error = EB_ErrorBadParameter;
                 break;
             }
@@ -950,7 +953,7 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         for (verticalTileIndex = 0; verticalTileIndex < (config->tileRowCount - 1); ++verticalTileIndex) {
             if (((verticalTileIndex + 1) * pictureHeightInLcu / config->tileRowCount -
                 verticalTileIndex * pictureHeightInLcu / config->tileRowCount) * MAX_LCU_SIZE < 64) { // 64 samples
-                printf("Error Instance %u: TileRowCount must be chosen such that each tile has a minimum height of 64 luma samples\n", channelNumber + 1);
+                fprintf(config->errorLogFile, "SVT [Error]: Instance %u: TileRowCount must be chosen such that each tile has a minimum height of 64 luma samples\n", channelNumber + 1);
                 return_error = EB_ErrorBadParameter;
                 break;
 

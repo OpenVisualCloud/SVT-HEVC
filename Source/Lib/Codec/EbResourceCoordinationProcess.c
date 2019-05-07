@@ -598,6 +598,12 @@ void* ResourceCoordinationKernel(void *inputPtr)
         // Set the current SequenceControlSet
         sequenceControlSetPtr   = (SequenceControlSet_t*) contextPtr->sequenceControlSetActiveArray[instanceIndex]->objectPtr;
         
+#if TILES
+        sequenceControlSetPtr->tileUniformSpacing = 1;
+        sequenceControlSetPtr->tileColumnCount = sequenceControlSetPtr->staticConfig.tileColumnCount;
+        sequenceControlSetPtr->tileRowCount    = sequenceControlSetPtr->staticConfig.tileRowCount;
+        sequenceControlSetPtr->tileSliceMode   = sequenceControlSetPtr->staticConfig.tileSliceMode;
+#endif
 		// Init LCU Params
         if (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->initialPicture) {
             DeriveInputResolution(
@@ -750,11 +756,6 @@ void* ResourceCoordinationKernel(void *inputPtr)
                 TOP_FIELD_PICT_STRUCT :
                 BOTTOM_FIELD_PICT_STRUCT ;
 
-#if TILES        
-        sequenceControlSetPtr->tileUniformSpacing = 1;
-        sequenceControlSetPtr->tileColumnCount = sequenceControlSetPtr->staticConfig.tileColumnCount;
-        sequenceControlSetPtr->tileRowCount    = sequenceControlSetPtr->staticConfig.tileRowCount;
-#endif
         sequenceControlSetPtr->encodeContextPtr->initialPicture = EB_FALSE;
 
         // Get Empty Reference Picture Object
