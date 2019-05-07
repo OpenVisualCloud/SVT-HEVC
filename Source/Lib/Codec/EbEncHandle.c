@@ -2793,7 +2793,7 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->tileSliceMode > 1 || (config->tileRowCount * config->tileColumnCount == 1 && config->tileSliceMode == 1)) {
+    if (config->tileSliceMode > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid tile slice mode\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }

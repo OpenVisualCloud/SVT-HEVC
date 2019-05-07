@@ -405,54 +405,21 @@ void LimitMvOverBound(
 
     EB_S32 cuOriginX = (EB_S32)ctxtPtr->cuOriginX << 2;
     EB_S32 cuOriginY = (EB_S32)ctxtPtr->cuOriginY << 2;
-    EB_S32 lumaWidth = (EB_S32)sCSet->lumaWidth << 2;
-    EB_S32 lumaHeight = (EB_S32)sCSet->lumaHeight << 2;
+    EB_S32 startX = 0;
+    EB_S32 startY = 0;
+    EB_S32 endX   = (EB_S32)sCSet->lumaWidth << 2;
+    EB_S32 endY   = (EB_S32)sCSet->lumaHeight << 2;
     EB_S32 cuSize = (EB_S32)ctxtPtr->cuStats->size << 2;
     EB_S32 pad = 4 << 2;
-
-
-    if (cuOriginX + mvxF + cuSize > (lumaWidth - pad)) {
-        *mvx = lumaWidth - pad - cuSize - cuOriginX;
-    }
-
-    if (cuOriginY + mvyF + cuSize > (lumaHeight - pad)) {
-        *mvy = lumaHeight - pad - cuSize - cuOriginY;
-    }
-
-    if (cuOriginX + mvxF < pad) {
-        *mvx = pad - cuOriginX;
-    }
-
-    if (cuOriginY + mvyF < pad) {
-        *mvy = pad - cuOriginY;
-    }
-}
-
 #if TILES
-void LimitMvOverSliceBound(
-    EB_S16 *mvx,
-    EB_S16 *mvy,
-    ModeDecisionContext_t           *ctxtPtr,
-    const SequenceControlSet_t      *sCSet,
-    const PictureControlSet_t       *pCSet)
-{
-    EB_S32 mvxF, mvyF;
-
-    //L0
-    mvxF = *mvx;
-    mvyF = *mvy;
-
-    EB_S32 cuOriginX = (EB_S32)ctxtPtr->cuOriginX << 2;
-    EB_S32 cuOriginY = (EB_S32)ctxtPtr->cuOriginY << 2;
-    const unsigned pictureWidthInLcu = (sCSet->lumaWidth + sCSet->lcuSize - 1) / sCSet->lcuSize;
-    const unsigned lcuIndex = ctxtPtr->cuOriginX/sCSet->lcuSize + (ctxtPtr->cuOriginY/sCSet->lcuSize) * pictureWidthInLcu;
-    EB_S32 startX = (EB_S32)pCSet->lcuPtrArray[lcuIndex]->tileOriginX << 2;
-    EB_S32 startY = (EB_S32)pCSet->lcuPtrArray[lcuIndex]->tileOriginY << 2;
-    EB_S32 endX   = (EB_S32)pCSet->lcuPtrArray[lcuIndex]->tileEndX << 2;
-    EB_S32 endY   = (EB_S32)pCSet->lcuPtrArray[lcuIndex]->tileEndY << 2;
-    EB_S32 cuSize = (EB_S32)ctxtPtr->cuStats->size << 2;
-    EB_S32 pad = 4 << 2;
-
+    if ((sCSet->tileRowCount * sCSet->tileColumnCount) > 1) {
+        const unsigned lcuIndex = ctxtPtr->cuOriginX/sCSet->lcuSize + (ctxtPtr->cuOriginY/sCSet->lcuSize) * sCSet->pictureWidthInLcu;
+        startX = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartX << 2;
+        startY = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartY << 2;
+        endX   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndX << 2;
+        endY   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndY << 2;
+    }
+#endif
 
     if (cuOriginX + mvxF + cuSize > (endX - pad)) {
         *mvx = endX - pad - cuSize - cuOriginX;
@@ -470,7 +437,6 @@ void LimitMvOverSliceBound(
         *mvy = startY + pad - cuOriginY;
     }
 }
-#endif
 
 void Me2Nx2NCandidatesInjection(
     PictureControlSet_t            *pictureControlSetPtr,
@@ -542,43 +508,6 @@ void Me2Nx2NCandidatesInjection(
                     sequenceControlSetPtr);
             }
         }
-
-#if TILES
-        //constrain mv inside slice
-        if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0 && sequenceControlSetPtr->staticConfig.tileSliceMode == 1) {
-            if (interDirection == UNI_PRED_LIST_0) {
-                LimitMvOverSliceBound(
-                    &candidateArray[canTotalCnt].motionVector_x_L0,
-                    &candidateArray[canTotalCnt].motionVector_y_L0,
-                    contextPtr,
-                    sequenceControlSetPtr,
-                    pictureControlSetPtr);
-            }
-            else if (interDirection == UNI_PRED_LIST_1) {
-                LimitMvOverSliceBound(
-                    &candidateArray[canTotalCnt].motionVector_x_L1,
-                    &candidateArray[canTotalCnt].motionVector_y_L1,
-                    contextPtr,
-                    sequenceControlSetPtr,
-                    pictureControlSetPtr);
-            }
-            else {
-                LimitMvOverSliceBound(
-                    &candidateArray[canTotalCnt].motionVector_x_L0,
-                    &candidateArray[canTotalCnt].motionVector_y_L0,
-                    contextPtr,
-                    sequenceControlSetPtr,
-                    pictureControlSetPtr);
-
-                LimitMvOverSliceBound(
-                    &candidateArray[canTotalCnt].motionVector_x_L1,
-                    &candidateArray[canTotalCnt].motionVector_y_L1,
-                    contextPtr,
-                    sequenceControlSetPtr,
-                    pictureControlSetPtr);
-            }
-        }
-#endif
 
 		candidateArray[canTotalCnt].meDistortion = mePuResult->distortionDirection[meCandidateIndex].distortion;
 
@@ -1519,85 +1448,21 @@ EB_BOOL CheckForMvOverBound(
 
     EB_S32 cuOriginX = (EB_S32)ctxtPtr->cuOriginX << 2;
     EB_S32 cuOriginY = (EB_S32)ctxtPtr->cuOriginY << 2;
-    EB_S32 lumaWidth = (EB_S32)sCSet->lumaWidth << 2;
-    EB_S32 lumaHeight = (EB_S32)sCSet->lumaHeight << 2;
+    EB_S32 startX = 0;
+    EB_S32 startY = 0;
+    EB_S32 endX   = (EB_S32)sCSet->lumaWidth << 2;
+    EB_S32 endY   = (EB_S32)sCSet->lumaHeight << 2;
     EB_S32 cuSize = (EB_S32)ctxtPtr->cuStats->size << 2;
     EB_S32 pad = 4 << 2;
-
-
-    if (cuOriginX + mvxF + cuSize > (lumaWidth - pad)) {
-
-        if (cuOriginX + mvxF + cuSize > lumaWidth) {
-            return EB_TRUE;
-        }
-        else {
-            if (mvxF % 4 != 0 || mvxF % 8 != 0) {
-                return EB_TRUE;
-            }
-        }
-    }
-
-    if (cuOriginY + mvyF + cuSize > (lumaHeight - pad)) {
-        if (cuOriginY + mvyF + cuSize > lumaHeight) {
-            return EB_TRUE;
-        }
-        else {
-            if (mvyF % 4 != 0 || mvyF % 8 != 0) {
-                return EB_TRUE;
-            }
-        }
-    }
-
-    if (cuOriginX + mvxF < pad) {
-        if (cuOriginX + mvxF < 0) {
-            return EB_TRUE;
-        }
-        else {
-            if (mvxF % 4 != 0 || mvxF % 8 != 0) {
-                return EB_TRUE;
-            }
-        }
-    }
-
-    if (cuOriginY + mvyF < pad) {
-        if (cuOriginY + mvyF < 0) {
-            return EB_TRUE;
-        }
-        else {
-            if (mvyF % 4 != 0 || mvyF % 8 != 0) {
-                return EB_TRUE;
-            }
-        }
-    }
-
-    return EB_FALSE;
-}
-
 #if TILES
-EB_BOOL CheckForMvOverSliceBound(
-    EB_S16 mvx,
-    EB_S16 mvy,
-    ModeDecisionContext_t           *ctxtPtr,
-    const SequenceControlSet_t      *sCSet,
-    const PictureControlSet_t       *pCSet)
-{
-    EB_S32 mvxF, mvyF;
-
-    //L0
-    mvxF = (EB_S32)mvx;
-    mvyF = (EB_S32)mvy;
-
-    EB_S32 cuOriginX = (EB_S32)ctxtPtr->cuOriginX << 2;
-    EB_S32 cuOriginY = (EB_S32)ctxtPtr->cuOriginY << 2;
-    const unsigned pictureWidthInLcu = (sCSet->lumaWidth + sCSet->lcuSize - 1) / sCSet->lcuSize;
-    const unsigned lcuIndex = ctxtPtr->cuOriginX/sCSet->lcuSize + (ctxtPtr->cuOriginY/sCSet->lcuSize) * pictureWidthInLcu;
-    EB_S32 startX = (EB_S32)pCSet->lcuPtrArray[lcuIndex]->tileOriginX << 2;
-    EB_S32 startY = (EB_S32)pCSet->lcuPtrArray[lcuIndex]->tileOriginY << 2;
-    EB_S32 endX   = (EB_S32)pCSet->lcuPtrArray[lcuIndex]->tileEndX << 2;
-    EB_S32 endY   = (EB_S32)pCSet->lcuPtrArray[lcuIndex]->tileEndY << 2;
-    EB_S32 cuSize = (EB_S32)ctxtPtr->cuStats->size << 2;
-    EB_S32 pad = 4 << 2;
-
+    if ((sCSet->tileRowCount * sCSet->tileColumnCount) > 1) {
+        const unsigned lcuIndex = ctxtPtr->cuOriginX/sCSet->lcuSize + (ctxtPtr->cuOriginY/sCSet->lcuSize) * sCSet->pictureWidthInLcu;
+        startX = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartX << 2;
+        startY = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartY << 2;
+        endX   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndX << 2;
+        endY   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndY << 2;
+    }
+#endif
 
     if (cuOriginX + mvxF + cuSize > (endX - pad)) {
 
@@ -1646,14 +1511,10 @@ EB_BOOL CheckForMvOverSliceBound(
 
     return EB_FALSE;
 }
-#endif
 
 void ProductMergeSkip2Nx2NCandidatesInjection(
     ModeDecisionContext_t          *contextPtr,
     const SequenceControlSet_t     *sequenceControlSetPtr,
-#if TILES
-	const PictureControlSet_t      *pictureControlSetPtr,
-#endif
     InterPredictionContext_t       *interPredictionPtr,
     EB_U32                         *candidateTotalCnt,
     EB_U32                          mvMergeCandidateTotalCount
@@ -1720,41 +1581,6 @@ void ProductMergeSkip2Nx2NCandidatesInjection(
                         sequenceControlSetPtr);
                 }
             }
-#if TILES
-            if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0 && sequenceControlSetPtr->staticConfig.tileSliceMode == 1) {
-                if (mvMergeCandidatePtr->predictionDirection == UNI_PRED_LIST_0) {
-                    mvOutOfPicFlag |= CheckForMvOverSliceBound(
-                        candidateMv[REF_LIST_0].x,
-                        candidateMv[REF_LIST_0].y,
-                        contextPtr,
-                        sequenceControlSetPtr,
-                        pictureControlSetPtr);
-                }
-                else if (mvMergeCandidatePtr->predictionDirection == UNI_PRED_LIST_1) {
-                    mvOutOfPicFlag |= CheckForMvOverSliceBound(
-                        candidateMv[REF_LIST_1].x,
-                        candidateMv[REF_LIST_1].y,
-                        contextPtr,
-                        sequenceControlSetPtr,
-                        pictureControlSetPtr);
-                }
-                else {
-                    mvOutOfPicFlag |= CheckForMvOverSliceBound(
-                        candidateMv[REF_LIST_0].x,
-                        candidateMv[REF_LIST_0].y,
-                        contextPtr,
-                        sequenceControlSetPtr,
-                        pictureControlSetPtr);
-                    mvOutOfPicFlag |= CheckForMvOverSliceBound(
-                        candidateMv[REF_LIST_1].x,
-                        candidateMv[REF_LIST_1].y,
-                        contextPtr,
-                        sequenceControlSetPtr,
-                        pictureControlSetPtr);
-                }
-            }
-#endif
-
 
             if ((sequenceControlSetPtr->staticConfig.unrestrictedMotionVector && mvMergeDuplicateFlag == EB_FALSE) ||
                 (!sequenceControlSetPtr->staticConfig.unrestrictedMotionVector && mvMergeDuplicateFlag == EB_FALSE && mvOutOfPicFlag == EB_FALSE)) {
@@ -2026,9 +1852,6 @@ EB_ERRORTYPE ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
 			ProductMergeSkip2Nx2NCandidatesInjection( // HT not much to do
 				contextPtr,
 				sequenceControlSetPtr,
-#if TILES
-				pictureControlSetPtr,
-#endif
 				interPredictionPtr,
 				&canTotalCnt,
 				mvMergeCandidateTotalCount);

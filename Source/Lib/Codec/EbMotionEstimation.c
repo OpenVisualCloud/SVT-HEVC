@@ -4110,7 +4110,7 @@ EB_ERRORTYPE MotionEstimateLcu(
             }
 
 #if TILES
-            if (sequenceControlSetPtr->tileColumnCount * sequenceControlSetPtr->tileRowCount > 1)
+            if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0 && (sequenceControlSetPtr->tileRowCount * sequenceControlSetPtr->tileColumnCount) > 1)
             {
                 int tileStartX = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileStartX;
                 int tileEndX   = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileEndX;
@@ -4155,7 +4155,7 @@ EB_ERRORTYPE MotionEstimateLcu(
             }
 
 #if TILES
-            if (sequenceControlSetPtr->tileColumnCount * sequenceControlSetPtr->tileRowCount > 1)
+            if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0 && (sequenceControlSetPtr->tileRowCount * sequenceControlSetPtr->tileColumnCount) > 1)
             {
                 int tileStartY = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileStartY;
                 int tileEndY   = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileEndY;
