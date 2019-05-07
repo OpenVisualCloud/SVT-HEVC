@@ -410,31 +410,47 @@ void LimitMvOverBound(
     EB_S32 endX   = (EB_S32)sCSet->lumaWidth << 2;
     EB_S32 endY   = (EB_S32)sCSet->lumaHeight << 2;
     EB_S32 cuSize = (EB_S32)ctxtPtr->cuStats->size << 2;
-    EB_S32 pad = 4 << 2;
+    EB_S32 pad = (4 << 2);
 #if TILES
     if ((sCSet->tileRowCount * sCSet->tileColumnCount) > 1) {
         const unsigned lcuIndex = ctxtPtr->cuOriginX/sCSet->lcuSize + (ctxtPtr->cuOriginY/sCSet->lcuSize) * sCSet->pictureWidthInLcu;
         startX = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartX << 2;
         startY = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartY << 2;
-        endX   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndX << 2;
-        endY   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndY << 2;
+        endX   = (EB_S32)(sCSet->lcuParamsArray[lcuIndex].tileEndX+1) << 2;
+        endY   = (EB_S32)(sCSet->lcuParamsArray[lcuIndex].tileEndY+1) << 2;
     }
 #endif
+    //Jing: if MV is quarter/half, the 7,8 tap interpolation will cross the boundary
+    //Just clamp the MV to integer
 
-    if (cuOriginX + mvxF + cuSize > (endX - pad)) {
-        *mvx = endX - pad - cuSize - cuOriginX;
+    // Horizontal
+    if (((mvxF % 4) != 0) &&
+            (cuOriginX + mvxF + cuSize > (endX - pad) || (cuOriginX + mvxF < (startX + pad)))) {
+        //half/quarter interpolation, and cross the boundary, clamp to integer first 
+        mvxF = ((mvxF >> 2) << 2);
     }
 
-    if (cuOriginY + mvyF + cuSize > (endY - pad)) {
-        *mvy = endY - pad - cuSize - cuOriginY;
+    if (cuOriginX + mvxF + cuSize > endX) {
+        *mvx = endX - cuSize - cuOriginX;
     }
 
-    if (cuOriginX + mvxF < (startX + pad)) {
-        *mvx = startX + pad - cuOriginX;
+    if (cuOriginX + mvxF < startX) {
+        *mvx = startX - cuOriginX;
     }
 
-    if (cuOriginY + mvyF < (startY + pad)) {
-        *mvy = startY + pad - cuOriginY;
+    // Vertical
+    if (((mvyF % 4) != 0) &&
+            (cuOriginY + mvyF + cuSize > (endY - pad) || (cuOriginY + mvyF < (startY + pad)))) {
+        //half/quarter interpolation, and cross the boundary, clamp to integer first
+        mvyF = ((mvyF >> 2) << 2);
+    }
+
+    if (cuOriginY + mvyF + cuSize > endY) {
+        *mvy = endY - cuSize - cuOriginY;
+    }
+
+    if (cuOriginY + mvyF < startY) {
+        *mvy = startY - cuOriginY;
     }
 }
 
