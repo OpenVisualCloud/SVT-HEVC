@@ -97,6 +97,8 @@ static EB_U32 mainTierCPB[TOTAL_LEVEL_COUNT] = { 350000, 1500000, 3000000, 60000
 static EB_U32 highTierCPB[TOTAL_LEVEL_COUNT] = { 350000, 1500000, 3000000, 6000000, 10000000, 30000000, 50000000, 100000000, 160000000, 240000000, 240000000, 480000000, 800000000 };
 static EB_U32 mainTierMaxBitRate[TOTAL_LEVEL_COUNT] = { 128000, 1500000, 3000000, 6000000, 10000000, 12000000, 20000000, 25000000, 40000000, 60000000, 60000000, 120000000, 240000000 };
 static EB_U32 highTierMaxBitRate[TOTAL_LEVEL_COUNT] = { 128000, 1500000, 3000000, 6000000, 10000000, 30000000, 50000000, 100000000, 160000000, 240000000, 240000000, 480000000, 800000000 };
+static EB_U32 maxTileColumn[TOTAL_LEVEL_COUNT] = { 1, 1, 1, 2, 3, 5, 5, 10, 10, 10, 20, 20, 20 };
+static EB_U32 maxTileRow[TOTAL_LEVEL_COUNT]    = { 1, 1, 1, 2, 3, 5, 5, 11, 11, 11, 22, 22, 22 };
 
 EB_U32 ASM_TYPES;
 /**************************************
@@ -2561,6 +2563,15 @@ static EB_ERRORTYPE VerifySettings(\
         SVT_LOG("SVT [Error]: Instance %u: Out of bound maxBufferSize for level %s and tier 1 \n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
+    // Table A.6 General tier and level limits
+	if ((config->level != 0) && (config->tileColumnCount > maxTileColumn[levelIdx])) {
+        SVT_LOG("SVT [Error]: Instance %u: Out of bound maxTileColumn for level %s\n",channelNumber+1, levelIdc);
+        return_error = EB_ErrorBadParameter;
+    }
+	if ((config->level != 0) && (config->tileRowCount > maxTileRow[levelIdx])) {
+        SVT_LOG("SVT [Error]: Instance %u: Out of bound maxTileRow for level %s\n",channelNumber+1, levelIdc);
+        return_error = EB_ErrorBadParameter;
+    }
     }
 
 	if(config->profile > 4){
@@ -2783,12 +2794,12 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->tileColumnCount < 1) {
+    if (config->tileColumnCount < 1 || config->tileColumnCount > 20) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid tile column count\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->tileRowCount < 1) {
+    if (config->tileRowCount < 1 || config->tileRowCount > 22) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid tile row count\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
