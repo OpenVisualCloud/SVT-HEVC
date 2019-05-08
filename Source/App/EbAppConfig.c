@@ -494,7 +494,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->bufferedInput                            = -1;
 
     // Annex A Definitions
-    configPtr->profile                                  = 2;
+    configPtr->profile                                  = 1;
     configPtr->tier                                     = 0;
     configPtr->level                                    = 0;
 
