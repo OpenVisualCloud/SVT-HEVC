@@ -407,8 +407,8 @@ static void ConfigureTiles(
                         (xLcuIndex == xLcuStart + scsPtr->tileColumnArray[columnIndex] - 1) ? EB_TRUE : EB_FALSE;
                     scsPtr->lcuParamsArray[lcuIndex].tileStartX = xLcuStart * scsPtr->lcuSize;
                     scsPtr->lcuParamsArray[lcuIndex].tileStartY = yLcuStart * scsPtr->lcuSize;
-                    scsPtr->lcuParamsArray[lcuIndex].tileEndX = (xLcuStart + scsPtr->tileColumnArray[columnIndex]) * scsPtr->lcuSize - 1;
-                    scsPtr->lcuParamsArray[lcuIndex].tileEndY = (yLcuStart + scsPtr->tileRowArray[rowIndex]) * scsPtr->lcuSize - 1;
+                    scsPtr->lcuParamsArray[lcuIndex].tileEndX = (columnIndex == (tileColumns - 1)) ? scsPtr->lumaWidth : (xLcuStart + scsPtr->tileColumnArray[columnIndex]) * scsPtr->lcuSize;
+                    scsPtr->lcuParamsArray[lcuIndex].tileEndY = (rowIndex == (tileRows - 1)) ? scsPtr->lumaHeight : (yLcuStart + scsPtr->tileRowArray[rowIndex]) * scsPtr->lcuSize;
                 }
             }
             xLcuStart += scsPtr->tileColumnArray[columnIndex];

@@ -416,8 +416,8 @@ void LimitMvOverBound(
         const unsigned lcuIndex = ctxtPtr->cuOriginX/sCSet->lcuSize + (ctxtPtr->cuOriginY/sCSet->lcuSize) * sCSet->pictureWidthInLcu;
         startX = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartX << 2;
         startY = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartY << 2;
-        endX   = (EB_S32)(sCSet->lcuParamsArray[lcuIndex].tileEndX+1) << 2;
-        endY   = (EB_S32)(sCSet->lcuParamsArray[lcuIndex].tileEndY+1) << 2;
+        endX   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndX << 2;
+        endY   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndY << 2;
     }
 #endif
     //Jing: if MV is quarter/half, the 7,8 tap interpolation will cross the boundary
