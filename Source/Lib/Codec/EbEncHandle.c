@@ -2225,7 +2225,7 @@ void CopyApiFromApp(
 
     //Set required flags to signal vbv status when hrd is enabled
     if (sequenceControlSetPtr->staticConfig.hrdFlag == 1) {
-		sequenceControlSetPtr->staticConfig.videoUsabilityInfo = 1;
+	    sequenceControlSetPtr->staticConfig.videoUsabilityInfo = 1;
         sequenceControlSetPtr->videoUsabilityInfoPtr->vuiHrdParametersPresentFlag = 1;
         sequenceControlSetPtr->staticConfig.bufferingPeriodSEI = 1;
         sequenceControlSetPtr->staticConfig.pictureTimingSEI = 1;
@@ -2379,12 +2379,12 @@ static EB_ERRORTYPE VerifySettings(\
 
 	if(levelIdx > TOTAL_LEVEL_COUNT){
         SVT_LOG("SVT [Error]: Instance %u: Unsupported level\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
     }
 
     if (sequenceControlSetPtr->maxInputLumaWidth < 64) {
         SVT_LOG("SVT [Error]: Instance %u: Source Width must be at least 64\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
 	}
     if (sequenceControlSetPtr->maxInputLumaHeight < 64) {
         SVT_LOG("SVT [Error]: Instance %u: Source Width must be at least 64\n", channelNumber + 1);
@@ -2416,12 +2416,12 @@ static EB_ERRORTYPE VerifySettings(\
     }
     if (sequenceControlSetPtr->maxInputLumaWidth > 8192) {
         SVT_LOG("SVT [Error]: Instance %u: Source Width must be less than 8192\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
 	}
 
     if (sequenceControlSetPtr->maxInputLumaHeight > 4320) {
         SVT_LOG("SVT [Error]: Instance %u: Source Height must be less than 4320\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
     }
 
 	EB_U32 inputSize = (EB_U32)sequenceControlSetPtr->maxInputLumaWidth * (EB_U32)sequenceControlSetPtr->maxInputLumaHeight;
@@ -2462,13 +2462,13 @@ static EB_ERRORTYPE VerifySettings(\
         sequenceControlSetPtr->maxEncMode = MAX_SUPPORTED_MODES_SUB1080P - 1;
         if (config->encMode > MAX_SUPPORTED_MODES_SUB1080P -1) {
             SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_SUB1080P-1);
-			return_error = EB_ErrorBadParameter;
+		    return_error = EB_ErrorBadParameter;
 		}
 	}else if (inputResolution == INPUT_SIZE_1080p_RANGE){
         sequenceControlSetPtr->maxEncMode = MAX_SUPPORTED_MODES_1080P - 1;
         if (config->encMode > MAX_SUPPORTED_MODES_1080P - 1) {
             SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_1080P - 1);
-			return_error = EB_ErrorBadParameter;
+		    return_error = EB_ErrorBadParameter;
 		}
 	}else {
         if (config->tune == 0)
@@ -2478,21 +2478,21 @@ static EB_ERRORTYPE VerifySettings(\
 
         if (config->encMode > MAX_SUPPORTED_MODES_4K_SQ - 1 && config->tune == 0) {
             SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_4K_SQ-1);
-			return_error = EB_ErrorBadParameter;
+		    return_error = EB_ErrorBadParameter;
         }else if (config->encMode > MAX_SUPPORTED_MODES_4K_OQ - 1 && config->tune >= 1) {
             SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_4K_OQ-1);
-			return_error = EB_ErrorBadParameter;
+		    return_error = EB_ErrorBadParameter;
 		}
 	}
 
 	if(config->qp > 51) {
         SVT_LOG("SVT [Error]: Instance %u: QP must be [0 - 51]\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
 	}
 
     if (config->hierarchicalLevels > 3) {
         SVT_LOG("SVT [Error]: Instance %u: Hierarchical Levels supported [0-3]\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
 	}
 
     if (config->intraPeriodLength < -2 || config->intraPeriodLength > 255) {
@@ -2519,12 +2519,12 @@ static EB_ERRORTYPE VerifySettings(\
     }
 
     if (config->hrdFlag > 1) {
-		SVT_LOG("SVT [Error]: Instance %u: hrdFlag must be [0 - 1]\n", channelNumber + 1);
+	    SVT_LOG("SVT [Error]: Instance %u: hrdFlag must be [0 - 1]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->hrdFlag == 1 && ((config->vbvBufsize <= 0) || (config->vbvMaxrate <= 0))) {
-		SVT_LOG("SVT [Error]: Instance %u: hrd requires vbv max rate and vbv bufsize to be greater than 0 ", channelNumber + 1);
+	    SVT_LOG("SVT [Error]: Instance %u: hrd requires vbv max rate and vbv bufsize to be greater than 0 ", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -2588,12 +2588,12 @@ static EB_ERRORTYPE VerifySettings(\
 
 	if (config->profile == 0){
         SVT_LOG("SVT [Error]: Instance %u: The minimum allowed Profile number is 1 \n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
 	}
 
 	if(config->profile == 3) {
         SVT_LOG("SVT [Error]: Instance %u: The Main Still Picture Profile is not supported \n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
 	}
 
     if(config->encoderColorFormat >= EB_YUV422 && config->profile != 4)
@@ -2618,11 +2618,11 @@ static EB_ERRORTYPE VerifySettings(\
     }
 	if (config->constrainedIntra > 1) {
         SVT_LOG("SVT [Error]: Instance %u: The constrained intra must be [0 - 1] \n", channelNumber + 1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
 	}
 	if (config->rateControlMode > 1) {
         SVT_LOG("SVT [Error]: Instance %u: The rate control mode must be [0 - 1] \n", channelNumber + 1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
 	}
 
     if (config->tune > 0 && config->bitRateReduction == 1){
@@ -2641,24 +2641,24 @@ static EB_ERRORTYPE VerifySettings(\
     }
 	if (config->sceneChangeDetection > 1) {
         SVT_LOG("SVT [Error]: Instance %u: The scene change detection must be [0 - 1] \n", channelNumber + 1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
 	}
 	if ( config->maxQpAllowed > 51) {
         SVT_LOG("SVT [Error]: Instance %u: MaxQpAllowed must be [0 - 51]\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
 	}
 	else if ( config->minQpAllowed > 50 ) {
         SVT_LOG("SVT [Error]: Instance %u: MinQpAllowed must be [0 - 50]\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
 	}
 	else if ( (config->minQpAllowed) > (config->maxQpAllowed))  {
         SVT_LOG("SVT [Error]: Instance %u:  MinQpAllowed must be smaller than MaxQpAllowed\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
 	}
 
 	if (config->videoUsabilityInfo > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid VideoUsabilityInfo. VideoUsabilityInfo must be [0 - 1]\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
     }
 
     if (config->tune > 2) {
@@ -2667,45 +2667,45 @@ static EB_ERRORTYPE VerifySettings(\
     }
 	if (config->bitRateReduction > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid BitRateReduction. BitRateReduction must be [0 - 1]\n", channelNumber + 1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
 	}
     if (config->improveSharpness > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid ImproveSharpness. ImproveSharpness must be [0 - 1]\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
     }
 
     if (config->highDynamicRangeInput > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid HighDynamicRangeInput. HighDynamicRangeInput must be [0 - 1]\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
     }
 	if (config->accessUnitDelimiter > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid AccessUnitDelimiter. AccessUnitDelimiter must be [0 - 1]\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
     }
 
 	if (config->bufferingPeriodSEI > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid BufferingPeriod. BufferingPeriod must be [0 - 1]\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
     }
 
 	if (config->pictureTimingSEI > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid PictureTiming. PictureTiming must be [0 - 1]\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
     }
 
 	if (config->registeredUserDataSeiFlag > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid RegisteredUserData. RegisteredUserData must be [0 - 1]\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+        return_error = EB_ErrorBadParameter;
     }
 
 	if (config->unregisteredUserDataSeiFlag > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid UnregisteredUserData. UnregisteredUserData must be [0 - 1]\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
     }
 
 	if (config->recoveryPointSeiFlag > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid RecoveryPoint. RecoveryPoint must be [0 - 1]\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
     }
 
     if (config->useMasteringDisplayColorVolume > 1) {
@@ -2719,33 +2719,33 @@ static EB_ERRORTYPE VerifySettings(\
     }
 
 	if ((config->maxCLL && !config->highDynamicRangeInput) || (config->maxFALL && !config->highDynamicRangeInput)) {
-		SVT_LOG("SVT [Error]: Instance %u: maxCLL or maxFALL should be used only with high dynamic range input; set highDynamicRangeInput to 1\n", channelNumber);
-		return_error = EB_ErrorBadParameter;
+	    SVT_LOG("SVT [Error]: Instance %u: maxCLL or maxFALL should be used only with high dynamic range input; set highDynamicRangeInput to 1\n", channelNumber);
+	    return_error = EB_ErrorBadParameter;
 	}
 
 	if (config->useMasteringDisplayColorVolume && !config->highDynamicRangeInput) {
-		SVT_LOG("SVT [Error]: Instance %u: MasterDisplay should be used only with high dynamic range input; set highDynamicRangeInput to 1\n", channelNumber);
-		return_error = EB_ErrorBadParameter;
+	    SVT_LOG("SVT [Error]: Instance %u: MasterDisplay should be used only with high dynamic range input; set highDynamicRangeInput to 1\n", channelNumber);
+	    return_error = EB_ErrorBadParameter;
 	}
 
 	if (config->dolbyVisionProfile != 0 && config->dolbyVisionProfile != 81) {
-		SVT_LOG("SVT [Error]: Instance %u: Only Dolby Vision Profile 8.1 is supported \n", channelNumber);
-		return_error = EB_ErrorBadParameter;
+	    SVT_LOG("SVT [Error]: Instance %u: Only Dolby Vision Profile 8.1 is supported \n", channelNumber);
+	    return_error = EB_ErrorBadParameter;
 	}
 
 	if (config->dolbyVisionProfile == 81 && config->encoderBitDepth != 10) {
-		SVT_LOG("SVT [Error]: Instance %u: Dolby Vision Profile 8.1 work only with main10 input \n", channelNumber);
-		return_error = EB_ErrorBadParameter;
+	    SVT_LOG("SVT [Error]: Instance %u: Dolby Vision Profile 8.1 work only with main10 input \n", channelNumber);
+	    return_error = EB_ErrorBadParameter;
 	}
 
 	if (config->dolbyVisionProfile == 81 && !config->useMasteringDisplayColorVolume) {
-		SVT_LOG("SVT [Error]: Instance %u: Dolby Vision Profile 8.1 requires mastering display color volume information \n", channelNumber);
-		return_error = EB_ErrorBadParameter;
+	    SVT_LOG("SVT [Error]: Instance %u: Dolby Vision Profile 8.1 requires mastering display color volume information \n", channelNumber);
+	    return_error = EB_ErrorBadParameter;
 	}
 
  	if (config->enableTemporalId > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid TemporalId. TemporalId must be [0 - 1]\n",channelNumber+1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
     }
 
     if (config->pictureTimingSEI && !config->videoUsabilityInfo){
@@ -2757,17 +2757,17 @@ static EB_ERRORTYPE VerifySettings(\
 		(config->encoderBitDepth !=10 )
 		) {
           SVT_LOG("SVT [Error]: Instance %u: Encoder Bit Depth shall be only 8 or 10 \n",channelNumber+1);
-			return_error = EB_ErrorBadParameter;
+		  return_error = EB_ErrorBadParameter;
 	}
 	// Check if the EncoderBitDepth is conformant with the Profile constraint
 	if(config->profile == 1 && config->encoderBitDepth == 10) {
         SVT_LOG("SVT [Error]: Instance %u: The encoder bit depth shall be equal to 8 for Main Profile\n",channelNumber+1);
-			return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
 	}
 
 	if (config->compressedTenBitFormat > 1)	{
         SVT_LOG("SVT [Error]: Instance %u: Invalid Compressed Ten Bit Format shall be only [0 - 1] \n", channelNumber + 1);
-		return_error = EB_ErrorBadParameter;
+	    return_error = EB_ErrorBadParameter;
 	}
 
     if (config->speedControlFlag > 1) {
@@ -2801,7 +2801,7 @@ static EB_ERRORTYPE VerifySettings(\
     }
 
     if (config->vbvBufInit > 100) {
-		SVT_LOG("SVT [Error]: Instance %u: Invalid vbvBufInit [0 - 100]\n", channelNumber + 1);
+	    SVT_LOG("SVT [Error]: Instance %u: Invalid vbvBufInit [0 - 100]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -3043,8 +3043,8 @@ EB_API EB_ERRORTYPE EbH265EncSetParameter(
 
     // Set the Prediction Structure
     pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->predStructPtr = GetPredictionStructure(
-		pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->predictionStructureGroupPtr,
-		pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.predStructure,
+	    pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->predictionStructureGroupPtr,
+	    pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.predStructure,
         pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxRefCount,
         pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxTemporalLayers);
 
