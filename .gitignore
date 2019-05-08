@@ -6,11 +6,9 @@
 *.bin
 *.log
 Bin
-Build/linux/debug/
-Build/linux/release/
-Build/windows/Release/
-Build/windows/x64/
-Build/windows/lib/
+Build
+!Build/linux/build.sh
+!Build/windows/build.bat
 
 # Visual Studio user-specific files
 *.rsuser
@@ -18,6 +16,7 @@ Build/windows/lib/
 *.user
 *.userosscache
 *.sln.docstates
+.vscode
 
 # Visual C++ cache files
 *.aps
@@ -37,7 +36,6 @@ Build/windows/lib/
 *.vcxproj
 *.sln
 
-
 #cmake
 CMakeLists.txt.user
 CMakeCache.txt
@@ -50,12 +48,6 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 
-
-Build/windows/ALL_BUILD.dir/
-Build/windows/INSTALL.dir/
-Build/windows/Source/
-Build/windows/SvtHevcEnc.pc
-Build/windows/ZERO_CHECK.dir/
 Source/App/SvtHevcEncApp.dir/
 Source/Lib/ASM_AVX2/ASM_AVX2.dir/
 Source/Lib/ASM_SSE2/ASM_SSE2.dir/
@@ -63,4 +55,3 @@ Source/Lib/ASM_SSE4_1/ASM_SSE4_1.dir/
 Source/Lib/ASM_SSSE3/ASM_SSSE3.dir/
 Source/Lib/C_DEFAULT/C_DEFAULT.dir/
 Source/Lib/Codec/SvtHevcEnc.dir/
-Source/SimpleApp/SvtHevcEncSimpleApp.dir/

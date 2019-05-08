@@ -297,6 +297,15 @@ typedef struct LcuParameters_s {
 	EB_BOOL rasterScanCuValidity[CU_MAX_COUNT];
     EB_U8   potentialLogoLcu;
 	EB_U8   isEdgeLcu;
+#if TILES
+    EB_U32  tileStartX;
+    EB_U32  tileStartY;
+    EB_U32  tileEndX;
+    EB_U32  tileEndY;
+    EB_BOOL tileLeftEdgeFlag;
+    EB_BOOL tileTopEdgeFlag;
+    EB_BOOL tileRightEdgeFlag;
+#endif
 } LcuParams_t;
 
 typedef struct CuStat_s {
