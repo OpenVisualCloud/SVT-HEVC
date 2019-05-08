@@ -2798,6 +2798,11 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
+    if ((config->tileColumnCount * config->tileRowCount) <= 1 && config->tileSliceMode) {
+        SVT_LOG("SVT [Error]: Instance %u: Invalid TileSliceMode. TileSliceMode could be 1 for multi tile mode, please set it to 0 for single tile mode\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
     if (config->unrestrictedMotionVector > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid Unrestricted Motion Vector flag [0 - 1]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;

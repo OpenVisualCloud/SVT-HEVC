@@ -305,7 +305,8 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **FPSInVPS** | -fpsinvps | [0,1] | 0 | Enables or disables the VPS timing info, 0 = OFF, 1 = ON |
 | **TileRowCount** | -tile_row_cnt | [1,16] | 1 | Tile count in the Row |
 | **TileColumnCount** | -tile_col_cnt | [1,16] | 1 | Tile count in the column |
-| **UnrestrictedMotionVector** | -umv | [0,1] | 1 | Enables or disables unrestriced motion vectors, 0 = OFF(motion vectors are constrained within frame boundary), 1 = ON |
+| **TileSliceMode** | -tile_slice_mode | [0,1] | 0 | Per slice per tile, only valid for multi-tile |
+| **UnrestrictedMotionVector** | -umv | [0,1] | 1 | Enables or disables unrestriced motion vectors, 0 = OFF(motion vectors are constrained within frame or tile boundary), 1 = ON. For MCTS support, set -umv 0 with valid TileRowCount and TileColumnCount |
 | **MaxCLL** | -max-cll | [0 , 2^16-1] | 0 | Maximum content light level (MaxCLL) as required by the Consumer Electronics Association 861.3 specification. Applicable for HDR content. If specified, signalled only when HighDynamicRangeInput is set to 1 |
 | **MaxFALL** | -max-fall | [0 , 2^16-1] | 0 | Maximum Frame Average light level (MaxFALL) as required by the Consumer Electronics Association 861.3 specification. Applicable for HDR content. If specified, signalled only when HighDynamicRangeInput is set to 1 |
 | **UseMasterDisplay** | -use-master-display | [0,1] | 0 | Enables or disables the MasterDisplayColorVolume, 0 = OFF, 1 = ON |
