@@ -901,9 +901,7 @@ void* PacketizationKernel(void *inputPtr)
                 bufferfill_temp -= queueEntryPtr->fillerBitsFinal;
                 bufferfill_temp = MIN(bufferfill_temp, encodeContextPtr->vbvBufsize);
                 encodeContextPtr->bufferFill = (EB_U64)(bufferfill_temp);
-                EbBlockOnMutex(encodeContextPtr->fillerBitMutex);
                 encodeContextPtr->fillerBitError = (EB_S64)(queueEntryPtr->fillerBitsFinal - queueEntryPtr->fillerBitsSent);
-                EbReleaseMutex(encodeContextPtr->fillerBitMutex);
                 EbReleaseMutex(encodeContextPtr->bufferFillMutex);
             }
             EbPostFullObject(outputStreamWrapperPtr);
