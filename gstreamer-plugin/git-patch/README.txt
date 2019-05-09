@@ -8,11 +8,10 @@
 2. Apply SVT-HEVC plugin and enable libsvthevc to Gstreamer
 - git clone https://gitlab.freedesktop.org/gstreamer/gst-build.git
 - cd gst-build
-- git checkout 1.14
 - meson build
 - cd subprojects/gst-plugins-bad
 - git apply ../SVT-HEVC/gstreamer-plugin/git-patch/0001-svthevcenc-Add-svthevc-encoder-element.patch
-- cd ../../gst-build
+- cd ../../
 - meson build --reconfigure
 - ninja -C build
 

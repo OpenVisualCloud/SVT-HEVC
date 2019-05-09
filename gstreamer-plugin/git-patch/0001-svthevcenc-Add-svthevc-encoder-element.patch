@@ -1,4 +1,4 @@
-From ca7dd2cb76108d95ec1dfd12175393b6872c9486 Mon Sep 17 00:00:00 2001
+From 6f0ea1627c58683e0c3a43ef570d21d433c4ad1c Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -23,10 +23,10 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  create mode 100644 tests/check/elements/svthevcenc.c
 
 diff --git a/configure.ac b/configure.ac
-index 943412c..ff91d62 100644
+index cb72ee8..a005e97 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -2310,6 +2310,12 @@ AG_GST_CHECK_FEATURE(WEBRTC, [WebRTC], webrtc, [
+@@ -2321,6 +2321,12 @@ AG_GST_CHECK_FEATURE(SCTP, [sctp plug-in], sctp, [
    ])
  ])
  
@@ -39,28 +39,28 @@ index 943412c..ff91d62 100644
  else
  
  dnl not building plugins with external dependencies,
-@@ -2393,6 +2399,7 @@ AM_CONDITIONAL(USE_X265, false)
- AM_CONDITIONAL(USE_DTLS, false)
+@@ -2403,6 +2409,7 @@ AM_CONDITIONAL(USE_DTLS, false)
  AM_CONDITIONAL(USE_VULKAN, false)
  AM_CONDITIONAL(USE_TTML, false)
+ AM_CONDITIONAL(USE_SCTP, false)
 +AM_CONDITIONAL(USE_SVTHEVCENC, false)
  
  fi dnl of EXT plugins
  
-@@ -2686,6 +2693,7 @@ ext/dtls/Makefile
- ext/webrtc/Makefile
+@@ -2697,6 +2704,7 @@ ext/webrtc/Makefile
  ext/webrtcdsp/Makefile
+ ext/wpe/Makefile
  ext/ttml/Makefile
 +ext/svthevcenc/Makefile
  po/Makefile.in
  docs/Makefile
  docs/plugins/Makefile
 diff --git a/ext/Makefile.am b/ext/Makefile.am
-index 4de9214..be87785 100644
+index 94d3bc4..49d3b28 100644
 --- a/ext/Makefile.am
 +++ b/ext/Makefile.am
 @@ -400,6 +400,12 @@ else
- TTML_DIR=
+ WPE_DIR=
  endif
  
 +if USE_SVTHEVCENC
@@ -73,33 +73,34 @@ index 4de9214..be87785 100644
  	$(VOAACENC_DIR) \
  	$(ASSRENDER_DIR) \
 @@ -468,7 +474,8 @@ SUBDIRS=\
- 	$(VULKAN_DIR) \
  	$(WEBRTCDSP_DIR) \
  	$(TTML_DIR) \
--	$(WEBRTC_DIR)
-+	$(WEBRTC_DIR) \
+ 	$(WEBRTC_DIR) \
+-	$(WPE_DIR)
++	$(WPE_DIR) \
 +	$(SVTHEVCENC_DIR)
  
  DIST_SUBDIRS = \
  	assrender \
 @@ -535,6 +542,7 @@ DIST_SUBDIRS = \
- 	vulkan \
  	webrtcdsp \
  	ttml \
--	webrtc
-+	webrtc \
+ 	webrtc \
+-	wpe
++	wpe \
 +	svthevcenc
  
  include $(top_srcdir)/common/parallel-subdirs.mak
 diff --git a/ext/meson.build b/ext/meson.build
-index cd193b7..1ec91da 100644
+index e1ce405..7c2deb3 100644
 --- a/ext/meson.build
 +++ b/ext/meson.build
-@@ -67,3 +67,4 @@ subdir('webrtc')
- subdir('webp')
+@@ -63,3 +63,4 @@ subdir('wildmidi')
+ subdir('wpe')
  subdir('x265')
  subdir('zbar')
 +subdir('svthevcenc')
+\ No newline at end of file
 diff --git a/ext/svthevcenc/Makefile.am b/ext/svthevcenc/Makefile.am
 new file mode 100644
 index 0000000..6d7f55a
@@ -2012,11 +2013,11 @@ index 0000000..bac7572
 +  )
 +endif
 diff --git a/tests/check/Makefile.am b/tests/check/Makefile.am
-index 163ef06..e67d699 100644
+index a05bc57..6d627df 100644
 --- a/tests/check/Makefile.am
 +++ b/tests/check/Makefile.am
-@@ -216,6 +216,12 @@ else
- check_msdk=
+@@ -229,6 +229,12 @@ else
+ check_nvenc=
  endif
  
 +if USE_SVTHEVCENC
@@ -2028,19 +2029,19 @@ index 163ef06..e67d699 100644
  VALGRIND_TO_FIX = \
  	elements/mpeg2enc \
  	elements/mplex    \
-@@ -297,6 +303,7 @@ check_PROGRAMS = \
- 	$(check_player) \
+@@ -313,6 +319,7 @@ check_PROGRAMS = \
  	$(check_webrtc) \
  	$(check_msdk) \
+ 	$(check_nvenc) \
 +	$(check_svthevcenc) \
  	$(EXPERIMENTAL_CHECKS)
  
  noinst_HEADERS = elements/mxfdemux.h libs/isoff.h
 diff --git a/tests/check/elements/.gitignore b/tests/check/elements/.gitignore
-index 5265a88..add5ee8 100644
+index b7e836f..03e403d 100644
 --- a/tests/check/elements/.gitignore
 +++ b/tests/check/elements/.gitignore
-@@ -65,4 +65,5 @@ voaacenc
+@@ -59,4 +59,5 @@ voaacenc
  voamrwbenc
  webrtcbin
  x265enc
@@ -2281,17 +2282,17 @@ index 0000000..0545b3c
 +
 +GST_CHECK_MAIN (svthevcenc);
 diff --git a/tests/check/meson.build b/tests/check/meson.build
-index 9bfac48..51ae520 100644
+index cd77fb4..73476c6 100644
 --- a/tests/check/meson.build
 +++ b/tests/check/meson.build
-@@ -57,6 +57,7 @@ base_tests = [
-   [['elements/x265enc.c'], not x265_dep.found(), [x265_dep]],
-   [['elements/zbar.c'], not zbar_dep.found(), [zbar_dep]],
-   [['elements/msdkh264enc.c'], not have_msdk, [msdk_dep]],
+@@ -43,6 +43,7 @@ base_tests = [
+   [['elements/mxfdemux.c']],
+   [['elements/mxfmux.c']],
+   [['elements/nvenc.c'], not cuda_dep.found() or not cudart_dep.found(), nvenc_test_deps],
 +  [['elements/svthevcenc.c'], not svthevcenc_dep.found(), [svthevcenc_dep]],
-   [['libs/h264parser.c'], false, [gstcodecparsers_dep]],
-   [['libs/h265parser.c'], false, [gstcodecparsers_dep]],
-   [['libs/insertbin.c'], false, [gstinsertbin_dep]],
+   [['elements/pcapparse.c'], false, [libparser_dep]],
+   [['elements/pnm.c']],
+   [['elements/rtponvifparse.c']],
 -- 
 2.7.4
 
