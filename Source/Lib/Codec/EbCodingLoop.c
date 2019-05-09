@@ -2248,7 +2248,7 @@ EB_ERRORTYPE EncQpmDeriveDeltaQPForEachLeafLcu(
 	EB_U8                           qpmQp = contextPtr->qpmQp;
 	EB_U8                           minQpAllowed = (EB_U8)sequenceControlSetPtr->staticConfig.minQpAllowed;
 	EB_U8                           maxQpAllowed = (EB_U8)sequenceControlSetPtr->staticConfig.maxQpAllowed;
-	EB_U8                           cuQP;
+	EB_S16                          cuQP;
 
     EB_BOOL  skipOis8x8  = (pictureControlSetPtr->ParentPcsPtr->skipOis8x8 && cuSize == 8);
 
@@ -2428,7 +2428,7 @@ EB_ERRORTYPE EncQpmDeriveDeltaQPForEachLeafLcu(
 				deltaQp = MIN(0, deltaQp);
 			}
 
-			cuQP = (EB_U32)(qpmQp + deltaQp);
+			cuQP = (qpmQp + deltaQp);
 
 
 			if ((qpmQp <= RC_QPMOD_MAXQP)){
@@ -2439,7 +2439,7 @@ EB_ERRORTYPE EncQpmDeriveDeltaQPForEachLeafLcu(
 			}
 		}
 		else{
-            cuQP = (EB_U8)(qpmQp + deltaQp);
+            cuQP = (qpmQp + deltaQp);
 		}
 
 		cuQP = (EB_U8)CLIP3(
@@ -4330,17 +4330,17 @@ EB_EXTERN void EncodePass(
 
 
 #if TILES
-                EB_U32 tileOriginX = 0;
-                EB_U32 tileOriginY = 0;
+                EB_U16 tileOriginX = 0;
+                EB_U16 tileOriginY = 0;
                 {
                     unsigned i = 0, j = 0;
 
-                    while (i < pictureControlSetPtr->tileColumnCount && tileOriginX + pictureControlSetPtr->tileColumnArray[i] * MAX_LCU_SIZE < lcuOriginX) {
-                        tileOriginX += pictureControlSetPtr->tileColumnArray[i++] * MAX_LCU_SIZE;
+                    while (i < sequenceControlSetPtr->tileColumnCount && tileOriginX + sequenceControlSetPtr->tileColumnArray[i] * MAX_LCU_SIZE < lcuOriginX) {
+                        tileOriginX += sequenceControlSetPtr->tileColumnArray[i++] * MAX_LCU_SIZE;
                     }
 
-                    while (j < pictureControlSetPtr->tileRowCount && tileOriginY + pictureControlSetPtr->tileRowArray[j] * MAX_LCU_SIZE < lcuOriginY) {
-                        tileOriginY += pictureControlSetPtr->tileRowArray[j++] * MAX_LCU_SIZE;
+                    while (j < sequenceControlSetPtr->tileRowCount && tileOriginY + sequenceControlSetPtr->tileRowArray[j] * MAX_LCU_SIZE < lcuOriginY) {
+                        tileOriginY += sequenceControlSetPtr->tileRowArray[j++] * MAX_LCU_SIZE;
                     }
 
                 }

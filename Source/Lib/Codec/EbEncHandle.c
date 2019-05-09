@@ -97,6 +97,8 @@ static EB_U32 mainTierCPB[TOTAL_LEVEL_COUNT] = { 350000, 1500000, 3000000, 60000
 static EB_U32 highTierCPB[TOTAL_LEVEL_COUNT] = { 350000, 1500000, 3000000, 6000000, 10000000, 30000000, 50000000, 100000000, 160000000, 240000000, 240000000, 480000000, 800000000 };
 static EB_U32 mainTierMaxBitRate[TOTAL_LEVEL_COUNT] = { 128000, 1500000, 3000000, 6000000, 10000000, 12000000, 20000000, 25000000, 40000000, 60000000, 60000000, 120000000, 240000000 };
 static EB_U32 highTierMaxBitRate[TOTAL_LEVEL_COUNT] = { 128000, 1500000, 3000000, 6000000, 10000000, 30000000, 50000000, 100000000, 160000000, 240000000, 240000000, 480000000, 800000000 };
+static EB_U32 maxTileColumn[TOTAL_LEVEL_COUNT] = { 1, 1, 1, 2, 3, 5, 5, 10, 10, 10, 20, 20, 20 };
+static EB_U32 maxTileRow[TOTAL_LEVEL_COUNT]    = { 1, 1, 1, 2, 3, 5, 5, 11, 11, 11, 22, 22, 22 };
 
 EB_U32 ASM_TYPES;
 /**************************************
@@ -2087,6 +2089,7 @@ void CopyApiFromApp(
 #if TILES
     sequenceControlSetPtr->staticConfig.tileRowCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileRowCount;
     sequenceControlSetPtr->staticConfig.tileColumnCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileColumnCount;
+    sequenceControlSetPtr->staticConfig.tileSliceMode = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileSliceMode;
 #endif
 
     // Deblock Filter
@@ -2579,6 +2582,15 @@ static EB_ERRORTYPE VerifySettings(\
         SVT_LOG("SVT [Error]: Instance %u: Out of bound maxBufferSize for level %s and tier 1 \n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
+    // Table A.6 General tier and level limits
+	if ((config->level != 0) && (config->tileColumnCount > maxTileColumn[levelIdx])) {
+        SVT_LOG("SVT [Error]: Instance %u: Out of bound maxTileColumn for level %s\n",channelNumber+1, levelIdc);
+        return_error = EB_ErrorBadParameter;
+    }
+	if ((config->level != 0) && (config->tileRowCount > maxTileRow[levelIdx])) {
+        SVT_LOG("SVT [Error]: Instance %u: Out of bound maxTileRow for level %s\n",channelNumber+1, levelIdc);
+        return_error = EB_ErrorBadParameter;
+    }
     }
 
 	if(config->profile > 4){
@@ -2805,13 +2817,23 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->tileColumnCount < 1) {
+    if (config->tileColumnCount < 1 || config->tileColumnCount > 20) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid tile column count\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->tileRowCount < 1) {
+    if (config->tileRowCount < 1 || config->tileRowCount > 22) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid tile row count\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->tileSliceMode > 1) {
+        SVT_LOG("SVT [Error]: Instance %u : Invalid tile slice mode\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if ((config->tileColumnCount * config->tileRowCount) <= 1 && config->tileSliceMode) {
+        SVT_LOG("SVT [Error]: Instance %u: Invalid TileSliceMode. TileSliceMode could be 1 for multi tile mode, please set it to 0 for single tile mode\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -2820,6 +2842,28 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
+#if TILES
+    //Check tiles
+    //TODO: Check maxTileCol/maxTileRow according to profile/level later
+    uint32_t pictureWidthInLcu = (config->sourceWidth + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE;
+    uint32_t pictureHeightInLcu = (config->sourceHeight + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE;
+    for (int horizontalTileIndex = 0; horizontalTileIndex < (config->tileColumnCount - 1); ++horizontalTileIndex) {
+        if (((horizontalTileIndex + 1) * pictureWidthInLcu / config->tileColumnCount -
+                    horizontalTileIndex * pictureWidthInLcu / config->tileColumnCount) * MAX_LCU_SIZE < 256) { // 256 samples
+            SVT_LOG("SVT [Error]: Instance %u: TileColumnCount must be chosen such that each tile has a minimum width of 256 luma samples\n", channelNumber + 1);
+            return_error = EB_ErrorBadParameter;
+            break;
+        }
+    }
+    for (int verticalTileIndex = 0; verticalTileIndex < (config->tileRowCount - 1); ++verticalTileIndex) {
+        if (((verticalTileIndex + 1) * pictureHeightInLcu / config->tileRowCount -
+                    verticalTileIndex * pictureHeightInLcu / config->tileRowCount) * MAX_LCU_SIZE < 64) { // 64 samples
+            SVT_LOG("SVT [Error]: Instance %u: TileRowCount must be chosen such that each tile has a minimum height of 64 luma samples\n", channelNumber + 1);
+            return_error = EB_ErrorBadParameter;
+            break;
+        }
+    }
+#endif
     return return_error;
 }
 
@@ -2856,6 +2900,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
 #if TILES
     configPtr->tileRowCount = 1;
     configPtr->tileColumnCount = 1;
+    configPtr->tileSliceMode = 0;
 #endif
     configPtr->sceneChangeDetection = 1;
     configPtr->rateControlMode = 0;

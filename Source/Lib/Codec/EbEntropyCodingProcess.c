@@ -443,7 +443,7 @@ void* EntropyCodingKernel(void *inputPtr)
         contextPtr->lcuSize = lcuSize;
         pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + lcuSize - 1) >> lcuSizeLog2;
 #if TILES
-        if (pictureControlSetPtr->tileRowCount * pictureControlSetPtr->tileColumnCount == 1)
+        if (sequenceControlSetPtr->tileRowCount * sequenceControlSetPtr->tileColumnCount == 1)
 #endif     
         {
             initialProcessCall = EB_TRUE;
@@ -582,10 +582,10 @@ void* EntropyCodingKernel(void *inputPtr)
 
             // Tile-loops
             yLcuStart = 0;
-            for (rowIndex = 0; rowIndex < pictureControlSetPtr->tileRowCount; ++rowIndex)
+            for (rowIndex = 0; rowIndex < sequenceControlSetPtr->tileRowCount; ++rowIndex)
             {
                 xLcuStart = 0;
-                for (columnIndex = 0; columnIndex < pictureControlSetPtr->tileColumnCount; ++columnIndex)
+                for (columnIndex = 0; columnIndex < sequenceControlSetPtr->tileColumnCount; ++columnIndex)
                 {
                     ResetEntropyCodingTile(
                         contextPtr,
@@ -594,16 +594,30 @@ void* EntropyCodingKernel(void *inputPtr)
                         yLcuIndex,
                         EB_TRUE);
 
+                    if (sequenceControlSetPtr->tileSliceMode == 1 && (xLcuStart !=0 || yLcuStart != 0)) {
+                        CabacEncodeContext_t *cabacEncodeCtxPtr = (CabacEncodeContext_t*)pictureControlSetPtr->entropyCoderPtr->cabacEncodeContextPtr;
+                        EncodeSliceHeader(
+                            xLcuStart + yLcuStart * pictureWidthInLcu,
+                            pictureControlSetPtr->pictureQp,
+                            pictureControlSetPtr,
+                            (OutputBitstreamUnit_t*) &(cabacEncodeCtxPtr->bacEncContext.m_pcTComBitIf));
+                    }
+
                     // LCU-loops
-                    for (yLcuIndex = yLcuStart; yLcuIndex < yLcuStart + pictureControlSetPtr->tileRowArray[rowIndex]; ++yLcuIndex)
+                    for (yLcuIndex = yLcuStart; yLcuIndex < yLcuStart + sequenceControlSetPtr->tileRowArray[rowIndex]; ++yLcuIndex)
                     {
-                        for (xLcuIndex = xLcuStart; xLcuIndex < xLcuStart + pictureControlSetPtr->tileColumnArray[columnIndex]; ++xLcuIndex)
+                        for (xLcuIndex = xLcuStart; xLcuIndex < xLcuStart + sequenceControlSetPtr->tileColumnArray[columnIndex]; ++xLcuIndex)
                         {
                             lcuIndex = xLcuIndex + yLcuIndex * pictureWidthInLcu;
                             lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuIndex];
                             lcuOriginX = xLcuIndex << lcuSizeLog2;
                             lcuOriginY = yLcuIndex << lcuSizeLog2;
-                            lastLcuFlag = (lcuIndex == pictureControlSetPtr->lcuTotalCount - 1) ? EB_TRUE : EB_FALSE;
+                            if (sequenceControlSetPtr->tileSliceMode == 0) {
+                                lastLcuFlag = (lcuIndex == pictureControlSetPtr->lcuTotalCount - 1) ? EB_TRUE : EB_FALSE;
+                            } else
+                            {
+                                lastLcuFlag = (xLcuIndex == (xLcuStart + sequenceControlSetPtr->tileColumnArray[columnIndex] -1) && yLcuIndex == (yLcuStart + sequenceControlSetPtr->tileRowArray[rowIndex] -1)) ? EB_TRUE : EB_FALSE;
+                            }
 
                             // Configure the LCU
                             EntropyCodingConfigureLcu(
@@ -624,13 +638,15 @@ void* EntropyCodingKernel(void *inputPtr)
                         }
                     }
 
-                    if (lastLcuFlag == EB_FALSE) {
+                    if (sequenceControlSetPtr->tileSliceMode == 0 && lastLcuFlag == EB_FALSE) {
                         EncodeTileFinish(pictureControlSetPtr->entropyCoderPtr);
+                    } else if (sequenceControlSetPtr->tileSliceMode) {
+                        EncodeSliceFinish(pictureControlSetPtr->entropyCoderPtr);
                     }
 
-                    xLcuStart += pictureControlSetPtr->tileColumnArray[columnIndex];
+                    xLcuStart += sequenceControlSetPtr->tileColumnArray[columnIndex];
                 }
-                yLcuStart += pictureControlSetPtr->tileRowArray[rowIndex];
+                yLcuStart += sequenceControlSetPtr->tileRowArray[rowIndex];
             }
 
             // If the picture is complete, terminate the slice, 2nd pass DLF, SAO application
@@ -638,7 +654,9 @@ void* EntropyCodingKernel(void *inputPtr)
             {
                 EB_U32 refIdx;
 
-                EncodeSliceFinish(pictureControlSetPtr->entropyCoderPtr);
+                if (sequenceControlSetPtr->tileSliceMode == 0) {
+                    EncodeSliceFinish(pictureControlSetPtr->entropyCoderPtr);
+                }
 
                 // Release the List 0 Reference Pictures
                 for (refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList0Count; ++refIdx) {
@@ -668,8 +686,6 @@ void* EntropyCodingKernel(void *inputPtr)
         }
         }
 #endif
-
-
 
 
 #if DEADLOCK_DEBUG
