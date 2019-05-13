@@ -440,15 +440,14 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->maxQpAllowed                         = 48;
     configPtr->minQpAllowed                         = 10;
     configPtr->baseLayerSwitchMode                  = 0;
-	  configPtr->encMode								              = 9;
     configPtr->vbvMaxRate                           = 0;
     configPtr->vbvBufsize                           = 0;
     configPtr->vbvBufInit                           = 90;
     configPtr->hrdFlag                              =  0;
     configPtr->intraPeriod                          = -2;
     configPtr->intraRefreshType                     = 1;
-	  configPtr->hierarchicalLevels					          = 3;
-	  configPtr->predStructure						            = 2;
+    configPtr->hierarchicalLevels					= 3;
+	configPtr->predStructure						= 2;
     configPtr->disableDlfFlag                       = EB_FALSE;
     configPtr->enableSaoFlag                        = EB_TRUE;
     configPtr->useDefaultMeHme                      = EB_TRUE;
@@ -464,7 +463,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->bufferingPeriodSEI                   = 0;
     configPtr->pictureTimingSEI                     = 0;
 
-    configPtr->bitRateReduction					    = EB_TRUE;
+    configPtr->bitRateReduction	                    = EB_TRUE;
     configPtr->improveSharpness                     = EB_TRUE;
     configPtr->registeredUserDataSeiFlag            = EB_FALSE;
     configPtr->unregisteredUserDataSeiFlag          = EB_FALSE;
@@ -495,9 +494,9 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->unrestrictedMotionVector             = EB_TRUE;
 
     // Encoding Presets
-    configPtr->encMode								    = 9;
-    //configPtr->latencyMode                              = 0; // Deprecated
-    configPtr->speedControlFlag                         = 0;
+	configPtr->encMode                              = 9;
+    //configPtr->latencyMode                        = 0; // Deprecated
+    configPtr->speedControlFlag                     = 0;
 
     // Bit-depth
     configPtr->encoderBitDepth                          = 8;
@@ -527,9 +526,9 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->separateFields                           = EB_FALSE;
 
     // Coding Structure
-    configPtr->hierarchicalLevels					    = 3;
+    configPtr->hierarchicalLevels                       = 3;
     configPtr->baseLayerSwitchMode                      = 0;
-    configPtr->predStructure						    = 2;
+    configPtr->predStructure                            = 2;
     configPtr->intraPeriod                              = -2;
     configPtr->intraRefreshType                         = 1;
 
@@ -562,7 +561,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->tune                                     = 1;
 
     // Adaptive QP Params
-    configPtr->bitRateReduction					        = EB_TRUE;
+    configPtr->bitRateReduction	                        = EB_TRUE;
     configPtr->improveSharpness                         = EB_TRUE;
 
     // Optional Features
