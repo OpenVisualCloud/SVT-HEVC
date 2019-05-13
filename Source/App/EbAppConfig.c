@@ -332,7 +332,6 @@ config_entry_t config_entry[] = {
 
     // Quantization
     { SINGLE_INPUT, QP_TOKEN, "QP", SetCfgQp },
-    { SINGLE_INPUT, USE_QP_FILE_TOKEN, "UseQpFile", SetCfgUseQpFile },
     { SINGLE_INPUT, VBV_MAX_RATE_TOKEN, "vbvMaxRate", SetVbvMaxrate },
     { SINGLE_INPUT, VBV_BUFFER_SIZE_TOKEN, "vbvBufsize", SetVbvBufsize },
     { SINGLE_INPUT, HRD_TOKEN, "hrd", SetHrdFlag },

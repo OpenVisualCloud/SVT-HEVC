@@ -419,6 +419,21 @@ Similarly, in order to run a 2-stream 8kp50 simultaneous encode on a Xeon Platin
 >taskset 0xFFFFFFF0000000FFFFFFF0000000./SvtHevcEncApp -encMode 12 -tune 0  -w 7680  -h 4320 -bit-depth 10 -compressed-ten-bit-format 1 -i in.yuv  -rc 1 –tbr 20000000 -fps 50  -b out1.bin   -n 5000 –nb 500  &amp;
 
 <br>
+Similarly, in order to enable VBV and run a 2-stream 8kp50 simultaneous encode on a Xeon Platinum 8180 system the following command lines should be used:
+
+#### *Running Windows\* Server 2016:*
+
+>start /node 0 SvtHevcEncApp.exe -encMode 12 -tune 0 -w 3840 -h 2160 -bit-depth 10 -compressed-ten-bit-format 1 -i in.yuv  -rc 1 –tbr 10000000 -vbv-maxrate 10000000  -vbv-bufsize 10000000 -fps 50  -b out1.bin   -n 5000 –nb 500
+
+>start /node 1 SvtHevcEncApp.exe -encMode 12 -tune 0  -w 3840 -h 2160 -bit-depth 10 -compressed-ten-bit-format 1 -i in.yuv  -rc 1 –tbr 10000000 -vbv-maxrate 10000000 -vbv-bufsize 10000000 -fps 50  -b out3.bin   -n 5000 –nb 500
+
+#### *Running Ubuntu\* 18.04:*
+
+>taskset 0x0000000FFFFFFF0000000FFFFFFF ./SvtHevcEncApp -encMode 12 -tune 0  -w 3840 -h 2160 -bit-depth 10 -compressed-ten-bit-format 1 -i in.yuv  -rc 1 –tbr 10000000 -vbv-maxrate 10000000  -vbv-bufsize 10000000 -fps 50  -b out3.bin   -n 5000 –nb 500 &amp;
+
+>taskset 0xFFFFFFF0000000FFFFFFF0000000 ./SvtHevcEncApp -encMode 12 -tune 0  -w 3840 -h 2160 -bit-depth 10 -compressed-ten-bit-format 1 -i in.yuv  -rc 1 –tbr 10000000 -vbv-maxrate 10000000  -vbv-bufsize 10000000 -fps 50  -b out3.bin   -n 5000 –nb 500  &amp;
+
+<br>
 Where 0x0000000FFFFFFF0000000FFFFFFF and 0xFFFFFFF0000000FFFFFFF0000000 are masks for sockets 0 and 1 respectively on a dual 8180 system.
 
 ## Appendix A Encoder Parameters
