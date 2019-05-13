@@ -12,6 +12,8 @@ gstbase_dep = dependency('gstreamer-base-1.0', version : gst_req,
   fallback : ['gstreamer', 'gstbase_dep'])
 gstvideo_dep = dependency('gstreamer-video-1.0', version : gst_req,
   fallback : ['gstreamer', 'gstvideo_dep'])
+gstpbutils_dep = dependency('gstreamer-pbutils-1.0', version : gst_req,
+    fallback : ['gst-plugins-base', 'pbutils_dep'])
 plugins_install_dir = '@0@/gstreamer-1.0'.format(get_option('libdir'))
 
 # common meson configuration
@@ -45,7 +47,7 @@ endforeach
 
 gstSvtHevcEnc = library('gstsvthevcenc',
   'gstsvthevcenc.c',
-  dependencies: [gstbase_dep, gstvideo_dep, svthevcenc_dep],
+  dependencies: [gstbase_dep, gstpbutils_dep , gstvideo_dep, svthevcenc_dep],
   install: true,
   install_dir: plugins_install_dir
 )
