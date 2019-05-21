@@ -62,7 +62,7 @@ SVT-HEVC may run on any Windows* or Linux* 64 bit operating systems. The list be
 
   - Ubuntu* 18.04 Server LTS
 
-## Hardware
+### Hardware
 
 The SVT-HEVC Encoder library supports x86 architecture
 
@@ -156,7 +156,11 @@ We welcome community contributions to the SVT-HEVC Encoder. Thank you for your t
 
 ### How to Report Bugs and Provide Feedback
 
-Use the "Issues" tab on Github
+Use the [Issues](https://github.com/OpenVisualCloud/SVT-HEVC/issues) tab on Github
+
+## IRC
+
+`#svt` on Freenode. Join via [Freenode Webchat](https://webchat.freenode.net/?channels=svt) or use your favorite IRC client.
 
 ## Notices and Disclaimers
 
