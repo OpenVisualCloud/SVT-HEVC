@@ -87,7 +87,7 @@ In order to run the highest resolution supported by the encoder, at least 64GB o
 ### Windows* Operating Systems (64-bit)
 
 - __Build Requirements__
-  - Visual Studio* 2017 (download [here](https://www.visualstudio.com/vs/older-downloads/)) or 2019 (download [here](https://github.com/OpenVisualCloud/SVT-AV1/commit/47e6f527c4f3bf82cfaccf688068f5dfa52dad6e))
+  - Visual Studio* 2017 (download [here](https://www.visualstudio.com/vs/older-downloads/)) or 2019 (download [here](https://visualstudio.microsoft.com/downloads/))
   - CMake 3.14 or later (download [here](https://github.com/Kitware/CMake/releases/download/v3.14.4/cmake-3.14.4-win64-x64.msi))
   - YASM Assembler version 1.2.0 or later
     - Download the yasm exe from the following [link](http://www.tortall.net/projects/yasm/releases/yasm-1.3.0-win64.exe)
