@@ -87,12 +87,12 @@ In order to run the highest resolution supported by the encoder, at least 64GB o
 ### Windows* Operating Systems (64-bit)
 
 - __Build Requirements__
-  - Visual Studio* 2017 (can be downloaded [here](https://www.visualstudio.com/vs/older-downloads/))
-  - CMake 3.5 or later (can be downloaded [here](https://github.com/Kitware/CMake/releases/download/v3.13.0/cmake-3.13.0-win64-x64.msi))
+  - Visual Studio* 2017 (download [here](https://www.visualstudio.com/vs/older-downloads/)) or 2019 (download [here](https://visualstudio.microsoft.com/downloads/))
+  - CMake 3.14 or later (download [here](https://github.com/Kitware/CMake/releases/download/v3.14.4/cmake-3.14.4-win64-x64.msi))
   - YASM Assembler version 1.2.0 or later
-  - Download the yasm exe from the following [link](http://www.tortall.net/projects/yasm/releases/yasm-1.3.0-win64.exe)
-  - Rename yasm-1.3.0-win64.exe to yasm.exe
-  - Copy yasm.exe into a location that is in the PATH environment variable
+    - Download the yasm exe from the following [link](http://www.tortall.net/projects/yasm/releases/yasm-1.3.0-win64.exe)
+    - Rename yasm-1.3.0-win64.exe to yasm.exe
+    - Copy yasm.exe into a location that is in the PATH environment variable
 
 - __Build Instructions__
   - Build the project by following the steps below in a windows command prompt:
