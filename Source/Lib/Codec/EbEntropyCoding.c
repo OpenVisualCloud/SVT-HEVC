@@ -76,8 +76,9 @@ static void BacEncContextFinish(BacEncContext_t *bacEncContextPtr)
 
 	carry = bacEncContextPtr->intervalLowValue >> (32 - bacEncContextPtr->bitsRemainingNum);
 	bacEncContextPtr->intervalLowValue &= 0xffffffffu >> bacEncContextPtr->bitsRemainingNum;
-
-	OutputBitstreamWriteByte(&(bacEncContextPtr->m_pcTComBitIf), (bacEncContextPtr->tempBufferedByte + carry) & 0xff);
+    if (carry > 0 || bacEncContextPtr->tempBufferedBytesNum > 0) {
+        OutputBitstreamWriteByte(&(bacEncContextPtr->m_pcTComBitIf), (bacEncContextPtr->tempBufferedByte + carry) & 0xff);
+    }
 
 	while (bacEncContextPtr->tempBufferedBytesNum > 1)
 	{
