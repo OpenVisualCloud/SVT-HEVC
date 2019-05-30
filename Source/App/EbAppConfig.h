@@ -238,7 +238,11 @@ typedef struct EbConfig_s
     FILE                   *qpFile;
 
     EB_BOOL                useQpFile;
-
+#if 1//TILES
+    uint8_t                 tileColumnCount;
+    uint8_t                 tileRowCount;
+    uint8_t                 tileSliceMode;
+#endif
     int32_t                 frameRate;
     int32_t                 frameRateNumerator;
     int32_t                 frameRateDenominator;
@@ -348,6 +352,7 @@ typedef struct EbConfig_s
     EB_BOOL                fpsInVps;
     uint32_t                 hrdFlag;
     EB_BOOL                  lowLevelVbv;
+    EB_BOOL                unrestrictedMotionVector;
 
     /****************************************
      * Annex A Parameters

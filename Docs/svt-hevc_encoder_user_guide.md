@@ -299,10 +299,14 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **RecoveryPoint** | -recovery-point | [0,1] | 0 | SEI message, 0 = OFF, 1 = ON |
 | **TemporalId** | -temporal-id | [0,1] | 1 | 0 = OFF, 1 = Insert temporal ID in NAL units |
 | **AsmType** | -asm | [0,1] | 1 | Assembly instruction set <br>(0: C Only, 1: Automatically select highest assembly instruction set supported) |
-| **LogicalProcessorNumber** | -lp | [0, total number of logical processor] | 0 | The number of logical processor which encoder threads run on.Refer to Appendix A.2 |
+| **LogicalProcessors** | -lp | [0, total number of logical processor] | 0 | The number of logical processor which encoder threads run on.Refer to Appendix A.2 |
 | **TargetSocket** | -ss | [-1,1] | -1 | For dual socket systems, this can specify which socket the encoder runs on.Refer to Appendix A.2 |
 | **SwitchThreadsToRtPriority** | -rt | [0,1] | 1 | Enables or disables threads to real time priority, 0 = OFF, 1 = ON (only works on Linux) |
 | **FPSInVPS** | -fpsinvps | [0,1] | 0 | Enables or disables the VPS timing info, 0 = OFF, 1 = ON |
+| **TileRowCount** | -tile_row_cnt | [1,16] | 1 | Tile count in the Row |
+| **TileColumnCount** | -tile_col_cnt | [1,16] | 1 | Tile count in the column |
+| **TileSliceMode** | -tile_slice_mode | [0,1] | 0 | Per slice per tile, only valid for multi-tile |
+| **UnrestrictedMotionVector** | -umv | [0,1] | 1 | Enables or disables unrestriced motion vectors, 0 = OFF(motion vectors are constrained within frame or tile boundary), 1 = ON. For MCTS support, set -umv 0 with valid TileRowCount and TileColumnCount |
 | **MaxCLL** | -max-cll | [0 , 2^16-1] | 0 | Maximum content light level (MaxCLL) as required by the Consumer Electronics Association 861.3 specification. Applicable for HDR content. If specified, signalled only when HighDynamicRangeInput is set to 1 |
 | **MaxFALL** | -max-fall | [0 , 2^16-1] | 0 | Maximum Frame Average light level (MaxFALL) as required by the Consumer Electronics Association 861.3 specification. Applicable for HDR content. If specified, signalled only when HighDynamicRangeInput is set to 1 |
 | **UseMasterDisplay** | -use-master-display | [0,1] | 0 | Enables or disables the MasterDisplayColorVolume, 0 = OFF, 1 = ON |
@@ -363,7 +367,7 @@ The above section is not needed for Windows\* as it does not perform the CPU uti
 
 The SVT-HEVC encoder achieves the best performance when restricting each channel to only one socket on either Windows\* or Linux\* operating systems. For example, when running four channels on a dual socket system, it&#39;s best to pin two channels to each socket and not split every channel on both sockets.
 
-LogicalProcessorNumber (-lp) and TargetSocket (-ss) parameters can be used to management the threads. Or you can use OS commands like below.
+LogicalProcessors (-lp) and TargetSocket (-ss) parameters can be used to management the threads. Or you can use OS commands like below.
 
 For example, in order to run a 6-stream 4kp60 simultaneous encode on a Xeon Platinum 8180 system the following command lines should be used:
 
@@ -415,7 +419,7 @@ Where 0x0000000FFFFFFF0000000FFFFFFF and 0xFFFFFFF0000000FFFFFFF0000000 are mask
 
 ## Appendix A Encoder Parameters
 
-### Hierarchical coding structure parameters
+### 1. Hierarchical coding structure parameters
 
 The GOP is constructed assuming a prediction structure (PredStructure: LowDelay/Random-Access) and hierarchical levels (HierarchicalLevels: number of hierarchical layers).
 
@@ -435,15 +439,15 @@ In a LowDelay structure, B/b pictures can be used instead of P/p pictures. Howev
 
 In the SVT-HEVC code, the GOP structure is constructed in the Picture Decision process which performs multi-picture level decisions, including setting the prediction structure, setting the picture type, and scene change detection.  Since the prior Picture Analysis processes stage is multithreaded, inputs to the Picture Decision Process can arrive out-of-display-order, so a reordering queue is used to enforce processing of pictures in display order.  The algorithms employed in the Picture Decision process are dependent on prior pictures' statistics, so the order in which pictures are processed must be strictly enforced.  Additionally, the Picture Decision process uses the reorder queue to hold input pictures until they are ready to be sent to the Motion Analysis process, following the proper prediction structure.
 
-### Thread management parameters
+### 2. Thread management parameters
 
-LogicalProcessorNumber (-lp) and TargetSocket (-ss) parameters are used to management thread affinity on Windows and Ubuntu OS. These are some examples how you use them together.
+LogicalProcessors (-lp) and TargetSocket (-ss) parameters are used to management thread affinity on Windows and Ubuntu OS. These are some examples how you use them together.
 
-If LogicalProcessorNumber and TargetSocket are not set, threads are managed by OS thread scheduler.
+If LogicalProcessors and TargetSocket are not set, threads are managed by OS thread scheduler.
 
 >SvtHevcEncApp.exe -i in.yuv -w 3840 -h 2160 –lp 40
 
-If only LogicalProcessorNumber is set, threads run on 40 logical processors. Threads may run on dual sockets if 40 is larger than logical processor number of a socket.
+If only LogicalProcessors is set, threads run on 40 logical processors. Threads may run on dual sockets if 40 is larger than logical processor number of a socket.
 
 NOTE: On Windows, thread affinity can be set only by group on system with more than 64 logical processors. So, if 40 is larger than logical processor number of a single socket, threads run on all logical processors of both sockets.
 
@@ -453,7 +457,7 @@ If only TargetSocket is set, threads run on all the logical processors of socket
 
 >SvtHevcEncApp.exe -i in.yuv -w 3840 -h 2160 –lp 20 –ss 0
 
-If both LogicalProcessorNumber and TargetSocket are set, threads run on 20 logical processors of socket 0. Threads guaranteed to run only on socket 0 if 20 is larger than logical processor number of socket 0.
+If both LogicalProcessors and TargetSocket are set, threads run on 20 logical processors of socket 0. Threads guaranteed to run only on socket 0 if 20 is larger than logical processor number of socket 0.
 
 
 

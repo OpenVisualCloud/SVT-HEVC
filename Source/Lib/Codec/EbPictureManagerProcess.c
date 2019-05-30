@@ -703,6 +703,17 @@ void* PictureManagerKernel(void *inputPtr)
                     pictureWidthInLcu  = (EB_U8)((entrySequenceControlSetPtr->lumaWidth + entrySequenceControlSetPtr->lcuSize - 1) / entrySequenceControlSetPtr->lcuSize);
                     pictureHeightInLcu = (EB_U8)((entrySequenceControlSetPtr->lumaHeight + entrySequenceControlSetPtr->lcuSize - 1) / entrySequenceControlSetPtr->lcuSize); 
 
+#if TILES
+                    for (unsigned lcuIndex = 0; lcuIndex < (pictureWidthInLcu * pictureHeightInLcu); lcuIndex++) {
+                        ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileLeftEdgeFlag  = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileLeftEdgeFlag;
+                        ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileTopEdgeFlag   = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileTopEdgeFlag;
+                        ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileRightEdgeFlag = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileRightEdgeFlag;
+                        ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileOriginX       = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileStartX;
+                        ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileOriginY       = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileStartY;
+                        ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileEndX          = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileEndX;
+                        ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileEndY          = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileEndY;
+                    }
+#endif
                     // EncDec Segments 
                     EncDecSegmentsInit(
                         ChildPictureControlSetPtr->encDecSegmentCtrl,

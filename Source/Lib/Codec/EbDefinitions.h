@@ -51,6 +51,17 @@ extern "C" {
     typedef int errno_t;
 #endif  /* _ERRNO_T_DEFINED */
 
+
+#define  TILES    1  //enable TILES.
+
+
+
+#if TILES
+//Maximum 8192x4320
+#define EB_TILE_COLUMN_MAX_COUNT                    32
+#define EB_TILE_ROW_MAX_COUNT                       68
+#endif
+
 #define EB_MIN(a,b)             (((a) < (b)) ? (a) : (b))
 
 #ifdef _WIN32 
@@ -74,10 +85,11 @@ extern "C" {
 #endif
 #endif
 
-#define INPUT_SIZE_576p_TH				0x90000		// 0.58 Million   
-#define INPUT_SIZE_1080i_TH				0xB71B0		// 0.75 Million
-#define INPUT_SIZE_1080p_TH				0x1AB3F0	// 1.75 Million
-#define INPUT_SIZE_4K_TH				0x29F630	// 2.75 Million   
+#define INPUT_SIZE_576p_TH				0x90000     // 0.58 Million   
+#define INPUT_SIZE_1080i_TH				0xB71B0     // 0.75 Million
+#define INPUT_SIZE_1080p_TH				0x1AB3F0    // 1.75 Million
+#define INPUT_SIZE_4K_TH				0x29F630    // 2.75 Million   
+#define INPUT_SIZE_8K_TH				0xB71B00    // 12 Million
 
 #define EB_INPUT_RESOLUTION             EB_U8
 #define INPUT_SIZE_576p_RANGE_OR_LOWER	 0
