@@ -434,7 +434,7 @@ void* PictureManagerKernel(void *inputPtr)
 			   referenceEntryPtr->releaseEnable = EB_TRUE;
 			   referenceEntryPtr->referenceAvailable = EB_FALSE;
 			   referenceEntryPtr->isUsedAsReferenceFlag = pictureControlSetPtr->isUsedAsReferenceFlag;
-               referenceEntryPtr->feedbackArrived = EB_FALSE;
+			   referenceEntryPtr->feedbackArrived = EB_FALSE;
 			   encodeContextPtr->referencePictureQueueTailIndex =
 				   (encodeContextPtr->referencePictureQueueTailIndex == REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : encodeContextPtr->referencePictureQueueTailIndex + 1;
 
@@ -535,18 +535,14 @@ void* PictureManagerKernel(void *inputPtr)
             referenceQueueIndex = encodeContextPtr->referencePictureQueueHeadIndex;
             // Find the Reference in the Reference Queue
             do {
-
                 referenceEntryPtr = encodeContextPtr->referencePictureQueue[referenceQueueIndex];
-
                 if (referenceEntryPtr->pictureNumber == inputPictureDemuxPtr->pictureNumber) {
 
                     // Set the feedback arrived
                     referenceEntryPtr->feedbackArrived = EB_TRUE;
                 }
-
                 // Increment the referenceQueueIndex Iterator
                 referenceQueueIndex = (referenceQueueIndex == REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : referenceQueueIndex + 1;
-
             } while ((referenceQueueIndex != encodeContextPtr->referencePictureQueueTailIndex) && (referenceEntryPtr->pictureNumber != inputPictureDemuxPtr->pictureNumber));
 
             //keep the relase of SCS here because we still need the encodeContext strucutre here

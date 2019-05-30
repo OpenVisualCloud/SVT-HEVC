@@ -213,13 +213,13 @@ static void SetEnableConstrainedIntra           (const char *value, EbConfig_t *
 static void SetCfgTune                          (const char *value, EbConfig_t *cfg) {cfg->tune                             = (uint8_t)strtoul(value, NULL, 0); };
 static void SetBitRateReduction                 (const char *value, EbConfig_t *cfg) {cfg->bitRateReduction                 = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetImproveSharpness                 (const char *value, EbConfig_t *cfg) {cfg->improveSharpness                 = (EB_BOOL)strtol(value,  NULL, 0);};
-static void SetVbvMaxrate                       (const char *value, EbConfig_t *cfg) { cfg->vbvMaxRate = strtoul(value, NULL, 0); };
-static void SetVbvBufsize                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufsize = strtoul(value, NULL, 0); };
-static void SetVbvBufInit                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufInit = strtoul(value, NULL, 0); };
-static void SetVbvEndFrameAdjust                (const char *value, EbConfig_t *cfg) { cfg->vbvEndFrameAdjust = strtoul(value, NULL, 0); };
-static void SetVbvBufEnd                        (const char *value, EbConfig_t *cfg) { cfg->vbvBufEnd = strtoul(value, NULL, 0); };
-static void SetLowLevelVbv                      (const char *value, EbConfig_t *cfg) { cfg->lowLevelVbv = (EB_BOOL)strtol(value, NULL, 0); };
-static void SetHrdFlag                          (const char *value, EbConfig_t *cfg) { cfg->hrdFlag = strtoul(value, NULL, 0); };
+static void SetVbvMaxrate                       (const char *value, EbConfig_t *cfg) { cfg->vbvMaxRate                      = strtoul(value, NULL, 0); };
+static void SetVbvBufsize                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufsize                      = strtoul(value, NULL, 0); };
+static void SetVbvBufInit                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufInit                      = strtoul(value, NULL, 0); };
+static void SetVbvEndFrameAdjust                (const char *value, EbConfig_t *cfg) { cfg->vbvEndFrameAdjust               = strtoul(value, NULL, 0); };
+static void SetVbvBufEnd                        (const char *value, EbConfig_t *cfg) { cfg->vbvBufEnd                       = strtoul(value, NULL, 0); };
+static void SetLowLevelVbv                      (const char *value, EbConfig_t *cfg) { cfg->lowLevelVbv                     = (EB_BOOL)strtol(value, NULL, 0); };
+static void SetHrdFlag                          (const char *value, EbConfig_t *cfg) { cfg->hrdFlag                         = strtoul(value, NULL, 0); };
 static void SetVideoUsabilityInfo               (const char *value, EbConfig_t *cfg) {cfg->videoUsabilityInfo               = strtol(value,  NULL, 0);};
 static void SetHighDynamicRangeInput            (const char *value, EbConfig_t *cfg) {cfg->highDynamicRangeInput            = strtol(value,  NULL, 0);};
 static void SetAccessUnitDelimiter              (const char *value, EbConfig_t *cfg) {cfg->accessUnitDelimiter              = strtol(value,  NULL, 0);};
@@ -465,7 +465,6 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->maxQpAllowed                         = 48;
     configPtr->minQpAllowed                         = 10;
     configPtr->baseLayerSwitchMode                  = 0;
-	  configPtr->encMode								              = 9;
     configPtr->vbvMaxRate                           = 0;
     configPtr->vbvBufsize                           = 0;
     configPtr->vbvBufInit                           = 90;
@@ -475,8 +474,8 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->lowLevelVbv                          = 0;
     configPtr->intraPeriod                          = -2;
     configPtr->intraRefreshType                     = 1;
-	  configPtr->hierarchicalLevels					          = 3;
-	  configPtr->predStructure						            = 2;
+    configPtr->hierarchicalLevels					= 3;
+    configPtr->predStructure						= 2;
     configPtr->disableDlfFlag                       = EB_FALSE;
     configPtr->enableSaoFlag                        = EB_TRUE;
     configPtr->useDefaultMeHme                      = EB_TRUE;
@@ -492,7 +491,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->bufferingPeriodSEI                   = 0;
     configPtr->pictureTimingSEI                     = 0;
 
-    configPtr->bitRateReduction					    = EB_TRUE;
+    configPtr->bitRateReduction	                    = EB_TRUE;
     configPtr->improveSharpness                     = EB_TRUE;
     configPtr->registeredUserDataSeiFlag            = EB_FALSE;
     configPtr->unregisteredUserDataSeiFlag          = EB_FALSE;
@@ -523,7 +522,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->unrestrictedMotionVector             = EB_TRUE;
 
     // Encoding Presets
-    configPtr->encMode								    = 9;
+    configPtr->encMode							        = 9;
     //configPtr->latencyMode                              = 0; // Deprecated
     configPtr->speedControlFlag                         = 0;
 
@@ -555,9 +554,9 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->separateFields                           = EB_FALSE;
 
     // Coding Structure
-    configPtr->hierarchicalLevels					    = 3;
+    configPtr->hierarchicalLevels                       = 3;
     configPtr->baseLayerSwitchMode                      = 0;
-    configPtr->predStructure						    = 2;
+    configPtr->predStructure                            = 2;
     configPtr->intraPeriod                              = -2;
     configPtr->intraRefreshType                         = 1;
 
@@ -590,7 +589,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->tune                                     = 1;
 
     // Adaptive QP Params
-    configPtr->bitRateReduction					        = EB_TRUE;
+    configPtr->bitRateReduction	                        = EB_TRUE;
     configPtr->improveSharpness                         = EB_TRUE;
 
     // Optional Features
