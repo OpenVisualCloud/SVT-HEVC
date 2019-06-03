@@ -1,7 +1,7 @@
-# 
+#
 # Copyright(c) 2018 Intel Corporation
 # SPDX - License - Identifier: BSD - 2 - Clause - Patent
-# 
+#
 
 # ASM_SSSE3 Directory CMakeLists.txt
 
@@ -37,5 +37,4 @@ add_library(ASM_SSSE3 STATIC
     EbIntraPrediction16bit_Intrinsic_SSSE3.c
     EbMcp_Intrinsic_SSSE3.c
     EbSaoApplication_Intrinsic_SSSE3.c
-    EbTransforms_Intrinsic_SSSE3.c
-)
+    EbTransforms_Intrinsic_SSSE3.c)
