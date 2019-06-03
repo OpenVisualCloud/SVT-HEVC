@@ -179,6 +179,10 @@ add_library(SvtHevcEnc SHARED
     EbTransQuantBuffers.c
     EbUtility.c)
 
+if(UNIX)
+    set(LIBS_PRIVATE "-lpthread")
+endif()
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     # Set version number for SONAME.
     set_target_properties(SvtHevcEnc PROPERTIES SOVERSION ${SVT_HEVC_SOVERSION})
