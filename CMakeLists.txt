@@ -71,6 +71,57 @@ if(UNIX)
     endif()
 endif()
 
+set(flags_to_test
+    -Wextra
+    -Wformat
+    -Wformat-security
+    -fstack-protector-strong
+    -fvisibility=hidden
+    -fPIE
+    -fPIC
+    -D_FORTIFY_SOURCE=2
+    /GS
+    /sdl)
+if(MSVC)
+    list(APPEND flags_to_test /MP)
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /O2")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Od")
+else()
+    list(INSERT flags_to_test 0 -Wall)
+    #for Mingw64 support, see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65782
+    if(MINGW)
+        list(APPEND flags_to_test -fno-asynchronous-unwind-tables)
+    endif()
+endif()
+set(release_flags_to_test
+    -O2
+    -O3)
+set(debug_flags_to_test
+    -O0
+    -Og)
+
+if(MSVC)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NXCompat /DynamicBase")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /NXCompat /DynamicBase")
+endif()
+
+foreach(flag ${flags_to_test};${release_flags_to_test};${debug_flags_to_test})
+    string(REGEX REPLACE "[^A-Za-z0-9]" "_" flag_var "${flag}")
+    set(test_c_flag "C_FLAG${flag_var}")
+    check_c_compiler_flag(${flag} "${test_c_flag}")
+    list(FIND release_flags_to_test ${flag} r_flag)
+    list(FIND debug_flags_to_test ${flag} d_flag)
+    if(${test_c_flag})
+        if(NOT r_flag EQUAL -1)
+            set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${flag}")
+        elseif(NOT d_flag EQUAL -1)
+            set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${flag}")
+        else()
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flag}")
+        endif()
+    endif()
+endforeach()
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(CMAKE_ASM_NASM_OBJECT_FORMAT macho64)
     set(CMAKE_ASM_NASM_FLAGS "-DUNIX64")
