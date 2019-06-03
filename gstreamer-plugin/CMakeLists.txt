@@ -66,13 +66,12 @@ target_link_libraries(gstsvthevcenc
     ${GSTREAMER_VIDEO_LIBRARIES}
     ${SVT_HEVC_LIBRARIES})
 
-if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set (CMAKE_INSTALL_PREFIX "${GSTREAMER_LIBDIR}")
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "${GSTREAMER_LIBDIR}")
     message("Install to: " ${GSTREAMER_LIBDIR})
 endif()
 
-install (TARGETS gstsvthevcenc
+install(TARGETS gstsvthevcenc
     LIBRARY DESTINATION gstreamer-1.0)
 
 message("Build: " ${CMAKE_BUILD_TYPE})
-
