@@ -27,10 +27,6 @@ foreach(cflag ${flags_to_test})
     endif()
 endforeach()
 
-if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse4.1")
-endif()
-
 if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
 endif()
