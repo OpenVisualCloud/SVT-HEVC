@@ -196,6 +196,12 @@ if(UNIX)
         PROPERTIES LINK_DEPENDS ${VERSION_SCRIPT})
 endif()
 
+add_dependencies(SvtHevcEnc
+    C_DEFAULT
+    ASM_SSE2
+    ASM_SSSE3
+    ASM_SSE4_1
+    ASM_AVX2)
 target_link_libraries(SvtHevcEnc
     $<TARGET_OBJECTS:C_DEFAULT>
     $<TARGET_OBJECTS:ASM_SSE2>
