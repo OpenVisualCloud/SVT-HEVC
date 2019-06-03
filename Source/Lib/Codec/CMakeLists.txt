@@ -1,7 +1,7 @@
-# 
+#
 # Copyright(c) 2018 Intel Corporation
 # SPDX - License - Identifier: BSD - 2 - Clause - Patent
-# 
+#
 
 # Include Encoder Subdirectories
 include_directories (${PROJECT_SOURCE_DIR}/Source/API/)
@@ -179,8 +179,7 @@ add_library(SvtHevcEnc SHARED
     EbSei.c
     EbTransforms.c
     EbTransQuantBuffers.c
-    EbUtility.c
-)
+    EbUtility.c)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     # Set version number for SONAME.
