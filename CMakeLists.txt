@@ -138,6 +138,14 @@ else()
     endif()
 endif()
 
+# BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
+# make it prominent in the GUI.
+if(WIN32 OR MSYS)
+    option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." ON)
+else()
+    option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
+endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(CMAKE_ASM_NASM_OBJECT_FORMAT macho64)
     set(CMAKE_ASM_NASM_FLAGS "-DUNIX64")
