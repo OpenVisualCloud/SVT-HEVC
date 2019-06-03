@@ -1,9 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
-project(gst-svt-hevc C)
-
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
+project(gst-svt-hevc C)
 
 FIND_PACKAGE(PkgConfig REQUIRED)
 pkg_check_modules (GSTREAMER REQUIRED gstreamer-1.0>=1.8)
