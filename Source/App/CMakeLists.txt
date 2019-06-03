@@ -12,7 +12,7 @@ include_directories(${PROJECT_SOURCE_DIR}/Source/API/
     ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 
 # App Source Files
-add_executable (SvtHevcEncApp
+add_executable(SvtHevcEncApp
     EbAppConfig.c
     EbAppContext.c
     EbAppFifo.c
@@ -24,8 +24,7 @@ add_executable (SvtHevcEncApp
     EbAppContext.h
     ../API/EbErrorCodes.h
     ../API/EbTime.h
-    EbAppInputy4m.c
-)
+    EbAppInputy4m.c)
 
 #********** SET COMPILE FLAGS************
 
@@ -39,14 +38,10 @@ if (UNIX)
 endif()
 
 if (MSVC OR MSYS OR MINGW OR WIN32)
-	
+
 	# Link the Encoder App
 	target_link_libraries (SvtHevcEncApp
                            SvtHevcEnc)
-endif()
-
-if(NOT CMAKE_INSTALL_BINDIR)
-    set(CMAKE_INSTALL_BINDIR bin)
 endif()
 
 install(TARGETS SvtHevcEncApp RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
