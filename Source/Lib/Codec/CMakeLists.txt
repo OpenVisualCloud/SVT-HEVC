@@ -4,24 +4,22 @@
 #
 
 # Include Encoder Subdirectories
-include_directories (${PROJECT_SOURCE_DIR}/Source/API/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Codec/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/API/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/Codec/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
 
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
+link_directories(${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
 
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
-
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 
 # Encoder Lib Source Files
 add_library(SvtHevcEnc SHARED  
