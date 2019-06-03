@@ -203,15 +203,6 @@ target_link_libraries(SvtHevcEnc
     $<TARGET_OBJECTS:ASM_SSE4_1>
     $<TARGET_OBJECTS:ASM_AVX2>)
 
-if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
-    set(CMAKE_INSTALL_LIBDIR "lib")
-endif()
-
-if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
-    set(CMAKE_INSTALL_INCLUDEDIR "include/svt-hevc")
-endif()
-
 configure_file(../pkg-config.pc.in ${CMAKE_BINARY_DIR}/SvtHevcEnc.pc @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/SvtHevcEnc.pc DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 install(TARGETS SvtHevcEnc DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-install(DIRECTORY ../../API/ DESTINATION "${CMAKE_INSTALL_PREFIX}/include/svt-hevc" FILES_MATCHING PATTERN "*.h")
