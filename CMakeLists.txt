@@ -6,14 +6,19 @@ if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
                     "Please use the Build folder or create your own.")
 endif()
 
+find_program(YASM_EXE yasm)
+if(YASM_EXE AND NOT CMAKE_ASM_NASM_COMPILER MATCHES "yasm")
+    set(CMAKE_ASM_NASM_COMPILER ${YASM_EXE})
+endif()
+
 project(${project_name} C ASM_NASM)
 
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    if(NOT CMAKE_BUILD_TYPE)
-        set(CMAKE_BUILD_TYPE Release)
-    endif()
-    message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
 endif()
+
+include(GNUInstallDirs)
+include(CheckCCompilerFlag)
 
 if(NOT CMAKE_C_COMPILER)
     set(CMAKE_C_COMPILER gcc)
