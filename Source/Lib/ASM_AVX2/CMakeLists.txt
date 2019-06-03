@@ -66,6 +66,4 @@ add_library(ASM_AVX2 OBJECT
     EbNoiseExtractAVX2.c
     EbPackUnPack_Intrinsic_AVX2.c
     EbPictureOperators_Intrinsic_AVX2.c
-    EbTransforms_Intrinsic_AVX2.c
-)
-
+    EbTransforms_Intrinsic_AVX2.c)
