@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 set(project_name "svt-hevc")
 
+if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
+    message(WARNING "Building in-source is highly not recommended\n"
+                    "Please use the Build folder or create your own.")
+endif()
+
 project(${project_name} C ASM_NASM)
 
 if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
