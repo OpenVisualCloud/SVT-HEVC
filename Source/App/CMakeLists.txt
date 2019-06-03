@@ -28,20 +28,14 @@ add_executable(SvtHevcEncApp
 
 #********** SET COMPILE FLAGS************
 
-if (UNIX)
+# Link the Encoder App
+target_link_libraries(SvtHevcEncApp
+    SvtHevcEnc)
 
-	# Link the Encoder App
-	target_link_libraries (SvtHevcEncApp
-							SvtHevcEnc
-							pthread
-							rt)
-endif()
-
-if (MSVC OR MSYS OR MINGW OR WIN32)
-
-	# Link the Encoder App
-	target_link_libraries (SvtHevcEncApp
-                           SvtHevcEnc)
+if(UNIX)
+	target_link_libraries(SvtHevcEncApp
+        pthread
+        rt)
 endif()
 
 install(TARGETS SvtHevcEncApp RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
