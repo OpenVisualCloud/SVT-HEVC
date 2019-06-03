@@ -195,3 +195,4 @@ if(BUILD_APP)
     add_subdirectory(Source/App)
 endif()
 
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/Source/API/ DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}/svt-hevc" FILES_MATCHING PATTERN "*.h")
