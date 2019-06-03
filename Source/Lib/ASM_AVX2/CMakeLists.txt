@@ -6,14 +6,13 @@
 # ASM_AVX2 Directory CMakeLists.txt
 
 # Include Encoder Subdirectories
-include_directories(${PROJECT_SOURCE_DIR}/Source/API/)
-include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Codec/)
-include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
-include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/)
-include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
-include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/)
-include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
-
+include_directories(${PROJECT_SOURCE_DIR}/Source/API/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/Codec/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
 link_directories(${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
