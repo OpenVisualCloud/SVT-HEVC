@@ -190,8 +190,10 @@ if(UNIX)
     # Pass version script to ensure that only global-namespace symbols
     # are exported.
     set(VERSION_SCRIPT ${PROJECT_SOURCE_DIR}/Source/API/EbApi.version)
-    set(CMAKE_SHARED_LINKER_FLAGS
+    if(NOT APPLE)
+        set(CMAKE_SHARED_LINKER_FLAGS
         "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--version-script=${VERSION_SCRIPT}")
+    endif()
     set_target_properties(SvtHevcEnc
         PROPERTIES LINK_DEPENDS ${VERSION_SCRIPT})
 endif()
