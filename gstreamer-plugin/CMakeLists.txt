@@ -4,6 +4,8 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 project(gst-svt-hevc C)
 
+include(CheckCCompilerFlag)
+
 FIND_PACKAGE(PkgConfig REQUIRED)
 pkg_check_modules (GSTREAMER REQUIRED gstreamer-1.0>=1.8)
 include_directories (${GSTREAMER_INCLUDE_DIRS})
