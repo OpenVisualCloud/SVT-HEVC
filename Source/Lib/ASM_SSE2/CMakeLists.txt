@@ -1,7 +1,7 @@
-# 
+#
 # Copyright(c) 2018 Intel Corporation
 # SPDX - License - Identifier: BSD - 2 - Clause - Patent
-# 
+#
 
 # ASM_SSE2 Directory CMakeLists.txt
 
@@ -54,6 +54,4 @@ add_library(ASM_SSE2 STATIC
     EbTransforms_Intrinsic_SSE2.c
     x64inc.asm
     x64Macro.asm
-    x64RegisterUtil.asm
-)
-
+    x64RegisterUtil.asm)
