@@ -46,17 +46,6 @@ if(CMAKE_C_COMPILER_VERSION VERSION_EQUAL 5.4)
     string(REPLACE "-flto" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 endif()
 
-if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx2")
-    if(CMAKE_C_COMPILER_VERSION VERSION_EQUAL 5.4)
-        string(REPLACE "-flto" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-    endif()
-endif()
-
-if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -static-intel /W0 /Qwd10148 /Qwd10010 /Qwd10157")
-endif()
-
 add_library(ASM_AVX2 OBJECT
     EbCombinedAveragingSAD_Intrinsic_AVX2.h
     EbCombinedAveragingSAD_Intrinsic_AVX512.h
