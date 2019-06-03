@@ -1,7 +1,7 @@
-# 
+#
 # Copyright(c) 2018 Intel Corporation
 # SPDX - License - Identifier: BSD - 2 - Clause - Patent
-# 
+#
 
 # C_DEFAULT Directory CMakeLists.txt
 
@@ -33,5 +33,4 @@ add_library(C_DEFAULT STATIC
     EbPackUnPack_C.c
     EbPictureOperators_C.c
     EbSampleAdaptiveOffset_C.c
-    EbTransforms_C.c
-)
+    EbTransforms_C.c)
