@@ -8,8 +8,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 
 # Include Subdirectories
-include_directories (${PROJECT_SOURCE_DIR}/Source/API/)
-include_directories (${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/API/
+    ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 
 # App Source Files
 add_executable (SvtHevcEncApp
