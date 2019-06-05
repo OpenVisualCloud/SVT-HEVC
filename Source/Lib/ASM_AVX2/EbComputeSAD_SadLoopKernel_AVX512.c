@@ -230,7 +230,7 @@ void SadLoopKernel_AVX512_HmeL0_INTRIN(
 						{
 							__m256i ref0temp, ref1temp, ref4temp, ref3temp;
 								
-							__m256i temp = _mm256_loadu_si256((__m256i*) (pSrc));
+							__m256i temp = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_loadu_si128((__m128i*)pSrc)), _mm_loadu_si128((__m128i*)(pSrc + srcStride)), 0x1);
 							ref0temp = _mm256_permutevar8x32_epi32(temp, _mm256_setr_epi64x(               0x0,                0x0, 0x0004000400040004, 0x0004000400040004));
 							ref1temp = _mm256_permutevar8x32_epi32(temp, _mm256_setr_epi64x(0x0001000100010001, 0x0001000100010001, 0x0005000500050005, 0x0005000500050005));
 							ref3temp = _mm256_permutevar8x32_epi32(temp, _mm256_setr_epi64x(0x0002000200020002, 0x0002000200020002, 0x0006000600060006, 0x0006000600060006));
@@ -1280,7 +1280,7 @@ void SadLoopKernel_AVX2_HmeL0_INTRIN(
                     for (k = 0; k<height; k += 2) {
                         ss0 = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_loadu_si128((__m128i*)pRef)), _mm_loadu_si128((__m128i*)(pRef + refStride)), 0x1);
                         ss1 = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_loadu_si128((__m128i*)(pRef + 8))), _mm_loadu_si128((__m128i*)(pRef + refStride + 8)), 0x1);
-                        ss2 = _mm256_load_si256((__m256i*)pSrc);
+                        ss2 = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_loadu_si128((__m128i*)pSrc)), _mm_loadu_si128((__m128i*)(pSrc + srcStride)), 0x1);
                         ss3 = _mm256_adds_epu16(ss3, _mm256_mpsadbw_epu8(ss0, ss2, 0));
                         ss4 = _mm256_adds_epu16(ss4, _mm256_mpsadbw_epu8(ss0, ss2, 45)); // 101 101
                         ss5 = _mm256_adds_epu16(ss5, _mm256_mpsadbw_epu8(ss1, ss2, 18)); // 010 010

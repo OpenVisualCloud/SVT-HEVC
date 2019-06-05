@@ -220,6 +220,11 @@ EB_ERRORTYPE CopyConfigurationParameters(
         printf("\nWarning: input profile is not correct, force converting it from %d to MainREXT for YUV422 or YUV444 cases \n", config->profile);
         callbackData->ebEncParameters.profile = 4;
     }
+    else if(config->encoderBitDepth > 8 && config->profile < 2)
+    {
+        printf("\nWarning: input profile is not correct, force converting it from %d to Main10 for 10 bits cases\n", config->profile);
+        callbackData->ebEncParameters.profile = 2;
+    }
     callbackData->ebEncParameters.tier = config->tier;
     callbackData->ebEncParameters.level = config->level;
     callbackData->ebEncParameters.injectorFrameRate = config->injectorFrameRate;

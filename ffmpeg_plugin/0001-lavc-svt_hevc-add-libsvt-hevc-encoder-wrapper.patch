@@ -1,7 +1,7 @@
-From 0f938e01a8cd6ee768aad4ee540ec247e720b295 Mon Sep 17 00:00:00 2001
+From 75edd6ac46515acb71a5a87dca23633fbbc842c5 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
-Subject: [PATCH 1/2] lavc/svt_hevc: add libsvt hevc encoder wrapper
+Subject: [PATCH 1/1] lavc/svt_hevc: add libsvt hevc encoder wrapper
 
 Signed-off-by: Zhengxu Huang <zhengxu.huang@intel.com>
 Signed-off-by: Hassene Tmar <hassene.tmar@intel.com>
@@ -11,12 +11,12 @@ Signed-off-by: Jing Sun <jing.a.sun@intel.com>
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 539 +++++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 545 insertions(+)
+ libavcodec/libsvt_hevc.c | 541 +++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 547 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index 938ff10..2aabac4 100755
+index d644a5b..2bc93a6 100755
 --- a/configure
 +++ b/configure
 @@ -264,6 +264,7 @@ External library support:
@@ -27,7 +27,7 @@ index 938ff10..2aabac4 100755
    --enable-libtensorflow   enable TensorFlow as a DNN module backend
                             for DNN based filters like sr [no]
    --enable-libtesseract    enable Tesseract, needed for ocr filter [no]
-@@ -1784,6 +1785,7 @@ EXTERNAL_LIBRARY_LIST="
+@@ -1782,6 +1783,7 @@ EXTERNAL_LIBRARY_LIST="
      libspeex
      libsrt
      libssh
@@ -35,7 +35,7 @@ index 938ff10..2aabac4 100755
      libtensorflow
      libtesseract
      libtheora
-@@ -3173,6 +3175,7 @@ libshine_encoder_select="audio_frame_queue"
+@@ -3174,6 +3176,7 @@ libshine_encoder_select="audio_frame_queue"
  libspeex_decoder_deps="libspeex"
  libspeex_encoder_deps="libspeex"
  libspeex_encoder_select="audio_frame_queue"
@@ -43,7 +43,7 @@ index 938ff10..2aabac4 100755
  libtheora_encoder_deps="libtheora"
  libtwolame_encoder_deps="libtwolame"
  libvo_amrwbenc_encoder_deps="libvo_amrwbenc"
-@@ -6209,6 +6212,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
+@@ -6203,6 +6206,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
  enabled libssh            && require_pkg_config libssh libssh libssh/sftp.h sftp_init
  enabled libspeex          && require_pkg_config libspeex speex speex/speex.h speex_decoder_init
  enabled libsrt            && require_pkg_config libsrt "srt >= 1.3.0" srt/srt.h srt_socket
@@ -52,10 +52,10 @@ index 938ff10..2aabac4 100755
  enabled libtesseract      && require_pkg_config libtesseract tesseract tesseract/capi.h TessBaseAPICreate
  enabled libtheora         && require libtheora theora/theoraenc.h th_info_init -ltheoraenc -ltheoradec -logg
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index 15c43a8..c93e545 100644
+index f37135f..8e031d3 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
-@@ -987,6 +987,7 @@ OBJS-$(CONFIG_LIBOPUS_ENCODER)            += libopusenc.o libopus.o     \
+@@ -991,6 +991,7 @@ OBJS-$(CONFIG_LIBOPUS_ENCODER)            += libopusenc.o libopus.o     \
  OBJS-$(CONFIG_LIBSHINE_ENCODER)           += libshine.o
  OBJS-$(CONFIG_LIBSPEEX_DECODER)           += libspeexdec.o
  OBJS-$(CONFIG_LIBSPEEX_ENCODER)           += libspeexenc.o
@@ -64,10 +64,10 @@ index 15c43a8..c93e545 100644
  OBJS-$(CONFIG_LIBTWOLAME_ENCODER)         += libtwolame.o
  OBJS-$(CONFIG_LIBVO_AMRWBENC_ENCODER)     += libvo-amrwbenc.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
-index b26aeca..e93f66f 100644
+index 6178d31..e27a7b6 100644
 --- a/libavcodec/allcodecs.c
 +++ b/libavcodec/allcodecs.c
-@@ -703,6 +703,7 @@ extern AVCodec ff_librsvg_decoder;
+@@ -706,6 +706,7 @@ extern AVCodec ff_librsvg_decoder;
  extern AVCodec ff_libshine_encoder;
  extern AVCodec ff_libspeex_encoder;
  extern AVCodec ff_libspeex_decoder;
@@ -77,10 +77,10 @@ index b26aeca..e93f66f 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000..b2a6ac4
+index 0000000..9b5d146
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,539 @@
+@@ -0,0 +1,541 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -231,10 +231,6 @@ index 0000000..b2a6ac4
 +        (avctx->pix_fmt == AV_PIX_FMT_YUV444P10)) {
 +        av_log(avctx, AV_LOG_DEBUG, "Encoder 10 bits depth input\n");
 +
-+        // Encoding the source frames of the compressed 10-bit format
-+        // supported by SVT-HEVC requires an extra conversion operation
-+        // from yuv420p10le to that format. Disable it for now in ffmpeg.
-+
 +        param->compressedTenBitFormat = 0;
 +        param->encoderBitDepth        = 10;
 +    }
@@ -272,6 +268,12 @@ index 0000000..b2a6ac4
 +        (param->profile != FF_PROFILE_HEVC_REXT)) {
 +        av_log(avctx, AV_LOG_WARNING, "Rext Profile forced for 422 or 444!\n");
 +        param->profile = FF_PROFILE_HEVC_REXT;
++    }
++
++    if ((param->profile == FF_PROFILE_HEVC_MAIN) &&
++        (param->encoderBitDepth > 8)) {
++        av_log(avctx, AV_LOG_WARNING, "Main10 Profile forced for 10 bits!\n");
++        param->profile = FF_PROFILE_HEVC_MAIN_10;
 +    }
 +
 +    param->targetBitRate          = avctx->bit_rate;
@@ -537,7 +539,7 @@ index 0000000..b2a6ac4
 +      OFFSET(enc_mode), AV_OPT_TYPE_INT, { .i64 = 9 }, 0, 12, VE },
 +
 +    { "profile", "Profile setting, Main Still Picture Profile not supported", OFFSET(profile),
-+      AV_OPT_TYPE_INT, { .i64 = FF_PROFILE_HEVC_MAIN_10 }, FF_PROFILE_HEVC_MAIN, FF_PROFILE_HEVC_REXT, VE, "profile"},
++      AV_OPT_TYPE_INT, { .i64 = FF_PROFILE_HEVC_MAIN }, FF_PROFILE_HEVC_MAIN, FF_PROFILE_HEVC_REXT, VE, "profile"},
 +
 +    { "tier", "Set tier (general_tier_flag)", OFFSET(tier),
 +      AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, VE, "tier" },
@@ -578,7 +580,7 @@ index 0000000..b2a6ac4
 +    { "asm_type", "Assembly instruction set type [0: C Only, 1: Auto]", OFFSET(asm_type),
 +      AV_OPT_TYPE_BOOL,   { .i64 = 1 }, 0, 1, VE },
 +
-+    {NULL},
++    { NULL },
 +};
 +
 +static const AVClass class = {
