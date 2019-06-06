@@ -54,7 +54,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(CMAKE_ASM_NASM_FLAGS "-DUNIX64")
+    set(CMAKE_ASM_NASM_FLAGS "-DUNIX64 -DPIC")
     set(CMAKE_ASM_NASM_FLAGS_DEBUG "-g null")
     set(CMAKE_ASM_NASM_OBJECT_FORMAT elf64)
     set(CMAKE_EXE_LINKER_FLAGS "-z noexecstack -z relro -z now -pie -lm")

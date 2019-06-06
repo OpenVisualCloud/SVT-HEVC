@@ -7,7 +7,7 @@
 
 #define BITS_PER_SUM (8 * sizeof(EB_U16))
 
-inline EB_U32 abs2(EB_U32 a)
+static inline EB_U32 abs2(EB_U32 a)
 {
 	EB_U32 s = ((a >> (BITS_PER_SUM - 1)) & (((EB_U32)1 << BITS_PER_SUM) + 1)) * ((EB_U32)-1);
 
