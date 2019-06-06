@@ -680,9 +680,8 @@ EB_ERRORTYPE PictureParentControlSetCtor(
 	}
 
 	EB_MALLOC(EB_U32*, objectPtr->rcMEdistortion, sizeof(EB_U32) * objectPtr->lcuTotalCount, EB_N_PTR);
+	EB_MALLOC(EB_U32*, objectPtr->rcMESatdDistortion, sizeof(EB_U32) * objectPtr->lcuTotalCount, EB_N_PTR);
 	
-
-
 	// ME and OIS Distortion Histograms
     EB_MALLOC(EB_U16*, objectPtr->meDistortionHistogram, sizeof(EB_U16) * NUMBER_OF_SAD_INTERVALS, EB_N_PTR);
 

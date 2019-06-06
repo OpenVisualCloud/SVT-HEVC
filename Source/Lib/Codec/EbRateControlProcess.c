@@ -966,10 +966,10 @@ void FrameLevelRcInputPictureMode3(
     else
     {
         for (EB_U16 lcuIndex = 0; lcuIndex < lcuTotalCount; lcuIndex++)
-            pictureControlSetPtr->sadCost += pictureControlSetPtr->ParentPcsPtr->rcMEdistortion[lcuIndex];
+            pictureControlSetPtr->sadCost += pictureControlSetPtr->ParentPcsPtr->rcMESatdDistortion[lcuIndex];
     }
 
-    pictureControlSetPtr->sadCost /= SAD_SATD_CONSTANT;
+    //pictureControlSetPtr->sadCost /= SAD_SATD_CONSTANT;
 
     if (pictureControlSetPtr->temporalLayerIndex > 1 && pictureControlSetPtr->sliceType != EB_I_PICTURE)
     {

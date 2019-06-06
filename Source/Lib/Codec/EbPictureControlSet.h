@@ -448,6 +448,7 @@ typedef struct PictureParentControlSet_s
 
 	MeCuResults_t						**meResults;
 	EB_U32								 *rcMEdistortion;
+	EB_U32								 *rcMESatdDistortion;
 
     // Motion Estimation Distortion and OIS Historgram 
     EB_U16                               *meDistortionHistogram;

@@ -34,6 +34,7 @@ add_library(ASM_AVX2 STATIC
     EbComputeSAD_SadLoopKernel_AVX512.h
     EbIntraPrediction_AVX2.h
     EbMcp_AVX2.h
+	EbMeSatdCalculation_AVX2.h
     EbNoiseExtractAVX2.h
     EbPackUnPack_Intrinsic_AVX2.h
     EbPictureOperators_AVX2.h
@@ -48,5 +49,9 @@ add_library(ASM_AVX2 STATIC
     EbPackUnPack_Intrinsic_AVX2.c
     EbPictureOperators_Intrinsic_AVX2.c
     EbTransforms_Intrinsic_AVX2.c
+	EbMeSatdCalculation_AVX2.asm
+	const-a.asm
+	x86inc.asm
+	x86util.asm
 )
 

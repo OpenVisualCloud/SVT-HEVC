@@ -19,6 +19,7 @@ add_library(C_DEFAULT STATIC
     EbIntraPrediction_C.h
     EbMcp_C.h
     EbMeSadCalculation_C.h
+	EbMeSatdCalculation_C.h
     EbPackUnPack_C.h
     EbPictureOperators_C.h
     EbSampleAdaptiveOffset_C.h
@@ -30,7 +31,8 @@ add_library(C_DEFAULT STATIC
     EbIntraPrediction_C.c
     EbMcp_C.c
     EbMeSadCalculation_C.c
-    EbPackUnPack_C.c
+    EbMeSatdCalculation_C.c
+	EbPackUnPack_C.c
     EbPictureOperators_C.c
     EbSampleAdaptiveOffset_C.c
     EbTransforms_C.c
