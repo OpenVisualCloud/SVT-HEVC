@@ -181,9 +181,6 @@ add_library(SvtHevcEnc SHARED
 
 if(UNIX)
     set(LIBS_PRIVATE "-lpthread")
-endif()
-
-if(UNIX)
     # Set version number for SONAME.
     set_target_properties(SvtHevcEnc
         PROPERTIES SOVERSION ${SVT_HEVC_SOVERSION})
