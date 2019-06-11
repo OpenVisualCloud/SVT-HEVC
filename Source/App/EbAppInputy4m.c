@@ -9,6 +9,9 @@
 #define PRINT_HEADER 0
 #define CHROMA_MAX 4
 
+#include "EbAppConfig.h"
+
+
 /* copy a string until a specified character or a new line is found */
 char* copyUntilCharacterOrNewLine(char *src, char *dst, char chr) {
 	rsize_t count = 0;

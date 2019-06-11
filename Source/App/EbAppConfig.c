@@ -10,6 +10,7 @@
 
 #include "EbAppConfig.h"
 #include "EbApi.h"
+#include "EbAppInputy4m.h"
 
 #ifdef _WIN32
 #else
@@ -129,7 +130,7 @@ static void SetCfgInputFile                     (const char *value, EbConfig_t *
         FOPEN(cfg->inputFile, value, "rb");
         /* if input is a YUV4MPEG2 (y4m) file, read header and parse parameters */
         if (cfg->inputFile != NULL) {
-            if (check_if_y4m(cfg) == EB_TRUE)
+            if ((EB_BOOL)(check_if_y4m(cfg)) == EB_TRUE)
                 cfg->y4m_input = EB_TRUE;
             else
                 cfg->y4m_input = EB_FALSE;

@@ -14,6 +14,7 @@
 #include "EbAppContext.h"
 #include "EbAppConfig.h"
 #include "EbErrorCodes.h"
+#include "EbAppInputy4m.h"
 
 #include "EbTime.h"
 /***************************************
