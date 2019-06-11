@@ -4749,10 +4749,22 @@ static void WriteUvlc(
 		numberOfBits += 2;
 	}
 
-	OutputBitstreamWrite(
-		bitstreamPtr,
-		bits,
-		numberOfBits);
+    if(numberOfBits<32) {
+	    OutputBitstreamWrite(
+		    bitstreamPtr,
+		    bits,
+		    numberOfBits);
+    } else
+    {
+	    OutputBitstreamWrite(
+		    bitstreamPtr,
+		    0,
+		    numberOfBits>>1);
+	    OutputBitstreamWrite(
+		    bitstreamPtr,
+		    bits,
+		    (numberOfBits+1)>>1);
+    }
 }
 
 /**************************************************
@@ -8779,17 +8791,6 @@ EB_ERRORTYPE CodeBufferingPeriodSEI(
 			bufferingPeriodPtr->rapCpbParamsPresentFlag);
 	}
 
-	// concatenation_flag
-	WriteFlagCavlc(
-		bitstreamPtr,
-		bufferingPeriodPtr->concatenationFlag);
-
-	// au_cpb_removal_delay_delta_minus1
-	WriteCodeCavlc(
-		bitstreamPtr,
-		bufferingPeriodPtr->auCpbRemovalDelayDeltaMinus1,
-		vuiPtr->hrdParametersPtr->auCpbRemovalDelayLengthMinus1 + 1);
-
 	if (bufferingPeriodPtr->rapCpbParamsPresentFlag){
 		// cpb_delay_offset
 		WriteCodeCavlc(
@@ -8802,6 +8803,17 @@ EB_ERRORTYPE CodeBufferingPeriodSEI(
 			bufferingPeriodPtr->dpbDelayOffset,
 			vuiPtr->hrdParametersPtr->dpbOutputDelayDuLengthMinus1 + 1);
 	}
+
+	// concatenation_flag
+	WriteFlagCavlc(
+		bitstreamPtr,
+		bufferingPeriodPtr->concatenationFlag);
+
+	// au_cpb_removal_delay_delta_minus1
+	WriteCodeCavlc(
+		bitstreamPtr,
+		bufferingPeriodPtr->auCpbRemovalDelayDeltaMinus1,
+		vuiPtr->hrdParametersPtr->auCpbRemovalDelayLengthMinus1 + 1);
 
 	for (nalVclIndex = 0; nalVclIndex < 2; ++nalVclIndex){
 		if ((nalVclIndex == 0 && vuiPtr->hrdParametersPtr->nalHrdParametersPresentFlag) ||
