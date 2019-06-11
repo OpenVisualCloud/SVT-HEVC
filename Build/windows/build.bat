@@ -6,14 +6,24 @@ setlocal
 cd /d "%~dp0"
 set instdir=%CD%
 
-if -%1-==-- call :help
-call :args %*
-call :buildCmake
+set "build=y"
+if NOT -%1-==-- call :args %*
+if exist CMakeCache.txt del /f /s /q CMakeCache.txt 1>nul
+if exist CMakeFiles rmdir /s /q CMakeFiles 1>nul
+if "%buildtype%"=="" set "release"
+if "%GENERATOR%"=="Visual Studio 16 2019" (
+    cmake ../.. -G"Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX=%SYSTEMDRIVE%\svt-encoders -DCMAKE_CONFIGURATION_TYPES="%buildtype%" %cmake_eflags%
+) else (
+    if NOT "%GENERATOR%"=="" set GENERATOR=-G"%GENERATOR%"
+    cmake ../.. %GENERATOR% -DCMAKE_INSTALL_PREFIX=%SYSTEMDRIVE%\svt-encoders -DCMAKE_CONFIGURATION_TYPES="%buildtype%" %cmake_eflags%
+)
+
+if "%build%"=="y" cmake --build . --config %buildtype%
 goto :EOF
 
 :args
 if -%1-==-- (
-    goto argend
+    exit /b
 ) else if /I "%1"=="/help" (
     call :help
 ) else if /I "%1"=="help" (
@@ -80,33 +90,21 @@ if -%1-==-- (
     shift
 ) else if /I "%1"=="release" (
     echo Building for release
-    set "buildtype=--config release"
+    set "buildtype=release"
     shift
 ) else if /I "%1"=="debug" (
     echo Building for debug
-    set "buildtype= --config debug"
+    set "buildtype=debug"
+    shift
+) else if /I "%1"=="nobuild" (
+    echo Building files
+    set "build=n"
     shift
 )
 goto :args
 
-:argend
-    exit /b
-goto :EOF
-
-:buildCmake
-if NOT "%GENERATOR%"=="" set "GENERATOR=-G%GENERATOR%"
-if "%buildtype%"=="" set "buildtype=--config release"
-if "%GENERATOR%"=="-GVisual Studio 16 2019" (
-    cmake ../.. "%GENERATOR%" -A x64 -DCMAKE_ASM_NASM_COMPILER="yasm" -DCMAKE_INSTALL_PREFIX=%SYSTEMDRIVE%\svt-encoders -DCMAKE_CONFIGURATION_TYPES="Debug;Release"
-) else (
-    cmake ../.. "%GENERATOR%" -DCMAKE_ASM_NASM_COMPILER="yasm" -DCMAKE_INSTALL_PREFIX=%SYSTEMDRIVE%\svt-encoders -DCMAKE_CONFIGURATION_TYPES="Debug;Release"
-)
-cmake --build . %buildtype%
-
-goto :EOF
-
 :help
     echo Batch file to build SVT-HEVC on Windows
-    echo Usage: generate.bat 2019^|2017^|2015^|clean [release|debug]
+    echo Usage: generate.bat 2019^|2017^|2015^|clean [release|debug] [nobuild]
     exit
 goto :EOF
