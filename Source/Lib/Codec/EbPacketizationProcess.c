@@ -808,7 +808,7 @@ void* PacketizationKernel(void *inputPtr)
                 startinBytes = queueEntryPtr->startSplicing;
                 totalBytes = outputStreamPtr->nFilledLen;
                 //Shift the bitstream by size of picture timing SEI
-                memcpy(outputStreamPtr->pBuffer + startinBytes + bufferWrittenBytesCount, outputStreamPtr->pBuffer + startinBytes, totalBytes - startinBytes);
+                memmove(outputStreamPtr->pBuffer + startinBytes + bufferWrittenBytesCount, outputStreamPtr->pBuffer + startinBytes, totalBytes - startinBytes);
                 // Copy Picture Timing SEI to the Output Bitstream
                 CopyRbspBitstreamToPayload(
                     queueEntryPtr->bitStreamPtr2,
