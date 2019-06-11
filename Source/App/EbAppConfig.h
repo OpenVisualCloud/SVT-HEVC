@@ -237,6 +237,10 @@ typedef struct EbConfig_s
 
     FILE                   *qpFile;
 
+    // y4m format support
+    EB_BOOL                 y4m_input;
+    unsigned char           y4m_buf[9];
+
     EB_BOOL                useQpFile;
 #if 1//TILES
     uint8_t                 tileColumnCount;
