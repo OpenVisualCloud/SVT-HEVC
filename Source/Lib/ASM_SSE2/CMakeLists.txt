@@ -13,6 +13,7 @@ include_directories(${PROJECT_SOURCE_DIR}/Source/API/
 
 set(flags_to_test
     -msse2
+    -msse4.1
     -static-intel)
 
 foreach(cflag ${flags_to_test})
