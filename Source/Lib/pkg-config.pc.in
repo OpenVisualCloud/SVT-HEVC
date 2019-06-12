@@ -5,5 +5,5 @@ libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
 Name: SvtHevcEnc
 Description: SVT (Scalable Video Technology) for HEVC encoder library
 Version: 1.3.0
-Libs: -L${libdir} -lSvtHevcEnc @LIBS_PRIVATE@
+Libs: -L${libdir} -lSvtHevcEnc @LIBS@
 Cflags: -I${includedir}
