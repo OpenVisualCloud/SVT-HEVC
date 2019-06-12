@@ -175,11 +175,11 @@ add_library(SvtHevcEnc SHARED
     EbTransforms.c
     EbTransQuantBuffers.c
     EbUtility.c
-    $<TARGET_OBJECTS:C_DEFAULT>
-    $<TARGET_OBJECTS:ASM_SSE2>
-    $<TARGET_OBJECTS:ASM_SSSE3>
-    $<TARGET_OBJECTS:ASM_SSE4_1>
-    $<TARGET_OBJECTS:ASM_AVX2>)
+    $<TARGET_OBJECTS:HEVC_C_DEFAULT>
+    $<TARGET_OBJECTS:HEVC_ASM_SSE2>
+    $<TARGET_OBJECTS:HEVC_ASM_SSSE3>
+    $<TARGET_OBJECTS:HEVC_ASM_SSE4_1>
+    $<TARGET_OBJECTS:HEVC_ASM_AVX2>)
 
 if(UNIX)
     set(LIBS_PRIVATE "-lpthread")
@@ -198,11 +198,11 @@ if(UNIX)
 endif()
 
 add_dependencies(SvtHevcEnc
-    C_DEFAULT
-    ASM_SSE2
-    ASM_SSSE3
-    ASM_SSE4_1
-    ASM_AVX2)
+    HEVC_C_DEFAULT
+    HEVC_ASM_SSE2
+    HEVC_ASM_SSSE3
+    HEVC_ASM_SSE4_1
+    HEVC_ASM_AVX2)
 
 configure_file(../pkg-config.pc.in ${CMAKE_BINARY_DIR}/SvtHevcEnc.pc @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/SvtHevcEnc.pc DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
