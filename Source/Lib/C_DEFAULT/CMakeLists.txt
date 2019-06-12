@@ -11,7 +11,7 @@ include_directories(${PROJECT_SOURCE_DIR}/Source/API/
     ${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
 
 # Utility Source Files
-add_library(C_DEFAULT OBJECT
+add_library(HEVC_C_DEFAULT OBJECT
     EbAvcStyleMcp_C.h
     EbComputeMean_C.h
     EbComputeSAD_C.h
