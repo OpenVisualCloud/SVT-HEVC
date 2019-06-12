@@ -33,7 +33,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
 endif()
 
 # Utility Source Files
-add_library(ASM_SSSE3 OBJECT
+add_library(HEVC_ASM_SSSE3 OBJECT
     EbAvcStyleMcp_SSSE3.h
     EbDeblockingFilter_SSSE3.h
     EbIntraPrediction_SSSE3.h
