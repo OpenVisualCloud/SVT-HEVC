@@ -30,7 +30,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
 endif()
 
 # Utility Source Files
-add_library(ASM_SSE2 OBJECT
+add_library(HEVC_ASM_SSE2 OBJECT
     EbAvcStyleMcp_SSE2.h
     EbComputeMean_SSE2.h
     EbComputeSAD_SSE2.h
