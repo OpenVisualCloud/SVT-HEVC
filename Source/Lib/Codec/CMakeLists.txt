@@ -182,7 +182,7 @@ add_library(SvtHevcEnc SHARED
     $<TARGET_OBJECTS:HEVC_ASM_AVX2>)
 
 if(UNIX)
-    set(LIBS_PRIVATE "-lpthread")
+    set(LIBS "-lpthread")
     # Set version number for SONAME.
     set_target_properties(SvtHevcEnc
         PROPERTIES SOVERSION ${SVT_HEVC_SOVERSION})
