@@ -24,7 +24,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
 endif()
 
 # Utility Source Files
-add_library(ASM_SSSE3 STATIC
+add_library(${SVT_COMMON_LIBRARY_PREFIX}ASM_SSSE3 STATIC
     EbAvcStyleMcp_SSSE3.h
     EbDeblockingFilter_SSSE3.h
     EbIntraPrediction_SSSE3.h

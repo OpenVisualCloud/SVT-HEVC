@@ -23,7 +23,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
 endif()
 
 # Utility Source Files
-add_library(ASM_SSE4_1 STATIC
+add_library(${SVT_COMMON_LIBRARY_PREFIX}ASM_SSE4_1 STATIC
     EbIntraPrediction_SSE4_1.h
     EbPictureOperators_SSE4_1.h
     EbTransforms_SSE4_1.h
