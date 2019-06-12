@@ -46,7 +46,7 @@ if(CMAKE_C_COMPILER_VERSION VERSION_EQUAL 5.4)
     string(REPLACE "-flto" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 endif()
 
-add_library(ASM_AVX2 OBJECT
+add_library(HEVC_ASM_AVX2 OBJECT
     EbCombinedAveragingSAD_Intrinsic_AVX2.h
     EbCombinedAveragingSAD_Intrinsic_AVX512.h
     EbComputeSAD_AVX2.h
