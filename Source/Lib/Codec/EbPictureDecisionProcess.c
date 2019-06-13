@@ -1267,8 +1267,7 @@ void* PictureDecisionKernel(void *inputPtr)
 						pictureControlSetPtr->temporalLayerIndex = (EB_U8)predPositionPtr->temporalLayerIndex;
 						pictureControlSetPtr->isUsedAsReferenceFlag = predPositionPtr->isReferenced;
 
-						pictureControlSetPtr->disableTmvpFlag = EB_FALSE;
-
+                        pictureControlSetPtr->disableTmvpFlag = sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0 ? EB_TRUE : EB_FALSE;
 
                         pictureControlSetPtr->useSrcRef = (sequenceControlSetPtr->staticConfig.improveSharpness && pictureControlSetPtr->temporalLayerIndex > 0) ?
                             EB_TRUE :

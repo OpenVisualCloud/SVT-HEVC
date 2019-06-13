@@ -18,6 +18,7 @@ EB_ERRORTYPE EbTransQuantBuffersCtor(
     transCoeffInitArray.maxWidth            = MAX_LCU_SIZE;
     transCoeffInitArray.maxHeight           = MAX_LCU_SIZE;
     transCoeffInitArray.bitDepth            = EB_16BIT;
+    transCoeffInitArray.colorFormat         = EB_YUV420;
     transCoeffInitArray.bufferEnableMask    = PICTURE_BUFFER_DESC_FULL_MASK;
 	transCoeffInitArray.leftPadding			= 0;
 	transCoeffInitArray.rightPadding		= 0;

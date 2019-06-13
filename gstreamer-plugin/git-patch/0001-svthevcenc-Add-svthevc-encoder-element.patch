@@ -1,0 +1,2298 @@
+From 6f0ea1627c58683e0c3a43ef570d21d433c4ad1c Mon Sep 17 00:00:00 2001
+From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
+Date: Sat, 23 Mar 2019 21:01:51 +0900
+Subject: [PATCH] svthevcenc: Add svthevc encoder element
+
+---
+ configure.ac                      |    8 +
+ ext/Makefile.am                   |   12 +-
+ ext/meson.build                   |    1 +
+ ext/svthevcenc/Makefile.am        |   18 +
+ ext/svthevcenc/gstsvthevcenc.c    | 1735 +++++++++++++++++++++++++++++++++++++
+ ext/svthevcenc/gstsvthevcenc.h    |  118 +++
+ ext/svthevcenc/meson.build        |   16 +
+ tests/check/Makefile.am           |    7 +
+ tests/check/elements/.gitignore   |    1 +
+ tests/check/elements/svthevcenc.c |  228 +++++
+ tests/check/meson.build           |    1 +
+ 11 files changed, 2143 insertions(+), 2 deletions(-)
+ create mode 100644 ext/svthevcenc/Makefile.am
+ create mode 100644 ext/svthevcenc/gstsvthevcenc.c
+ create mode 100644 ext/svthevcenc/gstsvthevcenc.h
+ create mode 100644 ext/svthevcenc/meson.build
+ create mode 100644 tests/check/elements/svthevcenc.c
+
+diff --git a/configure.ac b/configure.ac
+index cb72ee8..a005e97 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -2321,6 +2321,12 @@ AG_GST_CHECK_FEATURE(SCTP, [sctp plug-in], sctp, [
+   ])
+ ])
+ 
++dnl *** svthevcenc : works with libSVT-HEVC 1.3.0 ***
++translit(dnm, m, l) AM_CONDITIONAL(USE_SVTHEVCENC, true)
++AG_GST_CHECK_FEATURE(SVTHEVCENC, [svthevcenc plug-in], svthevcenc, [
++  AG_GST_PKG_CHECK_MODULES(SVTHEVCENC, SvtHevcEnc >= 1.3.0)
++])
++
+ else
+ 
+ dnl not building plugins with external dependencies,
+@@ -2403,6 +2409,7 @@ AM_CONDITIONAL(USE_DTLS, false)
+ AM_CONDITIONAL(USE_VULKAN, false)
+ AM_CONDITIONAL(USE_TTML, false)
+ AM_CONDITIONAL(USE_SCTP, false)
++AM_CONDITIONAL(USE_SVTHEVCENC, false)
+ 
+ fi dnl of EXT plugins
+ 
+@@ -2697,6 +2704,7 @@ ext/webrtc/Makefile
+ ext/webrtcdsp/Makefile
+ ext/wpe/Makefile
+ ext/ttml/Makefile
++ext/svthevcenc/Makefile
+ po/Makefile.in
+ docs/Makefile
+ docs/plugins/Makefile
+diff --git a/ext/Makefile.am b/ext/Makefile.am
+index 94d3bc4..49d3b28 100644
+--- a/ext/Makefile.am
++++ b/ext/Makefile.am
+@@ -400,6 +400,12 @@ else
+ WPE_DIR=
+ endif
+ 
++if USE_SVTHEVCENC
++SVTHEVCENC_DIR=svthevcenc
++else
++SVTHEVCENC_DIR=
++endif
++
+ SUBDIRS=\
+ 	$(VOAACENC_DIR) \
+ 	$(ASSRENDER_DIR) \
+@@ -468,7 +474,8 @@ SUBDIRS=\
+ 	$(WEBRTCDSP_DIR) \
+ 	$(TTML_DIR) \
+ 	$(WEBRTC_DIR) \
+-	$(WPE_DIR)
++	$(WPE_DIR) \
++	$(SVTHEVCENC_DIR)
+ 
+ DIST_SUBDIRS = \
+ 	assrender \
+@@ -535,6 +542,7 @@ DIST_SUBDIRS = \
+ 	webrtcdsp \
+ 	ttml \
+ 	webrtc \
+-	wpe
++	wpe \
++	svthevcenc
+ 
+ include $(top_srcdir)/common/parallel-subdirs.mak
+diff --git a/ext/meson.build b/ext/meson.build
+index e1ce405..7c2deb3 100644
+--- a/ext/meson.build
++++ b/ext/meson.build
+@@ -63,3 +63,4 @@ subdir('wildmidi')
+ subdir('wpe')
+ subdir('x265')
+ subdir('zbar')
++subdir('svthevcenc')
+\ No newline at end of file
+diff --git a/ext/svthevcenc/Makefile.am b/ext/svthevcenc/Makefile.am
+new file mode 100644
+index 0000000..6d7f55a
+--- /dev/null
++++ b/ext/svthevcenc/Makefile.am
+@@ -0,0 +1,18 @@
++plugin_LTLIBRARIES = libgstsvthevcenc.la
++
++libgstsvthevcenc_la_SOURCES = gstsvthevcenc.c
++libgstsvthevcenc_la_CFLAGS = \
++	$(GST_PLUGINS_BASE_CFLAGS) \
++	$(GST_BASE_CFLAGS) \
++	$(GST_CFLAGS) \
++	$(SVTHEVCENC_CFLAGS)
++libgstsvthevcenc_la_LIBADD = \
++	$(GST_PLUGINS_BASE_LIBS) \
++	-lgstvideo-$(GST_API_VERSION) \
++	-lgstpbutils-$(GST_API_VERSION) \
++	$(GST_BASE_LIBS) \
++	$(GST_LIBS) \
++	$(SVTHEVCENC_LIBS)
++libgstsvthevcenc_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
++
++noinst_HEADERS = gstsvthevcenc.h
+diff --git a/ext/svthevcenc/gstsvthevcenc.c b/ext/svthevcenc/gstsvthevcenc.c
+new file mode 100644
+index 0000000..53be342
+--- /dev/null
++++ b/ext/svthevcenc/gstsvthevcenc.c
+@@ -0,0 +1,1735 @@
++/* GStreamer H265 encoder plugin
++ * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Library General Public
++ * License as published by the Free Software Foundation; either
++ * version 2 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Library General Public License for more details.
++ *
++ * You should have received a copy of the GNU Library General Public
++ * License along with this library; if not, write to the
++ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
++ * Boston, MA 02110-1301, USA.
++ */
++
++/**
++ * SECTION:element-svthevcenc
++ * @title: svthevcenc
++ *
++ * This element encodes raw video into H265 compressed data.
++ *
++ **/
++
++#ifdef HAVE_CONFIG_H
++#  include "config.h"
++#endif
++
++#include "gstsvthevcenc.h"
++
++#include <gst/pbutils/pbutils.h>
++#include <gst/video/video.h>
++#include <gst/video/gstvideometa.h>
++#include <gst/video/gstvideopool.h>
++#include <gst/base/gstbitreader.h>
++
++#include <string.h>
++#include <stdlib.h>
++
++GST_DEBUG_CATEGORY_STATIC (svthevc_enc_debug);
++#define GST_CAT_DEFAULT svthevc_enc_debug
++
++enum
++{
++  PROP_0,
++  PROP_INSERT_VUI,
++  PROP_AUD,
++  PROP_HIERARCHICAL_LEVEL,
++  PROP_LOOKAHEAD_DISTANCE,
++  PROP_ENCODER_MODE,
++  PROP_RC_MODE,
++  PROP_QP,
++  PROP_QP_MAX,
++  PROP_QP_MIN,
++  PROP_SCENE_CHANGE_DETECTION,
++  PROP_TUNE,
++  PROP_LATENCY_MODE,
++  PROP_BASE_LAYER_SWITCH_MODE,
++  PROP_BITRATE,
++  PROP_KEY_INT_MAX,
++  PROP_INTRA_REFRESH,
++  PROP_CORES,
++  PROP_SOCKET,
++  PROP_TILE_ROW,
++  PROP_TILE_COL,
++};
++
++#define PROP_INSERT_VUI_DEFAULT             FALSE
++#define PROP_AUD_DEFAULT                    FALSE
++#define PROP_HIERARCHICAL_LEVEL_DEFAULT     3
++#define PROP_LOOKAHEAD_DISTANCE_DEFAULT     40
++#define PROP_ENCODER_MODE_DEFAULT           9
++#define PROP_RC_MODE_DEFAULT                0
++#define PROP_QP_DEFAULT                     25
++#define PROP_QP_MAX_DEFAULT                 48
++#define PROP_QP_MIN_DEFAULT                 10
++#define PROP_SCENE_CHANGE_DETECTION_DEFAULT TRUE
++#define PROP_TUNE_DEFAULT                   1
++#define PROP_LATENCY_MODE_DEFAULT           0
++#define PROP_BASE_LAYER_SWITCH_MODE_DEFAULT 0
++#define PROP_BITRATE_DEFAULT                (7 * 1000)
++#define PROP_KEY_INT_MAX_DEFAULT            -2
++#define PROP_INTRA_REFRESH_DEFAULT          1
++#define PROP_CORES_DEFAULT                  0
++#define PROP_SOCKET_DEFAULT                 -1
++#define PROP_TILE_ROW_DEFAULT               1
++#define PROP_TILE_COL_DEFAULT               1
++
++#define PROFILE_DEFAULT                     2
++#define LEVEL_DEFAULT                       0
++#define TIER_DEFAULT                        0
++
++#if G_BYTE_ORDER == G_LITTLE_ENDIAN
++#define FORMATS "I420, Y42B, Y444, I420_10LE, I422_10LE, Y444_10LE"
++#else
++#define FORMATS "I420, Y42B, Y444, I420_10BE, I422_10BE, Y444_10BE"
++#endif
++
++static GstStaticPadTemplate sink_factory = GST_STATIC_PAD_TEMPLATE ("sink",
++    GST_PAD_SINK,
++    GST_PAD_ALWAYS,
++    GST_STATIC_CAPS ("video/x-raw, "
++        "format = (string) { " FORMATS " }, "
++        "framerate = (fraction) [0, MAX], "
++        "width = (int) [ 64, 8192 ], " "height = (int) [ 64, 4320 ]")
++    );
++
++static GstStaticPadTemplate src_factory = GST_STATIC_PAD_TEMPLATE ("src",
++    GST_PAD_SRC,
++    GST_PAD_ALWAYS,
++    GST_STATIC_CAPS ("video/x-h265, "
++        "framerate = (fraction) [0/1, MAX], "
++        "width = (int) [ 64, 8192 ], " "height = (int) [ 64, 4320 ], "
++        "stream-format = (string) byte-stream, "
++        "alignment = (string) au, "
++        "profile = (string) { main, main-10, main-4:4:4 }")
++    );
++
++static void gst_svthevc_enc_finalize (GObject * object);
++static gboolean gst_svthevc_enc_start (GstVideoEncoder * encoder);
++static gboolean gst_svthevc_enc_stop (GstVideoEncoder * encoder);
++static gboolean gst_svthevc_enc_flush (GstVideoEncoder * encoder);
++
++static gboolean gst_svthevc_enc_init_encoder (GstSvtHevcEnc * encoder);
++static void gst_svthevc_enc_close_encoder (GstSvtHevcEnc * encoder);
++
++static GstFlowReturn gst_svthevc_enc_finish (GstVideoEncoder * encoder);
++static GstFlowReturn gst_svthevc_enc_handle_frame (GstVideoEncoder * encoder,
++    GstVideoCodecFrame * frame);
++static GstFlowReturn gst_svthevc_enc_flush_frames (GstSvtHevcEnc * encoder,
++    gboolean send);
++static GstFlowReturn gst_svthevc_enc_send_frame (GstSvtHevcEnc * encoder,
++    GstVideoCodecFrame * frame);
++static GstFlowReturn gst_svthevc_enc_receive_frame (GstSvtHevcEnc * encoder,
++    gboolean * got_packet, gboolean send);
++static gboolean gst_svthevc_enc_set_format (GstVideoEncoder * video_enc,
++    GstVideoCodecState * state);
++static gboolean gst_svthevc_enc_propose_allocation (GstVideoEncoder * encoder,
++    GstQuery * query);
++
++static void gst_svthevc_enc_set_property (GObject * object, guint prop_id,
++    const GValue * value, GParamSpec * pspec);
++static void gst_svthevc_enc_get_property (GObject * object, guint prop_id,
++    GValue * value, GParamSpec * pspec);
++
++#define gst_svthevc_enc_parent_class parent_class
++G_DEFINE_TYPE_WITH_CODE (GstSvtHevcEnc, gst_svthevc_enc, GST_TYPE_VIDEO_ENCODER,
++    G_IMPLEMENT_INTERFACE (GST_TYPE_PRESET, NULL));
++
++static gboolean
++gst_svthevc_enc_sink_query (GstVideoEncoder * enc, GstQuery * query)
++{
++  gboolean res;
++
++  switch (GST_QUERY_TYPE (query)) {
++    case GST_QUERY_ACCEPT_CAPS:{
++      GstCaps *acceptable, *caps;
++
++      acceptable = gst_static_pad_template_get_caps (&sink_factory);
++      gst_query_parse_accept_caps (query, &caps);
++
++      gst_query_set_accept_caps_result (query,
++          gst_caps_is_subset (caps, acceptable));
++      gst_caps_unref (acceptable);
++      res = TRUE;
++    }
++      break;
++    default:
++      res = GST_VIDEO_ENCODER_CLASS (parent_class)->sink_query (enc, query);
++      break;
++  }
++
++  return res;
++}
++
++static void
++check_formats (const gchar * str, gboolean * has_420, gboolean * has_420_10,
++    gboolean * has_422, gboolean * has_444)
++{
++  if (g_str_has_prefix (str, "main-10"))
++    *has_420 = *has_420_10 = TRUE;
++  else if (g_str_has_prefix (str, "main-4:4:4"))
++    *has_420 = *has_420_10 = *has_422 = *has_444 = TRUE;
++  else if (g_str_has_prefix (str, "main"))
++    *has_420 = TRUE;
++}
++
++static gboolean
++gst_svthevc_enc_add_chroma_format (GstStructure * s, gboolean allow_420,
++    gboolean allow_420_10, gboolean allow_422, gboolean allow_444)
++{
++  GValue fmts = G_VALUE_INIT;
++  GValue fmt = G_VALUE_INIT;
++  gboolean ret = FALSE;
++
++  g_value_init (&fmts, GST_TYPE_LIST);
++  g_value_init (&fmt, G_TYPE_STRING);
++
++  if (allow_420) {
++    g_value_set_string (&fmt, "I420");
++    gst_value_list_append_value (&fmts, &fmt);
++  }
++
++  if (allow_420_10) {
++    if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
++      g_value_set_string (&fmt, "I420_10LE");
++    else
++      g_value_set_string (&fmt, "I420_10BE");
++
++    gst_value_list_append_value (&fmts, &fmt);
++  }
++
++  if (allow_422) {
++    g_value_set_string (&fmt, "Y42B");
++    gst_value_list_append_value (&fmts, &fmt);
++
++    if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
++      g_value_set_string (&fmt, "I422_10LE");
++    else
++      g_value_set_string (&fmt, "I422_10BE");
++
++    gst_value_list_append_value (&fmts, &fmt);
++  }
++
++  if (allow_444) {
++    g_value_set_string (&fmt, "Y444");
++    gst_value_list_append_value (&fmts, &fmt);
++
++    if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
++      g_value_set_string (&fmt, "Y444_10LE");
++    else
++      g_value_set_string (&fmt, "Y444_10BE");
++
++    gst_value_list_append_value (&fmts, &fmt);
++  }
++
++  if (gst_value_list_get_size (&fmts) != 0) {
++    gst_structure_take_value (s, "format", &fmts);
++    ret = TRUE;
++  } else {
++    g_value_unset (&fmts);
++  }
++
++  g_value_unset (&fmt);
++
++  return ret;
++}
++
++static GstCaps *
++gst_svthevc_enc_sink_getcaps (GstVideoEncoder * enc, GstCaps * filter)
++{
++  GstCaps *supported_incaps;
++  GstCaps *allowed_caps;
++  GstCaps *filter_caps, *fcaps;
++  gint i, j, k;
++
++  supported_incaps = gst_static_pad_template_get_caps (&sink_factory);
++
++  allowed_caps = gst_pad_get_allowed_caps (GST_VIDEO_ENCODER_SRC_PAD (enc));
++
++  if (!allowed_caps || gst_caps_is_empty (allowed_caps)
++      || gst_caps_is_any (allowed_caps)) {
++    fcaps = supported_incaps;
++    goto done;
++  }
++
++  GST_LOG_OBJECT (enc, "template caps %" GST_PTR_FORMAT, supported_incaps);
++  GST_LOG_OBJECT (enc, "allowed caps %" GST_PTR_FORMAT, allowed_caps);
++
++  filter_caps = gst_caps_new_empty ();
++
++  for (i = 0; i < gst_caps_get_size (supported_incaps); i++) {
++    GQuark q_name =
++        gst_structure_get_name_id (gst_caps_get_structure (supported_incaps,
++            i));
++
++    for (j = 0; j < gst_caps_get_size (allowed_caps); j++) {
++      const GstStructure *allowed_s = gst_caps_get_structure (allowed_caps, j);
++      const GValue *val;
++      GstStructure *s;
++
++      s = gst_structure_new_id_empty (q_name);
++      if ((val = gst_structure_get_value (allowed_s, "width")))
++        gst_structure_set_value (s, "width", val);
++      if ((val = gst_structure_get_value (allowed_s, "height")))
++        gst_structure_set_value (s, "height", val);
++
++      if ((val = gst_structure_get_value (allowed_s, "profile"))) {
++        gboolean has_420 = FALSE;
++        gboolean has_420_10 = FALSE;
++        gboolean has_422 = FALSE;
++        gboolean has_444 = FALSE;
++
++        if (G_VALUE_HOLDS_STRING (val)) {
++          check_formats (g_value_get_string (val), &has_420, &has_420_10,
++              &has_422, &has_444);
++        } else if (GST_VALUE_HOLDS_LIST (val)) {
++          for (k = 0; k < gst_value_list_get_size (val); k++) {
++            const GValue *vlist = gst_value_list_get_value (val, k);
++
++            if (G_VALUE_HOLDS_STRING (vlist))
++              check_formats (g_value_get_string (vlist), &has_420, &has_420_10,
++                  &has_422, &has_444);
++          }
++        }
++
++        gst_svthevc_enc_add_chroma_format (s, has_420, has_420_10,
++            has_422, has_444);
++      }
++
++      filter_caps = gst_caps_merge_structure (filter_caps, s);
++    }
++  }
++
++  fcaps = gst_caps_intersect (filter_caps, supported_incaps);
++  gst_caps_unref (filter_caps);
++  gst_caps_unref (supported_incaps);
++
++  if (filter) {
++    GST_LOG_OBJECT (enc, "intersecting with %" GST_PTR_FORMAT, filter);
++    filter_caps = gst_caps_intersect (fcaps, filter);
++    gst_caps_unref (fcaps);
++    fcaps = filter_caps;
++  }
++
++done:
++  if (allowed_caps)
++    gst_caps_unref (allowed_caps);
++
++  GST_LOG_OBJECT (enc, "proxy caps %" GST_PTR_FORMAT, fcaps);
++
++  return fcaps;
++}
++
++static void
++gst_svthevc_enc_class_init (GstSvtHevcEncClass * klass)
++{
++  GObjectClass *gobject_class;
++  GstElementClass *element_class;
++  GstVideoEncoderClass *gstencoder_class;
++
++  gobject_class = G_OBJECT_CLASS (klass);
++  element_class = GST_ELEMENT_CLASS (klass);
++  gstencoder_class = GST_VIDEO_ENCODER_CLASS (klass);
++
++  gobject_class->set_property = gst_svthevc_enc_set_property;
++  gobject_class->get_property = gst_svthevc_enc_get_property;
++  gobject_class->finalize = gst_svthevc_enc_finalize;
++
++  gstencoder_class->set_format = GST_DEBUG_FUNCPTR (gst_svthevc_enc_set_format);
++  gstencoder_class->handle_frame =
++      GST_DEBUG_FUNCPTR (gst_svthevc_enc_handle_frame);
++  gstencoder_class->start = GST_DEBUG_FUNCPTR (gst_svthevc_enc_start);
++  gstencoder_class->stop = GST_DEBUG_FUNCPTR (gst_svthevc_enc_stop);
++  gstencoder_class->flush = GST_DEBUG_FUNCPTR (gst_svthevc_enc_flush);
++  gstencoder_class->finish = GST_DEBUG_FUNCPTR (gst_svthevc_enc_finish);
++  gstencoder_class->getcaps = GST_DEBUG_FUNCPTR (gst_svthevc_enc_sink_getcaps);
++  gstencoder_class->sink_query = GST_DEBUG_FUNCPTR (gst_svthevc_enc_sink_query);
++  gstencoder_class->propose_allocation =
++      GST_DEBUG_FUNCPTR (gst_svthevc_enc_propose_allocation);
++
++  g_object_class_install_property (gobject_class, PROP_INSERT_VUI,
++      g_param_spec_boolean ("insert-vui", "Insert VUI",
++          "Insert VUI NAL in stream",
++          PROP_INSERT_VUI_DEFAULT, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_AUD,
++      g_param_spec_boolean ("aud", "AUD",
++          "Use AU (Access Unit) delimiter", PROP_AUD_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_HIERARCHICAL_LEVEL,
++      g_param_spec_uint ("b-pyramid", "B Pyramid (Hierarchical Levels)",
++          "0 : Flat, 1: 2-Level Hierarchy, "
++          "2 : 3-Level Hierarchy, 3 : 4-Level Hierarchy",
++          0, 3, PROP_HIERARCHICAL_LEVEL_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_LOOKAHEAD_DISTANCE,
++      g_param_spec_uint ("lookahead", "Lookahead Depth",
++          "Look ahead distance",
++          0, 250, PROP_LOOKAHEAD_DISTANCE_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_ENCODER_MODE,
++      g_param_spec_uint ("speed", "speed (Encoder Mode)",
++          "Encoding preset [0, 12] (e,g, for subjective quality tuning mode and >=4k resolution), [0, 10] (for >= 1080p resolution), [0, 9] (for all resolution and modes)",
++          0, 12, PROP_ENCODER_MODE_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_RC_MODE,
++      g_param_spec_uint ("rc", "Ratecontrol Mode",
++          "Bitrate control mode: 0=CQP, 1=VBR",
++          0, 1, PROP_RC_MODE_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_QP,
++      g_param_spec_uint ("qp", "QP",
++          "QP value for intra frames",
++          0, 51, PROP_QP_DEFAULT, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_QP_MAX,
++      g_param_spec_uint ("qp-max", "QP Max",
++          "Maximum QP value allowed for rate control use",
++          0, 51, PROP_QP_MAX_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_QP_MIN,
++      g_param_spec_uint ("qp-min", "QP Min",
++          "Minimum QP value allowed for rate control use",
++          0, 50, PROP_QP_MIN_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_SCENE_CHANGE_DETECTION,
++      g_param_spec_boolean ("scd", "Scene Change Detection",
++          "Use the scene change detection algorithm",
++          PROP_SCENE_CHANGE_DETECTION_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_TUNE,
++      g_param_spec_uint ("tune", "Tune",
++          "Quality tuning mode: 0=SQ(visually optimized mode), 1=OQ(PSNR/SSIM optimized mode), 2=VMAF(VMAF optimized mode)",
++          0, 2, PROP_TUNE_DEFAULT, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_LATENCY_MODE,
++      g_param_spec_uint ("latency-mode", "Latency Mode",
++          "Flag to enable for lower latency mode: 0=Normal Latency, 1=Low Latency",
++          0, 1, PROP_LATENCY_MODE_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_BASE_LAYER_SWITCH_MODE,
++      g_param_spec_uint ("baselayer-mode", "Base Layer Switch Mode",
++          "Random Access Prediction Structure type setting: 0=Use B-frames in the base layer pointing to the same past picture, 1=Use P-frames in the base layer",
++          0, 1, PROP_BASE_LAYER_SWITCH_MODE_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_BITRATE,
++      g_param_spec_uint ("bitrate", "Bitrate",
++          "Bitrate in kbit/sec",
++          1, G_MAXINT, PROP_BITRATE_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_KEY_INT_MAX,
++      g_param_spec_int ("key-int-max", "Key-frame maximal interval",
++          "Distance Between Intra Frame inserted: -1=no intra update. -2=auto",
++          -2, 255, PROP_KEY_INT_MAX_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_INTRA_REFRESH,
++      g_param_spec_uint ("intra-refresh", "Intra Refresh",
++          "1=CRA (Open GOP), 2=IDR (Closed GOP)",
++          1, 2, PROP_INTRA_REFRESH_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_CORES,
++      g_param_spec_uint ("cores", "Number of logical cores",
++          "Number of logical cores to be used. 0: auto",
++          0, UINT_MAX, PROP_CORES_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_SOCKET,
++      g_param_spec_int ("socket", "Target socket",
++          "Target socket to run on. -1: all available",
++          -1, 1, PROP_SOCKET_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_TILE_ROW,
++      g_param_spec_uint ("tile-row", "Tile Row Count",
++          "Tile count in the Row",
++          1, 16, PROP_TILE_ROW_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_TILE_COL,
++      g_param_spec_uint ("tile-col", "Tile Column Count",
++          "Tile count in the Column",
++          1, 16, PROP_TILE_COL_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  gst_element_class_set_static_metadata (element_class,
++      "svthevcenc", "Codec/Encoder/Video",
++      "Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder)",
++      "Yeongjin Jeong <yeongjin.jeong@navercorp.com>");
++
++  gst_element_class_add_static_pad_template (element_class, &sink_factory);
++  gst_element_class_add_static_pad_template (element_class, &src_factory);
++}
++
++/* initialize the new element
++ * instantiate pads and add them to element
++ * set functions
++ * initialize structure
++ */
++static void
++gst_svthevc_enc_init (GstSvtHevcEnc * encoder)
++{
++  GString *string;
++  EB_H265_ENC_INPUT *in_data;
++
++  string = g_string_new (NULL);
++  g_string_printf (string, "%d.%d.%d", SVT_VERSION_MAJOR, SVT_VERSION_MINOR,
++      SVT_VERSION_PATCHLEVEL);
++
++  encoder->in_buf = g_slice_new0 (EB_BUFFERHEADERTYPE);
++  in_data = g_slice_new0 (EB_H265_ENC_INPUT);
++  encoder->in_buf->pBuffer = (unsigned char *) in_data;
++  encoder->in_buf->nSize = sizeof (*encoder->in_buf);
++  encoder->in_buf->pAppPrivate = NULL;
++
++  encoder->insert_vui = PROP_INSERT_VUI_DEFAULT;
++  encoder->aud = PROP_AUD_DEFAULT;
++  encoder->hierarchical_level = PROP_HIERARCHICAL_LEVEL_DEFAULT;
++  encoder->la_depth = PROP_LOOKAHEAD_DISTANCE_DEFAULT;
++  encoder->enc_mode = PROP_ENCODER_MODE_DEFAULT;
++  encoder->rc_mode = PROP_RC_MODE_DEFAULT;
++  encoder->qp = PROP_QP_DEFAULT;
++  encoder->qp_max = PROP_QP_MAX_DEFAULT;
++  encoder->qp_min = PROP_QP_MIN_DEFAULT;
++  encoder->scene_change_detection = PROP_SCENE_CHANGE_DETECTION_DEFAULT;
++  encoder->tune = PROP_TUNE_DEFAULT;
++  encoder->base_layer_switch_mode = PROP_BASE_LAYER_SWITCH_MODE_DEFAULT;
++  encoder->bitrate = PROP_BITRATE_DEFAULT;
++  encoder->keyintmax = PROP_KEY_INT_MAX_DEFAULT;
++  encoder->intra_refresh = PROP_INTRA_REFRESH_DEFAULT;
++  encoder->cores = PROP_CORES_DEFAULT;
++  encoder->socket = PROP_SOCKET_DEFAULT;
++  encoder->tile_row = PROP_TILE_ROW_DEFAULT;
++  encoder->tile_col = PROP_TILE_COL_DEFAULT;
++
++  encoder->profile = PROFILE_DEFAULT;
++  encoder->tier = TIER_DEFAULT;
++  encoder->level = LEVEL_DEFAULT;
++
++  encoder->svthevc_version = (const gchar *) g_string_free (string, FALSE);
++  encoder->push_header = TRUE;
++}
++
++typedef struct
++{
++  GstVideoCodecFrame *frame;
++  GstVideoFrame vframe;
++} FrameData;
++
++static FrameData *
++gst_svthevc_enc_queue_frame (GstSvtHevcEnc * enc, GstVideoCodecFrame * frame,
++    GstVideoInfo * info)
++{
++  GstVideoFrame vframe;
++  FrameData *fdata;
++
++  if (!gst_video_frame_map (&vframe, info, frame->input_buffer, GST_MAP_READ))
++    return NULL;
++
++  fdata = g_slice_new (FrameData);
++  fdata->frame = gst_video_codec_frame_ref (frame);
++  fdata->vframe = vframe;
++
++  enc->pending_frames = g_list_prepend (enc->pending_frames, fdata);
++
++  return fdata;
++}
++
++static void
++gst_svthevc_enc_dequeue_frame (GstSvtHevcEnc * enc, GstVideoCodecFrame * frame)
++{
++  GList *l;
++
++  for (l = enc->pending_frames; l; l = l->next) {
++    FrameData *fdata = l->data;
++
++    if (fdata->frame != frame)
++      continue;
++
++    gst_video_frame_unmap (&fdata->vframe);
++    gst_video_codec_frame_unref (fdata->frame);
++    g_slice_free (FrameData, fdata);
++
++    enc->pending_frames = g_list_delete_link (enc->pending_frames, l);
++    return;
++  }
++}
++
++static void
++gst_svthevc_enc_dequeue_all_frames (GstSvtHevcEnc * enc)
++{
++  GList *l;
++
++  for (l = enc->pending_frames; l; l = l->next) {
++    FrameData *fdata = l->data;
++
++    gst_video_frame_unmap (&fdata->vframe);
++    gst_video_codec_frame_unref (fdata->frame);
++    g_slice_free (FrameData, fdata);
++  }
++  g_list_free (enc->pending_frames);
++  enc->pending_frames = NULL;
++}
++
++static gboolean
++gst_svthevc_enc_start (GstVideoEncoder * encoder)
++{
++  return TRUE;
++}
++
++static gboolean
++gst_svthevc_enc_stop (GstVideoEncoder * encoder)
++{
++  GstSvtHevcEnc *svthevcenc = GST_SVTHEVC_ENC (encoder);
++
++  GST_DEBUG_OBJECT (encoder, "stop encoder");
++
++  gst_svthevc_enc_flush_frames (svthevcenc, FALSE);
++  gst_svthevc_enc_close_encoder (svthevcenc);
++  gst_svthevc_enc_dequeue_all_frames (svthevcenc);
++
++  if (svthevcenc->input_state)
++    gst_video_codec_state_unref (svthevcenc->input_state);
++  svthevcenc->input_state = NULL;
++
++  return TRUE;
++}
++
++
++static gboolean
++gst_svthevc_enc_flush (GstVideoEncoder * encoder)
++{
++  GstSvtHevcEnc *svthevcenc = GST_SVTHEVC_ENC (encoder);
++
++  GST_DEBUG_OBJECT (encoder, "flushing encoder");
++
++  gst_svthevc_enc_flush_frames (svthevcenc, FALSE);
++  gst_svthevc_enc_close_encoder (svthevcenc);
++  gst_svthevc_enc_dequeue_all_frames (svthevcenc);
++
++  gst_svthevc_enc_init_encoder (svthevcenc);
++
++  return TRUE;
++}
++
++static void
++gst_svthevc_enc_finalize (GObject * object)
++{
++  GstSvtHevcEnc *encoder = GST_SVTHEVC_ENC (object);
++
++  if (encoder->input_state)
++    gst_video_codec_state_unref (encoder->input_state);
++  encoder->input_state = NULL;
++
++  gst_svthevc_enc_close_encoder (encoder);
++
++  if (encoder->in_buf) {
++    EB_H265_ENC_INPUT *in_data = (EB_H265_ENC_INPUT *) encoder->in_buf->pBuffer;
++    if (in_data)
++      g_slice_free (EB_H265_ENC_INPUT, in_data);
++    g_slice_free (EB_BUFFERHEADERTYPE, encoder->in_buf);
++  }
++
++  g_free ((gpointer) encoder->svthevc_version);
++
++  G_OBJECT_CLASS (parent_class)->finalize (object);
++}
++
++static gint
++gst_svthevc_enc_gst_to_svthevc_video_format (GstVideoFormat format,
++    gint * nplanes)
++{
++  switch (format) {
++    case GST_VIDEO_FORMAT_I420:
++    case GST_VIDEO_FORMAT_YV12:
++    case GST_VIDEO_FORMAT_I420_10LE:
++    case GST_VIDEO_FORMAT_I420_10BE:
++      if (nplanes)
++        *nplanes = 3;
++      return EB_YUV420;
++    case GST_VIDEO_FORMAT_Y42B:
++    case GST_VIDEO_FORMAT_I422_10LE:
++    case GST_VIDEO_FORMAT_I422_10BE:
++      if (nplanes)
++        *nplanes = 3;
++      return EB_YUV422;
++    case GST_VIDEO_FORMAT_Y444:
++    case GST_VIDEO_FORMAT_Y444_10LE:
++    case GST_VIDEO_FORMAT_Y444_10BE:
++      if (nplanes)
++        *nplanes = 3;
++      return EB_YUV444;
++    default:
++      g_return_val_if_reached (GST_VIDEO_FORMAT_UNKNOWN);
++  }
++}
++
++static void
++config_enc_params (GstSvtHevcEnc * encoder, EB_H265_ENC_CONFIGURATION * param)
++{
++  GstVideoInfo *info;
++  int ten_bits = 0;
++
++  info = &encoder->input_state->info;
++
++  param->sourceWidth = info->width;
++  param->sourceHeight = info->height;
++
++  if (GST_VIDEO_INFO_COMP_DEPTH (info, 0) == 10) {
++    GST_DEBUG_OBJECT (encoder, "Encoder 10 bits depth input");
++    /* Disable Compressed 10-bit format default.
++     * SVT-HEVC support a compressed 10-bit format allowing the
++     * software to achieve a higher speed and channel density levels.
++     * The conversion between the 10-bit I420 and the compressed
++     * 10-bit format is a lossless operation.
++     */
++    param->compressedTenBitFormat = 0;
++    ten_bits = 1;
++  }
++  /* Update param from options */
++  param->hierarchicalLevels = encoder->hierarchical_level;
++  param->encMode = encoder->enc_mode;
++  param->profile = encoder->profile;
++  param->tier = encoder->tier;
++  param->level = encoder->level;
++  param->rateControlMode = encoder->rc_mode;
++  param->sceneChangeDetection = encoder->scene_change_detection;
++  param->tune = encoder->tune;
++  param->latencyMode = encoder->latency_mode;
++  param->baseLayerSwitchMode = encoder->base_layer_switch_mode;
++  param->qp = encoder->qp;
++  param->accessUnitDelimiter = encoder->aud;
++
++  param->targetBitRate = encoder->bitrate * 1000;
++  param->intraPeriodLength =
++      encoder->keyintmax > 0 ? encoder->keyintmax - 1 : encoder->keyintmax;
++
++  if (info->fps_d == 0 || info->fps_n == 0) {
++  } else {
++    param->frameRateNumerator = info->fps_n;
++    param->frameRateDenominator = info->fps_d;
++  }
++
++  if (param->rateControlMode) {
++    param->maxQpAllowed = encoder->qp_max;
++    param->minQpAllowed = encoder->qp_min;
++  }
++
++  param->intraRefreshType = encoder->intra_refresh;
++  param->logicalProcessors = encoder->cores;
++  param->targetSocket = encoder->socket;
++
++  param->tileRowCount = encoder->tile_row;
++  param->tileColumnCount = encoder->tile_col;
++
++  /* Send VPS, SPS and PPS Insertion in first IDR frame */
++  param->codeVpsSpsPps = 1;
++
++  /*
++   * NOTE: h265parser's eos nal unit processing will cause an unexpected
++   * error on some muxers, so disable it.
++   */
++  param->codeEosNal = 0;
++
++  if (encoder->insert_vui)
++    param->videoUsabilityInfo = encoder->insert_vui;
++
++  if (encoder->la_depth != -1)
++    param->lookAheadDistance = encoder->la_depth;
++
++  if (ten_bits) {
++    param->encoderBitDepth = 10;
++  }
++
++  param->encoderColorFormat =
++      gst_svthevc_enc_gst_to_svthevc_video_format (info->finfo->format, NULL);
++}
++
++static void
++read_in_data (EB_H265_ENC_CONFIGURATION * config,
++    FrameData * fdata, EB_BUFFERHEADERTYPE * headerPtr)
++{
++  uint8_t is16bit = config->encoderBitDepth > 8;
++  uint64_t luma_size =
++      (uint64_t) config->sourceWidth * config->sourceHeight << is16bit;
++  EB_H265_ENC_INPUT *in_data = (EB_H265_ENC_INPUT *) headerPtr->pBuffer;
++
++  in_data->luma = GST_VIDEO_FRAME_PLANE_DATA (&fdata->vframe, 0);
++  in_data->cb = GST_VIDEO_FRAME_PLANE_DATA (&fdata->vframe, 1);
++  in_data->cr = GST_VIDEO_FRAME_PLANE_DATA (&fdata->vframe, 2);
++
++  in_data->yStride = GST_VIDEO_FRAME_COMP_STRIDE (&fdata->vframe, 0) >> is16bit;
++  in_data->cbStride =
++      GST_VIDEO_FRAME_COMP_STRIDE (&fdata->vframe, 1) >> is16bit;
++  in_data->crStride =
++      GST_VIDEO_FRAME_COMP_STRIDE (&fdata->vframe, 2) >> is16bit;
++
++  headerPtr->nAllocLen = headerPtr->nFilledLen = luma_size * 3 / 2u;
++}
++
++/*
++ * gst_svthevc_enc_init_encoder
++ * @encoder:  Encoder which should be initialized.
++ *
++ * Initialize svthevc encoder.
++ *
++ */
++static gboolean
++gst_svthevc_enc_init_encoder (GstSvtHevcEnc * encoder)
++{
++  EB_ERRORTYPE svt_ret;
++
++  if (!encoder->input_state) {
++    GST_DEBUG_OBJECT (encoder, "Have no input state yet");
++    return FALSE;
++  }
++
++  /* make sure that the encoder is closed */
++  gst_svthevc_enc_close_encoder (encoder);
++
++  GST_OBJECT_LOCK (encoder);
++
++  encoder->svt_eos_flag = EOS_NOT_REACHED;
++
++  /* set up encoder parameters */
++  svt_ret = EbInitHandle (&encoder->svt_handle, encoder, &encoder->enc_params);
++  if (svt_ret != EB_ErrorNone) {
++    GST_DEBUG_OBJECT (encoder, "Error init encoder handle");
++    goto failed;
++
++  }
++
++  config_enc_params (encoder, &encoder->enc_params);
++
++  svt_ret = EbH265EncSetParameter (encoder->svt_handle, &encoder->enc_params);
++  if (svt_ret != EB_ErrorNone) {
++    GST_DEBUG_OBJECT (encoder, "Error setting encoder parameters");
++    goto failed_init_handle;
++  }
++
++  svt_ret = EbInitEncoder (encoder->svt_handle);
++  if (svt_ret != EB_ErrorNone) {
++    GST_DEBUG_OBJECT (encoder, "Error init encoder");
++    goto failed_init_handle;
++  }
++
++  encoder->reconfig = FALSE;
++
++  /* good start, will be corrected if needed */
++  encoder->dts_offset = 0;
++
++  GST_OBJECT_UNLOCK (encoder);
++
++  encoder->push_header = TRUE;
++
++  return TRUE;
++
++failed_init_handle:
++  EbDeinitHandle (encoder->svt_handle);
++failed:
++  encoder->svt_handle = NULL;
++  encoder = NULL;
++  return FALSE;
++}
++
++/* gst_svthevc_enc_close_encoder
++ * @encoder:  Encoder which should close.
++ *
++ * Close svthevc encoder.
++ */
++static void
++gst_svthevc_enc_close_encoder (GstSvtHevcEnc * encoder)
++{
++  if (encoder->svt_handle != NULL) {
++    EbDeinitEncoder (encoder->svt_handle);
++    EbDeinitHandle (encoder->svt_handle);
++    encoder->svt_handle = NULL;
++  }
++}
++
++static EB_BUFFERHEADERTYPE *
++gst_svthevc_enc_bytestream_to_nal (GstSvtHevcEnc * encoder,
++    EB_BUFFERHEADERTYPE * input)
++{
++  EB_BUFFERHEADERTYPE *output;
++  int i, j, zeros;
++  int offset = 4;
++
++  output = g_malloc (sizeof (EB_BUFFERHEADERTYPE));
++
++  /* skip access unit delimiter */
++  if (encoder->aud)
++    offset += 7;
++
++  output->pBuffer = g_malloc (input->nFilledLen - offset);
++  output->nFilledLen = input->nFilledLen - offset;
++
++  zeros = 0;
++  for (i = offset, j = 0; i < input->nFilledLen; (i++, j++)) {
++    if (input->pBuffer[i] == 0x00) {
++      zeros++;
++    } else if (input->pBuffer[i] == 0x03 && zeros == 2) {
++      zeros = 0;
++      j--;
++      output->nFilledLen--;
++      continue;
++    } else {
++      zeros = 0;
++    }
++    output->pBuffer[j] = input->pBuffer[i];
++  }
++
++  return output;
++}
++
++static void
++svthevc_nal_free (EB_BUFFERHEADERTYPE * nal)
++{
++  g_free (nal->pBuffer);
++  g_free (nal);
++}
++
++static const gchar *
++gst_svthevc_h265_get_format_range_ext_profile (guint16 val)
++{
++  GST_LOG ("format-range-extensions-profile : 0x%x", val);
++
++  switch (val) {
++    case 0x1c1:
++      return "main-4:4:4";
++    case 0x181:
++      return "main-4:4:4-10";
++    default:
++      break;
++  }
++
++  return NULL;
++}
++
++static const gchar *
++gst_svthevc_h265_get_profile (const guint8 * profile_tier_level, guint len)
++{
++  const gchar *profile = NULL;
++  gint profile_idc;
++
++  g_return_val_if_fail (profile_tier_level != NULL, NULL);
++
++  if (len < 2)
++    return NULL;
++
++  profile_idc = (profile_tier_level[0] & 0x1f);
++
++  if (profile_idc == 1)
++    profile = "main";
++  else if (profile_idc == 2)
++    profile = "main-10";
++  else if (profile_idc == 3)
++    profile = "main-still-picture";
++  else if (profile_idc == 4 && len >= 11) {
++    GstBitReader br = GST_BIT_READER_INIT (profile_tier_level, len);
++    guint16 range_ext;
++    if (!gst_bit_reader_skip (&br, 44))
++      return NULL;
++    if (!gst_bit_reader_get_bits_uint16 (&br, &range_ext, 9))
++      return NULL;
++    profile = gst_svthevc_h265_get_format_range_ext_profile (range_ext);
++  } else
++    profile = NULL;
++
++  return profile;
++}
++
++static gboolean
++gst_svthevc_enc_set_level_tier_and_profile (GstSvtHevcEnc * encoder,
++    GstCaps * caps)
++{
++  EB_BUFFERHEADERTYPE *headerPtr = NULL, *nal = NULL;
++  EB_ERRORTYPE svt_ret;
++  gboolean ret = TRUE;
++  const gchar *level, *tier, *profile;
++
++  GST_DEBUG_OBJECT (encoder, "set profile, level and tier");
++
++  svt_ret = EbH265EncStreamHeader (encoder->svt_handle, &headerPtr);
++  if (svt_ret != EB_ErrorNone) {
++    GST_ELEMENT_ERROR (encoder, STREAM, ENCODE,
++        ("Encode svthevc header failed."),
++        ("svthevc_encoder_headers return code=%d", svt_ret));
++    return FALSE;
++  }
++
++  GST_MEMDUMP ("ENCODER_HEADER", headerPtr->pBuffer, headerPtr->nFilledLen);
++
++  nal = gst_svthevc_enc_bytestream_to_nal (encoder, headerPtr);
++
++  level =
++      gst_codec_utils_h265_get_level (nal->pBuffer + 6, nal->nFilledLen - 6);
++  if (level != NULL)
++    gst_caps_set_simple (caps, "level", G_TYPE_STRING, level, NULL);
++
++  tier = gst_codec_utils_h265_get_tier (nal->pBuffer + 6, nal->nFilledLen - 6);
++  if (tier != NULL)
++    gst_caps_set_simple (caps, "tier", G_TYPE_STRING, tier, NULL);
++
++  /* codec_utils does not support h265 range extension profile yet.
++   * If GStreamer supports this, it will be better handle the profile data.
++   * https://gitlab.freedesktop.org/gstreamer/gst-plugins-base/issues/299
++   */
++  profile =
++      gst_svthevc_h265_get_profile (nal->pBuffer + 6, nal->nFilledLen - 6);
++  if (profile != NULL)
++    gst_caps_set_simple (caps, "profile", G_TYPE_STRING, profile, NULL);
++
++  GST_DEBUG_OBJECT (encoder, "profile : %s", (profile) ? profile : "---");
++  GST_DEBUG_OBJECT (encoder, "tier    : %s", (tier) ? tier : "---");
++  GST_DEBUG_OBJECT (encoder, "level   : %s", (level) ? level : "---");
++
++  svthevc_nal_free (nal);
++
++  return ret;
++}
++
++static GstBuffer *
++gst_svthevc_enc_get_header_buffer (GstSvtHevcEnc * encoder)
++{
++  EB_BUFFERHEADERTYPE *headerPtr = NULL;
++  EB_ERRORTYPE svt_ret;
++  GstBuffer *buf;
++
++  svt_ret = EbH265EncStreamHeader (encoder->svt_handle, &headerPtr);
++  if (svt_ret != EB_ErrorNone) {
++    GST_ELEMENT_ERROR (encoder, STREAM, ENCODE,
++        ("Encode svthevc header failed."),
++        ("svthevc_encoder_headers return code=%d", svt_ret));
++    return FALSE;
++  }
++
++  buf = gst_buffer_new_allocate (NULL, headerPtr->nFilledLen, NULL);
++  gst_buffer_fill (buf, 0, headerPtr->pBuffer, headerPtr->nFilledLen);
++
++  return buf;
++}
++
++/* gst_svthevc_enc_set_src_caps
++ * Returns: TRUE on success.
++ */
++static gboolean
++gst_svthevc_enc_set_src_caps (GstSvtHevcEnc * encoder, GstCaps * caps)
++{
++  GstCaps *outcaps;
++  GstStructure *structure;
++  GstVideoCodecState *state;
++  GstTagList *tags;
++
++  outcaps = gst_caps_new_empty_simple ("video/x-h265");
++  structure = gst_caps_get_structure (outcaps, 0);
++
++  gst_structure_set (structure, "stream-format", G_TYPE_STRING, "byte-stream",
++      NULL);
++  gst_structure_set (structure, "alignment", G_TYPE_STRING, "au", NULL);
++
++  if (!gst_svthevc_enc_set_level_tier_and_profile (encoder, outcaps)) {
++    gst_caps_unref (outcaps);
++    return FALSE;
++  }
++
++  state = gst_video_encoder_set_output_state (GST_VIDEO_ENCODER (encoder),
++      outcaps, encoder->input_state);
++  GST_DEBUG_OBJECT (encoder, "output caps: %" GST_PTR_FORMAT, state->caps);
++  gst_video_codec_state_unref (state);
++
++  tags = gst_tag_list_new_empty ();
++  gst_tag_list_add (tags, GST_TAG_MERGE_REPLACE, GST_TAG_ENCODER, "svthevc",
++      GST_TAG_ENCODER_VERSION, encoder->svthevc_version, NULL);
++  gst_video_encoder_merge_tags (GST_VIDEO_ENCODER (encoder), tags,
++      GST_TAG_MERGE_REPLACE);
++  gst_tag_list_unref (tags);
++
++  return TRUE;
++}
++
++static void
++gst_svthevc_enc_set_latency (GstSvtHevcEnc * encoder)
++{
++  GstVideoInfo *info = &encoder->input_state->info;
++  gint max_delayed_frames;
++  GstClockTime latency;
++
++  /* FIXME get a real value from the encoder, this is currently not exposed */
++  max_delayed_frames = 5;
++
++  if (info->fps_n) {
++    latency = gst_util_uint64_scale_ceil (GST_SECOND * info->fps_d,
++        max_delayed_frames, info->fps_n);
++  } else {
++    /* FIXME: Assume 25fps. This is better than reporting no latency at
++     * all and then later failing in live pipelines
++     */
++    latency = gst_util_uint64_scale_ceil (GST_SECOND * 1,
++        max_delayed_frames, 25);
++  }
++
++  GST_INFO_OBJECT (encoder,
++      "Updating latency to %" GST_TIME_FORMAT " (%d frames)",
++      GST_TIME_ARGS (latency), max_delayed_frames);
++
++  gst_video_encoder_set_latency (GST_VIDEO_ENCODER (encoder), latency, latency);
++}
++
++static gboolean
++gst_svthevc_enc_set_format (GstVideoEncoder * video_enc,
++    GstVideoCodecState * state)
++{
++  GstSvtHevcEnc *encoder = GST_SVTHEVC_ENC (video_enc);
++  GstVideoInfo *info = &state->info;
++  GstCaps *template_caps;
++  GstCaps *allowed_caps;
++
++  /* If the encoder is initialized, do not reinitialize it again if not
++   * necessary */
++  if (encoder->svt_handle) {
++    GstVideoInfo *old = &encoder->input_state->info;
++
++    if (info->finfo->format == old->finfo->format
++        && info->width == old->width && info->height == old->height
++        && info->fps_n == old->fps_n && info->fps_d == old->fps_d
++        && info->par_n == old->par_n && info->par_d == old->par_d) {
++      gst_video_codec_state_unref (encoder->input_state);
++      encoder->input_state = gst_video_codec_state_ref (state);
++      return TRUE;
++    }
++
++    /* clear out pending frames */
++    gst_svthevc_enc_flush_frames (encoder, TRUE);
++  }
++
++  if (encoder->input_state)
++    gst_video_codec_state_unref (encoder->input_state);
++  encoder->input_state = gst_video_codec_state_ref (state);
++
++  template_caps = gst_static_pad_template_get_caps (&src_factory);
++  allowed_caps = gst_pad_get_allowed_caps (GST_VIDEO_ENCODER_SRC_PAD (encoder));
++
++  if (allowed_caps == template_caps) {
++    GST_INFO_OBJECT (encoder, "downstream has ANY caps");
++
++    /* SVT-HEVC encoder does not yet support auto profile selecting.
++     * So we should be set the profile from input format */
++    encoder->profile = GST_VIDEO_INFO_COMP_DEPTH (info, 0) == 8 ? 1 : 2;
++    switch (GST_VIDEO_INFO_FORMAT (info)) {
++      case GST_VIDEO_FORMAT_Y42B:
++      case GST_VIDEO_FORMAT_I422_10LE:
++      case GST_VIDEO_FORMAT_I422_10BE:
++      case GST_VIDEO_FORMAT_Y444:
++      case GST_VIDEO_FORMAT_Y444_10LE:
++      case GST_VIDEO_FORMAT_Y444_10BE:
++        encoder->profile = 4;
++      default:
++        break;
++    }
++
++    gst_caps_unref (allowed_caps);
++  } else if (allowed_caps) {
++    GstStructure *s;
++    const gchar *profile;
++    const gchar *level;
++    const gchar *tier;
++
++    GST_LOG_OBJECT (encoder, "allowed caps %" GST_PTR_FORMAT, allowed_caps);
++
++    if (gst_caps_is_empty (allowed_caps)) {
++      gst_caps_unref (template_caps);
++      gst_caps_unref (allowed_caps);
++      return FALSE;
++    }
++
++    allowed_caps = gst_caps_make_writable (allowed_caps);
++    allowed_caps = gst_caps_fixate (allowed_caps);
++    s = gst_caps_get_structure (allowed_caps, 0);
++
++    profile = gst_structure_get_string (s, "profile");
++    if (profile) {
++      if (g_str_has_prefix (profile, "main-10")) {
++        encoder->profile = 2;
++      } else if (g_str_has_prefix (profile, "main-4:4:4")) {
++        encoder->profile = 4;
++      } else if (g_str_has_prefix (profile, "main")) {
++        encoder->profile = 1;
++      } else {
++        g_assert_not_reached ();
++      }
++    }
++
++    level = gst_structure_get_string (s, "level");
++    if (level) {
++      if (g_str_has_prefix (level, "2.1")) {
++        encoder->level = 21;
++      } else if (g_str_has_prefix (level, "3.1")) {
++        encoder->level = 31;
++      } else if (g_str_has_prefix (level, "4.1")) {
++        encoder->level = 41;
++      } else if (g_str_has_prefix (level, "5.1")) {
++        encoder->level = 51;
++      } else if (g_str_has_prefix (level, "5.2")) {
++        encoder->level = 52;
++      } else if (g_str_has_prefix (level, "6.1")) {
++        encoder->level = 61;
++      } else if (g_str_has_prefix (level, "6.2")) {
++        encoder->level = 62;
++      } else if (g_str_has_prefix (level, "1")) {
++        encoder->level = 10;
++      } else if (g_str_has_prefix (level, "2")) {
++        encoder->level = 20;
++      } else if (g_str_has_prefix (level, "3")) {
++        encoder->level = 30;
++      } else if (g_str_has_prefix (level, "4")) {
++        encoder->level = 40;
++      } else if (g_str_has_prefix (level, "5")) {
++        encoder->level = 50;
++      } else if (g_str_has_prefix (level, "6")) {
++        encoder->level = 60;
++      } else {
++        g_assert_not_reached ();
++      }
++    }
++
++    tier = gst_structure_get_string (s, "tier");
++    if (tier) {
++      if (g_str_has_prefix (tier, "main")) {
++        encoder->tier = 0;
++      } else if (g_str_has_prefix (tier, "high")) {
++        encoder->tier = 1;
++      } else {
++        g_assert_not_reached ();
++      }
++    }
++
++    gst_caps_unref (allowed_caps);
++  }
++  gst_caps_unref (template_caps);
++
++  GST_DEBUG_OBJECT (encoder, "Using profile %d, tier %d, level %d",
++      encoder->profile, encoder->tier, encoder->level);
++
++  if (!gst_svthevc_enc_init_encoder (encoder))
++    return FALSE;
++
++  if (!gst_svthevc_enc_set_src_caps (encoder, state->caps)) {
++    gst_svthevc_enc_close_encoder (encoder);
++    return FALSE;
++  }
++
++  gst_svthevc_enc_set_latency (encoder);
++
++  return TRUE;
++}
++
++static GstFlowReturn
++gst_svthevc_enc_finish (GstVideoEncoder * encoder)
++{
++  GST_DEBUG_OBJECT (encoder, "finish encoder");
++
++  gst_svthevc_enc_flush_frames (GST_SVTHEVC_ENC (encoder), TRUE);
++  return GST_FLOW_OK;
++}
++
++static gboolean
++gst_svthevc_enc_propose_allocation (GstVideoEncoder * encoder, GstQuery * query)
++{
++  gst_query_add_allocation_meta (query, GST_VIDEO_META_API_TYPE, NULL);
++
++  return GST_VIDEO_ENCODER_CLASS (parent_class)->propose_allocation (encoder,
++      query);
++}
++
++/* chain function
++ * this function does the actual processing
++ */
++static GstFlowReturn
++gst_svthevc_enc_handle_frame (GstVideoEncoder * video_enc,
++    GstVideoCodecFrame * frame)
++{
++  GstSvtHevcEnc *encoder = GST_SVTHEVC_ENC (video_enc);
++  GstFlowReturn ret = GST_FLOW_OK;
++  gboolean got_packet;
++
++  if (G_UNLIKELY (encoder->svt_handle == NULL))
++    goto not_inited;
++
++  ret = gst_svthevc_enc_send_frame (encoder, frame);
++
++  if (ret != GST_FLOW_OK)
++    goto encode_fail;
++
++  do {
++    ret = gst_svthevc_enc_receive_frame (encoder, &got_packet, TRUE);
++    GST_INFO_OBJECT (encoder, "ret %d, got_packet %d", ret, got_packet);
++    if (ret != GST_FLOW_OK)
++      break;
++  } while (got_packet);
++
++done:
++  return ret;
++
++/* ERRORS */
++not_inited:
++  {
++    GST_WARNING_OBJECT (encoder, "Got buffer before set_caps was called");
++    return GST_FLOW_NOT_NEGOTIATED;
++  }
++encode_fail:
++  {
++    /* avoid frame (and ts etc) piling up */
++    if (frame) {
++      gst_svthevc_enc_dequeue_frame (encoder, frame);
++      ret = gst_video_encoder_finish_frame (GST_VIDEO_ENCODER (encoder), frame);
++    }
++    goto done;
++  }
++}
++
++static GstFlowReturn
++gst_svthevc_enc_send_frame (GstSvtHevcEnc * encoder, GstVideoCodecFrame * frame)
++{
++  GstFlowReturn ret = GST_FLOW_OK;
++  gboolean update_latency = FALSE;
++  EB_BUFFERHEADERTYPE *headerPtr = NULL;
++  GstVideoInfo *info = &encoder->input_state->info;
++  FrameData *fdata;
++  EB_ERRORTYPE svt_ret;
++
++  if (encoder->svt_eos_flag == EOS_TOTRIGGER) {
++    return GST_FLOW_EOS;
++  }
++
++  if (!frame)
++    goto out;
++
++  headerPtr = encoder->in_buf;
++
++  fdata = gst_svthevc_enc_queue_frame (encoder, frame, info);
++  if (!fdata) {
++    GST_ERROR_OBJECT (encoder, "Failed to map frame");
++    return GST_FLOW_ERROR;
++  }
++
++  read_in_data (&encoder->enc_params, fdata, headerPtr);
++
++  headerPtr->nFlags = 0;
++  headerPtr->pAppPrivate = NULL;
++  headerPtr->pts = frame->pts;
++
++  GST_OBJECT_LOCK (encoder);
++  if (encoder->reconfig) {
++    /* svthevc_encoder_reconfig is not yet implemented thus we shut down and re-create encoder */
++    gst_svthevc_enc_init_encoder (encoder);
++    update_latency = TRUE;
++  }
++
++  if (headerPtr && frame) {
++    if (GST_VIDEO_CODEC_FRAME_IS_FORCE_KEYFRAME (frame)) {
++      GST_INFO_OBJECT (encoder, "Forcing key frame");
++      headerPtr->sliceType = EB_IDR_PICTURE;
++    }
++  }
++  GST_OBJECT_UNLOCK (encoder);
++
++  if (G_UNLIKELY (update_latency))
++    gst_svthevc_enc_set_latency (encoder);
++
++out:
++  if (!headerPtr) {
++    EB_BUFFERHEADERTYPE headerPtrLast;
++    headerPtrLast.nAllocLen = 0;
++    headerPtrLast.nFilledLen = 0;
++    headerPtrLast.nTickCount = 0;
++    headerPtrLast.pAppPrivate = NULL;
++    headerPtrLast.pBuffer = NULL;
++    headerPtrLast.nFlags = EB_BUFFERFLAG_EOS;
++
++    GST_INFO_OBJECT (encoder, "flush frame");
++    svt_ret = EbH265EncSendPicture (encoder->svt_handle, &headerPtrLast);
++    encoder->svt_eos_flag = EOS_REACHED;
++  } else {
++    GST_INFO_OBJECT (encoder, "encode frame");
++    svt_ret = EbH265EncSendPicture (encoder->svt_handle, headerPtr);
++  }
++
++  GST_DEBUG_OBJECT (encoder, "encoder result (%d)", svt_ret);
++
++  if (svt_ret != EB_ErrorNone) {
++    GST_ELEMENT_ERROR (encoder, STREAM, ENCODE,
++        ("Encode svthevc frame failed."),
++        ("svthevc_encoder_encode return code=%d", svt_ret));
++    ret = GST_FLOW_ERROR;
++  }
++
++  /* Input frame is now queued */
++  if (frame)
++    gst_video_codec_frame_unref (frame);
++
++  return ret;
++}
++
++static GstVideoCodecFrame *
++gst_svthevc_encoder_get_frame (GstVideoEncoder * encoder, GstClockTime ts)
++{
++  GList *g;
++  GList *frames;
++  GstVideoCodecFrame *frame = NULL;
++
++  GST_DEBUG_OBJECT (encoder, "timestamp : %" GST_TIME_FORMAT,
++      GST_TIME_ARGS (ts));
++
++  frames = gst_video_encoder_get_frames (GST_VIDEO_ENCODER (encoder));
++
++  for (g = frames; g; g = g->next) {
++    GstVideoCodecFrame *tmp = g->data;
++
++    if (tmp->pts == ts) {
++      frame = gst_video_codec_frame_ref (tmp);
++      break;
++    }
++  }
++
++  g_list_free_full (frames, (GDestroyNotify) gst_video_codec_frame_unref);
++
++  return frame;
++}
++
++
++static GstFlowReturn
++gst_svthevc_enc_receive_frame (GstSvtHevcEnc * encoder,
++    gboolean * got_packet, gboolean send)
++{
++  GstVideoCodecFrame *frame = NULL;
++  GstBuffer *out_buf = NULL;
++  GstFlowReturn ret = GST_FLOW_OK;
++  EB_BUFFERHEADERTYPE *output_buffer = NULL;
++  EB_ERRORTYPE svt_ret;
++
++  *got_packet = FALSE;
++
++  if (encoder->svt_eos_flag == EOS_TOTRIGGER) {
++    return GST_FLOW_EOS;
++  }
++
++  svt_ret =
++      EbH265GetPacket (encoder->svt_handle, &output_buffer,
++      encoder->svt_eos_flag);
++
++  if (svt_ret == EB_NoErrorEmptyQueue) {
++    GST_LOG_OBJECT (encoder, "no output yet");
++    return GST_FLOW_OK;
++  }
++
++  GST_LOG_OBJECT (encoder, "got %d from svt", output_buffer->nFlags);
++
++  *got_packet = TRUE;
++
++  /* Get oldest frame */
++  frame =
++      gst_svthevc_encoder_get_frame (GST_VIDEO_ENCODER (encoder),
++      output_buffer->pts);
++  if (!frame) {
++    frame = gst_video_encoder_get_oldest_frame (GST_VIDEO_ENCODER (encoder));
++  }
++
++  if (!send || !frame) {
++    GST_LOG_OBJECT (encoder, "not sending (%d) or frame not found (%d)", send,
++        frame != NULL);
++  }
++
++  GST_DEBUG_OBJECT (encoder,
++      "output picture ready system=%d frame found %d",
++      frame->system_frame_number, frame != NULL);
++
++  if (send) {
++    out_buf = gst_buffer_new_allocate (NULL, output_buffer->nFilledLen, NULL);
++    gst_buffer_fill (out_buf, 0, output_buffer->pBuffer,
++        output_buffer->nFilledLen);
++
++    frame->output_buffer = out_buf;
++
++    if (output_buffer->sliceType == EB_IDR_PICTURE) {
++      GST_VIDEO_CODEC_FRAME_SET_SYNC_POINT (frame);
++    } else {
++      GST_VIDEO_CODEC_FRAME_UNSET_SYNC_POINT (frame);
++    }
++
++    if (encoder->push_header) {
++      GstBuffer *header;
++
++      header = gst_svthevc_enc_get_header_buffer (encoder);
++      frame->output_buffer = gst_buffer_append (header, frame->output_buffer);
++      encoder->push_header = FALSE;
++    }
++
++    frame->pts = output_buffer->pts;
++
++    GST_LOG_OBJECT (encoder,
++        "output: frame dts %" G_GINT64_FORMAT " pts %" G_GINT64_FORMAT,
++        (gint64) frame->dts, (gint64) frame->pts);
++  }
++
++  if (output_buffer->nFlags == EB_BUFFERFLAG_EOS) {
++    encoder->svt_eos_flag = EOS_TOTRIGGER;
++  }
++
++  if (output_buffer)
++    EbH265ReleaseOutBuffer (&output_buffer);
++
++  if (frame) {
++    gst_svthevc_enc_dequeue_frame (encoder, frame);
++    ret = gst_video_encoder_finish_frame (GST_VIDEO_ENCODER (encoder), frame);
++  }
++
++  return ret;
++}
++
++static GstFlowReturn
++gst_svthevc_enc_flush_frames (GstSvtHevcEnc * encoder, gboolean send)
++{
++  GstFlowReturn ret = GST_FLOW_OK;
++  gboolean got_packet;
++
++  /* first send the remaining frames */
++
++  if (G_UNLIKELY (encoder->svt_handle == NULL) ||
++      G_UNLIKELY (encoder->svt_eos_flag == EOS_TOTRIGGER))
++    goto done;
++
++  ret = gst_svthevc_enc_send_frame (encoder, NULL);
++
++  if (ret != GST_FLOW_OK)
++    goto done;
++
++  do {
++    ret = gst_svthevc_enc_receive_frame (encoder, &got_packet, send);
++    GST_INFO_OBJECT (encoder, "ret %d, got_packet %d", ret, got_packet);
++    if (ret != GST_FLOW_OK)
++      break;
++  } while (got_packet);
++
++done:
++  return ret;
++}
++
++static void
++gst_svthevc_enc_reconfig (GstSvtHevcEnc * encoder)
++{
++  encoder->reconfig = TRUE;
++}
++
++static void
++gst_svthevc_enc_set_property (GObject * object, guint prop_id,
++    const GValue * value, GParamSpec * pspec)
++{
++  GstSvtHevcEnc *encoder;
++  GstState state;
++
++  encoder = GST_SVTHEVC_ENC (object);
++
++  GST_OBJECT_LOCK (encoder);
++
++  state = GST_STATE (encoder);
++  if ((state != GST_STATE_READY && state != GST_STATE_NULL) &&
++      !(pspec->flags & GST_PARAM_MUTABLE_PLAYING))
++    goto wrong_state;
++
++  switch (prop_id) {
++    case PROP_INSERT_VUI:
++      encoder->insert_vui = g_value_get_boolean (value);
++      break;
++    case PROP_AUD:
++      encoder->aud = g_value_get_boolean (value);
++      break;
++    case PROP_HIERARCHICAL_LEVEL:
++      encoder->hierarchical_level = g_value_get_uint (value);
++      break;
++    case PROP_LOOKAHEAD_DISTANCE:
++      encoder->la_depth = g_value_get_uint (value);
++      break;
++    case PROP_ENCODER_MODE:
++      encoder->enc_mode = g_value_get_uint (value);
++      break;
++    case PROP_RC_MODE:
++      encoder->rc_mode = g_value_get_uint (value);
++      break;
++    case PROP_QP:
++      encoder->qp = g_value_get_uint (value);
++      break;
++    case PROP_QP_MAX:
++      encoder->qp_max = g_value_get_uint (value);
++      break;
++    case PROP_QP_MIN:
++      encoder->qp_min = g_value_get_uint (value);
++      break;
++    case PROP_SCENE_CHANGE_DETECTION:
++      encoder->scene_change_detection = g_value_get_boolean (value);
++      break;
++    case PROP_TUNE:
++      encoder->tune = g_value_get_uint (value);
++      break;
++    case PROP_LATENCY_MODE:
++      encoder->latency_mode = g_value_get_uint (value);
++      break;
++    case PROP_BASE_LAYER_SWITCH_MODE:
++      encoder->base_layer_switch_mode = g_value_get_uint (value);
++      break;
++    case PROP_BITRATE:
++      encoder->bitrate = g_value_get_uint (value);
++      break;
++    case PROP_KEY_INT_MAX:
++      encoder->keyintmax = g_value_get_int (value);
++      break;
++    case PROP_INTRA_REFRESH:
++      encoder->intra_refresh = g_value_get_uint (value);
++      break;
++    case PROP_CORES:
++      encoder->cores = g_value_get_uint (value);
++      break;
++    case PROP_SOCKET:
++      encoder->socket = g_value_get_int (value);
++      break;
++    case PROP_TILE_ROW:
++      encoder->tile_row = g_value_get_uint (value);
++      break;
++    case PROP_TILE_COL:
++      encoder->tile_col = g_value_get_uint (value);
++      break;
++    default:
++      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
++      break;
++  }
++
++  gst_svthevc_enc_reconfig (encoder);
++  GST_OBJECT_UNLOCK (encoder);
++  return;
++
++wrong_state:
++  {
++    GST_WARNING_OBJECT (encoder, "setting property in wrong state");
++    GST_OBJECT_UNLOCK (encoder);
++  }
++}
++
++static void
++gst_svthevc_enc_get_property (GObject * object, guint prop_id,
++    GValue * value, GParamSpec * pspec)
++{
++  GstSvtHevcEnc *encoder;
++
++  encoder = GST_SVTHEVC_ENC (object);
++
++  GST_OBJECT_LOCK (encoder);
++  switch (prop_id) {
++    case PROP_INSERT_VUI:
++      g_value_set_boolean (value, encoder->insert_vui);
++      break;
++    case PROP_AUD:
++      g_value_set_boolean (value, encoder->aud);
++      break;
++    case PROP_HIERARCHICAL_LEVEL:
++      g_value_set_uint (value, encoder->hierarchical_level);
++      break;
++    case PROP_LOOKAHEAD_DISTANCE:
++      g_value_set_uint (value, encoder->la_depth);
++      break;
++    case PROP_ENCODER_MODE:
++      g_value_set_uint (value, encoder->enc_mode);
++      break;
++    case PROP_RC_MODE:
++      g_value_set_uint (value, encoder->rc_mode);
++      break;
++    case PROP_QP:
++      g_value_set_uint (value, encoder->qp);
++      break;
++    case PROP_QP_MAX:
++      g_value_set_uint (value, encoder->qp_max);
++      break;
++    case PROP_QP_MIN:
++      g_value_set_uint (value, encoder->qp_min);
++      break;
++    case PROP_SCENE_CHANGE_DETECTION:
++      g_value_set_boolean (value, encoder->scene_change_detection);
++      break;
++    case PROP_TUNE:
++      g_value_set_uint (value, encoder->tune);
++      break;
++    case PROP_LATENCY_MODE:
++      g_value_set_uint (value, encoder->latency_mode);
++      break;
++    case PROP_BASE_LAYER_SWITCH_MODE:
++      g_value_set_uint (value, encoder->base_layer_switch_mode);
++      break;
++    case PROP_BITRATE:
++      g_value_set_uint (value, encoder->bitrate);
++      break;
++    case PROP_KEY_INT_MAX:
++      g_value_set_int (value, encoder->keyintmax);
++      break;
++    case PROP_INTRA_REFRESH:
++      g_value_set_uint (value, encoder->intra_refresh);
++      break;
++    case PROP_CORES:
++      g_value_set_uint (value, encoder->cores);
++      break;
++    case PROP_SOCKET:
++      g_value_set_int (value, encoder->socket);
++      break;
++    case PROP_TILE_ROW:
++      g_value_set_uint (value, encoder->tile_row);
++      break;
++    case PROP_TILE_COL:
++      g_value_set_uint (value, encoder->tile_col);
++      break;
++    default:
++      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
++      break;
++  }
++  GST_OBJECT_UNLOCK (encoder);
++}
++
++static gboolean
++plugin_init (GstPlugin * plugin)
++{
++  GST_DEBUG_CATEGORY_INIT (svthevc_enc_debug, "svthevcenc", 0,
++      "h265 encoding element");
++
++  return gst_element_register (plugin, "svthevcenc",
++      GST_RANK_PRIMARY, GST_TYPE_SVTHEVC_ENC);
++}
++
++GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
++    GST_VERSION_MINOR,
++    svthevcenc,
++    "svt-hevc encoder based H265 plugins",
++    plugin_init, VERSION, "GPL", GST_PACKAGE_NAME, GST_PACKAGE_ORIGIN)
+diff --git a/ext/svthevcenc/gstsvthevcenc.h b/ext/svthevcenc/gstsvthevcenc.h
+new file mode 100644
+index 0000000..be1d492
+--- /dev/null
++++ b/ext/svthevcenc/gstsvthevcenc.h
+@@ -0,0 +1,118 @@
++/* GStreamer H265 encoder plugin
++ * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Library General Public
++ * License as published by the Free Software Foundation; either
++ * version 2 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Library General Public License for more details.
++ *
++ * You should have received a copy of the GNU Library General Public
++ * License along with this library; if not, write to the
++ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
++ * Boston, MA 02110-1301, USA.
++ */
++
++#ifndef __GST_SVTHEVC_ENC_H__
++#define __GST_SVTHEVC_ENC_H__
++
++#include <gst/gst.h>
++#include <gst/video/video.h>
++#include <gst/video/gstvideoencoder.h>
++
++#include <EbErrorCodes.h>
++#include <EbTime.h>
++#include <EbApi.h>
++
++G_BEGIN_DECLS
++#define GST_TYPE_SVTHEVC_ENC \
++  (gst_svthevc_enc_get_type())
++#define GST_SVTHEVC_ENC(obj) \
++  (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_SVTHEVC_ENC,GstSvtHevcEnc))
++#define GST_SVTHEVC_ENC_CLASS(klass) \
++  (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_SVTHEVC_ENC,GstSvtHevcEncClass))
++#define GST_IS_SVTHEVC_ENC(obj) \
++  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_SVTHEVC_ENC))
++#define GST_IS_SVTHEVC_ENC_CLASS(klass) \
++  (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_SVTHEVC_ENC))
++typedef struct _GstSvtHevcEnc GstSvtHevcEnc;
++typedef struct _GstSvtHevcEncClass GstSvtHevcEncClass;
++
++typedef enum svt_eos_status
++{
++  EOS_NOT_REACHED = 0,
++  EOS_REACHED,
++  EOS_TOTRIGGER
++} SVT_EOS_STATUS;
++
++struct _GstSvtHevcEnc
++{
++  GstVideoEncoder element;
++
++  /*< private > */
++  const gchar *svthevc_version;
++  EB_H265_ENC_CONFIGURATION enc_params;
++  EB_COMPONENTTYPE *svt_handle;
++
++  EB_BUFFERHEADERTYPE *in_buf;
++
++  SVT_EOS_STATUS svt_eos_flag;
++
++  GstClockTime dts_offset;
++  gboolean push_header;
++
++  /* List of frame/buffer mapping structs for
++   * pending frames */
++  GList *pending_frames;
++
++  /* properties */
++  gboolean insert_vui;
++  gboolean aud;
++  guint hierarchical_level;
++  guint la_depth;
++  guint enc_mode;
++  guint rc_mode;
++  guint qp;
++  guint qp_max;
++  guint qp_min;
++  gboolean scene_change_detection;
++  guint tune;
++  guint latency_mode;
++  guint base_layer_switch_mode;
++  guint bitrate;
++  gint keyintmax;
++  guint intra_refresh;
++  guint cores;
++  gint socket;
++  guint tile_row;
++  guint tile_col;
++
++  guint profile;
++  guint tier;
++  guint level;
++
++  /* input description */
++  GstVideoCodecState *input_state;
++
++  /* configuration changed  while playing */
++  gboolean reconfig;
++
++  /* from the downstream caps */
++  const gchar *peer_profile;
++  gboolean peer_intra_profile;
++  /*const svthevc_level_t *peer_level; */
++};
++
++struct _GstSvtHevcEncClass
++{
++  GstVideoEncoderClass parent_class;
++};
++
++GType gst_svthevc_enc_get_type (void);
++
++G_END_DECLS
++#endif /* __GST_SVTHEVC_ENC_H__ */
+diff --git a/ext/svthevcenc/meson.build b/ext/svthevcenc/meson.build
+new file mode 100644
+index 0000000..bac7572
+--- /dev/null
++++ b/ext/svthevcenc/meson.build
+@@ -0,0 +1,16 @@
++svthevcenc_sources = [
++  'gstsvthevcenc.c',
++]
++
++svthevcenc_dep = dependency('SvtHevcEnc', required: false)
++
++if svthevcenc_dep.found()
++  gstsvthevcenc = library('gstsvthevcenc',
++    svthevcenc_sources,
++    c_args : gst_plugins_bad_args,
++    include_directories : [configinc],
++    dependencies : [gstbase_dep, gstpbutils_dep, gstvideo_dep, svthevcenc_dep],
++    install : true,
++    install_dir : plugins_install_dir,
++  )
++endif
+diff --git a/tests/check/Makefile.am b/tests/check/Makefile.am
+index a05bc57..6d627df 100644
+--- a/tests/check/Makefile.am
++++ b/tests/check/Makefile.am
+@@ -229,6 +229,12 @@ else
+ check_nvenc=
+ endif
+ 
++if USE_SVTHEVCENC
++check_svthevcenc=elements/svthevcenc
++else
++check_svthevcenc=
++endif
++
+ VALGRIND_TO_FIX = \
+ 	elements/mpeg2enc \
+ 	elements/mplex    \
+@@ -313,6 +319,7 @@ check_PROGRAMS = \
+ 	$(check_webrtc) \
+ 	$(check_msdk) \
+ 	$(check_nvenc) \
++	$(check_svthevcenc) \
+ 	$(EXPERIMENTAL_CHECKS)
+ 
+ noinst_HEADERS = elements/mxfdemux.h libs/isoff.h
+diff --git a/tests/check/elements/.gitignore b/tests/check/elements/.gitignore
+index b7e836f..03e403d 100644
+--- a/tests/check/elements/.gitignore
++++ b/tests/check/elements/.gitignore
+@@ -59,4 +59,5 @@ voaacenc
+ voamrwbenc
+ webrtcbin
+ x265enc
++svthevcenc
+ zbar
+diff --git a/tests/check/elements/svthevcenc.c b/tests/check/elements/svthevcenc.c
+new file mode 100644
+index 0000000..0545b3c
+--- /dev/null
++++ b/tests/check/elements/svthevcenc.c
+@@ -0,0 +1,228 @@
++/* GStreamer
++ * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Library General Public
++ * License as published by the Free Software Foundation; either
++ * version 2 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Library General Public License for more details.
++ *
++ * You should have received a copy of the GNU Library General Public
++ * License along with this library; if not, write to the
++ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
++ * Boston, MA 02110-1301, USA.
++ */
++
++#include <gst/check/gstcheck.h>
++
++static GstStaticPadTemplate sinktemplate = GST_STATIC_PAD_TEMPLATE ("sink",
++    GST_PAD_SINK,
++    GST_PAD_ALWAYS,
++    GST_STATIC_CAPS ("video/x-h265, "
++        "width = (int) [ 64, 8192 ], "
++        "height = (int) [ 64, 4320 ], " "framerate = (fraction) [0, MAX]"));
++
++static GstStaticPadTemplate srctemplate = GST_STATIC_PAD_TEMPLATE ("src",
++    GST_PAD_SRC,
++    GST_PAD_ALWAYS,
++    GST_STATIC_CAPS ("video/x-raw, "
++        "format = (string) I420, "
++        "width = (int) [ 64, 8192 ], "
++        "height = (int) [ 64, 4320 ], " "framerate = (fraction) [0, MAX]"));
++
++static GstPad *sinkpad, *srcpad;
++
++static GstElement *
++setup_svthevcenc (const gchar * src_caps_str, GstCaps ** srccaps)
++{
++  GstElement *svthevcenc;
++  GstCaps *caps = NULL;
++  GstBus *bus;
++
++  caps = gst_caps_from_string (src_caps_str);
++  fail_unless (caps != NULL);
++
++  svthevcenc = gst_check_setup_element ("svthevcenc");
++  fail_unless (svthevcenc != NULL);
++  srcpad = gst_check_setup_src_pad (svthevcenc, &srctemplate);
++  sinkpad = gst_check_setup_sink_pad (svthevcenc, &sinktemplate);
++  gst_pad_set_active (srcpad, TRUE);
++  gst_pad_set_active (sinkpad, TRUE);
++
++  bus = gst_bus_new ();
++  gst_element_set_bus (svthevcenc, bus);
++
++  *srccaps = caps;
++
++  buffers = NULL;
++
++  return svthevcenc;
++}
++
++static void
++cleanup_svthevcenc (GstElement * svthevcenc)
++{
++  GstBus *bus;
++
++  /* Free parsed buffers */
++  gst_check_drop_buffers ();
++
++  bus = GST_ELEMENT_BUS (svthevcenc);
++  gst_bus_set_flushing (bus, TRUE);
++  gst_object_unref (bus);
++
++  gst_pad_set_active (srcpad, FALSE);
++  gst_pad_set_active (sinkpad, FALSE);
++  gst_check_teardown_src_pad (svthevcenc);
++  gst_check_teardown_sink_pad (svthevcenc);
++  gst_check_teardown_element (svthevcenc);
++}
++
++GST_START_TEST (test_encode_simple)
++{
++  GstElement *svthevcenc;
++  GstBuffer *buffer;
++  gint i;
++  GList *l;
++  GstCaps *outcaps, *sinkcaps, *srccaps;
++  GstSegment seg;
++
++  svthevcenc =
++      setup_svthevcenc
++      ("video/x-raw,format=(string)I420,width=(int)320,height=(int)240,framerate=(fraction)25/1",
++      &srccaps);
++
++  ASSERT_SET_STATE (svthevcenc, GST_STATE_PLAYING, GST_STATE_CHANGE_SUCCESS);
++
++  gst_segment_init (&seg, GST_FORMAT_TIME);
++  seg.stop = gst_util_uint64_scale (10, GST_SECOND, 25);
++
++  gst_check_setup_events (srcpad, svthevcenc, srccaps, GST_FORMAT_TIME);
++  fail_unless (gst_pad_push_event (srcpad, gst_event_new_segment (&seg)));
++
++  buffer = gst_buffer_new_allocate (NULL, 320 * 240 + 2 * 160 * 120, NULL);
++  gst_buffer_memset (buffer, 0, 0, -1);
++
++  for (i = 0; i < 10; i++) {
++    GST_BUFFER_TIMESTAMP (buffer) = gst_util_uint64_scale (i, GST_SECOND, 25);
++    GST_BUFFER_DURATION (buffer) = gst_util_uint64_scale (1, GST_SECOND, 25);
++    fail_unless (gst_pad_push (srcpad, gst_buffer_ref (buffer)) == GST_FLOW_OK);
++  }
++
++  gst_buffer_unref (buffer);
++
++  fail_unless (gst_pad_push_event (srcpad, gst_event_new_eos ()));
++
++  /* All buffers must be there now */
++  fail_unless_equals_int (g_list_length (buffers), 10);
++
++  outcaps =
++      gst_caps_from_string
++      ("video/x-h265,width=(int)320,height=(int)240,framerate=(fraction)25/1");
++
++  for (l = buffers, i = 0; l; l = l->next, i++) {
++    buffer = l->data;
++
++    fail_unless_equals_uint64 (GST_BUFFER_DURATION (buffer),
++        gst_util_uint64_scale (1, GST_SECOND, 25));
++
++    sinkcaps = gst_pad_get_current_caps (sinkpad);
++    fail_unless (gst_caps_can_intersect (sinkcaps, outcaps));
++    gst_caps_unref (sinkcaps);
++  }
++
++  gst_caps_unref (outcaps);
++  gst_caps_unref (srccaps);
++
++  cleanup_svthevcenc (svthevcenc);
++}
++
++GST_END_TEST;
++
++GST_START_TEST (test_reuse)
++{
++  GstElement *svthevcenc;
++  GstBuffer *buffer;
++  gint i, loop;
++  GList *l;
++  GstCaps *outcaps, *sinkcaps, *srccaps;
++  GstSegment seg;
++
++  svthevcenc =
++      setup_svthevcenc
++      ("video/x-raw,format=(string)I420,width=(int)320,height=(int)240,framerate=(fraction)25/1",
++      &srccaps);
++
++  for (loop = 0; loop < 2; loop++) {
++    ASSERT_SET_STATE (svthevcenc, GST_STATE_PLAYING, GST_STATE_CHANGE_SUCCESS);
++
++    gst_segment_init (&seg, GST_FORMAT_TIME);
++    seg.stop = gst_util_uint64_scale (10, GST_SECOND, 25);
++
++    gst_check_setup_events (srcpad, svthevcenc, srccaps, GST_FORMAT_TIME);
++    fail_unless (gst_pad_push_event (srcpad, gst_event_new_segment (&seg)));
++
++    buffer = gst_buffer_new_allocate (NULL, 320 * 240 + 2 * 160 * 120, NULL);
++    gst_buffer_memset (buffer, 0, 0, -1);
++
++    for (i = 0; i < 10; i++) {
++      GST_BUFFER_TIMESTAMP (buffer) = gst_util_uint64_scale (i, GST_SECOND, 25);
++      GST_BUFFER_DURATION (buffer) = gst_util_uint64_scale (1, GST_SECOND, 25);
++      fail_unless (gst_pad_push (srcpad,
++              gst_buffer_ref (buffer)) == GST_FLOW_OK);
++    }
++
++    gst_buffer_unref (buffer);
++
++    fail_unless (gst_pad_push_event (srcpad, gst_event_new_eos ()));
++
++    /* All buffers must be there now */
++    fail_unless_equals_int (g_list_length (buffers), 10);
++
++    outcaps =
++        gst_caps_from_string
++        ("video/x-h265,width=(int)320,height=(int)240,framerate=(fraction)25/1");
++
++    for (l = buffers, i = 0; l; l = l->next, i++) {
++      buffer = l->data;
++
++      fail_unless_equals_uint64 (GST_BUFFER_DURATION (buffer),
++          gst_util_uint64_scale (1, GST_SECOND, 25));
++
++      sinkcaps = gst_pad_get_current_caps (sinkpad);
++      fail_unless (gst_caps_can_intersect (sinkcaps, outcaps));
++      gst_caps_unref (sinkcaps);
++    }
++
++    gst_check_drop_buffers ();
++    gst_caps_unref (outcaps);
++
++    ASSERT_SET_STATE (svthevcenc, GST_STATE_READY, GST_STATE_CHANGE_SUCCESS);
++  }
++
++  gst_caps_unref (srccaps);
++
++  cleanup_svthevcenc (svthevcenc);
++}
++
++GST_END_TEST;
++
++static Suite *
++svthevcenc_suite (void)
++{
++  Suite *s = suite_create ("svthevcenc");
++  TCase *tc_chain = tcase_create ("general");
++
++  suite_add_tcase (s, tc_chain);
++
++  tcase_add_test (tc_chain, test_encode_simple);
++  tcase_add_test (tc_chain, test_reuse);
++
++  return s;
++}
++
++GST_CHECK_MAIN (svthevcenc);
+diff --git a/tests/check/meson.build b/tests/check/meson.build
+index cd77fb4..73476c6 100644
+--- a/tests/check/meson.build
++++ b/tests/check/meson.build
+@@ -43,6 +43,7 @@ base_tests = [
+   [['elements/mxfdemux.c']],
+   [['elements/mxfmux.c']],
+   [['elements/nvenc.c'], not cuda_dep.found() or not cudart_dep.found(), nvenc_test_deps],
++  [['elements/svthevcenc.c'], not svthevcenc_dep.found(), [svthevcenc_dep]],
+   [['elements/pcapparse.c'], false, [libparser_dep]],
+   [['elements/pnm.c']],
+   [['elements/rtponvifparse.c']],
+-- 
+2.7.4
+

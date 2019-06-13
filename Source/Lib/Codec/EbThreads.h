@@ -92,7 +92,7 @@ extern    EB_BOOL                  alternateGroups;
         return EB_ErrorInsufficientResources; \
     } \
     libThreadCount++;
-#else
+#elif defined(__linux__)
 #define __USE_GNU
 #define _GNU_SOURCE
 #include <sched.h>
@@ -105,6 +105,26 @@ extern    cpu_set_t                   groupAffinity;
     } \
     else { \
         pthread_setaffinity_np(*((pthread_t*)pointer),sizeof(cpu_set_t),&groupAffinity); \
+        memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
+        memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
+		if (nElements % 8 == 0) { \
+			*totalLibMemory += (nElements); \
+		} \
+		else { \
+			*totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
+		} \
+    } \
+    if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
+        return EB_ErrorInsufficientResources; \
+    } \
+    libThreadCount++;
+#else
+#define EB_CREATETHREAD(type, pointer, nElements, pointerClass, threadFunction, threadContext) \
+    pointer = EbCreateThread(threadFunction, threadContext); \
+    if (pointer == (type)EB_NULL) { \
+        return EB_ErrorInsufficientResources; \
+    } \
+    else { \
         memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
         memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
 		if (nElements % 8 == 0) { \

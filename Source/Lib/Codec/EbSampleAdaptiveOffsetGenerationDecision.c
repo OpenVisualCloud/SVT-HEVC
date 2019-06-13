@@ -677,6 +677,11 @@ EB_ERRORTYPE SaoGenerationDecision(
         reconPicturePtr = ((EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr)->referencePicture;
      else
 		reconPicturePtr = pictureControlSetPtr->reconPicturePtr;
+
+    const EB_COLOR_FORMAT colorFormat = reconPicturePtr->colorFormat;
+    const EB_U16 subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    const EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
+
     // Intialise SAO  Parameters         
     saoParams->saoTypeIndex[SAO_COMPONENT_LUMA]     = 0;
     saoParams->saoTypeIndex[SAO_COMPONENT_CHROMA]   = 0;
@@ -693,7 +698,7 @@ EB_ERRORTYPE SaoGenerationDecision(
 
     if (mmSao) {
         // Y
-        SaoGatherFunctionTableLossy[(ASM_TYPES & PREAVX2_MASK) && 1](
+        SaoGatherFunctionTableLossy[!!(ASM_TYPES & PREAVX2_MASK)](
             &(inputPicturePtr->bufferY[(inputPicturePtr->originY + tbOriginY) * inputPicturePtr->strideY + inputPicturePtr->originX + tbOriginX]),
             inputPicturePtr->strideY,
             &(reconPicturePtr->bufferY[(reconPicturePtr->originY + tbOriginY) * reconPicturePtr->strideY + reconPicturePtr->originX + tbOriginX]),
@@ -706,26 +711,26 @@ EB_ERRORTYPE SaoGenerationDecision(
             saoStats->eoCount[0]);
 
         // U
-        SaoGatherFunctionTableLossy[(ASM_TYPES & PREAVX2_MASK) && 1](
-            &(inputPicturePtr->bufferCb[((inputPicturePtr->originY + tbOriginY) * inputPicturePtr->strideCb + inputPicturePtr->originX + tbOriginX) >> 1]),
+        SaoGatherFunctionTableLossy[!!(ASM_TYPES & PREAVX2_MASK)](
+            &(inputPicturePtr->bufferCb[(((inputPicturePtr->originY + tbOriginY) * inputPicturePtr->strideCb) >> subHeightCMinus1) + ((inputPicturePtr->originX + tbOriginX) >> subWidthCMinus1)]),
             inputPicturePtr->strideCb,
-            &(reconPicturePtr->bufferCb[((reconPicturePtr->originY + tbOriginY) * reconPicturePtr->strideCb + reconPicturePtr->originX + tbOriginX) >> 1]),
+            &(reconPicturePtr->bufferCb[(((reconPicturePtr->originY + tbOriginY) * reconPicturePtr->strideCb) >> subHeightCMinus1) + ((reconPicturePtr->originX + tbOriginX) >> subWidthCMinus1)]),
             reconPicturePtr->strideCb,
-            lcuWidth >> 1,
-            lcuHeight >> 1,
+            lcuWidth >> subWidthCMinus1,
+            lcuHeight >> subHeightCMinus1,
             saoStats->boDiff[1],
             saoStats->boCount[1],
             saoStats->eoDiff[1],
             saoStats->eoCount[1]);
 
         // V
-        SaoGatherFunctionTableLossy[(ASM_TYPES & PREAVX2_MASK) && 1](
-            &(inputPicturePtr->bufferCr[((inputPicturePtr->originY + tbOriginY) * inputPicturePtr->strideCr + inputPicturePtr->originX + tbOriginX) >> 1]),
+        SaoGatherFunctionTableLossy[!!(ASM_TYPES & PREAVX2_MASK)](
+            &(inputPicturePtr->bufferCr[(((inputPicturePtr->originY + tbOriginY) * inputPicturePtr->strideCr) >> subHeightCMinus1) + ((inputPicturePtr->originX + tbOriginX) >> subWidthCMinus1)]),
             inputPicturePtr->strideCr,
-            &(reconPicturePtr->bufferCr[((reconPicturePtr->originY + tbOriginY) * reconPicturePtr->strideCr + reconPicturePtr->originX + tbOriginX) >> 1]),
+            &(reconPicturePtr->bufferCr[(((reconPicturePtr->originY + tbOriginY) * reconPicturePtr->strideCr) >> subHeightCMinus1) + ((reconPicturePtr->originX + tbOriginX) >> subHeightCMinus1)]),
             reconPicturePtr->strideCr,
-            lcuWidth >> 1,
-            lcuHeight >> 1,
+            lcuWidth >> subWidthCMinus1,
+            lcuHeight >> subHeightCMinus1,
             saoStats->boDiff[2],
             saoStats->boCount[2],
             saoStats->eoDiff[2],
@@ -768,7 +773,7 @@ EB_ERRORTYPE SaoGenerationDecision(
         if (pictureControlSetPtr->temporalLayerIndex == 0) {
             // Y
             {
-                SaoGatherFunctionTableLossy_90_45_135[(ASM_TYPES & PREAVX2_MASK) && 1](
+                SaoGatherFunctionTableLossy_90_45_135[!!(ASM_TYPES & PREAVX2_MASK)](
                     &(inputPicturePtr->bufferY[(inputPicturePtr->originY + tbOriginY) * inputPicturePtr->strideY + inputPicturePtr->originX + tbOriginX]),
                     inputPicturePtr->strideY,
                     &(reconPicturePtr->bufferY[(reconPicturePtr->originY + tbOriginY) * reconPicturePtr->strideY + reconPicturePtr->originX + tbOriginX]),
@@ -783,7 +788,7 @@ EB_ERRORTYPE SaoGenerationDecision(
 
         if (pictureControlSetPtr->temporalLayerIndex == 1) {
             // Y
-            SaoGatherFunctionTableLossy_90_45_135[(ASM_TYPES & PREAVX2_MASK) && 1](
+            SaoGatherFunctionTableLossy_90_45_135[!!(ASM_TYPES & PREAVX2_MASK)](
                 &(inputPicturePtr->bufferY[(inputPicturePtr->originY + tbOriginY) * inputPicturePtr->strideY + inputPicturePtr->originX + tbOriginX]),
                 inputPicturePtr->strideY,
                 &(reconPicturePtr->bufferY[(reconPicturePtr->originY + tbOriginY) * reconPicturePtr->strideY + reconPicturePtr->originX + tbOriginX]),
@@ -958,6 +963,10 @@ EB_ERRORTYPE SaoGenerationDecision16bit(
         recon16 = ((EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr)->referencePicture16bit;
      else
 		recon16 = pictureControlSetPtr->reconPicture16bitPtr;
+
+    const EB_COLOR_FORMAT colorFormat = recon16->colorFormat;
+    const EB_U16 subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    const EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
         
     // Intialise SAO  Parameters         
     saoParams->saoTypeIndex[SAO_COMPONENT_LUMA] = 0;
@@ -974,8 +983,8 @@ EB_ERRORTYPE SaoGenerationDecision16bit(
 
 	if (mmSao) {
 
-		EB_U32       lcuChromaWidth = lcuWidth >> 1;
-		EB_U32       lcuChromaHeight = lcuHeight >> 1;
+		EB_U32       lcuChromaWidth = lcuWidth >> subWidthCMinus1;
+		EB_U32       lcuChromaHeight = lcuHeight >> subHeightCMinus1;
 
 		// Y
 		// Requirement: lcuWidth = 28, 56 or lcuWidth % 16 = 0
@@ -998,7 +1007,7 @@ EB_ERRORTYPE SaoGenerationDecision16bit(
 		SaoGatherFunctionTabl_16bit[((lcuChromaWidth & 15) == 0) || (lcuChromaWidth == 28) || (lcuChromaWidth == 56)](
 			(EB_U16*)inputLcuPtr->bufferCb,
 			inputLcuPtr->strideCb,
-			(EB_U16*)(recon16->bufferCb) + (((recon16->originY + tbOriginY) * recon16->strideCb + (recon16->originX + tbOriginX)) >> 1),
+			(EB_U16*)(recon16->bufferCb) + ((((recon16->originY + tbOriginY) * recon16->strideCb) >> subHeightCMinus1) + ((recon16->originX + tbOriginX) >> subWidthCMinus1)),
 			recon16->strideCb,
 			lcuChromaWidth,
 			lcuChromaHeight,
@@ -1011,7 +1020,7 @@ EB_ERRORTYPE SaoGenerationDecision16bit(
 		SaoGatherFunctionTabl_16bit[((lcuChromaWidth & 15) == 0) || (lcuChromaWidth == 28) || (lcuChromaWidth == 56)](
 			(EB_U16*)inputLcuPtr->bufferCr,
 			inputLcuPtr->strideCr,
-			(EB_U16*)(recon16->bufferCr) + (((recon16->originY + tbOriginY) * recon16->strideCb + (recon16->originX + tbOriginX)) >> 1),
+			(EB_U16*)(recon16->bufferCr) + ((((recon16->originY + tbOriginY) * recon16->strideCb) >> subHeightCMinus1) + ((recon16->originX + tbOriginX) >> subWidthCMinus1)),
 			recon16->strideCr,
 			lcuChromaWidth,
 			lcuChromaHeight,
@@ -1060,7 +1069,7 @@ EB_ERRORTYPE SaoGenerationDecision16bit(
 			//; Requirement: lcuHeight > 2
 
 			{
-                SaoGatherFunctionTable_90_45_135_16bit_SSE2[(ASM_TYPES & PREAVX2_MASK) && 1][((lcuWidth & 15) == 0) || (lcuWidth == 28) || (lcuWidth == 56)](
+                SaoGatherFunctionTable_90_45_135_16bit_SSE2[!!(ASM_TYPES & PREAVX2_MASK)][((lcuWidth & 15) == 0) || (lcuWidth == 28) || (lcuWidth == 56)](
                     (EB_U16*)inputLcuPtr->bufferY,
                     inputLcuPtr->strideY,
                     (EB_U16*)(recon16->bufferY) + (recon16->originY + tbOriginY)*recon16->strideY + (recon16->originX + tbOriginX),
@@ -1073,7 +1082,7 @@ EB_ERRORTYPE SaoGenerationDecision16bit(
 		}
 
 		if (pictureControlSetPtr->temporalLayerIndex == 1) {
-            SaoGatherFunctionTable_90_45_135_16bit_SSE2[(ASM_TYPES & PREAVX2_MASK) && 1][((lcuWidth & 15) == 0) || (lcuWidth == 28) || (lcuWidth == 56)](
+            SaoGatherFunctionTable_90_45_135_16bit_SSE2[!!(ASM_TYPES & PREAVX2_MASK)][((lcuWidth & 15) == 0) || (lcuWidth == 28) || (lcuWidth == 56)](
                 (EB_U16*)inputLcuPtr->bufferY,
                 inputLcuPtr->strideY,
                 (EB_U16*)(recon16->bufferY) + (recon16->originY + tbOriginY)*recon16->strideY + (recon16->originX + tbOriginX),

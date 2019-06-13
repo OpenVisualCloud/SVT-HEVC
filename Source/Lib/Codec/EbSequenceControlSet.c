@@ -72,7 +72,7 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     sequenceControlSetPtr->profileIdc                                       = 0;
     sequenceControlSetPtr->levelIdc                                         = 0;
     sequenceControlSetPtr->tierIdc                                          = 0;
-    sequenceControlSetPtr->chromaFormatIdc                                  = 1; // EB_YUV420
+    sequenceControlSetPtr->chromaFormatIdc                                  = EB_YUV420;
     sequenceControlSetPtr->maxTemporalLayers                                = 1;
     
     sequenceControlSetPtr->bitsForPictureOrderCount                         = 16;
@@ -145,9 +145,25 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     EbRecoveryPointSeiCtor(
         &sequenceControlSetPtr->recoveryPoint);
 
-	// Initialize LCU params
-	LcuParamsCtor(
-		sequenceControlSetPtr);
+    // Initialize Content Light Level SEI
+    EbContentLightLevelCtor(
+        &sequenceControlSetPtr->contentLightLevel);
+
+    // Initialize Mastering Color Volume SEI
+    EbMasteringDisplayColorVolumeCtor(
+        &sequenceControlSetPtr->masteringDisplayColorVolume);
+
+    // Initialize Registered User Data SEI
+    EbRegUserDataSEICtor(
+        &sequenceControlSetPtr->regUserDataSeiPtr);
+
+    // Initialize Un-Registered User Data SEI
+    EbUnRegUserDataSEICtor(
+        &sequenceControlSetPtr->unRegUserDataSeiPtr);
+
+    // Initialize LCU params
+    LcuParamsCtor(
+        sequenceControlSetPtr);
 
     sequenceControlSetPtr->maxDpbSize	= 0;
     
@@ -178,8 +194,6 @@ EB_ERRORTYPE CopySequenceControlSet(
     dst->bitsForPictureOrderCount   = src->bitsForPictureOrderCount;                writeCount += sizeof(EB_U32);                     
     dst->maxInputLumaWidth          = src->maxInputLumaWidth;                       writeCount += sizeof(EB_U32);                     
     dst->maxInputLumaHeight         = src->maxInputLumaHeight;                      writeCount += sizeof(EB_U32);  
-    dst->maxInputChromaHeight       = src->maxInputChromaHeight;                    writeCount += sizeof(EB_U32);       
-    dst->maxInputChromaWidth        = src->maxInputChromaWidth;                     writeCount += sizeof(EB_U32);
     dst->maxInputPadRight           = src->maxInputPadRight;                        writeCount += sizeof(EB_U32);
     dst->maxInputPadBottom          = src->maxInputPadBottom;                       writeCount += sizeof(EB_U32);
     dst->lumaWidth                  = src->lumaWidth;                               writeCount += sizeof(EB_U32);                     
@@ -244,11 +258,39 @@ EB_ERRORTYPE CopySequenceControlSet(
     writeCount += sizeof(AppRecoveryPoint_t);
 
     EB_MEMCPY(
+        &dst->contentLightLevel,
+        &src->contentLightLevel,
+        sizeof(AppContentLightLevelSei_t));
+
+    writeCount += sizeof(AppContentLightLevelSei_t);
+
+    EB_MEMCPY(
+        &dst->masteringDisplayColorVolume,
+        &src->masteringDisplayColorVolume,
+        sizeof(AppMasteringDisplayColorVolumeSei_t));
+
+    writeCount += sizeof(AppMasteringDisplayColorVolumeSei_t);
+
+    EB_MEMCPY(
         &dst->picTimingSei,
         &src->picTimingSei,
         sizeof(AppPictureTimingSei_t));
 
     writeCount += sizeof(AppPictureTimingSei_t);
+
+    EB_MEMCPY(
+        &dst->regUserDataSeiPtr,
+        &src->regUserDataSeiPtr,
+        sizeof(RegistedUserData_t));
+
+    writeCount += sizeof(RegistedUserData_t);
+
+    EB_MEMCPY(
+        &dst->unRegUserDataSeiPtr,
+        &src->unRegUserDataSeiPtr,
+        sizeof(UnregistedUserData_t));
+
+    writeCount += sizeof(UnregistedUserData_t);
 
     EbVideoUsabilityInfoCopy(
         dst->videoUsabilityInfoPtr,
@@ -296,6 +338,87 @@ extern EB_ERRORTYPE LcuParamsCtor(
 	EB_MALLOC(LcuParams_t*, sequenceControlSetPtr->lcuParamsArray, sizeof(LcuParams_t) * ((MAX_PICTURE_WIDTH_SIZE + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize) * ((MAX_PICTURE_HEIGHT_SIZE + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize), EB_N_PTR);
 	return return_error;
 }
+
+#if TILES
+/************************************************
+ * Configure ME Tiles
+ ************************************************/
+static void ConfigureTiles(
+    SequenceControlSet_t *scsPtr)
+{
+    // Tiles Initialisation
+    const unsigned pictureWidthInLcu  = scsPtr->pictureWidthInLcu;
+    const unsigned pictureHeightInLcu = scsPtr->pictureHeightInLcu;
+
+    const unsigned tileColumns = scsPtr->tileColumnCount;
+    const unsigned tileRows = scsPtr->tileRowCount;
+
+    unsigned lastColumnWidth = pictureWidthInLcu;
+    unsigned lastRowHeight = pictureHeightInLcu;
+
+    unsigned rowIndex, columnIndex;
+    unsigned xLcuIndex, yLcuIndex, lcuIndex;
+    unsigned xLcuStart, yLcuStart;
+
+    if (scsPtr->tileUniformSpacing == 1)
+    {
+        for (columnIndex = 0; columnIndex < tileColumns - 1; ++columnIndex) {
+            scsPtr->tileColumnArray[columnIndex] = (EB_U16)((columnIndex + 1) * pictureWidthInLcu / tileColumns -
+                columnIndex * pictureWidthInLcu / tileColumns);
+            lastColumnWidth -= scsPtr->tileColumnArray[columnIndex];
+        }
+        scsPtr->tileColumnArray[columnIndex] = (EB_U16)lastColumnWidth;
+
+        for (rowIndex = 0; rowIndex < tileRows - 1; ++rowIndex) {
+            scsPtr->tileRowArray[rowIndex] = (EB_U16)((rowIndex + 1) * pictureHeightInLcu / tileRows -
+                rowIndex * pictureHeightInLcu / tileRows);
+            lastRowHeight -= scsPtr->tileRowArray[rowIndex];
+        }
+        scsPtr->tileRowArray[rowIndex] = (EB_U16)lastRowHeight;
+    }
+    else
+    {
+        for (columnIndex = 0; columnIndex < tileColumns - 1; ++columnIndex) {
+            scsPtr->tileColumnArray[columnIndex] = (EB_U16)scsPtr->tileColumnWidthArray[columnIndex];
+            lastColumnWidth -= scsPtr->tileColumnArray[columnIndex];
+        }
+        scsPtr->tileColumnArray[columnIndex] = (EB_U16)lastColumnWidth;
+
+        for (rowIndex = 0; rowIndex < tileRows - 1; ++rowIndex) {
+            scsPtr->tileRowArray[rowIndex] = (EB_U16)scsPtr->tileRowHeightArray[rowIndex];
+            lastRowHeight -= scsPtr->tileRowArray[rowIndex];
+        }
+        scsPtr->tileRowArray[rowIndex] = (EB_U16)lastRowHeight;
+    }
+
+    // Tile-loops
+    yLcuStart = 0;
+    for (rowIndex = 0; rowIndex < tileRows; ++rowIndex) {
+        xLcuStart = 0;
+        for (columnIndex = 0; columnIndex < tileColumns; ++columnIndex) {
+
+            // LCU-loops
+            for (yLcuIndex = yLcuStart; yLcuIndex < yLcuStart + scsPtr->tileRowArray[rowIndex]; ++yLcuIndex) {
+                for (xLcuIndex = xLcuStart; xLcuIndex < xLcuStart + scsPtr->tileColumnArray[columnIndex]; ++xLcuIndex) {
+                    lcuIndex = xLcuIndex + yLcuIndex * pictureWidthInLcu;
+                    scsPtr->lcuParamsArray[lcuIndex].tileLeftEdgeFlag = (xLcuIndex == xLcuStart) ? EB_TRUE : EB_FALSE;
+                    scsPtr->lcuParamsArray[lcuIndex].tileTopEdgeFlag = (yLcuIndex == yLcuStart) ? EB_TRUE : EB_FALSE;
+                    scsPtr->lcuParamsArray[lcuIndex].tileRightEdgeFlag =
+                        (xLcuIndex == xLcuStart + scsPtr->tileColumnArray[columnIndex] - 1) ? EB_TRUE : EB_FALSE;
+                    scsPtr->lcuParamsArray[lcuIndex].tileStartX = xLcuStart * scsPtr->lcuSize;
+                    scsPtr->lcuParamsArray[lcuIndex].tileStartY = yLcuStart * scsPtr->lcuSize;
+                    scsPtr->lcuParamsArray[lcuIndex].tileEndX = (columnIndex == (tileColumns - 1)) ? scsPtr->lumaWidth : (xLcuStart + scsPtr->tileColumnArray[columnIndex]) * scsPtr->lcuSize;
+                    scsPtr->lcuParamsArray[lcuIndex].tileEndY = (rowIndex == (tileRows - 1)) ? scsPtr->lumaHeight : (yLcuStart + scsPtr->tileRowArray[rowIndex]) * scsPtr->lcuSize;
+                }
+            }
+            xLcuStart += scsPtr->tileColumnArray[columnIndex];
+        }
+        yLcuStart += scsPtr->tileRowArray[rowIndex];
+    }
+
+    return;
+}
+#endif
 
 extern EB_ERRORTYPE LcuParamsInit(
 	SequenceControlSet_t *sequenceControlSetPtr) {
@@ -402,6 +525,10 @@ extern EB_ERRORTYPE LcuParamsInit(
 	sequenceControlSetPtr->pictureWidthInLcu = pictureLcuWidth;
 	sequenceControlSetPtr->pictureHeightInLcu = pictureLcuHeight;
 	sequenceControlSetPtr->lcuTotalCount = pictureLcuWidth * pictureLcuHeight;
+
+#if TILES
+    ConfigureTiles(sequenceControlSetPtr);
+#endif
 
 	return return_error;
 }

@@ -12,15 +12,31 @@
 #include "EbEncodeContext.h"
 #include "EbPredictionStructure.h"
 #include "EbSei.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
 /************************************
  * Sequence Control Set
  ************************************/
 typedef struct SequenceControlSet_s
 {        
     EB_H265_ENC_CONFIGURATION   staticConfig;
+
+#if TILES
+    // Tiles
+    // Better to put into PictureControlSet
+    EB_U32              tileUniformSpacing;
+    EB_U16              tileColumnCount;
+    EB_U16              tileRowCount;
+    EB_U8               tileSliceMode;
+    EB_U16              tileColumnWidthArray[EB_TILE_COLUMN_MAX_COUNT];
+    EB_U16              tileRowHeightArray[EB_TILE_ROW_MAX_COUNT];
+    EB_U16              tileColumnArray[EB_TILE_COLUMN_MAX_COUNT];
+    EB_U16              tileRowArray[EB_TILE_ROW_MAX_COUNT];
+#endif
     
     // Encoding Context
     EncodeContext_t            *encodeContextPtr;
@@ -39,8 +55,8 @@ typedef struct SequenceControlSet_s
     // Picture deminsions
 	EB_U16                      maxInputLumaWidth;
 	EB_U16                      maxInputLumaHeight;
-	EB_U16                      maxInputChromaWidth;
-	EB_U16                      maxInputChromaHeight; 
+	//EB_U16                      maxInputChromaWidth;
+	//EB_U16                      maxInputChromaHeight; 
 	EB_U16                      maxInputPadRight;
 	EB_U16                      maxInputPadBottom;
     EB_U16                      lumaWidth;
@@ -121,6 +137,19 @@ typedef struct SequenceControlSet_s
 
     // Recovery point
     AppRecoveryPoint_t          recoveryPoint;
+
+    // Content Light Level sei
+    AppContentLightLevelSei_t   contentLightLevel;
+
+    // Mastering Display Color Volume Sei
+    AppMasteringDisplayColorVolumeSei_t   masteringDisplayColorVolume;
+
+    // Registered User data Sei
+    RegistedUserData_t          regUserDataSeiPtr;
+
+    // Un Registered User data Sei
+    UnregistedUserData_t        unRegUserDataSeiPtr;
+
     // Maximum Decoded Picture Buffer size.
     EB_U32                      maxDpbSize;
     

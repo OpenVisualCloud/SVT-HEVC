@@ -401,7 +401,7 @@ EB_ERRORTYPE ComputeDecimatedZzSad(
 					4);
 
 				// ZZ SAD between 1/16 current & 1/16 collocated
-				decimatedLcuCollocatedSad = NxMSadKernel_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1][2](
+				decimatedLcuCollocatedSad = NxMSadKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][2](
 					&(sixteenthDecimatedPicturePtr->bufferY[blkDisplacementDecimated]),
 					sixteenthDecimatedPicturePtr->strideY,
 					contextPtr->meContextPtr->sixteenthLcuBuffer,

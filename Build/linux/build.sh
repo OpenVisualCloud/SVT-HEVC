@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright(c) 2018 Intel Corporation 
+# Copyright(c) 2018 Intel Corporation
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 
 function clean {
@@ -24,8 +24,6 @@ function debug {
 
 	# Compile the App
 	make -j SvtHevcEncApp
-	# Compile the Simple App
-	make -j SvtHevcEncSimpleApp
 	cd ..
 }
 
@@ -43,9 +41,7 @@ function release {
 
 	# Compile the App
 	make -j SvtHevcEncApp
-	# Compile the Simple App
-	make -j SvtHevcEncSimpleApp
-	cd ..	
+	cd ..
 }
 
 # Defines
@@ -56,7 +52,6 @@ RANLIB_COMPILER=gcc-ranlib
 CMAKE_COMPILER=$GCC_COMPILER
 
 if [ $# -eq 0 ]; then
-	debug
 	release
 elif [ "$1" = "clean" ]; then
 	clean
@@ -66,14 +61,11 @@ elif [ "$1" = "release" ]; then
 	release
 
 elif [ "$1" = "all" ]; then
-	debug
 	release
 elif [ "$1" = "gcc" ]; then
-	debug
 	release
 else
 	echo "build.sh <clean|all|debug|release|help>"
 fi
 
 exit
- 

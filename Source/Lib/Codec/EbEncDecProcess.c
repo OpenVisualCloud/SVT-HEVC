@@ -47,7 +47,8 @@ EB_ERRORTYPE EncDecContextCtor(
     EbFifo_t                *packetizationOutputFifoPtr,
     EbFifo_t                *feedbackFifoPtr,
     EbFifo_t                *pictureDemuxFifoPtr,
-    EB_BOOL                  is16bit)
+    EB_BOOL                  is16bit,
+    EB_COLOR_FORMAT          colorFormat)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
     EncDecContext_t *contextPtr;
@@ -55,6 +56,7 @@ EB_ERRORTYPE EncDecContextCtor(
     *contextDblPtr = contextPtr;
 
     contextPtr->is16bit = is16bit;
+    contextPtr->colorFormat = colorFormat;
 
     // Input/Output System Resource Manager FIFOs
     contextPtr->modeDecisionInputFifoPtr = modeDecisionConfigurationInputFifoPtr;
@@ -86,6 +88,7 @@ EB_ERRORTYPE EncDecContextCtor(
         initData.topPadding = 0;
         initData.botPadding = 0;
         initData.splitMode = EB_FALSE;
+        initData.colorFormat = colorFormat;
 
         contextPtr->inputSample16bitBuffer = (EbPictureBufferDesc_t *)EB_NULL;
         if (is16bit) {
@@ -109,6 +112,7 @@ EB_ERRORTYPE EncDecContextCtor(
         initData.maxWidth = MAX_LCU_SIZE;
         initData.maxHeight = MAX_LCU_SIZE;
         initData.bitDepth = EB_16BIT;
+        initData.colorFormat = colorFormat;
         initData.leftPadding = 0;
         initData.rightPadding = 0;
         initData.topPadding = 0;
@@ -132,13 +136,13 @@ EB_ERRORTYPE EncDecContextCtor(
     }
 
     // Intra Reference Samples
-    return_error = IntraReferenceSamplesCtor(&contextPtr->intraRefPtr);
+    return_error = IntraReferenceSamplesCtor(&contextPtr->intraRefPtr, colorFormat);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
     contextPtr->intraRefPtr16 = (IntraReference16bitSamples_t *)EB_NULL;
     if (is16bit) {
-        return_error = IntraReference16bitSamplesCtor(&contextPtr->intraRefPtr16);
+        return_error = IntraReference16bitSamplesCtor(&contextPtr->intraRefPtr16, colorFormat);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -229,10 +233,13 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
     EB_U8           *temporalBufferLeft;
     EB_U8           tmp[64], tmpY[64];
     EB_U32          i, j;
-    EB_S8           ReorderedsaoOffset[4 + 1];
+    EB_S8           ReorderedsaoOffset[4 + 1 + 3];
     EB_S8           OrderedsaoOffsetBo[5];
     EB_BOOL         FirstColLcu, LastColLcu, FirstRowLcu, LastRowLcu;
     EncodeContext_t *encodeContextPtr;
+    const EB_COLOR_FORMAT colorFormat = pictureControlSetPtr->colorFormat;
+    const EB_U16 subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    const EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
 
     encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
 
@@ -244,6 +251,9 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
     ReorderedsaoOffset[2] = 0;
     ReorderedsaoOffset[3] = (EB_S8)saoPtr->saoOffset[videoComponent][2];
     ReorderedsaoOffset[4] = (EB_S8)saoPtr->saoOffset[videoComponent][3];
+    ReorderedsaoOffset[5] = 0;
+    ReorderedsaoOffset[6] = 0;
+    ReorderedsaoOffset[7] = 0;
 
     OrderedsaoOffsetBo[0] = (EB_S8)saoPtr->saoOffset[videoComponent][0];
     OrderedsaoOffsetBo[1] = (EB_S8)saoPtr->saoOffset[videoComponent][1];
@@ -252,7 +262,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
     OrderedsaoOffsetBo[4] = 0;
 
     temporalBufferLeft = contextPtr->saoLeftBuffer[pingpongIdxLeft];
-    temporalBufferUpper = contextPtr->saoUpBuffer[pingpongIdxUp] + (tbOriginX >> isChroma);
+    temporalBufferUpper = contextPtr->saoUpBuffer[pingpongIdxUp] + (tbOriginX >> (isChroma ? subWidthCMinus1:0));
 
     //TODO:   get to this function only when lcuPtr->saoTypeIndex[isChroma] is not OFF
     switch (saoPtr->saoTypeIndex[isChroma]) {
@@ -260,7 +270,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
     case 1: // EO - 0 degrees
 
         FirstColLcu = (EB_BOOL)(tbOriginX == 0);
-        LastColLcu = (EB_BOOL)((tbOriginX >> isChroma) + lcuWidth == pictureWidth);
+        LastColLcu = (EB_BOOL)((tbOriginX >> (isChroma ? subWidthCMinus1 : 0)) + lcuWidth == pictureWidth);
 
         //save the non filtered first colomn if it is the first LCU in the row.
         if (FirstColLcu) {
@@ -276,7 +286,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
         }
 
 
-        SaoFunctionTableEO_0_90[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
+        SaoFunctionTableEO_0_90[!!(ASM_TYPES & PREAVX2_MASK)][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
             reconSamplePtr,
             reconStride,
             temporalBufferLeft,
@@ -302,7 +312,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
     case 2: // EO - 90 degrees
 
         FirstRowLcu = (EB_BOOL)(tbOriginY == 0);
-        LastRowLcu = (EB_BOOL)((tbOriginY >> isChroma) + lcuHeight == pictureHeight);
+        LastRowLcu = (EB_BOOL)((tbOriginY >> (isChroma ? subHeightCMinus1:0)) + lcuHeight == pictureHeight);
 
         //save the non filtered first row if this LCU is on the first LCU Row
         if (FirstRowLcu) {
@@ -316,7 +326,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
                 tmp[i] = reconSamplePtr[i + reconStride*(lcuHeight - 1)];
             }
         }
-        SaoFunctionTableEO_0_90[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
+        SaoFunctionTableEO_0_90[!!(ASM_TYPES & PREAVX2_MASK)][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
             reconSamplePtr,
             reconStride,
             temporalBufferUpper,
@@ -342,9 +352,9 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
     case 3: // EO - 135 degrees
 
         FirstColLcu = (EB_BOOL)(tbOriginX == 0);
-        LastColLcu = (EB_BOOL)((tbOriginX >> isChroma) + lcuWidth == pictureWidth);
+        LastColLcu = (EB_BOOL)((tbOriginX >> (isChroma ? subWidthCMinus1 : 0)) + lcuWidth == pictureWidth);
         FirstRowLcu = (EB_BOOL)(tbOriginY == 0);
-        LastRowLcu = (EB_BOOL)((tbOriginY >> isChroma) + lcuHeight == pictureHeight);
+        LastRowLcu = (EB_BOOL)((tbOriginY >> (isChroma ? subHeightCMinus1:0)) + lcuHeight == pictureHeight);
 
         //save the non filtered first colomn if it is the first LCU in the row.
         if (FirstColLcu) {
@@ -372,7 +382,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
             }
         }
 
-        SaoFunctionTableEO_135_45[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 3][(lcuHeight == MAX_LCU_SIZE_REMAINING) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
+        SaoFunctionTableEO_135_45[!!(ASM_TYPES & PREAVX2_MASK)][(saoPtr->saoTypeIndex[isChroma]) - 3][(lcuHeight == MAX_LCU_SIZE_REMAINING) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
             reconSamplePtr,
             reconStride,
             temporalBufferLeft,
@@ -408,9 +418,9 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
     case 4: // EO - 45 degrees
 
         FirstColLcu = (EB_BOOL)(tbOriginX == 0);
-        LastColLcu = (EB_BOOL)((tbOriginX >> isChroma) + lcuWidth == pictureWidth);
+        LastColLcu = (EB_BOOL)((tbOriginX >> (isChroma ? subWidthCMinus1 : 0)) + lcuWidth == pictureWidth);
         FirstRowLcu = (EB_BOOL)(tbOriginY == 0);
-        LastRowLcu = (EB_BOOL)((tbOriginY >> isChroma) + lcuHeight == pictureHeight);
+        LastRowLcu = (EB_BOOL)((tbOriginY >> (isChroma ? subHeightCMinus1:0)) + lcuHeight == pictureHeight);
 
         //save the non filtered first colomn if it is the first LCU in the row.
         if (FirstColLcu) {
@@ -438,7 +448,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
             }
         }
 
-        SaoFunctionTableEO_135_45[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 3][(lcuHeight == MAX_LCU_SIZE_REMAINING) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
+        SaoFunctionTableEO_135_45[!!(ASM_TYPES & PREAVX2_MASK)][(saoPtr->saoTypeIndex[isChroma]) - 3][(lcuHeight == MAX_LCU_SIZE_REMAINING) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
             reconSamplePtr,
             reconStride,
             temporalBufferLeft,
@@ -473,7 +483,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
 
     case 5: // BO
 
-        SaoFunctionTableBo[(ASM_TYPES & PREAVX2_MASK) && 1][((lcuWidth & 15) == 0 && (lcuHeight != MAX_LCU_SIZE_REMAINING))](
+        SaoFunctionTableBo[!!(ASM_TYPES & PREAVX2_MASK)][((lcuWidth & 15) == 0 && (lcuHeight != MAX_LCU_SIZE_REMAINING))](
             reconSamplePtr,
             reconStride,
             saoPtr->saoBandPosition[videoComponent],
@@ -533,6 +543,9 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture(
         reconPicturePtr = ((EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr)->referencePicture;
     else
         reconPicturePtr = pictureControlSetPtr->reconPicturePtr;
+    const EB_COLOR_FORMAT colorFormat = reconPicturePtr->colorFormat;    // Chroma format
+    const EB_U16 subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    const EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
     // Apply SAO
 
     // Y
@@ -610,12 +623,13 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture(
                 tbOriginX = lcuParams->originX;
                 tbOriginY = lcuParams->originY;
 
-                lcuWidth = lcuParams->width >> 1;
-                lcuHeight = lcuParams->height >> 1;
+                lcuWidth = lcuParams->width >> subWidthCMinus1;
+                lcuHeight = lcuParams->height >> subHeightCMinus1;
 
                 saoParams = &pictureControlSetPtr->lcuPtrArray[lcuIndex]->saoParams;
 
-                reconSampleChromaIndex = ((reconPicturePtr->originY + tbOriginY) * reconPicturePtr->strideCb + reconPicturePtr->originX + tbOriginX) >> 1;
+                reconSampleChromaIndex = ((reconPicturePtr->originX + tbOriginX) >> subWidthCMinus1) +
+                    (((reconPicturePtr->originY + tbOriginY) * reconPicturePtr->strideCb) >> subHeightCMinus1);
 
                 if (tbOriginX == 0) {
 
@@ -624,7 +638,7 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture(
                     EB_MEMCPY(contextPtr->saoUpBuffer[pingpongIdxUp], reconSampleCbPtr, sizeof(EB_U8) * sequenceControlSetPtr->chromaWidth);
                 }
 
-                lcuHeightPlusOne = (sequenceControlSetPtr->chromaHeight == (tbOriginY >> 1) + lcuHeight) ? lcuHeight : lcuHeight + 1;
+                lcuHeightPlusOne = (sequenceControlSetPtr->chromaHeight == (tbOriginY >> subHeightCMinus1) + lcuHeight) ? lcuHeight : lcuHeight + 1;
                 //Save last pixel colunm of this LCU  for next LCU
                 for (lcuRow = 0; lcuRow < lcuHeightPlusOne; ++lcuRow) {
                     contextPtr->saoLeftBuffer[pingpongIdxLeft][lcuRow] = reconPicturePtr->bufferCb[reconSampleChromaIndex + lcuWidth - 1 + lcuRow*reconPicturePtr->strideCb];
@@ -669,13 +683,13 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture(
                 tbOriginX = lcuParams->originX;
                 tbOriginY = lcuParams->originY;
 
-                lcuWidth = lcuParams->width >> 1;
-                lcuHeight = lcuParams->height >> 1;
+                lcuWidth = lcuParams->width >> subWidthCMinus1;
+                lcuHeight = lcuParams->height >> subHeightCMinus1;
 
                 saoParams = &pictureControlSetPtr->lcuPtrArray[lcuIndex]->saoParams;
 
-                reconSampleChromaIndex = ((reconPicturePtr->originY + tbOriginY) * reconPicturePtr->strideCr + reconPicturePtr->originX + tbOriginX) >> 1;
-
+                reconSampleChromaIndex = ((reconPicturePtr->originX + tbOriginX) >> subWidthCMinus1) +
+                    (((reconPicturePtr->originY + tbOriginY) * reconPicturePtr->strideCr) >> subHeightCMinus1);
 
                 if (tbOriginX == 0) {
 
@@ -686,7 +700,7 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture(
                 }
 
 
-                lcuHeightPlusOne = (sequenceControlSetPtr->chromaHeight == (tbOriginY >> 1) + lcuHeight) ? lcuHeight : lcuHeight + 1;
+                lcuHeightPlusOne = (sequenceControlSetPtr->chromaHeight == (tbOriginY >> subHeightCMinus1) + lcuHeight) ? lcuHeight : lcuHeight + 1;
 
                 //Save last pixel colunm of this LCU  for next LCU
                 for (lcuRow = 0; lcuRow < lcuHeightPlusOne; ++lcuRow) {
@@ -757,6 +771,9 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
     EB_S8           OrderedsaoOffsetBo[5];
     EB_BOOL         FirstColLcu, LastColLcu, FirstRowLcu, LastRowLcu;
 
+    const EB_COLOR_FORMAT colorFormat = pictureControlSetPtr->colorFormat;
+    const EB_U16 subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    const EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
     (void)bitDepth;
     lcuHeightCount = 0;
 
@@ -773,14 +790,14 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
     OrderedsaoOffsetBo[4] = 0;
 
     temporalBufferLeft = contextPtr->saoLeftBuffer16[pingpongIdxLeft];
-    temporalBufferUpper = contextPtr->saoUpBuffer16[pingpongIdxUp] + (tbOriginX >> isChroma);
+    temporalBufferUpper = contextPtr->saoUpBuffer16[pingpongIdxUp] + (tbOriginX >> (isChroma ? subWidthCMinus1: 0));
     //TODO:   get to this function only when lcuPtr->saoTypeIndex[isChroma] is not OFF
     switch (saoPtr->saoTypeIndex[isChroma]) {
     case 1: // EO - 0 degrees
 
 
         FirstColLcu = (EB_BOOL)(tbOriginX == 0);
-        LastColLcu = (EB_BOOL)((tbOriginX >> isChroma) + lcuWidth == pictureWidth);
+        LastColLcu = (EB_BOOL)((tbOriginX >> (isChroma ? subWidthCMinus1 : 0)) + lcuWidth == pictureWidth);
 
         //save the non filtered first colomn if it is the first LCU in the row.
         if (FirstColLcu) {
@@ -796,7 +813,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
         }
 
 
-        SaoFunctionTableEO_0_90_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
+        SaoFunctionTableEO_0_90_16bit[!!(ASM_TYPES & PREAVX2_MASK)][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
             reconSamplePtr,
             reconStride,
             temporalBufferLeft,
@@ -822,7 +839,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
     case 2: // EO - 90 degrees
 
         FirstRowLcu = (EB_BOOL)((tbOriginY == 0));
-        LastRowLcu = (EB_BOOL)(((tbOriginY >> isChroma) + lcuHeight == pictureHeight));
+        LastRowLcu = (EB_BOOL)(((tbOriginY >> (isChroma ? subHeightCMinus1 : 0)) + lcuHeight == pictureHeight));
 
         //save the non filtered first row if this LCU is on the first LCU Row
         if (FirstRowLcu) {
@@ -837,7 +854,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
             }
         }
 
-        SaoFunctionTableEO_0_90_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
+        SaoFunctionTableEO_0_90_16bit[!!(ASM_TYPES & PREAVX2_MASK)][(saoPtr->saoTypeIndex[isChroma]) - 1][((lcuHeight & 15) == 0) && ((lcuWidth & 15) == 0) && (lcuWidth >= 32)](
             reconSamplePtr,
             reconStride,
             temporalBufferUpper,
@@ -863,9 +880,9 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
     case 3: // EO - 135 degrees
 
         FirstColLcu = (EB_BOOL)((tbOriginX == 0));
-        LastColLcu = (EB_BOOL)(((tbOriginX >> isChroma) + lcuWidth == pictureWidth));
+        LastColLcu = (EB_BOOL)((tbOriginX >> (isChroma ? subWidthCMinus1 : 0)) + lcuWidth == pictureWidth);
         FirstRowLcu = (EB_BOOL)((tbOriginY == 0));
-        LastRowLcu = (EB_BOOL)(((tbOriginY >> isChroma) + lcuHeight == pictureHeight));
+        LastRowLcu = (EB_BOOL)(((tbOriginY >> (isChroma ? subHeightCMinus1 : 0)) + lcuHeight == pictureHeight));
 
         //save the non filtered first colomn if it is the first LCU in the row.
         if (FirstColLcu) {
@@ -893,7 +910,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
             }
         }
 
-        SaoFunctionTableEO_135_45_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 3][((lcuWidth & 15) == 0) && (lcuWidth >= 32) && ((lcuHeight & 7) == 0) && (lcuHeight >= 8)](
+        SaoFunctionTableEO_135_45_16bit[!!(ASM_TYPES & PREAVX2_MASK)][(saoPtr->saoTypeIndex[isChroma]) - 3][((lcuWidth & 15) == 0) && (lcuWidth >= 32) && ((lcuHeight & 7) == 0) && (lcuHeight >= 8)](
             reconSamplePtr,
             reconStride,
             temporalBufferLeft,
@@ -929,9 +946,9 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
     case 4: // EO - 45 degrees
 
         FirstColLcu = (EB_BOOL)((tbOriginX == 0));
-        LastColLcu = (EB_BOOL)(((tbOriginX >> isChroma) + lcuWidth == pictureWidth));
+        LastColLcu = (EB_BOOL)((tbOriginX >> (isChroma ? subWidthCMinus1 : 0)) + lcuWidth == pictureWidth);
         FirstRowLcu = (EB_BOOL)((tbOriginY == 0));
-        LastRowLcu = (EB_BOOL)(((tbOriginY >> isChroma) + lcuHeight == pictureHeight));
+        LastRowLcu = (EB_BOOL)(((tbOriginY >> (isChroma ? subHeightCMinus1 : 0)) + lcuHeight == pictureHeight));
 
         //save the non filtered first colomn if it is the first LCU in the row.
         if (FirstColLcu) {
@@ -959,7 +976,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
             }
         }
 
-        SaoFunctionTableEO_135_45_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][(saoPtr->saoTypeIndex[isChroma]) - 3][((lcuWidth & 15) == 0) && (lcuWidth >= 32) && ((lcuHeight & 7) == 0) && (lcuHeight >= 8)](
+        SaoFunctionTableEO_135_45_16bit[!!(ASM_TYPES & PREAVX2_MASK)][(saoPtr->saoTypeIndex[isChroma]) - 3][((lcuWidth & 15) == 0) && (lcuWidth >= 32) && ((lcuHeight & 7) == 0) && (lcuHeight >= 8)](
             reconSamplePtr,
             reconStride,
             temporalBufferLeft,
@@ -994,7 +1011,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
 
     case 5: // BO
 
-        SaoFunctionTableBo_16bit[(ASM_TYPES & PREAVX2_MASK) && 1][((lcuWidth & 15) == 0)](
+        SaoFunctionTableBo_16bit[!!(ASM_TYPES & PREAVX2_MASK)][((lcuWidth & 15) == 0)](
             reconSamplePtr,
             reconStride,
             saoPtr->saoBandPosition[videoComponent],
@@ -1053,6 +1070,9 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture16bit(
         recBuf16bit = ((EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr)->referencePicture16bit;
     else
         recBuf16bit = pictureControlSetPtr->reconPicture16bitPtr;
+    const EB_COLOR_FORMAT colorFormat = recBuf16bit->colorFormat;
+    const EB_U16 subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    const EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
     // Apply SAO
     // Y
     if (pictureControlSetPtr->saoFlag[0]) {
@@ -1133,11 +1153,12 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture16bit(
                 tbOriginX = lcuParams->originX;
                 tbOriginY = lcuParams->originY;
 
-                lcuWidth = lcuParams->width >> 1;
-                lcuHeight = lcuParams->height >> 1;
+                lcuWidth = lcuParams->width >> subWidthCMinus1;
+                lcuHeight = lcuParams->height >> subHeightCMinus1;
 
                 saoParams = &pictureControlSetPtr->lcuPtrArray[lcuIndex]->saoParams;
-                reconSampleChromaIndex = ((recBuf16bit->originY + tbOriginY) * recBuf16bit->strideCb + recBuf16bit->originX + tbOriginX) >> 1;
+                reconSampleChromaIndex = ((recBuf16bit->originX + tbOriginX) >> subWidthCMinus1) +
+                    (((recBuf16bit->originY + tbOriginY) * recBuf16bit->strideCb) >> subHeightCMinus1);
 
                 if (tbOriginX == 0) {
 
@@ -1148,7 +1169,7 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture16bit(
                 }
 
                 //Save last pixel colunm of this LCU  for next LCU
-                lcuHeightPlusOne = (sequenceControlSetPtr->chromaHeight == (tbOriginY >> 1) + lcuHeight) ? lcuHeight : lcuHeight + 1;
+                lcuHeightPlusOne = (sequenceControlSetPtr->chromaHeight == (tbOriginY >> subHeightCMinus1) + lcuHeight) ? lcuHeight : lcuHeight + 1;
                 reconSampleCbPtr = (EB_U16*)(recBuf16bit->bufferCb) + reconSampleChromaIndex + lcuWidth - 1;
 
                 for (lcuRow = 0; lcuRow < lcuHeightPlusOne; ++lcuRow) {
@@ -1195,12 +1216,13 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture16bit(
                 tbOriginX = lcuParams->originX;
                 tbOriginY = lcuParams->originY;
 
-                lcuWidth = lcuParams->width >> 1;
-                lcuHeight = lcuParams->height >> 1;
+                lcuWidth = lcuParams->width >> subWidthCMinus1;
+                lcuHeight = lcuParams->height >> subHeightCMinus1;
 
                 saoParams = &pictureControlSetPtr->lcuPtrArray[lcuIndex]->saoParams;
 
-                reconSampleChromaIndex = ((recBuf16bit->originY + tbOriginY) * recBuf16bit->strideCr + recBuf16bit->originX + tbOriginX) >> 1;
+                reconSampleChromaIndex = ((recBuf16bit->originX + tbOriginX) >> subWidthCMinus1) +
+                    (((recBuf16bit->originY + tbOriginY) * recBuf16bit->strideCr) >> subHeightCMinus1);
 
                 if (tbOriginX == 0) {
 
@@ -1210,7 +1232,7 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture16bit(
                 }
 
                 //Save last pixel colunm of this LCU  for next LCU
-                lcuHeightPlusOne = (sequenceControlSetPtr->chromaHeight == (tbOriginY >> 1) + lcuHeight) ? lcuHeight : lcuHeight + 1;
+                lcuHeightPlusOne = (sequenceControlSetPtr->chromaHeight == (tbOriginY >> subHeightCMinus1) + lcuHeight) ? lcuHeight : lcuHeight + 1;
                 reconSampleCrPtr = (EB_U16*)(recBuf16bit->bufferCr) + reconSampleChromaIndex + lcuWidth - 1;
 
                 for (lcuRow = 0; lcuRow < lcuHeightPlusOne; ++lcuRow) {
@@ -1617,10 +1639,9 @@ static void ReconOutput(
     EB_BUFFERHEADERTYPE           *outputReconPtr;
     EncodeContext_t               *encodeContextPtr = sequenceControlSetPtr->encodeContextPtr;
     EB_BOOL is16bit = (sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
-    // The totalNumberOfReconFrames counter has to be write/read protected as
-    //   it is used to determine the end of the stream.  If it is not protected
-    //   the encoder might not properly terminate.
-    EbBlockOnMutex(encodeContextPtr->terminatingConditionsMutex);
+    const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)sequenceControlSetPtr->chromaFormatIdc;
+    const EB_U16 subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    const EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
 
     // Get Recon Buffer
     EbGetEmptyObject( 
@@ -1628,14 +1649,6 @@ static void ReconOutput(
         &outputReconWrapperPtr);
     outputReconPtr = (EB_BUFFERHEADERTYPE*)outputReconWrapperPtr->objectPtr;
     outputReconPtr->nFlags = 0;
-
-    // START READ/WRITE PROTECTED SECTION
-    if (encodeContextPtr->totalNumberOfReconFrames == encodeContextPtr->terminatingPictureNumber)
-        outputReconPtr->nFlags = EB_BUFFERFLAG_EOS;
-    
-    encodeContextPtr->totalNumberOfReconFrames++;
-
-    EbReleaseMutex(encodeContextPtr->terminatingConditionsMutex);
 
     // STOP READ/WRITE PROTECTED SECTION
     outputReconPtr->nFilledLen = 0;
@@ -1683,8 +1696,9 @@ static void ReconOutput(
         outputReconPtr->nFilledLen += sampleTotalCount;
 
         // U Recon Samples
-        sampleTotalCount = ((reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight) * (reconPtr->maxHeight - sequenceControlSetPtr->maxInputPadBottom) >> 2) << is16bit;
-        reconReadPtr = reconPtr->bufferCb + ((reconPtr->originY << is16bit) >> 1) * reconPtr->strideCb + ((reconPtr->originX << is16bit) >> 1);
+        sampleTotalCount = ((reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight) * (reconPtr->maxHeight - sequenceControlSetPtr->maxInputPadBottom) >> (3 - colorFormat)) << is16bit;
+        reconReadPtr = reconPtr->bufferCb + ((reconPtr->originX << is16bit) >> subWidthCMinus1) +
+            ((reconPtr->originY << is16bit) >> subHeightCMinus1) * reconPtr->strideCb;
         reconWritePtr = &(outputReconPtr->pBuffer[outputReconPtr->nFilledLen]);
 
         CHECK_REPORT_ERROR(
@@ -1697,15 +1711,16 @@ static void ReconOutput(
             reconReadPtr,
             reconPtr->strideCb,
             reconWritePtr,
-            (reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight) >> 1,
-            (reconPtr->width - sequenceControlSetPtr->padRight) >> 1,
-            (reconPtr->height - sequenceControlSetPtr->padBottom) >> 1,
+            (reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight) >> subWidthCMinus1,
+            (reconPtr->width - sequenceControlSetPtr->padRight) >> subWidthCMinus1,
+            (reconPtr->height - sequenceControlSetPtr->padBottom) >> subHeightCMinus1,
             1 << is16bit);
         outputReconPtr->nFilledLen += sampleTotalCount;
 
         // V Recon Samples
-        sampleTotalCount = ((reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight) * (reconPtr->maxHeight - sequenceControlSetPtr->maxInputPadBottom) >> 2) << is16bit;
-        reconReadPtr = reconPtr->bufferCr + ((reconPtr->originY << is16bit) >> 1) * reconPtr->strideCr + ((reconPtr->originX << is16bit) >> 1);
+        sampleTotalCount = ((reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight) * (reconPtr->maxHeight - sequenceControlSetPtr->maxInputPadBottom) >> (3 - colorFormat)) << is16bit;
+        reconReadPtr = reconPtr->bufferCr + ((reconPtr->originX << is16bit) >> subWidthCMinus1) +
+            ((reconPtr->originY << is16bit) >> subHeightCMinus1) * reconPtr->strideCr;
         reconWritePtr = &(outputReconPtr->pBuffer[outputReconPtr->nFilledLen]);
 
         CHECK_REPORT_ERROR(
@@ -1719,17 +1734,29 @@ static void ReconOutput(
             reconReadPtr,
             reconPtr->strideCr,
             reconWritePtr,
-            (reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight) >> 1,
-            (reconPtr->width - sequenceControlSetPtr->padRight) >> 1,
-            (reconPtr->height - sequenceControlSetPtr->padBottom) >> 1,
+            (reconPtr->maxWidth - sequenceControlSetPtr->maxInputPadRight) >> subWidthCMinus1,
+            (reconPtr->width - sequenceControlSetPtr->padRight) >> subWidthCMinus1,
+            (reconPtr->height - sequenceControlSetPtr->padBottom) >> subHeightCMinus1,
             1 << is16bit);
         outputReconPtr->nFilledLen += sampleTotalCount;
         outputReconPtr->pts = pictureControlSetPtr->pictureNumber;
     }
 
+    // The totalNumberOfReconFrames counter has to be write/read protected as
+    //   it is used to determine the end of the stream.  If it is not protected
+    //   the encoder might not properly terminate.
+    EbBlockOnMutex(encodeContextPtr->terminatingConditionsMutex);
+
+    // START READ/WRITE PROTECTED SECTION
+    if (encodeContextPtr->totalNumberOfReconFrames == encodeContextPtr->terminatingPictureNumber) {
+        outputReconPtr->nFlags = EB_BUFFERFLAG_EOS;
+    }
+    encodeContextPtr->totalNumberOfReconFrames++;
+
     // Post the Recon object
     EbPostFullObject(outputReconWrapperPtr);
-    
+
+    EbReleaseMutex(encodeContextPtr->terminatingConditionsMutex);
 }
 
 void PadRefAndSetFlags(
@@ -1742,6 +1769,9 @@ void PadRefAndSetFlags(
     EbPictureBufferDesc_t *refPicPtr = (EbPictureBufferDesc_t*)referenceObject->referencePicture;
     EbPictureBufferDesc_t *refPic16BitPtr = (EbPictureBufferDesc_t*)referenceObject->referencePicture16bit;
     EB_BOOL                is16bit = (sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
+    EB_COLOR_FORMAT colorFormat = pictureControlSetPtr->colorFormat;
+    EB_U16 subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
 
     if (!is16bit) {
         // Y samples
@@ -1757,19 +1787,19 @@ void PadRefAndSetFlags(
         GeneratePadding(
             refPicPtr->bufferCb,
             refPicPtr->strideCb,
-            refPicPtr->width >> 1,
-            refPicPtr->height >> 1,
-            refPicPtr->originX >> 1,
-            refPicPtr->originY >> 1);
+            refPicPtr->width >> subWidthCMinus1,
+            refPicPtr->height >> subHeightCMinus1,
+            refPicPtr->originX >> subWidthCMinus1,
+            refPicPtr->originY >> subHeightCMinus1);
 
         // Cr samples
         GeneratePadding(
             refPicPtr->bufferCr,
             refPicPtr->strideCr,
-            refPicPtr->width >> 1,
-            refPicPtr->height >> 1,
-            refPicPtr->originX >> 1,
-            refPicPtr->originY >> 1);
+            refPicPtr->width >> subWidthCMinus1,
+            refPicPtr->height >> subHeightCMinus1,
+            refPicPtr->originX >> subWidthCMinus1,
+            refPicPtr->originY >> subHeightCMinus1);
     }
 
     //We need this for MCP
@@ -1787,19 +1817,19 @@ void PadRefAndSetFlags(
         GeneratePadding16Bit(
             refPic16BitPtr->bufferCb,
             refPic16BitPtr->strideCb << 1,
-            refPic16BitPtr->width,
-            refPic16BitPtr->height >> 1,
-            refPic16BitPtr->originX,
-            refPic16BitPtr->originY >> 1);
+            refPic16BitPtr->width << (1 - subWidthCMinus1),
+            refPic16BitPtr->height >> subHeightCMinus1,
+            refPic16BitPtr->originX << (1 - subWidthCMinus1),
+            refPic16BitPtr->originY >> subHeightCMinus1);
 
         // Cr samples
         GeneratePadding16Bit(
             refPic16BitPtr->bufferCr,
             refPic16BitPtr->strideCr << 1,
-            refPic16BitPtr->width,
-            refPic16BitPtr->height >> 1,
-            refPic16BitPtr->originX,
-            refPic16BitPtr->originY >> 1);   
+            refPic16BitPtr->width << (1 - subWidthCMinus1),
+            refPic16BitPtr->height >> subHeightCMinus1,
+            refPic16BitPtr->originX << (1 - subWidthCMinus1),
+            refPic16BitPtr->originY >> subHeightCMinus1);   
     }
 
     // set up TMVP flag for the reference picture
@@ -1922,11 +1952,11 @@ EB_ERRORTYPE QpmDeriveWeightsMinAndMax(
 Input   : encoder mode and tune
 Output  : EncDec Kernel signal(s)
 ******************************************************/
-EB_ERRORTYPE SignalDerivationEncDecKernelSq(
+static EB_ERRORTYPE SignalDerivationEncDecKernelSq(
     SequenceControlSet_t *sequenceControlSetPtr,
     PictureControlSet_t  *pictureControlSetPtr,
-    EncDecContext_t      *contextPtr) {
-
+    EncDecContext_t      *contextPtr)
+{
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
     // Set MD Open Loop Flag
@@ -2607,11 +2637,11 @@ EB_ERRORTYPE SignalDerivationEncDecKernelSq(
 Input   : encoder mode and tune
 Output  : EncDec Kernel signal(s)
 ******************************************************/
-EB_ERRORTYPE SignalDerivationEncDecKernelOq(
+static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     SequenceControlSet_t *sequenceControlSetPtr,
     PictureControlSet_t  *pictureControlSetPtr,
-    EncDecContext_t      *contextPtr) {
-
+    EncDecContext_t      *contextPtr)
+{
     EB_ERRORTYPE return_error = EB_ErrorNone;
     
     // Set MD Open Loop Flag
@@ -2630,7 +2660,7 @@ EB_ERRORTYPE SignalDerivationEncDecKernelOq(
 		}
 	}
     else {
-        contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->temporalLayerIndex == 0 ? EB_FALSE : EB_TRUE;
+    		contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->temporalLayerIndex == 0 ? EB_FALSE : EB_TRUE;
     }
 
     // Derive INTRA Injection Method
@@ -2711,14 +2741,14 @@ EB_ERRORTYPE SignalDerivationEncDecKernelOq(
 			contextPtr->mdContext->chromaLevel = 0;
 		}
 	}
-  else {
+    else {
 		if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
 			contextPtr->mdContext->chromaLevel = 1;
 		}
 		else if (pictureControlSetPtr->temporalLayerIndex == 0) {
 			contextPtr->mdContext->chromaLevel = 0;
 		}
-    else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+        else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
 			if (contextPtr->mdContext->intraMdOpenLoopFlag) {
 				contextPtr->mdContext->chromaLevel = 4;
 			}
@@ -2729,17 +2759,17 @@ EB_ERRORTYPE SignalDerivationEncDecKernelOq(
 		else {
 			contextPtr->mdContext->chromaLevel = 1;
 		}
-  }
+    }
 
     // Set Coeff Cabac Update Flag
-  if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
+    if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
 		contextPtr->mdContext->coeffCabacUpdate = ((pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_FULL85_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_FULL84_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_OPEN_LOOP_DEPTH_MODE) && contextPtr->mdContext->chromaLevel == 0) ?
 			EB_TRUE :
 			EB_FALSE;
 	}
-  else {
-    contextPtr->mdContext->coeffCabacUpdate = EB_FALSE;
-  }
+    else {
+        contextPtr->mdContext->coeffCabacUpdate = EB_FALSE;
+    }
   
     // Set INTRA8x8 Restriction @ P/B Slices
 	if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
@@ -3095,7 +3125,7 @@ EB_ERRORTYPE SignalDerivationEncDecKernelOq(
 		}
     }
     else {
-		  contextPtr->mdContext->nflLevelMd = 6;
+		contextPtr->mdContext->nflLevelMd = 6;
     }
 
     // NFL Level Pillar/8x8 Refinement         Settings
@@ -3846,6 +3876,13 @@ void* EncDecKernel(void *inputPtr)
                 contextPtr);
         }
 
+#if 1//TILES  //NEED these  to test stream complaince
+       // contextPtr->pmMethod = 0;
+        contextPtr->mdContext->rdoqPmCoreMethod = EB_NO_RDOQ;  //RDOQ   make DLF cause MD5 mismatch when encDec segments+QP mod are ON.. 
+        contextPtr->allowEncDecMismatch =  EB_FALSE;
+
+#endif
+
         // Derive Interpoldation Method @ Fast-Loop 
         contextPtr->mdContext->interpolationMethod = (pictureControlSetPtr->ParentPcsPtr->useSubpelFlag == EB_FALSE) ?
             INTERPOLATION_FREE_PATH  :
@@ -4076,9 +4113,9 @@ void* EncDecKernel(void *inputPtr)
                     sequenceControlSetPtr);
             }
             
-            EB_BOOL applySAOAtEncoderFlag = (sequenceControlSetPtr->staticConfig.enableSaoFlag &&
-                (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag )) ||
-                sequenceControlSetPtr->staticConfig.reconEnabled ? EB_TRUE : EB_FALSE;
+            EB_BOOL applySAOAtEncoderFlag = sequenceControlSetPtr->staticConfig.enableSaoFlag &&
+                (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag ||
+                sequenceControlSetPtr->staticConfig.reconEnabled);
 
             applySAOAtEncoderFlag = contextPtr->allowEncDecMismatch ? EB_FALSE : applySAOAtEncoderFlag;
 
@@ -4106,18 +4143,21 @@ void* EncDecKernel(void *inputPtr)
                     pictureControlSetPtr,
                     sequenceControlSetPtr);
 
-            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE && pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr)
-            {
+            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE &&
+                    pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr) {
                 EbPictureBufferDesc_t *inputPicturePtr = (EbPictureBufferDesc_t*)pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
+                EB_COLOR_FORMAT colorFormat = inputPicturePtr->colorFormat;
+                EB_U16 subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+                EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
                 const EB_U32  SrclumaOffSet = inputPicturePtr->originX + inputPicturePtr->originY    *inputPicturePtr->strideY;
-                const EB_U32  SrccbOffset = (inputPicturePtr->originX >> 1) + (inputPicturePtr->originY >> 1)*inputPicturePtr->strideCb;
-                const EB_U32  SrccrOffset = (inputPicturePtr->originX >> 1) + (inputPicturePtr->originY >> 1)*inputPicturePtr->strideCr;
+                const EB_U32 SrccbOffset = (inputPicturePtr->originX >> subWidthCMinus1) + (inputPicturePtr->originY >> subHeightCMinus1) * inputPicturePtr->strideCb;
+                const EB_U32 SrccrOffset = (inputPicturePtr->originX >> subWidthCMinus1) + (inputPicturePtr->originY >> subHeightCMinus1) * inputPicturePtr->strideCr;
 
                 EbReferenceObject_t   *referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr;
                 EbPictureBufferDesc_t *refDenPic = referenceObject->refDenSrcPicture;
                 const EB_U32           ReflumaOffSet = refDenPic->originX + refDenPic->originY    *refDenPic->strideY;
-                const EB_U32           RefcbOffset = (refDenPic->originX >> 1) + (refDenPic->originY >> 1)*refDenPic->strideCb;
-                const EB_U32           RefcrOffset = (refDenPic->originX >> 1) + (refDenPic->originY >> 1)*refDenPic->strideCr;
+                const EB_U32 RefcbOffset = (refDenPic->originX >> subWidthCMinus1) + (refDenPic->originY >> subHeightCMinus1) * refDenPic->strideCb;
+                const EB_U32 RefcrOffset = (refDenPic->originX >> subWidthCMinus1) + (refDenPic->originY >> subHeightCMinus1) * refDenPic->strideCr;
 
                 EB_U16  verticalIdx;
 
@@ -4128,15 +4168,15 @@ void* EncDecKernel(void *inputPtr)
                         inputPicturePtr->width);
                 }
 
-                for (verticalIdx = 0; verticalIdx < inputPicturePtr->height / 2; ++verticalIdx)
+                for (verticalIdx = 0; verticalIdx < inputPicturePtr->height >> subHeightCMinus1; ++verticalIdx)
                 {
                     EB_MEMCPY(refDenPic->bufferCb + RefcbOffset + verticalIdx*refDenPic->strideCb,
                         inputPicturePtr->bufferCb + SrccbOffset + verticalIdx* inputPicturePtr->strideCb,
-                        inputPicturePtr->width / 2);
+                        inputPicturePtr->width >> subWidthCMinus1);
 
                     EB_MEMCPY(refDenPic->bufferCr + RefcrOffset + verticalIdx*refDenPic->strideCr,
                         inputPicturePtr->bufferCr + SrccrOffset + verticalIdx* inputPicturePtr->strideCr,
-                        inputPicturePtr->width / 2);
+                        inputPicturePtr->width >> subWidthCMinus1 );
                 }
 
                 GeneratePadding(
@@ -4150,18 +4190,18 @@ void* EncDecKernel(void *inputPtr)
                 GeneratePadding(
                     refDenPic->bufferCb,
                     refDenPic->strideCb,
-                    refDenPic->width >> 1,
-                    refDenPic->height >> 1,
-                    refDenPic->originX >> 1,
-                    refDenPic->originY >> 1);
+                    refDenPic->width >> subWidthCMinus1,
+                    refDenPic->height >> subHeightCMinus1,
+                    refDenPic->originX >> subWidthCMinus1,
+                    refDenPic->originY >> subHeightCMinus1);
 
                 GeneratePadding(
                     refDenPic->bufferCr,
                     refDenPic->strideCr,
-                    refDenPic->width >> 1,
-                    refDenPic->height >> 1,
-                    refDenPic->originX >> 1,
-                    refDenPic->originY >> 1);
+                    refDenPic->width >> subWidthCMinus1,
+                    refDenPic->height >> subHeightCMinus1,
+                    refDenPic->originX >> subWidthCMinus1,
+                    refDenPic->originY >> subHeightCMinus1);
             }
 
             if (sequenceControlSetPtr->staticConfig.reconEnabled) {

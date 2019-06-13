@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "EbAppContext.h"
 #include "EbAppConfig.h"
@@ -21,7 +22,8 @@
 
 #define CLIP3(MinVal, MaxVal, a)        (((a)<(MinVal)) ? (MinVal) : (((a)>(MaxVal)) ? (MaxVal) :(a)))
 #define FUTURE_WINDOW_WIDTH                 4
-#define SIZE_OF_ONE_FRAME_IN_BYTES(width, height,is16bit) ( ( ((width)*(height)*3)>>1 )<<is16bit)
+#define SIZE_OF_ONE_FRAME_IN_BYTES(width, height, csp, is16bit) \
+    ( (((width)*(height)) + 2*(((width)*(height))>>(3-csp)) )<<is16bit)
 extern volatile int32_t keepRunning;
 
 /***************************************
@@ -621,16 +623,16 @@ void ProcessInputFieldStandardMode(
     uint8_t                    *lumaInputPtr,
     uint8_t                    *cbInputPtr,
     uint8_t                    *crInputPtr,
-    uint8_t                   is16bit) {
-
-
-    int64_t  inputPaddedWidth  = config->inputPaddedWidth;
-    int64_t  inputPaddedHeight = config->inputPaddedHeight;
-
-    uint64_t  sourceLumaRowSize = (uint64_t)(inputPaddedWidth << is16bit);
-
-    uint64_t  sourceChromaRowSize = sourceLumaRowSize >> 1;
-
+    uint8_t                   is16bit)
+{
+    const int64_t inputPaddedWidth  = config->inputPaddedWidth;
+    const int64_t inputPaddedHeight = config->inputPaddedHeight;
+    const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)config->encoderColorFormat;
+    const uint8_t subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    const uint8_t subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
+    //const uint8_t is16bit = (config->encoderBitDepth > 8) ? 1 : 0;
+    uint64_t sourceLumaRowSize = (uint64_t)(inputPaddedWidth << is16bit);
+    uint64_t sourceChromaRowSize = sourceLumaRowSize >> subWidthCMinus1;
     uint8_t  *ebInputPtr;
     uint32_t  inputRowIndex;
 
@@ -656,7 +658,7 @@ void ProcessInputFieldStandardMode(
         fseeko64(inputFile, (long)sourceChromaRowSize, SEEK_CUR);
     }
 
-    for (inputRowIndex = 0; inputRowIndex < inputPaddedHeight >> 1; inputRowIndex++) {
+    for (inputRowIndex = 0; inputRowIndex < inputPaddedHeight >> subHeightCMinus1; inputRowIndex++) {
 
         headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, sourceChromaRowSize, inputFile);
         // Skip 1 chroma row (only fields)
@@ -670,7 +672,7 @@ void ProcessInputFieldStandardMode(
     // => no action
 
 
-    for (inputRowIndex = 0; inputRowIndex < inputPaddedHeight >> 1; inputRowIndex++) {
+    for (inputRowIndex = 0; inputRowIndex < inputPaddedHeight >> subHeightCMinus1; inputRowIndex++) {
 
         headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, sourceChromaRowSize, inputFile);
         // Skip 1 chroma row (only fields)
@@ -753,29 +755,29 @@ int32_t GetNextQpFromQpFile(
     return qp;
 }
 
-void ReadInputFrames(
+static void ReadInputFrames(
     EbConfig_t                  *config,
     uint8_t                      is16bit,
     EB_BUFFERHEADERTYPE         *headerPtr)
 {
-
-    uint64_t  readSize;
-    uint32_t  inputPaddedWidth = config->inputPaddedWidth;
-    uint32_t  inputPaddedHeight = config->inputPaddedHeight;
+    const uint32_t  inputPaddedWidth = config->inputPaddedWidth;
+    const uint32_t  inputPaddedHeight = config->inputPaddedHeight;
     FILE   *inputFile = config->inputFile;
-    uint8_t  *ebInputPtr;
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
+    const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)config->encoderColorFormat;
+    const uint8_t subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+    const uint8_t subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
+    //const uint8_t is16bit = (config->encoderBitDepth > 8) ? 1 : 0;
 
-    uint64_t frameSize = (uint64_t)((inputPaddedWidth*inputPaddedHeight * 3) / 2 + (inputPaddedWidth / 4 * inputPaddedHeight * 3) / 2);
     inputPtr->yStride  = inputPaddedWidth;
-    inputPtr->crStride = inputPaddedWidth >> 1;
-    inputPtr->cbStride = inputPaddedWidth >> 1;
+    inputPtr->crStride = inputPaddedWidth >> subWidthCMinus1;
+    inputPtr->cbStride = inputPaddedWidth >> subWidthCMinus1;
+    inputPtr->dolbyVisionRpu.payloadSize = 0;
 
     if (config->bufferedInput == -1) {
-
         if (is16bit == 0 || (is16bit == 1 && config->compressedTenBitFormat == 0)) {
 
-            readSize = (uint64_t)SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, is16bit);
+            uint32_t readSize = SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, colorFormat, is16bit);
 
             headerPtr->nFilledLen = 0;
 
@@ -810,302 +812,98 @@ void ReadInputFrames(
                 if (config->processedFrameCount % 2 == 0) {
                     fseek(inputFile, -(long)(readSize << 1), SEEK_CUR);
                 }
-            }
-            else {
-                uint64_t lumaReadSize = (uint64_t)inputPaddedWidth*inputPaddedHeight << is16bit;
-                ebInputPtr = inputPtr->luma;
-                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize, inputFile);
-                ebInputPtr = inputPtr->cb;
-                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
-                ebInputPtr = inputPtr->cr;
-                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
-                inputPtr->luma = inputPtr->luma + ((config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING) << is16bit);
-                inputPtr->cb   = inputPtr->cb + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)) << is16bit);
-                inputPtr->cr   = inputPtr->cr + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)) << is16bit);
+            } else {
+                const uint32_t lumaReadSize = inputPaddedWidth * inputPaddedHeight << is16bit;
+                const uint32_t chromaReadSize = lumaReadSize >> (3 - colorFormat);
+                headerPtr->nFilledLen += (uint32_t)fread(inputPtr->luma, 1, lumaReadSize, inputFile);
+                headerPtr->nFilledLen += (uint32_t)fread(inputPtr->cb, 1, chromaReadSize, inputFile);
+                headerPtr->nFilledLen += (uint32_t)fread(inputPtr->cr, 1, chromaReadSize, inputFile);
 
 
                 if (readSize != headerPtr->nFilledLen) {
 
                     fseek(inputFile, 0, SEEK_SET);
-                    ebInputPtr = inputPtr->luma;
-                    headerPtr->nFilledLen = (uint32_t)fread(ebInputPtr, 1, lumaReadSize, inputFile);
-                    ebInputPtr = inputPtr->cb;
-                    headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
-                    ebInputPtr = inputPtr->cr;
-                    headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
+                    headerPtr->nFilledLen += (uint32_t)fread(inputPtr->luma, 1, lumaReadSize, inputFile);
+                    headerPtr->nFilledLen += (uint32_t)fread(inputPtr->cb, 1, chromaReadSize, inputFile);
+                    headerPtr->nFilledLen += (uint32_t)fread(inputPtr->cr, 1, chromaReadSize, inputFile);
 
                     inputPtr->luma = inputPtr->luma + ((config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING));
-                    inputPtr->cb = inputPtr->cb + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)));
-                    inputPtr->cr = inputPtr->cr + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)));
+                    inputPtr->cb = inputPtr->cb + (((config->inputPaddedWidth >> subWidthCMinus1)*(TOP_INPUT_PADDING >> subHeightCMinus1) + (LEFT_INPUT_PADDING >> subWidthCMinus1)));
+                    inputPtr->cr = inputPtr->cr + (((config->inputPaddedWidth >> subWidthCMinus1)*(TOP_INPUT_PADDING >> subHeightCMinus1) + (LEFT_INPUT_PADDING >> subWidthCMinus1)));
 
                 }
             }
-        }
-        // 10-bit Compressed Unpacked Mode
-        else if (is16bit == 1 && config->compressedTenBitFormat == 1) {
+        } else {
+            // 10-bit Compressed Unpacked Mode
+            const uint32_t lumaReadSize = inputPaddedWidth * inputPaddedHeight;
+            const uint32_t chromaReadSize = lumaReadSize >> (3 - colorFormat);
+            const uint32_t nbitLumaReadSize = (inputPaddedWidth / 4) * inputPaddedHeight;
+            const uint32_t nbitChromaReadSize = nbitLumaReadSize >> (3 - colorFormat);
 
             // Fill the buffer with a complete frame
             headerPtr->nFilledLen = 0;
+            headerPtr->nFilledLen += (uint32_t)fread(inputPtr->luma, 1, lumaReadSize, inputFile);
+            headerPtr->nFilledLen += (uint32_t)fread(inputPtr->cb, 1, chromaReadSize, inputFile);
+            headerPtr->nFilledLen += (uint32_t)fread(inputPtr->cr, 1, chromaReadSize, inputFile);
 
+            headerPtr->nFilledLen += (uint32_t)fread(inputPtr->lumaExt, 1, nbitLumaReadSize, inputFile);
+            headerPtr->nFilledLen += (uint32_t)fread(inputPtr->cbExt, 1, nbitChromaReadSize, inputFile);
+            headerPtr->nFilledLen += (uint32_t)fread(inputPtr->crExt, 1, nbitChromaReadSize, inputFile);
 
-            uint64_t lumaReadSize = (uint64_t)inputPaddedWidth*inputPaddedHeight;
-            uint64_t nbitlumaReadSize = (uint64_t)(inputPaddedWidth / 4)*inputPaddedHeight;
-
-            ebInputPtr = inputPtr->luma;
-            headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize, inputFile);
-            ebInputPtr = inputPtr->cb;
-            headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
-            ebInputPtr = inputPtr->cr;
-            headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
-
-            inputPtr->luma = inputPtr->luma + config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING;
-            inputPtr->cb = inputPtr->cb + (config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1);
-            inputPtr->cr = inputPtr->cr + (config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1);
-
-
-            ebInputPtr = inputPtr->lumaExt;
-            headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, nbitlumaReadSize, inputFile);
-            ebInputPtr = inputPtr->cbExt;
-            headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, nbitlumaReadSize >> 2, inputFile);
-            ebInputPtr = inputPtr->crExt;
-            headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, nbitlumaReadSize >> 2, inputFile);
-
-            inputPtr->lumaExt = inputPtr->lumaExt + ((config->inputPaddedWidth >> 2)*TOP_INPUT_PADDING + (LEFT_INPUT_PADDING >> 2));
-            inputPtr->cbExt = inputPtr->cbExt + (((config->inputPaddedWidth >> 1) >> 2)*(TOP_INPUT_PADDING >> 1) + ((LEFT_INPUT_PADDING >> 1) >> 2));
-            inputPtr->crExt = inputPtr->crExt + (((config->inputPaddedWidth >> 1) >> 2)*(TOP_INPUT_PADDING >> 1) + ((LEFT_INPUT_PADDING >> 1) >> 2));
-
-            readSize = ((lumaReadSize * 3) >> 1) + ((nbitlumaReadSize * 3) >> 1);
-
-            if (readSize != headerPtr->nFilledLen) {
-
+            if (headerPtr->nFilledLen != (lumaReadSize + nbitLumaReadSize + 2 * (chromaReadSize + nbitChromaReadSize))) {
                 fseek(inputFile, 0, SEEK_SET);
-                ebInputPtr = inputPtr->luma;
-                headerPtr->nFilledLen = (uint32_t)fread(ebInputPtr, 1, lumaReadSize, inputFile);
-                ebInputPtr = inputPtr->cb;
-                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
-                ebInputPtr = inputPtr->cr;
-                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
-
-                inputPtr->luma = inputPtr->luma + config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING;
-                inputPtr->cb = inputPtr->cb + (config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1);
-                inputPtr->cr = inputPtr->cr + (config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1);
-
-                ebInputPtr = inputPtr->lumaExt;
-                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, nbitlumaReadSize, inputFile);
-                ebInputPtr = inputPtr->cbExt;
-                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, nbitlumaReadSize >> 2, inputFile);
-                ebInputPtr = inputPtr->crExt;
-                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, nbitlumaReadSize >> 2, inputFile);
-
-                inputPtr->lumaExt = inputPtr->lumaExt + ((config->inputPaddedWidth >> 2)*TOP_INPUT_PADDING + (LEFT_INPUT_PADDING >> 2));
-                inputPtr->cbExt = inputPtr->cbExt + (((config->inputPaddedWidth >> 1) >> 2)*(TOP_INPUT_PADDING >> 1) + ((LEFT_INPUT_PADDING >> 1) >> 2));
-                inputPtr->crExt = inputPtr->crExt + (((config->inputPaddedWidth >> 1) >> 2)*(TOP_INPUT_PADDING >> 1) + ((LEFT_INPUT_PADDING >> 1) >> 2));
-
+                headerPtr->nFilledLen += (uint32_t)fread(inputPtr->luma, 1, lumaReadSize, inputFile);
+                headerPtr->nFilledLen += (uint32_t)fread(inputPtr->cb, 1, chromaReadSize, inputFile);
+                headerPtr->nFilledLen += (uint32_t)fread(inputPtr->cr, 1, chromaReadSize, inputFile);
+                headerPtr->nFilledLen += (uint32_t)fread(inputPtr->lumaExt, 1, nbitLumaReadSize, inputFile);
+                headerPtr->nFilledLen += (uint32_t)fread(inputPtr->cbExt, 1, nbitChromaReadSize, inputFile);
+                headerPtr->nFilledLen += (uint32_t)fread(inputPtr->crExt, 1, nbitChromaReadSize, inputFile);
             }
-
         }
-
-        // 10-bit Unpacked Mode
-        else {
-
-            readSize = (uint64_t)SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, 1);
-
-            headerPtr->nFilledLen = 0;
-
-            // Interlaced Video
-            if (config->separateFields) {
-
-                ProcessInputFieldStandardMode(
-                    config,
-                    headerPtr,
-                    inputFile,
-                    inputPtr->luma,
-                    inputPtr->cb,
-                    inputPtr->cr,
-                    0);
-
-                ProcessInputFieldStandardMode(
-                    config,
-                    headerPtr,
-                    inputFile,
-                    inputPtr->lumaExt,
-                    inputPtr->cbExt,
-                    inputPtr->crExt,
-                    0);
-
-                if (readSize != headerPtr->nFilledLen) {
-
-                    fseek(inputFile, 0, SEEK_SET);
-                    headerPtr->nFilledLen = 0;
-
-                    ProcessInputFieldStandardMode(
-                        config,
-                        headerPtr,
-                        inputFile,
-                        inputPtr->luma,
-                        inputPtr->cb,
-                        inputPtr->cr,
-                        0);
-
-                    ProcessInputFieldStandardMode(
-                        config,
-                        headerPtr,
-                        inputFile,
-                        inputPtr->lumaExt,
-                        inputPtr->cbExt,
-                        inputPtr->crExt,
-                        0);
-                }
-
-                // Reset the pointer position after a top field
-                if (config->processedFrameCount % 2 == 0) {
-                    fseek(inputFile, -(long)(readSize << 1), SEEK_CUR);
-                }
-
-            }
-            else {
-
-
-                uint64_t lumaReadSize = (uint64_t)inputPaddedWidth*inputPaddedHeight;
-
-                ebInputPtr = inputPtr->luma;
-                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize, inputFile);
-                ebInputPtr = inputPtr->cb;
-                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
-                ebInputPtr = inputPtr->cr;
-                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
-
-                inputPtr->luma = inputPtr->luma + ((config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING));
-                inputPtr->cb = inputPtr->cb + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)));
-                inputPtr->cr = inputPtr->cr + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)));
-
-                ebInputPtr = inputPtr->lumaExt;
-                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize, inputFile);
-                ebInputPtr = inputPtr->cbExt;
-                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
-                ebInputPtr = inputPtr->crExt;
-                headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
-
-                inputPtr->lumaExt = inputPtr->lumaExt + ((config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING));
-                inputPtr->cbExt = inputPtr->cbExt + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)));
-                inputPtr->crExt = inputPtr->crExt + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)));
-
-                if (readSize != headerPtr->nFilledLen) {
-
-                    fseek(inputFile, 0, SEEK_SET);
-                    ebInputPtr = inputPtr->luma;
-                    headerPtr->nFilledLen = (uint32_t)fread(ebInputPtr, 1, lumaReadSize, inputFile);
-                    ebInputPtr = inputPtr->cb;
-                    headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
-                    ebInputPtr = inputPtr->cr;
-                    headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
-
-                    inputPtr->luma = inputPtr->luma + ((config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING));
-                    inputPtr->cb = inputPtr->cb + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)));
-                    inputPtr->cr = inputPtr->cr + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)));
-
-                    ebInputPtr = inputPtr->lumaExt;
-                    headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize, inputFile);
-                    ebInputPtr = inputPtr->cbExt;
-                    headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
-                    ebInputPtr = inputPtr->crExt;
-                    headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize >> 2, inputFile);
-
-                    inputPtr->lumaExt = inputPtr->lumaExt + ((config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING));
-                    inputPtr->cbExt = inputPtr->cbExt + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)));
-                    inputPtr->crExt = inputPtr->crExt + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)));
-
-                }
-
-            }
-
-
-
-
-        }
-
-    }
-    else {
-        if (config->encoderBitDepth == 10 && config->compressedTenBitFormat == 1)
-        {
+    } else {
+        if (is16bit && config->compressedTenBitFormat == 1) {
             // Determine size of each plane
 
             const size_t luma8bitSize = config->inputPaddedWidth * config->inputPaddedHeight;
-            const size_t chroma8bitSize = luma8bitSize >> 2;
+            const size_t chroma8bitSize = luma8bitSize >> (3 - colorFormat);
 
             const size_t luma2bitSize = luma8bitSize / 4; //4-2bit pixels into 1 byte
-            const size_t chroma2bitSize = luma2bitSize >> 2;
+            const size_t chroma2bitSize = luma2bitSize >> (3 - colorFormat);
 
             EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
             inputPtr->yStride = config->inputPaddedWidth;
-            inputPtr->crStride = config->inputPaddedWidth >> 1;
-            inputPtr->cbStride = config->inputPaddedWidth >> 1;
+            inputPtr->crStride = config->inputPaddedWidth >> subWidthCMinus1;
+            inputPtr->cbStride = config->inputPaddedWidth >> subWidthCMinus1;
 
             inputPtr->luma = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput];
             inputPtr->cb = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize;
             inputPtr->cr = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + chroma8bitSize;
 
-            inputPtr->luma = inputPtr->luma + ((config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING));
-            inputPtr->cb = inputPtr->cb + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)));
-            inputPtr->cr = inputPtr->cr + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)));
+            inputPtr->lumaExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize;
+            inputPtr->cbExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize + luma2bitSize;
+            inputPtr->crExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize + luma2bitSize + chroma2bitSize;
 
-            if (is16bit) {
-                inputPtr->lumaExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize;
-                inputPtr->cbExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize + luma2bitSize;
-                inputPtr->crExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize + luma2bitSize + chroma2bitSize;
-
-                inputPtr->lumaExt = inputPtr->lumaExt + config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING;
-                inputPtr->cbExt = inputPtr->cbExt + (config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1);
-                inputPtr->crExt = inputPtr->crExt + (config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1);
-
-            }
-
-            headerPtr->nFilledLen = (uint32_t)frameSize;
-        }
-        else
-        {
-            const int32_t tenBitPackedMode = (config->encoderBitDepth > 8) && (config->compressedTenBitFormat == 0) ? 1 : 0;
+            headerPtr->nFilledLen = luma8bitSize + luma2bitSize + 2 * (chroma8bitSize + chroma2bitSize);
+        } else {
+            //Normal unpacked mode:yuv420p10le yuv422p10le yuv444p10le
 
             // Determine size of each plane
-            const size_t luma8bitSize =
-                (config->inputPaddedWidth) *
-                (config->inputPaddedHeight) *
-                (1 << tenBitPackedMode);
-
-            const size_t chroma8bitSize = luma8bitSize >> 2;
-
-            const size_t luma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? luma8bitSize : 0;
-            const size_t chroma10bitSize = (config->encoderBitDepth > 8 && tenBitPackedMode == 0) ? chroma8bitSize : 0;
+            const size_t lumaSize = (config->inputPaddedWidth * config->inputPaddedHeight) << is16bit;
+            const size_t chromaSize = lumaSize >> (3 - colorFormat);
 
             EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
 
             inputPtr->yStride = config->inputPaddedWidth;
-            inputPtr->crStride = config->inputPaddedWidth >> 1;
-            inputPtr->cbStride = config->inputPaddedWidth >> 1;
+            inputPtr->crStride = config->inputPaddedWidth >> subWidthCMinus1;
+            inputPtr->cbStride = config->inputPaddedWidth >> subWidthCMinus1;
 
             inputPtr->luma = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput];
-            inputPtr->cb = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize;
-            inputPtr->cr = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + chroma8bitSize;
-            inputPtr->luma = inputPtr->luma + ((config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING) << tenBitPackedMode);
-            inputPtr->cb = inputPtr->cb + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)) << tenBitPackedMode);
-            inputPtr->cr = inputPtr->cr + (((config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1)) << tenBitPackedMode);
+            inputPtr->cb = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + lumaSize;
+            inputPtr->cr = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + lumaSize + chromaSize;
 
-
-            if (is16bit) {
-                inputPtr->lumaExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize;
-                inputPtr->cbExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize + luma10bitSize;
-                inputPtr->crExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize + luma10bitSize + chroma10bitSize;
-                inputPtr->lumaExt = inputPtr->lumaExt + config->inputPaddedWidth*TOP_INPUT_PADDING + LEFT_INPUT_PADDING;
-                inputPtr->cbExt = inputPtr->cbExt + (config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1);
-                inputPtr->crExt = inputPtr->crExt + (config->inputPaddedWidth >> 1)*(TOP_INPUT_PADDING >> 1) + (LEFT_INPUT_PADDING >> 1);
-
-            }
-
-            headerPtr->nFilledLen = (uint32_t)(uint64_t)SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, is16bit);
+            headerPtr->nFilledLen = (uint32_t)(uint64_t)SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, colorFormat, is16bit);
 
         }
-
-
     }
 
     // If we reached the end of file, loop over again
@@ -1155,14 +953,130 @@ void SendQpOnTheFly(
     return;
 }
 
+void SendNaluOnTheFly(
+    EbConfig_t                  *config,
+    EB_BUFFERHEADERTYPE        *headerPtr)
+{
+    {
+        char line[1024];
+        EB_ERRORTYPE return_error = EB_ErrorNone;
+        uint32_t poc = 0;
+        uint8_t *prefix = NULL;
+        uint32_t nalType = 0;
+        uint32_t payloadType = 0;
+        uint8_t *base64Encode = NULL;
+        uint8_t *context = NULL;
+
+        if (fgets(line, sizeof(line), config->naluFile) != NULL) {
+            poc = strtol(EB_STRTOK(line, " ", &context), NULL, 0);
+            if (return_error == EB_ErrorNone && *context != 0) {
+                prefix = (uint8_t*)EB_STRTOK(NULL, " ", &context);
+            }
+            else {
+                return_error = EB_ErrorBadParameter;
+            }
+            if (return_error == EB_ErrorNone && *context != 0) {
+                nalType = strtol(EB_STRTOK(NULL, "/", &context), NULL, 0);
+            }
+            else {
+                return_error = EB_ErrorBadParameter;
+            }
+            if (return_error == EB_ErrorNone && *context != 0) {
+                payloadType = strtol(EB_STRTOK(NULL, " ", &context), NULL, 0);
+            }
+            else {
+                return_error = EB_ErrorBadParameter;
+            }
+            if (return_error == EB_ErrorNone && *context != 0) {
+                base64Encode = (uint8_t*)EB_STRTOK(NULL, "\n", &context);
+            }
+            else {
+                return_error = EB_ErrorBadParameter;
+            }
+
+            headerPtr->naluPOC = poc;
+            if (prefix != NULL && !EB_STRCMP((char*)prefix, "PREFIX"))
+                headerPtr->naluPrefix = 0;
+            headerPtr->naluNalType = nalType;
+            headerPtr->naluPayloadType = payloadType;
+            headerPtr->naluBase64Encode = base64Encode;
+            headerPtr->naluFound = EB_TRUE;
+        }
+        else {
+            return_error = EB_ErrorBadParameter;
+        }
+        if (return_error != EB_ErrorNone) {
+            printf("\nSVT [Warning]: Nalu file cannot be parsed correctly \n ");
+            headerPtr->naluFound = EB_FALSE;
+            //config->useNaluFile = EB_FALSE;
+            return;
+        }
+    }
+    return;
+}
+
+#define START_CODE 0x00000001
+#define START_CODE_BYTES 4
+
+int ParseDolbyVisionRPUMetadata(
+    EbConfig_t               *config,
+    EB_BUFFERHEADERTYPE      *headerPtr)
+{
+    uint8_t byteVal = 0;
+    uint32_t code = 0;
+    uint32_t bytesRead = 0;
+    EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
+    FILE* ptr = config->dolbyVisionRpuFile;
+
+    if (!headerPtr->pts) {
+        while (bytesRead++ < 4 && fread(&byteVal, sizeof(uint8_t), 1, ptr))
+            code = (code << 8) | byteVal;
+
+        if (code != START_CODE) {
+            printf("Warning : Invalid Dolby Vision RPU startcode in POC  %" PRId64 "\n", headerPtr->pts);
+            return 1;
+        }
+    }
+
+    bytesRead = 0;
+    while (fread(&byteVal, sizeof(uint8_t), 1, ptr))
+    {
+        code = (code << 8) | byteVal;
+        if (bytesRead++ < 3)
+            continue;
+        if (bytesRead >= 1024) {
+            printf("Warning : Invalid Dolby Vision RPU size in POC  %" PRId64 "\n", headerPtr->pts);
+            return 1;
+        }
+
+        if (code != START_CODE)
+            inputPtr->dolbyVisionRpu.payload[inputPtr->dolbyVisionRpu.payloadSize++] = (code >> (3 * 8)) & 0xFF;
+        else
+            return 0;
+
+    }
+
+    int ShiftBytes = START_CODE_BYTES - (bytesRead - inputPtr->dolbyVisionRpu.payloadSize);
+    int bytesLeft = bytesRead - inputPtr->dolbyVisionRpu.payloadSize;
+    code = (code << ShiftBytes * 8);
+    for (int i = 0; i < bytesLeft; i++) {
+        inputPtr->dolbyVisionRpu.payload[inputPtr->dolbyVisionRpu.payloadSize++] = (code >> (3 * 8)) & 0xFF;
+        code = (code << 8);
+    }
+    if (!inputPtr->dolbyVisionRpu.payloadSize) {
+        printf("Warning : Dolby Vision RPU not found for POC  %" PRId64 "\n", headerPtr->pts);
+        return 1;
+    }
+    return 0;
+
+}
+
 //************************************/
 // ProcessInputBuffer
 // Reads yuv frames from file and copy
 // them into the input buffer
 /************************************/
-APPEXITCONDITIONTYPE ProcessInputBuffer(
-    EbConfig_t             *config,
-    EbAppContext_t         *appCallBack)
+APPEXITCONDITIONTYPE ProcessInputBuffer(EbConfig_t *config, EbAppContext_t *appCallBack)
 {
     uint8_t            is16bit = (uint8_t)(config->encoderBitDepth > 8);
     EB_BUFFERHEADERTYPE     *headerPtr = appCallBack->inputBufferPool;
@@ -1173,9 +1087,12 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
     int64_t                  inputPaddedWidth           = config->inputPaddedWidth;
     int64_t                  inputPaddedHeight          = config->inputPaddedHeight;
     int64_t                  framesToBeEncoded          = config->framesToBeEncoded;
-	uint64_t                  frameSize                  = (uint64_t)((inputPaddedWidth*inputPaddedHeight * 3) / 2 + (inputPaddedWidth / 4 * inputPaddedHeight * 3) / 2);
     int64_t                  totalBytesToProcessCount;
     int64_t                  remainingByteCount;
+    const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)config->encoderColorFormat;
+    int ret;
+    uint32_t compressed10bitFrameSize = (inputPaddedWidth*inputPaddedHeight) + 2 * ((inputPaddedWidth*inputPaddedWidth) >> (3 - colorFormat));
+    compressed10bitFrameSize += compressed10bitFrameSize / 4;
 
     if (config->injector && config->processedFrameCount)
     {
@@ -1183,8 +1100,8 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
     }
 
 	totalBytesToProcessCount = (framesToBeEncoded < 0) ? -1 : (config->encoderBitDepth == 10 && config->compressedTenBitFormat == 1) ?
-		framesToBeEncoded * (int64_t)frameSize :
-        framesToBeEncoded * SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, is16bit);
+		framesToBeEncoded * compressed10bitFrameSize:
+        framesToBeEncoded * SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, colorFormat, is16bit);
 
 
     remainingByteCount       = (totalBytesToProcessCount < 0) ?   -1 :  totalBytesToProcessCount - (int64_t)config->processedByteCount;
@@ -1207,6 +1124,12 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
                 config,
                 headerPtr);
 
+        // Configuration parameters changed on the fly
+        if (config->useNaluFile && config->naluFile)
+            SendNaluOnTheFly(
+                config,
+                headerPtr);
+
         if (keepRunning == 0 && !config->stopEncoder) {
             config->stopEncoder = EB_TRUE;
         }
@@ -1216,6 +1139,15 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(
         headerPtr->sliceType    = EB_INVALID_PICTURE;
 
         headerPtr->nFlags = 0;
+
+        if (config->dolbyVisionProfile == 81 && config->dolbyVisionRpuFile) {
+            ret = ParseDolbyVisionRPUMetadata(
+                  config,
+                  headerPtr);
+            if (ret) {
+                printf("\n Warning : Dolby vision RPU not parsed for POC %" PRId64 "\t", headerPtr->pts);
+            }
+        }
 
         // Send the picture
         EbH265EncSendPicture(componentHandle, headerPtr);
@@ -1250,32 +1182,23 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     EbAppContext_t         *appCallBack,
     uint8_t                 picSendDone)
 {
-    APPPORTACTIVETYPE       *portState = &appCallBack->outputStreamPortActive;
-    EB_BUFFERHEADERTYPE     *headerPtr;
-    EB_COMPONENTTYPE        *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
-    APPEXITCONDITIONTYPE    return_value = APP_ExitConditionNone;
-    EB_ERRORTYPE            stream_status = EB_ErrorNone;
+    APPPORTACTIVETYPE      *portState       = &appCallBack->outputStreamPortActive;
+    EB_BUFFERHEADERTYPE    *headerPtr;
+    EB_COMPONENTTYPE       *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
+    APPEXITCONDITIONTYPE    return_value    = APP_ExitConditionNone;
+    EB_ERRORTYPE            stream_status   = EB_ErrorNone;
     // Per channel variables
-    FILE                 *streamFile      = config->bitstreamFile;
-    uint32_t               startFrame      = (config->framesToBeEncoded == 0 || config->framesToBeEncoded < LONG_ENCODE_FRAME_ENCODE || (SPEED_MEASUREMENT_INTERVAL < START_STEADY_STATE)) ? 0 : START_STEADY_STATE;
-	uint64_t              *startsTime      = &config->performanceContext.startsTime ;
-    uint64_t              *startuTime      = &config->performanceContext.startuTime ;
+    FILE                  *streamFile       = config->bitstreamFile;
 
-    uint64_t              *totalLatency    = &config->performanceContext.totalLatency;
-    uint32_t              *maxLatency      = &config->performanceContext.maxLatency;
+    uint64_t              *totalLatency     = &config->performanceContext.totalLatency;
+    uint32_t              *maxLatency       = &config->performanceContext.maxLatency;
 
     // System performance variables
-    static uint64_t        allChannelsStartsTime     = 0;
-    static uint64_t        allChannelsStartuTime     = 0;
-    static int32_t           frameCount                = 0;
-
-    // for a long encode, ignore startup time to get the steady state speed
-    static uint32_t        allChannelsStartFrame     = START_STEADY_STATE;
+    static int32_t         frameCount       = 0;
 
     // Local variables
-    uint64_t                finishsTime     = 0;
-    uint64_t                finishuTime     = 0;
-    double                duration        = 0.0;
+    uint64_t               finishsTime      = 0;
+    uint64_t               finishuTime      = 0;
 
     // non-blocking call until all input frames are sent
     stream_status = EbH265GetPacket(componentHandle, &headerPtr, picSendDone);
@@ -1291,25 +1214,23 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
         ++(config->performanceContext.frameCount);
         *totalLatency += (uint64_t)headerPtr->nTickCount;
         *maxLatency = (headerPtr->nTickCount > *maxLatency) ? headerPtr->nTickCount : *maxLatency;
-
-        // Reset counters for long encodes
-        if (config->performanceContext.frameCount - 1 == startFrame) {
-            EbStartTime((uint64_t*)startsTime, (uint64_t*)startuTime);
-            *maxLatency = 0;
-            *totalLatency = 0;
-        }
-        if ((uint32_t)frameCount == allChannelsStartFrame && allChannelsStartFrame <= SPEED_MEASUREMENT_INTERVAL) {
-            EbStartTime((uint64_t*)&allChannelsStartsTime, (uint64_t*)&allChannelsStartuTime);
-        }
-
+        
         EbFinishTime((uint64_t*)&finishsTime, (uint64_t*)&finishuTime);
-
+        // total execution time, inc init time
         EbComputeOverallElapsedTime(
-            *startsTime,
-            *startuTime,
+            config->performanceContext.libStartTime[0],
+            config->performanceContext.libStartTime[1],
             finishsTime,
             finishuTime,
-            &duration);
+            &config->performanceContext.totalExecutionTime);
+
+        // total encode time
+        EbComputeOverallElapsedTime(
+            config->performanceContext.encodeStartTime[0],
+            config->performanceContext.encodeStartTime[1],
+            finishsTime,
+            finishuTime,
+            &config->performanceContext.totalEncodeTime);
 
         // Write Stream Data to file
         if (streamFile) {
@@ -1351,42 +1272,15 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
         fflush(stdout);
 
         // Queue the buffer again if the port is still active
-        if (*portState != APP_PortActive) {
-            if ((config->framesToBeEncoded < SPEED_MEASUREMENT_INTERVAL) || (config->framesToBeEncoded - startFrame) < SPEED_MEASUREMENT_INTERVAL) {
-                config->performanceContext.averageSpeed = (config->performanceContext.frameCount - startFrame) / duration;
-                config->performanceContext.averageLatency = config->performanceContext.totalLatency / (double)(config->performanceContext.frameCount - startFrame);
-            }
-        }
-
-
-        if ((((config->framesToBeEncoded != 0) && (config->framesToBeEncoded > SPEED_MEASUREMENT_INTERVAL))
-            && ((int64_t)config->performanceContext.frameCount == (config->framesToBeEncoded - (int32_t)startFrame)))) {
-            config->performanceContext.averageSpeed = (config->performanceContext.frameCount - startFrame) / duration;
-            config->performanceContext.averageLatency = config->performanceContext.totalLatency / (double)(config->performanceContext.frameCount - startFrame);
+        {
+            config->performanceContext.averageSpeed = (config->performanceContext.frameCount) / config->performanceContext.totalEncodeTime;
+            config->performanceContext.averageLatency = config->performanceContext.totalLatency / (double)(config->performanceContext.frameCount);
         }
 
         if (!(frameCount % SPEED_MEASUREMENT_INTERVAL)) {
-            if (frameCount < (int32_t)allChannelsStartFrame && (frameCount >= (int32_t)LONG_ENCODE_FRAME_ENCODE) && (allChannelsStartFrame <= SPEED_MEASUREMENT_INTERVAL)) {
-                EbComputeOverallElapsedTime(
-                    allChannelsStartsTime,
-                    allChannelsStartuTime,
-                    finishsTime,
-                    finishuTime,
-                    &duration);
-
+            {
                 printf("\n");
-                printf("Average System Encoding Speed:        %.2f\n", (double)(frameCount - allChannelsStartFrame) / duration);
-            }
-            else {
-                EbComputeOverallElapsedTime(
-                    *startsTime,
-                    *startuTime,
-                    finishsTime,
-                    finishuTime,
-                    &duration);
-
-                printf("\n");
-                printf("Average System Encoding Speed:        %.2f\n", (double)(frameCount - (int32_t)startFrame) / duration);
+                printf("Average System Encoding Speed:        %.2f\n", (double)(frameCount) / config->performanceContext.totalEncodeTime);
             }
         }
     }

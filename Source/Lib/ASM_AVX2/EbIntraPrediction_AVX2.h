@@ -39,7 +39,15 @@ extern void IntraModeVerticalLuma_AVX2_INTRIN(
     EB_U8            *refSamples,             //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,          //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride, //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip                    //skip one row 
+    const EB_BOOL     skip                    //skip one row
+    );
+
+extern void IntraModeVerticalChroma_AVX2_INTRIN(
+    const EB_U32      size,                   //input parameter, denotes the size of the current PU
+    EB_U8            *refSamples,             //input parameter, pointer to the reference samples
+    EB_U8            *predictionPtr,          //output parameter, pointer to the prediction
+    const EB_U32      predictionBufferStride, //input parameter, denotes the stride for the prediction ptr
+    const EB_BOOL     skip                    //skip one row
     );
 
 extern void IntraModeDCLuma_AVX2_INTRIN(
@@ -47,7 +55,15 @@ extern void IntraModeDCLuma_AVX2_INTRIN(
     EB_U8            *refSamples,                 //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,              //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip)   ;                    //skip one row 
+    const EB_BOOL     skip)   ;                    //skip one row
+
+extern void IntraModeDCChroma_AVX2_INTRIN(
+    const EB_U32      size,                       //input parameter, denotes the size of the current PU
+    EB_U8            *refSamples,                 //input parameter, pointer to the reference samples
+    EB_U8            *predictionPtr,              //output parameter, pointer to the prediction
+    const EB_U32      predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
+    const EB_BOOL     skip);               //skip one row
+
 
 
 extern void IntraModeAngular_2_AVX2_INTRIN(

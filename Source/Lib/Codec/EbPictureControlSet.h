@@ -145,11 +145,8 @@ typedef struct PictureControlSet_s
     
     // Reference Lists
     EbObjectWrapper_t                    *refPicPtrArray[MAX_NUM_OF_REF_PIC_LIST];
-
     EB_U8                                 refPicQpArray[MAX_NUM_OF_REF_PIC_LIST];
-
     EB_PICTURE                              refSliceTypeArray[MAX_NUM_OF_REF_PIC_LIST];
-
     EB_U8                                 refPicTemporalLayerArray[MAX_NUM_OF_REF_PIC_LIST];
 
     // GOP
@@ -157,6 +154,7 @@ typedef struct PictureControlSet_s
     EB_U8                                 temporalLayerIndex;
     EB_U8                                 temporalId;
 
+    EB_COLOR_FORMAT                       colorFormat;
 
     EncDecSegments_t                     *encDecSegmentCtrl;
 
@@ -300,6 +298,15 @@ typedef struct LcuParameters_s {
 	EB_BOOL rasterScanCuValidity[CU_MAX_COUNT];
     EB_U8   potentialLogoLcu;
 	EB_U8   isEdgeLcu;
+#if TILES
+    EB_U32  tileStartX;
+    EB_U32  tileStartY;
+    EB_U32  tileEndX;
+    EB_U32  tileEndY;
+    EB_BOOL tileLeftEdgeFlag;
+    EB_BOOL tileTopEdgeFlag;
+    EB_BOOL tileRightEdgeFlag;
+#endif
 } LcuParams_t;
 
 typedef struct CuStat_s {
@@ -350,6 +357,7 @@ typedef struct PictureParentControlSet_s
     EB_U64                                pictureNumber;                                
 
     EbPictureBufferDesc_t                *enhancedPicturePtr; 
+    EbPictureBufferDesc_t                *chromaDownSamplePicturePtr;
 
     EB_PICNOISE_CLASS                     picNoiseClass;
 
@@ -585,6 +593,7 @@ typedef struct PictureControlSetInitData_s
 	EB_U16                           topPadding;
 	EB_U16                           botPadding;
     EB_BITDEPTH                      bitDepth;
+    EB_COLOR_FORMAT                  colorFormat;
     EB_U32                           lcuSize;
     EB_U32                           maxDepth;
     EB_BOOL                          is16bit;

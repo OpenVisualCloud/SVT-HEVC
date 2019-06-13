@@ -13,7 +13,8 @@ extern "C" {
 #endif
 // Bistream Slice Buffer Size
 #define EB_BITSTREAM_SLICE_BUFFER_SIZE          0x300000
-#define SLICE_HEADER_COUNT                         256
+// Table A.6 General tier and level limits
+#define SLICE_HEADER_COUNT                      600
 
 /**********************************
  * Bitstream Unit Types
@@ -57,7 +58,8 @@ extern EB_ERRORTYPE OutputBitstreamRBSPToPayload(
     EB_BYTE                outputBuffer,
     EB_U32                *outputBufferIndex,
     EB_U32                *outputBufferSize,
-    EB_U32                 startLocation);
+    EB_U32                 startLocation,
+    NalUnitType            nalType);
 #ifdef __cplusplus
 }
 #endif
