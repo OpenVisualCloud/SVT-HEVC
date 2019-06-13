@@ -46,4 +46,4 @@ if (MSVC OR MSYS OR MINGW OR WIN32)
                            SvtHevcEnc)
 endif()
 
-install(TARGETS SvtHevcEncApp RUNTIME DESTINATION bin)
+install(TARGETS SvtHevcEncApp RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
