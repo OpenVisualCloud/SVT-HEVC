@@ -420,6 +420,10 @@ typedef struct EB_H265_ENC_CONFIGURATION
      *
      * Default is 10. */
     uint32_t                minQpAllowed;
+    /* CRF value allowed for rate control use, only apllicable when rate
+     * control mode is set to 2.
+     *
+     * Default is 28. */
     uint32_t                crf;
 
 

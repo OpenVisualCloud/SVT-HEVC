@@ -281,7 +281,8 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **SearchAreaWidth** | -search-w | [1 - 256] | Depends on input resolution | Search Area in Width |
 | **SearchAreaHeight** | -search-h | [1 - 256] | Depends on input resolution | Search Area in Height |
 | **ConstrainedIntra** | -constrd-intra | [0,1] | 0 | Allow the use of Constrained Intra, when enabled, this features yields to sending two PPSs in the HEVC Elementary streams <br>0 = OFF, 1 = ON |
-| **RateControlMode** | -rc | [0,1] | 0 | 0 : CQP , 1 : VBR |
+| **RateControlMode** | -rc | [0,1] | 0 | 0 : CQP , 1 : VBR , 2 : CRF |
+| **ConstantRateFactor** | -crf | [0 - 51] | 28 | CRF value allowed for rate control use, only apllicable when RateControlMode is set to 2 |
 | **TargetBitRate** | -tbr | Any Number | 7000000 | Target bitrate in bits / second. Only used when RateControlMode is set to 1 |
 | **MaxQpAllowed** | -max-qp | [0 - 51] | 48 | Maximum QP value allowed for rate control use. Only used when RateControlMode is set to 1. Has to be >= MinQpAllowed |
 | **MinQpAllowed** | -min-qp | [0 - 50] | 10 | Minimum QP value allowed for rate control use. Only used when RateControlMode is set to 1. Has to be < MaxQpAllowed |
