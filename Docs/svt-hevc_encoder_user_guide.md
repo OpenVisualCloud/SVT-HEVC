@@ -197,7 +197,7 @@ This token sets the encoder to run in the visual quality optimized mode (when se
 
 >-i filename **[Required]**
 
-A YUV file (e.g. 8 bit 4:2:0 planar) containing the video sequence that will be encoded.  The dimensions of each image are specified by –w and –h as indicated below.
+A YUV file (e.g. 8 bit 4:2:0 planar) containing the video sequence that will be encoded.  Files encoded in YUV4MPEG2 format are also supported (common extension is ".y4m"). The dimensions of each image are specified by –w and –h as indicated below.
 
 >-b filename **[Optional]**
 
