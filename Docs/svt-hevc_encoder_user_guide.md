@@ -227,6 +227,15 @@ This token sets the bitrate control encoding mode [1: Variable Bitrate, 0: Const
 
 This token sets the encoder to automatically choose the best quality encoding mode that allows the encoder to run at a real-time speed set by the –fps parameter (described in the next section).
 
+>-lp integer **[Optional]**
+
+This token sets the number of logical processors which the encoder threads run on.
+
+>-ss integer **[Optional]**
+
+For dual socket systems, this token specific which socket the encoder runs on.
+
+
 For example, the following command encodes 100 frames of the YUV video sequence into the bin bit stream file.  The picture is 1920 luma pixels wide and 1080 pixels high using the Sample.cfg configuration. The QP equals 30 and the md5 checksum is not included in the bit stream.
 
 > SvtHevcEncApp.exe -c Sample.cfg -i CrowdRun\_1920x1080.yuv -w 1920 -h 1080 -n 100 -q 30 -intra-period 31 -b CrowdRun\_1920x1080\_qp30.bin
