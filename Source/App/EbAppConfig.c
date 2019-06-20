@@ -88,13 +88,13 @@
 #define TARGET_BIT_RATE_TOKEN           "-tbr"
 #define MAX_QP_TOKEN                    "-max-qp"
 #define MIN_QP_TOKEN                    "-min-qp"
-#define TEMPORAL_ID					    "-temporal-id" // no Eval
+#define TEMPORAL_ID                     "-temporal-id" // no Eval
 #define LOOK_AHEAD_DIST_TOKEN           "-lad"
 #define SCENE_CHANGE_DETECTION_TOKEN    "-scd"
 #define INJECTOR_TOKEN                  "-inj"  // no Eval
 #define INJECTOR_FRAMERATE_TOKEN        "-inj-frm-rt" // no Eval
 #define SPEED_CONTROL_TOKEN             "-speed-ctrl"
-#define ASM_TYPE_TOKEN				    "-asm" // no Eval
+#define ASM_TYPE_TOKEN                  "-asm" // no Eval
 #define THREAD_MGMNT                    "-lp"
 #define TARGET_SOCKET                   "-ss"
 #define SWITCHTHREADSTOREALTIME_TOKEN   "-rt"
@@ -160,7 +160,7 @@ static void SetCfgQpFile                        (const char *value, EbConfig_t *
     if (cfg->qpFile) { fclose(cfg->qpFile); }
     FOPEN(cfg->qpFile,value, "r");
 };
-static void SetCfgDolbyVisionRpuFile			(const char *value, EbConfig_t *cfg)
+static void SetCfgDolbyVisionRpuFile            (const char *value, EbConfig_t *cfg)
 {
     if (cfg->dolbyVisionRpuFile) { fclose(cfg->dolbyVisionRpuFile); }
     FOPEN(cfg->dolbyVisionRpuFile, value, "rb");
@@ -438,11 +438,11 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->maxQpAllowed                         = 48;
     configPtr->minQpAllowed                         = 10;
     configPtr->baseLayerSwitchMode                  = 0;
-	  configPtr->encMode								              = 9;
+      configPtr->encMode                                              = 9;
     configPtr->intraPeriod                          = -2;
     configPtr->intraRefreshType                     = 1;
-	  configPtr->hierarchicalLevels					          = 3;
-	  configPtr->predStructure						            = 2;
+      configPtr->hierarchicalLevels                              = 3;
+      configPtr->predStructure                                    = 2;
     configPtr->disableDlfFlag                       = EB_FALSE;
     configPtr->enableSaoFlag                        = EB_TRUE;
     configPtr->useDefaultMeHme                      = EB_TRUE;
@@ -458,7 +458,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->bufferingPeriodSEI                   = 0;
     configPtr->pictureTimingSEI                     = 0;
 
-    configPtr->bitRateReduction					    = EB_TRUE;
+    configPtr->bitRateReduction                        = EB_TRUE;
     configPtr->improveSharpness                     = EB_TRUE;
     configPtr->registeredUserDataSeiFlag            = EB_FALSE;
     configPtr->unregisteredUserDataSeiFlag          = EB_FALSE;
@@ -489,13 +489,13 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->unrestrictedMotionVector             = EB_TRUE;
 
     // Encoding Presets
-    configPtr->encMode								    = 9;
+    configPtr->encMode                                    = 9;
     //configPtr->latencyMode                              = 0; // Deprecated
     configPtr->speedControlFlag                         = 0;
 
     // Bit-depth
     configPtr->encoderBitDepth                          = 8;
-    configPtr->compressedTenBitFormat			        = 0;
+    configPtr->compressedTenBitFormat                    = 0;
     configPtr->encoderColorFormat                       = EB_YUV420;
 
     // Source Definitions
@@ -521,9 +521,9 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->separateFields                           = EB_FALSE;
 
     // Coding Structure
-    configPtr->hierarchicalLevels					    = 3;
+    configPtr->hierarchicalLevels                        = 3;
     configPtr->baseLayerSwitchMode                      = 0;
-    configPtr->predStructure						    = 2;
+    configPtr->predStructure                            = 2;
     configPtr->intraPeriod                              = -2;
     configPtr->intraRefreshType                         = 1;
 
@@ -556,7 +556,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->tune                                     = 1;
 
     // Adaptive QP Params
-    configPtr->bitRateReduction					        = EB_TRUE;
+    configPtr->bitRateReduction                            = EB_TRUE;
     configPtr->improveSharpness                         = EB_TRUE;
 
     // Optional Features
@@ -848,7 +848,7 @@ static int32_t FindToken(
 **********************************/
 static int32_t ReadConfigFile(
     EbConfig_t  *config,
-    char		*configPath,
+    char        *configPath,
     uint32_t     instanceIdx)
 {
     int32_t return_error = 0;
@@ -1205,8 +1205,8 @@ EB_ERRORTYPE ReadCommandLine(
 {
 
     EB_ERRORTYPE return_error = EB_ErrorBadParameter;
-    char		    config_string[COMMAND_LINE_MAX_SIZE];		// for one input options
-    char		   *config_strings[MAX_CHANNEL_NUMBER]; // for multiple input options
+    char            config_string[COMMAND_LINE_MAX_SIZE];        // for one input options
+    char           *config_strings[MAX_CHANNEL_NUMBER]; // for multiple input options
     char           *cmd_copy[MAX_NUM_TOKENS];                 // keep track of extra tokens
     uint32_t    index           = 0;
     int32_t             cmd_token_cnt   = 0;                        // total number of tokens
