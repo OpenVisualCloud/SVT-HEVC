@@ -302,7 +302,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **LogicalProcessors** | -lp | [0, total number of logical processor] | 0 | The number of logical processor which encoder threads run on.Refer to Appendix A.2 |
 | **TargetSocket** | -ss | [-1,1] | -1 | For dual socket systems, this can specify which socket the encoder runs on.Refer to Appendix A.2 |
 | **SwitchThreadsToRtPriority** | -rt | [0,1] | 1 | Enables or disables threads to real time priority, 0 = OFF, 1 = ON (only works on Linux) |
-| **FPSInVPS** | -fpsinvps | [0,1] | 0 | Enables or disables the VPS timing info, 0 = OFF, 1 = ON |
+| **FPSInVPS** | -fpsinvps | [0,1] | 1 | Enables or disables the VPS timing info, 0 = OFF, 1 = ON |
 | **TileRowCount** | -tile_row_cnt | [1,16] | 1 | Tile count in the Row |
 | **TileColumnCount** | -tile_col_cnt | [1,16] | 1 | Tile count in the column |
 | **TileSliceMode** | -tile_slice_mode | [0,1] | 0 | Per slice per tile, only valid for multi-tile |
