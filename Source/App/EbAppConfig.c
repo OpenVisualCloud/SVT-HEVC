@@ -474,7 +474,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->minDisplayMasteringLuminance         = 0;
 
     configPtr->switchThreadsToRtPriority            = EB_TRUE;
-    configPtr->fpsInVps                             = EB_FALSE;
+    configPtr->fpsInVps                             = EB_TRUE;
     configPtr->unrestrictedMotionVector             = EB_TRUE;
 
     // Encoding Presets
@@ -559,7 +559,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->recoveryPointSeiFlag                     = EB_FALSE;
     configPtr->enableTemporalId                         = 1;
     configPtr->switchThreadsToRtPriority                = EB_TRUE;
-    configPtr->fpsInVps                                 = EB_FALSE;
+    configPtr->fpsInVps                                 = EB_TRUE;
     configPtr->maxCLL                                   = 0;
     configPtr->maxFALL                                  = 0;
     configPtr->useMasteringDisplayColorVolume           = EB_FALSE;
