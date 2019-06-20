@@ -197,6 +197,14 @@ if(UNIX)
         PROPERTIES LINK_DEPENDS ${VERSION_SCRIPT})
 endif()
 
+if(COVERAGE)
+    if(CMAKE_C_COMPILER_ID MATCHES "GNU")
+        set(LIBS "-lgcov ${LIBS}")
+    else(CMAKE_C_COMPILER_ID MATCHES "Clang")
+        set(LIBS "--coverage ${LIBS}")
+    endif()
+endif()
+
 add_dependencies(SvtHevcEnc
     HEVC_C_DEFAULT
     HEVC_ASM_SSE2
