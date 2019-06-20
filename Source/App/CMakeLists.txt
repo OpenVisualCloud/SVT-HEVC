@@ -25,6 +25,7 @@ add_executable (SvtHevcEncApp
     EbAppContext.h
     ../API/EbErrorCodes.h
     ../API/EbTime.h
+    EbAppInputy4m.c
 )
 
 #********** SET COMPILE FLAGS************
@@ -45,4 +46,8 @@ if (MSVC OR MSYS OR MINGW OR WIN32)
                            SvtHevcEnc)
 endif()
 
-install(TARGETS SvtHevcEncApp RUNTIME DESTINATION bin)
+if(NOT CMAKE_INSTALL_BINDIR)
+    set(CMAKE_INSTALL_BINDIR bin)
+endif()
+
+install(TARGETS SvtHevcEncApp RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

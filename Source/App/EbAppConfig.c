@@ -10,6 +10,7 @@
 
 #include "EbAppConfig.h"
 #include "EbApi.h"
+#include "EbAppInputy4m.h"
 
 #ifdef _WIN32
 #else
@@ -127,6 +128,16 @@ static void SetCfgInputFile                     (const char *value, EbConfig_t *
     }
     else {
         FOPEN(cfg->inputFile, value, "rb");
+        /* if input is a YUV4MPEG2 (y4m) file, read header and parse parameters */
+        if (cfg->inputFile != NULL) {
+            if ((EB_BOOL)(check_if_y4m(cfg)) == EB_TRUE)
+                cfg->y4m_input = EB_TRUE;
+            else
+                cfg->y4m_input = EB_FALSE;
+        }
+        else {
+            cfg->y4m_input = EB_FALSE;
+        }
     }
 };
 static void SetCfgStreamFile                    (const char *value, EbConfig_t *cfg)
@@ -1121,9 +1132,13 @@ int32_t ComputeFramesToBeEncoded(
     uint64_t fileSize = 0;
     int32_t frameCount = 0;
     uint32_t frameSize;
+    uint64_t currLoc;
+
     if (config->inputFile) {
+        currLoc = ftello64(config->inputFile); // get current fp location
         fseeko64(config->inputFile, 0L, SEEK_END);
         fileSize = ftello64(config->inputFile);
+        fseeko64(config->inputFile, currLoc, SEEK_SET); // seek back to that location
     }
 
     frameSize = config->inputPaddedWidth * config->inputPaddedHeight; // Luma
@@ -1196,6 +1211,7 @@ EB_ERRORTYPE ReadCommandLine(
     uint32_t    index           = 0;
     int32_t             cmd_token_cnt   = 0;                        // total number of tokens
     int32_t             token_index     = -1;
+    int32_t ret_y4m;
 
     for (index = 0; index < MAX_CHANNEL_NUMBER; ++index){
         config_strings[index] = (char*)malloc(sizeof(char)*COMMAND_LINE_MAX_SIZE);
@@ -1260,6 +1276,20 @@ EB_ERRORTYPE ReadCommandLine(
     }
 
     /***************************************************************************************************/
+    /********************** Parse parameters from input file if in y4m format **************************/
+    /********************** overriding config file and command line inputs    **************************/
+    /***************************************************************************************************/
+    for (index = 0; index < numChannels; ++index) {
+        if ((configs[index])->y4m_input == EB_TRUE) {
+            ret_y4m = read_y4m_header(configs[index]);
+            if (ret_y4m == EB_ErrorBadParameter) {
+                printf("Error found when reading the y4m file parameters.\n");
+                return EB_ErrorBadParameter;
+            }
+        }
+    }
+
+    /***************************************************************************************************/
     /**************************************   Verify configuration parameters   ************************/
     /***************************************************************************************************/
     // Verify the config values
@@ -1274,7 +1304,6 @@ EB_ERRORTYPE ReadCommandLine(
                     configs[index]->inputPaddedWidth  = configs[index]->sourceWidth + LEFT_INPUT_PADDING + RIGHT_INPUT_PADDING;
                     configs[index]->inputPaddedHeight = configs[index]->sourceHeight + TOP_INPUT_PADDING + BOTTOM_INPUT_PADDING;
                 }
-
 
                 // Assuming no errors, set the frames to be encoded to the number of frames in the input yuv
                 if (return_errors[index] == EB_ErrorNone && configs[index]->framesToBeEncoded == 0)
