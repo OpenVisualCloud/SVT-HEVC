@@ -106,7 +106,6 @@ typedef struct SequenceControlSet_s
     EB_U32                      generalFrameOnlyConstraintFlag;
     
     // Rate Control
-    EB_U32                      rateControlMode;
     EB_U32                      targetBitrate;
     EB_U32                      availableBandwidth;          
     
@@ -206,6 +205,9 @@ typedef struct SequenceControlSet_s
     EB_U8                       transCoeffShapeArray[2][8][4];    // [componantTypeIndex][resolutionIndex][levelIndex][tuSizeIndex]
 
     EB_U8                       maxEncMode;
+
+    //Active parameter Set Sei
+    AppActiveparameterSetSei_t  activeParameterSet;
 
 } SequenceControlSet_t;
 

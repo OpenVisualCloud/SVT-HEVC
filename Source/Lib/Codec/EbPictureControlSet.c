@@ -26,6 +26,7 @@ EB_ERRORTYPE PictureControlSetCtor(
     const EB_U16 pictureLcuWidth    = (EB_U16)((initDataPtr->pictureWidth + initDataPtr->lcuSize - 1) / initDataPtr->lcuSize);
     const EB_U16 pictureLcuHeight   = (EB_U16)((initDataPtr->pictureHeight + initDataPtr->lcuSize - 1) / initDataPtr->lcuSize);
     EB_U16 lcuIndex;
+    EB_U16 rowIndex;
     EB_U16 lcuOriginX;
     EB_U16 lcuOriginY;
     EB_ERRORTYPE return_error = EB_ErrorNone;
@@ -92,7 +93,13 @@ EB_ERRORTYPE PictureControlSetCtor(
 	if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
-	
+    //Proxy Entropy Coder to be used in Encdec
+    return_error = EntropyCoderCtor(
+        &objectPtr->tempEntropyCoderPtr,
+        SEGMENT_ENTROPY_BUFFER_SIZE);
+    if (return_error == EB_ErrorInsufficientResources) {
+        return EB_ErrorInsufficientResources;
+    }
 	// Cabaccost
     EB_MALLOC(CabacCost_t*, objectPtr->cabacCost, sizeof(CabacCost_t), EB_N_PTR);
 
@@ -144,6 +151,16 @@ EB_ERRORTYPE PictureControlSetCtor(
         lcuOriginX = (lcuOriginX == pictureLcuWidth - 1) ? 0 : lcuOriginX + 1;
     }
 
+    //Row stats Array
+    EB_MALLOC(RCStatRow_t**, objectPtr->rowStats, sizeof(RCStatRow_t*) * pictureLcuHeight, EB_N_PTR);
+    for (rowIndex = 0; rowIndex < pictureLcuHeight; ++rowIndex)
+    {
+        return_error = RCStatRowCtor(
+            &(objectPtr->rowStats[rowIndex]), (EB_U16)rowIndex);
+        if (return_error == EB_ErrorInsufficientResources) {
+            return EB_ErrorInsufficientResources;
+        }
+    }
     // Mode Decision Control config
     EB_MALLOC(MdcLcuData_t*, objectPtr->mdcLcuArray, objectPtr->lcuTotalCount  * sizeof(MdcLcuData_t), EB_N_PTR);
     objectPtr->qpArrayStride = (EB_U16)((initDataPtr->pictureWidth +  MIN_CU_SIZE - 1) / MIN_CU_SIZE);
@@ -503,6 +520,19 @@ EB_ERRORTYPE PictureControlSetCtor(
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
+    // Proxy Entropy Coding Neighbor Arrays to be used in Encdec
+    return_error = NeighborArrayUnitCtor(
+        &objectPtr->tempModeTypeNeighborArray,
+        MAX_PICTURE_WIDTH_SIZE,
+        MAX_PICTURE_HEIGHT_SIZE,
+        sizeof(EB_U8),
+        PU_NEIGHBOR_ARRAY_GRANULARITY,
+        PU_NEIGHBOR_ARRAY_GRANULARITY,
+        NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+
+    if (return_error == EB_ErrorInsufficientResources) {
+        return EB_ErrorInsufficientResources;
+    }
     return_error = NeighborArrayUnitCtor(
         &objectPtr->leafDepthNeighborArray,
         MAX_PICTURE_WIDTH_SIZE,
@@ -513,6 +543,18 @@ EB_ERRORTYPE PictureControlSetCtor(
         NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
 
     if (return_error == EB_ErrorInsufficientResources){
+        return EB_ErrorInsufficientResources;
+    }
+    return_error = NeighborArrayUnitCtor(
+        &objectPtr->tempLeafDepthNeighborArray,
+        MAX_PICTURE_WIDTH_SIZE,
+        MAX_PICTURE_HEIGHT_SIZE,
+        sizeof(EB_U8),
+        CU_NEIGHBOR_ARRAY_GRANULARITY,
+        CU_NEIGHBOR_ARRAY_GRANULARITY,
+        NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+
+    if (return_error == EB_ErrorInsufficientResources) {
         return EB_ErrorInsufficientResources;
     }
     return_error = NeighborArrayUnitCtor(
@@ -527,7 +569,18 @@ EB_ERRORTYPE PictureControlSetCtor(
 	if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
-    
+    return_error = NeighborArrayUnitCtor(
+        &objectPtr->tempSkipFlagNeighborArray,
+        MAX_PICTURE_WIDTH_SIZE,
+        MAX_PICTURE_HEIGHT_SIZE,
+        sizeof(EB_U8),
+        CU_NEIGHBOR_ARRAY_GRANULARITY,
+        CU_NEIGHBOR_ARRAY_GRANULARITY,
+        NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+
+    if (return_error == EB_ErrorInsufficientResources) {
+        return EB_ErrorInsufficientResources;
+    }
     return_error = NeighborArrayUnitCtor(
         &objectPtr->intraLumaModeNeighborArray,
         MAX_PICTURE_WIDTH_SIZE,
@@ -537,6 +590,17 @@ EB_ERRORTYPE PictureControlSetCtor(
         PU_NEIGHBOR_ARRAY_GRANULARITY,
         NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
     if (return_error == EB_ErrorInsufficientResources){
+        return EB_ErrorInsufficientResources;
+    }
+    return_error = NeighborArrayUnitCtor(
+        &objectPtr->tempIntraLumaModeNeighborArray,
+        MAX_PICTURE_WIDTH_SIZE,
+        MAX_PICTURE_HEIGHT_SIZE,
+        sizeof(EB_U8),
+        PU_NEIGHBOR_ARRAY_GRANULARITY,
+        PU_NEIGHBOR_ARRAY_GRANULARITY,
+        NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+    if (return_error == EB_ErrorInsufficientResources) {
         return EB_ErrorInsufficientResources;
     }
 
@@ -587,8 +651,7 @@ EB_ERRORTYPE PictureParentControlSetCtor(
     EB_U16 lcuIndex;
 	EB_U32 regionInPictureWidthIndex;
 	EB_U32 regionInPictureHeightIndex;
-
-    EB_MALLOC(PictureParentControlSet_t*, objectPtr, sizeof(PictureParentControlSet_t), EB_N_PTR);
+    EB_CALLOC(PictureParentControlSet_t*, objectPtr, sizeof(PictureParentControlSet_t), 1, EB_N_PTR);
     *objectDblPtr = (EB_PTR)objectPtr;
 
     objectPtr->sequenceControlSetWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
@@ -627,6 +690,7 @@ EB_ERRORTYPE PictureParentControlSetCtor(
     objectPtr->totalNumBits = 0;
 
     objectPtr->lastIdrPicture = 0;
+    objectPtr->lastIdrPictureOrder = 0;
 
     objectPtr->lcuTotalCount            = pictureLcuWidth * pictureLcuHeight;
 

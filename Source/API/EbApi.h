@@ -515,15 +515,52 @@ typedef struct EB_H265_ENC_CONFIGURATION
     uint8_t                 fpsInVps;
 
 
-    // Application Specific parameters
+    // VBV Parameters
+    /* Sets the maximum rate the VBV buffer should be assumed to refill at
+     * 
+     * Default is 0. */
+    uint32_t                vbvMaxrate;
 
+    /* Sets the size of the VBV buffer in bits. 
+     *
+     * Default is 0. */
+    uint32_t                vbvBufsize;
+	/* Sets how full the VBV buffer must be before playback starts. If picture
+	 * number is 0, then the initial fill is vbv-init * vbvBufferSize.
+	 * Otherwise, it is interpreted as the initial fill in bits.
+	 *
+	 * Default is 90. */
+	uint64_t                vbvBufInit;
+	/* Sets how full the VBV buffer must be end.
+	 *
+	 * Default is 0. */
+	uint64_t                vbvBufEnd;
+	/* Sets  vbvEndFrameAdjust.
+	 *
+	 * Default is 0. */
+	uint64_t                vbvEndFrameAdjust;
+	/* Enables the buffering period SEI and picture timing SEI to signal the HRD
+	* parameters.
+	*
+	* 0 = disable.
+	* 1 = enable.
+	*
+	* Default is 0. */
+    uint32_t                hrdFlag;
+    
     /* ID assigned to each channel when multiple instances are running within the
      * same application. */
     uint32_t                channelId;
 
     /* Active channel count. */
     uint32_t                activeChannelCount;
-
+	/* Enables lowLevelVBV Algorithm
+    *
+	* 0 = disable.
+	* 1 = enable.
+	*
+	* Default is 0. */
+    uint8_t                 lowLevelVbv;
 
     // Threads management
 
@@ -541,6 +578,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
      *
      * Default is -1. */
     int32_t                 targetSocket;
+
 
     /* Flag to enable threads to real time priority. Running with sudo privilege
      * utilizes full resource. Only applicable to Linux.

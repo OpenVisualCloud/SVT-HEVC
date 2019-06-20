@@ -1301,7 +1301,12 @@ void* PictureDecisionKernel(void *inputPtr)
                         else {
                             pictureControlSetPtr->decodeOrder = pictureControlSetPtr->pictureNumber;
                         }
-
+                        if (sequenceControlSetPtr->intraRefreshType == IDR_REFRESH)
+                        {
+                            pictureControlSetPtr->lastIdrPictureOrder = encodeContextPtr->lastIdrPictureOrder;
+                            if (pictureControlSetPtr->sliceType == EB_I_PICTURE)
+                            encodeContextPtr->lastIdrPictureOrder = pictureControlSetPtr->decodeOrder;
+                        }
                         EbBlockOnMutex(encodeContextPtr->terminatingConditionsMutex);
 
                         encodeContextPtr->terminatingSequenceFlagReceived = (pictureControlSetPtr->endOfSequenceFlag == EB_TRUE) ? 

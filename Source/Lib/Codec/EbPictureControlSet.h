@@ -140,6 +140,8 @@ typedef struct PictureControlSet_s
     
     EntropyCoder_t                       *entropyCoderPtr;
 
+	EntropyCoder_t                       *tempEntropyCoderPtr;
+
     // Packetization (used to encode SPS, PPS, etc)
     Bitstream_t                          *bitstreamPtr;
     
@@ -250,6 +252,11 @@ typedef struct PictureControlSet_s
     NeighborArrayUnit_t                  *intraLumaModeNeighborArray;
     NeighborArrayUnit_t                  *skipFlagNeighborArray;
 
+	NeighborArrayUnit_t                  *tempModeTypeNeighborArray;
+	NeighborArrayUnit_t                  *tempLeafDepthNeighborArray;
+	NeighborArrayUnit_t                  *tempIntraLumaModeNeighborArray;
+	NeighborArrayUnit_t                  *tempSkipFlagNeighborArray;
+
     EB_REFLIST                            colocatedPuRefList;
     EB_BOOL                               isLowDelay;
 
@@ -278,6 +285,15 @@ typedef struct PictureControlSet_s
 
     EB_BOOL                               bdpPresentFlag;
     EB_BOOL                               mdPresentFlag;
+
+    //Row level vbv data
+    RCStatRow_t                           **rowStats;
+    EB_BOOL                               firstRowOfPicture;
+
+    EB_U64                                frameSizePlanned;
+    EB_U64                                frameSizeEstimated;
+    EB_U64                                bufferFillPerFrame;
+    EB_U8                                 qpNoVbv;
 
 } PictureControlSet_t;
 
@@ -417,6 +433,7 @@ typedef struct PictureParentControlSet_s
     EB_U64                                averageQp;
  
     EB_U64                                lastIdrPicture;
+    EB_U64                                lastIdrPictureOrder;
 
     EB_U64                                startTimeSeconds;
     EB_U64                                startTimeuSeconds;

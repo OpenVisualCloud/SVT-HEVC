@@ -44,6 +44,20 @@ extern EB_ERRORTYPE EncodeLcu(
     EB_U32                   pictureOriginX,
 	EB_U32                   pictureOriginY);
 
+extern EB_ERRORTYPE EstimateLcu(
+    LargestCodingUnit_t     *tbPtr,
+    EB_U32                   lcuOriginX,
+    EB_U32                   lcuOriginY,
+    PictureControlSet_t     *pictureControlSetPtr,
+    EB_U32                   lcuSize,
+    EntropyCoder_t          *entropyCoderPtr,
+    EbPictureBufferDesc_t   *coeffPtr,
+    NeighborArrayUnit_t     *modeTypeNeighborArray,
+    NeighborArrayUnit_t     *leafDepthNeighborArray,
+    NeighborArrayUnit_t     *intraLumaModeNeighborArray,
+    NeighborArrayUnit_t     *skipFlagNeighborArray,
+    EB_U32                   pictureOriginX,
+    EB_U32                   pictureOriginY);
 #if TILES
 extern EB_ERRORTYPE EncodeTileFinish(
     EntropyCoder_t        *entropyCoderPtr);
@@ -170,8 +184,16 @@ extern EB_ERRORTYPE EncodePictureTimingSEI(
     AppPictureTimingSei_t   *picTimingSeiPtr,
     AppVideoUsabilityInfo_t *vuiPtr,
     EncodeContext_t         *encodeContextPtr,
-    EB_U8                    pictStruct);
+    EB_U8                    pictStruct,
+    EB_U8                    temporalId);
 
+extern EB_ERRORTYPE EncodeActiveParameterSetsSEI(
+    Bitstream_t             *bitstreamPtr,
+    AppActiveparameterSetSei_t *activeParameterSet);
+
+extern EB_ERRORTYPE EncodeFillerData(
+    Bitstream_t             *bitstreamPtr,
+    EB_U8                    temporalId);
 
 extern EB_ERRORTYPE EncodeRegUserDataSEI(
     Bitstream_t             *bitstreamPtr,

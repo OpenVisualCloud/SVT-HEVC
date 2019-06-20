@@ -113,7 +113,6 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     sequenceControlSetPtr->enableStrongIntraSmoothing                       = EB_TRUE;
     
     // Rate Control
-    sequenceControlSetPtr->rateControlMode                                  = 0; 
     sequenceControlSetPtr->targetBitrate                                    = 0x1000; 
     sequenceControlSetPtr->availableBandwidth                               = 0x1000;
     
@@ -140,6 +139,10 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     // Initialize picture timing SEI
     EbBufferingPeriodSeiCtor(
         &sequenceControlSetPtr->bufferingPeriod);
+
+    //Initilaize Active Parametr Set SEI
+    EbActiveParameterSetSeiCtor(
+        &sequenceControlSetPtr->activeParameterSet);
 
         // Initialize picture timing SEI
     EbRecoveryPointSeiCtor(
@@ -249,6 +252,13 @@ EB_ERRORTYPE CopySequenceControlSet(
         sizeof(AppBufferingPeriodSei_t));
 
     writeCount += sizeof(AppBufferingPeriodSei_t);
+
+    EB_MEMCPY(
+        &dst->activeParameterSet,
+        &src->activeParameterSet,
+        sizeof(AppActiveparameterSetSei_t));
+
+    writeCount += sizeof(AppActiveparameterSetSei_t);
 
     EB_MEMCPY(
         &dst->recoveryPoint,
