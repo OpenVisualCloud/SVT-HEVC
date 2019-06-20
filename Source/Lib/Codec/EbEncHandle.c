@@ -2804,7 +2804,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->codeVpsSpsPps = 0;
     configPtr->codeEosNal    = 0;
     configPtr->switchThreadsToRtPriority = EB_TRUE;
-    configPtr->fpsInVps      = EB_FALSE;
+    configPtr->fpsInVps      = EB_TRUE;
     configPtr->unrestrictedMotionVector = EB_TRUE;
 
     configPtr->videoUsabilityInfo = 0;
