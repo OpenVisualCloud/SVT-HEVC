@@ -182,11 +182,9 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.minQpAllowed = config->minQpAllowed;
     callbackData->ebEncParameters.qp = config->qp;
     callbackData->ebEncParameters.useQpFile = (EB_BOOL)config->useQpFile;
-#if 1//TILES
     callbackData->ebEncParameters.tileColumnCount = (EB_BOOL)config->tileColumnCount;
     callbackData->ebEncParameters.tileRowCount = (EB_BOOL)config->tileRowCount;
     callbackData->ebEncParameters.tileSliceMode = (EB_BOOL)config->tileSliceMode;
-#endif
     callbackData->ebEncParameters.disableDlfFlag = (EB_BOOL)config->disableDlfFlag;
     callbackData->ebEncParameters.enableSaoFlag = (EB_BOOL)config->enableSaoFlag;
     callbackData->ebEncParameters.useDefaultMeHme = (EB_BOOL)config->useDefaultMeHme;

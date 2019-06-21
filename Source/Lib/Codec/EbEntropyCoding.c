@@ -6194,9 +6194,8 @@ static void CodePPS(
 	//SequenceControlSet_t    *scsPtr = (SequenceControlSet_t*)pcsPtr->sequenceControlSetWrapperPtr->objectPtr;
 
 	EB_BOOL disableDlfFlag = scsPtr->staticConfig.disableDlfFlag;
-#if TILES
     EB_BOOL tileMode = (scsPtr->tileColumnCount > 1 || scsPtr->tileRowCount > 1) ? EB_TRUE : EB_FALSE;
-#endif
+
 	// uiFirstByte
 	//codeNALUnitHeader( NAL_UNIT_PPS, NAL_REF_IDC_PRIORITY_HIGHEST );
 	CodeNALUnitHeader(
@@ -6318,17 +6317,13 @@ static void CodePPS(
 	// "tiles_enabled_flag"
     WriteFlagCavlc(
         bitstreamPtr,
-#if TILES
         tileMode);
-#else
-		0);
-#endif
 
 	// "entropy_coding_sync_enabled_flag"
 	WriteFlagCavlc(
 		bitstreamPtr,
 		0);
-#if TILES
+
     if (tileMode == EB_TRUE) {
 
         // Tiles Number of Columns
@@ -6373,15 +6368,14 @@ static void CodePPS(
         //if(scsPtr->staticConfig.tileColumnCount != 1 || scsPtr->staticConfig.tileRowCount > 1) {
         WriteFlagCavlc(
             bitstreamPtr,
-            1);
+            0);
         //}
     }
-#endif
 
 	// "loop_filter_across_slices_enabled_flag"
 	WriteFlagCavlc(
 		bitstreamPtr,
-		1);
+		0);
 
 	// "deblocking_filter_control_present_flag"
 	WriteFlagCavlc(
@@ -6442,6 +6436,27 @@ static void CodePPS(
 	return;
 }
 
+static EB_U32 GetEntropyCoderGetBitstreamSize(EntropyCoder_t *entropyCoderPtr)
+{
+	CabacEncodeContext_t *cabacEncCtxPtr = (CabacEncodeContext_t*)entropyCoderPtr->cabacEncodeContextPtr;
+    OutputBitstreamUnit_t *bitstreamPtr = &cabacEncCtxPtr->bacEncContext.m_pcTComBitIf;
+    unsigned payloadBytes = (cabacEncCtxPtr->bacEncContext.m_pcTComBitIf.writtenBitsCount) >> 3;
+    FlushBitstream(bitstreamPtr);
+
+    unsigned char *buf = (unsigned char *)bitstreamPtr->bufferBegin;
+    unsigned int emulationCount = 0;
+
+    //Count emulation counts 0x000001 and 0x000002
+    for (unsigned i = 0; i <= payloadBytes - 3; i++) {
+        if (buf[i] == 0 && buf[i+1] == 0 && (buf[i+2] <= 3)) {
+            emulationCount++;
+            i++;
+        }
+    }
+
+	return (payloadBytes + emulationCount);
+}
+
 static void CodeSliceHeader(
 	EB_U32         firstLcuAddr,
 	EB_U32         pictureQp,
@@ -6458,9 +6473,8 @@ static void CodeSliceHeader(
 	EB_BOOL disableDlfFlag = sequenceControlSetPtr->staticConfig.disableDlfFlag;
 
 	EB_U32 sliceType = (pcsPtr->ParentPcsPtr->idrFlag == EB_TRUE) ? EB_I_PICTURE : pcsPtr->sliceType;
-#if TILES
     EB_BOOL tileMode = (sequenceControlSetPtr->tileColumnCount > 1 || sequenceControlSetPtr->tileRowCount > 1) ? EB_TRUE : EB_FALSE;
-#endif
+
 	EB_U32 refPicsTotalCount =
 		pcsPtr->ParentPcsPtr->predStructPtr->predStructEntryPtrArray[pcsPtr->ParentPcsPtr->predStructIndex]->negativeRefPicsTotalCount +
 		pcsPtr->ParentPcsPtr->predStructPtr->predStructEntryPtrArray[pcsPtr->ParentPcsPtr->predStructIndex]->positiveRefPicsTotalCount;
@@ -6731,26 +6745,53 @@ static void CodeSliceHeader(
 			(pcsPtr->tcOffset >> 1));
 	}
 
-	if (!disableDlfFlag || (sequenceControlSetPtr->staticConfig.enableSaoFlag && (pcsPtr->saoFlag[0] || pcsPtr->saoFlag[1]))) {
-		// "slice_loop_filter_across_slices_enabled_flag"
-		WriteFlagCavlc(
-			bitstreamPtr,
-			1);
-	}
+	//if (!disableDlfFlag || (sequenceControlSetPtr->staticConfig.enableSaoFlag && (pcsPtr->saoFlag[0] || pcsPtr->saoFlag[1]))) {
+	//	// "slice_loop_filter_across_slices_enabled_flag"
+	//	WriteFlagCavlc(
+	//		bitstreamPtr,
+	//		1);
+	//}
 
-#if TILES
     if (tileMode) {
         unsigned tileColumnNumMinus1 = sequenceControlSetPtr->tileColumnCount - 1;
         unsigned tileRowNumMinus1 = sequenceControlSetPtr->tileRowCount - 1;
+        unsigned num_entry_point_offsets = sequenceControlSetPtr->tileColumnCount * sequenceControlSetPtr->tileRowCount - 1;
 
         if (tileColumnNumMinus1 > 0 || tileRowNumMinus1 > 0) {
+            EB_U32 maxOffset = 0;
+            EB_U32 offset[EB_TILE_MAX_COUNT];
+            for (unsigned tileIdx = 0; tileIdx < num_entry_point_offsets; tileIdx++) {
+                offset[tileIdx] = GetEntropyCoderGetBitstreamSize(pcsPtr->entropyCodingInfo[tileIdx]->entropyCoderPtr);
+                if (offset[tileIdx] > maxOffset) {
+                    maxOffset = offset[tileIdx];
+                }
+                //printf("tile %d, size %d\n", tileIdx, offset);
+            }
+
+            EB_U32 offsetLenMinus1 = 0;
+            while (maxOffset >= (1u << (offsetLenMinus1 + 1))) {
+                offsetLenMinus1++;
+                //assert(offsetLenMinus1 + 1 < 32);
+            }
+
             // "num_entry_point_offsets"
             WriteUvlc(
                 bitstreamPtr,
-                0);
+                num_entry_point_offsets);
+
+            if (num_entry_point_offsets > 0) {
+                WriteUvlc(
+                        bitstreamPtr,
+                        offsetLenMinus1);
+
+                for (unsigned tileIdx = 0; tileIdx < num_entry_point_offsets; tileIdx++) {
+                    //EB_U32 offset = GetEntropyCoderGetBitstreamSize(pcsPtr->entropyCodingInfo[tileIdx]->entropyCoderPtr);
+                    WriteCodeCavlc(bitstreamPtr, offset[tileIdx] - 1, offsetLenMinus1 + 1);
+                }
+            }
         }
     }
-#endif
+
 	// Byte Alignment
 
 	//pcBitstreamOut->write( 1, 1 );
@@ -6764,7 +6805,7 @@ static void CodeSliceHeader(
 		bitstreamPtr);
 
 }
-#if TILES
+
 EB_ERRORTYPE EncodeTileFinish(
     EntropyCoder_t        *entropyCoderPtr)
 {
@@ -6788,7 +6829,7 @@ EB_ERRORTYPE EncodeTileFinish(
 
     return return_error;
 }
-#endif
+
 EB_ERRORTYPE EncodeLcuSaoParameters(
 	LargestCodingUnit_t   *tbPtr,
 	EntropyCoder_t        *entropyCoderPtr,
@@ -6804,30 +6845,20 @@ EB_ERRORTYPE EncodeLcuSaoParameters(
 	// This needs to be revisited when there is more than one slice per tile
 	// Code Luma SAO parameters
 	// Code Luma SAO parameters
-#if TILES
     if (tbPtr->tileLeftEdgeFlag == EB_FALSE) {
-#else
-	if (tbPtr->pictureLeftEdgeFlag == EB_FALSE) {
-#endif
 		EncodeSaoMerge(
 			cabacEncodeCtxPtr,
 			tbPtr->saoParams.saoMergeLeftFlag);
-	}
-	else {
+	} else {
 		tbPtr->saoParams.saoMergeLeftFlag = EB_FALSE;
 	}
 
 	if (tbPtr->saoParams.saoMergeLeftFlag == 0) {
-#if TILES
         if (tbPtr->tileTopEdgeFlag == EB_FALSE) {
-#else
-		if (tbPtr->pictureTopEdgeFlag == EB_FALSE) {
-#endif
 			EncodeSaoMerge(
 				cabacEncodeCtxPtr,
 				tbPtr->saoParams.saoMergeUpFlag);
-		}
-		else {
+		} else {
 			tbPtr->saoParams.saoMergeUpFlag = EB_FALSE;
 		}
 	}
@@ -7331,6 +7362,7 @@ EB_ERRORTYPE EncodeLcu(
 	NeighborArrayUnit_t     *leafDepthNeighborArray,
 	NeighborArrayUnit_t     *intraLumaModeNeighborArray,
 	NeighborArrayUnit_t     *skipFlagNeighborArray,
+	EB_U16                   tileIdx,
 	EB_U32                   pictureOriginX,
 	EB_U32                   pictureOriginY)
 {
@@ -7434,8 +7466,8 @@ EB_ERRORTYPE EncodeLcu(
 					sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction ? EB_TRUE : EB_FALSE,
                     &entropyDeltaQpNotCoded,
                     pictureControlSetPtr->difCuDeltaQpDepth,
-                    &pictureControlSetPtr->prevCodedQp,
-                    &pictureControlSetPtr->prevQuantGroupCodedQp,
+                    &pictureControlSetPtr->prevCodedQp[tileIdx],
+                    &pictureControlSetPtr->prevQuantGroupCodedQp[tileIdx],
                     tbPtr->qp,
                     pictureControlSetPtr,
 					pictureOriginX,
