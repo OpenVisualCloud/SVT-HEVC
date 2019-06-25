@@ -906,7 +906,8 @@ void* PictureDecisionKernel(void *inputPtr)
         
         while(queueEntryPtr->parentPcsWrapperPtr != EB_NULL) {
             
-            if(  queueEntryPtr->pictureNumber == 0  || 
+            if(queueEntryPtr->pictureNumber == 0 ||
+                sequenceControlSetPtr->staticConfig.sceneChangeDetection == 0 ||
                 ((PictureParentControlSet_t *)(queueEntryPtr->parentPcsWrapperPtr->objectPtr))->endOfSequenceFlag == EB_TRUE){
                     framePasseThru = EB_TRUE;
             }else{

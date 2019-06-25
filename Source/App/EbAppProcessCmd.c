@@ -14,6 +14,7 @@
 #include "EbAppContext.h"
 #include "EbAppConfig.h"
 #include "EbErrorCodes.h"
+#include "EbAppInputy4m.h"
 
 #include "EbTime.h"
 /***************************************
@@ -24,6 +25,7 @@
 #define FUTURE_WINDOW_WIDTH                 4
 #define SIZE_OF_ONE_FRAME_IN_BYTES(width, height, csp, is16bit) \
     ( (((width)*(height)) + 2*(((width)*(height))>>(3-csp)) )<<is16bit)
+#define YUV4MPEG2_IND_SIZE 9
 extern volatile int32_t keepRunning;
 
 /***************************************
@@ -763,6 +765,7 @@ static void ReadInputFrames(
     const uint32_t  inputPaddedWidth = config->inputPaddedWidth;
     const uint32_t  inputPaddedHeight = config->inputPaddedHeight;
     FILE   *inputFile = config->inputFile;
+	uint8_t  *ebInputPtr;
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
     const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)config->encoderColorFormat;
     const uint8_t subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
@@ -813,12 +816,26 @@ static void ReadInputFrames(
                     fseek(inputFile, -(long)(readSize << 1), SEEK_CUR);
                 }
             } else {
+
+                /* if input is a y4m file, read next line which contains "FRAME" */
+                if (config->y4m_input == EB_TRUE)
+                    read_y4m_frame_delimiter(config);
                 const uint32_t lumaReadSize = inputPaddedWidth * inputPaddedHeight << is16bit;
+                ebInputPtr = inputPtr->luma;
+                if (config->y4m_input == EB_FALSE && config->processedFrameCount == 0 && config->inputFile == stdin) {
+                    /* if not a y4m file and input is read from stdin, 9 bytes were already read when checking
+                       or the YUV4MPEG2 string in the stream, so copy those bytes over */
+                    memcpy(ebInputPtr, config->y4m_buf, YUV4MPEG2_IND_SIZE);
+                    headerPtr->nFilledLen += YUV4MPEG2_IND_SIZE;
+                    ebInputPtr += YUV4MPEG2_IND_SIZE;
+                    headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize - YUV4MPEG2_IND_SIZE, inputFile);
+                }
+                else {
+                    headerPtr->nFilledLen += (uint32_t)fread(inputPtr->luma, 1, lumaReadSize, inputFile);
+                }
                 const uint32_t chromaReadSize = lumaReadSize >> (3 - colorFormat);
-                headerPtr->nFilledLen += (uint32_t)fread(inputPtr->luma, 1, lumaReadSize, inputFile);
                 headerPtr->nFilledLen += (uint32_t)fread(inputPtr->cb, 1, chromaReadSize, inputFile);
                 headerPtr->nFilledLen += (uint32_t)fread(inputPtr->cr, 1, chromaReadSize, inputFile);
-
 
                 if (readSize != headerPtr->nFilledLen) {
 

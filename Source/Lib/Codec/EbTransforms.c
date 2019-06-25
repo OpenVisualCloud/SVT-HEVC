@@ -2616,7 +2616,8 @@ void DecoupledQuantizeInvQuantizeLoops(
 	EB_U8                         temporalLayerIndex,
 	EB_BOOL                       isUsedAsReferenceFlag,
 	EB_U8                         chromaLambda,
-	EB_U16                        qp,
+    EB_U16                        qp,
+    EB_U32                        bitDepth,
 	CabacCost_t                  *CabacCost,
 	const EB_U32                  qFunc,
 	const EB_U32                  q_offset,
@@ -2636,7 +2637,11 @@ void DecoupledQuantizeInvQuantizeLoops(
 	EB_U32 adptive_qp_offset = q_offset;
 
     (void)chromaLambda;
-	*nonzerocoeff = 0;
+    *nonzerocoeff = 0;
+
+    if (bitDepth == (EB_U32)EB_10BIT) {
+        qp -= QP_BD_OFFSET;  // adjust for chroma weighting factor derivation in 10-bit coding
+    }
 
 #define RDCOST_ITERATION 3
 
@@ -3032,6 +3037,7 @@ void UnifiedQuantizeInvQuantize(
 			pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag,
             (EB_U8)contextPtr->fullChromaLambda,
 			(EB_U16)qp,
+            bitDepth,
 			CabacCost,
 			qFunc,
 			q_offset,
