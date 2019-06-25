@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -13,64 +13,64 @@
 #include "EbErrorHandling.h"
 
 EB_ERRORTYPE EncodeContextCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr)
 {
     EB_U32 pictureIndex;
     EB_ERRORTYPE return_error = EB_ErrorNone;
-    
+
     EncodeContext_t *encodeContextPtr;
     EB_MALLOC(EncodeContext_t*, encodeContextPtr, sizeof(EncodeContext_t), EB_N_PTR);
     *objectDblPtr = (EB_PTR) encodeContextPtr;
-    
+
     objectInitDataPtr = 0;
     CHECK_REPORT_ERROR(
-	    (objectInitDataPtr == 0),
-	    encodeContextPtr->appCallbackPtr, 
-	    EB_ENC_EC_ERROR29);
+        (objectInitDataPtr == 0),
+        encodeContextPtr->appCallbackPtr,
+        EB_ENC_EC_ERROR29);
 
     // Callback Functions
     encodeContextPtr->appCallbackPtr                                    = (EbCallback_t*) EB_NULL;
-    
+
     // Port Active State
     EB_CREATEMUTEX(EB_HANDLE, encodeContextPtr->terminatingConditionsMutex, sizeof(EB_HANDLE), EB_MUTEX);
 
     encodeContextPtr->totalNumberOfReconFrames                          = 0;
-	
-	
+
+
     // Output Buffer Fifos
     encodeContextPtr->streamOutputFifoPtr                            = (EbFifo_t*) EB_NULL;
-    
+
     // Picture Buffer Fifos
     encodeContextPtr->inputPicturePoolFifoPtr                           = (EbFifo_t*) EB_NULL;
-    encodeContextPtr->referencePicturePoolFifoPtr                       = (EbFifo_t*) EB_NULL;    
-    encodeContextPtr->paReferencePicturePoolFifoPtr                     = (EbFifo_t*) EB_NULL;    
-    
+    encodeContextPtr->referencePicturePoolFifoPtr                       = (EbFifo_t*) EB_NULL;
+    encodeContextPtr->paReferencePicturePoolFifoPtr                     = (EbFifo_t*) EB_NULL;
+
     // Picture Decision Reordering Queue
     encodeContextPtr->pictureDecisionReorderQueueHeadIndex                 = 0;
     EB_MALLOC(PictureDecisionReorderEntry_t**, encodeContextPtr->pictureDecisionReorderQueue, sizeof(PictureDecisionReorderEntry_t*) * PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH, EB_N_PTR);
-        
+
     for(pictureIndex=0; pictureIndex < PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH; ++pictureIndex) {
-		return_error = PictureDecisionReorderEntryCtor(
+        return_error = PictureDecisionReorderEntryCtor(
             &(encodeContextPtr->pictureDecisionReorderQueue[pictureIndex]),
             pictureIndex);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
     }
-    
-	// Picture Manager Reordering Queue
-	encodeContextPtr->pictureManagerReorderQueueHeadIndex = 0;
-	EB_MALLOC(PictureManagerReorderEntry_t**, encodeContextPtr->pictureManagerReorderQueue, sizeof(PictureManagerReorderEntry_t*) * PICTURE_MANAGER_REORDER_QUEUE_MAX_DEPTH, EB_N_PTR);
 
-	for (pictureIndex = 0; pictureIndex < PICTURE_MANAGER_REORDER_QUEUE_MAX_DEPTH; ++pictureIndex) {
-		return_error = PictureManagerReorderEntryCtor(
-			&(encodeContextPtr->pictureManagerReorderQueue[pictureIndex]),
-			pictureIndex);
-		if (return_error == EB_ErrorInsufficientResources){
-			return EB_ErrorInsufficientResources;
-		}
-	}
+    // Picture Manager Reordering Queue
+    encodeContextPtr->pictureManagerReorderQueueHeadIndex = 0;
+    EB_MALLOC(PictureManagerReorderEntry_t**, encodeContextPtr->pictureManagerReorderQueue, sizeof(PictureManagerReorderEntry_t*) * PICTURE_MANAGER_REORDER_QUEUE_MAX_DEPTH, EB_N_PTR);
+
+    for (pictureIndex = 0; pictureIndex < PICTURE_MANAGER_REORDER_QUEUE_MAX_DEPTH; ++pictureIndex) {
+        return_error = PictureManagerReorderEntryCtor(
+            &(encodeContextPtr->pictureManagerReorderQueue[pictureIndex]),
+            pictureIndex);
+        if (return_error == EB_ErrorInsufficientResources){
+            return EB_ErrorInsufficientResources;
+        }
+    }
 
 
     // Picture Manager Pre-Assignment Buffer
@@ -85,7 +85,7 @@ EB_ERRORTYPE EncodeContextCtor(
     encodeContextPtr->numberOfActivePictures                            = 0;
 
     EB_MALLOC(EbObjectWrapper_t**, encodeContextPtr->preAssignmentBuffer, sizeof(EbObjectWrapper_t*) * PRE_ASSIGNMENT_MAX_DEPTH, EB_N_PTR);
-    
+
     for(pictureIndex=0; pictureIndex < PRE_ASSIGNMENT_MAX_DEPTH; ++pictureIndex) {
         encodeContextPtr->preAssignmentBuffer[pictureIndex] = (EbObjectWrapper_t*) EB_NULL;
     }
@@ -102,12 +102,12 @@ EB_ERRORTYPE EncodeContextCtor(
             return EB_ErrorInsufficientResources;
         }
     }
-    
+
     // Picture Manager Reference Queue
     encodeContextPtr->referencePictureQueueHeadIndex                    = 0;
     encodeContextPtr->referencePictureQueueTailIndex                    = 0;
     EB_MALLOC(ReferenceQueueEntry_t**, encodeContextPtr->referencePictureQueue, sizeof(ReferenceQueueEntry_t*) * REFERENCE_QUEUE_MAX_DEPTH, EB_N_PTR);
-    
+
     for(pictureIndex=0; pictureIndex < REFERENCE_QUEUE_MAX_DEPTH; ++pictureIndex) {
         return_error = ReferenceQueueEntryCtor(
             &(encodeContextPtr->referencePictureQueue[pictureIndex]));
@@ -115,25 +115,25 @@ EB_ERRORTYPE EncodeContextCtor(
             return EB_ErrorInsufficientResources;
         }
     }
-    
+
     // Picture Decision PA Reference Queue
     encodeContextPtr->pictureDecisionPaReferenceQueueHeadIndex                     = 0;
     encodeContextPtr->pictureDecisionPaReferenceQueueTailIndex                     = 0;
     EB_MALLOC(PaReferenceQueueEntry_t**, encodeContextPtr->pictureDecisionPaReferenceQueue, sizeof(PaReferenceQueueEntry_t*) * PICTURE_DECISION_PA_REFERENCE_QUEUE_MAX_DEPTH, EB_N_PTR);
 
     for(pictureIndex=0; pictureIndex < PICTURE_DECISION_PA_REFERENCE_QUEUE_MAX_DEPTH; ++pictureIndex) {
-		return_error = PaReferenceQueueEntryCtor(
+        return_error = PaReferenceQueueEntryCtor(
             &(encodeContextPtr->pictureDecisionPaReferenceQueue[pictureIndex]));
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
     }
-    
+
     // Initial Rate Control Reordering Queue
     encodeContextPtr->initialRateControlReorderQueueHeadIndex                 = 0;
     EB_MALLOC(InitialRateControlReorderEntry_t**, encodeContextPtr->initialRateControlReorderQueue, sizeof(InitialRateControlReorderEntry_t*) * INITIAL_RATE_CONTROL_REORDER_QUEUE_MAX_DEPTH, EB_N_PTR);
 
-	for(pictureIndex=0; pictureIndex < INITIAL_RATE_CONTROL_REORDER_QUEUE_MAX_DEPTH; ++pictureIndex) {
+    for(pictureIndex=0; pictureIndex < INITIAL_RATE_CONTROL_REORDER_QUEUE_MAX_DEPTH; ++pictureIndex) {
         return_error = InitialRateControlReorderEntryCtor(
             &(encodeContextPtr->initialRateControlReorderQueue[pictureIndex]),
             pictureIndex);
@@ -144,7 +144,7 @@ EB_ERRORTYPE EncodeContextCtor(
 
     // High level Rate Control histogram Queue
     encodeContextPtr->hlRateControlHistorgramQueueHeadIndex                 = 0;
-    
+
     EB_MALLOC(HlRateControlHistogramEntry_t**, encodeContextPtr->hlRateControlHistorgramQueue, sizeof(HlRateControlHistogramEntry_t*) * HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH, EB_N_PTR);
 
     for(pictureIndex=0; pictureIndex < HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH; ++pictureIndex) {
@@ -161,7 +161,7 @@ EB_ERRORTYPE EncodeContextCtor(
     // Packetization Reordering Queue
     encodeContextPtr->packetizationReorderQueueHeadIndex                 = 0;
     EB_MALLOC(PacketizationReorderEntry_t**, encodeContextPtr->packetizationReorderQueue, sizeof(PacketizationReorderEntry_t*) * PACKETIZATION_REORDER_QUEUE_MAX_DEPTH, EB_N_PTR);
-    
+
     for(pictureIndex=0; pictureIndex < PACKETIZATION_REORDER_QUEUE_MAX_DEPTH; ++pictureIndex) {
         return_error = PacketizationReorderEntryCtor(
             &(encodeContextPtr->packetizationReorderQueue[pictureIndex]),
@@ -170,7 +170,7 @@ EB_ERRORTYPE EncodeContextCtor(
             return EB_ErrorInsufficientResources;
         }
     }
-    
+
     encodeContextPtr->intraPeriodPosition                               = 0;
     encodeContextPtr->predStructPosition                                = 0;
     encodeContextPtr->currentInputPoc                                   = -1;
@@ -223,18 +223,18 @@ EB_ERRORTYPE EncodeContextCtor(
     encodeContextPtr->scBuffer      = 0;
     encodeContextPtr->scFrameIn     = 0;
     encodeContextPtr->scFrameOut    = 0;
-	encodeContextPtr->encMode = SPEED_CONTROL_INIT_MOD;
+    encodeContextPtr->encMode = SPEED_CONTROL_INIT_MOD;
     encodeContextPtr->previousSelectedRefQp = 32;
     encodeContextPtr->maxCodedPoc = 0;
     encodeContextPtr->maxCodedPocSelectedRefQp = 32;
 
      encodeContextPtr->sharedReferenceMutex = EbCreateMutex();
-	if (encodeContextPtr->sharedReferenceMutex  == (EB_HANDLE) EB_NULL){
+    if (encodeContextPtr->sharedReferenceMutex  == (EB_HANDLE) EB_NULL){
         return EB_ErrorInsufficientResources;
     }else {
         memoryMap[*(memoryMapIndex)].ptrType          = EB_MUTEX;
         memoryMap[(*(memoryMapIndex))++].ptr          = encodeContextPtr->sharedReferenceMutex ;
-        *totalLibMemory                              += (sizeof(EB_HANDLE));    
+        *totalLibMemory                              += (sizeof(EB_HANDLE));
     }
 
 

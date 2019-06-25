@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -30,29 +30,29 @@ static void countEdge(__m128i *eoDiff, __m128i *eoCount, EB_BYTE ptr, EB_S32 off
   __m128i x1, x2;
   __m128i c1, c2;
   __m128i cat, select;
-  
+
   x1 = _mm_loadu_si128((__m128i *)(ptr + offset));
   x2 = _mm_loadu_si128((__m128i *)(ptr - offset));
   x1 = _mm_xor_si128(x1, _mm_set1_epi8(-128));
   x2 = _mm_xor_si128(x2, _mm_set1_epi8(-128));
-  
+
   c1 = _mm_sub_epi8(_mm_cmplt_epi8(x0, x1), _mm_cmpgt_epi8(x0, x1));
   c2 = _mm_sub_epi8(_mm_cmplt_epi8(x0, x2), _mm_cmpgt_epi8(x0, x2));
   cat = _mm_add_epi8(c1, c2);
   cat = _mm_and_si128(cat, mask);
-  
+
   select = _mm_cmpeq_epi8(cat, _mm_set1_epi8(-2));
   eoCount[0] = _mm_sub_epi8(eoCount[0], select);
   eoDiff[0] = _mm_add_epi64(eoDiff[0], _mm_sad_epu8(_mm_and_si128(diff, select), _mm_setzero_si128()));
-  
+
   select = _mm_cmpeq_epi8(cat, _mm_set1_epi8(-1));
   eoCount[1] = _mm_sub_epi8(eoCount[1], select);
   eoDiff[1] = _mm_add_epi64(eoDiff[1], _mm_sad_epu8(_mm_and_si128(diff, select), _mm_setzero_si128()));
-  
+
   select = _mm_cmpeq_epi8(cat, _mm_set1_epi8(1));
   eoCount[2] = _mm_sub_epi8(eoCount[2], select);
   eoDiff[2] = _mm_add_epi64(eoDiff[2], _mm_sad_epu8(_mm_and_si128(diff, select), _mm_setzero_si128()));
-  
+
   select = _mm_cmpeq_epi8(cat, _mm_set1_epi8(2));
   eoCount[3] = _mm_sub_epi8(eoCount[3], select);
   eoDiff[3] = _mm_add_epi64(eoDiff[3], _mm_sad_epu8(_mm_and_si128(diff, select), _mm_setzero_si128()));
@@ -80,7 +80,7 @@ EB_EXTERN EB_ERRORTYPE GatherSaoStatisticsLcu_BT_SSE2(
     EB_U32                   lcuWidth,              // input parameter, LCU width
     EB_U32                   lcuHeight,             // input parameter, LCU height
     EB_S32                  *boDiff,                // output parameter, used to store Band Offset diff, boDiff[SAO_BO_INTERVALS]
-    EB_U16                  *boCount,										// output parameter, used to store Band Offset count, boCount[SAO_BO_INTERVALS]
+    EB_U16                  *boCount,                                        // output parameter, used to store Band Offset count, boCount[SAO_BO_INTERVALS]
     EB_S32                   eoDiff[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1],     // output parameter, used to store Edge Offset diff, eoDiff[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
     EB_U16                   eoCount[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1])    // output parameter, used to store Edge Offset count, eoCount[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
 {
@@ -201,28 +201,28 @@ EB_EXTERN EB_ERRORTYPE GatherSaoStatisticsLcu_BT_SSE2(
 
 
 EB_EXTERN EB_ERRORTYPE GatherSaoStatisticsLcu_OnlyEo_90_45_135_BT_SSE2(
-	EB_U8                   *inputSamplePtr,        // input parameter, source Picture Ptr
-	EB_U32                   inputStride,           // input parameter, source stride
-	EB_U8                   *reconSamplePtr,        // input parameter, deblocked Picture Ptr
-	EB_U32                   reconStride,           // input parameter, deblocked stride
-	EB_U32                   lcuWidth,              // input parameter, LCU width
-	EB_U32                   lcuHeight,             // input parameter, LCU height
-	EB_S32                   eoDiff[SAO_EO_TYPES][SAO_EO_CATEGORIES+1],     // output parameter, used to store Edge Offset diff, eoDiff[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
-	EB_U16                   eoCount[SAO_EO_TYPES][SAO_EO_CATEGORIES+1])    // output parameter, used to store Edge Offset count, eoCount[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
+    EB_U8                   *inputSamplePtr,        // input parameter, source Picture Ptr
+    EB_U32                   inputStride,           // input parameter, source stride
+    EB_U8                   *reconSamplePtr,        // input parameter, deblocked Picture Ptr
+    EB_U32                   reconStride,           // input parameter, deblocked stride
+    EB_U32                   lcuWidth,              // input parameter, LCU width
+    EB_U32                   lcuHeight,             // input parameter, LCU height
+    EB_S32                   eoDiff[SAO_EO_TYPES][SAO_EO_CATEGORIES+1],     // output parameter, used to store Edge Offset diff, eoDiff[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
+    EB_U16                   eoCount[SAO_EO_TYPES][SAO_EO_CATEGORIES+1])    // output parameter, used to store Edge Offset count, eoCount[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
 {
   EB_S32 colCount, rowCount;
   EB_S32 i, j;
-  
+
   __m128i eoDiffX[SAO_EO_TYPES][SAO_EO_CATEGORIES];
   __m128i eoCountX[SAO_EO_TYPES][SAO_EO_CATEGORIES];
-  
+
   lcuWidth -= 2;
   lcuHeight -= 2;
   inputSamplePtr += inputStride + 1;
   reconSamplePtr += reconStride + 1;
-  
+
   colCount = lcuWidth;
-  
+
   for (i = 1; i < SAO_EO_TYPES; i++)
   {
     for (j = 0; j < SAO_EO_CATEGORIES; j++)
@@ -231,52 +231,52 @@ EB_EXTERN EB_ERRORTYPE GatherSaoStatisticsLcu_OnlyEo_90_45_135_BT_SSE2(
       eoCountX[i][j] = _mm_setzero_si128();
     }
   }
-  
+
   do
   {
     __m128i mask;
     EB_BYTE ptr = reconSamplePtr;
     EB_BYTE qtr = inputSamplePtr;
     EB_S32 idx;
-    
+
     rowCount = lcuHeight;
-    
+
     idx = (colCount >> 1) - 1;
-	mask = (idx >= 0 && idx < 8) ? _mm_loadu_si128((__m128i *)maskTable[idx]) : _mm_loadu_si128((__m128i *)maskTable[7]);
+    mask = (idx >= 0 && idx < 8) ? _mm_loadu_si128((__m128i *)maskTable[idx]) : _mm_loadu_si128((__m128i *)maskTable[7]);
     do
     {
       __m128i x0, y0;
       __m128i diff;
       x0 = _mm_loadu_si128((__m128i *)ptr);
       y0 = _mm_loadu_si128((__m128i *)qtr);
-      
+
       x0 = _mm_xor_si128(x0, _mm_set1_epi8(-128));
       y0 = _mm_xor_si128(y0, _mm_set1_epi8(-128));
       diff = _mm_subs_epi8(y0, x0);
       diff = _mm_and_si128(diff, mask);
 
       // Edge offset
-      
+
       // Add 128 to difference to make it an unsigned integer to allow use of _mm_sad_epu8 intrinsic
       // This difference will be subtracted from the end result
       diff = _mm_xor_si128(diff, _mm_set1_epi8(-128));
-      
+
       countEdge(eoDiffX[1], eoCountX[1], ptr, reconStride, x0, diff, mask);
       countEdge(eoDiffX[2], eoCountX[2], ptr, reconStride+1, x0, diff, mask);
       countEdge(eoDiffX[3], eoCountX[3], ptr, reconStride-1, x0, diff, mask);
-      
+
       ptr += reconStride;
       qtr += inputStride;
     }
     while (--rowCount);
-    
+
     reconSamplePtr += 16;
     inputSamplePtr += 16;
-    
+
     colCount -= 16;
   }
   while (colCount > 0);
-  
+
   for (i = 1; i < SAO_EO_TYPES; i++)
   {
     for (j = 0; j < SAO_EO_CATEGORIES; j++)
@@ -284,17 +284,17 @@ EB_EXTERN EB_ERRORTYPE GatherSaoStatisticsLcu_OnlyEo_90_45_135_BT_SSE2(
       __m128i x0;
       EB_U32 *p;
       EB_U16/*EB_U32*/ count;
-      
+
       // Note: accumulation of counts over 8 bits is ok since the maximum count is 62*4 = 248
       x0 = _mm_sad_epu8(eoCountX[i][j], _mm_setzero_si128());
       count =(EB_U16)(_mm_extract_epi32(x0, 0) + _mm_extract_epi32(x0, 2));
       eoCount[i][j] = count;
-      
+
       // Note: subtracting 128 that was previously added in main loop
       p = (EB_U32 *)&eoDiffX[i][j];
       eoDiff[i][j] = p[0] + p[2] - 128 * count;
     }
   }
-  
+
   return EB_ErrorNone;
 }

@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -113,10 +113,10 @@ void SadCalculation_32x32_64x64(
 }
 
 void InitializeBuffer_32bits(
-    EB_U32*		Pointer,
-    EB_U32		Count128,
-    EB_U32		Count32,
-    EB_U32		Value) {
+    EB_U32*        Pointer,
+    EB_U32        Count128,
+    EB_U32        Count32,
+    EB_U32        Value) {
 
     EB_U32  cuIndex;
 

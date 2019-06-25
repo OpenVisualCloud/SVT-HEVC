@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -2113,7 +2113,7 @@ void WpBiPredClipping16bit(
     }
 }
 
-// Weighted Prediction - EncoderBitDepth : 8 
+// Weighted Prediction - EncoderBitDepth : 8
 void WpLumaInterpolationCopy(
     EB_BYTE               refPic,
     EB_U32                srcStride,

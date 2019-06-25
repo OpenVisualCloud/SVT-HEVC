@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -23,12 +23,12 @@ EB_ERRORTYPE GatherSaoStatisticsLcu_OnlyEo_90_45_135_16bit_SSE2_INTRIN(
     EB_U16                   eoCount[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1]);   // output parameter, used to store Edge Offset count, eoCount[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
 
 extern EB_ERRORTYPE SAOApplyBO16bit_SSE2_INTRIN(
-	EB_U16                          *reconSamplePtr,
-	EB_U32                           reconStride,
-	EB_U32                           saoBandPosition,
-	EB_S8                           *saoOffsetPtr,
-	EB_U32                           lcuHeight,
-	EB_U32                           lcuWidth);
+    EB_U16                          *reconSamplePtr,
+    EB_U32                           reconStride,
+    EB_U32                           saoBandPosition,
+    EB_S8                           *saoOffsetPtr,
+    EB_U32                           lcuHeight,
+    EB_U32                           lcuWidth);
 
 extern EB_ERRORTYPE SAOApplyEO_45_16bit_SSE2_INTRIN(
     EB_U16                           *reconSamplePtr,

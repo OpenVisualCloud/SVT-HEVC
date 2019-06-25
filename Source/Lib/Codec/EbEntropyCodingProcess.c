@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -52,48 +52,48 @@ static void EntropyCodingResetNeighborArrays(PictureControlSet_t *pictureControl
  * Reset Entropy Coding Picture
  **************************************************/
 static void ResetEntropyCodingPicture(
-	EntropyCodingContext_t  *contextPtr,
-	PictureControlSet_t     *pictureControlSetPtr,
-	SequenceControlSet_t    *sequenceControlSetPtr)
+    EntropyCodingContext_t  *contextPtr,
+    PictureControlSet_t     *pictureControlSetPtr,
+    SequenceControlSet_t    *sequenceControlSetPtr)
 {
     ResetBitstream(EntropyCoderGetBitstreamPtr(pictureControlSetPtr->entropyCoderPtr));
 
-	EB_U32                       entropyCodingQp;
+    EB_U32                       entropyCodingQp;
 
-	contextPtr->is16bit = (EB_BOOL)(sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
+    contextPtr->is16bit = (EB_BOOL)(sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
 
-	// SAO
-	pictureControlSetPtr->saoFlag[0] = EB_TRUE;
-	pictureControlSetPtr->saoFlag[1] = EB_TRUE;
+    // SAO
+    pictureControlSetPtr->saoFlag[0] = EB_TRUE;
+    pictureControlSetPtr->saoFlag[1] = EB_TRUE;
 
-	// QP
-	contextPtr->qp = pictureControlSetPtr->pictureQp;
-	// Asuming cb and cr offset to be the same for chroma QP in both slice and pps for lambda computation
+    // QP
+    contextPtr->qp = pictureControlSetPtr->pictureQp;
+    // Asuming cb and cr offset to be the same for chroma QP in both slice and pps for lambda computation
 
-	EB_U8	qpScaled = CLIP3((EB_S8)MIN_QP_VALUE, (EB_S8)MAX_CHROMA_MAP_QP_VALUE, (EB_S8)(contextPtr->qp + pictureControlSetPtr->cbQpOffset + pictureControlSetPtr->sliceCbQpOffset));
-	contextPtr->chromaQp = MapChromaQp(qpScaled);
-
-
-	if (pictureControlSetPtr->useDeltaQp) {
-		entropyCodingQp = pictureControlSetPtr->pictureQp;
-	}
-	else {
-		entropyCodingQp = pictureControlSetPtr->pictureQp;
-	}
+    EB_U8    qpScaled = CLIP3((EB_S8)MIN_QP_VALUE, (EB_S8)MAX_CHROMA_MAP_QP_VALUE, (EB_S8)(contextPtr->qp + pictureControlSetPtr->cbQpOffset + pictureControlSetPtr->sliceCbQpOffset));
+    contextPtr->chromaQp = MapChromaQp(qpScaled);
 
 
-	// Reset CABAC Contexts
-	// Reset QP Assignement
-	pictureControlSetPtr->prevCodedQp = pictureControlSetPtr->pictureQp;
-	pictureControlSetPtr->prevQuantGroupCodedQp = pictureControlSetPtr->pictureQp;
+    if (pictureControlSetPtr->useDeltaQp) {
+        entropyCodingQp = pictureControlSetPtr->pictureQp;
+    }
+    else {
+        entropyCodingQp = pictureControlSetPtr->pictureQp;
+    }
 
-	ResetEntropyCoder(
-		sequenceControlSetPtr->encodeContextPtr,
-		pictureControlSetPtr->entropyCoderPtr,
-		entropyCodingQp,
-		pictureControlSetPtr->sliceType);
 
-	EntropyCodingResetNeighborArrays(pictureControlSetPtr);
+    // Reset CABAC Contexts
+    // Reset QP Assignement
+    pictureControlSetPtr->prevCodedQp = pictureControlSetPtr->pictureQp;
+    pictureControlSetPtr->prevQuantGroupCodedQp = pictureControlSetPtr->pictureQp;
+
+    ResetEntropyCoder(
+        sequenceControlSetPtr->encodeContextPtr,
+        pictureControlSetPtr->entropyCoderPtr,
+        entropyCodingQp,
+        pictureControlSetPtr->sliceType);
+
+    EntropyCodingResetNeighborArrays(pictureControlSetPtr);
 
     return;
 }
@@ -109,10 +109,10 @@ static void EntropyCodingConfigureLcu(
 {
     contextPtr->qp = pictureControlSetPtr->pictureQp;
 
-	// Asuming cb and cr offset to be the same for chroma QP in both slice and pps for lambda computation
+    // Asuming cb and cr offset to be the same for chroma QP in both slice and pps for lambda computation
 
-	EB_U8	qpScaled = CLIP3((EB_S8)MIN_QP_VALUE, (EB_S8)MAX_CHROMA_MAP_QP_VALUE, (EB_S8)(contextPtr->qp + pictureControlSetPtr->cbQpOffset + pictureControlSetPtr->sliceCbQpOffset));
-	contextPtr->chromaQp = MapChromaQp(qpScaled);
+    EB_U8    qpScaled = CLIP3((EB_S8)MIN_QP_VALUE, (EB_S8)MAX_CHROMA_MAP_QP_VALUE, (EB_S8)(contextPtr->qp + pictureControlSetPtr->cbQpOffset + pictureControlSetPtr->sliceCbQpOffset));
+    contextPtr->chromaQp = MapChromaQp(qpScaled);
 
     lcuPtr->qp = contextPtr->qp;
 
@@ -133,14 +133,14 @@ static void EntropyCodingLcu(
     EB_U32                             pictureOriginY)
 {
 
-	EbPictureBufferDesc_t *coeffPicturePtr = lcuPtr->quantizedCoeff;
+    EbPictureBufferDesc_t *coeffPicturePtr = lcuPtr->quantizedCoeff;
 
     //rate Control
     EB_U32                       writtenBitsBeforeQuantizedCoeff;
     EB_U32                       writtenBitsAfterQuantizedCoeff;
 
-    //store the number of written bits before coding quantized coeffs (flush is not called yet): 
-    // The total number of bits is 
+    //store the number of written bits before coding quantized coeffs (flush is not called yet):
+    // The total number of bits is
     // number of written bits
     // + 32  - bits remaining in interval Low Value
     // + number of buffered byte * 8
@@ -172,11 +172,11 @@ static void EntropyCodingLcu(
         pictureControlSetPtr->leafDepthNeighborArray,
         pictureControlSetPtr->intraLumaModeNeighborArray,
         pictureControlSetPtr->skipFlagNeighborArray,
-		pictureOriginX,
-		pictureOriginY);
+        pictureOriginX,
+        pictureOriginY);
 
-    //store the number of written bits after coding quantized coeffs (flush is not called yet): 
-    // The total number of bits is 
+    //store the number of written bits after coding quantized coeffs (flush is not called yet):
+    // The total number of bits is
     // number of written bits
     // + 32  - bits remaining in interval Low Value
     // + number of buffered byte * 8
@@ -206,12 +206,12 @@ static void EntropyCodingLcu(
 }
 
 /******************************************************
- * Update Entropy Coding Rows 
+ * Update Entropy Coding Rows
  *
  * This function is responsible for synchronizing the
- *   processing of Entropy Coding LCU-rows and starts 
- *   processing of LCU-rows as soon as their inputs are 
- *   available and the previous LCU-row has completed.  
+ *   processing of Entropy Coding LCU-rows and starts
+ *   processing of LCU-rows as soon as their inputs are
+ *   available and the previous LCU-row has completed.
  *   At any given time, only one segment row per picture
  *   is being processed.
  *
@@ -261,7 +261,7 @@ static EB_BOOL UpdateEntropyCodingRows(
         for(i=*rowIndex; i < *rowIndex + rowCount; ++i) {
             pictureControlSetPtr->entropyCodingRowArray[i] = EB_TRUE;
         }
-        
+
         while(pictureControlSetPtr->entropyCodingRowArray[pictureControlSetPtr->entropyCodingCurrentAvailableRow] == EB_TRUE &&
               pictureControlSetPtr->entropyCodingCurrentAvailableRow < pictureControlSetPtr->entropyCodingRowCount)
         {
@@ -275,7 +275,7 @@ static EB_BOOL UpdateEntropyCodingRows(
     }
 
     // Test if the picture is not already complete AND not currently being worked on by another ENCDEC process
-    if(pictureControlSetPtr->entropyCodingCurrentRow < pictureControlSetPtr->entropyCodingRowCount && 
+    if(pictureControlSetPtr->entropyCodingCurrentRow < pictureControlSetPtr->entropyCodingRowCount &&
        pictureControlSetPtr->entropyCodingRowArray[pictureControlSetPtr->entropyCodingCurrentRow] == EB_TRUE &&
        pictureControlSetPtr->entropyCodingInProgress == EB_FALSE)
     {
@@ -444,41 +444,41 @@ void* EntropyCodingKernel(void *inputPtr)
         pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + lcuSize - 1) >> lcuSizeLog2;
 #if TILES
         if (sequenceControlSetPtr->tileRowCount * sequenceControlSetPtr->tileColumnCount == 1)
-#endif     
+#endif
         {
             initialProcessCall = EB_TRUE;
-            yLcuIndex = encDecResultsPtr->completedLcuRowIndexStart;   
-            
+            yLcuIndex = encDecResultsPtr->completedLcuRowIndexStart;
+
             // LCU-loops
-            while(UpdateEntropyCodingRows(pictureControlSetPtr, &yLcuIndex, encDecResultsPtr->completedLcuRowCount, &initialProcessCall) == EB_TRUE) 
+            while(UpdateEntropyCodingRows(pictureControlSetPtr, &yLcuIndex, encDecResultsPtr->completedLcuRowCount, &initialProcessCall) == EB_TRUE)
             {
                 EB_U32 rowTotalBits = 0;
 
                 if(yLcuIndex == 0) {
-					ResetEntropyCodingPicture(
-						contextPtr, 
-						pictureControlSetPtr,
-						sequenceControlSetPtr);
-					pictureControlSetPtr->entropyCodingPicDone = EB_FALSE;
+                    ResetEntropyCodingPicture(
+                        contextPtr,
+                        pictureControlSetPtr,
+                        sequenceControlSetPtr);
+                    pictureControlSetPtr->entropyCodingPicDone = EB_FALSE;
                 }
 
-                for(xLcuIndex = 0; xLcuIndex < pictureWidthInLcu; ++xLcuIndex) 
+                for(xLcuIndex = 0; xLcuIndex < pictureWidthInLcu; ++xLcuIndex)
                 {
 
-                    
+
                     lcuIndex = (EB_U16)(xLcuIndex + yLcuIndex * pictureWidthInLcu);
                     lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuIndex];
 
                     lcuOriginX = xLcuIndex << lcuSizeLog2;
                     lcuOriginY = yLcuIndex << lcuSizeLog2;
                     lastLcuFlag = (lcuIndex == pictureControlSetPtr->lcuTotalCount - 1) ? EB_TRUE : EB_FALSE;
-            
+
                     // Configure the LCU
                     EntropyCodingConfigureLcu(
                         contextPtr,
                         lcuPtr,
                         pictureControlSetPtr);
-            
+
                     // Entropy Coding
                     EntropyCodingLcu(
                         lcuPtr,
@@ -510,55 +510,55 @@ void* EntropyCodingKernel(void *inputPtr)
 
                     rateControlTaskPtr->pictureControlSetWrapperPtr = 0;
                     rateControlTaskPtr->segmentIndex = ~0u;
-                    
+
                     // Post EncDec Results
                     EbPostFullObject(rateControlTaskWrapperPtr);
                 }
 
-				EbBlockOnMutex(pictureControlSetPtr->entropyCodingMutex);
-				if (pictureControlSetPtr->entropyCodingPicDone == EB_FALSE) {
+                EbBlockOnMutex(pictureControlSetPtr->entropyCodingMutex);
+                if (pictureControlSetPtr->entropyCodingPicDone == EB_FALSE) {
 
-					// If the picture is complete, terminate the slice
-					if (pictureControlSetPtr->entropyCodingCurrentRow == pictureControlSetPtr->entropyCodingRowCount)
-					{
-						EB_U32 refIdx;
+                    // If the picture is complete, terminate the slice
+                    if (pictureControlSetPtr->entropyCodingCurrentRow == pictureControlSetPtr->entropyCodingRowCount)
+                    {
+                        EB_U32 refIdx;
 
-						pictureControlSetPtr->entropyCodingPicDone = EB_TRUE;
+                        pictureControlSetPtr->entropyCodingPicDone = EB_TRUE;
 
-						EncodeSliceFinish(pictureControlSetPtr->entropyCoderPtr);
+                        EncodeSliceFinish(pictureControlSetPtr->entropyCoderPtr);
 
-						// Release the List 0 Reference Pictures
-						for (refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList0Count; ++refIdx) {
-							if (pictureControlSetPtr->refPicPtrArray[0] != EB_NULL) {
+                        // Release the List 0 Reference Pictures
+                        for (refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList0Count; ++refIdx) {
+                            if (pictureControlSetPtr->refPicPtrArray[0] != EB_NULL) {
 
-								EbReleaseObject(pictureControlSetPtr->refPicPtrArray[0]);
+                                EbReleaseObject(pictureControlSetPtr->refPicPtrArray[0]);
                             }
-						}
+                        }
 
-						// Release the List 1 Reference Pictures
-						for (refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList1Count; ++refIdx) {
-							if (pictureControlSetPtr->refPicPtrArray[1] != EB_NULL) {
+                        // Release the List 1 Reference Pictures
+                        for (refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList1Count; ++refIdx) {
+                            if (pictureControlSetPtr->refPicPtrArray[1] != EB_NULL) {
 
-								EbReleaseObject(pictureControlSetPtr->refPicPtrArray[1]);
-							}
-						}
+                                EbReleaseObject(pictureControlSetPtr->refPicPtrArray[1]);
+                            }
+                        }
 
-						// Get Empty Entropy Coding Results
-						EbGetEmptyObject(
-							contextPtr->entropyCodingOutputFifoPtr,
-							&entropyCodingResultsWrapperPtr);
-						entropyCodingResultsPtr = (EntropyCodingResults_t*)entropyCodingResultsWrapperPtr->objectPtr;
-						entropyCodingResultsPtr->pictureControlSetWrapperPtr = encDecResultsPtr->pictureControlSetWrapperPtr;
+                        // Get Empty Entropy Coding Results
+                        EbGetEmptyObject(
+                            contextPtr->entropyCodingOutputFifoPtr,
+                            &entropyCodingResultsWrapperPtr);
+                        entropyCodingResultsPtr = (EntropyCodingResults_t*)entropyCodingResultsWrapperPtr->objectPtr;
+                        entropyCodingResultsPtr->pictureControlSetWrapperPtr = encDecResultsPtr->pictureControlSetWrapperPtr;
 
-						// Post EntropyCoding Results
-						EbPostFullObject(entropyCodingResultsWrapperPtr);
+                        // Post EntropyCoding Results
+                        EbPostFullObject(entropyCodingResultsWrapperPtr);
 
-					} // End if(PictureCompleteFlag)
-				}
-				EbReleaseMutex(pictureControlSetPtr->entropyCodingMutex);
+                    } // End if(PictureCompleteFlag)
+                }
+                EbReleaseMutex(pictureControlSetPtr->entropyCodingMutex);
 
 
-			}
+            }
         }
 #if TILES
         else
@@ -569,7 +569,7 @@ void* EntropyCodingKernel(void *inputPtr)
 
         yLcuIndex = encDecResultsPtr->completedLcuRowIndexStart;
 
-        // Update EC-rows, exit if picture is "in-progress" 
+        // Update EC-rows, exit if picture is "in-progress"
         if (WaitForAllEntropyCodingRows(pictureControlSetPtr, &yLcuIndex, encDecResultsPtr->completedLcuRowCount, &initialProcessCall) == EB_TRUE)
         {
 
@@ -695,6 +695,6 @@ void* EntropyCodingKernel(void *inputPtr)
         EbReleaseObject(encDecResultsWrapperPtr);
 
     }
-    
+
     return EB_NULL;
 }

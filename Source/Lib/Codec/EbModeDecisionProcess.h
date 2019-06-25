@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -60,12 +60,12 @@ typedef struct MDEncPassCuData_s
     EB_S16        yDc[4];// Store the ABS of DC values per TU. If one TU, stored in 0, otherwise 4 tus stored in 0 to 3
     EB_U16        yCountNonZeroCoeffs[4];// Store nonzero CoeffNum, per TU. If one TU, stored in 0, otherwise 4 tus stored in 0 to 3
 
-} MDEncPassCuData_t;    
+} MDEncPassCuData_t;
 typedef struct LcuBasedDetectors_s
 {
     unsigned intraInterCond1                      : 1; // intra / inter bias
     unsigned intraInterCond2                      : 1; // intra / inter bias
-	unsigned intraInterCond3                      : 1; // intra / inter bias
+    unsigned intraInterCond3                      : 1; // intra / inter bias
     unsigned intraInterCond4                      : 1;
     unsigned biPredCond1                          : 1; // FastLoop
 
@@ -75,123 +75,123 @@ typedef struct LcuBasedDetectors_s
 
 typedef struct MdCodingUnit_s
 {
-	unsigned					testedCuFlag : 1;   //tells whether this CU is tested in MD.
-	unsigned                    mdcArrayIndex : 7;
-	unsigned                    countNonZeroCoeffs : 11;
-	unsigned                    topNeighborDepth : 2;
-	unsigned                    leftNeighborDepth : 2;
-	unsigned                    topNeighborMode : 2;
-	unsigned                    leftNeighborMode : 2;
-	unsigned                    fullDistortion : 32;
-	unsigned                    chromaDistortion : 32;
-	unsigned                    chromaDistortionInterDepth : 32;
-	EB_U64						cost;
-	EB_U64						costLuma;
+    unsigned                    testedCuFlag : 1;   //tells whether this CU is tested in MD.
+    unsigned                    mdcArrayIndex : 7;
+    unsigned                    countNonZeroCoeffs : 11;
+    unsigned                    topNeighborDepth : 2;
+    unsigned                    leftNeighborDepth : 2;
+    unsigned                    topNeighborMode : 2;
+    unsigned                    leftNeighborMode : 2;
+    unsigned                    fullDistortion : 32;
+    unsigned                    chromaDistortion : 32;
+    unsigned                    chromaDistortionInterDepth : 32;
+    EB_U64                        cost;
+    EB_U64                        costLuma;
 
 }MdCodingUnit_t;
 
 typedef struct ModeDecisionContext_s
 {
-	EbFifo_t                       *modeDecisionConfigurationInputFifoPtr;
-	EbFifo_t                       *modeDecisionOutputFifoPtr;
+    EbFifo_t                       *modeDecisionConfigurationInputFifoPtr;
+    EbFifo_t                       *modeDecisionOutputFifoPtr;
 
-	EB_S16                         *transformInnerArrayPtr;
+    EB_S16                         *transformInnerArrayPtr;
 
-	ModeDecisionCandidate_t       **fastCandidatePtrArray;
-	ModeDecisionCandidate_t        *fastCandidateArray;
+    ModeDecisionCandidate_t       **fastCandidatePtrArray;
+    ModeDecisionCandidate_t        *fastCandidateArray;
 
     // TMVP
-	EbReferenceObject_t            *referenceObjectWritePtr;
+    EbReferenceObject_t            *referenceObjectWritePtr;
 
     // Coding Unit Workspace---------------------------
-	EbPictureBufferDesc_t          *predictionBuffer;
+    EbPictureBufferDesc_t          *predictionBuffer;
 
     // Intra Reference Samples
-	IntraReferenceSamples_t        *intraRefPtr;
+    IntraReferenceSamples_t        *intraRefPtr;
 
     ModeDecisionCandidateBuffer_t **candidateBufferPtrArray;
 
-	InterPredictionContext_t       *interPredictionContext;
+    InterPredictionContext_t       *interPredictionContext;
 
-	MdRateEstimationContext_t      *mdRateEstimationPtr;
+    MdRateEstimationContext_t      *mdRateEstimationPtr;
 
-	SaoStats_t                     *saoStats;
+    SaoStats_t                     *saoStats;
 
     // Transform and Quantization Buffers
-	EbTransQuantBuffers_t			*transQuantBuffersPtr;
+    EbTransQuantBuffers_t            *transQuantBuffersPtr;
 
     // MCP Context
-	MotionCompensationPredictionContext_t *mcpContext;
+    MotionCompensationPredictionContext_t *mcpContext;
 
     struct EncDecContext_s         *encDecContextPtr;
 
-	EB_U64                         *fastCostArray;
-	EB_U64                         *fullCostArray;
-	EB_U64                         *fullCostSkipPtr;
-	EB_U64                         *fullCostMergePtr;
+    EB_U64                         *fastCostArray;
+    EB_U64                         *fullCostArray;
+    EB_U64                         *fullCostSkipPtr;
+    EB_U64                         *fullCostMergePtr;
 
-	
 
-	// Fast loop buffers
-	EB_U8                           bufferDepthIndexStart[MAX_LEVEL_COUNT];
-	EB_U8                           bufferDepthIndexWidth[MAX_LEVEL_COUNT];
 
-	// Lambda
-	EB_U8                           qp;
-	EB_U8                           chromaQp;
-	EB_U32                          fastLambda;
-	EB_U32                          fullLambda;
-	EB_U32                          fastChromaLambda;
-	EB_U32                          fullChromaLambda;
-	EB_U32                          fullChromaLambdaSao;
-	
-	//  Context Variables---------------------------------
+    // Fast loop buffers
+    EB_U8                           bufferDepthIndexStart[MAX_LEVEL_COUNT];
+    EB_U8                           bufferDepthIndexWidth[MAX_LEVEL_COUNT];
+
+    // Lambda
+    EB_U8                           qp;
+    EB_U8                           chromaQp;
+    EB_U32                          fastLambda;
+    EB_U32                          fullLambda;
+    EB_U32                          fastChromaLambda;
+    EB_U32                          fullChromaLambda;
+    EB_U32                          fullChromaLambdaSao;
+
+    //  Context Variables---------------------------------
 
     LargestCodingUnit_t            *lcuPtr;
     TransformUnit_t                *tuPtr;
-	const TransformUnitStats_t     *tuStats;
+    const TransformUnitStats_t     *tuStats;
     CodingUnit_t                   *cuPtr;
-	const CodedUnitStats_t         *cuStats;
+    const CodedUnitStats_t         *cuStats;
     PredictionUnit_t               *puPtr;
-	const PredictionUnitStats_t    *puStats;
+    const PredictionUnitStats_t    *puStats;
 
     MvUnit_t                        mvUnit;
-	MvMergeCandidate_t              mergeCandidateArray[MAX_NUM_OF_MV_MERGE_CANDIDATE];
+    MvMergeCandidate_t              mergeCandidateArray[MAX_NUM_OF_MV_MERGE_CANDIDATE];
 
     // Inter depth decision
     EB_U8                           mpmSearchCandidate;
-	EB_U8                           groupOf8x8BlocksCount;
-	EB_U8                           groupOf16x16BlocksCount;
+    EB_U8                           groupOf8x8BlocksCount;
+    EB_U8                           groupOf16x16BlocksCount;
     EB_U8                           puItr;
     EB_U8                           cuSizeLog2;
     EB_U8                           amvpCandidateCountRefList0;
-	EB_U8                           amvpCandidateCountRefList1;
+    EB_U8                           amvpCandidateCountRefList1;
 
-	EB_U8                           bestCandidateIndexArray[MAX_FULL_LOOP_CANIDATES_PER_DEPTH];
+    EB_U8                           bestCandidateIndexArray[MAX_FULL_LOOP_CANIDATES_PER_DEPTH];
 
-	EB_U16                          cuOriginX;
-	EB_U16                          cuOriginY;
-	EB_S16                          xMvAmvpCandidateArrayList0[MAX_NUM_OF_AMVP_CANDIDATES];
-	EB_S16                          yMvAmvpCandidateArrayList0[MAX_NUM_OF_AMVP_CANDIDATES];
-	EB_S16                          xMvAmvpCandidateArrayList1[MAX_NUM_OF_AMVP_CANDIDATES];
-	EB_S16                          yMvAmvpCandidateArrayList1[MAX_NUM_OF_AMVP_CANDIDATES];
-	
-    EB_U32	                        mostProbableModeArray[MAX_MPM_CANDIDATES];
-	EB_U32                          useChromaInformationInFastLoop;                                
+    EB_U16                          cuOriginX;
+    EB_U16                          cuOriginY;
+    EB_S16                          xMvAmvpCandidateArrayList0[MAX_NUM_OF_AMVP_CANDIDATES];
+    EB_S16                          yMvAmvpCandidateArrayList0[MAX_NUM_OF_AMVP_CANDIDATES];
+    EB_S16                          xMvAmvpCandidateArrayList1[MAX_NUM_OF_AMVP_CANDIDATES];
+    EB_S16                          yMvAmvpCandidateArrayList1[MAX_NUM_OF_AMVP_CANDIDATES];
+
+    EB_U32                            mostProbableModeArray[MAX_MPM_CANDIDATES];
+    EB_U32                          useChromaInformationInFastLoop;
 
     EB_BOOL                         useChromaInformationInFullLoop;
     EB_U8                           cuDepth;
-	EB_U8                           cuSize;
-	EB_U8                           lcuSize;
-	EB_U8                           lcuChromaSize;
-	EB_U16                          cuChromaOriginX;
-	EB_U16                          cuChromaOriginY;
+    EB_U8                           cuSize;
+    EB_U8                           lcuSize;
+    EB_U8                           lcuChromaSize;
+    EB_U16                          cuChromaOriginX;
+    EB_U16                          cuChromaOriginY;
     EB_U16                          puOriginX;
-	EB_U16                          puOriginY;
+    EB_U16                          puOriginY;
     EB_U16                          puWidth;
-	EB_U16                          puHeight;
+    EB_U16                          puHeight;
 
-	EB_PF_MODE                      pfMdMode;
+    EB_PF_MODE                      pfMdMode;
 
     EB_BOOL                         mpmSearch;
     EB_BOOL                         useIntraInterBias;
@@ -203,11 +203,11 @@ typedef struct ModeDecisionContext_s
     EB_U8                           intraLumaTopModeArray[4];
 
     // Entropy Coder
-	EntropyCoder_t                 *coeffEstEntropyCoderPtr;
-	CabacCost_t                    *CabacCost;
+    EntropyCoder_t                 *coeffEstEntropyCoderPtr;
+    CabacCost_t                    *CabacCost;
     SyntaxContextModelEncContext_t  syntaxCabacCtxModelArray;
 
-    MDEncPassCuData_t               mdEpPipeLcu[CU_MAX_COUNT];    
+    MDEncPassCuData_t               mdEpPipeLcu[CU_MAX_COUNT];
     LcuBasedDetectors_t            *mdPicLcuDetect;
 
     EbPictureBufferDesc_t          *pillarReconBuffer;
@@ -221,33 +221,33 @@ typedef struct ModeDecisionContext_s
     NeighborArrayUnit_t            *skipFlagNeighborArray;
     NeighborArrayUnit_t            *modeTypeNeighborArray;
     NeighborArrayUnit_t            *leafDepthNeighborArray;
-	NeighborArrayUnit_t            *lumaReconNeighborArray;
+    NeighborArrayUnit_t            *lumaReconNeighborArray;
     NeighborArrayUnit_t            *cbReconNeighborArray;
     NeighborArrayUnit_t            *crReconNeighborArray;
- 
+
     BdpCuData_t                     pillarCuArray;
     EB_BOOL                         cu8x8RefinementOnFlag;
     EB_BOOL                         depthRefinment ;
     EB_BOOL                         conformantMvMergeTable;
- 
-	EB_BOOL                         edgeBlockNumFlag;
-	MdCodingUnit_t					mdLocalCuUnit[CU_MAX_COUNT];
-	EB_BOOL                         cuUseRefSrcFlag; 
-    EB_BOOL                         restrictIntraGlobalMotion;    
+
+    EB_BOOL                         edgeBlockNumFlag;
+    MdCodingUnit_t                    mdLocalCuUnit[CU_MAX_COUNT];
+    EB_BOOL                         cuUseRefSrcFlag;
+    EB_BOOL                         restrictIntraGlobalMotion;
     EB_U8                           interpolationMethod;
 
     EB_BOOL                         coeffCabacUpdate;
     CoeffCtxtMdl_t                  latestValidCoeffCtxModel; //tracks the best CU partition so far
     CoeffCtxtMdl_t                  i4x4CoeffCtxModel;
 
-	EB_BOOL                         use4x4ChromaInformationInFullLoop;
+    EB_BOOL                         use4x4ChromaInformationInFullLoop;
 
-    // Multi-modes signal(s) 
+    // Multi-modes signal(s)
     EB_U8                           intraInjectionMethod;
     EB_BOOL                         spatialSseFullLoop;
     EB_BOOL                         intra8x8RestrictionInterSlice;
     EB_BOOL                         generateAmvpTableMd;
-    EB_BOOL	                        fullLoopEscape;
+    EB_BOOL                            fullLoopEscape;
     EB_BOOL                         singleFastLoopFlag;
     EB_BOOL                         amvpInjection;
     EB_BOOL                         unipred3x3Injection;
@@ -297,8 +297,8 @@ extern void ResetModeDecisionNeighborArrays(PictureControlSet_t *pictureControlS
 extern void  ApplyIntraInterModeBias(
     EB_BOOL                        intraInterCond1,
     EB_BOOL                        intraInterCond2,
-	EB_BOOL                        intraInterCond3,
-	EB_U64                         *fullCostPtr);
+    EB_BOOL                        intraInterCond3,
+    EB_U64                         *fullCostPtr);
 
 extern const EB_LAMBDA_ASSIGN_FUNC lambdaAssignmentFunctionTable[4];
 

@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -28,7 +28,7 @@ extern "C" {
 
     typedef struct RegistedUserData_s {
 
-        EB_U8   *userData;    // First byte is itu_t_t35_country_code. 
+        EB_U8   *userData;    // First byte is itu_t_t35_country_code.
                               // If itu_t_t35_country_code  ==  0xFF, second byte is itu_t_t35_country_code_extension_byte.
                               // the rest are the payloadByte
         EB_U32   userDataSize;
@@ -176,8 +176,8 @@ extern "C" {
 
     } AppRecoveryPoint_t;
 
-    // Below is an example of PanScanRectangle SEI data structure 
-    // Other SEI messages can have data structure in this format  
+    // Below is an example of PanScanRectangle SEI data structure
+    // Other SEI messages can have data structure in this format
     typedef struct AppPanScanRectangleSei_s {
 
         EB_U32      panScanRectId;
@@ -221,10 +221,10 @@ extern "C" {
 
     typedef struct EB_LATENCY_CALC
     {
-        EB_U64	startTimesSeconds;
-        EB_U64	finishTimesSeconds;
-        EB_U64	startTimesuSeconds;
-        EB_U64	finishTimesuSeconds;
+        EB_U64    startTimesSeconds;
+        EB_U64    finishTimesSeconds;
+        EB_U64    startTimesuSeconds;
+        EB_U64    finishTimesuSeconds;
         EB_U64  poc;
     } EB_LATENCY_CALC;
 
@@ -246,7 +246,7 @@ extern "C" {
 
 
 
-    // Signals that the default prediction structure and controls are to be 
+    // Signals that the default prediction structure and controls are to be
     //   overwritten and manually controlled. Manual control should be active
     //   for an entire encode, from beginning to termination.  Mixing of default
     //   prediction structure control and override prediction structure control
@@ -266,18 +266,18 @@ extern "C" {
         EB_U32              refList0Count;      // A count of zero indicates the list is inactive
         EB_U32              refList1Count;      // A count of zero indicates the list is inactive
         EB_BOOL             isReferenced;       // Indicates whether or not the picture is used as
-                                                //   future reference.           
+                                                //   future reference.
         EB_U32              futureReferenceCount;
         EB_S32             *futureReferenceList;// Contains a list of delta POCs whose references shall
                                                 //   be saved for future reference.  This signalling must
-                                                //   be done with respect to decode picture order. Must 
+                                                //   be done with respect to decode picture order. Must
                                                 //   be conformant with the DPB rules.
     } EB_PRED_STRUCTURE_CFG;
 
     // EB_PICTURE_PLANE defines the data formatting of a singple plane of picture data.
     typedef struct EB_PICTURE_PLANE
     {
-        // "start" is the starting position of the first 
+        // "start" is the starting position of the first
         //   valid pixel in the picture plane.
         EB_U8* start;
 

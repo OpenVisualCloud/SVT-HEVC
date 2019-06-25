@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -26,7 +26,7 @@ extern "C" {
 #define MEAN_PRECISION      (VARIANCE_PRECISION >> 1)
 
 #define HME_RECTANGULAR    0
-#define HME_SPARSE         1       
+#define HME_SPARSE         1
 
 // Quater pel refinement methods
 typedef enum EB_QUARTER_PEL_REFINEMENT_METHOD {
@@ -135,7 +135,7 @@ typedef enum EB_ME_TIER_ZERO_PU {
     ME_TIER_ZERO_PU_8x8_61      =    82,
     ME_TIER_ZERO_PU_8x8_62      =    83,
     ME_TIER_ZERO_PU_8x8_63      =    84,
-    // 2NxN  [42 partitions]    
+    // 2NxN  [42 partitions]
     ME_TIER_ZERO_PU_64x32_0     =    85,
     ME_TIER_ZERO_PU_64x32_1     =    86,
     ME_TIER_ZERO_PU_32x16_0     =    87,
@@ -178,7 +178,7 @@ typedef enum EB_ME_TIER_ZERO_PU {
     ME_TIER_ZERO_PU_16x8_29     =    124,
     ME_TIER_ZERO_PU_16x8_30     =    125,
     ME_TIER_ZERO_PU_16x8_31     =    126,
-    // Nx2N  [42 partitions]      
+    // Nx2N  [42 partitions]
     ME_TIER_ZERO_PU_32x64_0     =    127,
     ME_TIER_ZERO_PU_32x64_1     =    128,
     ME_TIER_ZERO_PU_16x32_0     =    129,
@@ -222,7 +222,7 @@ typedef enum EB_ME_TIER_ZERO_PU {
     ME_TIER_ZERO_PU_8x16_30     =    167,
     ME_TIER_ZERO_PU_8x16_31     =    168,
 
-    // 2NxnU [10 partitions]     
+    // 2NxnU [10 partitions]
     ME_TIER_ZERO_PU_64x16_0     =    169,
     ME_TIER_ZERO_PU_64x16_1     =    170,
     ME_TIER_ZERO_PU_32x8_0      =    171,
@@ -233,7 +233,7 @@ typedef enum EB_ME_TIER_ZERO_PU {
     ME_TIER_ZERO_PU_32x8_5      =    176,
     ME_TIER_ZERO_PU_32x8_6      =    177,
     ME_TIER_ZERO_PU_32x8_7      =    178,
-    // 2NxnD [10 partitions]   
+    // 2NxnD [10 partitions]
     ME_TIER_ZERO_PU_64x48_0     =    179,
     ME_TIER_ZERO_PU_64x48_1     =    180,
     ME_TIER_ZERO_PU_32x24_0     =    181,
@@ -244,7 +244,7 @@ typedef enum EB_ME_TIER_ZERO_PU {
     ME_TIER_ZERO_PU_32x24_5     =    186,
     ME_TIER_ZERO_PU_32x24_6     =    187,
     ME_TIER_ZERO_PU_32x24_7     =    188,
-    // nLx2N [10 partitions]     
+    // nLx2N [10 partitions]
     ME_TIER_ZERO_PU_16x64_0     =    189,
     ME_TIER_ZERO_PU_16x64_1     =    190,
     ME_TIER_ZERO_PU_8x32_0      =    191,
@@ -255,7 +255,7 @@ typedef enum EB_ME_TIER_ZERO_PU {
     ME_TIER_ZERO_PU_8x32_5      =    196,
     ME_TIER_ZERO_PU_8x32_6      =    197,
     ME_TIER_ZERO_PU_8x32_7      =    198,
-    // nRx2N [10 partitions]     
+    // nRx2N [10 partitions]
     ME_TIER_ZERO_PU_48x64_0     =    199,
     ME_TIER_ZERO_PU_48x64_1     =    200,
     ME_TIER_ZERO_PU_24x32_0     =    201,
@@ -269,7 +269,7 @@ typedef enum EB_ME_TIER_ZERO_PU {
 } EB_ME_TIER_ZERO_PU;
 
 typedef struct MeTierZero_s {
-    
+
     MePredictionUnit_t  pu[MAX_ME_PU_COUNT];
 
 } MeTierZero_t;
@@ -288,36 +288,36 @@ typedef struct IntraReferenceSamplesOpenLoop_s {
 } IntraReferenceSamplesOpenLoop_t;
 
 typedef EB_U64 (*EB_ME_DISTORTION_FUNC)(
-    EB_U8  *src,       
-    EB_U32  srcStride, 
-    EB_U8  *ref,        
-    EB_U32  refStride, 
-    EB_U32  width,     
+    EB_U8  *src,
+    EB_U32  srcStride,
+    EB_U8  *ref,
+    EB_U32  refStride,
+    EB_U32  width,
     EB_U32  height);
 
 typedef struct MePredUnit_s {
     EB_U32  distortion;
-	EB_PREDDIRECTION  predictionDirection;
+    EB_PREDDIRECTION  predictionDirection;
     EB_U32  Mv[MAX_NUM_OF_REF_PIC_LIST];
 
 } MePredUnit_t;
 
 typedef struct MotionEstimationTierZero_s {
-    
+
     MePredUnit_t  pu[MAX_ME_PU_COUNT];
 
 } MotionEstimationTierZero_t;
 
 typedef struct MeContext_s {
-    
+
     // MV offset (search center)
     EB_BOOL         updateHmeSearchCenter;
     EB_S16          xMvOffset;
     EB_S16          yMvOffset;
 
     // Search region stride
-	EB_U32  interpolatedStride;
-	EB_U32  interpolatedFullStride[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];
+    EB_U32  interpolatedStride;
+    EB_U32  interpolatedFullStride[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];
 
     MotionEstimationTierZero_t    meCandidate[MAX_ME_CANDIDATE_PER_PU];
 
@@ -328,18 +328,18 @@ typedef struct MeContext_s {
     EB_U8 *lcuBuffer;
     EB_U8 *lcuBufferPtr;
     EB_U32 lcuBufferStride;
-    EB_U8 *hmeLcuBuffer; 
+    EB_U8 *hmeLcuBuffer;
     EB_U32 hmeLcuBufferStride;
-	EB_U8 *lcuSrcPtr;
-	EB_U32 lcuSrcStride;
+    EB_U8 *lcuSrcPtr;
+    EB_U32 lcuSrcStride;
     EB_U8 *quarterLcuBuffer;
     EB_U32 quarterLcuBufferStride;
     EB_U8 *sixteenthLcuBuffer;
     EB_U32 sixteenthLcuBufferStride;
 
     EB_U8 *integerBuffer[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];
-	EB_U8 *integerBufferPtr[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];	
-    EB_U8 *posbBuffer[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX]; 
+    EB_U8 *integerBufferPtr[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];
+    EB_U8 *posbBuffer[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];
     EB_U8 *poshBuffer[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];
     EB_U8 *posjBuffer[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];
 
@@ -405,12 +405,12 @@ typedef struct MeContext_s {
     EB_U8   psubPelDirection32x16[8];
     EB_U8   psubPelDirection16x8[32];
 
-    EB_U8   psubPelDirection32x64[2]; 
-    EB_U8   psubPelDirection16x32[8]; 
+    EB_U8   psubPelDirection32x64[2];
+    EB_U8   psubPelDirection16x32[8];
     EB_U8   psubPelDirection8x16[32];
 
-    EB_U8   psubPelDirection64x16[2]; 
-    EB_U8   psubPelDirection32x8[8]; 
+    EB_U8   psubPelDirection64x16[2];
+    EB_U8   psubPelDirection32x8[8];
 
     EB_U8   psubPelDirection64x48[2];
     EB_U8   psubPelDirection32x24[8];
@@ -426,7 +426,7 @@ typedef struct MeContext_s {
     EB_U32  pLcuBipredSad[MAX_ME_PU_COUNT];//needs to be upgraded to 209 pus
     EB_U32  pBestSadMap[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX][MAX_ME_PU_COUNT];
     EB_U32  pBestMvMap[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX][MAX_ME_PU_COUNT];
-	
+
 
     EB_U32  pLcuBestSsd[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX][MAX_ME_PU_COUNT];
     EB_U32  *pBestSsd8x8;
@@ -436,19 +436,19 @@ typedef struct MeContext_s {
 
     EB_U16  *pEightPosSad16x16;
 
-	EB_U64   lambda;
+    EB_U64   lambda;
     EB_U8    hmeSearchType;
 
     // Multi-Mode signal(s)
-    EB_U8    fractionalSearchMethod;           
+    EB_U8    fractionalSearchMethod;
     EB_U8    fractionalSearchModel;
     EB_BOOL  fractionalSearch64x64;
     EB_BOOL  oneQuadrantHME;
-            
-    // ME  
+
+    // ME
     EB_U8    searchAreaWidth;
     EB_U8    searchAreaHeight;
-    // HME  
+    // HME
     EB_U16   numberHmeSearchRegionInWidth;
     EB_U16   numberHmeSearchRegionInHeight;
     EB_U16   hmeLevel0TotalSearchAreaWidth;
@@ -461,13 +461,13 @@ typedef struct MeContext_s {
     EB_U16   hmeLevel2SearchAreaInHeightArray[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
 
 
-	EB_BitFraction *mvdBitsArray;
+    EB_BitFraction *mvdBitsArray;
 
 } MeContext_t;
 
 extern EB_ERRORTYPE MeContextCtor(
     MeContext_t     **objectDblPtr);
-    
+
 #ifdef __cplusplus
 }
 #endif

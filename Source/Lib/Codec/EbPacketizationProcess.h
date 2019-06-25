@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -19,7 +19,7 @@ typedef struct EbPPSConfig_s
 {
     EB_U8       ppsId;
     EB_U8       constrainedFlag;
-    
+
 } EbPPSConfig_t;
 
 /**************************************
@@ -30,7 +30,7 @@ typedef struct PacketizationContext_s
     EbFifo_t                *entropyCodingInputFifoPtr;
     EbFifo_t                *rateControlTasksOutputFifoPtr;
     EbPPSConfig_t           *ppsConfig;
-    
+
 } PacketizationContext_t;
 
 /**************************************
@@ -40,8 +40,8 @@ extern EB_ERRORTYPE PacketizationContextCtor(
     PacketizationContext_t **contextDblPtr,
     EbFifo_t                *entropyCodingInputFifoPtr,
     EbFifo_t                *rateControlTasksOutputFifoPtr);
-    
-    
+
+
 extern void* PacketizationKernel(void *inputPtr);
 #ifdef __cplusplus
 }

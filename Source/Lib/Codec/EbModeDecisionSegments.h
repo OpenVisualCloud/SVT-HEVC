@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -14,11 +14,11 @@ typedef struct
 {
     EB_U64                                completionMask;
     EB_HANDLE                             writeLockMutex;
-    
+
     EB_U32                                totalCount;
     EB_U32                                columnCount;
     EB_U32                                rowCount;
-    
+
     EB_BOOL                               inProgress;
     EB_U32                                currentRowIdx;
 

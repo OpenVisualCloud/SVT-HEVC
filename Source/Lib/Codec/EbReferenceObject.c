@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -25,9 +25,9 @@ void InitializeSamplesNeighboringReferencePicture16Bit(
     EB_MEMSET((EB_U8*)reconSamplesPtr, 0, sizeof(EB_U16)*(1 + reconWidth + 1));
 
     // 2. Zero out the bottom row
-    reconSamplesPtr = (EB_U16*)reconSamplesBufferPtr + (topPadding + reconHeight) * stride + leftPadding - 1; 
+    reconSamplesPtr = (EB_U16*)reconSamplesBufferPtr + (topPadding + reconHeight) * stride + leftPadding - 1;
     EB_MEMSET((EB_U8*)reconSamplesPtr, 0, sizeof(EB_U16)*(1 + reconWidth + 1));
-    
+
     // 3. Zero out the left column
     reconSamplesPtr = (EB_U16*)reconSamplesBufferPtr + topPadding * stride + leftPadding - 1;
     for (sampleCount = 0; sampleCount < reconHeight; sampleCount++) {
@@ -57,9 +57,9 @@ void InitializeSamplesNeighboringReferencePicture8Bit(
     EB_MEMSET(reconSamplesPtr, 0, sizeof(EB_U8)*(1 + reconWidth + 1));
 
     // 2. Zero out the bottom row
-    reconSamplesPtr = reconSamplesBufferPtr + (topPadding + reconHeight) * stride + leftPadding - 1; 
+    reconSamplesPtr = reconSamplesBufferPtr + (topPadding + reconHeight) * stride + leftPadding - 1;
     EB_MEMSET(reconSamplesPtr, 0, sizeof(EB_U8)*(1 + reconWidth + 1));
-    
+
     // 3. Zero out the left column
     reconSamplesPtr = reconSamplesBufferPtr + topPadding * stride + leftPadding - 1;
     for (sampleCount = 0; sampleCount < reconHeight; sampleCount++) {
@@ -105,7 +105,7 @@ void InitializeSamplesNeighboringReferencePicture(
             pictureBufferDescInitDataPtr->topPadding >> 1);
     }
     else {
-    
+
         InitializeSamplesNeighboringReferencePicture8Bit(
             referenceObject->referencePicture->bufferY,
             referenceObject->referencePicture->strideY,
@@ -135,12 +135,12 @@ void InitializeSamplesNeighboringReferencePicture(
 
 /*****************************************
  * EbPictureBufferDescCtor
- *  Initializes the Buffer Descriptor's 
+ *  Initializes the Buffer Descriptor's
  *  values that are fixed for the life of
  *  the descriptor.
  *****************************************/
 EB_ERRORTYPE EbReferenceObjectCtor(
-    EB_PTR  *objectDblPtr, 
+    EB_PTR  *objectDblPtr,
     EB_PTR   objectInitDataPtr)
 {
 
@@ -178,13 +178,13 @@ EB_ERRORTYPE EbReferenceObjectCtor(
             pictureBufferDescInitData16BitPtr.bitDepth);
     }
 
-	if (return_error == EB_ErrorInsufficientResources){
-		return EB_ErrorInsufficientResources;
-	}
+    if (return_error == EB_ErrorInsufficientResources){
+        return EB_ErrorInsufficientResources;
+    }
 
 
 
-    // Allocate LCU based TMVP map   
+    // Allocate LCU based TMVP map
     EB_MALLOC(TmvpUnit_t *, referenceObject->tmvpMap, (sizeof(TmvpUnit_t) * (((pictureBufferDescInitDataPtr->maxWidth + (64 - 1)) >> 6) * ((pictureBufferDescInitDataPtr->maxHeight + (64 - 1)) >> 6))), EB_N_PTR);
 
     //RESTRICT THIS TO M4
@@ -194,7 +194,7 @@ EB_ERRORTYPE EbReferenceObjectCtor(
         bufDesc.maxWidth = pictureBufferDescInitDataPtr->maxWidth;
         bufDesc.maxHeight = pictureBufferDescInitDataPtr->maxHeight;
         bufDesc.bitDepth = EB_8BIT;
-        bufDesc.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK; 
+        bufDesc.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
         bufDesc.leftPadding  = pictureBufferDescInitDataPtr->leftPadding;
         bufDesc.rightPadding = pictureBufferDescInitDataPtr->rightPadding;
         bufDesc.topPadding   = pictureBufferDescInitDataPtr->topPadding;
@@ -207,19 +207,19 @@ EB_ERRORTYPE EbReferenceObjectCtor(
                                                 (EB_PTR)&bufDesc);
         if (return_error == EB_ErrorInsufficientResources)
             return EB_ErrorInsufficientResources;
-    }    
+    }
 
     return EB_ErrorNone;
 }
 
 /*****************************************
  * EbPaReferenceObjectCtor
- *  Initializes the Buffer Descriptor's 
+ *  Initializes the Buffer Descriptor's
  *  values that are fixed for the life of
  *  the descriptor.
  *****************************************/
 EB_ERRORTYPE EbPaReferenceObjectCtor(
-    EB_PTR  *objectDblPtr, 
+    EB_PTR  *objectDblPtr,
     EB_PTR   objectInitDataPtr)
 {
 
@@ -237,8 +237,8 @@ EB_ERRORTYPE EbPaReferenceObjectCtor(
         return EB_ErrorInsufficientResources;
     }
 
-	// Quarter Decim reference picture constructor
-	paReferenceObject->quarterDecimatedPicturePtr = (EbPictureBufferDesc_t*)EB_NULL;
+    // Quarter Decim reference picture constructor
+    paReferenceObject->quarterDecimatedPicturePtr = (EbPictureBufferDesc_t*)EB_NULL;
         return_error = EbPictureBufferDescCtor(
             (EB_PTR*) &(paReferenceObject->quarterDecimatedPicturePtr),
             (EB_PTR )  (pictureBufferDescInitDataPtr + 1));
@@ -247,14 +247,14 @@ EB_ERRORTYPE EbPaReferenceObjectCtor(
         }
 
     // Sixteenth Decim reference picture constructor
-	paReferenceObject->sixteenthDecimatedPicturePtr = (EbPictureBufferDesc_t*)EB_NULL;
+    paReferenceObject->sixteenthDecimatedPicturePtr = (EbPictureBufferDesc_t*)EB_NULL;
         return_error = EbPictureBufferDescCtor(
             (EB_PTR*) &(paReferenceObject->sixteenthDecimatedPicturePtr),
             (EB_PTR )  (pictureBufferDescInitDataPtr + 2));
-		if (return_error == EB_ErrorInsufficientResources){
+        if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
-    
+
     return EB_ErrorNone;
 }
 

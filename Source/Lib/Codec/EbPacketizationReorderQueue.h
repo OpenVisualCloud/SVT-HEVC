@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -15,18 +15,18 @@ extern "C" {
  * Packetization Reorder Queue Entry
  ************************************************/
 typedef struct PacketizationReorderEntry_s {
-    EB_U64                          pictureNumber;    
+    EB_U64                          pictureNumber;
     EbObjectWrapper_t              *outputStreamWrapperPtr;
 
     EB_U64                          startTimeSeconds;
     EB_U64                          startTimeuSeconds;
-} PacketizationReorderEntry_t;   
+} PacketizationReorderEntry_t;
 
-extern EB_ERRORTYPE PacketizationReorderEntryCtor(   
+extern EB_ERRORTYPE PacketizationReorderEntryCtor(
     PacketizationReorderEntry_t   **entryDblPtr,
     EB_U32                          pictureNumber);
 
-  
+
 #ifdef __cplusplus
 }
 #endif

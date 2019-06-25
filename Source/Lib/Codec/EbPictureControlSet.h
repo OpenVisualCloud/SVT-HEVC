@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -28,9 +28,9 @@ extern "C" {
 #define SEGMENT_ENTROPY_BUFFER_SIZE         0x989680// Entropy Bitstream Buffer Size
 #define PACKETIZATION_PROCESS_BUFFER_SIZE   0x001000 // Bitstream used to code SPS, PPS, etc.
 #define EOS_NAL_BUFFER_SIZE                 0x0010 // Bitstream used to code EOS NAL
-#define HISTOGRAM_NUMBER_OF_BINS            256  
-#define MAX_NUMBER_OF_REGIONS_IN_WIDTH		4
-#define MAX_NUMBER_OF_REGIONS_IN_HEIGHT		4
+#define HISTOGRAM_NUMBER_OF_BINS            256
+#define MAX_NUMBER_OF_REGIONS_IN_WIDTH        4
+#define MAX_NUMBER_OF_REGIONS_IN_HEIGHT        4
 
 #define MAX_REF_QP_NUM                      52
 
@@ -38,7 +38,7 @@ extern "C" {
 #define SEGMENT_MAX_COUNT   64
 #define SEGMENT_COMPLETION_MASK_SET(mask, index)        MULTI_LINE_MACRO_BEGIN (mask) |= (((EB_U64) 1) << (index)); MULTI_LINE_MACRO_END
 #define SEGMENT_COMPLETION_MASK_TEST(mask, totalCount)  ((mask) == ((((EB_U64) 1) << (totalCount)) - 1))
-#define SEGMENT_ROW_COMPLETION_TEST(mask, rowIndex, width) ((((mask) >> ((rowIndex) * (width))) & ((1ull << (width))-1)) == ((1ull << (width))-1)) 
+#define SEGMENT_ROW_COMPLETION_TEST(mask, rowIndex, width) ((((mask) >> ((rowIndex) * (width))) & ((1ull << (width))-1)) == ((1ull << (width))-1))
 #define SEGMENT_CONVERT_IDX_TO_XY(index, x, y, picWidthInLcu) \
                                                         MULTI_LINE_MACRO_BEGIN \
                                                             (y) = (index) / (picWidthInLcu); \
@@ -62,7 +62,7 @@ extern "C" {
 struct PredictionUnit_s;
 
 #define MAX_NUMBER_OF_SLICES_PER_PICTURE        16
-typedef struct InLoopFilterSliceData_s 
+typedef struct InLoopFilterSliceData_s
 {
     EB_U8           betaOffset;
     EB_U8           tcOffset;
@@ -79,18 +79,18 @@ typedef struct InLoopFilterSliceData_s
  * Segment-based Control Sets
  **************************************/
 
-typedef struct EbMdcLeafData_s 
+typedef struct EbMdcLeafData_s
 {
     EB_U8           leafIndex;
     EB_BOOL         splitFlag;
-} EbMdcLeafData_t; 
+} EbMdcLeafData_t;
 
 
 typedef struct MdcLcuData_s
 {
     // Rate Control
     EB_U8           qp;
-    
+
     // ME Results
     EB_U64          treeblockVariance;
 
@@ -111,15 +111,15 @@ typedef struct BdpCuData_s
 /**************************************
  * MD Segment Control
  **************************************/
-typedef struct MdSegmentCtrl_s 
+typedef struct MdSegmentCtrl_s
 {
     EB_U64                                completionMask;
     EB_HANDLE                             writeLockMutex;
-    
+
     EB_U32                                totalCount;
     EB_U32                                columnCount;
     EB_U32                                rowCount;
-    
+
     EB_BOOL                               inProgress;
     EB_U32                                currentRowIdx;
 
@@ -131,26 +131,26 @@ typedef struct MdSegmentCtrl_s
 struct CodedTreeblock_s;
 struct LargestCodingUnit_s;
 
-typedef struct PictureControlSet_s 
+typedef struct PictureControlSet_s
 {
     EbObjectWrapper_t                    *sequenceControlSetWrapperPtr;
     EbPictureBufferDesc_t                *reconPicturePtr;
-  
+
     EbPictureBufferDesc_t                *reconPicture16bitPtr;
-    
+
     EntropyCoder_t                       *entropyCoderPtr;
 
     // Packetization (used to encode SPS, PPS, etc)
     Bitstream_t                          *bitstreamPtr;
-    
+
     // Reference Lists
     EbObjectWrapper_t                    *refPicPtrArray[MAX_NUM_OF_REF_PIC_LIST];
 
     EB_U8                                 refPicQpArray[MAX_NUM_OF_REF_PIC_LIST];
-    EB_PICTURE                            refSliceTypeArray[MAX_NUM_OF_REF_PIC_LIST];    
-    
+    EB_PICTURE                            refSliceTypeArray[MAX_NUM_OF_REF_PIC_LIST];
+
     // GOP
-    EB_U64                                pictureNumber;        
+    EB_U64                                pictureNumber;
     EB_U8                                 temporalLayerIndex;
     EB_U8                                 temporalId;
 
@@ -165,7 +165,7 @@ typedef struct PictureControlSet_s
     EB_S8                                 entropyCodingRowCount;
     EB_HANDLE                             entropyCodingMutex;
     EB_BOOL                               entropyCodingInProgress;
-	EB_BOOL                               entropyCodingPicDone;
+    EB_BOOL                               entropyCodingPicDone;
 
     EB_HANDLE                             intraMutex;
     EB_U32                                intraCodedArea;
@@ -178,12 +178,12 @@ typedef struct PictureControlSet_s
 
     // Slice Type
     EB_PICTURE                              sliceType;
-    
+
     // Rate Control
     EB_U8                                 pictureQp;
     EB_U8                                 difCuDeltaQpDepth;
     EB_U8                                 useDeltaQp;
-    
+
     // LCU Array
     EB_U8                                 lcuMaxDepth;
     EB_U16                                lcuTotalCount;
@@ -205,10 +205,10 @@ typedef struct PictureControlSet_s
     // Enc/DecQP Assignment
     EB_U8                                 encPrevCodedQp[MAX_PICTURE_HEIGHT_SIZE / MAX_LCU_SIZE];
     EB_U8                                 encPrevQuantGroupCodedQp[MAX_PICTURE_HEIGHT_SIZE / MAX_LCU_SIZE];
-                                                                              
-    // EncDec Entropy Coder (for rate estimation)           
+
+    // EncDec Entropy Coder (for rate estimation)
     EntropyCoder_t                       *coeffEstEntropyCoderPtr;
-	CabacCost_t                          *cabacCost;
+    CabacCost_t                          *cabacCost;
 
     // Mode Decision Neighbor Arrays
     NeighborArrayUnit_t                  *mdIntraLumaModeNeighborArray[NEIGHBOR_ARRAY_TOTAL_COUNT];
@@ -216,16 +216,16 @@ typedef struct PictureControlSet_s
     NeighborArrayUnit_t                  *mdSkipFlagNeighborArray[NEIGHBOR_ARRAY_TOTAL_COUNT];
     NeighborArrayUnit_t                  *mdModeTypeNeighborArray[NEIGHBOR_ARRAY_TOTAL_COUNT];
     NeighborArrayUnit_t                  *mdLeafDepthNeighborArray[NEIGHBOR_ARRAY_TOTAL_COUNT];
-	NeighborArrayUnit_t                  *mdLumaReconNeighborArray[NEIGHBOR_ARRAY_TOTAL_COUNT];
-	NeighborArrayUnit_t                  *mdCbReconNeighborArray[NEIGHBOR_ARRAY_TOTAL_COUNT];
-	NeighborArrayUnit_t                  *mdCrReconNeighborArray[NEIGHBOR_ARRAY_TOTAL_COUNT];
+    NeighborArrayUnit_t                  *mdLumaReconNeighborArray[NEIGHBOR_ARRAY_TOTAL_COUNT];
+    NeighborArrayUnit_t                  *mdCbReconNeighborArray[NEIGHBOR_ARRAY_TOTAL_COUNT];
+    NeighborArrayUnit_t                  *mdCrReconNeighborArray[NEIGHBOR_ARRAY_TOTAL_COUNT];
 
-	// Mode Decision Refinement Neighbor Arrays
-	NeighborArrayUnit_t                  *mdRefinementIntraLumaModeNeighborArray;
-	NeighborArrayUnit_t                  *mdRefinementModeTypeNeighborArray;
-	NeighborArrayUnit_t                  *mdRefinementLumaReconNeighborArray;
+    // Mode Decision Refinement Neighbor Arrays
+    NeighborArrayUnit_t                  *mdRefinementIntraLumaModeNeighborArray;
+    NeighborArrayUnit_t                  *mdRefinementModeTypeNeighborArray;
+    NeighborArrayUnit_t                  *mdRefinementLumaReconNeighborArray;
 
-    // Encode Pass Neighbor Arrays      
+    // Encode Pass Neighbor Arrays
     NeighborArrayUnit_t                  *epIntraLumaModeNeighborArray;
     NeighborArrayUnit_t                  *epMvNeighborArray;
     NeighborArrayUnit_t                  *epSkipFlagNeighborArray;
@@ -239,7 +239,7 @@ typedef struct PictureControlSet_s
     NeighborArrayUnit_t                  *epCbReconNeighborArray16bit;
     NeighborArrayUnit_t                  *epCrReconNeighborArray16bit;
 
-    // AMVP & MV Merge Neighbor Arrays 
+    // AMVP & MV Merge Neighbor Arrays
     NeighborArrayUnit_t                  *amvpMvMergeMvNeighborArray;
     NeighborArrayUnit_t                  *amvpMvMergeModeTypeNeighborArray;
 
@@ -257,22 +257,22 @@ typedef struct PictureControlSet_s
 
     EB_BOOL                               sliceLevelChromaQpFlag;
 
-	// slice level chroma QP offsets
-	EB_S8 								  sliceCbQpOffset;
-	EB_S8 								  sliceCrQpOffset;
+    // slice level chroma QP offsets
+    EB_S8                                   sliceCbQpOffset;
+    EB_S8                                   sliceCrQpOffset;
 
-	EB_S8                                 cbQpOffset;
-	EB_S8                                 crQpOffset;
+    EB_S8                                 cbQpOffset;
+    EB_S8                                 crQpOffset;
 
-	struct PictureParentControlSet_s     *ParentPcsPtr;//The parent of this PCS.
-	EbObjectWrapper_t                    *PictureParentControlSetWrapperPtr;
-	EB_S8                                 betaOffset;
-	EB_S8                                 tcOffset;
+    struct PictureParentControlSet_s     *ParentPcsPtr;//The parent of this PCS.
+    EbObjectWrapper_t                    *PictureParentControlSetWrapperPtr;
+    EB_S8                                 betaOffset;
+    EB_S8                                 tcOffset;
 
-	EB_U8                                 highIntraSlection;
+    EB_U8                                 highIntraSlection;
 
-	EB_FRAME_CARACTERICTICS               sceneCaracteristicId;
-	EB_BOOL                               adjustMinQPFlag;
+    EB_FRAME_CARACTERICTICS               sceneCaracteristicId;
+    EB_BOOL                               adjustMinQPFlag;
     EB_ENC_MODE                           encMode;
 
     EB_BOOL                               bdpPresentFlag;
@@ -287,16 +287,16 @@ typedef struct PictureControlSet_s
 // To study speed-memory trade-offs
 typedef struct LcuParameters_s {
 
-	EB_U8   horizontalIndex;
-	EB_U8   verticalIndex;
-	EB_U16  originX;
-	EB_U16  originY;
-	EB_U8   width;
-	EB_U8   height;
-	EB_U8   isCompleteLcu;
-	EB_BOOL rasterScanCuValidity[CU_MAX_COUNT];
+    EB_U8   horizontalIndex;
+    EB_U8   verticalIndex;
+    EB_U16  originX;
+    EB_U16  originY;
+    EB_U8   width;
+    EB_U8   height;
+    EB_U8   isCompleteLcu;
+    EB_BOOL rasterScanCuValidity[CU_MAX_COUNT];
     EB_U8   potentialLogoLcu;
-	EB_U8   isEdgeLcu;
+    EB_U8   isEdgeLcu;
 #if TILES
     EB_U32  tileStartX;
     EB_U32  tileStartY;
@@ -309,20 +309,20 @@ typedef struct LcuParameters_s {
 } LcuParams_t;
 
 typedef struct CuStat_s {
-	EB_BOOL			grassArea;
-	EB_BOOL			skinArea;
+    EB_BOOL            grassArea;
+    EB_BOOL            skinArea;
 
-	EB_BOOL			highChroma;
-	EB_BOOL			highLuma;
+    EB_BOOL            highChroma;
+    EB_BOOL            highLuma;
 
-    EB_U16          edgeCu; 
+    EB_U16          edgeCu;
     EB_U16          similarEdgeCount;
     EB_U16          pmSimilarEdgeCount;
 } CuStat_t;
 
 typedef struct LcuStat_s {
 
-	CuStat_t		cuStatArray[CU_MAX_COUNT];
+    CuStat_t        cuStatArray[CU_MAX_COUNT];
     EB_U8           stationaryEdgeOverTimeFlag;
 
     EB_U8           pmStationaryEdgeOverTimeFlag;
@@ -333,15 +333,15 @@ typedef struct LcuStat_s {
     EB_U8           lowDistLogo;
 
 } LcuStat_t;
-                    
+
 //CHKN
 // Add the concept of PictureParentControlSet which is a subset of the old PictureControlSet.
 // It actually holds only high level Pciture based control data:(GOP management,when to start a picture, when to release the PCS, ....).
 // The regular PictureControlSet(Child) will be dedicated to store LCU based encoding results and information.
 // Parent is created before the Child, and continue to live more. Child PCS only lives the exact time needed to encode the picture: from ME to EC/ALF.
-typedef struct PictureParentControlSet_s 
+typedef struct PictureParentControlSet_s
 {
-    EbObjectWrapper_t                    *sequenceControlSetWrapperPtr;   
+    EbObjectWrapper_t                    *sequenceControlSetWrapperPtr;
     EbObjectWrapper_t                    *inputPictureWrapperPtr;
     EbObjectWrapper_t                    *referencePictureWrapperPtr;
     EbObjectWrapper_t                    *paReferencePictureWrapperPtr;
@@ -349,13 +349,13 @@ typedef struct PictureParentControlSet_s
     EB_BOOL                               idrFlag;
     EB_BOOL                               craFlag;
     EB_BOOL                               openGopCraFlag;
-    EB_BOOL                               sceneChangeFlag;   
-    EB_BOOL                               endOfSequenceFlag;   
+    EB_BOOL                               sceneChangeFlag;
+    EB_BOOL                               endOfSequenceFlag;
 
-    EB_U8                                 pictureQp;                                 
-    EB_U64                                pictureNumber;                                
+    EB_U8                                 pictureQp;
+    EB_U64                                pictureNumber;
 
-    EbPictureBufferDesc_t                *enhancedPicturePtr; 
+    EbPictureBufferDesc_t                *enhancedPicturePtr;
     EbPictureBufferDesc_t                *chromaDownSamplePicturePtr;
 
     EB_PICNOISE_CLASS                     picNoiseClass;
@@ -364,16 +364,16 @@ typedef struct PictureParentControlSet_s
 
     EbObjectWrapper_t                    *ebInputWrapperPtr;
 
-    EB_PICTURE                              sliceType;                                 
+    EB_PICTURE                              sliceType;
     NalUnitType                           nalUnit;
-    EB_U8                                 predStructIndex;  
-    EB_BOOL                               useRpsInSps;   
-    EB_U8                                 referenceStructIndex;                      
-    EB_U8                                 temporalLayerIndex;                       
-    EB_U64                                decodeOrder;        
+    EB_U8                                 predStructIndex;
+    EB_BOOL                               useRpsInSps;
+    EB_U8                                 referenceStructIndex;
+    EB_U8                                 temporalLayerIndex;
+    EB_U64                                decodeOrder;
     EB_BOOL                               isUsedAsReferenceFlag;
-    EB_U8                                 refList0Count;                             
-    EB_U8                                 refList1Count;   
+    EB_U8                                 refList0Count;
+    EB_U8                                 refList1Count;
     PredictionStructure_t                *predStructPtr;          // need to check
     struct PictureParentControlSet_s     *refPaPcsArray[MAX_NUM_OF_REF_PIC_LIST];
     EbObjectWrapper_t                    *pPcsWrapperPtr;
@@ -405,7 +405,7 @@ typedef struct PictureParentControlSet_s
 
     EB_BOOL                               qpOnTheFly;
 
-	EB_U8                                 calculatedQp;
+    EB_U8                                 calculatedQp;
     EB_U8                                 intraSelectedOrgQp;
     EB_U64                                sadMe;
 
@@ -413,34 +413,34 @@ typedef struct PictureParentControlSet_s
     EB_U64                                quantizedCoeffNumBits;
     EB_U64                                targetBits;
     EB_U64                                averageQp;
- 
+
     EB_U64                                lastIdrPicture;
 
     EB_U64                                startTimeSeconds;
     EB_U64                                startTimeuSeconds;
-    EB_U32                                lumaSse;   
-    EB_U32                                crSse;   
-    EB_U32                                cbSse;   
-        
+    EB_U32                                lumaSse;
+    EB_U32                                crSse;
+    EB_U32                                cbSse;
+
 
     // PA
     EB_U32                                preAssignmentBufferCount;
 
-	EbObjectWrapper_t                    *refPaPicPtrArray[MAX_NUM_OF_REF_PIC_LIST];
+    EbObjectWrapper_t                    *refPaPicPtrArray[MAX_NUM_OF_REF_PIC_LIST];
     EB_U64                                refPicPocArray[MAX_NUM_OF_REF_PIC_LIST];
     EB_U16                              **variance;
-                                        
-	EB_U8                               **yMean;
-	EB_U8                               **cbMean;
-	EB_U8                               **crMean;
 
-	EB_U16                                picAvgVariance;
+    EB_U8                               **yMean;
+    EB_U8                               **cbMean;
+    EB_U8                               **crMean;
+
+    EB_U16                                picAvgVariance;
 
     // Histograms
-	EB_U32                            ****pictureHistogram;
+    EB_U32                            ****pictureHistogram;
 
-	EB_U64								  averageIntensityPerRegion[MAX_NUMBER_OF_REGIONS_IN_WIDTH][MAX_NUMBER_OF_REGIONS_IN_HEIGHT][3];
-    
+    EB_U64                                  averageIntensityPerRegion[MAX_NUMBER_OF_REGIONS_IN_WIDTH][MAX_NUMBER_OF_REGIONS_IN_HEIGHT][3];
+
     // Segments
     EB_U16                                meSegmentsTotalCount;
     EB_U8                                 meSegmentsColumnCount;
@@ -452,13 +452,13 @@ typedef struct PictureParentControlSet_s
     EB_U8                                 maxNumberOfMeCandidatesPerPU;
 
 
-	MeCuResults_t						**meResults;
-	EB_U32								 *rcMEdistortion;
+    MeCuResults_t                        **meResults;
+    EB_U32                                 *rcMEdistortion;
 
-    // Motion Estimation Distortion and OIS Historgram 
+    // Motion Estimation Distortion and OIS Historgram
     EB_U16                               *meDistortionHistogram;
     EB_U16                               *oisDistortionHistogram;
-                                       
+
     EB_U32                               *intraSadIntervalIndex;
     EB_U32                               *interSadIntervalIndex;
 
@@ -468,8 +468,8 @@ typedef struct PictureParentControlSet_s
 
     // Open loop Intra candidate Search Results
 
-	OisCu32Cu16Results_t                **oisCu32Cu16Results;
-	OisCu8Results_t                     **oisCu8Results;
+    OisCu32Cu16Results_t                **oisCu32Cu16Results;
+    OisCu8Results_t                     **oisCu8Results;
 
     // Dynamic GOP
     EB_PRED                               predStructure;
@@ -481,126 +481,126 @@ typedef struct PictureParentControlSet_s
     // Interlaced Video
     EB_PICT_STRUCT                        pictStruct;
 
-	// Average intensity
+    // Average intensity
     EB_U8                                 averageIntensity[3];
 
     EbObjectWrapper_t                    *outputStreamWrapperPtr;
-	EB_BOOL							      disableTmvpFlag;
-	// zz cost array
-	EB_U8                                *zzCostArray; 
-	// Non moving index array
-	EB_U8                                *nonMovingIndexArray; 
+    EB_BOOL                                  disableTmvpFlag;
+    // zz cost array
+    EB_U8                                *zzCostArray;
+    // Non moving index array
+    EB_U8                                *nonMovingIndexArray;
 
-	EB_BOOL								  isPan;
-	EB_BOOL								  isTilt;
+    EB_BOOL                                  isPan;
+    EB_BOOL                                  isTilt;
 
     EB_BOOL                              *similarColocatedLcuArray;
     EB_BOOL                              *similarColocatedLcuArrayAllLayers;
-	EB_U8                                *lcuFlatNoiseArray;
-	EB_U64                               *lcuVarianceOfVarianceOverTime;
-	EB_BOOL							     *isLcuHomogeneousOverTime;
-    EB_U32							      regionActivityCost[MAX_NUMBER_OF_REGIONS_IN_WIDTH][MAX_NUMBER_OF_REGIONS_IN_HEIGHT];
-    // 5L or 6L prediction error compared to 4L prediction structure 
+    EB_U8                                *lcuFlatNoiseArray;
+    EB_U64                               *lcuVarianceOfVarianceOverTime;
+    EB_BOOL                                 *isLcuHomogeneousOverTime;
+    EB_U32                                  regionActivityCost[MAX_NUMBER_OF_REGIONS_IN_WIDTH][MAX_NUMBER_OF_REGIONS_IN_HEIGHT];
+    // 5L or 6L prediction error compared to 4L prediction structure
     // 5L: computed for base layer frames (16 -  8 on top of 16 - 0)
     // 6L: computed for base layer frames (32 - 24 on top of 32 - 0 & 16 - 8 on top of 16 - 0)
     EB_U8                                 picHomogenousOverTimeLcuPercentage;
-    
-    // To further optimize
-    EdgeLcuResults_t                     *edgeResultsPtr;				                // used by EncDecProcess()
 
-    EB_U8							     *sharpEdgeLcuFlag;
-    EB_U8							     *failingMotionLcuFlag;		                // used by EncDecProcess()  and ModeDecisionConfigurationProcess // USED for L2 to replace the uncovered detectors for L6 and L7
-    EB_BOOL							     *uncoveredAreaLcuFlag;		                // used by EncDecProcess() 
-    EB_BOOL                              *lcuHomogeneousAreaArray;		                // used by EncDecProcess()  
-    EB_BOOL                               logoPicFlag;				                    // used by EncDecProcess()  
-    EB_U64                              **varOfVar32x32BasedLcuArray;	                // used by ModeDecisionConfigurationProcess()- the variance of 8x8 block variances for each 32x32 block	 	 
-    EB_BOOL                              *lcuCmplxContrastArray;			            // used by EncDecProcess()
-                                       
-                                       
-    EB_U64                              **lcuYSrcEnergyCuArray;			            // used by ModeDecisionConfigurationProcess()	 0- 64x64, 1-4 32x32
-    EB_U64							    **lcuYSrcMeanCuArray;			                // used by ModeDecisionConfigurationProcess()	 0- 64x64, 1-4 32x32
-    EB_U8                                 intraCodedBlockProbability;	                // used by EncDecProcess()	
-    EB_BOOL                               lowMotionContentFlag;			            // used by EncDecProcess()
-    EB_U32                                zzCostAverage;					            // used by ModeDecisionConfigurationProcess()	
-    EB_U16                                nonMovingIndexAverage;			            // used by ModeDecisionConfigurationProcess()	
-    EB_BOOL                              *lcuIsolatedNonHomogeneousAreaArray;			// used by ModeDecisionConfigurationProcess()	
+    // To further optimize
+    EdgeLcuResults_t                     *edgeResultsPtr;                                // used by EncDecProcess()
+
+    EB_U8                                 *sharpEdgeLcuFlag;
+    EB_U8                                 *failingMotionLcuFlag;                        // used by EncDecProcess()  and ModeDecisionConfigurationProcess // USED for L2 to replace the uncovered detectors for L6 and L7
+    EB_BOOL                                 *uncoveredAreaLcuFlag;                        // used by EncDecProcess()
+    EB_BOOL                              *lcuHomogeneousAreaArray;                        // used by EncDecProcess()
+    EB_BOOL                               logoPicFlag;                                    // used by EncDecProcess()
+    EB_U64                              **varOfVar32x32BasedLcuArray;                    // used by ModeDecisionConfigurationProcess()- the variance of 8x8 block variances for each 32x32 block
+    EB_BOOL                              *lcuCmplxContrastArray;                        // used by EncDecProcess()
+
+
+    EB_U64                              **lcuYSrcEnergyCuArray;                        // used by ModeDecisionConfigurationProcess()     0- 64x64, 1-4 32x32
+    EB_U64                                **lcuYSrcMeanCuArray;                            // used by ModeDecisionConfigurationProcess()     0- 64x64, 1-4 32x32
+    EB_U8                                 intraCodedBlockProbability;                    // used by EncDecProcess()
+    EB_BOOL                               lowMotionContentFlag;                        // used by EncDecProcess()
+    EB_U32                                zzCostAverage;                                // used by ModeDecisionConfigurationProcess()
+    EB_U16                                nonMovingIndexAverage;                        // used by ModeDecisionConfigurationProcess()
+    EB_BOOL                              *lcuIsolatedNonHomogeneousAreaArray;            // used by ModeDecisionConfigurationProcess()
     EB_U8                                 grassPercentageInPicture;
-    EB_U8 			                      percentageOfEdgeinLightBackground;
-    EB_BOOL			                      darkBackGroundlightForeGround;
+    EB_U8                                   percentageOfEdgeinLightBackground;
+    EB_BOOL                                  darkBackGroundlightForeGround;
     EbObjectWrapper_t                    *previousPictureControlSetWrapperPtr;
     LcuStat_t                            *lcuStatArray;
     EB_U8                                 veryLowVarPicFlag;
-	EB_BOOL		                          highDarkAreaDensityFlag;		                // computed @ PictureAnalysisProcess() and used @ SourceBasedOperationsProcess()
-    EB_BOOL		                          highDarkLowLightAreaDensityFlag;		        // computed @ PictureAnalysisProcess() and used @ SourceBasedOperationsProcess()
+    EB_BOOL                                  highDarkAreaDensityFlag;                        // computed @ PictureAnalysisProcess() and used @ SourceBasedOperationsProcess()
+    EB_BOOL                                  highDarkLowLightAreaDensityFlag;                // computed @ PictureAnalysisProcess() and used @ SourceBasedOperationsProcess()
     EB_U8                                 blackAreaPercentage;
-	EB_U32							      intraComplexityMin[4];
-	EB_U32                                intraComplexityMax[4];
-	EB_U32                                intraComplexityAccum[4];
-	EB_U32                                intraComplexityAvg[4];
-	EB_U32							      interComplexityMin[4];
-	EB_U32                                interComplexityMax[4];
-	EB_U32                                interComplexityAccum[4];
-	EB_U32                                interComplexityAvg[4];
-	EB_U32                                processedleafCount[4];
-                                       
-	EB_U32							      intraComplexityMinPre;
-	EB_U32                                intraComplexityMaxPre;
-	EB_U32                                interComplexityMinPre;
-	EB_U32                                interComplexityMaxPre;
-                                       
-	EB_S32							      intraMinDistance[4];
-	EB_S32							      intraMaxDistance[4];
-	EB_S32							      interMinDistance[4];
-	EB_S32							      interMaxDistance[4];
-	EB_U8                                 lcuBlockPercentage;
-                                       
+    EB_U32                                  intraComplexityMin[4];
+    EB_U32                                intraComplexityMax[4];
+    EB_U32                                intraComplexityAccum[4];
+    EB_U32                                intraComplexityAvg[4];
+    EB_U32                                  interComplexityMin[4];
+    EB_U32                                interComplexityMax[4];
+    EB_U32                                interComplexityAccum[4];
+    EB_U32                                interComplexityAvg[4];
+    EB_U32                                processedleafCount[4];
+
+    EB_U32                                  intraComplexityMinPre;
+    EB_U32                                intraComplexityMaxPre;
+    EB_U32                                interComplexityMinPre;
+    EB_U32                                interComplexityMaxPre;
+
+    EB_S32                                  intraMinDistance[4];
+    EB_S32                                  intraMaxDistance[4];
+    EB_S32                                  interMinDistance[4];
+    EB_S32                                  interMaxDistance[4];
+    EB_U8                                 lcuBlockPercentage;
+
     EB_LCU_DEPTH_MODE                    *lcuMdModeArray;
     EB_LCU_COMPLEXITY_STATUS             *complexLcuArray;
     EB_BOOL                               useSrcRef;
-    EB_U8                                *cmplxStatusLcu;			// used by EncDecProcess()  
-                                       
-    // Encoder Mode                    
+    EB_U8                                *cmplxStatusLcu;            // used by EncDecProcess()
+
+    // Encoder Mode
     EB_ENC_MODE                           encMode;
-                                       
-    // Multi-modes signal(s)           
+
+    // Multi-modes signal(s)
     EB_PICTURE_DEPTH_MODE                 depthMode;
     EB_BOOL                               limitOisToDcModeFlag;
     EB_BOOL                               useSubpelFlag;
     EB_CU_8x8_MODE                        cu8x8Mode;
-	EB_CU_16x16_MODE                      cu16x16Mode;
+    EB_CU_16x16_MODE                      cu16x16Mode;
     EB_BOOL                               skipOis8x8;
     EB_NOISE_DETECT_MODE                  noiseDetectionMethod;
     EB_U8                                 noiseDetectionTh;
-	EB_BOOL                               enableDenoiseSrcFlag;
+    EB_BOOL                               enableDenoiseSrcFlag;
     EB_BOOL                               enableHmeFlag;
     EB_BOOL                               enableHmeLevel0Flag;
     EB_BOOL                               enableHmeLevel1Flag;
     EB_BOOL                               enableHmeLevel2Flag;
-	EB_BOOL                               disableVarianceFlag;
+    EB_BOOL                               disableVarianceFlag;
 
 } PictureParentControlSet_t;
 
 
 typedef struct PictureControlSetInitData_s
 {
-	EB_U16                           pictureWidth;
-	EB_U16                           pictureHeight;
-	EB_U16                           leftPadding;
-	EB_U16                           rightPadding;
-	EB_U16                           topPadding;
-	EB_U16                           botPadding;
+    EB_U16                           pictureWidth;
+    EB_U16                           pictureHeight;
+    EB_U16                           leftPadding;
+    EB_U16                           rightPadding;
+    EB_U16                           topPadding;
+    EB_U16                           botPadding;
     EB_BITDEPTH                      bitDepth;
     EB_COLOR_FORMAT                  colorFormat;
     EB_U32                           lcuSize;
     EB_U32                           maxDepth;
     EB_BOOL                          is16bit;
-	EB_U32                           compressedTenBitFormat;
+    EB_U32                           compressedTenBitFormat;
     EB_U16                           encDecSegmentCol;
     EB_U16                           encDecSegmentRow;
 
-	EB_ENC_MODE                      encMode;
+    EB_ENC_MODE                      encMode;
 
-	EB_U8                            speedControl;
+    EB_U8                            speedControl;
 
     EB_U8                            tune;
 
@@ -611,11 +611,11 @@ typedef struct PictureControlSetInitData_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE PictureControlSetCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
 
 extern EB_ERRORTYPE PictureParentControlSetCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
 
 #ifdef __cplusplus

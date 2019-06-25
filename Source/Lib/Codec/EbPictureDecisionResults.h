@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -27,8 +27,8 @@ typedef struct PictureDecisionResultInitData_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE PictureDecisionResultCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
 
-   
+
 #endif //EbPictureDecisionResults_h

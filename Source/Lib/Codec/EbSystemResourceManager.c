@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -92,7 +92,7 @@ static EB_BOOL EbFifoPeakFront(
         return EB_TRUE;
     }
     else {
-        return EB_FALSE; 
+        return EB_FALSE;
     }
 }
 
@@ -197,7 +197,7 @@ static EB_ERRORTYPE EbCircularBufferPushFront(
 
     // Increment the Current Count
     ++bufferPtr->currentCount;
-    
+
     return return_error;
 }
 
@@ -321,18 +321,18 @@ static EB_ERRORTYPE EbMuxingQueueObjectPushBack(
 * EbMuxingQueueObjectPushFront
 **************************************/
 static EB_ERRORTYPE EbMuxingQueueObjectPushFront(
-	EbMuxingQueue_t    *queuePtr,
-	EbObjectWrapper_t  *objectPtr)
+    EbMuxingQueue_t    *queuePtr,
+    EbObjectWrapper_t  *objectPtr)
 {
-	EB_ERRORTYPE return_error = EB_ErrorNone;
+    EB_ERRORTYPE return_error = EB_ErrorNone;
 
-	EbCircularBufferPushFront(
-		queuePtr->objectQueue,
-		objectPtr);
+    EbCircularBufferPushFront(
+        queuePtr->objectQueue,
+        objectPtr);
 
-	EbMuxingQueueAssignation(queuePtr);
+    EbMuxingQueueAssignation(queuePtr);
 
-	return return_error;
+    return return_error;
 }
 
 /*********************************************************************
@@ -602,9 +602,9 @@ EB_ERRORTYPE EbReleaseObject(
         // Set liveCount to EB_ObjectWrapperReleasedValue
         objectPtr->liveCount = EB_ObjectWrapperReleasedValue;
 
-		EbMuxingQueueObjectPushFront(
-			objectPtr->systemResourcePtr->emptyQueue,
-			objectPtr);
+        EbMuxingQueueObjectPushFront(
+            objectPtr->systemResourcePtr->emptyQueue,
+            objectPtr);
 
     }
 

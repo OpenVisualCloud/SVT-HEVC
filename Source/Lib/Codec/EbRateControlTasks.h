@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -34,7 +34,7 @@ typedef struct RateControlTasks_s
     EB_U64                              pictureNumber;
     EB_U32                              rowNumber;
     EB_U32                              bitCount;
-    
+
 } RateControlTasks_t;
 
 typedef struct RateControlTasksInitData_s
@@ -46,7 +46,7 @@ typedef struct RateControlTasksInitData_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE RateControlTasksCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
 
 

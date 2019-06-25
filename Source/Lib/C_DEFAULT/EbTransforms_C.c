@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -133,24 +133,24 @@ void QuantizeInvQuantize(
 }
 
 #define EB_INTRA_CHROMA_DM          4
-#define MAX_TU_SIZE					32
+#define MAX_TU_SIZE                    32
 
 //enum COMPONENT_TYPE
 //{
-//	COMPONENT_LUMA = 0,			// luma
-//	COMPONENT_CHROMA = 1,		// chroma (Cb+Cr)
-//	COMPONENT_CHROMA_CB = 2,	// chroma Cb
-//	COMPONENT_CHROMA_CR = 3,	// chroma Cr
-//	COMPONENT_ALL = 4,			// Y+Cb+Cr
-//	COMPONENT_NONE = 15
+//    COMPONENT_LUMA = 0,            // luma
+//    COMPONENT_CHROMA = 1,        // chroma (Cb+Cr)
+//    COMPONENT_CHROMA_CB = 2,    // chroma Cb
+//    COMPONENT_CHROMA_CR = 3,    // chroma Cr
+//    COMPONENT_ALL = 4,            // Y+Cb+Cr
+//    COMPONENT_NONE = 15
 //};
 //
 //
 //enum COEFF_SCAN_TYPE2
 //{
-//	SCAN_DIAG2 = 0,				// diagonal scan
-//	SCAN_HOR2,					// first scan is horizontal
-//	SCAN_VER2					// first scan is vertical
+//    SCAN_DIAG2 = 0,                // diagonal scan
+//    SCAN_HOR2,                    // first scan is horizontal
+//    SCAN_VER2                    // first scan is vertical
 //};
 
 /**************************************
@@ -158,46 +158,46 @@ void QuantizeInvQuantize(
 **************************************/
 
 void UpdateQiQCoef_R(
-	EB_S16           *quantCoeff,
-	EB_S16           *reconCoeff,
-	const EB_U32      coeffStride,
-	const EB_S32      shiftedFFunc,
-	const EB_S32      iq_offset,
-	const EB_S32      shiftNum,
-	const EB_U32      areaSize,
-	EB_U32           *nonzerocoeff,
-	EB_U32            componentType,
-	EB_PICTURE          sliceType,
-	EB_U32            temporalLayer,
-	EB_U32            enableCbflag,
-	EB_U8             enableContouringQCUpdateFlag)
+    EB_S16           *quantCoeff,
+    EB_S16           *reconCoeff,
+    const EB_U32      coeffStride,
+    const EB_S32      shiftedFFunc,
+    const EB_S32      iq_offset,
+    const EB_S32      shiftNum,
+    const EB_U32      areaSize,
+    EB_U32           *nonzerocoeff,
+    EB_U32            componentType,
+    EB_PICTURE          sliceType,
+    EB_U32            temporalLayer,
+    EB_U32            enableCbflag,
+    EB_U8             enableContouringQCUpdateFlag)
 
 {
 
-	EB_U32 coeffLocation = 0;
+    EB_U32 coeffLocation = 0;
 
-	//EB_U32 rowIndex = 0;
-	//EB_U32 colIndex = 0;
+    //EB_U32 rowIndex = 0;
+    //EB_U32 colIndex = 0;
 
 
     if ((*nonzerocoeff < 10) && enableContouringQCUpdateFlag && sliceType == EB_I_PICTURE && temporalLayer == 0 && componentType == 0){
 
-		coeffLocation = (areaSize - 1) + (areaSize - 1) * coeffStride;
+        coeffLocation = (areaSize - 1) + (areaSize - 1) * coeffStride;
 
-		if (quantCoeff[coeffLocation] == 0){
-			(*nonzerocoeff)++;
-			quantCoeff[coeffLocation] = 1;
-			reconCoeff[coeffLocation] = (EB_S16)((quantCoeff[coeffLocation] * shiftedFFunc) + iq_offset) >> shiftNum;
-		}
-	}
+        if (quantCoeff[coeffLocation] == 0){
+            (*nonzerocoeff)++;
+            quantCoeff[coeffLocation] = 1;
+            reconCoeff[coeffLocation] = (EB_S16)((quantCoeff[coeffLocation] * shiftedFFunc) + iq_offset) >> shiftNum;
+        }
+    }
 
-	if ((*nonzerocoeff == 0) && (enableCbflag == 1))
-	{
-		EB_U32 coeffLocation = ((areaSize - 2)*coeffStride) + (areaSize - 1);
-		*nonzerocoeff = 1;
-		quantCoeff[coeffLocation] = 1;
-		reconCoeff[coeffLocation] = (EB_S16)((quantCoeff[coeffLocation] * shiftedFFunc) + iq_offset) >> shiftNum;
-	}
+    if ((*nonzerocoeff == 0) && (enableCbflag == 1))
+    {
+        EB_U32 coeffLocation = ((areaSize - 2)*coeffStride) + (areaSize - 1);
+        *nonzerocoeff = 1;
+        quantCoeff[coeffLocation] = 1;
+        reconCoeff[coeffLocation] = (EB_S16)((quantCoeff[coeffLocation] * shiftedFFunc) + iq_offset) >> shiftNum;
+    }
 }
 
 /*********************************************************************
@@ -207,25 +207,25 @@ void UpdateQiQCoef_R(
 *********************************************************************/
 
 void UpdateQiQCoef(
-	EB_S16           *quantCoeff,
-	EB_S16           *reconCoeff,
-	const EB_U32      coeffStride,
-	const EB_S32      shiftedFFunc,
-	const EB_S32      iq_offset,
-	const EB_S32      shiftNum,
-	const EB_U32      areaSize,
-	EB_U32           *nonzerocoeff,
-	EB_U32            componentType,
-	EB_PICTURE          sliceType,
-	EB_U32            temporalLayer,
-	EB_U32            enableCbflag,
-	EB_U8             enableContouringQCUpdateFlag)
+    EB_S16           *quantCoeff,
+    EB_S16           *reconCoeff,
+    const EB_U32      coeffStride,
+    const EB_S32      shiftedFFunc,
+    const EB_S32      iq_offset,
+    const EB_S32      shiftNum,
+    const EB_U32      areaSize,
+    EB_U32           *nonzerocoeff,
+    EB_U32            componentType,
+    EB_PICTURE          sliceType,
+    EB_U32            temporalLayer,
+    EB_U32            enableCbflag,
+    EB_U8             enableContouringQCUpdateFlag)
 
 {
 
-	EB_U32 coeffLocation = 0;
-	//EB_U32 rowIndex = 0;
-	//EB_U32 colIndex = 0;
+    EB_U32 coeffLocation = 0;
+    //EB_U32 rowIndex = 0;
+    //EB_U32 colIndex = 0;
 
 
 
@@ -240,14 +240,14 @@ void UpdateQiQCoef(
         }
     }
 
-  
-	if ((*nonzerocoeff == 0) && (enableCbflag == 1))
-	{
-		EB_U32 coeffLocation = ((areaSize - 2)*coeffStride) + (areaSize - 1);
-		*nonzerocoeff = 1;
-		quantCoeff[coeffLocation] = 1;
-		reconCoeff[coeffLocation] = (EB_S16)((quantCoeff[coeffLocation] * shiftedFFunc) + iq_offset) >> shiftNum;
-	}
+
+    if ((*nonzerocoeff == 0) && (enableCbflag == 1))
+    {
+        EB_U32 coeffLocation = ((areaSize - 2)*coeffStride) + (areaSize - 1);
+        *nonzerocoeff = 1;
+        quantCoeff[coeffLocation] = 1;
+        reconCoeff[coeffLocation] = (EB_S16)((quantCoeff[coeffLocation] * shiftedFFunc) + iq_offset) >> shiftNum;
+    }
 }
 
 /*********************************************************************
@@ -490,226 +490,226 @@ inline static void PartialButterfly32(
 }
 
 inline static void PartialButterfly32Estimate(
-	EB_S16       *residual,
-	EB_S16       *transformCoefficients,
-	const EB_U32  srcStride,
-	const EB_U32  dstStride,
-	const EB_U32  shift)
+    EB_S16       *residual,
+    EB_S16       *transformCoefficients,
+    const EB_U32  srcStride,
+    const EB_U32  dstStride,
+    const EB_U32  shift)
 {
-	EB_S16 even0, even1, even2, even3, even4, even5, even6, even7, even8, even9, even10, even11, even12, even13, even14, even15;
-	EB_S16 odd0, odd1, odd2, odd3, odd4, odd5, odd6, odd7, odd8, odd9, odd10, odd11, odd12, odd13, odd14, odd15;
-	EB_S16 evenEven0, evenEven1, evenEven2, evenEven3, evenEven4, evenEven5, evenEven6, evenEven7;
-	EB_S16 evenOdd0, evenOdd1, evenOdd2, evenOdd3, evenOdd4, evenOdd5, evenOdd6, evenOdd7;
-	EB_S32 evenEvenEven0, evenEvenEven1, evenEvenEven2, evenEvenEven3;
-	EB_S32 evenEvenOdd0, evenEvenOdd1, evenEvenOdd2, evenEvenOdd3;
-	EB_S32 evenEvenEvenEven0, evenEvenEvenEven1;
-	EB_S32 evenEvenEvenOdd0, evenEvenEvenOdd1;
-	EB_U32 rowIndex, rowStrideIndex;
-	const EB_S16 offset = 1 << (shift - 1);
+    EB_S16 even0, even1, even2, even3, even4, even5, even6, even7, even8, even9, even10, even11, even12, even13, even14, even15;
+    EB_S16 odd0, odd1, odd2, odd3, odd4, odd5, odd6, odd7, odd8, odd9, odd10, odd11, odd12, odd13, odd14, odd15;
+    EB_S16 evenEven0, evenEven1, evenEven2, evenEven3, evenEven4, evenEven5, evenEven6, evenEven7;
+    EB_S16 evenOdd0, evenOdd1, evenOdd2, evenOdd3, evenOdd4, evenOdd5, evenOdd6, evenOdd7;
+    EB_S32 evenEvenEven0, evenEvenEven1, evenEvenEven2, evenEvenEven3;
+    EB_S32 evenEvenOdd0, evenEvenOdd1, evenEvenOdd2, evenEvenOdd3;
+    EB_S32 evenEvenEvenEven0, evenEvenEvenEven1;
+    EB_S32 evenEvenEvenOdd0, evenEvenEvenOdd1;
+    EB_U32 rowIndex, rowStrideIndex;
+    const EB_S16 offset = 1 << (shift - 1);
 
-	for (rowIndex = 0; rowIndex < 32; rowIndex++) {
-		rowStrideIndex = rowIndex*srcStride;
+    for (rowIndex = 0; rowIndex < 32; rowIndex++) {
+        rowStrideIndex = rowIndex*srcStride;
 
-		//Calculating even and odd variables
-		even0 = residual[rowStrideIndex + 0] + residual[rowStrideIndex + 31];
-		even1 = residual[rowStrideIndex + 1] + residual[rowStrideIndex + 30];
-		even2 = residual[rowStrideIndex + 2] + residual[rowStrideIndex + 29];
-		even3 = residual[rowStrideIndex + 3] + residual[rowStrideIndex + 28];
-		even4 = residual[rowStrideIndex + 4] + residual[rowStrideIndex + 27];
-		even5 = residual[rowStrideIndex + 5] + residual[rowStrideIndex + 26];
-		even6 = residual[rowStrideIndex + 6] + residual[rowStrideIndex + 25];
-		even7 = residual[rowStrideIndex + 7] + residual[rowStrideIndex + 24];
-		even8 = residual[rowStrideIndex + 8] + residual[rowStrideIndex + 23];
-		even9 = residual[rowStrideIndex + 9] + residual[rowStrideIndex + 22];
-		even10 = residual[rowStrideIndex + 10] + residual[rowStrideIndex + 21];
-		even11 = residual[rowStrideIndex + 11] + residual[rowStrideIndex + 20];
-		even12 = residual[rowStrideIndex + 12] + residual[rowStrideIndex + 19];
-		even13 = residual[rowStrideIndex + 13] + residual[rowStrideIndex + 18];
-		even14 = residual[rowStrideIndex + 14] + residual[rowStrideIndex + 17];
-		even15 = residual[rowStrideIndex + 15] + residual[rowStrideIndex + 16];
+        //Calculating even and odd variables
+        even0 = residual[rowStrideIndex + 0] + residual[rowStrideIndex + 31];
+        even1 = residual[rowStrideIndex + 1] + residual[rowStrideIndex + 30];
+        even2 = residual[rowStrideIndex + 2] + residual[rowStrideIndex + 29];
+        even3 = residual[rowStrideIndex + 3] + residual[rowStrideIndex + 28];
+        even4 = residual[rowStrideIndex + 4] + residual[rowStrideIndex + 27];
+        even5 = residual[rowStrideIndex + 5] + residual[rowStrideIndex + 26];
+        even6 = residual[rowStrideIndex + 6] + residual[rowStrideIndex + 25];
+        even7 = residual[rowStrideIndex + 7] + residual[rowStrideIndex + 24];
+        even8 = residual[rowStrideIndex + 8] + residual[rowStrideIndex + 23];
+        even9 = residual[rowStrideIndex + 9] + residual[rowStrideIndex + 22];
+        even10 = residual[rowStrideIndex + 10] + residual[rowStrideIndex + 21];
+        even11 = residual[rowStrideIndex + 11] + residual[rowStrideIndex + 20];
+        even12 = residual[rowStrideIndex + 12] + residual[rowStrideIndex + 19];
+        even13 = residual[rowStrideIndex + 13] + residual[rowStrideIndex + 18];
+        even14 = residual[rowStrideIndex + 14] + residual[rowStrideIndex + 17];
+        even15 = residual[rowStrideIndex + 15] + residual[rowStrideIndex + 16];
 
-		odd0 = residual[rowStrideIndex + 0] - residual[rowStrideIndex + 31];
-		odd1 = residual[rowStrideIndex + 1] - residual[rowStrideIndex + 30];
-		odd2 = residual[rowStrideIndex + 2] - residual[rowStrideIndex + 29];
-		odd3 = residual[rowStrideIndex + 3] - residual[rowStrideIndex + 28];
-		odd4 = residual[rowStrideIndex + 4] - residual[rowStrideIndex + 27];
-		odd5 = residual[rowStrideIndex + 5] - residual[rowStrideIndex + 26];
-		odd6 = residual[rowStrideIndex + 6] - residual[rowStrideIndex + 25];
-		odd7 = residual[rowStrideIndex + 7] - residual[rowStrideIndex + 24];
-		odd8 = residual[rowStrideIndex + 8] - residual[rowStrideIndex + 23];
-		odd9 = residual[rowStrideIndex + 9] - residual[rowStrideIndex + 22];
-		odd10 = residual[rowStrideIndex + 10] - residual[rowStrideIndex + 21];
-		odd11 = residual[rowStrideIndex + 11] - residual[rowStrideIndex + 20];
-		odd12 = residual[rowStrideIndex + 12] - residual[rowStrideIndex + 19];
-		odd13 = residual[rowStrideIndex + 13] - residual[rowStrideIndex + 18];
-		odd14 = residual[rowStrideIndex + 14] - residual[rowStrideIndex + 17];
-		odd15 = residual[rowStrideIndex + 15] - residual[rowStrideIndex + 16];
+        odd0 = residual[rowStrideIndex + 0] - residual[rowStrideIndex + 31];
+        odd1 = residual[rowStrideIndex + 1] - residual[rowStrideIndex + 30];
+        odd2 = residual[rowStrideIndex + 2] - residual[rowStrideIndex + 29];
+        odd3 = residual[rowStrideIndex + 3] - residual[rowStrideIndex + 28];
+        odd4 = residual[rowStrideIndex + 4] - residual[rowStrideIndex + 27];
+        odd5 = residual[rowStrideIndex + 5] - residual[rowStrideIndex + 26];
+        odd6 = residual[rowStrideIndex + 6] - residual[rowStrideIndex + 25];
+        odd7 = residual[rowStrideIndex + 7] - residual[rowStrideIndex + 24];
+        odd8 = residual[rowStrideIndex + 8] - residual[rowStrideIndex + 23];
+        odd9 = residual[rowStrideIndex + 9] - residual[rowStrideIndex + 22];
+        odd10 = residual[rowStrideIndex + 10] - residual[rowStrideIndex + 21];
+        odd11 = residual[rowStrideIndex + 11] - residual[rowStrideIndex + 20];
+        odd12 = residual[rowStrideIndex + 12] - residual[rowStrideIndex + 19];
+        odd13 = residual[rowStrideIndex + 13] - residual[rowStrideIndex + 18];
+        odd14 = residual[rowStrideIndex + 14] - residual[rowStrideIndex + 17];
+        odd15 = residual[rowStrideIndex + 15] - residual[rowStrideIndex + 16];
 
-		//Calculating evenEven and evenOdd variables
-		evenEven0 = even0 + even15;
-		evenEven1 = even1 + even14;
-		evenEven2 = even2 + even13;
-		evenEven3 = even3 + even12;
-		evenEven4 = even4 + even11;
-		evenEven5 = even5 + even10;
-		evenEven6 = even6 + even9;
-		evenEven7 = even7 + even8;
+        //Calculating evenEven and evenOdd variables
+        evenEven0 = even0 + even15;
+        evenEven1 = even1 + even14;
+        evenEven2 = even2 + even13;
+        evenEven3 = even3 + even12;
+        evenEven4 = even4 + even11;
+        evenEven5 = even5 + even10;
+        evenEven6 = even6 + even9;
+        evenEven7 = even7 + even8;
 
-		evenOdd0 = even0 - even15;
-		evenOdd1 = even1 - even14;
-		evenOdd2 = even2 - even13;
-		evenOdd3 = even3 - even12;
-		evenOdd4 = even4 - even11;
-		evenOdd5 = even5 - even10;
-		evenOdd6 = even6 - even9;
-		evenOdd7 = even7 - even8;
+        evenOdd0 = even0 - even15;
+        evenOdd1 = even1 - even14;
+        evenOdd2 = even2 - even13;
+        evenOdd3 = even3 - even12;
+        evenOdd4 = even4 - even11;
+        evenOdd5 = even5 - even10;
+        evenOdd6 = even6 - even9;
+        evenOdd7 = even7 - even8;
 
-		//Calculating evenEvenEven and evenEvenOdd variables
-		evenEvenEven0 = evenEven0 + evenEven7;
-		evenEvenEven1 = evenEven1 + evenEven6;
-		evenEvenEven2 = evenEven2 + evenEven5;
-		evenEvenEven3 = evenEven3 + evenEven4;
+        //Calculating evenEvenEven and evenEvenOdd variables
+        evenEvenEven0 = evenEven0 + evenEven7;
+        evenEvenEven1 = evenEven1 + evenEven6;
+        evenEvenEven2 = evenEven2 + evenEven5;
+        evenEvenEven3 = evenEven3 + evenEven4;
 
-		evenEvenOdd0 = evenEven0 - evenEven7;
-		evenEvenOdd1 = evenEven1 - evenEven6;
-		evenEvenOdd2 = evenEven2 - evenEven5;
-		evenEvenOdd3 = evenEven3 - evenEven4;
+        evenEvenOdd0 = evenEven0 - evenEven7;
+        evenEvenOdd1 = evenEven1 - evenEven6;
+        evenEvenOdd2 = evenEven2 - evenEven5;
+        evenEvenOdd3 = evenEven3 - evenEven4;
 
-		//Calculating evenEvenEvenEven and evenEvenEvenOdd variables
-		evenEvenEvenEven0 = evenEvenEven0 + evenEvenEven3;
-		evenEvenEvenEven1 = evenEvenEven1 + evenEvenEven2;
+        //Calculating evenEvenEvenEven and evenEvenEvenOdd variables
+        evenEvenEvenEven0 = evenEvenEven0 + evenEvenEven3;
+        evenEvenEvenEven1 = evenEvenEven1 + evenEvenEven2;
 
-		evenEvenEvenOdd0 = evenEvenEven0 - evenEvenEven3;
-		evenEvenEvenOdd1 = evenEvenEven1 - evenEvenEven2;
+        evenEvenEvenOdd0 = evenEvenEven0 - evenEvenEven3;
+        evenEvenEvenOdd1 = evenEvenEven1 - evenEvenEven2;
 
-		transformCoefficients[0 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[0 * 32 + 0] * evenEvenEvenEven0 + DctCoef32x32[0 * 32 + 1] * evenEvenEvenEven1 + offset) >> shift);
-		transformCoefficients[8 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[8 * 32 + 0] * evenEvenEvenOdd0 + DctCoef32x32[8 * 32 + 1] * evenEvenEvenOdd1 + offset) >> shift);
-		transformCoefficients[16 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[16 * 32 + 0] * evenEvenEvenEven0 + DctCoef32x32[16 * 32 + 1] * evenEvenEvenEven1 + offset) >> shift);
-		transformCoefficients[24 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[24 * 32 + 0] * evenEvenEvenOdd0 + DctCoef32x32[24 * 32 + 1] * evenEvenEvenOdd1 + offset) >> shift);
+        transformCoefficients[0 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[0 * 32 + 0] * evenEvenEvenEven0 + DctCoef32x32[0 * 32 + 1] * evenEvenEvenEven1 + offset) >> shift);
+        transformCoefficients[8 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[8 * 32 + 0] * evenEvenEvenOdd0 + DctCoef32x32[8 * 32 + 1] * evenEvenEvenOdd1 + offset) >> shift);
+        transformCoefficients[16 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[16 * 32 + 0] * evenEvenEvenEven0 + DctCoef32x32[16 * 32 + 1] * evenEvenEvenEven1 + offset) >> shift);
+        transformCoefficients[24 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[24 * 32 + 0] * evenEvenEvenOdd0 + DctCoef32x32[24 * 32 + 1] * evenEvenEvenOdd1 + offset) >> shift);
 
-		transformCoefficients[4 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[4 * 32 + 0] * evenEvenOdd0 + DctCoef32x32[4 * 32 + 1] * evenEvenOdd1 +
-			DctCoef32x32[4 * 32 + 2] * evenEvenOdd2 + DctCoef32x32[4 * 32 + 3] * evenEvenOdd3 + offset) >> shift);
-		transformCoefficients[12 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[12 * 32 + 0] * evenEvenOdd0 + DctCoef32x32[12 * 32 + 1] * evenEvenOdd1 +
-			DctCoef32x32[12 * 32 + 2] * evenEvenOdd2 + DctCoef32x32[12 * 32 + 3] * evenEvenOdd3 + offset) >> shift);
-		transformCoefficients[20 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[20 * 32 + 0] * evenEvenOdd0 + DctCoef32x32[20 * 32 + 1] * evenEvenOdd1 +
-			DctCoef32x32[20 * 32 + 2] * evenEvenOdd2 + DctCoef32x32[20 * 32 + 3] * evenEvenOdd3 + offset) >> shift);
-		transformCoefficients[28 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[28 * 32 + 0] * evenEvenOdd0 + DctCoef32x32[28 * 32 + 1] * evenEvenOdd1 +
-			DctCoef32x32[28 * 32 + 2] * evenEvenOdd2 + DctCoef32x32[28 * 32 + 3] * evenEvenOdd3 + offset) >> shift);
+        transformCoefficients[4 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[4 * 32 + 0] * evenEvenOdd0 + DctCoef32x32[4 * 32 + 1] * evenEvenOdd1 +
+            DctCoef32x32[4 * 32 + 2] * evenEvenOdd2 + DctCoef32x32[4 * 32 + 3] * evenEvenOdd3 + offset) >> shift);
+        transformCoefficients[12 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[12 * 32 + 0] * evenEvenOdd0 + DctCoef32x32[12 * 32 + 1] * evenEvenOdd1 +
+            DctCoef32x32[12 * 32 + 2] * evenEvenOdd2 + DctCoef32x32[12 * 32 + 3] * evenEvenOdd3 + offset) >> shift);
+        transformCoefficients[20 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[20 * 32 + 0] * evenEvenOdd0 + DctCoef32x32[20 * 32 + 1] * evenEvenOdd1 +
+            DctCoef32x32[20 * 32 + 2] * evenEvenOdd2 + DctCoef32x32[20 * 32 + 3] * evenEvenOdd3 + offset) >> shift);
+        transformCoefficients[28 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[28 * 32 + 0] * evenEvenOdd0 + DctCoef32x32[28 * 32 + 1] * evenEvenOdd1 +
+            DctCoef32x32[28 * 32 + 2] * evenEvenOdd2 + DctCoef32x32[28 * 32 + 3] * evenEvenOdd3 + offset) >> shift);
 
-		transformCoefficients[2 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[2 * 32 + 0] * evenOdd0 + DctCoef32x32[2 * 32 + 1] * evenOdd1 +
-			DctCoef32x32[2 * 32 + 2] * evenOdd2 + DctCoef32x32[2 * 32 + 3] * evenOdd3 +
-			DctCoef32x32[2 * 32 + 4] * evenOdd4 + DctCoef32x32[2 * 32 + 5] * evenOdd5 +
-			DctCoef32x32[2 * 32 + 6] * evenOdd6 + DctCoef32x32[2 * 32 + 7] * evenOdd7 + offset) >> shift);
-		transformCoefficients[6 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[6 * 32 + 0] * evenOdd0 + DctCoef32x32[6 * 32 + 1] * evenOdd1 +
-			DctCoef32x32[6 * 32 + 2] * evenOdd2 + DctCoef32x32[6 * 32 + 3] * evenOdd3 +
-			DctCoef32x32[6 * 32 + 4] * evenOdd4 + DctCoef32x32[6 * 32 + 5] * evenOdd5 +
-			DctCoef32x32[6 * 32 + 6] * evenOdd6 + DctCoef32x32[6 * 32 + 7] * evenOdd7 + offset) >> shift);
-		transformCoefficients[10 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[10 * 32 + 0] * evenOdd0 + DctCoef32x32[10 * 32 + 1] * evenOdd1 +
-			DctCoef32x32[10 * 32 + 2] * evenOdd2 + DctCoef32x32[10 * 32 + 3] * evenOdd3 +
-			DctCoef32x32[10 * 32 + 4] * evenOdd4 + DctCoef32x32[10 * 32 + 5] * evenOdd5 +
-			DctCoef32x32[10 * 32 + 6] * evenOdd6 + DctCoef32x32[10 * 32 + 7] * evenOdd7 + offset) >> shift);
-		transformCoefficients[14 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[14 * 32 + 0] * evenOdd0 + DctCoef32x32[14 * 32 + 1] * evenOdd1 +
-			DctCoef32x32[14 * 32 + 2] * evenOdd2 + DctCoef32x32[14 * 32 + 3] * evenOdd3 +
-			DctCoef32x32[14 * 32 + 4] * evenOdd4 + DctCoef32x32[14 * 32 + 5] * evenOdd5 +
-			DctCoef32x32[14 * 32 + 6] * evenOdd6 + DctCoef32x32[14 * 32 + 7] * evenOdd7 + offset) >> shift);
-		transformCoefficients[18 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[18 * 32 + 0] * evenOdd0 + DctCoef32x32[18 * 32 + 1] * evenOdd1 +
-			DctCoef32x32[18 * 32 + 2] * evenOdd2 + DctCoef32x32[18 * 32 + 3] * evenOdd3 +
-			DctCoef32x32[18 * 32 + 4] * evenOdd4 + DctCoef32x32[18 * 32 + 5] * evenOdd5 +
-			DctCoef32x32[18 * 32 + 6] * evenOdd6 + DctCoef32x32[18 * 32 + 7] * evenOdd7 + offset) >> shift);
-		transformCoefficients[22 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[22 * 32 + 0] * evenOdd0 + DctCoef32x32[22 * 32 + 1] * evenOdd1 +
-			DctCoef32x32[22 * 32 + 2] * evenOdd2 + DctCoef32x32[22 * 32 + 3] * evenOdd3 +
-			DctCoef32x32[22 * 32 + 4] * evenOdd4 + DctCoef32x32[22 * 32 + 5] * evenOdd5 +
-			DctCoef32x32[22 * 32 + 6] * evenOdd6 + DctCoef32x32[22 * 32 + 7] * evenOdd7 + offset) >> shift);
-		transformCoefficients[26 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[26 * 32 + 0] * evenOdd0 + DctCoef32x32[26 * 32 + 1] * evenOdd1 +
-			DctCoef32x32[26 * 32 + 2] * evenOdd2 + DctCoef32x32[26 * 32 + 3] * evenOdd3 +
-			DctCoef32x32[26 * 32 + 4] * evenOdd4 + DctCoef32x32[26 * 32 + 5] * evenOdd5 +
-			DctCoef32x32[26 * 32 + 6] * evenOdd6 + DctCoef32x32[26 * 32 + 7] * evenOdd7 + offset) >> shift);
-		transformCoefficients[30 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[30 * 32 + 0] * evenOdd0 + DctCoef32x32[30 * 32 + 1] * evenOdd1 +
-			DctCoef32x32[30 * 32 + 2] * evenOdd2 + DctCoef32x32[30 * 32 + 3] * evenOdd3 +
-			DctCoef32x32[30 * 32 + 4] * evenOdd4 + DctCoef32x32[30 * 32 + 5] * evenOdd5 +
-			DctCoef32x32[30 * 32 + 6] * evenOdd6 + DctCoef32x32[30 * 32 + 7] * evenOdd7 + offset) >> shift);
+        transformCoefficients[2 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[2 * 32 + 0] * evenOdd0 + DctCoef32x32[2 * 32 + 1] * evenOdd1 +
+            DctCoef32x32[2 * 32 + 2] * evenOdd2 + DctCoef32x32[2 * 32 + 3] * evenOdd3 +
+            DctCoef32x32[2 * 32 + 4] * evenOdd4 + DctCoef32x32[2 * 32 + 5] * evenOdd5 +
+            DctCoef32x32[2 * 32 + 6] * evenOdd6 + DctCoef32x32[2 * 32 + 7] * evenOdd7 + offset) >> shift);
+        transformCoefficients[6 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[6 * 32 + 0] * evenOdd0 + DctCoef32x32[6 * 32 + 1] * evenOdd1 +
+            DctCoef32x32[6 * 32 + 2] * evenOdd2 + DctCoef32x32[6 * 32 + 3] * evenOdd3 +
+            DctCoef32x32[6 * 32 + 4] * evenOdd4 + DctCoef32x32[6 * 32 + 5] * evenOdd5 +
+            DctCoef32x32[6 * 32 + 6] * evenOdd6 + DctCoef32x32[6 * 32 + 7] * evenOdd7 + offset) >> shift);
+        transformCoefficients[10 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[10 * 32 + 0] * evenOdd0 + DctCoef32x32[10 * 32 + 1] * evenOdd1 +
+            DctCoef32x32[10 * 32 + 2] * evenOdd2 + DctCoef32x32[10 * 32 + 3] * evenOdd3 +
+            DctCoef32x32[10 * 32 + 4] * evenOdd4 + DctCoef32x32[10 * 32 + 5] * evenOdd5 +
+            DctCoef32x32[10 * 32 + 6] * evenOdd6 + DctCoef32x32[10 * 32 + 7] * evenOdd7 + offset) >> shift);
+        transformCoefficients[14 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[14 * 32 + 0] * evenOdd0 + DctCoef32x32[14 * 32 + 1] * evenOdd1 +
+            DctCoef32x32[14 * 32 + 2] * evenOdd2 + DctCoef32x32[14 * 32 + 3] * evenOdd3 +
+            DctCoef32x32[14 * 32 + 4] * evenOdd4 + DctCoef32x32[14 * 32 + 5] * evenOdd5 +
+            DctCoef32x32[14 * 32 + 6] * evenOdd6 + DctCoef32x32[14 * 32 + 7] * evenOdd7 + offset) >> shift);
+        transformCoefficients[18 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[18 * 32 + 0] * evenOdd0 + DctCoef32x32[18 * 32 + 1] * evenOdd1 +
+            DctCoef32x32[18 * 32 + 2] * evenOdd2 + DctCoef32x32[18 * 32 + 3] * evenOdd3 +
+            DctCoef32x32[18 * 32 + 4] * evenOdd4 + DctCoef32x32[18 * 32 + 5] * evenOdd5 +
+            DctCoef32x32[18 * 32 + 6] * evenOdd6 + DctCoef32x32[18 * 32 + 7] * evenOdd7 + offset) >> shift);
+        transformCoefficients[22 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[22 * 32 + 0] * evenOdd0 + DctCoef32x32[22 * 32 + 1] * evenOdd1 +
+            DctCoef32x32[22 * 32 + 2] * evenOdd2 + DctCoef32x32[22 * 32 + 3] * evenOdd3 +
+            DctCoef32x32[22 * 32 + 4] * evenOdd4 + DctCoef32x32[22 * 32 + 5] * evenOdd5 +
+            DctCoef32x32[22 * 32 + 6] * evenOdd6 + DctCoef32x32[22 * 32 + 7] * evenOdd7 + offset) >> shift);
+        transformCoefficients[26 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[26 * 32 + 0] * evenOdd0 + DctCoef32x32[26 * 32 + 1] * evenOdd1 +
+            DctCoef32x32[26 * 32 + 2] * evenOdd2 + DctCoef32x32[26 * 32 + 3] * evenOdd3 +
+            DctCoef32x32[26 * 32 + 4] * evenOdd4 + DctCoef32x32[26 * 32 + 5] * evenOdd5 +
+            DctCoef32x32[26 * 32 + 6] * evenOdd6 + DctCoef32x32[26 * 32 + 7] * evenOdd7 + offset) >> shift);
+        transformCoefficients[30 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[30 * 32 + 0] * evenOdd0 + DctCoef32x32[30 * 32 + 1] * evenOdd1 +
+            DctCoef32x32[30 * 32 + 2] * evenOdd2 + DctCoef32x32[30 * 32 + 3] * evenOdd3 +
+            DctCoef32x32[30 * 32 + 4] * evenOdd4 + DctCoef32x32[30 * 32 + 5] * evenOdd5 +
+            DctCoef32x32[30 * 32 + 6] * evenOdd6 + DctCoef32x32[30 * 32 + 7] * evenOdd7 + offset) >> shift);
 
-		transformCoefficients[1 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[1 * 32 + 0] * odd0 + DctCoef32x32[1 * 32 + 1] * odd1 + DctCoef32x32[1 * 32 + 2] * odd2 + DctCoef32x32[1 * 32 + 3] * odd3 +
-			DctCoef32x32[1 * 32 + 4] * odd4 + DctCoef32x32[1 * 32 + 5] * odd5 + DctCoef32x32[1 * 32 + 6] * odd6 + DctCoef32x32[1 * 32 + 7] * odd7 +
-			DctCoef32x32[1 * 32 + 8] * odd8 + DctCoef32x32[1 * 32 + 9] * odd9 + DctCoef32x32[1 * 32 + 10] * odd10 + DctCoef32x32[1 * 32 + 11] * odd11 +
-			DctCoef32x32[1 * 32 + 12] * odd12 + DctCoef32x32[1 * 32 + 13] * odd13 + DctCoef32x32[1 * 32 + 14] * odd14 + DctCoef32x32[1 * 32 + 15] * odd15 +
-			offset) >> shift);
-		transformCoefficients[3 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[3 * 32 + 0] * odd0 + DctCoef32x32[3 * 32 + 1] * odd1 + DctCoef32x32[3 * 32 + 2] * odd2 + DctCoef32x32[3 * 32 + 3] * odd3 +
-			DctCoef32x32[3 * 32 + 4] * odd4 + DctCoef32x32[3 * 32 + 5] * odd5 + DctCoef32x32[3 * 32 + 6] * odd6 + DctCoef32x32[3 * 32 + 7] * odd7 +
-			DctCoef32x32[3 * 32 + 8] * odd8 + DctCoef32x32[3 * 32 + 9] * odd9 + DctCoef32x32[3 * 32 + 10] * odd10 + DctCoef32x32[3 * 32 + 11] * odd11 +
-			DctCoef32x32[3 * 32 + 12] * odd12 + DctCoef32x32[3 * 32 + 13] * odd13 + DctCoef32x32[3 * 32 + 14] * odd14 + DctCoef32x32[3 * 32 + 15] * odd15 +
-			offset) >> shift);
-		transformCoefficients[5 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[5 * 32 + 0] * odd0 + DctCoef32x32[5 * 32 + 1] * odd1 + DctCoef32x32[5 * 32 + 2] * odd2 + DctCoef32x32[5 * 32 + 3] * odd3 +
-			DctCoef32x32[5 * 32 + 4] * odd4 + DctCoef32x32[5 * 32 + 5] * odd5 + DctCoef32x32[5 * 32 + 6] * odd6 + DctCoef32x32[5 * 32 + 7] * odd7 +
-			DctCoef32x32[5 * 32 + 8] * odd8 + DctCoef32x32[5 * 32 + 9] * odd9 + DctCoef32x32[5 * 32 + 10] * odd10 + DctCoef32x32[5 * 32 + 11] * odd11 +
-			DctCoef32x32[5 * 32 + 12] * odd12 + DctCoef32x32[5 * 32 + 13] * odd13 + DctCoef32x32[5 * 32 + 14] * odd14 + DctCoef32x32[5 * 32 + 15] * odd15 +
-			offset) >> shift);
-		transformCoefficients[7 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[7 * 32 + 0] * odd0 + DctCoef32x32[7 * 32 + 1] * odd1 + DctCoef32x32[7 * 32 + 2] * odd2 + DctCoef32x32[7 * 32 + 3] * odd3 +
-			DctCoef32x32[7 * 32 + 4] * odd4 + DctCoef32x32[7 * 32 + 5] * odd5 + DctCoef32x32[7 * 32 + 6] * odd6 + DctCoef32x32[7 * 32 + 7] * odd7 +
-			DctCoef32x32[7 * 32 + 8] * odd8 + DctCoef32x32[7 * 32 + 9] * odd9 + DctCoef32x32[7 * 32 + 10] * odd10 + DctCoef32x32[7 * 32 + 11] * odd11 +
-			DctCoef32x32[7 * 32 + 12] * odd12 + DctCoef32x32[7 * 32 + 13] * odd13 + DctCoef32x32[7 * 32 + 14] * odd14 + DctCoef32x32[7 * 32 + 15] * odd15 +
-			offset) >> shift);
-		transformCoefficients[9 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[9 * 32 + 0] * odd0 + DctCoef32x32[9 * 32 + 1] * odd1 + DctCoef32x32[9 * 32 + 2] * odd2 + DctCoef32x32[9 * 32 + 3] * odd3 +
-			DctCoef32x32[9 * 32 + 4] * odd4 + DctCoef32x32[9 * 32 + 5] * odd5 + DctCoef32x32[9 * 32 + 6] * odd6 + DctCoef32x32[9 * 32 + 7] * odd7 +
-			DctCoef32x32[9 * 32 + 8] * odd8 + DctCoef32x32[9 * 32 + 9] * odd9 + DctCoef32x32[9 * 32 + 10] * odd10 + DctCoef32x32[9 * 32 + 11] * odd11 +
-			DctCoef32x32[9 * 32 + 12] * odd12 + DctCoef32x32[9 * 32 + 13] * odd13 + DctCoef32x32[9 * 32 + 14] * odd14 + DctCoef32x32[9 * 32 + 15] * odd15 +
-			offset) >> shift);
-		transformCoefficients[11 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[11 * 32 + 0] * odd0 + DctCoef32x32[11 * 32 + 1] * odd1 + DctCoef32x32[11 * 32 + 2] * odd2 + DctCoef32x32[11 * 32 + 3] * odd3 +
-			DctCoef32x32[11 * 32 + 4] * odd4 + DctCoef32x32[11 * 32 + 5] * odd5 + DctCoef32x32[11 * 32 + 6] * odd6 + DctCoef32x32[11 * 32 + 7] * odd7 +
-			DctCoef32x32[11 * 32 + 8] * odd8 + DctCoef32x32[11 * 32 + 9] * odd9 + DctCoef32x32[11 * 32 + 10] * odd10 + DctCoef32x32[11 * 32 + 11] * odd11 +
-			DctCoef32x32[11 * 32 + 12] * odd12 + DctCoef32x32[11 * 32 + 13] * odd13 + DctCoef32x32[11 * 32 + 14] * odd14 + DctCoef32x32[11 * 32 + 15] * odd15 +
-			offset) >> shift);
-		transformCoefficients[13 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[13 * 32 + 0] * odd0 + DctCoef32x32[13 * 32 + 1] * odd1 + DctCoef32x32[13 * 32 + 2] * odd2 + DctCoef32x32[13 * 32 + 3] * odd3 +
-			DctCoef32x32[13 * 32 + 4] * odd4 + DctCoef32x32[13 * 32 + 5] * odd5 + DctCoef32x32[13 * 32 + 6] * odd6 + DctCoef32x32[13 * 32 + 7] * odd7 +
-			DctCoef32x32[13 * 32 + 8] * odd8 + DctCoef32x32[13 * 32 + 9] * odd9 + DctCoef32x32[13 * 32 + 10] * odd10 + DctCoef32x32[13 * 32 + 11] * odd11 +
-			DctCoef32x32[13 * 32 + 12] * odd12 + DctCoef32x32[13 * 32 + 13] * odd13 + DctCoef32x32[13 * 32 + 14] * odd14 + DctCoef32x32[13 * 32 + 15] * odd15 +
-			offset) >> shift);
-		transformCoefficients[15 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[15 * 32 + 0] * odd0 + DctCoef32x32[15 * 32 + 1] * odd1 + DctCoef32x32[15 * 32 + 2] * odd2 + DctCoef32x32[15 * 32 + 3] * odd3 +
-			DctCoef32x32[15 * 32 + 4] * odd4 + DctCoef32x32[15 * 32 + 5] * odd5 + DctCoef32x32[15 * 32 + 6] * odd6 + DctCoef32x32[15 * 32 + 7] * odd7 +
-			DctCoef32x32[15 * 32 + 8] * odd8 + DctCoef32x32[15 * 32 + 9] * odd9 + DctCoef32x32[15 * 32 + 10] * odd10 + DctCoef32x32[15 * 32 + 11] * odd11 +
-			DctCoef32x32[15 * 32 + 12] * odd12 + DctCoef32x32[15 * 32 + 13] * odd13 + DctCoef32x32[15 * 32 + 14] * odd14 + DctCoef32x32[15 * 32 + 15] * odd15 +
-			offset) >> shift);
-		transformCoefficients[17 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[17 * 32 + 0] * odd0 + DctCoef32x32[17 * 32 + 1] * odd1 + DctCoef32x32[17 * 32 + 2] * odd2 + DctCoef32x32[17 * 32 + 3] * odd3 +
-			DctCoef32x32[17 * 32 + 4] * odd4 + DctCoef32x32[17 * 32 + 5] * odd5 + DctCoef32x32[17 * 32 + 6] * odd6 + DctCoef32x32[17 * 32 + 7] * odd7 +
-			DctCoef32x32[17 * 32 + 8] * odd8 + DctCoef32x32[17 * 32 + 9] * odd9 + DctCoef32x32[17 * 32 + 10] * odd10 + DctCoef32x32[17 * 32 + 11] * odd11 +
-			DctCoef32x32[17 * 32 + 12] * odd12 + DctCoef32x32[17 * 32 + 13] * odd13 + DctCoef32x32[17 * 32 + 14] * odd14 + DctCoef32x32[17 * 32 + 15] * odd15 +
-			offset) >> shift);
-		transformCoefficients[19 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[19 * 32 + 0] * odd0 + DctCoef32x32[19 * 32 + 1] * odd1 + DctCoef32x32[19 * 32 + 2] * odd2 + DctCoef32x32[19 * 32 + 3] * odd3 +
-			DctCoef32x32[19 * 32 + 4] * odd4 + DctCoef32x32[19 * 32 + 5] * odd5 + DctCoef32x32[19 * 32 + 6] * odd6 + DctCoef32x32[19 * 32 + 7] * odd7 +
-			DctCoef32x32[19 * 32 + 8] * odd8 + DctCoef32x32[19 * 32 + 9] * odd9 + DctCoef32x32[19 * 32 + 10] * odd10 + DctCoef32x32[19 * 32 + 11] * odd11 +
-			DctCoef32x32[19 * 32 + 12] * odd12 + DctCoef32x32[19 * 32 + 13] * odd13 + DctCoef32x32[19 * 32 + 14] * odd14 + DctCoef32x32[19 * 32 + 15] * odd15 +
-			offset) >> shift);
-		transformCoefficients[21 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[21 * 32 + 0] * odd0 + DctCoef32x32[21 * 32 + 1] * odd1 + DctCoef32x32[21 * 32 + 2] * odd2 + DctCoef32x32[21 * 32 + 3] * odd3 +
-			DctCoef32x32[21 * 32 + 4] * odd4 + DctCoef32x32[21 * 32 + 5] * odd5 + DctCoef32x32[21 * 32 + 6] * odd6 + DctCoef32x32[21 * 32 + 7] * odd7 +
-			DctCoef32x32[21 * 32 + 8] * odd8 + DctCoef32x32[21 * 32 + 9] * odd9 + DctCoef32x32[21 * 32 + 10] * odd10 + DctCoef32x32[21 * 32 + 11] * odd11 +
-			DctCoef32x32[21 * 32 + 12] * odd12 + DctCoef32x32[21 * 32 + 13] * odd13 + DctCoef32x32[21 * 32 + 14] * odd14 + DctCoef32x32[21 * 32 + 15] * odd15 +
-			offset) >> shift);
-		transformCoefficients[23 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[23 * 32 + 0] * odd0 + DctCoef32x32[23 * 32 + 1] * odd1 + DctCoef32x32[23 * 32 + 2] * odd2 + DctCoef32x32[23 * 32 + 3] * odd3 +
-			DctCoef32x32[23 * 32 + 4] * odd4 + DctCoef32x32[23 * 32 + 5] * odd5 + DctCoef32x32[23 * 32 + 6] * odd6 + DctCoef32x32[23 * 32 + 7] * odd7 +
-			DctCoef32x32[23 * 32 + 8] * odd8 + DctCoef32x32[23 * 32 + 9] * odd9 + DctCoef32x32[23 * 32 + 10] * odd10 + DctCoef32x32[23 * 32 + 11] * odd11 +
-			DctCoef32x32[23 * 32 + 12] * odd12 + DctCoef32x32[23 * 32 + 13] * odd13 + DctCoef32x32[23 * 32 + 14] * odd14 + DctCoef32x32[23 * 32 + 15] * odd15 +
-			offset) >> shift);
-		transformCoefficients[25 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[25 * 32 + 0] * odd0 + DctCoef32x32[25 * 32 + 1] * odd1 + DctCoef32x32[25 * 32 + 2] * odd2 + DctCoef32x32[25 * 32 + 3] * odd3 +
-			DctCoef32x32[25 * 32 + 4] * odd4 + DctCoef32x32[25 * 32 + 5] * odd5 + DctCoef32x32[25 * 32 + 6] * odd6 + DctCoef32x32[25 * 32 + 7] * odd7 +
-			DctCoef32x32[25 * 32 + 8] * odd8 + DctCoef32x32[25 * 32 + 9] * odd9 + DctCoef32x32[25 * 32 + 10] * odd10 + DctCoef32x32[25 * 32 + 11] * odd11 +
-			DctCoef32x32[25 * 32 + 12] * odd12 + DctCoef32x32[25 * 32 + 13] * odd13 + DctCoef32x32[25 * 32 + 14] * odd14 + DctCoef32x32[25 * 32 + 15] * odd15 +
-			offset) >> shift);
-		transformCoefficients[27 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[27 * 32 + 0] * odd0 + DctCoef32x32[27 * 32 + 1] * odd1 + DctCoef32x32[27 * 32 + 2] * odd2 + DctCoef32x32[27 * 32 + 3] * odd3 +
-			DctCoef32x32[27 * 32 + 4] * odd4 + DctCoef32x32[27 * 32 + 5] * odd5 + DctCoef32x32[27 * 32 + 6] * odd6 + DctCoef32x32[27 * 32 + 7] * odd7 +
-			DctCoef32x32[27 * 32 + 8] * odd8 + DctCoef32x32[27 * 32 + 9] * odd9 + DctCoef32x32[27 * 32 + 10] * odd10 + DctCoef32x32[27 * 32 + 11] * odd11 +
-			DctCoef32x32[27 * 32 + 12] * odd12 + DctCoef32x32[27 * 32 + 13] * odd13 + DctCoef32x32[27 * 32 + 14] * odd14 + DctCoef32x32[27 * 32 + 15] * odd15 +
-			offset) >> shift);
-		transformCoefficients[29 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[29 * 32 + 0] * odd0 + DctCoef32x32[29 * 32 + 1] * odd1 + DctCoef32x32[29 * 32 + 2] * odd2 + DctCoef32x32[29 * 32 + 3] * odd3 +
-			DctCoef32x32[29 * 32 + 4] * odd4 + DctCoef32x32[29 * 32 + 5] * odd5 + DctCoef32x32[29 * 32 + 6] * odd6 + DctCoef32x32[29 * 32 + 7] * odd7 +
-			DctCoef32x32[29 * 32 + 8] * odd8 + DctCoef32x32[29 * 32 + 9] * odd9 + DctCoef32x32[29 * 32 + 10] * odd10 + DctCoef32x32[29 * 32 + 11] * odd11 +
-			DctCoef32x32[29 * 32 + 12] * odd12 + DctCoef32x32[29 * 32 + 13] * odd13 + DctCoef32x32[29 * 32 + 14] * odd14 + DctCoef32x32[29 * 32 + 15] * odd15 +
-			offset) >> shift);
-		transformCoefficients[31 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[31 * 32 + 0] * odd0 + DctCoef32x32[31 * 32 + 1] * odd1 + DctCoef32x32[31 * 32 + 2] * odd2 + DctCoef32x32[31 * 32 + 3] * odd3 +
-			DctCoef32x32[31 * 32 + 4] * odd4 + DctCoef32x32[31 * 32 + 5] * odd5 + DctCoef32x32[31 * 32 + 6] * odd6 + DctCoef32x32[31 * 32 + 7] * odd7 +
-			DctCoef32x32[31 * 32 + 8] * odd8 + DctCoef32x32[31 * 32 + 9] * odd9 + DctCoef32x32[31 * 32 + 10] * odd10 + DctCoef32x32[31 * 32 + 11] * odd11 +
-			DctCoef32x32[31 * 32 + 12] * odd12 + DctCoef32x32[31 * 32 + 13] * odd13 + DctCoef32x32[31 * 32 + 14] * odd14 + DctCoef32x32[31 * 32 + 15] * odd15 +
-			offset) >> shift);
-	}
+        transformCoefficients[1 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[1 * 32 + 0] * odd0 + DctCoef32x32[1 * 32 + 1] * odd1 + DctCoef32x32[1 * 32 + 2] * odd2 + DctCoef32x32[1 * 32 + 3] * odd3 +
+            DctCoef32x32[1 * 32 + 4] * odd4 + DctCoef32x32[1 * 32 + 5] * odd5 + DctCoef32x32[1 * 32 + 6] * odd6 + DctCoef32x32[1 * 32 + 7] * odd7 +
+            DctCoef32x32[1 * 32 + 8] * odd8 + DctCoef32x32[1 * 32 + 9] * odd9 + DctCoef32x32[1 * 32 + 10] * odd10 + DctCoef32x32[1 * 32 + 11] * odd11 +
+            DctCoef32x32[1 * 32 + 12] * odd12 + DctCoef32x32[1 * 32 + 13] * odd13 + DctCoef32x32[1 * 32 + 14] * odd14 + DctCoef32x32[1 * 32 + 15] * odd15 +
+            offset) >> shift);
+        transformCoefficients[3 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[3 * 32 + 0] * odd0 + DctCoef32x32[3 * 32 + 1] * odd1 + DctCoef32x32[3 * 32 + 2] * odd2 + DctCoef32x32[3 * 32 + 3] * odd3 +
+            DctCoef32x32[3 * 32 + 4] * odd4 + DctCoef32x32[3 * 32 + 5] * odd5 + DctCoef32x32[3 * 32 + 6] * odd6 + DctCoef32x32[3 * 32 + 7] * odd7 +
+            DctCoef32x32[3 * 32 + 8] * odd8 + DctCoef32x32[3 * 32 + 9] * odd9 + DctCoef32x32[3 * 32 + 10] * odd10 + DctCoef32x32[3 * 32 + 11] * odd11 +
+            DctCoef32x32[3 * 32 + 12] * odd12 + DctCoef32x32[3 * 32 + 13] * odd13 + DctCoef32x32[3 * 32 + 14] * odd14 + DctCoef32x32[3 * 32 + 15] * odd15 +
+            offset) >> shift);
+        transformCoefficients[5 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[5 * 32 + 0] * odd0 + DctCoef32x32[5 * 32 + 1] * odd1 + DctCoef32x32[5 * 32 + 2] * odd2 + DctCoef32x32[5 * 32 + 3] * odd3 +
+            DctCoef32x32[5 * 32 + 4] * odd4 + DctCoef32x32[5 * 32 + 5] * odd5 + DctCoef32x32[5 * 32 + 6] * odd6 + DctCoef32x32[5 * 32 + 7] * odd7 +
+            DctCoef32x32[5 * 32 + 8] * odd8 + DctCoef32x32[5 * 32 + 9] * odd9 + DctCoef32x32[5 * 32 + 10] * odd10 + DctCoef32x32[5 * 32 + 11] * odd11 +
+            DctCoef32x32[5 * 32 + 12] * odd12 + DctCoef32x32[5 * 32 + 13] * odd13 + DctCoef32x32[5 * 32 + 14] * odd14 + DctCoef32x32[5 * 32 + 15] * odd15 +
+            offset) >> shift);
+        transformCoefficients[7 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[7 * 32 + 0] * odd0 + DctCoef32x32[7 * 32 + 1] * odd1 + DctCoef32x32[7 * 32 + 2] * odd2 + DctCoef32x32[7 * 32 + 3] * odd3 +
+            DctCoef32x32[7 * 32 + 4] * odd4 + DctCoef32x32[7 * 32 + 5] * odd5 + DctCoef32x32[7 * 32 + 6] * odd6 + DctCoef32x32[7 * 32 + 7] * odd7 +
+            DctCoef32x32[7 * 32 + 8] * odd8 + DctCoef32x32[7 * 32 + 9] * odd9 + DctCoef32x32[7 * 32 + 10] * odd10 + DctCoef32x32[7 * 32 + 11] * odd11 +
+            DctCoef32x32[7 * 32 + 12] * odd12 + DctCoef32x32[7 * 32 + 13] * odd13 + DctCoef32x32[7 * 32 + 14] * odd14 + DctCoef32x32[7 * 32 + 15] * odd15 +
+            offset) >> shift);
+        transformCoefficients[9 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[9 * 32 + 0] * odd0 + DctCoef32x32[9 * 32 + 1] * odd1 + DctCoef32x32[9 * 32 + 2] * odd2 + DctCoef32x32[9 * 32 + 3] * odd3 +
+            DctCoef32x32[9 * 32 + 4] * odd4 + DctCoef32x32[9 * 32 + 5] * odd5 + DctCoef32x32[9 * 32 + 6] * odd6 + DctCoef32x32[9 * 32 + 7] * odd7 +
+            DctCoef32x32[9 * 32 + 8] * odd8 + DctCoef32x32[9 * 32 + 9] * odd9 + DctCoef32x32[9 * 32 + 10] * odd10 + DctCoef32x32[9 * 32 + 11] * odd11 +
+            DctCoef32x32[9 * 32 + 12] * odd12 + DctCoef32x32[9 * 32 + 13] * odd13 + DctCoef32x32[9 * 32 + 14] * odd14 + DctCoef32x32[9 * 32 + 15] * odd15 +
+            offset) >> shift);
+        transformCoefficients[11 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[11 * 32 + 0] * odd0 + DctCoef32x32[11 * 32 + 1] * odd1 + DctCoef32x32[11 * 32 + 2] * odd2 + DctCoef32x32[11 * 32 + 3] * odd3 +
+            DctCoef32x32[11 * 32 + 4] * odd4 + DctCoef32x32[11 * 32 + 5] * odd5 + DctCoef32x32[11 * 32 + 6] * odd6 + DctCoef32x32[11 * 32 + 7] * odd7 +
+            DctCoef32x32[11 * 32 + 8] * odd8 + DctCoef32x32[11 * 32 + 9] * odd9 + DctCoef32x32[11 * 32 + 10] * odd10 + DctCoef32x32[11 * 32 + 11] * odd11 +
+            DctCoef32x32[11 * 32 + 12] * odd12 + DctCoef32x32[11 * 32 + 13] * odd13 + DctCoef32x32[11 * 32 + 14] * odd14 + DctCoef32x32[11 * 32 + 15] * odd15 +
+            offset) >> shift);
+        transformCoefficients[13 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[13 * 32 + 0] * odd0 + DctCoef32x32[13 * 32 + 1] * odd1 + DctCoef32x32[13 * 32 + 2] * odd2 + DctCoef32x32[13 * 32 + 3] * odd3 +
+            DctCoef32x32[13 * 32 + 4] * odd4 + DctCoef32x32[13 * 32 + 5] * odd5 + DctCoef32x32[13 * 32 + 6] * odd6 + DctCoef32x32[13 * 32 + 7] * odd7 +
+            DctCoef32x32[13 * 32 + 8] * odd8 + DctCoef32x32[13 * 32 + 9] * odd9 + DctCoef32x32[13 * 32 + 10] * odd10 + DctCoef32x32[13 * 32 + 11] * odd11 +
+            DctCoef32x32[13 * 32 + 12] * odd12 + DctCoef32x32[13 * 32 + 13] * odd13 + DctCoef32x32[13 * 32 + 14] * odd14 + DctCoef32x32[13 * 32 + 15] * odd15 +
+            offset) >> shift);
+        transformCoefficients[15 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[15 * 32 + 0] * odd0 + DctCoef32x32[15 * 32 + 1] * odd1 + DctCoef32x32[15 * 32 + 2] * odd2 + DctCoef32x32[15 * 32 + 3] * odd3 +
+            DctCoef32x32[15 * 32 + 4] * odd4 + DctCoef32x32[15 * 32 + 5] * odd5 + DctCoef32x32[15 * 32 + 6] * odd6 + DctCoef32x32[15 * 32 + 7] * odd7 +
+            DctCoef32x32[15 * 32 + 8] * odd8 + DctCoef32x32[15 * 32 + 9] * odd9 + DctCoef32x32[15 * 32 + 10] * odd10 + DctCoef32x32[15 * 32 + 11] * odd11 +
+            DctCoef32x32[15 * 32 + 12] * odd12 + DctCoef32x32[15 * 32 + 13] * odd13 + DctCoef32x32[15 * 32 + 14] * odd14 + DctCoef32x32[15 * 32 + 15] * odd15 +
+            offset) >> shift);
+        transformCoefficients[17 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[17 * 32 + 0] * odd0 + DctCoef32x32[17 * 32 + 1] * odd1 + DctCoef32x32[17 * 32 + 2] * odd2 + DctCoef32x32[17 * 32 + 3] * odd3 +
+            DctCoef32x32[17 * 32 + 4] * odd4 + DctCoef32x32[17 * 32 + 5] * odd5 + DctCoef32x32[17 * 32 + 6] * odd6 + DctCoef32x32[17 * 32 + 7] * odd7 +
+            DctCoef32x32[17 * 32 + 8] * odd8 + DctCoef32x32[17 * 32 + 9] * odd9 + DctCoef32x32[17 * 32 + 10] * odd10 + DctCoef32x32[17 * 32 + 11] * odd11 +
+            DctCoef32x32[17 * 32 + 12] * odd12 + DctCoef32x32[17 * 32 + 13] * odd13 + DctCoef32x32[17 * 32 + 14] * odd14 + DctCoef32x32[17 * 32 + 15] * odd15 +
+            offset) >> shift);
+        transformCoefficients[19 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[19 * 32 + 0] * odd0 + DctCoef32x32[19 * 32 + 1] * odd1 + DctCoef32x32[19 * 32 + 2] * odd2 + DctCoef32x32[19 * 32 + 3] * odd3 +
+            DctCoef32x32[19 * 32 + 4] * odd4 + DctCoef32x32[19 * 32 + 5] * odd5 + DctCoef32x32[19 * 32 + 6] * odd6 + DctCoef32x32[19 * 32 + 7] * odd7 +
+            DctCoef32x32[19 * 32 + 8] * odd8 + DctCoef32x32[19 * 32 + 9] * odd9 + DctCoef32x32[19 * 32 + 10] * odd10 + DctCoef32x32[19 * 32 + 11] * odd11 +
+            DctCoef32x32[19 * 32 + 12] * odd12 + DctCoef32x32[19 * 32 + 13] * odd13 + DctCoef32x32[19 * 32 + 14] * odd14 + DctCoef32x32[19 * 32 + 15] * odd15 +
+            offset) >> shift);
+        transformCoefficients[21 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[21 * 32 + 0] * odd0 + DctCoef32x32[21 * 32 + 1] * odd1 + DctCoef32x32[21 * 32 + 2] * odd2 + DctCoef32x32[21 * 32 + 3] * odd3 +
+            DctCoef32x32[21 * 32 + 4] * odd4 + DctCoef32x32[21 * 32 + 5] * odd5 + DctCoef32x32[21 * 32 + 6] * odd6 + DctCoef32x32[21 * 32 + 7] * odd7 +
+            DctCoef32x32[21 * 32 + 8] * odd8 + DctCoef32x32[21 * 32 + 9] * odd9 + DctCoef32x32[21 * 32 + 10] * odd10 + DctCoef32x32[21 * 32 + 11] * odd11 +
+            DctCoef32x32[21 * 32 + 12] * odd12 + DctCoef32x32[21 * 32 + 13] * odd13 + DctCoef32x32[21 * 32 + 14] * odd14 + DctCoef32x32[21 * 32 + 15] * odd15 +
+            offset) >> shift);
+        transformCoefficients[23 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[23 * 32 + 0] * odd0 + DctCoef32x32[23 * 32 + 1] * odd1 + DctCoef32x32[23 * 32 + 2] * odd2 + DctCoef32x32[23 * 32 + 3] * odd3 +
+            DctCoef32x32[23 * 32 + 4] * odd4 + DctCoef32x32[23 * 32 + 5] * odd5 + DctCoef32x32[23 * 32 + 6] * odd6 + DctCoef32x32[23 * 32 + 7] * odd7 +
+            DctCoef32x32[23 * 32 + 8] * odd8 + DctCoef32x32[23 * 32 + 9] * odd9 + DctCoef32x32[23 * 32 + 10] * odd10 + DctCoef32x32[23 * 32 + 11] * odd11 +
+            DctCoef32x32[23 * 32 + 12] * odd12 + DctCoef32x32[23 * 32 + 13] * odd13 + DctCoef32x32[23 * 32 + 14] * odd14 + DctCoef32x32[23 * 32 + 15] * odd15 +
+            offset) >> shift);
+        transformCoefficients[25 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[25 * 32 + 0] * odd0 + DctCoef32x32[25 * 32 + 1] * odd1 + DctCoef32x32[25 * 32 + 2] * odd2 + DctCoef32x32[25 * 32 + 3] * odd3 +
+            DctCoef32x32[25 * 32 + 4] * odd4 + DctCoef32x32[25 * 32 + 5] * odd5 + DctCoef32x32[25 * 32 + 6] * odd6 + DctCoef32x32[25 * 32 + 7] * odd7 +
+            DctCoef32x32[25 * 32 + 8] * odd8 + DctCoef32x32[25 * 32 + 9] * odd9 + DctCoef32x32[25 * 32 + 10] * odd10 + DctCoef32x32[25 * 32 + 11] * odd11 +
+            DctCoef32x32[25 * 32 + 12] * odd12 + DctCoef32x32[25 * 32 + 13] * odd13 + DctCoef32x32[25 * 32 + 14] * odd14 + DctCoef32x32[25 * 32 + 15] * odd15 +
+            offset) >> shift);
+        transformCoefficients[27 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[27 * 32 + 0] * odd0 + DctCoef32x32[27 * 32 + 1] * odd1 + DctCoef32x32[27 * 32 + 2] * odd2 + DctCoef32x32[27 * 32 + 3] * odd3 +
+            DctCoef32x32[27 * 32 + 4] * odd4 + DctCoef32x32[27 * 32 + 5] * odd5 + DctCoef32x32[27 * 32 + 6] * odd6 + DctCoef32x32[27 * 32 + 7] * odd7 +
+            DctCoef32x32[27 * 32 + 8] * odd8 + DctCoef32x32[27 * 32 + 9] * odd9 + DctCoef32x32[27 * 32 + 10] * odd10 + DctCoef32x32[27 * 32 + 11] * odd11 +
+            DctCoef32x32[27 * 32 + 12] * odd12 + DctCoef32x32[27 * 32 + 13] * odd13 + DctCoef32x32[27 * 32 + 14] * odd14 + DctCoef32x32[27 * 32 + 15] * odd15 +
+            offset) >> shift);
+        transformCoefficients[29 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[29 * 32 + 0] * odd0 + DctCoef32x32[29 * 32 + 1] * odd1 + DctCoef32x32[29 * 32 + 2] * odd2 + DctCoef32x32[29 * 32 + 3] * odd3 +
+            DctCoef32x32[29 * 32 + 4] * odd4 + DctCoef32x32[29 * 32 + 5] * odd5 + DctCoef32x32[29 * 32 + 6] * odd6 + DctCoef32x32[29 * 32 + 7] * odd7 +
+            DctCoef32x32[29 * 32 + 8] * odd8 + DctCoef32x32[29 * 32 + 9] * odd9 + DctCoef32x32[29 * 32 + 10] * odd10 + DctCoef32x32[29 * 32 + 11] * odd11 +
+            DctCoef32x32[29 * 32 + 12] * odd12 + DctCoef32x32[29 * 32 + 13] * odd13 + DctCoef32x32[29 * 32 + 14] * odd14 + DctCoef32x32[29 * 32 + 15] * odd15 +
+            offset) >> shift);
+        transformCoefficients[31 * dstStride + rowIndex] = (EB_S16)((DctCoef32x32[31 * 32 + 0] * odd0 + DctCoef32x32[31 * 32 + 1] * odd1 + DctCoef32x32[31 * 32 + 2] * odd2 + DctCoef32x32[31 * 32 + 3] * odd3 +
+            DctCoef32x32[31 * 32 + 4] * odd4 + DctCoef32x32[31 * 32 + 5] * odd5 + DctCoef32x32[31 * 32 + 6] * odd6 + DctCoef32x32[31 * 32 + 7] * odd7 +
+            DctCoef32x32[31 * 32 + 8] * odd8 + DctCoef32x32[31 * 32 + 9] * odd9 + DctCoef32x32[31 * 32 + 10] * odd10 + DctCoef32x32[31 * 32 + 11] * odd11 +
+            DctCoef32x32[31 * 32 + 12] * odd12 + DctCoef32x32[31 * 32 + 13] * odd13 + DctCoef32x32[31 * 32 + 14] * odd14 + DctCoef32x32[31 * 32 + 15] * odd15 +
+            offset) >> shift);
+    }
 }
 
 /*********************************************************************
@@ -1632,35 +1632,35 @@ void Transform32x32(
 }
 
 void Transform32x32Estimate(
-	EB_S16                  *residual,
-	const EB_U32             srcStride,
-	EB_S16                  *transformCoefficients,
-	const EB_U32             dstStride,
-	EB_S16                  *transformInnerArrayPtr,
-	EB_U32                   bitIncrement)
+    EB_S16                  *residual,
+    const EB_U32             srcStride,
+    EB_S16                  *transformCoefficients,
+    const EB_U32             dstStride,
+    EB_S16                  *transformInnerArrayPtr,
+    EB_U32                   bitIncrement)
 {
 
-	const EB_U32 shift1st = 6 + bitIncrement; // 2;//log2(trasnform size)-1+TRANS_BIT_INCREMENT
-	const EB_U32 shift2nd = 9;                     // log2(trasnform size) + 6
+    const EB_U32 shift1st = 6 + bitIncrement; // 2;//log2(trasnform size)-1+TRANS_BIT_INCREMENT
+    const EB_U32 shift2nd = 9;                     // log2(trasnform size) + 6
 
 
-	const EB_U32 transformInnerArrayStride = 32;
+    const EB_U32 transformInnerArrayStride = 32;
 
-	PartialButterfly32Estimate(
-		residual,
-		transformInnerArrayPtr,
-		srcStride,
-		transformInnerArrayStride,
-		shift1st);
+    PartialButterfly32Estimate(
+        residual,
+        transformInnerArrayPtr,
+        srcStride,
+        transformInnerArrayStride,
+        shift1st);
 
-	PartialButterfly32Estimate(
-		transformInnerArrayPtr,
-		transformCoefficients,
-		transformInnerArrayStride,
-		dstStride,
-		shift2nd);
+    PartialButterfly32Estimate(
+        transformInnerArrayPtr,
+        transformCoefficients,
+        transformInnerArrayStride,
+        dstStride,
+        shift2nd);
 
-	return;
+    return;
 }
 
 /*********************************************************************

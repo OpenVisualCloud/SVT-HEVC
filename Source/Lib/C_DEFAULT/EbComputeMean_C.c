@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -79,7 +79,7 @@ EB_U64 ComputeSubMeanOfSquaredValues(
     EB_U64 blockMean = 0;
     EB_U16 skip = 0;
 
-    
+
     for (verticalIndex = 0; skip < inputAreaHeight; skip =verticalIndex + verticalIndex) {
         for (horizontalIndex = 0; horizontalIndex < inputAreaWidth; horizontalIndex++) {
 

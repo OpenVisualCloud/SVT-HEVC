@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -15,27 +15,27 @@ extern EB_ALIGN(16) const EB_S16 IntraPredictionConst_SSE2[344];
 /**************************************************
 * Assembly Declarations
 **************************************************/
-extern void PictureCopyKernel_SSE2(EB_BYTE src, EB_U32 srcStride, EB_BYTE dst, EB_U32 dstStride, EB_U32 areaWidth, EB_U32 areaHeight); 
+extern void PictureCopyKernel_SSE2(EB_BYTE src, EB_U32 srcStride, EB_BYTE dst, EB_U32 dstStride, EB_U32 areaWidth, EB_U32 areaHeight);
 void PictureAverageKernel_SSE2(EB_BYTE src0, EB_U32 src0Stride, EB_BYTE src1, EB_U32 src1Stride, EB_BYTE dst, EB_U32 dstStride, EB_U32 areaWidth, EB_U32 areaHeight);
 void PictureAverageKernel_SSE2_INTRIN(EB_BYTE src0, EB_U32 src0Stride, EB_BYTE src1, EB_U32 src1Stride, EB_BYTE dst, EB_U32 dstStride, EB_U32 areaWidth, EB_U32 areaHeight);
 void PictureAverageKernel1Line_SSE2_INTRIN(
-	EB_BYTE                  src0,
-	EB_BYTE                  src1,
-	EB_BYTE                  dst,
-	EB_U32                   areaWidth);
+    EB_BYTE                  src0,
+    EB_BYTE                  src1,
+    EB_BYTE                  dst,
+    EB_U32                   areaWidth);
 
 
 extern void BiPredClipping16bit_SSE2_INTRIN(EB_U32 puWidth, EB_U32 puHeight, EB_S16 *list0Src, EB_S16 *list1Src, EB_U16 *dst, EB_U32 dstStride);
 
 void BiPredClippingOnTheFly16bit_SSE2(
-	EB_U16    *list0Src,
-	EB_U32     list0SrcStride,
-	EB_U16    *list1Src,
-	EB_U32     list1SrcStride,
-	EB_U16    *dst,
-	EB_U32     dstStride,
-	EB_U32     puWidth,
-	EB_U32     puHeight);
+    EB_U16    *list0Src,
+    EB_U32     list0SrcStride,
+    EB_U16    *list1Src,
+    EB_U32     list1SrcStride,
+    EB_U16    *dst,
+    EB_U32     dstStride,
+    EB_U32     puWidth,
+    EB_U32     puHeight);
 
 // 16Bit
 extern void LumaInterpolationCopy16bit_SSE2(EB_U16* refPic, EB_U32 srcStride, EB_U16* dst, EB_U32 dstStride, EB_U32 puWidth, EB_U32 puHeight, EB_S16 *firstPassIFDst);

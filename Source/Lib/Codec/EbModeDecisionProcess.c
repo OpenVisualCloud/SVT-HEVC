@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -47,7 +47,7 @@ EB_ERRORTYPE ModeDecisionContextCtor(
     EB_MALLOC(ModeDecisionCandidate_t*, contextPtr->fastCandidateArray, sizeof(ModeDecisionCandidate_t) * MODE_DECISION_CANDIDATE_MAX_COUNT, EB_N_PTR);
 
     EB_MALLOC(ModeDecisionCandidate_t**, contextPtr->fastCandidatePtrArray, sizeof(ModeDecisionCandidate_t*) * MODE_DECISION_CANDIDATE_MAX_COUNT, EB_N_PTR);
-    
+
     for(candidateIndex = 0; candidateIndex < MODE_DECISION_CANDIDATE_MAX_COUNT; ++candidateIndex) {
         contextPtr->fastCandidatePtrArray[candidateIndex] = &contextPtr->fastCandidateArray[candidateIndex];
         contextPtr->fastCandidatePtrArray[candidateIndex]->mdRateEstimationPtr  = contextPtr->mdRateEstimationPtr;
@@ -56,7 +56,7 @@ EB_ERRORTYPE ModeDecisionContextCtor(
     // Transform and Quantization Buffers
     EB_MALLOC(EbTransQuantBuffers_t*, contextPtr->transQuantBuffersPtr, sizeof(EbTransQuantBuffers_t), EB_N_PTR);
 
-	// Cabac cost
+    // Cabac cost
     EB_MALLOC(CabacCost_t*, contextPtr->CabacCost, sizeof(CabacCost_t), EB_N_PTR);
 
     return_error = EbTransQuantBuffersCtor(
@@ -105,15 +105,15 @@ EB_ERRORTYPE ModeDecisionContextCtor(
     {
         EbPictureBufferDescInitData_t initData;
 
-		initData.bufferEnableMask = PICTURE_BUFFER_DESC_LUMA_MASK;
+        initData.bufferEnableMask = PICTURE_BUFFER_DESC_LUMA_MASK;
         initData.maxWidth          = MAX_LCU_SIZE;
         initData.maxHeight         = MAX_LCU_SIZE;
         initData.bitDepth          = EB_8BIT;
         initData.colorFormat       = EB_YUV420;
-		initData.leftPadding	   = 0;
-		initData.rightPadding      = 0;
-		initData.topPadding        = 0;
-		initData.botPadding        = 0;
+        initData.leftPadding       = 0;
+        initData.rightPadding      = 0;
+        initData.topPadding        = 0;
+        initData.botPadding        = 0;
         initData.splitMode         = EB_FALSE;
 
         return_error = EbPictureBufferDescCtor(
@@ -149,10 +149,10 @@ EB_ERRORTYPE ModeDecisionContextCtor(
         initData.maxHeight         = MAX_LCU_SIZE;
         initData.bitDepth          = EB_8BIT;
         initData.colorFormat       = EB_YUV420;
-		initData.leftPadding	   = 0;
-		initData.rightPadding      = 0;
-		initData.topPadding        = 0;
-		initData.botPadding        = 0;
+        initData.leftPadding       = 0;
+        initData.rightPadding      = 0;
+        initData.topPadding        = 0;
+        initData.botPadding        = 0;
         initData.splitMode         = EB_FALSE;
 
         return_error = EbPictureBufferDescCtor(
@@ -199,30 +199,30 @@ void ResetModeDecisionNeighborArrays(PictureControlSet_t *pictureControlSetPtr)
 
 void ResetMdRefinmentNeighborArrays(PictureControlSet_t *pictureControlSetPtr)
 {
-	NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementIntraLumaModeNeighborArray);
-	NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementModeTypeNeighborArray);
+    NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementIntraLumaModeNeighborArray);
+    NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementModeTypeNeighborArray);
     NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementLumaReconNeighborArray);
 
-	return;
+    return;
 }
 
 
 extern void lambdaAssignLowDelay(
     PictureParentControlSet_t *pictureControlSetPtr,
-	EB_U32                    *fastLambda,
-	EB_U32                    *fullLambda,
-	EB_U32                    *fastChromaLambda,
-	EB_U32                    *fullChromaLambda,
-	EB_U32                    *fullChromaLambdaSao,
-	EB_U8                      qp,
-	EB_U8                      chromaQp)
+    EB_U32                    *fastLambda,
+    EB_U32                    *fullLambda,
+    EB_U32                    *fastChromaLambda,
+    EB_U32                    *fullChromaLambda,
+    EB_U32                    *fullChromaLambdaSao,
+    EB_U8                      qp,
+    EB_U8                      chromaQp)
 
 {
 
     if (pictureControlSetPtr->temporalLayerIndex == 0) {
 
-		*fastLambda              = lambdaModeDecisionLdSad[qp];
-		*fastChromaLambda        = lambdaModeDecisionLdSad[qp];
+        *fastLambda              = lambdaModeDecisionLdSad[qp];
+        *fastChromaLambda        = lambdaModeDecisionLdSad[qp];
         *fullLambda              = lambdaModeDecisionLdSse[qp];
         *fullChromaLambda        = lambdaModeDecisionLdSse[qp];
         *fullChromaLambdaSao     = lambdaModeDecisionLdSse[chromaQp];
@@ -230,8 +230,8 @@ extern void lambdaAssignLowDelay(
     }
     else { // Hierarchical postions 1, 2, 3, 4, 5
 
-		*fastLambda				 = lambdaModeDecisionLdSadQpScaling[qp];
-		*fastChromaLambda		 = lambdaModeDecisionLdSadQpScaling[qp];
+        *fastLambda                 = lambdaModeDecisionLdSadQpScaling[qp];
+        *fastChromaLambda         = lambdaModeDecisionLdSadQpScaling[qp];
         *fullLambda              = lambdaModeDecisionLdSseQpScaling[qp];
         *fullChromaLambda        = lambdaModeDecisionLdSseQpScaling[qp];
         *fullChromaLambdaSao     = lambdaModeDecisionLdSseQpScaling[chromaQp];
@@ -241,13 +241,13 @@ extern void lambdaAssignLowDelay(
 
 void lambdaAssignRandomAccess(
     PictureParentControlSet_t *pictureControlSetPtr,
-	EB_U32                    *fastLambda,
-	EB_U32                    *fullLambda,
-	EB_U32                    *fastChromaLambda,
-	EB_U32                    *fullChromaLambda,
-	EB_U32                    *fullChromaLambdaSao,
-	EB_U8                      qp,
-	EB_U8                      chromaQp)
+    EB_U32                    *fastLambda,
+    EB_U32                    *fullLambda,
+    EB_U32                    *fastChromaLambda,
+    EB_U32                    *fullChromaLambda,
+    EB_U32                    *fullChromaLambdaSao,
+    EB_U8                      qp,
+    EB_U8                      chromaQp)
 
 {
     if (pictureControlSetPtr->temporalLayerIndex == 0) {
@@ -280,20 +280,20 @@ void lambdaAssignRandomAccess(
 
 void lambdaAssignISlice(
     PictureParentControlSet_t *pictureControlSetPtr,
-	EB_U32                    *fastLambda,
-	EB_U32                    *fullLambda,
-	EB_U32                    *fastChromaLambda,
-	EB_U32                    *fullChromaLambda,
-	EB_U32                    *fullChromaLambdaSao,
-	EB_U8                      qp,
-	EB_U8                      chromaQp)
+    EB_U32                    *fastLambda,
+    EB_U32                    *fullLambda,
+    EB_U32                    *fastChromaLambda,
+    EB_U32                    *fullChromaLambda,
+    EB_U32                    *fullChromaLambdaSao,
+    EB_U8                      qp,
+    EB_U8                      chromaQp)
 
 {
 
     if (pictureControlSetPtr->temporalLayerIndex == 0) {
 
-		*fastLambda              = lambdaModeDecisionISliceSad[qp];
-		*fastChromaLambda        = lambdaModeDecisionISliceSad[qp];
+        *fastLambda              = lambdaModeDecisionISliceSad[qp];
+        *fastChromaLambda        = lambdaModeDecisionISliceSad[qp];
         *fullLambda              = lambdaModeDecisionISliceSse[qp];
         *fullChromaLambda        = lambdaModeDecisionISliceSse[qp];
         *fullChromaLambdaSao     = lambdaModeDecisionISliceSse[chromaQp];
@@ -305,10 +305,10 @@ void lambdaAssignISlice(
 
 }
 const EB_LAMBDA_ASSIGN_FUNC lambdaAssignmentFunctionTable[4]  = {
-    lambdaAssignLowDelay,		// low delay P
-    lambdaAssignLowDelay,		// low delay B
-    lambdaAssignRandomAccess,	// Random Access
-    lambdaAssignISlice			// I_SLICE
+    lambdaAssignLowDelay,        // low delay P
+    lambdaAssignLowDelay,        // low delay B
+    lambdaAssignRandomAccess,    // Random Access
+    lambdaAssignISlice            // I_SLICE
 };
 
 void ProductResetModeDecision(
@@ -317,112 +317,112 @@ void ProductResetModeDecision(
     SequenceControlSet_t    *sequenceControlSetPtr,
     EB_U32                   segmentIndex)
 {
-	EB_PICTURE                     sliceType;
-	EB_U32                       lcuRowIndex;
-	MdRateEstimationContext_t   *mdRateEstimationArray;
-	
-	// SAO
-	pictureControlSetPtr->saoFlag[0] = EB_TRUE;
-	pictureControlSetPtr->saoFlag[1] = EB_TRUE;
+    EB_PICTURE                     sliceType;
+    EB_U32                       lcuRowIndex;
+    MdRateEstimationContext_t   *mdRateEstimationArray;
 
-	// QP
-	contextPtr->qp = pictureControlSetPtr->pictureQp;
-	// Asuming cb and cr offset to be the same for chroma QP in both slice and pps for lambda computation
+    // SAO
+    pictureControlSetPtr->saoFlag[0] = EB_TRUE;
+    pictureControlSetPtr->saoFlag[1] = EB_TRUE;
 
-	EB_U8 qpScaled = CLIP3(MIN_QP_VALUE, MAX_CHROMA_MAP_QP_VALUE, (EB_S32)(contextPtr->qp + pictureControlSetPtr->cbQpOffset + pictureControlSetPtr->sliceCbQpOffset));
-	contextPtr->chromaQp = MapChromaQp(qpScaled);
+    // QP
+    contextPtr->qp = pictureControlSetPtr->pictureQp;
+    // Asuming cb and cr offset to be the same for chroma QP in both slice and pps for lambda computation
 
-	if (pictureControlSetPtr->sliceType == EB_I_PICTURE && pictureControlSetPtr->temporalId == 0){
+    EB_U8 qpScaled = CLIP3(MIN_QP_VALUE, MAX_CHROMA_MAP_QP_VALUE, (EB_S32)(contextPtr->qp + pictureControlSetPtr->cbQpOffset + pictureControlSetPtr->sliceCbQpOffset));
+    contextPtr->chromaQp = MapChromaQp(qpScaled);
 
-		(*lambdaAssignmentFunctionTable[3])(
+    if (pictureControlSetPtr->sliceType == EB_I_PICTURE && pictureControlSetPtr->temporalId == 0){
+
+        (*lambdaAssignmentFunctionTable[3])(
             pictureControlSetPtr->ParentPcsPtr,
-			&contextPtr->fastLambda,
-			&contextPtr->fullLambda,
-			&contextPtr->fastChromaLambda,
-			&contextPtr->fullChromaLambda,
-			&contextPtr->fullChromaLambdaSao,
-			contextPtr->qp,
-			contextPtr->chromaQp);
-	}
-	else{
-		(*lambdaAssignmentFunctionTable[sequenceControlSetPtr->staticConfig.predStructure])(
+            &contextPtr->fastLambda,
+            &contextPtr->fullLambda,
+            &contextPtr->fastChromaLambda,
+            &contextPtr->fullChromaLambda,
+            &contextPtr->fullChromaLambdaSao,
+            contextPtr->qp,
+            contextPtr->chromaQp);
+    }
+    else{
+        (*lambdaAssignmentFunctionTable[sequenceControlSetPtr->staticConfig.predStructure])(
             pictureControlSetPtr->ParentPcsPtr,
-			&contextPtr->fastLambda,
-			&contextPtr->fullLambda,
-			&contextPtr->fastChromaLambda,
-			&contextPtr->fullChromaLambda,
-			&contextPtr->fullChromaLambdaSao,
-			contextPtr->qp,
-			contextPtr->chromaQp);
-	}
-	// Configure the number of candidate buffers to search at each depth
+            &contextPtr->fastLambda,
+            &contextPtr->fullLambda,
+            &contextPtr->fastChromaLambda,
+            &contextPtr->fullChromaLambda,
+            &contextPtr->fullChromaLambdaSao,
+            contextPtr->qp,
+            contextPtr->chromaQp);
+    }
+    // Configure the number of candidate buffers to search at each depth
 
     // 64x64 CU
     contextPtr->bufferDepthIndexStart[0] = 0;
-	contextPtr->bufferDepthIndexWidth[0] = 5; // 4 NFL + 1 for temporary data
+    contextPtr->bufferDepthIndexWidth[0] = 5; // 4 NFL + 1 for temporary data
 
     // 32x32 CU
     contextPtr->bufferDepthIndexStart[1] = contextPtr->bufferDepthIndexStart[0] + contextPtr->bufferDepthIndexWidth[0];
-	contextPtr->bufferDepthIndexWidth[1] = 8; // 4 NFL + 3 MPM + 1 for temporary data
+    contextPtr->bufferDepthIndexWidth[1] = 8; // 4 NFL + 3 MPM + 1 for temporary data
 
     // 16x16 CU
     contextPtr->bufferDepthIndexStart[2] = contextPtr->bufferDepthIndexStart[1] + contextPtr->bufferDepthIndexWidth[1];
-	contextPtr->bufferDepthIndexWidth[2] = 8; // 4 NFL + 3 MPM + 1 for temporary data
+    contextPtr->bufferDepthIndexWidth[2] = 8; // 4 NFL + 3 MPM + 1 for temporary data
 
     // 8x8 CU
     contextPtr->bufferDepthIndexStart[3] = contextPtr->bufferDepthIndexStart[2] + contextPtr->bufferDepthIndexWidth[2];
-	contextPtr->bufferDepthIndexWidth[3] = 8; // 4 NFL + 3 MPM + 1 for temporary data
+    contextPtr->bufferDepthIndexWidth[3] = 8; // 4 NFL + 3 MPM + 1 for temporary data
 
     // 4x4 CU
     contextPtr->bufferDepthIndexStart[4] = contextPtr->bufferDepthIndexStart[3] + contextPtr->bufferDepthIndexWidth[3];
-	contextPtr->bufferDepthIndexWidth[4] = 5; // 4 NFL + 1 for temporary data
+    contextPtr->bufferDepthIndexWidth[4] = 5; // 4 NFL + 1 for temporary data
 
-	// Slice Type
-	sliceType =
-		(pictureControlSetPtr->ParentPcsPtr->idrFlag == EB_TRUE) ? EB_I_PICTURE :
-		pictureControlSetPtr->sliceType;
+    // Slice Type
+    sliceType =
+        (pictureControlSetPtr->ParentPcsPtr->idrFlag == EB_TRUE) ? EB_I_PICTURE :
+        pictureControlSetPtr->sliceType;
 
-	// Increment the MD Rate Estimation array pointer to point to the right address based on the QP and slice type
+    // Increment the MD Rate Estimation array pointer to point to the right address based on the QP and slice type
 
-	/* Note(CHKN) : Rate estimation will use FrameQP even when Qp modulation is ON */
+    /* Note(CHKN) : Rate estimation will use FrameQP even when Qp modulation is ON */
 
-	mdRateEstimationArray = (MdRateEstimationContext_t*)sequenceControlSetPtr->encodeContextPtr->mdRateEstimationArray;
-	mdRateEstimationArray += sliceType * TOTAL_NUMBER_OF_QP_VALUES + contextPtr->qp;
+    mdRateEstimationArray = (MdRateEstimationContext_t*)sequenceControlSetPtr->encodeContextPtr->mdRateEstimationArray;
+    mdRateEstimationArray += sliceType * TOTAL_NUMBER_OF_QP_VALUES + contextPtr->qp;
 
-	// Reset MD rate Estimation table to initial values by copying from mdRateEstimationArray
-	contextPtr->mdRateEstimationPtr = mdRateEstimationArray;
+    // Reset MD rate Estimation table to initial values by copying from mdRateEstimationArray
+    contextPtr->mdRateEstimationPtr = mdRateEstimationArray;
 
-	EB_U32  candidateIndex;
-	for (candidateIndex = 0; candidateIndex < MODE_DECISION_CANDIDATE_MAX_COUNT; ++candidateIndex) {
-		contextPtr->fastCandidatePtrArray[candidateIndex]->mdRateEstimationPtr = mdRateEstimationArray;
-	}
+    EB_U32  candidateIndex;
+    for (candidateIndex = 0; candidateIndex < MODE_DECISION_CANDIDATE_MAX_COUNT; ++candidateIndex) {
+        contextPtr->fastCandidatePtrArray[candidateIndex]->mdRateEstimationPtr = mdRateEstimationArray;
+    }
 
-	// TMVP Map Writer Pointer
-	if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
-		contextPtr->referenceObjectWritePtr = (EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr;
-	else
-		contextPtr->referenceObjectWritePtr = (EbReferenceObject_t*)EB_NULL;
+    // TMVP Map Writer Pointer
+    if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
+        contextPtr->referenceObjectWritePtr = (EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr;
+    else
+        contextPtr->referenceObjectWritePtr = (EbReferenceObject_t*)EB_NULL;
 
-	// Reset CABAC Contexts
-	contextPtr->coeffEstEntropyCoderPtr = pictureControlSetPtr->coeffEstEntropyCoderPtr;
+    // Reset CABAC Contexts
+    contextPtr->coeffEstEntropyCoderPtr = pictureControlSetPtr->coeffEstEntropyCoderPtr;
 
-	// Reset Neighbor Arrays at start of new Segment / Picture
-	if (segmentIndex == 0) {
-		ResetModeDecisionNeighborArrays(pictureControlSetPtr);
+    // Reset Neighbor Arrays at start of new Segment / Picture
+    if (segmentIndex == 0) {
+        ResetModeDecisionNeighborArrays(pictureControlSetPtr);
         ResetMdRefinmentNeighborArrays(pictureControlSetPtr);
 
         for(lcuRowIndex = 0; lcuRowIndex< ((sequenceControlSetPtr->lumaHeight + MAX_LCU_SIZE - 1)/MAX_LCU_SIZE); lcuRowIndex++){
-			pictureControlSetPtr->encPrevCodedQp[lcuRowIndex] = (EB_U8)pictureControlSetPtr->pictureQp;
-			pictureControlSetPtr->encPrevQuantGroupCodedQp[lcuRowIndex] = (EB_U8)pictureControlSetPtr->pictureQp;
-		}
-	}
+            pictureControlSetPtr->encPrevCodedQp[lcuRowIndex] = (EB_U8)pictureControlSetPtr->pictureQp;
+            pictureControlSetPtr->encPrevQuantGroupCodedQp[lcuRowIndex] = (EB_U8)pictureControlSetPtr->pictureQp;
+        }
+    }
 
-	return;
+    return;
 }
 
 void ConfigureChroma(
-    PictureControlSet_t			   *pictureControlSetPtr,
-    ModeDecisionContext_t		   *contextPtr,
+    PictureControlSet_t               *pictureControlSetPtr,
+    ModeDecisionContext_t           *contextPtr,
     LargestCodingUnit_t            *lcuPtr) {
 
     EB_U32     lcuAddr = lcuPtr->index;
@@ -436,7 +436,7 @@ void ConfigureChroma(
     EB_BOOL chromaCond2 = !lcuStatPtr->cuStatArray[0].highLuma;
     EB_BOOL chromaCond3 = ((pictureControlSetPtr->ParentPcsPtr->grassPercentageInPicture > 60) || (lcuPtr->auraStatus == AURA_STATUS_1) || (pictureControlSetPtr->ParentPcsPtr->isPan));
 
-    // 0: Full Search Chroma for All 
+    // 0: Full Search Chroma for All
     // 1: Best Search Chroma for All LCUs; Chroma OFF if I_SLICE, Chroma for only MV_Merge if P/B_SLICE
     // 2: Full vs. Best Swicth Method 0: chromaCond0 || chromaCond1 || chromaCond2
     // 3: Full vs. Best Swicth Method 1: chromaCond0 || chromaCond1
@@ -486,8 +486,8 @@ void ConfigureChroma(
 
 void DeriveIntraInterBiasFlag(
     SequenceControlSet_t           *sequenceControlSetPtr,
-    PictureControlSet_t			   *pictureControlSetPtr,
-    ModeDecisionContext_t		   *contextPtr,
+    PictureControlSet_t               *pictureControlSetPtr,
+    ModeDecisionContext_t           *contextPtr,
     LargestCodingUnit_t            *lcuPtr) {
 
 
@@ -532,8 +532,8 @@ void DeriveIntraInterBiasFlag(
 }
 
 void ProductConfigurePicLcuMdDetectors(
-    PictureControlSet_t		*pictureControlSetPtr,
-    ModeDecisionContext_t	*contextPtr,
+    PictureControlSet_t        *pictureControlSetPtr,
+    ModeDecisionContext_t    *contextPtr,
     LargestCodingUnit_t     *lcuPtr)
 
 {
@@ -584,7 +584,7 @@ void ProductConfigurePicLcuMdDetectors(
 
 
 void ConfigureMpm(
-    ModeDecisionContext_t	*contextPtr)
+    ModeDecisionContext_t    *contextPtr)
 {
     if (contextPtr->restrictIntraGlobalMotion) {
         contextPtr->mpmSearch = EB_FALSE;
@@ -615,9 +615,9 @@ void DeriveIntra4x4SearchMethod(
     if (pictureControlSetPtr->ParentPcsPtr->lcuFlatNoiseArray[lcuPtr->index] == EB_FALSE) {
 
         // Set INTRA4x4 Search Level
-        // Level    Settings 
-        // 0        INLINE if not BDP, refinment otherwise 
-        // 1        REFINMENT   
+        // Level    Settings
+        // 0        INLINE if not BDP, refinment otherwise
+        // 1        REFINMENT
         // 2        OFF
         if (contextPtr->intra4x4Level == 0) {
             if ((pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_FULL85_DEPTH_MODE ||
@@ -653,12 +653,12 @@ void DeriveDepthRefinment(
 
     EB_U32      lcuAddr = lcuPtr->index;
     LcuStat_t  *lcuStatPtr = &(pictureControlSetPtr->ParentPcsPtr->lcuStatArray[lcuAddr]);
-             
+
     EB_U8       stationaryEdgeOverTimeFlag = lcuStatPtr->stationaryEdgeOverTimeFlag;
 
     contextPtr->depthRefinment = 0;
 
-    // S-LOGO                                       
+    // S-LOGO
     if (stationaryEdgeOverTimeFlag > 0) {
         if (lcuStatPtr->lowDistLogo)
             contextPtr->depthRefinment = 1;
@@ -700,7 +700,7 @@ void ModeDecisionConfigureLcu(
         pictureControlSetPtr,
         contextPtr,
         lcuPtr);
-   
+
     // Load MPM Settings
     ConfigureMpm(
         contextPtr);
@@ -722,19 +722,19 @@ void ModeDecisionConfigureLcu(
         contextPtr,
         lcuPtr);
 
-    if (sequenceControlSetPtr->staticConfig.rateControlMode == 0 && sequenceControlSetPtr->staticConfig.improveSharpness == 0) { 
-		contextPtr->qp = (EB_U8)pictureQp;
+    if (sequenceControlSetPtr->staticConfig.rateControlMode == 0 && sequenceControlSetPtr->staticConfig.improveSharpness == 0) {
+        contextPtr->qp = (EB_U8)pictureQp;
         lcuPtr->qp = (EB_U8)contextPtr->qp;
     }
     //RC is on
     else {
-		contextPtr->qp = (EB_U8) lcuQp;
+        contextPtr->qp = (EB_U8) lcuQp;
     }
 
-	// Asuming cb and cr offset to be the same for chroma QP in both slice and pps for lambda computation
+    // Asuming cb and cr offset to be the same for chroma QP in both slice and pps for lambda computation
 
-	EB_U8	qpScaled = CLIP3((EB_S8)MIN_QP_VALUE, (EB_S8)MAX_CHROMA_MAP_QP_VALUE, (EB_S8)(contextPtr->qp + pictureControlSetPtr->cbQpOffset + pictureControlSetPtr->sliceCbQpOffset));
-	contextPtr->chromaQp = MapChromaQp(qpScaled);
+    EB_U8    qpScaled = CLIP3((EB_S8)MIN_QP_VALUE, (EB_S8)MAX_CHROMA_MAP_QP_VALUE, (EB_S8)(contextPtr->qp + pictureControlSetPtr->cbQpOffset + pictureControlSetPtr->sliceCbQpOffset));
+    contextPtr->chromaQp = MapChromaQp(qpScaled);
 
     /* Note(CHKN) : when Qp modulation varies QP on a sub-LCU(CU) basis,  Lamda has to change based on Cu->QP , and then this code has to move inside the CU loop in MD */
 
@@ -753,17 +753,17 @@ void ModeDecisionConfigureLcu(
     }
     else{
 
-		// Change lambda QP for 4K 5L and 6L
-		EB_U8 lambdaQp = contextPtr->qp;
+        // Change lambda QP for 4K 5L and 6L
+        EB_U8 lambdaQp = contextPtr->qp;
 
-		(*lambdaAssignmentFunctionTable[sequenceControlSetPtr->staticConfig.predStructure])(
+        (*lambdaAssignmentFunctionTable[sequenceControlSetPtr->staticConfig.predStructure])(
             pictureControlSetPtr->ParentPcsPtr,
             &contextPtr->fastLambda,
             &contextPtr->fullLambda,
             &contextPtr->fastChromaLambda,
             &contextPtr->fullChromaLambda,
             &contextPtr->fullChromaLambdaSao,
-			lambdaQp,
+            lambdaQp,
             contextPtr->chromaQp);
     }
 

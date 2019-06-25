@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -74,8 +74,8 @@ static PredictionStructureConfigEntry_t flatPredStruct[] = {
     {
         0,              // GOP Index 0 - Temporal Layer
         0,              // GOP Index 0 - Decode Order
-        1,				// GOP Index 0 - Ref List 0
-        1				// GOP Index 0 - Ref List 1
+        1,                // GOP Index 0 - Ref List 0
+        1                // GOP Index 0 - Ref List 1
     }
 };
 
@@ -97,15 +97,15 @@ static PredictionStructureConfigEntry_t twoLevelHierarchicalPredStruct[] = {
     {
         0,              // GOP Index 0 - Temporal Layer
         0,              // GOP Index 0 - Decode Order
-        2,				// GOP Index 0 - Ref List 0
-        2				// GOP Index 0 - Ref List 1
+        2,                // GOP Index 0 - Ref List 0
+        2                // GOP Index 0 - Ref List 1
     },
 
     {
         1,              // GOP Index 1 - Temporal Layer
         1,              // GOP Index 1 - Decode Order
-        1,				// GOP Index 1 - Ref List 0
-       -1				// GOP Index 1 - Ref List 1
+        1,                // GOP Index 1 - Ref List 0
+       -1                // GOP Index 1 - Ref List 1
     }
 };
 
@@ -131,29 +131,29 @@ static PredictionStructureConfigEntry_t threeLevelHierarchicalPredStruct[] = {
     {
         0,                  // GOP Index 0 - Temporal Layer
         0,                  // GOP Index 0 - Decode Order
-        4,					// GOP Index 0 - Ref List 0
-        4					// GOP Index 0 - Ref List 1
+        4,                    // GOP Index 0 - Ref List 0
+        4                    // GOP Index 0 - Ref List 1
     },
 
     {
         2,                  // GOP Index 1 - Temporal Layer
         2,                  // GOP Index 1 - Decode Order
-        1,					 // GOP Index 1 - Ref List 0
-       -1					// GOP Index 1 - Ref List 1
+        1,                     // GOP Index 1 - Ref List 0
+       -1                    // GOP Index 1 - Ref List 1
     },
 
     {
         1,                  // GOP Index 2 - Temporal Layer
         1,                  // GOP Index 2 - Decode Order
-        2,					// GOP Index 2 - Ref List 0
-       -2					// GOP Index 2 - Ref List 1
+        2,                    // GOP Index 2 - Ref List 0
+       -2                    // GOP Index 2 - Ref List 1
     },
 
     {
         2,                   // GOP Index 3 - Temporal Layer
         3,                   // GOP Index 3 - Decode Order
-        1,					 // GOP Index 3 - Ref List 0
-       -1					 // GOP Index 3 - Ref List 1
+        1,                     // GOP Index 3 - Ref List 0
+       -1                     // GOP Index 3 - Ref List 1
     }
 };
 
@@ -192,50 +192,50 @@ static PredictionStructureConfigEntry_t fourLevelHierarchicalPredStruct[] = {
     {
         3,                  // GOP Index 1 - Temporal Layer
         3,                  // GOP Index 1 - Decode Order
-        1,					// GOP Index 1 - Ref List 0
-       -1				    // GOP Index 1 - Ref List 1
+        1,                    // GOP Index 1 - Ref List 0
+       -1                    // GOP Index 1 - Ref List 1
     },
 
     {
         2,                  // GOP Index 2 - Temporal Layer
         2,                  // GOP Index 2 - Decode Order
-        2,					 // GOP Index 2 - Ref List 0
-       -2					 // GOP Index 2 - Ref List 1
+        2,                     // GOP Index 2 - Ref List 0
+       -2                     // GOP Index 2 - Ref List 1
     },
 
     {
         3,                  // GOP Index 3 - Temporal Layer
         4,                  // GOP Index 3 - Decode Order
-        1,					// GOP Index 3 - Ref List 0
-       -1					// GOP Index 3 - Ref List 1
+        1,                    // GOP Index 3 - Ref List 0
+       -1                    // GOP Index 3 - Ref List 1
     },
 
     {
         1,                   // GOP Index 4 - Temporal Layer
         1,                   // GOP Index 4 - Decode Order
-        4,					 // GOP Index 4 - Ref List 0
-       -4					 // GOP Index 4 - Ref List 1
+        4,                     // GOP Index 4 - Ref List 0
+       -4                     // GOP Index 4 - Ref List 1
     },
 
     {
         3,                  // GOP Index 5 - Temporal Layer
         6,                  // GOP Index 5 - Decode Order
-        1,					 // GOP Index 5 - Ref List 0
-       -1					// GOP Index 5 - Ref List 1
+        1,                     // GOP Index 5 - Ref List 0
+       -1                    // GOP Index 5 - Ref List 1
     },
 
     {
         2,                  // GOP Index 6 - Temporal Layer
         5,                  // GOP Index 6 - Decode Order
-        2,					// GOP Index 6 - Ref List 0
-       -2					// GOP Index 6 - Ref List 1
+        2,                    // GOP Index 6 - Ref List 0
+       -2                    // GOP Index 6 - Ref List 1
     },
 
     {
         3,                  // GOP Index 7 - Temporal Layer
         7,                  // GOP Index 7 - Decode Order
-        1,				    // GOP Index 7 - Ref List 0
-       -1			        // GOP Index 7 - Ref List 1
+        1,                    // GOP Index 7 - Ref List 0
+       -1                    // GOP Index 7 - Ref List 1
     }
 };
 
@@ -268,113 +268,113 @@ static PredictionStructureConfigEntry_t fiveLevelHierarchicalPredStruct[] = {
     {
         0,                  // GOP Index 0 - Temporal Layer
         0,                  // GOP Index 0 - Decode Order
-        16,					// GOP Index 0 - Ref List 0
-        16			        // GOP Index 0 - Ref List 1
+        16,                    // GOP Index 0 - Ref List 0
+        16                    // GOP Index 0 - Ref List 1
     },
 
     {
         4,                  // GOP Index 1 - Temporal Layer
         4,                  // GOP Index 1 - Decode Order
-        1,					// GOP Index 1 - Ref List 0
-       -1					 // GOP Index 1 - Ref List 1
+        1,                    // GOP Index 1 - Ref List 0
+       -1                     // GOP Index 1 - Ref List 1
     },
 
     {
         3,                  // GOP Index 2 - Temporal Layer
         3,                  // GOP Index 2 - Decode Order
-        2,					// GOP Index 2 - Ref List 0
-       -2				    // GOP Index 2 - Ref List 1
+        2,                    // GOP Index 2 - Ref List 0
+       -2                    // GOP Index 2 - Ref List 1
     },
 
     {
         4,                  // GOP Index 3 - Temporal Layer
         5,                  // GOP Index 3 - Decode Order
-        1,					 // GOP Index 3 - Ref List 0
-       -1				    // GOP Index 3 - Ref List 1
+        1,                     // GOP Index 3 - Ref List 0
+       -1                    // GOP Index 3 - Ref List 1
     },
 
     {
         2,                  // GOP Index 4 - Temporal Layer
         2,                  // GOP Index 4 - Decode Order
-        4,					// GOP Index 4 - Ref List 0
-       -4					// GOP Index 4 - Ref List 1
+        4,                    // GOP Index 4 - Ref List 0
+       -4                    // GOP Index 4 - Ref List 1
     },
 
     {
         4,                  // GOP Index 5 - Temporal Layer
         7,                  // GOP Index 5 - Decode Order
-        1,					// GOP Index 5 - Ref List 0
-       -1					// GOP Index 5 - Ref List 1
+        1,                    // GOP Index 5 - Ref List 0
+       -1                    // GOP Index 5 - Ref List 1
     },
 
     {
         3,                  // GOP Index 6 - Temporal Layer
         6,                  // GOP Index 6 - Decode Order
-        2,					// GOP Index 6 - Ref List 0
-       -2					// GOP Index 6 - Ref List 1
+        2,                    // GOP Index 6 - Ref List 0
+       -2                    // GOP Index 6 - Ref List 1
     },
 
     {
         4,                  // GOP Index 7 - Temporal Layer
         8,                  // GOP Index 7 - Decode Order
-        1,					// GOP Index 7 - Ref List 0
-       -1					 // GOP Index 7 - Ref List 1
+        1,                    // GOP Index 7 - Ref List 0
+       -1                     // GOP Index 7 - Ref List 1
     },
 
     {
         1,                  // GOP Index 8 - Temporal Layer
         1,                  // GOP Index 8 - Decode Order
-        8,					// GOP Index 8 - Ref List 0
-       -8				    // GOP Index 8 - Ref List 1
+        8,                    // GOP Index 8 - Ref List 0
+       -8                    // GOP Index 8 - Ref List 1
     },
 
     {
         4,                  // GOP Index 9 - Temporal Layer
         11,                 // GOP Index 9 - Decode Order
-        1,					 // GOP Index 9 - Ref List 0
-       -1				    // GOP Index 9 - Ref List 1
+        1,                     // GOP Index 9 - Ref List 0
+       -1                    // GOP Index 9 - Ref List 1
     },
 
     {
         3,                  // GOP Index 10 - Temporal Layer
         10,                 // GOP Index 10 - Decode Order
-        2,					// GOP Index 10 - Ref List 0
-       -2				    // GOP Index 10 - Ref List 1
+        2,                    // GOP Index 10 - Ref List 0
+       -2                    // GOP Index 10 - Ref List 1
     },
 
     {
         4,                  // GOP Index 11 - Temporal Layer
         12,                 // GOP Index 11 - Decode Order
-        1,					// GOP Index 11 - Ref List 0
-       -1					 // GOP Index 11 - Ref List 1
+        1,                    // GOP Index 11 - Ref List 0
+       -1                     // GOP Index 11 - Ref List 1
     },
 
     {
         2,                  // GOP Index 12 - Temporal Layer
         9,                  // GOP Index 12 - Decode Order
-        4,					// GOP Index 12 - Ref List 0
-       -4				    // GOP Index 12 - Ref List 1
+        4,                    // GOP Index 12 - Ref List 0
+       -4                    // GOP Index 12 - Ref List 1
     },
 
     {
         4,                  // GOP Index 13 - Temporal Layer
         14,                 // GOP Index 13 - Decode Order
-        1,					 // GOP Index 13 - Ref List 0
-       -1				     // GOP Index 13 - Ref List 1
+        1,                     // GOP Index 13 - Ref List 0
+       -1                     // GOP Index 13 - Ref List 1
     },
 
     {
         3,                  // GOP Index 14 - Temporal Layer
         13,                 // GOP Index 14 - Decode Order
-        2,					 // GOP Index 14 - Ref List 0
-       -2				     // GOP Index 14 - Ref List 1
+        2,                     // GOP Index 14 - Ref List 0
+       -2                     // GOP Index 14 - Ref List 1
     },
 
     {
         4,                  // GOP Index 15 - Temporal Layer
         15,                 // GOP Index 15 - Decode Order
-        1,				    // GOP Index 15 - Ref List 0
-       -1			        // GOP Index 15 - Ref List 1
+        1,                    // GOP Index 15 - Ref List 0
+       -1                    // GOP Index 15 - Ref List 1
     }
 };
 
@@ -410,225 +410,225 @@ static PredictionStructureConfigEntry_t sixLevelHierarchicalPredStruct[] = {
     {
         0,                  // GOP Index 0 - Temporal Layer
         0,                  // GOP Index 0 - Decode Order
-        32,					// GOP Index 0 - Ref List 0
-        32					// GOP Index 0 - Ref List 1
+        32,                    // GOP Index 0 - Ref List 0
+        32                    // GOP Index 0 - Ref List 1
     },
 
     {
         5,                  // GOP Index 1 - Temporal Layer
         5,                  // GOP Index 1 - Decode Order
-        1,					// GOP Index 1 - Ref List 0
-       -1					// GOP Index 1 - Ref List 1
+        1,                    // GOP Index 1 - Ref List 0
+       -1                    // GOP Index 1 - Ref List 1
     },
 
     {
         4,                  // GOP Index 2 - Temporal Layer
         4,                  // GOP Index 2 - Decode Order
-        2,					// GOP Index 2 - Ref List 0
-       -2					// GOP Index 2 - Ref List 1
+        2,                    // GOP Index 2 - Ref List 0
+       -2                    // GOP Index 2 - Ref List 1
     },
 
     {
         5,                  // GOP Index 3 - Temporal Layer
         6,                  // GOP Index 3 - Decode Order
-        1,					// GOP Index 3 - Ref List 0
-       -1					// GOP Index 3 - Ref List 1
+        1,                    // GOP Index 3 - Ref List 0
+       -1                    // GOP Index 3 - Ref List 1
     },
 
     {
         3,                  // GOP Index 4 - Temporal Layer
         3,                  // GOP Index 4 - Decode Order
-        4,					// GOP Index 4 - Ref List 0
-       -4					// GOP Index 4 - Ref List 1
+        4,                    // GOP Index 4 - Ref List 0
+       -4                    // GOP Index 4 - Ref List 1
     },
 
     {
         5,                  // GOP Index 5 - Temporal Layer
         8,                  // GOP Index 5 - Decode Order
-        1,					// GOP Index 5 - Ref List 0
-       -1					// GOP Index 5 - Ref List 1
+        1,                    // GOP Index 5 - Ref List 0
+       -1                    // GOP Index 5 - Ref List 1
     },
 
     {
         4,                  // GOP Index 6 - Temporal Layer
         7,                  // GOP Index 6 - Decode Order
-        2,					// GOP Index 6 - Ref List 0
-       -2					// GOP Index 6 - Ref List 1
+        2,                    // GOP Index 6 - Ref List 0
+       -2                    // GOP Index 6 - Ref List 1
     },
 
     {
         5,                  // GOP Index 7 - Temporal Layer
         9,                  // GOP Index 7 - Decode Order
-        1,					// GOP Index 7 - Ref List 0
-       -1					// GOP Index 7 - Ref List 1
+        1,                    // GOP Index 7 - Ref List 0
+       -1                    // GOP Index 7 - Ref List 1
     },
 
     {
         2,                  // GOP Index 8 - Temporal Layer
         2,                  // GOP Index 8 - Decode Order
-        8,					// GOP Index 8 - Ref List 0
-       -8					// GOP Index 8 - Ref List 1
+        8,                    // GOP Index 8 - Ref List 0
+       -8                    // GOP Index 8 - Ref List 1
     },
 
     {
         5,                  // GOP Index 9 - Temporal Layer
         12,                 // GOP Index 9 - Decode Order
-        1,					// GOP Index 9 - Ref List 0
-       -1					// GOP Index 9 - Ref List 1
+        1,                    // GOP Index 9 - Ref List 0
+       -1                    // GOP Index 9 - Ref List 1
     },
 
     {
         4,                  // GOP Index 10 - Temporal Layer
         11,                 // GOP Index 10 - Decode Order
-         2,					// GOP Index 10 - Ref List 0
-        -2					// GOP Index 10 - Ref List 1
+         2,                    // GOP Index 10 - Ref List 0
+        -2                    // GOP Index 10 - Ref List 1
     },
 
     {
         5,                  // GOP Index 11 - Temporal Layer
         13,                 // GOP Index 11 - Decode Order
-        1,					// GOP Index 11 - Ref List 0
-       -1					// GOP Index 11 - Ref List 1
+        1,                    // GOP Index 11 - Ref List 0
+       -1                    // GOP Index 11 - Ref List 1
     },
 
     {
         3,                  // GOP Index 12 - Temporal Layer
         10,                 // GOP Index 12 - Decode Order
-        4,					// GOP Index 12 - Ref List 0
-       -4					// GOP Index 12 - Ref List 1
+        4,                    // GOP Index 12 - Ref List 0
+       -4                    // GOP Index 12 - Ref List 1
     },
 
     {
         5,                  // GOP Index 13 - Temporal Layer
         15,                 // GOP Index 13 - Decode Order
-        1,					// GOP Index 13 - Ref List 0
-       -1					// GOP Index 13 - Ref List 1
+        1,                    // GOP Index 13 - Ref List 0
+       -1                    // GOP Index 13 - Ref List 1
     },
 
     {
         4,                  // GOP Index 14 - Temporal Layer
         14,                 // GOP Index 14 - Decode Order
-        2,					// GOP Index 14 - Ref List 0
-       -2					// GOP Index 14 - Ref List 1
+        2,                    // GOP Index 14 - Ref List 0
+       -2                    // GOP Index 14 - Ref List 1
     },
 
     {
         5,                  // GOP Index 15 - Temporal Layer
         16,                 // GOP Index 15 - Decode Order
-        1,					// GOP Index 15 - Ref List 0
-       -1					// GOP Index 15 - Ref List 1
+        1,                    // GOP Index 15 - Ref List 0
+       -1                    // GOP Index 15 - Ref List 1
     },
 
     {
         1,                  // GOP Index 16 - Temporal Layer
         1,                  // GOP Index 16 - Decode Order
-        16,					// GOP Index 16 - Ref List 0
-       -16					// GOP Index 16 - Ref List 1
+        16,                    // GOP Index 16 - Ref List 0
+       -16                    // GOP Index 16 - Ref List 1
     },
 
     {
         5,                  // GOP Index 17 - Temporal Layer
         20,                 // GOP Index 17 - Decode Order
-        1,					// GOP Index 17 - Ref List 0
-       -1					// GOP Index 17 - Ref List 1
+        1,                    // GOP Index 17 - Ref List 0
+       -1                    // GOP Index 17 - Ref List 1
     },
 
     {
         4,                  // GOP Index 18 - Temporal Layer
         19,                 // GOP Index 18 - Decode Order
-        2,					// GOP Index 18 - Ref List 0
-       -2					// GOP Index 18 - Ref List 1
+        2,                    // GOP Index 18 - Ref List 0
+       -2                    // GOP Index 18 - Ref List 1
     },
 
     {
         5,                  // GOP Index 19 - Temporal Layer
         21,                 // GOP Index 19 - Decode Order
-        1,					// GOP Index 19 - Ref List 0
-       -1					// GOP Index 19 - Ref List 1
+        1,                    // GOP Index 19 - Ref List 0
+       -1                    // GOP Index 19 - Ref List 1
     },
 
     {
         3,                  // GOP Index 20 - Temporal Layer
         18,                 // GOP Index 20 - Decode Order
-         4,					// GOP Index 20 - Ref List 0
-        -4					// GOP Index 20 - Ref List 1
+         4,                    // GOP Index 20 - Ref List 0
+        -4                    // GOP Index 20 - Ref List 1
     },
 
     {
         5,                  // GOP Index 21 - Temporal Layer
         23,                 // GOP Index 21 - Decode Order
-        1,					// GOP Index 21 - Ref List 0
-       -1					 // GOP Index 21 - Ref List 1
+        1,                    // GOP Index 21 - Ref List 0
+       -1                     // GOP Index 21 - Ref List 1
     },
 
     {
         4,                  // GOP Index 22 - Temporal Layer
         22,                 // GOP Index 22 - Decode Order
-        2,					// GOP Index 22 - Ref List 0
-       -2					// GOP Index 22 - Ref List 1
+        2,                    // GOP Index 22 - Ref List 0
+       -2                    // GOP Index 22 - Ref List 1
     },
 
     {
         5,                  // GOP Index 23 - Temporal Layer
         24,                 // GOP Index 23 - Decode Order
-        1,					// GOP Index 23 - Ref List 0
-       -1					// GOP Index 23 - Ref List 1
+        1,                    // GOP Index 23 - Ref List 0
+       -1                    // GOP Index 23 - Ref List 1
     },
 
     {
         2,                  // GOP Index 24 - Temporal Layer
         17,                 // GOP Index 24 - Decode Order
-        8,					// GOP Index 24 - Ref List 0
-       -8				    // GOP Index 24 - Ref List 1
+        8,                    // GOP Index 24 - Ref List 0
+       -8                    // GOP Index 24 - Ref List 1
     },
 
     {
         5,                  // GOP Index 25 - Temporal Layer
         27,                 // GOP Index 25 - Decode Order
-        1,					// GOP Index 25 - Ref List 0
-       -1					// GOP Index 25 - Ref List 1
+        1,                    // GOP Index 25 - Ref List 0
+       -1                    // GOP Index 25 - Ref List 1
     },
 
     {
         4,                  // GOP Index 26 - Temporal Layer
         26,                 // GOP Index 26 - Decode Order
-        2,					// GOP Index 26 - Ref List 0
-       -2					// GOP Index 26 - Ref List 1
+        2,                    // GOP Index 26 - Ref List 0
+       -2                    // GOP Index 26 - Ref List 1
     },
 
     {
         5,                  // GOP Index 27 - Temporal Layer
         28,                 // GOP Index 27 - Decode Order
-        1,					// GOP Index 27 - Ref List 0
-       -1					// GOP Index 27 - Ref List 1
+        1,                    // GOP Index 27 - Ref List 0
+       -1                    // GOP Index 27 - Ref List 1
     },
 
     {
         3,                  // GOP Index 28 - Temporal Layer
         25,                 // GOP Index 28 - Decode Order
-         4,					// GOP Index 28 - Ref List 0
-        -4					// GOP Index 28 - Ref List 1
+         4,                    // GOP Index 28 - Ref List 0
+        -4                    // GOP Index 28 - Ref List 1
     },
 
     {
         5,                  // GOP Index 29 - Temporal Layer
         30,                 // GOP Index 29 - Decode Order
-        1,					// GOP Index 29 - Ref List 0
-       -1					// GOP Index 29 - Ref List 1
+        1,                    // GOP Index 29 - Ref List 0
+       -1                    // GOP Index 29 - Ref List 1
     },
 
     {
         4,                  // GOP Index 30 - Temporal Layer
         29,                 // GOP Index 30 - Decode Order
-        2,					// GOP Index 30 - Ref List 0
-       -2					// GOP Index 30 - Ref List 1
+        2,                    // GOP Index 30 - Ref List 0
+       -2                    // GOP Index 30 - Ref List 1
     },
 
     {
         5,                  // GOP Index 31 - Temporal Layer
         31,                 // GOP Index 31 - Decode Order
-        1,					// GOP Index 31 - Ref List 0
-       -1					// GOP Index 31 - Ref List 1
+        1,                    // GOP Index 31 - Ref List 0
+       -1                    // GOP Index 31 - Ref List 1
     }
 };
 
@@ -1018,7 +1018,7 @@ static EB_ERRORTYPE PredictionStructureCtor(
             predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refList0.referenceListCount = refIndex;
 
             // Allocate the Leading Picture Reference List 0{
-			predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refList0.referenceList = 0;
+            predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refList0.referenceList = 0;
 
             // Copy Reference List 0
             for(refIndex = 0; refIndex < predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refList0.referenceListCount; ++refIndex) {
@@ -1045,7 +1045,7 @@ static EB_ERRORTYPE PredictionStructureCtor(
 
                 // Allocate the Leading Picture Reference List 1
                 predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refList1.referenceList = 0;
-              
+
 
                 // Copy Reference List 1
                 for(refIndex = 0; refIndex < predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refList1.referenceListCount; ++refIndex) {
@@ -1071,7 +1071,7 @@ static EB_ERRORTYPE PredictionStructureCtor(
 
                 // Allocate the Leading Picture Reference List 1
                 predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refList1.referenceList = 0;
-               
+
 
                 // Copy Reference List 1
                 for(refIndex = 0; refIndex < predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refList1.referenceListCount; ++refIndex) {
@@ -1145,7 +1145,7 @@ static EB_ERRORTYPE PredictionStructureCtor(
 
                 // Allocate the Leading Picture Reference List 1
                 predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refList1.referenceList = 0;
-                               
+
 
                 // Copy Reference List 1
                 for(refIndex = 0; refIndex < predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refList1.referenceListCount; ++refIndex) {
@@ -1167,7 +1167,7 @@ static EB_ERRORTYPE PredictionStructureCtor(
 
                 // Allocate the Leading Picture Reference List 1
                 predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refList1.referenceList = 0;
-                  
+
 
                 // Copy Reference List 1
                 for(refIndex = 0; refIndex < predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refList1.referenceListCount; ++refIndex) {
@@ -1781,10 +1781,10 @@ EB_ERRORTYPE PredictionStructureGroupCtor(
     // Count the number of Prediction Structures
     while((PredictionStructureConfigArray[predStructIndex].entryArray != 0) && (PredictionStructureConfigArray[predStructIndex].entryCount != 0)) {
         // Get Random Access + P for temporal ID 0
-        if(PredictionStructureConfigArray[predStructIndex].entryArray->temporalLayerIndex == 0 && baseLayerSwitchMode) { 
+        if(PredictionStructureConfigArray[predStructIndex].entryArray->temporalLayerIndex == 0 && baseLayerSwitchMode) {
                 PredictionStructureConfigArray[predStructIndex].entryArray->refList1 = 0;
         }
-		++predStructIndex;
+        ++predStructIndex;
     }
 
     predictionStructureGroupPtr->predictionStructureCount = MAX_TEMPORAL_LAYERS * EB_PRED_TOTAL_COUNT;

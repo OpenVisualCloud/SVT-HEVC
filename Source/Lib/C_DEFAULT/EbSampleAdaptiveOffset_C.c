@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -21,107 +21,107 @@ static int clipToSigned8Bit(int x)
 * collects Sao Statistics
 ********************************************/
 EB_ERRORTYPE GatherSaoStatisticsLcu_62x62_16bit(
-	EB_U16                   *inputSamplePtr,        // input parameter, source Picture Ptr
-	EB_U32                   inputStride,           // input parameter, source stride
-	EB_U16                   *reconSamplePtr,        // input parameter, deblocked Picture Ptr
-	EB_U32                   reconStride,           // input parameter, deblocked stride
-	EB_U32                   lcuWidth,              // input parameter, LCU width
-	EB_U32                   lcuHeight,             // input parameter, LCU height
-	EB_S32                  *boDiff,                // output parameter, used to store Band Offset diff, boDiff[SAO_BO_INTERVALS]
-	EB_U16                  *boCount,										// output parameter, used to store Band Offset count, boCount[SAO_BO_INTERVALS]
-	EB_S32                   eoDiff[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1],     // output parameter, used to store Edge Offset diff, eoDiff[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
-	EB_U16                   eoCount[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1])    // output parameter, used to store Edge Offset count, eoCount[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
+    EB_U16                   *inputSamplePtr,        // input parameter, source Picture Ptr
+    EB_U32                   inputStride,           // input parameter, source stride
+    EB_U16                   *reconSamplePtr,        // input parameter, deblocked Picture Ptr
+    EB_U32                   reconStride,           // input parameter, deblocked stride
+    EB_U32                   lcuWidth,              // input parameter, LCU width
+    EB_U32                   lcuHeight,             // input parameter, LCU height
+    EB_S32                  *boDiff,                // output parameter, used to store Band Offset diff, boDiff[SAO_BO_INTERVALS]
+    EB_U16                  *boCount,                                        // output parameter, used to store Band Offset count, boCount[SAO_BO_INTERVALS]
+    EB_S32                   eoDiff[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1],     // output parameter, used to store Edge Offset diff, eoDiff[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
+    EB_U16                   eoCount[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1])    // output parameter, used to store Edge Offset count, eoCount[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
 {
-	EB_ERRORTYPE    return_error = EB_ErrorNone;
+    EB_ERRORTYPE    return_error = EB_ErrorNone;
 
-	EB_S32          diff;
-	EB_U32          boIndex, eoType, eoIndex;
-	EB_S16          signLeft, signRight, signTop, signBottom, signTopLeft, signBottomRight, signTopRight, signBottomLeft;
+    EB_S32          diff;
+    EB_U32          boIndex, eoType, eoIndex;
+    EB_S16          signLeft, signRight, signTop, signBottom, signTopLeft, signBottomRight, signTopRight, signBottomLeft;
 
-	EB_U16          *temporalInputSamplePtr;
-	EB_U16          *temporalReconSamplePtr;
+    EB_U16          *temporalInputSamplePtr;
+    EB_U16          *temporalReconSamplePtr;
 
-	EB_U32          i = 0;
-	EB_U32          j = 0;
+    EB_U32          i = 0;
+    EB_U32          j = 0;
 
-	EB_U32 boShift = 5;
+    EB_U32 boShift = 5;
 
-	// Intialize SAO Arrays
+    // Intialize SAO Arrays
 
-	// BO
-	for (boIndex = 0; boIndex < SAO_BO_INTERVALS; ++boIndex) {
+    // BO
+    for (boIndex = 0; boIndex < SAO_BO_INTERVALS; ++boIndex) {
 
-		boDiff[boIndex] = 0;
-		boCount[boIndex] = 0;
-	}
+        boDiff[boIndex] = 0;
+        boCount[boIndex] = 0;
+    }
 
-	// EO
-	for (eoType = 0; eoType < SAO_EO_TYPES; ++eoType) {
-		for (eoIndex = 0; eoIndex < SAO_EO_CATEGORIES + 1; ++eoIndex) {
+    // EO
+    for (eoType = 0; eoType < SAO_EO_TYPES; ++eoType) {
+        for (eoIndex = 0; eoIndex < SAO_EO_CATEGORIES + 1; ++eoIndex) {
 
-			eoDiff[eoType][eoIndex] = 0;
-			eoCount[eoType][eoIndex] = 0;
+            eoDiff[eoType][eoIndex] = 0;
+            eoCount[eoType][eoIndex] = 0;
 
-		}
-	}
+        }
+    }
 
 
-	temporalInputSamplePtr = inputSamplePtr + 1 + inputStride;
-	temporalReconSamplePtr = reconSamplePtr + 1 + reconStride;
+    temporalInputSamplePtr = inputSamplePtr + 1 + inputStride;
+    temporalReconSamplePtr = reconSamplePtr + 1 + reconStride;
 
-	for (j = 0; j < lcuHeight - 2; j++) {
-		for (i = 0; i < lcuWidth - 2; i++) {
+    for (j = 0; j < lcuHeight - 2; j++) {
+        for (i = 0; i < lcuWidth - 2; i++) {
 
-			diff = temporalInputSamplePtr[i] - temporalReconSamplePtr[i];
+            diff = temporalInputSamplePtr[i] - temporalReconSamplePtr[i];
 
-			//BO
-			boIndex = temporalReconSamplePtr[i] >> boShift;
-			boDiff[boIndex] += diff;
-			boCount[boIndex] ++;
+            //BO
+            boIndex = temporalReconSamplePtr[i] >> boShift;
+            boDiff[boIndex] += diff;
+            boCount[boIndex] ++;
 
-			//EO-0
-			signLeft = SIGN(temporalReconSamplePtr[i], temporalReconSamplePtr[(EB_S32)(i - 1)]);
-			signRight = SIGN(temporalReconSamplePtr[i], temporalReconSamplePtr[i + 1]);
-			eoIndex = signRight + signLeft + 2;
-			eoDiff[0][eoIndex] += diff;
-			eoCount[0][eoIndex] ++;
+            //EO-0
+            signLeft = SIGN(temporalReconSamplePtr[i], temporalReconSamplePtr[(EB_S32)(i - 1)]);
+            signRight = SIGN(temporalReconSamplePtr[i], temporalReconSamplePtr[i + 1]);
+            eoIndex = signRight + signLeft + 2;
+            eoDiff[0][eoIndex] += diff;
+            eoCount[0][eoIndex] ++;
 
-			//EO-90
-			signTop = SIGN(temporalReconSamplePtr[i], temporalReconSamplePtr[(EB_S32)(i - reconStride)]);
-			signBottom = SIGN(temporalReconSamplePtr[i], temporalReconSamplePtr[i + reconStride]);
-			eoIndex = signTop + signBottom + 2;
-			eoDiff[1][eoIndex] += diff;
-			eoCount[1][eoIndex] ++;
+            //EO-90
+            signTop = SIGN(temporalReconSamplePtr[i], temporalReconSamplePtr[(EB_S32)(i - reconStride)]);
+            signBottom = SIGN(temporalReconSamplePtr[i], temporalReconSamplePtr[i + reconStride]);
+            eoIndex = signTop + signBottom + 2;
+            eoDiff[1][eoIndex] += diff;
+            eoCount[1][eoIndex] ++;
 
-			//EO-45
-			signTopRight = SIGN(temporalReconSamplePtr[i], temporalReconSamplePtr[(EB_S32)(i - reconStride + 1)]);
-			signBottomLeft = SIGN(temporalReconSamplePtr[i], temporalReconSamplePtr[i + reconStride - 1]);
-			eoIndex = signTopRight + signBottomLeft + 2;
-			eoDiff[3][eoIndex] += diff;
-			eoCount[3][eoIndex] ++;
+            //EO-45
+            signTopRight = SIGN(temporalReconSamplePtr[i], temporalReconSamplePtr[(EB_S32)(i - reconStride + 1)]);
+            signBottomLeft = SIGN(temporalReconSamplePtr[i], temporalReconSamplePtr[i + reconStride - 1]);
+            eoIndex = signTopRight + signBottomLeft + 2;
+            eoDiff[3][eoIndex] += diff;
+            eoCount[3][eoIndex] ++;
 
-			//EO-135
-			signTopLeft = SIGN(temporalReconSamplePtr[i], temporalReconSamplePtr[(EB_S32)(i - reconStride - 1)]);
-			signBottomRight = SIGN(temporalReconSamplePtr[i], temporalReconSamplePtr[i + reconStride + 1]);
-			eoIndex = signTopLeft + signBottomRight + 2;
-			eoDiff[2][eoIndex] += diff;
-			eoCount[2][eoIndex] ++;
-		}
+            //EO-135
+            signTopLeft = SIGN(temporalReconSamplePtr[i], temporalReconSamplePtr[(EB_S32)(i - reconStride - 1)]);
+            signBottomRight = SIGN(temporalReconSamplePtr[i], temporalReconSamplePtr[i + reconStride + 1]);
+            eoIndex = signTopLeft + signBottomRight + 2;
+            eoDiff[2][eoIndex] += diff;
+            eoCount[2][eoIndex] ++;
+        }
 
-		temporalInputSamplePtr += inputStride;
-		temporalReconSamplePtr += reconStride;
+        temporalInputSamplePtr += inputStride;
+        temporalReconSamplePtr += reconStride;
 
-	}
-	for (eoType = 0; eoType < SAO_EO_TYPES; ++eoType) {
-		eoDiff[eoType][2] = eoDiff[eoType][3];
-		eoDiff[eoType][3] = eoDiff[eoType][4];
-		eoCount[eoType][2] = eoCount[eoType][3];
-		eoCount[eoType][3] = eoCount[eoType][4];
-	}
+    }
+    for (eoType = 0; eoType < SAO_EO_TYPES; ++eoType) {
+        eoDiff[eoType][2] = eoDiff[eoType][3];
+        eoDiff[eoType][3] = eoDiff[eoType][4];
+        eoCount[eoType][2] = eoCount[eoType][3];
+        eoCount[eoType][3] = eoCount[eoType][4];
+    }
 
-	return return_error;
+    return return_error;
 }
-    
+
 EB_ERRORTYPE GatherSaoStatisticsLcuLossy_62x62(
     EB_U8                   *inputSamplePtr,        // input parameter, source Picture Ptr
     EB_U32                   inputStride,           // input parameter, source stride
@@ -130,7 +130,7 @@ EB_ERRORTYPE GatherSaoStatisticsLcuLossy_62x62(
     EB_U32                   lcuWidth,              // input parameter, LCU width
     EB_U32                   lcuHeight,             // input parameter, LCU height
     EB_S32                  *boDiff,                // output parameter, used to store Band Offset diff, boDiff[SAO_BO_INTERVALS]
-    EB_U16                  *boCount,										// output parameter, used to store Band Offset count, boCount[SAO_BO_INTERVALS]
+    EB_U16                  *boCount,                                        // output parameter, used to store Band Offset count, boCount[SAO_BO_INTERVALS]
     EB_S32                   eoDiff[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1],     // output parameter, used to store Edge Offset diff, eoDiff[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
     EB_U16                   eoCount[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1])    // output parameter, used to store Edge Offset count, eoCount[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
 {
@@ -223,7 +223,7 @@ EB_ERRORTYPE GatherSaoStatisticsLcuLossy_62x62(
 
     return return_error;
 }
-    
+
 EB_ERRORTYPE GatherSaoStatisticsLcu_OnlyEo_90_45_135_Lossy(
     EB_U8                   *inputSamplePtr,        // input parameter, source Picture Ptr
     EB_U32                   inputStride,           // input parameter, source stride
@@ -332,7 +332,7 @@ EB_ERRORTYPE GatherSaoStatisticsLcu_62x62_OnlyEo_90_45_135_16bit(
     EB_U32          i = 0;
     EB_U32          j = 0;
 
-    // Intialize SAO Arrays    
+    // Intialize SAO Arrays
     // EO
     for (eoType = 0; eoType < SAO_EO_TYPES; ++eoType) {
         for (eoIndex = 0; eoIndex < SAO_EO_CATEGORIES + 1; ++eoIndex) {

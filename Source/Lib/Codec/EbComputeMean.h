@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -27,7 +27,7 @@ static const EB_COMPUTE_MEAN_FUNC ComputeMeanFunc[2][EB_ASM_TYPE_TOTAL] = {
         // C_DEFAULT
         ComputeMean,
         // AVX2
-		ComputeMean8x8_AVX2_INTRIN
+        ComputeMean8x8_AVX2_INTRIN
     },
     {
         // C_DEFAULT

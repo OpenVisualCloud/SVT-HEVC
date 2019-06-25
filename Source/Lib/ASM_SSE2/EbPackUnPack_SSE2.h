@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -13,29 +13,29 @@ extern "C" {
 #endif
 
 void EB_ENC_UnPack8BitData_SSE2_INTRIN(
-	EB_U16      *in16BitBuffer,
-	EB_U32       inStride,
-	EB_U8       *out8BitBuffer,	
-	EB_U32       out8Stride,	
-	EB_U32       width,
-	EB_U32       height);
+    EB_U16      *in16BitBuffer,
+    EB_U32       inStride,
+    EB_U8       *out8BitBuffer,
+    EB_U32       out8Stride,
+    EB_U32       width,
+    EB_U32       height);
 
 void EB_ENC_UnPack8BitDataSafeSub_SSE2_INTRIN(
-	EB_U16      *in16BitBuffer,
-	EB_U32       inStride,
-	EB_U8       *out8BitBuffer,
-	EB_U32       out8Stride,	
-	EB_U32       width,
+    EB_U16      *in16BitBuffer,
+    EB_U32       inStride,
+    EB_U8       *out8BitBuffer,
+    EB_U32       out8Stride,
+    EB_U32       width,
     EB_U32       height
     );
 
 void UnpackAvg_SSE2_INTRIN(
-	    EB_U16 *ref16L0,
+        EB_U16 *ref16L0,
         EB_U32  refL0Stride,
         EB_U16 *ref16L1,
         EB_U32  refL1Stride,
         EB_U8  *dstPtr,
-        EB_U32  dstStride,      
+        EB_U32  dstStride,
         EB_U32  width,
         EB_U32  height);
 

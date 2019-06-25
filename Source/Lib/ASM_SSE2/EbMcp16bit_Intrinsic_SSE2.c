@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -36,12 +36,12 @@ void PictureCopyKernelOutRaw16bit_SSE2_INTRIN(
   EB_S16               *dst,
   EB_U32                puWidth,
   EB_U32                puHeight)
-{ 
+{
   EB_U32 rowCount, colCount;
   __m128i a0, a1, a2, a3;
 
   //PrefetchBlock(refPic, srcStride, puWidth, puHeight);
-  
+
   if (puWidth & 2) {
     EB_U16 *ptr = refPic;
     rowCount = puHeight;
@@ -56,20 +56,20 @@ void PictureCopyKernelOutRaw16bit_SSE2_INTRIN(
       a0 = _mm_slli_epi16(a0, BI_SHIFT_10BIT);
       a0 = _mm_sub_epi16(a0, _mm_set1_epi16(BI_OFFSET_10BIT));
       _mm_storeu_si128((__m128i *)dst, a0);
-      
+
       dst += 8;
       rowCount -= 4;
     }
     while (rowCount != 0);
-    
+
     puWidth -= 2;
     if (puWidth == 0) {
       return;
     }
-    
+
     refPic += 2;
   }
-  
+
   if (puWidth & 4) {
     EB_U16 *ptr = refPic;
     rowCount = puHeight;
@@ -81,20 +81,20 @@ void PictureCopyKernelOutRaw16bit_SSE2_INTRIN(
       a0 = _mm_slli_epi16(a0, BI_SHIFT_10BIT);
       a0 = _mm_sub_epi16(a0, _mm_set1_epi16(BI_OFFSET_10BIT));
       _mm_storeu_si128((__m128i *)dst, a0);
-      
+
       dst += 8;
       rowCount -= 2;
     }
     while (rowCount != 0);
-    
+
     puWidth -= 4;
     if (puWidth == 0) {
       return;
     }
-    
+
     refPic += 4;
   }
-  
+
   colCount = puWidth;
   do {
     __m128i a0;
@@ -108,7 +108,7 @@ void PictureCopyKernelOutRaw16bit_SSE2_INTRIN(
       dst += 8;
     }
     while (--rowCount != 0);
-    
+
     colCount -= 8;
     refPic += 8;
   }
@@ -1972,9 +1972,9 @@ void LumaInterpolationFilterPosnOutRaw16bit_SSE2_INTRIN(
 void ChromaInterpolationFilterOneD16bitHorizontal_SSE2_INTRIN(
 EB_U16 *refPic, EB_U32 srcStride, EB_U16 *dst, EB_U32 dstStride, EB_U32 puWidth, EB_U32 puHeight, EB_S16 *firstPassIFDst, EB_U32 fracPosx, EB_U32 fracPosy)
 {
-	EB_U32 rowCount, colCount;
-	EB_U16 *ptr, *qtr;
-	__m128i a0, a1, a2, a3, b0, b1, b2, b3, c0, c1, c2, c3, sum;
+    EB_U32 rowCount, colCount;
+    EB_U16 *ptr, *qtr;
+    __m128i a0, a1, a2, a3, b0, b1, b2, b3, c0, c1, c2, c3, sum;
 
   (void)firstPassIFDst;
   (void)fracPosy;
@@ -1983,7 +1983,7 @@ EB_U16 *refPic, EB_U32 srcStride, EB_U16 *dst, EB_U32 dstStride, EB_U32 puWidth,
   //PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
   c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeffSR1[fracPosx]);
-  c0 = _mm_unpacklo_epi16(c0, c0);  
+  c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
   c2 = _mm_shuffle_epi32(c0, 0xaa);
   c1 = _mm_shuffle_epi32(c0, 0x55);
@@ -2103,16 +2103,16 @@ EB_U16 *refPic, EB_U32 srcStride, EB_U16 *dst, EB_U32 dstStride, EB_U32 puWidth,
 void ChromaInterpolationFilterOneD16bitVertical_SSE2_INTRIN(
 EB_U16 *refPic, EB_U32 srcStride, EB_U16 *dst, EB_U32 dstStride, EB_U32 puWidth, EB_U32 puHeight, EB_S16 *firstPassIFDst, EB_U32 fracPosx, EB_U32 fracPosy)
 {
-	EB_U32 rowCount, colCount;
-	EB_U16 *ptr, *qtr;
-	__m128i a0, a1, a2, a3, b0, b1, c0, c1, c2, c3;
-	__m128i sum;
+    EB_U32 rowCount, colCount;
+    EB_U16 *ptr, *qtr;
+    __m128i a0, a1, a2, a3, b0, b1, c0, c1, c2, c3;
+    __m128i sum;
 
   (void)firstPassIFDst;
   (void)fracPosx;
 
   c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeffSR1[fracPosy]);
-  c0 = _mm_unpacklo_epi16(c0, c0);  
+  c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
   c2 = _mm_shuffle_epi32(c0, 0xaa);
   c1 = _mm_shuffle_epi32(c0, 0x55);
@@ -2122,7 +2122,7 @@ EB_U16 *refPic, EB_U32 srcStride, EB_U16 *dst, EB_U32 dstStride, EB_U32 puWidth,
   //PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
   if (puWidth & 2) {
-  	__m128i a4, a5, b2, b3, d0, d1, d2, d3;
+      __m128i a4, a5, b2, b3, d0, d1, d2, d3;
     ptr = refPic;
     qtr = dst;
 
@@ -2238,9 +2238,9 @@ void ChromaInterpolationFilterOneDOutRaw16bitHorizontal_SSE2_INTRIN(
     EB_U32                fracPosx,
     EB_U32                fracPosy)
 {
-	EB_U32 rowCount, colCount;
-	EB_U16 *ptr;
-	__m128i a0, a1, a2, a3, b0, b1, b2, b3, c0, c1, c2, c3, sum;
+    EB_U32 rowCount, colCount;
+    EB_U16 *ptr;
+    __m128i a0, a1, a2, a3, b0, b1, b2, b3, c0, c1, c2, c3, sum;
 
   (void)firstPassIFDst;
   (void)fracPosy;
@@ -2249,7 +2249,7 @@ void ChromaInterpolationFilterOneDOutRaw16bitHorizontal_SSE2_INTRIN(
   //PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
   c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeffSR1[fracPosx]);
-  c0 = _mm_unpacklo_epi16(c0, c0);  
+  c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
   c2 = _mm_shuffle_epi32(c0, 0xaa);
   c1 = _mm_shuffle_epi32(c0, 0x55);
@@ -2366,16 +2366,16 @@ void ChromaInterpolationFilterOneDOutRaw16bitVertical_SSE2_INTRIN(
     EB_U32                fracPosx,
     EB_U32                fracPosy)
 {
-	EB_U32 rowCount, colCount;
-	EB_U16 *ptr;
-	__m128i a0, a1, a2, a3, b0, b1, c0, c1, c2, c3;
-	__m128i sum;
+    EB_U32 rowCount, colCount;
+    EB_U16 *ptr;
+    __m128i a0, a1, a2, a3, b0, b1, c0, c1, c2, c3;
+    __m128i sum;
 
   (void)firstPassIFDst;
   (void)fracPosx;
 
   c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeffSR1[fracPosy]);
-  c0 = _mm_unpacklo_epi16(c0, c0);  
+  c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
   c2 = _mm_shuffle_epi32(c0, 0xaa);
   c1 = _mm_shuffle_epi32(c0, 0x55);
@@ -2385,7 +2385,7 @@ void ChromaInterpolationFilterOneDOutRaw16bitVertical_SSE2_INTRIN(
   //PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
   if (puWidth & 2) {
-  	__m128i a4, a5, b2, b3, d0, d1, d2, d3;
+      __m128i a4, a5, b2, b3, d0, d1, d2, d3;
     ptr = refPic;
 
     a0 = _mm_cvtsi32_si128(*(EB_U32 *)ptr); ptr += srcStride;
@@ -2487,10 +2487,10 @@ void ChromaInterpolationFilterTwoDInRaw16bit_SSE2_INTRIN(
     EB_U32                puHeight,
     EB_U32                fracPosy)
 {
-	EB_U32 rowCount, colCount;
-	EB_U16 *qtr;
-	__m128i a0, a1, a2, a3, b0, b1, b2, b3, c0, c1;
-	__m128i sum0, sum1;
+    EB_U32 rowCount, colCount;
+    EB_U16 *qtr;
+    __m128i a0, a1, a2, a3, b0, b1, b2, b3, c0, c1;
+    __m128i sum0, sum1;
 
   //PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
@@ -2616,9 +2616,9 @@ void ChromaInterpolationFilterTwoDInRawOutRaw_SSE2_INTRIN(
     EB_U32                puHeight,
     EB_U32                fracPosy)
 {
-	EB_U32 rowCount, colCount;
-	__m128i a0, a1, a2, a3, b0, b1, b2, b3, c0, c1;
-	__m128i sum0, sum1;
+    EB_U32 rowCount, colCount;
+    __m128i a0, a1, a2, a3, b0, b1, b2, b3, c0, c1;
+    __m128i sum0, sum1;
 
   //PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
@@ -2728,7 +2728,7 @@ void BiPredClipping16bit_SSE2_INTRIN(
 {
   EB_U32 rowCount, colCount;
   __m128i a0, a1;
-  
+
   if (puWidth & 2) {
     EB_U16 *qtr = dst;
     rowCount = puHeight;
@@ -2737,12 +2737,12 @@ void BiPredClipping16bit_SSE2_INTRIN(
       a1 = _mm_load_si128((__m128i *)list1Src);
       list0Src += 8;
       list1Src += 8;
-      
+
       a0 = _mm_adds_epi16(a0, a1);
       a0 = _mm_adds_epi16(a0, _mm_set1_epi16(BI_AVG_OFFSET_10BIT));
       a0 = _mm_srai_epi16(a0, BI_AVG_SHIFT_10BIT);
       a0 = _mm_max_epi16(a0, _mm_setzero_si128());
-      
+
       *(EB_U32 *)qtr = _mm_cvtsi128_si32(a0); a0 = _mm_srli_si128(a0, 4); qtr += dstStride;
       *(EB_U32 *)qtr = _mm_cvtsi128_si32(a0); a0 = _mm_srli_si128(a0, 4); qtr += dstStride;
       *(EB_U32 *)qtr = _mm_cvtsi128_si32(a0); a0 = _mm_srli_si128(a0, 4); qtr += dstStride;
@@ -2750,14 +2750,14 @@ void BiPredClipping16bit_SSE2_INTRIN(
       rowCount -= 4;
     }
     while (rowCount != 0);
-    
+
     puWidth -= 2;
     if (puWidth == 0) {
       return;
-    }    
+    }
     dst += 2;
   }
-  
+
   if (puWidth & 4) {
     EB_U16 *qtr = dst;
     rowCount = puHeight;
@@ -2766,7 +2766,7 @@ void BiPredClipping16bit_SSE2_INTRIN(
       a1 = _mm_load_si128((__m128i *)list1Src);
       list0Src += 8;
       list1Src += 8;
-      
+
       a0 = _mm_adds_epi16(a0, a1);
       a0 = _mm_adds_epi16(a0, _mm_set1_epi16(BI_AVG_OFFSET_10BIT));
       a0 = _mm_srai_epi16(a0, BI_AVG_SHIFT_10BIT);
@@ -2777,14 +2777,14 @@ void BiPredClipping16bit_SSE2_INTRIN(
       rowCount -= 2;
     }
     while (rowCount != 0);
-    
+
     puWidth -= 4;
     if (puWidth == 0) {
       return;
-    }    
+    }
     dst += 4;
   }
-  
+
   colCount = puWidth;
   do {
     __m128i a2, a3;
@@ -2812,173 +2812,173 @@ void BiPredClipping16bit_SSE2_INTRIN(
       _mm_storeu_si128((__m128i *)qtr,             a0);
       _mm_storeu_si128((__m128i *)(qtr+dstStride), a2);
       qtr += 2*dstStride;
-      
+
       rowCount -= 2;
     }
     while (rowCount != 0);
-    
+
     colCount -= 8;
     dst += 8;
   }
   while (colCount != 0);
 }
 
-	void BiPredClippingOnTheFly16bit_SSE2(
-		EB_U16    *list0Src,
-		EB_U32     list0SrcStride,
-		EB_U16    *list1Src,
-		EB_U32     list1SrcStride,
-		EB_U16    *dst,
-		EB_U32     dstStride,
-		EB_U32     puWidth,
-		EB_U32     puHeight)
-	{
-		EB_U32 rowCount, colCount;
-		__m128i a0, a1;
-		__m128i a2, a3;
+    void BiPredClippingOnTheFly16bit_SSE2(
+        EB_U16    *list0Src,
+        EB_U32     list0SrcStride,
+        EB_U16    *list1Src,
+        EB_U32     list1SrcStride,
+        EB_U16    *dst,
+        EB_U32     dstStride,
+        EB_U32     puWidth,
+        EB_U32     puHeight)
+    {
+        EB_U32 rowCount, colCount;
+        __m128i a0, a1;
+        __m128i a2, a3;
 
-		if (puWidth & 2) {
-			__m128i a4;
-			EB_U16 *qtr = dst;
-			EB_U16 *ptrSrc0 = list0Src;
-			EB_U16 *ptrSrc1 = list1Src;
-			rowCount = puHeight;
-			do {
+        if (puWidth & 2) {
+            __m128i a4;
+            EB_U16 *qtr = dst;
+            EB_U16 *ptrSrc0 = list0Src;
+            EB_U16 *ptrSrc1 = list1Src;
+            rowCount = puHeight;
+            do {
 
-				a0 = _mm_cvtsi32_si128(*(EB_U32 *)ptrSrc0); ptrSrc0 += list0SrcStride;
-				a1 = _mm_cvtsi32_si128(*(EB_U32 *)ptrSrc0); ptrSrc0 += list0SrcStride;
-				a2 = _mm_cvtsi32_si128(*(EB_U32 *)ptrSrc0); ptrSrc0 += list0SrcStride;
-				a3 = _mm_cvtsi32_si128(*(EB_U32 *)ptrSrc0); ptrSrc0 += list0SrcStride;
-				a0 = _mm_unpacklo_epi32(a0, a1);
-				a2 = _mm_unpacklo_epi32(a2, a3);
-				a0 = _mm_unpacklo_epi64(a0, a2);
-				a0 = _mm_slli_epi16(a0, BI_SHIFT_10BIT);
-				a0 = _mm_sub_epi16(a0, _mm_set1_epi16(BI_OFFSET_10BIT));
+                a0 = _mm_cvtsi32_si128(*(EB_U32 *)ptrSrc0); ptrSrc0 += list0SrcStride;
+                a1 = _mm_cvtsi32_si128(*(EB_U32 *)ptrSrc0); ptrSrc0 += list0SrcStride;
+                a2 = _mm_cvtsi32_si128(*(EB_U32 *)ptrSrc0); ptrSrc0 += list0SrcStride;
+                a3 = _mm_cvtsi32_si128(*(EB_U32 *)ptrSrc0); ptrSrc0 += list0SrcStride;
+                a0 = _mm_unpacklo_epi32(a0, a1);
+                a2 = _mm_unpacklo_epi32(a2, a3);
+                a0 = _mm_unpacklo_epi64(a0, a2);
+                a0 = _mm_slli_epi16(a0, BI_SHIFT_10BIT);
+                a0 = _mm_sub_epi16(a0, _mm_set1_epi16(BI_OFFSET_10BIT));
 
-				a4 = _mm_cvtsi32_si128(*(EB_U32 *)ptrSrc1); ptrSrc1 += list0SrcStride;
-				a1 = _mm_cvtsi32_si128(*(EB_U32 *)ptrSrc1); ptrSrc1 += list0SrcStride;
-				a2 = _mm_cvtsi32_si128(*(EB_U32 *)ptrSrc1); ptrSrc1 += list0SrcStride;
-				a3 = _mm_cvtsi32_si128(*(EB_U32 *)ptrSrc1); ptrSrc1 += list0SrcStride;
-				a4 = _mm_unpacklo_epi32(a4, a1);
-				a2 = _mm_unpacklo_epi32(a2, a3);
-				a4 = _mm_unpacklo_epi64(a4, a2);
-				a4 = _mm_slli_epi16(a4, BI_SHIFT_10BIT);
-				a4 = _mm_sub_epi16(a4, _mm_set1_epi16(BI_OFFSET_10BIT));
+                a4 = _mm_cvtsi32_si128(*(EB_U32 *)ptrSrc1); ptrSrc1 += list0SrcStride;
+                a1 = _mm_cvtsi32_si128(*(EB_U32 *)ptrSrc1); ptrSrc1 += list0SrcStride;
+                a2 = _mm_cvtsi32_si128(*(EB_U32 *)ptrSrc1); ptrSrc1 += list0SrcStride;
+                a3 = _mm_cvtsi32_si128(*(EB_U32 *)ptrSrc1); ptrSrc1 += list0SrcStride;
+                a4 = _mm_unpacklo_epi32(a4, a1);
+                a2 = _mm_unpacklo_epi32(a2, a3);
+                a4 = _mm_unpacklo_epi64(a4, a2);
+                a4 = _mm_slli_epi16(a4, BI_SHIFT_10BIT);
+                a4 = _mm_sub_epi16(a4, _mm_set1_epi16(BI_OFFSET_10BIT));
 
 
-				a0 = _mm_adds_epi16(a0, a4);
-				a0 = _mm_adds_epi16(a0, _mm_set1_epi16(BI_AVG_OFFSET_10BIT));
-				a0 = _mm_srai_epi16(a0, BI_AVG_SHIFT_10BIT);
-				a0 = _mm_max_epi16(a0, _mm_setzero_si128());
+                a0 = _mm_adds_epi16(a0, a4);
+                a0 = _mm_adds_epi16(a0, _mm_set1_epi16(BI_AVG_OFFSET_10BIT));
+                a0 = _mm_srai_epi16(a0, BI_AVG_SHIFT_10BIT);
+                a0 = _mm_max_epi16(a0, _mm_setzero_si128());
 
-				*(EB_U32 *)qtr = _mm_cvtsi128_si32(a0); a0 = _mm_srli_si128(a0, 4); qtr += dstStride;
-				*(EB_U32 *)qtr = _mm_cvtsi128_si32(a0); a0 = _mm_srli_si128(a0, 4); qtr += dstStride;
-				*(EB_U32 *)qtr = _mm_cvtsi128_si32(a0); a0 = _mm_srli_si128(a0, 4); qtr += dstStride;
-				*(EB_U32 *)qtr = _mm_cvtsi128_si32(a0); qtr += dstStride;
-				rowCount -= 4;
-			} while (rowCount != 0);
+                *(EB_U32 *)qtr = _mm_cvtsi128_si32(a0); a0 = _mm_srli_si128(a0, 4); qtr += dstStride;
+                *(EB_U32 *)qtr = _mm_cvtsi128_si32(a0); a0 = _mm_srli_si128(a0, 4); qtr += dstStride;
+                *(EB_U32 *)qtr = _mm_cvtsi128_si32(a0); a0 = _mm_srli_si128(a0, 4); qtr += dstStride;
+                *(EB_U32 *)qtr = _mm_cvtsi128_si32(a0); qtr += dstStride;
+                rowCount -= 4;
+            } while (rowCount != 0);
 
-			puWidth -= 2;
-			if (puWidth == 0) {
-				return;
-			}
+            puWidth -= 2;
+            if (puWidth == 0) {
+                return;
+            }
 
-			list0Src += 2;
-			list1Src += 2;
-			dst += 2;
-		}
+            list0Src += 2;
+            list1Src += 2;
+            dst += 2;
+        }
 
-		if (puWidth & 4) {
-			EB_U16 *qtr = dst;
-			EB_U16 *ptrSrc0 = list0Src;
-			EB_U16 *ptrSrc1 = list1Src;
-			rowCount = puHeight;
-			do {
+        if (puWidth & 4) {
+            EB_U16 *qtr = dst;
+            EB_U16 *ptrSrc0 = list0Src;
+            EB_U16 *ptrSrc1 = list1Src;
+            rowCount = puHeight;
+            do {
 
-				a0 = _mm_loadl_epi64((__m128i *)ptrSrc0);
-				ptrSrc0 += list0SrcStride;
-				a1 = _mm_loadl_epi64((__m128i *)ptrSrc0);
-				ptrSrc0 += list0SrcStride;
-				a0 = _mm_unpacklo_epi64(a0, a1);
-				a0 = _mm_slli_epi16(a0, BI_SHIFT_10BIT);
-				a0 = _mm_sub_epi16(a0, _mm_set1_epi16(BI_OFFSET_10BIT));
+                a0 = _mm_loadl_epi64((__m128i *)ptrSrc0);
+                ptrSrc0 += list0SrcStride;
+                a1 = _mm_loadl_epi64((__m128i *)ptrSrc0);
+                ptrSrc0 += list0SrcStride;
+                a0 = _mm_unpacklo_epi64(a0, a1);
+                a0 = _mm_slli_epi16(a0, BI_SHIFT_10BIT);
+                a0 = _mm_sub_epi16(a0, _mm_set1_epi16(BI_OFFSET_10BIT));
 
-				a2 = _mm_loadl_epi64((__m128i *)ptrSrc1);
-				ptrSrc1 += list1SrcStride;
-				a3 = _mm_loadl_epi64((__m128i *)ptrSrc1);
-				ptrSrc1 += list1SrcStride;
-				a2 = _mm_unpacklo_epi64(a2, a3);
-				a2 = _mm_slli_epi16(a2, BI_SHIFT_10BIT);
-				a2 = _mm_sub_epi16(a2, _mm_set1_epi16(BI_OFFSET_10BIT));
+                a2 = _mm_loadl_epi64((__m128i *)ptrSrc1);
+                ptrSrc1 += list1SrcStride;
+                a3 = _mm_loadl_epi64((__m128i *)ptrSrc1);
+                ptrSrc1 += list1SrcStride;
+                a2 = _mm_unpacklo_epi64(a2, a3);
+                a2 = _mm_slli_epi16(a2, BI_SHIFT_10BIT);
+                a2 = _mm_sub_epi16(a2, _mm_set1_epi16(BI_OFFSET_10BIT));
 
-				a0 = _mm_adds_epi16(a0, a2/*a1*/);
-				a0 = _mm_adds_epi16(a0, _mm_set1_epi16(BI_AVG_OFFSET_10BIT));
-				a0 = _mm_srai_epi16(a0, BI_AVG_SHIFT_10BIT);
-				a0 = _mm_max_epi16(a0, _mm_setzero_si128());
-				_mm_storel_epi64((__m128i *)qtr, a0);
-				a0 = _mm_srli_si128(a0, 8);
-				_mm_storel_epi64((__m128i *)(qtr + dstStride), a0); qtr += 2 * dstStride;
-				rowCount -= 2;
-			} while (rowCount != 0);
+                a0 = _mm_adds_epi16(a0, a2/*a1*/);
+                a0 = _mm_adds_epi16(a0, _mm_set1_epi16(BI_AVG_OFFSET_10BIT));
+                a0 = _mm_srai_epi16(a0, BI_AVG_SHIFT_10BIT);
+                a0 = _mm_max_epi16(a0, _mm_setzero_si128());
+                _mm_storel_epi64((__m128i *)qtr, a0);
+                a0 = _mm_srli_si128(a0, 8);
+                _mm_storel_epi64((__m128i *)(qtr + dstStride), a0); qtr += 2 * dstStride;
+                rowCount -= 2;
+            } while (rowCount != 0);
 
-			puWidth -= 4;
-			if (puWidth == 0) {
-				return;
-			}
+            puWidth -= 4;
+            if (puWidth == 0) {
+                return;
+            }
 
-			list0Src += 4;
-			list1Src += 4;
-			dst += 4;
-		}
+            list0Src += 4;
+            list1Src += 4;
+            dst += 4;
+        }
 
-		colCount = puWidth;
-		do {
-			EB_U16 *qtr = dst;
-			EB_U16 *ptrSrc0 = list0Src;
-			EB_U16 *ptrSrc1 = list1Src;
-			rowCount = puHeight;
-			do {
-				a0 = _mm_loadu_si128((__m128i *)ptrSrc0);
-				a1 = _mm_loadu_si128((__m128i *)ptrSrc1);
-				ptrSrc0 += list0SrcStride;
-				ptrSrc1 += list1SrcStride;
-				a0 = _mm_slli_epi16(a0, BI_SHIFT_10BIT);
-				a0 = _mm_sub_epi16(a0, _mm_set1_epi16(BI_OFFSET_10BIT));
-				a1 = _mm_slli_epi16(a1, BI_SHIFT_10BIT);
-				a1 = _mm_sub_epi16(a1, _mm_set1_epi16(BI_OFFSET_10BIT));
+        colCount = puWidth;
+        do {
+            EB_U16 *qtr = dst;
+            EB_U16 *ptrSrc0 = list0Src;
+            EB_U16 *ptrSrc1 = list1Src;
+            rowCount = puHeight;
+            do {
+                a0 = _mm_loadu_si128((__m128i *)ptrSrc0);
+                a1 = _mm_loadu_si128((__m128i *)ptrSrc1);
+                ptrSrc0 += list0SrcStride;
+                ptrSrc1 += list1SrcStride;
+                a0 = _mm_slli_epi16(a0, BI_SHIFT_10BIT);
+                a0 = _mm_sub_epi16(a0, _mm_set1_epi16(BI_OFFSET_10BIT));
+                a1 = _mm_slli_epi16(a1, BI_SHIFT_10BIT);
+                a1 = _mm_sub_epi16(a1, _mm_set1_epi16(BI_OFFSET_10BIT));
 
-				a0 = _mm_adds_epi16(a0, a1);
-				a0 = _mm_adds_epi16(a0, _mm_set1_epi16(BI_AVG_OFFSET_10BIT));
-				a0 = _mm_srai_epi16(a0, BI_AVG_SHIFT_10BIT);
-				a0 = _mm_max_epi16(a0, _mm_setzero_si128());
+                a0 = _mm_adds_epi16(a0, a1);
+                a0 = _mm_adds_epi16(a0, _mm_set1_epi16(BI_AVG_OFFSET_10BIT));
+                a0 = _mm_srai_epi16(a0, BI_AVG_SHIFT_10BIT);
+                a0 = _mm_max_epi16(a0, _mm_setzero_si128());
 
-				a2 = _mm_loadu_si128((__m128i *)ptrSrc0);
-				a3 = _mm_loadu_si128((__m128i *)ptrSrc1);
-				ptrSrc0 += list0SrcStride;
-				ptrSrc1 += list1SrcStride;
-				a2 = _mm_slli_epi16(a2, BI_SHIFT_10BIT);
-				a2 = _mm_sub_epi16(a2, _mm_set1_epi16(BI_OFFSET_10BIT));
-				a3 = _mm_slli_epi16(a3, BI_SHIFT_10BIT);
-				a3 = _mm_sub_epi16(a3, _mm_set1_epi16(BI_OFFSET_10BIT));
-				a2 = _mm_adds_epi16(a2, a3);
-				a2 = _mm_adds_epi16(a2, _mm_set1_epi16(BI_AVG_OFFSET_10BIT));
-				a2 = _mm_srai_epi16(a2, BI_AVG_SHIFT_10BIT);
-				a2 = _mm_max_epi16(a2, _mm_setzero_si128());
+                a2 = _mm_loadu_si128((__m128i *)ptrSrc0);
+                a3 = _mm_loadu_si128((__m128i *)ptrSrc1);
+                ptrSrc0 += list0SrcStride;
+                ptrSrc1 += list1SrcStride;
+                a2 = _mm_slli_epi16(a2, BI_SHIFT_10BIT);
+                a2 = _mm_sub_epi16(a2, _mm_set1_epi16(BI_OFFSET_10BIT));
+                a3 = _mm_slli_epi16(a3, BI_SHIFT_10BIT);
+                a3 = _mm_sub_epi16(a3, _mm_set1_epi16(BI_OFFSET_10BIT));
+                a2 = _mm_adds_epi16(a2, a3);
+                a2 = _mm_adds_epi16(a2, _mm_set1_epi16(BI_AVG_OFFSET_10BIT));
+                a2 = _mm_srai_epi16(a2, BI_AVG_SHIFT_10BIT);
+                a2 = _mm_max_epi16(a2, _mm_setzero_si128());
 
-				_mm_storeu_si128((__m128i *)qtr, a0);
-				_mm_storeu_si128((__m128i *)(qtr + dstStride), a2);
-				qtr += 2 * dstStride;
+                _mm_storeu_si128((__m128i *)qtr, a0);
+                _mm_storeu_si128((__m128i *)(qtr + dstStride), a2);
+                qtr += 2 * dstStride;
 
-				rowCount -= 2;
-			} while (rowCount != 0);
+                rowCount -= 2;
+            } while (rowCount != 0);
 
-			colCount -= 8;
-			list0Src += 8;
-			list1Src += 8;
-			dst += 8;
-		} while (colCount != 0);
+            colCount -= 8;
+            list0Src += 8;
+            list1Src += 8;
+            dst += 8;
+        } while (colCount != 0);
 
-	}
+    }
 
 void LumaInterpolationFilterPose16bit_SSE2_INTRIN(
     EB_U16               *refPic,

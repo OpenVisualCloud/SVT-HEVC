@@ -1,4 +1,4 @@
-/* The copyright in this software is being made available under the BSD
+﻿/* The copyright in this software is being made available under the BSD
 * License, included below. This software may be subject to other third party
 * and contributor rights, including patent rights, and no such rights are
 * granted under this license.
@@ -41,18 +41,18 @@ extern "C" {
 
 
 EB_U64 Compute4x4Satd(
-	EB_S16 *diff);
+    EB_S16 *diff);
 
 
 EB_U64 Compute4x4Satd_U8(
-	EB_U8  *src,
-	EB_U64 *dcValue,
-	EB_U32  srcStride);
+    EB_U8  *src,
+    EB_U64 *dcValue,
+    EB_U32  srcStride);
 
 extern const EB_U32 NextStateMpsLps[];
 extern const EB_U32 CabacEstimatedBits[];
 
 #ifdef __cplusplus
 }
-#endif        
+#endif
 #endif // EbHmCode_h

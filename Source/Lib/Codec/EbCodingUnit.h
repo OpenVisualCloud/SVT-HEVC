@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -53,13 +53,13 @@ Requirements:
 struct PictureControlSet_s;
 
 #define MAX_CU_COST (0xFFFFFFFFFFFFFFFFull >> 1)
-#define INVALID_FAST_CANDIDATE_INDEX	~0
+#define INVALID_FAST_CANDIDATE_INDEX    ~0
 
-#define MAX_OIS_0   7 // when I Slice 
-#define MAX_OIS_1   9 // when P/B Slice and oisKernelLevel = 0 
-#define MAX_OIS_2  18 // when P/B Slice and oisKernelLevel = 1 
+#define MAX_OIS_0   7 // when I Slice
+#define MAX_OIS_1   9 // when P/B Slice and oisKernelLevel = 0
+#define MAX_OIS_2  18 // when P/B Slice and oisKernelLevel = 1
 
-typedef struct CodingUnit_s 
+typedef struct CodingUnit_s
 {
     TransformUnit_t             transformUnitArray[TRANSFORM_UNIT_MAX_COUNT]; // 2-bytes * 21 = 42-bytes
     PredictionUnit_t            predictionUnitArray[MAX_NUM_OF_PU_PER_CU];    // 35-bytes * 4 = 140 bytes
@@ -71,18 +71,18 @@ typedef struct CodingUnit_s
     unsigned                    qp                          : 6;
     unsigned                    refQp                       : 6;
 
-	signed 						deltaQp						: 8; // can be signed 8bits
-	signed 						orgDeltaQp					: 8;
+    signed                         deltaQp                        : 8; // can be signed 8bits
+    signed                         orgDeltaQp                    : 8;
 
 
 
         // Coded Tree
-	struct {
-		unsigned                   leafIndex : 8;
-		unsigned                   splitFlag : 1;
-		unsigned                   skipFlag  : 1;
+    struct {
+        unsigned                   leafIndex : 8;
+        unsigned                   splitFlag : 1;
+        unsigned                   skipFlag  : 1;
 
-	};
+    };
 
 } CodingUnit_t;
 
@@ -99,7 +99,7 @@ typedef struct OisCandidate_s {
     };
 } OisCandidate_t;
 
-typedef struct OisLcuResults_s 
+typedef struct OisLcuResults_s
 {
     EB_U8           totalIntraLumaMode[CU_MAX_COUNT];
     OisCandidate_t  sortedOisCandidate[CU_MAX_COUNT][MAX_OIS_2];
@@ -109,24 +109,24 @@ typedef struct OisLcuResults_s
 
 typedef struct OisCu32Cu16Results_s
 {
-	EB_U8            totalIntraLumaMode[21]; 
-	OisCandidate_t*  sortedOisCandidate[21];   
-	
+    EB_U8            totalIntraLumaMode[21];
+    OisCandidate_t*  sortedOisCandidate[21];
+
 } OisCu32Cu16Results_t;
 
 typedef struct OisCu8Results_s
 {
-	EB_U8            totalIntraLumaMode[64];
-	OisCandidate_t*  sortedOisCandidate[64];
+    EB_U8            totalIntraLumaMode[64];
+    OisCandidate_t*  sortedOisCandidate[64];
 
 } OisCu8Results_t;
 
 
 typedef struct SaoStats_s {
 
-   	EB_S32                        **boDiff;
+       EB_S32                        **boDiff;
     EB_U16                        **boCount;
-	EB_S32                          eoDiff[3][SAO_EO_TYPES][SAO_EO_CATEGORIES+1];
+    EB_S32                          eoDiff[3][SAO_EO_TYPES][SAO_EO_CATEGORIES+1];
     EB_U16                          eoCount[3][SAO_EO_TYPES][SAO_EO_CATEGORIES+1];
     EB_S32                         *eoDiff1D;
     EB_U32                         *eoCount1D;
@@ -138,7 +138,7 @@ typedef struct SaoParameters_s {
     // SAO
     EB_BOOL                         saoMergeLeftFlag;
     EB_BOOL                         saoMergeUpFlag;
-    EB_U32                          saoTypeIndex[2]; 
+    EB_U32                          saoTypeIndex[2];
     EB_S32                          saoOffset[3][4];
     EB_U32                          saoBandPosition[3];
 
@@ -146,26 +146,26 @@ typedef struct SaoParameters_s {
 
 typedef struct QpmLcuResults_s {
     EB_U8  cuQP;
-	EB_U8  cuIntraQP;
+    EB_U8  cuIntraQP;
     EB_U8  cuInterQP;
     EB_S8  deltaQp;
-	EB_S8  innerLcuCudeltaQp;
+    EB_S8  innerLcuCudeltaQp;
 
 } QpmLcuResults_t;
 
 
 typedef struct EdgeLcuResults_s {
     EB_U8  edgeBlockNum;
-	EB_U8  isolatedHighIntensityLcu;
+    EB_U8  isolatedHighIntensityLcu;
 
 } EdgeLcuResults_t;
 
 typedef struct LargestCodingUnit_s {
     struct PictureControlSet_s     *pictureControlSetPtr;
-    CodingUnit_t                  **codedLeafArrayPtr; 
-    
-    // Coding Units   
-    EB_AURA_STATUS                  auraStatus; 
+    CodingUnit_t                  **codedLeafArrayPtr;
+
+    // Coding Units
+    EB_AURA_STATUS                  auraStatus;
 
     unsigned     qp                                 : 8;
     unsigned     size                               : 8;
@@ -191,7 +191,7 @@ typedef struct LargestCodingUnit_s {
     EB_U8                           intra4x4Mode[256];
     EB_U8                           preMdcRefinementLevel;
 
-	EB_U8							chromaEncodeMode;
+    EB_U8                            chromaEncodeMode;
 
     EB_INTRA4x4_SEARCH_METHOD       intra4x4SearchMethod;
 #if TILES
