@@ -2603,7 +2603,7 @@ void* RateControlKernel(void *inputPtr)
                         pictureControlSetPtr->pictureQp);
                 }
             }
-            if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize)
+            if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize && sequenceControlSetPtr->staticConfig.lookAheadDistance > 0)
             {
                 EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
                 pictureControlSetPtr->pictureQp = (EB_U8)Vbv_Buf_Calc(pictureControlSetPtr, sequenceControlSetPtr, encodeContextPtr);
