@@ -221,6 +221,19 @@ void* PacketizationKernel(void *inputPtr)
         }
         sliceType = pictureControlSetPtr->sliceType;
         
+        if (sequenceControlSetPtr->profileIdc == 0)
+        {
+            // Compute Profile Tier and Level Information
+            ComputeProfileTierLevelInfo(
+                sequenceControlSetPtr);
+
+            ComputeMaxDpbBuffer(
+                sequenceControlSetPtr);
+
+            if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
+                InitHRD(sequenceControlSetPtr);
+        }
+
         if(pictureControlSetPtr->pictureNumber == 0 && sequenceControlSetPtr->staticConfig.codeVpsSpsPps == 1) {
 
             // Reset the bitstream before writing to it
@@ -235,18 +248,7 @@ void* PacketizationKernel(void *inputPtr)
                     pictureControlSetPtr->temporalId);
             }
 
-            // Compute Profile Tier and Level Information
-            ComputeProfileTierLevelInfo(
-                sequenceControlSetPtr);
-                            
-          
-			ComputeMaxDpbBuffer(
-                sequenceControlSetPtr);
-
-            if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
-                InitHRD(sequenceControlSetPtr);
-
-			// Code the VPS
+            // Code the VPS
             EncodeVPS(
                 pictureControlSetPtr->bitstreamPtr,
                 sequenceControlSetPtr);
