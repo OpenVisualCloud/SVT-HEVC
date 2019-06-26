@@ -278,8 +278,8 @@ typedef struct EbConfig_s
      *****************************************/
     uint32_t                 baseLayerSwitchMode;
     uint8_t                  encMode;
-    int32_t                 intraPeriod;
-    uint32_t                 intraRefreshType;
+    int32_t                  intraPeriod;
+    int32_t                  intraRefreshType;
 	uint32_t                 hierarchicalLevels;
 	uint32_t                 predStructure;
 

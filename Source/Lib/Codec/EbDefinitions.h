@@ -499,9 +499,8 @@ typedef struct EB_H265_DYN_ENC_CONFIGURATION
 /** The EB_INTRA_REFRESH_TYPE is used to describe the intra refresh type.
 */
 typedef enum EB_INTRA_REFRESH_TYPE {
-    NO_REFRESH = 0,
-    CRA_REFRESH = 1,
-    IDR_REFRESH = 2
+    CRA_REFRESH = -1,
+    IDR_REFRESH = 0
 }EB_INTRA_REFRESH_TYPE;
 
 #if defined(_MSC_VER)

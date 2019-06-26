@@ -590,7 +590,6 @@ typedef struct PictureParentControlSet_s
     EB_BOOL                               enableHmeLevel1Flag;
     EB_BOOL                               enableHmeLevel2Flag;
 	EB_BOOL                               disableVarianceFlag;
-
 } PictureParentControlSet_t;
 
 

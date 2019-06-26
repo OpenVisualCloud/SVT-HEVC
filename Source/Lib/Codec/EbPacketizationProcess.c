@@ -75,6 +75,9 @@ void* PacketizationKernel(void *inputPtr)
     EB_PICTURE                      sliceType;
     EB_U16                          tileIdx;
     EB_U16                          tileCnt;
+
+    EB_S32                          idrCount = 0;
+    EB_BOOL                         toInsertHeaders = EB_FALSE;
     
     for(;;) {
     
@@ -126,9 +129,23 @@ void* PacketizationKernel(void *inputPtr)
         rateControlTasksPtr->taskType                       = RC_PACKETIZATION_FEEDBACK_RESULT;
         
         sliceType = pictureControlSetPtr->sliceType;
-        
-        if(pictureControlSetPtr->pictureNumber == 0 && sequenceControlSetPtr->staticConfig.codeVpsSpsPps == 1) {
 
+        if (pictureControlSetPtr->pictureNumber == 0) {
+            idrCount = 0;
+            toInsertHeaders = EB_TRUE;
+        } else if ((sliceType == EB_I_PICTURE) && (sequenceControlSetPtr->intraRefreshType >= IDR_REFRESH)) {
+            if (idrCount >= sequenceControlSetPtr->intraRefreshType) {
+                idrCount = 0;
+                toInsertHeaders = EB_TRUE;
+            } else {
+                ++idrCount;
+                toInsertHeaders = EB_FALSE;
+            }
+        } else {
+            toInsertHeaders = EB_FALSE;
+        }
+
+        if(sequenceControlSetPtr->staticConfig.codeVpsSpsPps && toInsertHeaders) {
             // Reset the bitstream before writing to it
             ResetBitstream(
                 pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
