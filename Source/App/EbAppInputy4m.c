@@ -46,10 +46,10 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
 	assert(fresult != NULL);
 
 	/* print header */
-	if (PRINT_HEADER) {
+#ifdef PRINT_HEADER
 		printf("y4m header:");
 		fputs(buffer, stdout);
-	}
+#endif
 
 	/* read header parameters */
 	for (tokstart = &(buffer[0]); *tokstart != '\0'; tokstart++) {
@@ -58,14 +58,16 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
 		switch (*tokstart++) {
 		case 'W': /* width, required. */
 			width = (uint32_t)strtol(tokstart, &tokend, 10);
-			if (PRINT_HEADER)
+#ifdef PRINT_HEADER
 				printf("width = %d\n", width);
+#endif
 			tokstart = tokend;
 			break;
 		case 'H': /* height, required. */
 			height = (uint32_t)strtol(tokstart, &tokend, 10);
-			if (PRINT_HEADER)
+#ifdef PRINT_HEADER
 				printf("height = %d\n", height);
+#endif
 			tokstart = tokend;
 			break;
 		case 'I': /* scan type, not required, default: 'p' */
@@ -87,8 +89,9 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
 				fprintf(cfg->errorLogFile, "interlace type not supported\n");
 				return EB_ErrorBadParameter;
 			}
-			if (PRINT_HEADER)
+#ifdef PRINT_HEADER
 				printf("scan_type = %c\n", scan_type);
+#endif
 			break;
 		case 'C': /* color space, not required: default "420" */
 			tokstart = copyUntilCharacterOrNewLine(tokstart, format_str, 0x20);
@@ -207,8 +210,9 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
 				fprintf(cfg->errorLogFile, "chroma format not supported\n");
 				return EB_ErrorBadParameter;
 			}
-			if (PRINT_HEADER)
+#ifdef PRINT_HEADER
 				printf("chroma = %s, bitdepth = %d\n", chroma, bitdepth);
+#endif
 			break;
 		case 'F': /* frame rate, required */
 			tokstart = copyUntilCharacterOrNewLine(tokstart, format_str, ':');
@@ -216,10 +220,10 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
 			tokstart++;
 			tokstart = copyUntilCharacterOrNewLine(tokstart, format_str, 0x20);
 			fr_d = (uint32_t)strtol(format_str, (char **)NULL, 10);
-			if (PRINT_HEADER) {
+#ifdef PRINT_HEADER
 				printf("framerate_n = %d\n", fr_n);
 				printf("framerate_d = %d\n", fr_d);
-			}
+#endif
 			break;
 		case 'A': /* aspect ratio, not required */
 			tokstart = copyUntilCharacterOrNewLine(tokstart, format_str, ':');
@@ -227,10 +231,10 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
 			tokstart++;
 			tokstart = copyUntilCharacterOrNewLine(tokstart, format_str, 0x20);
 			aspect_d = (uint32_t)strtol(format_str, (char **)NULL, 10);
-			if (PRINT_HEADER) {
+#ifdef PRINT_HEADER
 				printf("aspect_n = %d\n", aspect_n);
 				printf("aspect_d = %d\n", aspect_d);
-			}
+#endif
 			break;
 		default:
 			break;
