@@ -8351,7 +8351,7 @@ EB_ERRORTYPE CodeBufferingPeriodSEI(
 		WriteCodeCavlc(
 			bitstreamPtr,
 			bufferingPeriodPtr->cpbDelayOffset,
-			vuiPtr->hrdParametersPtr->initialCpbRemovalDelayLengthMinus1 + 1);
+			vuiPtr->hrdParametersPtr->auCpbRemovalDelayLengthMinus1 + 1);
 		// dpb_delay_offset
 		WriteCodeCavlc(
 			bitstreamPtr,
@@ -8368,7 +8368,7 @@ EB_ERRORTYPE CodeBufferingPeriodSEI(
 	WriteCodeCavlc(
 		bitstreamPtr,
 		bufferingPeriodPtr->auCpbRemovalDelayDeltaMinus1,
-		vuiPtr->hrdParametersPtr->initialCpbRemovalDelayLengthMinus1 + 1);
+		vuiPtr->hrdParametersPtr->auCpbRemovalDelayLengthMinus1 + 1);
 
 	for (nalVclIndex = 0; nalVclIndex < 2; ++nalVclIndex){
 		if ((nalVclIndex == 0 && vuiPtr->hrdParametersPtr->nalHrdParametersPresentFlag) ||
