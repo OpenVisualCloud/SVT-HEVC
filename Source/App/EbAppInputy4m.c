@@ -47,8 +47,8 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
 
 	/* print header */
 #ifdef PRINT_HEADER
-		printf("y4m header:");
-		fputs(buffer, stdout);
+    printf("y4m header:");
+    fputs(buffer, stdout);
 #endif
 
 	/* read header parameters */
