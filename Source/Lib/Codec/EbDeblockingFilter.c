@@ -3536,7 +3536,7 @@ void LCUPictureEdgeDLFCore(
 	EB_U32  blk4x4Addr;
 	EB_U32  blk2x2Addr;
 	EB_U32  pictureWidthInLcu;
-	EB_U32  pictureHeightInLcu;
+	//EB_U32  pictureHeightInLcu;
 	EB_U32  tileWidthInPxl;
 	EB_U32  tileHeightInPxl;
 	EB_U32  tileWidthEndInLcu;
@@ -3572,7 +3572,7 @@ void LCUPictureEdgeDLFCore(
 	LargestCodingUnit_t   *lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuIdx];
 
 	pictureWidthInLcu = (sequenceControlSet->lumaWidth + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
-	pictureHeightInLcu = (sequenceControlSet->lumaHeight + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
+	//pictureHeightInLcu = (sequenceControlSet->lumaHeight + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
 	tileWidthEndInLcu = (lcuPtr->tileEndX + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
 	tileHeightEndInLcu = (lcuPtr->tileEndY + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
     tileWidthInPxl = lcuPtr->tileEndX - lcuPtr->tileOriginX;
@@ -3938,7 +3938,7 @@ void LCUPictureEdgeDLFCore16bit(
 	EB_U32  blk4x4Addr;
 	EB_U32  blk2x2Addr;
 	EB_U32  pictureWidthInLcu;
-	EB_U32  pictureHeightInLcu;
+	//EB_U32  pictureHeightInLcu;
 
 	EB_U32  tileWidthInPxl;
 	EB_U32  tileHeightInPxl;
@@ -3976,7 +3976,7 @@ void LCUPictureEdgeDLFCore16bit(
 	LargestCodingUnit_t   *lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuIdx];
 
 	pictureWidthInLcu = (sequenceControlSet->lumaWidth + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
-	pictureHeightInLcu = (sequenceControlSet->lumaHeight + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
+	//pictureHeightInLcu = (sequenceControlSet->lumaHeight + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
 	tileWidthEndInLcu = (lcuPtr->tileEndX + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
 	tileHeightEndInLcu = (lcuPtr->tileEndY + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
     tileWidthInPxl = lcuPtr->tileEndX - lcuPtr->tileOriginX;

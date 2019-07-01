@@ -252,6 +252,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
     LastRowLcu = (lcuPtr->tileEndY <= lcuPtr->originY + MAX_LCU_SIZE);
 
     (void)bitDepth;
+    (void)pictureWidth;
     lcuHeightCount = 0;
 
     ReorderedsaoOffset[0] = (EB_S8)saoPtr->saoOffset[videoComponent][0];
@@ -795,6 +796,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
     LastRowLcu = (lcuPtr->tileEndY <= lcuPtr->originY + MAX_LCU_SIZE);
 
     (void)bitDepth;
+    (void)pictureWidth;
     lcuHeightCount = 0;
 
     ReorderedsaoOffset[0] = (EB_S8)saoPtr->saoOffset[videoComponent][0];
@@ -3877,7 +3879,7 @@ void* EncDecKernel(void *inputPtr)
         tileRowIndex = encDecTasksPtr->tileRowIndex;
 
         segmentsPtr = pictureControlSetPtr->encDecSegmentCtrl[tileRowIndex];
-        tileX = 0;
+        (void)tileX;
         tileY = tileRowIndex;
 
         contextPtr->tileRowIndex = tileRowIndex;
