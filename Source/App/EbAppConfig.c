@@ -37,11 +37,9 @@
 #define BASE_LAYER_SWITCH_MODE_TOKEN    "-base-layer-switch-mode" // no Eval
 #define QP_TOKEN                        "-q"
 #define USE_QP_FILE_TOKEN               "-use-q-file"
-#if 1//TILES
 #define TILE_ROW_COUNT_TOKEN            "-tile_row_cnt"
 #define TILE_COL_COUNT_TOKEN            "-tile_col_cnt"
 #define TILE_SLICE_MODE_TOKEN           "-tile_slice_mode"
-#endif
 #define TUNE_TOKEN                      "-tune"
 #define FRAME_RATE_TOKEN                "-fps"
 #define FRAME_RATE_NUMERATOR_TOKEN      "-fps-num"
@@ -196,11 +194,9 @@ static void SetHierarchicalLevels               (const char *value, EbConfig_t *
 static void SetCfgPredStructure                 (const char *value, EbConfig_t *cfg) {cfg->predStructure                    = strtol(value, NULL, 0); };
 static void SetCfgQp                            (const char *value, EbConfig_t *cfg) {cfg->qp                               = strtoul(value, NULL, 0);};
 static void SetCfgUseQpFile                     (const char *value, EbConfig_t *cfg) {cfg->useQpFile                        = (EB_BOOL)strtol(value, NULL, 0); };
-#if 1//TILES
 static void SetCfgTileColumnCount               (const char *value, EbConfig_t *cfg) { cfg->tileColumnCount                 = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetCfgTileRowCount                  (const char *value, EbConfig_t *cfg) { cfg->tileRowCount                    = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetCfgTileSliceMode                 (const char *value, EbConfig_t *cfg) { cfg->tileSliceMode                   = (EB_BOOL)strtol(value, NULL, 0); };
-#endif
 static void SetDisableDlfFlag                   (const char *value, EbConfig_t *cfg) {cfg->disableDlfFlag                   = (EB_BOOL)strtoul(value, NULL, 0);};
 static void SetEnableSaoFlag                    (const char *value, EbConfig_t *cfg) {cfg->enableSaoFlag                    = (EB_BOOL)strtoul(value, NULL, 0);};
 static void SetEnableHmeFlag                    (const char *value, EbConfig_t *cfg) {cfg->enableHmeFlag                    = (EB_BOOL)strtoul(value, NULL, 0);};
@@ -288,11 +284,9 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, USE_QP_FILE_TOKEN, "UseQpFile", SetCfgUseQpFile },
     { SINGLE_INPUT, QP_FILE_TOKEN, "QpFile", SetCfgQpFile },
 
-#if 1//TILES
      { SINGLE_INPUT, TILE_ROW_COUNT_TOKEN, "TileRowCount", SetCfgTileRowCount },
      { SINGLE_INPUT, TILE_COL_COUNT_TOKEN, "TileColumnCount", SetCfgTileColumnCount },
      { SINGLE_INPUT, TILE_SLICE_MODE_TOKEN, "TileSliceMode", SetCfgTileSliceMode },
-#endif
 
     // Encoding Presets
     { SINGLE_INPUT, ENCMODE_TOKEN, "EncoderMode", SetencMode },
@@ -426,11 +420,9 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->useQpFile                                = EB_FALSE;
     configPtr->qpFile                                   = NULL;
 
-#if 1//TILES
     configPtr->tileColumnCount                          = 1;
     configPtr->tileRowCount                             = 1;
     configPtr->tileSliceMode                            = 0;
-#endif
     configPtr->sceneChangeDetection                 = 1;
     configPtr->rateControlMode                      = 0;
     configPtr->lookAheadDistance                    = (uint32_t)~0;
@@ -923,7 +915,6 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         return_error = EB_ErrorBadParameter;
     }
 
-#if 1//TILES
 
 #define MAX_LCU_SIZE                                64
     
@@ -972,7 +963,6 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         }
 
     }   
-#endif
 
     if (config->separateFields > 1) {
         fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid SeperateFields Input\n", channelNumber + 1);

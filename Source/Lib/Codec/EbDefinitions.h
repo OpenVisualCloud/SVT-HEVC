@@ -6,6 +6,8 @@
 #ifndef EbDefinitions_h
 #define EbDefinitions_h
 
+//#define BENCHMARK 0
+#define LATENCY_PROFILE 0
 #include "EbApi.h"
 #ifdef __cplusplus
 extern "C" {
@@ -52,15 +54,12 @@ extern "C" {
 #endif  /* _ERRNO_T_DEFINED */
 
 
-#define  TILES    1  //enable TILES.
 
 
-
-#if TILES
 //Maximum 8192x4320
-#define EB_TILE_COLUMN_MAX_COUNT                    32
-#define EB_TILE_ROW_MAX_COUNT                       68
-#endif
+#define EB_TILE_COLUMN_MAX_COUNT                    20u
+#define EB_TILE_ROW_MAX_COUNT                       22u
+#define EB_TILE_MAX_COUNT                           440u
 
 #define EB_MIN(a,b)             (((a) < (b)) ? (a) : (b))
 

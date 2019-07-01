@@ -267,6 +267,8 @@ typedef struct ModeDecisionContext_s
     EB_U8                           nflLevelMd;
     EB_U8                           nflLevelPillar8x8ref;
     EB_U8                           nflLevelMvMerge64x64ref;
+
+    EB_U16                          tileIndex;
 } ModeDecisionContext_t;
 
 typedef void(*EB_LAMBDA_ASSIGN_FUNC)(
@@ -291,8 +293,9 @@ extern EB_ERRORTYPE ModeDecisionContextCtor(
     EB_BOOL                  is16bit);
 
 
-extern void ResetModeDecisionNeighborArrays(PictureControlSet_t *pictureControlSetPtr);
-
+//extern void ResetModeDecisionNeighborArrays(
+//        PictureControlSet_t *pictureControlSetPtr,
+//        EB_U32 tileIndex);
 
 extern void  ApplyIntraInterModeBias(
     EB_BOOL                        intraInterCond1,
@@ -306,6 +309,7 @@ extern void ProductResetModeDecision(
     ModeDecisionContext_t   *contextPtr,
     PictureControlSet_t     *pictureControlSetPtr,
     SequenceControlSet_t    *sequenceControlSetPtr,
+    EB_U32                   tileRowIndex,
     EB_U32                   segmentIndex);
 extern void ModeDecisionConfigureLcu(
     ModeDecisionContext_t   *contextPtr,

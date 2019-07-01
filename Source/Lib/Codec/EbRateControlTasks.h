@@ -32,6 +32,7 @@ typedef struct RateControlTasks_s
 
     // Following are valid for RC_ENTROPY_CODING_ROW_FEEDBACK_RESULT only
     EB_U64                              pictureNumber;
+    EB_U16                              tileIndex;
     EB_U32                              rowNumber;
     EB_U32                              bitCount;
     
