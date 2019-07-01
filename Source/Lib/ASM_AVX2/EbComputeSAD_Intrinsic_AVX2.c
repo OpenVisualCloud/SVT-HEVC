@@ -67,7 +67,7 @@ void SadLoopKernel_AVX2_INTRIN(
           pRef = ref + j;
           ss3 = ss5 = _mm256_setzero_si256();
           for (k=0; k<height; k+=4) {
-			ss0 = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_loadu_si128((__m128i*)(pRef + 2 * refStride))), _mm_loadu_si128((__m128i*)pRef), 0x1);
+			ss0 = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_loadu_si128((__m128i*)(pRef))), _mm_loadu_si128((__m128i*)(pRef + 2 * refStride)), 0x1);
 			ss1 = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_loadu_si128((__m128i*)(pRef + refStride))), _mm_loadu_si128((__m128i*)(pRef + refStrideT)), 0x1);
 			ss2 = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_unpacklo_epi64(_mm_cvtsi32_si128(*(EB_U32 *)pSrc), _mm_cvtsi32_si128(*(EB_U32 *)(pSrc + srcStride)))), _mm_unpacklo_epi64(_mm_cvtsi32_si128(*(EB_U32 *)(pSrc + 2 * srcStride)), _mm_cvtsi32_si128(*(EB_U32 *)(pSrc + srcStrideT))), 0x1);
             ss3 = _mm256_adds_epu16(ss3, _mm256_mpsadbw_epu8(ss0, ss2, 0));
@@ -1660,6 +1660,40 @@ EB_U32 Compute32xMSad_AVX2_INTRIN(
 /*******************************************************************************
 * Requirement: height % 2 = 0
 *******************************************************************************/
+EB_U32 Compute40xMSad_AVX2_INTRIN(
+        EB_U8  *src,        // input parameter, source samples Ptr
+        EB_U32  srcStride,  // input parameter, source stride
+        EB_U8  *ref,        // input parameter, reference samples Ptr
+        EB_U32  refStride,  // input parameter, reference stride
+        EB_U32  height,     // input parameter, block height (M)
+        EB_U32  width)     // input parameter, block width (N)
+{
+        __m128i xmm0, xmm1;
+        __m256i ymm0, ymm1;
+        EB_U32 y;
+        (void)width;
+
+        ymm0 = ymm1 = _mm256_setzero_si256();
+        xmm0 = xmm1 = _mm_setzero_si128();
+        for (y = 0; y < height; y += 2) {
+                ymm0 = _mm256_add_epi32(ymm0, _mm256_sad_epu8(_mm256_loadu_si256((__m256i*)src), _mm256_loadu_si256((__m256i*)ref)));
+                xmm0 = _mm_add_epi16(xmm0, _mm_sad_epu8(_mm_loadl_epi64((__m128i*)(src + 32)), _mm_loadl_epi64((__m128i*)(ref + 32))));
+                ymm1 = _mm256_add_epi32(ymm1, _mm256_sad_epu8(_mm256_loadu_si256((__m256i*)(src + srcStride)), _mm256_loadu_si256((__m256i*)(ref + refStride))));
+                xmm1 = _mm_add_epi16(xmm1, _mm_sad_epu8(_mm_loadl_epi64((__m128i*)(src + srcStride + 32)), _mm_loadl_epi64((__m128i*)(ref + refStride + 32))));
+
+                src += srcStride << 1;
+                ref += refStride << 1;
+        }
+        ymm0 = _mm256_add_epi32(ymm0, ymm1);
+        xmm0 = _mm_add_epi32(xmm0, xmm1);
+        xmm0 = _mm_add_epi32(xmm0, _mm_add_epi32(_mm256_extracti128_si256(ymm0, 0), _mm256_extracti128_si256(ymm0, 1)));
+        xmm0 = _mm_add_epi32(xmm0, _mm_srli_si128(xmm0, 8));
+        return _mm_extract_epi32(xmm0, 0);
+}
+
+/*******************************************************************************
+* Requirement: height % 2 = 0
+*******************************************************************************/
 EB_U32 Compute48xMSad_AVX2_INTRIN(
 	EB_U8  *src,        // input parameter, source samples Ptr
 	EB_U32  srcStride,  // input parameter, source stride
@@ -1688,6 +1722,42 @@ EB_U32 Compute48xMSad_AVX2_INTRIN(
 	xmm0 = _mm_add_epi32(xmm0, _mm_add_epi32(_mm256_extracti128_si256(ymm0, 0), _mm256_extracti128_si256(ymm0, 1)));
 	xmm0 = _mm_add_epi32(xmm0, _mm_srli_si128(xmm0, 8));
 	return _mm_extract_epi32(xmm0, 0);
+}
+
+/*******************************************************************************
+* Requirement: height % 2 = 0
+*******************************************************************************/
+EB_U32 Compute56xMSad_AVX2_INTRIN(
+        EB_U8  *src,        // input parameter, source samples Ptr
+        EB_U32  srcStride,  // input parameter, source stride
+        EB_U8  *ref,        // input parameter, reference samples Ptr
+        EB_U32  refStride,  // input parameter, reference stride
+        EB_U32  height,     // input parameter, block height (M)
+        EB_U32  width)     // input parameter, block width (N)
+{
+        __m128i xmm0, xmm1;
+        __m256i ymm0, ymm1, ymm2, ymm3;
+        EB_U32 y;
+        (void)width;
+
+        ymm0 = ymm1 = ymm2 = ymm3 = _mm256_setzero_si256();
+        for (y = 0; y < height; y += 2) {
+                ymm0 = _mm256_add_epi32(ymm0, _mm256_sad_epu8(_mm256_loadu_si256((__m256i*)src), _mm256_loadu_si256((__m256i*)ref)));
+                ymm1 = _mm256_add_epi32(ymm1, _mm256_sad_epu8(_mm256_loadu_si256((__m256i*)(src + 32)), _mm256_loadu_si256((__m256i*)(ref + 32))));
+                ymm2 = _mm256_add_epi32(ymm2, _mm256_sad_epu8(_mm256_loadu_si256((__m256i*)(src + srcStride)), _mm256_loadu_si256((__m256i*)(ref + refStride))));
+                ymm3 = _mm256_add_epi32(ymm3, _mm256_sad_epu8(_mm256_loadu_si256((__m256i*)(src + srcStride + 32)), _mm256_loadu_si256((__m256i*)(ref + refStride + 32))));
+
+                src += srcStride << 1;
+                ref += refStride << 1;
+        }
+        ymm0 = _mm256_add_epi32(ymm0, ymm2);
+        xmm0 = _mm_add_epi32(_mm256_extracti128_si256(ymm0, 0), _mm256_extracti128_si256(ymm0, 1));
+
+        xmm0 = _mm_add_epi32(xmm0, _mm_add_epi32(_mm256_extracti128_si256(ymm1, 0), _mm256_extracti128_si256(ymm3, 0)));
+        xmm1 = _mm_add_epi32(_mm256_extracti128_si256(ymm1, 1), _mm256_extracti128_si256(ymm3, 1)); 
+
+        xmm0 = _mm_add_epi32(_mm_add_epi32(xmm0, _mm_srli_si128(xmm0, 8)), xmm1);
+       return _mm_extract_epi32(xmm0, 0);
 }
 
 /*******************************************************************************
