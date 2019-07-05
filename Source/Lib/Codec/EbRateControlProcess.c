@@ -612,7 +612,9 @@ void HighLevelRcInputPictureMode2(
                     hlRateControlHistogramPtrTemp->predBitsRefQp[refQpIndexTemp] = 0;
 
                     if (refQpTableIndex == previousSelectedRefQp){
+                        EbBlockOnMutex(sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueueMutex);
                         hlRateControlHistogramPtrTemp->lifeCount--;
+                        EbReleaseMutex(sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueueMutex);
                     }
                     if (hlRateControlHistogramPtrTemp->isCoded){
                         // If the frame is already coded, use the actual number of bits
