@@ -4,7 +4,6 @@
 */
 
 #include <stdlib.h>
-
 #include "EbEntropyCodingProcess.h"
 #include "EbTransforms.h"
 #include "EbEncDecResults.h"
@@ -29,6 +28,7 @@ EB_ERRORTYPE EntropyCodingContextCtor(
 
     // Input/Output System Resource Manager FIFOs
     contextPtr->encDecInputFifoPtr          = encDecInputFifoPtr;
+    //contextPtr->encDecInputFifoPtr->dbg_info = &contextPtr->debug_info;
     contextPtr->entropyCodingOutputFifoPtr  = packetizationOutputFifoPtr;
     contextPtr->rateControlOutputFifoPtr    = rateControlOutputFifoPtr;
 
@@ -38,12 +38,12 @@ EB_ERRORTYPE EntropyCodingContextCtor(
 /***********************************************
  * Entropy Coding Reset Neighbor Arrays
  ***********************************************/
-static void EntropyCodingResetNeighborArrays(PictureControlSet_t *pictureControlSetPtr)
+static void EntropyCodingResetNeighborArrays(PictureControlSet_t *pictureControlSetPtr, EB_U16 tileIdx)
 {
-    NeighborArrayUnitReset(pictureControlSetPtr->modeTypeNeighborArray);
-    NeighborArrayUnitReset(pictureControlSetPtr->leafDepthNeighborArray);
-    NeighborArrayUnitReset(pictureControlSetPtr->skipFlagNeighborArray);
-    NeighborArrayUnitReset(pictureControlSetPtr->intraLumaModeNeighborArray);
+    NeighborArrayUnitReset(pictureControlSetPtr->modeTypeNeighborArray[tileIdx]);
+    NeighborArrayUnitReset(pictureControlSetPtr->leafDepthNeighborArray[tileIdx]);
+    NeighborArrayUnitReset(pictureControlSetPtr->intraLumaModeNeighborArray[tileIdx]);
+    NeighborArrayUnitReset(pictureControlSetPtr->skipFlagNeighborArray[tileIdx]);
 
     return;
 }
@@ -56,7 +56,12 @@ static void ResetEntropyCodingPicture(
 	PictureControlSet_t     *pictureControlSetPtr,
 	SequenceControlSet_t    *sequenceControlSetPtr)
 {
-    ResetBitstream(EntropyCoderGetBitstreamPtr(pictureControlSetPtr->entropyCoderPtr));
+    EB_U32 tileCnt = pictureControlSetPtr->tileRowCount * pictureControlSetPtr->tileColumnCount;
+    EB_U32 tileIdx = 0;
+
+    for (tileIdx = 0; tileIdx < tileCnt; tileIdx++) {
+        ResetBitstream(EntropyCoderGetBitstreamPtr(pictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCoderPtr));
+    }
 
 	EB_U32                       entropyCodingQp;
 
@@ -84,16 +89,19 @@ static void ResetEntropyCodingPicture(
 
 	// Reset CABAC Contexts
 	// Reset QP Assignement
-	pictureControlSetPtr->prevCodedQp = pictureControlSetPtr->pictureQp;
-	pictureControlSetPtr->prevQuantGroupCodedQp = pictureControlSetPtr->pictureQp;
+    for (tileIdx = 0; tileIdx < tileCnt; tileIdx++) {
+        pictureControlSetPtr->prevCodedQp[tileIdx] = pictureControlSetPtr->pictureQp;
+        pictureControlSetPtr->prevQuantGroupCodedQp[tileIdx] = pictureControlSetPtr->pictureQp;
 
-	ResetEntropyCoder(
-		sequenceControlSetPtr->encodeContextPtr,
-		pictureControlSetPtr->entropyCoderPtr,
-		entropyCodingQp,
-		pictureControlSetPtr->sliceType);
+        ResetEntropyCoder(
+                sequenceControlSetPtr->encodeContextPtr,
+                pictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCoderPtr,
+                entropyCodingQp,
+                pictureControlSetPtr->sliceType);
+	
+        EntropyCodingResetNeighborArrays(pictureControlSetPtr, tileIdx);
+    }
 
-	EntropyCodingResetNeighborArrays(pictureControlSetPtr);
 
     return;
 }
@@ -129,6 +137,7 @@ static void EntropyCodingLcu(
     EB_U32                             lcuOriginX,
     EB_U32                             lcuOriginY,
     EB_BOOL                            terminateSliceFlag,
+    EB_U16                             tileIdx,
     EB_U32                             pictureOriginX,
     EB_U32                             pictureOriginY)
 {
@@ -138,23 +147,23 @@ static void EntropyCodingLcu(
     //rate Control
     EB_U32                       writtenBitsBeforeQuantizedCoeff;
     EB_U32                       writtenBitsAfterQuantizedCoeff;
-
+    EntropyCoder_t               *entropyCoderPtr = pictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCoderPtr;
     //store the number of written bits before coding quantized coeffs (flush is not called yet): 
     // The total number of bits is 
     // number of written bits
     // + 32  - bits remaining in interval Low Value
     // + number of buffered byte * 8
     // This should be only for coeffs not any flag
-    writtenBitsBeforeQuantizedCoeff =  ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->entropyCoderPtr))->writtenBitsCount +
-                                        32 - ((CabacEncodeContext_t*) pictureControlSetPtr->entropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
-                                        (((CabacEncodeContext_t*) pictureControlSetPtr->entropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum <<3);
+    writtenBitsBeforeQuantizedCoeff =  ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(entropyCoderPtr))->writtenBitsCount +
+                                        32 - ((CabacEncodeContext_t*) entropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
+                                        (((CabacEncodeContext_t*)entropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum <<3);
 
     if(sequenceControlSetPtr->staticConfig.enableSaoFlag && (pictureControlSetPtr->saoFlag[0] || pictureControlSetPtr->saoFlag[1])) {
 
         // Code SAO parameters
         EncodeLcuSaoParameters(
             lcuPtr,
-            pictureControlSetPtr->entropyCoderPtr,
+            entropyCoderPtr,
             pictureControlSetPtr->saoFlag[0],
             pictureControlSetPtr->saoFlag[1],
             (EB_U8)sequenceControlSetPtr->staticConfig.encoderBitDepth);
@@ -166,23 +175,27 @@ static void EntropyCodingLcu(
         lcuOriginY,
         pictureControlSetPtr,
         sequenceControlSetPtr->lcuSize,
-        pictureControlSetPtr->entropyCoderPtr,
+        entropyCoderPtr,
         coeffPicturePtr,
-        pictureControlSetPtr->modeTypeNeighborArray,
-        pictureControlSetPtr->leafDepthNeighborArray,
-        pictureControlSetPtr->intraLumaModeNeighborArray,
-        pictureControlSetPtr->skipFlagNeighborArray,
+        pictureControlSetPtr->modeTypeNeighborArray[tileIdx],
+        pictureControlSetPtr->leafDepthNeighborArray[tileIdx],
+        pictureControlSetPtr->intraLumaModeNeighborArray[tileIdx],
+        pictureControlSetPtr->skipFlagNeighborArray[tileIdx],
+        tileIdx,
 		pictureOriginX,
 		pictureOriginY);
 
+    //Jing:TODO
+    // extend the totalBits to tile, for tile based brc
+    
     //store the number of written bits after coding quantized coeffs (flush is not called yet): 
     // The total number of bits is 
     // number of written bits
     // + 32  - bits remaining in interval Low Value
     // + number of buffered byte * 8
-    writtenBitsAfterQuantizedCoeff =   ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->entropyCoderPtr))->writtenBitsCount +
-                                        32 - ((CabacEncodeContext_t*) pictureControlSetPtr->entropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
-                                        (((CabacEncodeContext_t*) pictureControlSetPtr->entropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum <<3);
+    writtenBitsAfterQuantizedCoeff =   ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(entropyCoderPtr))->writtenBitsCount +
+                                        32 - ((CabacEncodeContext_t*) entropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
+                                        (((CabacEncodeContext_t*) entropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum <<3);
 
     lcuPtr->totalBits = writtenBitsAfterQuantizedCoeff - writtenBitsBeforeQuantizedCoeff;
 
@@ -199,7 +212,7 @@ static void EntropyCodingLcu(
     for the tile ending LCU.
     *********************************************************/
     EncodeTerminateLcu(
-        pictureControlSetPtr->entropyCoderPtr,
+        entropyCoderPtr,
         terminateSliceFlag);
 
     return;
@@ -247,151 +260,57 @@ static EB_BOOL UpdateEntropyCodingRows(
     PictureControlSet_t *pictureControlSetPtr,
     EB_U32              *rowIndex,
     EB_U32               rowCount,
+    EB_U32               tileIdx,
     EB_BOOL             *initialProcessCall)
 {
     EB_BOOL processNextRow = EB_FALSE;
 
+    EntropyTileInfo *infoPtr = pictureControlSetPtr->entropyCodingInfo[tileIdx];
     // Note, any writes & reads to status variables (e.g. inProgress) in MD-CTRL must be thread-safe
-    EbBlockOnMutex(pictureControlSetPtr->entropyCodingMutex);
+    EbBlockOnMutex(infoPtr->entropyCodingMutex);
 
     // Update availability mask
     if (*initialProcessCall == EB_TRUE) {
         unsigned i;
 
         for(i=*rowIndex; i < *rowIndex + rowCount; ++i) {
-            pictureControlSetPtr->entropyCodingRowArray[i] = EB_TRUE;
+            infoPtr->entropyCodingRowArray[i] = EB_TRUE;
         }
         
-        while(pictureControlSetPtr->entropyCodingRowArray[pictureControlSetPtr->entropyCodingCurrentAvailableRow] == EB_TRUE &&
-              pictureControlSetPtr->entropyCodingCurrentAvailableRow < pictureControlSetPtr->entropyCodingRowCount)
+        while(infoPtr->entropyCodingRowArray[infoPtr->entropyCodingCurrentAvailableRow] == EB_TRUE &&
+              infoPtr->entropyCodingCurrentAvailableRow < infoPtr->entropyCodingRowCount)
         {
-            ++pictureControlSetPtr->entropyCodingCurrentAvailableRow;
+            ++infoPtr->entropyCodingCurrentAvailableRow;
         }
     }
 
     // Release inProgress token
-    if(*initialProcessCall == EB_FALSE && pictureControlSetPtr->entropyCodingInProgress == EB_TRUE) {
-        pictureControlSetPtr->entropyCodingInProgress = EB_FALSE;
+    if(*initialProcessCall == EB_FALSE && infoPtr->entropyCodingInProgress == EB_TRUE) {
+        infoPtr->entropyCodingInProgress = EB_FALSE;
     }
 
     // Test if the picture is not already complete AND not currently being worked on by another ENCDEC process
-    if(pictureControlSetPtr->entropyCodingCurrentRow < pictureControlSetPtr->entropyCodingRowCount && 
-       pictureControlSetPtr->entropyCodingRowArray[pictureControlSetPtr->entropyCodingCurrentRow] == EB_TRUE &&
-       pictureControlSetPtr->entropyCodingInProgress == EB_FALSE)
+    if(infoPtr->entropyCodingCurrentRow < infoPtr->entropyCodingRowCount && 
+       infoPtr->entropyCodingRowArray[infoPtr->entropyCodingCurrentRow] == EB_TRUE &&
+       infoPtr->entropyCodingInProgress == EB_FALSE)
     {
         // Test if the next LCU-row is ready to go
-        if(pictureControlSetPtr->entropyCodingCurrentRow <= pictureControlSetPtr->entropyCodingCurrentAvailableRow)
+        if(infoPtr->entropyCodingCurrentRow <= infoPtr->entropyCodingCurrentAvailableRow)
         {
-            pictureControlSetPtr->entropyCodingInProgress = EB_TRUE;
-            *rowIndex = pictureControlSetPtr->entropyCodingCurrentRow++;
+            infoPtr->entropyCodingInProgress = EB_TRUE;
+            *rowIndex = infoPtr->entropyCodingCurrentRow++;
             processNextRow = EB_TRUE;
         }
     }
 
     *initialProcessCall = EB_FALSE;
 
-    EbReleaseMutex(pictureControlSetPtr->entropyCodingMutex);
+    EbReleaseMutex(infoPtr->entropyCodingMutex);
 
     return processNextRow;
 }
-#if TILES
-
-static EB_BOOL WaitForAllEntropyCodingRows(
-    PictureControlSet_t *pictureControlSetPtr,
-    EB_U32              *rowIndex,
-    EB_U32               rowCount,
-    EB_BOOL             *initialProcessCall)
-{
-    EB_BOOL processNextRow = EB_TRUE;
-    unsigned i;
-
-    // Note, any writes & reads to status variables (e.g. inProgress) in MD-CTRL must be thread-safe
-    EbBlockOnMutex(pictureControlSetPtr->entropyCodingMutex);
-
-    // Update availability mask
-    if (*initialProcessCall == EB_TRUE) {
-
-        for (i = *rowIndex; i < *rowIndex + rowCount; ++i) {
-            pictureControlSetPtr->entropyCodingRowArray[i] = EB_TRUE;
-        }
-
-        //pictureControlSetPtr->entropyCodingCurrentAvailableRow = MAX(((EB_S32) (*rowIndex)),pictureControlSetPtr->entropyCodingCurrentAvailableRow);
-        while (pictureControlSetPtr->entropyCodingRowArray[pictureControlSetPtr->entropyCodingCurrentAvailableRow] == EB_TRUE &&
-            pictureControlSetPtr->entropyCodingCurrentAvailableRow < pictureControlSetPtr->entropyCodingRowCount)
-        {
-            ++pictureControlSetPtr->entropyCodingCurrentAvailableRow;
-        }
-    }
-
-    // Release inProgress token
-    if (*initialProcessCall == EB_FALSE && pictureControlSetPtr->entropyCodingInProgress == EB_TRUE) {
-        pictureControlSetPtr->entropyCodingInProgress = EB_FALSE;
-    }
-
-    // Test if all rows are available
-    for (i = 0; i < (unsigned)pictureControlSetPtr->entropyCodingRowCount; ++i) {
-        processNextRow = (pictureControlSetPtr->entropyCodingRowArray[i] == EB_FALSE) ? EB_FALSE : processNextRow;
-    }
-
-    // Test if the picture is already being processed
-    processNextRow = (pictureControlSetPtr->entropyCodingInProgress) ? EB_FALSE : processNextRow;
-
-    *initialProcessCall = EB_FALSE;
-
-    EbReleaseMutex(pictureControlSetPtr->entropyCodingMutex);
-
-    return processNextRow;
-}
-/**************************************************
- * Reset Entropy Coding Tiles
- **************************************************/
-static void ResetEntropyCodingTile(
-    EntropyCodingContext_t  *contextPtr,
-    PictureControlSet_t     *pictureControlSetPtr,
-    SequenceControlSet_t    *sequenceControlSetPtr,
-    EB_U32                   lcuRowIndex,
-    EB_BOOL                  tilesActiveFlag)
-{
-    EB_U32                       entropyCodingQp;
-
-    contextPtr->is16bit = (EB_BOOL)(sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
-
-    // SAO
-    pictureControlSetPtr->saoFlag[0] = EB_TRUE;
-    pictureControlSetPtr->saoFlag[1] = EB_TRUE;
-
-    // QP
-    contextPtr->qp = pictureControlSetPtr->pictureQp;
-    contextPtr->chromaQp = MapChromaQp(contextPtr->qp);
-
-    if (pictureControlSetPtr->useDeltaQp) {
-        entropyCodingQp = pictureControlSetPtr->pictureQp;
-    }
-    else {
-        entropyCodingQp = pictureControlSetPtr->pictureQp;
-    }
 
 
-
-    // Reset CABAC Contexts
-    if (lcuRowIndex == 0 || tilesActiveFlag)
-    {
-        // Reset QP Assignement
-        pictureControlSetPtr->prevCodedQp = pictureControlSetPtr->pictureQp;
-        pictureControlSetPtr->prevQuantGroupCodedQp = pictureControlSetPtr->pictureQp;
-
-        ResetEntropyCoder(
-            sequenceControlSetPtr->encodeContextPtr,
-            pictureControlSetPtr->entropyCoderPtr,
-            entropyCodingQp,
-            pictureControlSetPtr->sliceType);
-
-        EntropyCodingResetNeighborArrays(pictureControlSetPtr);
-    }
-
-    return;
-}
-#endif
 /******************************************************
  * Entropy Coding Kernel
  ******************************************************/
@@ -419,10 +338,17 @@ void* EntropyCodingKernel(void *inputPtr)
     EB_U32                                   yLcuIndex;
     EB_U32                                   lcuOriginX;
     EB_U32                                   lcuOriginY;
-    EB_BOOL                                  lastLcuFlag;
+    EB_BOOL                                  lastLcuFlagInSlice;
+    EB_BOOL                                  lastLcuFlagInTile;
     EB_U32                                   pictureWidthInLcu;
+    EB_U32                                   tileWidthInLcu;
+    EB_U32                                   tileHeightInLcu;
     // Variables
     EB_BOOL                                  initialProcessCall;
+    EB_U32                                   tileIdx;
+    EB_U32                                   tileCnt;
+    EB_U32                                   xLcuStart;
+    EB_U32                                   yLcuStart;
 
     for(;;) {
 
@@ -433,45 +359,72 @@ void* EntropyCodingKernel(void *inputPtr)
         encDecResultsPtr       = (EncDecResults_t*) encDecResultsWrapperPtr->objectPtr;
         pictureControlSetPtr   = (PictureControlSet_t*) encDecResultsPtr->pictureControlSetWrapperPtr->objectPtr;
         sequenceControlSetPtr  = (SequenceControlSet_t*) pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
-        lastLcuFlag            = EB_FALSE;
+        tileIdx                = encDecResultsPtr->tileIndex;
+        lastLcuFlagInSlice     = EB_FALSE;
+        lastLcuFlagInTile      = EB_FALSE;
+        tileCnt                = pictureControlSetPtr->tileRowCount * pictureControlSetPtr->tileColumnCount;
 #if DEADLOCK_DEBUG
         SVT_LOG("POC %lld EC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
+        //SVT_LOG("[%lld]: POC %lld EC IN, tile %d, (%d, %d) \n",
+        //        EbGetSysTimeMs(),
+        //        pictureControlSetPtr->pictureNumber, tileIdx,
+        //        encDecResultsPtr->completedLcuRowIndexStart,
+        //        encDecResultsPtr->completedLcuRowIndexStart + encDecResultsPtr->completedLcuRowCount);
         // LCU Constants
         lcuSize     = sequenceControlSetPtr->lcuSize;
         lcuSizeLog2 = (EB_U8)Log2f(lcuSize);
         contextPtr->lcuSize = lcuSize;
         pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + lcuSize - 1) >> lcuSizeLog2;
-#if TILES
-        if (sequenceControlSetPtr->tileRowCount * sequenceControlSetPtr->tileColumnCount == 1)
-#endif     
-        {
+        tileWidthInLcu = sequenceControlSetPtr->tileColumnArray[tileIdx % pictureControlSetPtr->tileColumnCount];
+        tileHeightInLcu = sequenceControlSetPtr->tileRowArray[tileIdx / pictureControlSetPtr->tileColumnCount];
+        xLcuStart = yLcuStart = 0;
+        for (unsigned int i = 0; i < (tileIdx % pictureControlSetPtr->tileColumnCount); i++) {
+            xLcuStart += sequenceControlSetPtr->tileColumnArray[i];
+        }
+        for (unsigned int i = 0; i < (tileIdx / pictureControlSetPtr->tileColumnCount); i++) {
+            yLcuStart += sequenceControlSetPtr->tileRowArray[i];
+        }
+
+        //assert(tileCnt >= 1);
+        if (tileCnt >= 1) {
             initialProcessCall = EB_TRUE;
             yLcuIndex = encDecResultsPtr->completedLcuRowIndexStart;   
             
             // LCU-loops
-            while(UpdateEntropyCodingRows(pictureControlSetPtr, &yLcuIndex, encDecResultsPtr->completedLcuRowCount, &initialProcessCall) == EB_TRUE) 
+            while(UpdateEntropyCodingRows(pictureControlSetPtr, &yLcuIndex, encDecResultsPtr->completedLcuRowCount, tileIdx, &initialProcessCall) == EB_TRUE) 
             {
                 EB_U32 rowTotalBits = 0;
 
                 if(yLcuIndex == 0) {
-					ResetEntropyCodingPicture(
-						contextPtr, 
-						pictureControlSetPtr,
-						sequenceControlSetPtr);
-					pictureControlSetPtr->entropyCodingPicDone = EB_FALSE;
+                    EbBlockOnMutex(pictureControlSetPtr->entropyCodingPicMutex);
+                    if (pictureControlSetPtr->entropyCodingPicResetFlag) {
+                        //printf("[%lld]:Reset pic %d at tile %d, yLcuIndex is %d\n",
+                        //        EbGetSysTimeMs(),
+                        //        pictureControlSetPtr->pictureNumber, tileIdx, yLcuIndex + yLcuStart);
+                        pictureControlSetPtr->entropyCodingPicResetFlag = EB_FALSE;
+                        ResetEntropyCodingPicture(
+                                contextPtr, 
+                                pictureControlSetPtr,
+                                sequenceControlSetPtr);
+                    }
+                    EbReleaseMutex(pictureControlSetPtr->entropyCodingPicMutex);
+					pictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingPicDone = EB_FALSE;
                 }
 
-                for(xLcuIndex = 0; xLcuIndex < pictureWidthInLcu; ++xLcuIndex) 
-                {
-
-                    
-                    lcuIndex = (EB_U16)(xLcuIndex + yLcuIndex * pictureWidthInLcu);
+                for(xLcuIndex = 0; xLcuIndex < tileWidthInLcu; ++xLcuIndex) {
+                    lcuIndex = (EB_U16)((xLcuIndex + xLcuStart) + (yLcuIndex + yLcuStart) * pictureWidthInLcu);
                     lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuIndex];
 
-                    lcuOriginX = xLcuIndex << lcuSizeLog2;
-                    lcuOriginY = yLcuIndex << lcuSizeLog2;
-                    lastLcuFlag = (lcuIndex == pictureControlSetPtr->lcuTotalCount - 1) ? EB_TRUE : EB_FALSE;
+                    lcuOriginX = (xLcuIndex + xLcuStart) << lcuSizeLog2;
+                    lcuOriginY = (yLcuIndex + yLcuStart) << lcuSizeLog2;
+                    //Jing:
+                    //Check for lastLcu, since tiles are parallelized, last LCU may not be the the last one in slice
+                    lastLcuFlagInSlice = (lcuIndex == pictureControlSetPtr->lcuTotalCount - 1) ? EB_TRUE : EB_FALSE;
+                    lastLcuFlagInTile = (xLcuIndex == tileWidthInLcu - 1 && yLcuIndex == tileHeightInLcu - 1) ? EB_TRUE : EB_FALSE;
+                    if (sequenceControlSetPtr->tileSliceMode) {
+                        lastLcuFlagInSlice = lastLcuFlagInTile;
+                    }
             
                     // Configure the LCU
                     EntropyCodingConfigureLcu(
@@ -486,15 +439,18 @@ void* EntropyCodingKernel(void *inputPtr)
                         sequenceControlSetPtr,
                         lcuOriginX,
                         lcuOriginY,
-                        lastLcuFlag,
-                        0,
-                        0);
+                        lastLcuFlagInSlice,
+                        tileIdx,
+                        (xLcuIndex + xLcuStart) * lcuSize,
+                        (yLcuIndex + yLcuStart) * lcuSize);
 
                     rowTotalBits += lcuPtr->totalBits;
                 }
 
                 // At the end of each LCU-row, send the updated bit-count to Entropy Coding
                 {
+                    //Jing: TODO
+                    //this is per tile, brc can use it or just ignore it
                     EbObjectWrapper_t *rateControlTaskWrapperPtr;
                     RateControlTasks_t *rateControlTaskPtr;
 
@@ -505,7 +461,8 @@ void* EntropyCodingKernel(void *inputPtr)
                     rateControlTaskPtr = (RateControlTasks_t*) rateControlTaskWrapperPtr->objectPtr;
                     rateControlTaskPtr->taskType = RC_ENTROPY_CODING_ROW_FEEDBACK_RESULT;
                     rateControlTaskPtr->pictureNumber = pictureControlSetPtr->pictureNumber;
-                    rateControlTaskPtr->rowNumber = yLcuIndex;
+                    rateControlTaskPtr->tileIndex = tileIdx;
+                    rateControlTaskPtr->rowNumber = yLcuIndex; //Jing: yLcuIndex within tile
                     rateControlTaskPtr->bitCount = rowTotalBits;
 
                     rateControlTaskPtr->pictureControlSetWrapperPtr = 0;
@@ -515,178 +472,73 @@ void* EntropyCodingKernel(void *inputPtr)
                     EbPostFullObject(rateControlTaskWrapperPtr);
                 }
 
-				EbBlockOnMutex(pictureControlSetPtr->entropyCodingMutex);
-				if (pictureControlSetPtr->entropyCodingPicDone == EB_FALSE) {
+				EbBlockOnMutex(pictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingMutex);
+				if (pictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingPicDone == EB_FALSE) {
+                    //Jing: Store the av(e) part for different tiles and copy it as a whole to slice bitstream
 
 					// If the picture is complete, terminate the slice
-					if (pictureControlSetPtr->entropyCodingCurrentRow == pictureControlSetPtr->entropyCodingRowCount)
+					if (pictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingCurrentRow == pictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingRowCount)
 					{
 						EB_U32 refIdx;
+                        EB_BOOL pic_ready = EB_TRUE;
 
-						pictureControlSetPtr->entropyCodingPicDone = EB_TRUE;
+                        //assert(lastLcuFlagInTile == EB_TRUE);
 
-						EncodeSliceFinish(pictureControlSetPtr->entropyCoderPtr);
+                        //Jing:tile end, may not be the slice end
+                        if (!lastLcuFlagInSlice) {
+                            //printf("[%lld]:Encode tile end for tile %d\n", EbGetSysTimeMs(), tileIdx);
+                            EncodeTileFinish(pictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCoderPtr);
+                        } else {
+                            //printf("[%lld]:Encode slice end for tile %d\n", EbGetSysTimeMs(), tileIdx);
+						    EncodeSliceFinish(pictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCoderPtr);
+                        }
 
-						// Release the List 0 Reference Pictures
-						for (refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList0Count; ++refIdx) {
-							if (pictureControlSetPtr->refPicPtrArray[0] != EB_NULL) {
-
-								EbReleaseObject(pictureControlSetPtr->refPicPtrArray[0]);
+                        //Jing: TODO
+                        //Release the ref if the whole pic are done
+                        EbBlockOnMutex(pictureControlSetPtr->entropyCodingPicMutex);
+						pictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingPicDone = EB_TRUE;
+                        for (EB_U32 i = 0; i < tileCnt; i++) {
+                            if (pictureControlSetPtr->entropyCodingInfo[i]->entropyCodingPicDone == EB_FALSE) {
+                                pic_ready = EB_FALSE;
+                                //printf("current POC %d not fully ready, tile %d missing\n", pictureControlSetPtr->pictureNumber, i);
+                                break;
                             }
-						}
+                        }
+                        EbReleaseMutex(pictureControlSetPtr->entropyCodingPicMutex);
 
-						// Release the List 1 Reference Pictures
-						for (refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList1Count; ++refIdx) {
-							if (pictureControlSetPtr->refPicPtrArray[1] != EB_NULL) {
+                        if (pic_ready) {
+                            // Release the List 0 Reference Pictures
+                            for (refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList0Count; ++refIdx) {
+                                if (pictureControlSetPtr->refPicPtrArray[0] != EB_NULL) {
 
-								EbReleaseObject(pictureControlSetPtr->refPicPtrArray[1]);
-							}
-						}
+                                    EbReleaseObject(pictureControlSetPtr->refPicPtrArray[0]);
+                                }
+                            }
 
-						// Get Empty Entropy Coding Results
-						EbGetEmptyObject(
-							contextPtr->entropyCodingOutputFifoPtr,
-							&entropyCodingResultsWrapperPtr);
-						entropyCodingResultsPtr = (EntropyCodingResults_t*)entropyCodingResultsWrapperPtr->objectPtr;
-						entropyCodingResultsPtr->pictureControlSetWrapperPtr = encDecResultsPtr->pictureControlSetWrapperPtr;
+                            // Release the List 1 Reference Pictures
+                            for (refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList1Count; ++refIdx) {
+                                if (pictureControlSetPtr->refPicPtrArray[1] != EB_NULL) {
 
-						// Post EntropyCoding Results
-						EbPostFullObject(entropyCodingResultsWrapperPtr);
+                                    EbReleaseObject(pictureControlSetPtr->refPicPtrArray[1]);
+                                }
+                            }
 
+                            // Get Empty Entropy Coding Results
+                            EbGetEmptyObject(
+                                    contextPtr->entropyCodingOutputFifoPtr,
+                                    &entropyCodingResultsWrapperPtr);
+                            entropyCodingResultsPtr = (EntropyCodingResults_t*)entropyCodingResultsWrapperPtr->objectPtr;
+                            entropyCodingResultsPtr->pictureControlSetWrapperPtr = encDecResultsPtr->pictureControlSetWrapperPtr;
+
+                            //SVT_LOG("[%lld]: Entropy post result, POC %d\n", EbGetSysTimeMs(), pictureControlSetPtr->pictureNumber);
+                            // Post EntropyCoding Results
+                            EbPostFullObject(entropyCodingResultsWrapperPtr);
+                        }
 					} // End if(PictureCompleteFlag)
 				}
-				EbReleaseMutex(pictureControlSetPtr->entropyCodingMutex);
-
-
+				EbReleaseMutex(pictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingMutex);
 			}
         }
-#if TILES
-        else
-        {
-        unsigned xLcuStart, yLcuStart, rowIndex, columnIndex;
-
-        initialProcessCall = EB_TRUE;
-
-        yLcuIndex = encDecResultsPtr->completedLcuRowIndexStart;
-
-        // Update EC-rows, exit if picture is "in-progress" 
-        if (WaitForAllEntropyCodingRows(pictureControlSetPtr, &yLcuIndex, encDecResultsPtr->completedLcuRowCount, &initialProcessCall) == EB_TRUE)
-        {
-
-
-            ResetEntropyCodingPicture(
-                contextPtr,
-                pictureControlSetPtr,
-                sequenceControlSetPtr);
-
-
-            // Tile-loops
-            yLcuStart = 0;
-            for (rowIndex = 0; rowIndex < sequenceControlSetPtr->tileRowCount; ++rowIndex)
-            {
-                xLcuStart = 0;
-                for (columnIndex = 0; columnIndex < sequenceControlSetPtr->tileColumnCount; ++columnIndex)
-                {
-                    ResetEntropyCodingTile(
-                        contextPtr,
-                        pictureControlSetPtr,
-                        sequenceControlSetPtr,
-                        yLcuIndex,
-                        EB_TRUE);
-
-                    if (sequenceControlSetPtr->tileSliceMode == 1 && (xLcuStart !=0 || yLcuStart != 0)) {
-                        CabacEncodeContext_t *cabacEncodeCtxPtr = (CabacEncodeContext_t*)pictureControlSetPtr->entropyCoderPtr->cabacEncodeContextPtr;
-                        EncodeSliceHeader(
-                            xLcuStart + yLcuStart * pictureWidthInLcu,
-                            pictureControlSetPtr->pictureQp,
-                            pictureControlSetPtr,
-                            (OutputBitstreamUnit_t*) &(cabacEncodeCtxPtr->bacEncContext.m_pcTComBitIf));
-                    }
-
-                    // LCU-loops
-                    for (yLcuIndex = yLcuStart; yLcuIndex < yLcuStart + sequenceControlSetPtr->tileRowArray[rowIndex]; ++yLcuIndex)
-                    {
-                        for (xLcuIndex = xLcuStart; xLcuIndex < xLcuStart + sequenceControlSetPtr->tileColumnArray[columnIndex]; ++xLcuIndex)
-                        {
-                            lcuIndex = xLcuIndex + yLcuIndex * pictureWidthInLcu;
-                            lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuIndex];
-                            lcuOriginX = xLcuIndex << lcuSizeLog2;
-                            lcuOriginY = yLcuIndex << lcuSizeLog2;
-                            if (sequenceControlSetPtr->tileSliceMode == 0) {
-                                lastLcuFlag = (lcuIndex == pictureControlSetPtr->lcuTotalCount - 1) ? EB_TRUE : EB_FALSE;
-                            } else
-                            {
-                                lastLcuFlag = (xLcuIndex == (xLcuStart + sequenceControlSetPtr->tileColumnArray[columnIndex] -1) && yLcuIndex == (yLcuStart + sequenceControlSetPtr->tileRowArray[rowIndex] -1)) ? EB_TRUE : EB_FALSE;
-                            }
-
-                            // Configure the LCU
-                            EntropyCodingConfigureLcu(
-                                contextPtr,
-                                lcuPtr,
-                                pictureControlSetPtr);
-
-                            // Entropy Coding
-                            EntropyCodingLcu(
-                                lcuPtr,
-                                pictureControlSetPtr,
-                                sequenceControlSetPtr,
-                                lcuOriginX,
-                                lcuOriginY,
-                                lastLcuFlag,
-                                xLcuIndex * lcuSize,
-                                yLcuIndex * lcuSize);
-                        }
-                    }
-
-                    if (sequenceControlSetPtr->tileSliceMode == 0 && lastLcuFlag == EB_FALSE) {
-                        EncodeTileFinish(pictureControlSetPtr->entropyCoderPtr);
-                    } else if (sequenceControlSetPtr->tileSliceMode) {
-                        EncodeSliceFinish(pictureControlSetPtr->entropyCoderPtr);
-                    }
-
-                    xLcuStart += sequenceControlSetPtr->tileColumnArray[columnIndex];
-                }
-                yLcuStart += sequenceControlSetPtr->tileRowArray[rowIndex];
-            }
-
-            // If the picture is complete, terminate the slice, 2nd pass DLF, SAO application
-            if (lastLcuFlag == EB_TRUE)
-            {
-                EB_U32 refIdx;
-
-                if (sequenceControlSetPtr->tileSliceMode == 0) {
-                    EncodeSliceFinish(pictureControlSetPtr->entropyCoderPtr);
-                }
-
-                // Release the List 0 Reference Pictures
-                for (refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList0Count; ++refIdx) {
-                    if (pictureControlSetPtr->refPicPtrArray[0]/*[refIdx]*/ != EB_NULL) {
-                        EbReleaseObject(pictureControlSetPtr->refPicPtrArray[0]/*[refIdx]*/);
-                    }
-                }
-
-                // Release the List 1 Reference Pictures
-                for (refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList1Count; ++refIdx) {
-                    if (pictureControlSetPtr->refPicPtrArray[1]/*[refIdx]*/ != EB_NULL) {
-                        EbReleaseObject(pictureControlSetPtr->refPicPtrArray[1]/*[refIdx]*/);
-                    }
-                }
-
-                // Get Empty Entropy Coding Results
-                EbGetEmptyObject(
-                    contextPtr->entropyCodingOutputFifoPtr,
-                    &entropyCodingResultsWrapperPtr);
-                entropyCodingResultsPtr = (EntropyCodingResults_t*)entropyCodingResultsWrapperPtr->objectPtr;
-                entropyCodingResultsPtr->pictureControlSetWrapperPtr = encDecResultsPtr->pictureControlSetWrapperPtr;
-
-                // Post EntropyCoding Results
-                EbPostFullObject(entropyCodingResultsWrapperPtr);
-
-            } // End if(PictureCompleteFlag)
-        }
-        }
-#endif
-
 
 #if DEADLOCK_DEBUG
         SVT_LOG("POC %lld EC OUT \n", pictureControlSetPtr->pictureNumber);

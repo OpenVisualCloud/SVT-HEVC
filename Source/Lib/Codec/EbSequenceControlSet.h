@@ -25,7 +25,6 @@ typedef struct SequenceControlSet_s
 {        
     EB_H265_ENC_CONFIGURATION   staticConfig;
 
-#if TILES
     // Tiles
     // Better to put into PictureControlSet
     EB_U32              tileUniformSpacing;
@@ -36,7 +35,6 @@ typedef struct SequenceControlSet_s
     EB_U16              tileRowHeightArray[EB_TILE_ROW_MAX_COUNT];
     EB_U16              tileColumnArray[EB_TILE_COLUMN_MAX_COUNT];
     EB_U16              tileRowArray[EB_TILE_ROW_MAX_COUNT];
-#endif
     
     // Encoding Context
     EncodeContext_t            *encodeContextPtr;
@@ -182,7 +180,7 @@ typedef struct SequenceControlSet_s
 	EB_U32						rateControlTasksFifoInitCount;           
 	EB_U32						rateControlFifoInitCount;                
 	EB_U32						modeDecisionConfigurationFifoInitCount;
-	EB_U32						modeDecisionFifoInitCount;            
+	//EB_U32						modeDecisionFifoInitCount;            
 	EB_U32						encDecFifoInitCount;
 	EB_U32						entropyCodingFifoInitCount;
 	EB_U32						pictureAnalysisProcessInitCount;     

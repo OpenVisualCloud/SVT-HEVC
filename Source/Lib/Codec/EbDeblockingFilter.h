@@ -76,6 +76,10 @@ extern void SetBSArrayBasedOnPUBoundary(
     const CodedUnitStats_t  *cuStatsPtr,
     EB_U32                   tbOriginX,
     EB_U32                   tbOriginY,
+    EB_BOOL                  tileLeftBoundary,
+    EB_BOOL                  tileTopBoundary,
+    //EB_U32                       tileOriginX,
+    //EB_U32                       tileOriginY,
     PictureControlSet_t     *pictureControlSetPtr,
     EB_U8                   *horizontalEdgeBSArray,
     EB_U8                   *verticalEdgeBSArray);

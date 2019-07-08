@@ -539,7 +539,7 @@ void* PictureManagerKernel(void *inputPtr)
             encodeContextPtr        = (EncodeContext_t*) EB_NULL;
             
             break;
-        } 
+        }
         
         // ***********************************
         //  Common Code
@@ -658,6 +658,10 @@ void* PictureManagerKernel(void *inputPtr)
                     ChildPictureControlSetPtr->ParentPcsPtr->quantizedCoeffNumBits      = 0;      
                     ChildPictureControlSetPtr->encMode                                  = entryPictureControlSetPtr->encMode; 
 
+                    ChildPictureControlSetPtr->encDecCodedLcuCount = 0;
+                    ChildPictureControlSetPtr->tileRowCount = entrySequenceControlSetPtr->tileRowCount;
+                    ChildPictureControlSetPtr->tileColumnCount = entrySequenceControlSetPtr->tileColumnCount;
+                    
 
 
                     // Update temporal ID
@@ -671,7 +675,6 @@ void* PictureManagerKernel(void *inputPtr)
                     pictureWidthInLcu  = (EB_U8)((entrySequenceControlSetPtr->lumaWidth + entrySequenceControlSetPtr->lcuSize - 1) / entrySequenceControlSetPtr->lcuSize);
                     pictureHeightInLcu = (EB_U8)((entrySequenceControlSetPtr->lumaHeight + entrySequenceControlSetPtr->lcuSize - 1) / entrySequenceControlSetPtr->lcuSize); 
 
-#if TILES
                     for (unsigned lcuIndex = 0; lcuIndex < (pictureWidthInLcu * pictureHeightInLcu); lcuIndex++) {
                         ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileLeftEdgeFlag  = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileLeftEdgeFlag;
                         ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileTopEdgeFlag   = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileTopEdgeFlag;
@@ -681,28 +684,45 @@ void* PictureManagerKernel(void *inputPtr)
                         ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileEndX          = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileEndX;
                         ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileEndY          = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileEndY;
                     }
-#endif
-                    // EncDec Segments 
-                    EncDecSegmentsInit(
-                        ChildPictureControlSetPtr->encDecSegmentCtrl,
-                        entrySequenceControlSetPtr->encDecSegmentColCountArray[entryPictureControlSetPtr->temporalLayerIndex],
-                        entrySequenceControlSetPtr->encDecSegmentRowCountArray[entryPictureControlSetPtr->temporalLayerIndex],
-                        pictureWidthInLcu,
-                        pictureHeightInLcu);
 
-                    // Entropy Coding Rows
-                    {
-                        unsigned rowIndex;
+                    EB_U32 encDecSegRow = entrySequenceControlSetPtr->encDecSegmentRowCountArray[entryPictureControlSetPtr->temporalLayerIndex];
+                    EB_U32 encDecSegCol = entrySequenceControlSetPtr->encDecSegmentColCountArray[entryPictureControlSetPtr->temporalLayerIndex]; 
 
-                        ChildPictureControlSetPtr->entropyCodingCurrentRow = 0;
-                        ChildPictureControlSetPtr->entropyCodingCurrentAvailableRow = 0;
-                        ChildPictureControlSetPtr->entropyCodingRowCount = pictureHeightInLcu;
-                        ChildPictureControlSetPtr->entropyCodingInProgress = EB_FALSE;
-
-                        for(rowIndex=0; rowIndex < MAX_LCU_ROWS; ++rowIndex) {
-                            ChildPictureControlSetPtr->entropyCodingRowArray[rowIndex] = EB_FALSE;
-                        }
+                    if (entrySequenceControlSetPtr->tileRowCount * entrySequenceControlSetPtr->tileColumnCount> 1) {
+                        //Jing: Tuning segments number, better to put tile info to pps
+                        encDecSegCol = pictureWidthInLcu;//  / entrySequenceControlSetPtr->tileColumnCount;
+                        encDecSegRow = pictureHeightInLcu / entrySequenceControlSetPtr->tileRowCount;
                     }
+
+                    // EncDec Segments 
+                    for (int r = 0; r < entrySequenceControlSetPtr->tileRowCount; r++) {
+                        EncDecSegmentsInit(
+                                ChildPictureControlSetPtr->encDecSegmentCtrl[r],
+                                encDecSegCol,
+                                encDecSegRow,
+                                //sequenceControlSetPtr->tileColumnArray[c],
+                                pictureWidthInLcu,
+                                sequenceControlSetPtr->tileRowArray[r]);
+
+                        // Jing: Apply with tile row for better parallelism..
+                        // Entropy Coding Rows
+                        for (int c = 0; c < entrySequenceControlSetPtr->tileColumnCount; c++) {
+                            int tileIdx = r * entrySequenceControlSetPtr->tileColumnCount + c;
+                            ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingCurrentRow = 0;
+                            ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingCurrentAvailableRow = 0;
+                            ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingRowCount = sequenceControlSetPtr->tileRowArray[r];
+                            ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingInProgress = EB_FALSE;
+                            ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingPicDone = EB_FALSE;
+
+                            for(unsigned rowIndex=0; rowIndex < MAX_LCU_ROWS; ++rowIndex) {
+                                ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingRowArray[rowIndex] = EB_FALSE;
+                            }
+                        }
+                        ChildPictureControlSetPtr->entropyCodingPicResetFlag = EB_TRUE;
+                    }
+
+                    //Jing: TODO
+                    //Check if need to check tile edges
                     // Picture edges
 					ConfigurePictureEdges(entrySequenceControlSetPtr, ChildPictureControlSetPtr);
                     
@@ -828,6 +848,25 @@ void* PictureManagerKernel(void *inputPtr)
                                         
                     // Post the Full Results Object
                     EbPostFullObject(outputWrapperPtr);
+#if LATENCY_PROFILE
+                    double latency = 0.0;
+                    EB_U64 finishTimeSeconds = 0;
+                    EB_U64 finishTimeuSeconds = 0;
+                    EbFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
+
+                    EbComputeOverallElapsedTimeMs(
+                            ChildPictureControlSetPtr->ParentPcsPtr->startTimeSeconds,
+                            ChildPictureControlSetPtr->ParentPcsPtr->startTimeuSeconds,
+                            finishTimeSeconds,
+                            finishTimeuSeconds,
+                            &latency);
+
+                    SVT_LOG("[%lld]: POC %lld PM OUT, decoder order %d, latency %3.3f \n",
+                            EbGetSysTimeMs(),
+                            ChildPictureControlSetPtr->pictureNumber,
+                            ChildPictureControlSetPtr->ParentPcsPtr->decodeOrder,
+                            latency);
+#endif
 
                     // Remove the Input Entry from the Input Queue
                     inputEntryPtr->inputObjectPtr = (EbObjectWrapper_t*) EB_NULL;

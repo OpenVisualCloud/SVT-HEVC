@@ -72,7 +72,9 @@ void* PacketizationKernel(void *inputPtr)
     EB_U32                          refQpIndex = 0;       
     EB_U32                          packetizationQp;
        
-    EB_PICTURE                        sliceType;
+    EB_PICTURE                      sliceType;
+    EB_U16                          tileIdx;
+    EB_U16                          tileCnt;
     
     for(;;) {
     
@@ -84,9 +86,11 @@ void* PacketizationKernel(void *inputPtr)
         pictureControlSetPtr    = (PictureControlSet_t*)    entropyCodingResultsPtr->pictureControlSetWrapperPtr->objectPtr;
         sequenceControlSetPtr   = (SequenceControlSet_t*)   pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
         encodeContextPtr        = (EncodeContext_t*)        sequenceControlSetPtr->encodeContextPtr;
+        tileCnt = pictureControlSetPtr->tileRowCount * pictureControlSetPtr->tileColumnCount; 
 #if DEADLOCK_DEBUG
         SVT_LOG("POC %lld PK IN \n", pictureControlSetPtr->pictureNumber);
 #endif
+
         //****************************************************
         // Input Entropy Results into Reordering Queue
         //****************************************************
@@ -217,7 +221,7 @@ void* PacketizationKernel(void *inputPtr)
             lcuTotalCount               = pictureControlSetPtr->lcuTotalCount;
 
             // LCU Loop
-            if (sequenceControlSetPtr->staticConfig.rateControlMode > 0){          
+            if (sequenceControlSetPtr->staticConfig.rateControlMode > 0){
                 EB_U64  sadBits[NUMBER_OF_SAD_INTERVALS]= {0};
                 EB_U32  count[NUMBER_OF_SAD_INTERVALS] = {0};
 
@@ -493,40 +497,61 @@ void* PacketizationKernel(void *inputPtr)
             }
         }
 
-        EncodeSliceHeader(
-            0,
-            packetizationQp,
-            pictureControlSetPtr,
-            (OutputBitstreamUnit_t*) pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
 
-        // Flush the Bitstream
-        FlushBitstream(
-            pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);      
-        
-        // Copy Slice Header to the Output Bitstream
-        CopyRbspBitstreamToPayload(
-            pictureControlSetPtr->bitstreamPtr,
-            outputStreamPtr->pBuffer,
-            (EB_U32*) &(outputStreamPtr->nFilledLen),
-            (EB_U32*) &(outputStreamPtr->nAllocLen),
-            encodeContextPtr,
-			NAL_UNIT_INVALID);
+        // Jing: process multiple tiles
+        for (tileIdx = 0; tileIdx < tileCnt; tileIdx++) {
+            EB_U32 lcuSize     = sequenceControlSetPtr->lcuSize;
+            EB_U32 lcuSizeLog2 = (EB_U8)Log2f(lcuSize);
+            EB_U32 pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + lcuSize - 1) >> lcuSizeLog2;
+            EB_U32 xLcuStart = 0;
+            EB_U32 yLcuStart = 0;
+            EB_U32 lcuIndex = 0;
+            for (EB_U32 i = 0; i < (tileIdx % pictureControlSetPtr->tileColumnCount); i++) {
+                xLcuStart += sequenceControlSetPtr->tileColumnArray[i];
+            }
+            for (EB_U32 i = 0; i < (tileIdx / pictureControlSetPtr->tileColumnCount); i++) {
+                yLcuStart += sequenceControlSetPtr->tileRowArray[i];
+            }
+            lcuIndex = xLcuStart + yLcuStart * pictureWidthInLcu;
 
-        // Reset the bitstream
-        ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+            // Encode slice header
+            if (tileIdx == 0 || sequenceControlSetPtr->tileSliceMode == 1) {
+                EncodeSliceHeader(
+                        lcuIndex,
+                        packetizationQp,
+                        pictureControlSetPtr,
+                        (OutputBitstreamUnit_t*) pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
 
-        // Write the slice data into the bitstream
-        bitstream.outputBitstreamPtr = EntropyCoderGetBitstreamPtr(pictureControlSetPtr->entropyCoderPtr);
+                // Flush the Bitstream
+                FlushBitstream(
+                        pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);      
 
-        FlushBitstream(bitstream.outputBitstreamPtr);
+                // Copy Slice Header to the Output Bitstream
+                CopyRbspBitstreamToPayload(
+                        pictureControlSetPtr->bitstreamPtr,
+                        outputStreamPtr->pBuffer,
+                        (EB_U32*) &(outputStreamPtr->nFilledLen),
+                        (EB_U32*) &(outputStreamPtr->nAllocLen),
+                        encodeContextPtr,
+                        NAL_UNIT_INVALID);
 
-        CopyRbspBitstreamToPayload(
-            &bitstream,
-            outputStreamPtr->pBuffer,
-            (EB_U32*) &(outputStreamPtr->nFilledLen),
-            (EB_U32*) &(outputStreamPtr->nAllocLen),
-            encodeContextPtr,
-			NAL_UNIT_INVALID);
+                // Reset the bitstream
+                ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+            }
+
+            // Write the slice data into the bitstream
+            bitstream.outputBitstreamPtr = EntropyCoderGetBitstreamPtr(pictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCoderPtr);
+
+            FlushBitstream(bitstream.outputBitstreamPtr);
+
+            CopyRbspBitstreamToPayload(
+                    &bitstream,
+                    outputStreamPtr->pBuffer,
+                    (EB_U32*) &(outputStreamPtr->nFilledLen),
+                    (EB_U32*) &(outputStreamPtr->nAllocLen),
+                    encodeContextPtr,
+                    NAL_UNIT_INVALID);
+        }
         
         // Send the number of bytes per frame to RC
         pictureControlSetPtr->ParentPcsPtr->totalNumBits = outputStreamPtr->nFilledLen << 3;    
@@ -619,6 +644,7 @@ void* PacketizationKernel(void *inputPtr)
                 finishTimeSeconds,
                 finishTimeuSeconds,
                 &latency);
+            //printf("pts %d, dts %d, Packetization latency %3.3f\n", outputStreamPtr->pts, outputStreamPtr->dts, latency);
 
             outputStreamPtr->nTickCount = (EB_U32)latency;
 			EbPostFullObject(outputStreamWrapperPtr);
