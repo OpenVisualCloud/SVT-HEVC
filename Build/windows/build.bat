@@ -15,10 +15,10 @@ if "%buildtype%"=="" set "buildtype=Release"
 for /f "usebackq tokens=2" %%f in (`cmake -G 2^>^&1 ^| findstr /i ^*`) do (
     if "%GENERATOR:~0,6%"=="Visual" (
         set "cmake_eflags=-DCMAKE_CONFIGURATION_TYPES=%buildtype% %cmake_eflags%"
+    ) else if NOT "%GENERATOR%"=="" (
+        set "cmake_eflags=-DCMAKE_BUILD_TYPE=%buildtype% %cmake_eflags%"
     ) else if "%%f"=="Visual" (
         set "cmake_eflags=-DCMAKE_CONFIGURATION_TYPES=%buildtype% %cmake_eflags%"
-    ) else (
-        set "cmake_eflags=-DCMAKE_BUILD_TYPE=%buildtype% %cmake_eflags%"
     )
 )
 
