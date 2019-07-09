@@ -30,7 +30,10 @@ if "%GENERATOR%"=="Visual Studio 16 2019" (
     cmake ../.. -DCMAKE_INSTALL_PREFIX="%SYSTEMDRIVE%\svt-encoders" %cmake_eflags%
 )
 
-if "%build%"=="y" cmake --build . --config %buildtype%
+for /f "usebackq tokens=*" %%f in (`cmake --build 2^>^&1 ^| findstr /i jobs`) do (
+    if NOT "%%f"=="" set "build_flags=-j %NUMBER_OF_PROCESSORS% %build_flags%"
+)
+if "%build%"=="y" cmake --build . --config %buildtype% %build_flags%
 goto :EOF
 
 :args
