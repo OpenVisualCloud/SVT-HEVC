@@ -9,33 +9,43 @@ set instdir=%CD%
 set "build=y"
 set "Release=y"
 set "Debug=y"
+set "cmake_eflags=-DCMAKE_INSTALL_PREFIX=^"%SYSTEMDRIVE%\svt-encoders^""
 if NOT -%1-==-- call :args %*
 if exist CMakeCache.txt del /f /s /q CMakeCache.txt 1>nul
 if exist CMakeFiles rmdir /s /q CMakeFiles 1>nul
-if "%Release%"=="y" (
-    if "%Debug%"=="y" (
-        set "buildtype=Release;Debug"
-    ) else (
-        set "buildtype=Release"
-    )
-) else set "buildtype=Debug"
 
+setlocal ENABLEDELAYEDEXPANSION
 for /f "usebackq tokens=2" %%f in (`cmake -G 2^>^&1 ^| findstr /i ^*`) do (
+    if "%Release%"=="y" (
+        if "%Debug%"=="y" (
+            if "%GENERATOR:~0,6%"=="Visual" (
+                set "buildtype=Release;Debug"
+            ) else if NOT "%GENERATOR%"=="" (
+                set "buildtype=Debug"
+            ) else if "%%f"=="Visual" (
+                set "buildtype=Release;Debug"
+            )
+        ) else (
+            set "buildtype=Release"
+        )
+    ) else set "buildtype=Debug"
+
     if "%GENERATOR:~0,6%"=="Visual" (
-        set "cmake_eflags=-DCMAKE_CONFIGURATION_TYPES=^"%buildtype%^" %cmake_eflags%"
+        set "cmake_eflags=-DCMAKE_CONFIGURATION_TYPES=^"!buildtype!^" %cmake_eflags%"
     ) else if NOT "%GENERATOR%"=="" (
-        set "cmake_eflags=-DCMAKE_BUILD_TYPE=^"%buildtype%^" %cmake_eflags%"
+        set "cmake_eflags=-DCMAKE_BUILD_TYPE=^"!buildtype!^" %cmake_eflags%"
     ) else if "%%f"=="Visual" (
-        set "cmake_eflags=-DCMAKE_CONFIGURATION_TYPES=^"%buildtype%^" %cmake_eflags%"
+        set "cmake_eflags=-DCMAKE_CONFIGURATION_TYPES=^"!buildtype!^" %cmake_eflags%"
     )
 )
+endlocal
 
 if "%GENERATOR%"=="Visual Studio 16 2019" (
-    cmake ../.. -G"Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX="%SYSTEMDRIVE%\svt-encoders" %cmake_eflags%
+    cmake ../.. -G"Visual Studio 16 2019" -A x64 %cmake_eflags%
 ) else if NOT "%GENERATOR%"=="" (
-    cmake ../.. -G"%GENERATOR%" -DCMAKE_INSTALL_PREFIX="%SYSTEMDRIVE%\svt-encoders" %cmake_eflags%
+    cmake ../.. -G"%GENERATOR%" %cmake_eflags%
 ) else (
-    cmake ../.. -DCMAKE_INSTALL_PREFIX="%SYSTEMDRIVE%\svt-encoders" %cmake_eflags%
+    cmake ../.. %cmake_eflags%
 )
 
 for /f "usebackq tokens=*" %%f in (`cmake --build 2^>^&1 ^| findstr /i jobs`) do (
