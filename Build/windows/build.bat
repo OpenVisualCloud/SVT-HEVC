@@ -102,21 +102,24 @@ if -%1-==-- (
     shift
 ) else if /I "%1"=="release" (
     echo Building for release
-    set "buildtype=release"
+    set "buildtype=Release"
     shift
 ) else if /I "%1"=="debug" (
     echo Building for debug
-    set "buildtype=debug"
+    set "buildtype=Debug"
     shift
 ) else if /I "%1"=="nobuild" (
-    echo Building files
+    echo Generating solution only
     set "build=n"
     shift
+) else (
+    echo Unknown Token "%1"
+    exit 1
 )
 goto :args
 
 :help
     echo Batch file to build SVT-HEVC on Windows
-    echo Usage: generate.bat 2019^|2017^|2015^|clean [release|debug] [nobuild]
+    echo Usage: build.bat [2019^|2017^|2015^|clean] [release|debug] [nobuild]
     exit
 goto :EOF
