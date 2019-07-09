@@ -10,12 +10,24 @@ set "build=y"
 if NOT -%1-==-- call :args %*
 if exist CMakeCache.txt del /f /s /q CMakeCache.txt 1>nul
 if exist CMakeFiles rmdir /s /q CMakeFiles 1>nul
-if "%buildtype%"=="" set "release"
+if "%buildtype%"=="" set "buildtype=Release"
+
+for /f "usebackq tokens=2" %%f in (`cmake -G 2^>^&1 ^| findstr /i ^*`) do (
+    if "%GENERATOR:~0,6%"=="Visual" (
+        set "cmake_eflags=-DCMAKE_CONFIGURATION_TYPES=%buildtype% %cmake_eflags%"
+    ) else if "%%f"=="Visual" (
+        set "cmake_eflags=-DCMAKE_CONFIGURATION_TYPES=%buildtype% %cmake_eflags%"
+    ) else (
+        set "cmake_eflags=-DCMAKE_BUILD_TYPE=%buildtype% %cmake_eflags%"
+    )
+)
+
 if "%GENERATOR%"=="Visual Studio 16 2019" (
-    cmake ../.. -G"Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX=%SYSTEMDRIVE%\svt-encoders -DCMAKE_CONFIGURATION_TYPES="%buildtype%" %cmake_eflags%
+    cmake ../.. -G"Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX="%SYSTEMDRIVE%\svt-encoders" %cmake_eflags%
+) else if NOT "%GENERATOR%"=="" (
+    cmake ../.. -G"%GENERATOR%" -DCMAKE_INSTALL_PREFIX="%SYSTEMDRIVE%\svt-encoders" %cmake_eflags%
 ) else (
-    if NOT "%GENERATOR%"=="" set GENERATOR=-G"%GENERATOR%"
-    cmake ../.. %GENERATOR% -DCMAKE_INSTALL_PREFIX=%SYSTEMDRIVE%\svt-encoders -DCMAKE_CONFIGURATION_TYPES="%buildtype%" %cmake_eflags%
+    cmake ../.. -DCMAKE_INSTALL_PREFIX="%SYSTEMDRIVE%\svt-encoders" %cmake_eflags%
 )
 
 if "%build%"=="y" cmake --build . --config %buildtype%
