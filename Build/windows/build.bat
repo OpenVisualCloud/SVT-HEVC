@@ -7,18 +7,54 @@ cd /d "%~dp0"
 set instdir=%CD%
 
 set "build=y"
+set "Release=y"
+set "Debug=y"
+set "cmake_eflags=-DCMAKE_INSTALL_PREFIX=^"%SYSTEMDRIVE%\svt-encoders^""
 if NOT -%1-==-- call :args %*
 if exist CMakeCache.txt del /f /s /q CMakeCache.txt 1>nul
 if exist CMakeFiles rmdir /s /q CMakeFiles 1>nul
-if "%buildtype%"=="" set "release"
+
+setlocal ENABLEDELAYEDEXPANSION
+for /f "usebackq tokens=2" %%f in (`cmake -G 2^>^&1 ^| findstr /i ^*`) do (
+    if "%Release%"=="y" (
+        if "%Debug%"=="y" (
+            if "%GENERATOR:~0,6%"=="Visual" (
+                set "buildtype=Release;Debug"
+            ) else if NOT "%GENERATOR%"=="" (
+                set "buildtype=Debug"
+            ) else if "%%f"=="Visual" (
+                set "buildtype=Release;Debug"
+            )
+        ) else (
+            set "buildtype=Release"
+        )
+    ) else set "buildtype=Debug"
+
+    if "%GENERATOR:~0,6%"=="Visual" (
+        set "cmake_eflags=-DCMAKE_CONFIGURATION_TYPES=^"!buildtype!^" %cmake_eflags%"
+    ) else if NOT "%GENERATOR%"=="" (
+        set "cmake_eflags=-DCMAKE_BUILD_TYPE=^"!buildtype!^" %cmake_eflags%"
+    ) else if "%%f"=="Visual" (
+        set "cmake_eflags=-DCMAKE_CONFIGURATION_TYPES=^"!buildtype!^" %cmake_eflags%"
+    )
+)
+endlocal
+
 if "%GENERATOR%"=="Visual Studio 16 2019" (
-    cmake ../.. -G"Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX=%SYSTEMDRIVE%\svt-encoders -DCMAKE_CONFIGURATION_TYPES="%buildtype%" %cmake_eflags%
+    cmake ../.. -G"Visual Studio 16 2019" -A x64 %cmake_eflags%
+) else if NOT "%GENERATOR%"=="" (
+    cmake ../.. -G"%GENERATOR%" %cmake_eflags%
 ) else (
-    if NOT "%GENERATOR%"=="" set GENERATOR=-G"%GENERATOR%"
-    cmake ../.. %GENERATOR% -DCMAKE_INSTALL_PREFIX=%SYSTEMDRIVE%\svt-encoders -DCMAKE_CONFIGURATION_TYPES="%buildtype%" %cmake_eflags%
+    cmake ../.. %cmake_eflags%
 )
 
-if "%build%"=="y" cmake --build . --config %buildtype%
+for /f "usebackq tokens=*" %%f in (`cmake --build 2^>^&1 ^| findstr /i jobs`) do (
+    if NOT "%%f"=="" set "build_flags=-j %NUMBER_OF_PROCESSORS% %build_flags%"
+)
+if "%build%"=="y" (
+    if "%Release%"=="y" cmake --build . --config Release %build_flags%
+    if "%Debug%"=="y" cmake --build . --config Debug %build_flags%
+)
 goto :EOF
 
 :args
@@ -89,22 +125,32 @@ if -%1-==-- (
     set "GENERATOR=Unix Makefiles"
     shift
 ) else if /I "%1"=="release" (
-    echo Building for release
-    set "buildtype=release"
+    echo Building release only
+    set "Release=y"
+    set "Debug=n"
     shift
 ) else if /I "%1"=="debug" (
-    echo Building for debug
-    set "buildtype=debug"
+    echo Building for debug only
+    set "Release=n"
+    set "Debug=y"
+    shift
+) else if /I "%1"=="all" (
+    echo Building release and debug
+    set "Release=y"
+    set "Debug=y"
     shift
 ) else if /I "%1"=="nobuild" (
-    echo Building files
+    echo Generating solution only
     set "build=n"
     shift
+) else (
+    echo Unknown Token "%1"
+    exit 1
 )
 goto :args
 
 :help
     echo Batch file to build SVT-HEVC on Windows
-    echo Usage: generate.bat 2019^|2017^|2015^|clean [release|debug] [nobuild]
+    echo Usage: build.bat [2019^|2017^|2015^|clean] [release|debug] [nobuild]
     exit
 goto :EOF

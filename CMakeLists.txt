@@ -13,7 +13,7 @@ endif()
 
 project(${project_name} C ASM_NASM)
 
-if(NOT CMAKE_BUILD_TYPE)
+if(NOT MSVC AND NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
