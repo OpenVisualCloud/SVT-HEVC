@@ -3863,7 +3863,7 @@ EB_U32 predBitsPerLcu(PictureControlSet_t* pictureControlSetPtr, EncodeContext_t
     return sadBits;
 }
 
-EB_U64 predictBitsDup(SequenceControlSet_t *sequenceControlSetPtr, PictureControlSet_t* pictureControlSetPtr, EncodeContext_t *encodeContextPtr, HlRateControlHistogramEntry_t *hlRateControlHistogramPtrTemp,EB_U32 qp)
+EB_U64 predictBitsDup(SequenceControlSet_t *sequenceControlSetPtr, EncodeContext_t *encodeContextPtr, HlRateControlHistogramEntry_t *hlRateControlHistogramPtrTemp,EB_U32 qp)
 {
     EB_U64 totalBits = 0;
         RateControlTables_t *rateControlTablesPtr = &encodeContextPtr->rateControlTablesArray[qp];
@@ -3914,15 +3914,10 @@ EB_U64 predictRowsSizeSum(PictureControlSet_t* pictureControlSetPtr, SequenceCon
 {
     EB_U64 predictedBitsForFrame = 0;
     EB_U64 predictedBitsDoneSoFar = 0;
-    EB_U64 distortionBitsSoFar = 0;
     *encodedBitsSoFar = 0;
-    EB_U64 distortionSofar = 0;
-    EB_U64 distortionSofarIntra = 0;
-    EB_U64 distortionSofarInter = 0;
     EB_U32 queueEntryIndexTemp;
     EB_U32 queueEntryIndexHeadTemp;
     HlRateControlHistogramEntry_t      *hlRateControlHistogramPtrTemp;
-    EB_BOOL useIntraSadFlag = EB_TRUE;
     EB_U8 lcuSizeLog2 = (EB_U8)Log2f(sequenceControlSetPtr->lcuSize);
     EB_U8 pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + sequenceControlSetPtr->lcuSize - 1) >> lcuSizeLog2;
     EB_U8 pictureHeightInLcu = (sequenceControlSetPtr->lumaHeight + sequenceControlSetPtr->lcuSize - 1) >> lcuSizeLog2;
@@ -3947,12 +3942,12 @@ EB_U64 predictRowsSizeSum(PictureControlSet_t* pictureControlSetPtr, SequenceCon
         *encodedBitsSoFar += pictureControlSetPtr->rowStats[row]->encodedBits;
         predictedBitsDoneSoFar += pictureControlSetPtr->rowStats[row]->predictedBits;
     }
-    predictedBitsForFrame = predictBitsDup(sequenceControlSetPtr, pictureControlSetPtr, sequenceControlSetPtr->encodeContextPtr, hlRateControlHistogramPtrTemp, qpVbv);
+    predictedBitsForFrame = predictBitsDup(sequenceControlSetPtr, sequenceControlSetPtr->encodeContextPtr, hlRateControlHistogramPtrTemp, qpVbv);
     EB_U64 framesizeEstimated = (predictedBitsForFrame - predictedBitsDoneSoFar) + (*encodedBitsSoFar);
     return framesizeEstimated;
 }
 
-EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,///mutex to be added since Buffer fill is read
+EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,//mutex to be added since Buffer fill is read
     SequenceControlSet_t                       *sequenceControlSetPtr,
     RCStatRow_t                                *rowPtr,
     EncodeContext_t                            *rcData,
@@ -3963,18 +3958,15 @@ EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,///mutex to
     EB_U8 qpAbsoluteMax = sequenceControlSetPtr->staticConfig.maxQpAllowed;
     EB_U8 qpAbsoluteMin = sequenceControlSetPtr->staticConfig.minQpAllowed;
     EB_U8 lcuSizeLog2 = (EB_U8)Log2f(sequenceControlSetPtr->lcuSize);
-    EB_U8 pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + sequenceControlSetPtr->lcuSize - 1) >> lcuSizeLog2;
     EB_U8 pictureHeightInLcu = (sequenceControlSetPtr->lumaHeight + sequenceControlSetPtr->lcuSize - 1) >> lcuSizeLog2;
 
     EB_U8 qpMax = MIN(prevRowQp + 4, qpAbsoluteMax);
     EB_U8 qpMin = MAX(prevRowQp - 4, qpAbsoluteMin);
     EB_U64 bufferLeftPlanned = pictureControlSetPtr->bufferFillPerFrame - pictureControlSetPtr->frameSizePlanned;
-    double maxFrameError = MAX(0.05, 1.0 / pictureHeightInLcu);
     if (rowPtr->rowIndex<pictureHeightInLcu+1)
     {
 
-            /* More threads means we have to be more cautious in letting ratecontrol use up extra bits. */
-            EB_U64 rcTol = 1 * bufferLeftPlanned;//bufferLeftPlanned / m_param->frameNumThreads * m_rateTolerance;
+            EB_U64 rcTol = 1 * bufferLeftPlanned;
             EB_U64 encodedBitsSoFar = 0;
             EB_U64 accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, &encodedBitsSoFar);
 
@@ -4014,12 +4006,6 @@ EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,///mutex to
 
             pictureControlSetPtr->frameSizeEstimated = accFrameBits;
 
-            ///* If the current row was large enough to cause a large QP jump */
-            //if (qpVbv > qpMax && prevRowQp < qpMax)
-            //{
-            //    /* Bump QP to halfway in between... close enough. */
-            //    qpVbv = CLIP3(prevRowQp, qpMax, (EB_U8)((prevRowQp + qpVbv) * 0.5));
-            //}
 
     }
 
