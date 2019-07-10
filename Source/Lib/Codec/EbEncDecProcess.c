@@ -1403,11 +1403,7 @@ static void ResetEncDec(
                     pictureControlSetPtr->coeffEstEntropyCoderPtr,
                     entropyCodingQp,
                     pictureControlSetPtr->sliceType);
-            //ResetEntropyCoder(
-            //    sequenceControlSetPtr->encodeContextPtr,
-            //    pictureControlSetPtr->tempEntropyCoderPtr,
-            //    entropyCodingQp,
-            //    pictureControlSetPtr->sliceType);
+
             //this function could be optimized by removed chroma, and unessary TU sizes.
             PrecomputeCabacCost(&(*pictureControlSetPtr->cabacCost),
                     (CabacEncodeContext_t*)pictureControlSetPtr->coeffEstEntropyCoderPtr->cabacEncodeContextPtr);
@@ -4076,7 +4072,6 @@ void* EncDecKernel(void *inputPtr)
 
     //Proxy entropy coding
     EbPictureBufferDesc_t *  tempCoeffPicturePtr;
-    EB_U32                   totalbits = 0;
     EB_U32                   tempWrittenBitsBeforeQuantizedCoeff;
     EB_U32                   tempWrittenBitsAfterQuantizedCoeff;
     EB_U32                   bestOisCuIndex = 0;

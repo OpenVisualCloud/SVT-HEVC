@@ -631,7 +631,7 @@ void* PacketizationKernel(void *inputPtr)
 
         // Jing: process multiple tiles
         for (tileIdx = 0; tileIdx < tileCnt; tileIdx++) {
-            EB_U32 lcuSize = sequenceControlSetPtr->lcuSize;
+            EB_U32 lcuSize     = sequenceControlSetPtr->lcuSize;
             EB_U32 lcuSizeLog2 = (EB_U8)Log2f(lcuSize);
             EB_U32 pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + lcuSize - 1) >> lcuSizeLog2;
             EB_U32 xLcuStart = 0;
@@ -648,23 +648,23 @@ void* PacketizationKernel(void *inputPtr)
             // Encode slice header
             if (tileIdx == 0 || sequenceControlSetPtr->tileSliceMode == 1) {
                 EncodeSliceHeader(
-                    lcuIndex,
-                    packetizationQp,
-                    pictureControlSetPtr,
-                    (OutputBitstreamUnit_t*)pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+                        lcuIndex,
+                        packetizationQp,
+                        pictureControlSetPtr,
+                        (OutputBitstreamUnit_t*) pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
 
                 // Flush the Bitstream
                 FlushBitstream(
-                    pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+                        pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);      
 
                 // Copy Slice Header to the Output Bitstream
                 CopyRbspBitstreamToPayload(
-                    pictureControlSetPtr->bitstreamPtr,
-                    outputStreamPtr->pBuffer,
-                    (EB_U32*) &(outputStreamPtr->nFilledLen),
-                    (EB_U32*) &(outputStreamPtr->nAllocLen),
-                    encodeContextPtr,
-                    NAL_UNIT_INVALID);
+                        pictureControlSetPtr->bitstreamPtr,
+                        outputStreamPtr->pBuffer,
+                        (EB_U32*) &(outputStreamPtr->nFilledLen),
+                        (EB_U32*) &(outputStreamPtr->nAllocLen),
+                        encodeContextPtr,
+                        NAL_UNIT_INVALID);
 
                 // Reset the bitstream
                 ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
