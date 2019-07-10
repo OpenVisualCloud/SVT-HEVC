@@ -28,8 +28,23 @@ EB_U32 Compute32xMSad_AVX2_INTRIN(
 	EB_U32  height,                         // input parameter, block height (M)
 	EB_U32  width);                         // input parameter, block width (N)    
 
+EB_U32 Compute40xMSad_AVX2_INTRIN(
+	EB_U8  *src,                            // input parameter, source samples Ptr
+	EB_U32  srcStride,                      // input parameter, source stride
+	EB_U8  *ref,                            // input parameter, reference samples Ptr
+	EB_U32  refStride,                      // input parameter, reference stride  
+	EB_U32  height,                         // input parameter, block height (M)
+	EB_U32  width);                         // input parameter, block width (N)    
 
 EB_U32 Compute48xMSad_AVX2_INTRIN(
+	EB_U8  *src,                            // input parameter, source samples Ptr
+	EB_U32  srcStride,                      // input parameter, source stride
+	EB_U8  *ref,                            // input parameter, reference samples Ptr
+	EB_U32  refStride,                      // input parameter, reference stride  
+	EB_U32  height,                         // input parameter, block height (M)
+	EB_U32  width);                         // input parameter, block width (N)    
+
+EB_U32 Compute56xMSad_AVX2_INTRIN(
 	EB_U8  *src,                            // input parameter, source samples Ptr
 	EB_U32  srcStride,                      // input parameter, source stride
 	EB_U8  *ref,                            // input parameter, reference samples Ptr

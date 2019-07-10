@@ -345,6 +345,8 @@ void SetBSArrayBasedOnPUBoundary(
 	const CodedUnitStats_t      *cuStatsPtr,
 	EB_U32                       tbOriginX,
 	EB_U32                       tbOriginY,
+    EB_BOOL                      tileLeftBoundary,
+    EB_BOOL                      tileTopBoundary,
 	PictureControlSet_t         *pictureControlSetPtr,
 	EB_U8                       *horizontalEdgeBSArray,
 	EB_U8                       *verticalEdgeBSArray)
@@ -371,7 +373,8 @@ void SetBSArrayBasedOnPUBoundary(
 	EB_U32               neighborPuIdx;
 
 	// set bS for the horizontal PU boundary which lies on the 8 sample edge
-	if ((cuStatsPtr->originY & 7) == 0 && cuStatsPtr->originY + tbOriginY != 0) {
+	//if ((cuStatsPtr->originY & 7) == 0 && cuStatsPtr->originY + tbOriginY != 0) {
+	if ((cuStatsPtr->originY & 7) == 0 && !tileTopBoundary) {
 
 		for (blk4x4Addr = puTopLeft4x4blkAddr; blk4x4Addr <= puTopRight4x4blkAddr; ++blk4x4Addr) {
 
@@ -400,7 +403,8 @@ void SetBSArrayBasedOnPUBoundary(
 	}
 
 	// set bS for the vertical PU boundary which lies on the 8 sample edge
-	if ((cuStatsPtr->originX & 7) == 0 && cuStatsPtr->originX + tbOriginX != 0) {
+	//if ((cuStatsPtr->originX & 7) == 0 && cuStatsPtr->originX + tbOriginX != 0) {
+	if ((cuStatsPtr->originX & 7) == 0 && !tileLeftBoundary) {
 		for (blk4x4Addr = puTopLeft4x4blkAddr; blk4x4Addr <= puBottomLeft4x4blkAddr; blk4x4Addr += MaxLcuSizeIn4x4blk) {
 			blk4x4Pos_x = (blk4x4Addr & (MaxLcuSizeIn4x4blk - 1)) << 2;
 			blk4x4Pos_y = (blk4x4Addr >> logMaxLcuSizeIn4x4blk) << 2;
@@ -3518,10 +3522,6 @@ void LCUPictureEdgeDLFCore(
 	EB_U32                 lcuPos_y,                        //input parameter, the picture-wise vertical location of the LCU.
 	EB_U32                 lcuWidth,                        //input parameter, the LCU width.
 	EB_U32                 lcuHeight,                       //input parameter, the LCU height.
-	//    EB_U8                 *lcuVerticalEdgeBSArray,          //input parameter, the pointer to the vertical edge BS array.
-	//    EB_U8                 *lcuHorizontalEdgeBSArray,        //input parameter, the pointer to the horizontal edge BS array.
-	//    EB_U8                 *topLcuVerticalEdgeBSArray,       //input parameter, the pointer to the vertical edge BS array of the top neighbour LCU.
-	//    EB_U8                 *leftLcuHorizontalEdgeBSArray,    //input parameter, the pointer to the horizontal edge BS array of the left neighbour LCU.
 	PictureControlSet_t   *pictureControlSetPtr)            //input parameter, picture control set.
 {
 	const EB_U32 MaxLcuSizeIn4x4blk = MAX_LCU_SIZE >> 2;
@@ -3536,7 +3536,11 @@ void LCUPictureEdgeDLFCore(
 	EB_U32  blk4x4Addr;
 	EB_U32  blk2x2Addr;
 	EB_U32  pictureWidthInLcu;
-	EB_U32  pictureHeightInLcu;
+	//EB_U32  pictureHeightInLcu;
+	EB_U32  tileWidthInPxl;
+	EB_U32  tileHeightInPxl;
+	EB_U32  tileWidthEndInLcu;
+	EB_U32  tileHeightEndInLcu;
 	EB_U32  fourSampleEdgeStartSamplePos_x;
 	EB_U32  fourSampleEdgeStartSamplePos_y;
 	EB_U8   bS;
@@ -3568,25 +3572,25 @@ void LCUPictureEdgeDLFCore(
 	LargestCodingUnit_t   *lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuIdx];
 
 	pictureWidthInLcu = (sequenceControlSet->lumaWidth + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
-	pictureHeightInLcu = (sequenceControlSet->lumaHeight + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
+	//pictureHeightInLcu = (sequenceControlSet->lumaHeight + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
+	tileWidthEndInLcu = (lcuPtr->tileEndX + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
+	tileHeightEndInLcu = (lcuPtr->tileEndY + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
+    tileWidthInPxl = lcuPtr->tileEndX - lcuPtr->tileOriginX;
+	tileHeightInPxl = lcuPtr->tileEndY - lcuPtr->tileOriginY;
 	lcuSize = sequenceControlSet->lcuSize;
 	chromaLcuSizeX = lcuSize >> (colorFormat==EB_YUV444?0:1);
 	chromaLcuSizeY = lcuSize >> (colorFormat==EB_YUV420?1:0);
     const EB_U32 subWidthShfitMinus1  = colorFormat==EB_YUV444?1:0;
     const EB_U32 subHeightShfitMinus1 = colorFormat==EB_YUV420?0:1;
-	if (lcuPos_x >> lcuPtr->sizeLog2 == pictureWidthInLcu - 1) {
+	if (lcuPos_x >> lcuPtr->sizeLog2 == tileWidthEndInLcu - 1) {
 		/***** picture right-most 4 sample horizontal edges filtering *****/
 		// luma component filtering
-		//num4SampleHorizontalEdges     = (sequenceControlSet->lumaHeight >> 3) - 1;
 		num4SampleHorizontalEdges = (lcuHeight >> 3);
-		fourSampleEdgeStartSamplePos_x = sequenceControlSet->lumaWidth - 4;          // picutre-wise position
-		//for(verticalIdx = 1; verticalIdx <= num4SampleHorizontalEdges; ++verticalIdx) {
-		for (verticalIdx = (lcuPos_y == 0); verticalIdx < num4SampleHorizontalEdges; ++verticalIdx) {
+		fourSampleEdgeStartSamplePos_x = lcuPtr->tileEndX - 4;          // picutre-wise position
+		for (verticalIdx = (lcuPos_y == lcuPtr->tileOriginY); verticalIdx < num4SampleHorizontalEdges; ++verticalIdx) {
 			// edge B
-			//fourSampleEdgeStartSamplePos_y = verticalIdx << 3;                       // picture-wise position
 			fourSampleEdgeStartSamplePos_y = lcuPos_y + (verticalIdx << 3);                       // picture-wise position
 			//lcuIdx     = (fourSampleEdgeStartSamplePos_y >> logMaxLcuSize) * pictureWidthInLcu + (fourSampleEdgeStartSamplePos_x >> logMaxLcuSize);
-			//lcuPtr     = pictureControlSetPtr->lcuPtrArray[lcuIdx];
 			blk4x4Addr = GET_LUMA_4X4BLK_ADDR(
 				fourSampleEdgeStartSamplePos_x & (lcuSize - 1),
 				fourSampleEdgeStartSamplePos_y & (lcuSize - 1),
@@ -3634,16 +3638,12 @@ void LCUPictureEdgeDLFCore(
 		}
 
 		// chroma component filtering
-		if ((sequenceControlSet->chromaWidth & 7) == 0) {
-			//num4SampleHorizontalEdges     = (sequenceControlSet->chromaHeight >> 3) + ((sequenceControlSet->chromaHeight & 7) != 0) - 1;
+		if (((tileWidthInPxl >> subWidthCMinus1) & 7) == 0) {
 			num4SampleHorizontalEdges = (lcuHeight >> (colorFormat==EB_YUV420?4:3)) + (((lcuHeight >> (colorFormat==EB_YUV420?1:0)) & (colorFormat==EB_YUV420?7:15)) != 0);
-			fourSampleEdgeStartSamplePos_x = sequenceControlSet->chromaWidth - 4;       // Picture wise location
+			fourSampleEdgeStartSamplePos_x = (lcuPtr->tileEndX >> subWidthCMinus1) - 4; // Tile wise location
 			//for(verticalIdx = 1; verticalIdx <= num4SampleHorizontalEdges; ++verticalIdx) {
-			for (verticalIdx = (lcuPos_y == 0); verticalIdx < num4SampleHorizontalEdges; ++verticalIdx) {
-				//fourSampleEdgeStartSamplePos_y = verticalIdx << 3;                      // Picture wise location
+			for (verticalIdx = (lcuPos_y == lcuPtr->tileOriginY); verticalIdx < num4SampleHorizontalEdges; ++verticalIdx) {
 				fourSampleEdgeStartSamplePos_y = (lcuPos_y >> (colorFormat==EB_YUV420?1:0)) + (verticalIdx << 3);                      // Picture wise location
-				//lcuIdx     = (fourSampleEdgeStartSamplePos_y >> (logMaxLcuSize-1)) * pictureWidthInLcu + (fourSampleEdgeStartSamplePos_x >> (logMaxLcuSize-1));
-				//lcuPtr     = pictureControlSetPtr->lcuPtrArray[lcuIdx];
 
 				// left 2 sample edge
 				blk2x2Addr = GET_CHROMA_4X4BLK_ADDR(
@@ -3745,14 +3745,12 @@ void LCUPictureEdgeDLFCore(
 		}
 	}
 
-	if (lcuPos_y >> lcuPtr->sizeLog2 == pictureHeightInLcu - 1) {
+	if (lcuPos_y >> lcuPtr->sizeLog2 == tileHeightEndInLcu - 1) {
 		/***** picture bottom 4 sample vertical edges filtering *****/
 		// luma component filtering
-		//num4SampleVerticalEdges       = (sequenceControlSet->lumaWidth >> 3) - 1;
 		num4SampleVerticalEdges = (lcuWidth >> 3);
-		fourSampleEdgeStartSamplePos_y = sequenceControlSet->lumaHeight - 4;      // picture-wise position
-		//for(horizontalIdx = 1; horizontalIdx <= num4SampleVerticalEdges; ++horizontalIdx) {
-		for (horizontalIdx = (lcuPos_x == 0); horizontalIdx < num4SampleVerticalEdges; ++horizontalIdx) {
+		fourSampleEdgeStartSamplePos_y = lcuPtr->tileEndY - 4;      // picture-wise position
+		for (horizontalIdx = (lcuPos_x == lcuPtr->tileOriginX); horizontalIdx < num4SampleVerticalEdges; ++horizontalIdx) {
 			// edge A
 			fourSampleEdgeStartSamplePos_x = lcuPos_x + (horizontalIdx << 3);                  // picuture-wise position
 			lcuIdx = (fourSampleEdgeStartSamplePos_y >> logMaxLcuSize) * pictureWidthInLcu + (fourSampleEdgeStartSamplePos_x >> logMaxLcuSize);
@@ -3803,13 +3801,12 @@ void LCUPictureEdgeDLFCore(
 		}
 
 		// chroma component filtering
-		if ((sequenceControlSet->chromaHeight & 7) == 0) {
-			//num4SampleVerticalEdges       = (sequenceControlSet->chromaWidth >> 3) + ((sequenceControlSet->chromaWidth & 7) != 0) - 1;
+		if (((tileHeightInPxl>> subHeightCMinus1) & 7) == 0) {
 			num4SampleVerticalEdges = (lcuWidth >> (3+(colorFormat==EB_YUV444?0:1))) + (((lcuWidth >> (colorFormat==EB_YUV444?0:1)) & (colorFormat==EB_YUV444?15:7)) != 0);
 
 			fourSampleEdgeStartSamplePos_y = sequenceControlSet->chromaHeight - 4;        // Picture wise location
-			//for(horizontalIdx = 1; horizontalIdx <= num4SampleVerticalEdges; ++horizontalIdx) {
-			for (horizontalIdx = (lcuPos_x == 0); horizontalIdx < num4SampleVerticalEdges; ++horizontalIdx) {
+			fourSampleEdgeStartSamplePos_y = (lcuPtr->tileEndY >> subHeightCMinus1) - 4;  // Tile wise location
+			for (horizontalIdx = (lcuPos_x == lcuPtr->tileOriginX); horizontalIdx < num4SampleVerticalEdges; ++horizontalIdx) {
 				fourSampleEdgeStartSamplePos_x = (lcuPos_x >> (colorFormat==EB_YUV444?0:1)) + (horizontalIdx << 3);   // Picture wise location
 				lcuIdx = (fourSampleEdgeStartSamplePos_y >> (logMaxLcuSize - (colorFormat==EB_YUV420?1:0))) * pictureWidthInLcu + (fourSampleEdgeStartSamplePos_x >> (logMaxLcuSize - (colorFormat==EB_YUV444?0:1)));
 				lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuIdx];
@@ -3941,7 +3938,13 @@ void LCUPictureEdgeDLFCore16bit(
 	EB_U32  blk4x4Addr;
 	EB_U32  blk2x2Addr;
 	EB_U32  pictureWidthInLcu;
-	EB_U32  pictureHeightInLcu;
+	//EB_U32  pictureHeightInLcu;
+
+	EB_U32  tileWidthInPxl;
+	EB_U32  tileHeightInPxl;
+	EB_U32  tileWidthEndInLcu;
+	EB_U32  tileHeightEndInLcu;
+
 	EB_U32  fourSampleEdgeStartSamplePos_x;
 	EB_U32  fourSampleEdgeStartSamplePos_y;
 	EB_U8   bS;
@@ -3973,21 +3976,24 @@ void LCUPictureEdgeDLFCore16bit(
 	LargestCodingUnit_t   *lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuIdx];
 
 	pictureWidthInLcu = (sequenceControlSet->lumaWidth + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
-	pictureHeightInLcu = (sequenceControlSet->lumaHeight + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
+	//pictureHeightInLcu = (sequenceControlSet->lumaHeight + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
+	tileWidthEndInLcu = (lcuPtr->tileEndX + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
+	tileHeightEndInLcu = (lcuPtr->tileEndY + sequenceControlSet->lcuSize - 1) / sequenceControlSet->lcuSize;
+    tileWidthInPxl = lcuPtr->tileEndX - lcuPtr->tileOriginX;
+	tileHeightInPxl = lcuPtr->tileEndY - lcuPtr->tileOriginY;
     lcuSize = sequenceControlSet->lcuSize;
     chromaLcuSizeX = lcuSize >> (colorFormat==EB_YUV444?0:1);
     chromaLcuSizeY = lcuSize >> (colorFormat==EB_YUV420?1:0);
     const EB_U32 subWidthShfitMinus1  = colorFormat==EB_YUV444?1:0;
     const EB_U32 subHeightShfitMinus1 = colorFormat==EB_YUV420?0:1;
 
-	if (lcuPos_x >> lcuPtr->sizeLog2 == pictureWidthInLcu - 1) {
+	if (lcuPos_x >> lcuPtr->sizeLog2 == tileWidthEndInLcu - 1) {
 		/***** picture right-most 4 sample horizontal edges filtering *****/
 		// luma component filtering
-		//num4SampleHorizontalEdges     = (sequenceControlSet->lumaHeight >> 3) - 1;
 		num4SampleHorizontalEdges = (lcuHeight >> 3);
-		fourSampleEdgeStartSamplePos_x = sequenceControlSet->lumaWidth - 4;          // picutre-wise position
-		//for(verticalIdx = 1; verticalIdx <= num4SampleHorizontalEdges; ++verticalIdx) {
-		for (verticalIdx = (lcuPos_y == 0); verticalIdx < num4SampleHorizontalEdges; ++verticalIdx) {
+		fourSampleEdgeStartSamplePos_x = lcuPtr->tileEndX - 4;          // picutre-wise position
+
+		for (verticalIdx = (lcuPos_y == lcuPtr->tileOriginY); verticalIdx < num4SampleHorizontalEdges; ++verticalIdx) {
 			// edge B
 			//fourSampleEdgeStartSamplePos_y = verticalIdx << 3;                       // picture-wise position
 			fourSampleEdgeStartSamplePos_y = lcuPos_y + (verticalIdx << 3);                       // picture-wise position
@@ -4043,12 +4049,11 @@ void LCUPictureEdgeDLFCore16bit(
 		}
 
 		// chroma component filtering
-		if ((sequenceControlSet->chromaWidth & 7) == 0) {
+		if (((tileWidthInPxl >> subWidthCMinus1) & 7) == 0) {
 			//num4SampleHorizontalEdges     = (sequenceControlSet->chromaHeight >> 3) + ((sequenceControlSet->chromaHeight & 7) != 0) - 1;
             num4SampleHorizontalEdges = (lcuHeight >> (colorFormat==EB_YUV420?4:3)) + (((lcuHeight >> (colorFormat==EB_YUV420?1:0)) & (colorFormat==EB_YUV420?7:15)) != 0);
-			fourSampleEdgeStartSamplePos_x = sequenceControlSet->chromaWidth - 4;       // Picture wise location
-			//for(verticalIdx = 1; verticalIdx <= num4SampleHorizontalEdges; ++verticalIdx) {
-			for (verticalIdx = (lcuPos_y == 0); verticalIdx < num4SampleHorizontalEdges; ++verticalIdx) {
+			fourSampleEdgeStartSamplePos_x = (lcuPtr->tileEndX >> subWidthCMinus1) - 4; // Tile wise location
+			for (verticalIdx = (lcuPos_y == lcuPtr->tileOriginY); verticalIdx < num4SampleHorizontalEdges; ++verticalIdx) {
 				//fourSampleEdgeStartSamplePos_y = verticalIdx << 3;                      // Picture wise location
                 fourSampleEdgeStartSamplePos_y = (lcuPos_y >> (colorFormat==EB_YUV420?1:0)) + (verticalIdx << 3);                      // Picture wise location
 				//lcuIdx     = (fourSampleEdgeStartSamplePos_y >> (logMaxLcuSize-1)) * pictureWidthInLcu + (fourSampleEdgeStartSamplePos_x >> (logMaxLcuSize-1));
@@ -4161,14 +4166,12 @@ void LCUPictureEdgeDLFCore16bit(
 		}
 	}
 
-	if (lcuPos_y >> lcuPtr->sizeLog2 == pictureHeightInLcu - 1) {
+	if (lcuPos_y >> lcuPtr->sizeLog2 == tileHeightEndInLcu - 1) {
 		/***** picture bottom 4 sample vertical edges filtering *****/
 		// luma component filtering
-		//num4SampleVerticalEdges       = (sequenceControlSet->lumaWidth >> 3) - 1;
 		num4SampleVerticalEdges = (lcuWidth >> 3);
-		fourSampleEdgeStartSamplePos_y = sequenceControlSet->lumaHeight - 4;      // picture-wise position
-		//for(horizontalIdx = 1; horizontalIdx <= num4SampleVerticalEdges; ++horizontalIdx) {
-		for (horizontalIdx = (lcuPos_x == 0); horizontalIdx < num4SampleVerticalEdges; ++horizontalIdx) {
+		fourSampleEdgeStartSamplePos_y = lcuPtr->tileEndY - 4;      // picture-wise position
+		for (horizontalIdx = (lcuPos_x == lcuPtr->tileOriginX); horizontalIdx < num4SampleVerticalEdges; ++horizontalIdx) {
 			// edge A
 			fourSampleEdgeStartSamplePos_x = lcuPos_x + (horizontalIdx << 3);                  // picuture-wise position
 			lcuIdx = (fourSampleEdgeStartSamplePos_y >> logMaxLcuSize) * pictureWidthInLcu + (fourSampleEdgeStartSamplePos_x >> logMaxLcuSize);
@@ -4221,12 +4224,10 @@ void LCUPictureEdgeDLFCore16bit(
 		}
 
 		// chroma component filtering
-		if ((sequenceControlSet->chromaHeight & 7) == 0) {
-			//num4SampleVerticalEdges       = (sequenceControlSet->chromaWidth >> 3) + ((sequenceControlSet->chromaWidth & 7) != 0) - 1;
+		if (((tileHeightInPxl>> subHeightCMinus1) & 7) == 0) {
             num4SampleVerticalEdges = (lcuWidth >> (3+(colorFormat==EB_YUV444?0:1))) + (((lcuWidth >> (colorFormat==EB_YUV444?0:1)) & (colorFormat==EB_YUV444?15:7)) != 0);
-			fourSampleEdgeStartSamplePos_y = sequenceControlSet->chromaHeight - 4;        // Picture wise location
-			//for(horizontalIdx = 1; horizontalIdx <= num4SampleVerticalEdges; ++horizontalIdx) {
-			for (horizontalIdx = (lcuPos_x == 0); horizontalIdx < num4SampleVerticalEdges; ++horizontalIdx) {
+			fourSampleEdgeStartSamplePos_y = (lcuPtr->tileEndY >> subHeightCMinus1) - 4;  // Tile wise location
+			for (horizontalIdx = (lcuPos_x == lcuPtr->tileOriginX); horizontalIdx < num4SampleVerticalEdges; ++horizontalIdx) {
                 fourSampleEdgeStartSamplePos_x = (lcuPos_x >> (colorFormat==EB_YUV444?0:1)) + (horizontalIdx << 3);   // Picture wise location
                 lcuIdx = (fourSampleEdgeStartSamplePos_y >> (logMaxLcuSize - (colorFormat==EB_YUV420?1:0))) * pictureWidthInLcu + (fourSampleEdgeStartSamplePos_x >> (logMaxLcuSize - (colorFormat==EB_YUV444?0:1)));
 				lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuIdx];

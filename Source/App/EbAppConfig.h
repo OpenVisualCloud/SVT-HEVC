@@ -242,11 +242,9 @@ typedef struct EbConfig_s
     unsigned char           y4m_buf[9];
 
     EB_BOOL                useQpFile;
-#if 1//TILES
     uint8_t                 tileColumnCount;
     uint8_t                 tileRowCount;
     uint8_t                 tileSliceMode;
-#endif
     int32_t                 frameRate;
     int32_t                 frameRateNumerator;
     int32_t                 frameRateDenominator;

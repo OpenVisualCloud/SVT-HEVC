@@ -324,11 +324,9 @@ typedef struct EB_H265_ENC_CONFIGURATION
      * Default is null.*/
     uint8_t                 useQpFile;
 
-#if 1//TILES
     uint8_t                 tileColumnCount;
     uint8_t                 tileRowCount;
     uint8_t                 tileSliceMode;
-#endif
 
     // Deblock Filter
 

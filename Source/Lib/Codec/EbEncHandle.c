@@ -818,6 +818,9 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         inputData.lcuSize           = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lcuSize;
         inputData.maxDepth          = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxLcuDepth;
         inputData.is16bit           = is16bit;
+        inputData.tileRowCount      = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.tileRowCount;
+        inputData.tileColumnCount   = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.tileColumnCount;
+
         return_error = EbSystemResourceCtor(
             &(encHandlePtr->pictureControlSetPoolPtrArray[instanceIndex]),
             encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->pictureControlSetPoolInitCountChild, //EB_PictureControlSetPoolInitCountChild,
@@ -1761,17 +1764,17 @@ void LoadDefaultBufferConfigurationSettings(
 
     //#====================== Inter process Fifos ======================
     sequenceControlSetPtr->resourceCoordinationFifoInitCount = 300;
-    sequenceControlSetPtr->pictureAnalysisFifoInitCount = 300;
-    sequenceControlSetPtr->pictureDecisionFifoInitCount = 300;
-    sequenceControlSetPtr->initialRateControlFifoInitCount = 300;
-    sequenceControlSetPtr->pictureDemuxFifoInitCount = 300;
-    sequenceControlSetPtr->rateControlTasksFifoInitCount = 300;
-    sequenceControlSetPtr->rateControlFifoInitCount = 301;
-    sequenceControlSetPtr->modeDecisionFifoInitCount = 300;
-    sequenceControlSetPtr->modeDecisionConfigurationFifoInitCount = 300;
-    sequenceControlSetPtr->motionEstimationFifoInitCount = 300;
-    sequenceControlSetPtr->entropyCodingFifoInitCount = 300;
-    sequenceControlSetPtr->encDecFifoInitCount = 300;
+    sequenceControlSetPtr->pictureAnalysisFifoInitCount = 301;
+    sequenceControlSetPtr->pictureDecisionFifoInitCount = 302;
+    sequenceControlSetPtr->initialRateControlFifoInitCount = 303;
+    sequenceControlSetPtr->pictureDemuxFifoInitCount = 304;
+    sequenceControlSetPtr->rateControlTasksFifoInitCount = 305;
+    sequenceControlSetPtr->rateControlFifoInitCount = 306;
+    //sequenceControlSetPtr->modeDecisionFifoInitCount = 307;
+    sequenceControlSetPtr->modeDecisionConfigurationFifoInitCount = (300 * sequenceControlSetPtr->tileRowCount);
+    sequenceControlSetPtr->motionEstimationFifoInitCount = 308;
+    sequenceControlSetPtr->entropyCodingFifoInitCount = 309;
+    sequenceControlSetPtr->encDecFifoInitCount = 900;
 
     //#====================== Processes number ======================
     sequenceControlSetPtr->totalProcessInitCount = 0;
@@ -2076,6 +2079,9 @@ void CopyApiFromApp(
     sequenceControlSetPtr->intraRefreshType = sequenceControlSetPtr->staticConfig.intraRefreshType;
     sequenceControlSetPtr->maxTemporalLayers = sequenceControlSetPtr->staticConfig.hierarchicalLevels;
     sequenceControlSetPtr->maxRefCount = 1;
+    sequenceControlSetPtr->tileRowCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileRowCount;
+    sequenceControlSetPtr->tileColumnCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileColumnCount;
+    sequenceControlSetPtr->tileSliceMode = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileSliceMode;
 
 
     // Quantization
@@ -2859,7 +2865,6 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
-#if TILES
     //Check tiles
     //TODO: Check maxTileCol/maxTileRow according to profile/level later
     uint32_t pictureWidthInLcu = (config->sourceWidth + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE;
@@ -2880,7 +2885,6 @@ static EB_ERRORTYPE VerifySettings(\
             break;
         }
     }
-#endif
     return return_error;
 }
 
@@ -2914,11 +2918,9 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->interlacedVideo = EB_FALSE;
     configPtr->qp = 32;
     configPtr->useQpFile = EB_FALSE;
-#if TILES
     configPtr->tileRowCount = 1;
     configPtr->tileColumnCount = 1;
     configPtr->tileSliceMode = 0;
-#endif
     configPtr->sceneChangeDetection = 1;
     configPtr->rateControlMode = 0;
     configPtr->lookAheadDistance = (EB_U32)~0;

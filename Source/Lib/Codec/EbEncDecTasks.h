@@ -24,6 +24,7 @@ typedef struct EncDecTasks_s
     EB_U32                        inputType;
     EB_S16                        encDecSegmentRow;
 
+    EB_U32                        tileRowIndex;
 } EncDecTasks_t;
 
 typedef struct EncDecTasksInitData_s

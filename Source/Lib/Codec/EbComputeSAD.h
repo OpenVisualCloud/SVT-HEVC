@@ -101,9 +101,9 @@ extern "C" {
             /*2 16xM */ FastLoop_NxMSadKernel,
             /*3 24xM */ FastLoop_NxMSadKernel,
             /*4 32xM */ FastLoop_NxMSadKernel,
-            /*5      */ FastLoop_NxMSadKernel,
+            /*5 40xM */ FastLoop_NxMSadKernel,
             /*6 48xM */ FastLoop_NxMSadKernel,
-            /*7      */ FastLoop_NxMSadKernel,
+            /*7 56xM */ FastLoop_NxMSadKernel,
             /*8 64xM */ FastLoop_NxMSadKernel
         },
         // AVX2
@@ -113,9 +113,9 @@ extern "C" {
             /*2 16xM */	Compute16xMSad_SSE2_INTRIN,//Compute16xMSad_AVX2_INTRIN is slower than the SSE2 version
             /*3 24xM */	Compute24xMSad_AVX2_INTRIN,
             /*4 32xM */	Compute32xMSad_AVX2_INTRIN,
-            /*5      */ (EB_SADKERNELNxM_TYPE)NxMSadKernelVoidFunc,
+            /*5 40xM */ Compute40xMSad_AVX2_INTRIN,
             /*6 48xM */	Compute48xMSad_AVX2_INTRIN,
-            /*7      */ (EB_SADKERNELNxM_TYPE)NxMSadKernelVoidFunc,
+            /*7 56xM */	Compute56xMSad_AVX2_INTRIN,
             /*8 64xM */ Compute64xMSad_AVX2_INTRIN,
         },
     };
