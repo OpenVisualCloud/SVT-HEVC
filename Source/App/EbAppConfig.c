@@ -167,7 +167,10 @@ static void SetNaluFile(const char *value, EbConfig_t *cfg)
 {
     if (cfg->naluFile) { fclose(cfg->naluFile); }
     FOPEN(cfg->naluFile, value, "rb");
-    cfg->useNaluFile = EB_TRUE;
+    if (cfg->naluFile)
+        cfg->useNaluFile = EB_TRUE;
+    else 
+        printf("Error: Nalu file: %s does not exist, won't use\n", value);
 };
 static void SetCfgSourceWidth                   (const char *value, EbConfig_t *cfg) {cfg->sourceWidth                      = strtoul(value, NULL, 0);};
 static void SetInterlacedVideo                  (const char *value, EbConfig_t *cfg) {cfg->interlacedVideo                  = (EB_BOOL) strtoul(value, NULL, 0);};
