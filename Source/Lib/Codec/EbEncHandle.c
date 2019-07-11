@@ -3137,7 +3137,7 @@ EB_API EB_ERRORTYPE EbH265EncEosNal(
 }
 
 /* charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/" */
-static EB_ERRORTYPE BaseDecodeFunction(EB_U8* encodedString, EB_U32 base64EncodeLength, EB_U8* decodedString )
+static EB_ERRORTYPE BaseDecodeFunction(EB_U8* encodedString, EB_U32 base64EncodeLength, EB_U8* decodedString, EB_U32 base64DecodeLength)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_U32 i, j, k = 0;
@@ -3180,9 +3180,10 @@ static EB_ERRORTYPE BaseDecodeFunction(EB_U8* encodedString, EB_U32 base64Encode
                 }
             }
 
+            //
             while (countBits != 0) {
                 countBits -= 8;
-                if (k >= sizeof(decodedString)) {
+                if (k >= base64DecodeLength) {
                     return EB_ErrorBadParameter;
                 }
                 decodedString[k++] = (bitstream >> countBits) & 255;
@@ -3202,6 +3203,7 @@ static EB_ERRORTYPE ParseSeiMetaData(
     EB_U8 *base64Encode;
     EB_U32 base64EncodeLength;
     EB_U8 *base64Decode;
+    EB_U32 base64DecodeLength;
 
     if (src->naluFound == EB_FALSE) {
         return EB_ErrorBadParameter;
@@ -3209,8 +3211,10 @@ static EB_ERRORTYPE ParseSeiMetaData(
 
     base64Encode = src->naluBase64Encode;
     base64EncodeLength = (uint32_t)strlen((char*)base64Encode);
-    EB_MALLOC(EB_U8*, base64Decode, (base64EncodeLength / 4) * 3, EB_N_PTR);
-    return_error = BaseDecodeFunction(base64Encode, base64EncodeLength, base64Decode);
+    base64DecodeLength = (base64EncodeLength / 4) * 3;
+    EB_MALLOC(EB_U8*, base64Decode, base64DecodeLength, EB_N_PTR);
+    
+    return_error = BaseDecodeFunction(base64Encode, base64EncodeLength, base64Decode, base64DecodeLength);
 
     if (return_error != EB_ErrorNone) {
         src->naluFound = EB_FALSE;
