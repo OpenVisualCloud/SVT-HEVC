@@ -11,7 +11,7 @@
 
 #include "EbModeDecisionConfiguration.h"
 
-static const EB_U32 skipFlagBits[6] = { 17878, 62157, 86651, 54723, 14816, 8254 };
+static const EB_U32 skipFlagBits[NUMBER_OF_SKIP_FLAG_CASES] = { 17878, 62157, 86651, 54723, 14816, 8254 };
 static const EB_U32 mergeIndexBits[6] = { 10350, 109741, 142509, 175277, 175277 };
 static const EB_U32 interBiDirBits[8] = { 29856, 36028, 15752, 59703, 8692, 84420, 2742, 136034 };
 static const EB_U32 interUniDirBits[2] = { 2742, 136034 };
@@ -1160,9 +1160,7 @@ EB_ERRORTYPE InterFastCostPsliceOpt(
 	ModeDecisionCandidateBuffer_t          *candidateBufferPtr,
 	EB_U32                                  qp,
 	EB_U64                                  lumaDistortion,
-
 	EB_U64                                  chromaDistortion,
-
 	EB_U64                                  lambda,
 	PictureControlSet_t                    *pictureControlSetPtr)
 {
@@ -1178,7 +1176,7 @@ EB_ERRORTYPE InterFastCostPsliceOpt(
 		EB_U32 mergeIndex = candidatePtr->mergeIndex;
 		// Rate
 		EB_U64 mergeSkiplumaRate;
-		mergeSkiplumaRate = skipFlagBits[4 + cuPtr->skipFlagContext];
+		mergeSkiplumaRate = skipFlagBits[(NUMBER_OF_SKIP_FLAG_CASES >> 1) + cuPtr->skipFlagContext];
 
 		{
 			mergeSkiplumaRate += mergeIndexBits[mergeIndex];
@@ -1319,7 +1317,7 @@ EB_ERRORTYPE InterFastCostBsliceOpt(
 		EB_U32 mergeIndex = candidatePtr->mergeIndex;
 		// Rate
 		EB_U64 mergeSkiplumaRate;
-		mergeSkiplumaRate = skipFlagBits[4 + cuPtr->skipFlagContext];
+		mergeSkiplumaRate = skipFlagBits[(NUMBER_OF_SKIP_FLAG_CASES >> 1) + cuPtr->skipFlagContext];
 
 		{
 			mergeSkiplumaRate += mergeIndexBits[mergeIndex];
