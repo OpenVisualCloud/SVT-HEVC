@@ -675,7 +675,7 @@ void* PictureManagerKernel(void *inputPtr)
                     pictureWidthInLcu  = (EB_U8)((entrySequenceControlSetPtr->lumaWidth + entrySequenceControlSetPtr->lcuSize - 1) / entrySequenceControlSetPtr->lcuSize);
                     pictureHeightInLcu = (EB_U8)((entrySequenceControlSetPtr->lumaHeight + entrySequenceControlSetPtr->lcuSize - 1) / entrySequenceControlSetPtr->lcuSize); 
 
-                    for (unsigned lcuIndex = 0; lcuIndex < (pictureWidthInLcu * pictureHeightInLcu); lcuIndex++) {
+                    for (unsigned lcuIndex = 0; lcuIndex < (unsigned)(pictureWidthInLcu * pictureHeightInLcu); lcuIndex++) {
                         ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileLeftEdgeFlag  = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileLeftEdgeFlag;
                         ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileTopEdgeFlag   = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileTopEdgeFlag;
                         ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileRightEdgeFlag = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileRightEdgeFlag;
@@ -710,7 +710,7 @@ void* PictureManagerKernel(void *inputPtr)
                             int tileIdx = r * entrySequenceControlSetPtr->tileColumnCount + c;
                             ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingCurrentRow = 0;
                             ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingCurrentAvailableRow = 0;
-                            ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingRowCount = sequenceControlSetPtr->tileRowArray[r];
+                            ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingRowCount = (EB_S8)(sequenceControlSetPtr->tileRowArray[r]);
                             ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingInProgress = EB_FALSE;
                             ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingPicDone = EB_FALSE;
 

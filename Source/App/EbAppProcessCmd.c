@@ -900,7 +900,7 @@ static void ReadInputFrames(
             inputPtr->cbExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize + luma2bitSize;
             inputPtr->crExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize + luma2bitSize + chroma2bitSize;
 
-            headerPtr->nFilledLen = luma8bitSize + luma2bitSize + 2 * (chroma8bitSize + chroma2bitSize);
+            headerPtr->nFilledLen = (uint32_t)(luma8bitSize + luma2bitSize + 2 * (chroma8bitSize + chroma2bitSize));
         } else {
             //Normal unpacked mode:yuv420p10le yuv422p10le yuv444p10le
 
@@ -1108,7 +1108,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(EbConfig_t *config, EbAppContext_t *appC
     int64_t                  remainingByteCount;
     const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)config->encoderColorFormat;
     int ret;
-    uint32_t compressed10bitFrameSize = (inputPaddedWidth*inputPaddedHeight) + 2 * ((inputPaddedWidth*inputPaddedWidth) >> (3 - colorFormat));
+    uint32_t compressed10bitFrameSize = (uint32_t)((inputPaddedWidth*inputPaddedHeight) + 2 * ((inputPaddedWidth*inputPaddedWidth) >> (3 - colorFormat)));
     compressed10bitFrameSize += compressed10bitFrameSize / 4;
 
     if (config->injector && config->processedFrameCount)
