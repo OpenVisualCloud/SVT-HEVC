@@ -900,7 +900,7 @@ static void ReadInputFrames(
             inputPtr->cbExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize + luma2bitSize;
             inputPtr->crExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize + luma2bitSize + chroma2bitSize;
 
-            headerPtr->nFilledLen = (uint32_t)(luma8bitSize + luma2bitSize + 2 * (chroma8bitSize + chroma2bitSize));
+            headerPtr->nFilledLen = luma8bitSize + luma2bitSize + 2 * (chroma8bitSize + chroma2bitSize);
         } else {
             //Normal unpacked mode:yuv420p10le yuv422p10le yuv444p10le
 
