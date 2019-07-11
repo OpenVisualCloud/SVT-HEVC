@@ -10,7 +10,7 @@
 #define CHROMA_MAX 4
 
 #include "EbAppConfig.h"
-
+#include <ctype.h>
 
 /* copy a string until a specified character or a new line is found */
 char* copyUntilCharacterOrNewLine(char *src, char *dst, char chr) {
