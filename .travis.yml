@@ -1,54 +1,189 @@
 language: c
+cache: ccache
+os:
+  - linux
+  - osx
 dist: xenial
-
+osx_image: xcode10.2
+compiler:
+  - clang
+  - gcc
 addons:
   apt:
     packages:
-     - cmake
-     - yasm
+      - cmake
+      - yasm
+      - valgrind
+      - libgstreamer-plugins-base1.0-dev
+      - libgstreamer1.0-dev
+      - llvm
+      - clang
   homebrew:
     packages:
+      - ccache
       - yasm
-
-jobs:
+notifications:
+  webhooks:
+    - https://coveralls.io/webhook
+env:
+  - build_type=release
+stages:
+  - name: style
+  - name: test
+  - name: Coveralls And Valgrind
+    if: type != pull_request
+before_install:
+  - "sudo chown -R travis: $HOME/.ccache"
+  - export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig PATH="/usr/local/opt/ccache/libexec:$PATH"
+  - wget -nc https://raw.githubusercontent.com/OpenVisualCloud/SVT-AV1-Resources/master/video.tar.gz || wget -nc http://randomderp.com/video.tar.gz
+  - tar xf video.tar.gz
+  - mkdir -p $TRAVIS_BUILD_DIR/Build/linux/$build_type
+install:
+  - pip install --user cpp-coveralls
+  - export PATH=/Users/travis/Library/Python/2.7/bin:${PATH}
+  - if [ $TRAVIS_OS_NAME = osx ]; then ulimit -n 512; fi
+  #- if [ $TRAVIS_OS_NAME = osx ]; then brew install --HEAD valgrind; fi
+script:
+  - &base_script |
+    cd $TRAVIS_BUILD_DIR/Build/linux/$build_type
+    cmake $TRAVIS_BUILD_DIR -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=$build_type ${CMAKE_EFLAGS[@]}
+    cmake -j $(if [ $TRAVIS_OS_NAME = osx ]; then sysctl -n hw.ncpu; else nproc; fi) --build . &&
+    sudo cmake --build . --target install && cd $TRAVIS_BUILD_DIR
+  - SvtHevcEncApp -encMode 9 -i akiyo_cif.y4m -b test1.h265
+before_cache:
+  - "sudo chown -R travis: $HOME/.ccache"
+matrix:
+  fast_finish: true
+  allow_failures:
+    - name: Style check
+    - name: Binary Identical?
+    - os: osx
+    - name: Valgrind
+    - env: COVERALLS_PARALLEL=true build_type=debug CMAKE_EFLAGS="-DCOVERAGE=ON"
+  exclude:
+    - os: osx
+      compiler: gcc # gcc = clang in macOS, unecessary duplicate
   include:
-   # General Linux build job
-   - name: Build
-     script:
-     - cd Build/linux
-     - ./build.sh release
-   # General macOS build job
-   - name: macOS build
-     os: osx
-     script:
-     - cd Build/linux
-     - ./build.sh release    
-   # Coveralls test job
-   - name: Test & Coveralls
-     before_install:
-     - pip install --user cpp-coveralls
-     script:
-     - cd Build/linux
-     - ./build.sh release
-     after_success:
-     - coveralls
-     
+  # valgrind --tool=memcheck --leak-check=yes --show-reachable=yes ./SvtHevcEncApp -help
+  # Coding style check
+    - name: Style check
+      stage: style
+      addons: skip
+      before_install: skip
+      install: skip
+      script:
+        - git grep -InP --heading "\t|\r| $" -- .  && IS_FAIL=true || true
+        - git grep -I -l -z "" -- . | while IFS= read -r -d '' i; do
+              if [ -n "$(tail -c 1 "$i")" ]; then
+                  echo "No newline at end of $i";
+                  IS_FAIL=true;
+              fi;
+          done
+        - git remote rm upstream 2> /dev/null || true
+        - git remote add upstream https://github.com/OpenVisualCloud/SVT-HEVC.git
+        - git fetch -q upstream master
+        - for i in $(git rev-list HEAD ^upstream/master); do
+              echo "Checking commit message of $i";
+              msg="$(git log --format=%B -n 1 $i)";
+              if [ -n "$(echo "$msg" | awk "NR==2")" ]; then
+                  echo "Malformed commit message in $i, second line must be empty";
+                  IS_FAIL=true;
+              fi;
+              if echo "$msg" | head -1 | grep -q '\.$'; then
+                  echo "Malformed commit message in $i, trailing period in subject line";
+                  IS_FAIL=true;
+              fi;
+          done
+        - test -z "$IS_FAIL"
    # FFmpeg interation build
-   - name: FFmpeg patch
-     script:
-     # Build and install SVT-HEVC
-     - cd $TRAVIS_BUILD_DIR
-     - cd Build
-     - cmake ..
-     - make -j$(nproc)
-     - sudo make install
-     # Apply SVT-HEVC plugin and enable libsvthevc to FFmpeg
-     - git clone https://github.com/FFmpeg/FFmpeg ffmpeg
-     - cd ffmpeg
-     - git checkout release/4.1
-     - git apply $TRAVIS_BUILD_DIR/ffmpeg_plugin/0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch
-     - git apply $TRAVIS_BUILD_DIR/ffmpeg_plugin/0002-doc-Add-libsvt_hevc-encoder-docs.patch
-     - export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
-     - export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
-     - ./configure --enable-libsvthevc
-     - make --quiet -j$(nproc)
+    - name: FFmpeg patch
+      stage: test
+      compiler: gcc
+      env: build_type=release
+      script:
+        # Build and install SVT-HEVC
+        - *base_script
+        # Apply SVT-HEVC plugin and enable libsvthevc to FFmpeg
+        - git clone https://github.com/FFmpeg/FFmpeg --branch release/4.1 --depth=1 ffmpeg && cd ffmpeg
+        - git am $TRAVIS_BUILD_DIR/ffmpeg_plugin/0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch
+        - git am $TRAVIS_BUILD_DIR/ffmpeg_plugin/0002-doc-Add-libsvt_hevc-encoder-docs.patch
+        - export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
+        - "sudo chown -R travis: $HOME/.ccache"
+        - ./configure --enable-libsvthevc || less ffbuild/config.log
+        - make --quiet -j$(nproc) && sudo make install
+    # GStreamer interation build
+    - name: GStreamer patch
+      stage: test
+      compiler: gcc
+      env: build_type=release
+      script:
+        # Build and install SVT-HEVC
+        - *base_script
+        # Build GST-SVT-HEVC plugin
+        - cd $TRAVIS_BUILD_DIR/gstreamer-plugin
+        - "sudo chown -R travis: $HOME/.ccache"
+        - cmake .
+        - make --quiet -j$(nproc)
+        - sudo make install
+    # Tests if .h265 files are identical on binary level
+    - name: Binary Identical?
+      stage: test
+      script:
+        - mv -t $HOME akiyo_cif.y4m
+        - *base_script
+        - cd $HOME
+        - SvtHevcEncApp -encMode 9 -i akiyo_cif.y4m -n 120 -b test-pr-m9.h265
+        - SvtHevcEncApp -encMode 0 -i akiyo_cif.y4m -n 3 -b test-pr-m0.h265
+        - rm -rf $TRAVIS_BUILD_DIR
+        - git clone --depth 1 https://github.com/OpenVisualCloud/SVT-HEVC.git $TRAVIS_BUILD_DIR && cd $TRAVIS_BUILD_DIR
+        - *base_script
+        - mkdir -p $TRAVIS_BUILD_DIR/Build/linux/$build_type
+        - cd $HOME
+        - SvtHevcEncApp -encMode 9 -i akiyo_cif.y4m -n 120 -b test-master-m9.h265
+        - SvtHevcEncApp -encMode 0 -i akiyo_cif.y4m -n 3 -b test-master-m0.h265
+        - diff test-pr-m9.h265 test-master-m9.h265
+        - diff test-pr-m0.h265 test-master-m0.h265
+    - name: Coveralls Linux+gcc
+      stage: Coveralls And Valgrind
+      os: linux
+      compiler: gcc
+      env: COVERALLS_PARALLEL=true build_type=debug CMAKE_EFLAGS="-DCOVERAGE=ON"
+      script:
+        - *base_script
+        - &coveralls_script |
+          SvtHevcEncApp -encMode 9 -i akiyo_cif.y4m -b test1.h265
+          git clone https://github.com/FFmpeg/FFmpeg ffmpeg --depth=1 --branch release/4.1
+          cd ffmpeg
+          git am $TRAVIS_BUILD_DIR/ffmpeg_plugin/0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch &&
+          git am $TRAVIS_BUILD_DIR/ffmpeg_plugin/0002-doc-Add-libsvt_hevc-encoder-docs.patch
+          sudo chown -R travis: $HOME/.ccache
+          ./configure --enable-libsvthevc || cat ffbuild/config.log
+          make -s -j$(if [ $TRAVIS_OS_NAME = osx ]; then sysctl -n hw.ncpu; else nproc; fi) >/dev/null &&
+          sudo make install
+          cd $TRAVIS_BUILD_DIR
+          ffmpeg -i akiyo_cif.y4m -c:v libsvt_hevc test.h265
+          SvtHevcEncApp -i stdin -w 352 -h 288 -fps 30 -n 150 -b test2.h265 < akiyo_cif.y4m
+      after_script: &after_coveralls_script |
+        if [ $CC = "clang" ] && [ $TRAVIS_OS_NAME = linux ]; then
+          GCOV_FILE=llvm-cov GCOV_OPTIONS='gcov -pl'
+        else
+          GCOV_FILE=gcov GCOV_OPTIONS='\-lp'
+        fi
+        coveralls --root $TRAVIS_BUILD_DIR -i Source -E ".*CMakeFiles.*" -E ".*ffmpeg.*" --gcov $GCOV_FILE --gcov-options "$GCOV_OPTIONS"
+    - name: Coveralls osx+clang
+      stage: Coveralls And Valgrind
+      os: osx
+      compiler: clang
+      env: COVERALLS_PARALLEL=true build_type=debug CMAKE_EFLAGS="-DCOVERAGE=ON"
+      script:
+        - *base_script
+        - *coveralls_script
+      after_script: *after_coveralls_script
+    - name: Valgrind
+      stage: Coveralls And Valgrind
+      compiler: gcc
+      os: linux
+      env: build_type=debug
+      script:
+        - *base_script
+        - valgrind -- SvtHevcEncApp -encMode 9 -i akiyo_cif.y4m -n 150 -b test1.h265

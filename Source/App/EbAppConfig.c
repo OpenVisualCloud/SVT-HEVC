@@ -10,6 +10,7 @@
 
 #include "EbAppConfig.h"
 #include "EbApi.h"
+#include "EbAppInputy4m.h"
 
 #ifdef _WIN32
 #else
@@ -36,11 +37,9 @@
 #define BASE_LAYER_SWITCH_MODE_TOKEN    "-base-layer-switch-mode" // no Eval
 #define QP_TOKEN                        "-q"
 #define USE_QP_FILE_TOKEN               "-use-q-file"
-#if 1//TILES
 #define TILE_ROW_COUNT_TOKEN            "-tile_row_cnt"
 #define TILE_COL_COUNT_TOKEN            "-tile_col_cnt"
 #define TILE_SLICE_MODE_TOKEN           "-tile_slice_mode"
-#endif
 #define TUNE_TOKEN                      "-tune"
 #define FRAME_RATE_TOKEN                "-fps"
 #define FRAME_RATE_NUMERATOR_TOKEN      "-fps-num"
@@ -127,6 +126,16 @@ static void SetCfgInputFile                     (const char *value, EbConfig_t *
     }
     else {
         FOPEN(cfg->inputFile, value, "rb");
+        /* if input is a YUV4MPEG2 (y4m) file, read header and parse parameters */
+        if (cfg->inputFile != NULL) {
+            if ((EB_BOOL)(check_if_y4m(cfg)) == EB_TRUE)
+                cfg->y4m_input = EB_TRUE;
+            else
+                cfg->y4m_input = EB_FALSE;
+        }
+        else {
+            cfg->y4m_input = EB_FALSE;
+        }
     }
 };
 static void SetCfgStreamFile                    (const char *value, EbConfig_t *cfg)
@@ -158,7 +167,10 @@ static void SetNaluFile(const char *value, EbConfig_t *cfg)
 {
     if (cfg->naluFile) { fclose(cfg->naluFile); }
     FOPEN(cfg->naluFile, value, "rb");
-    cfg->useNaluFile = EB_TRUE;
+    if (cfg->naluFile)
+        cfg->useNaluFile = EB_TRUE;
+    else 
+        printf("Error: Nalu file: %s does not exist, won't use\n", value);
 };
 static void SetCfgSourceWidth                   (const char *value, EbConfig_t *cfg) {cfg->sourceWidth                      = strtoul(value, NULL, 0);};
 static void SetInterlacedVideo                  (const char *value, EbConfig_t *cfg) {cfg->interlacedVideo                  = (EB_BOOL) strtoul(value, NULL, 0);};
@@ -185,11 +197,9 @@ static void SetHierarchicalLevels               (const char *value, EbConfig_t *
 static void SetCfgPredStructure                 (const char *value, EbConfig_t *cfg) {cfg->predStructure                    = strtol(value, NULL, 0); };
 static void SetCfgQp                            (const char *value, EbConfig_t *cfg) {cfg->qp                               = strtoul(value, NULL, 0);};
 static void SetCfgUseQpFile                     (const char *value, EbConfig_t *cfg) {cfg->useQpFile                        = (EB_BOOL)strtol(value, NULL, 0); };
-#if 1//TILES
 static void SetCfgTileColumnCount               (const char *value, EbConfig_t *cfg) { cfg->tileColumnCount                 = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetCfgTileRowCount                  (const char *value, EbConfig_t *cfg) { cfg->tileRowCount                    = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetCfgTileSliceMode                 (const char *value, EbConfig_t *cfg) { cfg->tileSliceMode                   = (EB_BOOL)strtol(value, NULL, 0); };
-#endif
 static void SetDisableDlfFlag                   (const char *value, EbConfig_t *cfg) {cfg->disableDlfFlag                   = (EB_BOOL)strtoul(value, NULL, 0);};
 static void SetEnableSaoFlag                    (const char *value, EbConfig_t *cfg) {cfg->enableSaoFlag                    = (EB_BOOL)strtoul(value, NULL, 0);};
 static void SetEnableHmeFlag                    (const char *value, EbConfig_t *cfg) {cfg->enableHmeFlag                    = (EB_BOOL)strtoul(value, NULL, 0);};
@@ -276,12 +286,15 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, OUTPUT_RECON_TOKEN, "ReconFile", SetCfgReconFile },
     { SINGLE_INPUT, USE_QP_FILE_TOKEN, "UseQpFile", SetCfgUseQpFile },
     { SINGLE_INPUT, QP_FILE_TOKEN, "QpFile", SetCfgQpFile },
+  
+    // Interlaced Video
+    { SINGLE_INPUT, INTERLACED_VIDEO_TOKEN, "InterlacedVideo", SetInterlacedVideo },
+    // Do NOT move, the value is used in other entries
+    { SINGLE_INPUT, SEPERATE_FILDS_TOKEN, "SeperateFields", SetSeperateFields },
 
-#if 1//TILES
      { SINGLE_INPUT, TILE_ROW_COUNT_TOKEN, "TileRowCount", SetCfgTileRowCount },
      { SINGLE_INPUT, TILE_COL_COUNT_TOKEN, "TileColumnCount", SetCfgTileColumnCount },
      { SINGLE_INPUT, TILE_SLICE_MODE_TOKEN, "TileSliceMode", SetCfgTileSliceMode },
-#endif
 
     // Encoding Presets
     { SINGLE_INPUT, ENCMODE_TOKEN, "EncoderMode", SetencMode },
@@ -310,10 +323,6 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, FRAME_RATE_DENOMINATOR_TOKEN, "FrameRateDenominator", SetFrameRateDenominator },
     { SINGLE_INPUT, INJECTOR_TOKEN, "Injector", SetInjector },
     { SINGLE_INPUT, INJECTOR_FRAMERATE_TOKEN, "InjectorFrameRate", SetInjectorFrameRate },
-
-    // Interlaced Video
-    { SINGLE_INPUT, INTERLACED_VIDEO_TOKEN, "InterlacedVideo", SetInterlacedVideo },
-    { SINGLE_INPUT, SEPERATE_FILDS_TOKEN, "SeperateFields", SetSeperateFields },
 
     // Coding Structure
     { SINGLE_INPUT, HIERARCHICAL_LEVELS_TOKEN, "HierarchicalLevels", SetHierarchicalLevels },
@@ -415,11 +424,9 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->useQpFile                                = EB_FALSE;
     configPtr->qpFile                                   = NULL;
 
-#if 1//TILES
     configPtr->tileColumnCount                          = 1;
     configPtr->tileRowCount                             = 1;
     configPtr->tileSliceMode                            = 0;
-#endif
     configPtr->sceneChangeDetection                 = 1;
     configPtr->rateControlMode                      = 0;
     configPtr->lookAheadDistance                    = (uint32_t)~0;
@@ -474,7 +481,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->minDisplayMasteringLuminance         = 0;
 
     configPtr->switchThreadsToRtPriority            = EB_TRUE;
-    configPtr->fpsInVps                             = EB_FALSE;
+    configPtr->fpsInVps                             = EB_TRUE;
     configPtr->unrestrictedMotionVector             = EB_TRUE;
 
     // Encoding Presets
@@ -559,7 +566,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->recoveryPointSeiFlag                     = EB_FALSE;
     configPtr->enableTemporalId                         = 1;
     configPtr->switchThreadsToRtPriority                = EB_TRUE;
-    configPtr->fpsInVps                                 = EB_FALSE;
+    configPtr->fpsInVps                                 = EB_TRUE;
     configPtr->maxCLL                                   = 0;
     configPtr->maxFALL                                  = 0;
     configPtr->useMasteringDisplayColorVolume           = EB_FALSE;
@@ -912,7 +919,6 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         return_error = EB_ErrorBadParameter;
     }
 
-#if 1//TILES
 
 #define MAX_LCU_SIZE                                64
     
@@ -961,7 +967,6 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         }
 
     }   
-#endif
 
     if (config->separateFields > 1) {
         fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid SeperateFields Input\n", channelNumber + 1);
@@ -1121,9 +1126,13 @@ int32_t ComputeFramesToBeEncoded(
     uint64_t fileSize = 0;
     int32_t frameCount = 0;
     uint32_t frameSize;
+    uint64_t currLoc;
+
     if (config->inputFile) {
+        currLoc = ftello64(config->inputFile); // get current fp location
         fseeko64(config->inputFile, 0L, SEEK_END);
         fileSize = ftello64(config->inputFile);
+        fseeko64(config->inputFile, currLoc, SEEK_SET); // seek back to that location
     }
 
     frameSize = config->inputPaddedWidth * config->inputPaddedHeight; // Luma
@@ -1196,6 +1205,7 @@ EB_ERRORTYPE ReadCommandLine(
     uint32_t    index           = 0;
     int32_t             cmd_token_cnt   = 0;                        // total number of tokens
     int32_t             token_index     = -1;
+    int32_t ret_y4m;
 
     for (index = 0; index < MAX_CHANNEL_NUMBER; ++index){
         config_strings[index] = (char*)malloc(sizeof(char)*COMMAND_LINE_MAX_SIZE);
@@ -1260,6 +1270,20 @@ EB_ERRORTYPE ReadCommandLine(
     }
 
     /***************************************************************************************************/
+    /********************** Parse parameters from input file if in y4m format **************************/
+    /********************** overriding config file and command line inputs    **************************/
+    /***************************************************************************************************/
+    for (index = 0; index < numChannels; ++index) {
+        if ((configs[index])->y4m_input == EB_TRUE) {
+            ret_y4m = read_y4m_header(configs[index]);
+            if (ret_y4m == EB_ErrorBadParameter) {
+                printf("Error found when reading the y4m file parameters.\n");
+                return EB_ErrorBadParameter;
+            }
+        }
+    }
+
+    /***************************************************************************************************/
     /**************************************   Verify configuration parameters   ************************/
     /***************************************************************************************************/
     // Verify the config values
@@ -1274,7 +1298,6 @@ EB_ERRORTYPE ReadCommandLine(
                     configs[index]->inputPaddedWidth  = configs[index]->sourceWidth + LEFT_INPUT_PADDING + RIGHT_INPUT_PADDING;
                     configs[index]->inputPaddedHeight = configs[index]->sourceHeight + TOP_INPUT_PADDING + BOTTOM_INPUT_PADDING;
                 }
-
 
                 // Assuming no errors, set the frames to be encoded to the number of frames in the input yuv
                 if (return_errors[index] == EB_ErrorNone && configs[index]->framesToBeEncoded == 0)

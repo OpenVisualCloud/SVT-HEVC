@@ -727,7 +727,7 @@ EB_ERRORTYPE SaoGenerationDecision(
         SaoGatherFunctionTableLossy[!!(ASM_TYPES & PREAVX2_MASK)](
             &(inputPicturePtr->bufferCr[(((inputPicturePtr->originY + tbOriginY) * inputPicturePtr->strideCr) >> subHeightCMinus1) + ((inputPicturePtr->originX + tbOriginX) >> subWidthCMinus1)]),
             inputPicturePtr->strideCr,
-            &(reconPicturePtr->bufferCr[(((reconPicturePtr->originY + tbOriginY) * reconPicturePtr->strideCr) >> subHeightCMinus1) + ((reconPicturePtr->originX + tbOriginX) >> subHeightCMinus1)]),
+            &(reconPicturePtr->bufferCr[(((reconPicturePtr->originY + tbOriginY) * reconPicturePtr->strideCr) >> subHeightCMinus1) + ((reconPicturePtr->originX + tbOriginX) >> subWidthCMinus1)]),
             reconPicturePtr->strideCr,
             lcuWidth >> subWidthCMinus1,
             lcuHeight >> subHeightCMinus1,

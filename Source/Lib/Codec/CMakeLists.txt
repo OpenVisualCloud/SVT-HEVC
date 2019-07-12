@@ -1,30 +1,25 @@
-# 
+#
 # Copyright(c) 2018 Intel Corporation
 # SPDX - License - Identifier: BSD - 2 - Clause - Patent
-# 
+#
 
 # Include Encoder Subdirectories
-include_directories (${PROJECT_SOURCE_DIR}/Source/API/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Codec/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/API/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/Codec/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
 
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
-
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
-
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
+link_directories(${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/
+    ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
 
 # Encoder Lib Source Files
-add_library(SvtHevcEnc SHARED  
+add_library(SvtHevcEnc SHARED
     EbAdaptiveMotionVectorPrediction.h
     EbAvailability.h
     EbAvcStyleMcp.h
@@ -180,36 +175,46 @@ add_library(SvtHevcEnc SHARED
     EbTransforms.c
     EbTransQuantBuffers.c
     EbUtility.c
-)
+    $<TARGET_OBJECTS:HEVC_C_DEFAULT>
+    $<TARGET_OBJECTS:HEVC_ASM_SSE2>
+    $<TARGET_OBJECTS:HEVC_ASM_SSSE3>
+    $<TARGET_OBJECTS:HEVC_ASM_SSE4_1>
+    $<TARGET_OBJECTS:HEVC_ASM_AVX2>)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+if(UNIX)
+    set(LIBS "-lpthread")
     # Set version number for SONAME.
-    set_target_properties(SvtHevcEnc PROPERTIES SOVERSION ${SVT_HEVC_SOVERSION})
-
+    set_target_properties(SvtHevcEnc
+        PROPERTIES SOVERSION ${SVT_HEVC_SOVERSION})
     # Pass version script to ensure that only global-namespace symbols
     # are exported.
     set(VERSION_SCRIPT ${PROJECT_SOURCE_DIR}/Source/API/EbApi.version)
-    set(CMAKE_SHARED_LINKER_FLAGS
+    if(NOT APPLE)
+        set(CMAKE_SHARED_LINKER_FLAGS
         "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--version-script=${VERSION_SCRIPT}")
-    set_target_properties(SvtHevcEnc PROPERTIES LINK_DEPENDS ${VERSION_SCRIPT})
-endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-
-target_link_libraries(SvtHevcEnc 
-	C_DEFAULT
-	ASM_SSE2
-	ASM_SSSE3
-	ASM_SSE4_1
-	ASM_AVX2)
-
-if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
-    set(CMAKE_INSTALL_LIBDIR "lib")
+    endif()
+    set_target_properties(SvtHevcEnc
+        PROPERTIES LINK_DEPENDS ${VERSION_SCRIPT})
 endif()
 
-if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
-    set(CMAKE_INSTALL_INCLUDEDIR "include/svt-hevc")
+if(COVERAGE)
+    if(CMAKE_C_COMPILER_ID MATCHES "GNU")
+        set(LIBS "-lgcov ${LIBS}")
+    else(CMAKE_C_COMPILER_ID MATCHES "Clang")
+        set(LIBS "--coverage ${LIBS}")
+    endif()
 endif()
+
+add_dependencies(SvtHevcEnc
+    HEVC_C_DEFAULT
+    HEVC_ASM_SSE2
+    HEVC_ASM_SSSE3
+    HEVC_ASM_SSE4_1
+    HEVC_ASM_AVX2)
 
 configure_file(../pkg-config.pc.in ${CMAKE_BINARY_DIR}/SvtHevcEnc.pc @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/SvtHevcEnc.pc DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-install(TARGETS SvtHevcEnc DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-install(DIRECTORY ../../API/ DESTINATION "${CMAKE_INSTALL_PREFIX}/include/svt-hevc" FILES_MATCHING PATTERN "*.h")
+install(TARGETS SvtHevcEnc
+        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")

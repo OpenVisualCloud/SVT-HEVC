@@ -411,7 +411,7 @@ void LimitMvOverBound(
     EB_S32 endY   = (EB_S32)sCSet->lumaHeight << 2;
     EB_S32 cuSize = (EB_S32)ctxtPtr->cuStats->size << 2;
     EB_S32 pad = (4 << 2);
-#if TILES
+
     if ((sCSet->tileRowCount * sCSet->tileColumnCount) > 1) {
         const unsigned lcuIndex = ctxtPtr->cuOriginX/sCSet->lcuSize + (ctxtPtr->cuOriginY/sCSet->lcuSize) * sCSet->pictureWidthInLcu;
         startX = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartX << 2;
@@ -419,7 +419,6 @@ void LimitMvOverBound(
         endX   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndX << 2;
         endY   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndY << 2;
     }
-#endif
     //Jing: if MV is quarter/half, the 7,8 tap interpolation will cross the boundary
     //Just clamp the MV to integer
 
@@ -1470,7 +1469,7 @@ EB_BOOL CheckForMvOverBound(
     EB_S32 endY   = (EB_S32)sCSet->lumaHeight << 2;
     EB_S32 cuSize = (EB_S32)ctxtPtr->cuStats->size << 2;
     EB_S32 pad = 4 << 2;
-#if TILES
+
     if ((sCSet->tileRowCount * sCSet->tileColumnCount) > 1) {
         const unsigned lcuIndex = ctxtPtr->cuOriginX/sCSet->lcuSize + (ctxtPtr->cuOriginY/sCSet->lcuSize) * sCSet->pictureWidthInLcu;
         startX = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartX << 2;
@@ -1478,7 +1477,6 @@ EB_BOOL CheckForMvOverBound(
         endX   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndX << 2;
         endY   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndY << 2;
     }
-#endif
 
     if (cuOriginX + mvxF + cuSize > (endX - pad)) {
 

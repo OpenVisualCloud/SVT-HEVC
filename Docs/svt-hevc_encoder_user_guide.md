@@ -197,7 +197,7 @@ This token sets the encoder to run in the visual quality optimized mode (when se
 
 >-i filename **[Required]**
 
-A YUV file (e.g. 8 bit 4:2:0 planar) containing the video sequence that will be encoded.  The dimensions of each image are specified by –w and –h as indicated below.
+A YUV file (e.g. 8 bit 4:2:0 planar) containing the video sequence that will be encoded.  The dimensions of each image are specified by –w and –h as indicated below. Files encoded in YUV4MPEG2 format are also supported (common extension is ".y4m"). The header in YUV4MPEG2 files contains width, height, framerate, and bit-depth information which do not need to be additional specified as command line arguments.
 
 >-b filename **[Optional]**
 
@@ -227,9 +227,22 @@ This token sets the bitrate control encoding mode [1: Variable Bitrate, 0: Const
 
 This token sets the encoder to automatically choose the best quality encoding mode that allows the encoder to run at a real-time speed set by the –fps parameter (described in the next section).
 
+>-lp integer **[Optional]**
+
+This token sets the number of logical processors which the encoder threads run on.
+
+>-ss integer **[Optional]**
+
+For dual socket systems, this token specific which socket the encoder runs on.
+
+
 For example, the following command encodes 100 frames of the YUV video sequence into the bin bit stream file.  The picture is 1920 luma pixels wide and 1080 pixels high using the Sample.cfg configuration. The QP equals 30 and the md5 checksum is not included in the bit stream.
 
 > SvtHevcEncApp.exe -c Sample.cfg -i CrowdRun\_1920x1080.yuv -w 1920 -h 1080 -n 100 -q 30 -intra-period 31 -b CrowdRun\_1920x1080\_qp30.bin
+
+For another example, the following command encodes the complete YUV video sequence, which is stored in a y4m format, into the bin bit stream file. No width, height, or frame rate parameters need to be specified for y4m files.
+
+> SvtHevcEncApp.exe -i akiyo_cif.y4m -b akiyo_cif.bin
 
 It should be noted that not all the encoder parameters present in the Sample.cfg can be changed using the command line.
 
@@ -302,7 +315,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **LogicalProcessors** | -lp | [0, total number of logical processor] | 0 | The number of logical processor which encoder threads run on.Refer to Appendix A.2 |
 | **TargetSocket** | -ss | [-1,1] | -1 | For dual socket systems, this can specify which socket the encoder runs on.Refer to Appendix A.2 |
 | **SwitchThreadsToRtPriority** | -rt | [0,1] | 1 | Enables or disables threads to real time priority, 0 = OFF, 1 = ON (only works on Linux) |
-| **FPSInVPS** | -fpsinvps | [0,1] | 0 | Enables or disables the VPS timing info, 0 = OFF, 1 = ON |
+| **FPSInVPS** | -fpsinvps | [0,1] | 1 | Enables or disables the VPS timing info, 0 = OFF, 1 = ON |
 | **TileRowCount** | -tile_row_cnt | [1,16] | 1 | Tile count in the Row |
 | **TileColumnCount** | -tile_col_cnt | [1,16] | 1 | Tile count in the column |
 | **TileSliceMode** | -tile_slice_mode | [0,1] | 0 | Per slice per tile, only valid for multi-tile |

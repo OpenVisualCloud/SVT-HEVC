@@ -441,19 +441,19 @@ EB_U32 GetBufPeriodSEILength(
         seiLength += 1;
     }
 
-    // concatenation_flag
-    seiLength += 1;
-
-    // au_cpb_removal_delay_delta_minus1
-    seiLength += vuiPtr->hrdParametersPtr->initialCpbRemovalDelayLengthMinus1 + 1;
-
     if(bufferingPeriodPtr->rapCpbParamsPresentFlag) {
         // cpb_delay_offset
-        seiLength += vuiPtr->hrdParametersPtr->initialCpbRemovalDelayLengthMinus1 + 1;
+        seiLength += vuiPtr->hrdParametersPtr->auCpbRemovalDelayLengthMinus1 + 1;
 
         // dpb_delay_offset
         seiLength += vuiPtr->hrdParametersPtr->dpbOutputDelayDuLengthMinus1 + 1;
     }
+
+    // concatenation_flag
+    seiLength += 1;
+
+    // au_cpb_removal_delay_delta_minus1
+    seiLength += vuiPtr->hrdParametersPtr->auCpbRemovalDelayLengthMinus1 + 1;
 
     for(nalVclIndex = 0; nalVclIndex < 2; ++nalVclIndex) {
         if((nalVclIndex == 0 && vuiPtr->hrdParametersPtr->nalHrdParametersPresentFlag) ||

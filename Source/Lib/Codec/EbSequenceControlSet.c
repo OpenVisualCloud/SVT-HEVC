@@ -339,7 +339,6 @@ extern EB_ERRORTYPE LcuParamsCtor(
 	return return_error;
 }
 
-#if TILES
 /************************************************
  * Configure ME Tiles
  ************************************************/
@@ -347,49 +346,13 @@ static void ConfigureTiles(
     SequenceControlSet_t *scsPtr)
 {
     // Tiles Initialisation
-    const unsigned pictureWidthInLcu  = scsPtr->pictureWidthInLcu;
-    const unsigned pictureHeightInLcu = scsPtr->pictureHeightInLcu;
-
     const unsigned tileColumns = scsPtr->tileColumnCount;
     const unsigned tileRows = scsPtr->tileRowCount;
 
-    unsigned lastColumnWidth = pictureWidthInLcu;
-    unsigned lastRowHeight = pictureHeightInLcu;
 
     unsigned rowIndex, columnIndex;
     unsigned xLcuIndex, yLcuIndex, lcuIndex;
     unsigned xLcuStart, yLcuStart;
-
-    if (scsPtr->tileUniformSpacing == 1)
-    {
-        for (columnIndex = 0; columnIndex < tileColumns - 1; ++columnIndex) {
-            scsPtr->tileColumnArray[columnIndex] = (EB_U16)((columnIndex + 1) * pictureWidthInLcu / tileColumns -
-                columnIndex * pictureWidthInLcu / tileColumns);
-            lastColumnWidth -= scsPtr->tileColumnArray[columnIndex];
-        }
-        scsPtr->tileColumnArray[columnIndex] = (EB_U16)lastColumnWidth;
-
-        for (rowIndex = 0; rowIndex < tileRows - 1; ++rowIndex) {
-            scsPtr->tileRowArray[rowIndex] = (EB_U16)((rowIndex + 1) * pictureHeightInLcu / tileRows -
-                rowIndex * pictureHeightInLcu / tileRows);
-            lastRowHeight -= scsPtr->tileRowArray[rowIndex];
-        }
-        scsPtr->tileRowArray[rowIndex] = (EB_U16)lastRowHeight;
-    }
-    else
-    {
-        for (columnIndex = 0; columnIndex < tileColumns - 1; ++columnIndex) {
-            scsPtr->tileColumnArray[columnIndex] = (EB_U16)scsPtr->tileColumnWidthArray[columnIndex];
-            lastColumnWidth -= scsPtr->tileColumnArray[columnIndex];
-        }
-        scsPtr->tileColumnArray[columnIndex] = (EB_U16)lastColumnWidth;
-
-        for (rowIndex = 0; rowIndex < tileRows - 1; ++rowIndex) {
-            scsPtr->tileRowArray[rowIndex] = (EB_U16)scsPtr->tileRowHeightArray[rowIndex];
-            lastRowHeight -= scsPtr->tileRowArray[rowIndex];
-        }
-        scsPtr->tileRowArray[rowIndex] = (EB_U16)lastRowHeight;
-    }
 
     // Tile-loops
     yLcuStart = 0;
@@ -400,7 +363,7 @@ static void ConfigureTiles(
             // LCU-loops
             for (yLcuIndex = yLcuStart; yLcuIndex < yLcuStart + scsPtr->tileRowArray[rowIndex]; ++yLcuIndex) {
                 for (xLcuIndex = xLcuStart; xLcuIndex < xLcuStart + scsPtr->tileColumnArray[columnIndex]; ++xLcuIndex) {
-                    lcuIndex = xLcuIndex + yLcuIndex * pictureWidthInLcu;
+                    lcuIndex = xLcuIndex + yLcuIndex * scsPtr->pictureWidthInLcu;
                     scsPtr->lcuParamsArray[lcuIndex].tileLeftEdgeFlag = (xLcuIndex == xLcuStart) ? EB_TRUE : EB_FALSE;
                     scsPtr->lcuParamsArray[lcuIndex].tileTopEdgeFlag = (yLcuIndex == yLcuStart) ? EB_TRUE : EB_FALSE;
                     scsPtr->lcuParamsArray[lcuIndex].tileRightEdgeFlag =
@@ -409,6 +372,7 @@ static void ConfigureTiles(
                     scsPtr->lcuParamsArray[lcuIndex].tileStartY = yLcuStart * scsPtr->lcuSize;
                     scsPtr->lcuParamsArray[lcuIndex].tileEndX = (columnIndex == (tileColumns - 1)) ? scsPtr->lumaWidth : (xLcuStart + scsPtr->tileColumnArray[columnIndex]) * scsPtr->lcuSize;
                     scsPtr->lcuParamsArray[lcuIndex].tileEndY = (rowIndex == (tileRows - 1)) ? scsPtr->lumaHeight : (yLcuStart + scsPtr->tileRowArray[rowIndex]) * scsPtr->lcuSize;
+                    scsPtr->lcuParamsArray[lcuIndex].tileIndex = rowIndex * tileColumns + columnIndex;
                 }
             }
             xLcuStart += scsPtr->tileColumnArray[columnIndex];
@@ -418,7 +382,6 @@ static void ConfigureTiles(
 
     return;
 }
-#endif
 
 extern EB_ERRORTYPE LcuParamsInit(
 	SequenceControlSet_t *sequenceControlSetPtr) {
@@ -427,8 +390,8 @@ extern EB_ERRORTYPE LcuParamsInit(
 	EB_U16	lcuIndex;
 	EB_U16	rasterScanCuIndex;
 
-	EB_U8   pictureLcuWidth  = (EB_U8)((sequenceControlSetPtr->lumaWidth + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize);
-	EB_U8	pictureLcuHeight = (EB_U8)((sequenceControlSetPtr->lumaHeight + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize);
+	EB_U8   pictureLcuWidth  = sequenceControlSetPtr->pictureWidthInLcu;
+	EB_U8	pictureLcuHeight = sequenceControlSetPtr->pictureHeightInLcu;
 	EB_MALLOC(LcuParams_t*, sequenceControlSetPtr->lcuParamsArray, sizeof(LcuParams_t) * pictureLcuWidth * pictureLcuHeight, EB_N_PTR);
 
 	for (lcuIndex = 0; lcuIndex < pictureLcuWidth * pictureLcuHeight; ++lcuIndex) {
@@ -522,13 +485,7 @@ extern EB_ERRORTYPE LcuParamsInit(
 		}
 	}
 
-	sequenceControlSetPtr->pictureWidthInLcu = pictureLcuWidth;
-	sequenceControlSetPtr->pictureHeightInLcu = pictureLcuHeight;
-	sequenceControlSetPtr->lcuTotalCount = pictureLcuWidth * pictureLcuHeight;
-
-#if TILES
     ConfigureTiles(sequenceControlSetPtr);
-#endif
 
 	return return_error;
 }

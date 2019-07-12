@@ -98,6 +98,9 @@ In order to run the highest resolution supported by the encoder, at least 64GB o
   - Build the project by following the steps below in a windows command prompt:
     - In the main repository directory, cd to `<repo dir>\Build\windows`
     - Run `build.bat [2019|2017|2015]` [This will automatically generate and build the project]
+  - To Build the project using a generator other than Visual Studio
+    - run `build.bat [ninja|msys|mingw|unix]` instead of the second command
+    - Note: These are not officially supported and thus are not displayed in the help message.
 
 - __Binaries Location__
   - Binaries can be found under `<repo dir>\Bin\Release` or `<repo dir>\Bin\Debug`, depending on whether Debug or Release was selected

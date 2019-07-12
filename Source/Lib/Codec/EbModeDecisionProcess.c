@@ -182,26 +182,26 @@ EB_ERRORTYPE ModeDecisionContextCtor(
 /**************************************************
  * Reset Mode Decision Neighbor Arrays
  *************************************************/
-void ResetModeDecisionNeighborArrays(PictureControlSet_t *pictureControlSetPtr)
+static void ResetModeDecisionNeighborArrays(PictureControlSet_t *pictureControlSetPtr, EB_U32 tileIdx)
 {
     EB_U8 depth;
     for (depth = 0; depth < NEIGHBOR_ARRAY_TOTAL_COUNT; depth++) {
-        NeighborArrayUnitReset(pictureControlSetPtr->mdIntraLumaModeNeighborArray[depth]);
-        NeighborArrayUnitReset(pictureControlSetPtr->mdMvNeighborArray[depth]);
-        NeighborArrayUnitReset(pictureControlSetPtr->mdSkipFlagNeighborArray[depth]);
-        NeighborArrayUnitReset(pictureControlSetPtr->mdModeTypeNeighborArray[depth]);
-        NeighborArrayUnitReset(pictureControlSetPtr->mdLeafDepthNeighborArray[depth]);
+        NeighborArrayUnitReset(pictureControlSetPtr->mdIntraLumaModeNeighborArray[depth][tileIdx]);
+        NeighborArrayUnitReset(pictureControlSetPtr->mdMvNeighborArray[depth][tileIdx]);
+        NeighborArrayUnitReset(pictureControlSetPtr->mdSkipFlagNeighborArray[depth][tileIdx]);
+        NeighborArrayUnitReset(pictureControlSetPtr->mdModeTypeNeighborArray[depth][tileIdx]);
+        NeighborArrayUnitReset(pictureControlSetPtr->mdLeafDepthNeighborArray[depth][tileIdx]);
     }
 
     return;
 }
 
 
-void ResetMdRefinmentNeighborArrays(PictureControlSet_t *pictureControlSetPtr)
+static void ResetMdRefinmentNeighborArrays(PictureControlSet_t *pictureControlSetPtr, EB_U32 tileIdx)
 {
-	NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementIntraLumaModeNeighborArray);
-	NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementModeTypeNeighborArray);
-    NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementLumaReconNeighborArray);
+	NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementIntraLumaModeNeighborArray[tileIdx]);
+	NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementModeTypeNeighborArray[tileIdx]);
+    NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementLumaReconNeighborArray[tileIdx]);
 
 	return;
 }
@@ -315,6 +315,7 @@ void ProductResetModeDecision(
     ModeDecisionContext_t   *contextPtr,
     PictureControlSet_t     *pictureControlSetPtr,
     SequenceControlSet_t    *sequenceControlSetPtr,
+    EB_U32                   tileRowIndex,
     EB_U32                   segmentIndex)
 {
 	EB_PICTURE                     sliceType;
@@ -407,14 +408,22 @@ void ProductResetModeDecision(
 	contextPtr->coeffEstEntropyCoderPtr = pictureControlSetPtr->coeffEstEntropyCoderPtr;
 
 	// Reset Neighbor Arrays at start of new Segment / Picture
+    // Jing: Current segments will cross tiles
 	if (segmentIndex == 0) {
-		ResetModeDecisionNeighborArrays(pictureControlSetPtr);
-        ResetMdRefinmentNeighborArrays(pictureControlSetPtr);
+        for (unsigned int tileIdx = tileRowIndex * sequenceControlSetPtr->tileColumnCount;
+                tileIdx < (tileRowIndex + 1) * sequenceControlSetPtr->tileColumnCount;
+                tileIdx++) {
+            ResetModeDecisionNeighborArrays(pictureControlSetPtr, tileIdx);
+            ResetMdRefinmentNeighborArrays(pictureControlSetPtr, tileIdx);
 
-        for(lcuRowIndex = 0; lcuRowIndex< ((sequenceControlSetPtr->lumaHeight + MAX_LCU_SIZE - 1)/MAX_LCU_SIZE); lcuRowIndex++){
-			pictureControlSetPtr->encPrevCodedQp[lcuRowIndex] = (EB_U8)pictureControlSetPtr->pictureQp;
-			pictureControlSetPtr->encPrevQuantGroupCodedQp[lcuRowIndex] = (EB_U8)pictureControlSetPtr->pictureQp;
-		}
+            //Jing: TODO Change to tile
+            //      Used in DLF, need to double check if need tile level parameters
+            for(lcuRowIndex = 0; lcuRowIndex< ((sequenceControlSetPtr->lumaHeight + MAX_LCU_SIZE - 1)/MAX_LCU_SIZE); lcuRowIndex++){
+                pictureControlSetPtr->encPrevCodedQp[tileIdx][lcuRowIndex] = (EB_U8)pictureControlSetPtr->pictureQp;
+                pictureControlSetPtr->encPrevQuantGroupCodedQp[tileIdx][lcuRowIndex] = (EB_U8)pictureControlSetPtr->pictureQp;
+            }
+        }
+
 	}
 
 	return;
