@@ -3296,6 +3296,8 @@ static EB_ERRORTYPE CopyFrameBuffer(
     EB_U16                           subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
     // Need to include for Interlacing on the fly with pictureScanType = 1
 
+    // verfify stride values are within range
+ 
     if (!is16BitInput) {
 
         EB_U32                           lumaBufferOffset = inputPicturePtr->strideY*sequenceControlSetPtr->topPadding + sequenceControlSetPtr->leftPadding;
@@ -3312,6 +3314,13 @@ static EB_ERRORTYPE CopyFrameBuffer(
         EB_U16                           sourceCbStride   = (EB_U16)(inputPtr->cbStride);
 
         //EB_U16                           lumaHeight  = inputPicturePtr->maxHeight;
+
+        if (lumaWidth > lumaStride || lumaWidth > sourceLumaStride || chromaWidth > chromaStride)
+        {
+            return EB_ErrorBadParameter;
+        }
+
+
         // Y
         for (inputRowIndex = 0; inputRowIndex < lumaHeight; inputRowIndex++) {
 
@@ -3350,6 +3359,11 @@ static EB_ERRORTYPE CopyFrameBuffer(
             EB_U16 sourceLumaStride = (EB_U16)(inputPtr->yStride);
             EB_U16 sourceCrStride   = (EB_U16)(inputPtr->crStride);
             EB_U16 sourceCbStride   = (EB_U16)(inputPtr->cbStride);
+
+            if (lumaWidth > lumaStride || lumaWidth > sourceLumaStride || chromaWidth > chromaStride)
+            {
+                return EB_ErrorBadParameter;
+            }
 
             // Y 8bit
             for (inputRowIndex = 0; inputRowIndex < lumaHeight; inputRowIndex++) {
@@ -3415,6 +3429,11 @@ static EB_ERRORTYPE CopyFrameBuffer(
         EB_U16 sourceCrStride = (EB_U16)(inputPtr->crStride);
         EB_U16 sourceCbStride = (EB_U16)(inputPtr->cbStride);
 
+        if (lumaWidth > sourceLumaStride || chromaWidth > sourceCbStride)
+        {
+            return EB_ErrorBadParameter;
+        }
+
         UnPack2D(
             (EB_U16*)(inputPtr->luma + lumaOffset),
             sourceLumaStride,
@@ -3459,12 +3478,15 @@ static EB_ERRORTYPE CopyFrameBuffer(
 
     return return_error;
 }
-static void CopyInputBuffer(
+
+static EB_ERRORTYPE  CopyInputBuffer(
     SequenceControlSet_t*    sequenceControlSet,
     EB_BUFFERHEADERTYPE*     dst,
     EB_BUFFERHEADERTYPE*     src
 )
 {
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+
     // Copy the higher level structure
     dst->nAllocLen  = src->nAllocLen;
     dst->nFilledLen = src->nFilledLen;
@@ -3477,11 +3499,18 @@ static void CopyInputBuffer(
 
     // Copy the picture buffer
     if(src->pBuffer != NULL)
-        CopyFrameBuffer(sequenceControlSet, dst->pBuffer, src->pBuffer);
+        return_error = CopyFrameBuffer(sequenceControlSet, dst->pBuffer, src->pBuffer);
+
+    if (return_error != EB_ErrorNone)
+    {
+        return return_error;
+    }
 
     // Copy User SEI
     if (src->pBuffer != NULL)
         CopyUserSei(sequenceControlSet, dst, src);
+
+    return return_error;
 
 }
 
@@ -3498,16 +3527,24 @@ EB_API EB_ERRORTYPE EbH265EncSendPicture(
     EbEncHandle_t          *encHandlePtr = (EbEncHandle_t*) h265EncComponent->pComponentPrivate;
     EbObjectWrapper_t      *ebWrapperPtr;
 
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+
     // Take the buffer and put it into our internal queue structure
     EbGetEmptyObject(
         encHandlePtr->inputBufferProducerFifoPtrArray[0],
         &ebWrapperPtr);
 
     if (pBuffer != NULL) {
-        CopyInputBuffer(
+
+        return_error = CopyInputBuffer(
             encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr,
             (EB_BUFFERHEADERTYPE*)ebWrapperPtr->objectPtr,
             pBuffer);
+
+        if (return_error != EB_ErrorNone)
+        {
+            return return_error;
+        }
     }
 
     EbPostFullObject(ebWrapperPtr);
