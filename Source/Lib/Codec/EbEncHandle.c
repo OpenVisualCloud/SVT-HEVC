@@ -2346,8 +2346,8 @@ static EB_ERRORTYPE VerifySettings(\
             SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - 12] for this resolution\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
         }
-        else if (config->encMode > 10 && config->tune >= 1) {
-            SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - 10] for this resolution\n", channelNumber + 1);
+        else if (config->encMode > 11 && config->tune >= 1) {
+            SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - 11] for this resolution\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
         }
     }
