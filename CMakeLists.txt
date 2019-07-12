@@ -13,7 +13,7 @@ endif()
 
 project(${project_name} C ASM_NASM)
 
-if(NOT CMAKE_BUILD_TYPE)
+if(NOT MSVC AND NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
@@ -53,7 +53,13 @@ if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
 endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_C_STANDARD 99)
+if(CMAKE_VERSION VERSION_LESS "3.1")
+    if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        set(CMAKE_C_FLAGS "--std=gnu99 ${CMAKE_C_FLAGS}")
+    endif()
+else()
+    set(CMAKE_C_STANDARD 99)
+endif()
 set(CAN_USE_ASSEMBLER TRUE)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -91,7 +97,7 @@ if(MSVC)
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /O2")
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Od")
 else()
-    option(NATIVE "Build for native performance (march=native)" ON)
+    option(NATIVE "Build for native performance (march=native)")
     list(INSERT flags_to_test 0 -Wall)
     #for Mingw64 support, see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65782
     if(MINGW)
