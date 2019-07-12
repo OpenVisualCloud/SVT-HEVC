@@ -3315,8 +3315,7 @@ static EB_ERRORTYPE CopyFrameBuffer(
 
         //EB_U16                           lumaHeight  = inputPicturePtr->maxHeight;
 
-        if (lumaWidth > lumaStride || lumaWidth > sourceLumaStride || chromaWidth > chromaStride)
-        {
+        if (lumaWidth > lumaStride || lumaWidth > sourceLumaStride || chromaWidth > chromaStride) {
             return EB_ErrorBadParameter;
         }
 
@@ -3360,8 +3359,7 @@ static EB_ERRORTYPE CopyFrameBuffer(
             EB_U16 sourceCrStride   = (EB_U16)(inputPtr->crStride);
             EB_U16 sourceCbStride   = (EB_U16)(inputPtr->cbStride);
 
-            if (lumaWidth > lumaStride || lumaWidth > sourceLumaStride || chromaWidth > chromaStride)
-            {
+            if (lumaWidth > lumaStride || lumaWidth > sourceLumaStride || chromaWidth > chromaStride) {
                 return EB_ErrorBadParameter;
             }
 
@@ -3429,8 +3427,7 @@ static EB_ERRORTYPE CopyFrameBuffer(
         EB_U16 sourceCrStride = (EB_U16)(inputPtr->crStride);
         EB_U16 sourceCbStride = (EB_U16)(inputPtr->cbStride);
 
-        if (lumaWidth > sourceLumaStride || chromaWidth > sourceCbStride)
-        {
+        if (lumaWidth > sourceLumaStride || chromaWidth > sourceCbStride) {
             return EB_ErrorBadParameter;
         }
 
