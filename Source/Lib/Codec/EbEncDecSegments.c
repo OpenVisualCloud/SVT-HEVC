@@ -59,6 +59,8 @@ void EncDecSegmentsInit(
     unsigned x, y, yLast;
     unsigned rowIndex, bandIndex, segmentIndex;
 
+    segColCount = (segColCount <= picWidthLcu) ? segColCount : picWidthLcu;
+    segRowCount = (segRowCount <= picHeightLcu) ? segRowCount : picHeightLcu;
     segmentsPtr->lcuRowCount = picHeightLcu;
     segmentsPtr->lcuBandCount = BAND_TOTAL_COUNT(picHeightLcu, picWidthLcu);
     segmentsPtr->segmentRowCount = segRowCount;
