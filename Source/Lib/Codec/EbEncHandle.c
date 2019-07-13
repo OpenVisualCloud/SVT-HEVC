@@ -2051,11 +2051,6 @@ void CopyApiFromApp(
     sequenceControlSetPtr->maxInputLumaWidth  = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceWidth;
     sequenceControlSetPtr->maxInputLumaHeight = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceHeight;
 
-    if (sequenceControlSetPtr->staticConfig.tune >= 1) {
-        sequenceControlSetPtr->staticConfig.bitRateReduction = 0;
-        sequenceControlSetPtr->staticConfig.improveSharpness = 0;
-    }
-
     sequenceControlSetPtr->intraPeriodLength = sequenceControlSetPtr->staticConfig.intraPeriodLength;
     sequenceControlSetPtr->intraRefreshType = sequenceControlSetPtr->staticConfig.intraRefreshType;
     sequenceControlSetPtr->maxTemporalLayers = sequenceControlSetPtr->staticConfig.hierarchicalLevels;
@@ -2522,16 +2517,6 @@ static EB_ERRORTYPE VerifySettings(\
 		return_error = EB_ErrorBadParameter;
 	}
 
-    if (config->tune > 0 && config->bitRateReduction == 1){
-        SVT_LOG("SVT [Error]: Instance %u: Bit Rate Reduction is not supported for OQ mode (Tune = 1 ) and VMAF mode (Tune = 2)\n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
-    }
-
-    if (config->tune > 0 && config->improveSharpness == 1){
-        SVT_LOG("SVT [Error]: Instance %u: Improve sharpness is not supported for OQ mode (Tune = 1 ) and VMAF mode (Tune = 2)\n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
-    }
-
     if (config->lookAheadDistance > 250 && config->lookAheadDistance != (EB_U32)~0) {
         SVT_LOG("SVT [Error]: Instance %u: The lookahead distance must be [0 - 250] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
@@ -2906,7 +2891,7 @@ static void PrintLibParams(
     else
         SVT_LOG("\nSVT [config]: BRC Mode / QP  / LookaheadDistance / SceneChange\t\t\t: CQP / %d / %d / %d ", config->qp, config->lookAheadDistance, config->sceneChangeDetection);
 
-    if (config->tune == 0)
+    if (config->tune <= 1)
         SVT_LOG("\nSVT [config]: BitRateReduction / ImproveSharpness\t\t\t\t: %d / %d ", config->bitRateReduction, config->improveSharpness);
     SVT_LOG("\n------------------------------------------- ");
     SVT_LOG("\n");
