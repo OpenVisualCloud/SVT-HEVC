@@ -32,7 +32,7 @@ target_link_libraries(SvtHevcEncApp
 
 if(UNIX)
 	target_link_libraries(SvtHevcEncApp
-        pthread)
+        pthread m)
     if(NOT APPLE)
         target_link_libraries(SvtHevcEncApp
             rt)
