@@ -3499,9 +3499,8 @@ static EB_ERRORTYPE  CopyInputBuffer(
         return_error = CopyFrameBuffer(sequenceControlSet, dst->pBuffer, src->pBuffer);
 
     if (return_error != EB_ErrorNone)
-    {
         return return_error;
-    }
+
 
     // Copy User SEI
     if (src->pBuffer != NULL)
