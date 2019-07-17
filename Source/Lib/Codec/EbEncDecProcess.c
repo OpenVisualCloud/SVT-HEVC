@@ -2789,7 +2789,6 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
         else {
             contextPtr->mdContext->chromaLevel = 1;
         }
-
     }
     else {
         contextPtr->mdContext->chromaLevel = 1;
@@ -2895,7 +2894,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
 	contextPtr->yBitsThsld = YBITS_THSHLD_1(0);
     
     // Set SAO Mode
-    contextPtr->saoMode = (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_10) ? 1 : 0;;
+    contextPtr->saoMode = (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_10) ? 1 : 0;
     
     // Set Exit Partitioning Flag 
     if (pictureControlSetPtr->encMode >= ENC_MODE_10) {

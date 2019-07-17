@@ -375,7 +375,6 @@ EB_U8 PictureLevelSubPelSettingsOq(
             if (encMode > ENC_MODE_10) {
                 subPelMode = 0;
             }
-
             else {
                 subPelMode = (temporalLayerIndex == 0) ? 1 : 0;
             }
@@ -612,9 +611,7 @@ EB_ERRORTYPE SignalDerivationMultiProcessesOq(
 
     else {
         if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-
             pictureControlSetPtr->depthMode = PICT_BDP_DEPTH_MODE;
-
         }
         else {
             pictureControlSetPtr->depthMode = PICT_LCU_SWITCH_DEPTH_MODE;
