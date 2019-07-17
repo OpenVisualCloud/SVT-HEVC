@@ -136,13 +136,13 @@ For the binaries to operate properly, the following conditions have to be met:
 
 ## Demo features and limitations
 
-- **VBR BRC mode:** \
+- **VBR BRC mode:** 
   The VBR functionality implemented in SVT-HEVC Encoder is a demo feature to allow for an easier integration of product level BRC. The algorithm implemented would allow the encoder to generate an output bit stream matching, with a best effort, the target bitrate. The algorithm does not guarantee a certain maximum bitrate or maximum buffer size [does not follow HRD compliance]. When set to encode in VBR mode, the encoder does not produce a bit-exact output from one run to another.
 
-- **Speed Control output:** \
+- **Speed Control output:** 
   The speed control functionality implemented for SVT-HEVC Encoder is a demo feature showcasing the capability of the library to adapt to the resources available on the fly in order to generate the best possible video quality while maintaining a real-time encoding speed. When set to use the Speed Control mode, the encoder does not produce a bit-exact output from one run to another.
 
-- **Multi-instance support:** \
+- **Multi-instance support:** 
   The multi-instance functionality is a demo feature implemented in the SVT-HEVC Encoder sample application as an example of one sample application using multiple encoding libraries. Encoding using the multi-instance support is limited to only 6 simultaneous streams. For example two channels encoding on Windows: SvtHevcEncApp.exe -nch 2 -c firstchannel.cfg secondchannel.cfg
 
 ## How to Contribute
@@ -151,10 +151,9 @@ We welcome community contributions to the SVT-HEVC Encoder. Thank you for your t
 
 ### Contribution process
 
+- Follow the [coding_guidelines](STYLE.md)
 - Validate that your changes do not break a build
-
 - Perform smoke tests and ensure they pass
-
 - Submit a pull request for review to the maintainer
 
 ### How to Report Bugs and Provide Feedback
