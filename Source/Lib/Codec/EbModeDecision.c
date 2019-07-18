@@ -1229,8 +1229,10 @@ void  ProductIntraCandidateInjection(
                 // P/B Slice
                 //----------------------  
                 else {
-					if ((cuSize >= 16 && pictureControlSetPtr->ParentPcsPtr->cu16x16Mode == CU_16x16_MODE_0) || (cuSize == 32)) {
-
+                    if (((cuSize >= 16 && pictureControlSetPtr->ParentPcsPtr->cu16x16Mode == CU_16x16_MODE_0) &&
+                        (sequenceControlSetPtr->staticConfig.tune != TUNE_OQ || (sequenceControlSetPtr->staticConfig.tune == TUNE_OQ && pictureControlSetPtr->encMode < ENC_MODE_11)))
+                         || (cuSize == 32)) 
+                    {
                         {
                             if (pictureControlSetPtr->ParentPcsPtr->limitOisToDcModeFlag)
                             {
