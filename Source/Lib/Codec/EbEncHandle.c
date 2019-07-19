@@ -3828,6 +3828,14 @@ EB_ERRORTYPE EbOutputBufferHeaderCtor(
 	EB_MALLOC(EB_BUFFERHEADERTYPE*, outBufPtr, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR);
 	*objectDblPtr = (EB_PTR)outBufPtr;
 
+    //Jing:TODO
+    //Simple work around here, for 8K case.
+    //Will improve here if memory is limited
+    //Can use fps/tbr/intra_period to compute a ideal maximum size
+    if (config->rateControlMode == 1 && config->targetBitRate >= 50000000) {
+        nStride = 10000000;
+    }
+
 	// Initialize Header
 	outBufPtr->nSize = sizeof(EB_BUFFERHEADERTYPE);
 
