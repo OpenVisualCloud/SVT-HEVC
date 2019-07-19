@@ -286,21 +286,20 @@ void* PacketizationKernel(void *inputPtr)
                     contextPtr->ppsConfig);
             }
 
+            if (sequenceControlSetPtr->staticConfig.maxCLL || sequenceControlSetPtr->staticConfig.maxFALL) {
+                sequenceControlSetPtr->contentLightLevel.maxContentLightLevel = sequenceControlSetPtr->staticConfig.maxCLL;
+                sequenceControlSetPtr->contentLightLevel.maxPicAverageLightLevel = sequenceControlSetPtr->staticConfig.maxFALL;
+                EncodeContentLightLevelSEI(
+                    pictureControlSetPtr->bitstreamPtr,
+                    &sequenceControlSetPtr->contentLightLevel);
+            }
 
-			if (sequenceControlSetPtr->staticConfig.maxCLL || sequenceControlSetPtr->staticConfig.maxFALL) {
-				sequenceControlSetPtr->contentLightLevel.maxContentLightLevel = sequenceControlSetPtr->staticConfig.maxCLL;
-				sequenceControlSetPtr->contentLightLevel.maxPicAverageLightLevel = sequenceControlSetPtr->staticConfig.maxFALL;
-				EncodeContentLightLevelSEI(
-					pictureControlSetPtr->bitstreamPtr,
-					&sequenceControlSetPtr->contentLightLevel);
-			}
+            if (sequenceControlSetPtr->staticConfig.useMasteringDisplayColorVolume) {
+                EncodeMasteringDisplayColorVolumeSEI(
+                    pictureControlSetPtr->bitstreamPtr,
+                    &sequenceControlSetPtr->masteringDisplayColorVolume);
+            }
 
-			if (sequenceControlSetPtr->staticConfig.useMasteringDisplayColorVolume) {
-				EncodeMasteringDisplayColorVolumeSEI(
-					pictureControlSetPtr->bitstreamPtr,
-					&sequenceControlSetPtr->masteringDisplayColorVolume);
-			}
-			
             if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
             {
                 sequenceControlSetPtr->activeParameterSet.selfContainedCvsFlag = EB_TRUE;
@@ -309,21 +308,21 @@ void* PacketizationKernel(void *inputPtr)
                     pictureControlSetPtr->bitstreamPtr,
                     &sequenceControlSetPtr->activeParameterSet);
             }
-                    // Flush the Bitstream
-                    FlushBitstream(
-                        pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
-                    
-                    // Copy SPS & PPS to the Output Bitstream
-                    CopyRbspBitstreamToPayload(
-                        pictureControlSetPtr->bitstreamPtr,
-                        outputStreamPtr->pBuffer,
-                        (EB_U32*) &(outputStreamPtr->nFilledLen),
-                        (EB_U32*) &(outputStreamPtr->nAllocLen),
-						encodeContextPtr,
-						NAL_UNIT_INVALID);
-                }
-
-
+            // Flush the Bitstream
+            FlushBitstream(
+                pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+            
+            // Copy SPS & PPS to the Output Bitstream
+            CopyRbspBitstreamToPayload(
+                pictureControlSetPtr->bitstreamPtr,
+                outputStreamPtr->pBuffer,
+                (EB_U32*) &(outputStreamPtr->nFilledLen),
+                (EB_U32*) &(outputStreamPtr->nAllocLen),
+                encodeContextPtr,
+				NAL_UNIT_INVALID);
+        }
+        
+         
         // Bitstream Written Loop
         // This loop writes the result of entropy coding into the bitstream
         {

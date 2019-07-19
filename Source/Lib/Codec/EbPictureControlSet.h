@@ -428,7 +428,6 @@ typedef struct PictureParentControlSet_s
     EB_U64                                averageQp;
  
     EB_U64                                lastIdrPicture;
-    EB_U64                                lastIdrPictureOrder;
 
     EB_U64                                startTimeSeconds;
     EB_U64                                startTimeuSeconds;

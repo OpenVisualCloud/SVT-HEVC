@@ -702,8 +702,6 @@ EB_ERRORTYPE PictureParentControlSetCtor(
     objectPtr->totalNumBits = 0;
 
     objectPtr->lastIdrPicture = 0;
-    objectPtr->lastIdrPictureOrder = 0;
-
     objectPtr->lcuTotalCount            = pictureLcuWidth * pictureLcuHeight;
 
 	EB_MALLOC(EB_U16**, objectPtr->variance, sizeof(EB_U16*) * objectPtr->lcuTotalCount, EB_N_PTR);

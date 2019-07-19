@@ -27,9 +27,6 @@ EB_ERRORTYPE PacketizationReorderEntryCtor(
     return_error = BitstreamCtor(
         &(*entryDblPtr)->bitStreamPtr2,
         PACKETIZATION_PROCESS_BUFFER_SIZE);
-    return_error = BitstreamCtor(
-        &(*entryDblPtr)->bitStreamPtr3,
-        PACKETIZATION_PROCESS_BUFFER_SIZE);
     (*entryDblPtr)->pictureNumber                   = pictureNumber;
     (*entryDblPtr)->outputStreamWrapperPtr          = (EbObjectWrapper_t *)EB_NULL;
     (*entryDblPtr)->startSplicing = 0;

@@ -711,7 +711,6 @@ EB_ERRORTYPE SaoGenerationDecision(
             saoStats->eoCount[0]);
 
         // U
-
         SaoGatherFunctionTableLossy[!!(ASM_TYPES & PREAVX2_MASK)](
             &(inputPicturePtr->bufferCb[(((inputPicturePtr->originY + tbOriginY) * inputPicturePtr->strideCb) >> subHeightCMinus1) + ((inputPicturePtr->originX + tbOriginX) >> subWidthCMinus1)]),
             inputPicturePtr->strideCb,
@@ -725,7 +724,6 @@ EB_ERRORTYPE SaoGenerationDecision(
             saoStats->eoCount[1]);
 
         // V
-
         SaoGatherFunctionTableLossy[!!(ASM_TYPES & PREAVX2_MASK)](
             &(inputPicturePtr->bufferCr[(((inputPicturePtr->originY + tbOriginY) * inputPicturePtr->strideCr) >> subHeightCMinus1) + ((inputPicturePtr->originX + tbOriginX) >> subWidthCMinus1)]),
             inputPicturePtr->strideCr,

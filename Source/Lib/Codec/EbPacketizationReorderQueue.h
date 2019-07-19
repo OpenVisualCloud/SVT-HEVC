@@ -33,10 +33,9 @@ typedef struct PacketizationReorderEntry_s {
     EB_PICTURE                      sliceType;
     PicTimingEntry_t                *picTimingEntry;
     Bitstream_t                     *bitStreamPtr2;
-    Bitstream_t                     *bitStreamPtr3;
     EB_U32                          startSplicing;
-    EB_U32                          fillerBitsSent;
-    EB_U32                          fillerBitsFinal;
+    EB_U64                          fillerBitsSent;
+    EB_U64                          fillerBitsFinal;
 } PacketizationReorderEntry_t;   
 
 extern EB_ERRORTYPE PacketizationReorderEntryCtor(   

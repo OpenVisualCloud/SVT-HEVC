@@ -179,7 +179,6 @@ EB_ERRORTYPE EncodeContextCtor(
     encodeContextPtr->initialPicture                                    = EB_TRUE;
 
     encodeContextPtr->lastIdrPicture                                    = 0;
-    encodeContextPtr->lastIdrPictureOrder                               = 0;
     // Sequence Termination Flags
     encodeContextPtr->terminatingPictureNumber                          = ~0u;
     encodeContextPtr->terminatingSequenceFlagReceived                   = EB_FALSE;
@@ -230,7 +229,6 @@ EB_ERRORTYPE EncodeContextCtor(
     encodeContextPtr->encMode = SPEED_CONTROL_INIT_MOD;
 
     EB_CREATEMUTEX(EB_HANDLE, encodeContextPtr->bufferFillMutex, sizeof(EB_HANDLE), EB_MUTEX);
-    EB_CREATEMUTEX(EB_HANDLE,encodeContextPtr->fillerBitMutex,sizeof(EB_HANDLE),EB_MUTEX)
     encodeContextPtr->previousSelectedRefQp = 32;
     encodeContextPtr->maxCodedPoc = 0;
     encodeContextPtr->maxCodedPocSelectedRefQp = 32;
