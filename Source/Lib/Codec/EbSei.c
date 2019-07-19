@@ -454,7 +454,7 @@ EB_U32 GetBufPeriodSEILength(
 
     if(bufferingPeriodPtr->rapCpbParamsPresentFlag) {
         // cpb_delay_offset
-        seiLength += vuiPtr->hrdParametersPtr->initialCpbRemovalDelayLengthMinus1 + 1;
+        seiLength += vuiPtr->hrdParametersPtr->auCpbRemovalDelayLengthMinus1 + 1;
 
         // dpb_delay_offset
         seiLength += vuiPtr->hrdParametersPtr->dpbOutputDelayDuLengthMinus1 + 1;

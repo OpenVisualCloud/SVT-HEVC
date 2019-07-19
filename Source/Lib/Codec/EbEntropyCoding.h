@@ -41,13 +41,12 @@ extern EB_ERRORTYPE EncodeLcu(
     NeighborArrayUnit_t     *leafDepthNeighborArray,
     NeighborArrayUnit_t     *intraLumaModeNeighborArray,
     NeighborArrayUnit_t     *skipFlagNeighborArray,
+    EB_U16                   tileIdx,
     EB_U32                   pictureOriginX,
 	EB_U32                   pictureOriginY);
 
-#if TILES
 extern EB_ERRORTYPE EncodeTileFinish(
     EntropyCoder_t        *entropyCoderPtr);
-#endif
 
 extern EB_ERRORTYPE EncodeLcuSaoParameters(
     LargestCodingUnit_t     *tbPtr,

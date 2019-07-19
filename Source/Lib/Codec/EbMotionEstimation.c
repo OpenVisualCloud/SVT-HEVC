@@ -4109,7 +4109,6 @@ EB_ERRORTYPE MotionEstimateLcu(
 				}
             }
 
-#if TILES
             if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0 && (sequenceControlSetPtr->tileRowCount * sequenceControlSetPtr->tileColumnCount) > 1)
             {
                 int tileStartX = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileStartX;
@@ -4132,9 +4131,7 @@ EB_ERRORTYPE MotionEstimateLcu(
                 searchAreaWidth = ((originX + xSearchAreaOrigin + searchAreaWidth) > tileEndX) ?
                     MAX(1, searchAreaWidth - ((originX + xSearchAreaOrigin + searchAreaWidth) - tileEndX)) :
                     searchAreaWidth;
-            } else
-#endif
-            {
+            } else {
                 // Correct the left edge of the Search Area if it is not on the reference Picture
 			    xSearchAreaOrigin = ((originX + xSearchAreaOrigin) < -padWidth) ?
 			    	-padWidth - originX :
@@ -4154,7 +4151,6 @@ EB_ERRORTYPE MotionEstimateLcu(
                     searchAreaWidth;
             }
 
-#if TILES
             if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0 && (sequenceControlSetPtr->tileRowCount * sequenceControlSetPtr->tileColumnCount) > 1)
             {
                 int tileStartY = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileStartY;
@@ -4177,9 +4173,7 @@ EB_ERRORTYPE MotionEstimateLcu(
                 searchAreaHeight = (originY + ySearchAreaOrigin + searchAreaHeight > tileEndY) ?
                     MAX(1, searchAreaHeight - ((originY + ySearchAreaOrigin + searchAreaHeight) - tileEndY)) :
                     searchAreaHeight;
-            } else
-#endif
-            {
+            } else {
 			    // Correct the top edge of the Search Area if it is not on the reference Picture
                 ySearchAreaOrigin = ((originY + ySearchAreaOrigin) < -padHeight) ?
                     -padHeight - originY :

@@ -1493,26 +1493,45 @@ void SetTargetBudgetOq(
 				budget = pictureControlSetPtr->lcuTotalCount * U_109;
 		}
 	}
+    else if (contextPtr->adpLevel <= ENC_MODE_10) {
+        if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0)
+            budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_127 :
+            (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_125 :
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_121;
+        else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag)
+            budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * OPEN_LOOP_COST :
+            (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
+        else
+            budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
+    }
     else {
-		if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0)
-			budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
-			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_127 :
-			(contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
-			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_125 :
-			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_121;
-		else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag)
-			budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
-			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * OPEN_LOOP_COST :
-			(contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
-			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
-			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
-		else
-			budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
-			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
-			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
+        if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0)
+            budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_127 :
+            (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_125 :
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_121;
+        else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag)
+            budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * OPEN_LOOP_COST :
+            (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_104 :
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_103;
+        else
+            budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_104 :
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_103;
     }
 
-	contextPtr->budget = budget;
+
+    contextPtr->budget = budget;
 }
 
 /******************************************************
@@ -2343,7 +2362,6 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
 	EB_U32                                      pictureHeightInLcu;
 
     for(;;) {
-
 		// Get RateControl Results
 		EbGetFullObject(
 			contextPtr->rateControlInputFifoPtr,
@@ -2519,16 +2537,41 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
         SVT_LOG("POC %lld MDC OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
         // Post the results to the MD processes
-        EbGetEmptyObject(
-            contextPtr->modeDecisionConfigurationOutputFifoPtr,
-            &encDecTasksWrapperPtr);
 
-        encDecTasksPtr = (EncDecTasks_t*) encDecTasksWrapperPtr->objectPtr;
-        encDecTasksPtr->pictureControlSetWrapperPtr = rateControlResultsPtr->pictureControlSetWrapperPtr;
-        encDecTasksPtr->inputType = ENCDEC_TASKS_MDC_INPUT;
-        
-        // Post the Full Results Object
-        EbPostFullObject(encDecTasksWrapperPtr);
+        //printf("MDC, post POC %d, decoder order %d\n",
+        //        pictureControlSetPtr->pictureNumber, pictureControlSetPtr->ParentPcsPtr->decodeOrder);
+        for (unsigned tileRowIdx = 0; tileRowIdx < sequenceControlSetPtr->tileRowCount; tileRowIdx++) {
+            // TODO: Too many objects may drain the FIFO and downgrade the perf
+            EbGetEmptyObject(
+                    contextPtr->modeDecisionConfigurationOutputFifoPtr,
+                    &encDecTasksWrapperPtr);
+            encDecTasksPtr = (EncDecTasks_t*) encDecTasksWrapperPtr->objectPtr;
+            encDecTasksPtr->pictureControlSetWrapperPtr = rateControlResultsPtr->pictureControlSetWrapperPtr;
+            encDecTasksPtr->inputType = ENCDEC_TASKS_MDC_INPUT;
+            encDecTasksPtr->tileRowIndex = tileRowIdx;
+
+            // Post the Full Results Object
+            EbPostFullObject(encDecTasksWrapperPtr);
+        }
+#if LATENCY_PROFILE
+        double latency = 0.0;
+        EB_U64 finishTimeSeconds = 0;
+        EB_U64 finishTimeuSeconds = 0;
+        EbFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
+
+        EbComputeOverallElapsedTimeMs(
+                pictureControlSetPtr->ParentPcsPtr->startTimeSeconds,
+                pictureControlSetPtr->ParentPcsPtr->startTimeuSeconds,
+                finishTimeSeconds,
+                finishTimeuSeconds,
+                &latency);
+
+        SVT_LOG("[%lld]: POC %lld MDC OUT, decoder order %d, latency %3.3f \n",
+                EbGetSysTimeMs(),
+                pictureControlSetPtr->ParentPcsPtr->pictureNumber,
+                pictureControlSetPtr->ParentPcsPtr->decodeOrder,
+                latency);
+#endif
 
         // Release Rate Control Results
         EbReleaseObject(rateControlResultsWrapperPtr);

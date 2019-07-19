@@ -114,6 +114,7 @@ typedef struct EncDecContext_s
 	EB_U16                         *saoLeftBuffer16[2];
 
 	EB_U64                          totIntraCodedArea;
+    EB_U32                          codedLcuCount;
 	EB_U8                           intraCodedAreaLCU[MAX_NUMBER_OF_TREEBLOCKS_PER_PICTURE];//percentage of intra coded area 0-100%
     EB_U8					        cleanSparseCeoffPfEncDec;
     EB_U8					        pmpMaskingLevelEncDec;
@@ -145,6 +146,10 @@ typedef struct EncDecContext_s
     EB_U8                           saoMode;
     EB_PM_MODE  				    pmMode;     // agressive vs. conservative
     EB_BOOL                         pmMethod;   // 1-stgae   vs. 2-stage 
+
+    EB_U16                          tileRowIndex;
+    EB_U16                          tileIndex;
+    ////
 } EncDecContext_t;
 
 /**************************************

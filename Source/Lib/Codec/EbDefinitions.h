@@ -6,6 +6,8 @@
 #ifndef EbDefinitions_h
 #define EbDefinitions_h
 
+//#define BENCHMARK 0
+#define LATENCY_PROFILE 0
 #include "EbApi.h"
 #ifdef __cplusplus
 extern "C" {
@@ -51,15 +53,12 @@ extern "C" {
 #endif  /* _ERRNO_T_DEFINED */
 
 
-#define  TILES    1  //enable TILES.
 
 
-
-#if TILES
 //Maximum 8192x4320
-#define EB_TILE_COLUMN_MAX_COUNT                    32
-#define EB_TILE_ROW_MAX_COUNT                       68
-#endif
+#define EB_TILE_COLUMN_MAX_COUNT                    20u
+#define EB_TILE_ROW_MAX_COUNT                       22u
+#define EB_TILE_MAX_COUNT                           440u
 
 #define EB_MIN(a,b)             (((a) < (b)) ? (a) : (b))
 
@@ -406,7 +405,7 @@ static const EB_U32 me2Nx2NOffset[4]    = { 0, 1, 5, 21 };
 
 #define MAX_SUPPORTED_MODES_SUB1080P    10
 #define MAX_SUPPORTED_MODES_1080P       11
-#define MAX_SUPPORTED_MODES_4K_OQ       11
+#define MAX_SUPPORTED_MODES_4K_OQ       12
 #define MAX_SUPPORTED_MODES_4K_SQ       13
 
 #define SPEED_CONTROL_INIT_MOD ENC_MODE_5;
@@ -2054,7 +2053,7 @@ static const EB_U8 SearchAreaHeightOq[5][MAX_SUPPORTED_MODES] = {
 	{  64,   64,   64,   64,   16,   13,   13,    9,    9,    7,    7,    7,    7 },
 	{  64,   64,   64,   64,   16,    9,    9,    7,    7,    7,    7,    7,    7 },
 	{  64,   64,   64,   64,   16,   13,   13,    9,    9,    7,    7,    7,    7 },
-	{  64,   64,   64,   64,    9,    9,    9,    9,    7,    7,    7,    7,    7 }
+	{  64,   64,   64,   64,    9,    9,    9,    9,    7,    7,    7,    5,    5 }
 };
 /******************************************************************************
                             ME/HME settings SQ
