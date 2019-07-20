@@ -58,7 +58,6 @@ YUV_PATH = "yuvs"
 TOOLS_PATH = "tools"
 
 TEST_CONFIGURATION = 0 # 0 - Validation Test, 1 - Speed Test (Refer to Validation/Speed Test specific configurations)
-SQ_OQ_MODE = 0 # 0 - SQ, OQ and VMAF, 1 - SQ Only, 2 - OQ Only
 
 #------------- Validation Test Specific -------------#
 VALIDATION_TEST_MODE = get_test_mode(sys.argv) # 0 - Fast Test, 1 - Overnight Test, 2- Full Test
@@ -102,7 +101,7 @@ SPEED_TEST_SEQUENCES = [
 
 ##-------------- TEST MODE SPECIFIC SETTINGS -------------##
 if VALIDATION_TEST_MODE == 0:
-    ENC_MODES                       = [1,4,8,12]
+    ENC_MODES                       = [7]
     NUM_FRAMES                      = 20
     QP_ITERATIONS                   = 1
     VBR_ITERATIONS                  = 1
@@ -111,7 +110,7 @@ if VALIDATION_TEST_MODE == 0:
     INTRA_PERIOD_ITER               = 1 # Intra Period per test
     WH_ITER                         = 1 # WidthxHeight per test
 elif VALIDATION_TEST_MODE == 1:
-    ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11,12]
+    ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11]
     NUM_FRAMES                      = 40
     QP_ITERATIONS                   = 1
     VBR_ITERATIONS                  = 1
@@ -120,7 +119,7 @@ elif VALIDATION_TEST_MODE == 1:
     INTRA_PERIOD_ITER               = 1 # Intra Period per test
     WH_ITER                         = 1 # WidthxHeight per test
 elif VALIDATION_TEST_MODE == 2:
-    ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11,12]
+    ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11]
     NUM_FRAMES                      = 40
     QP_ITERATIONS                   = 2
     VBR_ITERATIONS                  = 2
@@ -147,15 +146,6 @@ elif QP_VBR_MODE == 1:
     QP_VBR_COMBINATION = [0]
 elif QP_VBR_MODE == 2:
     QP_VBR_COMBINATION = [1]
-    
-if SQ_OQ_MODE == 0:
-    SQ_OQ_COMBINATION = [0, 1, 2]
-elif SQ_OQ_MODE == 1:
-    SQ_OQ_COMBINATION = [0]
-elif SQ_OQ_MODE == 2:
-    SQ_OQ_COMBINATION = [1]
-elif SQ_OQ_MODE == 3:
-    SQ_OQ_COMBINATION = [2]
 
 class EB_Test(object):
     # Initialization parameters for folders
@@ -283,7 +273,6 @@ class EB_Test(object):
                         'BaseLayerSwitchMode'               : '-base-layer-switch-mode',
                         'LoopFilterDisable'                 : '-dlf',
                         'SAO'                               : '-sao',
-                        'tune'                              : '-tune',
                         'ImproveSharpness'                  : '-sharp',
                         'brr'                               : '-brr',
                         'ConstrainedIntra'                  : '-constrd-intra',
@@ -396,55 +385,16 @@ class EB_Test(object):
         if 'enc_mode' in enc_params:
             encMode     = enc_params['enc_mode']
             # Check if encMode is valid
+            if encMode >= 12:
+                return -1
             if width*height < 3840*2160:
                 if encMode == 10:
-                    if width*height != 1920*1080:
+                    if width*height < 1920*1080:
                         return -1
-                if encMode >= 11:
-                    return -1
-            if 'tune' in enc_params:
-                tune        = enc_params['tune']
-                if tune == 1 and encMode >= 10:
-                    return -1
-                elif tune == 2 and encMode >= 10:
-                    return -1
         if width %2 != 0 or height %2 != 0:
             return -1
         if bitdepth == 10 and height %8 != 0:
             return -1
-        if 'tune' in enc_params:
-            tune        = enc_params['tune']
-            if 'ImproveSharpness' in enc_params and 'brr' in enc_params:
-                sharpness   = enc_params['ImproveSharpness']
-                brr         = enc_params['brr']
-                if tune == 1 and sharpness == 1:
-                    return -1
-                elif tune == 2 and sharpness == 1:
-                    return -1
-                elif tune == 0 and sharpness == 0:
-                    return -1
-                elif tune == 1 and brr == 1:
-                    return -1
-                elif tune == 2 and brr == 1:
-                    return -1
-                elif tune == 0 and brr == 0:
-                    return -1
-            elif 'ImproveSharpness' in enc_params:
-                sharpness   = enc_params['ImproveSharpness']
-                if tune == 1 and sharpness == 1:
-                    return -1
-                elif tune == 2 and sharpness == 1:
-                    return -1
-                elif tune == 0 and sharpness == 0:
-                    return -1
-            elif 'brr' in enc_params:
-                brr         = enc_params['brr']
-                if tune == 1 and brr == 1:
-                    return -1
-                elif tune == 2 and brr == 1:
-                    return -1
-                elif tune == 0 and brr == 0:
-                    return -1
         # Test specific constraints
         if test_name == 'unpacked_test':
             if bitdepth == 8:
@@ -500,7 +450,7 @@ class EB_Test(object):
         return qp_file_name
     
     # Test to Compare exactness between bitstreams
-    def run_test(self, test_name, test_params, enc_params, OQ, VBR, COMPARE):
+    def run_test(self, test_name, test_params, enc_params, VBR, COMPARE):
         total_tests = 0
         passed_tests = 0
         if VBR == 0:
@@ -524,13 +474,6 @@ class EB_Test(object):
                     else:
                         enc_params.update({'rc': 1, 'tbr': iter})
                         bitstream_name = bitstream_name + '_TBR' + str(iter)
-                    enc_params.update({'tune': OQ})
-                    if OQ == 0:
-                        bitstream_name = bitstream_name + '_SQ'
-                    elif OQ == 1:
-                        bitstream_name = bitstream_name + '_OQ'
-                    elif OQ == 2:
-                        bitstream_name = bitstream_name + '_VMAF'
                     for cond in test_cond:
                         enc_params.update({cond: test_cond[cond]})
                         if not isinstance(test_cond[cond], list):
@@ -603,10 +546,9 @@ class EB_Test(object):
             # Run test
             test_params = self.get_test_params(seq, combination_test_params)
             for VBR in QP_VBR_COMBINATION:
-                for OQ in SQ_OQ_COMBINATION:
-                    num_tests, num_passed = self.run_test(test_name, test_params, enc_params, OQ, VBR, 0)
-                    total_test = total_test + num_tests
-                    total_passed = total_passed + num_passed
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, 0)
+                total_test = total_test + num_tests
+                total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
         return total_test, total_passed
     
@@ -631,10 +573,9 @@ class EB_Test(object):
             ]
             # Run test
             for VBR in QP_VBR_COMBINATION:
-                for OQ in SQ_OQ_COMBINATION:
-                    num_tests, num_passed = self.run_test(test_name, test_params, enc_params, OQ, VBR, not VBR)
-                    total_test = total_test + num_tests
-                    total_passed = total_passed + num_passed
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, not VBR)
+                total_test = total_test + num_tests
+                total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
         return total_test, total_passed
         
@@ -656,10 +597,9 @@ class EB_Test(object):
             [seq, {'frame_to_be_encoded': 150}]
             ]
             # Run test
-            for OQ in SQ_OQ_COMBINATION:
-                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, OQ, 0, 1)
-                total_test = total_test + num_tests
-                total_passed = total_passed + num_passed
+            num_tests, num_passed = self.run_test(test_name, test_params, enc_params, 0, 1)
+            total_test = total_test + num_tests
+            total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
         return total_test, total_passed
         
@@ -683,10 +623,9 @@ class EB_Test(object):
             ]
             # Run test
             for VBR in QP_VBR_COMBINATION:
-                for OQ in SQ_OQ_COMBINATION:
-                    num_tests, num_passed = self.run_test(test_name, test_params, enc_params, OQ, VBR, not VBR)
-                    total_test = total_test + num_tests
-                    total_passed = total_passed + num_passed
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, not VBR)
+                total_test = total_test + num_tests
+                total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
         return total_test, total_passed
         
@@ -715,13 +654,12 @@ class EB_Test(object):
             ]
             # Run test
             for VBR in QP_VBR_COMBINATION:
-                for OQ in SQ_OQ_COMBINATION:
-                    num_tests, num_passed = self.run_test(test_name, test_params, enc_params, OQ, VBR, not VBR)
-                    total_test = total_test + num_tests
-                    total_passed = total_passed + num_passed
-                    num_tests, num_passed = self.run_test(test_name, test_params_2, enc_params, OQ, VBR, not VBR)
-                    total_test = total_test + num_tests
-                    total_passed = total_passed + num_passed
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, not VBR)
+                total_test = total_test + num_tests
+                total_passed = total_passed + num_passed
+                num_tests, num_passed = self.run_test(test_name, test_params_2, enc_params, VBR, not VBR)
+                total_test = total_test + num_tests
+                total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
         return total_test, total_passed
 ## ------------------------------------------- ##
@@ -848,13 +786,12 @@ class EB_Test(object):
         total_passed = 0
         for seq in seq_list:
             for VBR in QP_VBR_COMBINATION:
-                for OQ in SQ_OQ_COMBINATION:
-                    test_params = [
-                    [seq, {'frame_to_be_encoded': 20}],
-                    ]
-                    num_tests, num_passed = self.run_test(test_name, test_params, enc_params, OQ, VBR, 0)
-                    total_test = total_test + num_tests
-                    total_passed = total_passed + num_passed
+                test_params = [
+                [seq, {'frame_to_be_encoded': 20}],
+                ]
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, 0)
+                total_test = total_test + num_tests
+                total_passed = total_passed + num_passed
         return total_test, total_passed
                 
     
@@ -1028,43 +965,36 @@ class EB_Test(object):
             print("", file=open('speed_script.bat', 'w'))
         else:
             print("", file=open('speed_script.bat', 'w'))
-        for OQ in SQ_OQ_COMBINATION:
-            for seq in seq_dict:
-                enc_params.update(self.get_stream_info(seq['name']))
-                if 'qp' in seq and 'tbr' in seq:
-                    print("Please only have \"qp\" or \"tbr\" for each sequence")
-                    continue
-                elif not 'qp' in seq and not 'tbr' in seq:
-                    print("Please have \"qp\" or \"tbr\" for each sequence")
-                    continue
-                elif 'qp' in seq:
-                    VBR = 0
-                    iter_list = seq['qp']
-                elif 'tbr' in seq:
-                    VBR = 1
-                    iter_list = seq['tbr']
-                if OQ == 1 and VBR == 1:
-                    continue
-                for enc_mode in SPEED_ENC_MODES:
-                    num_channels = self.get_num_channels(enc_mode, enc_params)
-                    num_frames = self.get_num_frames(enc_mode)
-                    if OQ == 0:
-                        quality_mode = '_SQ'
-                    elif OQ == 1:
-                        quality_mode = '_OQ'
-                    else:
-                        quality_mode = '_VMAF'
-                    if VBR == 0:
-                        enc_params.update({'enc_mode': enc_mode, 'qp': iter_list, 'rc': 0, 'tune': OQ, 'frame_to_be_encoded': num_frames})
-                        cmd = self.get_enc_cmd(enc_params, seq['name'], 'Speed_Test_M' + str(enc_mode) + '_' + seq['name'] + quality_mode + '_Q' + str(iter_list), num_channels)
-                    else:
-                        enc_params.update({'enc_mode': enc_mode, 'tbr': iter_list, 'rc': 1, 'tune': OQ, 'frame_to_be_encoded': num_frames})
-                        cmd = self.get_enc_cmd(enc_params, seq['name'], 'Speed_Test_M' + str(enc_mode) + '_' + seq['name'] + quality_mode + '_TBR' + str(iter_list), num_channels)
-                    print (cmd)
-                    if platform == WINDOWS_PLATFORM_STR:
-                        print(cmd, file=open('speed_script.bat', 'a'))
-                    else:
-                        print(cmd, file=open('speed_script.sh', 'a'))
+        for seq in seq_dict:
+            enc_params.update(self.get_stream_info(seq['name']))
+            if 'qp' in seq and 'tbr' in seq:
+                print("Please only have \"qp\" or \"tbr\" for each sequence")
+                continue
+            elif not 'qp' in seq and not 'tbr' in seq:
+                print("Please have \"qp\" or \"tbr\" for each sequence")
+                continue
+            elif 'qp' in seq:
+                VBR = 0
+                iter_list = seq['qp']
+            elif 'tbr' in seq:
+                VBR = 1
+                iter_list = seq['tbr']
+            if VBR == 1:
+                continue
+            for enc_mode in SPEED_ENC_MODES:
+                num_channels = self.get_num_channels(enc_mode, enc_params)
+                num_frames = self.get_num_frames(enc_mode)
+                if VBR == 0:
+                    enc_params.update({'enc_mode': enc_mode, 'qp': iter_list, 'rc': 0, 'frame_to_be_encoded': num_frames})
+                    cmd = self.get_enc_cmd(enc_params, seq['name'], 'Speed_Test_M' + str(enc_mode) + '_' + seq['name'] + '_Q' + str(iter_list), num_channels)
+                else:
+                    enc_params.update({'enc_mode': enc_mode, 'tbr': iter_list, 'rc': 1, 'frame_to_be_encoded': num_frames})
+                    cmd = self.get_enc_cmd(enc_params, seq['name'], 'Speed_Test_M' + str(enc_mode) + '_' + seq['name'] + '_TBR' + str(iter_list), num_channels)
+                print (cmd)
+                if platform == WINDOWS_PLATFORM_STR:
+                    print(cmd, file=open('speed_script.bat', 'a'))
+                else:
+                    print(cmd, file=open('speed_script.sh', 'a'))
                     
 ##----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------##
 small_test = EB_Test(ENC_PATH, BIN_PATH, YUV_PATH, TOOLS_PATH)

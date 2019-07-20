@@ -512,7 +512,7 @@ index 0000000..d9ac04c
 +      AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 0xff, VE, "level" },
 +
 +    { "preset", "Encoding preset [0, 12]",
-+      OFFSET(enc_mode), AV_OPT_TYPE_INT, { .i64 = 9 }, 0, 12, VE },
++      OFFSET(enc_mode), AV_OPT_TYPE_INT, { .i64 = 7 }, 0, 12, VE },
 +
 +    { "profile", "Profile setting, Main Still Picture Profile not supported", OFFSET(profile),
 +      AV_OPT_TYPE_INT, { .i64 = FF_PROFILE_HEVC_MAIN }, FF_PROFILE_HEVC_MAIN, FF_PROFILE_HEVC_REXT, VE, "profile"},
