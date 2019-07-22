@@ -1000,7 +1000,7 @@ void SendNaluOnTheFly(
             if (return_error == EB_ErrorNone && *context != 0) {
                 nextValue = (uint8_t*)EB_STRTOK(NULL, "/", &context);
                 if (nextValue !=NULL)
-                    nalType = (uint32_t)strtol(nextValue, NULL, 0);
+                    nalType = (uint32_t)strtol((char*)nextValue, NULL, 0);
                 else
                     return_error = EB_ErrorBadParameter;
             }
