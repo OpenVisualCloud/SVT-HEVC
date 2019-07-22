@@ -4750,15 +4750,13 @@ static void WriteUvlc(
 		numberOfBits += 2;
 	}
 
-
-	if (numberOfBits<32)
-	{
+    if(numberOfBits<32) {
 	    OutputBitstreamWrite(
 		    bitstreamPtr,
 		    bits,
 		    numberOfBits);
-	} else
-	{
+    } else
+    {
 	    OutputBitstreamWrite(
 		    bitstreamPtr,
 		    0,
@@ -4767,7 +4765,7 @@ static void WriteUvlc(
 		    bitstreamPtr,
 		    bits,
 		    (numberOfBits+1)>>1);
-	}
+    }
 }
 
 /**************************************************
@@ -8460,6 +8458,41 @@ EB_ERRORTYPE CodeBufferingPeriodSEI(
 	return return_error;
 }
 
+EB_ERRORTYPE CodeActiveParameterSetSEI(
+    OutputBitstreamUnit_t   *bitstreamPtr,
+    AppActiveparameterSetSei_t    *activeParameterSet)
+{
+	EB_U32 i;
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    //active_vps_id
+    WriteCodeCavlc(bitstreamPtr, activeParameterSet->activeVideoParameterSetid, 4);
+    //self_contained_flag
+    WriteFlagCavlc(bitstreamPtr, activeParameterSet->selfContainedCvsFlag);
+    //no_param_set_update_flag
+    WriteFlagCavlc(bitstreamPtr, activeParameterSet->noParameterSetUpdateFlag);
+    //num_sps_ids_minus1
+    WriteUvlc(bitstreamPtr, activeParameterSet->numSpsIdsMinus1);
+    //active_seq_param_set_id
+    for (i = 0; i <= activeParameterSet->numSpsIdsMinus1; i++)
+    {
+        WriteUvlc(bitstreamPtr, activeParameterSet->activeSeqParameterSetId);
+    }
+    if (bitstreamPtr->writtenBitsCount % 8 != 0) {
+        // bit_equal_to_one
+        WriteFlagCavlc(
+            bitstreamPtr,
+            1);
+
+        while (bitstreamPtr->writtenBitsCount % 8 != 0) {
+            // bit_equal_to_zero
+            WriteFlagCavlc(
+                bitstreamPtr,
+                0);
+        }
+    }
+
+    return return_error;
+}
 
 EB_ERRORTYPE CodePictureTimingSEI(
 	OutputBitstreamUnit_t   *bitstreamPtr,
@@ -8498,7 +8531,7 @@ EB_ERRORTYPE CodePictureTimingSEI(
 		WriteCodeCavlc(
 			bitstreamPtr,
 			picTimingSeiPtr->auCpbRemovalDelayMinus1,
-			vuiPtr->hrdParametersPtr->duCpbRemovalDelayLengthMinus1 + 1);
+			vuiPtr->hrdParametersPtr->auCpbRemovalDelayLengthMinus1 + 1);
 
 		// pic_dpb_output_delay
 		WriteCodeCavlc(
@@ -8583,7 +8616,8 @@ EB_ERRORTYPE EncodePictureTimingSEI(
 	AppPictureTimingSei_t   *picTimingSeiPtr,
 	AppVideoUsabilityInfo_t *vuiPtr,
 	EncodeContext_t         *encodeContextPtr,
-    EB_U8                    pictStruct)
+    EB_U8                    pictStruct,
+    EB_U8                    temporalId)
 
 {
 	EB_ERRORTYPE return_error = EB_ErrorNone;
@@ -8597,7 +8631,7 @@ EB_ERRORTYPE EncodePictureTimingSEI(
 	CodeNALUnitHeader(
 		outputBitstreamPtr,
 		NAL_UNIT_PREFIX_SEI,
-		0);
+		temporalId);
 
 	payloadSize = GetPictureTimingSEILength(
 		picTimingSeiPtr,
@@ -8709,6 +8743,80 @@ EB_ERRORTYPE EncodeBufferingPeriodSEI(
 		outputBitstreamPtr);
 
 	return return_error;
+}
+
+EB_ERRORTYPE EncodeActiveParameterSetsSEI(
+    Bitstream_t             *bitstreamPtr,
+    AppActiveparameterSetSei_t    *activeParameterSet)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    unsigned payloadType = ACTIVE_PARAMETER_SETS;
+
+    // Note: payloadSize is fixed temporarily, this may change in future based on what is sent in CodeActiveParameterSet
+    unsigned payloadSize;
+
+    OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
+
+    CodeNALUnitHeader(
+        outputBitstreamPtr,
+        NAL_UNIT_PREFIX_SEI,
+        0);
+
+    payloadSize = GetActiveParameterSetSEILength(
+        activeParameterSet);
+
+    for (; payloadType >= 0xff; payloadType -= 0xff) {
+        OutputBitstreamWrite(
+            outputBitstreamPtr,
+            0xff,
+            8);
+    }
+    OutputBitstreamWrite(
+        outputBitstreamPtr,
+        payloadType,
+        8);
+
+    for (; payloadSize >= 0xff; payloadSize -= 0xff) {
+        OutputBitstreamWrite(
+            outputBitstreamPtr,
+            0xff,
+            8);
+    }
+    OutputBitstreamWrite(
+        outputBitstreamPtr,
+        payloadSize,
+        8);
+
+    // Active Parameter Set SEI data
+    CodeActiveParameterSetSEI(
+        outputBitstreamPtr,
+        activeParameterSet);
+
+    // Byte Align the Bitstream
+    OutputBitstreamWrite(
+        outputBitstreamPtr,
+        1,
+        1);
+
+    OutputBitstreamWriteAlignZero(
+        outputBitstreamPtr);
+
+    return return_error;
+}
+
+EB_ERRORTYPE EncodeFillerData(
+    Bitstream_t             *bitstreamPtr,
+    EB_U8                    temporalId)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+
+    OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
+
+    CodeNALUnitHeader(
+        outputBitstreamPtr,
+        NAL_UNIT_FILLER_DATA,
+        temporalId);
+    return return_error;
 }
 
 EB_ERRORTYPE EncodeRegUserDataSEI(

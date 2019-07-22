@@ -51,6 +51,7 @@ typedef struct ReferenceQueueEntry_s {
     EB_BOOL                         isUsedAsReferenceFlag;
 
     EB_U64                          rcGroupIndex;
+    EB_BOOL                         feedbackArrived;
     
 } ReferenceQueueEntry_t;   
 

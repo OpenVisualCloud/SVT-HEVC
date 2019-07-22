@@ -17,11 +17,88 @@
 #include "EbRateControlTasks.h"
 #include "EbRateControlProcess.h"
 #include "EbTime.h"
+#include "EbPictureDemuxResults.h"
+
+void HrdFullness(SequenceControlSet_t *sequenceControlSetPtr, PictureControlSet_t *pictureControlSetptr, AppBufferingPeriodSei_t *seiBP)
+{
+    EB_U32 i;
+    const AppVideoUsabilityInfo_t* vui = sequenceControlSetPtr->videoUsabilityInfoPtr;
+    const AppHrdParameters_t* hrd = vui->hrdParametersPtr;
+    EB_U32 num = 90000;
+    EB_U32 denom = (hrd->bitRateValueMinus1[pictureControlSetptr->temporalLayerIndex][0][hrd->cpbCountMinus1[0]] + 1) << (hrd->bitRateScale + BR_SHIFT);
+    EB_U64 cpbState = sequenceControlSetPtr->encodeContextPtr->bufferFill;
+    EB_U64 cpbSize = (hrd->cpbSizeValueMinus1[pictureControlSetptr->temporalLayerIndex][0][hrd->cpbCountMinus1[0]] + 1) << (hrd->cpbSizeScale + CPB_SHIFT);
+
+    for (i = 0; i < hrd->cpbCountMinus1[0]+1; i++)
+    {
+        seiBP->initialCpbRemovalDelay[0][i] = (EB_U32)(num * cpbState / denom);
+        seiBP->initialCpbRemovalDelayOffset[0][i] = (EB_U32)(num * cpbSize / denom - seiBP->initialCpbRemovalDelay[0][i]);
+    }
+}
+
+static inline EB_S32 calcScale(EB_U32 x)
+{
+    EB_U8 lut[16] = { 4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0 };
+    EB_S32 y, z = (((x & 0xffff) - 1) >> 27) & 16;
+    x >>= z;
+    z += y = (((x & 0xff) - 1) >> 28) & 8;
+    x >>= y;
+    z += y = (((x & 0xf) - 1) >> 29) & 4;
+    x >>= y;
+    return z + lut[x & 0xf];
+}
+
+static inline EB_S32 calcLength(EB_U32 x)
+{
+    EB_U8 lut[16] = { 4, 3, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
+    EB_S32 y, z = (((x >> 16) - 1) >> 27) & 16;
+    x >>= z ^ 16;
+    z += y = ((x - 0x100) >> 28) & 8;
+    x >>= y ^ 8;
+    z += y = ((x - 0x10) >> 29) & 4;
+    x >>= y ^ 4;
+    return z + lut[x];
+}
+
+void InitHRD(SequenceControlSet_t *scsPtr)
+{
+    EB_U32 i, j, k;
+    AppHrdParameters_t *hrd = scsPtr->videoUsabilityInfoPtr->hrdParametersPtr;
+
+    // normalize HRD size and rate to the value / scale notation
+    hrd->bitRateScale = (EB_U32)CLIP3(0, 15, calcScale(scsPtr->staticConfig.vbvMaxrate) - BR_SHIFT);
+    hrd->cpbSizeScale = (EB_U32)CLIP3(0, 15, calcScale(scsPtr->staticConfig.vbvBufsize) - CPB_SHIFT);
+    for (i = 0; i < MAX_TEMPORAL_LAYERS; i++)
+        for (j = 0; j < 2; j++)
+            for (k = 0; k < MAX_CPB_COUNT; k++)
+            {
+                hrd->bitRateValueMinus1[i][j][k] = (scsPtr->staticConfig.vbvMaxrate >> (hrd->bitRateScale + BR_SHIFT))-1;
+                hrd->cpbSizeValueMinus1[i][j][k] = (scsPtr->staticConfig.vbvBufsize >> (hrd->cpbSizeScale + CPB_SHIFT))-1;
+                if (scsPtr->staticConfig.vbvMaxrate == scsPtr->staticConfig.targetBitRate)
+                    hrd->cbrFlag[i][j][k] = 1;
+            }
+    EB_U32 bitRateUnscale = ((scsPtr->staticConfig.vbvMaxrate >> (hrd->bitRateScale + BR_SHIFT)) << (hrd->bitRateScale + BR_SHIFT));
+    EB_U32 cpbSizeUnscale = ((scsPtr->staticConfig.vbvBufsize >> (hrd->cpbSizeScale + CPB_SHIFT)) << (hrd->cpbSizeScale + CPB_SHIFT));
+
+    // arbitrary
+#define MAX_DURATION 0.5
+
+    EB_U32 maxCpbOutputDelay = (EB_U32)MIN((EB_U32)scsPtr->staticConfig.intraPeriodLength* MAX_DURATION *scsPtr->videoUsabilityInfoPtr->vuiTimeScale / scsPtr->videoUsabilityInfoPtr->vuiNumUnitsInTick, MAX_UNSIGNED_VALUE);
+    EB_U32 maxDpbOutputDelay = (EB_U32)(scsPtr->maxDpbSize* MAX_DURATION *scsPtr->videoUsabilityInfoPtr->vuiTimeScale / scsPtr->videoUsabilityInfoPtr->vuiNumUnitsInTick);
+    EB_U32 maxDelay = (EB_U32)(90000.0 * cpbSizeUnscale / bitRateUnscale + 0.5);
+    hrd->initialCpbRemovalDelayLengthMinus1 = (EB_U32)((2 + CLIP3(4, 22, 32 - calcLength(maxDelay)))-1);
+    hrd->auCpbRemovalDelayLengthMinus1 = (EB_U32)((CLIP3(4, 31, 32 - calcLength(maxCpbOutputDelay)))-1);
+    hrd->dpbOutputDelayLengthMinus1 = (EB_U32)((CLIP3(4, 31, 32 - calcLength(maxDpbOutputDelay)))-1);
+
+#undef MAX_DURATION
+}
 
 EB_ERRORTYPE PacketizationContextCtor(
     PacketizationContext_t **contextDblPtr,
     EbFifo_t                *entropyCodingInputFifoPtr,
-    EbFifo_t                *rateControlTasksOutputFifoPtr)
+    EbFifo_t                *rateControlTasksOutputFifoPtr,
+    EbFifo_t                *pictureManagerOutputFifoPtr
+)
 {
     PacketizationContext_t *contextPtr;
     EB_MALLOC(PacketizationContext_t*, contextPtr, sizeof(PacketizationContext_t), EB_N_PTR);
@@ -29,6 +106,7 @@ EB_ERRORTYPE PacketizationContextCtor(
         
     contextPtr->entropyCodingInputFifoPtr      = entropyCodingInputFifoPtr;
     contextPtr->rateControlTasksOutputFifoPtr  = rateControlTasksOutputFifoPtr;
+    contextPtr->pictureManagerOutputFifoPtr    = pictureManagerOutputFifoPtr;
 
     EB_MALLOC(EbPPSConfig_t*, contextPtr->ppsConfig, sizeof(EbPPSConfig_t), EB_N_PTR);
     
@@ -57,7 +135,8 @@ void* PacketizationKernel(void *inputPtr)
     EB_BUFFERHEADERTYPE           *outputStreamPtr;
     EbObjectWrapper_t              *rateControlTasksWrapperPtr;
     RateControlTasks_t             *rateControlTasksPtr;
-    
+    EbObjectWrapper_t               *pictureManagerResultsWrapperPtr;
+    PictureDemuxResults_t       	*pictureManagerResultPtr;
     // Bitstream copy to output buffer
     Bitstream_t                     bitstream;
     
@@ -72,6 +151,10 @@ void* PacketizationKernel(void *inputPtr)
     EB_U32                          refQpIndex = 0;       
     EB_U32                          packetizationQp;
        
+    EB_U64                          refDecOrder = 0;
+    EB_U64                          filler;
+    EB_U32                          fillerBytes;
+    EB_U64                          bufferRate;
     EB_PICTURE                      sliceType;
     EB_U16                          tileIdx;
     EB_U16                          tileCnt;
@@ -124,9 +207,38 @@ void* PacketizationKernel(void *inputPtr)
         rateControlTasksPtr                                 = (RateControlTasks_t*) rateControlTasksWrapperPtr->objectPtr; 
         rateControlTasksPtr->pictureControlSetWrapperPtr    = pictureControlSetPtr->PictureParentControlSetWrapperPtr;
         rateControlTasksPtr->taskType                       = RC_PACKETIZATION_FEEDBACK_RESULT;
-        
+
+        if (sequenceControlSetPtr->staticConfig.rateControlMode) {
+            // Get Empty Results Object
+            EbGetEmptyObject(
+                contextPtr->pictureManagerOutputFifoPtr,
+                &pictureManagerResultsWrapperPtr);
+
+            pictureManagerResultPtr = (PictureDemuxResults_t*)pictureManagerResultsWrapperPtr->objectPtr;
+            pictureManagerResultPtr->pictureNumber = pictureControlSetPtr->pictureNumber;
+            pictureManagerResultPtr->pictureType = EB_PIC_FEEDBACK;
+            pictureManagerResultPtr->sequenceControlSetWrapperPtr = pictureControlSetPtr->sequenceControlSetWrapperPtr;
+        }
+        else {
+            pictureManagerResultsWrapperPtr = EB_NULL;
+            (void) pictureManagerResultPtr;
+            (void)pictureManagerResultsWrapperPtr;
+        }
         sliceType = pictureControlSetPtr->sliceType;
         
+        if (sequenceControlSetPtr->profileIdc == 0)
+        {
+            // Compute Profile Tier and Level Information
+            ComputeProfileTierLevelInfo(
+                sequenceControlSetPtr);
+
+            ComputeMaxDpbBuffer(
+                sequenceControlSetPtr);
+
+            if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
+                InitHRD(sequenceControlSetPtr);
+        }
+
         if(pictureControlSetPtr->pictureNumber == 0 && sequenceControlSetPtr->staticConfig.codeVpsSpsPps == 1) {
 
             // Reset the bitstream before writing to it
@@ -141,14 +253,7 @@ void* PacketizationKernel(void *inputPtr)
                     pictureControlSetPtr->temporalId);
             }
 
-            // Compute Profile Tier and Level Information
-            ComputeProfileTierLevelInfo(
-                sequenceControlSetPtr);
-                            
-			ComputeMaxDpbBuffer(
-                sequenceControlSetPtr);
-
-			// Code the VPS
+            // Code the VPS
             EncodeVPS(
                 pictureControlSetPtr->bitstreamPtr,
                 sequenceControlSetPtr);
@@ -195,6 +300,14 @@ void* PacketizationKernel(void *inputPtr)
                     &sequenceControlSetPtr->masteringDisplayColorVolume);
             }
 
+            if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
+            {
+                sequenceControlSetPtr->activeParameterSet.selfContainedCvsFlag = EB_TRUE;
+                sequenceControlSetPtr->activeParameterSet.noParameterSetUpdateFlag = EB_TRUE;
+                EncodeActiveParameterSetsSEI(
+                    pictureControlSetPtr->bitstreamPtr,
+                    &sequenceControlSetPtr->activeParameterSet);
+            }
             // Flush the Bitstream
             FlushBitstream(
                 pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
@@ -209,7 +322,7 @@ void* PacketizationKernel(void *inputPtr)
 				NAL_UNIT_INVALID);
         }
         
-        
+         
         // Bitstream Written Loop
         // This loop writes the result of entropy coding into the bitstream
         {
@@ -449,12 +562,16 @@ void* PacketizationKernel(void *inputPtr)
 
         // Parsing the linked list and find the user data SEI msgs and code them
         sequenceControlSetPtr->picTimingSei.picStruct = 0;
-
         if( sequenceControlSetPtr->staticConfig.bufferingPeriodSEI && 
             pictureControlSetPtr->sliceType == EB_I_PICTURE && 
             sequenceControlSetPtr->staticConfig.videoUsabilityInfo &&
             (sequenceControlSetPtr->videoUsabilityInfoPtr->hrdParametersPtr->nalHrdParametersPresentFlag || sequenceControlSetPtr->videoUsabilityInfoPtr->hrdParametersPtr->vclHrdParametersPresentFlag)) 
-        {                           
+        {
+            //Calculating the hrdfullness based on the vbv buffer fill status
+            if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
+            {
+                HrdFullness(sequenceControlSetPtr, pictureControlSetPtr, &sequenceControlSetPtr->bufferingPeriod);
+            }
             EncodeBufferingPeriodSEI(
                 pictureControlSetPtr->bitstreamPtr,
                 &sequenceControlSetPtr->bufferingPeriod,
@@ -462,16 +579,32 @@ void* PacketizationKernel(void *inputPtr)
                 sequenceControlSetPtr->encodeContextPtr);    
         }
 
-        if(sequenceControlSetPtr->staticConfig.pictureTimingSEI) {
+        // Flush the Bitstream
+        FlushBitstream(
+            pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
 
-            EncodePictureTimingSEI(
-                pictureControlSetPtr->bitstreamPtr,
-                &sequenceControlSetPtr->picTimingSei,
-                sequenceControlSetPtr->videoUsabilityInfoPtr,
-                sequenceControlSetPtr->encodeContextPtr,
-                pictureControlSetPtr->ParentPcsPtr->pictStruct);
+        // Copy Buffering Period SEI to the Output Bitstream
+        CopyRbspBitstreamToPayload(
+            pictureControlSetPtr->bitstreamPtr,
+            outputStreamPtr->pBuffer,
+            (EB_U32*) &(outputStreamPtr->nFilledLen),
+            (EB_U32*) &(outputStreamPtr->nAllocLen),
+            encodeContextPtr,
+			NAL_UNIT_INVALID);
+        queueEntryPtr->startSplicing = outputStreamPtr->nFilledLen;
+        if (sequenceControlSetPtr->staticConfig.pictureTimingSEI) {
+            if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
+            {
+                queueEntryPtr->picTimingEntry->decodeOrder = pictureControlSetPtr->ParentPcsPtr->decodeOrder;
+                queueEntryPtr->picTimingEntry->picStruct = pictureControlSetPtr->ParentPcsPtr->pictStruct;
+                queueEntryPtr->picTimingEntry->temporalId = pictureControlSetPtr->temporalId;
+                queueEntryPtr->sliceType = pictureControlSetPtr->sliceType;
+                queueEntryPtr->picTimingEntry->poc = pictureControlSetPtr->pictureNumber;
+            }
 
         }
+        // Reset the bitstream
+        ResetBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
 
         if(sequenceControlSetPtr->staticConfig.recoveryPointSeiFlag){
             EncodeRecoveryPointSEI(
@@ -545,17 +678,38 @@ void* PacketizationKernel(void *inputPtr)
             FlushBitstream(bitstream.outputBitstreamPtr);
 
             CopyRbspBitstreamToPayload(
-                    &bitstream,
-                    outputStreamPtr->pBuffer,
-                    (EB_U32*) &(outputStreamPtr->nFilledLen),
-                    (EB_U32*) &(outputStreamPtr->nAllocLen),
-                    encodeContextPtr,
-                    NAL_UNIT_INVALID);
+                &bitstream,
+                outputStreamPtr->pBuffer,
+                (EB_U32*) &(outputStreamPtr->nFilledLen),
+                (EB_U32*) &(outputStreamPtr->nAllocLen),
+			    encodeContextPtr,
+			    NAL_UNIT_INVALID);
+
+            bufferRate = encodeContextPtr->vbvMaxrate / (sequenceControlSetPtr->staticConfig.frameRate >> 16);
+            queueEntryPtr->fillerBitsSent = 0;
+            if ((sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate) && (sequenceControlSetPtr->staticConfig.vbvMaxrate == sequenceControlSetPtr->staticConfig.targetBitRate))
+            {
+                pictureControlSetPtr->ParentPcsPtr->totalNumBits = outputStreamPtr->nFilledLen << 3;
+                EB_S64 buffer = (EB_S64)(encodeContextPtr->bufferFill);
+
+                buffer -= pictureControlSetPtr->ParentPcsPtr->totalNumBits;
+                buffer = MAX(buffer, 0);
+                buffer = (EB_S64)(buffer + bufferRate);
+                //Block to write filler data to prevent vbv overflow
+                if ((EB_U64)buffer > encodeContextPtr->vbvBufsize)
+                {
+                    filler = (EB_U64)buffer - encodeContextPtr->vbvBufsize;
+                    queueEntryPtr->fillerBitsSent = filler;
+                }
+            }
+
         }
         
         // Send the number of bytes per frame to RC
         pictureControlSetPtr->ParentPcsPtr->totalNumBits = outputStreamPtr->nFilledLen << 3;    
 
+        queueEntryPtr->actualBits = pictureControlSetPtr->ParentPcsPtr->totalNumBits;
+        pictureControlSetPtr->ParentPcsPtr->totalNumBits += queueEntryPtr->fillerBitsSent;
         // Copy Dolby Vision RPU metadata to the output bitstream
         if (sequenceControlSetPtr->staticConfig.dolbyVisionProfile == 81 && pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr->dolbyVisionRpu.payloadSize) {
             // Reset the bitstream
@@ -578,7 +732,6 @@ void* PacketizationKernel(void *inputPtr)
                 ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr,
                 NAL_UNIT_UNSPECIFIED_62);
         }
-
 
         // Code EOS NUT
         if (outputStreamPtr->nFlags & EB_BUFFERFLAG_EOS && sequenceControlSetPtr->staticConfig.codeEosNal == 1) 
@@ -614,6 +767,10 @@ void* PacketizationKernel(void *inputPtr)
         // Post Rate Control Taks            
         EbPostFullObject(rateControlTasksWrapperPtr);    
 
+        if (sequenceControlSetPtr->staticConfig.rateControlMode) {
+            // Post the Full Results Object
+            EbPostFullObject(pictureManagerResultsWrapperPtr);
+        }
         //Release the Parent PCS then the Child PCS
         EbReleaseObject(entropyCodingResultsPtr->pictureControlSetWrapperPtr);//Child
 
@@ -636,6 +793,9 @@ void* PacketizationKernel(void *inputPtr)
             double latency = 0.0;
             EB_U64 finishTimeSeconds = 0;
             EB_U64 finishTimeuSeconds = 0;
+            EB_U32  bufferWrittenBytesCount = 0;
+            EB_U32  startinBytes = 0;
+            EB_U32  totalBytes = 0;
             EbFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
 
             EbComputeOverallElapsedTimeMs(
@@ -647,8 +807,133 @@ void* PacketizationKernel(void *inputPtr)
             //printf("pts %d, dts %d, Packetization latency %3.3f\n", outputStreamPtr->pts, outputStreamPtr->dts, latency);
 
             outputStreamPtr->nTickCount = (EB_U32)latency;
-			EbPostFullObject(outputStreamWrapperPtr);
+            if (sequenceControlSetPtr->staticConfig.pictureTimingSEI) {
+                if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
+                {
+                    // The aucpbremoval delay specifies how many clock ticks the
+                    // access unit associated with the picture timing SEI message has to
+                    // wait after removal of the access unit with the most recent
+                    // buffering period SEI message
+                    const AppVideoUsabilityInfo_t* vui = sequenceControlSetPtr->videoUsabilityInfoPtr;
+                    const AppHrdParameters_t* hrd = vui->hrdParametersPtr;
+                    sequenceControlSetPtr->picTimingSei.auCpbRemovalDelayMinus1 = (EB_U32)((MIN(MAX(1, (EB_S32)(queueEntryPtr->picTimingEntry->decodeOrder - refDecOrder)), (1 << hrd->auCpbRemovalDelayLengthMinus1))) - 1);
+                    sequenceControlSetPtr->picTimingSei.picDpbOutputDelay = (EB_U32)((sequenceControlSetPtr->maxDpbSize - 1) + queueEntryPtr->picTimingEntry->poc - queueEntryPtr->picTimingEntry->decodeOrder);
+                }
+                // Reset the bitstream
+                ResetBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
 
+                EncodePictureTimingSEI(
+                    queueEntryPtr->bitStreamPtr2,
+                    &sequenceControlSetPtr->picTimingSei,
+                    sequenceControlSetPtr->videoUsabilityInfoPtr,
+                    sequenceControlSetPtr->encodeContextPtr,
+                    queueEntryPtr->picTimingEntry->picStruct,
+                    queueEntryPtr->picTimingEntry->temporalId);
+
+                // Flush the Bitstream
+                FlushBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)queueEntryPtr->bitStreamPtr2->outputBitstreamPtr;
+                bufferWrittenBytesCount = outputBitstreamPtr->writtenBitsCount >> 3;
+                startinBytes = queueEntryPtr->startSplicing;
+                totalBytes = outputStreamPtr->nFilledLen;
+                //Shift the bitstream by size of picture timing SEI
+                memmove(outputStreamPtr->pBuffer + startinBytes + bufferWrittenBytesCount, outputStreamPtr->pBuffer + startinBytes, totalBytes - startinBytes);
+                // Copy Picture Timing SEI to the Output Bitstream
+                CopyRbspBitstreamToPayload(
+                    queueEntryPtr->bitStreamPtr2,
+                    outputStreamPtr->pBuffer,
+                    (EB_U32*) &(queueEntryPtr->startSplicing),
+                    (EB_U32*) &(outputStreamPtr->nAllocLen),
+                    sequenceControlSetPtr->encodeContextPtr,
+					NAL_UNIT_INVALID);
+                outputStreamPtr->nFilledLen += bufferWrittenBytesCount;
+            }
+
+            if (queueEntryPtr->sliceType == EB_I_PICTURE)
+            {
+                refDecOrder = queueEntryPtr->pictureNumber;
+            }
+            /* update VBV plan */
+            if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize)
+            {   
+                EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
+                EB_S64 bufferfill_temp = (EB_S64)(encodeContextPtr->bufferFill);
+                bufferfill_temp -= queueEntryPtr->actualBits;
+                bufferfill_temp = MAX(bufferfill_temp, 0);
+                queueEntryPtr->fillerBitsFinal = 0;
+                EB_U64 buffer=bufferfill_temp = (EB_S64)(bufferfill_temp + (encodeContextPtr->vbvMaxrate * (1.0 / (sequenceControlSetPtr->frameRate >> RC_PRECISION))));
+                //Block to write filler data to prevent cpb overflow
+                if ((sequenceControlSetPtr->staticConfig.vbvMaxrate == sequenceControlSetPtr->staticConfig.targetBitRate)&& !(outputStreamPtr->nFlags & EB_BUFFERFLAG_EOS))
+                {
+                    if (buffer > encodeContextPtr->vbvBufsize)
+                    {
+                        filler = buffer - encodeContextPtr->vbvBufsize;
+                        queueEntryPtr->fillerBitsFinal = filler;
+                        fillerBytes = ((EB_U32)(filler >> 3)) - FILLER_DATA_OVERHEAD;
+                        // Reset the bitstream
+                        ResetBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+
+                        EncodeFillerData(queueEntryPtr->bitStreamPtr2, queueEntryPtr->picTimingEntry->temporalId);
+
+                        // Flush the Bitstream
+                        FlushBitstream(
+                            queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+
+                        // Copy filler bits to the Output Bitstream
+                        CopyRbspBitstreamToPayload(
+                            queueEntryPtr->bitStreamPtr2,
+                            outputStreamPtr->pBuffer,
+                            (EB_U32*) &(outputStreamPtr->nFilledLen),
+                            (EB_U32*) &(outputStreamPtr->nAllocLen),
+                            encodeContextPtr, NAL_UNIT_INVALID);
+
+                        for (EB_U32 i = 0; i < fillerBytes; i++)
+                        {
+                            ResetBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                            OutputBitstreamWrite(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr, 0xff, 8);
+                            FlushBitstream(
+                                queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                            CopyRbspBitstreamToPayload(
+                                queueEntryPtr->bitStreamPtr2,
+                                outputStreamPtr->pBuffer,
+                                (EB_U32*) &(outputStreamPtr->nFilledLen),
+                                (EB_U32*) &(outputStreamPtr->nAllocLen),
+                                encodeContextPtr, NAL_UNIT_INVALID);
+                        }
+                        ResetBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                        // Byte Align the Bitstream: rbsp_trailing_bits
+                        OutputBitstreamWrite(
+                            queueEntryPtr->bitStreamPtr2->outputBitstreamPtr,
+                            1,
+                            1);
+                        FlushBitstream(
+                            queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                        CopyRbspBitstreamToPayload(
+                            queueEntryPtr->bitStreamPtr2,
+                            outputStreamPtr->pBuffer,
+                            (EB_U32*) &(outputStreamPtr->nFilledLen),
+                            (EB_U32*) &(outputStreamPtr->nAllocLen),
+                            encodeContextPtr, NAL_UNIT_INVALID);
+                        ResetBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                        OutputBitstreamWriteAlignZero(
+                            queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                        FlushBitstream(
+                            queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                        CopyRbspBitstreamToPayload(
+                            queueEntryPtr->bitStreamPtr2,
+                            outputStreamPtr->pBuffer,
+                            (EB_U32*) &(outputStreamPtr->nFilledLen),
+                            (EB_U32*) &(outputStreamPtr->nAllocLen),
+                            encodeContextPtr, NAL_UNIT_INVALID);
+                    }
+                }
+                bufferfill_temp -= queueEntryPtr->fillerBitsFinal;
+                bufferfill_temp = MIN(bufferfill_temp, encodeContextPtr->vbvBufsize);
+                encodeContextPtr->bufferFill = (EB_U64)(bufferfill_temp);
+                encodeContextPtr->fillerBitError = (EB_S64)(queueEntryPtr->fillerBitsFinal - queueEntryPtr->fillerBitsSent);
+                EbReleaseMutex(encodeContextPtr->bufferFillMutex);
+            }
+            EbPostFullObject(outputStreamWrapperPtr);
             // Reset the Reorder Queue Entry
             queueEntryPtr->pictureNumber    += PACKETIZATION_REORDER_QUEUE_MAX_DEPTH;            
             queueEntryPtr->outputStreamWrapperPtr = (EbObjectWrapper_t *)EB_NULL;

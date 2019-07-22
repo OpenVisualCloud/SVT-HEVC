@@ -1316,7 +1316,6 @@ void* PictureDecisionKernel(void *inputPtr)
                         else {
                             pictureControlSetPtr->decodeOrder = pictureControlSetPtr->pictureNumber;
                         }
-
                         EbBlockOnMutex(encodeContextPtr->terminatingConditionsMutex);
 
                         encodeContextPtr->terminatingSequenceFlagReceived = (pictureControlSetPtr->endOfSequenceFlag == EB_TRUE) ? 

@@ -23,7 +23,7 @@ EB_ERRORTYPE HlRateControlHistogramEntryCtor(
     HlRateControlHistogramEntry_t   **entryDblPtr,
     EB_U32                          pictureNumber)
 {
-    EB_MALLOC(HlRateControlHistogramEntry_t*, *entryDblPtr, sizeof(HlRateControlHistogramEntry_t), EB_N_PTR);
+    EB_CALLOC(HlRateControlHistogramEntry_t*, *entryDblPtr, sizeof(HlRateControlHistogramEntry_t), 1, EB_N_PTR);
 
     (*entryDblPtr)->pictureNumber       = pictureNumber;
     (*entryDblPtr)->lifeCount           = 0;

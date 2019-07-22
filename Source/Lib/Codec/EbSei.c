@@ -264,6 +264,17 @@ void EbBufferingPeriodSeiCtor(
     return;
 }
 
+void EbActiveParameterSetSeiCtor(
+    AppActiveparameterSetSei_t  *activeParameterSetSei)
+{
+    activeParameterSetSei->activeVideoParameterSetid = 0;
+    activeParameterSetSei->selfContainedCvsFlag = EB_FALSE;
+    activeParameterSetSei->noParameterSetUpdateFlag = EB_FALSE;
+    activeParameterSetSei->numSpsIdsMinus1 = 0;
+    activeParameterSetSei->activeSeqParameterSetId = 0;
+//	activeParameterSetSei->layerSpsIdx = 0;
+    return;
+}
 
 void EbRecoveryPointSeiCtor(
     AppRecoveryPoint_t   *recoveryPointSeiPtr)
@@ -383,7 +394,7 @@ EB_U32 GetPictureTimingSEILength(
 
     if(vuiPtr->hrdParametersPtr->cpbDpbDelaysPresentFlag) {
         // au_cpb_removal_delay_minus1
-        seiLength += vuiPtr->hrdParametersPtr->duCpbRemovalDelayLengthMinus1 + 1;
+        seiLength += vuiPtr->hrdParametersPtr->auCpbRemovalDelayLengthMinus1 + 1;
 
         // pic_dpb_output_delay
         seiLength += vuiPtr->hrdParametersPtr->dpbOutputDelayLengthMinus1 + 1;
@@ -476,6 +487,31 @@ EB_U32 GetBufPeriodSEILength(
             }
         }
     }
+
+    seiLength = (seiLength + 7) >> 3;
+
+    return seiLength;
+}
+
+EB_U32 GetActiveParameterSetSEILength(
+    AppActiveparameterSetSei_t    *activeParameterSet)
+{
+    EB_U32       seiLength = 0;
+
+    // active_video_parameter_set_id
+    seiLength += 4;
+
+    // self_contained_cvs_flag
+    seiLength += 1;
+
+    // no_param_set_update_flag
+    seiLength += 1;
+
+    //num_sps_ids_minus1
+    seiLength += GetUvlcCodeLength(activeParameterSet->numSpsIdsMinus1);
+
+    //active_seq_param_set_id
+    seiLength += GetUvlcCodeLength(activeParameterSet->activeSeqParameterSetId);
 
     seiLength = (seiLength + 7) >> 3;
 

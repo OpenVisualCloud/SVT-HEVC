@@ -84,6 +84,10 @@
 #define NALU_FILE_TOKEN                 "-nalu-file"
 #define RATE_CONTROL_ENABLE_TOKEN       "-rc"
 #define TARGET_BIT_RATE_TOKEN           "-tbr"
+#define VBV_MAX_RATE_TOKEN              "-vbv-maxrate"
+#define VBV_BUFFER_SIZE_TOKEN           "-vbv-bufsize"
+#define VBV_BUFFER_INIT_TOKEN           "-vbv-init"
+#define HRD_TOKEN                       "-hrd"
 #define MAX_QP_TOKEN                    "-max-qp"
 #define MIN_QP_TOKEN                    "-min-qp"
 #define TEMPORAL_ID					    "-temporal-id" // no Eval
@@ -216,6 +220,10 @@ static void SetEnableConstrainedIntra           (const char *value, EbConfig_t *
 static void SetCfgTune                          (const char *value, EbConfig_t *cfg) {cfg->tune                             = (uint8_t)strtoul(value, NULL, 0); };
 static void SetBitRateReduction                 (const char *value, EbConfig_t *cfg) {cfg->bitRateReduction                 = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetImproveSharpness                 (const char *value, EbConfig_t *cfg) {cfg->improveSharpness                 = (EB_BOOL)strtol(value,  NULL, 0);};
+static void SetVbvMaxrate                       (const char *value, EbConfig_t *cfg) { cfg->vbvMaxRate						= strtoul(value, NULL, 0);};
+static void SetVbvBufsize                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufsize						= strtoul(value, NULL, 0);};
+static void SetVbvBufInit                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufInit						= strtoul(value, NULL, 0);};
+static void SetHrdFlag                          (const char *value, EbConfig_t *cfg) { cfg->hrdFlag							= strtoul(value, NULL, 0);};
 static void SetVideoUsabilityInfo               (const char *value, EbConfig_t *cfg) {cfg->videoUsabilityInfo               = strtol(value,  NULL, 0);};
 static void SetHighDynamicRangeInput            (const char *value, EbConfig_t *cfg) {cfg->highDynamicRangeInput            = strtol(value,  NULL, 0);};
 static void SetAccessUnitDelimiter              (const char *value, EbConfig_t *cfg) {cfg->accessUnitDelimiter              = strtol(value,  NULL, 0);};
@@ -331,7 +339,12 @@ config_entry_t config_entry[] = {
 
     // Quantization
     { SINGLE_INPUT, QP_TOKEN, "QP", SetCfgQp },
+    { SINGLE_INPUT, VBV_MAX_RATE_TOKEN, "vbvMaxRate", SetVbvMaxrate },
+    { SINGLE_INPUT, VBV_BUFFER_SIZE_TOKEN, "vbvBufsize", SetVbvBufsize },
+    { SINGLE_INPUT, HRD_TOKEN, "hrd", SetHrdFlag },
+    { SINGLE_INPUT, VBV_BUFFER_INIT_TOKEN, "vbvBufInit", SetVbvBufInit},
 
+   
     // Deblock Filter
     { SINGLE_INPUT, LOOP_FILTER_DISABLE_TOKEN, "LoopFilterDisable", SetDisableDlfFlag },
 
@@ -350,7 +363,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, CONSTRAINED_INTRA_ENABLE_TOKEN, "ConstrainedIntra", SetEnableConstrainedIntra },
 
     // Rate Control
-    { SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "RateControlMode", SetRateControlMode },
+	{ SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "RateControlMode", SetRateControlMode },
     { SINGLE_INPUT, TARGET_BIT_RATE_TOKEN, "TargetBitRate", SetTargetBitRate },
     { SINGLE_INPUT, MAX_QP_TOKEN, "MaxQpAllowed", SetMaxQpAllowed },
     { SINGLE_INPUT, MIN_QP_TOKEN, "MinQpAllowed", SetMinQpAllowed },
@@ -431,11 +444,14 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->maxQpAllowed                         = 48;
     configPtr->minQpAllowed                         = 10;
     configPtr->baseLayerSwitchMode                  = 0;
-	  configPtr->encMode								              = 9;
+    configPtr->vbvMaxRate                           = 0;
+    configPtr->vbvBufsize                           = 0;
+    configPtr->vbvBufInit                           = 90;
+    configPtr->hrdFlag                              =  0;
     configPtr->intraPeriod                          = -2;
     configPtr->intraRefreshType                     = 1;
-	  configPtr->hierarchicalLevels					          = 3;
-	  configPtr->predStructure						            = 2;
+    configPtr->hierarchicalLevels					= 3;
+	configPtr->predStructure						= 2;
     configPtr->disableDlfFlag                       = EB_FALSE;
     configPtr->enableSaoFlag                        = EB_TRUE;
     configPtr->useDefaultMeHme                      = EB_TRUE;
@@ -451,7 +467,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->bufferingPeriodSEI                   = 0;
     configPtr->pictureTimingSEI                     = 0;
 
-    configPtr->bitRateReduction					    = EB_TRUE;
+    configPtr->bitRateReduction	                    = EB_TRUE;
     configPtr->improveSharpness                     = EB_TRUE;
     configPtr->registeredUserDataSeiFlag            = EB_FALSE;
     configPtr->unregisteredUserDataSeiFlag          = EB_FALSE;
@@ -482,9 +498,9 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->unrestrictedMotionVector             = EB_TRUE;
 
     // Encoding Presets
-    configPtr->encMode								    = 9;
-    //configPtr->latencyMode                              = 0; // Deprecated
-    configPtr->speedControlFlag                         = 0;
+	configPtr->encMode                              = 9;
+    //configPtr->latencyMode                        = 0; // Deprecated
+    configPtr->speedControlFlag                     = 0;
 
     // Bit-depth
     configPtr->encoderBitDepth                          = 8;
@@ -514,9 +530,9 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->separateFields                           = EB_FALSE;
 
     // Coding Structure
-    configPtr->hierarchicalLevels					    = 3;
+    configPtr->hierarchicalLevels                       = 3;
     configPtr->baseLayerSwitchMode                      = 0;
-    configPtr->predStructure						    = 2;
+    configPtr->predStructure                            = 2;
     configPtr->intraPeriod                              = -2;
     configPtr->intraRefreshType                         = 1;
 
@@ -549,7 +565,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->tune                                     = 1;
 
     // Adaptive QP Params
-    configPtr->bitRateReduction					        = EB_TRUE;
+    configPtr->bitRateReduction	                        = EB_TRUE;
     configPtr->improveSharpness                         = EB_TRUE;
 
     // Optional Features
