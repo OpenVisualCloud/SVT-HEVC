@@ -29,7 +29,7 @@ else:
     slash = '/'
     exe_name = 'SvtHevcEncApp'
     dec_exe = 'TAppDecoder'
-    
+
 def get_test_mode(mode):
     if len(mode) <= 1:
         print("Running default mode: Fast")
@@ -101,7 +101,7 @@ SPEED_TEST_SEQUENCES = [
 
 ##-------------- TEST MODE SPECIFIC SETTINGS -------------##
 if VALIDATION_TEST_MODE == 0:
-    ENC_MODES                       = [7]
+    ENC_MODES                       = [1,4,8,11]
     NUM_FRAMES                      = 20
     QP_ITERATIONS                   = 1
     VBR_ITERATIONS                  = 1
@@ -154,15 +154,15 @@ class EB_Test(object):
                  bitstream_path,
                  yuv_path,
                  tools_path):
-    
+
         self.yuv_path       = yuv_path
         self.encoder_path   = encoder_path
         self.bitstream_path = bitstream_path
         self.tools_path     = tools_path
-        
+
         if not os.path.exists(bitstream_path):
             os.mkdir(bitstream_path)
-            
+
         if not os.path.exists('qp_files'):
             os.mkdir('qp_files')
         else:
@@ -170,7 +170,7 @@ class EB_Test(object):
             for f in files:
                 if os.path.exists(f):
                     os.remove(f)
-            
+
     def get_default_params(self):
         # Default encoding parameters
         encoder_bit_depth                   = 8
@@ -180,7 +180,7 @@ class EB_Test(object):
         frame_rate                          = 60
         intra_period                        = 31
         frame_to_be_encoded                 = NUM_FRAMES
-                
+
         # Dictionary of all input parameters
         default_enc = { 'encoder_dir'                       : self.encoder_path,
                         'bitstream_dir'                     : self.bitstream_path,
@@ -194,7 +194,7 @@ class EB_Test(object):
                         'frame_to_be_encoded'               : frame_to_be_encoded,
                         }
         return default_enc
-        
+
     def get_stream_info(self, seq_name):
         enc_params = {}
         if "_4096x2160_" in seq_name:
@@ -225,21 +225,21 @@ class EB_Test(object):
             width = 832
             height = 480
             enc_params.update({'width' : width, 'height': height})
-        
+
         if "_8bit_" in seq_name:
             bit_depth = 8
             enc_params.update({'encoder_bit_depth' : bit_depth})
         elif "_10bit_" in seq_name:
             bit_depth = 10
             enc_params.update({'encoder_bit_depth' : bit_depth})
-        
+
         if "_2bitspacked" in seq_name:
             compressed_ten_bit = 1
             enc_params.update({'compressed_ten_bit_format' : compressed_ten_bit})
         else:
             compressed_ten_bit = 0
             enc_params.update({'compressed_ten_bit_format' : compressed_ten_bit})
-        
+
         if "Hz_" in seq_name:
             frame_rate = seq_name[seq_name[:seq_name.rfind("Hz_")].rfind("_")+1:seq_name.rfind("Hz_")]
             if frame_rate == 30:
@@ -248,7 +248,7 @@ class EB_Test(object):
                 intra_period = int(int(frame_rate)/8)*8 - 1
             enc_params.update({'frame_rate' : frame_rate, 'intra_period': intra_period})
         return enc_params
-    
+
     def get_param_tokens(self):
         # Dictionary of all input parameters
         default_tokens = {
@@ -284,7 +284,7 @@ class EB_Test(object):
                         'SearchAreaHeight'                  : '-search-h',
                         }
         return default_tokens
-    
+
     # Assemble the command line
     def get_enc_cmd(self, enc_param, yuv_name, bitstream_name, num_channels = 1):
         all_tokens = self.get_param_tokens()
@@ -325,7 +325,7 @@ class EB_Test(object):
         enc_cmd +=  (' -n ')
         for count in range (0, num_channels):
             enc_cmd += (str(enc_param['frame_to_be_encoded']) + ' ')
-        
+
         # optional command line
         for tokens in all_tokens:
             if tokens in enc_param:
@@ -337,11 +337,11 @@ class EB_Test(object):
                 else:
                     for count in range (0, num_channels):
                         enc_cmd += (str(enc_param[tokens]) + ' ')
-        
+
         # command line to produce output
         enc_cmd += (' > ' + enc_param['bitstream_dir'] + slash + bitstream_name + '.txt')
         return enc_cmd
-        
+
     def get_test_params(self, seq, combination_test_params):
         test_param = []
         param_value = []
@@ -359,7 +359,7 @@ class EB_Test(object):
                 list_index = list_index + 1
             test_param.append((seq, param_dict))
         return test_param
-    
+
     def split_search_region(self, total_search_area, iteration):
         search_area = []
         total_searched = 0
@@ -374,8 +374,8 @@ class EB_Test(object):
                 if remainder <= 0:
                     break
         return search_area
-    
-    
+
+
     # Check if sequence and combination is supported
     def check_seq_support(self, test_name, seq, enc_params):
         width       = enc_params['width']
@@ -429,7 +429,7 @@ class EB_Test(object):
                     if width*height > 1920*1080:
                         return -1
         return 0
-    
+
     def get_width_height(self):
         widths = []
         heights = []
@@ -441,14 +441,14 @@ class EB_Test(object):
             height = int((random.randint(MIN_HEIGHT + int((count)*height_bin_size), MIN_HEIGHT + int((count+1)*height_bin_size))/8))*8
             heights.append(height)
         return widths, heights
-        
+
     def generate_qp_file(self, bitstream_name, num_frames):
         found = 0
         qp_file_name = bitstream_name + '.qpfile'
         for i in range(num_frames):
             print(random.randint(MIN_QP,MAX_QP), file=open('qp_files' + slash + qp_file_name, 'a'))
         return qp_file_name
-    
+
     # Test to Compare exactness between bitstreams
     def run_test(self, test_name, test_params, enc_params, VBR, COMPARE):
         total_tests = 0
@@ -457,7 +457,7 @@ class EB_Test(object):
             iter_list = [random.randint(MIN_QP,MAX_QP) for x in range(QP_ITERATIONS)]
         else:
             iter_list = [random.randint(MIN_BR,MAX_BR) for x in range(VBR_ITERATIONS)]
-            
+
         for enc_mode in ENC_MODES:
             for iter in iter_list: # QP or Bitrate
                 compare_bitstream = ""
@@ -470,7 +470,7 @@ class EB_Test(object):
                     bitstream_name = test_name + '_M' + str(enc_mode) + '_' + seq_name
                     if VBR == 0:
                         enc_params.update({'rc': 0, 'qp': iter})
-                        bitstream_name = bitstream_name + '_Q' + str(iter) 
+                        bitstream_name = bitstream_name + '_Q' + str(iter)
                     else:
                         enc_params.update({'rc': 1, 'tbr': iter})
                         bitstream_name = bitstream_name + '_TBR' + str(iter)
@@ -530,7 +530,7 @@ class EB_Test(object):
                     if bitstream_name != "":
                         compare_bitstream = bitstream_name
         return total_tests, passed_tests
-    
+
     def run_functional_tests(self, seq_list, test_name, combination_test_params):
         # Get default encoding params
         enc_params = self.get_default_params().copy()
@@ -551,7 +551,7 @@ class EB_Test(object):
                 total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
         return total_test, total_passed
-    
+
 ## -------------- COMPARE TESTS -------------- ##
 ## These test checks for bitstream exactness, these comparisons are done to make sure specific features are working correctly
     def buffered_test(self, seq_list):
@@ -578,7 +578,7 @@ class EB_Test(object):
                 total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
         return total_test, total_passed
-        
+
     def run_to_run_test(self, seq_list):
         # Test specific parameters:
         test_name = 'run_to_run_test'
@@ -602,7 +602,7 @@ class EB_Test(object):
             total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
         return total_test, total_passed
-        
+
     def unpacked_test(self, seq_list):
         # Test specific parameters:
         test_name = 'unpacked_test'
@@ -628,7 +628,7 @@ class EB_Test(object):
                 total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
         return total_test, total_passed
-        
+
     def defield_test(self, seq_list):
         # Test specific parameters:
         test_name = 'defield_test'
@@ -666,15 +666,15 @@ class EB_Test(object):
 
 ## ------------ FUNCTIONAL TESTS ------------- ##
 # These tests put the encoder through various combinations to ensure the encoder does not crash
-    def qp_file_test(self,seq_list):        
+    def qp_file_test(self,seq_list):
         # Test specific parameters:
         test_name = 'qp_file_test'
         combination_test_params = { 'use_qp_file'       : [1]
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
-        
-    def intra_period_test(self,seq_list):        
+
+    def intra_period_test(self,seq_list):
         # Test specific parameters:
         test_name = 'intra_period_test'
         intra = []
@@ -689,7 +689,7 @@ class EB_Test(object):
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
-        
+
     def enc_struct_test(self,seq_list):
         # Test specific parameters:
         test_name = 'enc_struct_test'
@@ -699,7 +699,7 @@ class EB_Test(object):
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
-        
+
     def width_height_test(self,seq_list):
         # Test specific parameters:
         test_name = 'width_height_test'
@@ -709,15 +709,15 @@ class EB_Test(object):
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
-        
-    def dlf_test(self,seq_list):        
+
+    def dlf_test(self,seq_list):
         # Test specific parameters:
         test_name = 'dlf_test'
         combination_test_params = { 'LoopFilterDisable'     : [0, 1],
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
-        
+
     def sao_test(self,seq_list):
         # Test specific parameters:
         test_name = 'sao_test'
@@ -725,7 +725,7 @@ class EB_Test(object):
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
-        
+
     def constrained_intra_test(self,seq_list):
         # Test specific parameters:
         test_name = 'constrained_intra_test'
@@ -733,7 +733,7 @@ class EB_Test(object):
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
-        
+
     def scene_change_test(self,seq_list):
         # Test specific parameters:
         test_name = 'scene_change_test'
@@ -749,7 +749,7 @@ class EB_Test(object):
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
-        
+
     def me_hme_test(self,seq_list):
         # Test specific parameters:
         test_name = 'me_hme_test'
@@ -793,18 +793,18 @@ class EB_Test(object):
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
         return total_test, total_passed
-                
-    
+
+
 ## ------------------------------------------- ##
-    
+
     def get_time(self, total_seconds):
         hours = int(total_seconds/3600)
         minutes = int((total_seconds - hours*3600)/60)
         seconds = int(total_seconds - minutes*60 - hours*3600)
-        
+
         days = int(hours/24)
         hours = hours - days*24
-        
+
         time_str = ""
         if days != 0:
             time_str = str(days) + " day(s), "
@@ -814,9 +814,9 @@ class EB_Test(object):
             time_str = time_str + str(minutes) + " minute(s), "
         if minutes != 0:
             time_str = time_str + str(seconds) + " second(s)"
-        
+
         return time_str
-    
+
     def error_check(self, seq_list):
         exit_code = 0
         if not os.path.exists(self.encoder_path + slash + exe_name):
@@ -844,7 +844,7 @@ class EB_Test(object):
             print ("8 bits sequences need to have the fields-separated counterpart")
             print ("10 bits sequences need to have the 2bitspacked counterpart")
         return exit_code
-    
+
     def run_validation_test(self, seq_list):
         if self.error_check(seq_list) != 0:
             return
@@ -906,12 +906,12 @@ class EB_Test(object):
         print ("Percentage Passed: " + str(float(total_passed)/float(total_tests)*100) + "%", file=open(file_name + '.txt', 'a'))
         print ("Time Elapsed: " + self.get_time(finish_time - start_time), file=open(file_name + '.txt', 'a'))
         print ("---------------------------------------------------------", file=open(file_name + '.txt', 'a'))
-        
+
     def show_speed_test_instructions(self):
         print ("To run speed test:", file=open('Running_Speed_Test.txt', 'w'))
         print ("1. Run shell script (Run in \"sudo\" mode in Linux)", file=open('Running_Speed_Test.txt', 'a'))
         print ("Note: Running it from a shell script minimizes use of CPU cycles from Python", file=open('Running_Speed_Test.txt', 'a'))
-    
+
     # Set number of channels for speed test
     def get_num_channels(self, enc_mode, enc_params):
         if enc_params['width']*enc_params['height'] > 1920*1080:
@@ -938,7 +938,7 @@ class EB_Test(object):
         else:
             num_channels = 6
         return num_channels
-        
+
     # Set number of frames for speed test
     def get_num_frames(self, enc_mode):
         if enc_mode >= 0 and enc_mode <= 1:
@@ -948,7 +948,7 @@ class EB_Test(object):
         elif enc_mode >= 5:
             num_frames = 4000
         return num_frames
-    
+
     def run_speed_test(self, seq_dict):
         seq_list = []
         for x in seq_dict:
@@ -995,7 +995,7 @@ class EB_Test(object):
                     print(cmd, file=open('speed_script.bat', 'a'))
                 else:
                     print(cmd, file=open('speed_script.sh', 'a'))
-                    
+
 ##----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------##
 small_test = EB_Test(ENC_PATH, BIN_PATH, YUV_PATH, TOOLS_PATH)
 if TEST_CONFIGURATION == 0:

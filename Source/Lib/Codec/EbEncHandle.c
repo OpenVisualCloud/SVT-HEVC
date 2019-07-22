@@ -2517,7 +2517,7 @@ static EB_ERRORTYPE VerifySettings(\
     }
 
     if (config->tune != 1) {
-        SVT_LOG("SVT [WARNING]: -tune is deprecated. Encoder always uses OQ - PSNR / SSIM optimized mode\n");
+        SVT_LOG("SVT [WARNING]: -tune is deprecated.\n");
         config->tune = 1;
     }
 	if (config->bitRateReduction > 1) {

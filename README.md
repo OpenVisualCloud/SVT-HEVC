@@ -18,14 +18,6 @@ This encoder has been optimized to achieve excellent performance levels using 13
 
 - Real-time encoding of up to six 4Kp60/10-bit streams on the Platinum 8180 with M12 in the visual quality mode
 
-SVT-HEVC Encoder also supports 3 modes:
-
-- A visually optimized mode for visual quality (-tune 0)
-
-- An PSNR/SSIM optimized mode for PSNR / SSIM benchmarking (-tune 1 (Default setting))
-
-- An VMAF optimized mode for VMAF benchmarking (-tune 2)
-
 The encoder can also run the ABR profile below on one Intel® Xeon-D™ D-2191:
 
 |       ABR Profile         |

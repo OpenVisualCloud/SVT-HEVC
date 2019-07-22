@@ -158,7 +158,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
     /* Encoder tuning for specific aim.
      *
-     * Deprecated. Always use OQ - PSNR / SSIM optimized mode.
+     * Deprecated.
      *
      */
     uint8_t                 tune;
