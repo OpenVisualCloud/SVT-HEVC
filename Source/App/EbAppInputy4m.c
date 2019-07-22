@@ -43,7 +43,10 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
 
     /* get first line after YUV4MPEG2 */
     fresult = fgets(buffer, sizeof(buffer), ptr_in);
-    assert(fresult != NULL);
+    if (fresult== NULL)
+    { 
+        return EB_ErrorBadParameter;
+    }
 
     /* print header */
 #ifdef PRINT_HEADER
@@ -269,16 +272,17 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
     return EB_ErrorNone;
 }
 
-void validateAlphanumeric(char* buffer)
+EB_BOOL validateAlphanumeric(char* buffer)
 {
-    /* validate input is alphanumeric..substitute '-' for nonalphanumeric characters */
+    /* validate input is alphanumeric */
     char *cp = buffer;
     const char *end = buffer + strlen(buffer);
     for (cp = buffer; cp != end; cp++)
     {
-        if (!isalnum(*cp))
-            *cp = '-';
+        if (*cp <0 || !isalnum(*cp) && *cp!='\n')
+            return EB_FALSE;
     }
+    return EB_TRUE;
 }
 
 /* read next line which contains the "FRAME" delimiter */
@@ -292,7 +296,10 @@ int32_t read_y4m_frame_delimiter(EbConfig_t *cfg) {
         assert(feof(cfg->inputFile));
         return EB_ErrorNone;
     }
-    validateAlphanumeric(bufferY4Mheader);
+    if (!validateAlphanumeric((char*)bufferY4Mheader))
+    {
+        return EB_ErrorBadParameter;
+    }
     if (EB_STRCMP((const char*)bufferY4Mheader, "FRAME\n") != 0) {
         fprintf(cfg->errorLogFile, "Failed to read proper y4m frame delimeter. Read broken.\n");
         return EB_ErrorBadParameter;
@@ -308,12 +315,14 @@ EB_BOOL check_if_y4m(EbConfig_t *cfg) {
 
     /* Parse the header for the "YUV4MPEG2" string */
     headerReadLength = fread(buffer, YUV4MPEG2_IND_SIZE, 1, cfg->inputFile);
-    assert(headerReadLength == 1);
+    if (headerReadLength != 1)
+    {
+        assert(feof(cfg->inputFile));
+        return EB_FALSE;
+    }
+
     buffer[YUV4MPEG2_IND_SIZE] = 0;
-
-    validateAlphanumeric(buffer);
-
-    if (EB_STRCMP(buffer, "YUV4MPEG2") == 0) {
+    if (validateAlphanumeric((char*)buffer) && EB_STRCMP(buffer, "YUV4MPEG2") == 0) {
         return EB_TRUE; /* YUV4MPEG2 file */
     }
     else {
@@ -321,7 +330,7 @@ EB_BOOL check_if_y4m(EbConfig_t *cfg) {
             fseek(cfg->inputFile, 0, SEEK_SET);
         }
         else {
-            EB_STRNCPY(cfg->y4m_buf, buffer, YUV4MPEG2_IND_SIZE); /* TODO copy 9 bytes read to cfg->y4m_buf*/
+            EB_STRNCPY((char*)cfg->y4m_buf, buffer, YUV4MPEG2_IND_SIZE); /* TODO copy 9 bytes read to cfg->y4m_buf*/
         }
         return EB_FALSE; /* Not a YUV4MPEG2 file */
     }

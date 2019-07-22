@@ -986,9 +986,9 @@ void SendNaluOnTheFly(
         uint8_t *nextValue = NULL;
 
         if (fgets(line, sizeof(line), config->naluFile) != NULL) {
-            nextValue = EB_STRTOK(line, " ", &context);
+            nextValue = (uint8_t*)EB_STRTOK(line, " ", &context);
             if (nextValue != NULL)
-               poc = strtol(nextValue, NULL, 0);
+               poc = (uint32_t)strtol(nextValue, NULL, 0);
             else
                 return_error = EB_ErrorBadParameter;
             if (return_error == EB_ErrorNone && *context != 0) {
@@ -998,9 +998,9 @@ void SendNaluOnTheFly(
                 return_error = EB_ErrorBadParameter;
             }
             if (return_error == EB_ErrorNone && *context != 0) {
-                nextValue = EB_STRTOK(NULL, "/", &context);
+                nextValue = (uint8_t*)EB_STRTOK(NULL, "/", &context);
                 if (nextValue !=NULL)
-                    nalType = strtol(nextValue, NULL, 0);
+                    nalType = (uint32_t)strtol(nextValue, NULL, 0);
                 else
                     return_error = EB_ErrorBadParameter;
             }
@@ -1008,9 +1008,9 @@ void SendNaluOnTheFly(
                 return_error = EB_ErrorBadParameter;
             }
             if (return_error == EB_ErrorNone && *context != 0) {
-                nextValue = EB_STRTOK(NULL, " ", &context);
+                nextValue = (uint8_t*)EB_STRTOK(NULL, " ", &context);
                 if (nextValue != NULL)
-                    payloadType = strtol(nextValue, NULL, 0);
+                    payloadType = (uint32_t)strtol(nextValue, NULL, 0);
                 else
                     return_error = EB_ErrorBadParameter;
             }
