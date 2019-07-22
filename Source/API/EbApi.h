@@ -205,7 +205,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
      * encoded pictures in display order. In other words, pictures with display
      * order N can only be referenced by pictures with display order greater than
      * N, and it can only refer pictures with picture order lower than N. The Low
-     * Delay structure can be flat structured (e.g. IPPPPPPP…) or hierarchically
+     * Delay structure can be flat structured (e.g. IPPPPPPP...) or hierarchically
      * structured. B/b pictures can be used instead of P/p pictures. However, the
      * reference picture list 0 and the reference picture list 1 will contain the
      * same reference picture.
@@ -547,7 +547,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     /* Assembly instruction set used by encoder.
      *
      * 0 = non-AVX2, C only.
-     * 1 = up to AVX512, auto-select highest assembly insturction set supported.
+     * 1 = up to AVX512, auto-select highest assembly instruction set supported.
      * 
      * Default is 1. */
     uint32_t                asmType;
@@ -558,7 +558,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     /* Flag to enable the Speed Control functionality to achieve the real-time
      * encoding speed defined by dynamically changing the encoding preset to meet
      * the average speed defined in injectorFrameRate. When this parameter is set
-     * to 1 it forces –inj to be 1 -inj-frm-rt to be set to the –fps.
+     * to 1 it forces -inj to be 1 and -inj-frm-rt to be set to the -fps.
      *
      * Default is 0. */
     uint32_t                speedControlFlag;
