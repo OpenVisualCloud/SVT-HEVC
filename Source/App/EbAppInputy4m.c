@@ -279,7 +279,7 @@ EB_BOOL validateAlphanumeric(char* buffer)
     const char *end = buffer + strlen(buffer);
     for (cp = buffer; cp != end; cp++)
     {
-        if (*cp <0 || !isalnum(*cp) && *cp!='\n')
+        if ((*cp <0) || (!isalnum(*cp) && *cp!='\n'))
             return EB_FALSE;
     }
     return EB_TRUE;
