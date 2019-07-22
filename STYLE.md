@@ -3,7 +3,7 @@
 
 This style guide should be used for all SVT-HEVC code submissions
 
-Tabs vs Spaces
+Tabs vs Spaces\
 **No tabs,** only spaces; 4-space indentation
 
 Be aware that some tools might add tabs when auto aligning the code, please check your commits with a diff tool for tabs.
@@ -138,9 +138,9 @@ Note: For macOS and BSD related distros, you may need to use `sed -i ''` inplace
 ls -Recurse -File -Filter *.c | ForEach-Object{$(Get-Content $_.FullName | Foreach {Write-Output "$($_.TrimEnd().Replace("`t","    "))`n"}) | Set-Content -NoNewline -Encoding utf8 $_.FullName}
 ```
 
-Where `-Filter *.c` has your extention/filename(s).
-This does not work with `pwsh` on non-windows OS.
-Search the docs for [`pwsh`](https://docs.microsoft.com/en-us/powershell/scripting/overview?view=powershell-6) related commands and [`powershell`](https://docs.microsoft.com/en-us/powershell/scripting/overview?view=powershell-5.1) related commands for more information on what they do.
+Where `-Filter *.c` has your extention/filename(s).\
+This does not work with `pwsh` on non-windows OS.\
+Search the docs for [`pwsh`](https://docs.microsoft.com/en-us/powershell/scripting/overview?view=powershell-6) related commands and [`powershell`](https://docs.microsoft.com/en-us/powershell/scripting/overview?view=powershell-5.1) related commands for more information on what they do.\
 **Do not** use ls without a `-Filter` on the root directory or with the `.git` folder still present. Doing so will corrupt your repo folder and you will need to copy a new `.git` folder and re-setup your folder.
 
 Alternatively, for a single file:
