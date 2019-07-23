@@ -2,11 +2,28 @@ image: Visual Studio 2019
 configuration: Release
 
 install:
-    - git submodule update --init
-    - appveyor DownloadFile http://www.tortall.net/projects/yasm/releases/yasm-1.3.0-win64.exe -FileName yasm.exe
-    - set PATH=%PATH%;%APPVEYOR_BUILD_FOLDER%
-    - cd Build
-    - cmake .. -G "Visual Studio 16 2019" -A x64 -DCMAKE_ASM_NASM_COMPILER=yasm
+  - ps: |
+      $wc = New-Object System.Net.WebClient
+      $wc.DownloadFile('http://repo.msys2.org/distrib/msys2-x86_64-latest.tar.xz', "$PWD\msys2-base.tar.xz")
+      $wc.DownloadFile((Invoke-RestMethod "https://www.powershellgallery.com/api/v2/Packages?`$filter=Id eq 'pscx' and IsLatestVersion").content.src, "$PWD\pscx.zip")
+      Add-Type -assembly "System.IO.Compression.FileSystem"
+      [System.IO.Compression.ZipFile]::ExtractToDirectory("$PWD\pscx.zip", "$PWD\pscx")
+      Remove-Item -Recurse $PWD\pscx.zip, $PWD\pscx\_rels, $PWD\pscx\package
+      powershell -noprofile -command {
+          Import-Module $PWD\pscx\Pscx.psd1 -Force -Cmdlet Expand-Archive -Prefix 7za
+          Expand-7zaArchive -Force -ShowProgress $PWD\msys2-base.tar.xz
+          Remove-Item $PWD\msys2-base.tar.xz
+          Expand-7zaArchive -Force -ShowProgress -OutputPath C:\ $PWD\msys2-base.tar
+          Remove-Item $PWD\msys2-base.tar
+      }
+      Remove-Item -Recurse $PWD\pscx
+  - set "PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%"
+  - set MSYSTEM=MINGW64
+  - set MSYS2_PATH_TYPE=inherit
+  - bash -lc 'exit'
+  - pacman -Sy --ask=20 --noconfirm --noprogressbar --needed mingw-w64-x86_64-yasm
+  - cd Build
+  - cmake .. -G "Visual Studio 16 2019" -A x64
 
 build:
   project: Build\svt-hevc.sln
