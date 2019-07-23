@@ -532,7 +532,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->lookAheadDistance                    = (uint32_t)~0;
     configPtr->sceneChangeDetection                 = 1;
 
-    // Tune: OQ By Default
+    // Tune: only OQ
     configPtr->tune                                 = 1;
 
     // Adaptive QP Params
