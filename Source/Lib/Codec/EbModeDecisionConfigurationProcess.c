@@ -2366,6 +2366,7 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
 		EbGetFullObject(
 			contextPtr->rateControlInputFifoPtr,
 			&rateControlResultsWrapperPtr);
+        EB_CHECK_END_OBJ(rateControlResultsWrapperPtr);
 
 		rateControlResultsPtr = (RateControlResults_t*)rateControlResultsWrapperPtr->objectPtr;
 		pictureControlSetPtr = (PictureControlSet_t*)rateControlResultsPtr->pictureControlSetWrapperPtr->objectPtr;

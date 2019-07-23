@@ -885,6 +885,7 @@ void* PictureDecisionKernel(void *inputPtr)
         EbGetFullObject(
             contextPtr->pictureAnalysisResultsInputFifoPtr,
             &inputResultsWrapperPtr);
+        EB_CHECK_END_OBJ(inputResultsWrapperPtr);
         
         inputResultsPtr         = (PictureAnalysisResults_t*)   inputResultsWrapperPtr->objectPtr;     
         pictureControlSetPtr    = (PictureParentControlSet_t*)  inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;
