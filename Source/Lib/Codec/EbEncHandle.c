@@ -2806,8 +2806,8 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->searchAreaHeight = 7;
     configPtr->constrainedIntra = EB_FALSE;
     configPtr->tune = 1;
-    configPtr->bitRateReduction = EB_TRUE;
-    configPtr->improveSharpness = EB_TRUE;
+    configPtr->bitRateReduction = EB_FALSE;
+    configPtr->improveSharpness = EB_FALSE;
 
     // Bitstream options
     configPtr->codeVpsSpsPps = 0;
