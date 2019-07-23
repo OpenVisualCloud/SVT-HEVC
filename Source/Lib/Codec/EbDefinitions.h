@@ -12,7 +12,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 // Internal Marcos
 #define NON_AVX512_SUPPORT
 
@@ -924,6 +923,8 @@ typedef enum EB_SEI {
 #define MAX_PICTURE_WIDTH_SIZE                      9344u
 #define MAX_PICTURE_HEIGHT_SIZE                     5120u
 
+#define FILLER_DATA_OVERHEAD                        6
+
 #define INTERNAL_BIT_DEPTH                          8 // to be modified
 #define MAX_SAMPLE_VALUE                            ((1 << INTERNAL_BIT_DEPTH) - 1)
 #define MAX_SAMPLE_VALUE_10BIT                      0x3FF
@@ -1078,6 +1079,9 @@ typedef enum EB_SEI {
 #define LOW_LCU_VARIANCE		10
 #define MEDIUM_LCU_VARIANCE		50
 
+//HRD constants
+#define BR_SHIFT               6
+#define CPB_SHIFT              4
 
 // INTRA restriction for global motion
 #define INTRA_GLOBAL_MOTION_NON_MOVING_INDEX_TH  2

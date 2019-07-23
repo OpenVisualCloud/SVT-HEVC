@@ -114,7 +114,6 @@ typedef struct EncodeContext_s
     EB_BOOL                              initialPicture;
 
     EB_U64                               lastIdrPicture; // the most recently occured IDR picture (in decode order)
-
     // Sequence Termination Flags
     EB_U64							     terminatingPictureNumber;
 	EB_BOOL                              terminatingSequenceFlagReceived;
@@ -144,6 +143,11 @@ typedef struct EncodeContext_s
     // Rate Control
     EB_U32                               availableTargetBitRate;
     EB_BOOL                              availableTargetBitRateChanged;
+    EB_U32                               vbvMaxrate;
+    EB_U32                               vbvBufsize;
+    EB_U64                               bufferFill;
+    EB_S64                               fillerBitError;
+    EB_HANDLE                            bufferFillMutex;
 
     EB_U32								 previousSelectedRefQp;
     EB_U64								 maxCodedPoc;

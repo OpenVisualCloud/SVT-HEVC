@@ -663,8 +663,7 @@ EB_ERRORTYPE PictureParentControlSetCtor(
     EB_U16 lcuIndex;
 	EB_U32 regionInPictureWidthIndex;
 	EB_U32 regionInPictureHeightIndex;
-
-    EB_MALLOC(PictureParentControlSet_t*, objectPtr, sizeof(PictureParentControlSet_t), EB_N_PTR);
+    EB_CALLOC(PictureParentControlSet_t*, objectPtr, sizeof(PictureParentControlSet_t), 1, EB_N_PTR);
     *objectDblPtr = (EB_PTR)objectPtr;
 
     objectPtr->sequenceControlSetWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
@@ -703,7 +702,6 @@ EB_ERRORTYPE PictureParentControlSetCtor(
     objectPtr->totalNumBits = 0;
 
     objectPtr->lastIdrPicture = 0;
-
     objectPtr->lcuTotalCount            = pictureLcuWidth * pictureLcuHeight;
 
 	EB_MALLOC(EB_U16**, objectPtr->variance, sizeof(EB_U16*) * objectPtr->lcuTotalCount, EB_N_PTR);

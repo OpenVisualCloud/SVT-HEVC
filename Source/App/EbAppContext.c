@@ -181,12 +181,16 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.maxQpAllowed = config->maxQpAllowed;
     callbackData->ebEncParameters.minQpAllowed = config->minQpAllowed;
     callbackData->ebEncParameters.qp = config->qp;
+    callbackData->ebEncParameters.vbvMaxrate = config->vbvMaxRate;
+    callbackData->ebEncParameters.vbvBufsize = config->vbvBufsize;
+    callbackData->ebEncParameters.vbvBufInit = config->vbvBufInit;
     callbackData->ebEncParameters.useQpFile = (EB_BOOL)config->useQpFile;
     callbackData->ebEncParameters.tileColumnCount = (EB_BOOL)config->tileColumnCount;
     callbackData->ebEncParameters.tileRowCount = (EB_BOOL)config->tileRowCount;
     callbackData->ebEncParameters.tileSliceMode = (EB_BOOL)config->tileSliceMode;
     callbackData->ebEncParameters.disableDlfFlag = (EB_BOOL)config->disableDlfFlag;
     callbackData->ebEncParameters.enableSaoFlag = (EB_BOOL)config->enableSaoFlag;
+    callbackData->ebEncParameters.hrdFlag = (EB_BOOL)config->hrdFlag;
     callbackData->ebEncParameters.useDefaultMeHme = (EB_BOOL)config->useDefaultMeHme;
     callbackData->ebEncParameters.enableHmeFlag = (EB_BOOL)config->enableHmeFlag;
     callbackData->ebEncParameters.searchAreaWidth = config->searchAreaWidth;

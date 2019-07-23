@@ -145,7 +145,7 @@ EB_ERRORTYPE EncodeContextCtor(
     // High level Rate Control histogram Queue
     encodeContextPtr->hlRateControlHistorgramQueueHeadIndex                 = 0;
     
-    EB_MALLOC(HlRateControlHistogramEntry_t**, encodeContextPtr->hlRateControlHistorgramQueue, sizeof(HlRateControlHistogramEntry_t*) * HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH, EB_N_PTR);
+    EB_CALLOC(HlRateControlHistogramEntry_t**, encodeContextPtr->hlRateControlHistorgramQueue, sizeof(HlRateControlHistogramEntry_t*) * HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH, 1, EB_N_PTR);
 
     for(pictureIndex=0; pictureIndex < HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH; ++pictureIndex) {
         return_error = HlRateControlHistogramEntryCtor(
@@ -179,7 +179,6 @@ EB_ERRORTYPE EncodeContextCtor(
     encodeContextPtr->initialPicture                                    = EB_TRUE;
 
     encodeContextPtr->lastIdrPicture                                    = 0;
-
     // Sequence Termination Flags
     encodeContextPtr->terminatingPictureNumber                          = ~0u;
     encodeContextPtr->terminatingSequenceFlagReceived                   = EB_FALSE;
@@ -206,6 +205,10 @@ EB_ERRORTYPE EncodeContextCtor(
     // Rate Control
     encodeContextPtr->availableTargetBitRate                            = 10000000;
     encodeContextPtr->availableTargetBitRateChanged                     = EB_FALSE;
+    encodeContextPtr->bufferFill                                        = 0;
+    encodeContextPtr->vbvBufsize                                        = 0;
+    encodeContextPtr->vbvMaxrate                                        = 0;
+    encodeContextPtr->fillerBitError                                    = 0;
 
     // Rate Control Bit Tables
     EB_MALLOC(RateControlTables_t*, encodeContextPtr->rateControlTablesArray, sizeof(RateControlTables_t) * TOTAL_NUMBER_OF_INITIAL_RC_TABLES_ENTRY, EB_N_PTR);
@@ -223,7 +226,9 @@ EB_ERRORTYPE EncodeContextCtor(
     encodeContextPtr->scBuffer      = 0;
     encodeContextPtr->scFrameIn     = 0;
     encodeContextPtr->scFrameOut    = 0;
-	encodeContextPtr->encMode = SPEED_CONTROL_INIT_MOD;
+    encodeContextPtr->encMode = SPEED_CONTROL_INIT_MOD;
+
+    EB_CREATEMUTEX(EB_HANDLE, encodeContextPtr->bufferFillMutex, sizeof(EB_HANDLE), EB_MUTEX);
     encodeContextPtr->previousSelectedRefQp = 32;
     encodeContextPtr->maxCodedPoc = 0;
     encodeContextPtr->maxCodedPocSelectedRefQp = 32;
