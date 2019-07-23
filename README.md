@@ -151,10 +151,9 @@ We welcome community contributions to the SVT-HEVC Encoder. Thank you for your t
 
 ### Contribution process
 
+- Follow the [coding_guidelines](STYLE.md)
 - Validate that your changes do not break a build
-
 - Perform smoke tests and ensure they pass
-
 - Submit a pull request for review to the maintainer
 
 ### How to Report Bugs and Provide Feedback
