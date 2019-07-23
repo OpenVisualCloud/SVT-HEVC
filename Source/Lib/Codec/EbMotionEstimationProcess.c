@@ -1042,6 +1042,7 @@ void* MotionEstimationKernel(void *inputPtr)
 		EbGetFullObject(
 			contextPtr->pictureDecisionResultsInputFifoPtr,
 			&inputResultsWrapperPtr);
+        EB_CHECK_END_OBJ(inputResultsWrapperPtr);
 
 		inputResultsPtr = (PictureDecisionResults_t*)inputResultsWrapperPtr->objectPtr;
 		pictureControlSetPtr = (PictureParentControlSet_t*)inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;

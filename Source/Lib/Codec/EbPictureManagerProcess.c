@@ -160,6 +160,7 @@ void* PictureManagerKernel(void *inputPtr)
         EbGetFullObject(
             contextPtr->pictureInputFifoPtr,
             &inputPictureDemuxWrapperPtr);
+        EB_CHECK_END_OBJ(inputPictureDemuxWrapperPtr);
 
         inputPictureDemuxPtr = (PictureDemuxResults_t*) inputPictureDemuxWrapperPtr->objectPtr;
         

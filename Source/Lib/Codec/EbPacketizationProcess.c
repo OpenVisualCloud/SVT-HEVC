@@ -165,6 +165,7 @@ void* PacketizationKernel(void *inputPtr)
         EbGetFullObject(
             contextPtr->entropyCodingInputFifoPtr,
             &entropyCodingResultsWrapperPtr);
+        EB_CHECK_END_OBJ(entropyCodingResultsWrapperPtr);
         entropyCodingResultsPtr = (EntropyCodingResults_t*) entropyCodingResultsWrapperPtr->objectPtr;
         pictureControlSetPtr    = (PictureControlSet_t*)    entropyCodingResultsPtr->pictureControlSetWrapperPtr->objectPtr;
         sequenceControlSetPtr   = (SequenceControlSet_t*)   pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;

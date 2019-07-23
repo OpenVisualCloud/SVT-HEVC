@@ -3887,6 +3887,7 @@ void* EncDecKernel(void *inputPtr)
         EbGetFullObject(
             contextPtr->modeDecisionInputFifoPtr,
             &encDecTasksWrapperPtr);
+        EB_CHECK_END_OBJ(encDecTasksWrapperPtr);
 
         encDecTasksPtr = (EncDecTasks_t*)encDecTasksWrapperPtr->objectPtr;
         pictureControlSetPtr = (PictureControlSet_t*)encDecTasksPtr->pictureControlSetWrapperPtr->objectPtr;
