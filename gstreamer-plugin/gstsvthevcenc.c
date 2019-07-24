@@ -108,7 +108,7 @@ enum
 #define PROP_RC_MODE_CQP                    0
 #define PROP_RC_MODE_VBR                    1
 #define PROP_INSERT_VUI_DEFAULT             FALSE
-#define PROP_ENCMODE_DEFAULT                9
+#define PROP_ENCMODE_DEFAULT                7
 #define PROP_TUNE_DEFAULT                   1
 #define PROP_LATENCY_MODE_DEFAULT           0
 #define PROP_B_PYRAMID_DEFAULT              3

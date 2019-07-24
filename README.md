@@ -8,33 +8,7 @@ The Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder) is an HEVC-com
 
 The whitepaper for SVT-HEVC can be found here: <https://01.org/svt>
 
-This encoder has been optimized to achieve excellent performance levels using 13 density-quality presets (please refer to the user guide for more details) on a system with a dual Intel® Xeon® Scalable CPU targeting:
-
-- Real-time encoding of up to one 8Kp60/10-bit streams on the Platinum 8180 with M11 in the visual quality mode
-
-- Real-time encoding of up to two 8Kp50/10-bit streams on the Platinum 8180 with M12 in the visual quality mode
-
-- Real-time encoding of up to four 4Kp60/10-bit streams on the Gold 6148 with M12 in the visual quality mode
-
-- Real-time encoding of up to six 4Kp60/10-bit streams on the Platinum 8180 with M12 in the visual quality mode
-
-SVT-HEVC Encoder also supports 3 modes:
-
-- A visually optimized mode for visual quality (-tune 0)
-
-- An PSNR/SSIM optimized mode for PSNR / SSIM benchmarking (-tune 1 (Default setting))
-
-- An VMAF optimized mode for VMAF benchmarking (-tune 2)
-
-The encoder can also run the ABR profile below on one Intel® Xeon-D™ D-2191:
-
-|       ABR Profile         |
-|---------------------------------------|
-|   1 x 4kp60/10-bit Stream (@M11)      |
-|   1 x 1080p60/10-bit Stream (@M10)    |
-|   1 x 720p60/8-bit Stream (@M9)       |
-|   1 x 480p60/8-bit Stream (@M9)       |
-|   1 x 360p60/8-bit Stream (@M9)       |
+This encoder has been optimized to achieve excellent performance levels using 12 density-quality presets (please refer to the user guide for more details).
 
 ## License
 

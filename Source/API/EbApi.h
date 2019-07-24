@@ -146,23 +146,21 @@ typedef struct EB_H265_ENC_CONFIGURATION
     // Encoding preset
 
     /* A preset defining the quality vs density tradeoff point that the encoding
-     * is to be performed at. 0 is the highest quality mode, 12 is the highest
+     * is to be performed at. 0 is the highest quality mode, 11 is the highest
      * density mode. 
      * 
-     * [0, 12] for tune 0 and >= 4k resolution.
+     * [0, 11] for >= 4k resolution.
      * [0, 10] for >= 1080p resolution.
-     * [0,  9] for all resolution and modes.
+     * [0,  9] for all resolution.
      * 
-     * Default is 9. */
+     * Default is 7. */
     uint8_t                 encMode;
 
     /* Encoder tuning for specific aim.
      *
-     * 0 = SQ - visually optimized mode.
-     * 1 = OQ - PSNR / SSIM optimized mode.
-     * 2 = VMAF - VMAF optimized mode. 
-     * 
-     * Default is 1. */
+     * Deprecated.
+     *
+     */
     uint8_t                 tune;
 
     /* Flag to enable for lower latency mode. The change is lossless. 

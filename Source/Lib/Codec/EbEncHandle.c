@@ -2342,73 +2342,46 @@ static EB_ERRORTYPE VerifySettings(\
 
     EB_U32 inputSize = (EB_U32)sequenceControlSetPtr->maxInputLumaWidth * (EB_U32)sequenceControlSetPtr->maxInputLumaHeight;
 
-    EB_U8 inputResolution = (inputSize < INPUT_SIZE_1080i_TH)	?	INPUT_SIZE_576p_RANGE_OR_LOWER :
-	                        (inputSize < INPUT_SIZE_1080p_TH)	?	INPUT_SIZE_1080i_RANGE :
-	                        (inputSize < INPUT_SIZE_4K_TH)		?	INPUT_SIZE_1080p_RANGE :
-																	INPUT_SIZE_4K_RANGE;
-
-    if (inputResolution <= INPUT_SIZE_1080i_RANGE) {
-        if (config->encMode > 9) {
-            SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - 9] for this resolution\n", channelNumber + 1);
-            return_error = EB_ErrorBadParameter;
-        }
-
-    }
-    else if (inputResolution == INPUT_SIZE_1080p_RANGE) {
-        if (config->encMode > 10) {
-            SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - 10] for this resolution\n", channelNumber + 1);
-            return_error = EB_ErrorBadParameter;
-        }
-
-    }
-    else {
-        if (config->encMode > 12 && config->tune == 0) {
-            SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - 12] for this resolution\n", channelNumber + 1);
-            return_error = EB_ErrorBadParameter;
-        }
-        else if (config->encMode > 11 && config->tune >= 1) {
-            SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - 11] for this resolution\n", channelNumber + 1);
-            return_error = EB_ErrorBadParameter;
-        }
-    }
+    EB_U8 inputResolution = (inputSize < INPUT_SIZE_1080i_TH) ? INPUT_SIZE_576p_RANGE_OR_LOWER :
+      (inputSize < INPUT_SIZE_1080p_TH) ? INPUT_SIZE_1080i_RANGE :
+      (inputSize < INPUT_SIZE_4K_TH) ? INPUT_SIZE_1080p_RANGE :
+      INPUT_SIZE_4K_RANGE;
 
     // encMode
     sequenceControlSetPtr->maxEncMode = MAX_SUPPORTED_MODES;
-    if (inputResolution <= INPUT_SIZE_1080i_RANGE){
+    if (inputResolution <= INPUT_SIZE_1080i_RANGE) {
         sequenceControlSetPtr->maxEncMode = MAX_SUPPORTED_MODES_SUB1080P - 1;
         if (config->encMode > MAX_SUPPORTED_MODES_SUB1080P -1) {
             SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_SUB1080P-1);
             return_error = EB_ErrorBadParameter;
         }
-	}else if (inputResolution == INPUT_SIZE_1080p_RANGE){
+    } else if (inputResolution == INPUT_SIZE_1080p_RANGE) {
         sequenceControlSetPtr->maxEncMode = MAX_SUPPORTED_MODES_1080P - 1;
         if (config->encMode > MAX_SUPPORTED_MODES_1080P - 1) {
             SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_1080P - 1);
             return_error = EB_ErrorBadParameter;
         }
-	}else {
-        if (config->tune == 0)
-            sequenceControlSetPtr->maxEncMode = MAX_SUPPORTED_MODES_4K_SQ - 1;
-        else
-            sequenceControlSetPtr->maxEncMode = MAX_SUPPORTED_MODES_4K_OQ - 1;
-
-        if (config->encMode > MAX_SUPPORTED_MODES_4K_SQ - 1 && config->tune == 0) {
-            SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_4K_SQ-1);
-            return_error = EB_ErrorBadParameter;
-        }else if (config->encMode > MAX_SUPPORTED_MODES_4K_OQ - 1 && config->tune >= 1) {
+    } else {
+        sequenceControlSetPtr->maxEncMode = MAX_SUPPORTED_MODES_4K_OQ - 1;
+        // Incase deprecated tune 0 M12
+        if (config->encMode == MAX_SUPPORTED_MODES_4K_OQ) {
+            SVT_LOG("SVT [WARNING]: M12 is deprecated. -encMode is set to %d\n", MAX_SUPPORTED_MODES_4K_OQ-1);
+            config->encMode--;
+        }
+        if (config->encMode > MAX_SUPPORTED_MODES_4K_OQ - 1) {
             SVT_LOG("SVT [Error]: Instance %u: encMode must be [0 - %d]\n", channelNumber + 1, MAX_SUPPORTED_MODES_4K_OQ-1);
             return_error = EB_ErrorBadParameter;
         }
     }
 
-	if(config->qp > 51) {
-        SVT_LOG("SVT [Error]: Instance %u: QP must be [0 - 51]\n",channelNumber+1);
+    if (config->qp > 51) {
+        SVT_LOG("SVT [Error]: Instance %u: QP must be [0 - 51]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->hierarchicalLevels > 3) {
-        SVT_LOG("SVT [Error]: Instance %u: Hierarchical Levels supported [0-3]\n",channelNumber+1);
-        return_error = EB_ErrorBadParameter;
+      SVT_LOG("SVT [Error]: Instance %u: Hierarchical Levels supported [0-3]\n", channelNumber + 1);
+      return_error = EB_ErrorBadParameter;
     }
 
     if (config->intraPeriodLength < -2 || config->intraPeriodLength > 255) {
@@ -2576,9 +2549,9 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->tune > 2) {
-        SVT_LOG("SVT [Error]: Instance %u : Invalid Tune. Tune must be [0 - 2]\n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
+    if (config->tune != 1) {
+        SVT_LOG("SVT [WARNING]: -tune is deprecated.\n");
+        config->tune = 1;
     }
     if (config->bitRateReduction > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid BitRateReduction. BitRateReduction must be [0 - 1]\n", channelNumber + 1);
@@ -2808,7 +2781,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->maxQpAllowed = 48;
     configPtr->minQpAllowed = 10;
     configPtr->baseLayerSwitchMode = 0;
-    configPtr->encMode  = 9;
+    configPtr->encMode  = 7;
     configPtr->intraPeriodLength = -2;
     configPtr->intraRefreshType = 1;
     configPtr->hierarchicalLevels = 3;
