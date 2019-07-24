@@ -3010,7 +3010,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
             contextPtr->mdContext->pfMdLevel = 1;
         }
         else if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0) {
-            contextPtr->mdContext->pfMdLevel = 2;
+            contextPtr->mdContext->pfMdLevel = 1;
         }
         else {
             contextPtr->mdContext->pfMdLevel = 3;
@@ -3887,6 +3887,7 @@ void* EncDecKernel(void *inputPtr)
         EbGetFullObject(
             contextPtr->modeDecisionInputFifoPtr,
             &encDecTasksWrapperPtr);
+        EB_CHECK_END_OBJ(encDecTasksWrapperPtr);
 
         encDecTasksPtr = (EncDecTasks_t*)encDecTasksWrapperPtr->objectPtr;
         pictureControlSetPtr = (PictureControlSet_t*)encDecTasksPtr->pictureControlSetWrapperPtr->objectPtr;

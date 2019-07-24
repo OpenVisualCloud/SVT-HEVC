@@ -546,6 +546,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         EbGetFullObject(
             contextPtr->inputBufferFifoPtr,
             &ebInputWrapperPtr);
+        EB_CHECK_END_OBJ(ebInputWrapperPtr);
         ebInputPtr = (EB_BUFFERHEADERTYPE*) ebInputWrapperPtr->objectPtr;
      
         sequenceControlSetPtr       = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr;

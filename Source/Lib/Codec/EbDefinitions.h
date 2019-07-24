@@ -680,6 +680,19 @@ extern    EB_U32                   libMutexCount;
     EB_MALLOC_(char*, dst, strlen(src)+1, EB_N_PTR); \
     strcpy_ss((char*)dst, strlen(src)+1, src);
 
+#define EB_SEND_END_OBJ(fifoPtrArray, count) \
+    for (int i = 0; i < count; i++) { \
+        EbObjectWrapper_t *outputWrapperPtr; \
+        EbGetEmptyObject(fifoPtrArray[0], &outputWrapperPtr); \
+        outputWrapperPtr->objectPtr = NULL; \
+        EbPostFullObject(outputWrapperPtr); \
+    }
+
+#define EB_CHECK_END_OBJ(wrapperPtr) \
+    if (wrapperPtr->objectPtr == NULL) { \
+        break; \
+    }
+
 #ifdef _WIN32
 #define EB_SCANF sscanf_s
 #else

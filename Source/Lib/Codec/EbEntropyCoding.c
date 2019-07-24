@@ -7034,11 +7034,19 @@ EB_ERRORTYPE Intra4x4CheckAndCodeDeltaQp(
 	EB_ERRORTYPE return_error = EB_ErrorNone;
 
 	if (isDeltaQpEnable) {
-		if (tuPtr->lumaCbf ||
-                (&cuPtr->transformUnitArray[1])->cbCbf ||
-                (&cuPtr->transformUnitArray[1])->crCbf ||
-                (&cuPtr->transformUnitArray[3])->cbCbf ||
-                (&cuPtr->transformUnitArray[3])->crCbf){
+        EB_BOOL cbfChroma = 0;
+        if (cabacEncodeCtxPtr->colorFormat == EB_YUV444) {
+            cbfChroma = tuPtr->cbCbf || tuPtr->crCbf;
+        } else if (cabacEncodeCtxPtr->colorFormat == EB_YUV422) {
+            cbfChroma = (cuPtr->transformUnitArray[1].cbCbf ||
+                        cuPtr->transformUnitArray[1].crCbf ||
+                        cuPtr->transformUnitArray[3].cbCbf ||
+                        cuPtr->transformUnitArray[3].crCbf);
+        } else {
+            cbfChroma = (cuPtr->transformUnitArray[1].cbCbf ||
+                        cuPtr->transformUnitArray[1].crCbf);
+        }
+		if (tuPtr->lumaCbf || cbfChroma) {
 			if (*isdeltaQpNotCoded){
 				EB_S32  deltaQp;
 				deltaQp = cuPtr->qp - cuPtr->refQp;

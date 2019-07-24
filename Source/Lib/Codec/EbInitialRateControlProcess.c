@@ -921,6 +921,7 @@ void* InitialRateControlKernel(void *inputPtr)
 		EbGetFullObject(
 			contextPtr->motionEstimationResultsInputFifoPtr,
 			&inputResultsWrapperPtr);
+        EB_CHECK_END_OBJ(inputResultsWrapperPtr);
 
 		inputResultsPtr = (MotionEstimationResults_t*)inputResultsWrapperPtr->objectPtr;
 		pictureControlSetPtr = (PictureParentControlSet_t*)inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;

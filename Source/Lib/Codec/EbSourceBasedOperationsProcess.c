@@ -1421,6 +1421,7 @@ void* SourceBasedOperationsKernel(void *inputPtr)
         EbGetFullObject(
             contextPtr->initialrateControlResultsInputFifoPtr,
             &inputResultsWrapperPtr);
+        EB_CHECK_END_OBJ(inputResultsWrapperPtr);
 
 		inputResultsPtr = (InitialRateControlResults_t*)inputResultsWrapperPtr->objectPtr;
         pictureControlSetPtr = (PictureParentControlSet_t*)inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;
