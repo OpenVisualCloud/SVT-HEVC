@@ -46,7 +46,7 @@ QP_VBR_MODE defines how the quantization parameter and variable bitrate paramete
 
 ### Encoder Modes
 
-SPEED_ENC_MODES is a list variable that defines which encoding modes (0-12) are used in the tests. It defaults to [0,6,9]
+SPEED_ENC_MODES is a list variable that defines which encoding modes (0-11) are used in the tests. It defaults to [0,6,9]
 	
 
 ### Number of Frames
