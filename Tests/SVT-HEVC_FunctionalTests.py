@@ -49,7 +49,7 @@ def get_test_mode(mode):
         print("Running default mode: Fast")
         return 0
 
-DEBUG_MODE = 0 # For debugging purposes
+DEBUG_MODE = 1 # For debugging purposes
 
 ##--------------------- TEST SETTINGS --------------------##
 ENC_PATH = "encoders"
@@ -109,6 +109,7 @@ if VALIDATION_TEST_MODE == 0:
     LAD_ITER                        = 1 # LAD per test
     INTRA_PERIOD_ITER               = 1 # Intra Period per test
     WH_ITER                         = 1 # WidthxHeight per test
+    MCTS_ITER                       = 1 # MCTS per test		
 elif VALIDATION_TEST_MODE == 1:
     ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11]
     NUM_FRAMES                      = 40
@@ -118,6 +119,7 @@ elif VALIDATION_TEST_MODE == 1:
     LAD_ITER                        = 1 # LAD per test
     INTRA_PERIOD_ITER               = 1 # Intra Period per test
     WH_ITER                         = 1 # WidthxHeight per test
+    MCTS_ITER                       = 1 # MCTS per test		
 elif VALIDATION_TEST_MODE == 2:
     ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11]
     NUM_FRAMES                      = 40
@@ -127,6 +129,7 @@ elif VALIDATION_TEST_MODE == 2:
     LAD_ITER                        = 2 # LAD per test
     INTRA_PERIOD_ITER               = 2 # Intra Period per test
     WH_ITER                         = 2 # WidthxHeight per test
+    MCTS_ITER                       = 2 # MCTS per test		
 ##--------------------------------------------------------##
 
 ##-------------------- Global Defines --------------------##
@@ -282,6 +285,9 @@ class EB_Test(object):
                         'HME'                               : '-hme',
                         'SearchAreaWidth'                   : '-search-w',
                         'SearchAreaHeight'                  : '-search-h',
+                        'EncoderColorFormat'                : '-color-format',
+                        'TileRowCount'                      : '-tile_row_cnt',
+                        'TileColCount'                      : '-tile_col_cnt',						
                         }
         return default_tokens
 
@@ -768,6 +774,37 @@ class EB_Test(object):
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
+		
+    def hdr_test(self,seq_list):
+        # Test specific parameters:
+        test_name = 'hdr_test'
+        combination_test_params = { 'high_dyanmic_range_input'     : [0, 1],
+                                  }
+        # Run tests
+        return self.run_functional_tests(seq_list, test_name, combination_test_params)	
+
+		
+    def encoder_color_format_test(self,seq_list):
+        # Test specific parameters:
+        test_name = 'encoder_color_format_test'
+        combination_test_params = { 'EncoderColorFormat'     : [1, 2, 3],
+                                  }
+        # Run tests
+        return self.run_functional_tests(seq_list, test_name, combination_test_params)
+
+    def mcts_test(self,seq_list):
+        # Test specific parameters:
+        test_name = 'mcts_test'
+        mcts_rows = []
+        mcts_cols = []
+        for count in range(MCTS_ITER):
+            mcts_rows.append(random.randint(2,16))
+            mcts_cols.append(random.randint(2,16))			
+        combination_test_params = { 'TileRowCount'     : mcts_rows,
+                                    'TileColCount'     : mcts_cols,
+                                  }
+        # Run tests
+        return self.run_functional_tests(seq_list, test_name, combination_test_params)
 ## ------------------------------------------- ##
 
 ## --------------- DECODE TEST --------------- ##
@@ -893,6 +930,15 @@ class EB_Test(object):
         num_tests, num_passed = self.me_hme_test(seq_list)
         total_tests = total_tests + num_tests
         total_passed = total_passed + num_passed
+        num_tests, num_passed = self.hdr_test(seq_list)
+        total_tests = total_tests + num_tests
+        total_passed = total_passed + num_passed
+        num_tests, num_passed = self.encoder_color_format_test(seq_list)
+        total_tests = total_tests + num_tests
+        total_passed = total_passed + num_passed
+        num_tests, num_passed = self.mcts_test(seq_list)
+        total_tests = total_tests + num_tests
+        total_passed = total_passed + num_passed				
         num_tests, num_passed = self.decode_test(seq_list)
         total_tests = total_tests + num_tests
         total_passed = total_passed + num_passed
