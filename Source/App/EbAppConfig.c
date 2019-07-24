@@ -559,6 +559,12 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->targetSocket                         = -1;
     configPtr->logicalProcessors                    = 0;
 
+    // vbv
+    configPtr->vbvMaxRate                           = 0;
+    configPtr->vbvBufsize                           = 0;
+    configPtr->vbvBufInit                           = 90;
+    configPtr->hrdFlag                              = 0;
+
     // Testing
     configPtr->testUserData                         = 0;
     configPtr->eosFlag                              = EB_FALSE;
