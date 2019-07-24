@@ -3010,7 +3010,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
             contextPtr->mdContext->pfMdLevel = 1;
         }
         else if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0) {
-            contextPtr->mdContext->pfMdLevel = 2;
+            contextPtr->mdContext->pfMdLevel = 1;
         }
         else {
             contextPtr->mdContext->pfMdLevel = 3;

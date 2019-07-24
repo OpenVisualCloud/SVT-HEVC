@@ -173,7 +173,7 @@ static void SetNaluFile(const char *value, EbConfig_t *cfg)
     FOPEN(cfg->naluFile, value, "rb");
     if (cfg->naluFile)
         cfg->useNaluFile = EB_TRUE;
-    else 
+    else
         printf("Error: Nalu file: %s does not exist, won't use\n", value);
 };
 static void SetCfgSourceWidth                   (const char *value, EbConfig_t *cfg) {cfg->sourceWidth                      = strtoul(value, NULL, 0);};
@@ -239,7 +239,7 @@ static void SetMasterDisplay                    (const char *value, EbConfig_t *
     if (cfg->useMasteringDisplayColorVolume)
         EB_STRCPY(cfg->masteringDisplayColorVolumeString, EB_STRLEN(value, MAX_STRING_LENGTH) + 1, value);
 };
-static void SetDolbyVisionProfile               (const char *value, EbConfig_t *cfg) { 
+static void SetDolbyVisionProfile               (const char *value, EbConfig_t *cfg) {
     if (strtoul(value, NULL, 0) != 0 || EB_STRCMP(value, "0") == 0)
         cfg->dolbyVisionProfile = (uint32_t)(10 * strtod(value, NULL));
 };
@@ -294,7 +294,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, OUTPUT_RECON_TOKEN, "ReconFile", SetCfgReconFile },
     { SINGLE_INPUT, USE_QP_FILE_TOKEN, "UseQpFile", SetCfgUseQpFile },
     { SINGLE_INPUT, QP_FILE_TOKEN, "QpFile", SetCfgQpFile },
-  
+
     // Interlaced Video
     { SINGLE_INPUT, INTERLACED_VIDEO_TOKEN, "InterlacedVideo", SetInterlacedVideo },
     // Do NOT move, the value is used in other entries
@@ -344,7 +344,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, HRD_TOKEN, "hrd", SetHrdFlag },
     { SINGLE_INPUT, VBV_BUFFER_INIT_TOKEN, "vbvBufInit", SetVbvBufInit},
 
-   
+
     // Deblock Filter
     { SINGLE_INPUT, LOOP_FILTER_DISABLE_TOKEN, "LoopFilterDisable", SetDisableDlfFlag },
 
@@ -359,7 +359,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, SEARCH_AREA_WIDTH_TOKEN, "SearchAreaWidth", SetCfgSearchAreaWidth },
     { SINGLE_INPUT, SEARCH_AREA_HEIGHT_TOKEN, "SearchAreaHeight", SetCfgSearchAreaHeight },
 
-    // MD Parameters         
+    // MD Parameters
     { SINGLE_INPUT, CONSTRAINED_INTRA_ENABLE_TOKEN, "ConstrainedIntra", SetEnableConstrainedIntra },
 
     // Rate Control
@@ -565,8 +565,8 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->tune                                     = 1;
 
     // Adaptive QP Params
-    configPtr->bitRateReduction	                        = EB_TRUE;
-    configPtr->improveSharpness                         = EB_TRUE;
+    configPtr->bitRateReduction	                        = EB_FALSE;
+    configPtr->improveSharpness                         = EB_FALSE;
 
     // Optional Features
     configPtr->videoUsabilityInfo                       = 0;
@@ -618,7 +618,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
 
     configPtr->performanceContext.encodeStartTime[0]    = 0;
     configPtr->performanceContext.encodeStartTime[1]    = 0;
-    
+
     configPtr->performanceContext.totalExecutionTime    = 0;
     configPtr->performanceContext.totalEncodeTime       = 0;
     configPtr->performanceContext.frameCount            = 0;
@@ -934,7 +934,7 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
 
 
 #define MAX_LCU_SIZE                                64
-    
+
     int32_t pictureWidthInLcu = (config->sourceWidth + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE;
     int32_t pictureHeightInLcu = (config->sourceHeight + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE;
     int32_t maxTileColumnCount = (pictureWidthInLcu + 3) / 4;
@@ -979,7 +979,7 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
             }
         }
 
-    }   
+    }
 
     if (config->separateFields > 1) {
         fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid SeperateFields Input\n", channelNumber + 1);
