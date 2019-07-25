@@ -3327,10 +3327,10 @@ EB_EXTERN EB_ERRORTYPE PerformIntra4x4Search(
                             candidateBuffer->reconPtr,
                             0,
                             puChromaOriginIndex,
-                            candidateBuffer->candidatePtr->transformSize,
-                            candidateBuffer->candidatePtr->transformSize,
                             0,
                             0,
+                            candidateBuffer->candidatePtr->transformSize,
+                            candidateBuffer->candidatePtr->transformSize,
                             PICTURE_BUFFER_DESC_Cb_FLAG);
                     }
 
@@ -3375,10 +3375,10 @@ EB_EXTERN EB_ERRORTYPE PerformIntra4x4Search(
                             candidateBuffer->reconPtr,
                             0,
                             puChromaOriginIndex,
-                            candidateBuffer->candidatePtr->transformSize,
-                            candidateBuffer->candidatePtr->transformSize,
                             0,
                             0,
+                            candidateBuffer->candidatePtr->transformSize,
+                            candidateBuffer->candidatePtr->transformSize,
                             PICTURE_BUFFER_DESC_Cr_FLAG);
                     }
 
