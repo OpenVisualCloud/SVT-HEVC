@@ -978,21 +978,21 @@ void SendNaluOnTheFly(
         char line[1024];
         EB_ERRORTYPE return_error = EB_ErrorNone;
         uint32_t poc = 0;
-        uint8_t *prefix = NULL;
+        char *prefix = NULL;
         uint32_t nalType = 0;
         uint32_t payloadType = 0;
         uint8_t *base64Encode = NULL;
         uint8_t *context = NULL;
-        uint8_t *nextValue = NULL;
+        char *nextValue = NULL;
 
         if (fgets(line, sizeof(line), config->naluFile) != NULL) {
             nextValue = EB_STRTOK(line, " ", &context);
             if (nextValue != NULL)
-               poc = strtol(nextValue, NULL, 0);
+               poc = (uint32_t)strtol(nextValue, NULL, 0);
             else
                 return_error = EB_ErrorBadParameter;
             if (return_error == EB_ErrorNone && *context != 0) {
-                prefix = (uint8_t*)EB_STRTOK(NULL, " ", &context);
+                prefix = EB_STRTOK(NULL, " ", &context);
             }
             else {
                 return_error = EB_ErrorBadParameter;
@@ -1000,7 +1000,7 @@ void SendNaluOnTheFly(
             if (return_error == EB_ErrorNone && *context != 0) {
                 nextValue = EB_STRTOK(NULL, "/", &context);
                 if (nextValue !=NULL)
-                    nalType = strtol(nextValue, NULL, 0);
+                    nalType = (uint32_t)strtol(nextValue, NULL, 0);
                 else
                     return_error = EB_ErrorBadParameter;
             }
@@ -1010,7 +1010,7 @@ void SendNaluOnTheFly(
             if (return_error == EB_ErrorNone && *context != 0) {
                 nextValue = EB_STRTOK(NULL, " ", &context);
                 if (nextValue != NULL)
-                    payloadType = strtol(nextValue, NULL, 0);
+                    payloadType = (uint32_t)strtol(nextValue, NULL, 0);
                 else
                     return_error = EB_ErrorBadParameter;
             }
@@ -1025,7 +1025,7 @@ void SendNaluOnTheFly(
             }
 
             headerPtr->naluPOC = poc;
-            if (prefix != NULL && !EB_STRCMP((char*)prefix, "PREFIX"))
+            if (prefix != NULL && !EB_STRCMP(prefix, "PREFIX"))
                 headerPtr->naluPrefix = 0;
             headerPtr->naluNalType = nalType;
             headerPtr->naluPayloadType = payloadType;
