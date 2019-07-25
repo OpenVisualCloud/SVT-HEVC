@@ -49,7 +49,7 @@ def get_test_mode(mode):
         print("Running default mode: Fast")
         return 0
 
-DEBUG_MODE = 1 # For debugging purposes
+DEBUG_MODE = 0 # For debugging purposes
 
 ##--------------------- TEST SETTINGS --------------------##
 ENC_PATH = "encoders"
@@ -109,7 +109,8 @@ if VALIDATION_TEST_MODE == 0:
     LAD_ITER                        = 1 # LAD per test
     INTRA_PERIOD_ITER               = 1 # Intra Period per test
     WH_ITER                         = 1 # WidthxHeight per test
-    MCTS_ITER                       = 1 # MCTS per test		
+    MCTS_ITER                       = 1 # MCTS per test
+    VBV_ITER	                    = 1 # VBV per test
 elif VALIDATION_TEST_MODE == 1:
     ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11]
     NUM_FRAMES                      = 40
@@ -119,7 +120,8 @@ elif VALIDATION_TEST_MODE == 1:
     LAD_ITER                        = 1 # LAD per test
     INTRA_PERIOD_ITER               = 1 # Intra Period per test
     WH_ITER                         = 1 # WidthxHeight per test
-    MCTS_ITER                       = 1 # MCTS per test		
+    MCTS_ITER                       = 1 # MCTS per test
+    VBV_ITER	                    = 1 # VBV per test
 elif VALIDATION_TEST_MODE == 2:
     ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11]
     NUM_FRAMES                      = 40
@@ -129,7 +131,8 @@ elif VALIDATION_TEST_MODE == 2:
     LAD_ITER                        = 2 # LAD per test
     INTRA_PERIOD_ITER               = 2 # Intra Period per test
     WH_ITER                         = 2 # WidthxHeight per test
-    MCTS_ITER                       = 2 # MCTS per test		
+    MCTS_ITER                       = 2 # MCTS per test
+    VBV_ITER	                    = 2 # VBV per test
 ##--------------------------------------------------------##
 
 ##-------------------- Global Defines --------------------##
@@ -141,6 +144,8 @@ MIN_QP                          = 30
 MAX_QP                          = 51
 MIN_BR                          = 1000
 MAX_BR                          = 10000000
+MIN_VBV_BUFFER_DURATION         = 0.5
+MAX_VBV_BUFFER_DURATION         = 4.0
 ##--------------------------------------------------------##
 
 if QP_VBR_MODE == 0:
@@ -288,6 +293,9 @@ class EB_Test(object):
                         'EncoderColorFormat'                : '-color-format',
                         'TileRowCount'                      : '-tile_row_cnt',
                         'TileColCount'                      : '-tile_col_cnt',						
+                        'VbvMaxRate'                        : '-vbvMaxrate',
+                        'VbvBufSize'                        : '-vbvBufsize',
+                        'VbvBufInit'                        : '-vbvBufInit',
                         }
         return default_tokens
 
@@ -805,6 +813,29 @@ class EB_Test(object):
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
+		
+    def vbv_test(self,seq_list):
+        # Test specific parameters:		
+        test_name = 'vbv test'
+        vbv_maxRate = []
+        vbv_bufferSize = []
+        vbv_bufferInit = []
+        rateControl=[]
+        for count in range(VBV_ITER):
+            maxBitRate = random.randint(MIN_BR,MAX_BR)
+            duration = random.uniform(MIN_VBV_BUFFER_DURATION,MAX_VBV_BUFFER_DURATION)
+            vbv_maxRate.append(maxBitRate)
+            vbv_bufferSize.append(int(duration * maxBitRate))			
+            vbv_bufferInit.append(random.randint(10,100))	
+            rateControl.append(1)
+        combination_test_params = { 
+								    'VbvMaxRate'       : vbv_maxRate,
+								    'VbvBufSize'       : vbv_bufferSize,
+								    'VbvBufInit'       : vbv_bufferInit,
+									'rc'               : rateControl,
+                                  }
+        # Run tests
+        return self.run_functional_tests(seq_list, test_name, combination_test_params)		
 ## ------------------------------------------- ##
 
 ## --------------- DECODE TEST --------------- ##
@@ -937,6 +968,9 @@ class EB_Test(object):
         total_tests = total_tests + num_tests
         total_passed = total_passed + num_passed
         num_tests, num_passed = self.mcts_test(seq_list)
+        total_tests = total_tests + num_tests
+        total_passed = total_passed + num_passed				
+        num_tests, num_passed = self.vbv_test(seq_list)
         total_tests = total_tests + num_tests
         total_passed = total_passed + num_passed				
         num_tests, num_passed = self.decode_test(seq_list)
