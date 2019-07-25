@@ -285,11 +285,11 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
     return EB_ErrorNone;
 }
 
-EB_BOOL validateAlphanumeric(char* buffer)
+EB_BOOL validateAlphanumeric(unsigned char* buffer)
 {
     /* validate input is alphanumeric */
-    char *cp = buffer;
-    const char *end = buffer + strlen(buffer);
+    unsigned char *cp = buffer;
+    const unsigned char *end = buffer + strlen((char*)buffer);
     for (cp = buffer; cp != end; cp++)
     {
         if ((*cp <0) || (!isalnum(*cp) && *cp!='\n'))
@@ -309,7 +309,7 @@ int32_t read_y4m_frame_delimiter(EbConfig_t *cfg) {
         assert(feof(cfg->inputFile));
         return EB_ErrorNone;
     }
-    if (!validateAlphanumeric((char*)bufferY4Mheader)){
+    if (!validateAlphanumeric(bufferY4Mheader)){
         return EB_ErrorBadParameter;
     }
     if (EB_STRCMP((const char*)bufferY4Mheader, "FRAME\n") != 0) {
