@@ -265,8 +265,22 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
     cfg->frameRate = fr_n / fr_d;
     cfg->encoderBitDepth = bitdepth;
     cfg->interlacedVideo = interlaced;
-    /* TODO: when implemented, need to set input bit depth
-        (instead of the encoder bit depth) and chroma format */
+    if (EB_STRCMP("420", chroma) == 0) {
+        cfg->encoderColorFormat = EB_YUV420;
+    }
+    else if (EB_STRCMP("422", chroma) == 0) {
+        cfg->encoderColorFormat = EB_YUV422;
+    }
+    else if (EB_STRCMP("444", chroma) == 0) {
+        cfg->encoderColorFormat = EB_YUV444;
+    }
+    else if (EB_STRCMP("400", chroma) == 0) {
+        cfg->encoderColorFormat = EB_YUV400;
+    }
+    else {
+        fprintf(cfg->errorLogFile, "Unsupported color format: %s\n", chroma);
+        return EB_ErrorBadParameter;
+    }
 
     return EB_ErrorNone;
 }
@@ -295,8 +309,7 @@ int32_t read_y4m_frame_delimiter(EbConfig_t *cfg) {
         assert(feof(cfg->inputFile));
         return EB_ErrorNone;
     }
-    if (!validateAlphanumeric((char*)bufferY4Mheader))
-    {
+    if (!validateAlphanumeric((char*)bufferY4Mheader)){
         return EB_ErrorBadParameter;
     }
     if (EB_STRCMP((const char*)bufferY4Mheader, "FRAME\n") != 0) {
@@ -309,7 +322,7 @@ int32_t read_y4m_frame_delimiter(EbConfig_t *cfg) {
 
 /* check if the input file is in YUV4MPEG2 (y4m) format */
 EB_BOOL check_if_y4m(EbConfig_t *cfg) {
-    char buffer[YUV4MPEG2_IND_SIZE + 1];
+    unsigned char buffer[YUV4MPEG2_IND_SIZE + 1];
     size_t headerReadLength;
 
     /* Parse the header for the "YUV4MPEG2" string */
@@ -320,7 +333,7 @@ EB_BOOL check_if_y4m(EbConfig_t *cfg) {
     }
 
     buffer[YUV4MPEG2_IND_SIZE] = 0;
-    if (validateAlphanumeric((char*)buffer) && EB_STRCMP(buffer, "YUV4MPEG2") == 0) {
+    if (validateAlphanumeric((char*)buffer) && EB_STRCMP((char*)buffer, "YUV4MPEG2") == 0) {
         return EB_TRUE; /* YUV4MPEG2 file */
     }
     else {
@@ -328,7 +341,7 @@ EB_BOOL check_if_y4m(EbConfig_t *cfg) {
             fseek(cfg->inputFile, 0, SEEK_SET);
         }
         else {
-            EB_STRNCPY((char*)cfg->y4m_buf, buffer, YUV4MPEG2_IND_SIZE); /* TODO copy 9 bytes read to cfg->y4m_buf*/
+            EB_STRNCPY((char*)cfg->y4m_buf, (char*)buffer, YUV4MPEG2_IND_SIZE);
         }
         return EB_FALSE; /* Not a YUV4MPEG2 file */
     }
