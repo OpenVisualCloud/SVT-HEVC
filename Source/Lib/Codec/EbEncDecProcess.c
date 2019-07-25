@@ -3946,12 +3946,6 @@ void* EncDecKernel(void *inputPtr)
                     contextPtr);
         }
 
-#if 1//TILES  //NEED these  to test stream complaince
-        // contextPtr->pmMethod = 0;
-        contextPtr->mdContext->rdoqPmCoreMethod = EB_NO_RDOQ;  //RDOQ   make DLF cause MD5 mismatch when encDec segments+QP mod are ON.. 
-        contextPtr->allowEncDecMismatch =  EB_FALSE;
-#endif
-
         // Derive Interpoldation Method @ Fast-Loop 
         contextPtr->mdContext->interpolationMethod = (pictureControlSetPtr->ParentPcsPtr->useSubpelFlag == EB_FALSE) ?
             INTERPOLATION_FREE_PATH  :
