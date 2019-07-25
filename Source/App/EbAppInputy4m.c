@@ -292,7 +292,7 @@ EB_BOOL validateAlphanumeric(unsigned char* buffer)
     const unsigned char *end = buffer + strlen((char*)buffer);
     for (cp = buffer; cp != end; cp++)
     {
-        if ((*cp <0) || (!isalnum(*cp) && *cp!='\n'))
+        if (!isalnum(*cp) && *cp!='\n')
             return EB_FALSE;
     }
     return EB_TRUE;
@@ -333,7 +333,7 @@ EB_BOOL check_if_y4m(EbConfig_t *cfg) {
     }
 
     buffer[YUV4MPEG2_IND_SIZE] = 0;
-    if (validateAlphanumeric(buffer) && EB_STRCMP(buffer, "YUV4MPEG2") == 0) {
+    if (validateAlphanumeric(buffer) && EB_STRCMP((char*)buffer, "YUV4MPEG2") == 0) {
         return EB_TRUE; /* YUV4MPEG2 file */
     }
     else {
@@ -341,7 +341,7 @@ EB_BOOL check_if_y4m(EbConfig_t *cfg) {
             fseek(cfg->inputFile, 0, SEEK_SET);
         }
         else {
-            EB_STRNCPY(cfg->y4m_buf, buffer, YUV4MPEG2_IND_SIZE);
+            EB_STRNCPY((char*)cfg->y4m_buf, (char*)buffer, YUV4MPEG2_IND_SIZE);
         }
         return EB_FALSE; /* Not a YUV4MPEG2 file */
     }
