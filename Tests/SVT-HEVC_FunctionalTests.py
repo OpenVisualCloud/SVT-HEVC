@@ -20,7 +20,7 @@ platform = platform.system()
 
 if platform == WINDOWS_PLATFORM_STR:
     SEM_NOGPFAULTERRORBOX = 0x0002
-    ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX);
+    ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)
     subprocess_flags = 0x8000000
     slash = '\\'
     exe_name = 'SvtHevcEncApp.exe'
@@ -110,7 +110,7 @@ if VALIDATION_TEST_MODE == 0:
     INTRA_PERIOD_ITER               = 1 # Intra Period per test
     WH_ITER                         = 1 # WidthxHeight per test
     MCTS_ITER                       = 1 # MCTS per test
-    VBV_ITER	                    = 1 # VBV per test
+    VBV_ITER                        = 1 # VBV per test
 elif VALIDATION_TEST_MODE == 1:
     ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11]
     NUM_FRAMES                      = 40
@@ -121,7 +121,7 @@ elif VALIDATION_TEST_MODE == 1:
     INTRA_PERIOD_ITER               = 1 # Intra Period per test
     WH_ITER                         = 1 # WidthxHeight per test
     MCTS_ITER                       = 1 # MCTS per test
-    VBV_ITER	                    = 1 # VBV per test
+    VBV_ITER                        = 1 # VBV per test
 elif VALIDATION_TEST_MODE == 2:
     ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11]
     NUM_FRAMES                      = 40
@@ -132,7 +132,7 @@ elif VALIDATION_TEST_MODE == 2:
     INTRA_PERIOD_ITER               = 2 # Intra Period per test
     WH_ITER                         = 2 # WidthxHeight per test
     MCTS_ITER                       = 2 # MCTS per test
-    VBV_ITER	                    = 2 # VBV per test
+    VBV_ITER                        = 2 # VBV per test
 ##--------------------------------------------------------##
 
 ##-------------------- Global Defines --------------------##
@@ -292,7 +292,7 @@ class EB_Test(object):
                         'SearchAreaHeight'                  : '-search-h',
                         'EncoderColorFormat'                : '-color-format',
                         'TileRowCount'                      : '-tile_row_cnt',
-                        'TileColCount'                      : '-tile_col_cnt',						
+                        'TileColCount'                      : '-tile_col_cnt',
                         'VbvMaxRate'                        : '-vbvMaxrate',
                         'VbvBufSize'                        : '-vbvBufsize',
                         'VbvBufInit'                        : '-vbvBufInit',
@@ -782,16 +782,15 @@ class EB_Test(object):
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
-		
+        
     def hdr_test(self,seq_list):
         # Test specific parameters:
         test_name = 'hdr_test'
         combination_test_params = { 'high_dyanmic_range_input'     : [0, 1],
                                   }
         # Run tests
-        return self.run_functional_tests(seq_list, test_name, combination_test_params)	
+        return self.run_functional_tests(seq_list, test_name, combination_test_params)
 
-		
     def encoder_color_format_test(self,seq_list):
         # Test specific parameters:
         test_name = 'encoder_color_format_test'
@@ -807,15 +806,15 @@ class EB_Test(object):
         mcts_cols = []
         for count in range(MCTS_ITER):
             mcts_rows.append(random.randint(2,16))
-            mcts_cols.append(random.randint(2,16))			
+            mcts_cols.append(random.randint(2,16))
         combination_test_params = { 'TileRowCount'     : mcts_rows,
                                     'TileColCount'     : mcts_cols,
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
-		
+
     def vbv_test(self,seq_list):
-        # Test specific parameters:		
+        # Test specific parameters:
         test_name = 'vbv test'
         vbv_maxRate = []
         vbv_bufferSize = []
@@ -825,17 +824,17 @@ class EB_Test(object):
             maxBitRate = random.randint(MIN_BR,MAX_BR)
             duration = random.uniform(MIN_VBV_BUFFER_DURATION,MAX_VBV_BUFFER_DURATION)
             vbv_maxRate.append(maxBitRate)
-            vbv_bufferSize.append(int(duration * maxBitRate))			
-            vbv_bufferInit.append(random.randint(10,100))	
+            vbv_bufferSize.append(int(duration * maxBitRate))
+            vbv_bufferInit.append(random.randint(10,100))
             rateControl.append(1)
         combination_test_params = { 
-								    'VbvMaxRate'       : vbv_maxRate,
-								    'VbvBufSize'       : vbv_bufferSize,
-								    'VbvBufInit'       : vbv_bufferInit,
-									'rc'               : rateControl,
+                                    'VbvMaxRate'       : vbv_maxRate,
+                                    'VbvBufSize'       : vbv_bufferSize,
+                                    'VbvBufInit'       : vbv_bufferInit,
+                                    'rc'               : rateControl,
                                   }
         # Run tests
-        return self.run_functional_tests(seq_list, test_name, combination_test_params)		
+        return self.run_functional_tests(seq_list, test_name, combination_test_params)
 ## ------------------------------------------- ##
 
 ## --------------- DECODE TEST --------------- ##
@@ -923,59 +922,41 @@ class EB_Test(object):
         total_tests = 0
         total_passed = 0
         num_tests, num_passed = self.defield_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.intra_period_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.width_height_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.buffered_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.run_to_run_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.qp_file_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed
+        stotal_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.enc_struct_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.unpacked_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.dlf_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.sao_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.constrained_intra_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.scene_change_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.me_hme_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.hdr_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.encoder_color_format_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.mcts_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed				
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.vbv_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed				
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.decode_test(seq_list)
-        total_tests = total_tests + num_tests
-        total_passed = total_passed + num_passed
+        stotal_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         finish_time = time.time()
         if total_tests == 0 and total_passed == 0:
             print ("No tests were ran.. Exiting...", file=open(file_name + '.txt', 'a'))
@@ -986,6 +967,9 @@ class EB_Test(object):
         print ("Percentage Passed: " + str(float(total_passed)/float(total_tests)*100) + "%", file=open(file_name + '.txt', 'a'))
         print ("Time Elapsed: " + self.get_time(finish_time - start_time), file=open(file_name + '.txt', 'a'))
         print ("---------------------------------------------------------", file=open(file_name + '.txt', 'a'))
+
+    def update_totals(self, total_tests, total_passed, num_tests, num_passed):
+        return total_tests + num_tests, total_passed + num_passed;
 
     def show_speed_test_instructions(self):
         print ("To run speed test:", file=open('Running_Speed_Test.txt', 'w'))
@@ -1082,5 +1066,3 @@ if TEST_CONFIGURATION == 0:
     small_test.run_validation_test(VALIDATION_TEST_SEQUENCES)
 elif TEST_CONFIGURATION == 1:
     small_test.run_speed_test(SPEED_TEST_SEQUENCES)
-
-
