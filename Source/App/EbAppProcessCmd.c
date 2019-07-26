@@ -825,7 +825,7 @@ static void ReadInputFrames(
                 if (config->y4m_input == EB_FALSE && config->processedFrameCount == 0 && config->inputFile == stdin) {
                     /* if not a y4m file and input is read from stdin, 9 bytes were already read when checking
                        or the YUV4MPEG2 string in the stream, so copy those bytes over */
-                    memcpy(ebInputPtr, config->y4m_buf, YUV4MPEG2_IND_SIZE);
+                    memcpy_s(ebInputPtr, YUV4MPEG2_IND_SIZE, config->y4m_buf, YUV4MPEG2_IND_SIZE);
                     headerPtr->nFilledLen += YUV4MPEG2_IND_SIZE;
                     ebInputPtr += YUV4MPEG2_IND_SIZE;
                     headerPtr->nFilledLen += (uint32_t)fread(ebInputPtr, 1, lumaReadSize - YUV4MPEG2_IND_SIZE, inputFile);
