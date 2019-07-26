@@ -956,7 +956,7 @@ class EB_Test(object):
         num_tests, num_passed = self.vbv_test(seq_list)
         total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         num_tests, num_passed = self.decode_test(seq_list)
-        stotal_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         finish_time = time.time()
         if total_tests == 0 and total_passed == 0:
             print ("No tests were ran.. Exiting...", file=open(file_name + '.txt', 'a'))
