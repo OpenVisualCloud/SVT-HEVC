@@ -85,8 +85,8 @@ void* SetMeHmeParamsSq(
 		                                                                            4;  // 4K
 		   
     // HME/ME default settings
-	meContextPtr->numberHmeSearchRegionInWidth          = 2;
-	meContextPtr->numberHmeSearchRegionInHeight         = 2;
+	meContextPtr->numberHmeSearchRegionInWidth          = EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT;
+	meContextPtr->numberHmeSearchRegionInHeight         = EB_HME_SEARCH_AREA_ROW_MAX_COUNT;
     
     // HME Level0
 	meContextPtr->hmeLevel0TotalSearchAreaWidth         = HmeLevel0TotalSearchAreaWidthSq[resolutionIndex][hmeMeLevel];
@@ -170,8 +170,8 @@ void* SetMeHmeParamsOq(
 		                                                                            4;  // 4K
 		   
     // HME/ME default settings
-	meContextPtr->numberHmeSearchRegionInWidth          = 2;
-	meContextPtr->numberHmeSearchRegionInHeight         = 2;
+	meContextPtr->numberHmeSearchRegionInWidth          = EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT;
+	meContextPtr->numberHmeSearchRegionInHeight         = EB_HME_SEARCH_AREA_ROW_MAX_COUNT;
     
     // HME Level0
 	meContextPtr->hmeLevel0TotalSearchAreaWidth         = HmeLevel0TotalSearchAreaWidthOq[resolutionIndex][hmeMeLevel];
@@ -249,8 +249,9 @@ void* SetMeHmeParamsVmaf(
 		4;  // 4K
 
 	// HME/ME default settings
-	meContextPtr->numberHmeSearchRegionInWidth = 2;
-	meContextPtr->numberHmeSearchRegionInHeight = 2;
+	meContextPtr->numberHmeSearchRegionInWidth          = EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT;
+	meContextPtr->numberHmeSearchRegionInHeight         = EB_HME_SEARCH_AREA_ROW_MAX_COUNT;
+
 	resolutionIndex = 3;
 	// HME Level0
 	meContextPtr->hmeLevel0TotalSearchAreaWidth = HmeLevel0TotalSearchAreaWidthVmaf[resolutionIndex][hmeMeLevel];
