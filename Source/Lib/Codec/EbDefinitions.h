@@ -681,7 +681,7 @@ extern    EB_U32                   libMutexCount;
     strcpy_ss((char*)dst, strlen(src)+1, src);
 
 #define EB_SEND_END_OBJ(fifoPtrArray, count) \
-    for (int i = 0; i < count; i++) { \
+    for (unsigned int i = 0; i < count; i++) { \
         EbObjectWrapper_t *outputWrapperPtr; \
         EbGetEmptyObject(fifoPtrArray[0], &outputWrapperPtr); \
         outputWrapperPtr->objectPtr = NULL; \

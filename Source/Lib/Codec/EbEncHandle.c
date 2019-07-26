@@ -2903,8 +2903,11 @@ static void PrintLibParams(
 
     if (config->tune <= 1)
         SVT_LOG("\nSVT [config]: BitRateReduction / ImproveSharpness\t\t\t\t: %d / %d ", config->bitRateReduction, config->improveSharpness);
+
+    SVT_LOG("\nSVT [config]: tileColumnCount / tileRowCount / tileSliceMode / Constraint MV \t: %d / %d / %d / %d", config->tileColumnCount, config->tileRowCount, config->tileSliceMode, !config->unrestrictedMotionVector);
     SVT_LOG("\n------------------------------------------- ");
     SVT_LOG("\n");
+
 
     fflush(stdout);
 }
