@@ -391,6 +391,8 @@ class EB_Test(object):
                 if encMode == 10:
                     if width*height < 1920*1080:
                         return -1
+                if encMode >= 11:
+                    return -1;
         if width %2 != 0 or height %2 != 0:
             return -1
         if bitdepth == 10 and height %8 != 0:
