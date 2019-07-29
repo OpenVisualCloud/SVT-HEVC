@@ -429,7 +429,7 @@ void LimitMvOverBound(
         mvxF = ((mvxF >> 2) << 2);
     }
 
-    if (cuOriginX + mvxF + cuSize > endX) {
+    if (cuOriginX + mvxF + cuSize >= endX) {
         *mvx = endX - cuSize - cuOriginX;
     }
 
@@ -444,7 +444,7 @@ void LimitMvOverBound(
         mvyF = ((mvyF >> 2) << 2);
     }
 
-    if (cuOriginY + mvyF + cuSize > endY) {
+    if (cuOriginY + mvyF + cuSize >= endY) {
         *mvy = endY - cuSize - cuOriginY;
     }
 
