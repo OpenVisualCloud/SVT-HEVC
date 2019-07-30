@@ -59,17 +59,39 @@ static void countEdge(__m128i *eoDiff, __m128i *eoCount, EB_BYTE ptr, EB_S32 off
 }
 
 
-static void countBand(EB_S32 *boDiff, EB_U16 *boCount, EB_S32 cat01, EB_S32 diff01)
+static void countBand(EB_S32 *boDiff, EB_U16 *boCount, EB_S32 cat01, EB_S32 diff01, EB_U8 *validSample)
 {
     EB_U8 cat0 = (EB_U8)cat01;
     EB_U8 cat1 = (EB_U8)(cat01 >> 8);
     EB_S8 diff0 = (EB_S8)diff01;
     EB_S8 diff1 = (EB_S8)(diff01 >> 8);
 
-    boCount[cat0]++;
-    boCount[cat1]++;
-    boDiff[cat0] += diff0;
-    boDiff[cat1] += diff1;
+    if (validSample[0])
+    {
+        boCount[cat0]++;
+        boDiff[cat0] += diff0;
+    }
+
+    if (validSample[1])
+    {
+        boCount[cat1]++;
+        boDiff[cat1] += diff1;
+    }
+}
+
+static void updateValidSamples(EB_U8 *validSample, EB_U8 size, EB_S32 colCount, EB_S32 colCountDiv2)
+{
+    if (!validSample)
+        return;
+
+    EB_MEMSET(validSample, 1, size);
+    if (colCountDiv2 == 0)
+    {
+        validSample[0] = (colCount & 1) ? 1 : 0;
+        validSample[1] = 0;
+    }
+    else if (colCountDiv2 < 0)
+        EB_MEMSET(validSample, 0, size);
 }
 
 EB_EXTERN EB_ERRORTYPE GatherSaoStatisticsLcu_BT_SSE2(
@@ -84,7 +106,10 @@ EB_EXTERN EB_ERRORTYPE GatherSaoStatisticsLcu_BT_SSE2(
     EB_S32                   eoDiff[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1],     // output parameter, used to store Edge Offset diff, eoDiff[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
     EB_U16                   eoCount[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1])    // output parameter, used to store Edge Offset count, eoCount[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
 {
-    EB_S32 colCount, rowCount;
+    EB_S32 colCount, colCountDiv2, rowCount;
+#define EPIL16EXACTBYTES 2
+    EB_U8 validSample[EPIL16EXACTBYTES];
+    EB_U8 resetSize = sizeof(validSample[0]) * EPIL16EXACTBYTES;
     EB_S32 i, j;
 
     __m128i eoDiffX[SAO_EO_TYPES][SAO_EO_CATEGORIES];
@@ -147,14 +172,51 @@ EB_EXTERN EB_ERRORTYPE GatherSaoStatisticsLcu_BT_SSE2(
             diff = _mm_subs_epi8(y0, x0);
             diff = _mm_and_si128(diff, mask);
 
-            countBand(boDiff, boCount, _mm_extract_epi16(cat, 0), _mm_extract_epi16(diff, 0));
-            countBand(boDiff, boCount, _mm_extract_epi16(cat, 1), _mm_extract_epi16(diff, 1));
-            countBand(boDiff, boCount, _mm_extract_epi16(cat, 2), _mm_extract_epi16(diff, 2));
-            countBand(boDiff, boCount, _mm_extract_epi16(cat, 3), _mm_extract_epi16(diff, 3));
-            countBand(boDiff, boCount, _mm_extract_epi16(cat, 4), _mm_extract_epi16(diff, 4));
-            countBand(boDiff, boCount, _mm_extract_epi16(cat, 5), _mm_extract_epi16(diff, 5));
-            countBand(boDiff, boCount, _mm_extract_epi16(cat, 6), _mm_extract_epi16(diff, 6));
-            countBand(boDiff, boCount, _mm_extract_epi16(cat, 7), _mm_extract_epi16(diff, 7));
+            // Conditionally add the valid samples when counting BO diffs and counts.
+            // Because when executing the right edge (colCount != 16) of a LCU, the redundant
+            // samples will be loaded for calculation with the valid ones, as the use SSE2
+            // intrinsics typically need to handle __m128i data type (128 bits, or 16 bytes).
+            //
+            // Note: the redundant samples wouldn't cause memory out of bound access, because
+            // the contents of the memory (page frame and page table are ready, although some
+            // bits the thread shouldn't touch) are loaded into the intrinsic temp variables,
+            // and later into XMM registers of CPU for calculation.
+            colCountDiv2 = colCount >> 1;
+
+            // Note: can not use variable as the 2nd argument of _mm_extract_epi16(), whose
+            // selector must be an integer constant in the range 0..7. So handle the bi-bytes
+            // one by one...
+            updateValidSamples(validSample, resetSize, colCount, colCountDiv2);
+            colCountDiv2--;
+            countBand(boDiff, boCount, _mm_extract_epi16(cat, 0), _mm_extract_epi16(diff, 0), validSample);
+
+            updateValidSamples(validSample, resetSize, colCount, colCountDiv2);
+            colCountDiv2--;
+            countBand(boDiff, boCount, _mm_extract_epi16(cat, 1), _mm_extract_epi16(diff, 1), validSample);
+
+            updateValidSamples(validSample, resetSize, colCount, colCountDiv2);
+            colCountDiv2--;
+            countBand(boDiff, boCount, _mm_extract_epi16(cat, 2), _mm_extract_epi16(diff, 2), validSample);
+
+            updateValidSamples(validSample, resetSize, colCount, colCountDiv2);
+            colCountDiv2--;
+            countBand(boDiff, boCount, _mm_extract_epi16(cat, 3), _mm_extract_epi16(diff, 3), validSample);
+
+            updateValidSamples(validSample, resetSize, colCount, colCountDiv2);
+            colCountDiv2--;
+            countBand(boDiff, boCount, _mm_extract_epi16(cat, 4), _mm_extract_epi16(diff, 4), validSample);
+
+            updateValidSamples(validSample, resetSize, colCount, colCountDiv2);
+            colCountDiv2--;
+            countBand(boDiff, boCount, _mm_extract_epi16(cat, 5), _mm_extract_epi16(diff, 5), validSample);
+
+            updateValidSamples(validSample, resetSize, colCount, colCountDiv2);
+            colCountDiv2--;
+            countBand(boDiff, boCount, _mm_extract_epi16(cat, 6), _mm_extract_epi16(diff, 6), validSample);
+
+            updateValidSamples(validSample, resetSize, colCount, colCountDiv2);
+            colCountDiv2--;
+            countBand(boDiff, boCount, _mm_extract_epi16(cat, 7), _mm_extract_epi16(diff, 7), validSample);
 
             // Edge offset
 
