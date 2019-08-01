@@ -276,9 +276,9 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **SpeedControlFlag** | -speed-ctrl | [0,1] | 0 | Enables the Speed Control functionality to achieve the real-time encoding speed defined by –fps. When this parameter is set to 1 it forces –inj to be 1 -inj-frm-rt to be set to the –fps. |
 | **InterlacedVideo** | -interlaced-video | [0,1] | 0 | 1 : encoder will signal interlaced signal in the stream <br>0 : assumes progressive signal |
 | **SeparateFields** | -separate-fields | [0,1] | 0 | 1 : Interlaced input, application will separate top and bottom fields and encode it as progressive. <br>0 : Treat video as progressive video |
-| **HierarchicalLevels** | -hierarchical-levels | [0 – 3] | 3 | 0 : Flat<br>1: 2-Level Hierarchy<br>2: 3-Level Hierarchy<br>3: 4-Level HierarchyMinigop Size = (2^HierarchicalLevels) <br>(e.g. 3 == > 7B pyramid, 2 ==> 3B Pyramid)Refer to Appendix A.1 |
-| **BaseLayerSwitchMode** | -base-layer-switch-mode | [0,1] | 0 | 0 : Use B-frames in the base layer pointing to the same past picture<br>1 : Use P-frames in the base layerRefer to Appendix A.1 |
-| **PredStructure** | -pred-struct | [0 – 2] | 2 | 0: Low Delay P<br>1: Low Delay B<br>2: Random AccessRefer to Appendix A.1 |
+| **HierarchicalLevels** | -hierarchical-levels | [0 – 3] | 3 | 0 : Flat<br>1: 2-Level Hierarchy<br>2: 3-Level Hierarchy<br>3: 4-Level HierarchyMinigop Size = (2^HierarchicalLevels) <br>(e.g. 3 == > 7B pyramid, 2 ==> 3B Pyramid)<br>Refer to Appendix A.1 |
+| **BaseLayerSwitchMode** | -base-layer-switch-mode | [0,1] | 0 | 0 : Use B-frames in the base layer pointing to the same past picture<br>1 : Use P-frames in the base layer<br>Refer to Appendix A.1 |
+| **PredStructure** | -pred-struct | [0 – 2] | 2 | 0: Low Delay P<br>1: Low Delay B<br>2: Random Access<br>Refer to Appendix A.1 |
 | **IntraPeriod** | -intra-period | [-2 - 255] | -2 | Distance Between Intra Frame inserted. <br>-1 denotes no intra update. <br>-2 denotes auto. |
 | **IntraRefreshType** | -irefresh-type | [1,2] | 1 | 1: CRA (Open GOP)<br>2: IDR (Closed GOP) |
 | **QP** | -q | [0 - 51] | 25 | Initial quantization parameter for the Intra pictures used when RateControlMode 0 (CQP) |
