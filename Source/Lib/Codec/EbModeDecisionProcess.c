@@ -454,7 +454,8 @@ void ConfigureChroma(
     // If INTRA Close Loop, then the switch modes (2,3,4,5) are not supported as reference samples for Chroma compensation will be a mix of source samples and reconstructed samples
 
     if (contextPtr->chromaLevel == 0) {
-        lcuPtr->chromaEncodeMode = CHROMA_MODE_FULL;
+        // hack disable chroma search for P422/444 for known error
+        lcuPtr->chromaEncodeMode = (pictureControlSetPtr->colorFormat == EB_YUV420) ? CHROMA_MODE_FULL : CHROMA_MODE_BEST;
     }
     else if (contextPtr->chromaLevel == 1) {
         lcuPtr->chromaEncodeMode = CHROMA_MODE_BEST;
