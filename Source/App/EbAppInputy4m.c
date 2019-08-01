@@ -8,7 +8,9 @@
 #define YUV4MPEG2_IND_SIZE 9
 
 // Define PRINT_HEADER to log y4m header contents
-//#define PRINT_HEADER
+#ifndef NDEBUG
+#define PRINT_HEADER
+#endif
 
 #define CHROMA_MAX 4
 
