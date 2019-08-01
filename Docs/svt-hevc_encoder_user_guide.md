@@ -278,9 +278,9 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **SeparateFields** | -separate-fields | [0,1] | 0 | 1 : Interlaced input, application will separate top and bottom fields and encode it as progressive. <br>0 : Treat video as progressive video |
 | **HierarchicalLevels** | -hierarchical-levels | [0 – 3] | 3 | 0 : Flat<br>1: 2-Level Hierarchy<br>2: 3-Level Hierarchy<br>3: 4-Level HierarchyMinigop Size = (2^HierarchicalLevels) <br>(e.g. 3 == > 7B pyramid, 2 ==> 3B Pyramid)Refer to Appendix A.1 |
 | **BaseLayerSwitchMode** | -base-layer-switch-mode | [0,1] | 0 | 0 : Use B-frames in the base layer pointing to the same past picture<br>1 : Use P-frames in the base layerRefer to Appendix A.1 |
-| **PredStructure** | -pred-struct | [0 – 2] | 2 | 0: Low Delay P1: Low Delay B<br>2: Random AccessRefer to Appendix A.1 |
-| **IntraPeriod** | -intra-period | [-2 - 255] | -2 | Distance Between Intra Frame inserted. -1 denotes no intra update. -2 denotes auto. |
-| **IntraRefreshType** | -irefresh-type | [1,2] | 1 | 1: CRA (Open GOP)2: IDR (Closed GOP) |
+| **PredStructure** | -pred-struct | [0 – 2] | 2 | 0: Low Delay P<br>1: Low Delay B<br>2: Random AccessRefer to Appendix A.1 |
+| **IntraPeriod** | -intra-period | [-2 - 255] | -2 | Distance Between Intra Frame inserted. <br>-1 denotes no intra update. <br>-2 denotes auto. |
+| **IntraRefreshType** | -irefresh-type | [1,2] | 1 | 1: CRA (Open GOP)<br>2: IDR (Closed GOP) |
 | **QP** | -q | [0 - 51] | 25 | Initial quantization parameter for the Intra pictures used when RateControlMode 0 (CQP) |
 | **LoopFilterDisable** | -dlf | [0, 1] | 0 | When set to 1 disables the Deblocking Loop Filtering |
 | **SAO** | -sao | [0,1] | 1 | When set to 0 the encoder will not use the Sample Adaptive Filter |
@@ -309,7 +309,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **RegisteredUserData** | -reg-user-data | [0,1] | 0 | SEI message, 0 = OFF, 1 = ON |
 | **UnregisteredUserData** | -unreg-user-data | [0,1] | 0 | SEI message, 0 = OFF, 1 = ON |
 | **RecoveryPoint** | -recovery-point | [0,1] | 0 | SEI message, 0 = OFF, 1 = ON |
-| **TemporalId** | -temporal-id | [0,1] | 1 | 0 = OFF, 1 = Insert temporal ID in NAL units |
+| **TemporalId** | -temporal-id | [0,1] | 1 | 0 = OFF<br>1 = Insert temporal ID in NAL units |
 | **AsmType** | -asm | [0,1] | 1 | Assembly instruction set <br>(0: C Only, 1: Automatically select highest assembly instruction set supported) |
 | **LogicalProcessors** | -lp | [0, total number of logical processor] | 0 | The number of logical processor which encoder threads run on.Refer to Appendix A.2 |
 | **TargetSocket** | -ss | [-1,1] | -1 | For dual socket systems, this can specify which socket the encoder runs on.Refer to Appendix A.2 |
@@ -318,10 +318,10 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **TileRowCount** | -tile_row_cnt | [1,16] | 1 | Tile count in the Row |
 | **TileColumnCount** | -tile_col_cnt | [1,16] | 1 | Tile count in the column |
 | **TileSliceMode** | -tile_slice_mode | [0,1] | 0 | Per slice per tile, only valid for multi-tile |
-| **UnrestrictedMotionVector** | -umv | [0,1] | 1 | Enables or disables unrestriced motion vectors, 0 = OFF(motion vectors are constrained within frame or tile boundary), 1 = ON. For MCTS support, set -umv 0 with valid TileRowCount and TileColumnCount |
+| **UnrestrictedMotionVector** | -umv | [0,1] | 1 | Enables or disables unrestricted motion vectors<br>0 = OFF(motion vectors are constrained within frame or tile boundary)<br>1 = ON.<br>For MCTS support, set -umv 0 with valid TileRowCount and TileColumnCount |
 | **MaxCLL** | -max-cll | [0 , 2^16-1] | 0 | Maximum content light level (MaxCLL) as required by the Consumer Electronics Association 861.3 specification. Applicable for HDR content. If specified, signalled only when HighDynamicRangeInput is set to 1 |
 | **MaxFALL** | -max-fall | [0 , 2^16-1] | 0 | Maximum Frame Average light level (MaxFALL) as required by the Consumer Electronics Association 861.3 specification. Applicable for HDR content. If specified, signalled only when HighDynamicRangeInput is set to 1 |
-| **UseMasterDisplay** | -use-master-display | [0,1] | 0 | Enables or disables the MasterDisplayColorVolume, 0 = OFF, 1 = ON |
+| **UseMasterDisplay** | -use-master-display | [0,1] | 0 | Enables or disables the MasterDisplayColorVolume<br>0 = OFF<br>1 = ON |
 | **MasterDisplay** | -master-display | For R, G, B and whitepoint [0, 2^16-1]. For max, min luminance [0, 2^32-1] | 0 | SMPTE ST 2086 mastering display color volume SEI info, specified as a string. The string format is “G(%hu,%hu)B(%hu,%hu)R(%hu,% hu)WP(%hu,%hu)L(%u,%u)” where %hu are unsigned 16bit integers and %u are unsigned 32bit integers. The SEI includes X, Y display primaries for RGB channels and white point (WP) in units of 0.00002 and max, min luminance (L) values in units of 0.0001 candela per meter square. Applicable for HDR content. Example for a P3D65 1000-nits monitor,G(13250,34500)B(7500,3 000)R(34000,16000)WP(15635,16 450)L(10000000,1) |
 | **DolbyVisionRpuFile** | -dolby-vision-rpu | any string | null | Path to the file containing Dolby Vision RPU metadata |
 | **DolbyVisionProfile** | -dolby-vision-profile | 8.1 or 81 | 0 | Generate bitstreams confirming to the specified Dolby Vision profile 8.1. When specified, enables HighDynamicRangeInput automatically. Applicable only for 10-bit input content. MasterDisplay should be set for using dolby vision profile 81. Pass the dynamic metadata through DolbyVisionRpuFile option |
