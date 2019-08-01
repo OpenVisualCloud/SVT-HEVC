@@ -264,10 +264,10 @@ typedef struct PictureControlSet_s
     NeighborArrayUnit_t                  **intraLumaModeNeighborArray;
     NeighborArrayUnit_t                  **skipFlagNeighborArray;
 
-    NeighborArrayUnit_t                  *tempModeTypeNeighborArray;
-    NeighborArrayUnit_t                  *tempLeafDepthNeighborArray;
-    NeighborArrayUnit_t                  *tempIntraLumaModeNeighborArray;
-    NeighborArrayUnit_t                  *tempSkipFlagNeighborArray;
+    NeighborArrayUnit_t                  **tempModeTypeNeighborArray;
+    NeighborArrayUnit_t                  **tempLeafDepthNeighborArray;
+    NeighborArrayUnit_t                  **tempIntraLumaModeNeighborArray;
+    NeighborArrayUnit_t                  **tempSkipFlagNeighborArray;
 
     EB_REFLIST                            colocatedPuRefList;
     EB_BOOL                               isLowDelay;
@@ -301,6 +301,7 @@ typedef struct PictureControlSet_s
     //Row level vbv data
     RCStatRow_t                           **rowStats;
     EB_BOOL                               firstRowOfPicture;
+    EB_BOOL                               resetProxyFlag;
 
     EB_U64                                frameSizePlanned;
     EB_U64                                frameSizeEstimated;

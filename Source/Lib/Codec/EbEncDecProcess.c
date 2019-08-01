@@ -1316,6 +1316,34 @@ static void ResetEncodePassNeighborArrays(PictureControlSet_t *pictureControlSet
     return;
 }
 
+//Reset Proxy Neighbor arrays in Encdec
+static void EntropyCodingResetTempNeighborArrays(PictureControlSet_t *pictureControlSetPtr, EB_U16 tileIdx)
+{
+    NeighborArrayUnitReset(pictureControlSetPtr->tempModeTypeNeighborArray[tileIdx]);
+    NeighborArrayUnitReset(pictureControlSetPtr->tempLeafDepthNeighborArray[tileIdx]);
+    NeighborArrayUnitReset(pictureControlSetPtr->tempIntraLumaModeNeighborArray[tileIdx]);
+    NeighborArrayUnitReset(pictureControlSetPtr->tempSkipFlagNeighborArray[tileIdx]);
+
+    return;
+}
+
+static void ResetTempEntropy(
+    EncDecContext_t         *contextPtr,
+    PictureControlSet_t     *pictureControlSetPtr,
+    SequenceControlSet_t    *sequenceControlSetPtr) {
+    EB_U32 tileCnt = pictureControlSetPtr->tileRowCount * pictureControlSetPtr->tileColumnCount;
+    EB_U32 tileIdx = 0;
+    EB_U32 entropyCodingQp = pictureControlSetPtr->pictureQp;
+    for (tileIdx = 0; tileIdx < tileCnt; tileIdx++) {
+        ResetEntropyCoder(
+            sequenceControlSetPtr->encodeContextPtr,
+            pictureControlSetPtr->entropyCodingInfo[tileIdx]->tempEntropyCoderPtr,
+            entropyCodingQp,
+            pictureControlSetPtr->sliceType);
+
+        EntropyCodingResetTempNeighborArrays(pictureControlSetPtr, tileIdx);
+    }
+}
 /**************************************************
  * Reset Coding Loop
  **************************************************/
@@ -4142,6 +4170,7 @@ void* EncDecKernel(void *inputPtr)
                     contextPtr);
         }
 
+        
 #if 1//TILES  //NEED these  to test stream complaince
         // contextPtr->pmMethod = 0;
         contextPtr->mdContext->rdoqPmCoreMethod = EB_NO_RDOQ;  //RDOQ   make DLF cause MD5 mismatch when encDec segments+QP mod are ON.. 
@@ -4192,7 +4221,15 @@ void* EncDecKernel(void *inputPtr)
                     pictureControlSetPtr,
                     sequenceControlSetPtr,
                     segmentIndex);
-
+            //Reset Temp Entropy Coding
+            if (segmentIndex == 0) {
+                if (contextPtr->tileRowIndex == 0) {
+                    if (pictureControlSetPtr->resetProxyFlag == EB_FALSE) {
+                        ResetTempEntropy(contextPtr, pictureControlSetPtr, sequenceControlSetPtr);
+                        pictureControlSetPtr->resetProxyFlag = EB_TRUE;
+                    }
+                }
+            }
             contextPtr->mdContext->CabacCost = pictureControlSetPtr->cabacCost;
 
             if (pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr != NULL) {
@@ -4219,6 +4256,7 @@ void* EncDecKernel(void *inputPtr)
                     rowIndex = (EB_U16)(yLcuIndex / pictureHeightInLcu);
                     rowPtr = pictureControlSetPtr->rowStats[rowIndex];
                     pictureControlSetPtr->firstRowOfPicture = (xLcuIndex <= pictureWidthInLcu) ? EB_TRUE : EB_FALSE;
+
                     lcuOriginX = (xLcuIndex+tileGroupLcuStartX) << lcuSizeLog2;
                     lcuOriginY = (yLcuIndex+tileGroupLcuStartY) << lcuSizeLog2;
                     //printf("Process lcu (%d, %d), lcuIndex %d, segmentIndex %d\n", lcuOriginX, lcuOriginY, lcuIndex, segmentIndex);
@@ -4414,7 +4452,7 @@ void* EncDecKernel(void *inputPtr)
                         tempWrittenBitsBeforeQuantizedCoeff = ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->entropyCodingInfo[contextPtr->tileIndex]->tempEntropyCoderPtr))->writtenBitsCount +
                             32 - ((CabacEncodeContext_t*)pictureControlSetPtr->entropyCodingInfo[contextPtr->tileIndex]->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
                             (((CabacEncodeContext_t*)pictureControlSetPtr->entropyCodingInfo[contextPtr->tileIndex]->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum << 3);
-						  EstimateLcu(
+                        EstimateLcu(
                             lcuPtr,
                             lcuOriginX,
                             lcuOriginY,
@@ -4422,10 +4460,10 @@ void* EncDecKernel(void *inputPtr)
                             sequenceControlSetPtr->lcuSize,
                             pictureControlSetPtr->entropyCodingInfo[contextPtr->tileIndex]->tempEntropyCoderPtr,
                             tempCoeffPicturePtr,
-                            pictureControlSetPtr->tempModeTypeNeighborArray,
-                            pictureControlSetPtr->tempLeafDepthNeighborArray,
-                            pictureControlSetPtr->tempIntraLumaModeNeighborArray,
-                            pictureControlSetPtr->tempSkipFlagNeighborArray,
+                            pictureControlSetPtr->tempModeTypeNeighborArray[contextPtr->tileIndex],
+                            pictureControlSetPtr->tempLeafDepthNeighborArray[contextPtr->tileIndex],
+                            pictureControlSetPtr->tempIntraLumaModeNeighborArray[contextPtr->tileIndex],
+                            pictureControlSetPtr->tempSkipFlagNeighborArray[contextPtr->tileIndex],
                             0,
                             0);
 

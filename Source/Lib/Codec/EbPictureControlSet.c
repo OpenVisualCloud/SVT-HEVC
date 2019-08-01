@@ -211,6 +211,12 @@ EB_ERRORTYPE PictureControlSetCtor(
     EB_MALLOC(NeighborArrayUnit_t**, objectPtr->intraLumaModeNeighborArray, sizeof(NeighborArrayUnit_t*) * totalTileCount, EB_N_PTR);
     EB_MALLOC(NeighborArrayUnit_t**, objectPtr->skipFlagNeighborArray, sizeof(NeighborArrayUnit_t*) * totalTileCount, EB_N_PTR);
 
+    // For proxy entropy
+    EB_MALLOC(NeighborArrayUnit_t**, objectPtr->tempModeTypeNeighborArray, sizeof(NeighborArrayUnit_t*) * totalTileCount, EB_N_PTR);
+    EB_MALLOC(NeighborArrayUnit_t**, objectPtr->tempLeafDepthNeighborArray, sizeof(NeighborArrayUnit_t*) * totalTileCount, EB_N_PTR);
+    EB_MALLOC(NeighborArrayUnit_t**, objectPtr->tempIntraLumaModeNeighborArray, sizeof(NeighborArrayUnit_t*) * totalTileCount, EB_N_PTR);
+    EB_MALLOC(NeighborArrayUnit_t**, objectPtr->tempSkipFlagNeighborArray, sizeof(NeighborArrayUnit_t*) * totalTileCount, EB_N_PTR);
+
     // Mode Decision Neighbor Arrays
     EB_U8 depth;
     EB_U16 array_size = sizeof(NeighborArrayUnit_t*) * totalTileCount;
@@ -570,6 +576,56 @@ EB_ERRORTYPE PictureControlSetCtor(
             if (return_error == EB_ErrorInsufficientResources){
                 return EB_ErrorInsufficientResources;
             }
+
+            //Proxy entropy Neighbor Arrays
+            return_error = NeighborArrayUnitCtor(
+                &objectPtr->tempModeTypeNeighborArray[tileIdx],
+                MAX_PICTURE_WIDTH_SIZE,
+                MAX_PICTURE_HEIGHT_SIZE,
+                sizeof(EB_U8),
+                PU_NEIGHBOR_ARRAY_GRANULARITY,
+                PU_NEIGHBOR_ARRAY_GRANULARITY,
+                NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+
+            if (return_error == EB_ErrorInsufficientResources) {
+                return EB_ErrorInsufficientResources;
+            }
+            return_error = NeighborArrayUnitCtor(
+                &objectPtr->tempLeafDepthNeighborArray[tileIdx],
+                MAX_PICTURE_WIDTH_SIZE,
+                MAX_PICTURE_HEIGHT_SIZE,
+                sizeof(EB_U8),
+                CU_NEIGHBOR_ARRAY_GRANULARITY,
+                CU_NEIGHBOR_ARRAY_GRANULARITY,
+                NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+
+            if (return_error == EB_ErrorInsufficientResources) {
+                return EB_ErrorInsufficientResources;
+            }
+            return_error = NeighborArrayUnitCtor(
+                &objectPtr->tempSkipFlagNeighborArray[tileIdx],
+                MAX_PICTURE_WIDTH_SIZE,
+                MAX_PICTURE_HEIGHT_SIZE,
+                sizeof(EB_U8),
+                CU_NEIGHBOR_ARRAY_GRANULARITY,
+                CU_NEIGHBOR_ARRAY_GRANULARITY,
+                NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+
+            if (return_error == EB_ErrorInsufficientResources) {
+                return EB_ErrorInsufficientResources;
+            }
+
+            return_error = NeighborArrayUnitCtor(
+                &objectPtr->tempIntraLumaModeNeighborArray[tileIdx],
+                MAX_PICTURE_WIDTH_SIZE,
+                MAX_PICTURE_HEIGHT_SIZE,
+                sizeof(EB_U8),
+                PU_NEIGHBOR_ARRAY_GRANULARITY,
+                PU_NEIGHBOR_ARRAY_GRANULARITY,
+                NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+            if (return_error == EB_ErrorInsufficientResources) {
+                return EB_ErrorInsufficientResources;
+            }
         }
     }
     //return_error = NeighborArrayUnitCtor(
@@ -661,6 +717,7 @@ EB_ERRORTYPE PictureControlSetCtor(
     EB_CREATEMUTEX(EB_HANDLE, objectPtr->intraMutex, sizeof(EB_HANDLE), EB_MUTEX);
 
     objectPtr->encDecCodedLcuCount = 0;
+    objectPtr->resetProxyFlag = EB_FALSE;
     return EB_ErrorNone;
 
 }
