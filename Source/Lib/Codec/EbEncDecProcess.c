@@ -245,11 +245,11 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
 
     LargestCodingUnit_t *lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuIndex];
 
-    FirstColLcu = lcuPtr->tileLeftEdgeFlag;
-    LastColLcu = lcuPtr->tileRightEdgeFlag;
-    FirstRowLcu = lcuPtr->tileTopEdgeFlag;
+    FirstColLcu = lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag;
+    LastColLcu = lcuPtr->lcuEdgeInfoPtr->tileRightEdgeFlag;
+    FirstRowLcu = lcuPtr->lcuEdgeInfoPtr->tileTopEdgeFlag;
     LastRowLcu = (EB_BOOL)((tbOriginY >> (isChroma ? subHeightCMinus1:0)) + lcuHeight == pictureHeight);
-    LastRowLcu = (lcuPtr->tileEndY <= lcuPtr->originY + MAX_LCU_SIZE);
+    LastRowLcu = (lcuPtr->tileInfoPtr->tileLcuEndY * MAX_LCU_SIZE <= lcuPtr->originY + MAX_LCU_SIZE);
 
     (void)bitDepth;
     (void)pictureWidth;
@@ -789,11 +789,11 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
     const EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
     LargestCodingUnit_t *lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuIndex];
 
-    FirstColLcu = lcuPtr->tileLeftEdgeFlag;
-    LastColLcu = lcuPtr->tileRightEdgeFlag;
-    FirstRowLcu = lcuPtr->tileTopEdgeFlag;
+    FirstColLcu = lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag;
+    LastColLcu = lcuPtr->lcuEdgeInfoPtr->tileRightEdgeFlag;
+    FirstRowLcu = lcuPtr->lcuEdgeInfoPtr->tileTopEdgeFlag;
     LastRowLcu = (EB_BOOL)((tbOriginY >> (isChroma ? subHeightCMinus1:0)) + lcuHeight == pictureHeight);
-    LastRowLcu = (lcuPtr->tileEndY <= lcuPtr->originY + MAX_LCU_SIZE);
+    LastRowLcu = (lcuPtr->tileInfoPtr->tileLcuEndY * MAX_LCU_SIZE <= lcuPtr->originY + MAX_LCU_SIZE);
 
     (void)bitDepth;
     (void)pictureWidth;
@@ -1408,8 +1408,8 @@ static void ResetEncDec(
         }
 
 
-        for (int tileIdx = contextPtr->tileRowIndex * sequenceControlSetPtr->tileColumnCount;
-                tileIdx < (contextPtr->tileRowIndex + 1) * sequenceControlSetPtr->tileColumnCount;
+        for (int tileIdx = contextPtr->tileRowIndex * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
+                tileIdx < (contextPtr->tileRowIndex + 1) * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
                 tileIdx++) {
             ResetEncodePassNeighborArrays(pictureControlSetPtr, tileIdx);
         }
@@ -3876,7 +3876,6 @@ void* EncDecKernel(void *inputPtr)
     EB_U32                  segmentBandSize;
     EncDecSegments_t       *segmentsPtr;
     EB_U32                  tileX, tileY, tileRowIndex;
-    EB_U32                  i, j, tmp;
     EB_U32                  tileGroupLcuStartX, tileGroupLcuStartY;
 
 
@@ -3896,18 +3895,13 @@ void* EncDecKernel(void *inputPtr)
 
         segmentsPtr = pictureControlSetPtr->encDecSegmentCtrl[tileRowIndex];
         (void)tileX;
-        tileY = tileRowIndex;
+        (void)tileY;
 
         contextPtr->tileRowIndex = tileRowIndex;
         contextPtr->tileIndex = 0;
 
         tileGroupLcuStartX = tileGroupLcuStartY = 0;
-        //for (i = 0; i < tileX; i++) {
-        //    tileGroupLcuStartX += sequenceControlSetPtr->tileColumnArray[i];
-        //}
-        for (j = 0; j < tileY; j++) {
-            tileGroupLcuStartY += sequenceControlSetPtr->tileRowArray[j];
-        }
+        tileGroupLcuStartY = pictureControlSetPtr->ParentPcsPtr->tileRowStartLcu[tileRowIndex];
         lastLcuFlag = EB_FALSE;
         is16bit = (EB_BOOL)(sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
 #if DEADLOCK_DEBUG
@@ -4015,17 +4009,8 @@ void* EncDecKernel(void *inputPtr)
                     //printf("Process lcu (%d, %d), lcuIndex %d, segmentIndex %d\n", lcuOriginX, lcuOriginY, lcuIndex, segmentIndex);
                     
                     // Set current LCU tile Index
-                    tmp = 0;
-                    for (i = 0; i < sequenceControlSetPtr->tileColumnCount; i++) {
-                        tmp += sequenceControlSetPtr->tileColumnArray[i];
-                        if (xLcuIndex < tmp) {
-                            // Jing: Set correct tileIndex (in raster order) for ModeDecisionContext
-                            contextPtr->mdContext->tileIndex = contextPtr->tileRowIndex * sequenceControlSetPtr->tileColumnCount + i;
-                            contextPtr->tileIndex = contextPtr->tileRowIndex * sequenceControlSetPtr->tileColumnCount + i;
-                            //currentTileWidthInLcu = sequenceControlSetPtr->tileColumnArray[i];
-                            break;
-                        }
-                    }
+                    contextPtr->mdContext->tileIndex = lcuPtr->lcuEdgeInfoPtr->tileIndexInRaster;
+                    contextPtr->tileIndex = lcuPtr->lcuEdgeInfoPtr->tileIndexInRaster;
 
 
                     endOfRowFlag = (xLcuIndex == tileRowWidthInLcu - 1) ? EB_TRUE : EB_FALSE;
@@ -4326,8 +4311,7 @@ void* EncDecKernel(void *inputPtr)
                             finishTimeuSeconds,
                             &latency);
 
-                    SVT_LOG("[%lld]: POC %lld ENCDEC REF DONE, decoder order %d, latency %3.3f \n",
-                            EbGetSysTimeMs(),
+                    SVT_LOG("POC %lld ENCDEC REF DONE, decoder order %d, latency %3.3f \n",
                             pictureControlSetPtr->pictureNumber,
                             pictureControlSetPtr->ParentPcsPtr->decodeOrder,
                             latency);
@@ -4349,8 +4333,8 @@ void* EncDecKernel(void *inputPtr)
         // Send the Entropy Coder incremental updates as each LCU row becomes available
         {
             if (endOfRowFlag == EB_TRUE) {
-                for (unsigned int tileIdx = tileRowIndex * sequenceControlSetPtr->tileColumnCount;
-                        tileIdx < (tileRowIndex + 1) * sequenceControlSetPtr->tileColumnCount;
+                for (unsigned int tileIdx = tileRowIndex * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
+                        tileIdx < (tileRowIndex + 1) * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
                         tileIdx++) {
                     // Get Empty EncDec Results
                     EbGetEmptyObject(

@@ -350,49 +350,6 @@ extern EB_ERRORTYPE LcuParamsCtor(
 	return return_error;
 }
 
-/************************************************
- * Configure ME Tiles
- ************************************************/
-static void ConfigureTiles(
-    SequenceControlSet_t *scsPtr)
-{
-    // Tiles Initialisation
-    const unsigned tileColumns = scsPtr->tileColumnCount;
-    const unsigned tileRows = scsPtr->tileRowCount;
-
-
-    unsigned rowIndex, columnIndex;
-    unsigned xLcuIndex, yLcuIndex, lcuIndex;
-    unsigned xLcuStart, yLcuStart;
-
-    // Tile-loops
-    yLcuStart = 0;
-    for (rowIndex = 0; rowIndex < tileRows; ++rowIndex) {
-        xLcuStart = 0;
-        for (columnIndex = 0; columnIndex < tileColumns; ++columnIndex) {
-
-            // LCU-loops
-            for (yLcuIndex = yLcuStart; yLcuIndex < yLcuStart + scsPtr->tileRowArray[rowIndex]; ++yLcuIndex) {
-                for (xLcuIndex = xLcuStart; xLcuIndex < xLcuStart + scsPtr->tileColumnArray[columnIndex]; ++xLcuIndex) {
-                    lcuIndex = xLcuIndex + yLcuIndex * scsPtr->pictureWidthInLcu;
-                    scsPtr->lcuParamsArray[lcuIndex].tileLeftEdgeFlag = (xLcuIndex == xLcuStart) ? EB_TRUE : EB_FALSE;
-                    scsPtr->lcuParamsArray[lcuIndex].tileTopEdgeFlag = (yLcuIndex == yLcuStart) ? EB_TRUE : EB_FALSE;
-                    scsPtr->lcuParamsArray[lcuIndex].tileRightEdgeFlag =
-                        (xLcuIndex == xLcuStart + scsPtr->tileColumnArray[columnIndex] - 1) ? EB_TRUE : EB_FALSE;
-                    scsPtr->lcuParamsArray[lcuIndex].tileStartX = xLcuStart * scsPtr->lcuSize;
-                    scsPtr->lcuParamsArray[lcuIndex].tileStartY = yLcuStart * scsPtr->lcuSize;
-                    scsPtr->lcuParamsArray[lcuIndex].tileEndX = (columnIndex == (tileColumns - 1)) ? scsPtr->lumaWidth : (xLcuStart + scsPtr->tileColumnArray[columnIndex]) * scsPtr->lcuSize;
-                    scsPtr->lcuParamsArray[lcuIndex].tileEndY = (rowIndex == (tileRows - 1)) ? scsPtr->lumaHeight : (yLcuStart + scsPtr->tileRowArray[rowIndex]) * scsPtr->lcuSize;
-                    scsPtr->lcuParamsArray[lcuIndex].tileIndex = rowIndex * tileColumns + columnIndex;
-                }
-            }
-            xLcuStart += scsPtr->tileColumnArray[columnIndex];
-        }
-        yLcuStart += scsPtr->tileRowArray[rowIndex];
-    }
-
-    return;
-}
 
 extern EB_ERRORTYPE LcuParamsInit(
 	SequenceControlSet_t *sequenceControlSetPtr) {
@@ -496,7 +453,7 @@ extern EB_ERRORTYPE LcuParamsInit(
 		}
 	}
 
-    ConfigureTiles(sequenceControlSetPtr);
+    //ConfigureTiles(sequenceControlSetPtr);
 
 	return return_error;
 }

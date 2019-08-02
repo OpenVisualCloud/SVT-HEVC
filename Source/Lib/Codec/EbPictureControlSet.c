@@ -9,6 +9,52 @@
 #include "EbPictureControlSet.h"
 #include "EbPictureBufferDesc.h"
 
+
+static void ConfigureTileInfo(PictureParentControlSet_t *ppcsPtr, EB_U8 lcuSize, EB_U16 pic_width, EB_U16 pic_height)
+{
+    // Tiles Initialisation
+    for (EB_U16 r = 0; r < ppcsPtr->tileRowCount; r++) {
+        for (EB_U16 c = 0; c < ppcsPtr->tileColumnCount; c++) {
+            unsigned tileIdx = r * ppcsPtr->tileColumnCount + c;
+            ppcsPtr->tileInfoArray[tileIdx].tileLcuOriginX = ppcsPtr->tileColStartLcu[c];
+            ppcsPtr->tileInfoArray[tileIdx].tileLcuOriginY = ppcsPtr->tileRowStartLcu[r];
+            ppcsPtr->tileInfoArray[tileIdx].tileLcuEndX = ppcsPtr->tileColStartLcu[c + 1];
+            ppcsPtr->tileInfoArray[tileIdx].tileLcuEndY = ppcsPtr->tileRowStartLcu[r + 1];
+
+            ppcsPtr->tileInfoArray[tileIdx].tilePxlOriginX = ppcsPtr->tileColStartLcu[c] * lcuSize;
+            ppcsPtr->tileInfoArray[tileIdx].tilePxlOriginY = ppcsPtr->tileRowStartLcu[r] * lcuSize;
+            ppcsPtr->tileInfoArray[tileIdx].tilePxlEndX = (c < ppcsPtr->tileColumnCount - 1) ?
+                ppcsPtr->tileColStartLcu[c + 1] * lcuSize : pic_width;
+            ppcsPtr->tileInfoArray[tileIdx].tilePxlEndY = (r < ppcsPtr->tileRowCount - 1) ?
+                ppcsPtr->tileRowStartLcu[r + 1] * lcuSize : pic_height;
+        }
+    }
+
+    return;
+}
+
+static void ConfigureLcuEdgeInfo(PictureParentControlSet_t *ppcsPtr)
+{
+    EB_U32 tileCnt = ppcsPtr->tileRowCount * ppcsPtr->tileColumnCount;
+    TileInfo_t *ti = ppcsPtr->tileInfoArray;
+    for (EB_U16 tileIdx = 0; tileIdx < tileCnt; tileIdx++) {
+        for (EB_U16 y = ti[tileIdx].tileLcuOriginY; y < ti[tileIdx].tileLcuEndY; y++) {
+            for (EB_U16 x = ti[tileIdx].tileLcuOriginX; x < ti[tileIdx].tileLcuEndX; x++) {
+
+                unsigned lcuIndex = y * ppcsPtr->pictureWidthInLcu + x;
+                ppcsPtr->lcuEdgeInfoArray[lcuIndex].tileLeftEdgeFlag  = (x == ti[tileIdx].tileLcuOriginX);
+                ppcsPtr->lcuEdgeInfoArray[lcuIndex].tileTopEdgeFlag   = (y == ti[tileIdx].tileLcuOriginY);
+                ppcsPtr->lcuEdgeInfoArray[lcuIndex].tileRightEdgeFlag = (x == ti[tileIdx].tileLcuEndX - 1);
+                ppcsPtr->lcuEdgeInfoArray[lcuIndex].pictureLeftEdgeFlag  = (x == 0) ? EB_TRUE : EB_FALSE;
+                ppcsPtr->lcuEdgeInfoArray[lcuIndex].pictureTopEdgeFlag = (y == 0) ? EB_TRUE : EB_FALSE;
+                ppcsPtr->lcuEdgeInfoArray[lcuIndex].pictureRightEdgeFlag = (x == (ppcsPtr->pictureWidthInLcu - 1)) ? EB_TRUE : EB_FALSE;
+                ppcsPtr->lcuEdgeInfoArray[lcuIndex].tileIndexInRaster = tileIdx;
+            }
+        }
+    }
+    return;
+}
+
 EB_ERRORTYPE PictureControlSetCtor(
     EB_PTR *objectDblPtr, 
     EB_PTR objectInitDataPtr)
@@ -23,17 +69,16 @@ EB_ERRORTYPE PictureControlSetCtor(
     const EB_U32 maxCuSize = initDataPtr->lcuSize;
     EB_U32 encDecSegRow = initDataPtr->encDecSegmentRow;
     EB_U32 encDecSegCol = initDataPtr->encDecSegmentCol;
+    EB_U16 pictureWidthInLcu = (EB_U16)((initDataPtr->pictureWidth + initDataPtr->lcuSize - 1) / initDataPtr->lcuSize);
+    EB_U16 pictureHeightInLcu = (EB_U16)((initDataPtr->pictureHeight + initDataPtr->lcuSize - 1) / initDataPtr->lcuSize);
 
-
-    // Tile info
-    EB_U32 totalTileCount = initDataPtr->tileRowCount * initDataPtr->tileColumnCount;
-    totalTileCount = (totalTileCount > 0) ? totalTileCount : 1;
     EB_U16 tileIdx;
     EB_U16 r, c;
+
+
+    EB_U32 totalTileCount = initDataPtr->tileRowCount * initDataPtr->tileColumnCount;
     
     // LCUs
-    const EB_U16 pictureLcuWidth    = (EB_U16)((initDataPtr->pictureWidth + initDataPtr->lcuSize - 1) / initDataPtr->lcuSize);
-    const EB_U16 pictureLcuHeight   = (EB_U16)((initDataPtr->pictureHeight + initDataPtr->lcuSize - 1) / initDataPtr->lcuSize);
     EB_U16 lcuIndex;
     EB_U16 lcuOriginX;
     EB_U16 lcuOriginY;
@@ -76,8 +121,6 @@ EB_ERRORTYPE PictureControlSetCtor(
     objectPtr->colorFormat          =  initDataPtr->colorFormat;
     objectPtr->reconPicture16bitPtr =  (EbPictureBufferDesc_t *)EB_NULL;
     objectPtr->reconPicturePtr      =  (EbPictureBufferDesc_t *)EB_NULL;
-    objectPtr->tileColumnCount = initDataPtr->tileColumnCount;
-    objectPtr->tileRowCount = initDataPtr->tileRowCount;
 
     // Reconstructed Picture Buffer
     if(initDataPtr->is16bit == EB_TRUE){
@@ -123,7 +166,7 @@ EB_ERRORTYPE PictureControlSetCtor(
 
     // LCU Array
     objectPtr->lcuMaxDepth = (EB_U8) initDataPtr->maxDepth;
-    objectPtr->lcuTotalCount = pictureLcuWidth * pictureLcuHeight;
+    objectPtr->lcuTotalCount = pictureWidthInLcu * pictureHeightInLcu;
     EB_MALLOC(LargestCodingUnit_t**, objectPtr->lcuPtrArray, sizeof(LargestCodingUnit_t*) * objectPtr->lcuTotalCount, EB_N_PTR);
     
     lcuOriginX = 0;
@@ -144,9 +187,11 @@ EB_ERRORTYPE PictureControlSetCtor(
             return EB_ErrorInsufficientResources;
         }
         // Increment the Order in coding order (Raster Scan Order)
-        lcuOriginY = (lcuOriginX == pictureLcuWidth - 1) ? lcuOriginY + 1: lcuOriginY;
-        lcuOriginX = (lcuOriginX == pictureLcuWidth - 1) ? 0 : lcuOriginX + 1;
+        lcuOriginY = (lcuOriginX == pictureWidthInLcu - 1) ? lcuOriginY + 1: lcuOriginY;
+        lcuOriginX = (lcuOriginX == pictureWidthInLcu - 1) ? 0 : lcuOriginX + 1;
     }
+
+    //ConfigureEdges(objectPtr, maxCuSize);
 
     // Mode Decision Control config
     EB_MALLOC(MdcLcuData_t*, objectPtr->mdcLcuArray, objectPtr->lcuTotalCount  * sizeof(MdcLcuData_t), EB_N_PTR);
@@ -561,30 +606,6 @@ EB_ERRORTYPE PictureControlSetCtor(
             }
         }
     }
-    //return_error = NeighborArrayUnitCtor(
-    //    &objectPtr->amvpMvMergeMvNeighborArray,
-    //    MAX_PICTURE_WIDTH_SIZE,
-    //    MAX_PICTURE_HEIGHT_SIZE,
-    //    sizeof(MvUnit_t),
-    //    PU_NEIGHBOR_ARRAY_GRANULARITY,
-    //    PU_NEIGHBOR_ARRAY_GRANULARITY,
-    //    NEIGHBOR_ARRAY_UNIT_FULL_MASK);
-
-    //if (return_error == EB_ErrorInsufficientResources){
-    //    return EB_ErrorInsufficientResources;
-    //}
-    //return_error = NeighborArrayUnitCtor(
-    //    &objectPtr->amvpMvMergeModeTypeNeighborArray,
-    //    MAX_PICTURE_WIDTH_SIZE,
-    //    MAX_PICTURE_HEIGHT_SIZE,
-    //    sizeof(EB_U8),
-    //    PU_NEIGHBOR_ARRAY_GRANULARITY,
-    //    PU_NEIGHBOR_ARRAY_GRANULARITY,
-    //    NEIGHBOR_ARRAY_UNIT_FULL_MASK);
-
-    //if (return_error == EB_ErrorInsufficientResources){
-    //    return EB_ErrorInsufficientResources;
-    //}
 
     // Note - non-zero offsets are not supported (to be fixed later in DLF chroma filtering)
     objectPtr->cbQpOffset = 0;
@@ -601,6 +622,7 @@ EB_ERRORTYPE PictureControlSetCtor(
     // Error Resilience
     objectPtr->constrainedIntraFlag = EB_FALSE;
 
+
     //Jing:
     //Alloc segment per tile group
     // Segments
@@ -609,8 +631,8 @@ EB_ERRORTYPE PictureControlSetCtor(
     for (tileIdx = 0; tileIdx < initDataPtr->tileRowCount; tileIdx++) {
         if (totalTileCount > 1) {
             //Jing: Tuning segments number, put tile info to pps
-            encDecSegRow = pictureLcuHeight / initDataPtr->tileRowCount;
-            encDecSegCol = pictureLcuWidth; 
+            encDecSegRow = pictureHeightInLcu / initDataPtr->tileRowCount;
+            encDecSegCol = pictureWidthInLcu; 
         }
 
         return_error = EncDecSegmentsCtor(
@@ -666,6 +688,24 @@ EB_ERRORTYPE PictureParentControlSetCtor(
     EB_CALLOC(PictureParentControlSet_t*, objectPtr, sizeof(PictureParentControlSet_t), 1, EB_N_PTR);
     *objectDblPtr = (EB_PTR)objectPtr;
 
+    // Jing: Tiles
+    EB_U32 totalTileCount = initDataPtr->tileRowCount * initDataPtr->tileColumnCount;
+	EB_MALLOC(TileInfo_t*, objectPtr->tileInfoArray, sizeof(TileInfo_t) * totalTileCount, EB_N_PTR);
+    objectPtr->pictureWidthInLcu = (EB_U16)((initDataPtr->pictureWidth + initDataPtr->lcuSize - 1) / initDataPtr->lcuSize);
+    objectPtr->pictureHeightInLcu = (EB_U16)((initDataPtr->pictureHeight + initDataPtr->lcuSize - 1) / initDataPtr->lcuSize);
+    objectPtr->tileRowCount = initDataPtr->tileRowCount;
+    objectPtr->tileColumnCount = initDataPtr->tileColumnCount;
+    objectPtr->tileUniformSpacing = 1;
+
+    for (EB_U16 c = 0; c <= objectPtr->tileColumnCount; c++) {
+        objectPtr->tileColStartLcu[c] = c * objectPtr->pictureWidthInLcu / objectPtr->tileColumnCount;
+    }
+    for (EB_U16 r = 0; r <= objectPtr->tileRowCount; r++) {
+        objectPtr->tileRowStartLcu[r] = r * objectPtr->pictureHeightInLcu / objectPtr->tileRowCount;
+    }
+    ConfigureTileInfo(objectPtr, initDataPtr->lcuSize, initDataPtr->pictureWidth, initDataPtr->pictureHeight);
+
+
     objectPtr->sequenceControlSetWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
     objectPtr->inputPictureWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
     objectPtr->referencePictureWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
@@ -714,6 +754,11 @@ EB_ERRORTYPE PictureParentControlSetCtor(
 		EB_MALLOC(EB_U8*, objectPtr->cbMean[lcuIndex], sizeof(EB_U8) * 21, EB_N_PTR);
 		EB_MALLOC(EB_U8*, objectPtr->crMean[lcuIndex], sizeof(EB_U8) * 21, EB_N_PTR);
 	}
+
+    //LCU edge info
+    EB_MALLOC(LcuEdgeInfo_t*, objectPtr->lcuEdgeInfoArray, sizeof(LcuEdgeInfo_t) * objectPtr->lcuTotalCount, EB_N_PTR);
+    ConfigureLcuEdgeInfo(objectPtr);
+
     // Histograms
     EB_U32 videoComponent;
 

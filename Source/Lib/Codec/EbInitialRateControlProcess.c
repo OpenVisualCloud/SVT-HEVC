@@ -1148,8 +1148,7 @@ void* InitialRateControlKernel(void *inputPtr)
                 finishTimeuSeconds,
                 &latency);
 
-        SVT_LOG("[%lld]: POC %lld IRC OUT, decoder order %d, latency %3.3f \n",
-                EbGetSysTimeMs(),
+        SVT_LOG("POC %lld IRC OUT, decoder order %d, latency %3.3f \n",
                 pictureControlSetPtr->pictureNumber,
                 pictureControlSetPtr->decodeOrder,
                 latency);

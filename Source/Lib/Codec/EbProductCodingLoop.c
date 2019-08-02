@@ -271,9 +271,9 @@ extern void GenerateIntraLumaReferenceSamplesMd(
 	EbPictureBufferDesc_t      *inputPicturePtr) {
 
 
-    EB_BOOL pictureLeftBoundary = (contextPtr->lcuPtr->tileLeftEdgeFlag == EB_TRUE && ((contextPtr->cuOriginX & (contextPtr->lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
-    EB_BOOL pictureTopBoundary = (contextPtr->lcuPtr->tileTopEdgeFlag == EB_TRUE && ((contextPtr->cuOriginY & (contextPtr->lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
-    EB_BOOL pictureRightBoundary = (contextPtr->lcuPtr->tileRightEdgeFlag == EB_TRUE && (((contextPtr->cuOriginX + contextPtr->cuStats->size) & (contextPtr->lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+    EB_BOOL pictureLeftBoundary = (contextPtr->lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag == EB_TRUE && ((contextPtr->cuOriginX & (contextPtr->lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+    EB_BOOL pictureTopBoundary = (contextPtr->lcuPtr->lcuEdgeInfoPtr->tileTopEdgeFlag == EB_TRUE && ((contextPtr->cuOriginY & (contextPtr->lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+    EB_BOOL pictureRightBoundary = (contextPtr->lcuPtr->lcuEdgeInfoPtr->tileRightEdgeFlag == EB_TRUE && (((contextPtr->cuOriginX + contextPtr->cuStats->size) & (contextPtr->lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
 
 	if (contextPtr->intraMdOpenLoopFlag == EB_FALSE) {
 
@@ -5189,7 +5189,7 @@ EB_EXTERN EB_ERRORTYPE BdpPillar(
 
 	// Input   
     EbPictureBufferDesc_t                  *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->chromaDownSamplePicturePtr;
-    EB_U16                                  tileIdx = lcuParamPtr->tileIndex;
+    EB_U16                                  tileIdx = lcuPtr->lcuEdgeInfoPtr->tileIndexInRaster;
 
 
 	// Mode Decision Candidate Buffers
@@ -5614,7 +5614,7 @@ EB_EXTERN EB_ERRORTYPE Bdp64x64vs32x32RefinementProcess(
     ModeDecisionCandidateBuffer_t         **candidateBufferPtrArray;
 
     EB_U32                                  maxBuffers;
-    EB_U16                                  tileIdx = lcuParamPtr->tileIndex;
+    EB_U16                                  tileIdx = lcuPtr->lcuEdgeInfoPtr->tileIndexInRaster;
 
     // Keep track of the LCU Ptr
     contextPtr->lcuPtr = lcuPtr;

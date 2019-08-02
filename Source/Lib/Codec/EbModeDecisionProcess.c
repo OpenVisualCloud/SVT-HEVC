@@ -410,8 +410,8 @@ void ProductResetModeDecision(
 	// Reset Neighbor Arrays at start of new Segment / Picture
     // Jing: Current segments will cross tiles
 	if (segmentIndex == 0) {
-        for (unsigned int tileIdx = tileRowIndex * sequenceControlSetPtr->tileColumnCount;
-                tileIdx < (tileRowIndex + 1) * sequenceControlSetPtr->tileColumnCount;
+        for (unsigned int tileIdx = tileRowIndex * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
+                tileIdx < (tileRowIndex + 1) * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
                 tileIdx++) {
             ResetModeDecisionNeighborArrays(pictureControlSetPtr, tileIdx);
             ResetMdRefinmentNeighborArrays(pictureControlSetPtr, tileIdx);

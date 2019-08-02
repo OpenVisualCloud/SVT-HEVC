@@ -56,7 +56,7 @@ static void ResetEntropyCodingPicture(
 	PictureControlSet_t     *pictureControlSetPtr,
 	SequenceControlSet_t    *sequenceControlSetPtr)
 {
-    EB_U32 tileCnt = pictureControlSetPtr->tileRowCount * pictureControlSetPtr->tileColumnCount;
+    EB_U32 tileCnt = pictureControlSetPtr->ParentPcsPtr->tileRowCount * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
     EB_U32 tileIdx = 0;
 
     for (tileIdx = 0; tileIdx < tileCnt; tileIdx++) {
@@ -346,6 +346,8 @@ void* EntropyCodingKernel(void *inputPtr)
     // Variables
     EB_BOOL                                  initialProcessCall;
     EB_U32                                   tileIdx;
+    EB_U16                                   tileRowIdx;
+    EB_U16                                   tileColIdx;
     EB_U32                                   tileCnt;
     EB_U32                                   xLcuStart;
     EB_U32                                   yLcuStart;
@@ -361,9 +363,11 @@ void* EntropyCodingKernel(void *inputPtr)
         pictureControlSetPtr   = (PictureControlSet_t*) encDecResultsPtr->pictureControlSetWrapperPtr->objectPtr;
         sequenceControlSetPtr  = (SequenceControlSet_t*) pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
         tileIdx                = encDecResultsPtr->tileIndex;
+        tileRowIdx             = tileIdx / pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
+        tileColIdx             = tileIdx % pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
         lastLcuFlagInSlice     = EB_FALSE;
         lastLcuFlagInTile      = EB_FALSE;
-        tileCnt                = pictureControlSetPtr->tileRowCount * pictureControlSetPtr->tileColumnCount;
+        tileCnt                = pictureControlSetPtr->ParentPcsPtr->tileRowCount * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
 #if DEADLOCK_DEBUG
         SVT_LOG("POC %lld EC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
@@ -376,19 +380,14 @@ void* EntropyCodingKernel(void *inputPtr)
         lcuSize     = sequenceControlSetPtr->lcuSize;
         lcuSizeLog2 = (EB_U8)Log2f(lcuSize);
         contextPtr->lcuSize = lcuSize;
-        pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + lcuSize - 1) >> lcuSizeLog2;
-        tileWidthInLcu = sequenceControlSetPtr->tileColumnArray[tileIdx % pictureControlSetPtr->tileColumnCount];
-        tileHeightInLcu = sequenceControlSetPtr->tileRowArray[tileIdx / pictureControlSetPtr->tileColumnCount];
-        xLcuStart = yLcuStart = 0;
-        for (unsigned int i = 0; i < (tileIdx % pictureControlSetPtr->tileColumnCount); i++) {
-            xLcuStart += sequenceControlSetPtr->tileColumnArray[i];
-        }
-        for (unsigned int i = 0; i < (tileIdx / pictureControlSetPtr->tileColumnCount); i++) {
-            yLcuStart += sequenceControlSetPtr->tileRowArray[i];
-        }
+        pictureWidthInLcu = pictureControlSetPtr->ParentPcsPtr->pictureWidthInLcu;
 
-        //assert(tileCnt >= 1);
-        if (tileCnt >= 1) {
+        tileWidthInLcu = pictureControlSetPtr->ParentPcsPtr->tileColStartLcu[tileColIdx + 1] - pictureControlSetPtr->ParentPcsPtr->tileColStartLcu[tileColIdx];
+        tileHeightInLcu = pictureControlSetPtr->ParentPcsPtr->tileRowStartLcu[tileRowIdx + 1] - pictureControlSetPtr->ParentPcsPtr->tileRowStartLcu[tileRowIdx];
+        xLcuStart = pictureControlSetPtr->ParentPcsPtr->tileColStartLcu[tileColIdx];
+        yLcuStart = pictureControlSetPtr->ParentPcsPtr->tileRowStartLcu[tileRowIdx];
+
+        {
             initialProcessCall = EB_TRUE;
             yLcuIndex = encDecResultsPtr->completedLcuRowIndexStart;   
             
@@ -423,7 +422,7 @@ void* EntropyCodingKernel(void *inputPtr)
                     //Check for lastLcu, since tiles are parallelized, last LCU may not be the the last one in slice
                     lastLcuFlagInSlice = (lcuIndex == pictureControlSetPtr->lcuTotalCount - 1) ? EB_TRUE : EB_FALSE;
                     lastLcuFlagInTile = (xLcuIndex == tileWidthInLcu - 1 && yLcuIndex == tileHeightInLcu - 1) ? EB_TRUE : EB_FALSE;
-                    if (sequenceControlSetPtr->tileSliceMode) {
+                    if (sequenceControlSetPtr->staticConfig.tileSliceMode) {
                         lastLcuFlagInSlice = lastLcuFlagInTile;
                     }
             

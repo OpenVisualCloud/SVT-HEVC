@@ -3181,9 +3181,9 @@ EB_EXTERN void EncodePass(
             contextPtr->cuOriginX = (EB_U16)(lcuOriginX + cuStats->originX);
             contextPtr->cuOriginY = (EB_U16)(lcuOriginY + cuStats->originY);
 
-            EB_BOOL  tileLeftBoundary = (lcuPtr->tileLeftEdgeFlag == EB_TRUE && ((contextPtr->cuOriginX & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
-            EB_BOOL  tileTopBoundary = (lcuPtr->tileTopEdgeFlag == EB_TRUE && ((contextPtr->cuOriginY & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
-            EB_BOOL  tileRightBoundary = (lcuPtr->tileRightEdgeFlag == EB_TRUE && (((contextPtr->cuOriginX + cuStats->size) & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+            EB_BOOL  tileLeftBoundary = (lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag == EB_TRUE && ((contextPtr->cuOriginX & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+            EB_BOOL  tileTopBoundary = (lcuPtr->lcuEdgeInfoPtr->tileTopEdgeFlag == EB_TRUE && ((contextPtr->cuOriginY & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+            EB_BOOL  tileRightBoundary = (lcuPtr->lcuEdgeInfoPtr->tileRightEdgeFlag == EB_TRUE && (((contextPtr->cuOriginX + cuStats->size) & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
             //printf("LCU (%d, %d), left/top/right boundary %d/%d/%d\n", lcuOriginX, lcuOriginY,
             //        tileLeftBoundary, tileTopBoundary, tileRightBoundary);
 
@@ -3355,7 +3355,7 @@ EB_EXTERN void EncodePass(
                         {
                             contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag) ?
                                 EB_FALSE :
-                                lcuPtr->tileLeftEdgeFlag && ((contextPtr->cuOriginX & (63)) == 0) && (contextPtr->cuOriginY == lcuOriginY);                           
+                                lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag && ((contextPtr->cuOriginX & (63)) == 0) && (contextPtr->cuOriginY == lcuOriginY);                           
                             SetPmEncDecMode(
                                 pictureControlSetPtr,
                                 contextPtr,
@@ -3574,9 +3574,9 @@ EB_EXTERN void EncodePass(
                     EB_U16 partitionOriginX = contextPtr->cuOriginX + INTRA_4x4_OFFSET_X[partitionIndex];
                     EB_U16 partitionOriginY = contextPtr->cuOriginY + INTRA_4x4_OFFSET_Y[partitionIndex];
 
-                    EB_BOOL pictureLeftBoundary = (lcuPtr->tileLeftEdgeFlag == EB_TRUE && ((partitionOriginX & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
-                    EB_BOOL pictureTopBoundary = (lcuPtr->tileTopEdgeFlag == EB_TRUE && ((partitionOriginY & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
-                    EB_BOOL pictureRightBoundary = (lcuPtr->tileRightEdgeFlag == EB_TRUE && (((partitionOriginX + MIN_PU_SIZE) & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+                    EB_BOOL pictureLeftBoundary = (lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag == EB_TRUE && ((partitionOriginX & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+                    EB_BOOL pictureTopBoundary = (lcuPtr->lcuEdgeInfoPtr->tileTopEdgeFlag == EB_TRUE && ((partitionOriginY & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+                    EB_BOOL pictureRightBoundary = (lcuPtr->lcuEdgeInfoPtr->tileRightEdgeFlag == EB_TRUE && (((partitionOriginX + MIN_PU_SIZE) & (lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
 
                     EB_U8   intraLumaMode = lcuPtr->intra4x4Mode[((MD_SCAN_TO_RASTER_SCAN[cuItr] - 21) << 2) + partitionIndex];
                     EB_U8   intraLumaModeForChroma = lcuPtr->intra4x4Mode[((MD_SCAN_TO_RASTER_SCAN[cuItr] - 21) << 2)];
@@ -3623,9 +3623,9 @@ EB_EXTERN void EncodePass(
                         //   only the right picture edge check and not the left or top boundary checks as the block size
                         //   has no influence on those checks.  
                         if (colorFormat == EB_YUV444) {
-                            pictureRightBoundary = (lcuPtr->tileRightEdgeFlag == EB_TRUE && (((partitionOriginX + MIN_PU_SIZE) & (MAX_LCU_SIZE - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+                            pictureRightBoundary = (lcuPtr->lcuEdgeInfoPtr->tileRightEdgeFlag == EB_TRUE && (((partitionOriginX + MIN_PU_SIZE) & (MAX_LCU_SIZE - 1)) == 0)) ? EB_TRUE : EB_FALSE;
                         } else {
-                            pictureRightBoundary = (lcuPtr->tileRightEdgeFlag == EB_TRUE && ((((partitionOriginX / 2) + MIN_PU_SIZE) & ((MAX_LCU_SIZE / 2) - 1)) == 0)) ? EB_TRUE : EB_FALSE;
+                            pictureRightBoundary = (lcuPtr->lcuEdgeInfoPtr->tileRightEdgeFlag == EB_TRUE && ((((partitionOriginX / 2) + MIN_PU_SIZE) & ((MAX_LCU_SIZE / 2) - 1)) == 0)) ? EB_TRUE : EB_FALSE;
                         }
                         componentMask = PICTURE_BUFFER_DESC_FULL_MASK;
 						GenerateChromaIntraReferenceSamplesFuncTable[is16bit](
@@ -3684,7 +3684,7 @@ EB_EXTERN void EncodePass(
                     // Encode Transform Unit -INTRA-
                     contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag) ?
                         EB_FALSE :
-                        lcuPtr->tileLeftEdgeFlag && ((contextPtr->cuOriginX & (63)) == 0) && (contextPtr->cuOriginY == lcuOriginY);
+                        lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag && ((contextPtr->cuOriginX & (63)) == 0) && (contextPtr->cuOriginY == lcuOriginY);
 
                     SetPmEncDecMode(
                         pictureControlSetPtr,
@@ -3816,7 +3816,7 @@ EB_EXTERN void EncodePass(
                 //if QPM and Segments are used, First Cu in LCU row should have at least one coeff. 
                 EB_BOOL isFirstCUinRow = (useDeltaQp == 1) &&
                     !singleSegment &&
-                     lcuPtr->tileLeftEdgeFlag && ((contextPtr->cuOriginX & (63)) == 0) && (contextPtr->cuOriginY == lcuOriginY) ? EB_TRUE : EB_FALSE;;
+                     lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag && ((contextPtr->cuOriginX & (63)) == 0) && (contextPtr->cuOriginY == lcuOriginY) ? EB_TRUE : EB_FALSE;;
                 //Motion Compensation could be avoided in the case below
                 EB_BOOL doMC = EB_TRUE;
 
@@ -3970,7 +3970,7 @@ EB_EXTERN void EncodePass(
                         //TU LOOP for MV mode + Luma CBF decision. 
                         contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag) ?
                             EB_FALSE :
-                            lcuPtr->tileLeftEdgeFlag && ((tuOriginX & 63) == 0) && (tuOriginY == lcuOriginY);
+                            lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag && ((tuOriginX & 63) == 0) && (tuOriginY == lcuOriginY);
 
                         SetPmEncDecMode(
                                 pictureControlSetPtr,
@@ -4159,7 +4159,7 @@ EB_EXTERN void EncodePass(
                     } else if (cuPtr->predictionUnitArray[0].mergeFlag == EB_TRUE) {
                         contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag) ?
                             EB_FALSE :
-                            lcuPtr->tileLeftEdgeFlag && ((tuOriginX & 63) == 0) && (tuOriginY == lcuOriginY);
+                            lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag && ((tuOriginX & 63) == 0) && (tuOriginY == lcuOriginY);
 
                         SetPmEncDecMode(
                                 pictureControlSetPtr,
@@ -4257,7 +4257,7 @@ EB_EXTERN void EncodePass(
 
                     contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag) ?
                         EB_FALSE :
-                        lcuPtr->tileLeftEdgeFlag && ((tuOriginX & 63) == 0) && (tuOriginY == lcuOriginY);
+                        lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag && ((tuOriginX & 63) == 0) && (tuOriginY == lcuOriginY);
 
                     if (cuPtr->transformUnitArray[contextPtr->tuItr].crCbf) {
                         cuPtr->transformUnitArray[0].crCbf = EB_TRUE;
@@ -4453,8 +4453,8 @@ EB_EXTERN void EncodePass(
                     pictureControlSetPtr->difCuDeltaQpDepth,
                     &(pictureControlSetPtr->encPrevCodedQp[tileIdx][singleSegment ? 0 : lcuRowIndex]),
                     &(pictureControlSetPtr->encPrevQuantGroupCodedQp[tileIdx][singleSegment ? 0 : lcuRowIndex]),
-                    lcuPtr->tileOriginX,
-                    lcuPtr->tileOriginY,
+                    lcuPtr->tileInfoPtr->tilePxlOriginX,
+                    lcuPtr->tileInfoPtr->tilePxlOriginY,
                     lcuQp);
 
                 // Assign DLF QP
@@ -4608,8 +4608,8 @@ EB_EXTERN void EncodePass(
             pictureControlSetPtr->horizontalEdgeBSArray[tbAddr],
             //lcuOriginY == 0 ? (EB_U8*)EB_NULL : pictureControlSetPtr->verticalEdgeBSArray[tbAddr - pictureWidthInLcu],
             //lcuOriginX == 0 ? (EB_U8*)EB_NULL : pictureControlSetPtr->horizontalEdgeBSArray[tbAddr - 1],
-            lcuPtr->tileTopEdgeFlag ? (EB_U8*)EB_NULL : pictureControlSetPtr->verticalEdgeBSArray[tbAddr - pictureWidthInLcu],
-            lcuPtr->tileLeftEdgeFlag ? (EB_U8*)EB_NULL : pictureControlSetPtr->horizontalEdgeBSArray[tbAddr - 1],
+            lcuPtr->lcuEdgeInfoPtr->tileTopEdgeFlag ? (EB_U8*)EB_NULL : pictureControlSetPtr->verticalEdgeBSArray[tbAddr - pictureWidthInLcu],
+            lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag ? (EB_U8*)EB_NULL : pictureControlSetPtr->horizontalEdgeBSArray[tbAddr - 1],
             pictureControlSetPtr);
 
         LcuPicEdgeDLFCoreFuncTable[is16bit](
@@ -4634,7 +4634,7 @@ EB_EXTERN void EncodePass(
 
         //Jing: Double check for multi-tile
         //if (lcuOriginY != 0){
-        if (!lcuPtr->tileTopEdgeFlag) {
+        if (!lcuPtr->lcuEdgeInfoPtr->tileTopEdgeFlag) {
             EB_U32 topSaoIndex = GetNeighborArrayUnitTopIndex(
                 pictureControlSetPtr->epSaoNeighborArray[tileIdx],
                 lcuOriginX);
@@ -4645,7 +4645,7 @@ EB_EXTERN void EncodePass(
             topSaoPtr = (SaoParameters_t*)EB_NULL;
         }
         //if (lcuOriginX != 0){
-        if (!lcuPtr->tileLeftEdgeFlag) {
+        if (!lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag) {
             EB_U32 leftSaoIndex = GetNeighborArrayUnitLeftIndex(
                 pictureControlSetPtr->epSaoNeighborArray[tileIdx],
                 lcuOriginY);

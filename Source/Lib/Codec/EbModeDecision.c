@@ -391,11 +391,11 @@ EB_ERRORTYPE PreModeDecision(
 	return return_error;
 }
 
-void LimitMvOverBound(
+static void LimitMvOverBound(
     EB_S16 *mvx,
     EB_S16 *mvy,
     ModeDecisionContext_t           *ctxtPtr,
-    const SequenceControlSet_t      *sCSet)
+    const LargestCodingUnit_t *lcuPtr)
 {
     EB_S32 mvxF, mvyF;
 
@@ -405,20 +405,14 @@ void LimitMvOverBound(
 
     EB_S32 cuOriginX = (EB_S32)ctxtPtr->cuOriginX << 2;
     EB_S32 cuOriginY = (EB_S32)ctxtPtr->cuOriginY << 2;
-    EB_S32 startX = 0;
-    EB_S32 startY = 0;
-    EB_S32 endX   = (EB_S32)sCSet->lumaWidth << 2;
-    EB_S32 endY   = (EB_S32)sCSet->lumaHeight << 2;
+
+    EB_S32 startX = lcuPtr->tileInfoPtr->tilePxlOriginX << 2;
+    EB_S32 startY = lcuPtr->tileInfoPtr->tilePxlOriginY << 2;
+    EB_S32 endX   = lcuPtr->tileInfoPtr->tilePxlEndX << 2;
+    EB_S32 endY   = lcuPtr->tileInfoPtr->tilePxlEndY << 2;
     EB_S32 cuSize = (EB_S32)ctxtPtr->cuStats->size << 2;
     EB_S32 pad = (4 << 2);
 
-    if ((sCSet->tileRowCount * sCSet->tileColumnCount) > 1) {
-        const unsigned lcuIndex = ctxtPtr->cuOriginX/sCSet->lcuSize + (ctxtPtr->cuOriginY/sCSet->lcuSize) * sCSet->pictureWidthInLcu;
-        startX = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartX << 2;
-        startY = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartY << 2;
-        endX   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndX << 2;
-        endY   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndY << 2;
-    }
     //Jing: if MV is quarter/half, the 7,8 tap interpolation will cross the boundary
     //Just clamp the MV to integer
 
@@ -500,27 +494,27 @@ void Me2Nx2NCandidatesInjection(
                     &candidateArray[canTotalCnt].motionVector_x_L0,
                     &candidateArray[canTotalCnt].motionVector_y_L0,
                     contextPtr,
-                    sequenceControlSetPtr);
+                    lcuPtr);
             }
             else if (interDirection == UNI_PRED_LIST_1) {
                 LimitMvOverBound(
                     &candidateArray[canTotalCnt].motionVector_x_L1,
                     &candidateArray[canTotalCnt].motionVector_y_L1,
                     contextPtr,
-                    sequenceControlSetPtr);
+                    lcuPtr);
             }
             else {
                 LimitMvOverBound(
                     &candidateArray[canTotalCnt].motionVector_x_L0,
                     &candidateArray[canTotalCnt].motionVector_y_L0,
                     contextPtr,
-                    sequenceControlSetPtr);
+                    lcuPtr);
 
                 LimitMvOverBound(
                     &candidateArray[canTotalCnt].motionVector_x_L1,
                     &candidateArray[canTotalCnt].motionVector_y_L1,
                     contextPtr,
-                    sequenceControlSetPtr);
+                    lcuPtr);
             }
         }
 
@@ -1451,11 +1445,11 @@ void  ProductIntraCandidateInjection(
     return;
 }
 
-EB_BOOL CheckForMvOverBound(
+static EB_BOOL CheckForMvOverBound(
     EB_S16 mvx,
     EB_S16 mvy,
     ModeDecisionContext_t           *ctxtPtr,
-    const SequenceControlSet_t      *sCSet)
+    const LargestCodingUnit_t *lcuPtr)
 {
     EB_S32 mvxF, mvyF;
 
@@ -1465,20 +1459,13 @@ EB_BOOL CheckForMvOverBound(
 
     EB_S32 cuOriginX = (EB_S32)ctxtPtr->cuOriginX << 2;
     EB_S32 cuOriginY = (EB_S32)ctxtPtr->cuOriginY << 2;
-    EB_S32 startX = 0;
-    EB_S32 startY = 0;
-    EB_S32 endX   = (EB_S32)sCSet->lumaWidth << 2;
-    EB_S32 endY   = (EB_S32)sCSet->lumaHeight << 2;
-    EB_S32 cuSize = (EB_S32)ctxtPtr->cuStats->size << 2;
-    EB_S32 pad = 4 << 2;
 
-    if ((sCSet->tileRowCount * sCSet->tileColumnCount) > 1) {
-        const unsigned lcuIndex = ctxtPtr->cuOriginX/sCSet->lcuSize + (ctxtPtr->cuOriginY/sCSet->lcuSize) * sCSet->pictureWidthInLcu;
-        startX = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartX << 2;
-        startY = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileStartY << 2;
-        endX   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndX << 2;
-        endY   = (EB_S32)sCSet->lcuParamsArray[lcuIndex].tileEndY << 2;
-    }
+    EB_S32 startX = lcuPtr->tileInfoPtr->tilePxlOriginX << 2;
+    EB_S32 startY = lcuPtr->tileInfoPtr->tilePxlOriginY << 2;
+    EB_S32 endX   = lcuPtr->tileInfoPtr->tilePxlEndX << 2;
+    EB_S32 endY   = lcuPtr->tileInfoPtr->tilePxlEndY << 2;
+    EB_S32 cuSize = (EB_S32)ctxtPtr->cuStats->size << 2;
+    EB_S32 pad = (4 << 2);
 
     if (cuOriginX + mvxF + cuSize > (endX - pad)) {
 
@@ -1528,9 +1515,10 @@ EB_BOOL CheckForMvOverBound(
     return EB_FALSE;
 }
 
-void ProductMergeSkip2Nx2NCandidatesInjection(
+static void ProductMergeSkip2Nx2NCandidatesInjection(
     ModeDecisionContext_t          *contextPtr,
     const SequenceControlSet_t     *sequenceControlSetPtr,
+	LargestCodingUnit_t			   *lcuPtr,
     InterPredictionContext_t       *interPredictionPtr,
     EB_U32                         *candidateTotalCnt,
     EB_U32                          mvMergeCandidateTotalCount
@@ -1542,7 +1530,6 @@ void ProductMergeSkip2Nx2NCandidatesInjection(
     EB_U32                   duplicateIndex;
     EB_BOOL                  mvMergeDuplicateFlag       = EB_FALSE;
     EB_BOOL                  mvOutOfPicFlag             = EB_FALSE;
-    (void)sequenceControlSetPtr;
     ModeDecisionCandidate_t	*candidateArray             = contextPtr->fastCandidateArray;
 
     while (mvMergeCandidateTotalCount)
@@ -1575,26 +1562,26 @@ void ProductMergeSkip2Nx2NCandidatesInjection(
                         candidateMv[REF_LIST_0].x,
                         candidateMv[REF_LIST_0].y,
                         contextPtr,
-                        sequenceControlSetPtr);
+                        lcuPtr);
                 }
                 else if (mvMergeCandidatePtr->predictionDirection == UNI_PRED_LIST_1) {
                     mvOutOfPicFlag = CheckForMvOverBound(
                         candidateMv[REF_LIST_1].x,
                         candidateMv[REF_LIST_1].y,
                         contextPtr,
-                        sequenceControlSetPtr);
+                        lcuPtr);
                 }
                 else {
                     mvOutOfPicFlag = CheckForMvOverBound(
                         candidateMv[REF_LIST_0].x,
                         candidateMv[REF_LIST_0].y,
                         contextPtr,
-                        sequenceControlSetPtr);
+                        lcuPtr);
                     mvOutOfPicFlag += CheckForMvOverBound(
                         candidateMv[REF_LIST_1].x,
                         candidateMv[REF_LIST_1].y,
                         contextPtr,
-                        sequenceControlSetPtr);
+                        lcuPtr);
                 }
             }
 
@@ -1868,6 +1855,7 @@ EB_ERRORTYPE ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
 			ProductMergeSkip2Nx2NCandidatesInjection( // HT not much to do
 				contextPtr,
 				sequenceControlSetPtr,
+                lcuPtr,
 				interPredictionPtr,
 				&canTotalCnt,
 				mvMergeCandidateTotalCount);

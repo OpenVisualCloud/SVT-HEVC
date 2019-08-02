@@ -4934,8 +4934,8 @@ EB_ERRORTYPE UpdateNeighborSamplesArrayOL(
 	EB_U32 height = inputPtr->height;
 	EB_U32 blockSizeHalf = blockSize << 1;
 
-    const EB_BOOL pictureLeftBoundary = (lcuPtr->pictureLeftEdgeFlag == EB_TRUE && (srcOriginX & (lcuPtr->size - 1)) == 0) ? EB_TRUE : EB_FALSE;
-    const EB_BOOL pictureTopBoundary  = (lcuPtr->pictureTopEdgeFlag  == EB_TRUE && (srcOriginY & (lcuPtr->size - 1)) == 0) ? EB_TRUE : EB_FALSE;
+    const EB_BOOL pictureLeftBoundary = (lcuPtr->lcuEdgeInfoPtr->pictureLeftEdgeFlag == EB_TRUE && (srcOriginX & (lcuPtr->size - 1)) == 0) ? EB_TRUE : EB_FALSE;
+    const EB_BOOL pictureTopBoundary  = (lcuPtr->lcuEdgeInfoPtr->pictureTopEdgeFlag  == EB_TRUE && (srcOriginY & (lcuPtr->size - 1)) == 0) ? EB_TRUE : EB_FALSE;
     // Adjust the Source ptr to start at the origin of the block being updated
 	srcPtr  = inputPtr->bufferY + (((srcOriginY + inputPtr->originY) * stride) + (srcOriginX + inputPtr->originX));
 
@@ -5058,8 +5058,8 @@ EB_ERRORTYPE UpdateChromaNeighborSamplesArrayOL(
 	EB_U32 height = inputPtr->height >> 1;
 	EB_U32 blockSizeHalf = blockSize << 1;
 
-    const EB_BOOL pictureLeftBoundary = (lcuPtr->pictureLeftEdgeFlag == EB_TRUE && (srcOriginX & (lcuPtr->size - 1)) == 0) ? EB_TRUE : EB_FALSE;
-    const EB_BOOL pictureTopBoundary  = (lcuPtr->pictureTopEdgeFlag  == EB_TRUE && (srcOriginY & (lcuPtr->size - 1)) == 0) ? EB_TRUE : EB_FALSE;
+    const EB_BOOL pictureLeftBoundary = (lcuPtr->lcuEdgeInfoPtr->pictureLeftEdgeFlag == EB_TRUE && (srcOriginX & (lcuPtr->size - 1)) == 0) ? EB_TRUE : EB_FALSE;
+    const EB_BOOL pictureTopBoundary  = (lcuPtr->lcuEdgeInfoPtr->pictureTopEdgeFlag  == EB_TRUE && (srcOriginY & (lcuPtr->size - 1)) == 0) ? EB_TRUE : EB_FALSE;
 
     // Adjust the Source ptr to start at the origin of the block being updated
 	cbSrcPtr  = inputPtr->bufferCb + (((cuChromaOriginY + (inputPtr->originY >> 1)) * cbStride) + (cuChromaOriginX + (inputPtr->originX >> 1)));
