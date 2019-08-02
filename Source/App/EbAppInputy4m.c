@@ -7,11 +7,6 @@
 #define YFM_HEADER_MAX 80
 #define YUV4MPEG2_IND_SIZE 9
 
-// Define PRINT_HEADER to log y4m header contents
-#ifndef NDEBUG
-#define PRINT_HEADER
-#endif
-
 #define CHROMA_MAX 4
 
 #include "EbAppConfig.h"
