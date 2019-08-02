@@ -6755,7 +6755,7 @@ static void CodeSliceHeader(
     if (tileMode) {
         unsigned tileColumnNumMinus1 = sequenceControlSetPtr->tileColumnCount - 1;
         unsigned tileRowNumMinus1 = sequenceControlSetPtr->tileRowCount - 1;
-        unsigned num_entry_point_offsets = sequenceControlSetPtr->tileColumnCount * sequenceControlSetPtr->tileRowCount - 1;
+        unsigned num_entry_point_offsets = sequenceControlSetPtr->tileSliceMode == 0 ? (sequenceControlSetPtr->tileColumnCount * sequenceControlSetPtr->tileRowCount - 1) : 0;
 
         if (tileColumnNumMinus1 > 0 || tileRowNumMinus1 > 0) {
             EB_U32 maxOffset = 0;
@@ -6765,7 +6765,7 @@ static void CodeSliceHeader(
                 if (offset[tileIdx] > maxOffset) {
                     maxOffset = offset[tileIdx];
                 }
-                //printf("tile %d, size %d\n", tileIdx, offset);
+                //printf("tile %d, size %d\n", tileIdx, offset[tileIdx]);
             }
 
             EB_U32 offsetLenMinus1 = 0;
