@@ -6,7 +6,7 @@
 #include "EbAppInputy4m.h"
 #define YFM_HEADER_MAX 80
 #define YUV4MPEG2_IND_SIZE 9
-#define PRINT_HEADER 0
+
 #define CHROMA_MAX 4
 
 #include "EbAppConfig.h"
