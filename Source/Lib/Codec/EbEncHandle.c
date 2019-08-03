@@ -1682,7 +1682,7 @@ EB_U32 SetParentPcs(EB_H265_ENC_CONFIGURATION*   config)
 
     fps = fps > 120 ? 120 : fps;
     fps = fps < 24 ? 24 : fps;
-    
+
     if (config->intraPeriodLength > 0 && ((EB_U32)(config->intraPeriodLength) > (fps << 1)) && ((config->sourceWidth * config->sourceHeight) < INPUT_SIZE_4K_TH))
         fps = config->intraPeriodLength;
 
