@@ -664,7 +664,7 @@ EB_ERRORTYPE SignalDerivationMultiProcessesOq(
 	  pictureControlSetPtr->cu16x16Mode = CU_16x16_MODE_0;
 
     // Set Skip OIS 8x8 Flag
-    pictureControlSetPtr->skipOis8x8 = EB_FALSE;
+    pictureControlSetPtr->skipOis8x8 = (pictureControlSetPtr->sliceType == EB_I_PICTURE && (pictureControlSetPtr->encMode <= ENC_MODE_10)) ? EB_FALSE : EB_TRUE;
 
     return return_error;
 }
