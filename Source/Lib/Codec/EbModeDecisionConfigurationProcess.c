@@ -1522,12 +1522,12 @@ void SetTargetBudgetOq(
             budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
             pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * OPEN_LOOP_COST :
             (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
-            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_104 :
-            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_103;
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
         else
             budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
-            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_104 :
-            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_103;
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
     }
 
 
