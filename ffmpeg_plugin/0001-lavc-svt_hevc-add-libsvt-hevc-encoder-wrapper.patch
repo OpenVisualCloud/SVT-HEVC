@@ -80,7 +80,7 @@ new file mode 100644
 index 0000000..d9ac04c
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,501 @@
+@@ -0,0 +1,499 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -103,8 +103,6 @@ index 0000000..d9ac04c
 +* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 +*/
 +
-+#include "EbErrorCodes.h"
-+#include "EbTime.h"
 +#include "EbApi.h"
 +
 +#include "libavutil/common.h"
