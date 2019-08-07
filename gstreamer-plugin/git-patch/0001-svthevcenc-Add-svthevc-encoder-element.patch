@@ -1,4 +1,4 @@
-From 3c1319270bb1391e6193ec3d35456bc8c81a7ad3 Mon Sep 17 00:00:00 2001
+From ba1d8710f9b42d8aa8bbad770d90780bb654c512 Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -1992,7 +1992,7 @@ index 0000000..be1d492
 +#endif /* __GST_SVTHEVC_ENC_H__ */
 diff --git a/ext/svthevcenc/meson.build b/ext/svthevcenc/meson.build
 new file mode 100644
-index 0000000..a743b52
+index 0000000..941d7ad
 --- /dev/null
 +++ b/ext/svthevcenc/meson.build
 @@ -0,0 +1,18 @@
@@ -2000,7 +2000,7 @@ index 0000000..a743b52
 +  'gstsvthevcenc.c',
 +]
 +
-+svthevcenc_dep = dependency('SvtHevcEnc', required: false)
++svthevcenc_dep = dependency('SvtHevcEnc', version : '>= 1.3.0', required: false)
 +
 +if svthevcenc_dep.found()
 +  gstsvthevcenc = library('gstsvthevcenc',
