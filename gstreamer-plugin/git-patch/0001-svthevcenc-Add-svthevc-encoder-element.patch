@@ -1,4 +1,4 @@
-From ba1d8710f9b42d8aa8bbad770d90780bb654c512 Mon Sep 17 00:00:00 2001
+From c296ac47df7b66fc29c47f14037a19fd8fb5f80c Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -8,14 +8,14 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  ext/Makefile.am                   |   12 +-
  ext/meson.build                   |    1 +
  ext/svthevcenc/Makefile.am        |   18 +
- ext/svthevcenc/gstsvthevcenc.c    | 1735 +++++++++++++++++++++++++++++++++++++
+ ext/svthevcenc/gstsvthevcenc.c    | 1676 +++++++++++++++++++++++++++++++++++++
  ext/svthevcenc/gstsvthevcenc.h    |  118 +++
  ext/svthevcenc/meson.build        |   18 +
  tests/check/Makefile.am           |    7 +
  tests/check/elements/.gitignore   |    1 +
  tests/check/elements/svthevcenc.c |  228 +++++
  tests/check/meson.build           |    1 +
- 11 files changed, 2145 insertions(+), 2 deletions(-)
+ 11 files changed, 2086 insertions(+), 2 deletions(-)
  create mode 100644 ext/svthevcenc/Makefile.am
  create mode 100644 ext/svthevcenc/gstsvthevcenc.c
  create mode 100644 ext/svthevcenc/gstsvthevcenc.h
@@ -127,10 +127,10 @@ index 0000000..6d7f55a
 +noinst_HEADERS = gstsvthevcenc.h
 diff --git a/ext/svthevcenc/gstsvthevcenc.c b/ext/svthevcenc/gstsvthevcenc.c
 new file mode 100644
-index 0000000..53be342
+index 0000000..58a12ed
 --- /dev/null
 +++ b/ext/svthevcenc/gstsvthevcenc.c
-@@ -0,0 +1,1735 @@
+@@ -0,0 +1,1676 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 + *
@@ -249,7 +249,7 @@ index 0000000..53be342
 +        "width = (int) [ 64, 8192 ], " "height = (int) [ 64, 4320 ], "
 +        "stream-format = (string) byte-stream, "
 +        "alignment = (string) au, "
-+        "profile = (string) { main, main-10, main-4:4:4 }")
++        "profile = (string) { main, main-10, main-444 }")
 +    );
 +
 +static void gst_svthevc_enc_finalize (GObject * object);
@@ -315,7 +315,7 @@ index 0000000..53be342
 +{
 +  if (g_str_has_prefix (str, "main-10"))
 +    *has_420 = *has_420_10 = TRUE;
-+  else if (g_str_has_prefix (str, "main-4:4:4"))
++  else if (g_str_has_prefix (str, "main-444"))
 +    *has_420 = *has_420_10 = *has_422 = *has_444 = TRUE;
 +  else if (g_str_has_prefix (str, "main"))
 +    *has_420 = TRUE;
@@ -1049,56 +1049,6 @@ index 0000000..53be342
 +  g_free (nal);
 +}
 +
-+static const gchar *
-+gst_svthevc_h265_get_format_range_ext_profile (guint16 val)
-+{
-+  GST_LOG ("format-range-extensions-profile : 0x%x", val);
-+
-+  switch (val) {
-+    case 0x1c1:
-+      return "main-4:4:4";
-+    case 0x181:
-+      return "main-4:4:4-10";
-+    default:
-+      break;
-+  }
-+
-+  return NULL;
-+}
-+
-+static const gchar *
-+gst_svthevc_h265_get_profile (const guint8 * profile_tier_level, guint len)
-+{
-+  const gchar *profile = NULL;
-+  gint profile_idc;
-+
-+  g_return_val_if_fail (profile_tier_level != NULL, NULL);
-+
-+  if (len < 2)
-+    return NULL;
-+
-+  profile_idc = (profile_tier_level[0] & 0x1f);
-+
-+  if (profile_idc == 1)
-+    profile = "main";
-+  else if (profile_idc == 2)
-+    profile = "main-10";
-+  else if (profile_idc == 3)
-+    profile = "main-still-picture";
-+  else if (profile_idc == 4 && len >= 11) {
-+    GstBitReader br = GST_BIT_READER_INIT (profile_tier_level, len);
-+    guint16 range_ext;
-+    if (!gst_bit_reader_skip (&br, 44))
-+      return NULL;
-+    if (!gst_bit_reader_get_bits_uint16 (&br, &range_ext, 9))
-+      return NULL;
-+    profile = gst_svthevc_h265_get_format_range_ext_profile (range_ext);
-+  } else
-+    profile = NULL;
-+
-+  return profile;
-+}
-+
 +static gboolean
 +gst_svthevc_enc_set_level_tier_and_profile (GstSvtHevcEnc * encoder,
 +    GstCaps * caps)
@@ -1107,6 +1057,7 @@ index 0000000..53be342
 +  EB_ERRORTYPE svt_ret;
 +  gboolean ret = TRUE;
 +  const gchar *level, *tier, *profile;
++  GstStructure *s;
 +
 +  GST_DEBUG_OBJECT (encoder, "set profile, level and tier");
 +
@@ -1122,23 +1073,13 @@ index 0000000..53be342
 +
 +  nal = gst_svthevc_enc_bytestream_to_nal (encoder, headerPtr);
 +
-+  level =
-+      gst_codec_utils_h265_get_level (nal->pBuffer + 6, nal->nFilledLen - 6);
-+  if (level != NULL)
-+    gst_caps_set_simple (caps, "level", G_TYPE_STRING, level, NULL);
++  gst_codec_utils_h265_caps_set_level_tier_and_profile (caps,
++      nal->pBuffer + 6, nal->nFilledLen - 6);
 +
-+  tier = gst_codec_utils_h265_get_tier (nal->pBuffer + 6, nal->nFilledLen - 6);
-+  if (tier != NULL)
-+    gst_caps_set_simple (caps, "tier", G_TYPE_STRING, tier, NULL);
-+
-+  /* codec_utils does not support h265 range extension profile yet.
-+   * If GStreamer supports this, it will be better handle the profile data.
-+   * https://gitlab.freedesktop.org/gstreamer/gst-plugins-base/issues/299
-+   */
-+  profile =
-+      gst_svthevc_h265_get_profile (nal->pBuffer + 6, nal->nFilledLen - 6);
-+  if (profile != NULL)
-+    gst_caps_set_simple (caps, "profile", G_TYPE_STRING, profile, NULL);
++  s = gst_caps_get_structure (caps, 0);
++  profile = gst_structure_get_string (s, "profile");
++  tier = gst_structure_get_string (s, "tier");
++  level = gst_structure_get_string (s, "level");
 +
 +  GST_DEBUG_OBJECT (encoder, "profile : %s", (profile) ? profile : "---");
 +  GST_DEBUG_OBJECT (encoder, "tier    : %s", (tier) ? tier : "---");
@@ -1311,7 +1252,7 @@ index 0000000..53be342
 +    if (profile) {
 +      if (g_str_has_prefix (profile, "main-10")) {
 +        encoder->profile = 2;
-+      } else if (g_str_has_prefix (profile, "main-4:4:4")) {
++      } else if (g_str_has_prefix (profile, "main-444")) {
 +        encoder->profile = 4;
 +      } else if (g_str_has_prefix (profile, "main")) {
 +        encoder->profile = 1;
