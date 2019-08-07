@@ -1,4 +1,4 @@
-From f9e7e9773c3d2d14c1de5373b8703a0ba99cfe12 Mon Sep 17 00:00:00 2001
+From 0fe61d276ddd6559058c77522c3a167912cbee97 Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -10,12 +10,12 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  ext/svthevcenc/Makefile.am        |   18 +
  ext/svthevcenc/gstsvthevcenc.c    | 1735 +++++++++++++++++++++++++++++++++++++
  ext/svthevcenc/gstsvthevcenc.h    |  118 +++
- ext/svthevcenc/meson.build        |   16 +
+ ext/svthevcenc/meson.build        |   17 +
  tests/check/Makefile.am           |    7 +
  tests/check/elements/.gitignore   |    1 +
  tests/check/elements/svthevcenc.c |  228 +++++
  tests/check/meson.build           |    1 +
- 11 files changed, 2143 insertions(+), 2 deletions(-)
+ 11 files changed, 2144 insertions(+), 2 deletions(-)
  create mode 100644 ext/svthevcenc/Makefile.am
  create mode 100644 ext/svthevcenc/gstsvthevcenc.c
  create mode 100644 ext/svthevcenc/gstsvthevcenc.h
@@ -1992,10 +1992,10 @@ index 0000000..be1d492
 +#endif /* __GST_SVTHEVC_ENC_H__ */
 diff --git a/ext/svthevcenc/meson.build b/ext/svthevcenc/meson.build
 new file mode 100644
-index 0000000..bac7572
+index 0000000..c49245d
 --- /dev/null
 +++ b/ext/svthevcenc/meson.build
-@@ -0,0 +1,16 @@
+@@ -0,0 +1,17 @@
 +svthevcenc_sources = [
 +  'gstsvthevcenc.c',
 +]
@@ -2011,6 +2011,7 @@ index 0000000..bac7572
 +    install : true,
 +    install_dir : plugins_install_dir,
 +  )
++  pkgconfig.generate(gstsvthevcenc, install_dir : plugins_pkgconfig_install_dir)
 +endif
 diff --git a/tests/check/Makefile.am b/tests/check/Makefile.am
 index c36fa9f..fb15aba 100644
