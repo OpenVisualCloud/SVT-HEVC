@@ -1,4 +1,4 @@
-From 6f0ea1627c58683e0c3a43ef570d21d433c4ad1c Mon Sep 17 00:00:00 2001
+From f9e7e9773c3d2d14c1de5373b8703a0ba99cfe12 Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -23,12 +23,12 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  create mode 100644 tests/check/elements/svthevcenc.c
 
 diff --git a/configure.ac b/configure.ac
-index cb72ee8..a005e97 100644
+index c770006..f8ff236 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -2321,6 +2321,12 @@ AG_GST_CHECK_FEATURE(SCTP, [sctp plug-in], sctp, [
-   ])
- ])
+@@ -2111,6 +2111,12 @@ if test "x$HAVE_LTC" = "xyes"; then
+   AC_DEFINE(HAVE_LTC, 1, [Use libltc])
+ fi
  
 +dnl *** svthevcenc : works with libSVT-HEVC 1.3.0 ***
 +translit(dnm, m, l) AM_CONDITIONAL(USE_SVTHEVCENC, true)
@@ -39,24 +39,24 @@ index cb72ee8..a005e97 100644
  else
  
  dnl not building plugins with external dependencies,
-@@ -2403,6 +2409,7 @@ AM_CONDITIONAL(USE_DTLS, false)
- AM_CONDITIONAL(USE_VULKAN, false)
+@@ -2192,6 +2198,7 @@ AM_CONDITIONAL(USE_X265, false)
+ AM_CONDITIONAL(USE_DTLS, false)
  AM_CONDITIONAL(USE_TTML, false)
  AM_CONDITIONAL(USE_SCTP, false)
 +AM_CONDITIONAL(USE_SVTHEVCENC, false)
  
  fi dnl of EXT plugins
  
-@@ -2697,6 +2704,7 @@ ext/webrtc/Makefile
+@@ -2483,6 +2490,7 @@ ext/webrtc/Makefile
  ext/webrtcdsp/Makefile
  ext/wpe/Makefile
  ext/ttml/Makefile
 +ext/svthevcenc/Makefile
  po/Makefile.in
- docs/Makefile
- docs/plugins/Makefile
+ pkgconfig/Makefile
+ pkgconfig/gstreamer-plugins-bad.pc
 diff --git a/ext/Makefile.am b/ext/Makefile.am
-index 94d3bc4..49d3b28 100644
+index 17e427d..ab978a4 100644
 --- a/ext/Makefile.am
 +++ b/ext/Makefile.am
 @@ -400,6 +400,12 @@ else
@@ -92,10 +92,10 @@ index 94d3bc4..49d3b28 100644
  
  include $(top_srcdir)/common/parallel-subdirs.mak
 diff --git a/ext/meson.build b/ext/meson.build
-index e1ce405..7c2deb3 100644
+index 1d3320c..324e8cc 100644
 --- a/ext/meson.build
 +++ b/ext/meson.build
-@@ -63,3 +63,4 @@ subdir('wildmidi')
+@@ -64,3 +64,4 @@ subdir('wildmidi')
  subdir('wpe')
  subdir('x265')
  subdir('zbar')
@@ -2013,10 +2013,10 @@ index 0000000..bac7572
 +  )
 +endif
 diff --git a/tests/check/Makefile.am b/tests/check/Makefile.am
-index a05bc57..6d627df 100644
+index c36fa9f..fb15aba 100644
 --- a/tests/check/Makefile.am
 +++ b/tests/check/Makefile.am
-@@ -229,6 +229,12 @@ else
+@@ -240,6 +240,12 @@ else
  check_nvenc=
  endif
  
@@ -2029,7 +2029,7 @@ index a05bc57..6d627df 100644
  VALGRIND_TO_FIX = \
  	elements/mpeg2enc \
  	elements/mplex    \
-@@ -313,6 +319,7 @@ check_PROGRAMS = \
+@@ -326,6 +332,7 @@ check_PROGRAMS = \
  	$(check_webrtc) \
  	$(check_msdk) \
  	$(check_nvenc) \
@@ -2038,10 +2038,10 @@ index a05bc57..6d627df 100644
  
  noinst_HEADERS = elements/mxfdemux.h libs/isoff.h
 diff --git a/tests/check/elements/.gitignore b/tests/check/elements/.gitignore
-index b7e836f..03e403d 100644
+index ca99cec..7a6834b 100644
 --- a/tests/check/elements/.gitignore
 +++ b/tests/check/elements/.gitignore
-@@ -59,4 +59,5 @@ voaacenc
+@@ -61,4 +61,5 @@ voaacenc
  voamrwbenc
  webrtcbin
  x265enc
@@ -2282,13 +2282,13 @@ index 0000000..0545b3c
 +
 +GST_CHECK_MAIN (svthevcenc);
 diff --git a/tests/check/meson.build b/tests/check/meson.build
-index cd77fb4..73476c6 100644
+index 2218dab..98183a6 100644
 --- a/tests/check/meson.build
 +++ b/tests/check/meson.build
-@@ -43,6 +43,7 @@ base_tests = [
+@@ -35,6 +35,7 @@ base_tests = [
    [['elements/mxfdemux.c']],
    [['elements/mxfmux.c']],
-   [['elements/nvenc.c'], not cuda_dep.found() or not cudart_dep.found(), nvenc_test_deps],
+   [['elements/nvenc.c'], false, [gmodule_dep, gstgl_dep]],
 +  [['elements/svthevcenc.c'], not svthevcenc_dep.found(), [svthevcenc_dep]],
    [['elements/pcapparse.c'], false, [libparser_dep]],
    [['elements/pnm.c']],
