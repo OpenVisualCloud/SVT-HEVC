@@ -225,14 +225,6 @@ typedef struct EB_PARAM_PORTDEFINITIONTYPE {
     EB_U32 nSize;
 } EB_PARAM_PORTDEFINITIONTYPE;
 
-/* string copy */
-extern errno_t strcpy_ss(char *dest, rsize_t dmax, const char *src);
-
-/* fitted string copy */
-extern errno_t strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t slen);
-
-/* string length */
-extern rsize_t strnlen_ss(const char *s, rsize_t smax);
 
 /********************************************************************************************
 * faster memcopy for <= 64B blocks, great w/ inlining and size known at compile time (or w/ PGO)
