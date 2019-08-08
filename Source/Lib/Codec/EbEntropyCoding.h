@@ -57,6 +57,7 @@ extern EB_ERRORTYPE EstimateLcu(
     NeighborArrayUnit_t     *leafDepthNeighborArray,
     NeighborArrayUnit_t     *intraLumaModeNeighborArray,
     NeighborArrayUnit_t     *skipFlagNeighborArray,
+    EB_U16                   tileIdx,
     EB_U32                   pictureOriginX,
     EB_U32                   pictureOriginY);
 

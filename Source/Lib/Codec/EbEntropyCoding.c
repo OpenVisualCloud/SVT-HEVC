@@ -7345,10 +7345,8 @@ static EB_ERRORTYPE Intra4x4EncodeCoeff(
 
 	return return_error;
 }
-/**********************************************
-* Estimate Lcu
-**********************************************/
-EB_ERRORTYPE EstimateLcu(
+
+EB_ERRORTYPE EstimateLcu (
     LargestCodingUnit_t     *tbPtr,
     EB_U32                   lcuOriginX,
     EB_U32                   lcuOriginY,
@@ -7360,6 +7358,7 @@ EB_ERRORTYPE EstimateLcu(
     NeighborArrayUnit_t     *leafDepthNeighborArray,
     NeighborArrayUnit_t     *intraLumaModeNeighborArray,
     NeighborArrayUnit_t     *skipFlagNeighborArray,
+    EB_U16                   tileIdx,
     EB_U32                   pictureOriginX,
     EB_U32                   pictureOriginY)
 {
@@ -7368,6 +7367,7 @@ EB_ERRORTYPE EstimateLcu(
     CabacEncodeContext_t     *cabacEncodeCtxPtr = (CabacEncodeContext_t*)entropyCoderPtr->cabacEncodeContextPtr;
     SequenceControlSet_t     *sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
     EncodeContext_t        *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
+
     // CU Varaiables
     const CodedUnitStats_t   *cuStatsPtr;
     CodingUnit_t             *cuPtr;
@@ -7379,6 +7379,7 @@ EB_ERRORTYPE EstimateLcu(
     EB_U32                    cuSize;
     EB_U8                     cuDepth;
     EB_BOOL                   availableCoeff;
+    cabacEncodeCtxPtr->colorFormat = pictureControlSetPtr->colorFormat;
 
     // PU Varaiables
     PredictionUnit_t         *puPtr;
@@ -7396,6 +7397,7 @@ EB_ERRORTYPE EstimateLcu(
     do {
         EB_BOOL codeCuCond = EB_TRUE; // Code cu only if it is inside the picture
         cuPtr = tbPtr->codedLeafArrayPtr[cuIndex];
+
         if (checkCuOutOfBound)
             codeCuCond = (EB_BOOL)lcuParam->rasterScanCuValidity[MD_SCAN_TO_RASTER_SCAN[cuIndex]]; // check if cu is inside the picture
 
@@ -7426,38 +7428,47 @@ EB_ERRORTYPE EstimateLcu(
             }
 
             if (cuPtr->splitFlag == EB_FALSE) {
-                if (cuPtr->predictionModeFlag == INTRA_MODE && cuPtr->predictionUnitArray->intraLumaMode == EB_INTRA_MODE_4x4)
-
+                if (cuPtr->predictionModeFlag == INTRA_MODE &&
+                    cuPtr->predictionUnitArray->intraLumaMode == EB_INTRA_MODE_4x4) {
                     availableCoeff = (
                         cuPtr->transformUnitArray[1].lumaCbf ||
                         cuPtr->transformUnitArray[2].lumaCbf ||
                         cuPtr->transformUnitArray[3].lumaCbf ||
                         cuPtr->transformUnitArray[4].lumaCbf ||
                         cuPtr->transformUnitArray[1].crCbf ||
-                        cuPtr->transformUnitArray[1].cbCbf) ? EB_TRUE : EB_FALSE;
-
-                else
+                        cuPtr->transformUnitArray[1].cbCbf ||
+                        cuPtr->transformUnitArray[2].crCbf ||
+                        cuPtr->transformUnitArray[2].cbCbf ||
+                        cuPtr->transformUnitArray[3].crCbf ||
+                        cuPtr->transformUnitArray[3].cbCbf ||
+                        cuPtr->transformUnitArray[4].crCbf || // 422 case will use 3rd 4x4 for the 2nd chroma
+                        cuPtr->transformUnitArray[4].cbCbf) ? EB_TRUE : EB_FALSE;
+                }
+                else {
                     availableCoeff = (cuPtr->predictionModeFlag == INTER_MODE) ? (EB_BOOL)cuPtr->rootCbf :
-                    (cuPtr->transformUnitArray[cuSize == sequenceControlSetPtr->lcuSize ? 1 : 0].lumaCbf ||
-                        cuPtr->transformUnitArray[cuSize == sequenceControlSetPtr->lcuSize ? 1 : 0].crCbf ||
-                        cuPtr->transformUnitArray[cuSize == sequenceControlSetPtr->lcuSize ? 1 : 0].cbCbf) ? EB_TRUE : EB_FALSE;
-                // Estimate function is overwritting the values of pictureControlSetPtr->prevCodedQp which are used in EC
-                //EntropyCodingUpdateQp(
-                //    cuPtr,
-                //    availableCoeff,
-                //    cuOriginX,
-                //    cuOriginY,
-                //    cuSize,
-                //    sequenceControlSetPtr->lcuSize,
-                //    sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction || (sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate && sequenceControlSetPtr->staticConfig.lowLevelVbv) ? EB_TRUE : EB_FALSE,
-                //    &entropyDeltaQpNotCoded,
-                //    pictureControlSetPtr->difCuDeltaQpDepth,
-                //    &pictureControlSetPtr->prevCodedQp,
-                //    &pictureControlSetPtr->prevQuantGroupCodedQp,
-                //    tbPtr->qp,
-                //    pictureControlSetPtr,
-                //    pictureOriginX,
-                //    pictureOriginY);
+                        (cuPtr->transformUnitArray[cuSize == sequenceControlSetPtr->lcuSize ? 1 : 0].lumaCbf ||
+                            cuPtr->transformUnitArray[cuSize == sequenceControlSetPtr->lcuSize ? 1 : 0].crCbf ||
+                            cuPtr->transformUnitArray[cuSize == sequenceControlSetPtr->lcuSize ? 1 : 0].crCbf2 ||
+                            cuPtr->transformUnitArray[cuSize == sequenceControlSetPtr->lcuSize ? 1 : 0].cbCbf ||
+                            cuPtr->transformUnitArray[cuSize == sequenceControlSetPtr->lcuSize ? 1 : 0].cbCbf2) ? EB_TRUE : EB_FALSE;
+                }
+
+                EntropyCodingUpdateQp(
+                    cuPtr,
+                    availableCoeff,
+                    cuOriginX,
+                    cuOriginY,
+                    cuSize,
+                    sequenceControlSetPtr->lcuSize,
+                    sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction || (sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate && sequenceControlSetPtr->staticConfig.lowLevelVbv) ? EB_TRUE : EB_FALSE,
+                    &entropyDeltaQpNotCoded,
+                    pictureControlSetPtr->difCuDeltaQpDepth,
+                    &pictureControlSetPtr->tempprevCodedQp[tileIdx],
+                    &pictureControlSetPtr->tempprevQuantGroupCodedQp[tileIdx],
+                    tbPtr->qp,
+                    pictureControlSetPtr,
+                    pictureOriginX,
+                    pictureOriginY);
 
                 // Assign DLF QP
                 entropySetQpArrayBasedOnCU(
@@ -7469,7 +7480,8 @@ EB_ERRORTYPE EstimateLcu(
                     cuPtr->qp);
 
                 // Code the skip flag
-                if (pictureControlSetPtr->sliceType == EB_P_PICTURE || pictureControlSetPtr->sliceType == EB_B_PICTURE) {
+                if (pictureControlSetPtr->sliceType == EB_P_PICTURE || pictureControlSetPtr->sliceType == EB_B_PICTURE)
+                {
                     EncodeSkipFlag(
                         cabacEncodeCtxPtr,
                         (EB_BOOL)cuPtr->skipFlag,
@@ -7479,25 +7491,28 @@ EB_ERRORTYPE EstimateLcu(
                         skipFlagNeighborArray);
                 }
 
-                if (cuPtr->skipFlag) {
+                if (cuPtr->skipFlag)
+                {
                     // Merge Index
                     EncodeMergeIndex(
                         cabacEncodeCtxPtr,
                         &cuPtr->predictionUnitArray[0]);
                 }
-                else {
+                else
+                {
                     // Code CU pred mode (I, P, B, etc.)
                     // (not needed for Intra Slice)
-                    if (pictureControlSetPtr->sliceType == EB_P_PICTURE || pictureControlSetPtr->sliceType == EB_B_PICTURE) {
+                    if (pictureControlSetPtr->sliceType == EB_P_PICTURE || pictureControlSetPtr->sliceType == EB_B_PICTURE)
+                    {
                         EncodePredictionMode(
                             cabacEncodeCtxPtr,
                             cuPtr);
                     }
+
                     switch (cuPtr->predictionModeFlag) {
-
                     case INTRA_MODE:
-                        if (cuPtr->predictionModeFlag == INTRA_MODE && cuPtr->predictionUnitArray->intraLumaMode == EB_INTRA_MODE_4x4) {
-
+                        if (cuPtr->predictionModeFlag == INTRA_MODE &&
+                            cuPtr->predictionUnitArray->intraLumaMode == EB_INTRA_MODE_4x4) {
                             // Code Partition Size
                             EncodeIntra4x4PartitionSize(
                                 cabacEncodeCtxPtr,
@@ -7572,8 +7587,11 @@ EB_ERRORTYPE EstimateLcu(
                             }
 
                             // Code Chroma Mode for Intra
-                            EncodeIntraChromaMode(
-                                cabacEncodeCtxPtr);
+                            for (partitionIndex = 0;
+                                partitionIndex < ((cabacEncodeCtxPtr->colorFormat == EB_YUV444) ? 4 : 1);
+                                partitionIndex++) {
+                                EncodeIntraChromaMode(cabacEncodeCtxPtr);
+                            }
 
                             // Encode Transform Unit Split & CBFs
                             Intra4x4EncodeCoeff(
@@ -7587,7 +7605,6 @@ EB_ERRORTYPE EstimateLcu(
                                 &deltaQpNotCoded);
 
                             tbPtr->quantizedCoeffsBits += cuQuantizedCoeffsBits;
-
                         }
                         else {
                             // Code Partition Size
@@ -7660,7 +7677,6 @@ EB_ERRORTYPE EstimateLcu(
                                 &deltaQpNotCoded);
 
                             tbPtr->quantizedCoeffsBits += cuQuantizedCoeffsBits;
-
                         }
                         break;
 

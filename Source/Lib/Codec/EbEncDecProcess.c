@@ -1341,6 +1341,8 @@ static void ResetTempEntropy(
             entropyCodingQp,
             pictureControlSetPtr->sliceType);
 
+        pictureControlSetPtr->tempprevCodedQp[tileIdx] = pictureControlSetPtr->pictureQp;
+        pictureControlSetPtr->tempprevQuantGroupCodedQp[tileIdx] = pictureControlSetPtr->pictureQp;
         EntropyCodingResetTempNeighborArrays(pictureControlSetPtr, tileIdx);
     }
 }
@@ -4464,6 +4466,7 @@ void* EncDecKernel(void *inputPtr)
                             pictureControlSetPtr->tempLeafDepthNeighborArray[contextPtr->tileIndex],
                             pictureControlSetPtr->tempIntraLumaModeNeighborArray[contextPtr->tileIndex],
                             pictureControlSetPtr->tempSkipFlagNeighborArray[contextPtr->tileIndex],
+                            contextPtr->tileIndex,
                             0,
                             0);
 

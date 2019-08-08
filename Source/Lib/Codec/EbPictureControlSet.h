@@ -217,6 +217,10 @@ typedef struct PictureControlSet_s
     EB_U8                                 prevCodedQp[EB_TILE_MAX_COUNT];
     EB_U8                                 prevQuantGroupCodedQp[EB_TILE_MAX_COUNT];
 
+    // Temp QP Assignment
+    EB_U8                                 tempprevCodedQp[EB_TILE_MAX_COUNT];
+    EB_U8                                 tempprevQuantGroupCodedQp[EB_TILE_MAX_COUNT];
+
     // Enc/DecQP Assignment
     EB_U8                                 encPrevCodedQp[EB_TILE_MAX_COUNT][MAX_PICTURE_HEIGHT_SIZE / MAX_LCU_SIZE];
     EB_U8                                 encPrevQuantGroupCodedQp[EB_TILE_MAX_COUNT][MAX_PICTURE_HEIGHT_SIZE / MAX_LCU_SIZE];
