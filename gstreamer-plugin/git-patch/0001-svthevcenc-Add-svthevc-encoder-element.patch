@@ -1,4 +1,4 @@
-From c296ac47df7b66fc29c47f14037a19fd8fb5f80c Mon Sep 17 00:00:00 2001
+From 718f79e2fa8bb43ac4977f38ac6fe99505dd08a0 Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -127,7 +127,7 @@ index 0000000..6d7f55a
 +noinst_HEADERS = gstsvthevcenc.h
 diff --git a/ext/svthevcenc/gstsvthevcenc.c b/ext/svthevcenc/gstsvthevcenc.c
 new file mode 100644
-index 0000000..58a12ed
+index 0000000..78b2c61
 --- /dev/null
 +++ b/ext/svthevcenc/gstsvthevcenc.c
 @@ -0,0 +1,1676 @@
@@ -205,7 +205,7 @@ index 0000000..58a12ed
 +#define PROP_AUD_DEFAULT                    FALSE
 +#define PROP_HIERARCHICAL_LEVEL_DEFAULT     3
 +#define PROP_LOOKAHEAD_DISTANCE_DEFAULT     40
-+#define PROP_ENCODER_MODE_DEFAULT           9
++#define PROP_ENCODER_MODE_DEFAULT           7
 +#define PROP_RC_MODE_DEFAULT                0
 +#define PROP_QP_DEFAULT                     25
 +#define PROP_QP_MAX_DEFAULT                 48
@@ -520,8 +520,8 @@ index 0000000..58a12ed
 +
 +  g_object_class_install_property (gobject_class, PROP_ENCODER_MODE,
 +      g_param_spec_uint ("speed", "speed (Encoder Mode)",
-+          "Encoding preset [0, 12] (e,g, for subjective quality tuning mode and >=4k resolution), [0, 10] (for >= 1080p resolution), [0, 9] (for all resolution and modes)",
-+          0, 12, PROP_ENCODER_MODE_DEFAULT,
++          "Encoding preset [0, 11] (e.g. 0 is the highest quality mode, 11 is the highest), [0, 11] (for >= 4k resolution), [0, 10] (for >= 1080p resolution), [0, 9] (for all resolution)",
++          0, 11, PROP_ENCODER_MODE_DEFAULT,
 +          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 +
 +  g_object_class_install_property (gobject_class, PROP_RC_MODE,
