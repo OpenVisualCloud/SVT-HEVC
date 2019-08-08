@@ -1244,10 +1244,10 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
         ++(config->performanceContext.frameCount);
         *totalLatency += (uint64_t)headerPtr->nTickCount;
         *maxLatency = (headerPtr->nTickCount > *maxLatency) ? headerPtr->nTickCount : *maxLatency;
-        
-        EbFinishTime((uint64_t*)&finishsTime, (uint64_t*)&finishuTime);
+
+        EbAppFinishTime((uint64_t*)&finishsTime, (uint64_t*)&finishuTime);
         // total execution time, inc init time
-        EbComputeOverallElapsedTime(
+        EbAppComputeOverallElapsedTime(
             config->performanceContext.libStartTime[0],
             config->performanceContext.libStartTime[1],
             finishsTime,
@@ -1255,7 +1255,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
             &config->performanceContext.totalExecutionTime);
 
         // total encode time
-        EbComputeOverallElapsedTime(
+        EbAppComputeOverallElapsedTime(
             config->performanceContext.encodeStartTime[0],
             config->performanceContext.encodeStartTime[1],
             finishsTime,
@@ -1356,4 +1356,3 @@ APPEXITCONDITIONTYPE ProcessOutputReconBuffer(
     }
     return return_value;
 }
-

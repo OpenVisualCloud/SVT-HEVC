@@ -22,7 +22,7 @@
 #error OS/Platform not supported.
 #endif
 
-static void EbStartTime(
+void EbAppStartTime(
     uint64_t *Startseconds,
     uint64_t *Startuseconds)
 {
@@ -42,7 +42,7 @@ static void EbStartTime(
 
 }
 
-static void EbFinishTime(
+void EbAppFinishTime(
     uint64_t *Finishseconds,
     uint64_t *Finishuseconds)
 {
@@ -61,7 +61,7 @@ static void EbFinishTime(
 #endif
 
 }
-static void EbComputeOverallElapsedTime(
+void EbAppComputeOverallElapsedTime(
     uint64_t Startseconds,
     uint64_t Startuseconds,
     uint64_t Finishseconds,
