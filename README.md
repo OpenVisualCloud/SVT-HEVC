@@ -28,13 +28,15 @@ SVT-HEVC may run on any Windows* or Linux* 64 bit operating systems. The list be
 
 - __Windows* Operating Systems (64-bit):__
 
-  - Windows* Server 2016
+  - Windows Server 2016
 
 - __Linux* Operating Systems (64-bit):__
 
-  - Ubuntu* 16.04 Server LTS
+  - Ubuntu 16.04 Server LTS
 
-  - Ubuntu* 18.04 Server LTS
+  - Ubuntu 18.04 Server LTS
+
+  - CentOS 7.4/7.5/7.6
 
 ### Hardware
 
