@@ -89,6 +89,8 @@ EB_ERRORTYPE LargestCodingUnitCtor(
     largestCodingUnitPtr->index                         = lcuIndex; 
     largestCodingUnitPtr->proxytotalBits = 0;
     largestCodingUnitPtr->rowInd = 0;
+    largestCodingUnitPtr->intraSadInterval = 0;
+    largestCodingUnitPtr->intraSadInterval = 0;
     EB_MALLOC(CodingUnit_t**, largestCodingUnitPtr->codedLeafArrayPtr, sizeof(CodingUnit_t*) * CU_MAX_COUNT, EB_N_PTR);
     for(codedLeafIndex=0; codedLeafIndex < CU_MAX_COUNT; ++codedLeafIndex) {
         EB_MALLOC(CodingUnit_t*, largestCodingUnitPtr->codedLeafArrayPtr[codedLeafIndex], sizeof(CodingUnit_t) , EB_N_PTR);

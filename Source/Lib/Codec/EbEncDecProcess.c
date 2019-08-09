@@ -3851,54 +3851,41 @@ EB_ERRORTYPE SignalDerivationEncDecKernelVmaf(
 	return return_error;
 }
 
+
 EB_U32 predBitsPerLcu(PictureControlSet_t* pictureControlSetPtr, EncodeContext_t* encodeContextPtr, LargestCodingUnit_t* lcuPtr, EB_U8 qpVbv)
 {
-    EB_U16 sadIntervalIndex = 0;
-    EB_U16 intraSadIntervalIndex = 0;
     EB_U32 sadBits;
     EB_U32 intraSadBits;
     EB_U32 interSadBits;
     RateControlTables_t *rateControlTablesPtr;
     EB_Bit_Number *sadBitsArrayPtr;
     EB_Bit_Number *intraSadBitsArrayPtr;
-    intraSadIntervalIndex = (EB_U16)(lcuPtr->intraDistortion >> (12 - SAD_PRECISION_INTERVAL));//change 12 to 2*log2(64) 
 
-    intraSadIntervalIndex = (EB_U16)(intraSadIntervalIndex >> 2);
-        if (intraSadIntervalIndex > (NUMBER_OF_SAD_INTERVALS >> 1) - 1) {
-            EB_U16 intraSadIntervalIndexTemp = intraSadIntervalIndex - ((NUMBER_OF_SAD_INTERVALS >> 1) - 1);
-
-            intraSadIntervalIndex = ((NUMBER_OF_SAD_INTERVALS >> 1) - 1) + (intraSadIntervalIndexTemp >> 3);
-    }
-        if (pictureControlSetPtr->sliceType != EB_I_PICTURE)
-        {
-            sadIntervalIndex = (EB_U16)(lcuPtr->interDistortion >> (12 - SAD_PRECISION_INTERVAL));//change 12 to 2*log2(64) 
-
-            sadIntervalIndex = (EB_U16)(sadIntervalIndex >> 2);
-            if (sadIntervalIndex > (NUMBER_OF_SAD_INTERVALS >> 1) - 1) {
-                EB_U16 sadIntervalIndexTemp = sadIntervalIndex - ((NUMBER_OF_SAD_INTERVALS >> 1) - 1);
-
-                sadIntervalIndex = ((NUMBER_OF_SAD_INTERVALS >> 1) - 1) + (sadIntervalIndexTemp >> 3);
-
-            }
-        }
     rateControlTablesPtr = &encodeContextPtr->rateControlTablesArray[qpVbv];
     sadBitsArrayPtr = rateControlTablesPtr->sadBitsArray[pictureControlSetPtr->temporalLayerIndex];
     intraSadBitsArrayPtr = rateControlTablesPtr->intraSadBitsArray[0];
 
-    if (pictureControlSetPtr->sliceType == EB_I_PICTURE)
-        {
-        intraSadBits = intraSadBitsArrayPtr[intraSadIntervalIndex];
-        interSadBits = 0;
-        sadBits = intraSadBits;
+    if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+        if (lcuPtr->fullLcu) {
+            intraSadBits = intraSadBitsArrayPtr[lcuPtr->intraSadInterval];
+            interSadBits = 0;
+            sadBits = intraSadBits;
+        }
+        else
+            return 0;
         }
     else
-        {
-        intraSadBits = intraSadBitsArrayPtr[intraSadIntervalIndex];
-        interSadBits = sadBitsArrayPtr[intraSadIntervalIndex];
-        sadBits = interSadBits;
-        if (interSadBits > (intraSadBits * 3))
-             sadBits = intraSadBits;
+    {
+        if (lcuPtr->fullLcu) {
+            intraSadBits = intraSadBitsArrayPtr[lcuPtr->intraSadInterval];
+            interSadBits = sadBitsArrayPtr[lcuPtr->interSadInterval];
+            sadBits = interSadBits;
+            if (interSadBits > (intraSadBits * 3))
+                sadBits = intraSadBits;
         }
+        else
+            return 0;
+    }
     return sadBits;
 }
 
@@ -4108,6 +4095,8 @@ void* EncDecKernel(void *inputPtr)
     EB_U32                   tempWrittenBitsAfterQuantizedCoeff;
     EB_U32                   bestOisCuIndex = 0;
     EB_U8                    baseQp;
+    EB_U32                   lcuWidth;
+    EB_U32                   lcuHeight;
 
     for (;;) {
 
@@ -4471,17 +4460,24 @@ void* EncDecKernel(void *inputPtr)
                             32 - ((CabacEncodeContext_t*)pictureControlSetPtr->entropyCodingInfo[contextPtr->tileIndex]->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
                             (((CabacEncodeContext_t*)pictureControlSetPtr->entropyCodingInfo[contextPtr->tileIndex]->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum << 3);
                         lcuPtr->proxytotalBits = tempWrittenBitsAfterQuantizedCoeff - tempWrittenBitsBeforeQuantizedCoeff;
+                        lcuWidth = (sequenceControlSetPtr->lumaWidth - lcuOriginX) < MAX_LCU_SIZE ? sequenceControlSetPtr->lumaWidth - lcuOriginX : MAX_LCU_SIZE;
+                        lcuHeight = (sequenceControlSetPtr->lumaHeight - lcuOriginY) < MAX_LCU_SIZE ? sequenceControlSetPtr->lumaHeight - lcuOriginY : MAX_LCU_SIZE;
+                        lcuPtr->fullLcu = 0;
+                        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+                            if (lcuWidth == MAX_LCU_SIZE && lcuHeight == MAX_LCU_SIZE) {
+                                lcuPtr->intraSadInterval = pictureControlSetPtr->ParentPcsPtr->intraSadIntervalIndex[lcuIndex];
+                                lcuPtr->fullLcu = 1;
+                            }
+                        }
+                        else {
+                            if (lcuWidth == MAX_LCU_SIZE && lcuHeight == MAX_LCU_SIZE) {
+                                lcuPtr->intraSadInterval = pictureControlSetPtr->ParentPcsPtr->intraSadIntervalIndex[lcuIndex];
+                                lcuPtr->interSadInterval = pictureControlSetPtr->ParentPcsPtr->interSadIntervalIndex[lcuIndex];
+                                lcuPtr->fullLcu = 1;
+                            }
+                        }
                         //Update CU Stats for row level vbv control
                         EbBlockOnMutex(pictureControlSetPtr->rowStats[yLcuIndex]->rowUpdateMutex);
-                        lcuPtr->intraDistortion = pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[1][bestOisCuIndex].distortion +
-
-                            pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[2][bestOisCuIndex].distortion +
-
-                            pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[3][bestOisCuIndex].distortion +
-
-                            pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[4][bestOisCuIndex].distortion;
-                        if (pictureControlSetPtr->sliceType != EB_I_PICTURE)
-                            lcuPtr->interDistortion = pictureControlSetPtr->ParentPcsPtr->rcMEdistortion[lcuIndex];
                         pictureControlSetPtr->rowStats[yLcuIndex]->encodedBits += lcuPtr->proxytotalBits;
                         pictureControlSetPtr->rowStats[yLcuIndex]->totalCUEncoded++;
                         pictureControlSetPtr->rowStats[yLcuIndex]->numEncodedCUs = lcuPtr->index;

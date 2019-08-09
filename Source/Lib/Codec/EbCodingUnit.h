@@ -187,8 +187,9 @@ typedef struct LargestCodingUnit_s {
     EB_U32                          totalBits;
     EB_U32                          proxytotalBits;
     EB_U32                          rowInd;
-    EB_U32                          intraDistortion;
-    EB_U32                          interDistortion;
+    EB_U32                          intraSadInterval;
+    EB_U32                          interSadInterval;
+    EB_U8                           fullLcu;
 
     // Quantized Coefficients
     EbPictureBufferDesc_t          *quantizedCoeff;
