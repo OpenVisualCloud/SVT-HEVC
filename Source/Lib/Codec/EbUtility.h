@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -15,7 +15,7 @@ extern "C" {
  ****************************/
 
 // CU Stats Helper Functions
-typedef struct CodedUnitStats_s 
+typedef struct CodedUnitStats_s
 {
     EB_U8   depth;
     EB_U8   size;
@@ -31,14 +31,14 @@ typedef struct CodedUnitStats_s
 typedef struct PredictionUnitStats_t
 {
     EB_U8  width;
-    EB_U8  height; 
+    EB_U8  height;
     EB_U8  offsetX;
     EB_U8  offsetY;
 
 } PredictionUnitStats_t;
 
 // TU Stats Helper Functions
-typedef struct TransformUnitStats_s 
+typedef struct TransformUnitStats_s
 {
     EB_U8  depth;
     EB_U8  offsetX;
@@ -59,9 +59,9 @@ extern const TransformUnitStats_t* GetTransformUnitStats(const EB_U32 tuIdx);
 
 extern EB_ERRORTYPE ZOrderIncrement(EB_U32 *xLoc, EB_U32 *yLoc);
 extern void ZOrderIncrementWithLevel(
-    EB_U32 *xLoc,   
-    EB_U32 *yLoc,   
-    EB_U32 *level,  
+    EB_U32 *xLoc,
+    EB_U32 *yLoc,
+    EB_U32 *level,
     EB_U32 *index);
 
 extern EB_U32 Log2f(EB_U32 x);
@@ -75,10 +75,10 @@ extern EB_U32 EndianSwap(EB_U32 ui);
 #ifdef _MSC_VER
 #define MULTI_LINE_MACRO_BEGIN do {
 #define MULTI_LINE_MACRO_END \
-	__pragma(warning(push)) \
-	__pragma(warning(disable:4127)) \
-	} while(0) \
-	__pragma(warning(pop))
+    __pragma(warning(push)) \
+    __pragma(warning(disable:4127)) \
+    } while(0) \
+    __pragma(warning(pop))
 #else
 #define MULTI_LINE_MACRO_BEGIN do {
 #define MULTI_LINE_MACRO_END } while(0)
@@ -112,7 +112,7 @@ extern EB_U32 EndianSwap(EB_U32 ui);
 // rounds down to the next power of two
 #define FLOOR_POW2(x)       \
     MULTI_LINE_MACRO_BEGIN  \
-		(x) |= ((x) >> 1);  \
+        (x) |= ((x) >> 1);  \
         (x) |= ((x) >> 2);  \
         (x) |= ((x) >> 4);  \
         (x) |= ((x) >> 8);  \
@@ -123,7 +123,7 @@ extern EB_U32 EndianSwap(EB_U32 ui);
 // rounds up to the next power of two
 #define CEIL_POW2(x)        \
     MULTI_LINE_MACRO_BEGIN  \
-		(x) -= 1;           \
+        (x) -= 1;           \
         (x) |= ((x) >> 1);  \
         (x) |= ((x) >> 2);  \
         (x) |= ((x) >> 4);  \
@@ -151,7 +151,7 @@ extern EB_U32 EndianSwap(EB_U32 ui);
 
 #define TWO_D_INDEX(x, y, stride)   \
     (((y) * (stride)) + (x))
-        
+
 // MAX_CU_COUNT is used to find the total number of partitions for the max partition depth and for
 // each parent partition up to the root partition level (i.e. LCU level).
 
@@ -166,37 +166,37 @@ extern EB_U32 EndianSwap(EB_U32 ui);
 #define MAX_UNSIGNED_VALUE     ~0u
 #define MIN_SIGNED_VALUE       ~0 - ((signed) (~0u >> 1))
 #define MAX_SIGNED_VALUE       ((signed) (~0u >> 1))
-#define MINI_GOP_MAX_COUNT			15
-#define MINI_GOP_WINDOW_MAX_COUNT	 8	// widow subdivision: 8 x 3L
+#define MINI_GOP_MAX_COUNT            15
+#define MINI_GOP_WINDOW_MAX_COUNT     8    // widow subdivision: 8 x 3L
 
-#define MIN_HIERARCHICAL_LEVEL		 2
+#define MIN_HIERARCHICAL_LEVEL         2
 static const EB_U32 MiniGopOffset[4] = { 1, 3, 7, 31 };
 
 typedef struct MiniGopStats_s
 {
-	EB_U32  hierarchicalLevels;
-	EB_U32  startIndex;
-	EB_U32  endIndex;
-	EB_U32  lenght;
+    EB_U32  hierarchicalLevels;
+    EB_U32  startIndex;
+    EB_U32  endIndex;
+    EB_U32  lenght;
 
 } MiniGopStats_t;
 extern const MiniGopStats_t* GetMiniGopStats(const EB_U32 miniGopIndex);
 typedef enum MINI_GOP_INDEX {
-	L6_INDEX   = 0,
-	L5_0_INDEX = 1,
-	L4_0_INDEX = 2,
-	L3_0_INDEX = 3,
-	L3_1_INDEX = 4,
-	L4_1_INDEX = 5,
-	L3_2_INDEX = 6,
-	L3_3_INDEX = 7,
-	L5_1_INDEX = 8,
-	L4_2_INDEX = 9,
-	L3_4_INDEX = 10,
-	L3_5_INDEX = 11,
-	L4_3_INDEX = 12,
-	L3_6_INDEX = 13,
-	L3_7_INDEX = 14
+    L6_INDEX   = 0,
+    L5_0_INDEX = 1,
+    L4_0_INDEX = 2,
+    L3_0_INDEX = 3,
+    L3_1_INDEX = 4,
+    L4_1_INDEX = 5,
+    L3_2_INDEX = 6,
+    L3_3_INDEX = 7,
+    L5_1_INDEX = 8,
+    L4_2_INDEX = 9,
+    L3_4_INDEX = 10,
+    L3_5_INDEX = 11,
+    L4_3_INDEX = 12,
+    L3_6_INDEX = 13,
+    L3_7_INDEX = 14
 } MINI_GOP_INDEX;
 
 #ifdef __cplusplus

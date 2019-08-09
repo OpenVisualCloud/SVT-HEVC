@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -151,8 +151,8 @@ void WpBiPredClipping16bit(EB_U32 puWidth, EB_U32 puHeight, EB_S16 *list0Src, EB
 
 void uniPredCopy16bit(
     EB_U16*               refPic,
-    EB_U32                srcStride,            
-    EB_U16*               dst,                 
+    EB_U32                srcStride,
+    EB_U16*               dst,
     EB_U32                dstStride,
     EB_U32                puWidth,
     EB_U32                puHeight,
@@ -162,5 +162,5 @@ void uniPredCopy16bit(
 
 #ifdef __cplusplus
 }
-#endif        
+#endif
 #endif // EbMcp_C_h

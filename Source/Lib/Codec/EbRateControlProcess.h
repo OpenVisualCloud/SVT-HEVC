@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -14,7 +14,7 @@
 #define CCOEFF_INIT_FACT              2
 #define SAD_CLIP_COEFF                5
 // 88 + 3*16*8
-#define SLICE_HEADER_BITS_NUM       104   
+#define SLICE_HEADER_BITS_NUM       104
 #define PPS_BITS_NUM                 80
 #define SPS_BITS_NUM                296
 #define RC_PRECISION                16
@@ -36,7 +36,7 @@
 #define     RC_NEW_EXTRA_BITS               1
 #define     RC_UPDATE_TARGET_RATE           1
 
-#define		RC_QPMOD_MAXQP					42
+#define        RC_QPMOD_MAXQP                    42
 
 
 static const EB_U8 MOD_QP_OFFSET_LAYER_ARRAY[MAX_HIERARCHICAL_LEVEL][MAX_TEMPORAL_LAYERS] = { // [Highest Temporal Layer] [Temporal Layer Index]
@@ -84,15 +84,15 @@ static const EB_U64 TWO_TO_POWER_QP_OVER_THREE[] = {
 };
 // range is from -51 to 51 (0 to 102)
 static const EB_U64 TWO_TO_POWER_X_OVER_SIX[] = {
-         0xB5,       0xCB,        0xE4,        0xFF,	    0x11F,	    0x142,	
-        0x16A,      0x196,       0x1C8,       0x1FF,	    0x23E,	    0x285,
-        0x2D4,      0x32C,       0x390,       0x3FF,	    0x47D,	    0x50A,
-        0x5A8,      0x659,       0x720,       0x7FF,	    0x8FA,	    0xA14,
-        0xB50,      0xCB2,       0xE41,       0xFFF,	   0x11F5,	   0x1428,	
-       0x16A0,     0x1965,      0x1C82,      0x1FFF,	   0x23EB,	   0x2851,
-       0x2D41,     0x32CB,      0x3904,      0x3FFF,	   0x47D6,	   0x50A2,
-       0x5A82,     0x6597,      0x7208,      0x7FFF,	   0x8FAC,	   0xA144,
-       0xB504,     0xCB2F,      0xE411,      0xFFFF,	  0x11F58,	  0x14288,
+         0xB5,       0xCB,        0xE4,        0xFF,        0x11F,        0x142,
+        0x16A,      0x196,       0x1C8,       0x1FF,        0x23E,        0x285,
+        0x2D4,      0x32C,       0x390,       0x3FF,        0x47D,        0x50A,
+        0x5A8,      0x659,       0x720,       0x7FF,        0x8FA,        0xA14,
+        0xB50,      0xCB2,       0xE41,       0xFFF,       0x11F5,       0x1428,
+       0x16A0,     0x1965,      0x1C82,      0x1FFF,       0x23EB,       0x2851,
+       0x2D41,     0x32CB,      0x3904,      0x3FFF,       0x47D6,       0x50A2,
+       0x5A82,     0x6597,      0x7208,      0x7FFF,       0x8FAC,       0xA144,
+       0xB504,     0xCB2F,      0xE411,      0xFFFF,      0x11F58,      0x14288,
       0x16A08,    0x1965E,     0x1C822,     0x1FFFE,      0x23EB1,    0x28511,
       0x2D410,    0x32CBC,     0x39044,     0x3FFFC,      0x47D62,    0x50A23,
       0x5A821,    0x65979,     0x72088,     0x7FFF8,      0x8FAC4,    0xA1447,
@@ -101,7 +101,7 @@ static const EB_U64 TWO_TO_POWER_X_OVER_SIX[] = {
      0x2D410F,   0x32CBCA,    0x390443,    0x3FFFC0,     0x47D623,   0x50A23B,
      0x5A821F,   0x659794,    0x720886,    0x7FFF80,     0x8FAC46,   0xA14476,
      0xB5043E,   0xCB2F29,    0xE4110C,    0xFFFF00,    0x11F588C,  0x14288ED,
-     0x16A087C	
+     0x16A087C
 };
 /**************************************
  * Input Port Types
@@ -126,23 +126,23 @@ typedef struct RateControlPorts_s {
  * Coded Frames Stats
  **************************************/
 typedef struct CodedFramesStatsEntry_s {
-    EB_U64               pictureNumber;    
+    EB_U64               pictureNumber;
     EB_S64               frameTotalBitActual;
     EB_BOOL              endOfSequenceFlag;
-} CodedFramesStatsEntry_t;  
+} CodedFramesStatsEntry_t;
 /**************************************
  * Context
  **************************************/
-typedef struct RateControlLayerContext_s 
+typedef struct RateControlLayerContext_s
 {
-    EB_U64                  previousFrameSadMe; 
+    EB_U64                  previousFrameSadMe;
     EB_U64                  previousFrameBitActual;
     EB_U64                  previousFrameQuantizedCoeffBitActual;
     EB_BOOL                 feedbackArrived;
 
     EB_U64                  targetBitRate;
-    EB_U64                  frameRate;   
-    EB_U64                  channelBitRate; 
+    EB_U64                  frameRate;
+    EB_U64                  channelBitRate;
 
     EB_U64                  previousBitConstraint;
     EB_U64                  bitConstraint;
@@ -152,11 +152,11 @@ typedef struct RateControlLayerContext_s
     EB_S64                  prevDifTotalAndEcBits;
 
     EB_S64                  bitDiff;
-    EB_U32                  coeffAveragingWeight1;           
+    EB_U32                  coeffAveragingWeight1;
     EB_U32                  coeffAveragingWeight2; // coeffAveragingWeight2 = 16- coeffAveragingWeight1
     //Ccoeffs have 2*RC_PRECISION precision
     EB_S64                  cCoeff;
-    EB_S64                  previousCCoeff;   
+    EB_S64                  previousCCoeff;
     //Kcoeffs have RC_PRECISION precision
     EB_U64                  kCoeff;
     EB_U64                  previousKCoeff;
@@ -172,7 +172,7 @@ typedef struct RateControlLayerContext_s
 
     //totalMad has RC_PRECISION precision
     EB_U64                  totalMad;
-    
+
     EB_U32                  firstFrame;
     EB_U32                  firstNonIntraFrame;
     EB_U32                  sameSADCount;
@@ -181,18 +181,18 @@ typedef struct RateControlLayerContext_s
 
     EB_U32                  maxQp;
     EB_U32                  temporalIndex;
-    
+
     EB_U64                  alpha;
-    
+
 } RateControlLayerContext_t;
 
 typedef struct RateControlIntervalParamContext_s
 {
-    EB_U64                       firstPoc;   
-    EB_U64                       lastPoc;   
-    EB_BOOL                      inUse;   
-    EB_BOOL                      wasUsed;  
-    EB_U64                       processedFramesNumber; 
+    EB_U64                       firstPoc;
+    EB_U64                       lastPoc;
+    EB_BOOL                      inUse;
+    EB_BOOL                      wasUsed;
+    EB_U64                       processedFramesNumber;
     EB_BOOL                      lastGop;
     RateControlLayerContext_t  **rateControlLayerArray;
 
@@ -210,17 +210,17 @@ typedef struct RateControlIntervalParamContext_s
     EB_BOOL                      sceneChangeInGop;
     EB_BOOL                      minTargetRateAssigned;
     EB_S64                       extraApBitRatioI;
-  
+
 } RateControlIntervalParamContext_t;
 
 typedef struct HighLevelRateControlContext_s
-{     
+{
 
     EB_U64                       targetBitsPerSlidingWindow;
     EB_U64                       targetBitRate;
-    EB_U64                       frameRate;   
-    EB_U64                       channelBitRatePerFrame; 
-    EB_U64                       channelBitRatePerSw; 
+    EB_U64                       frameRate;
+    EB_U64                       channelBitRatePerFrame;
+    EB_U64                       channelBitRatePerSw;
     EB_U64                       bitConstraintPerSw;
     EB_U64                       predBitsRefQpPerSw[MAX_REF_QP_NUM];
 #if RC_UPDATE_TARGET_RATE
@@ -228,23 +228,23 @@ typedef struct HighLevelRateControlContext_s
     EB_U32                       prevIntraOrgSelectedRefQp;
     EB_U64                       previousUpdatedBitConstraintPerSw;
 #endif
-    
+
 
 } HighLevelRateControlContext_t;
 
 typedef struct RateControlContext_s
 {
-    EbFifo_t                    *rateControlInputTasksFifoPtr;    
+    EbFifo_t                    *rateControlInputTasksFifoPtr;
     EbFifo_t                    *rateControlOutputResultsFifoPtr;
 
     HighLevelRateControlContext_t *highLevelRateControlPtr;
 
     RateControlIntervalParamContext_t **rateControlParamQueue;
-    EB_U64                       rateControlParamQueueHeadIndex;   
+    EB_U64                       rateControlParamQueueHeadIndex;
 
-    EB_U64                       frameRate;   
+    EB_U64                       frameRate;
 
-    EB_U64                       virtualBufferSize; 
+    EB_U64                       virtualBufferSize;
 
     EB_S64                       virtualBufferLevelInitialValue;
     EB_S64                       previousVirtualBufferLevel;
@@ -276,14 +276,14 @@ typedef struct RateControlContext_s
     EB_BOOL                      endOfSequenceRegion;
 
     EB_U32                       intraCoefRate;
-    EB_U32                       nonPeriodicIntraCoefRate;   
+    EB_U32                       nonPeriodicIntraCoefRate;
 
     EB_U64                       framesInInterval [EB_MAX_TEMPORAL_LAYERS];
-    EB_S64                       extraBits;  
+    EB_S64                       extraBits;
     EB_S64                       extraBitsGen;
     EB_S16                      maxRateAdjustDeltaQP;
-   
-   
+
+
 } RateControlContext_t;
 
 
@@ -294,7 +294,7 @@ typedef struct RateControlContext_s
 extern EB_ERRORTYPE RateControlLayerContextCtor(
     RateControlLayerContext_t   **entryDblPtr);
 
-  
+
 
 extern EB_ERRORTYPE RateControlIntervalParamContextCtor(
     RateControlIntervalParamContext_t   **entryDblPtr);
@@ -312,9 +312,9 @@ extern EB_ERRORTYPE RateControlContextCtor(
     EbFifo_t                *rateControlInputTasksFifoPtr,
     EbFifo_t                *rateControlOutputResultsFifoPtr,
     EB_S32                   intraPeriodLength);
-    
-   
-    
+
+
+
 extern void* RateControlKernel(void *inputPtr);
 
 #endif // EbRateControl_h

@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -14,7 +14,7 @@ extern "C" {
 /**************************************
  * Process Results
  **************************************/
-typedef struct MotionEstimationResults_s 
+typedef struct MotionEstimationResults_s
 {
     EbObjectWrapper_t   *pictureControlSetWrapperPtr;
     EB_U32               segmentIndex;
@@ -29,7 +29,7 @@ typedef struct MotionEstimationResultsInitData_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE MotionEstimationResultsCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
 
 

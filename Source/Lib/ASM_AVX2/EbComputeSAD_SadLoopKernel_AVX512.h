@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -56,6 +56,6 @@ extern void GetEightHorizontalSearchPointResultsAll85PUs_AVX512_INTRIN(
 
 #ifdef __cplusplus
 }
-#endif        
+#endif
 #endif // EbComputeSAD_AVX512_h
 

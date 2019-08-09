@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -18,7 +18,7 @@ extern "C" {
 typedef struct RateControlResults_s
 {
     EbObjectWrapper_t                   *pictureControlSetWrapperPtr;
-    
+
 } RateControlResults_t;
 
 typedef struct RateControlResultsInitData_s
@@ -30,7 +30,7 @@ typedef struct RateControlResultsInitData_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE RateControlResultsCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
 
 

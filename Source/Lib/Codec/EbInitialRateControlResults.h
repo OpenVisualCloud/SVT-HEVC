@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -26,8 +26,8 @@ typedef struct InitialRateControlResultInitData_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE InitialRateControlResultsCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
 
-   
+
 #endif //EbInitialRateControlResults_h

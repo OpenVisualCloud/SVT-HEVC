@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -147,12 +147,12 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
     /* A preset defining the quality vs density tradeoff point that the encoding
      * is to be performed at. 0 is the highest quality mode, 11 is the highest
-     * density mode. 
-     * 
+     * density mode.
+     *
      * [0, 11] for >= 4k resolution.
      * [0, 10] for >= 1080p resolution.
      * [0,  9] for all resolution.
-     * 
+     *
      * Default is 7. */
     uint8_t                 encMode;
 
@@ -163,8 +163,8 @@ typedef struct EB_H265_ENC_CONFIGURATION
      */
     uint8_t                 tune;
 
-    /* Flag to enable for lower latency mode. The change is lossless. 
-     * 
+    /* Flag to enable for lower latency mode. The change is lossless.
+     *
      * Default is 0. */
     uint8_t                 latencyMode;
 
@@ -198,7 +198,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
     /* Prediction structure used to construct GOP. There are two main structures
      * supported, which are: Low Delay (P or B) and Random Access.
-     * 
+     *
      * In Low Delay structure, pictures within a mini GOP refer to the previously
      * encoded pictures in display order. In other words, pictures with display
      * order N can only be referenced by pictures with display order greater than
@@ -234,7 +234,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
      *
      * Default is 0. */
     uint32_t                sourceHeight;
- 
+
     /* The frequecy of images being displayed. If the number is less than 1000,
      * the input frame rate is an integer number between 1 and 60, else the input
      * number is in Q16 format, shifted by 16 bits, where max allowed is 240 fps.
@@ -244,13 +244,13 @@ typedef struct EB_H265_ENC_CONFIGURATION
      * Default is 25. */
     uint32_t                frameRate;
 
-    /* Frame rate numerator. When zero, the encoder will use –fps if
+    /* Frame rate numerator. When zero, the encoder will use â€“fps if
      * FrameRateDenominator is also zero, otherwise an error is returned.
      *
      * Default is 0. */
     int32_t                 frameRateNumerator;
 
-    /* Frame rate denominator. When zero, the encoder will use –fps if
+    /* Frame rate denominator. When zero, the encoder will use â€“fps if
      * FrameRateNumerator is also zero, otherwise an error is returned.
      *
      * Default is 0. */
@@ -285,7 +285,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
     /* Enables subjective quality algorithms to reduce the output bitrate with
      * minimal or no subjective visual quality impact. Only applicable to tune 0.
-     * 
+     *
      * Default is 1. */
     uint8_t                 bitRateReduction;
 
@@ -318,7 +318,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     uint32_t                qp;
 
     /* Path to file that contains qp values.
-     * 
+     *
      * Default is null.*/
     uint8_t                 useQpFile;
 
@@ -343,7 +343,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
 
     // Motion Estimation Tools
-    
+
     /* Flag to enable the use of default ME HME parameters.
      *
      * Default is 1. */
@@ -378,7 +378,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
 
     // Rate Control
-    
+
     /* Rate control mode.
      *
      * 0 = Constant QP.
@@ -443,7 +443,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     uint32_t                highDynamicRangeInput;
 
     /* Flag to simplify the detection of boundary between access units.
-     * 
+     *
      * Default is 0. */
     uint32_t                accessUnitDelimiter;
 
@@ -508,24 +508,24 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
     // VBV Parameters
     /* Sets the maximum rate the VBV buffer should be assumed to refill at
-     * 
+     *
      * Default is 0. */
     uint32_t                vbvMaxrate;
 
-    /* Sets the size of the VBV buffer in bits. 
+    /* Sets the size of the VBV buffer in bits.
      *
      * Default is 0. */
     uint32_t                vbvBufsize;
 
     /* Sets how full the VBV buffer must be before playback starts. If picture
-     * number is 0, then the initial fill is vbv-init * vbvBufferSize. 
-     * Otherwise, it is interpreted as the initial fill in bits. 
+     * number is 0, then the initial fill is vbv-init * vbvBufferSize.
+     * Otherwise, it is interpreted as the initial fill in bits.
      *
      * Default is 90. */
     uint64_t                vbvBufInit;
 
     /* Enables the buffering period SEI and picture timing SEI to signal the HRD
-     * parameters. 
+     * parameters.
      *
      * 0 = disable.
      * 1 = enable.
@@ -566,16 +566,16 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
 
     // ASM Type
-    
+
     /* Assembly instruction set used by encoder.
      *
      * 0 = non-AVX2, C only.
      * 1 = up to AVX512, auto-select highest assembly instruction set supported.
-     * 
+     *
      * Default is 1. */
     uint32_t                asmType;
 
-    
+
     // Demo features
 
     /* Flag to enable the Speed Control functionality to achieve the real-time
@@ -601,7 +601,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
     // Debug tools
 
-    /* Output reconstructed yuv used for debug purposes. The value is set through 
+    /* Output reconstructed yuv used for debug purposes. The value is set through
      * ReconFile token (-o) and using the feature will affect the speed of encoder.
      *
      * Default is 0. */
@@ -643,7 +643,7 @@ EB_API EB_ERRORTYPE EbInitHandle(
 /* STEP 2: Set all configuration parameters.
  *
  * Parameter:
- * @ *h265EncComponent              Encoder handler.           
+ * @ *h265EncComponent              Encoder handler.
  * @ *pComponentParameterStructure  Encoder and buffer configurations will be copied to the library. */
 EB_API EB_ERRORTYPE EbH265EncSetParameter(
     EB_COMPONENTTYPE           *h265EncComponent,
@@ -659,7 +659,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(
 /* OPTIONAL: Get VPS / SPS / PPS headers at init time.
  *
  * Parameter:
- * @ *h265EncComponent  Encoder handler. 
+ * @ *h265EncComponent  Encoder handler.
  * @ **outputStreamPtr  Output stream. */
 EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     EB_COMPONENTTYPE           *h265EncComponent,

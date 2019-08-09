@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -24,10 +24,10 @@ typedef enum EB_PIC_TYPE {
 typedef struct PictureDemuxResults_s
 {
     EB_PIC_TYPE                    pictureType;
-    
+
     // Only valid for input pictures
     EbObjectWrapper_t             *pictureControlSetWrapperPtr;
-    
+
     // Only valid for reference pictures
     EbObjectWrapper_t             *referencePictureWrapperPtr;
     EbObjectWrapper_t             *sequenceControlSetWrapperPtr;
@@ -44,8 +44,8 @@ typedef struct PictureResultInitData_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE PictureResultsCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
 
-    
+
 #endif //EbPictureResults_h

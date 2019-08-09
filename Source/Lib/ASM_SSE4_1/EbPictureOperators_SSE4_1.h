@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -16,9 +16,9 @@ EB_U64 Compute8x8Satd_SSE4(
     EB_S16 *diff);       // input parameter, diff samples Ptr
 
 EB_U64 Compute8x8Satd_U8_SSE4(
-	EB_U8  *src,       // input parameter, diff samples Ptr
-	EB_U64 *dcValue,
-	EB_U32  srcStride);
+    EB_U8  *src,       // input parameter, diff samples Ptr
+    EB_U64 *dcValue,
+    EB_U32  srcStride);
 
 EB_U64 SpatialFullDistortionKernel4x4_SSSE3_INTRIN(
     EB_U8   *input,

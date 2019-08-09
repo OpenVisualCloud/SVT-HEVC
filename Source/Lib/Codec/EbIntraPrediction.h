@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -25,7 +25,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#define MAX_PU_SIZE                            64 
+#define MAX_PU_SIZE                            64
 
 struct ModeDecisionContext_s;
 
@@ -38,7 +38,7 @@ typedef struct IntraReferenceSamples_s {
     EB_U8                  *cbIntraFilteredReferenceArray;
     EB_U8                  *crIntraFilteredReferenceArray;
 
-    EB_U8                  *yIntraReferenceArrayReverse;        
+    EB_U8                  *yIntraReferenceArrayReverse;
     EB_U8                  *yIntraFilteredReferenceArrayReverse;
     EB_U8                  *cbIntraReferenceArrayReverse;
     EB_U8                  *cbIntraFilteredReferenceArrayReverse;
@@ -72,7 +72,7 @@ typedef struct IntraReference16bitSamples_s {
     EB_U16                  *cbIntraFilteredReferenceArray;
     EB_U16                  *crIntraFilteredReferenceArray;
 
-    EB_U16                  *yIntraReferenceArrayReverse;        
+    EB_U16                  *yIntraReferenceArrayReverse;
     EB_U16                  *yIntraFilteredReferenceArrayReverse;
     EB_U16                  *cbIntraReferenceArrayReverse;
     EB_U16                  *cbIntraFilteredReferenceArrayReverse;
@@ -233,16 +233,16 @@ extern EB_ERRORTYPE GenerateChromaIntraReference16bitSamplesEncodePass(
     EB_BOOL                     pictureRightBoundary);
 
 extern EB_ERRORTYPE IntraPredictionCl(
-	struct ModeDecisionContext_s           *contextPtr,
-	EB_U32                                  componentMask,
-	PictureControlSet_t                    *pictureControlSetPtr,
-	ModeDecisionCandidateBuffer_t		   *candidateBufferPtr);
+    struct ModeDecisionContext_s           *contextPtr,
+    EB_U32                                  componentMask,
+    PictureControlSet_t                    *pictureControlSetPtr,
+    ModeDecisionCandidateBuffer_t           *candidateBufferPtr);
 
 extern EB_ERRORTYPE IntraPredictionOl(
-	struct ModeDecisionContext_s		   *contextPtr,
-	EB_U32                                  componentMask,
-	PictureControlSet_t                    *pictureControlSetPtr,
-	ModeDecisionCandidateBuffer_t		   *candidateBufferPtr);
+    struct ModeDecisionContext_s           *contextPtr,
+    EB_U32                                  componentMask,
+    PictureControlSet_t                    *pictureControlSetPtr,
+    ModeDecisionCandidateBuffer_t           *candidateBufferPtr);
 
 extern EB_ERRORTYPE EncodePassIntraPrediction(
     void                                   *refSamples,
@@ -356,7 +356,7 @@ static const EB_U32 chromaMappingTable[] = {
 
 extern EB_ERRORTYPE UpdateNeighborSamplesArrayOL(
     IntraReferenceSamples_t         *intraRefPtr,
-    EbPictureBufferDesc_t           *inputPtr,          
+    EbPictureBufferDesc_t           *inputPtr,
     EB_U32                           stride,
     EB_U32                           srcOriginX,
     EB_U32                           srcOriginY,
@@ -365,11 +365,11 @@ extern EB_ERRORTYPE UpdateNeighborSamplesArrayOL(
 
 extern EB_ERRORTYPE UpdateChromaNeighborSamplesArrayOL(
     IntraReferenceSamples_t         *intraRefPtr,
-    EbPictureBufferDesc_t           *inputPtr,          
+    EbPictureBufferDesc_t           *inputPtr,
     EB_U32                           stride,
     EB_U32                           srcOriginX,
     EB_U32                           srcOriginY,
-	EB_U32                           cbStride,
+    EB_U32                           cbStride,
     EB_U32                           crStride,
     EB_U32                           cuChromaOriginX,
     EB_U32                           cuChromaOriginY,
@@ -390,7 +390,7 @@ extern EB_ERRORTYPE UpdateNeighborSamplesArrayOpenLoop(
     EB_U32                           blockSize);
 
 extern EB_ERRORTYPE IntraPredictionOpenLoop(
-    EB_U32                       cuSize, 
+    EB_U32                       cuSize,
     MotionEstimationContext_t   *contextPtr,
     EB_U32           openLoopIntraCandidate);
 
@@ -408,24 +408,24 @@ extern EB_ERRORTYPE Intra4x4IntraPredictionCl(
     EB_PTR                                  predictionContextPtr);
 
 extern EB_ERRORTYPE Intra4x4IntraPredictionOl(
-	EB_U32                                  puIndex,
+    EB_U32                                  puIndex,
     EB_U32                                  puOriginX,
     EB_U32                                  puOriginY,
     EB_U32                                  puWidth,
     EB_U32                                  puHeight,
     EB_U32                                  lcuSize,
-	EB_U32                                  componentMask,
-	PictureControlSet_t                    *pictureControlSetPtr,
-    ModeDecisionCandidateBuffer_t          *candidateBufferPtr,  
-    EB_PTR                                  predictionContextPtr); 
+    EB_U32                                  componentMask,
+    PictureControlSet_t                    *pictureControlSetPtr,
+    ModeDecisionCandidateBuffer_t          *candidateBufferPtr,
+    EB_PTR                                  predictionContextPtr);
 
 extern void GenerateIntraLumaReferenceSamplesMd(
-    struct ModeDecisionContext_s	*mdContextPtr,
-	EbPictureBufferDesc_t		    *inputPicturePtr);
+    struct ModeDecisionContext_s    *mdContextPtr,
+    EbPictureBufferDesc_t            *inputPicturePtr);
 
 extern void GenerateIntraChromaReferenceSamplesMd(
-    struct ModeDecisionContext_s	*mdContextPtr,
-	EbPictureBufferDesc_t		    *inputPicturePtr);
+    struct ModeDecisionContext_s    *mdContextPtr,
+    EbPictureBufferDesc_t            *inputPicturePtr);
 
 /***************************************
 * Function Ptr Types
@@ -438,11 +438,11 @@ typedef void(*EB_INTRA_NOANG_TYPE)(
     const EB_BOOL     skip);
 
 typedef EB_U32(*EB_NEIGHBOR_DC_INTRA_TYPE)(
-	MotionEstimationContext_t       *contextPtr,
-	EbPictureBufferDesc_t           *inputPtr,
-	EB_U32                           srcOriginX,
-	EB_U32                           srcOriginY,
-	EB_U32                           blockSize);
+    MotionEstimationContext_t       *contextPtr,
+    EbPictureBufferDesc_t           *inputPtr,
+    EB_U32                           srcOriginX,
+    EB_U32                           srcOriginY,
+    EB_U32                           blockSize);
 
 typedef void(*EB_INTRA_NOANG_16bit_TYPE)(
     const EB_U32   size,
@@ -463,7 +463,7 @@ typedef void(*EB_INTRA_ANG_16BIT_TYPE)(
     EB_U32          size,                       //input parameter, denotes the size of the current PU
     EB_U16         *refSampMain,                //input parameter, pointer to the reference samples
     EB_U16         *predictionPtr,              //output parameter, pointer to the prediction
-    EB_U32			predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
+    EB_U32            predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
     const EB_BOOL   skip,
     EB_S32   intraPredAngle);
 
@@ -533,15 +533,15 @@ static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraDCLuma_funcPtrArray[EB_ASM_TYPE_TOTAL
     IntraModeDCLuma,
     // AVX2
     IntraModeDCLuma_AVX2_INTRIN,
-  
+
 };
 
 EB_U32 UpdateNeighborDcIntraPred(
-	MotionEstimationContext_t       *contextPtr,
-	EbPictureBufferDesc_t           *inputPtr,
-	EB_U32                           srcOriginX,
-	EB_U32                           srcOriginY,
-	EB_U32                           blockSize);
+    MotionEstimationContext_t       *contextPtr,
+    EbPictureBufferDesc_t           *inputPtr,
+    EB_U32                           srcOriginX,
+    EB_U32                           srcOriginY,
+    EB_U32                           blockSize);
 
 static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraDCLuma_16bit_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT

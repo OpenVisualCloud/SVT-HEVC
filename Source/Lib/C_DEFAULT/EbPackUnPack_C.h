@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -25,22 +25,22 @@ void EB_ENC_msbPack2D(
     EB_U32     height);
 
 void CompressedPackmsb(
-	EB_U8     *in8BitBuffer,
-	EB_U32     in8Stride,
-	EB_U8     *innBitBuffer,
-	EB_U16    *out16BitBuffer,
-	EB_U32     innStride,
-	EB_U32     outStride,
-	EB_U32     width,
-	EB_U32     height);
+    EB_U8     *in8BitBuffer,
+    EB_U32     in8Stride,
+    EB_U8     *innBitBuffer,
+    EB_U16    *out16BitBuffer,
+    EB_U32     innStride,
+    EB_U32     outStride,
+    EB_U32     width,
+    EB_U32     height);
 void CPack_C(
-	const EB_U8     *innBitBuffer,
-	EB_U32     innStride,
-	EB_U8     *inCompnBitBuffer,
-	EB_U32     outStride,
-	EB_U8    *localCache,
-	EB_U32     width,
-	EB_U32     height);
+    const EB_U8     *innBitBuffer,
+    EB_U32     innStride,
+    EB_U8     *inCompnBitBuffer,
+    EB_U32     outStride,
+    EB_U8    *localCache,
+    EB_U32     width,
+    EB_U32     height);
 
 
 
@@ -56,8 +56,8 @@ void EB_ENC_msbUnPack2D(
 void UnPack8BitData(
     EB_U16      *in16BitBuffer,
     EB_U32       inStride,
-    EB_U8       *out8BitBuffer, 
-    EB_U32       out8Stride,  
+    EB_U8       *out8BitBuffer,
+    EB_U32       out8Stride,
     EB_U32       width,
     EB_U32       height);
 void UnpackAvg(

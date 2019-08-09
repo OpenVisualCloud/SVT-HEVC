@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -19,18 +19,18 @@ extern "C" {
 
 #define NUMBER_OF_SKIP_FLAG_CASES                             6       // number of cases for bit estimation for skip flag
 
-#define NUMBER_OF_MERGE_FLAG_CASES                            2       // number of cases for bit estimation for merge flag 
+#define NUMBER_OF_MERGE_FLAG_CASES                            2       // number of cases for bit estimation for merge flag
 
-#define NUMBER_OF_MERGE_INDEX_CASES                           5       // number of cases for bit estimation for merge index 
+#define NUMBER_OF_MERGE_INDEX_CASES                           5       // number of cases for bit estimation for merge index
 
 #define NUMBER_OF_ALF_CTRL_FLAG_CASES                         0       // number of cases for bit estimation for ALF control flag
 
 #define NUMBER_OF_INTRA_PART_SIZE_CASES                       2       // number of cases for bit estimation for Intra partition size
 
 //Note ** to be modified after adding all AMP modes
-#define NUMBER_OF_INTER_PART_SIZE_CASES                       8       // number of cases for bit estimation for Inter partition size  
+#define NUMBER_OF_INTER_PART_SIZE_CASES                       8       // number of cases for bit estimation for Inter partition size
 
-#define NUMBER_OF_AMP_XPOS_CASES                              0       // number of cases for bit estimation for asymmetric motion partition size 
+#define NUMBER_OF_AMP_XPOS_CASES                              0       // number of cases for bit estimation for asymmetric motion partition size
 
 #define NUMBER_OF_AMP_YPOS_CASES                              0       // number of cases for bit estimation for asymmetric motion partition size
 
@@ -42,7 +42,7 @@ extern "C" {
 
 #define NUMBER_OF_INTER_BI_DIR_CASES                          8       // number of cases for bit estimation for inter bi-prediction direction : unipred - bipred per depth
 
-#define NUMBER_OF_INTER_UNI_DIR_CASES                         2       // number of cases for bit estimation for inter uni-prediction direction : unipred List 0 - unipred List 1   
+#define NUMBER_OF_INTER_UNI_DIR_CASES                         2       // number of cases for bit estimation for inter uni-prediction direction : unipred List 0 - unipred List 1
 
 #define NUMBER_OF_MVD_CASES                                  12       // number of cases for bit estimation for motion vector difference
 
@@ -64,7 +64,7 @@ extern "C" {
 
 #define NUMBER_OF_LAST_SIG_XY_CASES                           0      // number of cases for bit estimation for last significant XY flag
 
-#define TOTAL_NUMBER_OF_LAST_SIG_XY_CASES                     0      // total number of cases for bit estimation for luma and chroma 
+#define TOTAL_NUMBER_OF_LAST_SIG_XY_CASES                     0      // total number of cases for bit estimation for luma and chroma
 
 #define NUMBER_OF_GREATER_ONE_COEFF_CASES                     0      // number of cases for bit estimation for coefficients greater than one
 
@@ -84,7 +84,7 @@ extern "C" {
 
 #define NUMBER_OF_SAO_MERGE_FLAG_CASES                        2      // number of cases for bit estimation for SAO merge flags
 
-#define NUMBER_OF_SAO_TYPE_INDEX_FLAG_CASES                   6      // number of cases for bit estimation for SAO Type 
+#define NUMBER_OF_SAO_TYPE_INDEX_FLAG_CASES                   6      // number of cases for bit estimation for SAO Type
 
 #define NUMBER_OF_SAO_OFFSET_TRUNUNARY_CASES                  8      // number of cases for bit estimation for SAO Offset trun unary case
 
@@ -144,10 +144,10 @@ typedef struct MdRateEstimationContext_s {
     EB_BitFraction  transSubDivFlagBits     [NUMBER_OF_TRANSFORM_SUBDIV_FLAG_CASES];
     EB_BitFraction  mergeFlagBits           [NUMBER_OF_MERGE_FLAG_CASES];
     EB_BitFraction  mergeIndexBits          [NUMBER_OF_MERGE_INDEX_CASES];
-  
-    EB_BitFraction  saoMergeFlagBits        [NUMBER_OF_SAO_MERGE_FLAG_CASES]; 
-    EB_BitFraction  saoTypeIndexBits        [NUMBER_OF_SAO_TYPE_INDEX_FLAG_CASES]; 
-    EB_BitFraction  saoOffsetTrunUnaryBits  [NUMBER_OF_SAO_OFFSET_TRUNUNARY_CASES]; 
+
+    EB_BitFraction  saoMergeFlagBits        [NUMBER_OF_SAO_MERGE_FLAG_CASES];
+    EB_BitFraction  saoTypeIndexBits        [NUMBER_OF_SAO_TYPE_INDEX_FLAG_CASES];
+    EB_BitFraction  saoOffsetTrunUnaryBits  [NUMBER_OF_SAO_OFFSET_TRUNUNARY_CASES];
 
     EB_BitFraction  interBiDirBits          [NUMBER_OF_INTER_BI_DIR_CASES];
     EB_BitFraction  interUniDirBits         [NUMBER_OF_INTER_UNI_DIR_CASES];

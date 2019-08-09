@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -31,13 +31,13 @@ extern "C" {
 /************************************************
  * Reference List
  *
- *   referenceList - Contains the deltaPOCs of 
+ *   referenceList - Contains the deltaPOCs of
  *    the pictures referenced by the current
  *    picture.
  ************************************************/
 typedef struct ReferenceList_s
 {
-    EB_S32                              referenceList;    
+    EB_S32                              referenceList;
     EB_U32                              referenceListCount;
 
 } ReferenceList_t;
@@ -47,25 +47,25 @@ typedef struct ReferenceList_s
  *
  *   listCount - Contains count of how
  *     deep into list should be used
- *     depending on how many references are 
+ *     depending on how many references are
  *     being used in the prediction structure.
  *
  *   list - Contains the deltaPOCs of
  *     pictures that reference the current picture.
  *     The dependent list pictures must be grouped
- *     by the referenceCount group in ascending 
+ *     by the referenceCount group in ascending
  *     order.  The grouping is not display order!
  ************************************************/
 typedef struct DependentList_s
 {
     EB_S32                             *list;
     EB_U32                              listCount;
-    
+
 } DependentList_t;
 
 /************************************************
  * Prediction Structure Config Entry
- *   Contains the basic reference lists and 
+ *   Contains the basic reference lists and
  *   configurations for each Prediction Structure
  *   Config Entry.
  ************************************************/
@@ -87,7 +87,7 @@ typedef struct PredictionStructureConfig_s {
 } PredictionStructureConfig_t;
 
 /************************************************
- * Prediction Structure Entry 
+ * Prediction Structure Entry
  *   Contains the reference and dependent lists
  *   for a particular picture in the Prediction
  *   Structure.
@@ -135,11 +135,11 @@ typedef struct PredictionStructureEntry_s {
     EB_S32                              refPicsList0TotalCountMinus1;
     EB_S32                              refPicsList1TotalCountMinus1;
     EB_BOOL                             listsModificationPresentFlag;
-    EB_BOOL                             restrictedRefPicListsFlag;      // Same list enable flag (if set, 
-                                                                        //   it implies all slices of the 
-                                                                        //   same type in the same picture 
+    EB_BOOL                             restrictedRefPicListsFlag;      // Same list enable flag (if set,
+                                                                        //   it implies all slices of the
+                                                                        //   same type in the same picture
                                                                         //   have identical lists)
-    
+
     // List Modification
     // *Note - This should probably be moved to the slice header since its a dynamic control - JMJ Jan 2, 2013
     EB_BOOL                             list0ModificationFlag;
@@ -148,7 +148,7 @@ typedef struct PredictionStructureEntry_s {
     EB_U32                              list1ModIndex[MAX_NUM_OF_REF_PICS_TOTAL];
 
     // Lists Combination (STUB)
-    
+
 } PredictionStructureEntry_t;
 
 /************************************************
@@ -169,7 +169,7 @@ typedef struct PredictionStructure_s {
     EB_U32                              leadingPicIndex;
     EB_U32                              initPicIndex;
     EB_U32                              steadyStateIndex;
-    
+
     // RPS Related Entries
     EB_BOOL                             restrictedRefPicListsEnableFlag;
     EB_BOOL                             listsModificationEnableFlag;
@@ -181,8 +181,8 @@ typedef struct PredictionStructure_s {
 
 /************************************************
  * Prediction Structure Group
- *   Contains the control structures for all 
- *   supported prediction structures. 
+ *   Contains the control structures for all
+ *   supported prediction structures.
  ************************************************/
 typedef struct PredictionStructureGroup_s {
     PredictionStructure_t             **predictionStructurePtrArray;
@@ -200,7 +200,7 @@ extern PredictionStructure_t* GetPredictionStructure(
     PredictionStructureGroup_t    *predictionStructureGroupPtr,
     EB_PRED                        predStructure,
     EB_U32                         numberOfReferences,
-    EB_U32                         levelsOfHierarchy);    
+    EB_U32                         levelsOfHierarchy);
 #ifdef __cplusplus
 }
 #endif

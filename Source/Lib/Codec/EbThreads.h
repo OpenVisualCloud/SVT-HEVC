@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -107,12 +107,12 @@ extern    cpu_set_t                   groupAffinity;
         pthread_setaffinity_np(*((pthread_t*)pointer),sizeof(cpu_set_t),&groupAffinity); \
         memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
         memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-		if (nElements % 8 == 0) { \
-			*totalLibMemory += (nElements); \
-		} \
-		else { \
-			*totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
-		} \
+        if (nElements % 8 == 0) { \
+            *totalLibMemory += (nElements); \
+        } \
+        else { \
+            *totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
+        } \
     } \
     if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
         return EB_ErrorInsufficientResources; \
@@ -127,12 +127,12 @@ extern    cpu_set_t                   groupAffinity;
     else { \
         memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
         memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-		if (nElements % 8 == 0) { \
-			*totalLibMemory += (nElements); \
-		} \
-		else { \
-			*totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
-		} \
+        if (nElements % 8 == 0) { \
+            *totalLibMemory += (nElements); \
+        } \
+        else { \
+            *totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
+        } \
     } \
     if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
         return EB_ErrorInsufficientResources; \

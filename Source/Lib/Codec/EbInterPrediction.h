@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -22,14 +22,14 @@ extern "C" {
 #define MVBOUNDHIGH   348   //  (80+7)<<2
 #define REFPADD_QPEL  320   //  (16+64)<<2
 
-	void RoundMvOnTheFly(
-		EB_S16 *motionVector_x,
-		EB_S16 *motionVector_y);
+    void RoundMvOnTheFly(
+        EB_S16 *motionVector_x,
+        EB_S16 *motionVector_y);
 
 struct ModeDecisionContext_s;
 
 typedef struct InterPredictionContext_s {
-    
+
     // mcp context
     MotionCompensationPredictionContext_t  *mcpContext;
 
@@ -40,8 +40,8 @@ typedef struct InterPredictionContext_s {
 } InterPredictionContext_t;
 
 extern EB_ERRORTYPE InterPredictionContextCtor(
-	InterPredictionContext_t **interPredictionContext,
-	EB_U16                     maxCUWidth,
+    InterPredictionContext_t **interPredictionContext,
+    EB_U16                     maxCUWidth,
     EB_U16                     maxCUHeight,
     EB_BOOL                    is16bit);
 
@@ -50,10 +50,10 @@ extern EB_ERRORTYPE InterPredictionContextDtor(
     InterPredictionContext_t *interPredictionContext);
 
 extern EB_ERRORTYPE Inter2Nx2NPuPredictionInterpolationFree(
-	struct ModeDecisionContext_s           *contextPtr,
-	EB_U32                                  componentMask,
-	PictureControlSet_t                    *pictureControlSetPtr,
-	ModeDecisionCandidateBuffer_t          *candidateBufferPtr);
+    struct ModeDecisionContext_s           *contextPtr,
+    EB_U32                                  componentMask,
+    PictureControlSet_t                    *pictureControlSetPtr,
+    ModeDecisionCandidateBuffer_t          *candidateBufferPtr);
 
 EB_ERRORTYPE Inter2Nx2NPuPredictionHevc(
     struct ModeDecisionContext_s           *contextPtr,
@@ -65,20 +65,20 @@ EB_ERRORTYPE Inter2Nx2NPuPredictionHevc(
 
 extern EB_ERRORTYPE EncodePassInterPrediction(
     MvUnit_t                               *mvUnit,
-	EB_U16                                  puOriginX,
-	EB_U16                                  puOriginY,
-	EB_U8                                   puWidth,
-	EB_U8                                   puHeight,
+    EB_U16                                  puOriginX,
+    EB_U16                                  puOriginY,
+    EB_U8                                   puWidth,
+    EB_U8                                   puHeight,
     PictureControlSet_t                    *pictureControlSetPtr,
     EbPictureBufferDesc_t                  *predictionPtr,
     MotionCompensationPredictionContext_t  *mcpContext);
 
 extern EB_ERRORTYPE EncodePassInterPrediction16bit(
     MvUnit_t                               *mvUnit,
-	EB_U16                                  puOriginX,
-	EB_U16                                  puOriginY,
-	EB_U8                                   puWidth,
-	EB_U8                                   puHeight,
+    EB_U16                                  puOriginX,
+    EB_U16                                  puOriginY,
+    EB_U8                                   puWidth,
+    EB_U8                                   puHeight,
     PictureControlSet_t                    *pictureControlSetPtr,
     EbPictureBufferDesc_t                  *predictionPtr,
     MotionCompensationPredictionContext_t  *mcpContext);

@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2019 Intel Corporation
 *     Authors: Xavier Hallade <xavier.hallade@intel.com> Jun Tian <jun.tian@intel.com>
 * SPDX - License - Identifier: LGPL-2.1-or-later

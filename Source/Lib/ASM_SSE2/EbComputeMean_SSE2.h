@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -12,11 +12,11 @@ extern "C" {
 #include "EbDefinitions.h"
 
 EB_U64 ComputeSubMean8x8_SSE2_INTRIN(
-	EB_U8 *  inputSamples,      // input parameter, input samples Ptr
-	EB_U16   inputStride);
+    EB_U8 *  inputSamples,      // input parameter, input samples Ptr
+    EB_U16   inputStride);
 EB_U64 ComputeSubdMeanOfSquaredValues8x8_SSE2_INTRIN(
-	EB_U8 *  inputSamples,      // input parameter, input samples Ptr
-	EB_U16   inputStride);
+    EB_U8 *  inputSamples,      // input parameter, input samples Ptr
+    EB_U16   inputStride);
 
 EB_U64 ComputeMeanOfSquaredValues8x8_SSE2_INTRIN(
     EB_U8 *  inputSamples,      // input parameter, input samples Ptr

@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -10,7 +10,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 void PictureAverageKernel(
     EB_BYTE                  src0,
     EB_U32                   src0Stride,
@@ -155,5 +155,5 @@ EB_U64 Compute8x8Satd_U8(
 
 #ifdef __cplusplus
 }
-#endif        
+#endif
 #endif // EbPictureOperators_C_h

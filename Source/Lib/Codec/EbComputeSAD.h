@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -60,13 +60,13 @@ extern "C" {
     typedef EB_U32(*EB_COMPUTE8X4SAD_TYPE)(
         EB_U8  *src,                            // input parameter, source samples Ptr
         EB_U32  srcStride,                      // input parameter, source stride
-        EB_U8  *ref,                            // input parameter, reference samples Ptr  
+        EB_U8  *ref,                            // input parameter, reference samples Ptr
         EB_U32  refStride);                     // input parameter, reference stride
 
     typedef EB_U32(*EB_COMPUTE8X8SAD_TYPE)(
         EB_U8  *src,                            // input parameter, source samples Ptr
         EB_U32  srcStride,                      // input parameter, source stride
-        EB_U8  *ref,                            // input parameter, reference samples Ptr  
+        EB_U8  *ref,                            // input parameter, reference samples Ptr
         EB_U32  refStride);                     // input parameter, reference stride
 
     typedef void(*EB_GETEIGHTSAD8x8)(
@@ -110,12 +110,12 @@ extern "C" {
         {
             /*0 4xM  */ Compute4xMSad_SSE2_INTRIN,
             /*1 8xM  */ Compute8xMSad_SSE2_INTRIN,
-            /*2 16xM */	Compute16xMSad_SSE2_INTRIN,//Compute16xMSad_AVX2_INTRIN is slower than the SSE2 version
-            /*3 24xM */	Compute24xMSad_AVX2_INTRIN,
-            /*4 32xM */	Compute32xMSad_AVX2_INTRIN,
+            /*2 16xM */    Compute16xMSad_SSE2_INTRIN,//Compute16xMSad_AVX2_INTRIN is slower than the SSE2 version
+            /*3 24xM */    Compute24xMSad_AVX2_INTRIN,
+            /*4 32xM */    Compute32xMSad_AVX2_INTRIN,
             /*5 40xM */ Compute40xMSad_AVX2_INTRIN,
-            /*6 48xM */	Compute48xMSad_AVX2_INTRIN,
-            /*7 56xM */	Compute56xMSad_AVX2_INTRIN,
+            /*6 48xM */    Compute48xMSad_AVX2_INTRIN,
+            /*7 56xM */    Compute56xMSad_AVX2_INTRIN,
             /*8 64xM */ Compute64xMSad_AVX2_INTRIN,
         },
     };

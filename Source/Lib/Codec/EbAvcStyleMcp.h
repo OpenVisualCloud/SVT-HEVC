@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -27,13 +27,13 @@ extern "C" {
 
 
 void UnpackUniPredRef10Bit(
-    EbPictureBufferDesc_t *refFramePicList0, 
+    EbPictureBufferDesc_t *refFramePicList0,
     EB_U32                 posX,
     EB_U32                 posY,
     EB_U32                 puWidth,
     EB_U32                 puHeight,
     EbPictureBufferDesc_t *dst,
-    EB_U32                 dstLumaIndex, 
+    EB_U32                 dstLumaIndex,
     EB_U32                 dstChromaIndex,          //input parameter, please refer to the detailed explanation above.
     EB_U32                 componentMask,
     EB_BYTE                tempBuf);
@@ -48,9 +48,9 @@ void UnpackBiPredRef10Bit(
     EB_U32                 puWidth,
     EB_U32                 puHeight,
     EbPictureBufferDesc_t *biDst,
-    EB_U32                 dstLumaIndex, 
-	EB_U32                 dstChromaIndex,
-	EB_U32                 componentMask,
+    EB_U32                 dstLumaIndex,
+    EB_U32                 dstChromaIndex,
+    EB_U32                 componentMask,
     EB_BYTE                refList0TempDst,
     EB_BYTE                refList1TempDst,
     EB_BYTE                firstPassIFTempDst);
@@ -62,7 +62,7 @@ void UniPredIFreeRef8Bit(
     EB_U32                 puWidth,
     EB_U32                 puHeight,
     EbPictureBufferDesc_t *dst,
-    EB_U32                 dstLumaIndex, 
+    EB_U32                 dstLumaIndex,
     EB_U32                 dstChromaIndex,          //input parameter, please refer to the detailed explanation above.
     EB_U32                 componentMask,
     EB_BYTE                tempBuf);
@@ -76,9 +76,9 @@ void BiPredIFreeRef8Bit(
     EB_U32                 puWidth,
     EB_U32                 puHeight,
     EbPictureBufferDesc_t *biDst,
-    EB_U32                 dstLumaIndex, 
-	EB_U32                 dstChromaIndex,
-	EB_U32                 componentMask,
+    EB_U32                 dstLumaIndex,
+    EB_U32                 dstChromaIndex,
+    EB_U32                 componentMask,
     EB_BYTE                refList0TempDst,
     EB_BYTE                refList1TempDst,
     EB_BYTE                firstPassIFTempDst);
@@ -127,17 +127,17 @@ static const AvcStyleInterpolationFilterNew FUNC_TABLE AvcStyleUniPredLumaIFFunc
 
 
 static const PictureAverage FUNC_TABLE PictureAverageArray[EB_ASM_TYPE_TOTAL] = {
-	// C_DEFAULT
+    // C_DEFAULT
     PictureAverageKernel,
-	// AVX2
-	PictureAverageKernel_SSE2_INTRIN,
+    // AVX2
+    PictureAverageKernel_SSE2_INTRIN,
 };
 
 typedef void(*PictureAverage1Line)(
-    EB_BYTE                  src0,   
-    EB_BYTE                  src1,   
-    EB_BYTE                  dst,  
-    EB_U32                   areaWidth);  
+    EB_BYTE                  src0,
+    EB_BYTE                  src1,
+    EB_BYTE                  dst,
+    EB_U32                   areaWidth);
 
 static const PictureAverage1Line FUNC_TABLE PictureAverage1LineArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT

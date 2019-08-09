@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -10,7 +10,7 @@
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbPredictionStructure.h"
-#include"EbPictureControlSet.h"  
+#include"EbPictureControlSet.h"
 /************************************************
  * PA Reference Queue Entry
  ************************************************/
@@ -20,16 +20,16 @@ typedef struct PaReferenceQueueEntry_s {
     EB_U32                          dependentCount;
     EB_U32                          referenceEntryIndex;
     ReferenceList_t                *list0Ptr;
-    ReferenceList_t                *list1Ptr;  
+    ReferenceList_t                *list1Ptr;
     EB_U32                          depList0Count;
     EB_U32                          depList1Count;
     DependentList_t                 list0;
     DependentList_t                 list1;
 
-	PictureParentControlSet_t       *pPcsPtr;
+    PictureParentControlSet_t       *pPcsPtr;
 } PaReferenceQueueEntry_t;
 
-extern EB_ERRORTYPE PaReferenceQueueEntryCtor(   
+extern EB_ERRORTYPE PaReferenceQueueEntryCtor(
     PaReferenceQueueEntry_t  **entryDblPtr);
 
 
