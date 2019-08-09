@@ -812,6 +812,7 @@ void GetHistogramQueueData(
 	histogramQueueEntryIndex = (histogramQueueEntryIndex > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ?
 		histogramQueueEntryIndex - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
 		histogramQueueEntryIndex;
+    pictureControlSetPtr->hlHistogramQueueIndex = histogramQueueEntryIndex;
 	histogramQueueEntryPtr = encodeContextPtr->hlRateControlHistorgramQueue[histogramQueueEntryIndex];
 
 

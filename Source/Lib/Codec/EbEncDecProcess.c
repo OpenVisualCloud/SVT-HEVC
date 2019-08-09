@@ -3941,25 +3941,14 @@ EB_U64 predictRowsSizeSum(PictureControlSet_t* pictureControlSetPtr, SequenceCon
     EB_U64 predictedBitsForFrame = 0;
     EB_U64 predictedBitsDoneSoFar = 0;
     *encodedBitsSoFar = 0;
-    EB_U32 queueEntryIndexTemp;
-    EB_U32 queueEntryIndexHeadTemp;
     HlRateControlHistogramEntry_t      *hlRateControlHistogramPtrTemp;
     EB_U8 lcuSizeLog2 = (EB_U8)Log2f(sequenceControlSetPtr->lcuSize);
     EB_U8 pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + sequenceControlSetPtr->lcuSize - 1) >> lcuSizeLog2;
     EB_U8 pictureHeightInLcu = (sequenceControlSetPtr->lumaHeight + sequenceControlSetPtr->lcuSize - 1) >> lcuSizeLog2;
-    queueEntryIndexHeadTemp = (EB_S32)(pictureControlSetPtr->pictureNumber - sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueue[sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueueHeadIndex]->pictureNumber);
-    queueEntryIndexHeadTemp += sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueueHeadIndex;
-    queueEntryIndexHeadTemp = (queueEntryIndexHeadTemp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ?
-        queueEntryIndexHeadTemp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
-        queueEntryIndexHeadTemp;
 
-    queueEntryIndexTemp = queueEntryIndexHeadTemp;
-
-
-    EB_U32 currentInd = (queueEntryIndexTemp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ? queueEntryIndexTemp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH : queueEntryIndexTemp;
-    hlRateControlHistogramPtrTemp = (sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueue[currentInd]);
     for (EB_U8 row = 0; row < pictureHeightInLcu; row++)
     {
+    hlRateControlHistogramPtrTemp = (sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueue[pictureControlSetPtr->ParentPcsPtr->hlHistogramQueueIndex]);
         pictureControlSetPtr->rowStats[row]->predictedBits = 0;
         for (EB_U8 col = 0; col < pictureControlSetPtr->rowStats[row]->totalCUEncoded; col++)
         {

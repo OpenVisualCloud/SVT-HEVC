@@ -434,6 +434,8 @@ typedef struct PictureParentControlSet_s
     EB_U16                                lcuTotalCount;
     EB_BOOL                               endOfSequenceRegion;
     EB_BOOL                               sceneChangeInGop;
+    EB_S32                                hlHistogramQueueIndex;
+
     // used for Look ahead
     EB_U8                                 framesInSw;
     EB_S16                                historgramLifeCount;

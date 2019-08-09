@@ -2758,22 +2758,12 @@ void* RateControlKernel(void *inputPtr)
                         pictureControlSetPtr->pictureQp);
                 }
             }
-            if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize)
-            {
+            if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize && sequenceControlSetPtr->staticConfig.lookAheadDistance > 0) {
                 EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
                 pictureControlSetPtr->qpNoVbv = pictureControlSetPtr->pictureQp;
                 pictureControlSetPtr->bufferFillPerFrame = encodeContextPtr->bufferFill;
                 pictureControlSetPtr->pictureQp = (EB_U8)Vbv_Buf_Calc(pictureControlSetPtr, sequenceControlSetPtr, encodeContextPtr);
-                queueEntryIndexHeadTemp = (EB_S32)(pictureControlSetPtr->pictureNumber - encodeContextPtr->hlRateControlHistorgramQueue[encodeContextPtr->hlRateControlHistorgramQueueHeadIndex]->pictureNumber);
-                queueEntryIndexHeadTemp += encodeContextPtr->hlRateControlHistorgramQueueHeadIndex;
-                queueEntryIndexHeadTemp = (queueEntryIndexHeadTemp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ?
-                    queueEntryIndexHeadTemp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
-                    queueEntryIndexHeadTemp;
-
-                queueEntryIndexTemp2 = queueEntryIndexHeadTemp;
-
-                EB_U32 currentInd = (queueEntryIndexTemp2 > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ? queueEntryIndexTemp2 - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH : queueEntryIndexTemp2;
-                hlRateControlHistogramPtrTemp = encodeContextPtr->hlRateControlHistorgramQueue[currentInd];
+                hlRateControlHistogramPtrTemp = encodeContextPtr->hlRateControlHistorgramQueue[pictureControlSetPtr->ParentPcsPtr->hlHistogramQueueIndex];
                 pictureControlSetPtr->frameSizePlanned = predictBits(sequenceControlSetPtr, encodeContextPtr, hlRateControlHistogramPtrTemp, pictureControlSetPtr->pictureQp);
                 EbReleaseMutex(encodeContextPtr->bufferFillMutex);
             }
