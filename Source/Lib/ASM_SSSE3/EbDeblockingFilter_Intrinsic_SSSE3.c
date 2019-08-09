@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -12,13 +12,13 @@
 
 
 EB_EXTERN void Luma4SampleEdgeDLFCore_SSSE3(
-	EB_U8                 *edgeStartSample,
-	EB_U32                 reconLumaPicStride,
-	EB_BOOL                isVerticalEdge,
-	EB_S32                 tc,
-	EB_S32                 beta)
+    EB_U8                 *edgeStartSample,
+    EB_U32                 reconLumaPicStride,
+    EB_BOOL                isVerticalEdge,
+    EB_S32                 tc,
+    EB_S32                 beta)
 {
-  
+
   __m128i x0, x1, x2, x3;
   __m128i d;
   __m128i e;
@@ -76,23 +76,23 @@ EB_EXTERN void Luma4SampleEdgeDLFCore_SSSE3(
     x3 = _mm_unpacklo_epi8(a3, _mm_setzero_si128());
   }
 
-   
 
-  
+
+
   // x0: p3 q3
   // x1: p2 q2
   // x2: p1 q1
   // x3: p0 q0
-  
+
   // d: dp0 in lane 0, dp3 in lane 3, dq0 in lane 4, dq3 in lane 7
-  
+
   d = _mm_sub_epi16(x1, x2);
   d = _mm_sub_epi16(d, x2);
   d = _mm_add_epi16(d, x3);
-  
+
   // Absolute value
   d = _mm_abs_epi16(d);
-  
+
   // Need sum of lanes 0, 3, 4, 7
   // e: d0=dp0+dq0 in lanes 0 and 4, d3=dp3+dq3 in lanes 3 and 7
   e = _mm_add_epi16(d, _mm_shuffle_epi32(d, 0x4e)); // 0x4e = 01001110
@@ -100,49 +100,49 @@ EB_EXTERN void Luma4SampleEdgeDLFCore_SSSE3(
   {
     return;
   }
-  
+
   d32 = d;
   d32 = _mm_shufflelo_epi16(d32, 0xcc); // 0xcc = 11001100
   d32 = _mm_shufflehi_epi16(d32, 0xcc);
   d32 = _mm_madd_epi16(d32, _mm_set1_epi16(1));
   // d: dp=dp0+dp3 in lanes 0 and 1, dq=dq0+dq3 in lanes 2 and 3 (note: 32-bit lanes)
-  
+
   tm = 0;
   tm += tc;
   tm += tc << 16;
   tcx = _mm_cvtsi32_si128(tm);
   tcx = _mm_unpacklo_epi16(tcx, tcx);
   tcx = _mm_shuffle_epi32(tcx, 0x50); // 01010000
-  
+
   x3r = _mm_shuffle_epi32(x3, 0x4e); // 0x4e = 01001110 (swap 64-bit lanes)
 
   f0 = _mm_max_epi16(_mm_sub_epi16(x0, x3), _mm_sub_epi16(x3, x0));
   f0 = _mm_add_epi16(f0, _mm_shuffle_epi32(f0, 0x4e));
   f0 = _mm_cmplt_epi16(f0, _mm_set1_epi16((short)(beta>>3)));
-  
+
   f1 = _mm_max_epi16(_mm_sub_epi16(x3, x3r), _mm_sub_epi16(x3r, x3));
   f1 = _mm_cmplt_epi16(f1, _mm_set1_epi16((short)((5*tc+1)>>1)));
-  
+
   f2 = _mm_cmplt_epi16(_mm_add_epi16(e, e), _mm_set1_epi16((short)(beta >> 2)));
-  
+
   f0 = _mm_and_si128(f0, f1);
   f0 = _mm_and_si128(f0, f2);
-  
-  
+
+
   y0 = x0;
   y1 = x1;
   y2 = x2;
   y3 = x3;
   strongFilter = (_mm_movemask_epi8(f0) & 0xc3) == 0xc3;
-  
+
   if (strongFilter)
   {
     tcx2 = _mm_add_epi16(tcx, tcx);
-    
+
     // q0 = p1 + 2p0 + 2q0 + 2q1 + q2
     // q1 = p0 + q0 + q1 + q2
     // q2 = p0 + q0 + q1 + 3q2 + 2q3
-    
+
     c0 = _mm_add_epi16(y0, y1); // q2 + q3
     c1 = _mm_add_epi16(y1, y2); // q1 + q2
     c2 = _mm_add_epi16(y2, y3); // q0 + q1
@@ -154,19 +154,19 @@ EB_EXTERN void Luma4SampleEdgeDLFCore_SSSE3(
 
     y2 = _mm_add_epi16(c3, c1);
     c2 = _mm_add_epi16(c2, _mm_shuffle_epi32(c2, 0x4e));
-    
+
     y1 = _mm_add_epi16(y2, c0);
     y1 = _mm_add_epi16(y1, c0);
     y3 = _mm_add_epi16(y2, c2);
-    
+
     y1 = _mm_add_epi16(y1, _mm_set1_epi16(4));
     y2 = _mm_add_epi16(y2, _mm_set1_epi16(2));
     y3 = _mm_add_epi16(y3, _mm_set1_epi16(4));
-    
+
     y1 = _mm_srai_epi16(y1, 3);
     y2 = _mm_srai_epi16(y2, 2);
     y3 = _mm_srai_epi16(y3, 3);
-    
+
     y1 = _mm_max_epi16(y1, _mm_sub_epi16(x1, tcx2));
     y1 = _mm_min_epi16(y1, _mm_add_epi16(x1, tcx2));
     y2 = _mm_max_epi16(y2, _mm_sub_epi16(x2, tcx2));
@@ -181,31 +181,31 @@ EB_EXTERN void Luma4SampleEdgeDLFCore_SSSE3(
     dl = _mm_sub_epi16(_mm_shuffle_epi32(dl, 0x4e), dl);
     dl = _mm_add_epi16(dl, _mm_setr_epi16(8, 8, 8, 8, 7, 7, 7, 7));
     dl = _mm_srai_epi16(dl, 4);
-    
+
     tcx10 = _mm_mullo_epi16(tcx, _mm_set1_epi16(10));
-    
+
     tcx = _mm_and_si128(tcx, _mm_cmplt_epi16(dl, tcx10));
     tcx = _mm_and_si128(tcx, _mm_cmpgt_epi16(dl, _mm_sub_epi16(_mm_setzero_si128(), tcx10)));
-    
+
     dl = _mm_min_epi16(dl, tcx);
     dl = _mm_max_epi16(dl, _mm_sub_epi16(_mm_setzero_si128(), tcx));
-    
+
     y3 = _mm_add_epi16(y3, dl);
-    
+
 
     tcx = _mm_srai_epi16(tcx, 1);
 
     tcx = _mm_and_si128(tcx, _mm_cmplt_epi32(d32, _mm_set1_epi32(3*beta>>4))); // side threshold
-    
+
     d2 = _mm_sub_epi16(_mm_avg_epu16(x3, x1), x2);
     d2 = _mm_add_epi16(d2, dl);
     d2 = _mm_srai_epi16(d2, 1);
     d2 = _mm_min_epi16(d2, tcx);
     d2 = _mm_max_epi16(d2, _mm_sub_epi16(_mm_setzero_si128(), tcx));
-    
+
     y2 = _mm_add_epi16(y2, d2);
   }
-  
+
   // Store sample values
   z0 = _mm_packus_epi16(y0, y1);
   z1 = _mm_packus_epi16(y2, y3);
@@ -240,12 +240,12 @@ EB_EXTERN void Luma4SampleEdgeDLFCore_SSSE3(
 }
 
 EB_EXTERN void Chroma2SampleEdgeDLFCore_SSSE3(
-	EB_BYTE                edgeStartSampleCb,
-	EB_BYTE                edgeStartSampleCr,
-	EB_U32                 reconChromaPicStride,
-	EB_BOOL                isVerticalEdge,
-	EB_U8                  cbTc,
-	EB_U8                  crTc)
+    EB_BYTE                edgeStartSampleCb,
+    EB_BYTE                edgeStartSampleCr,
+    EB_U32                 reconChromaPicStride,
+    EB_BOOL                isVerticalEdge,
+    EB_U8                  cbTc,
+    EB_U8                  crTc)
 {
   __m128i x0, x1, x2, x3;
   __m128i a0, a1, a2, a3, a4, a5, a6, a7;
@@ -263,12 +263,12 @@ EB_EXTERN void Chroma2SampleEdgeDLFCore_SSSE3(
 
     a0 = _mm_unpacklo_epi16(a0, a2);
     a1 = _mm_unpacklo_epi16(a1, a3);
-    
+
     a0 = _mm_unpacklo_epi8(a0, a1);
-    
+
     a0 = _mm_shufflelo_epi16(a0, 0xd8); // 11011000
     a0 = _mm_shufflehi_epi16(a0, 0xd8); // 11011000
-    
+
     x0 = _mm_unpacklo_epi8(a0, _mm_setzero_si128());
     x1 = _mm_srli_si128(x0, 8);
     x2 = _mm_unpackhi_epi8(a0, _mm_setzero_si128());
@@ -282,13 +282,13 @@ EB_EXTERN void Chroma2SampleEdgeDLFCore_SSSE3(
     x0 = _mm_srai_epi16(x0, 1);
     x0 = _mm_min_epi16(x0, lim);
     x0 = _mm_max_epi16(x0, _mm_sub_epi16(_mm_setzero_si128(), lim));
-    
-    
+
+
     x1 = _mm_add_epi16(x1, x0);
     x2 = _mm_sub_epi16(x2, x0);
     x1 = _mm_unpacklo_epi16(x1, x2);
     x1 = _mm_packus_epi16(x1, x1);
-    
+
     *(EB_U16 *)(edgeStartSampleCb-1+0*reconChromaPicStride) = (EB_U16)(_mm_extract_epi16(x1, 0));
     *(EB_U16 *)(edgeStartSampleCb-1+1*reconChromaPicStride) = (EB_U16)(_mm_extract_epi16(x1, 1));
     *(EB_U16 *)(edgeStartSampleCr-1+0*reconChromaPicStride) = (EB_U16)(_mm_extract_epi16(x1, 2));
@@ -300,7 +300,7 @@ EB_EXTERN void Chroma2SampleEdgeDLFCore_SSSE3(
     a1 = _mm_cvtsi32_si128(*(EB_U32 *)(edgeStartSampleCb-1*reconChromaPicStride));
     a2 = _mm_cvtsi32_si128(*(EB_U32 *)(edgeStartSampleCb+0*reconChromaPicStride));
     a3 = _mm_cvtsi32_si128(*(EB_U32 *)(edgeStartSampleCb+1*reconChromaPicStride));
-    
+
     a4 = _mm_cvtsi32_si128(*(EB_U32 *)(edgeStartSampleCr-2*reconChromaPicStride));
     a0 = _mm_unpacklo_epi16(a0, a4);
     a5 = _mm_cvtsi32_si128(*(EB_U32 *)(edgeStartSampleCr-1*reconChromaPicStride));
@@ -309,12 +309,12 @@ EB_EXTERN void Chroma2SampleEdgeDLFCore_SSSE3(
     a2 = _mm_unpacklo_epi16(a2, a6);
     a7 = _mm_cvtsi32_si128(*(EB_U32 *)(edgeStartSampleCr+1*reconChromaPicStride));
     a3 = _mm_unpacklo_epi16(a3, a7);
-    
+
     x0 = _mm_unpacklo_epi8(a0, _mm_setzero_si128());
     x1 = _mm_unpacklo_epi8(a1, _mm_setzero_si128());
     x2 = _mm_unpacklo_epi8(a2, _mm_setzero_si128());
     x3 = _mm_unpacklo_epi8(a3, _mm_setzero_si128());
-    
+
     x0 = _mm_sub_epi16(x0, x3);
     x3 = _mm_sub_epi16(x2, x1);
     x0 = _mm_srai_epi16(x0, 2);
@@ -323,11 +323,11 @@ EB_EXTERN void Chroma2SampleEdgeDLFCore_SSSE3(
     x0 = _mm_srai_epi16(x0, 1);
     x0 = _mm_min_epi16(x0, lim);
     x0 = _mm_max_epi16(x0, _mm_sub_epi16(_mm_setzero_si128(), lim));
-    
-    
+
+
     x1 = _mm_add_epi16(x1, x0);
     x2 = _mm_sub_epi16(x2, x0);
-    
+
     x1 = _mm_packus_epi16(x1, x2);
     *(EB_U16 *)(edgeStartSampleCb-1*reconChromaPicStride) = (EB_U16)(_mm_extract_epi16(x1, 0));
     *(EB_U16 *)(edgeStartSampleCb+0*reconChromaPicStride) = (EB_U16)(_mm_extract_epi16(x1, 4));

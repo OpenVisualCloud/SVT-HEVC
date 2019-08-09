@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -100,7 +100,7 @@ EB_ERRORTYPE MdcRefinement(
     }
 
     if (refinementLevel & REFINEMENT_Pp1){
-		
+
         if (depth < 3 && cuIndex < 81){
             localCuArray[cuIndex + 1].slectedCu = EB_TRUE;
             localCuArray[cuIndex + 1 + DepthOffset[depth + 1]].slectedCu = EB_TRUE;
@@ -108,7 +108,7 @@ EB_ERRORTYPE MdcRefinement(
             localCuArray[cuIndex + 1 + 3 * DepthOffset[depth + 1]].slectedCu = EB_TRUE;
         }
         if (lowestLevel == REFINEMENT_Pp1){
-			if (depth < 3 && cuIndex < 81){
+            if (depth < 3 && cuIndex < 81){
                 localCuArray[cuIndex + 1].stopSplit = EB_TRUE;
                 localCuArray[cuIndex + 1 + DepthOffset[depth + 1]].stopSplit = EB_TRUE;
                 localCuArray[cuIndex + 1 + 2 * DepthOffset[depth + 1]].stopSplit = EB_TRUE;
@@ -265,7 +265,7 @@ EB_ERRORTYPE MdcIntraCuRate(
     EB_U64 chromaRate;
 
     EncodeContext_t *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
-    
+
     CHECK_REPORT_ERROR(
         (partitionMode == SIZE_2Nx2N),
         encodeContextPtr->appCallbackPtr,
@@ -325,7 +325,7 @@ EB_U64 MdcInterCuRate(
         // Estimate the Motion Vector Prediction Index Bits
         rate += 23196;
 
-        // Estimate the Motion Vector Difference Bits   
+        // Estimate the Motion Vector Difference Bits
         MVs_0 = ABS(xMvL0);
         MVs_1 = ABS(yMvL0);
         MVs_0 = MVs_0 > 499 ? 499 : MVs_0;
@@ -338,7 +338,7 @@ EB_U64 MdcInterCuRate(
         // Estimate the Motion Vector Prediction Index Bits
         rate += 23196;
 
-        // Estimate the Motion Vector Difference Bits  
+        // Estimate the Motion Vector Difference Bits
 
         MVs_2 = ABS(xMvL1);
         MVs_3 = ABS(yMvL1);
@@ -360,7 +360,7 @@ EB_U64 MdcInterCuRate(
 
         rate += 46392;
 
-        // Estimate the Motion Vector Difference Bits   
+        // Estimate the Motion Vector Difference Bits
 
         MVs_0 = ABS(xMvL0);
         MVs_1 = ABS(yMvL0);
@@ -370,7 +370,7 @@ EB_U64 MdcInterCuRate(
 
         rate += mvBitTable[MVs_0][MVs_1];
 
-        // Estimate the Motion Vector Difference Bits    
+        // Estimate the Motion Vector Difference Bits
         MVs_2 = ABS(xMvL1);
         MVs_3 = ABS(yMvL1);
         MVs_2 = MVs_2 > 499 ? 499 : MVs_2;
@@ -463,7 +463,7 @@ void RefinementPredictionLoop(
                     EB_U8 lowestLevel = 0x00;
 
                     if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE)
-                        refinementLevel = NdpRefinementControl_ISLICE[depth]; 
+                        refinementLevel = NdpRefinementControl_ISLICE[depth];
                     else
                         refinementLevel = NdpRefinementControl_ISLICE_Sub4K[depth];
 
@@ -490,16 +490,16 @@ void RefinementPredictionLoop(
                 if (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_LCU_SWITCH_DEPTH_MODE && (pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_PRED_OPEN_LOOP_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE)) {
                     refinementLevel = Pred;
                 }
-                else 
-            
-				if  (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_OPEN_LOOP_DEPTH_MODE ||
+                else
+
+                if  (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_OPEN_LOOP_DEPTH_MODE ||
                     (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_LCU_SWITCH_DEPTH_MODE && pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_OPEN_LOOP_DEPTH_MODE))
 
                     refinementLevel =  NdpRefinementControlNREF[temporalLayerIndex][depth];
                 else
                     refinementLevel =  NdpRefinementControl_FAST[temporalLayerIndex][depth];
 
-				if (pictureControlSetPtr->ParentPcsPtr->cu8x8Mode == CU_8x8_MODE_1) {
+                if (pictureControlSetPtr->ParentPcsPtr->cu8x8Mode == CU_8x8_MODE_1) {
                     refinementLevel = ((refinementLevel & REFINEMENT_Pp1) && depth == 2) ? refinementLevel - REFINEMENT_Pp1 :
                         ((refinementLevel & REFINEMENT_Pp2) && depth == 1) ? refinementLevel - REFINEMENT_Pp2 :
                         ((refinementLevel & REFINEMENT_Pp3) && depth == 0) ? refinementLevel - REFINEMENT_Pp3 : refinementLevel;
@@ -568,7 +568,7 @@ void PrePredictionRefinement(
     }
 
 
-    // S-LOGO           
+    // S-LOGO
 
     if (stationaryEdgeOverTimeFlag > 0){
 
@@ -650,7 +650,7 @@ void ForwardCuToModeDecision(
 
                 }
 
-                // Take into account MAX CU size & MAX intra size (from the API)   
+                // Take into account MAX CU size & MAX intra size (from the API)
                 cuClass = (cuStatsPtr->size > MAX_CU_SIZE || (sliceType == EB_I_PICTURE && cuStatsPtr->size > MAX_INTRA_SIZE)) ?
                 DO_NOT_ADD_CU_CONTINUE_SPLIT :
                                              cuClass;
@@ -845,7 +845,7 @@ void MdcInterDepthDecision(
         }
     }
 
-    // Stage 2: Inter depth decision: depth 0 vs depth 1 
+    // Stage 2: Inter depth decision: depth 0 vs depth 1
 
     // Walks to the last coded 32x32 block for merging
     // Stage 2 isn't performed in I slices since the abcense of 64x64 candidates
@@ -912,7 +912,7 @@ void PredictionPartitionLoop(
     )
 {
 
-	MdRateEstimationContext_t *mdRateEstimationPtr = contextPtr->mdRateEstimationPtr;
+    MdRateEstimationContext_t *mdRateEstimationPtr = contextPtr->mdRateEstimationPtr;
     MdcpLocalCodingUnit_t *localCuArray = contextPtr->localCuArray;
     MdcpLocalCodingUnit_t   *cuPtr;
 
@@ -962,46 +962,46 @@ void PredictionPartitionLoop(
                         &cuIntraRate);
 
 
-					OisCu32Cu16Results_t	        *oisCu32Cu16ResultsPtr = pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex];
-					OisCu8Results_t   	            *oisCu8ResultsPtr = pictureControlSetPtr->ParentPcsPtr->oisCu8Results[lcuIndex];
-					OisCandidate_t * oisCuPtr = cuIndexInRaterScan < RASTER_SCAN_CU_INDEX_8x8_0 ?
-						oisCu32Cu16ResultsPtr->sortedOisCandidate[cuIndexInRaterScan] : oisCu8ResultsPtr->sortedOisCandidate[cuIndexInRaterScan - RASTER_SCAN_CU_INDEX_8x8_0];
+                    OisCu32Cu16Results_t            *oisCu32Cu16ResultsPtr = pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex];
+                    OisCu8Results_t                   *oisCu8ResultsPtr = pictureControlSetPtr->ParentPcsPtr->oisCu8Results[lcuIndex];
+                    OisCandidate_t * oisCuPtr = cuIndexInRaterScan < RASTER_SCAN_CU_INDEX_8x8_0 ?
+                        oisCu32Cu16ResultsPtr->sortedOisCandidate[cuIndexInRaterScan] : oisCu8ResultsPtr->sortedOisCandidate[cuIndexInRaterScan - RASTER_SCAN_CU_INDEX_8x8_0];
 
 
-					if (size > 32){
-						cuIntraSad =
-							oisCu32Cu16ResultsPtr->sortedOisCandidate[1][0].distortion +
-							oisCu32Cu16ResultsPtr->sortedOisCandidate[2][0].distortion +
-							oisCu32Cu16ResultsPtr->sortedOisCandidate[3][0].distortion +
-							oisCu32Cu16ResultsPtr->sortedOisCandidate[4][0].distortion;
-					}
-					else if (size == 32) {
-						cuIntraSad = oisCu32Cu16ResultsPtr->sortedOisCandidate[cuIndexInRaterScan][0].distortion;
-					}
-					else{
-						if (size > 8){
-							cuIntraSad = oisCu32Cu16ResultsPtr->sortedOisCandidate[cuIndexInRaterScan][0].distortion;
-						}
-						else{
-							if (oisCuPtr[0].validDistortion){
-								cuIntraSad = oisCuPtr[0].distortion;
-							}
-							else{
+                    if (size > 32){
+                        cuIntraSad =
+                            oisCu32Cu16ResultsPtr->sortedOisCandidate[1][0].distortion +
+                            oisCu32Cu16ResultsPtr->sortedOisCandidate[2][0].distortion +
+                            oisCu32Cu16ResultsPtr->sortedOisCandidate[3][0].distortion +
+                            oisCu32Cu16ResultsPtr->sortedOisCandidate[4][0].distortion;
+                    }
+                    else if (size == 32) {
+                        cuIntraSad = oisCu32Cu16ResultsPtr->sortedOisCandidate[cuIndexInRaterScan][0].distortion;
+                    }
+                    else{
+                        if (size > 8){
+                            cuIntraSad = oisCu32Cu16ResultsPtr->sortedOisCandidate[cuIndexInRaterScan][0].distortion;
+                        }
+                        else{
+                            if (oisCuPtr[0].validDistortion){
+                                cuIntraSad = oisCuPtr[0].distortion;
+                            }
+                            else{
 
-								const CodedUnitStats_t  *cuStats = GetCodedUnitStats(ParentBlockIndex[cuIndex]);
-								const EB_U32 me2Nx2NTableOffset = cuStats->cuNumInDepth + me2Nx2NOffset[cuStats->depth];
+                                const CodedUnitStats_t  *cuStats = GetCodedUnitStats(ParentBlockIndex[cuIndex]);
+                                const EB_U32 me2Nx2NTableOffset = cuStats->cuNumInDepth + me2Nx2NOffset[cuStats->depth];
 
 
-								if (oisCu8ResultsPtr->sortedOisCandidate[me2Nx2NTableOffset][0].validDistortion){
-									cuIntraSad = oisCu8ResultsPtr->sortedOisCandidate[me2Nx2NTableOffset][0].distortion;
-								}
-								else {
-									cuIntraSad = 0;
-								}
-							}
-						}
-					}
-            
+                                if (oisCu8ResultsPtr->sortedOisCandidate[me2Nx2NTableOffset][0].validDistortion){
+                                    cuIntraSad = oisCu8ResultsPtr->sortedOisCandidate[me2Nx2NTableOffset][0].distortion;
+                                }
+                                else {
+                                    cuIntraSad = 0;
+                                }
+                            }
+                        }
+                    }
+
 
                     cuIntraCost = (cuIntraSad << COST_PRECISION) + ((contextPtr->lambda * cuIntraRate + MD_OFFSET) >> MD_SHIFT);
                     cuPtr->earlyCost = cuIntraCost;
@@ -1010,16 +1010,16 @@ void PredictionPartitionLoop(
 
                 if (pictureControlSetPtr->sliceType != EB_I_PICTURE){
 
-		
 
-					MeCuResults_t * mePuResult = &pictureControlSetPtr->ParentPcsPtr->meResults[lcuIndex][cuIndexInRaterScan];
-					cuInterRate = MdcInterCuRate(
-						mePuResult->distortionDirection[0].direction,
-						mePuResult->xMvL0,
-						mePuResult->yMvL0,
-						mePuResult->xMvL1,
-						mePuResult->yMvL1);
-					cuInterSad = mePuResult->distortionDirection[0].distortion;
+
+                    MeCuResults_t * mePuResult = &pictureControlSetPtr->ParentPcsPtr->meResults[lcuIndex][cuIndexInRaterScan];
+                    cuInterRate = MdcInterCuRate(
+                        mePuResult->distortionDirection[0].direction,
+                        mePuResult->xMvL0,
+                        mePuResult->yMvL0,
+                        mePuResult->xMvL1,
+                        mePuResult->yMvL1);
+                    cuInterSad = mePuResult->distortionDirection[0].distortion;
 
 
                     cuInterCost = (cuInterSad << COST_PRECISION) + ((contextPtr->lambda * cuInterRate + MD_OFFSET) >> MD_SHIFT);

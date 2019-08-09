@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -765,7 +765,7 @@ static void ReadInputFrames(
     const uint32_t  inputPaddedWidth = config->inputPaddedWidth;
     const uint32_t  inputPaddedHeight = config->inputPaddedHeight;
     FILE   *inputFile = config->inputFile;
-	uint8_t  *ebInputPtr;
+    uint8_t  *ebInputPtr;
     EB_H265_ENC_INPUT* inputPtr = (EB_H265_ENC_INPUT*)headerPtr->pBuffer;
     const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)config->encoderColorFormat;
     const uint8_t subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
@@ -1129,8 +1129,8 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(EbConfig_t *config, EbAppContext_t *appC
         EbInjector(config->processedFrameCount, config->injectorFrameRate);
     }
 
-	totalBytesToProcessCount = (framesToBeEncoded < 0) ? -1 : (config->encoderBitDepth == 10 && config->compressedTenBitFormat == 1) ?
-		framesToBeEncoded * compressed10bitFrameSize:
+    totalBytesToProcessCount = (framesToBeEncoded < 0) ? -1 : (config->encoderBitDepth == 10 && config->compressedTenBitFormat == 1) ?
+        framesToBeEncoded * compressed10bitFrameSize:
         framesToBeEncoded * SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, colorFormat, is16bit);
 
 
@@ -1244,7 +1244,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
         ++(config->performanceContext.frameCount);
         *totalLatency += (uint64_t)headerPtr->nTickCount;
         *maxLatency = (headerPtr->nTickCount > *maxLatency) ? headerPtr->nTickCount : *maxLatency;
-        
+
         EbFinishTime((uint64_t*)&finishsTime, (uint64_t*)&finishuTime);
         // total execution time, inc init time
         EbComputeOverallElapsedTime(
@@ -1314,7 +1314,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
             }
         }
     }
-	return return_value;
+    return return_value;
 }
 APPEXITCONDITIONTYPE ProcessOutputReconBuffer(
     EbConfig_t             *config,

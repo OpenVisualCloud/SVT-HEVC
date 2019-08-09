@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2019 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -46,7 +46,7 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
 
     /* get first line after YUV4MPEG2 */
     fresult = fgets(buffer, sizeof(buffer), ptr_in);
-    if (fresult== NULL) { 
+    if (fresult== NULL) {
         return EB_ErrorBadParameter;
     }
 

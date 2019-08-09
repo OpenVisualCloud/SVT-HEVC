@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -160,8 +160,8 @@ EB_ERRORTYPE EncDecContextCtor(
 
     // Mode Decision Context
     return_error = ModeDecisionContextCtor(
-        &contextPtr->mdContext, 
-        0, 
+        &contextPtr->mdContext,
+        0,
         0,
         is16bit);
     if (return_error == EB_ErrorInsufficientResources){
@@ -507,7 +507,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
 
         break;
     }
-    
+
     return return_error;
 }
 
@@ -561,7 +561,7 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture(
     if (pictureControlSetPtr->saoFlag[0]) {
 
         lcuIndex = 0;
-        for (lcuNumberInHeight = 0; lcuNumberInHeight < pictureHeightInLcu; ++lcuNumberInHeight) { 
+        for (lcuNumberInHeight = 0; lcuNumberInHeight < pictureHeightInLcu; ++lcuNumberInHeight) {
 
             for (lcuNumberInWidth = 0; lcuNumberInWidth < pictureWidthInLcu; ++lcuNumberInWidth, ++lcuIndex) {
 
@@ -1049,7 +1049,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
             EB_ENC_SAO_ERROR1);
         break;
     }
-    
+
     return return_error;
 }
 /********************************************
@@ -1335,9 +1335,9 @@ static void ResetEncDec(
 
     // QP
     contextPtr->qp = pictureControlSetPtr->pictureQp;
-    // Asuming cb and cr offset to be the same for chroma QP in both slice and pps for lambda computation 
+    // Asuming cb and cr offset to be the same for chroma QP in both slice and pps for lambda computation
 
-    EB_U8	qpScaled = CLIP3(MIN_QP_VALUE, MAX_CHROMA_MAP_QP_VALUE, (EB_S32)(contextPtr->qp + pictureControlSetPtr->cbQpOffset + pictureControlSetPtr->sliceCbQpOffset));
+    EB_U8    qpScaled = CLIP3(MIN_QP_VALUE, MAX_CHROMA_MAP_QP_VALUE, (EB_S32)(contextPtr->qp + pictureControlSetPtr->cbQpOffset + pictureControlSetPtr->sliceCbQpOffset));
     contextPtr->chromaQp = (EB_U8)MapChromaQp(qpScaled);
 
     // Lambda Assignement
@@ -1418,7 +1418,7 @@ static void ResetEncDec(
     if (contextPtr->mdContext->coeffCabacUpdate)
     {
         ContextModelEncContext_t  *cabacCtxModelArray = (ContextModelEncContext_t*)sequenceControlSetPtr->encodeContextPtr->cabacContextModelArray;
-        // Increment the context model array pointer to point to the right address based on the QP and slice type 
+        // Increment the context model array pointer to point to the right address based on the QP and slice type
         cabacCtxModelArray += pictureControlSetPtr->sliceType * TOTAL_NUMBER_OF_QP_VALUES + entropyCodingQp;
 
         //LatestValid  <--  init
@@ -1450,7 +1450,7 @@ static void EncDecConfigureLcu(
     }
 
     // Asuming cb and cr offset to be the same for chroma QP in both slice and pps for lambda computation
-    EB_U8	qpScaled = CLIP3((EB_S8)MIN_QP_VALUE, (EB_S8)MAX_CHROMA_MAP_QP_VALUE, (EB_S8)(contextPtr->qp + pictureControlSetPtr->cbQpOffset + pictureControlSetPtr->sliceCbQpOffset));
+    EB_U8    qpScaled = CLIP3((EB_S8)MIN_QP_VALUE, (EB_S8)MAX_CHROMA_MAP_QP_VALUE, (EB_S8)(contextPtr->qp + pictureControlSetPtr->cbQpOffset + pictureControlSetPtr->sliceCbQpOffset));
     contextPtr->chromaQp = MapChromaQp(qpScaled);
 
     /* Note(CHKN) : when Qp modulation varies QP on a sub-LCU(CU) basis,  Lamda has to change based on Cu->QP , and then this code has to move inside the CU loop in MD */
@@ -1556,7 +1556,7 @@ EB_BOOL AssignEncDecSegments(
         // The entire picture is provided by the MDC process, so
         //   no logic is necessary to clear input dependencies.
 
-        // Start on Segment 0 immediately 
+        // Start on Segment 0 immediately
         *segmentInOutIndex = segmentPtr->rowArray[0].currentSegIndex;
         taskPtr->inputType = ENCDEC_TASKS_CONTINUE;
         ++segmentPtr->rowArray[0].currentSegIndex;
@@ -1674,7 +1674,7 @@ static void ReconOutput(
     const EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
 
     // Get Recon Buffer
-    EbGetEmptyObject( 
+    EbGetEmptyObject(
         sequenceControlSetPtr->encodeContextPtr->reconOutputFifoPtr,
         &outputReconWrapperPtr);
     outputReconPtr = (EB_BUFFERHEADERTYPE*)outputReconWrapperPtr->objectPtr;
@@ -1859,7 +1859,7 @@ void PadRefAndSetFlags(
             refPic16BitPtr->width << (1 - subWidthCMinus1),
             refPic16BitPtr->height >> subHeightCMinus1,
             refPic16BitPtr->originX << (1 - subWidthCMinus1),
-            refPic16BitPtr->originY >> subHeightCMinus1);   
+            refPic16BitPtr->originY >> subHeightCMinus1);
     }
 
     // set up TMVP flag for the reference picture
@@ -1896,7 +1896,7 @@ void CopyStatisticsToRefObject(
 
     EbReferenceObject_t  * refObjL0, *refObjL1;
     ((EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr)->penalizeSkipflag = EB_FALSE;
-    if (pictureControlSetPtr->sliceType == EB_B_PICTURE){ 
+    if (pictureControlSetPtr->sliceType == EB_B_PICTURE){
         refObjL0 = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr;
         refObjL1 = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_1]->objectPtr;
 
@@ -1963,7 +1963,7 @@ EB_ERRORTYPE QpmDeriveWeightsMinAndMax(
         }
     }
 
-    // Refine maxDeltaQpWeight; apply conservative max_degrade_weight when most of the picture is homogenous over time.  
+    // Refine maxDeltaQpWeight; apply conservative max_degrade_weight when most of the picture is homogenous over time.
     if (pictureControlSetPtr->ParentPcsPtr->picHomogenousOverTimeLcuPercentage > 90) {
         contextPtr->maxDeltaQpWeight = contextPtr->maxDeltaQpWeight >> 1;
     }
@@ -2007,8 +2007,8 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelSq(
 
     // Derive INTRA Injection Method
     // 0 : Default (OIS)
-    // 1 : Enhanced I_PICTURE, Default (OIS) otherwise 
-    // 2 : 35 modes 
+    // 1 : Enhanced I_PICTURE, Default (OIS) otherwise
+    // 2 : 35 modes
     if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_4) {
         contextPtr->mdContext->intraInjectionMethod = 1;
     }
@@ -2017,7 +2017,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelSq(
     }
 
     // Derive Spatial SSE Flag
-    if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_4) {          
+    if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_4) {
         if (pictureControlSetPtr->sliceType == EB_I_PICTURE && contextPtr->mdContext->intraMdOpenLoopFlag == EB_FALSE) {
             contextPtr->mdContext->spatialSseFullLoop = EB_TRUE;
         }
@@ -2032,8 +2032,8 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelSq(
 
     // Set CHROMA Level
     // Level    Settings
-    // 0        Full Search Chroma for All 
-    // 1        Best Search Chroma for All LCUs; Chroma OFF if I_PICTURE, Chroma for only MV_Merge if P/B_PICTURE 
+    // 0        Full Search Chroma for All
+    // 1        Best Search Chroma for All LCUs; Chroma OFF if I_PICTURE, Chroma for only MV_Merge if P/B_PICTURE
     // 2        Full vs. Best Swicth Method 0: chromaCond0 || chromaCond1 || chromaCond2
     // 3        Full vs. Best Swicth Method 1: chromaCond0 || chromaCond1
     // 4        Full vs. Best Swicth Method 2: chromaCond2 || chromaCond3
@@ -2140,7 +2140,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelSq(
 
     // Set INTRA8x8 Restriction @ P/B Slices
     contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_TRUE;
- 
+
     // Set AMVP Generation @ MD Flag
     contextPtr->mdContext->generateAmvpTableMd = (pictureControlSetPtr->encMode <= ENC_MODE_3) ? EB_TRUE : EB_FALSE;
 
@@ -2196,7 +2196,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelSq(
 
     // Set Fast EL Flag
     if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
-        contextPtr->fastEl = EB_FALSE;          
+        contextPtr->fastEl = EB_FALSE;
     }
     else if (pictureControlSetPtr->encMode <= ENC_MODE_10) {
         if (sequenceControlSetPtr->inputResolution >= INPUT_SIZE_4K_RANGE) {
@@ -2210,10 +2210,10 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelSq(
         contextPtr->fastEl = EB_TRUE;
     }
 
-	contextPtr->yBitsThsld = YBITS_THSHLD_1(pictureControlSetPtr->encMode);
+    contextPtr->yBitsThsld = YBITS_THSHLD_1(pictureControlSetPtr->encMode);
     // Set SAO Mode
     contextPtr->saoMode = 0;
-   
+
     // Set Exit Partitioning Flag
     if (pictureControlSetPtr->encMode >= ENC_MODE_9) {
         if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
@@ -2227,7 +2227,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelSq(
         contextPtr->mdContext->enableExitPartitioning = EB_FALSE;
     }
 
-    // Set Limit INTRA Flag 
+    // Set Limit INTRA Flag
     if (pictureControlSetPtr->encMode < ENC_MODE_10) {
         contextPtr->mdContext->limitIntra = EB_FALSE;
     }
@@ -2241,7 +2241,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelSq(
     }
 
     // Set MPM Level
-    // Level    Settings 
+    // Level    Settings
     // 0        Full MPM: 3
     // 1        ON but 1
     // 2        OFF
@@ -2267,11 +2267,11 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelSq(
             contextPtr->mdContext->mpmLevel = 2;
         }
     }
-    
+
     // Set PF @ MD Level
-    // Level    Settings 
+    // Level    Settings
     // 0        OFF
-    // 1        N2    
+    // 1        N2
     // 2        M2 if 8x8 or 16x16 or Detector, N4 otherwise
     // 3        M2 if 8x8, N4 otherwise
     if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
@@ -2324,9 +2324,9 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelSq(
 
 
     // Set INTRA4x4 Search Level
-    // Level    Settings 
-    // 0        INLINE if not BDP, refinment otherwise 
-    // 1        REFINMENT   
+    // Level    Settings
+    // 0        INLINE if not BDP, refinment otherwise
+    // 1        REFINMENT
     // 2        OFF
     if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
         if (pictureControlSetPtr->encMode == ENC_MODE_0) {
@@ -2530,14 +2530,14 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelSq(
     // NFL Level Pillar/8x8 Refinement         Settings
     // 0                                       4
     // 1                                       4 if depthRefinment, 3 if 32x32, 2 otherwise
-    // 2                                       3 
+    // 2                                       3
     // 3                                       3 if depthRefinment or 32x32, 2 otherwise
     // 4                                       3 if 32x32, 2 otherwise
-    // 5                                       2    
+    // 5                                       2
     // 6                                       2 if Detectors, 1 otherwise
     // 7                                       2 if 64x64 or 32x32 or 16x16, 1 otherwise
     // 8                                       2 if 64x64 or 332x32, 1 otherwise
-    // 9                                       1      
+    // 9                                       1
     if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
         contextPtr->mdContext->nflLevelPillar8x8ref = 0;
     }
@@ -2605,14 +2605,14 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelSq(
 
     // NFL Level MvMerge/64x64 Refinement      Settings
     // 0                                       4
-    // 1                                       3 
+    // 1                                       3
     // 2                                       3 if depthRefinment or 32x32, 2 otherwise
     // 3                                       3 if 32x32, 2 otherwise
-    // 4                                       2    
+    // 4                                       2
     // 5                                       2 if Detectors, 1 otherwise
     // 6                                       2 if 64x64 or 32x32 or 16x16, 1 otherwise
     // 7                                       2 if 64x64 or 332x32, 1 otherwise
-    // 8                                       1      
+    // 8                                       1
 
     if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
         contextPtr->mdContext->nflLevelMvMerge64x64ref = 0;
@@ -2673,22 +2673,22 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     EncDecContext_t      *contextPtr)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
-    
+
     // Set MD Open Loop Flag
-	if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
-		contextPtr->mdContext->intraMdOpenLoopFlag = EB_FALSE;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
-		contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE ? EB_FALSE : EB_TRUE;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->temporalLayerIndex == 0 ? EB_FALSE : EB_TRUE;
-		}
-		else {
-			contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE ? EB_FALSE : EB_TRUE;
-		}
-	}
+    if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
+        contextPtr->mdContext->intraMdOpenLoopFlag = EB_FALSE;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
+        contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE ? EB_FALSE : EB_TRUE;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->temporalLayerIndex == 0 ? EB_FALSE : EB_TRUE;
+        }
+        else {
+            contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE ? EB_FALSE : EB_TRUE;
+        }
+    }
     else if (pictureControlSetPtr->encMode <= ENC_MODE_10) {
         contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->temporalLayerIndex == 0 ? EB_FALSE : EB_TRUE;
     }
@@ -2697,39 +2697,39 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     }
     // Derive INTRA Injection Method
     // 0 : Default (OIS)
-    // 1 : Enhanced I_PICTURE, Default (OIS) otherwise 
-    // 2 : 35 modes 
+    // 1 : Enhanced I_PICTURE, Default (OIS) otherwise
+    // 2 : 35 modes
     if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
-		contextPtr->mdContext->intraInjectionMethod = 2;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
-		contextPtr->mdContext->intraInjectionMethod = 1;
-	}
+        contextPtr->mdContext->intraInjectionMethod = 2;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
+        contextPtr->mdContext->intraInjectionMethod = 1;
+    }
     else {
         contextPtr->mdContext->intraInjectionMethod = 0;
     }
-    
+
     // Derive Spatial SSE Flag
-	if (pictureControlSetPtr->sliceType == EB_I_PICTURE && contextPtr->mdContext->intraMdOpenLoopFlag == EB_FALSE && pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_2) {
-		contextPtr->mdContext->spatialSseFullLoop = EB_TRUE;
-	}
-	else {
-		contextPtr->mdContext->spatialSseFullLoop = EB_FALSE;
-	}
-    
+    if (pictureControlSetPtr->sliceType == EB_I_PICTURE && contextPtr->mdContext->intraMdOpenLoopFlag == EB_FALSE && pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_2) {
+        contextPtr->mdContext->spatialSseFullLoop = EB_TRUE;
+    }
+    else {
+        contextPtr->mdContext->spatialSseFullLoop = EB_FALSE;
+    }
+
     // Set Allow EncDec Mismatch Flag
-	if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_6) {
-		contextPtr->allowEncDecMismatch = EB_FALSE;
-	}
+    if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_6) {
+        contextPtr->allowEncDecMismatch = EB_FALSE;
+    }
     else if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_7) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			contextPtr->allowEncDecMismatch = (pictureControlSetPtr->temporalLayerIndex > 0) ?
-				EB_TRUE :
-				EB_FALSE;
-		}
-		else {
-			contextPtr->allowEncDecMismatch = EB_FALSE;
-		}
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            contextPtr->allowEncDecMismatch = (pictureControlSetPtr->temporalLayerIndex > 0) ?
+                EB_TRUE :
+                EB_FALSE;
+        }
+        else {
+            contextPtr->allowEncDecMismatch = EB_FALSE;
+        }
     }
     else {
         contextPtr->allowEncDecMismatch = (pictureControlSetPtr->temporalLayerIndex > 0) ?
@@ -2739,40 +2739,40 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
 
     // Set CHROMA Level
     // 0: Full Search Chroma for All LCUs
-    // 1: Best Search Chroma for All LCUs; Chroma OFF if I_PICTURE, Chroma for only MV_Merge if P/B_PICTURE 
+    // 1: Best Search Chroma for All LCUs; Chroma OFF if I_PICTURE, Chroma for only MV_Merge if P/B_PICTURE
     // 2: Full vs. Best Swicth Method 0: chromaCond0 || chromaCond1 || chromaCond2
     // 3: Full vs. Best Swicth Method 1: chromaCond0 || chromaCond1
     // 4: Full vs. Best Swicth Method 2: chromaCond2 || chromaCond3
     // 5: Full vs. Best Swicth Method 3: chromaCond0
     // If INTRA Close Loop, then the switch modes (2,3,4,5) are not supported as reference samples for Chroma compensation will be a mix of source samples and reconstructed samplesoop
 
-	if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
-		contextPtr->mdContext->chromaLevel = 0;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
-		if (sequenceControlSetPtr->inputResolution >= INPUT_SIZE_4K_RANGE) {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-				contextPtr->mdContext->chromaLevel = 1;
-			}
-			else if (pictureControlSetPtr->temporalLayerIndex == 0) {
-				contextPtr->mdContext->chromaLevel = 0;
-			}
-			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-				if (contextPtr->mdContext->intraMdOpenLoopFlag) {
-					contextPtr->mdContext->chromaLevel = 4;
-				}
-				else {
-					contextPtr->mdContext->chromaLevel = 0;
-				}
-			}
-			else {
-				contextPtr->mdContext->chromaLevel = 1;
-			}
-		}
-		else {
-			contextPtr->mdContext->chromaLevel = 0;
-		}
-	}
+    if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
+        contextPtr->mdContext->chromaLevel = 0;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
+        if (sequenceControlSetPtr->inputResolution >= INPUT_SIZE_4K_RANGE) {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+                contextPtr->mdContext->chromaLevel = 1;
+            }
+            else if (pictureControlSetPtr->temporalLayerIndex == 0) {
+                contextPtr->mdContext->chromaLevel = 0;
+            }
+            else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                if (contextPtr->mdContext->intraMdOpenLoopFlag) {
+                    contextPtr->mdContext->chromaLevel = 4;
+                }
+                else {
+                    contextPtr->mdContext->chromaLevel = 0;
+                }
+            }
+            else {
+                contextPtr->mdContext->chromaLevel = 1;
+            }
+        }
+        else {
+            contextPtr->mdContext->chromaLevel = 0;
+        }
+    }
     else if (pictureControlSetPtr->encMode <= ENC_MODE_10) {
         if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
             contextPtr->mdContext->chromaLevel = 1;
@@ -2798,37 +2798,37 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
 
     // Set Coeff Cabac Update Flag
     if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
-		contextPtr->mdContext->coeffCabacUpdate = ((pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_FULL85_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_FULL84_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_OPEN_LOOP_DEPTH_MODE) && contextPtr->mdContext->chromaLevel == 0) ?
-			EB_TRUE :
-			EB_FALSE;
-	}
+        contextPtr->mdContext->coeffCabacUpdate = ((pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_FULL85_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_FULL84_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_OPEN_LOOP_DEPTH_MODE) && contextPtr->mdContext->chromaLevel == 0) ?
+            EB_TRUE :
+            EB_FALSE;
+    }
     else {
         contextPtr->mdContext->coeffCabacUpdate = EB_FALSE;
     }
-  
+
     // Set INTRA8x8 Restriction @ P/B Slices
-	if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
-		contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_FALSE;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
-		if (sequenceControlSetPtr->inputResolution >= INPUT_SIZE_4K_RANGE) {
-			contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_TRUE;
-		}
-		else {
-			contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_FALSE;
-		}
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_5) {
-		contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_FALSE;
-	}
+    if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
+        contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_FALSE;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
+        if (sequenceControlSetPtr->inputResolution >= INPUT_SIZE_4K_RANGE) {
+            contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_TRUE;
+        }
+        else {
+            contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_FALSE;
+        }
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_5) {
+        contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_FALSE;
+    }
     else if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
-		if (sequenceControlSetPtr->inputResolution >= INPUT_SIZE_4K_RANGE) {
-			contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_TRUE;
-		}
-		else {
-			contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_FALSE;
-		}
-	}
+        if (sequenceControlSetPtr->inputResolution >= INPUT_SIZE_4K_RANGE) {
+            contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_TRUE;
+        }
+        else {
+            contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_FALSE;
+        }
+    }
     else {
         contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_TRUE;
     }
@@ -2850,12 +2850,12 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     }
 
     // Set Fast-Loop Method
-	if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
-		contextPtr->mdContext->singleFastLoopFlag = EB_TRUE;
-	}
-	else {
-		contextPtr->mdContext->singleFastLoopFlag = EB_FALSE;
-	}
+    if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
+        contextPtr->mdContext->singleFastLoopFlag = EB_TRUE;
+    }
+    else {
+        contextPtr->mdContext->singleFastLoopFlag = EB_FALSE;
+    }
 
     // Set AMVP Injection Flag
     if (pictureControlSetPtr->encMode <= ENC_MODE_1) {
@@ -2864,7 +2864,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     else {
         contextPtr->mdContext->amvpInjection = EB_FALSE;
     }
-    
+
     // Set Unipred 3x3 Injection Flag
     if (pictureControlSetPtr->encMode <= ENC_MODE_1) {
         contextPtr->mdContext->unipred3x3Injection = EB_TRUE;
@@ -2872,33 +2872,33 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     else {
         contextPtr->mdContext->unipred3x3Injection = EB_FALSE;
     }
-    
+
     // Set Bipred 3x3 Injection Flag
-	if (pictureControlSetPtr->encMode <= ENC_MODE_1) {
-		contextPtr->mdContext->bipred3x3Injection = EB_TRUE;
-	}
-	else {
-		contextPtr->mdContext->bipred3x3Injection = EB_FALSE;
-	}
+    if (pictureControlSetPtr->encMode <= ENC_MODE_1) {
+        contextPtr->mdContext->bipred3x3Injection = EB_TRUE;
+    }
+    else {
+        contextPtr->mdContext->bipred3x3Injection = EB_FALSE;
+    }
 
     // Set RDOQ/PM_CORE Flag
-	contextPtr->mdContext->rdoqPmCoreMethod = (pictureControlSetPtr->ParentPcsPtr->encMode == ENC_MODE_0) ?
-		EB_RDOQ :
-		(pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_4) ?
-		EB_PMCORE :
-		EB_NO_RDOQ;
+    contextPtr->mdContext->rdoqPmCoreMethod = (pictureControlSetPtr->ParentPcsPtr->encMode == ENC_MODE_0) ?
+        EB_RDOQ :
+        (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_4) ?
+        EB_PMCORE :
+        EB_NO_RDOQ;
 
     // Set PM Method (active only when brr is ON)
     contextPtr->pmMethod = 0;
 
     // Set Fast EL Flag
     contextPtr->fastEl      = (pictureControlSetPtr->encMode <= ENC_MODE_10) ? EB_FALSE : EB_TRUE;
-	contextPtr->yBitsThsld  = (pictureControlSetPtr->encMode <= ENC_MODE_10) ? YBITS_THSHLD_1(0) : YBITS_THSHLD_1(12);
-    
+    contextPtr->yBitsThsld  = (pictureControlSetPtr->encMode <= ENC_MODE_10) ? YBITS_THSHLD_1(0) : YBITS_THSHLD_1(12);
+
     // Set SAO Mode
     contextPtr->saoMode = (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_10) ? 1 : 0;
-    
-    // Set Exit Partitioning Flag 
+
+    // Set Exit Partitioning Flag
     if (pictureControlSetPtr->encMode >= ENC_MODE_10) {
         if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
             contextPtr->mdContext->enableExitPartitioning = EB_TRUE;
@@ -2911,10 +2911,10 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
         contextPtr->mdContext->enableExitPartitioning = EB_FALSE;
     }
 
-    // Set Limit INTRA Flag 
-	if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
-		contextPtr->mdContext->limitIntra = EB_FALSE;
-	}
+    // Set Limit INTRA Flag
+    if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
+        contextPtr->mdContext->limitIntra = EB_FALSE;
+    }
     else {
         if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_FALSE) {
             contextPtr->mdContext->limitIntra = EB_TRUE;
@@ -2925,78 +2925,78 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     }
 
     // Set MPM Level
-    // Level    Settings 
+    // Level    Settings
     // 0        Full MPM: 3
     // 1        ON but 1
-    // 2        OFF    
+    // 2        OFF
     if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
         contextPtr->mdContext->mpmLevel = 0;
     }
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
-		contextPtr->mdContext->mpmLevel = 2;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-				contextPtr->mdContext->mpmLevel = 1;
-			}
-			else {
-				contextPtr->mdContext->mpmLevel = 2;
-			}
-		}
-		else {
-			contextPtr->mdContext->mpmLevel = 2;
-		}
-	}
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
+        contextPtr->mdContext->mpmLevel = 2;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+                contextPtr->mdContext->mpmLevel = 1;
+            }
+            else {
+                contextPtr->mdContext->mpmLevel = 2;
+            }
+        }
+        else {
+            contextPtr->mdContext->mpmLevel = 2;
+        }
+    }
     else {
-		if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-			contextPtr->mdContext->mpmLevel = 1;
-		}
-		else {
-			contextPtr->mdContext->mpmLevel = 2;
-		}
+        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+            contextPtr->mdContext->mpmLevel = 1;
+        }
+        else {
+            contextPtr->mdContext->mpmLevel = 2;
+        }
     }
 
     // Set PF @ MD Level
-    // Level    Settings 
+    // Level    Settings
     // 0        OFF
-    // 1        N2    
+    // 1        N2
     // 2        M2 if 8x8 or 16x16 or Detector, N4 otherwise
     // 3        M2 if 8x8, N4 otherwise
-	if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
-		contextPtr->mdContext->pfMdLevel = 0;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-				contextPtr->mdContext->pfMdLevel = 0;
-			}
-			else {
-				contextPtr->mdContext->pfMdLevel = 1;
-			}
-		}
-		else {
-			contextPtr->mdContext->pfMdLevel = 0;
-		}
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_8) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			if (pictureControlSetPtr->temporalLayerIndex == 0) {
-				contextPtr->mdContext->pfMdLevel = 0;
-			}
-			else {
-				contextPtr->mdContext->pfMdLevel = 1;
-			}
-		}
-		else {
-			if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-				contextPtr->mdContext->pfMdLevel = 0;
-			}
-			else {
-				contextPtr->mdContext->pfMdLevel = 1;
-			}
-		}
-	}
+    if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
+        contextPtr->mdContext->pfMdLevel = 0;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                contextPtr->mdContext->pfMdLevel = 0;
+            }
+            else {
+                contextPtr->mdContext->pfMdLevel = 1;
+            }
+        }
+        else {
+            contextPtr->mdContext->pfMdLevel = 0;
+        }
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_8) {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            if (pictureControlSetPtr->temporalLayerIndex == 0) {
+                contextPtr->mdContext->pfMdLevel = 0;
+            }
+            else {
+                contextPtr->mdContext->pfMdLevel = 1;
+            }
+        }
+        else {
+            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                contextPtr->mdContext->pfMdLevel = 0;
+            }
+            else {
+                contextPtr->mdContext->pfMdLevel = 1;
+            }
+        }
+    }
     else if (pictureControlSetPtr->encMode <= ENC_MODE_10) {
         if (pictureControlSetPtr->temporalLayerIndex == 0) {
             contextPtr->mdContext->pfMdLevel = 0;
@@ -3017,50 +3017,50 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     }
 
     // Set INTRA4x4 Search Level
-    // Level    Settings 
-    // 0        INLINE if not BDP, refinment otherwise 
-    // 1        REFINMENT   
+    // Level    Settings
+    // 0        INLINE if not BDP, refinment otherwise
+    // 1        REFINMENT
     // 2        OFF
-	if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
-		contextPtr->mdContext->intra4x4Level = 0;
-	}
+    if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
+        contextPtr->mdContext->intra4x4Level = 0;
+    }
     else {
         contextPtr->mdContext->intra4x4Level = 2;
     }
 
     // Set INTRA4x4 NFL
-	if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
-		contextPtr->mdContext->intra4x4Nfl = 4;
-	}
-	else {
-		contextPtr->mdContext->intra4x4Nfl = 2;
-	}
-    
+    if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
+        contextPtr->mdContext->intra4x4Nfl = 4;
+    }
+    else {
+        contextPtr->mdContext->intra4x4Nfl = 2;
+    }
+
     // Set INTRA4x4 Injection
     // 0: 35 mdoes
     // 1: up to 4: DC, Best INTR8x8, +3, -0
-	if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
-		contextPtr->mdContext->intra4x4IntraInjection = 0;
-	}
-	else {
-		contextPtr->mdContext->intra4x4IntraInjection = 1;
-	}
+    if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
+        contextPtr->mdContext->intra4x4IntraInjection = 0;
+    }
+    else {
+        contextPtr->mdContext->intra4x4IntraInjection = 1;
+    }
 
     // NMM Level MD           Settings
     // 0                      5
     // 1                      3 if 32x32, 2 otherwise
     // 2                      2
     if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
-		contextPtr->mdContext->nmmLevelMd = 0;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			contextPtr->mdContext->nmmLevelMd = 1;
-		}
-		else {
-			contextPtr->mdContext->nmmLevelMd = 0;
-		}
-	}
+        contextPtr->mdContext->nmmLevelMd = 0;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            contextPtr->mdContext->nmmLevelMd = 1;
+        }
+        else {
+            contextPtr->mdContext->nmmLevelMd = 0;
+        }
+    }
     else {
         contextPtr->mdContext->nmmLevelMd = 1;
     }
@@ -3072,39 +3072,39 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     // 3                      3 if 32x32, 2 otherwise
     // 4                      2
     if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
-		contextPtr->mdContext->nmmLevelBdp = 0;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			contextPtr->mdContext->nmmLevelBdp = 3;
-		}
-		else {
-			contextPtr->mdContext->nmmLevelBdp = 0;
-		}
-	}
+        contextPtr->mdContext->nmmLevelBdp = 0;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            contextPtr->mdContext->nmmLevelBdp = 3;
+        }
+        else {
+            contextPtr->mdContext->nmmLevelBdp = 0;
+        }
+    }
     else if (pictureControlSetPtr->encMode <= ENC_MODE_8) {
-		if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER) {
-			contextPtr->mdContext->nmmLevelBdp = 0;
-		}
-		else if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0) {
-				contextPtr->mdContext->nmmLevelBdp = 1;
-			}
-			else {
-				contextPtr->mdContext->nmmLevelBdp = 2;
-			}
-		}
-		else {
-			contextPtr->mdContext->nmmLevelBdp = 3;
-		}
+        if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER) {
+            contextPtr->mdContext->nmmLevelBdp = 0;
+        }
+        else if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0) {
+                contextPtr->mdContext->nmmLevelBdp = 1;
+            }
+            else {
+                contextPtr->mdContext->nmmLevelBdp = 2;
+            }
+        }
+        else {
+            contextPtr->mdContext->nmmLevelBdp = 3;
+        }
     }
     else {
-		if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0) {
-			contextPtr->mdContext->nmmLevelBdp = 1;
-		}
-		else {
-			contextPtr->mdContext->nmmLevelBdp = 2;
-		}
+        if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0) {
+            contextPtr->mdContext->nmmLevelBdp = 1;
+        }
+        else {
+            contextPtr->mdContext->nmmLevelBdp = 2;
+        }
     }
 
     // NFL Level MD         Settings
@@ -3117,190 +3117,190 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     // 6                    1
 
     if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
-		contextPtr->mdContext->nflLevelMd = 0;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
-		if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-			contextPtr->mdContext->nflLevelMd = 0;
-		}
-		else {
-			if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-				contextPtr->mdContext->nflLevelMd = 1;
-			}
-			else {
-				contextPtr->mdContext->nflLevelMd = 2;
-			}
-		}
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-				contextPtr->mdContext->nflLevelMd = 1;
-			}
-			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-				contextPtr->mdContext->nflLevelMd = 4;
-			}
-			else {
-				contextPtr->mdContext->nflLevelMd = 5;
-			}
-		}
-		else {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-				contextPtr->mdContext->nflLevelMd = 0;
-			}
-			else {
-				if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-					contextPtr->mdContext->nflLevelMd = 1;
-				}
-				else {
-					contextPtr->mdContext->nflLevelMd = 2;
-				}
-			}
-		}
+        contextPtr->mdContext->nflLevelMd = 0;
     }
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
-		if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-			contextPtr->mdContext->nflLevelMd = 1;
-		}
-		else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-			contextPtr->mdContext->nflLevelMd = 4;
-		}
-		else {
-			contextPtr->mdContext->nflLevelMd = 5;
-		}
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
+        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+            contextPtr->mdContext->nflLevelMd = 0;
+        }
+        else {
+            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                contextPtr->mdContext->nflLevelMd = 1;
+            }
+            else {
+                contextPtr->mdContext->nflLevelMd = 2;
+            }
+        }
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+                contextPtr->mdContext->nflLevelMd = 1;
+            }
+            else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                contextPtr->mdContext->nflLevelMd = 4;
+            }
+            else {
+                contextPtr->mdContext->nflLevelMd = 5;
+            }
+        }
+        else {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+                contextPtr->mdContext->nflLevelMd = 0;
+            }
+            else {
+                if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                    contextPtr->mdContext->nflLevelMd = 1;
+                }
+                else {
+                    contextPtr->mdContext->nflLevelMd = 2;
+                }
+            }
+        }
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
+        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+            contextPtr->mdContext->nflLevelMd = 1;
+        }
+        else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+            contextPtr->mdContext->nflLevelMd = 4;
+        }
+        else {
+            contextPtr->mdContext->nflLevelMd = 5;
+        }
     }
     else {
-		contextPtr->mdContext->nflLevelMd = 6;
+        contextPtr->mdContext->nflLevelMd = 6;
     }
 
     // NFL Level Pillar/8x8 Refinement         Settings
     // 0                                       4
     // 1                                       4 if depthRefinment, 3 if 32x32, 2 otherwise
-    // 2                                       3 
+    // 2                                       3
     // 3                                       3 if depthRefinment or 32x32, 2 otherwise
     // 4                                       3 if 32x32, 2 otherwise
-    // 5                                       2    
+    // 5                                       2
     // 6                                       2 if Detectors, 1 otherwise
     // 7                                       2 if 64x64 or 32x32 or 16x16, 1 otherwise
     // 8                                       2 if 64x64 or 332x32, 1 otherwise
-    // 9                                       1      
+    // 9                                       1
     if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
-		contextPtr->mdContext->nflLevelPillar8x8ref = 0;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
-		if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-			contextPtr->mdContext->nflLevelPillar8x8ref = 0;
-		}
-		else {
-			if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-				contextPtr->mdContext->nflLevelPillar8x8ref = 4;
-			}
-			else {
-				contextPtr->mdContext->nflLevelPillar8x8ref = 5;
-			}
-		}
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-				contextPtr->mdContext->nflLevelPillar8x8ref = 4;
-			}
-			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-				contextPtr->mdContext->nflLevelPillar8x8ref = 7;
-			}
-			else {
-				contextPtr->mdContext->nflLevelPillar8x8ref = 8;
-			}
-		}
-		else {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-				contextPtr->mdContext->nflLevelPillar8x8ref = 0;
-			}
-			else {
-				if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-					contextPtr->mdContext->nflLevelPillar8x8ref = 4;
-				}
-				else {
-					contextPtr->mdContext->nflLevelPillar8x8ref = 5;
-				}
-			}
-		}
-	}
+        contextPtr->mdContext->nflLevelPillar8x8ref = 0;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
+        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+            contextPtr->mdContext->nflLevelPillar8x8ref = 0;
+        }
+        else {
+            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                contextPtr->mdContext->nflLevelPillar8x8ref = 4;
+            }
+            else {
+                contextPtr->mdContext->nflLevelPillar8x8ref = 5;
+            }
+        }
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+                contextPtr->mdContext->nflLevelPillar8x8ref = 4;
+            }
+            else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                contextPtr->mdContext->nflLevelPillar8x8ref = 7;
+            }
+            else {
+                contextPtr->mdContext->nflLevelPillar8x8ref = 8;
+            }
+        }
+        else {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+                contextPtr->mdContext->nflLevelPillar8x8ref = 0;
+            }
+            else {
+                if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                    contextPtr->mdContext->nflLevelPillar8x8ref = 4;
+                }
+                else {
+                    contextPtr->mdContext->nflLevelPillar8x8ref = 5;
+                }
+            }
+        }
+    }
     else if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
-		if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-			contextPtr->mdContext->nflLevelPillar8x8ref = 4;
-		}
-		else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-			contextPtr->mdContext->nflLevelPillar8x8ref = 7;
-		}
-		else {
-			contextPtr->mdContext->nflLevelPillar8x8ref = 8;
-		}
+        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+            contextPtr->mdContext->nflLevelPillar8x8ref = 4;
+        }
+        else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+            contextPtr->mdContext->nflLevelPillar8x8ref = 7;
+        }
+        else {
+            contextPtr->mdContext->nflLevelPillar8x8ref = 8;
+        }
     }
     else {
-		contextPtr->mdContext->nflLevelPillar8x8ref = 9;
+        contextPtr->mdContext->nflLevelPillar8x8ref = 9;
 
     }
 
     // NFL Level MvMerge/64x64 Refinement      Settings
     // 0                                       4
-    // 1                                       3 
+    // 1                                       3
     // 2                                       3 if depthRefinment or 32x32, 2 otherwise
     // 3                                       3 if 32x32, 2 otherwise
-    // 4                                       2    
+    // 4                                       2
     // 5                                       2 if Detectors, 1 otherwise
     // 6                                       2 if 64x64 or 32x32 or 16x16, 1 otherwise
     // 7                                       2 if 64x64 or 332x32, 1 otherwise
-    // 8                                       1     
+    // 8                                       1
     if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
-		contextPtr->mdContext->nflLevelMvMerge64x64ref = 0;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
-		if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-			contextPtr->mdContext->nflLevelMvMerge64x64ref = 0;
-		}
-		else {
-			if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-				contextPtr->mdContext->nflLevelMvMerge64x64ref = 3;
-			}
-			else {
-				contextPtr->mdContext->nflLevelMvMerge64x64ref = 4;
-			}
-		}
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-				contextPtr->mdContext->nflLevelMvMerge64x64ref = 6;
-			}
-			else {
-				contextPtr->mdContext->nflLevelMvMerge64x64ref = 7;
-			}
-		}
-		else {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-				contextPtr->mdContext->nflLevelMvMerge64x64ref = 0;
-			}
-			else {
-				if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-					contextPtr->mdContext->nflLevelMvMerge64x64ref = 3;
-				}
-				else {
-					contextPtr->mdContext->nflLevelMvMerge64x64ref = 4;
-				}
-			}
-		}
-	}
+        contextPtr->mdContext->nflLevelMvMerge64x64ref = 0;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
+        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+            contextPtr->mdContext->nflLevelMvMerge64x64ref = 0;
+        }
+        else {
+            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                contextPtr->mdContext->nflLevelMvMerge64x64ref = 3;
+            }
+            else {
+                contextPtr->mdContext->nflLevelMvMerge64x64ref = 4;
+            }
+        }
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                contextPtr->mdContext->nflLevelMvMerge64x64ref = 6;
+            }
+            else {
+                contextPtr->mdContext->nflLevelMvMerge64x64ref = 7;
+            }
+        }
+        else {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+                contextPtr->mdContext->nflLevelMvMerge64x64ref = 0;
+            }
+            else {
+                if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                    contextPtr->mdContext->nflLevelMvMerge64x64ref = 3;
+                }
+                else {
+                    contextPtr->mdContext->nflLevelMvMerge64x64ref = 4;
+                }
+            }
+        }
+    }
     else if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
-		if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-			contextPtr->mdContext->nflLevelMvMerge64x64ref = 6;
-		}
-		else {
-			contextPtr->mdContext->nflLevelMvMerge64x64ref = 7;
-		}
+        if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+            contextPtr->mdContext->nflLevelMvMerge64x64ref = 6;
+        }
+        else {
+            contextPtr->mdContext->nflLevelMvMerge64x64ref = 7;
+        }
     }
     else {
-		contextPtr->mdContext->nflLevelMvMerge64x64ref = 8;
+        contextPtr->mdContext->nflLevelMvMerge64x64ref = 8;
 
     }
 
@@ -3313,513 +3313,513 @@ Input   : encoder mode and tune
 Output  : EncDec Kernel signal(s)
 ******************************************************/
 EB_ERRORTYPE SignalDerivationEncDecKernelVmaf(
-	SequenceControlSet_t *sequenceControlSetPtr,
-	PictureControlSet_t  *pictureControlSetPtr,
-	EncDecContext_t      *contextPtr) {
+    SequenceControlSet_t *sequenceControlSetPtr,
+    PictureControlSet_t  *pictureControlSetPtr,
+    EncDecContext_t      *contextPtr) {
 
-	EB_ERRORTYPE return_error = EB_ErrorNone;
+    EB_ERRORTYPE return_error = EB_ErrorNone;
 
-	// Set MD Open Loop Flag
-	if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
-		contextPtr->mdContext->intraMdOpenLoopFlag = EB_FALSE;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
-		contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE ? EB_FALSE : EB_TRUE;
-	}
-	else {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE ? EB_FALSE : EB_TRUE;
-		}
-		else {
-			contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->sliceType == EB_I_PICTURE ? EB_FALSE : EB_TRUE;
-		}
-	}
+    // Set MD Open Loop Flag
+    if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
+        contextPtr->mdContext->intraMdOpenLoopFlag = EB_FALSE;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
+        contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE ? EB_FALSE : EB_TRUE;
+    }
+    else {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE ? EB_FALSE : EB_TRUE;
+        }
+        else {
+            contextPtr->mdContext->intraMdOpenLoopFlag = pictureControlSetPtr->sliceType == EB_I_PICTURE ? EB_FALSE : EB_TRUE;
+        }
+    }
 
-	// Derive INTRA Injection Method
-	// 0 : Default (OIS)
-	// 1 : Enhanced I_PICTURE, Default (OIS) otherwise 
-	// 2 : 35 modes 
-	if (pictureControlSetPtr->encMode == ENC_MODE_0) {
-		contextPtr->mdContext->intraInjectionMethod = 2;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
-		contextPtr->mdContext->intraInjectionMethod = 1;
-	}
-	else {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			contextPtr->mdContext->intraInjectionMethod = 1;
-		}
-		else {
-			contextPtr->mdContext->intraInjectionMethod = 0;
-		}
-	}
+    // Derive INTRA Injection Method
+    // 0 : Default (OIS)
+    // 1 : Enhanced I_PICTURE, Default (OIS) otherwise
+    // 2 : 35 modes
+    if (pictureControlSetPtr->encMode == ENC_MODE_0) {
+        contextPtr->mdContext->intraInjectionMethod = 2;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
+        contextPtr->mdContext->intraInjectionMethod = 1;
+    }
+    else {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            contextPtr->mdContext->intraInjectionMethod = 1;
+        }
+        else {
+            contextPtr->mdContext->intraInjectionMethod = 0;
+        }
+    }
 
-	// Derive Spatial SSE Flag
-	if (pictureControlSetPtr->sliceType == EB_I_PICTURE && contextPtr->mdContext->intraMdOpenLoopFlag == EB_FALSE && pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_1) {
-		contextPtr->mdContext->spatialSseFullLoop = EB_TRUE;
-	}
-	else {
-		contextPtr->mdContext->spatialSseFullLoop = EB_FALSE;
-	}
+    // Derive Spatial SSE Flag
+    if (pictureControlSetPtr->sliceType == EB_I_PICTURE && contextPtr->mdContext->intraMdOpenLoopFlag == EB_FALSE && pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_1) {
+        contextPtr->mdContext->spatialSseFullLoop = EB_TRUE;
+    }
+    else {
+        contextPtr->mdContext->spatialSseFullLoop = EB_FALSE;
+    }
 
-	// Set Allow EncDec Mismatch Flag
-	contextPtr->allowEncDecMismatch = EB_FALSE;
-	
-	// Set CHROMA Level
-	// 0: Full Search Chroma for All LCUs
-	// 1: Best Search Chroma for All LCUs; Chroma OFF if I_PICTURE, Chroma for only MV_Merge if P/B_PICTURE 
-	// 2: Full vs. Best Swicth Method 0: chromaCond0 || chromaCond1 || chromaCond2
-	// 3: Full vs. Best Swicth Method 1: chromaCond0 || chromaCond1
-	// 4: Full vs. Best Swicth Method 2: chromaCond2 || chromaCond3
-	// 5: Full vs. Best Swicth Method 3: chromaCond0
-	// If INTRA Close Loop, then the switch modes (2,3,4,5) are not supported as reference samples for Chroma compensation will be a mix of source samples and reconstructed samplesoop
-	if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_3) {
-		contextPtr->mdContext->chromaLevel = 0;
-	}
-	else if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_4) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			contextPtr->mdContext->chromaLevel = 0;
-		}
-		else {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE)
-				contextPtr->mdContext->chromaLevel = 1;
-			else if (pictureControlSetPtr->temporalLayerIndex == 0)
-				contextPtr->mdContext->chromaLevel = 0;
-			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-				if (contextPtr->mdContext->intraMdOpenLoopFlag) {
-					contextPtr->mdContext->chromaLevel = 4;
-				}
-				else {
-					contextPtr->mdContext->chromaLevel = 0;
-				}
-			}
-			else {
-				contextPtr->mdContext->chromaLevel = 1;
-			}
-		}
-	}
-	else if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_8) {
-		if (pictureControlSetPtr->sliceType == EB_I_PICTURE)
-			contextPtr->mdContext->chromaLevel = 1;
-		else if (pictureControlSetPtr->temporalLayerIndex == 0)
-			contextPtr->mdContext->chromaLevel = 0;
-		else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-			if (contextPtr->mdContext->intraMdOpenLoopFlag) {
-				contextPtr->mdContext->chromaLevel = 4;
-			}
-			else {
-				contextPtr->mdContext->chromaLevel = 0;
-			}
-		}
-		else {
-			contextPtr->mdContext->chromaLevel = 1;
-		}
-	}
-	else {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			contextPtr->mdContext->chromaLevel = 1;
-		}
-		else {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE)
-				contextPtr->mdContext->chromaLevel = 1;
-			else if (pictureControlSetPtr->temporalLayerIndex == 0)
-				contextPtr->mdContext->chromaLevel = 0;
-			else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-				if (contextPtr->mdContext->intraMdOpenLoopFlag) {
-					contextPtr->mdContext->chromaLevel = 4;
-				}
-				else {
-					contextPtr->mdContext->chromaLevel = 0;
-				}
-			}
-			else {
-				contextPtr->mdContext->chromaLevel = 1;
-			}
-		}
-	}
+    // Set Allow EncDec Mismatch Flag
+    contextPtr->allowEncDecMismatch = EB_FALSE;
 
-	// Set Coeff Cabac Update Flag
-	if (pictureControlSetPtr->encMode <= ENC_MODE_1) {
-		contextPtr->mdContext->coeffCabacUpdate = ((pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_FULL85_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_FULL84_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_OPEN_LOOP_DEPTH_MODE) && contextPtr->mdContext->chromaLevel == 0) ?
-			EB_TRUE :
-			EB_FALSE;
-	}
-	else {
-		contextPtr->mdContext->coeffCabacUpdate = EB_FALSE;
-	}
-	
-	// Set INTRA8x8 Restriction @ P/B Slices
-	if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
-		contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_FALSE;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_5) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_TRUE;
-		}
-		else {
-			contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_FALSE;
-		}
-	}
-	else {
-		contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_TRUE;
-	}
+    // Set CHROMA Level
+    // 0: Full Search Chroma for All LCUs
+    // 1: Best Search Chroma for All LCUs; Chroma OFF if I_PICTURE, Chroma for only MV_Merge if P/B_PICTURE
+    // 2: Full vs. Best Swicth Method 0: chromaCond0 || chromaCond1 || chromaCond2
+    // 3: Full vs. Best Swicth Method 1: chromaCond0 || chromaCond1
+    // 4: Full vs. Best Swicth Method 2: chromaCond2 || chromaCond3
+    // 5: Full vs. Best Swicth Method 3: chromaCond0
+    // If INTRA Close Loop, then the switch modes (2,3,4,5) are not supported as reference samples for Chroma compensation will be a mix of source samples and reconstructed samplesoop
+    if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_3) {
+        contextPtr->mdContext->chromaLevel = 0;
+    }
+    else if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_4) {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            contextPtr->mdContext->chromaLevel = 0;
+        }
+        else {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE)
+                contextPtr->mdContext->chromaLevel = 1;
+            else if (pictureControlSetPtr->temporalLayerIndex == 0)
+                contextPtr->mdContext->chromaLevel = 0;
+            else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                if (contextPtr->mdContext->intraMdOpenLoopFlag) {
+                    contextPtr->mdContext->chromaLevel = 4;
+                }
+                else {
+                    contextPtr->mdContext->chromaLevel = 0;
+                }
+            }
+            else {
+                contextPtr->mdContext->chromaLevel = 1;
+            }
+        }
+    }
+    else if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_8) {
+        if (pictureControlSetPtr->sliceType == EB_I_PICTURE)
+            contextPtr->mdContext->chromaLevel = 1;
+        else if (pictureControlSetPtr->temporalLayerIndex == 0)
+            contextPtr->mdContext->chromaLevel = 0;
+        else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+            if (contextPtr->mdContext->intraMdOpenLoopFlag) {
+                contextPtr->mdContext->chromaLevel = 4;
+            }
+            else {
+                contextPtr->mdContext->chromaLevel = 0;
+            }
+        }
+        else {
+            contextPtr->mdContext->chromaLevel = 1;
+        }
+    }
+    else {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            contextPtr->mdContext->chromaLevel = 1;
+        }
+        else {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE)
+                contextPtr->mdContext->chromaLevel = 1;
+            else if (pictureControlSetPtr->temporalLayerIndex == 0)
+                contextPtr->mdContext->chromaLevel = 0;
+            else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                if (contextPtr->mdContext->intraMdOpenLoopFlag) {
+                    contextPtr->mdContext->chromaLevel = 4;
+                }
+                else {
+                    contextPtr->mdContext->chromaLevel = 0;
+                }
+            }
+            else {
+                contextPtr->mdContext->chromaLevel = 1;
+            }
+        }
+    }
 
-	// Set AMVP Generation @ MD Flag
-	contextPtr->mdContext->generateAmvpTableMd = EB_TRUE;
+    // Set Coeff Cabac Update Flag
+    if (pictureControlSetPtr->encMode <= ENC_MODE_1) {
+        contextPtr->mdContext->coeffCabacUpdate = ((pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_FULL85_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_FULL84_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_OPEN_LOOP_DEPTH_MODE) && contextPtr->mdContext->chromaLevel == 0) ?
+            EB_TRUE :
+            EB_FALSE;
+    }
+    else {
+        contextPtr->mdContext->coeffCabacUpdate = EB_FALSE;
+    }
 
-	// Set Cbf based Full-Loop Escape Flag
-	contextPtr->mdContext->fullLoopEscape = (pictureControlSetPtr->encMode <= ENC_MODE_0)? EB_FALSE: EB_TRUE;
+    // Set INTRA8x8 Restriction @ P/B Slices
+    if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
+        contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_FALSE;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_5) {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_TRUE;
+        }
+        else {
+            contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_FALSE;
+        }
+    }
+    else {
+        contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_TRUE;
+    }
 
-	// Set Fast-Loop Method
-	contextPtr->mdContext->singleFastLoopFlag = (pictureControlSetPtr->encMode == ENC_MODE_0);
+    // Set AMVP Generation @ MD Flag
+    contextPtr->mdContext->generateAmvpTableMd = EB_TRUE;
 
-	// Set AMVP Injection Flag
-	contextPtr->mdContext->amvpInjection = (pictureControlSetPtr->encMode <= ENC_MODE_1)?EB_TRUE: EB_FALSE;
+    // Set Cbf based Full-Loop Escape Flag
+    contextPtr->mdContext->fullLoopEscape = (pictureControlSetPtr->encMode <= ENC_MODE_0)? EB_FALSE: EB_TRUE;
 
-	// Set Unipred 3x3 Injection Flag
-	contextPtr->mdContext->unipred3x3Injection = (pictureControlSetPtr->encMode <= ENC_MODE_1)?EB_TRUE: EB_FALSE;
+    // Set Fast-Loop Method
+    contextPtr->mdContext->singleFastLoopFlag = (pictureControlSetPtr->encMode == ENC_MODE_0);
 
-	// Set Bipred 3x3 Injection Flag
-	contextPtr->mdContext->bipred3x3Injection = (pictureControlSetPtr->encMode <= ENC_MODE_1)? EB_TRUE : EB_FALSE;
+    // Set AMVP Injection Flag
+    contextPtr->mdContext->amvpInjection = (pictureControlSetPtr->encMode <= ENC_MODE_1)?EB_TRUE: EB_FALSE;
 
-	// Set RDOQ/PM_CORE Flag
-	if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_4) {
-		contextPtr->mdContext->rdoqPmCoreMethod = EB_RDOQ;
-	}
-	else if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_5) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			contextPtr->mdContext->rdoqPmCoreMethod = EB_RDOQ;
-		}
-		else {
-			contextPtr->mdContext->rdoqPmCoreMethod = EB_LIGHT;
-		}
-	}
-	else if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_9) {
-		contextPtr->mdContext->rdoqPmCoreMethod = EB_LIGHT;
-	}
-	else {
-		contextPtr->mdContext->rdoqPmCoreMethod = EB_NO_RDOQ;
-	}
-	
-	// Set PM Method (active only when brr is ON)
-	contextPtr->pmMethod = 0;
+    // Set Unipred 3x3 Injection Flag
+    contextPtr->mdContext->unipred3x3Injection = (pictureControlSetPtr->encMode <= ENC_MODE_1)?EB_TRUE: EB_FALSE;
 
-	// Set Fast EL Flag
-	contextPtr->fastEl = EB_FALSE;
-	contextPtr->yBitsThsld = YBITS_THSHLD_1(0);
+    // Set Bipred 3x3 Injection Flag
+    contextPtr->mdContext->bipred3x3Injection = (pictureControlSetPtr->encMode <= ENC_MODE_1)? EB_TRUE : EB_FALSE;
 
-	// Set SAO Mode
-	contextPtr->saoMode = 0;
+    // Set RDOQ/PM_CORE Flag
+    if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_4) {
+        contextPtr->mdContext->rdoqPmCoreMethod = EB_RDOQ;
+    }
+    else if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_5) {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            contextPtr->mdContext->rdoqPmCoreMethod = EB_RDOQ;
+        }
+        else {
+            contextPtr->mdContext->rdoqPmCoreMethod = EB_LIGHT;
+        }
+    }
+    else if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_9) {
+        contextPtr->mdContext->rdoqPmCoreMethod = EB_LIGHT;
+    }
+    else {
+        contextPtr->mdContext->rdoqPmCoreMethod = EB_NO_RDOQ;
+    }
 
-	// Set Exit Partitioning Flag 
-	if (pictureControlSetPtr->encMode <= ENC_MODE_8) {
-		contextPtr->mdContext->enableExitPartitioning = EB_FALSE;
-	}
-	else {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			contextPtr->mdContext->enableExitPartitioning = EB_TRUE;
-		}
-		else {
-			contextPtr->mdContext->enableExitPartitioning = EB_FALSE;
-		}
-	}
+    // Set PM Method (active only when brr is ON)
+    contextPtr->pmMethod = 0;
 
-	// Set Limit INTRA Flag 
-	if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
-		contextPtr->mdContext->limitIntra = EB_FALSE;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_5) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_FALSE) {
-				contextPtr->mdContext->limitIntra = EB_TRUE;
-			}
-			else {
-				contextPtr->mdContext->limitIntra = EB_FALSE;
-			}
-		}
-		else {
-			contextPtr->mdContext->limitIntra = EB_FALSE;
-		}
-	}
-	else {
-		if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_FALSE) {
-			contextPtr->mdContext->limitIntra = EB_TRUE;
-		}
-		else {
-			contextPtr->mdContext->limitIntra = EB_FALSE;
-		}
-	}
+    // Set Fast EL Flag
+    contextPtr->fastEl = EB_FALSE;
+    contextPtr->yBitsThsld = YBITS_THSHLD_1(0);
 
-	// Set MPM Level
-	// Level    Settings 
-	// 0        Full MPM: 3
-	// 1        ON but 1
-	// 2        OFF    
-	if (pictureControlSetPtr->encMode <= ENC_MODE_0) {
-		contextPtr->mdContext->mpmLevel = 0;
-	}
-	else if(pictureControlSetPtr->encMode <= ENC_MODE_9) {
-		contextPtr->mdContext->mpmLevel = 2;
-	}
-	else {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			contextPtr->mdContext->mpmLevel = 2;
-		}
-		else {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-				contextPtr->mdContext->mpmLevel = 1;
-			}
-			else {
-				contextPtr->mdContext->mpmLevel = 2;
-			}
-		}
-	}
+    // Set SAO Mode
+    contextPtr->saoMode = 0;
 
-	// Set PF @ MD Level
-	// Level    Settings 
-	// 0        OFF
-	// 1        N2    
-	// 2        M2 if 8x8 or 16x16 or Detector, N4 otherwise
-	// 3        M2 if 8x8, N4 otherwise
-	if (pictureControlSetPtr->encMode < ENC_MODE_8) {
-		contextPtr->mdContext->pfMdLevel = 0;
-	}
-	else {
-		if (pictureControlSetPtr->temporalLayerIndex == 0) {
-			contextPtr->mdContext->pfMdLevel = 0;
-		}
-		else {
-			contextPtr->mdContext->pfMdLevel = 1;
-		}
-	}
+    // Set Exit Partitioning Flag
+    if (pictureControlSetPtr->encMode <= ENC_MODE_8) {
+        contextPtr->mdContext->enableExitPartitioning = EB_FALSE;
+    }
+    else {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            contextPtr->mdContext->enableExitPartitioning = EB_TRUE;
+        }
+        else {
+            contextPtr->mdContext->enableExitPartitioning = EB_FALSE;
+        }
+    }
 
-	// Set INTRA4x4 Search Level
-	// Level    Settings 
-	// 0        INLINE if not BDP, refinment otherwise 
-	// 1        REFINMENT   
-	// 2        OFF
-	contextPtr->mdContext->intra4x4Level = (pictureControlSetPtr->encMode <= ENC_MODE_1) ? 0 : 2;
+    // Set Limit INTRA Flag
+    if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
+        contextPtr->mdContext->limitIntra = EB_FALSE;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_5) {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_FALSE) {
+                contextPtr->mdContext->limitIntra = EB_TRUE;
+            }
+            else {
+                contextPtr->mdContext->limitIntra = EB_FALSE;
+            }
+        }
+        else {
+            contextPtr->mdContext->limitIntra = EB_FALSE;
+        }
+    }
+    else {
+        if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_FALSE) {
+            contextPtr->mdContext->limitIntra = EB_TRUE;
+        }
+        else {
+            contextPtr->mdContext->limitIntra = EB_FALSE;
+        }
+    }
 
-	// Set INTRA4x4 NFL
-	contextPtr->mdContext->intra4x4Nfl = (pictureControlSetPtr->encMode <= ENC_MODE_1) ? 4 : 2;
+    // Set MPM Level
+    // Level    Settings
+    // 0        Full MPM: 3
+    // 1        ON but 1
+    // 2        OFF
+    if (pictureControlSetPtr->encMode <= ENC_MODE_0) {
+        contextPtr->mdContext->mpmLevel = 0;
+    }
+    else if(pictureControlSetPtr->encMode <= ENC_MODE_9) {
+        contextPtr->mdContext->mpmLevel = 2;
+    }
+    else {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            contextPtr->mdContext->mpmLevel = 2;
+        }
+        else {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+                contextPtr->mdContext->mpmLevel = 1;
+            }
+            else {
+                contextPtr->mdContext->mpmLevel = 2;
+            }
+        }
+    }
 
-	// Set INTRA4x4 Injection
-	// 0: 35 mdoes
-	// 1: up to 4: DC, Best INTR8x8, +3, -0
-	contextPtr->mdContext->intra4x4IntraInjection = (pictureControlSetPtr->encMode <= ENC_MODE_1) ? 0 : 1;
+    // Set PF @ MD Level
+    // Level    Settings
+    // 0        OFF
+    // 1        N2
+    // 2        M2 if 8x8 or 16x16 or Detector, N4 otherwise
+    // 3        M2 if 8x8, N4 otherwise
+    if (pictureControlSetPtr->encMode < ENC_MODE_8) {
+        contextPtr->mdContext->pfMdLevel = 0;
+    }
+    else {
+        if (pictureControlSetPtr->temporalLayerIndex == 0) {
+            contextPtr->mdContext->pfMdLevel = 0;
+        }
+        else {
+            contextPtr->mdContext->pfMdLevel = 1;
+        }
+    }
 
-	// NMM Level MD           Settings
-	// 0                      5
-	// 1                      3 if 32x32, 2 otherwise
-	// 2                      2
-	if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
-		contextPtr->mdContext->nmmLevelMd = 0;
-	}
-	else {
-		contextPtr->mdContext->nmmLevelMd = 1;
-	}
+    // Set INTRA4x4 Search Level
+    // Level    Settings
+    // 0        INLINE if not BDP, refinment otherwise
+    // 1        REFINMENT
+    // 2        OFF
+    contextPtr->mdContext->intra4x4Level = (pictureControlSetPtr->encMode <= ENC_MODE_1) ? 0 : 2;
 
-	// NMM Level BDP          Settings
-	// 0                      5
-	// 1                      3
-	// 2                      3 if 32x32 or depth refinment true, 2 otherwise
-	// 3                      3 if 32x32, 2 otherwise
-	// 4                      2
-	if (pictureControlSetPtr->encMode < ENC_MODE_7) {
-		contextPtr->mdContext->nmmLevelBdp = 0;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
-		contextPtr->mdContext->nmmLevelBdp = 3;
-	}
-	else {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			contextPtr->mdContext->nmmLevelBdp = 3;
-		}
-		else {
-			if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0) {
-				contextPtr->mdContext->nmmLevelBdp = 1;
-			}
-			else {
-				contextPtr->mdContext->nmmLevelBdp = 2;
-			}
-		}
-	}
+    // Set INTRA4x4 NFL
+    contextPtr->mdContext->intra4x4Nfl = (pictureControlSetPtr->encMode <= ENC_MODE_1) ? 4 : 2;
 
-	// NFL Level MD         Settings
-	// 0                    4
-	// 1                    3 if 32x32, 2 otherwise
-	// 2                    2
-	// 3                    2 if Detectors, 1 otherwise
-	// 4                    2 if 64x64 or 32x32 or 16x16, 1 otherwise
-	// 5                    2 if 64x64 or 332x32, 1 otherwise
-	// 6                    1
-	if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
-		contextPtr->mdContext->nflLevelMd = 0;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
-		if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-			contextPtr->mdContext->nflLevelMd = 0;
-		}
-		else {
-			if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-				contextPtr->mdContext->nflLevelMd = 1;
-			}
-			else {
-				contextPtr->mdContext->nflLevelMd = 2;
-			}
-		}
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-				contextPtr->mdContext->nflLevelMd = 0;
-			}
-			else {
-				if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-					contextPtr->mdContext->nflLevelMd = 1;
-				}
-				else {
-					contextPtr->mdContext->nflLevelMd = 2;
-				}
-			}
-		}
-		else {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+    // Set INTRA4x4 Injection
+    // 0: 35 mdoes
+    // 1: up to 4: DC, Best INTR8x8, +3, -0
+    contextPtr->mdContext->intra4x4IntraInjection = (pictureControlSetPtr->encMode <= ENC_MODE_1) ? 0 : 1;
 
-				contextPtr->mdContext->nflLevelMd = 1;
-			}
-			else {
-				contextPtr->mdContext->nflLevelMd = 3;
-			}
-		}
-	}
-	else {
-		if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-				contextPtr->mdContext->nflLevelMd = 1;			
-		}
-		else {
-			contextPtr->mdContext->nflLevelMd = 3;
-		}
-	}
+    // NMM Level MD           Settings
+    // 0                      5
+    // 1                      3 if 32x32, 2 otherwise
+    // 2                      2
+    if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
+        contextPtr->mdContext->nmmLevelMd = 0;
+    }
+    else {
+        contextPtr->mdContext->nmmLevelMd = 1;
+    }
 
-	// NFL Level Pillar/8x8 Refinement         Settings
-	// 0                                       4
-	// 1                                       4 if depthRefinment, 3 if 32x32, 2 otherwise
-	// 2                                       3 
-	// 3                                       3 if depthRefinment or 32x32, 2 otherwise
-	// 4                                       3 if 32x32, 2 otherwise
-	// 5                                       2    
-	// 6                                       2 if Detectors, 1 otherwise
-	// 7                                       2 if 64x64 or 32x32 or 16x16, 1 otherwise
-	// 8                                       2 if 64x64 or 332x32, 1 otherwise
-	// 9                                       1  
-	if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
-		contextPtr->mdContext->nflLevelPillar8x8ref = 0;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-				    contextPtr->mdContext->nflLevelPillar8x8ref = 0;
-			}
-			else {
-				if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-					contextPtr->mdContext->nflLevelPillar8x8ref = 4;
-				}
-				else {
-					contextPtr->mdContext->nflLevelPillar8x8ref = 5;
-				}
-			}
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-				contextPtr->mdContext->nflLevelPillar8x8ref = 0;
-			}
-			else {
-				if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-					contextPtr->mdContext->nflLevelPillar8x8ref = 4;
-				}
-				else {
-					contextPtr->mdContext->nflLevelPillar8x8ref = 5;
-				}
-			}
-		}
-		else {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-				contextPtr->mdContext->nflLevelPillar8x8ref = 4;
-			}
-			else {
-				contextPtr->mdContext->nflLevelPillar8x8ref = 6;
-			}
-		}
-	}
-	else {
-		if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-			contextPtr->mdContext->nflLevelPillar8x8ref = 4;
-		}
-		else {
-			contextPtr->mdContext->nflLevelPillar8x8ref = 6;
-		}
-	}
+    // NMM Level BDP          Settings
+    // 0                      5
+    // 1                      3
+    // 2                      3 if 32x32 or depth refinment true, 2 otherwise
+    // 3                      3 if 32x32, 2 otherwise
+    // 4                      2
+    if (pictureControlSetPtr->encMode < ENC_MODE_7) {
+        contextPtr->mdContext->nmmLevelBdp = 0;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
+        contextPtr->mdContext->nmmLevelBdp = 3;
+    }
+    else {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            contextPtr->mdContext->nmmLevelBdp = 3;
+        }
+        else {
+            if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0) {
+                contextPtr->mdContext->nmmLevelBdp = 1;
+            }
+            else {
+                contextPtr->mdContext->nmmLevelBdp = 2;
+            }
+        }
+    }
 
-	// NFL Level MvMerge/64x64 Refinement      Settings
-	// 0                                       4
-	// 1                                       3 
-	// 2                                       3 if depthRefinment or 32x32, 2 otherwise
-	// 3                                       3 if 32x32, 2 otherwise
-	// 4                                       2    
-	// 5                                       2 if Detectors, 1 otherwise
-	// 6                                       2 if 64x64 or 32x32 or 16x16, 1 otherwise
-	// 7                                       2 if 64x64 or 332x32, 1 otherwise
-	// 8                                       1   
-	if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
-		contextPtr->mdContext->nflLevelMvMerge64x64ref = 0;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
-		if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-			contextPtr->mdContext->nflLevelMvMerge64x64ref = 0;
-		}
-		else {
-			if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-				contextPtr->mdContext->nflLevelMvMerge64x64ref = 3;
-			}
-			else {
-				contextPtr->mdContext->nflLevelMvMerge64x64ref = 4;
-			}
-		}
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-				contextPtr->mdContext->nflLevelMvMerge64x64ref = 0;
-			}
-			else {
-				if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
-					contextPtr->mdContext->nflLevelMvMerge64x64ref = 3;
-				}
-				else {
-					contextPtr->mdContext->nflLevelMvMerge64x64ref = 4;
-				}
-			}
-		}
-		else {
-			if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-				contextPtr->mdContext->nflLevelMvMerge64x64ref = 3;
-			}
-			else {
-				contextPtr->mdContext->nflLevelMvMerge64x64ref = 5;
-			}
-		}
-	}
-	else {
-		if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-			contextPtr->mdContext->nflLevelMvMerge64x64ref = 3;
-		}
-		else {
-			contextPtr->mdContext->nflLevelMvMerge64x64ref = 5;
-		}
-	}
+    // NFL Level MD         Settings
+    // 0                    4
+    // 1                    3 if 32x32, 2 otherwise
+    // 2                    2
+    // 3                    2 if Detectors, 1 otherwise
+    // 4                    2 if 64x64 or 32x32 or 16x16, 1 otherwise
+    // 5                    2 if 64x64 or 332x32, 1 otherwise
+    // 6                    1
+    if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
+        contextPtr->mdContext->nflLevelMd = 0;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
+        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+            contextPtr->mdContext->nflLevelMd = 0;
+        }
+        else {
+            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                contextPtr->mdContext->nflLevelMd = 1;
+            }
+            else {
+                contextPtr->mdContext->nflLevelMd = 2;
+            }
+        }
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+                contextPtr->mdContext->nflLevelMd = 0;
+            }
+            else {
+                if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                    contextPtr->mdContext->nflLevelMd = 1;
+                }
+                else {
+                    contextPtr->mdContext->nflLevelMd = 2;
+                }
+            }
+        }
+        else {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
 
-	return return_error;
+                contextPtr->mdContext->nflLevelMd = 1;
+            }
+            else {
+                contextPtr->mdContext->nflLevelMd = 3;
+            }
+        }
+    }
+    else {
+        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+                contextPtr->mdContext->nflLevelMd = 1;
+        }
+        else {
+            contextPtr->mdContext->nflLevelMd = 3;
+        }
+    }
+
+    // NFL Level Pillar/8x8 Refinement         Settings
+    // 0                                       4
+    // 1                                       4 if depthRefinment, 3 if 32x32, 2 otherwise
+    // 2                                       3
+    // 3                                       3 if depthRefinment or 32x32, 2 otherwise
+    // 4                                       3 if 32x32, 2 otherwise
+    // 5                                       2
+    // 6                                       2 if Detectors, 1 otherwise
+    // 7                                       2 if 64x64 or 32x32 or 16x16, 1 otherwise
+    // 8                                       2 if 64x64 or 332x32, 1 otherwise
+    // 9                                       1
+    if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
+        contextPtr->mdContext->nflLevelPillar8x8ref = 0;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+                    contextPtr->mdContext->nflLevelPillar8x8ref = 0;
+            }
+            else {
+                if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                    contextPtr->mdContext->nflLevelPillar8x8ref = 4;
+                }
+                else {
+                    contextPtr->mdContext->nflLevelPillar8x8ref = 5;
+                }
+            }
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+                contextPtr->mdContext->nflLevelPillar8x8ref = 0;
+            }
+            else {
+                if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                    contextPtr->mdContext->nflLevelPillar8x8ref = 4;
+                }
+                else {
+                    contextPtr->mdContext->nflLevelPillar8x8ref = 5;
+                }
+            }
+        }
+        else {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+                contextPtr->mdContext->nflLevelPillar8x8ref = 4;
+            }
+            else {
+                contextPtr->mdContext->nflLevelPillar8x8ref = 6;
+            }
+        }
+    }
+    else {
+        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+            contextPtr->mdContext->nflLevelPillar8x8ref = 4;
+        }
+        else {
+            contextPtr->mdContext->nflLevelPillar8x8ref = 6;
+        }
+    }
+
+    // NFL Level MvMerge/64x64 Refinement      Settings
+    // 0                                       4
+    // 1                                       3
+    // 2                                       3 if depthRefinment or 32x32, 2 otherwise
+    // 3                                       3 if 32x32, 2 otherwise
+    // 4                                       2
+    // 5                                       2 if Detectors, 1 otherwise
+    // 6                                       2 if 64x64 or 32x32 or 16x16, 1 otherwise
+    // 7                                       2 if 64x64 or 332x32, 1 otherwise
+    // 8                                       1
+    if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
+        contextPtr->mdContext->nflLevelMvMerge64x64ref = 0;
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
+        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+            contextPtr->mdContext->nflLevelMvMerge64x64ref = 0;
+        }
+        else {
+            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                contextPtr->mdContext->nflLevelMvMerge64x64ref = 3;
+            }
+            else {
+                contextPtr->mdContext->nflLevelMvMerge64x64ref = 4;
+            }
+        }
+    }
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
+        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+                contextPtr->mdContext->nflLevelMvMerge64x64ref = 0;
+            }
+            else {
+                if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) {
+                    contextPtr->mdContext->nflLevelMvMerge64x64ref = 3;
+                }
+                else {
+                    contextPtr->mdContext->nflLevelMvMerge64x64ref = 4;
+                }
+            }
+        }
+        else {
+            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+                contextPtr->mdContext->nflLevelMvMerge64x64ref = 3;
+            }
+            else {
+                contextPtr->mdContext->nflLevelMvMerge64x64ref = 5;
+            }
+        }
+    }
+    else {
+        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+            contextPtr->mdContext->nflLevelMvMerge64x64ref = 3;
+        }
+        else {
+            contextPtr->mdContext->nflLevelMvMerge64x64ref = 5;
+        }
+    }
+
+    return return_error;
 }
 
 /******************************************************
@@ -3831,18 +3831,18 @@ void* EncDecKernel(void *inputPtr)
     EncDecContext_t        *contextPtr = (EncDecContext_t*)inputPtr;
     PictureControlSet_t    *pictureControlSetPtr;
     SequenceControlSet_t   *sequenceControlSetPtr;
-                           
-    // Input               
+
+    // Input
     EbObjectWrapper_t      *encDecTasksWrapperPtr;
     EncDecTasks_t          *encDecTasksPtr;
-                           
-    // Output              
+
+    // Output
     EbObjectWrapper_t      *encDecResultsWrapperPtr;
     EncDecResults_t        *encDecResultsPtr;
     EbObjectWrapper_t      *pictureDemuxResultsWrapperPtr;
     PictureDemuxResults_t  *pictureDemuxResultsPtr;
-                           
-    // LCU Loop variables  
+
+    // LCU Loop variables
     LargestCodingUnit_t    *lcuPtr;
     EB_U16                  lcuIndex;
     EB_U8                   lcuSize;
@@ -3859,11 +3859,11 @@ void* EncDecKernel(void *inputPtr)
     EB_U32                  tileRowWidthInLcu;
     //EB_U32                  currentTileWidthInLcu;
     MdcLcuData_t           *mdcPtr;
-    // Variables           
+    // Variables
     EB_BOOL                 enableSaoFlag = EB_TRUE;
     EB_BOOL                 is16bit;
-                           
-    // Segments            
+
+    // Segments
     //EB_BOOL                 initialProcessCall;
     EB_U16                  segmentIndex = 0;
     EB_U32                  xLcuStartIndex;
@@ -3945,7 +3945,7 @@ void* EncDecKernel(void *inputPtr)
                     contextPtr);
         }
 
-        // Derive Interpoldation Method @ Fast-Loop 
+        // Derive Interpoldation Method @ Fast-Loop
         contextPtr->mdContext->interpolationMethod = (pictureControlSetPtr->ParentPcsPtr->useSubpelFlag == EB_FALSE) ?
             INTERPOLATION_FREE_PATH  :
             INTERPOLATION_METHOD_HEVC;
@@ -3955,7 +3955,7 @@ void* EncDecKernel(void *inputPtr)
             PM_MODE_1:
             PM_MODE_0;
 
-        // Set Constrained INTRA Flag 
+        // Set Constrained INTRA Flag
         pictureControlSetPtr->constrainedIntraFlag = (sequenceControlSetPtr->staticConfig.constrainedIntra == EB_TRUE && pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_FALSE) ?
             EB_TRUE :
             EB_FALSE;
@@ -3976,7 +3976,7 @@ void* EncDecKernel(void *inputPtr)
 
 
             // Reset Coding Loop State
-            ProductResetModeDecision( // HT done 
+            ProductResetModeDecision( // HT done
                     contextPtr->mdContext,
                     pictureControlSetPtr,
                     sequenceControlSetPtr,
@@ -4013,7 +4013,7 @@ void* EncDecKernel(void *inputPtr)
                     lcuOriginX = (xLcuIndex+tileGroupLcuStartX) << lcuSizeLog2;
                     lcuOriginY = (yLcuIndex+tileGroupLcuStartY) << lcuSizeLog2;
                     //printf("Process lcu (%d, %d), lcuIndex %d, segmentIndex %d\n", lcuOriginX, lcuOriginY, lcuIndex, segmentIndex);
-                    
+
                     // Set current LCU tile Index
                     tmp = 0;
                     for (i = 0; i < sequenceControlSetPtr->tileColumnCount; i++) {
@@ -4052,9 +4052,9 @@ void* EncDecKernel(void *inputPtr)
 
                     LcuParams_t * lcuParamPtr = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
 
-                    if ( 
-                            pictureControlSetPtr->ParentPcsPtr->depthMode  == PICT_FULL85_DEPTH_MODE || 
-                            pictureControlSetPtr->ParentPcsPtr->depthMode  == PICT_FULL84_DEPTH_MODE || 
+                    if (
+                            pictureControlSetPtr->ParentPcsPtr->depthMode  == PICT_FULL85_DEPTH_MODE ||
+                            pictureControlSetPtr->ParentPcsPtr->depthMode  == PICT_FULL84_DEPTH_MODE ||
                             pictureControlSetPtr->ParentPcsPtr->depthMode  == PICT_OPEN_LOOP_DEPTH_MODE ||
                             (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_LCU_SWITCH_DEPTH_MODE && (pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_FULL85_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_FULL84_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_OPEN_LOOP_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_LIGHT_OPEN_LOOP_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_AVC_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_LIGHT_AVC_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_PRED_OPEN_LOOP_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE))) {
 
@@ -4163,7 +4163,7 @@ void* EncDecKernel(void *inputPtr)
 
 
                     // Encode Pass
-                    EncodePass(                 // HT done 
+                    EncodePass(                 // HT done
                             sequenceControlSetPtr,
                             pictureControlSetPtr,
                             lcuPtr,
@@ -4334,7 +4334,7 @@ void* EncDecKernel(void *inputPtr)
 #endif
             }
 
-            // When de interlacing is performed in the lib, each two consecutive pictures (fields: top & bottom) are going to use the same input buffer     
+            // When de interlacing is performed in the lib, each two consecutive pictures (fields: top & bottom) are going to use the same input buffer
             // only when both fields are encoded we can free the input buffer
             // using the current prediction structure, bottom fields are usually encoded after top fields
             // so that when picture scan type is interlaced we free the input buffer after encoding the bottom field

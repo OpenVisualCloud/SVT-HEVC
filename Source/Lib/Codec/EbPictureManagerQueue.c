@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -25,7 +25,7 @@ EB_ERRORTYPE InputQueueEntryCtor(
 
 
 
-EB_ERRORTYPE ReferenceQueueEntryCtor(   
+EB_ERRORTYPE ReferenceQueueEntryCtor(
     ReferenceQueueEntry_t  **entryDblPtr)
 {
     ReferenceQueueEntry_t *entryPtr;

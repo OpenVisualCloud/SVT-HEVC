@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -272,7 +272,7 @@ void EbActiveParameterSetSeiCtor(
     activeParameterSetSei->noParameterSetUpdateFlag = EB_FALSE;
     activeParameterSetSei->numSpsIdsMinus1 = 0;
     activeParameterSetSei->activeSeqParameterSetId = 0;
-//	activeParameterSetSei->layerSpsIdx = 0;
+//    activeParameterSetSei->layerSpsIdx = 0;
     return;
 }
 

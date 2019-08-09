@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -34,11 +34,11 @@
 #include <time.h>
 void printfTime(const char *fmt, ...)
 {
-	va_list args;
-	va_start(args, fmt);
+    va_list args;
+    va_start(args, fmt);
     SVT_LOG("  [%i ms]\t", ((int)clock()));
-	vprintf(fmt, args);
-	va_end(args);
+    vprintf(fmt, args);
+    va_end(args);
 }
 #endif
 #endif
@@ -62,8 +62,8 @@ EB_HANDLE EbCreateThread(
                        NULL);                          // new thread ID
 
 #elif __linux__
-    
-    pthread_attr_t attr;  
+
+    pthread_attr_t attr;
     struct sched_param param = {
         .sched_priority = 99
     };
@@ -145,7 +145,7 @@ EB_HANDLE EbCreateSemaphore(
         (sem_t*) semaphoreHandle,       // semaphore handle
         0,                              // shared semaphore (not local)
         initialCount);                  // initial count
-#endif // _WIN32    
+#endif // _WIN32
 
     return semaphoreHandle;
 }

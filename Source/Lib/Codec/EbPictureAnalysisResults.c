@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -8,7 +8,7 @@
 #include "EbPictureAnalysisResults.h"
 
 EB_ERRORTYPE PictureAnalysisResultCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr)
 {
     PictureAnalysisResults_t *objectPtr;
@@ -17,7 +17,7 @@ EB_ERRORTYPE PictureAnalysisResultCtor(
     *objectDblPtr = (EB_PTR) objectPtr;
     objectInitDataPtr = 0;
     (void) objectInitDataPtr;
-    
+
     return EB_ErrorNone;
 }
 

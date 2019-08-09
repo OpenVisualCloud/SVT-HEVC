@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -152,8 +152,8 @@ void ZOrderIncrementWithLevel(
 }
 
 static CodedUnitStats_t CodedUnitStatsArray[] = {
-    
-//   Depth       Size      SizeLog2     OriginX    OriginY   cuNumInDepth   Index                                  
+
+//   Depth       Size      SizeLog2     OriginX    OriginY   cuNumInDepth   Index
     {0,           64,         6,           0,         0,        0     ,   0    },   // 0
     {1,           32,         5,           0,         0,        0     ,   1    },   // 1
     {2,           16,         4,           0,         0,        0     ,   1    },   // 2
@@ -250,35 +250,35 @@ const CodedUnitStats_t* GetCodedUnitStats(const EB_U32 cuIdx)
 }
 
 static const TransformUnitStats_t TransformUnitStatsArray[] = {
-	//
-	//        depth
-	//       /
-	//      /       offsetX (units of the current depth)
-	//     /       /
-	//    /       /       offsetY (units of the current depth)
-	//   /       /       /
-	{0,     0,      0},     // 0
-	{1,     0,      0},     // 1
-	{1,     2,      0},     // 2
-	{1,     0,      2},     // 3
-	{1,     2,      2},     // 4
-	{2,     0,      0},     // 5
-	{2,     1,      0},     // 6
-	{2,     0,      1},     // 7
-	{2,     1,      1},     // 8
-	{2,     2,      0},     // 9
-	{2,     3,      0},     // 10
-	{2,     2,      1},     // 11
-	{2,     3,      1},     // 12
-	{ 2,	0,		2},     // 13
-	{ 2,	1,		2},     // 14
-	{ 2,	0,		3},     // 15
-	{ 2,	1,		3},     // 16
-	{ 2,	2,		2},     // 17
-	{ 2,	3,		2},     // 18
-	{ 2,	2,		3},     // 19
-	{ 2,	3,		3},    // 20
-	{0xFF,  0xFF,   0xFF}   // Invalid
+    //
+    //        depth
+    //       /
+    //      /       offsetX (units of the current depth)
+    //     /       /
+    //    /       /       offsetY (units of the current depth)
+    //   /       /       /
+    {0,     0,      0},     // 0
+    {1,     0,      0},     // 1
+    {1,     2,      0},     // 2
+    {1,     0,      2},     // 3
+    {1,     2,      2},     // 4
+    {2,     0,      0},     // 5
+    {2,     1,      0},     // 6
+    {2,     0,      1},     // 7
+    {2,     1,      1},     // 8
+    {2,     2,      0},     // 9
+    {2,     3,      0},     // 10
+    {2,     2,      1},     // 11
+    {2,     3,      1},     // 12
+    { 2,    0,        2},     // 13
+    { 2,    1,        2},     // 14
+    { 2,    0,        3},     // 15
+    { 2,    1,        3},     // 16
+    { 2,    2,        2},     // 17
+    { 2,    3,        2},     // 18
+    { 2,    2,        3},     // 19
+    { 2,    3,        3},    // 20
+    {0xFF,  0xFF,   0xFF}   // Invalid
 };
 
 /**************************************************************
@@ -366,22 +366,22 @@ EB_U64 Log2fHighPrecision(EB_U64 x, EB_U8 precision)
 
 static const MiniGopStats_t MiniGopStatsArray[] = {
 
-	//	HierarchicalLevels	StartIndex	EndIndex	Lenght	miniGopIndex	                                
-	{ 5,  0, 31, 32 },	// 0
-	{ 4,  0, 15, 16 },	// 1
-	{ 3,  0,  7,  8 },	// 2
-	{ 2,  0,  3,  4 },	// 3
-	{ 2,  4,  7,  4 },	// 4
-	{ 3,  8, 15,  8 },	// 5
-	{ 2,  8, 11,  4 },	// 6
-	{ 2, 12, 15,  4 },	// 7
-	{ 4, 16, 31, 16 },	// 8
-	{ 3, 16, 23,  8 },	// 9
-	{ 2, 16, 19,  4 },	// 10
-	{ 2, 20, 23,  4 },	// 11
-	{ 3, 24, 31,  8 },	// 12
-	{ 2, 24, 27,  4 },	// 13
-	{ 2, 28, 31,  4 }	// 14
+    //    HierarchicalLevels    StartIndex    EndIndex    Lenght    miniGopIndex
+    { 5,  0, 31, 32 },    // 0
+    { 4,  0, 15, 16 },    // 1
+    { 3,  0,  7,  8 },    // 2
+    { 2,  0,  3,  4 },    // 3
+    { 2,  4,  7,  4 },    // 4
+    { 3,  8, 15,  8 },    // 5
+    { 2,  8, 11,  4 },    // 6
+    { 2, 12, 15,  4 },    // 7
+    { 4, 16, 31, 16 },    // 8
+    { 3, 16, 23,  8 },    // 9
+    { 2, 16, 19,  4 },    // 10
+    { 2, 20, 23,  4 },    // 11
+    { 3, 24, 31,  8 },    // 12
+    { 2, 24, 27,  4 },    // 13
+    { 2, 28, 31,  4 }    // 14
 };
 
 /**************************************************************
@@ -389,7 +389,7 @@ static const MiniGopStats_t MiniGopStatsArray[] = {
 **************************************************************/
 const MiniGopStats_t* GetMiniGopStats(const EB_U32 miniGopIndex)
 {
-	return &MiniGopStatsArray[miniGopIndex];
+    return &MiniGopStatsArray[miniGopIndex];
 }
 
 

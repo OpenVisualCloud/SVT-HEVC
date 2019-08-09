@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -16,7 +16,7 @@
 #include "EbErrorHandling.h"
 #include "EbModeDecisionProcess.h"
 
-static const EB_U32 mvMergeCandIndexArrayForFillingUp[2][12] = 
+static const EB_U32 mvMergeCandIndexArrayForFillingUp[2][12] =
 {
     {0 , 1, 0, 2, 1, 2, 0, 3, 1, 3, 2, 3},
     {1 , 0, 2, 0, 2, 1, 3, 0, 3, 1, 3, 2}
@@ -87,11 +87,11 @@ static inline EB_BOOL GetNonScalingSpatialAMVP(
     EbReferenceObject_t    *referenceObject;
     EB_U64                  refPicPOC;
     EB_REFLIST              refPicList;
-	EncodeContext_t        *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
+    EncodeContext_t        *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
 
     CHECK_REPORT_ERROR(
         (neighbourPuPtr != EB_NULL),
-        encodeContextPtr->appCallbackPtr, 
+        encodeContextPtr->appCallbackPtr,
         EB_ENC_AMVP_ERROR2);
 
     if (neighbourPuPtr != EB_NULL) {
@@ -152,7 +152,7 @@ static inline EB_BOOL GetNonScalingSpatialAMVP(
 
     default:
         CHECK_REPORT_ERROR_NC(
-            encodeContextPtr->appCallbackPtr, 
+            encodeContextPtr->appCallbackPtr,
             EB_ENC_AMVP_ERROR3);
         }
     }
@@ -164,9 +164,9 @@ static inline EB_BOOL GetNonScalingSpatialAMVP(
     return availability;
 }
 
-/** GetNonScalingSpatialAMVP_V2() 
+/** GetNonScalingSpatialAMVP_V2()
         is used to generate the spatial AMVP candidate by using the non-scaling method.
-    
+
     It returns the availability of the spatial AMVP candidate.
  */
 static inline EB_BOOL GetNonScalingSpatialAMVP_V2(
@@ -184,50 +184,50 @@ static inline EB_BOOL GetNonScalingSpatialAMVP_V2(
     EncodeContext_t        *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
 
 
-     
+
     switch(mvUnit->predDirection){
     case UNI_PRED_LIST_0:
-              
+
         referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr;
         refPicPOC       = referenceObject->refPOC;
         availability    = (EB_BOOL)(targetRefPicPOC == refPicPOC);
         if(availability){
-            *MVPCandx       =  mvUnit->mv[REF_LIST_0].x; 
-            *MVPCandy       =  mvUnit->mv[REF_LIST_0].y; 
+            *MVPCandx       =  mvUnit->mv[REF_LIST_0].x;
+            *MVPCandy       =  mvUnit->mv[REF_LIST_0].y;
         }
-              
+
         break;
 
     case UNI_PRED_LIST_1:
 
         referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_1]->objectPtr;
         refPicPOC       = referenceObject->refPOC;
-        availability    = (EB_BOOL)(targetRefPicPOC == refPicPOC); 
+        availability    = (EB_BOOL)(targetRefPicPOC == refPicPOC);
         if(availability){
-            *MVPCandx       = mvUnit->mv[REF_LIST_1].x;  
-            *MVPCandy       = mvUnit->mv[REF_LIST_1].y;  
+            *MVPCandx       = mvUnit->mv[REF_LIST_1].x;
+            *MVPCandy       = mvUnit->mv[REF_LIST_1].y;
         }
 
         break;
 
     case BI_PRED:
 
-        // Check the AMVP in targetRefPicList  
-        referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[targetRefPicList]->objectPtr;   
+        // Check the AMVP in targetRefPicList
+        referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[targetRefPicList]->objectPtr;
         refPicPOC       = referenceObject->refPOC;
         availability    = (EB_BOOL)(targetRefPicPOC == refPicPOC);
-        if(availability){         
-             *MVPCandx  = mvUnit->mv[targetRefPicList].x;   
-             *MVPCandy  = mvUnit->mv[targetRefPicList].y;   
+        if(availability){
+             *MVPCandx  = mvUnit->mv[targetRefPicList].x;
+             *MVPCandy  = mvUnit->mv[targetRefPicList].y;
         }else{
             // Check the AMVP in 1 - targetRefPicList
-            refPicList      = (EB_REFLIST) (1 - targetRefPicList);   
-            referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[refPicList]->objectPtr;  
+            refPicList      = (EB_REFLIST) (1 - targetRefPicList);
+            referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[refPicList]->objectPtr;
             refPicPOC       = referenceObject->refPOC;
-            availability    = (EB_BOOL)(targetRefPicPOC == refPicPOC); 
+            availability    = (EB_BOOL)(targetRefPicPOC == refPicPOC);
             *MVPCandx       =  mvUnit->mv[refPicList].x;
             *MVPCandy       =  mvUnit->mv[refPicList].y;
-              
+
         }
 
         break;
@@ -241,7 +241,7 @@ static inline EB_BOOL GetNonScalingSpatialAMVP_V2(
     return availability;
 }
 
-    /** GetScalingSpatialAMVP() 
+    /** GetScalingSpatialAMVP()
         is used to generate the spatial AMVP candidate by using the scaling method.
  */
 static inline EB_BOOL GetScalingSpatialAMVP_V2(
@@ -258,22 +258,22 @@ static inline EB_BOOL GetScalingSpatialAMVP_V2(
     EB_U64                  refPicPOC;
     EB_REFLIST              refPicList ;
 
-   
+
 
     curPicPOC = pictureControlSetPtr->pictureNumber;
-    
-    
+
+
     if(mvUnit->predDirection == BI_PRED)
        refPicList       =  targetRefPicList;
     else
        refPicList      = (EB_REFLIST)mvUnit->predDirection;
 
-    
+
     referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[refPicList]->objectPtr;
     refPicPOC       = referenceObject->refPOC;
-   
-    *MVPCandx       = mvUnit->mv[refPicList].x;  
-    *MVPCandy       = mvUnit->mv[refPicList].y;  
+
+    *MVPCandx       = mvUnit->mv[refPicList].x;
+    *MVPCandy       = mvUnit->mv[refPicList].y;
 
     ScaleMV(
         curPicPOC,
@@ -303,10 +303,10 @@ static inline EB_BOOL GetScalingSpatialAMVP(
     EB_U64                  refPicPOC;
     EB_REFLIST              refPicList = REF_LIST_0;
 
-	EncodeContext_t        *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
+    EncodeContext_t        *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
 
     /*CHECK_REPORT_ERROR_NC(
-        encodeContextPtr->appCallbackPtr, 
+        encodeContextPtr->appCallbackPtr,
         EB_ENC_AMVP_ERROR7);*/
 
     curPicPOC = pictureControlSetPtr->pictureNumber;
@@ -330,7 +330,7 @@ static inline EB_BOOL GetScalingSpatialAMVP(
 
     default:
         CHECK_REPORT_ERROR_NC(
-            encodeContextPtr->appCallbackPtr, 
+            encodeContextPtr->appCallbackPtr,
             EB_ENC_AMVP_ERROR1);
     }
 
@@ -372,7 +372,7 @@ static EB_BOOL GetSpatialMVPPosAx(
     EB_U8    puAvailability    = (EB_U8) puA0Availability + (((EB_U8) puA1Availability) << 1);
     EB_BOOL  MVPAxAvailability = EB_FALSE;
 
-	EncodeContext_t        *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
+    EncodeContext_t        *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
 
     switch(puAvailability) {
 
@@ -454,30 +454,30 @@ static EB_BOOL GetSpatialMVPPosAx(
 
     default:
         CHECK_REPORT_ERROR_NC(
-            encodeContextPtr->appCallbackPtr, 
+            encodeContextPtr->appCallbackPtr,
             EB_ENC_AMVP_ERROR4);
         break;
     }
 
     return MVPAxAvailability;
 }
-   
-/** GetSpatialMVPPosAx_V3() 
-       same as GetSpatialMVPPosAx       
-   is used to generate the spatial MVP candidate in position A0 or A1 (if needed).    
-   It returns the availability of the candidate. 
+
+/** GetSpatialMVPPosAx_V3()
+       same as GetSpatialMVPPosAx
+   is used to generate the spatial MVP candidate in position A0 or A1 (if needed).
+   It returns the availability of the candidate.
  */
 static EB_BOOL GetSpatialMVPPosAx_V3(
-    MvUnit_t               *mvUnitA0,                // Input parameter, PU pointer of position A0.            
-    MvUnit_t               *mvUnitA1,                // Input parameter, PU pointer of position A1.              
-    EB_U8                 puAvailability,   
+    MvUnit_t               *mvUnitA0,                // Input parameter, PU pointer of position A0.
+    MvUnit_t               *mvUnitA1,                // Input parameter, PU pointer of position A1.
+    EB_U8                 puAvailability,
     EB_REFLIST            targetRefPicList,         // Input parameter, the reference picture list where the AMVP is searching for.
     EB_U64                targetRefPicPOC,          // Input parameter, the POC of the reference picture where the AMVP is searcing for.
     EB_S16               *MVPCandx,                 // Output parameter, the horizontal componenet of the output AMVP candidate.
     EB_S16               *MVPCandy,                 // Output parameter, the vertical componenet of the output AMVP candidate.
     PictureControlSet_t  *pictureControlSetPtr)
 {
-       
+
     EB_BOOL  MVPAxAvailability = EB_FALSE;
     EncodeContext_t        *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
 
@@ -561,11 +561,11 @@ static EB_BOOL GetSpatialMVPPosAx_V3(
 
     default:
         CHECK_REPORT_ERROR_NC(
-	        encodeContextPtr->appCallbackPtr, 
-	        EB_ENC_AMVP_ERROR4);
+            encodeContextPtr->appCallbackPtr,
+            EB_ENC_AMVP_ERROR4);
         break;
     }
-        
+
     return MVPAxAvailability;
 }
 
@@ -595,7 +595,7 @@ static EB_BOOL GetNonScalingSpatialMVPPosBx(
     EB_BOOL  puB2Availability  = (EB_BOOL) (puB2Available == EB_TRUE && puB2CodingMode != INTRA_MODE);
     EB_U8    puAvailability    = (EB_U8) puB0Availability + (((EB_U8) puB1Availability) << 1) + (((EB_U8) puB2Availability) << 2);
 
-	EncodeContext_t        *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
+    EncodeContext_t        *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
 
     switch(puAvailability) {
 
@@ -732,9 +732,9 @@ static EB_BOOL GetNonScalingSpatialMVPPosBx(
 
     default:
         CHECK_REPORT_ERROR_NC(
-            encodeContextPtr->appCallbackPtr, 
+            encodeContextPtr->appCallbackPtr,
             EB_ENC_AMVP_ERROR5);
-		break;
+        break;
     }
 
     return MVPBxAvailability;
@@ -767,7 +767,7 @@ static EB_BOOL GetScalingSpatialMVPPosBx(
     EB_BOOL  puB2Availability  = (EB_BOOL)(puB2Available == EB_TRUE && puB2CodingMode != INTRA_MODE);
     EB_U8    puAvailability    = (EB_U8)puB0Availability + (((EB_U8)puB1Availability)<<1) + (((EB_U8)puB2Availability<<2));
 
-	EncodeContext_t        *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
+    EncodeContext_t        *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
 
     switch(puAvailability) {
 
@@ -910,7 +910,7 @@ static EB_BOOL GetScalingSpatialMVPPosBx(
 
     default:
         CHECK_REPORT_ERROR_NC(
-            encodeContextPtr->appCallbackPtr, 
+            encodeContextPtr->appCallbackPtr,
             EB_ENC_AMVP_ERROR4);
         break;
     }
@@ -924,181 +924,181 @@ is used to generate the spatial MVP candidate in position B0, B1 (if needed) or 
 and no MV scaling is used.
 */
 static EB_BOOL GetNonScalingSpatialMVPPosBx_V3(
-	//PredictionUnit_t  *puB0Ptr, PredictionUnit_t  *puB1Ptr, PredictionUnit_t  *puB2Ptr,                        
-	MvUnit_t          *mvUnitB0,                  // Input parameter, PU pointer of position B0.                 
-	MvUnit_t          *mvUnitB1,                  // Input parameter, PU pointer of position B1.                   
-	MvUnit_t          *mvUnitB2,                  // Input parameter, PU pointer of position B2.
-	EB_U8             puAvailability,
-	//EB_BOOL               puB0Available,
-	//EB_BOOL               puB1Available,
-	//EB_BOOL               puB2Available,
-	//EB_MODETYPE           puB0CodingMode,
-	//EB_MODETYPE           puB1CodingMode,
-	//EB_MODETYPE           puB2CodingMode,
-	EB_REFLIST            targetRefPicList,         // Input parameter, the reference picture list where the AMVP is searching for.
-	EB_U64                targetRefPicPOC,          // Input parameter, the POC of the reference picture where the AMVP is searcing for.
-	EB_S16               *MVPCandx,                 // Output parameter, the horizontal componenet of the output AMVP candidate.
-	EB_S16               *MVPCandy,                 // Output parameter, the vertical componenet of the output AMVP candidate.
-	PictureControlSet_t  *pictureControlSetPtr)
+    //PredictionUnit_t  *puB0Ptr, PredictionUnit_t  *puB1Ptr, PredictionUnit_t  *puB2Ptr,
+    MvUnit_t          *mvUnitB0,                  // Input parameter, PU pointer of position B0.
+    MvUnit_t          *mvUnitB1,                  // Input parameter, PU pointer of position B1.
+    MvUnit_t          *mvUnitB2,                  // Input parameter, PU pointer of position B2.
+    EB_U8             puAvailability,
+    //EB_BOOL               puB0Available,
+    //EB_BOOL               puB1Available,
+    //EB_BOOL               puB2Available,
+    //EB_MODETYPE           puB0CodingMode,
+    //EB_MODETYPE           puB1CodingMode,
+    //EB_MODETYPE           puB2CodingMode,
+    EB_REFLIST            targetRefPicList,         // Input parameter, the reference picture list where the AMVP is searching for.
+    EB_U64                targetRefPicPOC,          // Input parameter, the POC of the reference picture where the AMVP is searcing for.
+    EB_S16               *MVPCandx,                 // Output parameter, the horizontal componenet of the output AMVP candidate.
+    EB_S16               *MVPCandy,                 // Output parameter, the vertical componenet of the output AMVP candidate.
+    PictureControlSet_t  *pictureControlSetPtr)
 {
 
-	//CHKN move these avail outside
-	EB_BOOL  MVPBxAvailability = EB_FALSE;
-	EncodeContext_t        *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
-	//EB_BOOL  puB0Availability  = (EB_BOOL) (puB0Available == EB_TRUE && puB0CodingMode != INTRA_MODE);
-	//EB_BOOL  puB1Availability  = (EB_BOOL) (puB1Available == EB_TRUE && puB1CodingMode != INTRA_MODE);
-	//EB_BOOL  puB2Availability  = (EB_BOOL) (puB2Available == EB_TRUE && puB2CodingMode != INTRA_MODE);
-	//EB_U8    puAvailability    = (EB_U8) puB0Availability + (((EB_U8) puB1Availability) << 1) + (((EB_U8) puB2Availability) << 2);
+    //CHKN move these avail outside
+    EB_BOOL  MVPBxAvailability = EB_FALSE;
+    EncodeContext_t        *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
+    //EB_BOOL  puB0Availability  = (EB_BOOL) (puB0Available == EB_TRUE && puB0CodingMode != INTRA_MODE);
+    //EB_BOOL  puB1Availability  = (EB_BOOL) (puB1Available == EB_TRUE && puB1CodingMode != INTRA_MODE);
+    //EB_BOOL  puB2Availability  = (EB_BOOL) (puB2Available == EB_TRUE && puB2CodingMode != INTRA_MODE);
+    //EB_U8    puAvailability    = (EB_U8) puB0Availability + (((EB_U8) puB1Availability) << 1) + (((EB_U8) puB2Availability) << 2);
 
-	switch (puAvailability){
+    switch (puAvailability){
 
-	case 1:  // only B0 is available
-		MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
-			mvUnitB0,
-			targetRefPicList,
-			targetRefPicPOC,
-			MVPCandx,
-			MVPCandy,
-			pictureControlSetPtr);
+    case 1:  // only B0 is available
+        MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
+            mvUnitB0,
+            targetRefPicList,
+            targetRefPicPOC,
+            MVPCandx,
+            MVPCandy,
+            pictureControlSetPtr);
 
-		break;
+        break;
 
-	case 2:  // only B1 is available
-		MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
-			mvUnitB1,
-			targetRefPicList,
-			targetRefPicPOC,
-			MVPCandx,
-			MVPCandy,
-			pictureControlSetPtr);
+    case 2:  // only B1 is available
+        MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
+            mvUnitB1,
+            targetRefPicList,
+            targetRefPicPOC,
+            MVPCandx,
+            MVPCandy,
+            pictureControlSetPtr);
 
-		break;
+        break;
 
-	case 3:  // only B0 & B1 are available
-		MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
-			mvUnitB0,
-			targetRefPicList,
-			targetRefPicPOC,
-			MVPCandx,
-			MVPCandy,
-			pictureControlSetPtr);
+    case 3:  // only B0 & B1 are available
+        MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
+            mvUnitB0,
+            targetRefPicList,
+            targetRefPicPOC,
+            MVPCandx,
+            MVPCandy,
+            pictureControlSetPtr);
 
-		if (!MVPBxAvailability){
-			MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
-				mvUnitB1,
-				targetRefPicList,
-				targetRefPicPOC,
-				MVPCandx,
-				MVPCandy,
-				pictureControlSetPtr);
-		}
+        if (!MVPBxAvailability){
+            MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
+                mvUnitB1,
+                targetRefPicList,
+                targetRefPicPOC,
+                MVPCandx,
+                MVPCandy,
+                pictureControlSetPtr);
+        }
 
-		break;
+        break;
 
-	case 4:  // only B2 is available
-		MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
-			mvUnitB2,
-			targetRefPicList,
-			targetRefPicPOC,
-			MVPCandx,
-			MVPCandy,
-			pictureControlSetPtr);
+    case 4:  // only B2 is available
+        MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
+            mvUnitB2,
+            targetRefPicList,
+            targetRefPicPOC,
+            MVPCandx,
+            MVPCandy,
+            pictureControlSetPtr);
 
-		break;
+        break;
 
-	case 5:  // only B0 & B2 are available
-		MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
-			mvUnitB0,
-			targetRefPicList,
-			targetRefPicPOC,
-			MVPCandx,
-			MVPCandy,
-			pictureControlSetPtr);
+    case 5:  // only B0 & B2 are available
+        MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
+            mvUnitB0,
+            targetRefPicList,
+            targetRefPicPOC,
+            MVPCandx,
+            MVPCandy,
+            pictureControlSetPtr);
 
-		if (!MVPBxAvailability){
-			MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
-				mvUnitB2,
-				targetRefPicList,
-				targetRefPicPOC,
-				MVPCandx,
-				MVPCandy,
-				pictureControlSetPtr);
-		}
+        if (!MVPBxAvailability){
+            MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
+                mvUnitB2,
+                targetRefPicList,
+                targetRefPicPOC,
+                MVPCandx,
+                MVPCandy,
+                pictureControlSetPtr);
+        }
 
-		break;
+        break;
 
-	case 6:  // only B1 & B2 are available
-		MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
-			mvUnitB1,
-			targetRefPicList,
-			targetRefPicPOC,
-			MVPCandx,
-			MVPCandy,
-			pictureControlSetPtr);
+    case 6:  // only B1 & B2 are available
+        MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
+            mvUnitB1,
+            targetRefPicList,
+            targetRefPicPOC,
+            MVPCandx,
+            MVPCandy,
+            pictureControlSetPtr);
 
-		if (!MVPBxAvailability){
-			MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
-				mvUnitB2,
-				targetRefPicList,
-				targetRefPicPOC,
-				MVPCandx,
-				MVPCandy,
-				pictureControlSetPtr);
-		}
+        if (!MVPBxAvailability){
+            MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
+                mvUnitB2,
+                targetRefPicList,
+                targetRefPicPOC,
+                MVPCandx,
+                MVPCandy,
+                pictureControlSetPtr);
+        }
 
-		break;
+        break;
 
-	case 7:  // B0, B1 & B2 are all available
-		MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
-			mvUnitB0,
-			targetRefPicList,
-			targetRefPicPOC,
-			MVPCandx,
-			MVPCandy,
-			pictureControlSetPtr);
+    case 7:  // B0, B1 & B2 are all available
+        MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
+            mvUnitB0,
+            targetRefPicList,
+            targetRefPicPOC,
+            MVPCandx,
+            MVPCandy,
+            pictureControlSetPtr);
 
-		if (!MVPBxAvailability){
-			MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
-				mvUnitB1,
-				targetRefPicList,
-				targetRefPicPOC,
-				MVPCandx,
-				MVPCandy,
-				pictureControlSetPtr);
+        if (!MVPBxAvailability){
+            MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
+                mvUnitB1,
+                targetRefPicList,
+                targetRefPicPOC,
+                MVPCandx,
+                MVPCandy,
+                pictureControlSetPtr);
 
-			if (!MVPBxAvailability){
-				MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
-					mvUnitB2,
-					targetRefPicList,
-					targetRefPicPOC,
-					MVPCandx,
-					MVPCandy,
-					pictureControlSetPtr);
+            if (!MVPBxAvailability){
+                MVPBxAvailability = GetNonScalingSpatialAMVP_V2(
+                    mvUnitB2,
+                    targetRefPicList,
+                    targetRefPicPOC,
+                    MVPCandx,
+                    MVPCandy,
+                    pictureControlSetPtr);
 
-			}
-		}
+            }
+        }
 
-		break;
+        break;
 
-	case 0:  // none of B0, B1 or B2 is available
-		break;
+    case 0:  // none of B0, B1 or B2 is available
+        break;
 
-	default:
-		CHECK_REPORT_ERROR_NC(
-			encodeContextPtr->appCallbackPtr,
-			EB_ENC_AMVP_ERROR5);
-		break;
-	}
+    default:
+        CHECK_REPORT_ERROR_NC(
+            encodeContextPtr->appCallbackPtr,
+            EB_ENC_AMVP_ERROR5);
+        break;
+    }
 
-	return MVPBxAvailability;
+    return MVPBxAvailability;
 }
 /** GetScalingSpatialMVPPosBx_V3()
         is used to generate the spatial MVP candidate in position B0, B1 (if needed) or B2 (if needed)
         and the MV scaling is used.
  */
-static EB_BOOL GetScalingSpatialMVPPosBx_V3(    
-    MvUnit_t          *mvUnitB0,                  // Input parameter, PU pointer of position B0.                 
-    MvUnit_t          *mvUnitB1,                  // Input parameter, PU pointer of position B1.                   
+static EB_BOOL GetScalingSpatialMVPPosBx_V3(
+    MvUnit_t          *mvUnitB0,                  // Input parameter, PU pointer of position B0.
+    MvUnit_t          *mvUnitB1,                  // Input parameter, PU pointer of position B1.
     MvUnit_t          *mvUnitB2,                  // Input parameter, PU pointer of position B2.
     EB_U8              puAvailability,
     //EB_BOOL               puB0Available,
@@ -1123,7 +1123,7 @@ static EB_BOOL GetScalingSpatialMVPPosBx_V3(
     switch(puAvailability){
 
     case 1:  // only B0 is available
-        
+
         MVPBxAvailability = GetScalingSpatialAMVP_V2(
                              mvUnitB0,
                              targetRefPicList,
@@ -1181,7 +1181,7 @@ static EB_BOOL GetScalingSpatialMVPPosBx_V3(
         break;
 
     case 5:  // only B0 & B2 are available
-        
+
             MVPBxAvailability = GetScalingSpatialAMVP_V2(
                                  mvUnitB0,
                                  targetRefPicList,
@@ -1261,8 +1261,8 @@ static EB_BOOL GetScalingSpatialMVPPosBx_V3(
 
     default:
         CHECK_REPORT_ERROR_NC(
-	        encodeContextPtr->appCallbackPtr, 
-	        EB_ENC_AMVP_ERROR5);
+            encodeContextPtr->appCallbackPtr,
+            EB_ENC_AMVP_ERROR5);
         break;
     }
 
@@ -1272,7 +1272,7 @@ static EB_BOOL GetScalingSpatialMVPPosBx_V3(
 /** GetTemporalMVP()
         is used to generate the temporal MVP candidate.
  */
-EB_BOOL GetTemporalMVP(    
+EB_BOOL GetTemporalMVP(
     EB_U32                 puPicWiseLocX,
     EB_U32                 puPicWiseLocY,
     EB_U32                 puWidth,
@@ -1305,7 +1305,7 @@ EB_BOOL GetTemporalMVP(
     EB_BOOL      temporalMVPAvailability = EB_FALSE;
     EncodeContext_t        *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
 
-   
+
     //CHKN compute this outside (remove isLowdelay/targetRefPicList/preDefinedColocatedPuRefList
     //CHKN bottom right avail outside, common between L0+L1, tmvpPosition is common between L0+L1
 
@@ -1313,7 +1313,7 @@ EB_BOOL GetTemporalMVP(
 
 
 
-   
+
     //CHKN this if/else is common between L0+L1
     if(
         (puPicWiseLocX + puWidth) >= pictureWidth ||                    // Right Picture Edge Boundary Check
@@ -1332,9 +1332,9 @@ EB_BOOL GetTemporalMVP(
         bottomRightBlockPositionY = ((puPicWiseLocY & (tbSize-1)) + puHeight) >> LOG_MV_COMPRESS_UNIT_SIZE;    // won't rollover due to prior boundary checks
 
         CHECK_REPORT_ERROR(
-	        ((tmvpMapLcuIndexOffset < 2)),
-	        encodeContextPtr->appCallbackPtr, 
-	        EB_ENC_AMVP_ERROR8);
+            ((tmvpMapLcuIndexOffset < 2)),
+            encodeContextPtr->appCallbackPtr,
+            EB_ENC_AMVP_ERROR8);
 
         tmvpMapPuIndex = bottomRightBlockPositionY * (tbSize >> LOG_MV_COMPRESS_UNIT_SIZE) + bottomRightBlockPositionX;
 
@@ -1387,28 +1387,28 @@ EB_BOOL GetTemporalMVP(
 
     return temporalMVPAvailability;
 }
- 
+
  /** GetTemporalMVP_V2()
         is used to generate the temporal MVP candidate.
  */
-EB_BOOL GetTemporalMVP_V2(   
+EB_BOOL GetTemporalMVP_V2(
     TmvpPos                tmvpPosition,
     EB_U32                 tmvpMapLcuIndexOffset,
     EB_U32                 tmvpMapPuIndex,
-    EB_REFLIST             targetRefPicList,                 // Input parameter, the reference picture list where the TMVP is searching for.  
+    EB_REFLIST             targetRefPicList,                 // Input parameter, the reference picture list where the TMVP is searching for.
     EB_U64                 targetRefPicPOC,                  // Input parameter, the POC of the reference picture where the TMVP is searcing for.
     TmvpUnit_t            *tmvpMapPtr,                       // Input parameter, the pointer to the TMVP map.
     EB_U64                 colocatedPuPOC,                   // Input parameter, the POC of the co-located PU.
-    EB_REFLIST             preDefinedColocatedPuRefList,     // Input parameter, the reference picture list of the co-located PU, which is defined in the slice header. 
+    EB_REFLIST             preDefinedColocatedPuRefList,     // Input parameter, the reference picture list of the co-located PU, which is defined in the slice header.
     EB_S16                *MVPCandx,                         // Output parameter, the horizontal componenet of the output AMVP candidate.
     EB_S16                *MVPCandy,                         // Output parameter, the vertical componenet of the output AMVP candidate.
     PictureControlSet_t   *pictureControlSetPtr)
 {
-   
+
     EB_BOOL      temporalMVPAvailability = EB_FALSE;
     EB_REFLIST   colocatedPuRefList =  pictureControlSetPtr->isLowDelay ? targetRefPicList : (EB_REFLIST) (1-preDefinedColocatedPuRefList);
 
-    
+
     if(tmvpPosition == TmvpColocatedBottomRight) {
         colocatedPuRefList = tmvpMapPtr[tmvpMapLcuIndexOffset].predictionDirection[tmvpMapPuIndex] == BI_PRED ?
                              colocatedPuRefList :
@@ -1426,7 +1426,7 @@ EB_BOOL GetTemporalMVP_V2(
             MVPCandx,
             MVPCandy);
     }
-    else { // (tmvpType == TmvpColocatedCenter)      
+    else { // (tmvpType == TmvpColocatedCenter)
 
         temporalMVPAvailability = tmvpMapPtr->availabilityFlag[tmvpMapPuIndex];
         if(temporalMVPAvailability) {
@@ -1502,7 +1502,7 @@ EB_BOOL GetTemporalMVPBPicture(
 
         CHECK_REPORT_ERROR(
             (tmvpMapLcuIndexOffset < 2),
-            encodeContextPtr->appCallbackPtr, 
+            encodeContextPtr->appCallbackPtr,
             EB_ENC_AMVP_ERROR8);
 
         tmvpMapPuIndex = bottomRightBlockPositionY * (tbSize >> LOG_MV_COMPRESS_UNIT_SIZE) + bottomRightBlockPositionX;
@@ -1760,9 +1760,9 @@ EB_ERRORTYPE FillAMVPCandidates(
     EB_BOOL                 tmvpEnableFlag,
     EB_U32                  tbAddr,
     EB_REFLIST              targetRefPicList,
-	EB_S16                 *xMvAmvpArray,
-	EB_S16                 *yMvAmvpArray,
-	EB_U8                  *amvpCandidateCount)
+    EB_S16                 *xMvAmvpArray,
+    EB_S16                 *yMvAmvpArray,
+    EB_U8                  *amvpCandidateCount)
 {
     EB_ERRORTYPE            return_error = EB_ErrorNone;
 
@@ -1841,8 +1841,8 @@ EB_ERRORTYPE FillAMVPCandidates(
     EB_REFLIST              colocatedPuRefList;
 
     const EB_U64            targetRefPicPOC =((EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[targetRefPicList]->objectPtr)->refPOC;
-	EB_S16                  xMVPCandArray[4];
-	EB_S16                  yMVPCandArray[4];
+    EB_S16                  xMVPCandArray[4];
+    EB_S16                  yMVPCandArray[4];
     EB_S16                  xMVPCand;
     EB_S16                  yMVPCand;
     EB_U32                  numAvailableMVPCand = 0;
@@ -1863,7 +1863,7 @@ EB_ERRORTYPE FillAMVPCandidates(
 
     // Slice, picture & Intra Check
     a0_availability = (modeNeighborArray->leftArray[a0_ModeNaIndex] != INTER_MODE) ? EB_FALSE : a0_availability;
-	a0_availability = (pictureLeftBoundary == EB_TRUE) ? EB_FALSE : a0_availability;
+    a0_availability = (pictureLeftBoundary == EB_TRUE) ? EB_FALSE : a0_availability;
 
 
     if(a0_availability) {
@@ -1881,9 +1881,9 @@ EB_ERRORTYPE FillAMVPCandidates(
 
     // Slice, picture, & Intra Check
     a1_availability = (modeNeighborArray->leftArray[a1_ModeNaIndex] != INTER_MODE) ? EB_FALSE : EB_TRUE;
-	a1_availability = (pictureLeftBoundary == EB_TRUE) ? EB_FALSE : a1_availability;
+    a1_availability = (pictureLeftBoundary == EB_TRUE) ? EB_FALSE : a1_availability;
 
-    // To check: Intra-CU check (imposed by the standard to facilitate concurrent PU searches) 
+    // To check: Intra-CU check (imposed by the standard to facilitate concurrent PU searches)
     // a1_availability = (partIndex == 1 && isVerticalPartition == EB_TRUE) ? EB_FALSE : a1_availability;
 
     if (a1_availability) {
@@ -1901,7 +1901,7 @@ EB_ERRORTYPE FillAMVPCandidates(
 
     // Slice, picture, & Intra Check
     b2_availability = (modeNeighborArray->topLeftArray[b2_ModeNaIndex] != INTER_MODE) ? EB_FALSE : EB_TRUE;
-	b2_availability = (pictureLeftBoundary == EB_TRUE || pictureTopBoundary == EB_TRUE) ? EB_FALSE : b2_availability;
+    b2_availability = (pictureLeftBoundary == EB_TRUE || pictureTopBoundary == EB_TRUE) ? EB_FALSE : b2_availability;
 
     if (b2_availability) {
         puB2CodingMode                   = modeNeighborArray->topLeftArray[b2_ModeNaIndex];
@@ -1943,7 +1943,7 @@ EB_ERRORTYPE FillAMVPCandidates(
 
     // Slice, picture & Intra Check
     b0_availability = (modeNeighborArray->topArray[b0_ModeNaIndex] != INTER_MODE) ? EB_FALSE : b0_availability;
-	b0_availability = (pictureTopBoundary == EB_TRUE) ? EB_FALSE : b0_availability;
+    b0_availability = (pictureTopBoundary == EB_TRUE) ? EB_FALSE : b0_availability;
     b0_availability = (pictureRightBoundary == EB_TRUE) ? EB_FALSE : b0_availability;
 
     if (b0_availability) {
@@ -2099,48 +2099,48 @@ EB_ERRORTYPE FillAMVPCandidates(
 /**************************************************************************
  * GenerateL0L1AmvpMergeLists()
  *       Generates the AMVP(L0+L1) + MV merge candidates for a PU.
- * 
- *    B2 |                B1 | B0  
+ *
+ *    B2 |                B1 | B0
  *     -----------------------
- *       |                   |                   
- *       |                   |                   
- *       |                   |                  
- *       |                   |                  
- *       |                   |                               
- *       |                   |                   
- *       |                   |                   
- *    A1 |                   |             
+ *       |                   |
+ *       |                   |
+ *       |                   |
+ *       |                   |
+ *       |                   |
+ *       |                   |
+ *       |                   |
+ *    A1 |                   |
  *     --|-------------------|
  *    A0
- * 
+ *
  ***************************************************************************/
 EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
-	ModeDecisionContext_t		*contextPtr,
-	InterPredictionContext_t	*interPredictionPtr,
-	PictureControlSet_t			*pictureControlSetPtr,
-	EB_BOOL                      tmvpEnableFlag,
-	EB_U32						 tbAddr,
-	EB_S16						 xMvAmvpArray[2][2],
-	EB_S16						 yMvAmvpArray[2][2],
-	EB_U32						 amvpCandidateCount[2],
+    ModeDecisionContext_t        *contextPtr,
+    InterPredictionContext_t    *interPredictionPtr,
+    PictureControlSet_t            *pictureControlSetPtr,
+    EB_BOOL                      tmvpEnableFlag,
+    EB_U32                         tbAddr,
+    EB_S16                         xMvAmvpArray[2][2],
+    EB_S16                         yMvAmvpArray[2][2],
+    EB_U32                         amvpCandidateCount[2],
     EB_S16                           firstPuAMVPCandArray_x[MAX_NUM_OF_REF_PIC_LIST][2],
-	EB_S16                           firstPuAMVPCandArray_y[MAX_NUM_OF_REF_PIC_LIST][2]
+    EB_S16                           firstPuAMVPCandArray_y[MAX_NUM_OF_REF_PIC_LIST][2]
     ) {
     EB_ERRORTYPE            return_error = EB_ErrorNone;
 
-    NeighborArrayUnit_t    *mvNeighborArray		= contextPtr->mvNeighborArray;
-	NeighborArrayUnit_t    *modeNeighborArray	= contextPtr->modeTypeNeighborArray;
-	MvMergeCandidate_t     *mergeCandidateArray = interPredictionPtr->mvMergeCandidateArray;
+    NeighborArrayUnit_t    *mvNeighborArray        = contextPtr->mvNeighborArray;
+    NeighborArrayUnit_t    *modeNeighborArray    = contextPtr->modeTypeNeighborArray;
+    MvMergeCandidate_t     *mergeCandidateArray = interPredictionPtr->mvMergeCandidateArray;
 
-	const EB_U32            cuIndex	            = contextPtr->cuStats->cuNumInDepth;
-	const EB_U32            originX	            = contextPtr->cuOriginX;
-	const EB_U32            originY	            = contextPtr->cuOriginY;
-    const EB_U32            width	            = contextPtr->cuStats->size;
-	const EB_U32            height	            = contextPtr->cuStats->size;
-	const EB_U32            cuDepth	            = contextPtr->cuStats->depth;
+    const EB_U32            cuIndex                = contextPtr->cuStats->cuNumInDepth;
+    const EB_U32            originX                = contextPtr->cuOriginX;
+    const EB_U32            originY                = contextPtr->cuOriginY;
+    const EB_U32            width                = contextPtr->cuStats->size;
+    const EB_U32            height                = contextPtr->cuStats->size;
+    const EB_U32            cuDepth                = contextPtr->cuStats->depth;
     EB_U32                 *mergeCandidateCount = &interPredictionPtr->mvMergeCandidateCount;
     EB_REFLIST              targetRefPicList          = REF_LIST_0;
-	
+
     // Neighbor Array Fixed-indicies
     const EB_U32 a0_ModeNaIndex = GetNeighborArrayUnitLeftIndex(
         modeNeighborArray,
@@ -2200,14 +2200,14 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
     EbReferenceObject_t    *referenceObjectReadPtr;
     TmvpUnit_t             *tmvpMapPtr;
     EB_REFLIST              colocatedPuRefList;
-   
+
     EB_U64                  targetRefPicPOC;
 
 
     EB_U32                  mvMergeCandidateIndex = 0;
     EB_S16                  MVPCandx;
     EB_S16                  MVPCandy;
-	EB_S16                  MVPCand[4];
+    EB_S16                  MVPCand[4];
 
      // MV merge candidate array filling up
     EB_U32                  fillingIndex;
@@ -2234,7 +2234,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
 
     EB_U32                  numAvailableMVPCandL0 = 0;
     EB_U32                  numAvailableMVPCandL1 = 0;
-   
+
     EB_U32                 totalMergeCandidates = *mergeCandidateCount;
 
     EB_BOOL      tmvpInfoReady = EB_FALSE;
@@ -2251,69 +2251,69 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
     // Availability Checks for A0, A1, B0, B1, B2
     //----------------------------------------------
     // *********** A0 ***********
-    
+
     // CU scan-order availability check
     a0_availability = isBottomLeftAvailable(cuDepth, cuIndex);
 
     // Picture Boundary Check
     a0_availability = (a0_ModeNaIndex < modeNeighborArray->leftArraySize) ? a0_availability : EB_FALSE;
 
-    // Slice & Intra Check 
+    // Slice & Intra Check
     a0_availability = (((EB_MODETYPE*) modeNeighborArray->leftArray)[a0_ModeNaIndex] != INTER_MODE) ? EB_FALSE : a0_availability;
 
     // picture Check
-	a0_availability = (pictureLeftBoundary == EB_TRUE) ? EB_FALSE : a0_availability;
+    a0_availability = (pictureLeftBoundary == EB_TRUE) ? EB_FALSE : a0_availability;
 
-    if(a0_availability){       
+    if(a0_availability){
         mvUnitA0                         = &( (MvUnit_t*)mvNeighborArray->leftArray )[a0_MvNaIndex];
     }
     else{
-        mvUnitA0 = (MvUnit_t*)EB_NULL;        
+        mvUnitA0 = (MvUnit_t*)EB_NULL;
     }
 
     // *********** A1 ***********
-    
+
     // Slice & Intra Check
     a1_availability = (((EB_MODETYPE*) modeNeighborArray->leftArray)[a1_ModeNaIndex] != INTER_MODE) ? EB_FALSE : EB_TRUE;
 
     // picture Check
-	a1_availability = (pictureLeftBoundary == EB_TRUE) ? EB_FALSE : a1_availability;
-    
-    if (a1_availability) {      
+    a1_availability = (pictureLeftBoundary == EB_TRUE) ? EB_FALSE : a1_availability;
+
+    if (a1_availability) {
         mvUnitA1                         = &( (MvUnit_t*)mvNeighborArray->leftArray )[a1_MvNaIndex];
     }
     else {
-        mvUnitA1 = (MvUnit_t*)EB_NULL;   
+        mvUnitA1 = (MvUnit_t*)EB_NULL;
     }
 
     // *********** B2 ***********
-    
+
     // Slice & Intra Check
     b2_availability = (((EB_MODETYPE*) modeNeighborArray->topLeftArray)[b2_ModeNaIndex] != INTER_MODE) ? EB_FALSE : EB_TRUE;
 
     // picture Check
-	b2_availability = (pictureLeftBoundary == EB_TRUE || pictureTopBoundary == EB_TRUE) ? EB_FALSE : b2_availability;
-    
-    if (b2_availability) {        
+    b2_availability = (pictureLeftBoundary == EB_TRUE || pictureTopBoundary == EB_TRUE) ? EB_FALSE : b2_availability;
+
+    if (b2_availability) {
         mvUnitB2                         = &( (MvUnit_t*)mvNeighborArray->topLeftArray )[b2_MvNaIndex];
     }
     else {
-        mvUnitB2 = (MvUnit_t*)EB_NULL;        
+        mvUnitB2 = (MvUnit_t*)EB_NULL;
     }
-    
+
     // *********** B1 ***********
-    
+
     // Slice & Intra Check
     b1_availability = (((EB_MODETYPE*) modeNeighborArray->topArray)[b1_ModeNaIndex] != INTER_MODE) ? EB_FALSE : EB_TRUE;
 
     // picture Check
     b1_availability = (pictureTopBoundary == EB_TRUE) ? EB_FALSE : b1_availability;
 
-    if (b1_availability) {       
+    if (b1_availability) {
         mvUnitB1                         = &( (MvUnit_t*)mvNeighborArray->topArray )[b1_MvNaIndex];
     }
     else {
-        mvUnitB1 = (MvUnit_t*)EB_NULL;        
+        mvUnitB1 = (MvUnit_t*)EB_NULL;
     }
 
     // *********** B0 ***********
@@ -2324,21 +2324,21 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
     // Picture Boundary Check
     b0_availability = (b0_ModeNaIndex < modeNeighborArray->topArraySize) ? b0_availability : EB_FALSE;
 
-    // Slice & Intra Check 
+    // Slice & Intra Check
     b0_availability = (((EB_MODETYPE*) modeNeighborArray->topArray)[b0_ModeNaIndex] != INTER_MODE) ? EB_FALSE : b0_availability;
 
     // picture Check
     b0_availability = (pictureTopBoundary == EB_TRUE) ? EB_FALSE : b0_availability;
     b0_availability = (pictureRightBoundary == EB_TRUE) ? EB_FALSE : b0_availability;
 
-    if (b0_availability) {       
+    if (b0_availability) {
         mvUnitB0                         = &( (MvUnit_t*)mvNeighborArray->topArray )[b0_MvNaIndex];
     }
     else {
-        mvUnitB0 = (MvUnit_t*)EB_NULL;       
+        mvUnitB0 = (MvUnit_t*)EB_NULL;
     }
 
-    //-----------------AMVP L0------------- 
+    //-----------------AMVP L0-------------
     //-----------------AMVP L0-------------
     //-----------------AMVP L0-------------
 
@@ -2495,9 +2495,9 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
 
         amvpCandidateCount[REF_LIST_0] = numAvailableMVPCandL0;
 
-        //------------------AMVP L1-------------- 
-        //------------------AMVP L1-------------- 
-        //------------------AMVP L1-------------- 
+        //------------------AMVP L1--------------
+        //------------------AMVP L1--------------
+        //------------------AMVP L1--------------
         if (pictureControlSetPtr->sliceType == EB_B_PICTURE)
         {
             targetRefPicList = REF_LIST_1;
@@ -2557,7 +2557,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
                 }
             }
 
-            // Remove duplicate 
+            // Remove duplicate
             if (numAvailableMVPCandL1 == 2 && ((xMvAmvpArrayL1[0] == xMvAmvpArrayL1[1]) && (yMvAmvpArrayL1[0] == yMvAmvpArrayL1[1]))) {
                 numAvailableMVPCandL1 = 1;
             }
@@ -2628,7 +2628,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
                 }
             }
 
-            //fill (0,0) MVP in case there is no Candidates     
+            //fill (0,0) MVP in case there is no Candidates
             if ((numAvailableMVPCandL1 < 1) || (numAvailableMVPCandL1 == 1 && xMvAmvpArrayL1[0] != 0 && yMvAmvpArrayL1[0] != 0)) {
                 xMvAmvpArrayL1[numAvailableMVPCandL1] = 0;
                 yMvAmvpArrayL1[numAvailableMVPCandL1] = 0;
@@ -2641,18 +2641,18 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
         }
     }
 
-    //------------------Merge-------------- 
-    //------------------Merge-------------- 
-    //------------------Merge-------------- 
-   
+    //------------------Merge--------------
+    //------------------Merge--------------
+    //------------------Merge--------------
+
 
     //----------------------------------------
     // Candidate Selection
     //----------------------------------------
 
-    switch(pictureControlSetPtr->sliceType) 
+    switch(pictureControlSetPtr->sliceType)
     {
-    
+
     case EB_P_PICTURE:
 
         // A1
@@ -2668,13 +2668,13 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
         if(mvMergeCandidateIndex == totalMergeCandidates )
             break;
 
-        // B1 
+        // B1
         if (mvUnitB1 != (MvUnit_t*)EB_NULL) {
             EB_BOOL mvUnion = EB_FALSE;
             if (mvUnitB1 != (MvUnit_t*)EB_NULL && mvUnitA1 != (MvUnit_t*)EB_NULL)
                 mvUnion = (mvUnitB1->mv[REF_LIST_0].mvUnion != mvUnitA1->mv[REF_LIST_0].mvUnion);
             if(  (  b1_availability == EB_TRUE) &&
-                 ( (a1_availability == EB_FALSE) || 
+                 ( (a1_availability == EB_FALSE) ||
                    mvUnion))
             {
                 mergeCandidateArray[mvMergeCandidateIndex].predictionDirection          = UNI_PRED_LIST_0;
@@ -2685,14 +2685,14 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
 
         if(mvMergeCandidateIndex == totalMergeCandidates )
             break;
-        
+
         // B0
         if (mvUnitB0 != (MvUnit_t*)EB_NULL) {
             EB_BOOL mvUnion = EB_FALSE;
             if (mvUnitB0 != (MvUnit_t*)EB_NULL && mvUnitB1 != (MvUnit_t*)EB_NULL)
                 mvUnion = (mvUnitB0->mv[REF_LIST_0].mvUnion != mvUnitB1->mv[REF_LIST_0].mvUnion);
             if ( (b0_availability == EB_TRUE) &&
-                 ((b1_availability == EB_FALSE) ||                
+                 ((b1_availability == EB_FALSE) ||
                  mvUnion))
             {
                 mergeCandidateArray[mvMergeCandidateIndex].predictionDirection           = UNI_PRED_LIST_0;
@@ -2710,7 +2710,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
             if (mvUnitA0 != (MvUnit_t*)EB_NULL && mvUnitA1 != (MvUnit_t*)EB_NULL)
                 mvUnion = (mvUnitA0->mv[REF_LIST_0].mvUnion != mvUnitA1->mv[REF_LIST_0].mvUnion);
             if ((a0_availability == EB_TRUE) &&
-               ((a1_availability == EB_FALSE) ||                
+               ((a1_availability == EB_FALSE) ||
                mvUnion))
             {
                 mergeCandidateArray[mvMergeCandidateIndex].predictionDirection          = UNI_PRED_LIST_0;
@@ -2740,7 +2740,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
             ++mvMergeCandidateIndex;
         }
         }
-        
+
         if(mvMergeCandidateIndex == totalMergeCandidates )
             break;
 
@@ -2757,7 +2757,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
                 referenceObjectReadPtr->refPOC,
                 preDefinedColocatedPuRefList,
                 isLowDelay,
-                MAX_LCU_SIZE,    
+                MAX_LCU_SIZE,
                 &MVPCandx,
                 &MVPCandy,
                 pictureControlSetPtr);
@@ -2798,16 +2798,16 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
                 mergeCandidateArray[mvMergeCandidateIndex].mv[REF_LIST_1].mvUnion = mvUnitA1->mv[REF_LIST_1].mvUnion;
                 ++mvMergeCandidateIndex;
             }
-     
+
             if(mvMergeCandidateIndex == totalMergeCandidates )
                 break;
-              
-            
+
+
             // B1
             if (  (b1_availability == EB_TRUE) &&
                   ( (a1_availability == EB_FALSE) ||
-                    (mvUnitB1->predDirection != mvUnitA1->predDirection) || 
-                    (mvUnitB1->mv[REF_LIST_0].mvUnion != mvUnitA1->mv[REF_LIST_0].mvUnion) || 
+                    (mvUnitB1->predDirection != mvUnitA1->predDirection) ||
+                    (mvUnitB1->mv[REF_LIST_0].mvUnion != mvUnitA1->mv[REF_LIST_0].mvUnion) ||
                     (mvUnitB1->mv[REF_LIST_1].mvUnion != mvUnitA1->mv[REF_LIST_1].mvUnion))   )
             {
                 mergeCandidateArray[mvMergeCandidateIndex].predictionDirection     = mvUnitB1->predDirection;
@@ -2821,7 +2821,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
 
             // B0
             if (    (b0_availability == EB_TRUE) &&
-                    ((b1_availability == EB_FALSE) ||                
+                    ((b1_availability == EB_FALSE) ||
                      (mvUnitB0->predDirection      != mvUnitB1->predDirection)      ||
                      (mvUnitB0->mv[REF_LIST_0].mvUnion != mvUnitB1->mv[REF_LIST_0].mvUnion)  ||
                      (mvUnitB0->mv[REF_LIST_1].mvUnion != mvUnitB1->mv[REF_LIST_1].mvUnion)))
@@ -2837,7 +2837,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
 
             // A0
             if (    (a0_availability == EB_TRUE) &&
-                    ((a1_availability == EB_FALSE) ||               
+                    ((a1_availability == EB_FALSE) ||
                      (mvUnitA0->predDirection            != mvUnitA1->predDirection)          ||
                      (mvUnitA0->mv[REF_LIST_0].mvUnion  != mvUnitA1->mv[REF_LIST_0].mvUnion)  ||
                      (mvUnitA0->mv[REF_LIST_1].mvUnion  != mvUnitA1->mv[REF_LIST_1].mvUnion)))
@@ -2853,11 +2853,11 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
             // B2
             if (   mvMergeCandidateIndex < 4    &&
                    (b2_availability == EB_TRUE) &&
-                   ((a1_availability == EB_FALSE) ||              
+                   ((a1_availability == EB_FALSE) ||
                     (mvUnitB2->predDirection           != mvUnitA1->predDirection)           ||
                     (mvUnitB2->mv[REF_LIST_0].mvUnion  != mvUnitA1->mv[REF_LIST_0].mvUnion)  ||
                     (mvUnitB2->mv[REF_LIST_1].mvUnion  != mvUnitA1->mv[REF_LIST_1].mvUnion)) &&
-                    ((b1_availability == EB_FALSE) ||               
+                    ((b1_availability == EB_FALSE) ||
                     (mvUnitB2->predDirection           != mvUnitB1->predDirection)           ||
                     (mvUnitB2->mv[REF_LIST_0].mvUnion  != mvUnitB1->mv[REF_LIST_0].mvUnion)  ||
                     (mvUnitB2->mv[REF_LIST_1].mvUnion  != mvUnitB1->mv[REF_LIST_1].mvUnion)))
@@ -2888,7 +2888,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
                     {
                         // Center co-located
                         tmvpPosition = TmvpColocatedCenter;
-               
+
                     } else {
                         // Bottom-right co-located
                         bottomRightPositionX      = (originX & (63)) + width;
@@ -2896,13 +2896,13 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
                         bottomRightBlockPositionX = (bottomRightPositionX & (63)) >> LOG_MV_COMPRESS_UNIT_SIZE;
                         bottomRightBlockPositionY = ((originY & (63)) + height) >> LOG_MV_COMPRESS_UNIT_SIZE;    // won't rollover due to prior boundary checks
 
-                    
+
                         tmvpMapPuIndex = bottomRightBlockPositionY * (MAX_LCU_SIZE >> LOG_MV_COMPRESS_UNIT_SIZE) + bottomRightBlockPositionX;
 
                         // Determine whether the Bottom-Right is Available
                         tmvpPosition = (tmvpMapPtr[tmvpMapLcuIndexOffset].availabilityFlag[tmvpMapPuIndex] == EB_TRUE) ? TmvpColocatedBottomRight : TmvpColocatedCenter;
                     }
-                        
+
                     if(tmvpPosition == TmvpColocatedCenter) {
                         tmvpMapLcuIndexOffset     = 0;
                         bottomRightBlockPositionX = ((originX & (63)) + (width  >> 1)) >> LOG_MV_COMPRESS_UNIT_SIZE;
@@ -2911,19 +2911,19 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
 
 
                     }
-               }  
+               }
 
                 tmvp_availability = GetTemporalMVPBPicture_V2(
                                         tmvpPosition,
                                         tmvpMapLcuIndexOffset,
-                                        tmvpMapPuIndex,  
+                                        tmvpMapPuIndex,
                                         pictureControlSetPtr,
                                         tmvpMapPtr,
                                         referenceObjectReadPtr->refPOC,
                                         pictureControlSetPtr->colocatedPuRefList,
-                                        pictureControlSetPtr->isLowDelay,                                       
+                                        pictureControlSetPtr->isLowDelay,
                                         MVPCand);
-                                 
+
 
                 if(tmvp_availability) {
                     mergeCandidateArray[mvMergeCandidateIndex].predictionDirection   = BI_PRED;
@@ -2942,7 +2942,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
             // Bi-pred Combinations
             //  The MVs from the lists from the the {A0,A1,B0,B1,B2} are combined to create new merge candidates
             loopEnd = mvMergeCandidateIndex * (mvMergeCandidateIndex - 1);
-            for(fillingIndex = 0; mvMergeCandidateIndex < totalMergeCandidates && fillingIndex < loopEnd; ++fillingIndex) {            
+            for(fillingIndex = 0; mvMergeCandidateIndex < totalMergeCandidates && fillingIndex < loopEnd; ++fillingIndex) {
                 list0FillingMvMergeCandidateIndex       = mvMergeCandIndexArrayForFillingUp[REF_LIST_0][fillingIndex];
                 list1FillingMvMergeCandidateIndex       = mvMergeCandIndexArrayForFillingUp[REF_LIST_1][fillingIndex];
 
@@ -2972,7 +2972,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
                 break;
 
             // Add zero MV
-            for (refPicIndex = 0; refPicIndex < MAX_NUM_OF_MV_MERGE_CANDIDATE && mvMergeCandidateIndex < totalMergeCandidates; ++refPicIndex)           
+            for (refPicIndex = 0; refPicIndex < MAX_NUM_OF_MV_MERGE_CANDIDATE && mvMergeCandidateIndex < totalMergeCandidates; ++refPicIndex)
             {
                 mergeCandidateArray[mvMergeCandidateIndex].predictionDirection   = BI_PRED;
                 mergeCandidateArray[mvMergeCandidateIndex].mv[REF_LIST_0].x      = 0;
@@ -2981,7 +2981,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
                 mergeCandidateArray[mvMergeCandidateIndex].mv[REF_LIST_1].y      = 0;
                 ++mvMergeCandidateIndex;
             }
-     
+
 
         break;
 
@@ -2989,7 +2989,7 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
         break;
     }
 
-    // Update the number of MV merge candidate      
+    // Update the number of MV merge candidate
     *mergeCandidateCount = mvMergeCandidateIndex;
     //TODO: remove this tmp buffering
     firstPuAMVPCandArray_x[REF_LIST_0][0] = xMvAmvpArray[REF_LIST_0][0];
@@ -3006,23 +3006,23 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
 }
 
 EB_ERRORTYPE NonConformantGenerateL0L1AmvpMergeLists(
-	ModeDecisionContext_t		*contextPtr,
-	InterPredictionContext_t	*interPredictionPtr,
-	PictureControlSet_t			*pictureControlSetPtr,
-    EB_U32						 tbAddr) {
+    ModeDecisionContext_t        *contextPtr,
+    InterPredictionContext_t    *interPredictionPtr,
+    PictureControlSet_t            *pictureControlSetPtr,
+    EB_U32                         tbAddr) {
 
     EB_ERRORTYPE            return_error = EB_ErrorNone;
-	NeighborArrayUnit_t    *mvNeighborArray		= contextPtr->mvNeighborArray;
-	NeighborArrayUnit_t    *modeNeighborArray	= contextPtr->modeTypeNeighborArray;
-	MvMergeCandidate_t     *mergeCandidateArray = interPredictionPtr->mvMergeCandidateArray;
+    NeighborArrayUnit_t    *mvNeighborArray        = contextPtr->mvNeighborArray;
+    NeighborArrayUnit_t    *modeNeighborArray    = contextPtr->modeTypeNeighborArray;
+    MvMergeCandidate_t     *mergeCandidateArray = interPredictionPtr->mvMergeCandidateArray;
 
-	const EB_U32            originX	            = contextPtr->cuOriginX;
-	const EB_U32            originY	            = contextPtr->cuOriginY;
-    const EB_U32            width	            = contextPtr->cuStats->size;
-	const EB_U32            height	            = contextPtr->cuStats->size;
+    const EB_U32            originX                = contextPtr->cuOriginX;
+    const EB_U32            originY                = contextPtr->cuOriginY;
+    const EB_U32            width                = contextPtr->cuStats->size;
+    const EB_U32            height                = contextPtr->cuStats->size;
 
     EB_U32                 *mergeCandidateCount = &interPredictionPtr->mvMergeCandidateCount;
-	
+
     // Neighbor Array Fixed-indicies
     const EB_U32 a1_ModeNaIndex = GetNeighborArrayUnitLeftIndex(
         modeNeighborArray,
@@ -3069,7 +3069,7 @@ EB_ERRORTYPE NonConformantGenerateL0L1AmvpMergeLists(
     MvUnit_t               *mvUnitA1;
     MvUnit_t               *mvUnitB2;
     MvUnit_t               *mvUnitB1;
-   
+
     EB_U32                 totalMergeCandidates = *mergeCandidateCount;
 
     //----------------------------------------------
@@ -3077,57 +3077,57 @@ EB_ERRORTYPE NonConformantGenerateL0L1AmvpMergeLists(
     //----------------------------------------------
 
     // *********** A1 ***********
-    
+
     // Slice & Intra Check
     a1_availability = (((EB_MODETYPE*) modeNeighborArray->leftArray)[a1_ModeNaIndex] != INTER_MODE) ? EB_FALSE : EB_TRUE;
 
     // picture Check
-	a1_availability = (pictureLeftBoundary == EB_TRUE) ? EB_FALSE : a1_availability;
-    
-    if (a1_availability) {      
+    a1_availability = (pictureLeftBoundary == EB_TRUE) ? EB_FALSE : a1_availability;
+
+    if (a1_availability) {
         mvUnitA1                         = &( (MvUnit_t*)mvNeighborArray->leftArray )[a1_MvNaIndex];
     }
     else {
-        mvUnitA1 = (MvUnit_t*)EB_NULL;   
+        mvUnitA1 = (MvUnit_t*)EB_NULL;
     }
 
     // *********** B2 ***********
-    
+
     // Slice & Intra Check
     b2_availability = (((EB_MODETYPE*) modeNeighborArray->topLeftArray)[b2_ModeNaIndex] != INTER_MODE) ? EB_FALSE : EB_TRUE;
 
     // picture Check
-	b2_availability = (pictureLeftBoundary == EB_TRUE || pictureTopBoundary == EB_TRUE) ? EB_FALSE : b2_availability;
-    
-    if (b2_availability) {        
+    b2_availability = (pictureLeftBoundary == EB_TRUE || pictureTopBoundary == EB_TRUE) ? EB_FALSE : b2_availability;
+
+    if (b2_availability) {
         mvUnitB2                         = &( (MvUnit_t*)mvNeighborArray->topLeftArray )[b2_MvNaIndex];
     }
     else {
-        mvUnitB2 = (MvUnit_t*)EB_NULL;        
+        mvUnitB2 = (MvUnit_t*)EB_NULL;
     }
-    
+
     // *********** B1 ***********
-    
+
     // Slice & Intra Check
     b1_availability = (((EB_MODETYPE*) modeNeighborArray->topArray)[b1_ModeNaIndex] != INTER_MODE) ? EB_FALSE : EB_TRUE;
 
     // picture Check
-	b1_availability = (pictureTopBoundary == EB_TRUE) ? EB_FALSE : b1_availability;
+    b1_availability = (pictureTopBoundary == EB_TRUE) ? EB_FALSE : b1_availability;
 
-    if (b1_availability) {       
+    if (b1_availability) {
         mvUnitB1                         = &( (MvUnit_t*)mvNeighborArray->topArray )[b1_MvNaIndex];
     }
     else {
-        mvUnitB1 = (MvUnit_t*)EB_NULL;        
+        mvUnitB1 = (MvUnit_t*)EB_NULL;
     }
 
     //----------------------------------------
     // Candidate Selection
     //----------------------------------------
 
-    switch(pictureControlSetPtr->sliceType) 
+    switch(pictureControlSetPtr->sliceType)
     {
-    
+
     case EB_P_PICTURE:
 
         // A1
@@ -3141,9 +3141,9 @@ EB_ERRORTYPE NonConformantGenerateL0L1AmvpMergeLists(
         if(mvMergeCandidateIndex == totalMergeCandidates )
             break;
 
-        // B1 
+        // B1
         if(  (  b1_availability == EB_TRUE) &&
-             ( (a1_availability == EB_FALSE) || 
+             ( (a1_availability == EB_FALSE) ||
                (mvUnitB1->mv[REF_LIST_0].mvUnion != mvUnitA1->mv[REF_LIST_0].mvUnion)))
         {
             mergeCandidateArray[mvMergeCandidateIndex].predictionDirection          = UNI_PRED_LIST_0;
@@ -3164,7 +3164,7 @@ EB_ERRORTYPE NonConformantGenerateL0L1AmvpMergeLists(
             mergeCandidateArray[mvMergeCandidateIndex].mv[REF_LIST_0].mvUnion       = mvUnitB2->mv[REF_LIST_0].mvUnion;
             ++mvMergeCandidateIndex;
         }
-        
+
         if(mvMergeCandidateIndex == totalMergeCandidates )
             break;
 
@@ -3191,16 +3191,16 @@ EB_ERRORTYPE NonConformantGenerateL0L1AmvpMergeLists(
                 mergeCandidateArray[mvMergeCandidateIndex].mv[REF_LIST_1].mvUnion = mvUnitA1->mv[REF_LIST_1].mvUnion;
                 ++mvMergeCandidateIndex;
             }
-     
+
             if(mvMergeCandidateIndex == totalMergeCandidates )
                 break;
-              
-            
+
+
             // B1
             if (  (b1_availability == EB_TRUE) &&
                   ( (a1_availability == EB_FALSE) ||
-                    (mvUnitB1->predDirection != mvUnitA1->predDirection) || 
-                    (mvUnitB1->mv[REF_LIST_0].mvUnion != mvUnitA1->mv[REF_LIST_0].mvUnion) || 
+                    (mvUnitB1->predDirection != mvUnitA1->predDirection) ||
+                    (mvUnitB1->mv[REF_LIST_0].mvUnion != mvUnitA1->mv[REF_LIST_0].mvUnion) ||
                     (mvUnitB1->mv[REF_LIST_1].mvUnion != mvUnitA1->mv[REF_LIST_1].mvUnion))   )
             {
                 mergeCandidateArray[mvMergeCandidateIndex].predictionDirection     = mvUnitB1->predDirection;
@@ -3215,11 +3215,11 @@ EB_ERRORTYPE NonConformantGenerateL0L1AmvpMergeLists(
             // B2
             if (   mvMergeCandidateIndex < 4    &&
                    (b2_availability == EB_TRUE) &&
-                   ((a1_availability == EB_FALSE) ||              
+                   ((a1_availability == EB_FALSE) ||
                     (mvUnitB2->predDirection           != mvUnitA1->predDirection)           ||
                     (mvUnitB2->mv[REF_LIST_0].mvUnion  != mvUnitA1->mv[REF_LIST_0].mvUnion)  ||
                     (mvUnitB2->mv[REF_LIST_1].mvUnion  != mvUnitA1->mv[REF_LIST_1].mvUnion)) &&
-                    ((b1_availability == EB_FALSE) ||               
+                    ((b1_availability == EB_FALSE) ||
                     (mvUnitB2->predDirection           != mvUnitB1->predDirection)           ||
                     (mvUnitB2->mv[REF_LIST_0].mvUnion  != mvUnitB1->mv[REF_LIST_0].mvUnion)  ||
                     (mvUnitB2->mv[REF_LIST_1].mvUnion  != mvUnitB1->mv[REF_LIST_1].mvUnion)))
@@ -3236,7 +3236,7 @@ EB_ERRORTYPE NonConformantGenerateL0L1AmvpMergeLists(
             // Bi-pred Combinations
             //  The MVs from the lists from the the {A1,B1,B2} are combined to create new merge candidates
             loopEnd = mvMergeCandidateIndex * (mvMergeCandidateIndex - 1);
-            for(fillingIndex = 0; mvMergeCandidateIndex < totalMergeCandidates && fillingIndex < loopEnd; ++fillingIndex) {            
+            for(fillingIndex = 0; mvMergeCandidateIndex < totalMergeCandidates && fillingIndex < loopEnd; ++fillingIndex) {
                 list0FillingMvMergeCandidateIndex       = mvMergeCandIndexArrayForFillingUp[REF_LIST_0][fillingIndex];
                 list1FillingMvMergeCandidateIndex       = mvMergeCandIndexArrayForFillingUp[REF_LIST_1][fillingIndex];
 
@@ -3266,7 +3266,7 @@ EB_ERRORTYPE NonConformantGenerateL0L1AmvpMergeLists(
                 break;
 
             // Add zero MV
-            for (refPicIndex = 0; refPicIndex < MAX_NUM_OF_MV_MERGE_CANDIDATE && mvMergeCandidateIndex < totalMergeCandidates; ++refPicIndex)           
+            for (refPicIndex = 0; refPicIndex < MAX_NUM_OF_MV_MERGE_CANDIDATE && mvMergeCandidateIndex < totalMergeCandidates; ++refPicIndex)
             {
                 mergeCandidateArray[mvMergeCandidateIndex].predictionDirection   = BI_PRED;
                 mergeCandidateArray[mvMergeCandidateIndex].mv[REF_LIST_0].x      = 0;
@@ -3275,7 +3275,7 @@ EB_ERRORTYPE NonConformantGenerateL0L1AmvpMergeLists(
                 mergeCandidateArray[mvMergeCandidateIndex].mv[REF_LIST_1].y      = 0;
                 ++mvMergeCandidateIndex;
             }
-     
+
 
         break;
 
@@ -3283,7 +3283,7 @@ EB_ERRORTYPE NonConformantGenerateL0L1AmvpMergeLists(
         break;
     }
 
-    // Update the number of MV merge candidate      
+    // Update the number of MV merge candidate
     *mergeCandidateCount = mvMergeCandidateIndex;
 
     return return_error;
