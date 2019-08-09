@@ -6,32 +6,21 @@
 # Fails the script if any of the commands error (Other than if and some others)
 set -e
 
-# Allow use for coloring (as long as it's within the lines)
-if [ -n "$(tput colors 2> /dev/null)" ] && [ "$(tput colors 2> /dev/null)" -ge 8 ]; then
-    bold=$(tput bold)
-    blue=$(tput setaf 12)
-    yellow=$(tput setaf 11)
-    purple=$(tput setaf 13)
-    green=$(tput setaf 2)
-    red=$(tput setaf 1)
-    reset=$(tput sgr0)
-fi
-
 # Function to print to stderr or stdout while stripping preceding tabs(spaces)
 # If tabs are desired, use cat
 print_message() {
     if [ "$1" = "stdout" ] || [ "$1" = "-" ]; then
         shift
-        printf "%b\\n" "${@:-Unknown Message}" | sed -e 's/^[ \t]*//'
+        printf '%b\n' "${@:-Unknown Message}" | sed -e 's/^[ \t]*//'
     else
-        printf "%b\\n" "${@:-Unknown Message}" | sed -e 's/^[ \t]*//' >&2
+        printf '%b\n' "${@:-Unknown Message}" | sed -e 's/^[ \t]*//' >&2
     fi
 }
 
 # Convenient function to exit with message
 die() {
     if [ -z "$*" ]; then
-        print_message "${red}Unknown error${reset}"
+        print_message "Unknown error"
     else
         print_message "$@"
     fi
@@ -52,8 +41,7 @@ cd_safe() {
 }
 
 # info about self
-script_dir="$(cd "$(dirname "$0")" > /dev/null 2>&1 && pwd)"
-cd_safe "$script_dir"
+cd_safe "$(cd "$(dirname "$0")" > /dev/null 2>&1 && pwd)"
 
 # Help message
 echo_help() {
@@ -74,7 +62,7 @@ Example usage:
 EOF
 }
 
-# Usage: build <release|debug>
+# Usage: build <release|debug> "$@"
 build() (
     local build_type match
     while [ -n "$*" ]; do
@@ -91,7 +79,7 @@ build() (
     [ -f CMakeCache.txt ] && rm CMakeCache.txt
     [ -d CMakeFiles ] && rm -rf CMakeFiles
     [ -f Makefile ] && rm Makefile
-    cmake ../../.. -DCMAKE_BUILD_TYPE="${build_type:-release}" "${CMAKE_EXTRA_FLAGS[@]}" "$@"
+    cmake ../../.. -DCMAKE_BUILD_TYPE="${build_type:-Release}" "${CMAKE_EXTRA_FLAGS[@]}" "$@"
 
     # Compile the Library
     if [ -f Makefile ]; then
@@ -103,17 +91,16 @@ build() (
 )
 
 check_executable() {
+    local print_exec command_to_check
     while true; do
         case "$1" in
         -p)
-            local print_exec
             print_exec=y
             shift
             ;;
         *) break ;;
         esac
     done
-    local command_to_check
     command_to_check="$1"
     if command -v "$command_to_check" > /dev/null 2>&1; then
         [ -n "$print_exec" ] && command -v "$command_to_check"
@@ -135,13 +122,12 @@ check_executable() {
 }
 
 install_build() {
-    local build_type
+    local build_type sudo
     build_type="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
-    check_executable sudo && sudo -v > /dev/null 2>&1 && local sudo=sudo
+    check_executable sudo && sudo -v > /dev/null 2>&1 && sudo=sudo
     [ -d "${build_type:-release}" ] &&
         cd_safe "${build_type:-release}" "Unable to find the build folder. Did the build command run?"
-    $sudo cmake --build . --target install \
-        --config "${build_type:-release}" ||
+    $sudo cmake --build . --target install --config "${build_type:-release}" ||
         die "Unable to run install"
     cd_safe ..
 }
@@ -212,7 +198,9 @@ if [ -z "$*" ]; then
 else
     while [ -n "$*" ]; do
         match=""
+        # Handle --* based args
         if [ "${1:0:2}" = "--" ]; then
+            # Stop on "--", pass the rest to cmake
             [ -z "${1:2}" ] && shift && break
             match=$(echo "${1:2}" | tr '[:upper:]' '[:lower:]')
             case "$match" in
@@ -262,23 +250,25 @@ else
                 ;;
             *) die "Error, unknown option: $1" ;;
             esac
+        # Handle -* based args, one letter at a time
         elif [ "${1:0:1}" = "-" ]; then
             i=1
             opt=""
             while [ $i -lt ${#1} ]; do
-                opt=$(echo "${1:$i:1}" | tr '[:upper:]' '[:lower:]')
+                opt=$(echo "${1:i:1}" | tr '[:upper:]' '[:lower:]')
                 case "$opt" in
                 h) parse_options help ;;
-                a) parse_options all && i=$((i+1)) ;;
-                i) parse_options install && i=$((i+1)) ;;
-                p) parse_options prefix="$1" && i=$((i+1)) ;;
-                x) parse_options build_static && i=$((i+1)) ;;
-                v) parse_options verbose && i=$((i+1)) ;;
+                a) parse_options all && i=$((i + 1)) ;;
+                i) parse_options install && i=$((i + 1)) ;;
+                p) parse_options prefix="$1" && i=$((i + 1)) ;;
+                x) parse_options build_static && i=$((i + 1)) ;;
+                v) parse_options verbose && i=$((i + 1)) ;;
                 *) die "Error, unknown option: -$opt" ;;
                 esac
                 i=$((i + 1))
             done
             shift
+        # Handle single word args
         else
             match=$(echo "$1" | tr '[:upper:]' '[:lower:]')
             case "$match" in
