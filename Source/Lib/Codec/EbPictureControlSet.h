@@ -305,7 +305,6 @@ typedef struct PictureControlSet_s
     //Row level vbv data
     RCStatRow_t                           **rowStats;
     EB_BOOL                               firstRowOfPicture;
-    EB_BOOL                               resetProxyFlag;
 
     EB_U64                                frameSizePlanned;
     EB_U64                                frameSizeEstimated;

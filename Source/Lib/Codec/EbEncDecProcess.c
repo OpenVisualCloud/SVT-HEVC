@@ -1346,6 +1346,19 @@ static void ResetTempEntropy(
         EntropyCodingResetTempNeighborArrays(pictureControlSetPtr, tileIdx);
     }
 }
+
+static void ResetRowStats(
+    PictureControlSet_t     *pictureControlSetPtr,SequenceControlSet_t      *sequenceControlSetPtr) {
+    EB_U8 lcuSize = (EB_U8)sequenceControlSetPtr->lcuSize;
+    EB_U8 lcuSizeLog2 = (EB_U8)Log2f(lcuSize);
+    for (EB_U8 row = 0; row < ((sequenceControlSetPtr->lumaHeight + lcuSize - 1) >> lcuSizeLog2); row++) {
+        EbBlockOnMutex(pictureControlSetPtr->rowStats[row]->rowUpdateMutex);
+        pictureControlSetPtr->rowStats[row]->totalCUEncoded = 0;
+        pictureControlSetPtr->rowStats[row]->encodedBits = 0;
+        pictureControlSetPtr->rowStats[row]->numEncodedCUs = 0;
+        EbReleaseMutex(pictureControlSetPtr->rowStats[row]->rowUpdateMutex);
+    }
+}
 /**************************************************
  * Reset Coding Loop
  **************************************************/
@@ -4212,15 +4225,13 @@ void* EncDecKernel(void *inputPtr)
                     pictureControlSetPtr,
                     sequenceControlSetPtr,
                     segmentIndex);
-            //Reset Temp Entropy Coding
+            //Reset Stats required for low level vbv
             if (segmentIndex == 0) {
                 if (contextPtr->tileRowIndex == 0) {
-                    if (pictureControlSetPtr->resetProxyFlag == EB_FALSE) {
                         ResetTempEntropy(contextPtr, pictureControlSetPtr, sequenceControlSetPtr);
-                        pictureControlSetPtr->resetProxyFlag = EB_TRUE;
+                        ResetRowStats(pictureControlSetPtr,sequenceControlSetPtr);
                     }
                 }
-            }
             contextPtr->mdContext->CabacCost = pictureControlSetPtr->cabacCost;
 
             if (pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr != NULL) {
@@ -4236,9 +4247,6 @@ void* EncDecKernel(void *inputPtr)
             }
 
             for (yLcuIndex = yLcuStartIndex, lcuSegmentIndex = lcuStartIndex; lcuSegmentIndex < lcuStartIndex + lcuSegmentCount; ++yLcuIndex) {
-                pictureControlSetPtr->rowStats[yLcuIndex]->totalCUEncoded = 0;
-                pictureControlSetPtr->rowStats[yLcuIndex]->encodedBits = 0;
-                pictureControlSetPtr->rowStats[yLcuIndex]->numEncodedCUs = 0;
                 for (xLcuIndex = xLcuStartIndex; xLcuIndex < tileRowWidthInLcu && (xLcuIndex + yLcuIndex < segmentBandSize) && lcuSegmentIndex < lcuStartIndex + lcuSegmentCount; ++xLcuIndex, ++lcuSegmentIndex) {
 
                     // LCU per picture-wise

@@ -717,7 +717,6 @@ EB_ERRORTYPE PictureControlSetCtor(
     EB_CREATEMUTEX(EB_HANDLE, objectPtr->intraMutex, sizeof(EB_HANDLE), EB_MUTEX);
 
     objectPtr->encDecCodedLcuCount = 0;
-    objectPtr->resetProxyFlag = EB_FALSE;
     return EB_ErrorNone;
 
 }
