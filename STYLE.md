@@ -117,7 +117,7 @@ After coding, make sure to trim any trailing white space and convert any tabs to
 ### For bash
 
 ``` bash
-find . -name <Filename> -type f -exec sed -i 's/\t/    /;s/[[:space:]]*$//' {} +
+find . -type f -name <Filename> ! -wholename "./.git/*" ! -name "*.png" ! -wholename "./Bin/*" ! -wholename "./Build/*" -exec sed -i 's/\t/    /g;s/[[:space:]]*$//g' {} +
 ```
 
 Where `<Filename>` is `"*.c"` or `"*.(your file extention here)"`\
@@ -127,10 +127,17 @@ Search the `find` man page or tips and tricks for more options.\
 Alternatively, for single file(s):
 
 ``` bash
-sed -i 's/\t/    /;s/[[:space:]]*$//' <Filename/Filepath>
+sed -i 's/\t/    /g;s/[[:space:]]*$//g' <Filename/Filepath>
 ```
 
 Note: For macOS and BSD related distros, you may need to use `sed -i ''` inplace due to differences with GNU sed.
+
+``` bash
+git ls-files -z | while IFS= read -rd '' f; do tail -c1 < "$f" | read -r _ || echo >> "$f"; done
+```
+
+Use this to auto append a newline to the end of the file for any files that are under git.
+Taken from [here](https://unix.stackexchange.com/a/161853)
 
 ### For Powershell/pwsh
 
