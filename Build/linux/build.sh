@@ -68,7 +68,7 @@ Usage: $THIS_SCRIPT [OPTION] ... -- [OPTIONS FOR CMAKE]
     --clean, clean      Remove build and Bin folders
     --debug, debug      Build debug
     --shared, shared    Build shared libs
--x, --static, static    Don't build shared libs
+-x, --static, static    Build static libs
 -g, --gen, gen=*        Set CMake generator
 -i, --install, install  Install build [Default release]
 -j, --jobs, jobs=*      Set number of jobs for make/CMake [$jobs]
