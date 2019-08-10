@@ -4105,7 +4105,6 @@ void* EncDecKernel(void *inputPtr)
     EbPictureBufferDesc_t *  tempCoeffPicturePtr;
     EB_U32                   tempWrittenBitsBeforeQuantizedCoeff;
     EB_U32                   tempWrittenBitsAfterQuantizedCoeff;
-    EB_U32                   bestOisCuIndex = 0;
     EB_U8                    baseQp;
     EB_U32                   lcuWidth;
     EB_U32                   lcuHeight;

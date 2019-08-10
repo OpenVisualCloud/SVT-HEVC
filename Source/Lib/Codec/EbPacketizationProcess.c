@@ -287,22 +287,19 @@ void* PacketizationKernel(void *inputPtr)
                     contextPtr->ppsConfig);
             }
 
+            if (sequenceControlSetPtr->staticConfig.maxCLL || sequenceControlSetPtr->staticConfig.maxFALL) {
+                sequenceControlSetPtr->contentLightLevel.maxContentLightLevel = sequenceControlSetPtr->staticConfig.maxCLL;
+                sequenceControlSetPtr->contentLightLevel.maxPicAverageLightLevel = sequenceControlSetPtr->staticConfig.maxFALL;
+                EncodeContentLightLevelSEI(
+                    pictureControlSetPtr->bitstreamPtr,
+                    &sequenceControlSetPtr->contentLightLevel);
+            }
 
-			if (sequenceControlSetPtr->staticConfig.maxCLL || sequenceControlSetPtr->staticConfig.maxFALL) {
-				sequenceControlSetPtr->contentLightLevel.maxContentLightLevel = sequenceControlSetPtr->staticConfig.maxCLL;
-				sequenceControlSetPtr->contentLightLevel.maxPicAverageLightLevel = sequenceControlSetPtr->staticConfig.maxFALL;
-				EncodeContentLightLevelSEI(
-					pictureControlSetPtr->bitstreamPtr,
-					&sequenceControlSetPtr->contentLightLevel);
-			}
-
-			if (sequenceControlSetPtr->staticConfig.useMasteringDisplayColorVolume) {
-				EncodeMasteringDisplayColorVolumeSEI(
-					pictureControlSetPtr->bitstreamPtr,
-					&sequenceControlSetPtr->masteringDisplayColorVolume);
-			}
-			
-
+            if (sequenceControlSetPtr->staticConfig.useMasteringDisplayColorVolume) {
+                EncodeMasteringDisplayColorVolumeSEI(
+                    pictureControlSetPtr->bitstreamPtr,
+                    &sequenceControlSetPtr->masteringDisplayColorVolume);
+            }
 
             if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
             {
@@ -706,7 +703,9 @@ void* PacketizationKernel(void *inputPtr)
                     queueEntryPtr->fillerBitsSent = filler;
                 }
             }
+
         }
+
         // Send the number of bytes per frame to RC
         pictureControlSetPtr->ParentPcsPtr->totalNumBits = outputStreamPtr->nFilledLen << 3;    
 

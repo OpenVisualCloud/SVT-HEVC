@@ -214,7 +214,7 @@ typedef struct LargestCodingUnit_s {
 
 
 /**************************************
- * Row level vbv
+ * Low level vbv
  **************************************/
 typedef struct RCStatRow_s
 {

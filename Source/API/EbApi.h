@@ -569,7 +569,6 @@ typedef struct EB_H265_ENC_CONFIGURATION
      * Default is -1. */
     int32_t                 targetSocket;
 
-
     /* Flag to enable threads to real time priority. Running with sudo privilege
      * utilizes full resource. Only applicable to Linux.
      *

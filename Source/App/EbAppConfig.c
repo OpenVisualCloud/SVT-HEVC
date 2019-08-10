@@ -334,6 +334,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, FRAME_RATE_TOKEN, "FrameRate", SetFrameRate },
     { SINGLE_INPUT, FRAME_RATE_NUMERATOR_TOKEN, "FrameRateNumerator", SetFrameRateNumerator },
     { SINGLE_INPUT, FRAME_RATE_DENOMINATOR_TOKEN, "FrameRateDenominator", SetFrameRateDenominator },
+
     // Coding Structure
     { SINGLE_INPUT, HIERARCHICAL_LEVELS_TOKEN, "HierarchicalLevels", SetHierarchicalLevels },
     { SINGLE_INPUT, BASE_LAYER_SWITCH_MODE_TOKEN, "BaseLayerSwitchMode", SetBaseLayerSwitchMode },
@@ -343,19 +344,6 @@ config_entry_t config_entry[] = {
 
     // Quantization
     { SINGLE_INPUT, QP_TOKEN, "QP", SetCfgQp },
-    { SINGLE_INPUT, VBV_MAX_RATE_TOKEN, "vbvMaxRate", SetVbvMaxrate },
-    { SINGLE_INPUT, VBV_BUFFER_SIZE_TOKEN, "vbvBufsize", SetVbvBufsize },
-    { SINGLE_INPUT, HRD_TOKEN, "hrd", SetHrdFlag },
-    { SINGLE_INPUT, VBV_BUFFER_INIT_TOKEN, "vbvBufInit", SetVbvBufInit},
-
-
-
-    { SINGLE_INPUT, USE_QP_FILE_TOKEN, "UseQpFile", SetCfgUseQpFile },
-    { SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "RateControlMode", SetRateControlMode },
-    { SINGLE_INPUT, LOOK_AHEAD_DIST_TOKEN, "LookAheadDistance",                             SetLookAheadDistance},
-    { SINGLE_INPUT, TARGET_BIT_RATE_TOKEN, "TargetBitRate", SetTargetBitRate },
-    { SINGLE_INPUT, MAX_QP_TOKEN, "MaxQpAllowed", SetMaxQpAllowed },
-    { SINGLE_INPUT, MIN_QP_TOKEN, "MinQpAllowed", SetMinQpAllowed },
     { SINGLE_INPUT, VBV_MAX_RATE_TOKEN, "vbvMaxRate", SetVbvMaxrate },
     { SINGLE_INPUT, VBV_BUFFER_SIZE_TOKEN, "vbvBufsize", SetVbvBufsize },
     { SINGLE_INPUT, HRD_TOKEN, "hrd", SetHrdFlag },

@@ -2100,54 +2100,7 @@ void CopyApiFromApp(
     }
     sequenceControlSetPtr->chromaFormatIdc = (EB_U32)(sequenceControlSetPtr->staticConfig.encoderColorFormat);
     sequenceControlSetPtr->enableTmvpSps = sequenceControlSetPtr->staticConfig.unrestrictedMotionVector;
-    sequenceControlSetPtr->staticConfig.compressedTenBitFormat = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->compressedTenBitFormat;
-    sequenceControlSetPtr->staticConfig.videoUsabilityInfo = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->videoUsabilityInfo;
-    sequenceControlSetPtr->staticConfig.highDynamicRangeInput = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->highDynamicRangeInput;
-    sequenceControlSetPtr->staticConfig.accessUnitDelimiter = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->accessUnitDelimiter;
-    sequenceControlSetPtr->staticConfig.bufferingPeriodSEI = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->bufferingPeriodSEI;
-    sequenceControlSetPtr->staticConfig.pictureTimingSEI = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->pictureTimingSEI;
-    sequenceControlSetPtr->staticConfig.registeredUserDataSeiFlag = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->registeredUserDataSeiFlag;
-    sequenceControlSetPtr->staticConfig.unregisteredUserDataSeiFlag = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->unregisteredUserDataSeiFlag;
-    sequenceControlSetPtr->staticConfig.recoveryPointSeiFlag = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->recoveryPointSeiFlag;
-    sequenceControlSetPtr->staticConfig.enableTemporalId = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->enableTemporalId;
-
-    // Annex A parameters
-    sequenceControlSetPtr->staticConfig.profile = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->profile;
-    sequenceControlSetPtr->staticConfig.tier = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tier;
-    sequenceControlSetPtr->staticConfig.level = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->level;
-
-    sequenceControlSetPtr->staticConfig.injectorFrameRate   = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->injectorFrameRate;
-    sequenceControlSetPtr->staticConfig.speedControlFlag    = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->speedControlFlag;
-    //sequenceControlSetPtr->staticConfig.latencyMode         = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->latencyMode;
-    sequenceControlSetPtr->staticConfig.latencyMode         = 0;
-    sequenceControlSetPtr->staticConfig.asmType = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->asmType;
-    sequenceControlSetPtr->staticConfig.channelId = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->channelId;
-    sequenceControlSetPtr->staticConfig.activeChannelCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->activeChannelCount;
-    sequenceControlSetPtr->staticConfig.logicalProcessors = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->logicalProcessors;
-    sequenceControlSetPtr->staticConfig.targetSocket = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->targetSocket;
-    sequenceControlSetPtr->staticConfig.frameRateDenominator = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRateDenominator;
-    sequenceControlSetPtr->staticConfig.frameRateNumerator = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->frameRateNumerator;
-    sequenceControlSetPtr->staticConfig.reconEnabled = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->reconEnabled;
-    sequenceControlSetPtr->staticConfig.hrdFlag = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->hrdFlag;
-    sequenceControlSetPtr->staticConfig.unrestrictedMotionVector = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->unrestrictedMotionVector;
-    sequenceControlSetPtr->enableTmvpSps = sequenceControlSetPtr->staticConfig.unrestrictedMotionVector;
-    sequenceControlSetPtr->staticConfig.maxCLL = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxCLL;
-    sequenceControlSetPtr->staticConfig.maxFALL = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxFALL;
-
-    sequenceControlSetPtr->staticConfig.useMasteringDisplayColorVolume = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->useMasteringDisplayColorVolume;
-    sequenceControlSetPtr->staticConfig.useNaluFile = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->useNaluFile;
-    sequenceControlSetPtr->staticConfig.displayPrimaryX[0] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryX[0];
-    sequenceControlSetPtr->staticConfig.displayPrimaryX[1] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryX[1];
-    sequenceControlSetPtr->staticConfig.displayPrimaryX[2] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryX[2];
-    sequenceControlSetPtr->staticConfig.displayPrimaryY[0] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryY[0];
-    sequenceControlSetPtr->staticConfig.displayPrimaryY[1] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryY[1];
-    sequenceControlSetPtr->staticConfig.displayPrimaryY[2] = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->displayPrimaryY[2];
-    sequenceControlSetPtr->staticConfig.whitePointX = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->whitePointX;
-    sequenceControlSetPtr->staticConfig.whitePointY = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->whitePointY;
-    sequenceControlSetPtr->staticConfig.maxDisplayMasteringLuminance = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->maxDisplayMasteringLuminance;
-    sequenceControlSetPtr->staticConfig.minDisplayMasteringLuminance = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->minDisplayMasteringLuminance;
-    sequenceControlSetPtr->staticConfig.dolbyVisionProfile = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->dolbyVisionProfile;
-
+ 
     // Copying to masteringDisplayColorVolume structure
     sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryX[0] = sequenceControlSetPtr->staticConfig.displayPrimaryX[0];
     sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryX[1] = sequenceControlSetPtr->staticConfig.displayPrimaryX[1];
@@ -2194,6 +2147,7 @@ void CopyApiFromApp(
         sequenceControlSetPtr->videoUsabilityInfoPtr->hrdParametersPtr->nalHrdParametersPresentFlag = 1;
         sequenceControlSetPtr->videoUsabilityInfoPtr->hrdParametersPtr->cpbDpbDelaysPresentFlag = 1;
     }
+
     return;
 }
 
@@ -2564,16 +2518,15 @@ static EB_ERRORTYPE VerifySettings(\
         SVT_LOG("SVT [Error]: Instance %u: The constrained intra must be [0 - 1] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
-    if (config->rateControlMode > 2) {
-        SVT_LOG("SVT [Error]: Instance %u: The rate control mode must be [0 - 2] \n", channelNumber + 1);
+   if (config->rateControlMode > 2) {
+        SVT_LOG("SVT [Error]: Instance %u: The rate control mode must be [0 - 2] \n", channelNumber + 1); 
         return_error = EB_ErrorBadParameter;
     }
-
-    if (config->rateControlMode > 2) {
-        SVT_LOG("SVT [Error]: Instance %u: The rate control mode must be [0 - 2] \n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
-    }
-
+	if ((config->rateControlMode == 2) && (config->crf > 51))
+	{
+		SVT_LOG("SVT [Error]: Instance %u:The crf value must be [0-51] \n", channelNumber + 1);
+		return_error = EB_ErrorBadParameter;
+	}
     if (config->lookAheadDistance > 250 && config->lookAheadDistance != (EB_U32)~0) {
         SVT_LOG("SVT [Error]: Instance %u: The lookahead distance must be [0 - 250] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
