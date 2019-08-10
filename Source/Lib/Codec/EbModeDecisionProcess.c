@@ -480,6 +480,11 @@ void ConfigureChroma(
             (EB_U8)CHROMA_MODE_BEST;
     }
 
+    // hack disable chroma search for P422/444 for known error
+    if (lcuPtr->chromaEncodeMode == CHROMA_MODE_FULL && pictureControlSetPtr->colorFormat >= EB_YUV422) {
+        lcuPtr->chromaEncodeMode = CHROMA_MODE_BEST;
+    }
+
     contextPtr->useChromaInformationInFastLoop = (lcuEdgeNum > 0 || lcuPtr->chromaEncodeMode == CHROMA_MODE_FULL) ? 1 : 0;
 
     contextPtr->useChromaInformationInFullLoop = (lcuPtr->chromaEncodeMode == CHROMA_MODE_FULL) ? 1 : 0;

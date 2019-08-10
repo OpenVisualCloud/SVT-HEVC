@@ -11,7 +11,7 @@
 
 #include "EbModeDecisionConfiguration.h"
 
-static const EB_U32 skipFlagBits[6] = { 17878, 62157, 86651, 54723, 14816, 8254 };
+static const EB_U32 skipFlagBits[NUMBER_OF_SKIP_FLAG_CASES] = { 17878, 62157, 86651, 54723, 14816, 8254 };
 static const EB_U32 mergeIndexBits[6] = { 10350, 109741, 142509, 175277, 175277 };
 static const EB_U32 interBiDirBits[8] = { 29856, 36028, 15752, 59703, 8692, 84420, 2742, 136034 };
 static const EB_U32 interUniDirBits[2] = { 2742, 136034 };
@@ -242,7 +242,7 @@ EB_ERRORTYPE TuCalcCost(
 
 		// **Compute Rate
 
-		// Esimate Cbf's Bits
+		// Estimate Cbf's Bits
 
 		yNonZeroCbfLumaFlagBitsNum = candidatePtr->mdRateEstimationPtr->lumaCbfBits[(NUMBER_OF_CBF_CASES >> 1) + yCbfCtx];
 		yZeroCbfLumaFlagBitsNum = candidatePtr->mdRateEstimationPtr->lumaCbfBits[yCbfCtx];
@@ -338,7 +338,7 @@ EB_ERRORTYPE TuCalcCostLuma(
 
 	// **Compute Rate
 
-	// Esimate Cbf's Bits
+	// Estimate Cbf's Bits
 
 	yNonZeroCbfLumaFlagBitsNum = candidatePtr->mdRateEstimationPtr->lumaCbfBits[(NUMBER_OF_CBF_CASES >> 1) + yCbfCtx];
 	yZeroCbfLumaFlagBitsNum = candidatePtr->mdRateEstimationPtr->lumaCbfBits[yCbfCtx];
@@ -422,7 +422,7 @@ EB_ERRORTYPE IntraLumaModeContext(
 
 /*********************************************************************************
 * Intra2Nx2NFastCost function is used to estimate the cost of an intra candidate mode
-* for fast mode decisoion module in I slice.
+* for fast mode decision module in I slice.
 * Chroma cost is excluded from fast cost functions. Only the fastChromaRate is stored
 * for future use in full loop
 *
@@ -433,7 +433,7 @@ EB_ERRORTYPE IntraLumaModeContext(
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the intra condidate luma distortion.
+*       lumaDistortion is the intra candidate luma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -562,7 +562,7 @@ EB_ERRORTYPE Intra2Nx2NFastCostIslice(
 
 /*********************************************************************************
 * Intra2Nx2NFastCost function is used to estimate the cost of an intra candidate mode
-* for fast mode decisoion module in P slice.
+* for fast mode decision module in P slice.
 * Chroma cost is excluded from fast cost functions. Only the fastChromaRate is stored
 * for future use in full loop
 *
@@ -573,7 +573,7 @@ EB_ERRORTYPE Intra2Nx2NFastCostIslice(
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the intra condidate luma distortion.
+*       lumaDistortion is the intra candidate luma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -657,7 +657,7 @@ EB_ERRORTYPE Intra2Nx2NFastCostPsliceOpt(
 
 /*********************************************************************************
 * IntraFullCostIslice function is used to estimate the cost of an intra candidate mode
-* for full mode decisoion module in EB_I_PICTURE.
+* for full mode decision module in EB_I_PICTURE.
 *
 *   @param *cuPtr(input)
 *       cuPtr is the pointer of the target CU.
@@ -666,7 +666,7 @@ EB_ERRORTYPE Intra2Nx2NFastCostPsliceOpt(
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the intra condidate luma distortion.
+*       lumaDistortion is the intra candidate luma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -731,7 +731,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 	transSubDivFlagCtx = 5 - Log2f(transformSize);
 	// Rate Estimation of each syntax element
 
-	// Esimate the Transform Split Flag & the Cbf's Bits
+	// Estimate the Transform Split Flag & the Cbf's Bits
 	for (tuCount = 0; tuCount < transformBlockCount; ++tuCount) {
 
 		tranSubDivFlagBitsNum += candidateBufferPtr->candidatePtr->mdRateEstimationPtr->transSubDivFlagBits[transSubDivFlag * (NUMBER_OF_TRANSFORM_SUBDIV_FLAG_CASES >> 1) + transSubDivFlagCtx];
@@ -791,7 +791,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 
 /*********************************************************************************
 * IntraFullCost function is used to estimate the cost of an intra candidate mode
-* for full mode decisoion module.
+* for full mode decision module.
 *
 *   @param *cuPtr(input)
 *       cuPtr is the pointer of the target CU.
@@ -800,7 +800,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the intra condidate luma distortion.
+*       lumaDistortion is the intra candidate luma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -809,7 +809,7 @@ EB_ERRORTYPE IntraFullCostPslice(
 	CodingUnit_t                           *cuPtr,
 	EB_U32                                  cuSize,
 	EB_U32                                  cuSizeLog2,
-struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
+    ModeDecisionCandidateBuffer_t          *candidateBufferPtr,
 	EB_U32                                  qp,
 	EB_U64                                 *yDistortion,
 	EB_U64                                 *cbDistortion,
@@ -864,7 +864,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 	transSubDivFlagCtx = 5 - Log2f(transformSize);
 	// Rate Estimation of each syntax element
 
-	// Esimate the Transform Split Flag & the Cbf's Bits
+	// Estimate the Transform Split Flag & the Cbf's Bits
 	for (tuCount = 0; tuCount < transformBlockCount; ++tuCount) {
 
 		tranSubDivFlagBitsNum += candidateBufferPtr->candidatePtr->mdRateEstimationPtr->transSubDivFlagBits[transSubDivFlag * (NUMBER_OF_TRANSFORM_SUBDIV_FLAG_CASES >> 1) + transSubDivFlagCtx];
@@ -947,7 +947,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 
 /*********************************************************************************
 * IntraFullCostIslice function is used to estimate the cost of an intra candidate mode
-* for full mode decisoion module in EB_I_PICTURE.
+* for full mode decision module in EB_I_PICTURE.
 *
 *   @param *cuPtr(input)
 *       cuPtr is the pointer of the target CU.
@@ -956,7 +956,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the intra condidate luma distortion.
+*       lumaDistortion is the intra candidate luma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -1000,7 +1000,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 	transSubDivFlagCtx = 5 - Log2f(transformSize);
 	// Rate Estimation of each syntax element
 
-	// Esimate the Transform Split Flag & the Cbf's Bits
+	// Estimate the Transform Split Flag & the Cbf's Bits
 	for (tuCount = 0; tuCount < transformBlockCount; ++tuCount) {
 
 		tranSubDivFlagBitsNum += candidateBufferPtr->candidatePtr->mdRateEstimationPtr->transSubDivFlagBits[transSubDivFlag * (NUMBER_OF_TRANSFORM_SUBDIV_FLAG_CASES >> 1) + transSubDivFlagCtx];
@@ -1044,7 +1044,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 
 /*********************************************************************************
 * IntraFullCost function is used to estimate the cost of an intra candidate mode
-* for full mode decisoion module.
+* for full mode decision module.
 *
 *   @param *cuPtr(input)
 *       cuPtr is the pointer of the target CU.
@@ -1053,7 +1053,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the intra condidate luma distortion.
+*       lumaDistortion is the intra candidate luma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -1097,7 +1097,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 	transSubDivFlagCtx = 5 - Log2f(transformSize);
 	// Rate Estimation of each syntax element
 
-	// Esimate the Transform Split Flag & the Cbf's Bits
+	// Estimate the Transform Split Flag & the Cbf's Bits
 	for (tuCount = 0; tuCount < transformBlockCount; ++tuCount) {
 
 		tranSubDivFlagBitsNum += candidateBufferPtr->candidatePtr->mdRateEstimationPtr->transSubDivFlagBits[transSubDivFlag * (NUMBER_OF_TRANSFORM_SUBDIV_FLAG_CASES >> 1) + transSubDivFlagCtx];
@@ -1141,7 +1141,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 
 /*********************************************************************************
 * InterFastCostPsliceOpt function is used to estimate the cost of an inter candidate mode
-* for fast mode decisoion module in P Slice.
+* for fast mode decision module in P Slice.
 *
 *   @param *cuPtr(input)
 *       cuPtr is the pointer of the target CU.
@@ -1150,7 +1150,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the inter condidate luma distortion.
+*       lumaDistortion is the inter candidate luma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -1160,9 +1160,7 @@ EB_ERRORTYPE InterFastCostPsliceOpt(
 	ModeDecisionCandidateBuffer_t          *candidateBufferPtr,
 	EB_U32                                  qp,
 	EB_U64                                  lumaDistortion,
-
 	EB_U64                                  chromaDistortion,
-
 	EB_U64                                  lambda,
 	PictureControlSet_t                    *pictureControlSetPtr)
 {
@@ -1178,7 +1176,7 @@ EB_ERRORTYPE InterFastCostPsliceOpt(
 		EB_U32 mergeIndex = candidatePtr->mergeIndex;
 		// Rate
 		EB_U64 mergeSkiplumaRate;
-		mergeSkiplumaRate = skipFlagBits[4 + cuPtr->skipFlagContext];
+		mergeSkiplumaRate = skipFlagBits[(NUMBER_OF_SKIP_FLAG_CASES >> 1) + cuPtr->skipFlagContext];
 
 		{
 			mergeSkiplumaRate += mergeIndexBits[mergeIndex];
@@ -1285,7 +1283,7 @@ EB_ERRORTYPE InterFastCostPsliceOpt(
 
 /*********************************************************************************
 * InterFastCostBslice function is used to estimate the cost of an inter candidate mode
-* for fast mode decisoion module in B Slice.
+* for fast mode decision module in B Slice.
 *
 *   @param *cuPtr(input)
 *       cuPtr is the pointer of the target CU.
@@ -1294,7 +1292,7 @@ EB_ERRORTYPE InterFastCostPsliceOpt(
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the inter condidate luma distortion.
+*       lumaDistortion is the inter candidate luma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -1319,7 +1317,7 @@ EB_ERRORTYPE InterFastCostBsliceOpt(
 		EB_U32 mergeIndex = candidatePtr->mergeIndex;
 		// Rate
 		EB_U64 mergeSkiplumaRate;
-		mergeSkiplumaRate = skipFlagBits[4 + cuPtr->skipFlagContext];
+		mergeSkiplumaRate = skipFlagBits[(NUMBER_OF_SKIP_FLAG_CASES >> 1) + cuPtr->skipFlagContext];
 
 		{
 			mergeSkiplumaRate += mergeIndexBits[mergeIndex];
@@ -1739,7 +1737,7 @@ EB_ERRORTYPE EstimateTuFlags(
 
 /*********************************************************************************
 * InterFullCost function is used to estimate the cost of an inter candidate mode
-* for full mode decisoion module in P or B Slices.
+* for full mode decision module in P or B Slices.
 *
 *   @param *cuPtr(input)
 *       cuPtr is the pointer of the target CU.
@@ -1748,7 +1746,7 @@ EB_ERRORTYPE EstimateTuFlags(
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the inter condidate luma distortion.
+*       lumaDistortion is the inter candidate luma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -1840,7 +1838,7 @@ EB_ERRORTYPE InterFullCost(
 		EB_U64 chromaSse;
 
 		// Rate Estimation of each syntax element
-		// Esimate Root Cbf (Combined Y, Cb, & Cr Cbfs) Bits
+		// Estimate Root Cbf (Combined Y, Cb, & Cr Cbfs) Bits
 		rootCbfBitsNum = candidateBufferPtr->candidatePtr->mdRateEstimationPtr->rootCbfBits[rootCbf];
 
 		(void)cuPtr;
@@ -1875,7 +1873,7 @@ EB_ERRORTYPE InterFullCost(
 				}
 			}
 			else {
-				// Esimate the Transform Split Flag & the Cbf's Bits
+				// Estimate the Transform Split Flag & the Cbf's Bits
 
 				tranSubDivFlagBitsNum += candidateBufferPtr->candidatePtr->mdRateEstimationPtr->transSubDivFlagBits[transSubDivFlag * (NUMBER_OF_TRANSFORM_SUBDIV_FLAG_CASES >> 1) + transSubDivFlagCtx];
 
@@ -1954,7 +1952,7 @@ EB_ERRORTYPE InterFullCost(
 
 /*********************************************************************************
 * InterFullCost function is used to estimate the cost of an inter candidate mode
-* for full mode decisoion module in P or B Slices.
+* for full mode decision module in P or B Slices.
 *
 *   @param *cuPtr(input)
 *       cuPtr is the pointer of the target CU.
@@ -1963,7 +1961,7 @@ EB_ERRORTYPE InterFullCost(
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the inter condidate luma distortion.
+*       lumaDistortion is the inter candidate luma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -2021,7 +2019,7 @@ EB_ERRORTYPE InterFullLumaCost(
 		EB_U64 lumaSse;
 
 		// Rate Estimation of each syntax element
-		// Esimate Root Cbf (Combined Y, Cb, & Cr Cbfs) Bits
+		// Estimate Root Cbf (Combined Y, Cb, & Cr Cbfs) Bits
 		rootCbfBitsNum = candidateBufferPtr->candidatePtr->mdRateEstimationPtr->rootCbfBits[rootCbf];
 
 		(void)cuPtr;
@@ -2043,7 +2041,7 @@ EB_ERRORTYPE InterFullLumaCost(
 				}
 			}
 			else {
-				// Esimate the Transform Split Flag & the Cbf's Bits
+				// Estimate the Transform Split Flag & the Cbf's Bits
 
 				tranSubDivFlagBitsNum += candidateBufferPtr->candidatePtr->mdRateEstimationPtr->transSubDivFlagBits[transSubDivFlag * (NUMBER_OF_TRANSFORM_SUBDIV_FLAG_CASES >> 1) + transSubDivFlagCtx];
 
@@ -2086,7 +2084,7 @@ EB_ERRORTYPE InterFullLumaCost(
 
 /*********************************************************************************
 * MergeSkipFullCost function is used to estimate the cost of an AMVPSkip candidate
-* mode for full mode decisoion module.
+* mode for full mode decision module.
 *
 *   @param *cuPtr(input)
 *       cuPtr is the pointer of the target CU.
@@ -2095,7 +2093,7 @@ EB_ERRORTYPE InterFullLumaCost(
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the inter condidate luma distortion.
+*       lumaDistortion is the inter candidate luma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -2200,7 +2198,7 @@ EB_ERRORTYPE  MergeSkipFullCost(
 
     //mergeIndexBitsNum = candidateBufferPtr->candidatePtr->mdRateEstimationPtr->mergeIndexBits[mergeIndex];
 
-	// Esimate Root Cbf (Combined Y, Cb, & Cr Cbfs) Bits
+	// Estimate Root Cbf (Combined Y, Cb, & Cr Cbfs) Bits
 	// for Merge, rootCBF is not sent
 
 
@@ -2231,7 +2229,7 @@ EB_ERRORTYPE  MergeSkipFullCost(
 			}
 		}
 		else {
-			// Esimate the Transform Split Flag & the Cbf's Bits
+			// Estimate the Transform Split Flag & the Cbf's Bits
 			tranSubDivFlagBitsNum += candidateBufferPtr->candidatePtr->mdRateEstimationPtr->transSubDivFlagBits[transSubDivFlag * (NUMBER_OF_TRANSFORM_SUBDIV_FLAG_CASES >> 1) + transSubDivFlagCtx];
 
 			cbCbfBlock = (cbCbf > 0);
@@ -2336,7 +2334,7 @@ EB_ERRORTYPE  MergeSkipFullCost(
     skipCost = skipDistortion + (((lambda * candidateBufferPtr->candidatePtr->fastLumaRate) + MD_OFFSET) >> MD_SHIFT);
 	//skipLumaCost = skipLumaSse + (((lambda * candidateBufferPtr->candidatePtr->fastLumaRate) + MD_OFFSET) >> MD_SHIFT);
 
-	// Assigne full cost
+	// Assign full cost
 	*candidateBufferPtr->fullCostPtr = (skipCost <= mergeCost) ? skipCost : mergeCost;
 
 	EB_U64 tempDistortion;
@@ -2344,9 +2342,9 @@ EB_ERRORTYPE  MergeSkipFullCost(
 	candidateBufferPtr->fullLambdaRate = *candidateBufferPtr->fullCostPtr - tempDistortion;
     *candidateBufferPtr->fullCostMergePtr = mergeCost;
     *candidateBufferPtr->fullCostSkipPtr = skipCost;
-    // Assigne merge flag
+    // Assign merge flag
 	candidateBufferPtr->candidatePtr->mergeFlag = EB_TRUE;
-	// Assigne skip flag
+	// Assign skip flag
 	candidateBufferPtr->candidatePtr->skipFlag = EB_FALSE;
 
 
@@ -2355,7 +2353,7 @@ EB_ERRORTYPE  MergeSkipFullCost(
 
 /*********************************************************************************
 * MergeSkipFullCost function is used to estimate the cost of an AMVPSkip candidate
-* mode for full mode decisoion module.
+* mode for full mode decision module.
 *
 *   @param *cuPtr(input)
 *       cuPtr is the pointer of the target CU.
@@ -2364,7 +2362,7 @@ EB_ERRORTYPE  MergeSkipFullCost(
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the inter condidate luma distortion.
+*       lumaDistortion is the inter candidate luma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -2446,7 +2444,7 @@ EB_ERRORTYPE  MergeSkipFullLumaCost(
 
 	//mergeIndexBitsNum = candidateBufferPtr->candidatePtr->mdRateEstimationPtr->mergeIndexBits[mergeIndex];
 
-	// Esimate Root Cbf (Combined Y, Cb, & Cr Cbfs) Bits
+	// Estimate Root Cbf (Combined Y, Cb, & Cr Cbfs) Bits
 	// for Merge, rootCBF is not sent
 
 	// If the Root Cbf is on
@@ -2464,7 +2462,7 @@ EB_ERRORTYPE  MergeSkipFullLumaCost(
 			}
 		}
 		else {
-			// Esimate the Transform Split Flag & the Cbf's Bits
+			// Estimate the Transform Split Flag & the Cbf's Bits
 			tranSubDivFlagBitsNum += candidateBufferPtr->candidatePtr->mdRateEstimationPtr->transSubDivFlagBits[transSubDivFlag * (NUMBER_OF_TRANSFORM_SUBDIV_FLAG_CASES >> 1) + transSubDivFlagCtx];
 
 			yCbfBlock = (yCbf  > 0);
@@ -2503,7 +2501,7 @@ EB_ERRORTYPE  MergeSkipFullLumaCost(
 
 	skipCost = skipDistortion + (((lambda * candidateBufferPtr->candidatePtr->fastLumaRate) + MD_OFFSET) >> MD_SHIFT);
 
-	// Assigne full cost
+	// Assign full cost
 	*candidateBufferPtr->fullCostPtr = (skipCost <= mergeCost) ? skipCost : mergeCost;
 
 	EB_U64 tempDistortion;
@@ -2514,9 +2512,9 @@ EB_ERRORTYPE  MergeSkipFullLumaCost(
 	*candidateBufferPtr->fullCostMergePtr = mergeCost;
 	*candidateBufferPtr->fullCostSkipPtr = skipCost;
 
-	// Assigne merge flag
+	// Assign merge flag
 	candidateBufferPtr->candidatePtr->mergeFlag = EB_TRUE;
-	// Assigne skip flag
+	// Assign skip flag
 	candidateBufferPtr->candidatePtr->skipFlag = EB_FALSE;
 
 	return return_error;
@@ -2754,7 +2752,7 @@ EB_ERRORTYPE Intra4x4LumaModeContext(
 }
 /*********************************************************************************
 * Intra4x4FastCostIslice function is used to estimate the cost of an intra 4x4 candidate mode
-* for fast mode decisoion module in I slice.
+* for fast mode decision module in I slice.
 * The fast cost is based on Luma Distortion and Luma Rate only
 *
 *   @param *cuPtr(input)
@@ -2764,7 +2762,7 @@ EB_ERRORTYPE Intra4x4LumaModeContext(
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the intra condidate luma distortion.
+*       lumaDistortion is the intra candidate luma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -2838,7 +2836,7 @@ EB_ERRORTYPE Intra4x4FastCostIslice(
 
 /*********************************************************************************
 * Intra4x4FastCostPslice function is used to estimate the cost of an intra 4x4 candidate mode
-* for fast mode decisoion module in P slice.
+* for fast mode decision module in P slice.
 * The fast cost is based on Luma Distortion and Luma Rate only
 *
 *   @param *cuPtr(input)
@@ -2848,7 +2846,7 @@ EB_ERRORTYPE Intra4x4FastCostIslice(
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the intra condidate luma distortion.
+*       lumaDistortion is the intra candidate luma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -2935,7 +2933,7 @@ EB_ERRORTYPE Intra4x4FastCostPslice(
 
 /*********************************************************************************
 * Intra4x4FullCostIslice function is used to estimate the cost of an intra candidate mode
-* for full mode decisoion module in EB_I_PICTURE.
+* for full mode decision module in EB_I_PICTURE.
 *
 *   @param *cuPtr(input)
 *       cuPtr is the pointer of the target CU.
@@ -2944,9 +2942,9 @@ EB_ERRORTYPE Intra4x4FastCostPslice(
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the intra condidate luma distortion.
+*       lumaDistortion is the intra candidate luma distortion.
 *   @param chromaDistortion (input)
-*       chromaDistortion is the intra condidate chroma distortion.
+*       chromaDistortion is the intra candidate chroma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -2976,7 +2974,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 	tranSubDivFlagBitsNum = 0;
 	cbfLumaFlagBitsNum = 0;
 
-	// Esimate the Transform Split Flag & the Cbf's Bits
+	// Estimate the Transform Split Flag & the Cbf's Bits
 
 	cbfLumaFlagBitsNum += candidateBufferPtr->candidatePtr->mdRateEstimationPtr->lumaCbfBits[yCbf * (NUMBER_OF_CBF_CASES >> 1)];
 
@@ -3001,7 +2999,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 
 /*********************************************************************************
 * Intra4x4FullCostPslice function is used to estimate the cost of an intra candidate mode
-* for full mode decisoion module.
+* for full mode decision module.
 *
 *   @param *cuPtr(input)
 *       cuPtr is the pointer of the target CU.
@@ -3010,9 +3008,9 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the intra condidate luma distortion.
+*       lumaDistortion is the intra candidate luma distortion.
 *   @param chromaDistortion (input)
-*       chromaDistortion is the intra condidate chroma distortion.
+*       chromaDistortion is the intra candidate chroma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -3043,7 +3041,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 	tranSubDivFlagBitsNum = 0;
 	cbfLumaFlagBitsNum = 0;
 
-	// Esimate the Transform Split Flag & the Cbf's Bits
+	// Estimate the Transform Split Flag & the Cbf's Bits
 
 	cbfLumaFlagBitsNum += candidateBufferPtr->candidatePtr->mdRateEstimationPtr->lumaCbfBits[yCbf * (NUMBER_OF_CBF_CASES >> 1)];
 
@@ -3068,7 +3066,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 
 /*********************************************************************************
 * Intra2Nx2NFastCost function is used to estimate the cost of an intra candidate mode
-* for fast mode decisoion module in I slice.
+* for fast mode decision module in I slice.
 * Chroma cost is excluded from fast cost functions. Only the fastChromaRate is stored
 * for future use in full loop
 *
@@ -3079,7 +3077,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 *   @param qp(input)
 *       qp is the quantizer parameter.
 *   @param lumaDistortion (input)
-*       lumaDistortion is the intra condidate luma distortion.
+*       lumaDistortion is the intra candidate luma distortion.
 *   @param lambda(input)
 *       lambda is the Lagrange multiplier
 **********************************************************************************/
@@ -3296,7 +3294,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 	cbfLumaFlagBitsNum = 0;
 	cbfChromaFlagBitsNum = 0;
 
-	// Esimate the Transform Split Flag & the Cbf's Bits
+	// Estimate the Transform Split Flag & the Cbf's Bits
 	chromaCbfCtx = 2/*cuPtr->sizeLog2*/ - Log2f(transformSize);
 
 	cbfLumaFlagBitsNum += candidateBufferPtr->candidatePtr->mdRateEstimationPtr->lumaCbfBits[yCbf * (NUMBER_OF_CBF_CASES >> 1)];
@@ -3384,7 +3382,7 @@ struct ModeDecisionCandidateBuffer_s   *candidateBufferPtr,
 	cbfLumaFlagBitsNum = 0;
 	cbfChromaFlagBitsNum = 0;
 
-	// Esimate the Transform Split Flag & the Cbf's Bits
+	// Estimate the Transform Split Flag & the Cbf's Bits
 
 	chromaCbfCtx = /*cuPtr->sizeLog2*/ 2 - Log2f(transformSize);
 

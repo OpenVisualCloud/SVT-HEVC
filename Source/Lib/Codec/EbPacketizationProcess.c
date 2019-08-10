@@ -151,19 +151,21 @@ void* PacketizationKernel(void *inputPtr)
     EB_U32                          refQpIndex = 0;       
     EB_U32                          packetizationQp;
        
-    EB_PICTURE                        sliceType;
-    EB_U64                            refDecOrder = 0;
-    EB_U64                            filler;
-    EB_U32                            fillerBytes;
-    EB_U64                            bufferRate;
-    EB_U16                            tileIdx;
-    EB_U16                            tileCnt;
+    EB_U64                          refDecOrder = 0;
+    EB_U64                          filler;
+    EB_U32                          fillerBytes;
+    EB_U64                          bufferRate;
+    EB_PICTURE                      sliceType;
+    EB_U16                          tileIdx;
+    EB_U16                          tileCnt;
+    
     for(;;) {
     
         // Get EntropyCoding Results
         EbGetFullObject(
             contextPtr->entropyCodingInputFifoPtr,
             &entropyCodingResultsWrapperPtr);
+        EB_CHECK_END_OBJ(entropyCodingResultsWrapperPtr);
         entropyCodingResultsPtr = (EntropyCodingResults_t*) entropyCodingResultsWrapperPtr->objectPtr;
         pictureControlSetPtr    = (PictureControlSet_t*)    entropyCodingResultsPtr->pictureControlSetWrapperPtr->objectPtr;
         sequenceControlSetPtr   = (SequenceControlSet_t*)   pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
@@ -225,6 +227,19 @@ void* PacketizationKernel(void *inputPtr)
         }
         sliceType = pictureControlSetPtr->sliceType;
         
+        if (sequenceControlSetPtr->profileIdc == 0)
+        {
+            // Compute Profile Tier and Level Information
+            ComputeProfileTierLevelInfo(
+                sequenceControlSetPtr);
+
+            ComputeMaxDpbBuffer(
+                sequenceControlSetPtr);
+
+            if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
+                InitHRD(sequenceControlSetPtr);
+        }
+
         if(pictureControlSetPtr->pictureNumber == 0 && sequenceControlSetPtr->staticConfig.codeVpsSpsPps == 1) {
 
             // Reset the bitstream before writing to it
@@ -239,18 +254,7 @@ void* PacketizationKernel(void *inputPtr)
                     pictureControlSetPtr->temporalId);
             }
 
-            // Compute Profile Tier and Level Information
-            ComputeProfileTierLevelInfo(
-                sequenceControlSetPtr);
-                            
-          
-			ComputeMaxDpbBuffer(
-                sequenceControlSetPtr);
-
-            if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
-                InitHRD(sequenceControlSetPtr);
-
-			// Code the VPS
+            // Code the VPS
             EncodeVPS(
                 pictureControlSetPtr->bitstreamPtr,
                 sequenceControlSetPtr);
@@ -298,6 +302,8 @@ void* PacketizationKernel(void *inputPtr)
 					&sequenceControlSetPtr->masteringDisplayColorVolume);
 			}
 			
+
+
             if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
             {
                 sequenceControlSetPtr->activeParameterSet.selfContainedCvsFlag = EB_TRUE;
@@ -306,21 +312,21 @@ void* PacketizationKernel(void *inputPtr)
                     pictureControlSetPtr->bitstreamPtr,
                     &sequenceControlSetPtr->activeParameterSet);
             }
-                    // Flush the Bitstream
-                    FlushBitstream(
-                        pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
-                    
-                    // Copy SPS & PPS to the Output Bitstream
-                    CopyRbspBitstreamToPayload(
-                        pictureControlSetPtr->bitstreamPtr,
-                        outputStreamPtr->pBuffer,
-                        (EB_U32*) &(outputStreamPtr->nFilledLen),
-                        (EB_U32*) &(outputStreamPtr->nAllocLen),
-						encodeContextPtr,
-						NAL_UNIT_INVALID);
-                }
-
-
+            // Flush the Bitstream
+            FlushBitstream(
+                pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+            
+            // Copy SPS & PPS to the Output Bitstream
+            CopyRbspBitstreamToPayload(
+                pictureControlSetPtr->bitstreamPtr,
+                outputStreamPtr->pBuffer,
+                (EB_U32*) &(outputStreamPtr->nFilledLen),
+                (EB_U32*) &(outputStreamPtr->nAllocLen),
+                encodeContextPtr,
+				NAL_UNIT_INVALID);
+        }
+        
+         
         // Bitstream Written Loop
         // This loop writes the result of entropy coding into the bitstream
         {
@@ -680,24 +686,25 @@ void* PacketizationKernel(void *inputPtr)
                 outputStreamPtr->pBuffer,
                 (EB_U32*) &(outputStreamPtr->nFilledLen),
                 (EB_U32*) &(outputStreamPtr->nAllocLen),
-                encodeContextPtr,
-                NAL_UNIT_INVALID);
-        }
-        bufferRate = encodeContextPtr->vbvMaxrate / (sequenceControlSetPtr->staticConfig.frameRate >> 16);
-        queueEntryPtr->fillerBitsSent = 0;
-        if ((sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate) && (sequenceControlSetPtr->staticConfig.vbvMaxrate == sequenceControlSetPtr->staticConfig.targetBitRate))
-        {
-            pictureControlSetPtr->ParentPcsPtr->totalNumBits = outputStreamPtr->nFilledLen << 3;
-            EB_S64 buffer = (EB_S64)(encodeContextPtr->bufferFill);
+			    encodeContextPtr,
+			    NAL_UNIT_INVALID);
 
-            buffer -= pictureControlSetPtr->ParentPcsPtr->totalNumBits;
-            buffer = MAX(buffer, 0);
-            buffer = (EB_S64)(buffer + bufferRate);
-            //Block to write filler data to prevent vbv overflow
-            if ((EB_U64)buffer > encodeContextPtr->vbvBufsize)
+            bufferRate = encodeContextPtr->vbvMaxrate / (sequenceControlSetPtr->staticConfig.frameRate >> 16);
+            queueEntryPtr->fillerBitsSent = 0;
+            if ((sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate) && (sequenceControlSetPtr->staticConfig.vbvMaxrate == sequenceControlSetPtr->staticConfig.targetBitRate))
             {
-                filler = (EB_U64)buffer - encodeContextPtr->vbvBufsize;
-                queueEntryPtr->fillerBitsSent = filler;
+                pictureControlSetPtr->ParentPcsPtr->totalNumBits = outputStreamPtr->nFilledLen << 3;
+                EB_S64 buffer = (EB_S64)(encodeContextPtr->bufferFill);
+
+                buffer -= pictureControlSetPtr->ParentPcsPtr->totalNumBits;
+                buffer = MAX(buffer, 0);
+                buffer = (EB_S64)(buffer + bufferRate);
+                //Block to write filler data to prevent vbv overflow
+                if ((EB_U64)buffer > encodeContextPtr->vbvBufsize)
+                {
+                    filler = (EB_U64)buffer - encodeContextPtr->vbvBufsize;
+                    queueEntryPtr->fillerBitsSent = filler;
+                }
             }
         }
         // Send the number of bytes per frame to RC

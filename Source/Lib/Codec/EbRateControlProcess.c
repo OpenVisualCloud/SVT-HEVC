@@ -2466,6 +2466,7 @@ void* RateControlKernel(void *inputPtr)
         EbGetFullObject(
             contextPtr->rateControlInputTasksFifoPtr,
             &rateControlTasksWrapperPtr);
+        EB_CHECK_END_OBJ(rateControlTasksWrapperPtr);
 
         rateControlTasksPtr = (RateControlTasks_t*)rateControlTasksWrapperPtr->objectPtr;
         taskType = rateControlTasksPtr->taskType;

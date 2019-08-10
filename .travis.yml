@@ -106,7 +106,8 @@ matrix:
         # Apply SVT-HEVC plugin and enable libsvthevc to FFmpeg
         - git clone https://github.com/FFmpeg/FFmpeg --branch release/4.1 --depth=1 ffmpeg && cd ffmpeg
         - git am $TRAVIS_BUILD_DIR/ffmpeg_plugin/0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch
-        - git am $TRAVIS_BUILD_DIR/ffmpeg_plugin/0002-doc-Add-libsvt_hevc-encoder-docs.patch
+        # Patch 2 is doc only
+        #- git am $TRAVIS_BUILD_DIR/ffmpeg_plugin/0002-doc-Add-libsvt_hevc-encoder-docs.patch
         - export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
         - "sudo chown -R travis: $HOME/.ccache"
         - ./configure --enable-libsvthevc || less ffbuild/config.log

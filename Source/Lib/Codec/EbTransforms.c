@@ -2768,10 +2768,10 @@ void DecoupledQuantizeInvQuantizeLoops(
                                 rdoqError[iteration] = (((rdoqError[iteration] * ChromaWeightFactorRaNonRef[qp]) + CHROMA_WEIGHT_OFFSET) >> CHROMA_WEIGHT_SHIFT);
                             }
 
-                            rdoqCost[iteration] = ((rdoqError[iteration]) << COST_PRECISION) + (((lambda * rdoqBits[iteration]) + MD_OFFSET) >> MD_SHIFT);
+                            rdoqCost[iteration] = rdoqError[iteration] + (((lambda * rdoqBits[iteration]) + MD_OFFSET) >> MD_SHIFT);
                         }
                         else {
-                            rdoqCost[iteration] = ((rdoqError[iteration]) << COST_PRECISION) + (((lambda * rdoqBits[iteration]) + MD_OFFSET) >> MD_SHIFT);
+                            rdoqCost[iteration] = (rdoqError[iteration] << COST_PRECISION) + (((lambda * rdoqBits[iteration]) + MD_OFFSET) >> MD_SHIFT);
                         }
 
                         if (rdoqCost[iteration] < bestCost) {
@@ -2926,10 +2926,12 @@ void DecoupledQuantizeInvQuantizeLoops(
 							else {
 								sse[DIST_CALC_RESIDUAL] = (((sse[DIST_CALC_RESIDUAL] * ChromaWeightFactorRaNonRef[qp]) + CHROMA_WEIGHT_OFFSET) >> CHROMA_WEIGHT_SHIFT);
 							}
-						}
-						
 
-						pmCand->cost  = ((sse[DIST_CALC_RESIDUAL]) << COST_PRECISION) + (((lambda * coeffBits) + MD_OFFSET) >> MD_SHIFT);
+							pmCand->cost = sse[DIST_CALC_RESIDUAL] + (((lambda * coeffBits) + MD_OFFSET) >> MD_SHIFT);
+						} else {
+							pmCand->cost = (sse[DIST_CALC_RESIDUAL] << COST_PRECISION) + (((lambda * coeffBits) + MD_OFFSET) >> MD_SHIFT);
+						}
+
 
 						//determine best cost
 						if (pmCand->cost < bestCost){

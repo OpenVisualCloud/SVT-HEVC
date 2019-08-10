@@ -13,7 +13,7 @@ endif()
 
 project(${project_name} C ASM_NASM)
 
-if(NOT CMAKE_BUILD_TYPE)
+if(NOT MSVC AND NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
@@ -85,7 +85,6 @@ set(flags_to_test
     -Wextra
     -Wformat
     -Wformat-security
-    -fstack-protector-strong
     -fvisibility=hidden
     -fPIE
     -fPIC
@@ -102,6 +101,8 @@ else()
     #for Mingw64 support, see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65782
     if(MINGW)
         list(APPEND flags_to_test -fno-asynchronous-unwind-tables)
+    else()
+        list(APPEND flags_to_test -fstack-protector-strong)
     endif()
     if(NATIVE)
         list(APPEND flags_to_test -march=native)

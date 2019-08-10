@@ -900,7 +900,7 @@ static void ReadInputFrames(
             inputPtr->cbExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize + luma2bitSize;
             inputPtr->crExt = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + luma8bitSize + 2 * chroma8bitSize + luma2bitSize + chroma2bitSize;
 
-            headerPtr->nFilledLen = luma8bitSize + luma2bitSize + 2 * (chroma8bitSize + chroma2bitSize);
+            headerPtr->nFilledLen = (uint32_t)(luma8bitSize + luma2bitSize + 2 * (chroma8bitSize + chroma2bitSize));
         } else {
             //Normal unpacked mode:yuv420p10le yuv422p10le yuv444p10le
 
@@ -978,28 +978,41 @@ void SendNaluOnTheFly(
         char line[1024];
         EB_ERRORTYPE return_error = EB_ErrorNone;
         uint32_t poc = 0;
-        uint8_t *prefix = NULL;
+        char *prefix = NULL;
         uint32_t nalType = 0;
         uint32_t payloadType = 0;
         uint8_t *base64Encode = NULL;
         uint8_t *context = NULL;
+        char *nextValue = NULL;
 
         if (fgets(line, sizeof(line), config->naluFile) != NULL) {
-            poc = strtol(EB_STRTOK(line, " ", &context), NULL, 0);
+            nextValue = EB_STRTOK(line, " ", &context);
+            if (nextValue != NULL)
+               poc = (uint32_t)strtol(nextValue, NULL, 0);
+            else
+                return_error = EB_ErrorBadParameter;
             if (return_error == EB_ErrorNone && *context != 0) {
-                prefix = (uint8_t*)EB_STRTOK(NULL, " ", &context);
+                prefix = EB_STRTOK(NULL, " ", &context);
             }
             else {
                 return_error = EB_ErrorBadParameter;
             }
             if (return_error == EB_ErrorNone && *context != 0) {
-                nalType = strtol(EB_STRTOK(NULL, "/", &context), NULL, 0);
+                nextValue = EB_STRTOK(NULL, "/", &context);
+                if (nextValue !=NULL)
+                    nalType = (uint32_t)strtol(nextValue, NULL, 0);
+                else
+                    return_error = EB_ErrorBadParameter;
             }
             else {
                 return_error = EB_ErrorBadParameter;
             }
             if (return_error == EB_ErrorNone && *context != 0) {
-                payloadType = strtol(EB_STRTOK(NULL, " ", &context), NULL, 0);
+                nextValue = EB_STRTOK(NULL, " ", &context);
+                if (nextValue != NULL)
+                    payloadType = (uint32_t)strtol(nextValue, NULL, 0);
+                else
+                    return_error = EB_ErrorBadParameter;
             }
             else {
                 return_error = EB_ErrorBadParameter;
@@ -1012,7 +1025,7 @@ void SendNaluOnTheFly(
             }
 
             headerPtr->naluPOC = poc;
-            if (prefix != NULL && !EB_STRCMP((char*)prefix, "PREFIX"))
+            if (prefix != NULL && !EB_STRCMP(prefix, "PREFIX"))
                 headerPtr->naluPrefix = 0;
             headerPtr->naluNalType = nalType;
             headerPtr->naluPayloadType = payloadType;
@@ -1108,7 +1121,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(EbConfig_t *config, EbAppContext_t *appC
     int64_t                  remainingByteCount;
     const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)config->encoderColorFormat;
     int ret;
-    uint32_t compressed10bitFrameSize = (inputPaddedWidth*inputPaddedHeight) + 2 * ((inputPaddedWidth*inputPaddedWidth) >> (3 - colorFormat));
+    uint32_t compressed10bitFrameSize = (uint32_t)((inputPaddedWidth*inputPaddedHeight) + 2 * ((inputPaddedWidth*inputPaddedWidth) >> (3 - colorFormat)));
     compressed10bitFrameSize += compressed10bitFrameSize / 4;
 
     if (config->injector && config->processedFrameCount)
