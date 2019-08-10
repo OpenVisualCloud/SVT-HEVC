@@ -329,8 +329,7 @@ typedef struct EbConfig_s
     uint32_t                 vbvMaxRate;
     uint32_t                 vbvBufsize;
     uint64_t                 vbvBufInit;
-    uint64_t                 vbvBufEnd;
-    uint64_t                 vbvEndFrameAdjust;
+
     /****************************************
     * TUNE
     ****************************************/

@@ -210,7 +210,6 @@ EB_ERRORTYPE EncodeContextCtor(
     encodeContextPtr->vbvBufsize                                        = 0;
     encodeContextPtr->vbvMaxrate                                        = 0;
     encodeContextPtr->fillerBitError                                    = 0;
-    encodeContextPtr->vbvEndEmptiness                                   = 0;
 
     // Rate Control Bit Tables
     EB_MALLOC(RateControlTables_t*, encodeContextPtr->rateControlTablesArray, sizeof(RateControlTables_t) * TOTAL_NUMBER_OF_INITIAL_RC_TABLES_ENTRY, EB_N_PTR);

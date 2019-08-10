@@ -2117,9 +2117,8 @@ void CopyApiFromApp(
     sequenceControlSetPtr->staticConfig.vbvMaxrate = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->vbvMaxrate;
     sequenceControlSetPtr->staticConfig.vbvBufsize = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->vbvBufsize;
     sequenceControlSetPtr->staticConfig.vbvBufInit = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->vbvBufInit;
-    sequenceControlSetPtr->staticConfig.vbvBufEnd = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->vbvBufEnd;
-    sequenceControlSetPtr->staticConfig.vbvEndFrameAdjust = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->vbvEndFrameAdjust;
     sequenceControlSetPtr->staticConfig.lowLevelVbv= ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->lowLevelVbv;
+
     sequenceControlSetPtr->staticConfig.lookAheadDistance = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->lookAheadDistance;
     sequenceControlSetPtr->staticConfig.framesToBeEncoded = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->framesToBeEncoded;
 
@@ -2824,14 +2823,6 @@ static EB_ERRORTYPE VerifySettings(\
 
     if (config->vbvBufInit > 100) {
         SVT_LOG("SVT [Error]: Instance %u: Invalid vbvBufInit [0 - 100]\n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
-    }
-    if (config->vbvBufEnd > 100) {
-		SVT_LOG("SVT [Error]: Instance %u: Invalid vbvBufEnd [0 - 100]\n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
-    }
-    if (config->vbvEndFrameAdjust > 100) {
-		SVT_LOG("SVT [Error]: Instance %u: Invalid vbvEndFrameAdjust [0 - 100]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 

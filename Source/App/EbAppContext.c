@@ -185,8 +185,6 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.vbvMaxrate = config->vbvMaxRate;
     callbackData->ebEncParameters.vbvBufsize = config->vbvBufsize;
     callbackData->ebEncParameters.vbvBufInit = config->vbvBufInit;
-    callbackData->ebEncParameters.vbvBufEnd = config->vbvBufEnd;
-    callbackData->ebEncParameters.vbvEndFrameAdjust = config->vbvEndFrameAdjust;
     callbackData->ebEncParameters.lowLevelVbv = config->lowLevelVbv;
     callbackData->ebEncParameters.useQpFile = (EB_BOOL)config->useQpFile;
     callbackData->ebEncParameters.tileColumnCount = (EB_BOOL)config->tileColumnCount;

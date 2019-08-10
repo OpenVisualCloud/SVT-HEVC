@@ -529,14 +529,6 @@ typedef struct EB_H265_ENC_CONFIGURATION
 	 *
 	 * Default is 90. */
 	uint64_t                vbvBufInit;
-	/* Sets how full the VBV buffer must be end.
-	 *
-	 * Default is 0. */
-	uint64_t                vbvBufEnd;
-	/* Sets  vbvEndFrameAdjust.
-	 *
-	 * Default is 0. */
-	uint64_t                vbvEndFrameAdjust;
 	/* Enables the buffering period SEI and picture timing SEI to signal the HRD
 	* parameters.
 	*
@@ -545,7 +537,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
 	*
 	* Default is 0. */
     uint32_t                hrdFlag;
-    
+
     /* ID assigned to each channel when multiple instances are running within the
      * same application. */
     uint32_t                channelId;
