@@ -3,23 +3,17 @@
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
 #include <stdint.h>
-#ifdef _WIN32
 #include <stdlib.h>
-//#if  (WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
 #include <time.h>
+
+#ifdef _WIN32
+//#if  (WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
 #include <windows.h>
 //#endif
-
-#elif __linux__
-#include <stdio.h>
-#include <stdlib.h>
+#else
 //#if   (LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
 #include <sys/time.h>
-#include <time.h>
 //#endif
-
-#else
-#error OS/Platform not supported.
 #endif
 
 void EbAppStartTime(
