@@ -22,8 +22,8 @@
 #include "EbAppConfig.h"
 #include "EbAppContext.h"
 #include "EbTime.h"
-#if !__linux
-#include <Windows.h>
+#ifdef _WIN32
+#include <windows.h>
 #else
 #include <pthread.h>
 #include <semaphore.h>
@@ -31,7 +31,7 @@
 #include <errno.h>
 #endif
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <io.h>     /* _setmode() */
 #include <fcntl.h>  /* _O_BINARY */
 #endif
@@ -81,7 +81,7 @@ void AssignAppThreadGroup(uint8_t targetSocket) {
  ***************************************/
 int32_t main(int32_t argc, char* argv[])
 {
-#ifdef _MSC_VER
+#ifdef _WIN32
     _setmode(_fileno(stdin), _O_BINARY);
     _setmode(_fileno(stdout), _O_BINARY);
 #endif
