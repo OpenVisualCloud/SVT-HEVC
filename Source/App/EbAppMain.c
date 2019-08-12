@@ -62,7 +62,7 @@ void EventHandler(int32_t dummy) {
 }
 
 void AssignAppThreadGroup(uint8_t targetSocket) {
-#ifdef _MSC_VER
+#ifdef _WIN32
     if (GetActiveProcessorGroupCount() == 2) {
         GROUP_AFFINITY           groupAffinity;
         GetThreadGroupAffinity(GetCurrentThread(), &groupAffinity);
