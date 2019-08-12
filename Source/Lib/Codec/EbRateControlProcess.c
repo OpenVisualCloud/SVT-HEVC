@@ -561,7 +561,6 @@ void HighLevelRcInputPictureMode2(
                 highLevelRateControlPtr->predBitsRefQpPerSw[refQpTableIndex] = 0;
             }
 
-            bestQp = qpSearchMin;
             bitConstraintPerSw = highLevelRateControlPtr->bitConstraintPerSw * pictureControlSetPtr->framesInSw / (sequenceControlSetPtr->staticConfig.lookAheadDistance + 1);
 
             // Update the target rate for the sliding window based on the status of RC    
