@@ -19,7 +19,7 @@ link_directories(${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/
     ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
 
 # Encoder Lib Source Files
-add_library(SvtHevcEnc SHARED
+add_library(SvtHevcEnc
     EbAdaptiveMotionVectorPrediction.h
     EbAvailability.h
     EbAvcStyleMcp.h

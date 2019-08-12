@@ -26,7 +26,10 @@ notifications:
   webhooks:
     - https://coveralls.io/webhook
 env:
-  - build_type=release
+  global: build_type=release
+  matrix:
+    - CMAKE_EFLAGS="-DBUILD_SHARED_LIBS=ON"
+    - CMAKE_EFLAGS="-DBUILD_SHARED_LIBS=OFF"
 stages:
   - name: style
   - name: test
@@ -110,7 +113,7 @@ matrix:
         #- git am $TRAVIS_BUILD_DIR/ffmpeg_plugin/0002-doc-Add-libsvt_hevc-encoder-docs.patch
         - export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
         - "sudo chown -R travis: $HOME/.ccache"
-        - ./configure --enable-libsvthevc || less ffbuild/config.log
+        - ./configure --enable-libsvthevc || tail ffbuild/config.log
         - make --quiet -j$(nproc) && sudo make install
     # GStreamer interation build
     - name: GStreamer patch

@@ -262,7 +262,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
 }
 
 
-EB_ERRORTYPE AllocateFrameBuffer(
+EB_ERRORTYPE AllocateInputBuffer(
     EbConfig_t          *config,
     uint8_t               *pBuffer)
 {
@@ -355,7 +355,7 @@ EB_ERRORTYPE AllocateInputBuffers(
         if (config->bufferedInput == -1) {
 
             // Allocate frame buffer for the pBuffer
-            AllocateFrameBuffer(
+            AllocateInputBuffer(
                     config,
                     callbackData->inputBufferPool->pBuffer);
         }

@@ -156,7 +156,7 @@ int32_t main(int32_t argc, char* argv[])
                     configs[instanceCount]->activeChannelCount = numChannels;
                     configs[instanceCount]->channelId = instanceCount;
 
-                    EbStartTime((uint64_t*)&configs[instanceCount]->performanceContext.libStartTime[0], (uint64_t*)&configs[instanceCount]->performanceContext.libStartTime[1]);
+                    EbAppStartTime((uint64_t*)&configs[instanceCount]->performanceContext.libStartTime[0], (uint64_t*)&configs[instanceCount]->performanceContext.libStartTime[1]);
 
                     return_errors[instanceCount] = InitEncoder(configs[instanceCount], appCallbacks[instanceCount], instanceCount);
                     return_error = (EB_ERRORTYPE)(return_error | return_errors[instanceCount]);
@@ -176,7 +176,7 @@ int32_t main(int32_t argc, char* argv[])
                         exitConditionsRecon[instanceCount]  = configs[instanceCount]->reconFile ? APP_ExitConditionNone : APP_ExitConditionError;
                         exitConditionsInput[instanceCount]  = APP_ExitConditionNone;
                         channelActive[instanceCount]        = EB_TRUE;
-                        EbStartTime((uint64_t*)&configs[instanceCount]->performanceContext.encodeStartTime[0], (uint64_t*)&configs[instanceCount]->performanceContext.encodeStartTime[1]);
+                        EbAppStartTime((uint64_t*)&configs[instanceCount]->performanceContext.encodeStartTime[0], (uint64_t*)&configs[instanceCount]->performanceContext.encodeStartTime[1]);
                     }
                     else {
                         exitConditions[instanceCount]       = APP_ExitConditionError;
@@ -325,4 +325,3 @@ int32_t main(int32_t argc, char* argv[])
 
     return (return_error == 0) ? 0 : 1;
 }
-
