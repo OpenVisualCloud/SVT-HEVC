@@ -85,8 +85,6 @@ set(flags_to_test
     -Wextra
     -Wformat
     -Wformat-security
-    -fstack-protector-strong
-    -fvisibility=hidden
     -fPIE
     -fPIC
     -D_FORTIFY_SOURCE=2
@@ -102,6 +100,8 @@ else()
     #for Mingw64 support, see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65782
     if(MINGW)
         list(APPEND flags_to_test -fno-asynchronous-unwind-tables)
+    else()
+        list(APPEND flags_to_test -fstack-protector-strong)
     endif()
     if(NATIVE)
         list(APPEND flags_to_test -march=native)
@@ -154,11 +154,7 @@ endif()
 
 # BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
 # make it prominent in the GUI.
-if(WIN32 OR MSYS)
-    option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." ON)
-else()
-    option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
-endif()
+option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." ON)
 option(COVERAGE "Generate coverage report")
 option(BUILD_APP "Build Enc App" ON)
 

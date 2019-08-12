@@ -4426,6 +4426,7 @@ void* PictureAnalysisKernel(void *inputPtr)
 		EbGetFullObject(
 			contextPtr->resourceCoordinationResultsInputFifoPtr,
 			&inputResultsWrapperPtr);
+        EB_CHECK_END_OBJ(inputResultsWrapperPtr);
 
 		inputResultsPtr = (ResourceCoordinationResults_t*)inputResultsWrapperPtr->objectPtr;
 		pictureControlSetPtr = (PictureParentControlSet_t*)inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;

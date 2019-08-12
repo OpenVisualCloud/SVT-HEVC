@@ -3808,8 +3808,8 @@ EB_ERRORTYPE MotionEstimateLcu(
 
                 if (pictureControlSetPtr->enableHmeFlag && /*B*/lcuHeight == MAX_LCU_SIZE) {//(searchCenterSad > sequenceControlSetPtr->staticConfig.skipTier0HmeTh)) {
 
-					while (searchRegionNumberInHeight < contextPtr->numberHmeSearchRegionInHeight) {
-                        while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
+					while (searchRegionNumberInHeight < EB_MIN(contextPtr->numberHmeSearchRegionInHeight, EB_HME_SEARCH_AREA_ROW_MAX_COUNT)) {
+                        while (searchRegionNumberInWidth < EB_MIN(contextPtr->numberHmeSearchRegionInWidth, EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT)) {
                             if (contextPtr->updateHmeSearchCenter) {
                                 xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter >> 2;
                                 yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter >> 2;

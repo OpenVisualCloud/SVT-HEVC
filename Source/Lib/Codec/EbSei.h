@@ -167,6 +167,14 @@ extern "C" {
 
     } AppBufferingPeriodSei_t;
 
+    typedef struct AppActiveParameterSetsSei_s {
+        EB_U32 activeVideoParameterSetid;
+        EB_BOOL selfContainedCvsFlag;
+        EB_BOOL noParameterSetUpdateFlag;
+        EB_U32 numSpsIdsMinus1;
+        EB_U32 activeSeqParameterSetId;
+
+    } AppActiveparameterSetSei_t;
 
     typedef struct AppRecoveryPoint_s {
 
@@ -313,6 +321,9 @@ extern void EbPictureTimeingSeiCtor(
 extern void EbBufferingPeriodSeiCtor(
     AppBufferingPeriodSei_t   *bufferingPeriodPtr);
 
+extern void EbActiveParameterSetSeiCtor(
+    AppActiveparameterSetSei_t    *activeParameterPtr);
+
 extern void EbRecoveryPointSeiCtor(
     AppRecoveryPoint_t   *recoveryPointSeiPtr);
 
@@ -335,6 +346,9 @@ extern EB_U32 GetPictureTimingSEILength(
 extern EB_U32 GetBufPeriodSEILength(
     AppBufferingPeriodSei_t    *bufferingPeriodPtr,
     AppVideoUsabilityInfo_t    *vuiPtr);
+
+extern EB_U32 GetActiveParameterSetSEILength(
+	AppActiveparameterSetSei_t    *activeParameterSet);
 
 extern EB_U32 GetRecoveryPointSEILength(
     AppRecoveryPoint_t    *recoveryPointSeiPtr);

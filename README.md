@@ -8,33 +8,7 @@ The Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder) is an HEVC-com
 
 The whitepaper for SVT-HEVC can be found here: <https://01.org/svt>
 
-This encoder has been optimized to achieve excellent performance levels using 13 density-quality presets (please refer to the user guide for more details) on a system with a dual Intel® Xeon® Scalable CPU targeting:
-
-- Real-time encoding of up to one 8Kp60/10-bit streams on the Platinum 8180 with M11 in the visual quality mode
-
-- Real-time encoding of up to two 8Kp50/10-bit streams on the Platinum 8180 with M12 in the visual quality mode
-
-- Real-time encoding of up to four 4Kp60/10-bit streams on the Gold 6148 with M12 in the visual quality mode
-
-- Real-time encoding of up to six 4Kp60/10-bit streams on the Platinum 8180 with M12 in the visual quality mode
-
-SVT-HEVC Encoder also supports 3 modes:
-
-- A visually optimized mode for visual quality (-tune 0)
-
-- An PSNR/SSIM optimized mode for PSNR / SSIM benchmarking (-tune 1 (Default setting))
-
-- An VMAF optimized mode for VMAF benchmarking (-tune 2)
-
-The encoder can also run the ABR profile below on one Intel® Xeon-D™ D-2191:
-
-|       ABR Profile         |
-|---------------------------------------|
-|   1 x 4kp60/10-bit Stream (@M11)      |
-|   1 x 1080p60/10-bit Stream (@M10)    |
-|   1 x 720p60/8-bit Stream (@M9)       |
-|   1 x 480p60/8-bit Stream (@M9)       |
-|   1 x 360p60/8-bit Stream (@M9)       |
+This encoder has been optimized to achieve excellent performance levels using 12 density-quality presets (please refer to the user guide for more details).
 
 ## License
 
@@ -54,13 +28,15 @@ SVT-HEVC may run on any Windows* or Linux* 64 bit operating systems. The list be
 
 - __Windows* Operating Systems (64-bit):__
 
-  - Windows* Server 2016
+  - Windows Server 2016
 
 - __Linux* Operating Systems (64-bit):__
 
-  - Ubuntu* 16.04 Server LTS
+  - Ubuntu 16.04 Server LTS
 
-  - Ubuntu* 18.04 Server LTS
+  - Ubuntu 18.04 Server LTS
+
+  - CentOS 7.4/7.5/7.6
 
 ### Hardware
 
@@ -120,11 +96,23 @@ In order to run the highest resolution supported by the encoder, at least 64GB o
   - YASM Assembler version 1.2.0 or later
 
 - __Build Instructions__
-  - In the main repository, run
-    - `mkdir build && cd build && cmake .. && make -j $(nproc) && sudo make install`
+  - In the main repository, run either the provided build script
+
+    ``` bash
+    cd Build/linux
+    ./build.sh [release|debug] [static|shared] [install]
+    # Requires sudo permission for installing
+    # Run './build.sh -h' to see the full help
+    ```
+
+  - or run the commands directly
+
+    ``` bash
+    mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=<Release|Debug> && make -j $(nproc) && sudo make install
+    ```
 
 - __Sample Binaries location__
-  - Binaries can be found under `Bin/Release`
+  - Binaries can be found under `$REPO_DIR/Bin/Release`
 
 - __Installation__\
 For the binaries to operate properly, the following conditions have to be met:
@@ -151,10 +139,9 @@ We welcome community contributions to the SVT-HEVC Encoder. Thank you for your t
 
 ### Contribution process
 
+- Follow the [coding_guidelines](STYLE.md)
 - Validate that your changes do not break a build
-
 - Perform smoke tests and ensure they pass
-
 - Submit a pull request for review to the maintainer
 
 ### How to Report Bugs and Provide Feedback

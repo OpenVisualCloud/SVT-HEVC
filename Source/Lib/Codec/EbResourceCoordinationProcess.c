@@ -546,6 +546,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         EbGetFullObject(
             contextPtr->inputBufferFifoPtr,
             &ebInputWrapperPtr);
+        EB_CHECK_END_OBJ(ebInputWrapperPtr);
         ebInputPtr = (EB_BUFFERHEADERTYPE*) ebInputWrapperPtr->objectPtr;
      
         sequenceControlSetPtr       = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr;
@@ -634,13 +635,21 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
         }
         EbReleaseMutex(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->configMutex);
+        if (sequenceControlSetPtr->staticConfig.rateControlMode) {
+            // Sequence Control Set is released by Rate Control after passing through MDC->MD->ENCDEC->Packetization->RateControl
+            //   ,in the PictureManager after receiving the reference and in PictureManager after receiving the feedback
+            EbObjectIncLiveCount(
+                contextPtr->sequenceControlSetActiveArray[instanceIndex],
+                3);
+        }
+        else {
+            // Sequence Control Set is released by Rate Control after passing through MDC->MD->ENCDEC->Packetization->RateControl
+            //   and in the PictureManager
+            EbObjectIncLiveCount(
+                contextPtr->sequenceControlSetActiveArray[instanceIndex],
+                2);
 
-        // Sequence Control Set is released by Rate Control after passing through MDC->MD->ENCDEC->Packetization->RateControl
-        //   and in the PictureManager
-        EbObjectIncLiveCount(
-            contextPtr->sequenceControlSetActiveArray[instanceIndex],
-            2);
-
+        }
         // Set the current SequenceControlSet
         sequenceControlSetPtr   = (SequenceControlSet_t*) contextPtr->sequenceControlSetActiveArray[instanceIndex]->objectPtr;
         

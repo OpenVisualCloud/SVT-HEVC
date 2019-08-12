@@ -146,23 +146,21 @@ typedef struct EB_H265_ENC_CONFIGURATION
     // Encoding preset
 
     /* A preset defining the quality vs density tradeoff point that the encoding
-     * is to be performed at. 0 is the highest quality mode, 12 is the highest
+     * is to be performed at. 0 is the highest quality mode, 11 is the highest
      * density mode. 
      * 
-     * [0, 12] for tune 0 and >= 4k resolution.
+     * [0, 11] for >= 4k resolution.
      * [0, 10] for >= 1080p resolution.
-     * [0,  9] for all resolution and modes.
+     * [0,  9] for all resolution.
      * 
-     * Default is 9. */
+     * Default is 7. */
     uint8_t                 encMode;
 
     /* Encoder tuning for specific aim.
      *
-     * 0 = SQ - visually optimized mode.
-     * 1 = OQ - PSNR / SSIM optimized mode.
-     * 2 = VMAF - VMAF optimized mode. 
-     * 
-     * Default is 1. */
+     * Deprecated.
+     *
+     */
     uint8_t                 tune;
 
     /* Flag to enable for lower latency mode. The change is lossless. 
@@ -205,7 +203,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
      * encoded pictures in display order. In other words, pictures with display
      * order N can only be referenced by pictures with display order greater than
      * N, and it can only refer pictures with picture order lower than N. The Low
-     * Delay structure can be flat structured (e.g. IPPPPPPP…) or hierarchically
+     * Delay structure can be flat structured (e.g. IPPPPPPP...) or hierarchically
      * structured. B/b pictures can be used instead of P/p pictures. However, the
      * reference picture list 0 and the reference picture list 1 will contain the
      * same reference picture.
@@ -266,7 +264,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
      * Default is 8. */
     uint32_t                encoderBitDepth;
 
-	EB_COLOR_FORMAT         encoderColorFormat;
+    EB_COLOR_FORMAT         encoderColorFormat;
 
     /* Offline packing of the 2bits: requires two bits packed input.
      *
@@ -508,7 +506,32 @@ typedef struct EB_H265_ENC_CONFIGURATION
     uint8_t                 fpsInVps;
 
 
-    // Application Specific parameters
+    // VBV Parameters
+    /* Sets the maximum rate the VBV buffer should be assumed to refill at
+     * 
+     * Default is 0. */
+    uint32_t                vbvMaxrate;
+
+    /* Sets the size of the VBV buffer in bits. 
+     *
+     * Default is 0. */
+    uint32_t                vbvBufsize;
+
+    /* Sets how full the VBV buffer must be before playback starts. If picture
+     * number is 0, then the initial fill is vbv-init * vbvBufferSize. 
+     * Otherwise, it is interpreted as the initial fill in bits. 
+     *
+     * Default is 90. */
+    uint64_t                vbvBufInit;
+
+    /* Enables the buffering period SEI and picture timing SEI to signal the HRD
+     * parameters. 
+     *
+     * 0 = disable.
+     * 1 = enable.
+     *
+     * Default is 0. */
+    uint32_t                hrdFlag;
 
     /* ID assigned to each channel when multiple instances are running within the
      * same application. */
@@ -547,7 +570,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     /* Assembly instruction set used by encoder.
      *
      * 0 = non-AVX2, C only.
-     * 1 = up to AVX512, auto-select highest assembly insturction set supported.
+     * 1 = up to AVX512, auto-select highest assembly instruction set supported.
      * 
      * Default is 1. */
     uint32_t                asmType;
@@ -558,7 +581,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     /* Flag to enable the Speed Control functionality to achieve the real-time
      * encoding speed defined by dynamically changing the encoding preset to meet
      * the average speed defined in injectorFrameRate. When this parameter is set
-     * to 1 it forces –inj to be 1 -inj-frm-rt to be set to the –fps.
+     * to 1 it forces -inj to be 1 and -inj-frm-rt to be set to the -fps.
      *
      * Default is 0. */
     uint32_t                speedControlFlag;

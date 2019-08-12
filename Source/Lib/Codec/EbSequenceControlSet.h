@@ -205,6 +205,9 @@ typedef struct SequenceControlSet_s
 
     EB_U8                       maxEncMode;
 
+    //Active parameter Set Sei
+    AppActiveparameterSetSei_t  activeParameterSet;
+
 } SequenceControlSet_t;
 
 typedef struct EbSequenceControlSetInitData_s

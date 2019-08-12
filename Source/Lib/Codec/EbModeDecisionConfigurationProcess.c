@@ -1493,26 +1493,45 @@ void SetTargetBudgetOq(
 				budget = pictureControlSetPtr->lcuTotalCount * U_109;
 		}
 	}
+    else if (contextPtr->adpLevel <= ENC_MODE_10) {
+        if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0)
+            budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_127 :
+            (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_125 :
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_121;
+        else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag)
+            budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * OPEN_LOOP_COST :
+            (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
+        else
+            budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
+    }
     else {
-		if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0)
-			budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
-			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_127 :
-			(contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
-			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_125 :
-			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_121;
-		else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag)
-			budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
-			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * OPEN_LOOP_COST :
-			(contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
-			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
-			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
-		else
-			budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
-			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
-			pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
+        if (pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex == 0)
+            budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_127 :
+            (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_125 :
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_121;
+        else if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag)
+            budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * OPEN_LOOP_COST :
+            (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_1) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
+        else
+            budget = (contextPtr->adpDepthSensitivePictureClass == DEPTH_SENSITIVE_PIC_CLASS_2) ?
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100 :
+            pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
     }
 
-	contextPtr->budget = budget;
+
+    contextPtr->budget = budget;
 }
 
 /******************************************************
@@ -2347,6 +2366,7 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
 		EbGetFullObject(
 			contextPtr->rateControlInputFifoPtr,
 			&rateControlResultsWrapperPtr);
+        EB_CHECK_END_OBJ(rateControlResultsWrapperPtr);
 
 		rateControlResultsPtr = (RateControlResults_t*)rateControlResultsWrapperPtr->objectPtr;
 		pictureControlSetPtr = (PictureControlSet_t*)rateControlResultsPtr->pictureControlSetWrapperPtr->objectPtr;

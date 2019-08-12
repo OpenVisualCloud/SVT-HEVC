@@ -84,6 +84,10 @@
 #define NALU_FILE_TOKEN                 "-nalu-file"
 #define RATE_CONTROL_ENABLE_TOKEN       "-rc"
 #define TARGET_BIT_RATE_TOKEN           "-tbr"
+#define VBV_MAX_RATE_TOKEN              "-vbv-maxrate"
+#define VBV_BUFFER_SIZE_TOKEN           "-vbv-bufsize"
+#define VBV_BUFFER_INIT_TOKEN           "-vbv-init"
+#define HRD_TOKEN                       "-hrd"
 #define MAX_QP_TOKEN                    "-max-qp"
 #define MIN_QP_TOKEN                    "-min-qp"
 #define TEMPORAL_ID					    "-temporal-id" // no Eval
@@ -169,7 +173,7 @@ static void SetNaluFile(const char *value, EbConfig_t *cfg)
     FOPEN(cfg->naluFile, value, "rb");
     if (cfg->naluFile)
         cfg->useNaluFile = EB_TRUE;
-    else 
+    else
         printf("Error: Nalu file: %s does not exist, won't use\n", value);
 };
 static void SetCfgSourceWidth                   (const char *value, EbConfig_t *cfg) {cfg->sourceWidth                      = strtoul(value, NULL, 0);};
@@ -216,6 +220,10 @@ static void SetEnableConstrainedIntra           (const char *value, EbConfig_t *
 static void SetCfgTune                          (const char *value, EbConfig_t *cfg) {cfg->tune                             = (uint8_t)strtoul(value, NULL, 0); };
 static void SetBitRateReduction                 (const char *value, EbConfig_t *cfg) {cfg->bitRateReduction                 = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetImproveSharpness                 (const char *value, EbConfig_t *cfg) {cfg->improveSharpness                 = (EB_BOOL)strtol(value,  NULL, 0);};
+static void SetVbvMaxrate                       (const char *value, EbConfig_t *cfg) { cfg->vbvMaxRate						= strtoul(value, NULL, 0);};
+static void SetVbvBufsize                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufsize						= strtoul(value, NULL, 0);};
+static void SetVbvBufInit                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufInit						= strtoul(value, NULL, 0);};
+static void SetHrdFlag                          (const char *value, EbConfig_t *cfg) { cfg->hrdFlag							= strtoul(value, NULL, 0);};
 static void SetVideoUsabilityInfo               (const char *value, EbConfig_t *cfg) {cfg->videoUsabilityInfo               = strtol(value,  NULL, 0);};
 static void SetHighDynamicRangeInput            (const char *value, EbConfig_t *cfg) {cfg->highDynamicRangeInput            = strtol(value,  NULL, 0);};
 static void SetAccessUnitDelimiter              (const char *value, EbConfig_t *cfg) {cfg->accessUnitDelimiter              = strtol(value,  NULL, 0);};
@@ -231,7 +239,7 @@ static void SetMasterDisplay                    (const char *value, EbConfig_t *
     if (cfg->useMasteringDisplayColorVolume)
         EB_STRCPY(cfg->masteringDisplayColorVolumeString, EB_STRLEN(value, MAX_STRING_LENGTH) + 1, value);
 };
-static void SetDolbyVisionProfile               (const char *value, EbConfig_t *cfg) { 
+static void SetDolbyVisionProfile               (const char *value, EbConfig_t *cfg) {
     if (strtoul(value, NULL, 0) != 0 || EB_STRCMP(value, "0") == 0)
         cfg->dolbyVisionProfile = (uint32_t)(10 * strtod(value, NULL));
 };
@@ -286,7 +294,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, OUTPUT_RECON_TOKEN, "ReconFile", SetCfgReconFile },
     { SINGLE_INPUT, USE_QP_FILE_TOKEN, "UseQpFile", SetCfgUseQpFile },
     { SINGLE_INPUT, QP_FILE_TOKEN, "QpFile", SetCfgQpFile },
-  
+
     // Interlaced Video
     { SINGLE_INPUT, INTERLACED_VIDEO_TOKEN, "InterlacedVideo", SetInterlacedVideo },
     // Do NOT move, the value is used in other entries
@@ -321,8 +329,6 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, FRAME_RATE_TOKEN, "FrameRate", SetFrameRate },
     { SINGLE_INPUT, FRAME_RATE_NUMERATOR_TOKEN, "FrameRateNumerator", SetFrameRateNumerator },
     { SINGLE_INPUT, FRAME_RATE_DENOMINATOR_TOKEN, "FrameRateDenominator", SetFrameRateDenominator },
-    { SINGLE_INPUT, INJECTOR_TOKEN, "Injector", SetInjector },
-    { SINGLE_INPUT, INJECTOR_FRAMERATE_TOKEN, "InjectorFrameRate", SetInjectorFrameRate },
 
     // Coding Structure
     { SINGLE_INPUT, HIERARCHICAL_LEVELS_TOKEN, "HierarchicalLevels", SetHierarchicalLevels },
@@ -333,6 +339,11 @@ config_entry_t config_entry[] = {
 
     // Quantization
     { SINGLE_INPUT, QP_TOKEN, "QP", SetCfgQp },
+    { SINGLE_INPUT, VBV_MAX_RATE_TOKEN, "vbvMaxRate", SetVbvMaxrate },
+    { SINGLE_INPUT, VBV_BUFFER_SIZE_TOKEN, "vbvBufsize", SetVbvBufsize },
+    { SINGLE_INPUT, HRD_TOKEN, "hrd", SetHrdFlag },
+    { SINGLE_INPUT, VBV_BUFFER_INIT_TOKEN, "vbvBufInit", SetVbvBufInit},
+
 
     // Deblock Filter
     { SINGLE_INPUT, LOOP_FILTER_DISABLE_TOKEN, "LoopFilterDisable", SetDisableDlfFlag },
@@ -348,11 +359,11 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, SEARCH_AREA_WIDTH_TOKEN, "SearchAreaWidth", SetCfgSearchAreaWidth },
     { SINGLE_INPUT, SEARCH_AREA_HEIGHT_TOKEN, "SearchAreaHeight", SetCfgSearchAreaHeight },
 
-    // MD Parameters         
+    // MD Parameters
     { SINGLE_INPUT, CONSTRAINED_INTRA_ENABLE_TOKEN, "ConstrainedIntra", SetEnableConstrainedIntra },
 
     // Rate Control
-    { SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "RateControlMode", SetRateControlMode },
+	{ SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "RateControlMode", SetRateControlMode },
     { SINGLE_INPUT, TARGET_BIT_RATE_TOKEN, "TargetBitRate", SetTargetBitRate },
     { SINGLE_INPUT, MAX_QP_TOKEN, "MaxQpAllowed", SetMaxQpAllowed },
     { SINGLE_INPUT, MIN_QP_TOKEN, "MinQpAllowed", SetMinQpAllowed },
@@ -392,7 +403,6 @@ config_entry_t config_entry[] = {
     // Latency
     { SINGLE_INPUT, INJECTOR_TOKEN, "Injector", SetInjector },
     { SINGLE_INPUT, INJECTOR_FRAMERATE_TOKEN, "InjectorFrameRate", SetInjectorFrameRate },
-
     { SINGLE_INPUT, SPEED_CONTROL_TOKEN, "SpeedControlFlag", SpeedControlFlag },
 
     // Annex A parameters
@@ -416,50 +426,20 @@ config_entry_t config_entry[] = {
 void EbConfigCtor(EbConfig_t *configPtr)
 {
     // File I/O
-    configPtr->configFile                               = NULL;
-    configPtr->inputFile                                = NULL;
-    configPtr->bitstreamFile                            = NULL;
-    configPtr->errorLogFile                             = stderr;
-    configPtr->reconFile                                = NULL;
-    configPtr->useQpFile                                = EB_FALSE;
-    configPtr->qpFile                                   = NULL;
+    configPtr->configFile                           = NULL;
+    configPtr->inputFile                            = NULL;
+    configPtr->bitstreamFile                        = NULL;
+    configPtr->errorLogFile                         = stderr;
+    configPtr->reconFile                            = NULL;
+    configPtr->bufferFile                           = NULL;
+    configPtr->useQpFile                            = EB_FALSE;
+    configPtr->qpFile                               = NULL;
 
-    configPtr->tileColumnCount                          = 1;
-    configPtr->tileRowCount                             = 1;
-    configPtr->tileSliceMode                            = 0;
-    configPtr->sceneChangeDetection                 = 1;
-    configPtr->rateControlMode                      = 0;
-    configPtr->lookAheadDistance                    = (uint32_t)~0;
-    configPtr->targetBitRate                        = 7000000;
-    configPtr->maxQpAllowed                         = 48;
-    configPtr->minQpAllowed                         = 10;
-    configPtr->baseLayerSwitchMode                  = 0;
-	  configPtr->encMode								              = 9;
-    configPtr->intraPeriod                          = -2;
-    configPtr->intraRefreshType                     = 1;
-	  configPtr->hierarchicalLevels					          = 3;
-	  configPtr->predStructure						            = 2;
-    configPtr->disableDlfFlag                       = EB_FALSE;
-    configPtr->enableSaoFlag                        = EB_TRUE;
-    configPtr->useDefaultMeHme                      = EB_TRUE;
-    configPtr->enableHmeFlag                        = EB_TRUE;
-    configPtr->searchAreaWidth                      = 16;
-    configPtr->searchAreaHeight                     = 7;
-    configPtr->constrainedIntra                     = EB_FALSE;
-    configPtr->tune                                 = 1; // OQ By Default
-    // Thresholds
-    configPtr->videoUsabilityInfo                   = 0;
-    configPtr->highDynamicRangeInput                = 0;
-    configPtr->accessUnitDelimiter                  = 0;
-    configPtr->bufferingPeriodSEI                   = 0;
-    configPtr->pictureTimingSEI                     = 0;
+    configPtr->y4m_input                            = EB_FALSE;
 
-    configPtr->bitRateReduction					    = EB_TRUE;
-    configPtr->improveSharpness                     = EB_TRUE;
-    configPtr->registeredUserDataSeiFlag            = EB_FALSE;
-    configPtr->unregisteredUserDataSeiFlag          = EB_FALSE;
-    configPtr->recoveryPointSeiFlag                 = EB_FALSE;
-    configPtr->enableTemporalId                     = 1;
+    configPtr->tileColumnCount                      = 1;
+    configPtr->tileRowCount                         = 1;
+    configPtr->tileSliceMode                        = 0;
 
     // SEI
     configPtr->maxCLL                               = 0;
@@ -480,145 +460,136 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->maxDisplayMasteringLuminance         = 0;
     configPtr->minDisplayMasteringLuminance         = 0;
 
+    // Encoding Presets
+    configPtr->encMode                              = 7;
+    //configPtr->latencyMode                          = 0; // Deprecated
+
+    configPtr->speedControlFlag                     = 0;
+
+    // Bit-depth
+    configPtr->encoderBitDepth                      = 8;
+    configPtr->compressedTenBitFormat               = 0;
+    configPtr->encoderColorFormat                   = EB_YUV420;
+
+    // Source Definitions
+    configPtr->sourceWidth                          = 0;
+    configPtr->sourceHeight                         = 0;
+    configPtr->inputPaddedWidth                     = 0;
+    configPtr->inputPaddedHeight                    = 0;
+    configPtr->framesToBeEncoded                    = 0;
+    configPtr->framesEncoded                        = 0;
+    configPtr->bufferedInput                        = -1;
+    configPtr->sequenceBuffer                       = 0;
+
+    // Annex A Definitions
+    configPtr->profile                              = 1;
+    configPtr->tier                                 = 0;
+    configPtr->level                                = 0;
+
+    // Frame Rate
+    configPtr->frameRate                            = 60;
+    configPtr->frameRateNumerator                   = 0;
+    configPtr->frameRateDenominator                 = 0;
+    configPtr->injector                             = 0;
+    configPtr->injectorFrameRate                    = 60 << 16;
+
+    // Interlaced Video
+    configPtr->interlacedVideo                      = EB_FALSE;
+    configPtr->separateFields                       = EB_FALSE;
+
+    // Coding Structure
+    configPtr->hierarchicalLevels                   = 3;
+    configPtr->baseLayerSwitchMode                  = 0;
+    configPtr->predStructure                        = 2;
+    configPtr->intraPeriod                          = -2;
+    configPtr->intraRefreshType                     = 1;
+
+    // DLF
+    configPtr->disableDlfFlag                       = EB_FALSE;
+
+    // Quantization
+    configPtr->qp                                   = 32;
+
+    // Sample Adaptive Offset
+    configPtr->enableSaoFlag                        = EB_TRUE;
+
+    // ME Tools
+    configPtr->useDefaultMeHme                      = EB_TRUE;
+    configPtr->enableHmeFlag                        = EB_TRUE;
+
+    // ME Parameters
+    configPtr->searchAreaWidth                      = 16;
+    configPtr->searchAreaHeight                     = 7;
+
+    // MD Parameters
+    configPtr->constrainedIntra                     = EB_FALSE;
+
+    // Rate Control
+    configPtr->rateControlMode                      = 0;
+    configPtr->targetBitRate                        = 7000000;
+    configPtr->maxQpAllowed                         = 48;
+    configPtr->minQpAllowed                         = 10;
+    configPtr->lookAheadDistance                    = (uint32_t)~0;
+    configPtr->sceneChangeDetection                 = 1;
+
+    // Tune: only OQ
+    configPtr->tune                                 = 1;
+
+    // Adaptive QP Params
+    configPtr->bitRateReduction                     = EB_FALSE;
+    configPtr->improveSharpness                     = EB_FALSE;
+
+    // Optional Features
+    configPtr->videoUsabilityInfo                   = 0;
+    configPtr->highDynamicRangeInput                = 0;
+    configPtr->accessUnitDelimiter                  = 0;
+    configPtr->bufferingPeriodSEI                   = 0;
+    configPtr->pictureTimingSEI                     = 0;
+    configPtr->registeredUserDataSeiFlag            = EB_FALSE;
+    configPtr->unregisteredUserDataSeiFlag          = EB_FALSE;
+    configPtr->recoveryPointSeiFlag                 = EB_FALSE;
+    configPtr->enableTemporalId                     = 1;
     configPtr->switchThreadsToRtPriority            = EB_TRUE;
     configPtr->fpsInVps                             = EB_TRUE;
     configPtr->unrestrictedMotionVector             = EB_TRUE;
 
-    // Encoding Presets
-    configPtr->encMode								    = 9;
-    //configPtr->latencyMode                              = 0; // Deprecated
-    configPtr->speedControlFlag                         = 0;
-
-    // Bit-depth
-    configPtr->encoderBitDepth                          = 8;
-    configPtr->compressedTenBitFormat			        = 0;
-    configPtr->encoderColorFormat                       = EB_YUV420;
-
-    // Source Definitions
-    configPtr->sourceWidth                              = 0;
-    configPtr->sourceHeight                             = 0;
-    configPtr->framesToBeEncoded                        = 0;
-    configPtr->bufferedInput                            = -1;
-
-    // Annex A Definitions
-    configPtr->profile                                  = 1;
-    configPtr->tier                                     = 0;
-    configPtr->level                                    = 0;
-
-    // Frame Rate
-    configPtr->frameRate                                = 60;
-    configPtr->frameRateNumerator                       = 0;
-    configPtr->frameRateDenominator                     = 0;
-    configPtr->injector                                 = 0;
-    configPtr->injectorFrameRate                        = 60 << 16;
-
-    // Interlaced Video
-    configPtr->interlacedVideo                          = EB_FALSE;
-    configPtr->separateFields                           = EB_FALSE;
-
-    // Coding Structure
-    configPtr->hierarchicalLevels					    = 3;
-    configPtr->baseLayerSwitchMode                      = 0;
-    configPtr->predStructure						    = 2;
-    configPtr->intraPeriod                              = -2;
-    configPtr->intraRefreshType                         = 1;
-
-    // Quantization
-    configPtr->qp                                       = 32;
-
-    // Sample Adaptive Offset
-    configPtr->enableSaoFlag                            = EB_TRUE;
-
-    // ME Tools
-    configPtr->useDefaultMeHme                          = EB_TRUE;
-    configPtr->enableHmeFlag                            = EB_TRUE;
-
-    // ME Parameters
-    configPtr->searchAreaWidth                          = 16;
-    configPtr->searchAreaHeight                         = 7;
-
-    // MD Parameters
-    configPtr->constrainedIntra                         = EB_FALSE;
-
-    // Rate Control
-    configPtr->rateControlMode                          = 0;
-    configPtr->targetBitRate                            = 7000000;
-    configPtr->maxQpAllowed                             = 48;
-    configPtr->minQpAllowed                             = 10;
-    configPtr->lookAheadDistance                        = (uint32_t)~0;
-    configPtr->sceneChangeDetection                     = 1;
-
-    // Tune
-    configPtr->tune                                     = 1;
-
-    // Adaptive QP Params
-    configPtr->bitRateReduction					        = EB_TRUE;
-    configPtr->improveSharpness                         = EB_TRUE;
-
-    // Optional Features
-    configPtr->videoUsabilityInfo                       = 0;
-    configPtr->highDynamicRangeInput                    = 0;
-    configPtr->accessUnitDelimiter                      = 0;
-    configPtr->bufferingPeriodSEI                       = 0;
-    configPtr->pictureTimingSEI                         = 0;
-    configPtr->registeredUserDataSeiFlag                = EB_FALSE;
-    configPtr->unregisteredUserDataSeiFlag              = EB_FALSE;
-    configPtr->recoveryPointSeiFlag                     = EB_FALSE;
-    configPtr->enableTemporalId                         = 1;
-    configPtr->switchThreadsToRtPriority                = EB_TRUE;
-    configPtr->fpsInVps                                 = EB_TRUE;
-    configPtr->maxCLL                                   = 0;
-    configPtr->maxFALL                                  = 0;
-    configPtr->useMasteringDisplayColorVolume           = EB_FALSE;
-    configPtr->displayPrimaryX[0]                       = 0;
-    configPtr->displayPrimaryX[1]                       = 0;
-    configPtr->displayPrimaryX[2]                       = 0;
-    configPtr->displayPrimaryY[0]                       = 0;
-    configPtr->displayPrimaryY[1]                       = 0;
-    configPtr->displayPrimaryY[2]                       = 0;
-    configPtr->whitePointX                              = 0;
-    configPtr->whitePointY                              = 0;
-    configPtr->maxDisplayMasteringLuminance             = 0;
-    configPtr->minDisplayMasteringLuminance             = 0;
-    configPtr->dolbyVisionProfile                       = 0;
-    configPtr->dolbyVisionRpuFile                       = NULL;
-    configPtr->useNaluFile                              = EB_FALSE;
-    configPtr->naluFile                                 = NULL;
-
     // Platform Specific Flags
-    configPtr->asmType                                  = 1;
-    configPtr->targetSocket                             = -1;
-    configPtr->logicalProcessors                        = 0;
+    configPtr->asmType                              = 1;
+    configPtr->targetSocket                         = -1;
+    configPtr->logicalProcessors                    = 0;
 
-    configPtr->inputPaddedWidth                         = 0;
-    configPtr->inputPaddedHeight                        = 0;
-    configPtr->sequenceBuffer                           = 0;
-    configPtr->disableDlfFlag                           = EB_FALSE;
+    // vbv
+    configPtr->vbvMaxRate                           = 0;
+    configPtr->vbvBufsize                           = 0;
+    configPtr->vbvBufInit                           = 90;
+    configPtr->hrdFlag                              = 0;
 
     // Testing
-    configPtr->testUserData                             = 0;
-    configPtr->eosFlag                                  = EB_FALSE;
+    configPtr->testUserData                         = 0;
+    configPtr->eosFlag                              = EB_FALSE;
 
     // Computational Performance Parameters
-    configPtr->performanceContext.libStartTime[0]       = 0;
-    configPtr->performanceContext.libStartTime[1]       = 0;
+    configPtr->performanceContext.libStartTime[0]   = 0;
+    configPtr->performanceContext.libStartTime[1]   = 0;
 
-    configPtr->performanceContext.encodeStartTime[0]    = 0;
-    configPtr->performanceContext.encodeStartTime[1]    = 0;
+    configPtr->performanceContext.encodeStartTime[0]= 0;
+    configPtr->performanceContext.encodeStartTime[1]= 0;
     
-    configPtr->performanceContext.totalExecutionTime    = 0;
-    configPtr->performanceContext.totalEncodeTime       = 0;
-    configPtr->performanceContext.frameCount            = 0;
-    configPtr->performanceContext.averageSpeed          = 0;
-    configPtr->performanceContext.startsTime            = 0;
-    configPtr->performanceContext.startuTime            = 0;
-    configPtr->performanceContext.maxLatency            = 0;
-    configPtr->performanceContext.totalLatency          = 0;
-    configPtr->performanceContext.byteCount             = 0;
+    configPtr->performanceContext.totalExecutionTime= 0;
+    configPtr->performanceContext.totalEncodeTime   = 0;
+    configPtr->performanceContext.frameCount        = 0;
+    configPtr->performanceContext.averageSpeed      = 0;
+    configPtr->performanceContext.startsTime        = 0;
+    configPtr->performanceContext.startuTime        = 0;
+    configPtr->performanceContext.maxLatency        = 0;
+    configPtr->performanceContext.totalLatency      = 0;
+    configPtr->performanceContext.byteCount         = 0;
 
-    configPtr->stopEncoder                              = EB_FALSE;
-    configPtr->processedFrameCount                      = 0;
-    configPtr->processedByteCount                       = 0;
+    configPtr->channelId                            = 0;
+    configPtr->activeChannelCount                   = 0;
+    configPtr->stopEncoder                          = EB_FALSE;
+    configPtr->processedFrameCount                  = 0;
+    configPtr->processedByteCount                   = 0;
 
     return;
 }
@@ -921,7 +892,7 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
 
 
 #define MAX_LCU_SIZE                                64
-    
+
     int32_t pictureWidthInLcu = (config->sourceWidth + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE;
     int32_t pictureHeightInLcu = (config->sourceHeight + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE;
     int32_t maxTileColumnCount = (pictureWidthInLcu + 3) / 4;
@@ -966,7 +937,7 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
             }
         }
 
-    }   
+    }
 
     if (config->separateFields > 1) {
         fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid SeperateFields Input\n", channelNumber + 1);

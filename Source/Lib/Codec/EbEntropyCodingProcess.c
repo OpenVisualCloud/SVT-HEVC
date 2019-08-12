@@ -356,6 +356,7 @@ void* EntropyCodingKernel(void *inputPtr)
         EbGetFullObject(
             contextPtr->encDecInputFifoPtr,
             &encDecResultsWrapperPtr);
+        EB_CHECK_END_OBJ(encDecResultsWrapperPtr);
         encDecResultsPtr       = (EncDecResults_t*) encDecResultsWrapperPtr->objectPtr;
         pictureControlSetPtr   = (PictureControlSet_t*) encDecResultsPtr->pictureControlSetWrapperPtr->objectPtr;
         sequenceControlSetPtr  = (SequenceControlSet_t*) pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;

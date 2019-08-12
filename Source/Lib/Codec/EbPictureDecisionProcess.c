@@ -372,7 +372,12 @@ EB_U8 PictureLevelSubPelSettingsOq(
     }
     else {
 		if (inputResolution >= INPUT_SIZE_4K_RANGE) {
-			subPelMode = (temporalLayerIndex == 0) ? 1 : 0;
+            if (encMode > ENC_MODE_10) {
+                subPelMode = 0;
+            }
+            else {
+                subPelMode = (temporalLayerIndex == 0) ? 1 : 0;
+            }
 		}
 		else {
 			subPelMode = isUsedAsReferenceFlag ? 1 : 0;
@@ -595,9 +600,18 @@ EB_ERRORTYPE SignalDerivationMultiProcessesOq(
 			pictureControlSetPtr->depthMode = PICT_FULL85_DEPTH_MODE;
 		}
 	}
-    else {
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_10) {
         if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
             pictureControlSetPtr->depthMode = PICT_FULL84_DEPTH_MODE;
+        }
+        else {
+            pictureControlSetPtr->depthMode = PICT_LCU_SWITCH_DEPTH_MODE;
+        }
+    }
+
+    else {
+        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+            pictureControlSetPtr->depthMode = PICT_BDP_DEPTH_MODE;
         }
         else {
             pictureControlSetPtr->depthMode = PICT_LCU_SWITCH_DEPTH_MODE;
@@ -650,7 +664,7 @@ EB_ERRORTYPE SignalDerivationMultiProcessesOq(
 	  pictureControlSetPtr->cu16x16Mode = CU_16x16_MODE_0;
 
     // Set Skip OIS 8x8 Flag
-    pictureControlSetPtr->skipOis8x8 = EB_FALSE;
+    pictureControlSetPtr->skipOis8x8 = (pictureControlSetPtr->sliceType == EB_I_PICTURE && (pictureControlSetPtr->encMode <= ENC_MODE_10)) ? EB_FALSE : EB_TRUE;
 
     return return_error;
 }
@@ -871,6 +885,7 @@ void* PictureDecisionKernel(void *inputPtr)
         EbGetFullObject(
             contextPtr->pictureAnalysisResultsInputFifoPtr,
             &inputResultsWrapperPtr);
+        EB_CHECK_END_OBJ(inputResultsWrapperPtr);
         
         inputResultsPtr         = (PictureAnalysisResults_t*)   inputResultsWrapperPtr->objectPtr;     
         pictureControlSetPtr    = (PictureParentControlSet_t*)  inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;
@@ -1293,7 +1308,6 @@ void* PictureDecisionKernel(void *inputPtr)
                         else {
                             pictureControlSetPtr->decodeOrder = pictureControlSetPtr->pictureNumber;
                         }
-
                         EbBlockOnMutex(encodeContextPtr->terminatingConditionsMutex);
 
                         encodeContextPtr->terminatingSequenceFlagReceived = (pictureControlSetPtr->endOfSequenceFlag == EB_TRUE) ? 
