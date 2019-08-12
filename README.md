@@ -100,22 +100,16 @@ In order to run the highest resolution supported by the encoder, at least 64GB o
 
     ``` bash
     cd Build/linux
-    ./build.sh [release||debug] [static||shared] [install]
+    ./build.sh [release|debug] [static|shared] [install]
     # Requires sudo permission for installing
-    # [] means optional, `||` means either the first or the other option.
-    # Does not work with shells lacking array support at the time of writting.
+    # Run './build.sh -h' to see the full help
     ```
 
   - or run the commands directly
 
     ``` bash
-    cd Build
-    cmake .. -DCMAKE_BUILD_TYPE=<Release||Debug>
-    make -j $(nproc)
-    sudo make install
+    mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=<Release|Debug> && make -j $(nproc) && sudo make install
     ```
-
-  - Run `./build.sh -h` to see the full help
 
 - __Sample Binaries location__
   - Binaries can be found under `$REPO_DIR/Bin/Release`
