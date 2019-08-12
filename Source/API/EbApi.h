@@ -9,15 +9,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <EbApiVersion.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
-
-// API Version
-#define SVT_VERSION_MAJOR       1
-#define SVT_VERSION_MINOR       4
-#define SVT_VERSION_PATCHLEVEL  0
 
 #define EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT     2
 #define EB_HME_SEARCH_AREA_ROW_MAX_COUNT        2
