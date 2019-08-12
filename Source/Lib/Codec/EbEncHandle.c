@@ -3053,6 +3053,12 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
+
+    if (config->lowLevelVbv == 1 && ((config->vbvBufsize <= 0) || (config->vbvMaxrate <= 0))) {
+        SVT_LOG("SVT [Error]: Instance %u: Enabling Low level vbv requires Frame Level Vbv to be enabled", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
     if (config->tileColumnCount < 1 || config->tileColumnCount > 20) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid tile column count\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;

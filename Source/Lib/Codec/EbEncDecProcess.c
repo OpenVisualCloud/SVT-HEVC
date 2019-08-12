@@ -4393,8 +4393,7 @@ void* EncDecKernel(void *inputPtr)
 
                     }
                     //Block level vbv tuning starts here
-                    if (sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate && sequenceControlSetPtr->staticConfig.lowLevelVbv)
-                    {
+                    if (sequenceControlSetPtr->staticConfig.lowLevelVbv) {
                         EbBlockOnMutex(pictureControlSetPtr->rowStats[yLcuIndex]->rowUpdateMutex);
                         rowPtr = pictureControlSetPtr->rowStats[yLcuIndex];
                         rowPtr->rowIndex = yLcuIndex;
@@ -4431,16 +4430,15 @@ void* EncDecKernel(void *inputPtr)
                     // Encode Pass
                     EncodePass(                 // HT done 
                         sequenceControlSetPtr,
-                        pictureControlSetPtr,
-                        lcuPtr,
-                        lcuIndex,
-                        lcuOriginX,
-                        lcuOriginY,
-                        lcuPtr->qp,
-                        enableSaoFlag,
-                        contextPtr);
-                    if (sequenceControlSetPtr->staticConfig.vbvBufsize && sequenceControlSetPtr->staticConfig.vbvMaxrate && sequenceControlSetPtr->staticConfig.lowLevelVbv)
-                    {
+                            pictureControlSetPtr,
+                            lcuPtr,
+                            lcuIndex,
+                            lcuOriginX,
+                            lcuOriginY,
+                            lcuPtr->qp,
+                            enableSaoFlag,
+                            contextPtr);
+                    if (sequenceControlSetPtr->staticConfig.lowLevelVbv) {
                         /*Entropy Estimation for LCU*/
                         tempWrittenBitsBeforeQuantizedCoeff = ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->entropyCodingInfo[contextPtr->tileIndex]->tempEntropyCoderPtr))->writtenBitsCount +
                             32 - ((CabacEncodeContext_t*)pictureControlSetPtr->entropyCodingInfo[contextPtr->tileIndex]->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
