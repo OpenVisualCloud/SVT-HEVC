@@ -172,13 +172,13 @@ extern rsize_t strnlen_ss(const char *s, rsize_t smax);
 
 #define MAX_STRING_LENGTH       1024
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #define FOPEN(f,s,m) fopen_s(&f,s,m)
 #else
 #define FOPEN(f,s,m) f=fopen(s,m)
 #endif
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #define EB_STRTOK(str,delim,next) strtok_s((char*)str,(const char*)delim,(char**)next)
 #else
 #define EB_STRTOK(str,delim,next) strtok_r((char*)str,(const char*)delim,(char**)next)
