@@ -53,7 +53,6 @@ add_library(SvtHevcEnc
     EbMcp.h
     EbMdRateEstimation.h
     EbMeSadCalculation.h
-	EbMeSatdCalculation.h
     EbModeDecision.h
     EbModeDecisionConfiguration.h
     EbModeDecisionConfigurationProcess.h

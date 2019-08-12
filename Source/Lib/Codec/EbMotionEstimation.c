@@ -16,7 +16,7 @@
 #include "EbReferenceObject.h"
 #include "EbAvcStyleMcp.h"
 #include "EbMeSadCalculation.h"
-#include "EbMeSatdCalculation.h"
+#include "EbMeSatdCalculation_C.h"
 
 #include "EbIntraPrediction.h"
 #include "EbLambdaRateTables.h"
@@ -3745,6 +3745,7 @@ EB_ERRORTYPE MotionEstimateLcu(
 	EB_U64                  ref0Poc = 0;
 	EB_U64                  ref1Poc = 0;
                            
+
 	EB_S16                  hmeLevel1SearchAreaInWidth;
 	EB_S16                  hmeLevel1SearchAreaInHeight;
 
@@ -4459,7 +4460,7 @@ EB_ERRORTYPE MotionEstimateLcu(
 			referenceObject = (EbPaReferenceObject_t*)pictureControlSetPtr->refPaPicPtrArray[0]->objectPtr;
 			refPicPtr = (EbPictureBufferDesc_t*)referenceObject->inputPaddedPicturePtr;
 			searchRegionIndex = (EB_S16)refPicPtr->originX + originX + ((EB_S16)refPicPtr->originY + originY) * refPicPtr->strideY;
-			pictureControlSetPtr->rcMESatdDistortion[lcuIndex] += SatdCalculation_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1]
+			pictureControlSetPtr->rcMESatdDistortion[lcuIndex] += SatdCalculation_16x16
 			(contextPtr->lcuSrcPtr, contextPtr->lcuSrcStride, &(refPicPtr->bufferY[searchRegionIndex]), refPicPtr->strideY);
 			pictureControlSetPtr->rcMEdistortion[lcuIndex] += pictureControlSetPtr->meResults[lcuIndex][puIndex].distortionDirection[0].distortion;
 		}
@@ -5132,8 +5133,7 @@ EB_ERRORTYPE OpenLoopIntraSearchLcu(
 						(EB_U32)EB_INTRA_PLANAR);
 
 					//Distortion
-					oisCuPtr[0].distortion = SatdCalculation_16x16_funcPtrArray[(ASM_TYPES & AVX2_MASK) && 1](
-					//oisCuPtr[0].distortion = (EB_U32)NxMSadKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][cuSize >> 3]( // Always SAD without weighting 
+					oisCuPtr[0].distortion = SatdCalculation_16x16(
 						&(inputPtr->bufferY[(inputPtr->originY + cuOriginY) * inputPtr->strideY + (inputPtr->originX + cuOriginX)]),
 						inputPtr->strideY,
 						&(contextPtr->meContextPtr->lcuBuffer[0]),
