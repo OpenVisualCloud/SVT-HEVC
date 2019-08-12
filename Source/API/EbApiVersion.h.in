@@ -11,9 +11,9 @@ extern "C" {
 #endif // __cplusplus
 
 // API Version
-#define SVT_VERSION_MAJOR       (@SVT_VERSION_MAJOR@)
-#define SVT_VERSION_MINOR       (@SVT_VERSION_MINOR@)
-#define SVT_VERSION_PATCHLEVEL  (@SVT_VERSION_PATCHLEVEL@)
+#define SVT_VERSION_MAJOR       (@SVT_HEVC_VERSION_MAJOR@)
+#define SVT_VERSION_MINOR       (@SVT_HEVC_VERSION_MINOR@)
+#define SVT_VERSION_PATCHLEVEL  (@SVT_HEVC_VERSION_PATCHLEVEL@)
 
 #define	SVT_CHECK_VERSION(major,minor,patch)	\
     (SVT_VERSION_MAJOR > (major) || \
