@@ -69,6 +69,7 @@ add_library(SvtHevcEnc
     EbPacketizationProcess.h
     EbPacketizationReorderQueue.h
     EbPackUnPack.h
+    EbPerFramePrediction.h
     EbPictureAnalysisProcess.h
     EbPictureAnalysisResults.h
     EbPictureBufferDesc.h
@@ -121,6 +122,7 @@ add_library(SvtHevcEnc
     EbMotionEstimationResults.c
     EbPacketizationProcess.c
     EbPacketizationReorderQueue.c
+    EbPerFramePrediction.c
     EbPictureAnalysisProcess.c
     EbPictureAnalysisResults.c
     EbPictureBufferDesc.c
