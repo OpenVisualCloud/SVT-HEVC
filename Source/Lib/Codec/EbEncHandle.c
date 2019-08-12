@@ -4078,10 +4078,16 @@ EB_ERRORTYPE InitH265EncoderHandle(
     EB_COMPONENTTYPE  *h265EncComponent        = (EB_COMPONENTTYPE*) hComponent;
 
     printf("SVT [version]:\tSVT-HEVC Encoder Lib v%d.%d.%d\n", SVT_VERSION_MAJOR, SVT_VERSION_MINOR,SVT_VERSION_PATCHLEVEL);
-#if ( defined( _MSC_VER ) && (_MSC_VER < 1910) )
+#ifdef _MSC_VER
+#if _MSC_VER < 1910
     printf("SVT [build]  : Visual Studio 2013");
-#elif ( defined( _MSC_VER ) && (_MSC_VER >= 1910) )
+#elif (_MSC_VER >= 1910) && (_MSC_VER < 1920)
     printf("SVT [build]  :\tVisual Studio 2017");
+#elif (_MSC_VER >= 1920)
+    printf("SVT [build]  :\tVisual Studio 2019");
+#else
+    printf("SVT [build]  :\tUnknown Visual Studio Version");
+#endif
 #elif defined(__GNUC__)
     printf("SVT [build]  :\tGCC %s\t", __VERSION__);
 #else
