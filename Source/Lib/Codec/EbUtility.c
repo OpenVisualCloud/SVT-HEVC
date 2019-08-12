@@ -3,26 +3,14 @@
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
 
-
-#include "EbUtility.h"
-#ifdef _WIN32
-#include "EbDefinitions.h"
-//#if  (WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
 #include <time.h>
-//#endif
-#elif __linux__
-#include <stdio.h>
-#include <stdlib.h>
-#include "EbDefinitions.h"
+#ifndef _WIN32
 //#if   (LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
 #include <sys/time.h>
-#include <time.h>
 //#endif
-
-#else
-#error OS/Platform not supported.
 #endif
-
+#include "EbUtility.h"
+#include "EbDefinitions.h"
 
 /*****************************************
  * Z-Order
@@ -152,8 +140,8 @@ void ZOrderIncrementWithLevel(
 }
 
 static CodedUnitStats_t CodedUnitStatsArray[] = {
-    
-//   Depth       Size      SizeLog2     OriginX    OriginY   cuNumInDepth   Index                                  
+
+//   Depth       Size      SizeLog2     OriginX    OriginY   cuNumInDepth   Index
     {0,           64,         6,           0,         0,        0     ,   0    },   // 0
     {1,           32,         5,           0,         0,        0     ,   1    },   // 1
     {2,           16,         4,           0,         0,        0     ,   1    },   // 2
@@ -366,7 +354,7 @@ EB_U64 Log2fHighPrecision(EB_U64 x, EB_U8 precision)
 
 static const MiniGopStats_t MiniGopStatsArray[] = {
 
-	//	HierarchicalLevels	StartIndex	EndIndex	Lenght	miniGopIndex	                                
+	//	HierarchicalLevels	StartIndex	EndIndex	Lenght	miniGopIndex
 	{ 5,  0, 31, 32 },	// 0
 	{ 4,  0, 15, 16 },	// 1
 	{ 3,  0,  7,  8 },	// 2
@@ -474,6 +462,3 @@ void EbComputeOverallElapsedTimeMs(unsigned long long Startseconds, unsigned lon
 #endif
 
 }
-
-
-
