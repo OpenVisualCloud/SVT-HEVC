@@ -375,90 +375,64 @@ static const MiniGopStats_t MiniGopStatsArray[] = {
 /**************************************************************
 * Get Mini GOP Statistics
 **************************************************************/
-const MiniGopStats_t* GetMiniGopStats(const EB_U32 miniGopIndex)
-{
-	return &MiniGopStatsArray[miniGopIndex];
+const MiniGopStats_t* GetMiniGopStats(const EB_U32 miniGopIndex) {
+    return &MiniGopStatsArray[miniGopIndex];
 }
 
-
 void EbStartTime(unsigned long long *Startseconds, unsigned long long *Startuseconds) {
-
-#if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
+#ifdef _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
+    *Startseconds = (unsigned long long)clock();
+    (void)(*Startuseconds);
+#else //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     struct timeval start;
     gettimeofday(&start, NULL);
     *Startseconds = start.tv_sec;
     *Startuseconds = start.tv_usec;
-#elif _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
-    *Startseconds = (unsigned long long)clock();
-    (void)(*Startuseconds);
-#else
-    (void)(*Startuseconds);
-    (void)(*Startseconds);
 #endif
-
 }
 
 void EbFinishTime(unsigned long long *Finishseconds, unsigned long long *Finishuseconds) {
-
-#if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
+#ifdef _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
+    *Finishseconds = (unsigned long long)clock();
+    (void)(*Finishuseconds);
+#else //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     struct timeval finish;
     gettimeofday(&finish, NULL);
     *Finishseconds = finish.tv_sec;
     *Finishuseconds = finish.tv_usec;
-#elif _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
-    *Finishseconds = (unsigned long long)clock();
-    (void)(*Finishuseconds);
-#else
-    (void)(*Finishuseconds);
-    (void)(*Finishseconds);
 #endif
-
 }
-void EbComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration)
-{
-#if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
+
+void EbComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration) {
+#ifdef _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
+    //double  duration;
+    *duration = (double)(Finishseconds - Startseconds) / CLOCKS_PER_SEC;
+    //SVT_LOG("\nElapsed time: %3.3f seconds\n", *duration);
+    (void)(Startuseconds);
+    (void)(Finishuseconds);
+#else //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     long   mtime, seconds, useconds;
     seconds = Finishseconds - Startseconds;
     useconds = Finishuseconds - Startuseconds;
     mtime = ((seconds) * 1000 + useconds / 1000.0) + 0.5;
     *duration = (double)mtime / 1000;
     //SVT_LOG("\nElapsed time: %3.3ld seconds\n", mtime/1000);
-#elif _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
+#endif
+}
+
+void EbComputeOverallElapsedTimeMs(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration) {
+#ifdef _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
     //double  duration;
-    *duration = (double)(Finishseconds - Startseconds) / CLOCKS_PER_SEC;
+    *duration = (double)(Finishseconds - Startseconds);
     //SVT_LOG("\nElapsed time: %3.3f seconds\n", *duration);
     (void)(Startuseconds);
     (void)(Finishuseconds);
-#else
-    (void)(Startuseconds);
-    (void)(Startseconds);
-    (void)(Finishuseconds);
-    (void)(Finishseconds);
-
-#endif
-
-}
-void EbComputeOverallElapsedTimeMs(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration)
-{
-#if __linux__ //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
+#else //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
     long   mtime, seconds, useconds;
     seconds = Finishseconds - Startseconds;
     useconds = Finishuseconds - Startuseconds;
     mtime = ((seconds) * 1000 + useconds / 1000.0) + 0.5;
     *duration = (double)mtime;
     //SVT_LOG("\nElapsed time: %3.3ld seconds\n", mtime/1000);
-#elif _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
-    //double  duration;
-    *duration = (double)(Finishseconds - Startseconds);
-    //SVT_LOG("\nElapsed time: %3.3f seconds\n", *duration);
-    (void)(Startuseconds);
-    (void)(Finishuseconds);
-#else
-    (void)(Startuseconds);
-    (void)(Startseconds);
-    (void)(Finishuseconds);
-    (void)(Finishseconds);
-
 #endif
-
 }
