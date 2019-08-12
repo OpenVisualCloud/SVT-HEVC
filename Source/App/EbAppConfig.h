@@ -10,18 +10,14 @@
 
 #include "EbApi.h"
 
-#ifdef __GNUC__
-#define fseeko64 fseek
-#define ftello64 ftell
-#endif
 // Define Cross-Platform 64-bit fseek() and ftell()
-#ifdef _MSC_VER
+#ifdef _WIN32
 typedef __int64 off64_t;
 #define fseeko64 _fseeki64
 #define ftello64 _ftelli64
-
-#elif _WIN32 // MinGW
-
+#elif __GNUC__
+#define fseeko64 fseek
+#define ftello64 ftell
 #endif
 
 #ifndef _RSIZE_T_DEFINED
@@ -310,7 +306,7 @@ typedef struct EbConfig_s
      ****************************************/
     uint32_t               searchAreaWidth;
     uint32_t               searchAreaHeight;
-    
+
     /****************************************
      * MD Parameters
      ****************************************/
