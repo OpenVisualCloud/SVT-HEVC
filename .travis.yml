@@ -36,6 +36,14 @@ stages:
   - name: Coveralls And Valgrind
     if: type != pull_request
 before_install:
+  - |
+    if [ "$(uname -s)" == "Darwin" ]; then
+      sysctl -n machdep.cpu.brand_string
+      sysctl machdep.cpu.features
+      sysctl machdep.cpu.leaf7_features
+    elif [ -f "/proc/cpuinfo" ]; then
+      grep -Ei " sse*| ssse*| avx|model name" /proc/cpuinfo  | sort -u
+    fi
   - "sudo chown -R travis: $HOME/.ccache"
   - export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig PATH="/usr/local/opt/ccache/libexec:$PATH"
   - wget -nc https://raw.githubusercontent.com/OpenVisualCloud/SVT-AV1-Resources/master/video.tar.gz || wget -nc http://randomderp.com/video.tar.gz
