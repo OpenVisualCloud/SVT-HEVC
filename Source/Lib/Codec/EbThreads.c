@@ -122,6 +122,13 @@ EB_ERRORTYPE EbDestroyThread(
 /***************************************
  * EbCreateSemaphore
  ***************************************/
+#if defined(__APPLE__)
+static int32_t semaphore_id(void)
+{
+    static unsigned id = 0;
+    return id++;
+}
+#endif
 EB_HANDLE EbCreateSemaphore(
     EB_U32 initialCount,
     EB_U32 maxCount)
@@ -135,15 +142,25 @@ EB_HANDLE EbCreateSemaphore(
                           initialCount,                   // initial semaphore count
                           maxCount,                       // maximum semaphore count
                           NULL);                          // semaphore is not named
+    return semaphoreHandle;
+#elif defined(__APPLE__)
+    char name[15];
+    sprintf(name, "/sem_%05d_%03d", getpid(), semaphore_id());
+    sem_t *s = sem_open(name, O_CREAT | O_EXCL, 0644, initial_count);
+    if (s == SEM_FAILED) {
+        perror ("Error at sem_open");
+        return NULL;
+    }
+    sem_unlink(name);
+    return s;
 #else
     semaphoreHandle = (sem_t*) malloc(sizeof(sem_t));
     sem_init(
         (sem_t*) semaphoreHandle,       // semaphore handle
         0,                              // shared semaphore (not local)
         initialCount);                  // initial count
-#endif // _WIN32
-
     return semaphoreHandle;
+#endif // _WIN32
 }
 
 /***************************************
@@ -194,6 +211,8 @@ EB_ERRORTYPE EbDestroySemaphore(
 
 #ifdef _WIN32
     return_error = CloseHandle((HANDLE) semaphoreHandle) ? EB_ErrorNone : EB_ErrorDestroySemaphoreFailed;
+#elif defined(__APPLE__)
+    return_error = sem_close(semaphore_handle);
 #else
     return_error = sem_destroy((sem_t*) semaphoreHandle) ? EB_ErrorDestroySemaphoreFailed : EB_ErrorNone;
     free(semaphoreHandle);
