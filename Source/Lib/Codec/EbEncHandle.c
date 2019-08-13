@@ -130,8 +130,8 @@ typedef struct logicalProcessorGroup {
     uint32_t num;
     uint32_t group[1024];
 }processorGroup;
-#define MAX_PROCESSOR_GROUP 16
-processorGroup                   lpGroup[MAX_PROCESSOR_GROUP];
+#define INITIAL_PROCESSOR_GROUP 16
+processorGroup                  *lpGroup;
 #endif
 
 /**************************************
@@ -383,9 +383,10 @@ EB_ERRORTYPE InitThreadManagmentParams(){
     const char* PHYSICALID = "physical id";
     int processor_id_len = strnlen_ss(PROCESSORID, 128);
     int physical_id_len = strnlen_ss(PHYSICALID, 128);
+	int maxSize = INITIAL_PROCESSOR_GROUP;
     if (processor_id_len < 0 || processor_id_len >= 128) return EB_ErrorInsufficientResources;
     if (physical_id_len < 0 || physical_id_len >= 128) return EB_ErrorInsufficientResources;
-    memset(lpGroup, 0, 16* sizeof(processorGroup));
+	memset(lpGroup, 0, 16* sizeof(processorGroup));
 
     FILE *fin = fopen("/proc/cpuinfo", "r");
     if (fin) {
@@ -401,12 +402,16 @@ EB_ERRORTYPE InitThreadManagmentParams(){
                 char* p = line + physical_id_len;
                 while(*p < '0' || *p > '9') p++;
                 socket_id = strtol(p, NULL, 0);
-                if (socket_id < 0 || socket_id > 15) {
+                if (socket_id < 0) {
                     fclose(fin);
                     return EB_ErrorInsufficientResources;
                 }
                 if (socket_id + 1 > numGroups)
                     numGroups = socket_id + 1;
+				if (socket_id > maxSize) {
+					maxSize = maxSize+16;
+					lpGroup = realloc(lpGroup,maxSize*sizeof(processorGroup));
+				}
                 lpGroup[socket_id].group[lpGroup[socket_id].num++] = processor_id;
             }
         }
@@ -428,6 +433,7 @@ static EB_ERRORTYPE EbEncHandleCtor(
 {
     EB_U32  instanceIndex;
     EB_ERRORTYPE return_error = EB_ErrorNone;
+
     // Allocate Memory
     EbEncHandle_t *encHandlePtr = (EbEncHandle_t*) malloc(sizeof(EbEncHandle_t));
     *encHandleDblPtr = encHandlePtr;
@@ -437,6 +443,8 @@ static EB_ERRORTYPE EbEncHandleCtor(
     encHandlePtr->memoryMap             = (EbMemoryMapEntry*) malloc(sizeof(EbMemoryMapEntry) * MAX_NUM_PTR);
     encHandlePtr->memoryMapIndex        = 0;
 	encHandlePtr->totalLibMemory		= sizeof(EbEncHandle_t) + sizeof(EbMemoryMapEntry) * MAX_NUM_PTR;
+
+    lpGroup = (processorGroup*)malloc(sizeof(processorGroup)*INITIAL_PROCESSOR_GROUP);
 
     // Save Memory Map Pointers
     totalLibMemory                      = &encHandlePtr->totalLibMemory;
@@ -1587,6 +1595,9 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             //(void)(encHandlePtr);
         }
     }
+
+	free(lpGroup);
+
     return return_error;
 }
 
