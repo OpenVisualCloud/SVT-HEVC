@@ -219,11 +219,11 @@ typedef struct LargestCodingUnit_s {
 typedef struct RCStatRow_s
 {
     EB_U16                          rowIndex;
-    EB_U32                          numEncodedCUs;             /* Addr of last encoded LCU in row */
     EB_U32                          encodedBits;               /* sum of 'totalBits' of encoded LCUs */
     EB_U32                          predictedBits;
     EB_U32                          rowQp;
     EB_U32                          totalCUEncoded;             /*Tracks number of LCUs encoded in each row*/
+    EB_U32                          lastEncodedCU;              /*Tracks the address of last encoded CU*/
     EB_HANDLE                       rowUpdateMutex;
 }RCStatRow_t;
 

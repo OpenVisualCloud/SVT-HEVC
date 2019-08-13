@@ -29,11 +29,11 @@ EB_ERRORTYPE RCStatRowCtor(
     EB_MALLOC(RCStatRow_t*, rcStatRowPtr, sizeof(RCStatRow_t), EB_N_PTR);
     *rcStatRowDblPtr = rcStatRowPtr;
     rcStatRowPtr->rowIndex = rowIndex;
-    rcStatRowPtr->numEncodedCUs = 0;
     rcStatRowPtr->predictedBits = 0;
     rcStatRowPtr->encodedBits = 0;
     rcStatRowPtr->rowQp = 0;
     rcStatRowPtr->totalCUEncoded = 0;
+    rcStatRowPtr->lastEncodedCU = 0;
     EB_CREATEMUTEX(EB_HANDLE, rcStatRowPtr->rowUpdateMutex, sizeof(EB_HANDLE), EB_MUTEX);
     if (return_error == EB_ErrorInsufficientResources) {
         return EB_ErrorInsufficientResources;
@@ -90,7 +90,7 @@ EB_ERRORTYPE LargestCodingUnitCtor(
     largestCodingUnitPtr->proxytotalBits                = 0;
     largestCodingUnitPtr->rowInd                        = 0;
     largestCodingUnitPtr->intraSadInterval              = 0;
-    largestCodingUnitPtr->intraSadInterval              = 0;
+    largestCodingUnitPtr->interSadInterval              = 0;
     EB_MALLOC(CodingUnit_t**, largestCodingUnitPtr->codedLeafArrayPtr, sizeof(CodingUnit_t*) * CU_MAX_COUNT, EB_N_PTR);
     for(codedLeafIndex=0; codedLeafIndex < CU_MAX_COUNT; ++codedLeafIndex) {
         EB_MALLOC(CodingUnit_t*, largestCodingUnitPtr->codedLeafArrayPtr[codedLeafIndex], sizeof(CodingUnit_t) , EB_N_PTR);
