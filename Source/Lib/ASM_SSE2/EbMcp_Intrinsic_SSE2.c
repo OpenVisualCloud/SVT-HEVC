@@ -6,34 +6,7 @@
 #include "EbDefinitions.h"
 #include "EbMcp_SSE2.h"
 
-#ifdef __linux__
-#ifndef __cplusplus
-__attribute__((visibility("hidden")))
-#endif
-#endif
-
-
-#ifdef __linux__
-#ifndef __cplusplus
-__attribute__((visibility("hidden")))
-#endif
-#endif
-
-#ifdef __linux__
-#ifndef __cplusplus
-__attribute__((visibility("hidden")))
-#endif
-#endif
-
-
-#ifdef __linux__
-#ifndef __cplusplus
-__attribute__((visibility("hidden")))
-#endif
-#endif
-
-
-#ifdef __linux__
+#ifdef __GNUC__
 #ifndef __cplusplus
 __attribute__((visibility("hidden")))
 #endif
@@ -84,6 +57,11 @@ EB_ALIGN(16) const EB_S16 IntraPredictionConst_SSE2[344]= {
     32, 32, 32, 32, 32, 32, 32, 32,
 };
 
+#ifdef __GNUC__
+#ifndef __cplusplus
+__attribute__((visibility("hidden")))
+#endif
+#endif
 void LumaInterpolationCopy16bit_SSE2(
     EB_U16               *refPic,
     EB_U32                srcStride,
@@ -97,8 +75,12 @@ void LumaInterpolationCopy16bit_SSE2(
     PictureCopyKernel_SSE2((EB_BYTE)refPic, srcStride*sizeof(EB_U16), (EB_BYTE)dst, dstStride*sizeof(EB_U16), puWidth*sizeof(EB_U16), puHeight);
 }
 
-
- void ChromaInterpolationCopy16bit_SSE2(
+#ifdef __GNUC__
+#ifndef __cplusplus
+__attribute__((visibility("hidden")))
+#endif
+#endif
+void ChromaInterpolationCopy16bit_SSE2(
     EB_U16*               refPic,
     EB_U32                srcStride,
     EB_U16*               dst,
@@ -114,7 +96,3 @@ void LumaInterpolationCopy16bit_SSE2(
     (void)fracPosy;
     PictureCopyKernel_SSE2((EB_BYTE)refPic, srcStride*sizeof(EB_U16), (EB_BYTE)dst, dstStride*sizeof(EB_U16), puWidth*sizeof(EB_U16), puHeight);
 }
-
-
-
-
