@@ -135,11 +135,9 @@ EB_HANDLE EbCreateSemaphore(
     EB_U32 initialCount,
     EB_U32 maxCount)
 {
-    EB_HANDLE semaphoreHandle = NULL;
     (void) maxCount;
-
 #ifdef _WIN32
-    semaphoreHandle = (EB_HANDLE) CreateSemaphore(
+    EB_HANDLE semaphoreHandle = (EB_HANDLE) CreateSemaphore(
                           NULL,                           // default security attributes
                           initialCount,                   // initial semaphore count
                           maxCount,                       // maximum semaphore count
@@ -156,7 +154,7 @@ EB_HANDLE EbCreateSemaphore(
     sem_unlink(name);
     return s;
 #else
-    semaphoreHandle = (sem_t*) malloc(sizeof(sem_t));
+    EB_HANDLE semaphoreHandle = (sem_t*) malloc(sizeof(sem_t));
     sem_init(
         (sem_t*) semaphoreHandle,       // semaphore handle
         0,                              // shared semaphore (not local)
