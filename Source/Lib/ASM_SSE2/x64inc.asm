@@ -1,7 +1,30 @@
-; 
+;
 ; Copyright(c) 2018 Intel Corporation
 ; SPDX - License - Identifier: BSD - 2 - Clause - Patent
-; 
+;
+
+%undef WIN64
+%undef UNIX64
+
+%ifidn __OUTPUT_FORMAT__,win32
+    %define WIN64
+%elifidn __OUTPUT_FORMAT__,win64
+    %define WIN64
+%elifidn __OUTPUT_FORMAT__,x64
+    %define WIN64
+%else
+    %define UNIX64
+%endif
+
+%ifidn __OUTPUT_FORMAT__,macho32
+    %define FORMAT_MACHO
+%elifidn __OUTPUT_FORMAT__,macho64
+    %define FORMAT_MACHO
+%endif
+
+%ifdef FORMAT_MACHO
+    %define PREFIX
+%endif
 
 %ifdef PREFIX
     %define mangle(x) _ %+ x
@@ -310,7 +333,7 @@ bits 64
     ADD_RSP 16
     movdqu          xmm11,      [rsp]
     ADD_RSP 16
-    movdqu          xmm10,      [rsp] 
+    movdqu          xmm10,      [rsp]
     ADD_RSP 16
     movdqu          xmm9,       [rsp]
     ADD_RSP 16
