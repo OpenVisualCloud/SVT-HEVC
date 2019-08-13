@@ -99,7 +99,7 @@ else()
     list(INSERT flags_to_test 0 -Wall)
     #for Mingw64 support, see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65782
     if(MINGW)
-        list(APPEND flags_to_test -fno-asynchronous-unwind-tables)
+        list(APPEND flags_to_test -fno-asynchronous-unwind-tables -mxsave)
     else()
         list(APPEND flags_to_test -fstack-protector-strong)
     endif()
