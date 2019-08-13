@@ -383,7 +383,7 @@ EB_ERRORTYPE InitThreadManagmentParams(){
     const char* PHYSICALID = "physical id";
     int processor_id_len = strnlen_ss(PROCESSORID, 128);
     int physical_id_len = strnlen_ss(PHYSICALID, 128);
-	int maxSize = INITIAL_PROCESSOR_GROUP;
+    int maxSize = INITIAL_PROCESSOR_GROUP;
     if (processor_id_len < 0 || processor_id_len >= 128) return EB_ErrorInsufficientResources;
     if (physical_id_len < 0 || physical_id_len >= 128) return EB_ErrorInsufficientResources;
 	memset(lpGroup, 0, 16* sizeof(processorGroup));
@@ -408,10 +408,10 @@ EB_ERRORTYPE InitThreadManagmentParams(){
                 }
                 if (socket_id + 1 > numGroups)
                     numGroups = socket_id + 1;
-				if (socket_id > maxSize) {
-					maxSize = maxSize+16;
-					lpGroup = realloc(lpGroup,maxSize*sizeof(processorGroup));
-				}
+                if (socket_id > maxSize) {
+                    maxSize = maxSize+16;
+                    lpGroup = realloc(lpGroup,maxSize*sizeof(processorGroup));
+                }
                 lpGroup[socket_id].group[lpGroup[socket_id].num++] = processor_id;
             }
         }
@@ -1596,7 +1596,7 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         }
     }
 
-	free(lpGroup);
+    free(lpGroup);
 
     return return_error;
 }
