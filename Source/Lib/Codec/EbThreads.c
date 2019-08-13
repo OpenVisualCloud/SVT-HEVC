@@ -26,6 +26,7 @@
 #include <semaphore.h>
 #include <time.h>
 #include <errno.h>
+#include <stdio.h>
 #endif // _WIN32
 #if PRINTF_TIME
 #ifdef _WIN32
@@ -146,7 +147,7 @@ EB_HANDLE EbCreateSemaphore(
 #elif defined(__APPLE__)
     char name[15];
     sprintf(name, "/sem_%05d_%03d", getpid(), semaphore_id());
-    sem_t *s = sem_open(name, O_CREAT | O_EXCL, 0644, initial_count);
+    sem_t *s = sem_open(name, O_CREAT | O_EXCL, 0644, initialCount);
     if (s == SEM_FAILED) {
         perror ("Error at sem_open");
         return NULL;
@@ -212,7 +213,7 @@ EB_ERRORTYPE EbDestroySemaphore(
 #ifdef _WIN32
     return_error = CloseHandle((HANDLE) semaphoreHandle) ? EB_ErrorNone : EB_ErrorDestroySemaphoreFailed;
 #elif defined(__APPLE__)
-    return_error = sem_close(semaphore_handle);
+    return_error = sem_close(semaphoreHandle);
 #else
     return_error = sem_destroy((sem_t*) semaphoreHandle) ? EB_ErrorDestroySemaphoreFailed : EB_ErrorNone;
     free(semaphoreHandle);
