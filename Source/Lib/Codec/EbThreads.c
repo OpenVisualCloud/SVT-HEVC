@@ -21,13 +21,11 @@
  ****************************************/
 #ifdef _WIN32
 #include <windows.h>
-#elif __linux__
+#else
 #include <pthread.h>
 #include <semaphore.h>
 #include <time.h>
 #include <errno.h>
-#else
-#error OS/Platform not supported.
 #endif // _WIN32
 #if PRINTF_TIME
 #ifdef _WIN32
@@ -62,8 +60,8 @@ EB_HANDLE EbCreateThread(
                        NULL);                          // new thread ID
 
 #elif __linux__
-    
-    pthread_attr_t attr;  
+
+    pthread_attr_t attr;
     struct sched_param param = {
         .sched_priority = 99
     };
@@ -146,7 +144,7 @@ EB_HANDLE EbCreateSemaphore(
         (sem_t*) semaphoreHandle,       // semaphore handle
         0,                              // shared semaphore (not local)
         initialCount);                  // initial count
-#endif // _WIN32    
+#endif // _WIN32
 
     return semaphoreHandle;
 }
