@@ -12,6 +12,8 @@
 #include <sys/time.h>
 #endif
 
+#include "EbTime.h"
+
 void EbAppStartTime(
     uint64_t *Startseconds,
     uint64_t *Startuseconds)
