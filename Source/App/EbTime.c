@@ -7,23 +7,19 @@
 #include <time.h>
 
 #ifdef _WIN32
-//#if  (WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
 #include <windows.h>
-//#endif
 #else
-//#if   (LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
 #include <sys/time.h>
-//#endif
 #endif
 
 void EbAppStartTime(
     uint64_t *Startseconds,
     uint64_t *Startuseconds)
 {
-#ifdef _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
+#ifdef _WIN32
     *Startseconds = (uint64_t) clock();
     (void) (*Startuseconds);
-#else //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
+#else
     struct timeval start;
     gettimeofday(&start, NULL);
     *Startseconds=start.tv_sec;
@@ -35,10 +31,10 @@ void EbAppFinishTime(
     uint64_t *Finishseconds,
     uint64_t *Finishuseconds)
 {
-#ifdef _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
+#ifdef _WIN32
     *Finishseconds= (uint64_t)clock();
     (void) (*Finishuseconds);
-#else //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
+#else
     struct timeval finish;
     gettimeofday(&finish, NULL);
     *Finishseconds=finish.tv_sec;
@@ -53,13 +49,13 @@ void EbAppComputeOverallElapsedTime(
     uint64_t Finishuseconds,
     double *duration)
 {
-#ifdef _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
+#ifdef _WIN32
     //double  duration;
     *duration = (double)(Finishseconds - Startseconds) / CLOCKS_PER_SEC;
     //printf("\nElapsed time: %3.3f seconds\n", *duration);
     (void) (Startuseconds);
     (void) (Finishuseconds);
-#else //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
+#else
     long   mtime, seconds, useconds;
     seconds  = Finishseconds - Startseconds;
     useconds = Finishuseconds - Startuseconds;

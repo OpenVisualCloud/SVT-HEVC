@@ -5,9 +5,7 @@
 
 #include <time.h>
 #ifndef _WIN32
-//#if   (LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
 #include <sys/time.h>
-//#endif
 #endif
 #include "EbUtility.h"
 #include "EbDefinitions.h"
@@ -380,10 +378,10 @@ const MiniGopStats_t* GetMiniGopStats(const EB_U32 miniGopIndex) {
 }
 
 void EbStartTime(unsigned long long *Startseconds, unsigned long long *Startuseconds) {
-#ifdef _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
+#ifdef _WIN32
     *Startseconds = (unsigned long long)clock();
     (void)(*Startuseconds);
-#else //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
+#else
     struct timeval start;
     gettimeofday(&start, NULL);
     *Startseconds = start.tv_sec;
@@ -392,10 +390,10 @@ void EbStartTime(unsigned long long *Startseconds, unsigned long long *Startusec
 }
 
 void EbFinishTime(unsigned long long *Finishseconds, unsigned long long *Finishuseconds) {
-#ifdef _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
+#ifdef _WIN32
     *Finishseconds = (unsigned long long)clock();
     (void)(*Finishuseconds);
-#else //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
+#else
     struct timeval finish;
     gettimeofday(&finish, NULL);
     *Finishseconds = finish.tv_sec;
@@ -404,13 +402,13 @@ void EbFinishTime(unsigned long long *Finishseconds, unsigned long long *Finishu
 }
 
 void EbComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration) {
-#ifdef _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
+#ifdef _WIN32
     //double  duration;
     *duration = (double)(Finishseconds - Startseconds) / CLOCKS_PER_SEC;
     //SVT_LOG("\nElapsed time: %3.3f seconds\n", *duration);
     (void)(Startuseconds);
     (void)(Finishuseconds);
-#else //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
+#else
     long   mtime, seconds, useconds;
     seconds = Finishseconds - Startseconds;
     useconds = Finishuseconds - Startuseconds;
@@ -421,13 +419,13 @@ void EbComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long 
 }
 
 void EbComputeOverallElapsedTimeMs(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration) {
-#ifdef _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
+#ifdef _WIN32
     //double  duration;
     *duration = (double)(Finishseconds - Startseconds);
     //SVT_LOG("\nElapsed time: %3.3f seconds\n", *duration);
     (void)(Startuseconds);
     (void)(Finishuseconds);
-#else //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
+#else
     long   mtime, seconds, useconds;
     seconds = Finishseconds - Startseconds;
     useconds = Finishuseconds - Startuseconds;
