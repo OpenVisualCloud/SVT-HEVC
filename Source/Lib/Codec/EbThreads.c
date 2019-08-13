@@ -27,6 +27,7 @@
 #include <time.h>
 #include <errno.h>
 #include <stdio.h>
+#include <unistd.h>
 #endif // _WIN32
 #if PRINTF_TIME
 #ifdef _WIN32
