@@ -2451,6 +2451,7 @@ void CopyApiFromApp(
         sequenceControlSetPtr->staticConfig.encoderColorFormat = EB_YUV420;
     }
     sequenceControlSetPtr->chromaFormatIdc = (EB_U32)(sequenceControlSetPtr->staticConfig.encoderColorFormat);
+    sequenceControlSetPtr->encoderBitDepth = (EB_U32)(sequenceControlSetPtr->staticConfig.encoderBitDepth);
     sequenceControlSetPtr->enableTmvpSps = sequenceControlSetPtr->staticConfig.unrestrictedMotionVector;
 
     // Copying to masteringDisplayColorVolume structure
