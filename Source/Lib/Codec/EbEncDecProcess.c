@@ -4348,7 +4348,7 @@ void* EncDecKernel(void *inputPtr)
 
                     }
                     //Block level vbv tuning starts here
-                    if (sequenceControlSetPtr->staticConfig.lowLevelVbv) {
+                    if (sequenceControlSetPtr->staticConfig.lowLevelVbv && sequenceControlSetPtr->staticConfig.lookAheadDistance > 0) {
                         EbBlockOnMutex(pictureControlSetPtr->rowStats[yLcuIndex]->rowUpdateMutex);
                         rowPtr = pictureControlSetPtr->rowStats[yLcuIndex];
                         rowPtr->rowIndex = yLcuIndex;
@@ -4393,7 +4393,7 @@ void* EncDecKernel(void *inputPtr)
                             lcuPtr->qp,
                             enableSaoFlag,
                             contextPtr);
-                    if (sequenceControlSetPtr->staticConfig.lowLevelVbv) {
+                    if (sequenceControlSetPtr->staticConfig.lowLevelVbv && sequenceControlSetPtr->staticConfig.lookAheadDistance > 0) {
                         /*Entropy Estimation for LCU*/
 					    tempCoeffPicturePtr = lcuPtr->quantizedCoeff;
                         tempWrittenBitsBeforeQuantizedCoeff = ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->entropyCodingInfo[contextPtr->tileIndex]->tempEntropyCoderPtr))->writtenBitsCount +
