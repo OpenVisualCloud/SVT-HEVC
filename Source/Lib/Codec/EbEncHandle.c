@@ -797,6 +797,8 @@ static EB_ERRORTYPE EbEncHandleCtor(
 
     #if  defined(__linux__)
         lpGroup = (processorGroup*)malloc(sizeof(processorGroup)*INITIAL_PROCESSOR_GROUP);
+        if (lpGroup == (processorGroup*) EB_NULL)
+            return EB_ErrorInsufficientResources;
     #endif
 
     // Save Memory Map Pointers
@@ -1924,7 +1926,6 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
 #ifdef _WIN32
             _aligned_free(memoryEntry->ptr);
 #else
-            free(lpGroup);
             free(memoryEntry->ptr);
 #endif
             break;
@@ -2032,6 +2033,10 @@ EB_API EB_ERRORTYPE EbDeinitHandle(
     else {
         return_error = EB_ErrorInvalidComponent;
     }
+
+    #if  defined(__linux__)
+        free(lpGroup);
+    #endif
 
     return return_error;
 }
