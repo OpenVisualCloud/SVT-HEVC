@@ -4744,7 +4744,7 @@ static void WriteUvlc(
 	EB_U32 numberOfBits = 1;
 	EB_U32 tempBits = ++bits;
 
-	while (1 != tempBits)
+	while (tempBits > 1)
 	{
 		tempBits >>= 1;
 		numberOfBits += 2;
