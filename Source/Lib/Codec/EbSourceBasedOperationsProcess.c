@@ -814,7 +814,7 @@ void PopulateFromCurrentLcuToNeighborLcus(
     PictureParentControlSet_t   *pictureControlSetPtr,
     EB_BOOL	                     inputToPopulate,
     EB_BOOL	                    *outputBuffer,
-    EB_U32                       lcuAdrr,
+    EB_U32                       lcuAddr,
     EB_U32                       lcuOriginX,
     EB_U32                       lcuOriginY)
 {
@@ -822,42 +822,42 @@ void PopulateFromCurrentLcuToNeighborLcus(
 
     // Copy to left if present
     if (lcuOriginX != 0) {
-        outputBuffer[lcuAdrr - 1] = inputToPopulate;
+        outputBuffer[lcuAddr - 1] = inputToPopulate;
     }
 
     // Copy to right if present
     if ((lcuOriginX + MAX_LCU_SIZE) < pictureControlSetPtr->enhancedPicturePtr->width) {
-        outputBuffer[lcuAdrr + 1] = inputToPopulate;
+        outputBuffer[lcuAddr + 1] = inputToPopulate;
     }
 
     // Copy to top LCU if present
     if (lcuOriginY != 0) {
-        outputBuffer[lcuAdrr - pictureWidthInLcus] = inputToPopulate;
+        outputBuffer[lcuAddr - pictureWidthInLcus] = inputToPopulate;
     }
 
     // Copy to bottom LCU if present
     if ((lcuOriginY + MAX_LCU_SIZE) < pictureControlSetPtr->enhancedPicturePtr->height) {
-        outputBuffer[lcuAdrr + pictureWidthInLcus] = inputToPopulate;
+        outputBuffer[lcuAddr + pictureWidthInLcus] = inputToPopulate;
     }
 
     // Copy to top-left LCU if present
     if ((lcuOriginX >= MAX_LCU_SIZE) && (lcuOriginY >= MAX_LCU_SIZE)) {
-        outputBuffer[lcuAdrr - pictureWidthInLcus - 1] = inputToPopulate;
+        outputBuffer[lcuAddr - pictureWidthInLcus - 1] = inputToPopulate;
     }
 
     // Copy to top-right LCU if present
     if ((lcuOriginX < pictureControlSetPtr->enhancedPicturePtr->width - MAX_LCU_SIZE) && (lcuOriginY >= MAX_LCU_SIZE)) {
-        outputBuffer[lcuAdrr - pictureWidthInLcus + 1] = inputToPopulate;
+        outputBuffer[lcuAddr - pictureWidthInLcus + 1] = inputToPopulate;
     }
 
     // Copy to bottom-left LCU if present
     if ((lcuOriginX >= MAX_LCU_SIZE) && (lcuOriginY < pictureControlSetPtr->enhancedPicturePtr->height - MAX_LCU_SIZE)) {
-        outputBuffer[lcuAdrr + pictureWidthInLcus - 1] = inputToPopulate;
+        outputBuffer[lcuAddr + pictureWidthInLcus - 1] = inputToPopulate;
     }
 
     // Copy to bottom-right LCU if present
     if ((lcuOriginX < pictureControlSetPtr->enhancedPicturePtr->width - MAX_LCU_SIZE) && (lcuOriginY < pictureControlSetPtr->enhancedPicturePtr->height - MAX_LCU_SIZE)) {
-        outputBuffer[lcuAdrr + pictureWidthInLcus + 1] = inputToPopulate;
+        outputBuffer[lcuAddr + pictureWidthInLcus + 1] = inputToPopulate;
     }
 }
 
@@ -869,7 +869,7 @@ Output  : true if current & neighbors are spatially complex
 EB_BOOL IsSpatiallyComplexArea(
 
     PictureParentControlSet_t	*pictureControlSetPtr,
-    EB_U32                       lcuAdrr,
+    EB_U32                       lcuAddr,
     EB_U32                       lcuOriginX,
     EB_U32                       lcuOriginY)
 {
@@ -880,7 +880,7 @@ EB_BOOL IsSpatiallyComplexArea(
 
 
     // Check the variance of the current LCU
-    if ((pictureControlSetPtr->variance[lcuAdrr][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+    if ((pictureControlSetPtr->variance[lcuAddr][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
         availableLcusCount++;
         highVarianceLcusCount++;
     }
@@ -888,7 +888,7 @@ EB_BOOL IsSpatiallyComplexArea(
     // Check the variance of left LCU if available
     if (lcuOriginX != 0) {
         availableLcusCount++;
-        if ((pictureControlSetPtr->variance[lcuAdrr - 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+        if ((pictureControlSetPtr->variance[lcuAddr - 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
             highVarianceLcusCount++;
         }
     }
@@ -896,7 +896,7 @@ EB_BOOL IsSpatiallyComplexArea(
     // Check the variance of right LCU if available
     if ((lcuOriginX + MAX_LCU_SIZE) < pictureControlSetPtr->enhancedPicturePtr->width) {
         availableLcusCount++;
-        if ((pictureControlSetPtr->variance[lcuAdrr + 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+        if ((pictureControlSetPtr->variance[lcuAddr + 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
             highVarianceLcusCount++;
         }
 
@@ -905,7 +905,7 @@ EB_BOOL IsSpatiallyComplexArea(
     // Check the variance of top LCU if available
     if (lcuOriginY != 0) {
         availableLcusCount++;
-        if ((pictureControlSetPtr->variance[lcuAdrr - pictureWidthInLcus][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+        if ((pictureControlSetPtr->variance[lcuAddr - pictureWidthInLcus][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
             highVarianceLcusCount++;
         }
     }
@@ -913,7 +913,7 @@ EB_BOOL IsSpatiallyComplexArea(
     // Check the variance of bottom LCU
     if ((lcuOriginY + MAX_LCU_SIZE) < pictureControlSetPtr->enhancedPicturePtr->height) {
         availableLcusCount++;
-        if ((pictureControlSetPtr->variance[lcuAdrr + pictureWidthInLcus][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+        if ((pictureControlSetPtr->variance[lcuAddr + pictureWidthInLcus][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
             highVarianceLcusCount++;
         }
 
@@ -922,7 +922,7 @@ EB_BOOL IsSpatiallyComplexArea(
     // Check the variance of top-left LCU
     if ((lcuOriginX >= MAX_LCU_SIZE) && (lcuOriginY >= MAX_LCU_SIZE)) {
         availableLcusCount++;
-        if ((pictureControlSetPtr->variance[lcuAdrr - pictureWidthInLcus - 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+        if ((pictureControlSetPtr->variance[lcuAddr - pictureWidthInLcus - 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
             highVarianceLcusCount++;
         }
 
@@ -931,7 +931,7 @@ EB_BOOL IsSpatiallyComplexArea(
     // Check the variance of top-right LCU
     if ((lcuOriginX < pictureControlSetPtr->enhancedPicturePtr->width - MAX_LCU_SIZE) && (lcuOriginY >= MAX_LCU_SIZE)) {
         availableLcusCount++;
-        if ((pictureControlSetPtr->variance[lcuAdrr - pictureWidthInLcus + 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+        if ((pictureControlSetPtr->variance[lcuAddr - pictureWidthInLcus + 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
             highVarianceLcusCount++;
         }
     }
@@ -939,7 +939,7 @@ EB_BOOL IsSpatiallyComplexArea(
     // Check the variance of bottom-left LCU
     if ((lcuOriginX >= MAX_LCU_SIZE) && (lcuOriginY < pictureControlSetPtr->enhancedPicturePtr->height - MAX_LCU_SIZE)) {
         availableLcusCount++;
-        if ((pictureControlSetPtr->variance[lcuAdrr + pictureWidthInLcus - 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+        if ((pictureControlSetPtr->variance[lcuAddr + pictureWidthInLcus - 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
             highVarianceLcusCount++;
         }
 
@@ -948,7 +948,7 @@ EB_BOOL IsSpatiallyComplexArea(
     // Check the variance of bottom-right LCU
     if ((lcuOriginX < pictureControlSetPtr->enhancedPicturePtr->width - MAX_LCU_SIZE) && (lcuOriginY < pictureControlSetPtr->enhancedPicturePtr->height - MAX_LCU_SIZE)) {
         availableLcusCount++;
-        if ((pictureControlSetPtr->variance[lcuAdrr + pictureWidthInLcus + 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+        if ((pictureControlSetPtr->variance[lcuAddr + pictureWidthInLcus + 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
             highVarianceLcusCount++;
         }
     }
@@ -1691,6 +1691,25 @@ void* SourceBasedOperationsKernel(void *inputPtr)
 
         // Release the Input Results
         EbReleaseObject(inputResultsWrapperPtr);
+
+#if LATENCY_PROFILE
+        double latency = 0.0;
+        EB_U64 finishTimeSeconds = 0;
+        EB_U64 finishTimeuSeconds = 0;
+        EbFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
+
+        EbComputeOverallElapsedTimeMs(
+                pictureControlSetPtr->startTimeSeconds,
+                pictureControlSetPtr->startTimeuSeconds,
+                finishTimeSeconds,
+                finishTimeuSeconds,
+                &latency);
+
+        SVT_LOG("POC %lld SRC OUT, decoder order %d, latency %3.3f \n",
+                pictureControlSetPtr->pictureNumber,
+                pictureControlSetPtr->decodeOrder,
+                latency);
+#endif
 
         // Post the Full Results Object
         EbPostFullObject(outputResultsWrapperPtr);

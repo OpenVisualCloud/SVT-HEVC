@@ -19,15 +19,15 @@
 #include "EbTime.h"
 #include "EbPictureDemuxResults.h"
 
-void HrdFullness(SequenceControlSet_t *sequenceControlSetPtr, PictureControlSet_t *pictureControlSetptr, AppBufferingPeriodSei_t *seiBP)
+void HrdFullness(SequenceControlSet_t *sequenceControlSetPtr, PictureControlSet_t *pictureControlSetPtr, AppBufferingPeriodSei_t *seiBP)
 {
     EB_U32 i;
     const AppVideoUsabilityInfo_t* vui = sequenceControlSetPtr->videoUsabilityInfoPtr;
     const AppHrdParameters_t* hrd = vui->hrdParametersPtr;
     EB_U32 num = 90000;
-    EB_U32 denom = (hrd->bitRateValueMinus1[pictureControlSetptr->temporalLayerIndex][0][hrd->cpbCountMinus1[0]] + 1) << (hrd->bitRateScale + BR_SHIFT);
+    EB_U32 denom = (hrd->bitRateValueMinus1[pictureControlSetPtr->temporalLayerIndex][0][hrd->cpbCountMinus1[0]] + 1) << (hrd->bitRateScale + BR_SHIFT);
     EB_U64 cpbState = sequenceControlSetPtr->encodeContextPtr->bufferFill;
-    EB_U64 cpbSize = (hrd->cpbSizeValueMinus1[pictureControlSetptr->temporalLayerIndex][0][hrd->cpbCountMinus1[0]] + 1) << (hrd->cpbSizeScale + CPB_SHIFT);
+    EB_U64 cpbSize = (hrd->cpbSizeValueMinus1[pictureControlSetPtr->temporalLayerIndex][0][hrd->cpbCountMinus1[0]] + 1) << (hrd->cpbSizeScale + CPB_SHIFT);
 
     for (i = 0; i < hrd->cpbCountMinus1[0]+1; i++)
     {
@@ -170,7 +170,7 @@ void* PacketizationKernel(void *inputPtr)
         pictureControlSetPtr    = (PictureControlSet_t*)    entropyCodingResultsPtr->pictureControlSetWrapperPtr->objectPtr;
         sequenceControlSetPtr   = (SequenceControlSet_t*)   pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
         encodeContextPtr        = (EncodeContext_t*)        sequenceControlSetPtr->encodeContextPtr;
-        tileCnt = pictureControlSetPtr->tileRowCount * pictureControlSetPtr->tileColumnCount; 
+        tileCnt = pictureControlSetPtr->ParentPcsPtr->tileRowCount * pictureControlSetPtr->ParentPcsPtr->tileColumnCount; 
 #if DEADLOCK_DEBUG
         SVT_LOG("POC %lld PK IN \n", pictureControlSetPtr->pictureNumber);
 #endif
@@ -634,22 +634,12 @@ void* PacketizationKernel(void *inputPtr)
 
         // Jing: process multiple tiles
         for (tileIdx = 0; tileIdx < tileCnt; tileIdx++) {
-            EB_U32 lcuSize     = sequenceControlSetPtr->lcuSize;
-            EB_U32 lcuSizeLog2 = (EB_U8)Log2f(lcuSize);
-            EB_U32 pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + lcuSize - 1) >> lcuSizeLog2;
-            EB_U32 xLcuStart = 0;
-            EB_U32 yLcuStart = 0;
-            EB_U32 lcuIndex = 0;
-            for (EB_U32 i = 0; i < (tileIdx % pictureControlSetPtr->tileColumnCount); i++) {
-                xLcuStart += sequenceControlSetPtr->tileColumnArray[i];
-            }
-            for (EB_U32 i = 0; i < (tileIdx / pictureControlSetPtr->tileColumnCount); i++) {
-                yLcuStart += sequenceControlSetPtr->tileRowArray[i];
-            }
-            lcuIndex = xLcuStart + yLcuStart * pictureWidthInLcu;
+            EB_U16 xLcuStart = pictureControlSetPtr->ParentPcsPtr->tileColStartLcu[tileIdx % pictureControlSetPtr->ParentPcsPtr->tileColumnCount];
+            EB_U16 yLcuStart = pictureControlSetPtr->ParentPcsPtr->tileRowStartLcu[tileIdx / pictureControlSetPtr->ParentPcsPtr->tileColumnCount];
+            EB_U16 lcuIndex = xLcuStart + yLcuStart * pictureControlSetPtr->ParentPcsPtr->pictureWidthInLcu;
 
             // Encode slice header
-            if (tileIdx == 0 || sequenceControlSetPtr->tileSliceMode == 1) {
+            if (tileIdx == 0 || sequenceControlSetPtr->staticConfig.tileSliceMode == 1) {
                 EncodeSliceHeader(
                         lcuIndex,
                         packetizationQp,
@@ -805,7 +795,10 @@ void* PacketizationKernel(void *inputPtr)
                 finishTimeSeconds,
                 finishTimeuSeconds,
                 &latency);
-            //printf("pts %d, dts %d, Packetization latency %3.3f\n", outputStreamPtr->pts, outputStreamPtr->dts, latency);
+            //printf("POC %d, PAK out, dts %d, Packetization latency %3.3f\n", outputStreamPtr->pts, outputStreamPtr->dts, latency);
+#if LATENCY_PROFILE
+            SVT_LOG("POC %lld PAK OUT, latency %3.3f\n", outputStreamPtr->pts, latency);
+#endif
 
             outputStreamPtr->nTickCount = (EB_U32)latency;
             if (sequenceControlSetPtr->staticConfig.pictureTimingSEI) {

@@ -3938,6 +3938,7 @@ void EdgeDetection(
 
 	return;
 }
+
 /******************************************************
 * Calculate the variance of variance to determine Homogeneous regions. Note: Variance calculation should be on.
 ******************************************************/
@@ -4522,6 +4523,24 @@ void* PictureAnalysisKernel(void *inputPtr)
 		// Release the Input Results
 		EbReleaseObject(inputResultsWrapperPtr);
 
+#if LATENCY_PROFILE
+        double latency = 0.0;
+        EB_U64 finishTimeSeconds = 0;
+        EB_U64 finishTimeuSeconds = 0;
+        EbFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
+
+        EbComputeOverallElapsedTimeMs(
+                pictureControlSetPtr->startTimeSeconds,
+                pictureControlSetPtr->startTimeuSeconds,
+                finishTimeSeconds,
+                finishTimeuSeconds,
+                &latency);
+
+        SVT_LOG("POC %lld PA OUT, decoder order %d, latency %3.3f \n",
+                pictureControlSetPtr->pictureNumber,
+                pictureControlSetPtr->decodeOrder,
+                latency);
+#endif
 		// Post the Full Results Object
 		EbPostFullObject(outputResultsWrapperPtr);
 

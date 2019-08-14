@@ -456,51 +456,6 @@ EB_ERRORTYPE SignalDerivationPreAnalysisVmaf(
 	return return_error;
 }
 
-static void InitTileInfo(SequenceControlSet_t *scsPtr)
-{
-    scsPtr->tileUniformSpacing = 1;
-    scsPtr->tileColumnCount = scsPtr->staticConfig.tileColumnCount;
-    scsPtr->tileRowCount    = scsPtr->staticConfig.tileRowCount;
-    scsPtr->tileSliceMode   = scsPtr->staticConfig.tileSliceMode;
-
-    scsPtr->pictureWidthInLcu  = (EB_U8)((scsPtr->lumaWidth + scsPtr->lcuSize - 1) / scsPtr->lcuSize);
-    scsPtr->pictureHeightInLcu = (EB_U8)((scsPtr->lumaHeight + scsPtr->lcuSize - 1) / scsPtr->lcuSize);
-
-    scsPtr->lcuTotalCount = scsPtr->pictureWidthInLcu * scsPtr->pictureHeightInLcu;
-
-    EB_U16 lastColumnWidth = scsPtr->pictureWidthInLcu;
-    EB_U16 lastRowHeight = scsPtr->pictureHeightInLcu;
-    EB_U16 rowIndex, columnIndex;
-
-    scsPtr->tileUniformSpacing = 1;
-    if (scsPtr->tileUniformSpacing == 1) {
-        for (columnIndex = 0; columnIndex + 1 < scsPtr->tileColumnCount; ++columnIndex) {
-            scsPtr->tileColumnArray[columnIndex] = (EB_U16)((columnIndex + 1) * scsPtr->pictureWidthInLcu / scsPtr->tileColumnCount -
-                columnIndex * scsPtr->pictureWidthInLcu / scsPtr->tileColumnCount);
-            lastColumnWidth -= scsPtr->tileColumnArray[columnIndex];
-        }
-        scsPtr->tileColumnArray[columnIndex] = (EB_U16)lastColumnWidth;
-
-        for (rowIndex = 0; rowIndex + 1 < scsPtr->tileRowCount; ++rowIndex) {
-            scsPtr->tileRowArray[rowIndex] = (EB_U16)((rowIndex + 1) * scsPtr->pictureHeightInLcu / scsPtr->tileRowCount -
-                rowIndex * scsPtr->pictureHeightInLcu / scsPtr->tileRowCount);
-            lastRowHeight -= scsPtr->tileRowArray[rowIndex];
-        }
-        scsPtr->tileRowArray[rowIndex] = (EB_U16)lastRowHeight;
-    } else {
-        for (columnIndex = 0; columnIndex + 1 < scsPtr->tileColumnCount; ++columnIndex) {
-            scsPtr->tileColumnArray[columnIndex] = (EB_U16)scsPtr->tileColumnWidthArray[columnIndex];
-            lastColumnWidth -= scsPtr->tileColumnArray[columnIndex];
-        }
-        scsPtr->tileColumnArray[columnIndex] = (EB_U16)lastColumnWidth;
-
-        for (rowIndex = 0; rowIndex + 1 < scsPtr->tileRowCount; ++rowIndex) {
-            scsPtr->tileRowArray[rowIndex] = (EB_U16)scsPtr->tileRowHeightArray[rowIndex];
-            lastRowHeight -= scsPtr->tileRowArray[rowIndex];
-        }
-        scsPtr->tileRowArray[rowIndex] = (EB_U16)lastRowHeight;
-    }
-}
 
 
 /***************************************
@@ -653,7 +608,12 @@ void* ResourceCoordinationKernel(void *inputPtr)
         // Set the current SequenceControlSet
         sequenceControlSetPtr   = (SequenceControlSet_t*) contextPtr->sequenceControlSetActiveArray[instanceIndex]->objectPtr;
         
-        InitTileInfo(sequenceControlSetPtr);
+        //Move to pcs init stage
+        //InitTileInfo(sequenceControlSetPtr);
+
+        sequenceControlSetPtr->pictureWidthInLcu  = (EB_U8)((sequenceControlSetPtr->lumaWidth + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize);
+        sequenceControlSetPtr->pictureHeightInLcu = (EB_U8)((sequenceControlSetPtr->lumaHeight + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize);
+        sequenceControlSetPtr->lcuTotalCount = sequenceControlSetPtr->pictureWidthInLcu * sequenceControlSetPtr->pictureHeightInLcu;
 
 		// Init LCU Params
         if (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->initialPicture) {
@@ -740,7 +700,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
         pictureControlSetPtr->qpOnTheFly                      = EB_FALSE;
            
-		pictureControlSetPtr->lcuTotalCount					  = sequenceControlSetPtr->lcuTotalCount;
+		//pictureControlSetPtr->lcuTotalCount					  = sequenceControlSetPtr->lcuTotalCount;
 
 		if (sequenceControlSetPtr->staticConfig.speedControlFlag) {
 			SpeedBufferControl(

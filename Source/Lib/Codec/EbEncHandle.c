@@ -1104,22 +1104,24 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         // The segment Width & Height Arrays are in units of LCUs, not samples
         PictureControlSetInitData_t inputData;
 
-        inputData.pictureWidth          = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaWidth;
-        inputData.pictureHeight         = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaHeight;
-        inputData.leftPadding			= encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->leftPadding;
-        inputData.rightPadding			= encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->rightPadding;
-        inputData.topPadding			= encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->topPadding;
-        inputData.botPadding			= encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->botPadding;
-        inputData.bitDepth              = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->outputBitdepth;
-        inputData.colorFormat           = (EB_COLOR_FORMAT)encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaFormatIdc;
-        inputData.lcuSize               = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lcuSize;
-        inputData.maxDepth              = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxLcuDepth;
-        inputData.is16bit               = is16bit;
+        inputData.pictureWidth  = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaWidth;
+        inputData.pictureHeight = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaHeight;
+        inputData.leftPadding   = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->leftPadding;
+        inputData.rightPadding  = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->rightPadding;
+        inputData.topPadding    = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->topPadding;
+        inputData.botPadding    = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->botPadding;
+        inputData.bitDepth      = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->outputBitdepth;
+        inputData.colorFormat   = (EB_COLOR_FORMAT)encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaFormatIdc;
+        inputData.lcuSize       = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lcuSize;
+        inputData.maxDepth      = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxLcuDepth;
+        inputData.is16bit       = is16bit;
         inputData.compressedTenBitFormat = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.compressedTenBitFormat;
+        inputData.tileRowCount = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.tileRowCount;
+        inputData.tileColumnCount = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.tileColumnCount;
 
         inputData.encMode = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.encMode;
         inputData.speedControl = (EB_U8)encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.speedControlFlag;
-        inputData.tune = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.tune;
+        //inputData.tune = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.tune;
 	    return_error = EbSystemResourceCtor(
             &(encHandlePtr->pictureParentControlSetPoolPtrArray[instanceIndex]),
             encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->pictureControlSetPoolInitCount,//encHandlePtr->pictureControlSetPoolTotalCount,
@@ -1169,8 +1171,6 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         inputData.lcuSize           = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lcuSize;
         inputData.maxDepth          = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxLcuDepth;
         inputData.is16bit           = is16bit;
-        inputData.tileRowCount      = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.tileRowCount;
-        inputData.tileColumnCount   = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.tileColumnCount;
 
         return_error = EbSystemResourceCtor(
             &(encHandlePtr->pictureControlSetPoolPtrArray[instanceIndex]),
@@ -2137,7 +2137,7 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->rateControlTasksFifoInitCount = 305;
     sequenceControlSetPtr->rateControlFifoInitCount = 306;
     //sequenceControlSetPtr->modeDecisionFifoInitCount = 307;
-    sequenceControlSetPtr->modeDecisionConfigurationFifoInitCount = (300 * sequenceControlSetPtr->tileRowCount);
+    sequenceControlSetPtr->modeDecisionConfigurationFifoInitCount = (300 * sequenceControlSetPtr->staticConfig.tileRowCount);
     sequenceControlSetPtr->motionEstimationFifoInitCount = 308;
     sequenceControlSetPtr->entropyCodingFifoInitCount = 309;
     sequenceControlSetPtr->encDecFifoInitCount = 900;
@@ -2149,7 +2149,7 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->sourceBasedOperationsProcessInitCount        = MAX(3, coreCount / 12);
     sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount    = MAX(3, coreCount / 12);
     sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->encDecProcessInitCount                       = MAX(40, coreCount);
-    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->entropyCodingProcessInitCount                = MAX(3, coreCount / 12);
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->entropyCodingProcessInitCount                = MAX(3, coreCount / 6);
 
     sequenceControlSetPtr->totalProcessInitCount += 6; // single processes count
     SVT_LOG("Number of logical cores available: %u\nNumber of PPCS %u\n", coreCount, inputPic);
@@ -2422,9 +2422,10 @@ void CopyApiFromApp(
     sequenceControlSetPtr->intraRefreshType = sequenceControlSetPtr->staticConfig.intraRefreshType;
     sequenceControlSetPtr->maxTemporalLayers = sequenceControlSetPtr->staticConfig.hierarchicalLevels;
     sequenceControlSetPtr->maxRefCount = 1;
-    sequenceControlSetPtr->tileRowCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileRowCount;
-    sequenceControlSetPtr->tileColumnCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileColumnCount;
-    sequenceControlSetPtr->tileSliceMode = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileSliceMode;
+    //Jing: put these to pcs
+    //sequenceControlSetPtr->tileRowCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileRowCount;
+    //sequenceControlSetPtr->tileColumnCount = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileColumnCount;
+    //sequenceControlSetPtr->tileSliceMode = ((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->tileSliceMode;
 
 
     // Quantization

@@ -1816,10 +1816,10 @@ EB_ERRORTYPE FillAMVPCandidates(
             originY);
 
     const LargestCodingUnit_t *lcuPtr = pictureControlSetPtr->lcuPtrArray[tbAddr];
-    const EB_BOOL pictureLeftBoundary = (lcuPtr->tileLeftEdgeFlag == EB_TRUE && (originX & (lcuSize - 1)) == 0) ? EB_TRUE : EB_FALSE;
-    const EB_BOOL pictureTopBoundary = (lcuPtr->tileTopEdgeFlag == EB_TRUE && (originY & (lcuSize - 1)) == 0) ? EB_TRUE : EB_FALSE;
+    const EB_BOOL pictureLeftBoundary = (lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag == EB_TRUE && (originX & (lcuSize - 1)) == 0) ? EB_TRUE : EB_FALSE;
+    const EB_BOOL pictureTopBoundary = (lcuPtr->lcuEdgeInfoPtr->tileTopEdgeFlag == EB_TRUE && (originY & (lcuSize - 1)) == 0) ? EB_TRUE : EB_FALSE;
     const EB_BOOL pictureRightBoundary =
-        (lcuPtr->tileRightEdgeFlag == EB_TRUE && ((originX + width) & (lcuSize - 1)) == 0) ? EB_TRUE : EB_FALSE;
+        (lcuPtr->lcuEdgeInfoPtr->tileRightEdgeFlag == EB_TRUE && ((originX + width) & (lcuSize - 1)) == 0) ? EB_TRUE : EB_FALSE;
 
     EB_BOOL                 a0_availability;
     EB_BOOL                 a1_availability;
@@ -2177,10 +2177,10 @@ EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
         originY);
     const LargestCodingUnit_t *lcuPtr = pictureControlSetPtr->lcuPtrArray[tbAddr];
 
-    const EB_BOOL pictureLeftBoundary = (lcuPtr->tileLeftEdgeFlag == EB_TRUE && (originX & (64 - 1)) == 0) ? EB_TRUE : EB_FALSE;
-    const EB_BOOL pictureTopBoundary = (lcuPtr->tileTopEdgeFlag == EB_TRUE && (originY & (64 - 1)) == 0) ? EB_TRUE : EB_FALSE;
+    const EB_BOOL pictureLeftBoundary = (lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag == EB_TRUE && (originX & (64 - 1)) == 0) ? EB_TRUE : EB_FALSE;
+    const EB_BOOL pictureTopBoundary = (lcuPtr->lcuEdgeInfoPtr->tileTopEdgeFlag == EB_TRUE && (originY & (64 - 1)) == 0) ? EB_TRUE : EB_FALSE;
     const EB_BOOL pictureRightBoundary =
-        (lcuPtr->tileRightEdgeFlag == EB_TRUE && ((originX + width) & (64 - 1)) == 0) ? EB_TRUE : EB_FALSE;
+        (lcuPtr->lcuEdgeInfoPtr->tileRightEdgeFlag == EB_TRUE && ((originX + width) & (64 - 1)) == 0) ? EB_TRUE : EB_FALSE;
 
     EB_BOOL                 a0_availability;
     EB_BOOL                 a1_availability;
@@ -3046,8 +3046,8 @@ EB_ERRORTYPE NonConformantGenerateL0L1AmvpMergeLists(
         originX,
         originY);
     const LargestCodingUnit_t *lcuPtr = pictureControlSetPtr->lcuPtrArray[tbAddr];
-    const EB_BOOL pictureLeftBoundary = (lcuPtr->pictureLeftEdgeFlag == EB_TRUE && (originX & (63)) == 0) ? EB_TRUE : EB_FALSE;
-    const EB_BOOL pictureTopBoundary  = (lcuPtr->pictureTopEdgeFlag  == EB_TRUE && (originY & (63)) == 0) ? EB_TRUE : EB_FALSE;
+    const EB_BOOL pictureLeftBoundary = (lcuPtr->lcuEdgeInfoPtr->pictureLeftEdgeFlag == EB_TRUE && (originX & (63)) == 0) ? EB_TRUE : EB_FALSE;
+    const EB_BOOL pictureTopBoundary  = (lcuPtr->lcuEdgeInfoPtr->pictureTopEdgeFlag  == EB_TRUE && (originY & (63)) == 0) ? EB_TRUE : EB_FALSE;
 
     EB_BOOL                 a1_availability;
     EB_BOOL                 b1_availability;

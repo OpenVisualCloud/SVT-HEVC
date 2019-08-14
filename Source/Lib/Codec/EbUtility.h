@@ -199,6 +199,10 @@ typedef enum MINI_GOP_INDEX {
 	L3_7_INDEX = 14
 } MINI_GOP_INDEX;
 
+//extern void EbStartTime(unsigned long long *Startseconds, unsigned long long *Startuseconds);
+//extern void EbFinishTime(unsigned long long *Finishseconds, unsigned long long *Finishuseconds);
+//extern void EbComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration);
+//extern void EbComputeOverallElapsedTimeMs(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration);
 #ifdef __cplusplus
 }
 #endif
