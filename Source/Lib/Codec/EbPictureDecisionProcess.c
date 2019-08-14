@@ -998,21 +998,24 @@ void* PictureDecisionKernel(void *inputPtr)
            ReleasePrevPictureFromReorderQueue(
                encodeContextPtr);
 
+            pictureControlSetPtr->craFlag = EB_FALSE;
+            pictureControlSetPtr->idrFlag = EB_FALSE;
+
             // If the Intra period length is 0, then introduce an intra for every picture
-            if(sequenceControlSetPtr->intraPeriodLength == 0) {
-                pictureControlSetPtr->craFlag = EB_TRUE;
+            if ((sequenceControlSetPtr->intraPeriodLength == 0) || (pictureControlSetPtr->pictureNumber == 0)) {
+                if (sequenceControlSetPtr->intraRefreshType == CRA_REFRESH)
+                    pictureControlSetPtr->craFlag = EB_TRUE;
+                else
+                    pictureControlSetPtr->idrFlag = EB_TRUE;
             }
             // If an #IntraPeriodLength has passed since the last Intra, then introduce a CRA or IDR based on Intra Refresh type
-            else if(sequenceControlSetPtr->intraPeriodLength != -1) {
+            else if (sequenceControlSetPtr->intraPeriodLength != -1) {
                 if ((encodeContextPtr->intraPeriodPosition == (EB_U32) sequenceControlSetPtr->intraPeriodLength) ||
                     (pictureControlSetPtr->sceneChangeFlag == EB_TRUE)) {
-                    if (sequenceControlSetPtr->intraRefreshType == CRA_REFRESH) {
+                    if (sequenceControlSetPtr->intraRefreshType == CRA_REFRESH)
                         pictureControlSetPtr->craFlag = EB_TRUE;
-                        pictureControlSetPtr->idrFlag = EB_FALSE;
-                    } else {
-                        pictureControlSetPtr->craFlag = EB_FALSE;
+                    else
                         pictureControlSetPtr->idrFlag = EB_TRUE;
-                    }
                 }
             }
 
@@ -1023,16 +1026,17 @@ void* PictureDecisionKernel(void *inputPtr)
             encodeContextPtr->preAssignmentBufferIdrCount           += pictureControlSetPtr->idrFlag;
             encodeContextPtr->preAssignmentBufferCount              += 1;
 
-			if (sequenceControlSetPtr->staticConfig.rateControlMode)
-			{
-				// Increment the Intra Period Position
-				encodeContextPtr->intraPeriodPosition = (encodeContextPtr->intraPeriodPosition == (EB_U32)sequenceControlSetPtr->intraPeriodLength) ? 0 : encodeContextPtr->intraPeriodPosition + 1;
-			}
-			else
-			{
-				// Increment the Intra Period Position
-				encodeContextPtr->intraPeriodPosition = ((encodeContextPtr->intraPeriodPosition == (EB_U32)sequenceControlSetPtr->intraPeriodLength) || (pictureControlSetPtr->sceneChangeFlag == EB_TRUE)) ? 0 : encodeContextPtr->intraPeriodPosition + 1;
-			}
+            if (sequenceControlSetPtr->staticConfig.rateControlMode)
+            {
+                // Increment the Intra Period Position
+                encodeContextPtr->intraPeriodPosition = (encodeContextPtr->intraPeriodPosition == (EB_U32)sequenceControlSetPtr->intraPeriodLength) ?
+                                                        0 : encodeContextPtr->intraPeriodPosition + 1;
+            } else {
+                // Increment the Intra Period Position
+                encodeContextPtr->intraPeriodPosition = ((encodeContextPtr->intraPeriodPosition == (EB_U32)sequenceControlSetPtr->intraPeriodLength) ||
+                                                        (pictureControlSetPtr->sceneChangeFlag == EB_TRUE)) ?
+                                                        0 : encodeContextPtr->intraPeriodPosition + 1;
+            }
 
 			// Determine if Pictures can be released from the Pre-Assignment Buffer
 			if ((encodeContextPtr->preAssignmentBufferIntraCount > 0) ||

@@ -2171,7 +2171,7 @@ static EB_S32 ComputeIntraPeriod(
 
     intraPeriod = (ABS((fps - maxIp)) > ABS((fps - minIp))) ? minIp : maxIp;
 
-    if(config->intraRefreshType == CRA_REFRESH)
+    if (config->intraRefreshType == CRA_REFRESH)
         intraPeriod -= 1;
 
     return intraPeriod;
