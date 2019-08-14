@@ -448,9 +448,9 @@ Similarly, in order to enable VBV and run a 2-stream 8kp50 simultaneous encode o
 
 #### *Running Windows\* Server 2016:*
 
->start /node 0 SvtHevcEncApp.exe -encMode 12 -tune 0 -w 3840 -h 2160 -bit-depth 10 -compressed-ten-bit-format 1 -i in.yuv  -rc 1 –tbr 10000000 -vbv-maxrate 10000000  -vbv-bufsize 10000000 -fps 50  -b out1.bin   -n 5000 –nb 500
+>start /node 0 SvtHevcEncApp.exe -encMode 12 -tune 0 -w 3840 -h 2160 -bit-depth 10 -compressed-ten-bit-format 1 -i in.yuv  -rc 1 –tbr 10000000 -vbv-maxrate 10000000  -vbv-bufsize 20000000 -fps 50  -b out1.bin   -n 5000 –nb 500
 
->start /node 1 SvtHevcEncApp.exe -encMode 12 -tune 0  -w 3840 -h 2160 -bit-depth 10 -compressed-ten-bit-format 1 -i in.yuv  -rc 1 –tbr 10000000 -vbv-maxrate 10000000 -vbv-bufsize 10000000 -fps 50  -b out3.bin   -n 5000 –nb 500
+>start /node 1 SvtHevcEncApp.exe -encMode 12 -tune 0  -w 3840 -h 2160 -bit-depth 10 -compressed-ten-bit-format 1 -i in.yuv  -rc 1 –tbr 10000000 -vbv-maxrate 10000000 -vbv-bufsize 20000000 -fps 50  -b out3.bin   -n 5000 –nb 500
 
 #### *Running Ubuntu\* 18.04:*
 

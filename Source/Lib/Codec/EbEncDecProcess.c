@@ -1331,7 +1331,7 @@ static void ResetTempEntropy(
     EncDecContext_t         *contextPtr,
     PictureControlSet_t     *pictureControlSetPtr,
     SequenceControlSet_t    *sequenceControlSetPtr) {
-    EB_U32 tileCnt = pictureControlSetPtr->tileRowCount * pictureControlSetPtr->tileColumnCount;
+    EB_U32 tileCnt = pictureControlSetPtr->ParentPcsPtr->tileRowCount * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
     EB_U32 tileIdx = 0;
     EB_U32 entropyCodingQp = pictureControlSetPtr->pictureQp;
     for (tileIdx = 0; tileIdx < tileCnt; tileIdx++) {
