@@ -36,6 +36,8 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
     uint32_t bitdepth = 8, width = 0, height = 0, fr_n = 0,
         fr_d = 0, aspect_n, aspect_d;
     char chroma[CHROMA_MAX] = "420";
+    (void)aspect_d;
+    (void)aspect_n;
 #ifdef PRINT_HEADER
     char scan_type = 'p';
 #endif

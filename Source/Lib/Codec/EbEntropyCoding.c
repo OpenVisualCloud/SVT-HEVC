@@ -5243,11 +5243,11 @@ EB_ERRORTYPE ComputeProfileTierLevelInfo(
 
 	}
 
-    if(scsPtr->tileColumnCount > 1 || scsPtr->tileRowCount > 1) {
+    if(scsPtr->staticConfig.tileColumnCount > 1 || scsPtr->staticConfig.tileRowCount > 1) {
         unsigned int levelIdx = 0;
         const unsigned int general_level_idc[13] = {30, 60, 63, 90, 93, 120, 123, 150, 153, 156, 180, 183, 186};
         while (scsPtr->levelIdc != general_level_idc[levelIdx]) levelIdx++;
-        while(scsPtr->tileColumnCount > maxTileColumn[levelIdx] || scsPtr->tileRowCount > maxTileRow[levelIdx]) levelIdx++;
+        while(scsPtr->staticConfig.tileColumnCount > maxTileColumn[levelIdx] || scsPtr->staticConfig.tileRowCount > maxTileRow[levelIdx]) levelIdx++;
         if (levelIdx>12) {
             return_error = EB_ErrorBadParameter;
             return return_error;
@@ -6192,7 +6192,7 @@ static void CodePPS(
 	//SequenceControlSet_t    *scsPtr = (SequenceControlSet_t*)pcsPtr->sequenceControlSetWrapperPtr->objectPtr;
 
 	EB_BOOL disableDlfFlag = scsPtr->staticConfig.disableDlfFlag;
-    EB_BOOL tileMode = (scsPtr->tileColumnCount > 1 || scsPtr->tileRowCount > 1) ? EB_TRUE : EB_FALSE;
+    EB_BOOL tileMode = (scsPtr->staticConfig.tileColumnCount > 1 || scsPtr->staticConfig.tileRowCount > 1) ? EB_TRUE : EB_FALSE;
 
 	// uiFirstByte
 	//codeNALUnitHeader( NAL_UNIT_PPS, NAL_REF_IDC_PRIORITY_HIGHEST );
@@ -6327,25 +6327,26 @@ static void CodePPS(
         // Tiles Number of Columns
         WriteUvlc(
             bitstreamPtr,
-            scsPtr->tileColumnCount - 1);
+            scsPtr->staticConfig.tileColumnCount - 1);
 
         // Tiles Number of Rows
         WriteUvlc(
             bitstreamPtr,
-            scsPtr->tileRowCount - 1);
+            scsPtr->staticConfig.tileRowCount - 1);
 
         // Tiles Uniform Spacing Flag
         WriteCodeCavlc(
             bitstreamPtr,
-            scsPtr->tileUniformSpacing,
+//            scsPtr->tileUniformSpacing,
+            1,
             1);
 
-        if (scsPtr->tileUniformSpacing == 0) {
-
+#if 0
+        if (scsPtr->staticConfig.tileUniformSpacing == 0) {
             int syntaxItr;
 
             // Tile Column Width
-            for (syntaxItr = 0; syntaxItr < (scsPtr->tileColumnCount - 1); ++syntaxItr) {
+            for (syntaxItr = 0; syntaxItr < (scsPtr->staticConfig.tileColumnCount - 1); ++syntaxItr) {
                 // "column_width_minus1"
                 WriteUvlc(
                     bitstreamPtr,
@@ -6361,7 +6362,7 @@ static void CodePPS(
             }
 
         }
-
+#endif
         // Loop filter across tiles
         //if(scsPtr->staticConfig.tileColumnCount != 1 || scsPtr->staticConfig.tileRowCount > 1) {
         WriteFlagCavlc(
@@ -6471,9 +6472,10 @@ static void CodeSliceHeader(
 	SequenceControlSet_t     *sequenceControlSetPtr = (SequenceControlSet_t*)pcsPtr->sequenceControlSetWrapperPtr->objectPtr;
 
 	EB_BOOL disableDlfFlag = sequenceControlSetPtr->staticConfig.disableDlfFlag;
+    PictureParentControlSet_t *ppcsPtr = pcsPtr->ParentPcsPtr;
 
 	EB_U32 sliceType = (pcsPtr->ParentPcsPtr->idrFlag == EB_TRUE) ? EB_I_PICTURE : pcsPtr->sliceType;
-    EB_BOOL tileMode = (sequenceControlSetPtr->tileColumnCount > 1 || sequenceControlSetPtr->tileRowCount > 1) ? EB_TRUE : EB_FALSE;
+    EB_BOOL tileMode = (ppcsPtr->tileColumnCount > 1 || ppcsPtr->tileRowCount > 1) ? EB_TRUE : EB_FALSE;
 
 	EB_U32 refPicsTotalCount =
 		pcsPtr->ParentPcsPtr->predStructPtr->predStructEntryPtrArray[pcsPtr->ParentPcsPtr->predStructIndex]->negativeRefPicsTotalCount +
@@ -6753,9 +6755,9 @@ static void CodeSliceHeader(
 	//}
 
     if (tileMode) {
-        unsigned tileColumnNumMinus1 = sequenceControlSetPtr->tileColumnCount - 1;
-        unsigned tileRowNumMinus1 = sequenceControlSetPtr->tileRowCount - 1;
-        unsigned num_entry_point_offsets = sequenceControlSetPtr->tileSliceMode == 0 ? (sequenceControlSetPtr->tileColumnCount * sequenceControlSetPtr->tileRowCount - 1) : 0;
+        unsigned tileColumnNumMinus1 = ppcsPtr->tileColumnCount - 1;
+        unsigned tileRowNumMinus1 = ppcsPtr->tileRowCount - 1;
+        unsigned num_entry_point_offsets = sequenceControlSetPtr->staticConfig.tileSliceMode == 0 ? (ppcsPtr->tileColumnCount * ppcsPtr->tileRowCount - 1) : 0;
 
         if (tileColumnNumMinus1 > 0 || tileRowNumMinus1 > 0) {
             EB_U32 maxOffset = 0;
@@ -6845,7 +6847,7 @@ EB_ERRORTYPE EncodeLcuSaoParameters(
 	// This needs to be revisited when there is more than one slice per tile
 	// Code Luma SAO parameters
 	// Code Luma SAO parameters
-    if (tbPtr->tileLeftEdgeFlag == EB_FALSE) {
+    if (tbPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag == EB_FALSE) {
 		EncodeSaoMerge(
 			cabacEncodeCtxPtr,
 			tbPtr->saoParams.saoMergeLeftFlag);
@@ -6854,7 +6856,7 @@ EB_ERRORTYPE EncodeLcuSaoParameters(
 	}
 
 	if (tbPtr->saoParams.saoMergeLeftFlag == 0) {
-        if (tbPtr->tileTopEdgeFlag == EB_FALSE) {
+        if (tbPtr->lcuEdgeInfoPtr->tileTopEdgeFlag == EB_FALSE) {
 			EncodeSaoMerge(
 				cabacEncodeCtxPtr,
 				tbPtr->saoParams.saoMergeUpFlag);

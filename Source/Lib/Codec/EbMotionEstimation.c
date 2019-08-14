@@ -3767,7 +3767,6 @@ EB_ERRORTYPE MotionEstimateLcu(
 	ref0Poc                     = pictureControlSetPtr->refPicPocArray[0];
 
 	if (numOfListToSearch){
-
 		referenceObject = (EbPaReferenceObject_t*)pictureControlSetPtr->refPaPicPtrArray[1]->objectPtr;
 		ref1Poc = pictureControlSetPtr->refPicPocArray[1];
 	}
@@ -3776,19 +3775,17 @@ EB_ERRORTYPE MotionEstimateLcu(
 	// List Loop 
 	for (listIndex = REF_LIST_0; listIndex <= numOfListToSearch; ++listIndex) {
 
-		// Ref Picture Loop
-		{
+        // Ref Picture Loop
+        referenceObject     = (EbPaReferenceObject_t*)pictureControlSetPtr->refPaPicPtrArray[listIndex]->objectPtr;
+        refPicPtr           = (EbPictureBufferDesc_t*)referenceObject->inputPaddedPicturePtr;
+        quarterRefPicPtr    = (EbPictureBufferDesc_t*)referenceObject->quarterDecimatedPicturePtr;
+        sixteenthRefPicPtr  = (EbPictureBufferDesc_t*)referenceObject->sixteenthDecimatedPicturePtr;
 
-			referenceObject     = (EbPaReferenceObject_t*)pictureControlSetPtr->refPaPicPtrArray[listIndex]->objectPtr;
-			refPicPtr           = (EbPictureBufferDesc_t*)referenceObject->inputPaddedPicturePtr;
-			quarterRefPicPtr    = (EbPictureBufferDesc_t*)referenceObject->quarterDecimatedPicturePtr;
-			sixteenthRefPicPtr  = (EbPictureBufferDesc_t*)referenceObject->sixteenthDecimatedPicturePtr;
-
-			if (pictureControlSetPtr->temporalLayerIndex > 0 || listIndex == 0){
-				// A - The MV center for Tier0 search could be either (0,0), or HME
-				// A - Set HME MV Center
-                if (contextPtr->updateHmeSearchCenter) {
-                    TestSearchAreaBounds(
+        if (pictureControlSetPtr->temporalLayerIndex > 0 || listIndex == 0) {
+            // A - The MV center for Tier0 search could be either (0,0), or HME
+            // A - Set HME MV Center
+            if (contextPtr->updateHmeSearchCenter) {
+                TestSearchAreaBounds(
                         refPicPtr,
                         contextPtr,
                         &xSearchCenter,
@@ -3798,75 +3795,73 @@ EB_ERRORTYPE MotionEstimateLcu(
                         originY,
                         lcuWidth,
                         lcuHeight);
+            } else {
+                xSearchCenter = 0;
+                ySearchCenter = 0;
+            }
+
+            // B - NO HME in boundaries
+            // C - Skip HME
+            if (pictureControlSetPtr->enableHmeFlag && lcuHeight == MAX_LCU_SIZE) {
+                while (searchRegionNumberInHeight < EB_MIN(contextPtr->numberHmeSearchRegionInHeight, EB_HME_SEARCH_AREA_ROW_MAX_COUNT)) {
+                    while (searchRegionNumberInWidth < EB_MIN(contextPtr->numberHmeSearchRegionInWidth, EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT)) {
+                        if (contextPtr->updateHmeSearchCenter) {
+                            xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter >> 2;
+                            yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter >> 2;
+
+                            xHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter >> 1;
+                            yHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter >> 1;
+                        }
+                        else {
+                            xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter;
+                            yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter;
+
+                            xHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter;
+                            yHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter;
+                        }
+                        xHmeLevel2SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter;
+                        yHmeLevel2SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter;
+
+                        searchRegionNumberInWidth++;
+                    }
+                    searchRegionNumberInWidth = 0;
+                    searchRegionNumberInHeight++;
                 }
-                else {
-                    xSearchCenter = 0;
-                    ySearchCenter = 0;
-                }
-				// B - NO HME in boundaries
-				// C - Skip HME
 
-                if (pictureControlSetPtr->enableHmeFlag && /*B*/lcuHeight == MAX_LCU_SIZE) {//(searchCenterSad > sequenceControlSetPtr->staticConfig.skipTier0HmeTh)) {
+                // HME: Level0 search
+                if (enableHmeLevel0Flag) {
 
-					while (searchRegionNumberInHeight < EB_MIN(contextPtr->numberHmeSearchRegionInHeight, EB_HME_SEARCH_AREA_ROW_MAX_COUNT)) {
-                        while (searchRegionNumberInWidth < EB_MIN(contextPtr->numberHmeSearchRegionInWidth, EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT)) {
-                            if (contextPtr->updateHmeSearchCenter) {
-                                xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter >> 2;
-                                yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter >> 2;
+                    if (contextPtr->oneQuadrantHME && !enableHmeLevel1Flag && !enableHmeLevel2Flag) {
 
-                                xHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter >> 1;
-                                yHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter >> 1;
-                            }
-                            else {
-                                xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter;
-                                yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter;
+                        searchRegionNumberInHeight = 0;
+                        searchRegionNumberInWidth = 0;
 
-                                xHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter;
-                                yHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter;
-                            }
-							xHmeLevel2SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = xSearchCenter;
-							yHmeLevel2SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] = ySearchCenter;
-
-							searchRegionNumberInWidth++;
-						}
-						searchRegionNumberInWidth = 0;
-						searchRegionNumberInHeight++;
-					}
-
-					// HME: Level0 search
-					if (enableHmeLevel0Flag) {
-                      
-                        if (contextPtr->oneQuadrantHME && !enableHmeLevel1Flag && !enableHmeLevel2Flag) {
-
-                            searchRegionNumberInHeight = 0;
-						    searchRegionNumberInWidth = 0;
-                            
-                            HmeOneQuadrantLevel0(
-								contextPtr,
-								originX >> 2,
-								originY >> 2,
-								lcuWidth >> 2,
-								lcuHeight >> 2,
-								xSearchCenter >> 2,
-								ySearchCenter >> 2,
-								sixteenthRefPicPtr,								
-								&(hmeLevel0Sad[searchRegionNumberInWidth][searchRegionNumberInHeight]),
-								&(xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]),
-								&(yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]),
-	                            HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_X[pictureControlSetPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex],
-								HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_Y[pictureControlSetPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex]);
+                        HmeOneQuadrantLevel0(
+                                contextPtr,
+                                originX >> 2,
+                                originY >> 2,
+                                lcuWidth >> 2,
+                                lcuHeight >> 2,
+                                xSearchCenter >> 2,
+                                ySearchCenter >> 2,
+                                sixteenthRefPicPtr,								
+                                &(hmeLevel0Sad[searchRegionNumberInWidth][searchRegionNumberInHeight]),
+                                &(xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]),
+                                &(yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]),
+                                HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_X[pictureControlSetPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex],
+                                HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_Y[pictureControlSetPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex]);
 
 
 
-                        } else {
+                    } else {
 
-                            searchRegionNumberInHeight = 0;
-                            searchRegionNumberInWidth = 0;
-                            
-                            while (searchRegionNumberInHeight < contextPtr->numberHmeSearchRegionInHeight) {
-                                while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
+                        searchRegionNumberInHeight = 0;
+                        searchRegionNumberInWidth = 0;
 
-                                    HmeLevel0(
+                        while (searchRegionNumberInHeight < contextPtr->numberHmeSearchRegionInHeight) {
+                            while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
+
+                                HmeLevel0(
                                         contextPtr,
                                         originX >> 2,
                                         originY >> 2,
@@ -3883,26 +3878,26 @@ EB_ERRORTYPE MotionEstimateLcu(
                                         HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_X[pictureControlSetPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex],
                                         HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_Y[pictureControlSetPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex]);
 
-                                    searchRegionNumberInWidth++;
-                                }
-                                searchRegionNumberInWidth = 0;
-                                searchRegionNumberInHeight++;
-                            }                          
-                        }
+                                searchRegionNumberInWidth++;
+                            }
+                            searchRegionNumberInWidth = 0;
+                            searchRegionNumberInHeight++;
+                        }                          
                     }
+                }
 
-                    // HME: Level1 search
-                    if (enableHmeLevel1Flag) {
-                        searchRegionNumberInHeight = 0;
-                        searchRegionNumberInWidth = 0;
+                // HME: Level1 search
+                if (enableHmeLevel1Flag) {
+                    searchRegionNumberInHeight = 0;
+                    searchRegionNumberInWidth = 0;
 
-                        while (searchRegionNumberInHeight < contextPtr->numberHmeSearchRegionInHeight) {
-                            while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
+                    while (searchRegionNumberInHeight < contextPtr->numberHmeSearchRegionInHeight) {
+                        while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
 
-                                // When HME level 0 has been disabled, increase the search area width and height for level 1 to (32x12)
-                                hmeLevel1SearchAreaInWidth = (EB_S16)contextPtr->hmeLevel1SearchAreaInWidthArray[searchRegionNumberInWidth];
-                                hmeLevel1SearchAreaInHeight = (EB_S16)contextPtr->hmeLevel1SearchAreaInHeightArray[searchRegionNumberInHeight];
-                                HmeLevel1(
+                            // When HME level 0 has been disabled, increase the search area width and height for level 1 to (32x12)
+                            hmeLevel1SearchAreaInWidth = (EB_S16)contextPtr->hmeLevel1SearchAreaInWidthArray[searchRegionNumberInWidth];
+                            hmeLevel1SearchAreaInHeight = (EB_S16)contextPtr->hmeLevel1SearchAreaInHeightArray[searchRegionNumberInHeight];
+                            HmeLevel1(
                                     contextPtr,
                                     originX >> 1,
                                     originY >> 1,
@@ -3918,6 +3913,70 @@ EB_ERRORTYPE MotionEstimateLcu(
                                     &(yHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]));
 
 
+                            searchRegionNumberInWidth++;
+                        }
+                        searchRegionNumberInWidth = 0;
+                        searchRegionNumberInHeight++;
+                    }
+                }
+
+                // HME: Level2 search
+                if (enableHmeLevel2Flag) {
+
+                    searchRegionNumberInHeight = 0;
+                    searchRegionNumberInWidth = 0;
+
+                    while (searchRegionNumberInHeight < contextPtr->numberHmeSearchRegionInHeight) {
+                        while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
+
+
+                            HmeLevel2(
+                                    contextPtr,
+                                    originX,
+                                    originY,
+                                    lcuWidth,
+                                    lcuHeight,
+                                    refPicPtr,
+                                    searchRegionNumberInWidth,
+                                    searchRegionNumberInHeight,
+                                    xHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight],
+                                    yHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight],
+                                    &(hmeLevel2Sad[searchRegionNumberInWidth][searchRegionNumberInHeight]),
+                                    &(xHmeLevel2SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]),
+                                    &(yHmeLevel2SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]));
+
+
+                            searchRegionNumberInWidth++;
+                        }
+                        searchRegionNumberInWidth = 0;
+                        searchRegionNumberInHeight++;
+                    }
+                }
+
+                // Hierarchical ME - Search Center
+                if (enableHmeLevel0Flag && !enableHmeLevel1Flag && !enableHmeLevel2Flag) {
+
+                    if (contextPtr->oneQuadrantHME)
+                    {
+                        xHmeSearchCenter = xHmeLevel0SearchCenter[0][0];
+                        yHmeSearchCenter = yHmeLevel0SearchCenter[0][0];
+                        hmeMvSad = hmeLevel0Sad[0][0];
+                    }
+                    else {
+
+                        xHmeSearchCenter = xHmeLevel0SearchCenter[0][0];
+                        yHmeSearchCenter = yHmeLevel0SearchCenter[0][0];
+                        hmeMvSad = hmeLevel0Sad[0][0];
+
+                        searchRegionNumberInWidth = 1;
+                        searchRegionNumberInHeight = 0;
+
+                        while (searchRegionNumberInHeight < contextPtr->numberHmeSearchRegionInHeight) {
+                            while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
+
+                                xHmeSearchCenter = (hmeLevel0Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] : xHmeSearchCenter;
+                                yHmeSearchCenter = (hmeLevel0Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] : yHmeSearchCenter;
+                                hmeMvSad = (hmeLevel0Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? hmeLevel0Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] : hmeMvSad;
                                 searchRegionNumberInWidth++;
                             }
                             searchRegionNumberInWidth = 0;
@@ -3925,327 +3984,267 @@ EB_ERRORTYPE MotionEstimateLcu(
                         }
                     }
 
-					// HME: Level2 search
-					if (enableHmeLevel2Flag) {
+                }
 
-						searchRegionNumberInHeight = 0;
-						searchRegionNumberInWidth = 0;
+                if (enableHmeLevel1Flag && !enableHmeLevel2Flag) {
+                    xHmeSearchCenter = xHmeLevel1SearchCenter[0][0];
+                    yHmeSearchCenter = yHmeLevel1SearchCenter[0][0];
+                    hmeMvSad = hmeLevel1Sad[0][0];
 
-						while (searchRegionNumberInHeight < contextPtr->numberHmeSearchRegionInHeight) {
-							while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
+                    searchRegionNumberInWidth = 1;
+                    searchRegionNumberInHeight = 0;
 
+                    while (searchRegionNumberInHeight < contextPtr->numberHmeSearchRegionInHeight) {
+                        while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
 
-								HmeLevel2(
-									contextPtr,
-									originX,
-									originY,
-									lcuWidth,
-									lcuHeight,
-									refPicPtr,
-									searchRegionNumberInWidth,
-									searchRegionNumberInHeight,
-									xHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight],
-									yHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight],
-									&(hmeLevel2Sad[searchRegionNumberInWidth][searchRegionNumberInHeight]),
-									&(xHmeLevel2SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]),
-									&(yHmeLevel2SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]));
-
-
-								searchRegionNumberInWidth++;
-							}
-							searchRegionNumberInWidth = 0;
-							searchRegionNumberInHeight++;
-						}
-					}
-
-					// Hierarchical ME - Search Center
-					if (enableHmeLevel0Flag && !enableHmeLevel1Flag && !enableHmeLevel2Flag) {
-
-                        if (contextPtr->oneQuadrantHME)
-                        {
-                            xHmeSearchCenter = xHmeLevel0SearchCenter[0][0];
-                            yHmeSearchCenter = yHmeLevel0SearchCenter[0][0];
-                            hmeMvSad = hmeLevel0Sad[0][0];
+                            xHmeSearchCenter = (hmeLevel1Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? xHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] : xHmeSearchCenter;
+                            yHmeSearchCenter = (hmeLevel1Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? yHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] : yHmeSearchCenter;
+                            hmeMvSad = (hmeLevel1Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? hmeLevel1Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] : hmeMvSad;
+                            searchRegionNumberInWidth++;
                         }
-                        else {
+                        searchRegionNumberInWidth = 0;
+                        searchRegionNumberInHeight++;
+                    }
+                }
 
-                            xHmeSearchCenter = xHmeLevel0SearchCenter[0][0];
-                            yHmeSearchCenter = yHmeLevel0SearchCenter[0][0];
-                            hmeMvSad = hmeLevel0Sad[0][0];
+                if (enableHmeLevel2Flag) {
+                    xHmeSearchCenter = xHmeLevel2SearchCenter[0][0];
+                    yHmeSearchCenter = yHmeLevel2SearchCenter[0][0];
+                    hmeMvSad = hmeLevel2Sad[0][0];
 
-                            searchRegionNumberInWidth = 1;
-                            searchRegionNumberInHeight = 0;
+                    searchRegionNumberInWidth = 1;
+                    searchRegionNumberInHeight = 0;
 
-                            while (searchRegionNumberInHeight < contextPtr->numberHmeSearchRegionInHeight) {
-                                while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
+                    while (searchRegionNumberInHeight < contextPtr->numberHmeSearchRegionInHeight) {
+                        while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
 
-                                    xHmeSearchCenter = (hmeLevel0Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] : xHmeSearchCenter;
-                                    yHmeSearchCenter = (hmeLevel0Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] : yHmeSearchCenter;
-                                    hmeMvSad = (hmeLevel0Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? hmeLevel0Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] : hmeMvSad;
-                                    searchRegionNumberInWidth++;
+                            xHmeSearchCenter = (hmeLevel2Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? xHmeLevel2SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] : xHmeSearchCenter;
+                            yHmeSearchCenter = (hmeLevel2Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? yHmeLevel2SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] : yHmeSearchCenter;
+                            hmeMvSad = (hmeLevel2Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? hmeLevel2Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] : hmeMvSad;
+                            searchRegionNumberInWidth++;
+                        }
+                        searchRegionNumberInWidth = 0;
+                        searchRegionNumberInHeight++;
+                    }
+
+
+                    numQuadInWidth = contextPtr->numberHmeSearchRegionInWidth;
+                    totalMeQuad = contextPtr->numberHmeSearchRegionInHeight * contextPtr->numberHmeSearchRegionInWidth;
+
+                    if ((ref0Poc == ref1Poc) && (listIndex == 1) && (totalMeQuad > 1)){
+
+                        for (quadIndex = 0; quadIndex < totalMeQuad - 1; ++quadIndex) {
+                            for (nextQuadIndex = quadIndex + 1; nextQuadIndex < totalMeQuad; ++nextQuadIndex) {
+
+
+                                if (hmeLevel2Sad[quadIndex / numQuadInWidth][quadIndex%numQuadInWidth] > hmeLevel2Sad[nextQuadIndex / numQuadInWidth][nextQuadIndex%numQuadInWidth]) {
+
+                                    tempXHmeSearchCenter = xHmeLevel2SearchCenter[quadIndex / numQuadInWidth][quadIndex%numQuadInWidth];
+                                    tempYHmeSearchCenter = yHmeLevel2SearchCenter[quadIndex / numQuadInWidth][quadIndex%numQuadInWidth];
+                                    tempXHmeSad = hmeLevel2Sad[quadIndex / numQuadInWidth][quadIndex%numQuadInWidth];
+
+                                    xHmeLevel2SearchCenter[quadIndex / numQuadInWidth][quadIndex%numQuadInWidth] = xHmeLevel2SearchCenter[nextQuadIndex / numQuadInWidth][nextQuadIndex%numQuadInWidth];
+                                    yHmeLevel2SearchCenter[quadIndex / numQuadInWidth][quadIndex%numQuadInWidth] = yHmeLevel2SearchCenter[nextQuadIndex / numQuadInWidth][nextQuadIndex%numQuadInWidth];
+                                    hmeLevel2Sad[quadIndex / numQuadInWidth][quadIndex%numQuadInWidth] = hmeLevel2Sad[nextQuadIndex / numQuadInWidth][nextQuadIndex%numQuadInWidth];
+
+                                    xHmeLevel2SearchCenter[nextQuadIndex / numQuadInWidth][nextQuadIndex%numQuadInWidth] = tempXHmeSearchCenter;
+                                    yHmeLevel2SearchCenter[nextQuadIndex / numQuadInWidth][nextQuadIndex%numQuadInWidth] = tempYHmeSearchCenter;
+                                    hmeLevel2Sad[nextQuadIndex / numQuadInWidth][nextQuadIndex%numQuadInWidth] = tempXHmeSad;
                                 }
-                                searchRegionNumberInWidth = 0;
-                                searchRegionNumberInHeight++;
                             }
                         }
 
+                        xHmeSearchCenter = xHmeLevel2SearchCenter[0][1];
+                        yHmeSearchCenter = yHmeLevel2SearchCenter[0][1];
                     }
-
-					if (enableHmeLevel1Flag && !enableHmeLevel2Flag) {
-						xHmeSearchCenter = xHmeLevel1SearchCenter[0][0];
-						yHmeSearchCenter = yHmeLevel1SearchCenter[0][0];
-						hmeMvSad = hmeLevel1Sad[0][0];
-
-						searchRegionNumberInWidth = 1;
-						searchRegionNumberInHeight = 0;
-
-						while (searchRegionNumberInHeight < contextPtr->numberHmeSearchRegionInHeight) {
-							while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
-
-								xHmeSearchCenter = (hmeLevel1Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? xHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] : xHmeSearchCenter;
-								yHmeSearchCenter = (hmeLevel1Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? yHmeLevel1SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] : yHmeSearchCenter;
-								hmeMvSad = (hmeLevel1Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? hmeLevel1Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] : hmeMvSad;
-								searchRegionNumberInWidth++;
-							}
-							searchRegionNumberInWidth = 0;
-							searchRegionNumberInHeight++;
-						}
-					}
-
-					if (enableHmeLevel2Flag) {
-						xHmeSearchCenter = xHmeLevel2SearchCenter[0][0];
-						yHmeSearchCenter = yHmeLevel2SearchCenter[0][0];
-						hmeMvSad = hmeLevel2Sad[0][0];
-
-						searchRegionNumberInWidth = 1;
-						searchRegionNumberInHeight = 0;
-
-						while (searchRegionNumberInHeight < contextPtr->numberHmeSearchRegionInHeight) {
-							while (searchRegionNumberInWidth < contextPtr->numberHmeSearchRegionInWidth) {
-
-								xHmeSearchCenter = (hmeLevel2Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? xHmeLevel2SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] : xHmeSearchCenter;
-								yHmeSearchCenter = (hmeLevel2Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? yHmeLevel2SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight] : yHmeSearchCenter;
-								hmeMvSad = (hmeLevel2Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] < hmeMvSad) ? hmeLevel2Sad[searchRegionNumberInWidth][searchRegionNumberInHeight] : hmeMvSad;
-								searchRegionNumberInWidth++;
-							}
-							searchRegionNumberInWidth = 0;
-							searchRegionNumberInHeight++;
-						}
-
-
-						numQuadInWidth = contextPtr->numberHmeSearchRegionInWidth;
-						totalMeQuad = contextPtr->numberHmeSearchRegionInHeight * contextPtr->numberHmeSearchRegionInWidth;
-
-						if ((ref0Poc == ref1Poc) && (listIndex == 1) && (totalMeQuad > 1)){
-
-							for (quadIndex = 0; quadIndex < totalMeQuad - 1; ++quadIndex) {
-								for (nextQuadIndex = quadIndex + 1; nextQuadIndex < totalMeQuad; ++nextQuadIndex) {
-
-
-									if (hmeLevel2Sad[quadIndex / numQuadInWidth][quadIndex%numQuadInWidth] > hmeLevel2Sad[nextQuadIndex / numQuadInWidth][nextQuadIndex%numQuadInWidth]) {
-
-										tempXHmeSearchCenter = xHmeLevel2SearchCenter[quadIndex / numQuadInWidth][quadIndex%numQuadInWidth];
-										tempYHmeSearchCenter = yHmeLevel2SearchCenter[quadIndex / numQuadInWidth][quadIndex%numQuadInWidth];
-										tempXHmeSad = hmeLevel2Sad[quadIndex / numQuadInWidth][quadIndex%numQuadInWidth];
-
-										xHmeLevel2SearchCenter[quadIndex / numQuadInWidth][quadIndex%numQuadInWidth] = xHmeLevel2SearchCenter[nextQuadIndex / numQuadInWidth][nextQuadIndex%numQuadInWidth];
-										yHmeLevel2SearchCenter[quadIndex / numQuadInWidth][quadIndex%numQuadInWidth] = yHmeLevel2SearchCenter[nextQuadIndex / numQuadInWidth][nextQuadIndex%numQuadInWidth];
-										hmeLevel2Sad[quadIndex / numQuadInWidth][quadIndex%numQuadInWidth] = hmeLevel2Sad[nextQuadIndex / numQuadInWidth][nextQuadIndex%numQuadInWidth];
-
-										xHmeLevel2SearchCenter[nextQuadIndex / numQuadInWidth][nextQuadIndex%numQuadInWidth] = tempXHmeSearchCenter;
-										yHmeLevel2SearchCenter[nextQuadIndex / numQuadInWidth][nextQuadIndex%numQuadInWidth] = tempYHmeSearchCenter;
-										hmeLevel2Sad[nextQuadIndex / numQuadInWidth][nextQuadIndex%numQuadInWidth] = tempXHmeSad;
-									}
-								}
-							}
-
-							xHmeSearchCenter = xHmeLevel2SearchCenter[0][1];
-							yHmeSearchCenter = yHmeLevel2SearchCenter[0][1];
-						}
-					}
-
-					xSearchCenter = xHmeSearchCenter;
-					ySearchCenter = yHmeSearchCenter;
-				}
-			}
-            else {
-                xSearchCenter = 0;
-                ySearchCenter = 0;
-            }
-
-            searchAreaWidth = (EB_S16)MIN(contextPtr->searchAreaWidth, 127);
-            searchAreaHeight = (EB_S16)MIN(contextPtr->searchAreaHeight, 127);
-
-			if (xSearchCenter != 0 || ySearchCenter != 0) {
-				CheckZeroZeroCenter(
-					refPicPtr,
-					contextPtr,
-					lcuOriginX,
-					lcuOriginY,
-					lcuWidth,
-					lcuHeight,
-					&xSearchCenter,
-					&ySearchCenter);
-			}
-
-			xSearchAreaOrigin = xSearchCenter - (searchAreaWidth >> 1);
-			ySearchAreaOrigin = ySearchCenter - (searchAreaHeight >> 1);
-
-            if (listIndex == 1 && lcuWidth == MAX_LCU_SIZE && lcuHeight == MAX_LCU_SIZE)
-            {
-				{
-					if (adjustSearchAreaDirection == 1){
-						searchAreaWidth = (EB_S16)8;
-						searchAreaHeight = (EB_S16)5;
-					}
-					else if (adjustSearchAreaDirection == 2){
-						searchAreaWidth = (EB_S16)16;
-						searchAreaHeight = (EB_S16)9;
-					}
-
-					xSearchAreaOrigin = xSearchCenter - (searchAreaWidth >> 1);
-					ySearchAreaOrigin = ySearchCenter - (searchAreaHeight >> 1);
-
-				}
-            }
-
-            if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0 && (sequenceControlSetPtr->tileRowCount * sequenceControlSetPtr->tileColumnCount) > 1)
-            {
-                int tileStartX = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileStartX;
-                int tileEndX   = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileEndX;
-
-                // Correct the left edge of the Search Area if it is not on the reference Picture
-                xSearchAreaOrigin = ((originX + xSearchAreaOrigin) < tileStartX) ?
-                    tileStartX - originX :
-                    xSearchAreaOrigin;
-
-                searchAreaWidth = ((originX + xSearchAreaOrigin) < tileStartX) ?
-                    searchAreaWidth - (tileStartX - (originX + xSearchAreaOrigin)) :
-                    searchAreaWidth;
-
-                // Correct the right edge of the Search Area if its not on the reference Picture
-                xSearchAreaOrigin = ((originX + xSearchAreaOrigin) > tileEndX - 1) ?
-                    xSearchAreaOrigin - ((originX + xSearchAreaOrigin) - (tileEndX - 1)) :
-                    xSearchAreaOrigin;
-
-                searchAreaWidth = ((originX + xSearchAreaOrigin + searchAreaWidth) > tileEndX) ?
-                    MAX(1, searchAreaWidth - ((originX + xSearchAreaOrigin + searchAreaWidth) - tileEndX)) :
-                    searchAreaWidth;
-            } else {
-                // Correct the left edge of the Search Area if it is not on the reference Picture
-			    xSearchAreaOrigin = ((originX + xSearchAreaOrigin) < -padWidth) ?
-			    	-padWidth - originX :
-			    	xSearchAreaOrigin;
-
-			    searchAreaWidth = ((originX + xSearchAreaOrigin) < -padWidth) ?
-			    	searchAreaWidth - (-padWidth - (originX + xSearchAreaOrigin)) :
-			    	searchAreaWidth;
-
-			    // Correct the right edge of the Search Area if its not on the reference Picture
-			    xSearchAreaOrigin = ((originX + xSearchAreaOrigin) > pictureWidth - 1) ?
-			    	xSearchAreaOrigin - ((originX + xSearchAreaOrigin) - (pictureWidth - 1)) :
-			    	xSearchAreaOrigin;
-
-                searchAreaWidth = ((originX + xSearchAreaOrigin + searchAreaWidth) > pictureWidth) ?
-                    MAX(1, searchAreaWidth - ((originX + xSearchAreaOrigin + searchAreaWidth) - pictureWidth)) :
-                    searchAreaWidth;
-            }
-
-            if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0 && (sequenceControlSetPtr->tileRowCount * sequenceControlSetPtr->tileColumnCount) > 1)
-            {
-                int tileStartY = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileStartY;
-                int tileEndY   = sequenceControlSetPtr->lcuParamsArray[lcuIndex].tileEndY;
-
-                // Correct the top edge of the Search Area if it is not on the reference Picture
-                ySearchAreaOrigin = ((originY + ySearchAreaOrigin) < tileStartY) ?
-                    tileStartY - originY :
-                    ySearchAreaOrigin;
-
-                searchAreaHeight = ((originY + ySearchAreaOrigin) < tileStartY) ?
-                    searchAreaHeight - (tileStartY - (originY + ySearchAreaOrigin)) :
-                    searchAreaHeight;
-
-                // Correct the bottom edge of the Search Area if its not on the reference Picture
-                ySearchAreaOrigin = ((originY + ySearchAreaOrigin) > tileEndY - 1) ?
-                    ySearchAreaOrigin - ((originY + ySearchAreaOrigin) - (tileEndY - 1)) :
-                    ySearchAreaOrigin;
-
-                searchAreaHeight = (originY + ySearchAreaOrigin + searchAreaHeight > tileEndY) ?
-                    MAX(1, searchAreaHeight - ((originY + ySearchAreaOrigin + searchAreaHeight) - tileEndY)) :
-                    searchAreaHeight;
-            } else {
-			    // Correct the top edge of the Search Area if it is not on the reference Picture
-                ySearchAreaOrigin = ((originY + ySearchAreaOrigin) < -padHeight) ?
-                    -padHeight - originY :
-                    ySearchAreaOrigin;
-
-			    searchAreaHeight = ((originY + ySearchAreaOrigin) < -padHeight) ?
-			    	searchAreaHeight - (-padHeight - (originY + ySearchAreaOrigin)) :
-			    	searchAreaHeight;
-
-			    // Correct the bottom edge of the Search Area if its not on the reference Picture
-			    ySearchAreaOrigin = ((originY + ySearchAreaOrigin) > pictureHeight - 1) ?
-			    	ySearchAreaOrigin - ((originY + ySearchAreaOrigin) - (pictureHeight - 1)) :
-			    	ySearchAreaOrigin;
-
-			    searchAreaHeight = (originY + ySearchAreaOrigin + searchAreaHeight > pictureHeight) ?
-			    	MAX(1, searchAreaHeight - ((originY + ySearchAreaOrigin + searchAreaHeight) - pictureHeight)) :
-			    	searchAreaHeight;
-            }
-
-			contextPtr->xSearchAreaOrigin[listIndex][0] = xSearchAreaOrigin;
-			contextPtr->ySearchAreaOrigin[listIndex][0] = ySearchAreaOrigin;
-
-            xTopLeftSearchRegion    = (EB_S16)(refPicPtr->originX + lcuOriginX) - (ME_FILTER_TAP >> 1) + xSearchAreaOrigin;
-			yTopLeftSearchRegion    = (EB_S16)(refPicPtr->originY + lcuOriginY) - (ME_FILTER_TAP >> 1) + ySearchAreaOrigin;
-			searchRegionIndex       = (xTopLeftSearchRegion)+(yTopLeftSearchRegion)* refPicPtr->strideY;
-
-            contextPtr->integerBufferPtr[listIndex][0] = &(refPicPtr->bufferY[searchRegionIndex]);
-            contextPtr->interpolatedFullStride[listIndex][0] = refPicPtr->strideY;
-
-			// Move to the top left of the search region
-			xTopLeftSearchRegion = (EB_S16)(refPicPtr->originX + lcuOriginX) + xSearchAreaOrigin;
-			yTopLeftSearchRegion = (EB_S16)(refPicPtr->originY + lcuOriginY) + ySearchAreaOrigin;
-			searchRegionIndex = xTopLeftSearchRegion + yTopLeftSearchRegion * refPicPtr->strideY;
-
-			{
-				{
-
-					InitializeBuffer_32bits_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](contextPtr->pLcuBestSad[listIndex][0], 21, 1, MAX_SAD_VALUE);
-					contextPtr->pBestSad64x64 = &(contextPtr->pLcuBestSad[listIndex][0][ME_TIER_ZERO_PU_64x64]);
-					contextPtr->pBestSad32x32 = &(contextPtr->pLcuBestSad[listIndex][0][ME_TIER_ZERO_PU_32x32_0]);
-					contextPtr->pBestSad16x16 = &(contextPtr->pLcuBestSad[listIndex][0][ME_TIER_ZERO_PU_16x16_0]);
-					contextPtr->pBestSad8x8 = &(contextPtr->pLcuBestSad[listIndex][0][ME_TIER_ZERO_PU_8x8_0]);
-
-					contextPtr->pBestMV64x64 = &(contextPtr->pLcuBestMV[listIndex][0][ME_TIER_ZERO_PU_64x64]);
-					contextPtr->pBestMV32x32 = &(contextPtr->pLcuBestMV[listIndex][0][ME_TIER_ZERO_PU_32x32_0]);
-					contextPtr->pBestMV16x16 = &(contextPtr->pLcuBestMV[listIndex][0][ME_TIER_ZERO_PU_16x16_0]);
-					contextPtr->pBestMV8x8 = &(contextPtr->pLcuBestMV[listIndex][0][ME_TIER_ZERO_PU_8x8_0]);
-
-                    contextPtr->pBestSsd64x64 = &(contextPtr->pLcuBestSsd[listIndex][0][ME_TIER_ZERO_PU_64x64]);
-                    contextPtr->pBestSsd32x32 = &(contextPtr->pLcuBestSsd[listIndex][0][ME_TIER_ZERO_PU_32x32_0]);
-                    contextPtr->pBestSsd16x16 = &(contextPtr->pLcuBestSsd[listIndex][0][ME_TIER_ZERO_PU_16x16_0]);
-                    contextPtr->pBestSsd8x8   = &(contextPtr->pLcuBestSsd[listIndex][0][ME_TIER_ZERO_PU_8x8_0]);
-
-					FullPelSearch_LCU(
-						contextPtr,
-						listIndex,
-						xSearchAreaOrigin,
-						ySearchAreaOrigin,
-						searchAreaWidth,
-						searchAreaHeight
-					);
-
-				}
-
-                if (contextPtr->fractionalSearchModel == 0) {
-                    enableHalfPel32x32 = EB_TRUE;
-                    enableHalfPel16x16 = EB_TRUE;
-                    enableHalfPel8x8   = EB_TRUE;
-                    enableQuarterPel   = EB_TRUE;
                 }
-                else if (contextPtr->fractionalSearchModel == 1) {
-                    SuPelEnable(
+
+                xSearchCenter = xHmeSearchCenter;
+                ySearchCenter = yHmeSearchCenter;
+            }
+        } else {
+            xSearchCenter = 0;
+            ySearchCenter = 0;
+        }
+
+        searchAreaWidth = (EB_S16)MIN(contextPtr->searchAreaWidth, 127);
+        searchAreaHeight = (EB_S16)MIN(contextPtr->searchAreaHeight, 127);
+
+        if (xSearchCenter != 0 || ySearchCenter != 0) {
+            CheckZeroZeroCenter(
+                    refPicPtr,
+                    contextPtr,
+                    lcuOriginX,
+                    lcuOriginY,
+                    lcuWidth,
+                    lcuHeight,
+                    &xSearchCenter,
+                    &ySearchCenter);
+        }
+
+        xSearchAreaOrigin = xSearchCenter - (searchAreaWidth >> 1);
+        ySearchAreaOrigin = ySearchCenter - (searchAreaHeight >> 1);
+
+        if (listIndex == 1 && lcuWidth == MAX_LCU_SIZE && lcuHeight == MAX_LCU_SIZE)
+        {
+            {
+                if (adjustSearchAreaDirection == 1){
+                    searchAreaWidth = (EB_S16)8;
+                    searchAreaHeight = (EB_S16)5;
+                }
+                else if (adjustSearchAreaDirection == 2){
+                    searchAreaWidth = (EB_S16)16;
+                    searchAreaHeight = (EB_S16)9;
+                }
+
+                xSearchAreaOrigin = xSearchCenter - (searchAreaWidth >> 1);
+                ySearchAreaOrigin = ySearchCenter - (searchAreaHeight >> 1);
+
+            }
+        }
+
+        //Jing: Get tile index where this LCU belongs
+        //Jing: TODO
+        //Clean up this mess 
+        if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0 && (sequenceControlSetPtr->staticConfig.tileRowCount * sequenceControlSetPtr->staticConfig.tileColumnCount) > 1)
+        {
+            EB_U16 lcuTileIdx = pictureControlSetPtr->lcuEdgeInfoArray[lcuIndex].tileIndexInRaster;
+            int tileStartX = pictureControlSetPtr->tileInfoArray[lcuTileIdx].tilePxlOriginX;
+            int tileEndX   = pictureControlSetPtr->tileInfoArray[lcuTileIdx].tilePxlEndX;
+
+            // Correct the left edge of the Search Area if it is not on the reference Picture
+            xSearchAreaOrigin = ((originX + xSearchAreaOrigin) < tileStartX) ?
+                tileStartX - originX :
+                xSearchAreaOrigin;
+
+            searchAreaWidth = ((originX + xSearchAreaOrigin) < tileStartX) ?
+                searchAreaWidth - (tileStartX - (originX + xSearchAreaOrigin)) :
+                searchAreaWidth;
+
+            // Correct the right edge of the Search Area if its not on the reference Picture
+            xSearchAreaOrigin = ((originX + xSearchAreaOrigin) > tileEndX - 1) ?
+                xSearchAreaOrigin - ((originX + xSearchAreaOrigin) - (tileEndX - 1)) :
+                xSearchAreaOrigin;
+
+            searchAreaWidth = ((originX + xSearchAreaOrigin + searchAreaWidth) > tileEndX) ?
+                MAX(1, searchAreaWidth - ((originX + xSearchAreaOrigin + searchAreaWidth) - tileEndX)) :
+                searchAreaWidth;
+        } else {
+            // Correct the left edge of the Search Area if it is not on the reference Picture
+            xSearchAreaOrigin = ((originX + xSearchAreaOrigin) < -padWidth) ?
+                -padWidth - originX :
+                xSearchAreaOrigin;
+
+            searchAreaWidth = ((originX + xSearchAreaOrigin) < -padWidth) ?
+                searchAreaWidth - (-padWidth - (originX + xSearchAreaOrigin)) :
+                searchAreaWidth;
+
+            // Correct the right edge of the Search Area if its not on the reference Picture
+            xSearchAreaOrigin = ((originX + xSearchAreaOrigin) > pictureWidth - 1) ?
+                xSearchAreaOrigin - ((originX + xSearchAreaOrigin) - (pictureWidth - 1)) :
+                xSearchAreaOrigin;
+
+            searchAreaWidth = ((originX + xSearchAreaOrigin + searchAreaWidth) > pictureWidth) ?
+                MAX(1, searchAreaWidth - ((originX + xSearchAreaOrigin + searchAreaWidth) - pictureWidth)) :
+                searchAreaWidth;
+        }
+
+        if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0 && (sequenceControlSetPtr->staticConfig.tileRowCount * sequenceControlSetPtr->staticConfig.tileColumnCount) > 1)
+        {
+            EB_U16 lcuTileIdx = pictureControlSetPtr->lcuEdgeInfoArray[lcuIndex].tileIndexInRaster;
+            int tileStartY = pictureControlSetPtr->tileInfoArray[lcuTileIdx].tilePxlOriginY;
+            int tileEndY   = pictureControlSetPtr->tileInfoArray[lcuTileIdx].tilePxlEndY;
+
+            // Correct the top edge of the Search Area if it is not on the reference Picture
+            ySearchAreaOrigin = ((originY + ySearchAreaOrigin) < tileStartY) ?
+                tileStartY - originY :
+                ySearchAreaOrigin;
+
+            searchAreaHeight = ((originY + ySearchAreaOrigin) < tileStartY) ?
+                searchAreaHeight - (tileStartY - (originY + ySearchAreaOrigin)) :
+                searchAreaHeight;
+
+            // Correct the bottom edge of the Search Area if its not on the reference Picture
+            ySearchAreaOrigin = ((originY + ySearchAreaOrigin) > tileEndY - 1) ?
+                ySearchAreaOrigin - ((originY + ySearchAreaOrigin) - (tileEndY - 1)) :
+                ySearchAreaOrigin;
+
+            searchAreaHeight = (originY + ySearchAreaOrigin + searchAreaHeight > tileEndY) ?
+                MAX(1, searchAreaHeight - ((originY + ySearchAreaOrigin + searchAreaHeight) - tileEndY)) :
+                searchAreaHeight;
+        } else {
+            // Correct the top edge of the Search Area if it is not on the reference Picture
+            ySearchAreaOrigin = ((originY + ySearchAreaOrigin) < -padHeight) ?
+                -padHeight - originY :
+                ySearchAreaOrigin;
+
+            searchAreaHeight = ((originY + ySearchAreaOrigin) < -padHeight) ?
+                searchAreaHeight - (-padHeight - (originY + ySearchAreaOrigin)) :
+                searchAreaHeight;
+
+            // Correct the bottom edge of the Search Area if its not on the reference Picture
+            ySearchAreaOrigin = ((originY + ySearchAreaOrigin) > pictureHeight - 1) ?
+                ySearchAreaOrigin - ((originY + ySearchAreaOrigin) - (pictureHeight - 1)) :
+                ySearchAreaOrigin;
+
+            searchAreaHeight = (originY + ySearchAreaOrigin + searchAreaHeight > pictureHeight) ?
+                MAX(1, searchAreaHeight - ((originY + ySearchAreaOrigin + searchAreaHeight) - pictureHeight)) :
+                searchAreaHeight;
+        }
+
+        contextPtr->xSearchAreaOrigin[listIndex][0] = xSearchAreaOrigin;
+        contextPtr->ySearchAreaOrigin[listIndex][0] = ySearchAreaOrigin;
+
+        xTopLeftSearchRegion    = (EB_S16)(refPicPtr->originX + lcuOriginX) - (ME_FILTER_TAP >> 1) + xSearchAreaOrigin;
+        yTopLeftSearchRegion    = (EB_S16)(refPicPtr->originY + lcuOriginY) - (ME_FILTER_TAP >> 1) + ySearchAreaOrigin;
+        searchRegionIndex       = (xTopLeftSearchRegion)+(yTopLeftSearchRegion)* refPicPtr->strideY;
+
+        contextPtr->integerBufferPtr[listIndex][0] = &(refPicPtr->bufferY[searchRegionIndex]);
+        contextPtr->interpolatedFullStride[listIndex][0] = refPicPtr->strideY;
+
+        // Move to the top left of the search region
+        xTopLeftSearchRegion = (EB_S16)(refPicPtr->originX + lcuOriginX) + xSearchAreaOrigin;
+        yTopLeftSearchRegion = (EB_S16)(refPicPtr->originY + lcuOriginY) + ySearchAreaOrigin;
+        searchRegionIndex = xTopLeftSearchRegion + yTopLeftSearchRegion * refPicPtr->strideY;
+
+        {
+            {
+
+                InitializeBuffer_32bits_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](contextPtr->pLcuBestSad[listIndex][0], 21, 1, MAX_SAD_VALUE);
+                contextPtr->pBestSad64x64 = &(contextPtr->pLcuBestSad[listIndex][0][ME_TIER_ZERO_PU_64x64]);
+                contextPtr->pBestSad32x32 = &(contextPtr->pLcuBestSad[listIndex][0][ME_TIER_ZERO_PU_32x32_0]);
+                contextPtr->pBestSad16x16 = &(contextPtr->pLcuBestSad[listIndex][0][ME_TIER_ZERO_PU_16x16_0]);
+                contextPtr->pBestSad8x8 = &(contextPtr->pLcuBestSad[listIndex][0][ME_TIER_ZERO_PU_8x8_0]);
+
+                contextPtr->pBestMV64x64 = &(contextPtr->pLcuBestMV[listIndex][0][ME_TIER_ZERO_PU_64x64]);
+                contextPtr->pBestMV32x32 = &(contextPtr->pLcuBestMV[listIndex][0][ME_TIER_ZERO_PU_32x32_0]);
+                contextPtr->pBestMV16x16 = &(contextPtr->pLcuBestMV[listIndex][0][ME_TIER_ZERO_PU_16x16_0]);
+                contextPtr->pBestMV8x8 = &(contextPtr->pLcuBestMV[listIndex][0][ME_TIER_ZERO_PU_8x8_0]);
+
+                contextPtr->pBestSsd64x64 = &(contextPtr->pLcuBestSsd[listIndex][0][ME_TIER_ZERO_PU_64x64]);
+                contextPtr->pBestSsd32x32 = &(contextPtr->pLcuBestSsd[listIndex][0][ME_TIER_ZERO_PU_32x32_0]);
+                contextPtr->pBestSsd16x16 = &(contextPtr->pLcuBestSsd[listIndex][0][ME_TIER_ZERO_PU_16x16_0]);
+                contextPtr->pBestSsd8x8   = &(contextPtr->pLcuBestSsd[listIndex][0][ME_TIER_ZERO_PU_8x8_0]);
+
+                FullPelSearch_LCU(
+                        contextPtr,
+                        listIndex,
+                        xSearchAreaOrigin,
+                        ySearchAreaOrigin,
+                        searchAreaWidth,
+                        searchAreaHeight
+                        );
+
+            }
+
+            if (contextPtr->fractionalSearchModel == 0) {
+                enableHalfPel32x32 = EB_TRUE;
+                enableHalfPel16x16 = EB_TRUE;
+                enableHalfPel8x8   = EB_TRUE;
+                enableQuarterPel   = EB_TRUE;
+            }
+            else if (contextPtr->fractionalSearchModel == 1) {
+                SuPelEnable(
                         contextPtr,
                         pictureControlSetPtr,
                         listIndex,
@@ -4253,53 +4252,53 @@ EB_ERRORTYPE MotionEstimateLcu(
                         &enableHalfPel32x32,
                         &enableHalfPel16x16,
                         &enableHalfPel8x8);
-                    enableQuarterPel = EB_TRUE;
+                enableQuarterPel = EB_TRUE;
 
 
-                }
-                else {
-                    enableHalfPel32x32 = EB_FALSE;
-                    enableHalfPel16x16 = EB_FALSE;
-                    enableHalfPel8x8   = EB_FALSE;
-                    enableQuarterPel   = EB_FALSE;
+            }
+            else {
+                enableHalfPel32x32 = EB_FALSE;
+                enableHalfPel16x16 = EB_FALSE;
+                enableHalfPel8x8   = EB_FALSE;
+                enableQuarterPel   = EB_FALSE;
 
-                }
+            }
 
-		        if (enableHalfPel32x32 || enableHalfPel16x16 || enableHalfPel8x8 || enableQuarterPel){
+            if (enableHalfPel32x32 || enableHalfPel16x16 || enableHalfPel8x8 || enableQuarterPel){
 
-		        	// Move to the top left of the search region
-		        	xTopLeftSearchRegion = (EB_S16)(refPicPtr->originX + lcuOriginX) + xSearchAreaOrigin;
-		        	yTopLeftSearchRegion = (EB_S16)(refPicPtr->originY + lcuOriginY) + ySearchAreaOrigin;
-		        	searchRegionIndex = xTopLeftSearchRegion + yTopLeftSearchRegion * refPicPtr->strideY;
+                // Move to the top left of the search region
+                xTopLeftSearchRegion = (EB_S16)(refPicPtr->originX + lcuOriginX) + xSearchAreaOrigin;
+                yTopLeftSearchRegion = (EB_S16)(refPicPtr->originY + lcuOriginY) + ySearchAreaOrigin;
+                searchRegionIndex = xTopLeftSearchRegion + yTopLeftSearchRegion * refPicPtr->strideY;
 
-		        	// Interpolate the search region for Half-Pel Refinements 
-		        	// H - AVC Style
-		        	InterpolateSearchRegionAVC(
-		        		contextPtr,
-		        		listIndex,
-		        		contextPtr->integerBufferPtr[listIndex][0] + (ME_FILTER_TAP >> 1) + ((ME_FILTER_TAP >> 1) * contextPtr->interpolatedFullStride[listIndex][0]),
-		        		contextPtr->interpolatedFullStride[listIndex][0],
-		        		(EB_U32)searchAreaWidth + (MAX_LCU_SIZE - 1),
-		        		(EB_U32)searchAreaHeight + (MAX_LCU_SIZE - 1));
-
-		        	// Half-Pel Refinement [8 search positions]
-		        	HalfPelSearch_LCU(
-		        		sequenceControlSetPtr,
-		        		contextPtr,
+                // Interpolate the search region for Half-Pel Refinements 
+                // H - AVC Style
+                InterpolateSearchRegionAVC(
+                        contextPtr,
+                        listIndex,
                         contextPtr->integerBufferPtr[listIndex][0] + (ME_FILTER_TAP >> 1) + ((ME_FILTER_TAP >> 1) * contextPtr->interpolatedFullStride[listIndex][0]),
                         contextPtr->interpolatedFullStride[listIndex][0],
-		        		&(contextPtr->posbBuffer[listIndex][0][(ME_FILTER_TAP >> 1) * contextPtr->interpolatedStride]),
-		        		&(contextPtr->poshBuffer[listIndex][0][1]),
-		        		&(contextPtr->posjBuffer[listIndex][0][0]),
-		        		xSearchAreaOrigin,
-		        		ySearchAreaOrigin,
-		        		pictureControlSetPtr->cu8x8Mode == CU_8x8_MODE_1,
-		        		enableHalfPel32x32,
-						enableHalfPel16x16 && pictureControlSetPtr->cu16x16Mode == CU_16x16_MODE_0,
-		        		enableHalfPel8x8);
+                        (EB_U32)searchAreaWidth + (MAX_LCU_SIZE - 1),
+                        (EB_U32)searchAreaHeight + (MAX_LCU_SIZE - 1));
 
-                    // Quarter-Pel Refinement [8 search positions]
-                    QuarterPelSearch_LCU(
+                // Half-Pel Refinement [8 search positions]
+                HalfPelSearch_LCU(
+                        sequenceControlSetPtr,
+                        contextPtr,
+                        contextPtr->integerBufferPtr[listIndex][0] + (ME_FILTER_TAP >> 1) + ((ME_FILTER_TAP >> 1) * contextPtr->interpolatedFullStride[listIndex][0]),
+                        contextPtr->interpolatedFullStride[listIndex][0],
+                        &(contextPtr->posbBuffer[listIndex][0][(ME_FILTER_TAP >> 1) * contextPtr->interpolatedStride]),
+                        &(contextPtr->poshBuffer[listIndex][0][1]),
+                        &(contextPtr->posjBuffer[listIndex][0][0]),
+                        xSearchAreaOrigin,
+                        ySearchAreaOrigin,
+                        pictureControlSetPtr->cu8x8Mode == CU_8x8_MODE_1,
+                        enableHalfPel32x32,
+                        enableHalfPel16x16 && pictureControlSetPtr->cu16x16Mode == CU_16x16_MODE_0,
+                        enableHalfPel8x8);
+
+                // Quarter-Pel Refinement [8 search positions]
+                QuarterPelSearch_LCU(
                         contextPtr,
                         contextPtr->integerBufferPtr[listIndex][0] + (ME_FILTER_TAP >> 1) + ((ME_FILTER_TAP >> 1) * contextPtr->interpolatedFullStride[listIndex][0]),
                         contextPtr->interpolatedFullStride[listIndex][0],
@@ -4310,17 +4309,15 @@ EB_ERRORTYPE MotionEstimateLcu(
                         ySearchAreaOrigin,
                         pictureControlSetPtr->cu8x8Mode == CU_8x8_MODE_1,
                         enableHalfPel32x32,
-						enableHalfPel16x16 && pictureControlSetPtr->cu16x16Mode == CU_16x16_MODE_0,
+                        enableHalfPel16x16 && pictureControlSetPtr->cu16x16Mode == CU_16x16_MODE_0,
                         enableHalfPel8x8,
                         enableQuarterPel);
-		        }				
-			}
-		}
+            }				
+        }
 	}
 
 	// Bi-Prediction motion estimation loop
-	for (puIndex = 0; puIndex < maxNumberOfPusPerLcu; ++puIndex){
-
+	for (puIndex = 0; puIndex < maxNumberOfPusPerLcu; ++puIndex) {
 		candidateIndex = 0;
 		EB_U32 nIdx = puIndex >  20   ?   tab8x8[puIndex-21]  + 21   :
 			puIndex >   4   ?   tab32x32[puIndex-5] + 5    :  puIndex;                     
@@ -4329,16 +4326,12 @@ EB_ERRORTYPE MotionEstimateLcu(
 				candidateIndex++;
 		}
 
-
 		totalMeCandidateIndex = candidateIndex;
 
 		if (numOfListToSearch){
-
 			EB_BOOL condition = (EB_BOOL)((pictureControlSetPtr->cu8x8Mode == CU_8x8_MODE_0 || puIndex < 21) && (pictureControlSetPtr->cu16x16Mode == CU_16x16_MODE_0 || puIndex < 5));
 
 			if (condition) {
-
-
 				BiPredictionSearch(
 					contextPtr,
 					puIndex,
@@ -4415,9 +4408,7 @@ EB_ERRORTYPE MotionEstimateLcu(
 				SVT_LOG("Err in sorting");
 				break;
 			}
-
-		}
-		else if (totalMeCandidateIndex == 2){
+		} else if (totalMeCandidateIndex == 2){
 
 			EB_U32 L0Sad = contextPtr->pLcuBestSad[0][0][nIdx];
 			EB_U32 L1Sad = contextPtr->pLcuBestSad[1][0][nIdx];
@@ -4435,9 +4426,7 @@ EB_ERRORTYPE MotionEstimateLcu(
 				NSET_CAND(mePuResult, 0, L1Sad, UNI_PRED_LIST_1)
 					NSET_CAND(mePuResult, 1, L0Sad, UNI_PRED_LIST_0)
 			}
-
-		}
-		else{
+		} else{
 			EB_U32 L0Sad = contextPtr->pLcuBestSad[0][0][nIdx];
 			mePuResult->xMvL0 = _MVXT(contextPtr->pLcuBestMV[0][0][nIdx]);
 			mePuResult->yMvL0 = _MVYT(contextPtr->pLcuBestMV[0][0][nIdx]);
@@ -4445,11 +4434,7 @@ EB_ERRORTYPE MotionEstimateLcu(
 			mePuResult->yMvL1 = _MVYT(contextPtr->pLcuBestMV[1][0][nIdx]);
 			NSET_CAND(mePuResult, 0, L0Sad, UNI_PRED_LIST_0)
 		}
-
-
 	}
-
-
 
 	if (sequenceControlSetPtr->staticConfig.rateControlMode){
 
