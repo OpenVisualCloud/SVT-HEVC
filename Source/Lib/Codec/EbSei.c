@@ -12,62 +12,11 @@ void EbVideoUsabilityInfoCopy(
     AppVideoUsabilityInfo_t *dstVuiPtr,
     AppVideoUsabilityInfo_t *srcVuiPtr)
 {
+    size_t sizeCopy = (size_t)((EB_U64)(&dstVuiPtr->hrdParametersPtr) -
+                               (EB_U64)(&dstVuiPtr->aspectRatioInfoPresentFlag));
 
-    dstVuiPtr->aspectRatioInfoPresentFlag = srcVuiPtr->aspectRatioInfoPresentFlag;
-    dstVuiPtr->aspectRatioIdc = srcVuiPtr->aspectRatioIdc;
-    dstVuiPtr->sarWidth = srcVuiPtr->sarWidth;
-    dstVuiPtr->sarHeight = srcVuiPtr->sarHeight;
-
-    dstVuiPtr->overscanInfoPresentFlag = srcVuiPtr->overscanInfoPresentFlag;
-    dstVuiPtr->overscanApproriateFlag = srcVuiPtr->overscanApproriateFlag;
-    dstVuiPtr->videoSignalTypePresentFlag = srcVuiPtr->videoSignalTypePresentFlag;
-
-    dstVuiPtr->videoFormat = srcVuiPtr->videoFormat;
-    dstVuiPtr->videoFullRangeFlag = srcVuiPtr->videoFullRangeFlag;
-
-    dstVuiPtr->colorDescriptionPresentFlag =  srcVuiPtr->colorDescriptionPresentFlag;
-    dstVuiPtr->colorPrimaries = srcVuiPtr->colorPrimaries;
-    dstVuiPtr->transferCharacteristics = srcVuiPtr->transferCharacteristics;
-    dstVuiPtr->matrixCoeffs = srcVuiPtr->matrixCoeffs;
-
-    dstVuiPtr->chromaLocInfoPresentFlag = srcVuiPtr->chromaLocInfoPresentFlag;
-    dstVuiPtr->chromaSampleLocTypeTopField = srcVuiPtr->chromaSampleLocTypeTopField;
-    dstVuiPtr->chromaSampleLocTypeBottomField = srcVuiPtr->chromaSampleLocTypeBottomField;
-
-    dstVuiPtr->neutralChromaIndicationFlag = srcVuiPtr->neutralChromaIndicationFlag;
-    dstVuiPtr->fieldSeqFlag = srcVuiPtr->fieldSeqFlag;
-    dstVuiPtr->frameFieldInfoPresentFlag = srcVuiPtr->frameFieldInfoPresentFlag;
-
-    dstVuiPtr->defaultDisplayWindowFlag = srcVuiPtr->defaultDisplayWindowFlag;
-    dstVuiPtr->defaultDisplayWinLeftOffset = srcVuiPtr->defaultDisplayWinLeftOffset;
-    dstVuiPtr->defaultDisplayWinRightOffset = srcVuiPtr->defaultDisplayWinRightOffset;
-    dstVuiPtr->defaultDisplayWinTopOffset =  srcVuiPtr->defaultDisplayWinTopOffset;
-    dstVuiPtr->defaultDisplayWinBottomOffset = srcVuiPtr->defaultDisplayWinBottomOffset;
-
-    dstVuiPtr->vuiTimingInfoPresentFlag = srcVuiPtr->vuiTimingInfoPresentFlag;
-    dstVuiPtr->vuiNumUnitsInTick = srcVuiPtr->vuiNumUnitsInTick;
-    dstVuiPtr->vuiTimeScale = srcVuiPtr->vuiTimeScale;
-
-    dstVuiPtr->vuiPocPropotionalTimingFlag = srcVuiPtr->vuiPocPropotionalTimingFlag;
-    dstVuiPtr->vuiNumTicksPocDiffOneMinus1 = srcVuiPtr->vuiNumTicksPocDiffOneMinus1;
-
-    dstVuiPtr->vuiHrdParametersPresentFlag = srcVuiPtr->vuiHrdParametersPresentFlag;
-
-    dstVuiPtr->bitstreamRestrictionFlag = srcVuiPtr->bitstreamRestrictionFlag;
-
-    dstVuiPtr->motionVectorsOverPicBoundariesFlag = srcVuiPtr->motionVectorsOverPicBoundariesFlag;
-    dstVuiPtr->restrictedRefPicListsFlag = srcVuiPtr->restrictedRefPicListsFlag;
-
-    dstVuiPtr->minSpatialSegmentationIdc = srcVuiPtr->minSpatialSegmentationIdc;
-    dstVuiPtr->maxBytesPerPicDenom = srcVuiPtr->maxBytesPerPicDenom;
-    dstVuiPtr->maxBitsPerMinCuDenom = srcVuiPtr->maxBitsPerMinCuDenom;
-    dstVuiPtr->log2MaxMvLengthHorizontal = srcVuiPtr->log2MaxMvLengthHorizontal;
-    dstVuiPtr->log2MaxMvLengthVertical = srcVuiPtr->log2MaxMvLengthVertical;
-
-    EB_MEMCPY(
-        dstVuiPtr->hrdParametersPtr,
-        srcVuiPtr->hrdParametersPtr,
-        sizeof(AppHrdParameters_t));
+    EB_MEMCPY(dstVuiPtr, srcVuiPtr, sizeCopy);
+    EB_MEMCPY(dstVuiPtr->hrdParametersPtr, srcVuiPtr->hrdParametersPtr, sizeof(AppHrdParameters_t));
 
     return;
 }
