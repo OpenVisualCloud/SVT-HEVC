@@ -3943,7 +3943,7 @@ EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,
     EB_U8 qpAbsoluteMin = sequenceControlSetPtr->staticConfig.minQpAllowed;
     EB_U8 qpMax = MIN(prevRowQp + 4, qpAbsoluteMax);
     EB_U8 qpMin = MAX(prevRowQp - 4, qpAbsoluteMin);
-    pictureControlSetPtr->bufferFillPerFrame = sequenceControlSetPtr->encodeContextPtr->bufferFill;
+
     EB_U64 bufferLeftPlanned = pictureControlSetPtr->bufferFillPerFrame - pictureControlSetPtr->frameSizePlanned;
     if (rowPtr->rowIndex < pictureHeightInLcu) {
             //There is no tolerance limit allowed in low level RC as of now.

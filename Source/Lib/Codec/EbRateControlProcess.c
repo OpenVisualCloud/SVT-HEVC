@@ -2670,10 +2670,16 @@ void* RateControlKernel(void *inputPtr)
             if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize && sequenceControlSetPtr->staticConfig.lookAheadDistance > 0) {
                 EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
                 pictureControlSetPtr->qpNoVbv = pictureControlSetPtr->pictureQp;
-                pictureControlSetPtr->bufferFillPerFrame = encodeContextPtr->bufferFill;
                 pictureControlSetPtr->pictureQp = (EB_U8)Vbv_Buf_Calc(pictureControlSetPtr, sequenceControlSetPtr, encodeContextPtr);
                 hlRateControlHistogramPtrTemp = encodeContextPtr->hlRateControlHistorgramQueue[pictureControlSetPtr->ParentPcsPtr->hlHistogramQueueIndex];
                 pictureControlSetPtr->frameSizePlanned = predictBits(sequenceControlSetPtr, encodeContextPtr, hlRateControlHistogramPtrTemp, pictureControlSetPtr->pictureQp);
+                /* Update low level VBV Plan*/
+                EB_S64 bufferfill_plan = (EB_S64)(encodeContextPtr->bufferFill);
+                bufferfill_plan -= pictureControlSetPtr->frameSizePlanned;
+                bufferfill_plan = MAX(bufferfill_plan, 0);
+                bufferfill_plan = (EB_S64)(bufferfill_plan + (encodeContextPtr->vbvMaxrate * (1.0 / (sequenceControlSetPtr->frameRate >> RC_PRECISION))));
+                bufferfill_plan = MIN(bufferfill_plan, encodeContextPtr->vbvBufsize);
+                pictureControlSetPtr->bufferFillPerFrame = (EB_U64)(bufferfill_plan);
                 EbReleaseMutex(encodeContextPtr->bufferFillMutex);
             }
             pictureControlSetPtr->ParentPcsPtr->pictureQp = pictureControlSetPtr->pictureQp;
