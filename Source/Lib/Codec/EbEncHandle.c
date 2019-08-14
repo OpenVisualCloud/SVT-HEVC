@@ -409,7 +409,7 @@ EB_ERRORTYPE InitThreadManagmentParams(){
                 if (socket_id + 1 > numGroups)
                     numGroups = socket_id + 1;
                 if (socket_id > maxSize) {
-                    maxSize = maxSize+16;
+                    maxSize = maxSize*2;
                     lpGroup = realloc(lpGroup,maxSize*sizeof(processorGroup));
                 }
                 lpGroup[socket_id].group[lpGroup[socket_id].num++] = processor_id;
