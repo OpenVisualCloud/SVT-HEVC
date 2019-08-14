@@ -3943,10 +3943,11 @@ EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,
     EB_U8 qpAbsoluteMin = sequenceControlSetPtr->staticConfig.minQpAllowed;
     EB_U8 qpMax = MIN(prevRowQp + 4, qpAbsoluteMax);
     EB_U8 qpMin = MAX(prevRowQp - 4, qpAbsoluteMin);
+    pictureControlSetPtr->bufferFillPerFrame = sequenceControlSetPtr->encodeContextPtr->bufferFill;
     EB_U64 bufferLeftPlanned = pictureControlSetPtr->bufferFillPerFrame - pictureControlSetPtr->frameSizePlanned;
-    if (rowPtr->rowIndex<pictureHeightInLcu+1) {
-            //There is no tolerance limit allowed in RC as of now.
-            EB_U64 rcTol = 0;
+    if (rowPtr->rowIndex < pictureHeightInLcu) {
+            //There is no tolerance limit allowed in low level RC as of now.
+            EB_U64 rcTol = RC_TOL;
             EB_U64 encodedBitsSoFar = 0;
             EB_U64 accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, &encodedBitsSoFar);
 
@@ -3958,8 +3959,9 @@ EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,
                 qpMax = qpAbsoluteMax = prevRowQp;
 
             if (pictureControlSetPtr->sliceType!= EB_I_PICTURE)
-                rcTol *= 0;
+                rcTol *= RC_TOL_FACTOR;
 
+            if(sequenceControlSetPtr->targetBitrate <= sequenceControlSetPtr->encodeContextPtr->vbvMaxrate)
                 qpMin = MAX(qpMin, pictureControlSetPtr->qpNoVbv);
 
             //Increase the Qp when the current frame size exceeds the estimated frame size
@@ -3968,7 +3970,7 @@ EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,
                 (pictureControlSetPtr->bufferFillPerFrame - accFrameBits < (EB_U64)(bufferLeftPlanned * 0.5)) ||
                     (accFrameBits > pictureControlSetPtr->frameSizePlanned && qpVbv < pictureControlSetPtr->qpNoVbv)
                     ))) {
-                    qpVbv += 1;
+                    qpVbv += STEP_SIZE;
                     encodedBitsSoFar = 0;
                     accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, &encodedBitsSoFar);
                 }
@@ -3979,11 +3981,17 @@ EB_U8 RowVbvRateControl(PictureControlSet_t    *pictureControlSetPtr,
                 && (((accFrameBits < (EB_U64)(pictureControlSetPtr->frameSizePlanned * 0.8f) && qpVbv <= prevRowQp)
                     || (EB_S64)accFrameBits < (EB_S64)((EB_S64)(pictureControlSetPtr->bufferFillPerFrame - (rcData->vbvBufsize + (rcData->vbvMaxrate / (sequenceControlSetPtr->staticConfig.frameRate >> 16)))) * 1.1))
                     )) {
-                    qpVbv -= 1;
+                    qpVbv -= STEP_SIZE;
                     encodedBitsSoFar = 0;
                     accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, &encodedBitsSoFar);
                 }
 
+            /* avoid VBV underflow */
+            while ((qpVbv < qpAbsoluteMax)
+                && (pictureControlSetPtr->bufferFillPerFrame - accFrameBits < (rcData->vbvMaxrate / (sequenceControlSetPtr->staticConfig.frameRate >> 16)))) {
+                qpVbv += STEP_SIZE;
+                accFrameBits = predictRowsSizeSum(pictureControlSetPtr, sequenceControlSetPtr, qpVbv, &encodedBitsSoFar);
+            }
             pictureControlSetPtr->frameSizeEstimated = accFrameBits;
 
 

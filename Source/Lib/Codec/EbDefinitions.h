@@ -1093,6 +1093,10 @@ typedef enum EB_SEI {
 #define BR_SHIFT               6
 #define CPB_SHIFT              4
 
+#define STEP_SIZE              1
+#define RC_TOL                 0
+#define RC_TOL_FACTOR          0
+
 // INTRA restriction for global motion
 #define INTRA_GLOBAL_MOTION_NON_MOVING_INDEX_TH  2
 #define INTRA_GLOBAL_MOTION_DARK_LCU_TH         50
