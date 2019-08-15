@@ -2171,7 +2171,7 @@ static EB_S32 ComputeIntraPeriod(
 
     intraPeriod = (ABS((fps - maxIp)) > ABS((fps - minIp))) ? minIp : maxIp;
 
-    if(config->intraRefreshType == 1)
+    if (config->intraRefreshType == CRA_REFRESH)
         intraPeriod -= 1;
 
     return intraPeriod;
@@ -2741,10 +2741,11 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
-    if( config->intraRefreshType > 2 || config->intraRefreshType < 1) {
-        SVT_LOG("SVT [Error]: Instance %u: Invalid intra Refresh Type [1-2]\n",channelNumber+1);
+    if (config->intraRefreshType < CRA_REFRESH) {
+        SVT_LOG("SVT [Error]: Instance %u: Intra refresh type must be -1 (CRA) or >=0 (IDR)\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
-	}
+    }
+
     if (config->baseLayerSwitchMode > 1) {
         SVT_LOG("SVT [Error]: Instance %u: Invalid Base Layer Switch Mode [0-1] \n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
@@ -3135,7 +3136,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->baseLayerSwitchMode = 0;
     configPtr->encMode  = 7;
     configPtr->intraPeriodLength = -2;
-    configPtr->intraRefreshType = 1;
+    configPtr->intraRefreshType = CRA_REFRESH;
     configPtr->hierarchicalLevels = 3;
     configPtr->predStructure = EB_PRED_RANDOM_ACCESS;
     configPtr->disableDlfFlag = EB_FALSE;

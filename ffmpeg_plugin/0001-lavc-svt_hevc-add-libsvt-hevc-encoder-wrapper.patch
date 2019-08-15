@@ -276,7 +276,7 @@ index 0000000..d9ac04c
 +    param->accessUnitDelimiter = svt_enc->aud;
 +    param->asmType = svt_enc->asm_type;
 +
-+    param->intraRefreshType =  svt_enc->forced_idr + 1;
++    param->intraRefreshType =  svt_enc->forced_idr;
 +
 +    if (svt_enc->la_depth != -1)
 +        param->lookAheadDistance = svt_enc->la_depth;
@@ -494,7 +494,7 @@ index 0000000..d9ac04c
 +      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
 +
 +    { "forced-idr", "If forcing keyframes, force them as IDR frames.", OFFSET(forced_idr),
-+      AV_OPT_TYPE_BOOL,   { .i64 = 0 }, 0, 1, VE },
++      AV_OPT_TYPE_INT,   { .i64 = -1 }, -1, INT_MAX, VE },
 +
 +    { "hielevel", "Hierarchical prediction levels setting", OFFSET(hierarchical_level),
 +      AV_OPT_TYPE_INT, { .i64 = 3 }, 0, 3, VE , "hielevel"},

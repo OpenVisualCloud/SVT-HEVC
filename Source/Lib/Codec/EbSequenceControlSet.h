@@ -78,7 +78,7 @@ typedef struct SequenceControlSet_s
                                                         //   entry can be less.
     PredictionStructure_t      *predStructPtr;          
     EB_S32                      intraPeriodLength;      // The frequency of intra pictures
-    EB_U32                      intraRefreshType;       // 1: CRA, 2: IDR
+    EB_S32                      intraRefreshType;       // -1: CRA, >=0: IDR
     
     // LCU
     EB_U8                       lcuSize;

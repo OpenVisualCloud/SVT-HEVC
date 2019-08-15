@@ -280,7 +280,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **BaseLayerSwitchMode** | -base-layer-switch-mode | [0,1] | 0 | 0 : Use B-frames in the base layer pointing to the same past picture<br>1 : Use P-frames in the base layer<br>Refer to Appendix A.1 |
 | **PredStructure** | -pred-struct | [0 – 2] | 2 | 0: Low Delay P<br>1: Low Delay B<br>2: Random Access<br>Refer to Appendix A.1 |
 | **IntraPeriod** | -intra-period | [-2 - 255] | -2 | Distance Between Intra Frame inserted. <br>-1 denotes no intra update. <br>-2 denotes auto. |
-| **IntraRefreshType** | -irefresh-type | [1,2] | 1 | 1: CRA (Open GOP)<br>2: IDR (Closed GOP) |
+| **IntraRefreshType** | -irefresh-type | [-1,N] | -1 | -1: CRA (Open GOP)<br>>=0: IDR (Closed GOP, N is headers insertion interval, 0 supported if CQP, >=0 supported if VBR) |
 | **QP** | -q | [0 - 51] | 25 | Initial quantization parameter for the Intra pictures used when RateControlMode 0 (CQP) |
 | **LoopFilterDisable** | -dlf | [0, 1] | 0 | When set to 1 disables the Deblocking Loop Filtering |
 | **SAO** | -sao | [0,1] | 1 | When set to 0 the encoder will not use the Sample Adaptive Filter |

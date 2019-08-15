@@ -180,11 +180,11 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
     /* Random access.
      *
-     * 1 = CRA, open GOP.
-     * 2 = IDR, closed GOP.
+     * -1  = CRA, open GOP.
+     * >=0 = IDR, closed GOP, and the value is headers insertion interval.
      *
-     * Default is 1. */
-    uint32_t                intraRefreshType;
+     * Default is -1. */
+    int32_t                intraRefreshType;
 
     /* Number of hierarchical layers used to construct GOP.
      * Minigop size = 2^HierarchicalLevels.

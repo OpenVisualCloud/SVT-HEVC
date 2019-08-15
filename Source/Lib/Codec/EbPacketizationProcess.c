@@ -155,9 +155,10 @@ void* PacketizationKernel(void *inputPtr)
     EB_U64                          filler;
     EB_U32                          fillerBytes;
     EB_U64                          bufferRate;
-    EB_PICTURE                      sliceType;
     EB_U16                          tileIdx;
     EB_U16                          tileCnt;
+
+    EB_BOOL                         toInsertHeaders;
     
     for(;;) {
     
@@ -225,8 +226,7 @@ void* PacketizationKernel(void *inputPtr)
             (void) pictureManagerResultPtr;
             (void)pictureManagerResultsWrapperPtr;
         }
-        sliceType = pictureControlSetPtr->sliceType;
-        
+
         if (sequenceControlSetPtr->profileIdc == 0)
         {
             // Compute Profile Tier and Level Information
@@ -240,17 +240,31 @@ void* PacketizationKernel(void *inputPtr)
                 InitHRD(sequenceControlSetPtr);
         }
 
-        if(pictureControlSetPtr->pictureNumber == 0 && sequenceControlSetPtr->staticConfig.codeVpsSpsPps == 1) {
+        toInsertHeaders = EB_FALSE;
+        if (pictureControlSetPtr->pictureNumber == 0) {
+            toInsertHeaders = EB_TRUE;
+        } else if ((pictureControlSetPtr->sliceType == EB_I_PICTURE) &&
+                   (sequenceControlSetPtr->intraRefreshType >= IDR_REFRESH)) {
+            if (sequenceControlSetPtr->staticConfig.rateControlMode) {
+                EB_U32 idrCount = pictureControlSetPtr->pictureNumber /
+                                  (sequenceControlSetPtr->intraPeriodLength + 1);
+                if ((idrCount % (sequenceControlSetPtr->intraRefreshType + 1)) == 0)
+                    toInsertHeaders = EB_TRUE;
+            } else if (sequenceControlSetPtr->intraRefreshType == IDR_REFRESH) {
+                toInsertHeaders = EB_TRUE;
+            }
+        }
 
+        if (sequenceControlSetPtr->staticConfig.codeVpsSpsPps && toInsertHeaders) {
             // Reset the bitstream before writing to it
             ResetBitstream(
                 pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
 
-            if(sequenceControlSetPtr->staticConfig.accessUnitDelimiter) {
+            if (sequenceControlSetPtr->staticConfig.accessUnitDelimiter) {
 
                 EncodeAUD(
                     pictureControlSetPtr->bitstreamPtr,
-                    sliceType,
+                    pictureControlSetPtr->sliceType,
                     pictureControlSetPtr->temporalId);
             }
 
@@ -557,7 +571,7 @@ void* PacketizationKernel(void *inputPtr)
         {
             EncodeAUD(
                 pictureControlSetPtr->bitstreamPtr,
-                sliceType,
+                pictureControlSetPtr->sliceType,
                 pictureControlSetPtr->temporalId);
         }
 

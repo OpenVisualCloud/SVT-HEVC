@@ -164,8 +164,15 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.sourceWidth = config->sourceWidth;
     callbackData->ebEncParameters.sourceHeight = config->sourceHeight;
     callbackData->ebEncParameters.interlacedVideo = (EB_BOOL)config->interlacedVideo;
+    callbackData->ebEncParameters.rateControlMode = config->rateControlMode;
     callbackData->ebEncParameters.intraPeriodLength = config->intraPeriod;
     callbackData->ebEncParameters.intraRefreshType = config->intraRefreshType;
+    if (config->rateControlMode == 0 && config->intraRefreshType > 0)
+    {
+        printf("\nWarning: intraRefreshType >0 is only supported in VBR mode\n");
+        callbackData->ebEncParameters.intraRefreshType = 0;
+    }
+
     callbackData->ebEncParameters.baseLayerSwitchMode = config->baseLayerSwitchMode;
     callbackData->ebEncParameters.encMode = (EB_BOOL)config->encMode;
     callbackData->ebEncParameters.frameRate = config->frameRate;
@@ -176,7 +183,6 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.sceneChangeDetection = config->sceneChangeDetection;
     callbackData->ebEncParameters.lookAheadDistance = config->lookAheadDistance;
     callbackData->ebEncParameters.framesToBeEncoded = config->framesToBeEncoded;
-    callbackData->ebEncParameters.rateControlMode = config->rateControlMode;
     callbackData->ebEncParameters.targetBitRate = config->targetBitRate;
     callbackData->ebEncParameters.maxQpAllowed = config->maxQpAllowed;
     callbackData->ebEncParameters.minQpAllowed = config->minQpAllowed;
