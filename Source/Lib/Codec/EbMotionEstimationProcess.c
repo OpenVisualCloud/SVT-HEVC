@@ -85,8 +85,8 @@ void* SetMeHmeParamsSq(
 		                                                                            4;  // 4K
 		   
     // HME/ME default settings
-	meContextPtr->numberHmeSearchRegionInWidth          = 2;
-	meContextPtr->numberHmeSearchRegionInHeight         = 2;
+	meContextPtr->numberHmeSearchRegionInWidth          = EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT;
+	meContextPtr->numberHmeSearchRegionInHeight         = EB_HME_SEARCH_AREA_ROW_MAX_COUNT;
     
     // HME Level0
 	meContextPtr->hmeLevel0TotalSearchAreaWidth         = HmeLevel0TotalSearchAreaWidthSq[resolutionIndex][hmeMeLevel];
@@ -170,8 +170,8 @@ void* SetMeHmeParamsOq(
 		                                                                            4;  // 4K
 		   
     // HME/ME default settings
-	meContextPtr->numberHmeSearchRegionInWidth          = 2;
-	meContextPtr->numberHmeSearchRegionInHeight         = 2;
+	meContextPtr->numberHmeSearchRegionInWidth          = EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT;
+	meContextPtr->numberHmeSearchRegionInHeight         = EB_HME_SEARCH_AREA_ROW_MAX_COUNT;
     
     // HME Level0
 	meContextPtr->hmeLevel0TotalSearchAreaWidth         = HmeLevel0TotalSearchAreaWidthOq[resolutionIndex][hmeMeLevel];
@@ -249,8 +249,9 @@ void* SetMeHmeParamsVmaf(
 		4;  // 4K
 
 	// HME/ME default settings
-	meContextPtr->numberHmeSearchRegionInWidth = 2;
-	meContextPtr->numberHmeSearchRegionInHeight = 2;
+	meContextPtr->numberHmeSearchRegionInWidth          = EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT;
+	meContextPtr->numberHmeSearchRegionInHeight         = EB_HME_SEARCH_AREA_ROW_MAX_COUNT;
+
 	resolutionIndex = 3;
 	// HME Level0
 	meContextPtr->hmeLevel0TotalSearchAreaWidth = HmeLevel0TotalSearchAreaWidthVmaf[resolutionIndex][hmeMeLevel];
@@ -1042,6 +1043,7 @@ void* MotionEstimationKernel(void *inputPtr)
 		EbGetFullObject(
 			contextPtr->pictureDecisionResultsInputFifoPtr,
 			&inputResultsWrapperPtr);
+        EB_CHECK_END_OBJ(inputResultsWrapperPtr);
 
 		inputResultsPtr = (PictureDecisionResults_t*)inputResultsWrapperPtr->objectPtr;
 		pictureControlSetPtr = (PictureParentControlSet_t*)inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;
@@ -1370,25 +1372,6 @@ void* MotionEstimationKernel(void *inputPtr)
 
 		// Post the Full Results Object
 		EbPostFullObject(outputResultsWrapperPtr);
-#if LATENCY_PROFILE
-        double latency = 0.0;
-        EB_U64 finishTimeSeconds = 0;
-        EB_U64 finishTimeuSeconds = 0;
-        EbFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
-
-        EbComputeOverallElapsedTimeMs(
-                pictureControlSetPtr->startTimeSeconds,
-                pictureControlSetPtr->startTimeuSeconds,
-                finishTimeSeconds,
-                finishTimeuSeconds,
-                &latency);
-
-        SVT_LOG("[%lld]: POC %lld ME OUT, decoder order %d, latency %3.3f \n",
-                EbGetSysTimeMs(),
-                pictureControlSetPtr->pictureNumber,
-                pictureControlSetPtr->decodeOrder,
-                latency);
-#endif
 	}
 	return EB_NULL;
 }

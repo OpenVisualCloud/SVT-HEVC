@@ -921,6 +921,7 @@ void* InitialRateControlKernel(void *inputPtr)
 		EbGetFullObject(
 			contextPtr->motionEstimationResultsInputFifoPtr,
 			&inputResultsWrapperPtr);
+        EB_CHECK_END_OBJ(inputResultsWrapperPtr);
 
 		inputResultsPtr = (MotionEstimationResults_t*)inputResultsWrapperPtr->objectPtr;
 		pictureControlSetPtr = (PictureParentControlSet_t*)inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;
@@ -1147,8 +1148,7 @@ void* InitialRateControlKernel(void *inputPtr)
                 finishTimeuSeconds,
                 &latency);
 
-        SVT_LOG("[%lld]: POC %lld IRC OUT, decoder order %d, latency %3.3f \n",
-                EbGetSysTimeMs(),
+        SVT_LOG("POC %lld IRC OUT, decoder order %d, latency %3.3f \n",
                 pictureControlSetPtr->pictureNumber,
                 pictureControlSetPtr->decodeOrder,
                 latency);

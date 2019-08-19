@@ -141,6 +141,10 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     EbBufferingPeriodSeiCtor(
         &sequenceControlSetPtr->bufferingPeriod);
 
+    //Initilaize Active Parametr Set SEI
+    EbActiveParameterSetSeiCtor(
+        &sequenceControlSetPtr->activeParameterSet);
+
         // Initialize picture timing SEI
     EbRecoveryPointSeiCtor(
         &sequenceControlSetPtr->recoveryPoint);
@@ -178,125 +182,21 @@ EB_ERRORTYPE CopySequenceControlSet(
     SequenceControlSet_t *dst,
     SequenceControlSet_t *src)
 {
-    EB_U32  writeCount = 0;
-    EB_U32  segmentIndex = 0;
-    
-    dst->staticConfig               = src->staticConfig;                            writeCount += sizeof(EB_H265_ENC_CONFIGURATION);           
-    dst->encodeContextPtr           = src->encodeContextPtr;                        writeCount += sizeof(EncodeContext_t*);            
-    dst->spsId                      = src->spsId;                                   writeCount += sizeof(EB_U32);
-    dst->vpsId                      = src->vpsId;                                   writeCount += sizeof(EB_U32);
-    dst->profileSpace               = src->profileSpace;                            writeCount += sizeof(EB_U32);
-    dst->profileIdc                 = src->profileIdc;                              writeCount += sizeof(EB_U32);                     
-    dst->levelIdc                   = src->levelIdc;                                writeCount += sizeof(EB_U32);                     
-    dst->tierIdc                    = src->tierIdc;                                 writeCount += sizeof(EB_U32);                     
-    dst->chromaFormatIdc            = src->chromaFormatIdc;                         writeCount += sizeof(EB_U32);                     
-    dst->maxTemporalLayers          = src->maxTemporalLayers;                       writeCount += sizeof(EB_U32);                     
-    dst->bitsForPictureOrderCount   = src->bitsForPictureOrderCount;                writeCount += sizeof(EB_U32);                     
-    dst->maxInputLumaWidth          = src->maxInputLumaWidth;                       writeCount += sizeof(EB_U32);                     
-    dst->maxInputLumaHeight         = src->maxInputLumaHeight;                      writeCount += sizeof(EB_U32);  
-    dst->maxInputPadRight           = src->maxInputPadRight;                        writeCount += sizeof(EB_U32);
-    dst->maxInputPadBottom          = src->maxInputPadBottom;                       writeCount += sizeof(EB_U32);
-    dst->lumaWidth                  = src->lumaWidth;                               writeCount += sizeof(EB_U32);                     
-    dst->lumaHeight                 = src->lumaHeight;                              writeCount += sizeof(EB_U32); 
-    dst->chromaWidth                = src->chromaWidth;                             writeCount += sizeof(EB_U32);                     
-    dst->chromaHeight               = src->chromaHeight;                            writeCount += sizeof(EB_U32);                     
-    dst->padRight                   = src->padRight;                                writeCount += sizeof(EB_U32);
-    dst->padBottom                  = src->padBottom;                               writeCount += sizeof(EB_U32);
-	dst->croppingLeftOffset         = src->croppingLeftOffset;                      writeCount += sizeof(EB_S32);     
-    dst->croppingRightOffset        = src->croppingRightOffset;                     writeCount += sizeof(EB_S32);     
-    dst->croppingTopOffset          = src->croppingTopOffset;                       writeCount += sizeof(EB_S32);
-    dst->croppingBottomOffset       = src->croppingBottomOffset;                    writeCount += sizeof(EB_S32);
-    dst->conformanceWindowFlag      = src->conformanceWindowFlag;                   writeCount += sizeof(EB_U32);  
-    dst->frameRate                  = src->frameRate;                               writeCount += sizeof(EB_U32);                     
-    dst->inputBitdepth              = src->inputBitdepth;                           writeCount += sizeof(EB_BITDEPTH);                
-    dst->outputBitdepth             = src->outputBitdepth;                          writeCount += sizeof(EB_BITDEPTH);        
-	dst->predStructPtr              = src->predStructPtr;                           writeCount += sizeof(PredictionStructure_t*);
-    dst->intraPeriodLength          = src->intraPeriodLength;                       writeCount += sizeof(EB_S32);                     
-    dst->intraRefreshType           = src->intraRefreshType;                        writeCount += sizeof(EB_U32);  
-    dst->maxRefCount                = src->maxRefCount;                             writeCount += sizeof(EB_U32);
-    dst->lcuSize                    = src->lcuSize;                                 writeCount += sizeof(EB_U32);                     
-    dst->maxLcuDepth                = src->maxLcuDepth;                             writeCount += sizeof(EB_U32);
-                                                               
-    dst->interlacedVideo            = src->interlacedVideo ;                        writeCount += sizeof(EB_BOOL);
-                                                                              
-    dst->generalProgressiveSourceFlag   = src->generalProgressiveSourceFlag;        writeCount += sizeof(EB_U32);
-    dst->generalInterlacedSourceFlag    = src->generalInterlacedSourceFlag;         writeCount += sizeof(EB_U32);
-    dst->generalFrameOnlyConstraintFlag = src->generalFrameOnlyConstraintFlag;      writeCount += sizeof(EB_U32);
-    dst->targetBitrate              = src->targetBitrate;                           writeCount += sizeof(EB_U32);                     
-    dst->availableBandwidth         = src->availableBandwidth;                      writeCount += sizeof(EB_U32);                     
-    dst->qp                         = src->qp;                                      writeCount += sizeof(EB_U32);   
-    dst->enableQpScalingFlag        = src->enableQpScalingFlag;                     writeCount += sizeof(EB_BOOL);                  
-    dst->enableTmvpSps              = src->enableTmvpSps;                           writeCount += sizeof(EB_U32);   
-    dst->mvMergeTotalCount          = src->mvMergeTotalCount;                       writeCount += sizeof(EB_U32);            
-    dst->leftPadding                = src->leftPadding;                             writeCount += sizeof(EB_U16);
-    dst->rightPadding               = src->rightPadding;                            writeCount += sizeof(EB_U16);
-    dst->topPadding                 = src->topPadding;                              writeCount += sizeof(EB_U16);
-    dst->botPadding                 = src->botPadding;                              writeCount += sizeof(EB_U16);         
-    dst->enableDenoiseFlag          = src->enableDenoiseFlag;                       writeCount += sizeof(EB_BOOL);
-    dst->maxEncMode                 = src->maxEncMode;                              writeCount += sizeof(EB_U8);
+    AppVideoUsabilityInfo_t *videoUsabilityInfoPtr = dst->videoUsabilityInfoPtr;
+    size_t sizeCopy = (size_t)((EB_U64)(&dst->pictureControlSetPoolInitCount) -
+                               (EB_U64)(&dst->staticConfig));
 
-    // Segments
-    for (segmentIndex = 0; segmentIndex < MAX_TEMPORAL_LAYERS; ++segmentIndex) {
-        dst->meSegmentColumnCountArray[segmentIndex] = src->meSegmentColumnCountArray[segmentIndex]; writeCount += sizeof(EB_U32);
-        dst->meSegmentRowCountArray[segmentIndex] = src->meSegmentRowCountArray[segmentIndex]; writeCount += sizeof(EB_U32);
-        dst->encDecSegmentColCountArray[segmentIndex] = src->encDecSegmentColCountArray[segmentIndex]; writeCount += sizeof(EB_U32);
-        dst->encDecSegmentRowCountArray[segmentIndex] = src->encDecSegmentRowCountArray[segmentIndex]; writeCount += sizeof(EB_U32);
-    }
+    EB_MEMCPY(&dst->staticConfig, &src->staticConfig, sizeCopy);
 
-    EB_MEMCPY(
-        &dst->bufferingPeriod,
-        &src->bufferingPeriod,
-        sizeof(AppBufferingPeriodSei_t));
-
-    writeCount += sizeof(AppBufferingPeriodSei_t);
-
-    EB_MEMCPY(
-        &dst->recoveryPoint,
-        &src->recoveryPoint,
-        sizeof(AppRecoveryPoint_t));
-
-    writeCount += sizeof(AppRecoveryPoint_t);
-
-    EB_MEMCPY(
-        &dst->contentLightLevel,
-        &src->contentLightLevel,
-        sizeof(AppContentLightLevelSei_t));
-
-    writeCount += sizeof(AppContentLightLevelSei_t);
-
-    EB_MEMCPY(
-        &dst->masteringDisplayColorVolume,
-        &src->masteringDisplayColorVolume,
-        sizeof(AppMasteringDisplayColorVolumeSei_t));
-
-    writeCount += sizeof(AppMasteringDisplayColorVolumeSei_t);
-
-    EB_MEMCPY(
-        &dst->picTimingSei,
-        &src->picTimingSei,
-        sizeof(AppPictureTimingSei_t));
-
-    writeCount += sizeof(AppPictureTimingSei_t);
-
-    EB_MEMCPY(
-        &dst->regUserDataSeiPtr,
-        &src->regUserDataSeiPtr,
-        sizeof(RegistedUserData_t));
-
-    writeCount += sizeof(RegistedUserData_t);
-
-    EB_MEMCPY(
-        &dst->unRegUserDataSeiPtr,
-        &src->unRegUserDataSeiPtr,
-        sizeof(UnregistedUserData_t));
-
-    writeCount += sizeof(UnregistedUserData_t);
-
+    dst->videoUsabilityInfoPtr = videoUsabilityInfoPtr;
     EbVideoUsabilityInfoCopy(
         dst->videoUsabilityInfoPtr,
         src->videoUsabilityInfoPtr);
-    
-    writeCount += sizeof(AppVideoUsabilityInfo_t*); 
+
+    dst->enableDenoiseFlag = src->enableDenoiseFlag;
+    dst->maxEncMode        = src->maxEncMode;
+
+    EB_MEMCPY(&dst->activeParameterSet, &src->activeParameterSet, sizeof(AppActiveparameterSetSei_t));
 
     return EB_ErrorNone;
 }
@@ -339,49 +239,6 @@ extern EB_ERRORTYPE LcuParamsCtor(
 	return return_error;
 }
 
-/************************************************
- * Configure ME Tiles
- ************************************************/
-static void ConfigureTiles(
-    SequenceControlSet_t *scsPtr)
-{
-    // Tiles Initialisation
-    const unsigned tileColumns = scsPtr->tileColumnCount;
-    const unsigned tileRows = scsPtr->tileRowCount;
-
-
-    unsigned rowIndex, columnIndex;
-    unsigned xLcuIndex, yLcuIndex, lcuIndex;
-    unsigned xLcuStart, yLcuStart;
-
-    // Tile-loops
-    yLcuStart = 0;
-    for (rowIndex = 0; rowIndex < tileRows; ++rowIndex) {
-        xLcuStart = 0;
-        for (columnIndex = 0; columnIndex < tileColumns; ++columnIndex) {
-
-            // LCU-loops
-            for (yLcuIndex = yLcuStart; yLcuIndex < yLcuStart + scsPtr->tileRowArray[rowIndex]; ++yLcuIndex) {
-                for (xLcuIndex = xLcuStart; xLcuIndex < xLcuStart + scsPtr->tileColumnArray[columnIndex]; ++xLcuIndex) {
-                    lcuIndex = xLcuIndex + yLcuIndex * scsPtr->pictureWidthInLcu;
-                    scsPtr->lcuParamsArray[lcuIndex].tileLeftEdgeFlag = (xLcuIndex == xLcuStart) ? EB_TRUE : EB_FALSE;
-                    scsPtr->lcuParamsArray[lcuIndex].tileTopEdgeFlag = (yLcuIndex == yLcuStart) ? EB_TRUE : EB_FALSE;
-                    scsPtr->lcuParamsArray[lcuIndex].tileRightEdgeFlag =
-                        (xLcuIndex == xLcuStart + scsPtr->tileColumnArray[columnIndex] - 1) ? EB_TRUE : EB_FALSE;
-                    scsPtr->lcuParamsArray[lcuIndex].tileStartX = xLcuStart * scsPtr->lcuSize;
-                    scsPtr->lcuParamsArray[lcuIndex].tileStartY = yLcuStart * scsPtr->lcuSize;
-                    scsPtr->lcuParamsArray[lcuIndex].tileEndX = (columnIndex == (tileColumns - 1)) ? scsPtr->lumaWidth : (xLcuStart + scsPtr->tileColumnArray[columnIndex]) * scsPtr->lcuSize;
-                    scsPtr->lcuParamsArray[lcuIndex].tileEndY = (rowIndex == (tileRows - 1)) ? scsPtr->lumaHeight : (yLcuStart + scsPtr->tileRowArray[rowIndex]) * scsPtr->lcuSize;
-                    scsPtr->lcuParamsArray[lcuIndex].tileIndex = rowIndex * tileColumns + columnIndex;
-                }
-            }
-            xLcuStart += scsPtr->tileColumnArray[columnIndex];
-        }
-        yLcuStart += scsPtr->tileRowArray[rowIndex];
-    }
-
-    return;
-}
 
 extern EB_ERRORTYPE LcuParamsInit(
 	SequenceControlSet_t *sequenceControlSetPtr) {
@@ -485,7 +342,7 @@ extern EB_ERRORTYPE LcuParamsInit(
 		}
 	}
 
-    ConfigureTiles(sequenceControlSetPtr);
+    //ConfigureTiles(sequenceControlSetPtr);
 
 	return return_error;
 }

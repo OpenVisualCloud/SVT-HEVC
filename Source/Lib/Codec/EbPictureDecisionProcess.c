@@ -372,7 +372,12 @@ EB_U8 PictureLevelSubPelSettingsOq(
     }
     else {
 		if (inputResolution >= INPUT_SIZE_4K_RANGE) {
-			subPelMode = (temporalLayerIndex == 0) ? 1 : 0;
+            if (encMode > ENC_MODE_10) {
+                subPelMode = 0;
+            }
+            else {
+                subPelMode = (temporalLayerIndex == 0) ? 1 : 0;
+            }
 		}
 		else {
 			subPelMode = isUsedAsReferenceFlag ? 1 : 0;
@@ -595,9 +600,18 @@ EB_ERRORTYPE SignalDerivationMultiProcessesOq(
 			pictureControlSetPtr->depthMode = PICT_FULL85_DEPTH_MODE;
 		}
 	}
-    else {
+    else if (pictureControlSetPtr->encMode <= ENC_MODE_10) {
         if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
             pictureControlSetPtr->depthMode = PICT_FULL84_DEPTH_MODE;
+        }
+        else {
+            pictureControlSetPtr->depthMode = PICT_LCU_SWITCH_DEPTH_MODE;
+        }
+    }
+
+    else {
+        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+            pictureControlSetPtr->depthMode = PICT_BDP_DEPTH_MODE;
         }
         else {
             pictureControlSetPtr->depthMode = PICT_LCU_SWITCH_DEPTH_MODE;
@@ -650,7 +664,7 @@ EB_ERRORTYPE SignalDerivationMultiProcessesOq(
 	  pictureControlSetPtr->cu16x16Mode = CU_16x16_MODE_0;
 
     // Set Skip OIS 8x8 Flag
-    pictureControlSetPtr->skipOis8x8 = EB_FALSE;
+    pictureControlSetPtr->skipOis8x8 = (pictureControlSetPtr->sliceType == EB_I_PICTURE && (pictureControlSetPtr->encMode <= ENC_MODE_10)) ? EB_FALSE : EB_TRUE;
 
     return return_error;
 }
@@ -871,6 +885,7 @@ void* PictureDecisionKernel(void *inputPtr)
         EbGetFullObject(
             contextPtr->pictureAnalysisResultsInputFifoPtr,
             &inputResultsWrapperPtr);
+        EB_CHECK_END_OBJ(inputResultsWrapperPtr);
         
         inputResultsPtr         = (PictureAnalysisResults_t*)   inputResultsWrapperPtr->objectPtr;     
         pictureControlSetPtr    = (PictureParentControlSet_t*)  inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;
@@ -939,28 +954,23 @@ void* PictureDecisionKernel(void *inputPtr)
             } 
             pictureControlSetPtr                        = (PictureParentControlSet_t*)  queueEntryPtr->parentPcsWrapperPtr->objectPtr;
 
-           if(pictureControlSetPtr->idrFlag == EB_TRUE)
-                 contextPtr->lastSolidColorFramePoc = 0xFFFFFFFF;
+            if(pictureControlSetPtr->idrFlag == EB_TRUE)
+                contextPtr->lastSolidColorFramePoc = 0xFFFFFFFF;
 
-			if(windowAvail == EB_TRUE){
-				if(sequenceControlSetPtr->staticConfig.sceneChangeDetection) {
+            if(windowAvail == EB_TRUE) {
+                if(sequenceControlSetPtr->staticConfig.sceneChangeDetection) {
                     pictureControlSetPtr->sceneChangeFlag = SceneTransitionDetector(
                         contextPtr,
                         sequenceControlSetPtr,
                         ParentPcsWindow,
                         FUTURE_WINDOW_WIDTH);
-
                 } else {
-                    pictureControlSetPtr->sceneChangeFlag           = EB_FALSE;
+                    pictureControlSetPtr->sceneChangeFlag = EB_FALSE;
                 }
-				pictureControlSetPtr->craFlag = (pictureControlSetPtr->sceneChangeFlag == EB_TRUE) ? 
-					EB_TRUE : 
-					pictureControlSetPtr->craFlag;
 
-				// Store scene change in context
-				contextPtr->isSceneChangeDetected = pictureControlSetPtr->sceneChangeFlag;
-
-			}
+                // Store scene change in context
+                contextPtr->isSceneChangeDetected = pictureControlSetPtr->sceneChangeFlag;
+            }
 
             if(windowAvail == EB_TRUE ||framePasseThru == EB_TRUE)
 			{
@@ -988,26 +998,25 @@ void* PictureDecisionKernel(void *inputPtr)
            ReleasePrevPictureFromReorderQueue(
                encodeContextPtr);
 
+            pictureControlSetPtr->craFlag = EB_FALSE;
+            pictureControlSetPtr->idrFlag = EB_FALSE;
+
             // If the Intra period length is 0, then introduce an intra for every picture
-            if(sequenceControlSetPtr->intraPeriodLength == 0) {
-                pictureControlSetPtr->craFlag = EB_TRUE;
+            if ((sequenceControlSetPtr->intraPeriodLength == 0) || (pictureControlSetPtr->pictureNumber == 0)) {
+                if (sequenceControlSetPtr->intraRefreshType == CRA_REFRESH)
+                    pictureControlSetPtr->craFlag = EB_TRUE;
+                else
+                    pictureControlSetPtr->idrFlag = EB_TRUE;
             }
             // If an #IntraPeriodLength has passed since the last Intra, then introduce a CRA or IDR based on Intra Refresh type
-            else if(sequenceControlSetPtr->intraPeriodLength != -1) {
-                pictureControlSetPtr->craFlag = 
-                    (sequenceControlSetPtr->intraRefreshType != CRA_REFRESH) ?
-                        pictureControlSetPtr->craFlag :
-                        (encodeContextPtr->intraPeriodPosition == (EB_U32) sequenceControlSetPtr->intraPeriodLength) ? 
-                            EB_TRUE : 
-                            pictureControlSetPtr->craFlag;
-
-                pictureControlSetPtr->idrFlag = 
-                    (sequenceControlSetPtr->intraRefreshType != IDR_REFRESH) ? 
-                        pictureControlSetPtr->idrFlag :
-                        (encodeContextPtr->intraPeriodPosition == (EB_U32) sequenceControlSetPtr->intraPeriodLength) ? 
-                            EB_TRUE : 
-                            pictureControlSetPtr->idrFlag;
-                
+            else if (sequenceControlSetPtr->intraPeriodLength != -1) {
+                if ((encodeContextPtr->intraPeriodPosition == (EB_U32) sequenceControlSetPtr->intraPeriodLength) ||
+                    (pictureControlSetPtr->sceneChangeFlag == EB_TRUE)) {
+                    if (sequenceControlSetPtr->intraRefreshType == CRA_REFRESH)
+                        pictureControlSetPtr->craFlag = EB_TRUE;
+                    else
+                        pictureControlSetPtr->idrFlag = EB_TRUE;
+                }
             }
 
             encodeContextPtr->preAssignmentBufferEosFlag             = (pictureControlSetPtr->endOfSequenceFlag) ? (EB_U32)EB_TRUE : encodeContextPtr->preAssignmentBufferEosFlag;
@@ -1017,16 +1026,17 @@ void* PictureDecisionKernel(void *inputPtr)
             encodeContextPtr->preAssignmentBufferIdrCount           += pictureControlSetPtr->idrFlag;
             encodeContextPtr->preAssignmentBufferCount              += 1;
 
-			if (sequenceControlSetPtr->staticConfig.rateControlMode)
-			{
-				// Increment the Intra Period Position
-				encodeContextPtr->intraPeriodPosition = (encodeContextPtr->intraPeriodPosition == (EB_U32)sequenceControlSetPtr->intraPeriodLength) ? 0 : encodeContextPtr->intraPeriodPosition + 1;
-			}
-			else
-			{
-				// Increment the Intra Period Position
-				encodeContextPtr->intraPeriodPosition = ((encodeContextPtr->intraPeriodPosition == (EB_U32)sequenceControlSetPtr->intraPeriodLength) || (pictureControlSetPtr->sceneChangeFlag == EB_TRUE)) ? 0 : encodeContextPtr->intraPeriodPosition + 1;
-			}
+            if (sequenceControlSetPtr->staticConfig.rateControlMode)
+            {
+                // Increment the Intra Period Position
+                encodeContextPtr->intraPeriodPosition = (encodeContextPtr->intraPeriodPosition == (EB_U32)sequenceControlSetPtr->intraPeriodLength) ?
+                                                        0 : encodeContextPtr->intraPeriodPosition + 1;
+            } else {
+                // Increment the Intra Period Position
+                encodeContextPtr->intraPeriodPosition = ((encodeContextPtr->intraPeriodPosition == (EB_U32)sequenceControlSetPtr->intraPeriodLength) ||
+                                                        (pictureControlSetPtr->sceneChangeFlag == EB_TRUE)) ?
+                                                        0 : encodeContextPtr->intraPeriodPosition + 1;
+            }
 
 			// Determine if Pictures can be released from the Pre-Assignment Buffer
 			if ((encodeContextPtr->preAssignmentBufferIntraCount > 0) ||
@@ -1302,7 +1312,6 @@ void* PictureDecisionKernel(void *inputPtr)
                         else {
                             pictureControlSetPtr->decodeOrder = pictureControlSetPtr->pictureNumber;
                         }
-
                         EbBlockOnMutex(encodeContextPtr->terminatingConditionsMutex);
 
                         encodeContextPtr->terminatingSequenceFlagReceived = (pictureControlSetPtr->endOfSequenceFlag == EB_TRUE) ? 

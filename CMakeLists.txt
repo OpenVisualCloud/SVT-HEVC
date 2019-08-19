@@ -31,8 +31,14 @@ if(NOT DEFINED CMAKE_INSTALL_PREFIX OR CMAKE_INSTALL_PREFIX STREQUAL "")
 endif()
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
+set(SVT_HEVC_VERSION_MAJOR           "1")
+set(SVT_HEVC_VERSION_MINOR           "4")
+set(SVT_HEVC_VERSION_PATCHLEVEL      "0")
+
+configure_file(${PROJECT_SOURCE_DIR}/Source/API/EbApiVersion.h.in ${PROJECT_SOURCE_DIR}/Source/API/EbApiVersion.h @ONLY)
+
 if(NOT DEFINED SVT_HEVC_VERSION OR SVT_HEVC_VERSION STREQUAL "")
-    set(SVT_HEVC_VERSION "1.2.0")
+    set(SVT_HEVC_VERSION "${SVT_HEVC_VERSION_MAJOR}.${SVT_HEVC_VERSION_MINOR}.${SVT_HEVC_VERSION_PATCHLEVEL}")
 endif()
 set(SVT_HEVC_SOVERSION 1)
 
@@ -85,8 +91,6 @@ set(flags_to_test
     -Wextra
     -Wformat
     -Wformat-security
-    -fstack-protector-strong
-    -fvisibility=hidden
     -fPIE
     -fPIC
     -D_FORTIFY_SOURCE=2
@@ -101,7 +105,9 @@ else()
     list(INSERT flags_to_test 0 -Wall)
     #for Mingw64 support, see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65782
     if(MINGW)
-        list(APPEND flags_to_test -fno-asynchronous-unwind-tables)
+        list(APPEND flags_to_test -fno-asynchronous-unwind-tables -mxsave)
+    else()
+        list(APPEND flags_to_test -fstack-protector-strong)
     endif()
     if(NATIVE)
         list(APPEND flags_to_test -march=native)
@@ -154,11 +160,7 @@ endif()
 
 # BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
 # make it prominent in the GUI.
-if(WIN32 OR MSYS)
-    option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." ON)
-else()
-    option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
-endif()
+option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." ON)
 option(COVERAGE "Generate coverage report")
 option(BUILD_APP "Build Enc App" ON)
 

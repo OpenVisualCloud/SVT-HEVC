@@ -27,31 +27,6 @@
  ************************************************/
 #define POC_CIRCULAR_ADD(base, offset)             (((base) + (offset)))
 
-/************************************************
- * Configure Picture edges
- ************************************************/
-static void ConfigurePictureEdges(
-    SequenceControlSet_t *scsPtr,
-    PictureControlSet_t  *ppsPtr)
-{
-    // Tiles Initialisation
-    const EB_U16 pictureWidthInLcu   = (scsPtr->lumaWidth + scsPtr->lcuSize - 1) / scsPtr->lcuSize;
-    const EB_U16 pictureHeightInLcu  = (scsPtr->lumaHeight + scsPtr->lcuSize - 1) / scsPtr->lcuSize;
-    
-    unsigned xLcuIndex, yLcuIndex, lcuIndex;
-      
-    // LCU-loops
-	for (yLcuIndex = 0; yLcuIndex <  pictureHeightInLcu; ++yLcuIndex) {
-		for (xLcuIndex = 0; xLcuIndex < pictureWidthInLcu; ++xLcuIndex) {
-            lcuIndex = (EB_U16)(xLcuIndex + yLcuIndex * pictureWidthInLcu);
-            ppsPtr->lcuPtrArray[lcuIndex]->pictureLeftEdgeFlag  = (xLcuIndex == 0) ? EB_TRUE : EB_FALSE;
-            ppsPtr->lcuPtrArray[lcuIndex]->pictureTopEdgeFlag   = (yLcuIndex == 0) ? EB_TRUE : EB_FALSE;
-			ppsPtr->lcuPtrArray[lcuIndex]->pictureRightEdgeFlag = (xLcuIndex == (unsigned)(pictureWidthInLcu - 1)) ? EB_TRUE : EB_FALSE;
-        }
-    }
-
-    return;
-}
 
 /************************************************
  * Picture Manager Context Constructor
@@ -74,6 +49,25 @@ EB_ERRORTYPE PictureManagerContextCtor(
     return EB_ErrorNone;
 }
 
+static void ConfigureLcuInfo(PictureControlSet_t *pcsPtr)
+{
+    // Tiles Initialisation
+    PictureParentControlSet_t *ppcsPtr = pcsPtr->ParentPcsPtr;
+    EB_U32 tileCnt = ppcsPtr->tileRowCount * ppcsPtr->tileColumnCount;
+    TileInfo_t *ti = ppcsPtr->tileInfoArray;
+
+    for (EB_U16 tileIdx = 0; tileIdx < tileCnt; tileIdx++) {
+        for (EB_U16 y = ti[tileIdx].tileLcuOriginY; y < ti[tileIdx].tileLcuEndY; y++) {
+            for (EB_U16 x = ti[tileIdx].tileLcuOriginX; x < ti[tileIdx].tileLcuEndX; x++) {
+                unsigned lcuIndex = y * ppcsPtr->pictureWidthInLcu + x;
+                pcsPtr->lcuPtrArray[lcuIndex]->lcuEdgeInfoPtr = &ppcsPtr->lcuEdgeInfoArray[lcuIndex];
+                pcsPtr->lcuPtrArray[lcuIndex]->tileInfoPtr = &ti[tileIdx];
+            }
+        }
+    }
+
+    return;
+}
 
 
  
@@ -145,9 +139,6 @@ void* PictureManagerKernel(void *inputPtr)
     SequenceControlSet_t            *entrySequenceControlSetPtr;
     
     // Initialization
-    EB_U8                           pictureWidthInLcu;
-    EB_U8                           pictureHeightInLcu;
-    
 	PictureManagerReorderEntry_t    *queueEntryPtr;
 	EB_S32                           queueEntryIndex;
 
@@ -160,6 +151,7 @@ void* PictureManagerKernel(void *inputPtr)
         EbGetFullObject(
             contextPtr->pictureInputFifoPtr,
             &inputPictureDemuxWrapperPtr);
+        EB_CHECK_END_OBJ(inputPictureDemuxWrapperPtr);
 
         inputPictureDemuxPtr = (PictureDemuxResults_t*) inputPictureDemuxWrapperPtr->objectPtr;
         
@@ -434,6 +426,7 @@ void* PictureManagerKernel(void *inputPtr)
 			   referenceEntryPtr->releaseEnable = EB_TRUE;
 			   referenceEntryPtr->referenceAvailable = EB_FALSE;
 			   referenceEntryPtr->isUsedAsReferenceFlag = pictureControlSetPtr->isUsedAsReferenceFlag;
+			   referenceEntryPtr->feedbackArrived = EB_FALSE;
 			   encodeContextPtr->referencePictureQueueTailIndex =
 				   (encodeContextPtr->referencePictureQueueTailIndex == REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : encodeContextPtr->referencePictureQueueTailIndex + 1;
 
@@ -525,7 +518,29 @@ void* PictureManagerKernel(void *inputPtr)
             EbReleaseObject(inputPictureDemuxPtr->sequenceControlSetWrapperPtr);
                 
             break;
-            
+        case EB_PIC_FEEDBACK:
+
+            sequenceControlSetPtr = (SequenceControlSet_t*)inputPictureDemuxPtr->sequenceControlSetWrapperPtr->objectPtr;
+            encodeContextPtr = sequenceControlSetPtr->encodeContextPtr;
+
+            referenceQueueIndex = encodeContextPtr->referencePictureQueueHeadIndex;
+            // Find the Reference in the Reference Queue
+            do {
+                referenceEntryPtr = encodeContextPtr->referencePictureQueue[referenceQueueIndex];
+                if (referenceEntryPtr->pictureNumber == inputPictureDemuxPtr->pictureNumber) {
+
+                    // Set the feedback arrived
+                    referenceEntryPtr->feedbackArrived = EB_TRUE;
+                }
+                // Increment the referenceQueueIndex Iterator
+                referenceQueueIndex = (referenceQueueIndex == REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : referenceQueueIndex + 1;
+            } while ((referenceQueueIndex != encodeContextPtr->referencePictureQueueTailIndex) && (referenceEntryPtr->pictureNumber != inputPictureDemuxPtr->pictureNumber));
+
+            //keep the relase of SCS here because we still need the encodeContext strucutre here
+            // Release the Reference's SequenceControlSet    
+            EbReleaseObject(inputPictureDemuxPtr->sequenceControlSetWrapperPtr);
+
+            break;
         default:
            
             sequenceControlSetPtr   = (SequenceControlSet_t*) inputPictureDemuxPtr->sequenceControlSetWrapperPtr->objectPtr;
@@ -584,6 +599,7 @@ void* PictureManagerKernel(void *inputPtr)
                     availabilityFlag =
                         (availabilityFlag == EB_FALSE)          ? EB_FALSE  :   // Don't update if already False 
                         (refPoc > currentInputPoc)              ? EB_FALSE  :   // The Reference has not been received as an Input Picture yet, then its availability is false
+                        (!encodeContextPtr->terminatingSequenceFlagReceived && (entrySequenceControlSetPtr->staticConfig.rateControlMode && entryPictureControlSetPtr->sliceType != EB_I_PICTURE && entryPictureControlSetPtr->temporalLayerIndex == 0 && !referenceEntryPtr->feedbackArrived)) ? EB_FALSE :
                         (referenceEntryPtr->referenceAvailable) ? EB_TRUE   :   // The Reference has been completed
                                                                   EB_FALSE;     // The Reference has not been completed
                 }
@@ -620,6 +636,7 @@ void* PictureManagerKernel(void *inputPtr)
                             availabilityFlag =
                                 (availabilityFlag == EB_FALSE)          ? EB_FALSE  :   // Don't update if already False 
                                 (refPoc > currentInputPoc)              ? EB_FALSE  :   // The Reference has not been received as an Input Picture yet, then its availability is false
+                                (!encodeContextPtr->terminatingSequenceFlagReceived && (entrySequenceControlSetPtr->staticConfig.rateControlMode && entryPictureControlSetPtr->sliceType != EB_I_PICTURE && entryPictureControlSetPtr->temporalLayerIndex == 0 && !referenceEntryPtr->feedbackArrived)) ? EB_FALSE :
                                 (referenceEntryPtr->referenceAvailable) ? EB_TRUE   :   // The Reference has been completed
                                                                           EB_FALSE;     // The Reference has not been completed
                         }
@@ -628,6 +645,7 @@ void* PictureManagerKernel(void *inputPtr)
                 
                 if(availabilityFlag == EB_TRUE) { 
 
+                    //printf("PICTURE MANAGER RELEASE %d\n", (int)entryPictureControlSetPtr->pictureNumber);
                     // Get New  Empty Child PCS from PCS Pool
                     EbGetEmptyObject(
                         contextPtr->pictureControlSetFifoPtrArray[0],
@@ -659,8 +677,6 @@ void* PictureManagerKernel(void *inputPtr)
                     ChildPictureControlSetPtr->encMode                                  = entryPictureControlSetPtr->encMode; 
 
                     ChildPictureControlSetPtr->encDecCodedLcuCount = 0;
-                    ChildPictureControlSetPtr->tileRowCount = entrySequenceControlSetPtr->tileRowCount;
-                    ChildPictureControlSetPtr->tileColumnCount = entrySequenceControlSetPtr->tileColumnCount;
                     
 
 
@@ -671,46 +687,34 @@ void* PictureManagerKernel(void *inputPtr)
                                                                                                                                      entryPictureControlSetPtr->temporalLayerIndex;
                     }
 
-                    //3.make all  init for ChildPCS
-                    pictureWidthInLcu  = (EB_U8)((entrySequenceControlSetPtr->lumaWidth + entrySequenceControlSetPtr->lcuSize - 1) / entrySequenceControlSetPtr->lcuSize);
-                    pictureHeightInLcu = (EB_U8)((entrySequenceControlSetPtr->lumaHeight + entrySequenceControlSetPtr->lcuSize - 1) / entrySequenceControlSetPtr->lcuSize); 
-
-                    for (unsigned lcuIndex = 0; lcuIndex < (pictureWidthInLcu * pictureHeightInLcu); lcuIndex++) {
-                        ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileLeftEdgeFlag  = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileLeftEdgeFlag;
-                        ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileTopEdgeFlag   = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileTopEdgeFlag;
-                        ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileRightEdgeFlag = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileRightEdgeFlag;
-                        ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileOriginX       = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileStartX;
-                        ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileOriginY       = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileStartY;
-                        ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileEndX          = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileEndX;
-                        ChildPictureControlSetPtr->lcuPtrArray[lcuIndex]->tileEndY          = entrySequenceControlSetPtr->lcuParamsArray[lcuIndex].tileEndY;
-                    }
+                    //3.make all init for ChildPCS
 
                     EB_U32 encDecSegRow = entrySequenceControlSetPtr->encDecSegmentRowCountArray[entryPictureControlSetPtr->temporalLayerIndex];
                     EB_U32 encDecSegCol = entrySequenceControlSetPtr->encDecSegmentColCountArray[entryPictureControlSetPtr->temporalLayerIndex]; 
 
-                    if (entrySequenceControlSetPtr->tileRowCount * entrySequenceControlSetPtr->tileColumnCount> 1) {
-                        //Jing: Tuning segments number, better to put tile info to pps
-                        encDecSegCol = pictureWidthInLcu;//  / entrySequenceControlSetPtr->tileColumnCount;
-                        encDecSegRow = pictureHeightInLcu / entrySequenceControlSetPtr->tileRowCount;
+                    if (entryPictureControlSetPtr->tileRowCount * entryPictureControlSetPtr->tileColumnCount > 1) {
+                        encDecSegCol = entryPictureControlSetPtr->pictureWidthInLcu;//  / entrySequenceControlSetPtr->tileColumnCount;
+                        encDecSegRow = entryPictureControlSetPtr->pictureHeightInLcu / entryPictureControlSetPtr->tileRowCount;
                     }
 
                     // EncDec Segments 
-                    for (int r = 0; r < entrySequenceControlSetPtr->tileRowCount; r++) {
+                    for (int r = 0; r < entryPictureControlSetPtr->tileRowCount; r++) {
+                        EB_U16 tileHeightInLcu = entryPictureControlSetPtr->tileRowStartLcu[r + 1] - entryPictureControlSetPtr->tileRowStartLcu[r];
                         EncDecSegmentsInit(
                                 ChildPictureControlSetPtr->encDecSegmentCtrl[r],
                                 encDecSegCol,
                                 encDecSegRow,
                                 //sequenceControlSetPtr->tileColumnArray[c],
-                                pictureWidthInLcu,
-                                sequenceControlSetPtr->tileRowArray[r]);
+                                entryPictureControlSetPtr->pictureWidthInLcu,
+                                tileHeightInLcu);
 
                         // Jing: Apply with tile row for better parallelism..
                         // Entropy Coding Rows
-                        for (int c = 0; c < entrySequenceControlSetPtr->tileColumnCount; c++) {
-                            int tileIdx = r * entrySequenceControlSetPtr->tileColumnCount + c;
+                        for (int c = 0; c < entryPictureControlSetPtr->tileColumnCount; c++) {
+                            int tileIdx = r * entryPictureControlSetPtr->tileColumnCount + c;
                             ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingCurrentRow = 0;
                             ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingCurrentAvailableRow = 0;
-                            ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingRowCount = sequenceControlSetPtr->tileRowArray[r];
+                            ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingRowCount = tileHeightInLcu;
                             ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingInProgress = EB_FALSE;
                             ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingPicDone = EB_FALSE;
 
@@ -721,10 +725,9 @@ void* PictureManagerKernel(void *inputPtr)
                         ChildPictureControlSetPtr->entropyCodingPicResetFlag = EB_TRUE;
                     }
 
-                    //Jing: TODO
-                    //Check if need to check tile edges
-                    // Picture edges
-					ConfigurePictureEdges(entrySequenceControlSetPtr, ChildPictureControlSetPtr);
+                    //Jing: Move to PCS_Ctor
+                    //Configure tile/picture edges
+                    ConfigureLcuInfo(ChildPictureControlSetPtr);
                     
                     // Reset the qp array for DLF
                     EB_MEMSET(ChildPictureControlSetPtr->qpArray, 0, sizeof(EB_U8)*ChildPictureControlSetPtr->qpArraySize);
@@ -745,7 +748,7 @@ void* PictureManagerKernel(void *inputPtr)
                     ChildPictureControlSetPtr->useDeltaQp =  (EB_U8)(entrySequenceControlSetPtr->staticConfig.improveSharpness || entrySequenceControlSetPtr->staticConfig.bitRateReduction);
 
                     // Check resolution
-                    if (sequenceControlSetPtr->inputResolution < INPUT_SIZE_1080p_RANGE)
+                    if (entrySequenceControlSetPtr->inputResolution < INPUT_SIZE_1080p_RANGE)
                         ChildPictureControlSetPtr->difCuDeltaQpDepth = 2;
                     else
                         ChildPictureControlSetPtr->difCuDeltaQpDepth = 3;
@@ -861,8 +864,7 @@ void* PictureManagerKernel(void *inputPtr)
                             finishTimeuSeconds,
                             &latency);
 
-                    SVT_LOG("[%lld]: POC %lld PM OUT, decoder order %d, latency %3.3f \n",
-                            EbGetSysTimeMs(),
+                    SVT_LOG("POC %lld PM OUT, decoder order %d, latency %3.3f \n",
                             ChildPictureControlSetPtr->pictureNumber,
                             ChildPictureControlSetPtr->ParentPcsPtr->decodeOrder,
                             latency);

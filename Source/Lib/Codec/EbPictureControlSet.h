@@ -150,9 +150,6 @@ typedef struct PictureControlSet_s
   
     EbPictureBufferDesc_t                *reconPicture16bitPtr;
     
-    // Jing: move into entropyCodingInfo
-    //EntropyCoder_t                       *entropyCoderPtr;
-
     // Packetization (used to encode SPS, PPS, etc)
     Bitstream_t                          *bitstreamPtr;
     
@@ -171,9 +168,6 @@ typedef struct PictureControlSet_s
 
     EncDecSegments_t                     **encDecSegmentCtrl;
 
-    // Tile Count
-    EB_U16                                tileRowCount;
-    EB_U16                                tileColumnCount;
 
     EntropyTileInfo                       **entropyCodingInfo;
     EB_HANDLE                             entropyCodingPicMutex;
@@ -190,7 +184,7 @@ typedef struct PictureControlSet_s
     EB_BOOL                               constrainedIntraFlag;
 
     // Slice Type
-    EB_PICTURE                              sliceType;
+    EB_PICTURE                            sliceType;
     
     // Rate Control
     EB_U8                                 pictureQp;
@@ -310,15 +304,6 @@ typedef struct LcuParameters_s {
 	EB_BOOL rasterScanCuValidity[CU_MAX_COUNT];
     EB_U8   potentialLogoLcu;
 	EB_U8   isEdgeLcu;
-
-    EB_U32  tileStartX;
-    EB_U32  tileStartY;
-    EB_U32  tileEndX;
-    EB_U32  tileEndY;
-    EB_BOOL tileLeftEdgeFlag;
-    EB_BOOL tileTopEdgeFlag;
-    EB_BOOL tileRightEdgeFlag;
-    EB_U32  tileIndex;
 } LcuParams_t;
 
 typedef struct CuStat_s {
@@ -390,6 +375,19 @@ typedef struct PictureParentControlSet_s
     PredictionStructure_t                *predStructPtr;          // need to check
     struct PictureParentControlSet_s     *refPaPcsArray[MAX_NUM_OF_REF_PIC_LIST];
     EbObjectWrapper_t                    *pPcsWrapperPtr;
+
+    // Tiles
+    EB_U32                                tileUniformSpacing;
+    EB_U16                                tileColumnCount;
+    EB_U16                                tileRowCount;
+    EB_U16                                tileRowStartLcu[EB_TILE_ROW_MAX_COUNT + 1]; //plus one to calculate the width/height of last 
+    EB_U16                                tileColStartLcu[EB_TILE_COLUMN_MAX_COUNT + 1];
+    EB_U16                                pictureWidthInLcu;
+    EB_U16                                pictureHeightInLcu;
+
+    TileInfo_t                           *tileInfoArray; //Tile info in raster scan order
+    LcuEdgeInfo_t                        *lcuEdgeInfoArray; //LCU tile/picture edge info
+
 
     // Rate Control
     EB_U64                                predBitsRefQp[MAX_REF_QP_NUM];
@@ -590,7 +588,6 @@ typedef struct PictureParentControlSet_s
     EB_BOOL                               enableHmeLevel1Flag;
     EB_BOOL                               enableHmeLevel2Flag;
 	EB_BOOL                               disableVarianceFlag;
-
 } PictureParentControlSet_t;
 
 
@@ -615,7 +612,7 @@ typedef struct PictureControlSetInitData_s
 
 	EB_U8                            speedControl;
 
-    EB_U8                            tune;
+//    EB_U8                            tune;
 
     EB_U16                           tileRowCount;
     EB_U16                           tileColumnCount;

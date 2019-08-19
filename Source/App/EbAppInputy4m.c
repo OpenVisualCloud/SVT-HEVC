@@ -6,11 +6,11 @@
 #include "EbAppInputy4m.h"
 #define YFM_HEADER_MAX 80
 #define YUV4MPEG2_IND_SIZE 9
-#define PRINT_HEADER 0
+
 #define CHROMA_MAX 4
 
 #include "EbAppConfig.h"
-
+#include <ctype.h>
 
 /* copy a string until a specified character or a new line is found */
 char* copyUntilCharacterOrNewLine(char *src, char *dst, char chr) {
@@ -35,7 +35,12 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
     char *fresult, *tokstart, *tokend, format_str[YFM_HEADER_MAX];
     uint32_t bitdepth = 8, width = 0, height = 0, fr_n = 0,
         fr_d = 0, aspect_n, aspect_d;
-    char chroma[CHROMA_MAX] = "420", scan_type = 'p';
+    char chroma[CHROMA_MAX] = "420";
+    (void)aspect_d;
+    (void)aspect_n;
+#ifdef PRINT_HEADER
+    char scan_type = 'p';
+#endif
     EB_BOOL interlaced = EB_TRUE;
 
     /* pointer to the input file */
@@ -43,7 +48,9 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
 
     /* get first line after YUV4MPEG2 */
     fresult = fgets(buffer, sizeof(buffer), ptr_in);
-    assert(fresult != NULL);
+    if (fresult== NULL) { 
+        return EB_ErrorBadParameter;
+    }
 
     /* print header */
 #ifdef PRINT_HEADER
@@ -74,15 +81,21 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
             switch (*tokstart++) {
             case 'p':
                 interlaced = EB_FALSE;
+#ifdef PRINT_HEADER
                 scan_type = 'p';
+#endif
                 break;
             case 't':
                 interlaced = EB_TRUE;
+#ifdef PRINT_HEADER
                 scan_type = 't';
+#endif
                 break;
             case 'b':
                 interlaced = EB_TRUE;
+#ifdef PRINT_HEADER
                 scan_type = 'b';
+#endif
                 break;
             case '?':
             default:
@@ -263,22 +276,37 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
     cfg->frameRate = fr_n / fr_d;
     cfg->encoderBitDepth = bitdepth;
     cfg->interlacedVideo = interlaced;
-    /* TODO: when implemented, need to set input bit depth
-        (instead of the encoder bit depth) and chroma format */
+    if (EB_STRCMP("420", chroma) == 0) {
+        cfg->encoderColorFormat = EB_YUV420;
+    }
+    else if (EB_STRCMP("422", chroma) == 0) {
+        cfg->encoderColorFormat = EB_YUV422;
+    }
+    else if (EB_STRCMP("444", chroma) == 0) {
+        cfg->encoderColorFormat = EB_YUV444;
+    }
+    else if (EB_STRCMP("400", chroma) == 0) {
+        cfg->encoderColorFormat = EB_YUV400;
+    }
+    else {
+        fprintf(cfg->errorLogFile, "Unsupported color format: %s\n", chroma);
+        return EB_ErrorBadParameter;
+    }
 
     return EB_ErrorNone;
 }
 
-void validateAlphanumeric(char* buffer)
+EB_BOOL validateAlphanumeric(unsigned char* buffer)
 {
-    /* validate input is alphanumeric..substitute '-' for nonalphanumeric characters */
-    char *cp = buffer;
-    const char *end = buffer + strlen(buffer);
+    /* validate input is alphanumeric */
+    unsigned char *cp = buffer;
+    const unsigned char *end = buffer + strlen((char*)buffer);
     for (cp = buffer; cp != end; cp++)
     {
-        if (!isalnum(*cp))
-            *cp = '-';
+        if (!isalnum(*cp) && *cp!='\n')
+            return EB_FALSE;
     }
+    return EB_TRUE;
 }
 
 /* read next line which contains the "FRAME" delimiter */
@@ -292,7 +320,9 @@ int32_t read_y4m_frame_delimiter(EbConfig_t *cfg) {
         assert(feof(cfg->inputFile));
         return EB_ErrorNone;
     }
-    validateAlphanumeric(bufferY4Mheader);
+    if (!validateAlphanumeric(bufferY4Mheader)){
+        return EB_ErrorBadParameter;
+    }
     if (EB_STRCMP((const char*)bufferY4Mheader, "FRAME\n") != 0) {
         fprintf(cfg->errorLogFile, "Failed to read proper y4m frame delimeter. Read broken.\n");
         return EB_ErrorBadParameter;
@@ -303,17 +333,18 @@ int32_t read_y4m_frame_delimiter(EbConfig_t *cfg) {
 
 /* check if the input file is in YUV4MPEG2 (y4m) format */
 EB_BOOL check_if_y4m(EbConfig_t *cfg) {
-    char buffer[YUV4MPEG2_IND_SIZE + 1];
+    unsigned char buffer[YUV4MPEG2_IND_SIZE + 1];
     size_t headerReadLength;
 
     /* Parse the header for the "YUV4MPEG2" string */
     headerReadLength = fread(buffer, YUV4MPEG2_IND_SIZE, 1, cfg->inputFile);
-    assert(headerReadLength == 1);
+    if (headerReadLength != 1) {
+        assert(feof(cfg->inputFile));
+        return EB_FALSE;
+    }
+
     buffer[YUV4MPEG2_IND_SIZE] = 0;
-
-    validateAlphanumeric(buffer);
-
-    if (EB_STRCMP(buffer, "YUV4MPEG2") == 0) {
+    if (validateAlphanumeric(buffer) && EB_STRCMP((char*)buffer, "YUV4MPEG2") == 0) {
         return EB_TRUE; /* YUV4MPEG2 file */
     }
     else {
@@ -321,7 +352,7 @@ EB_BOOL check_if_y4m(EbConfig_t *cfg) {
             fseek(cfg->inputFile, 0, SEEK_SET);
         }
         else {
-            EB_STRNCPY(cfg->y4m_buf, buffer, YUV4MPEG2_IND_SIZE); /* TODO copy 9 bytes read to cfg->y4m_buf*/
+            EB_STRNCPY((char*)cfg->y4m_buf, (char*)buffer, YUV4MPEG2_IND_SIZE);
         }
         return EB_FALSE; /* Not a YUV4MPEG2 file */
     }

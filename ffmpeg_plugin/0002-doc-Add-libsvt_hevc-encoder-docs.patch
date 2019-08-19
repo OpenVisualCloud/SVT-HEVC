@@ -1,4 +1,4 @@
-From 03dfa1058c3b1362451d9a241f1eef240d8fff5b Mon Sep 17 00:00:00 2001
+From 6b0a4fd63454e3c2185efe741e50e80df5c9a4a4 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Tue, 5 Mar 2019 15:04:58 +0800
 Subject: [PATCH 2/2] doc: Add libsvt_hevc encoder docs
@@ -10,21 +10,21 @@ Signed-off-by: Zhengxu Huang <zhengxu.huang@intel.com>
 Signed-off-by: Hassene Tmar <hassene.tmar@intel.com>
 Signed-off-by: Jing Sun <jing.a.sun@intel.com>
 ---
- doc/encoders.texi | 145 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ doc/encoders.texi | 149 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
  doc/general.texi  |   8 +++
- 2 files changed, 153 insertions(+)
+ 2 files changed, 157 insertions(+)
 
 diff --git a/doc/encoders.texi b/doc/encoders.texi
-index 899faac..4030f6d 100644
+index eefd124..81debda 100644
 --- a/doc/encoders.texi
 +++ b/doc/encoders.texi
-@@ -1457,6 +1457,151 @@ Set maximum NAL size in bytes.
+@@ -1640,6 +1640,155 @@ Set maximum NAL size in bytes.
  Allow skipping frames to hit the target bitrate if set to 1.
  @end table
  
 +@section libsvt_hevc
 +
-+Scalable Video Technology for HEVC encoder (SVT-HEVC encoder) wrapper.
++Scalable Video Technology for HEVC (SVT-HEVC) encoder wrapper.
 +
 +This encoder requires the presence of the headers and
 +library during configuration. You need to explicitly configure the
@@ -37,7 +37,7 @@ index 899faac..4030f6d 100644
 +@subsection Options
 +
 +The following FFmpeg global options affect the configurations of the
-+libsvt_hevc encoder.
++libsvt_hevc encoder:
 +
 +@table @option
 +@item b  (@emph{bitrate})
@@ -50,74 +50,74 @@ index 899faac..4030f6d 100644
 +Enable closed GOP.
 +
 +@item qmin (@emph{min-q})
-+Defaults 10
++Default is 10
 +
 +@item qmax (@emph{max-q})
-+Defaults 48
++Default is 48
 +
 +Set minimum/maximum quantisation values.  Valid range is from 0 to 51
 +(Only used when bit rate control mode @option{rc} is set to 1(vbr) mode.
-+Has to be qmax > = qmin).
++It is required that qmax >= qmin).
 +
 +@item profile (@emph{profile})
 +Set profile restrictions. Can assume one of the following possible values:
-+
-+Default is 2 (main10).
 +
 +@table @samp
 +@item main
 +main profile
 +@item main10
 +main10 profile
++@item rext
++rext profile
 +@end table
 +
-+@item level
++Default is 1 (main).
 +
-+@option{profile} sets the value of @emph{profile}.
++@item level (@emph{level})
++
 +@option{level} sets the value of @emph{level}.
++Set level (level_idc). Default is 0 (to be determined by the encoder).
++
++@end table
 +
 +The encoder also has its own specific options:
 +
 +@table @option
-+@item vui
-+Enables or disables the vui structure in the HEVC elementary
-+bitstream. 0 = Off, 1 = On. Default is 0 (Off).
-+
 +@item aud (@emph{aud})
 +Enable use of access unit delimiters when set to 1. Default is 0 (Off).
 +
 +@item hielevel
 +Set hierarchical levels. Can assume one of the following possible values:
 +
-+Default is 3 (4level).
-+
 +@table @samp
 +@item flat
-+none hierarchy level
-+@item 2level
-+2-level hierarchy
-+@item 3level
-+3-level hierarchy
-+@item 4level
-+4-level hierarchy
++flat more
++@item 1 level
++Minigop size is 2^1
++@item 2 level
++Minigop size is 2^2
++@item 3 level
++Minigop size is 2^3
 +@end table
 +
++Default is 3 level.
++
 +@item la_depth
-+Set look-ahead depth, depending on bit rate control mode @option{rc}, when
-+bit rate control mode is set to vbr it's best to set this parameter to be
-+equal to the intra period value (such is the default set by the encoder),
-+when cqp is chosen, then a look ahead is recommended. The range is from @var{0-256}.
++Set look-ahead depth, depending on @option{rc}: for @var{vbr}, it's recommended
++to unset it and use the default value (the intra period); for @var{cqp}, better
++specify the look-ahead depth.
++
++The range is @var{-1-256}. Default is -1 (unset and the default value to be used).
 +
 +@item preset
-+A preset defining the quality vs density tradeoff point that the
-+encoding is to be performed at.(e.g. 0 is the highest quality mode,
-+12 is the highest density mode). The range is from @var{0-12}. Default is 9.
++Set the quality vs density tradeoff point at which the encoding is to be performed.
++Higher perset value, higher density and lower quality.
++
++The range is @var{0-12}. Default is 9.
 +
 +@item tier
 +Set @emph{general_tier_flag}.  This may affect the level chosen for the stream
 +if it is not explicitly specified. Can assume one of the following possible values:
-+
-+Default is 1 (main).
 +
 +@table @samp
 +@item main
@@ -126,10 +126,10 @@ index 899faac..4030f6d 100644
 +high tier
 +@end table
 +
++Default is 1 (main).
++
 +@item rc
 +Set bit rate control mode. Can assume one of the following possible values:
-+
-+Default is 0 (cqp).
 +
 +@table @samp
 +@item cqp
@@ -138,17 +138,23 @@ index 899faac..4030f6d 100644
 +Variable Bit Rate (VBR) mode
 +@end table
 +
++Default is 0 (cqp).
++
++@item forced_idr
++Force keyframes to be IDR if set to >=0 (the value sets headers insertion interval). Default is -1 (CRA).
++
++@item asm_type
++Auto select highest supported asm if set to 1 or C only if 0. Default is 1.
++
 +@item qp
 +Initial quantization parameter for the intra pictures used when
 +@option{rc} is cqp mode. The range is from @var{0-51}. Default is 32.
 +
 +@item sc_detection
-+Enables or disables the scene change detection algorithm. Default is 0 (disable).
++Enables or disables the scene change detection algorithm. Default is 0 (disabled).
 +
 +@item tune
 +Set quality tuning mode. Can assume one of the following possible values:
-+
-+Default is 1 (oq).
 +
 +@table @samp
 +@item sq
@@ -159,24 +165,22 @@ index 899faac..4030f6d 100644
 +VMAF optimized mode
 +@end table
 +
-+@item bl_mode
-+Enables or disables Random Access Prediction. Default is 0 (disable).
-+@end table
++Default is 1 (oq).
 +
-+@item hdr
-+High dynamic range input. Default is 0 (disable).
++@item bl_mode
++Enables or disables Random Access Prediction. Default is 0 (disabled).
 +@end table
 +
  @section libtheora
  
  libtheora Theora encoder wrapper.
 diff --git a/doc/general.texi b/doc/general.texi
-index 2b015f1..e82afb3 100644
+index 3c0c803..fa9cd31 100644
 --- a/doc/general.texi
 +++ b/doc/general.texi
-@@ -114,6 +114,14 @@ Go to @url{http://lame.sourceforge.net/} and follow the
- instructions for installing the library.
- Then pass @code{--enable-libmp3lame} to configure to enable it.
+@@ -243,6 +243,14 @@ FFmpeg can use the OpenJPEG libraries for decoding/encoding J2K videos.  Go to
+ instructions.  To enable using OpenJPEG in FFmpeg, pass @code{--enable-libopenjpeg} to
+ @file{./configure}.
  
 +@section Scalable Video Technology for HEVC
 +

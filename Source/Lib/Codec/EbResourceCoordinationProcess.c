@@ -456,51 +456,6 @@ EB_ERRORTYPE SignalDerivationPreAnalysisVmaf(
 	return return_error;
 }
 
-static void InitTileInfo(SequenceControlSet_t *scsPtr)
-{
-    scsPtr->tileUniformSpacing = 1;
-    scsPtr->tileColumnCount = scsPtr->staticConfig.tileColumnCount;
-    scsPtr->tileRowCount    = scsPtr->staticConfig.tileRowCount;
-    scsPtr->tileSliceMode   = scsPtr->staticConfig.tileSliceMode;
-
-    scsPtr->pictureWidthInLcu  = (EB_U8)((scsPtr->lumaWidth + scsPtr->lcuSize - 1) / scsPtr->lcuSize);
-    scsPtr->pictureHeightInLcu = (EB_U8)((scsPtr->lumaHeight + scsPtr->lcuSize - 1) / scsPtr->lcuSize);
-
-    scsPtr->lcuTotalCount = scsPtr->pictureWidthInLcu * scsPtr->pictureHeightInLcu;
-
-    EB_U16 lastColumnWidth = scsPtr->pictureWidthInLcu;
-    EB_U16 lastRowHeight = scsPtr->pictureHeightInLcu;
-    EB_U16 rowIndex, columnIndex;
-
-    scsPtr->tileUniformSpacing = 1;
-    if (scsPtr->tileUniformSpacing == 1) {
-        for (columnIndex = 0; columnIndex + 1 < scsPtr->tileColumnCount; ++columnIndex) {
-            scsPtr->tileColumnArray[columnIndex] = (EB_U16)((columnIndex + 1) * scsPtr->pictureWidthInLcu / scsPtr->tileColumnCount -
-                columnIndex * scsPtr->pictureWidthInLcu / scsPtr->tileColumnCount);
-            lastColumnWidth -= scsPtr->tileColumnArray[columnIndex];
-        }
-        scsPtr->tileColumnArray[columnIndex] = (EB_U16)lastColumnWidth;
-
-        for (rowIndex = 0; rowIndex + 1 < scsPtr->tileRowCount; ++rowIndex) {
-            scsPtr->tileRowArray[rowIndex] = (EB_U16)((rowIndex + 1) * scsPtr->pictureHeightInLcu / scsPtr->tileRowCount -
-                rowIndex * scsPtr->pictureHeightInLcu / scsPtr->tileRowCount);
-            lastRowHeight -= scsPtr->tileRowArray[rowIndex];
-        }
-        scsPtr->tileRowArray[rowIndex] = (EB_U16)lastRowHeight;
-    } else {
-        for (columnIndex = 0; columnIndex + 1 < scsPtr->tileColumnCount; ++columnIndex) {
-            scsPtr->tileColumnArray[columnIndex] = (EB_U16)scsPtr->tileColumnWidthArray[columnIndex];
-            lastColumnWidth -= scsPtr->tileColumnArray[columnIndex];
-        }
-        scsPtr->tileColumnArray[columnIndex] = (EB_U16)lastColumnWidth;
-
-        for (rowIndex = 0; rowIndex + 1 < scsPtr->tileRowCount; ++rowIndex) {
-            scsPtr->tileRowArray[rowIndex] = (EB_U16)scsPtr->tileRowHeightArray[rowIndex];
-            lastRowHeight -= scsPtr->tileRowArray[rowIndex];
-        }
-        scsPtr->tileRowArray[rowIndex] = (EB_U16)lastRowHeight;
-    }
-}
 
 
 /***************************************
@@ -546,6 +501,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         EbGetFullObject(
             contextPtr->inputBufferFifoPtr,
             &ebInputWrapperPtr);
+        EB_CHECK_END_OBJ(ebInputWrapperPtr);
         ebInputPtr = (EB_BUFFERHEADERTYPE*) ebInputWrapperPtr->objectPtr;
      
         sequenceControlSetPtr       = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr;
@@ -560,38 +516,32 @@ void* ResourceCoordinationKernel(void *inputPtr)
         //   prepare a new sequenceControlSetPtr containing the new changes and update the state
         //   of the previous Active SequenceControlSet
         EbBlockOnMutex(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->configMutex);
-        if(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->initialPicture) {
-            
+        if (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->initialPicture) {
+
             // Update picture width, picture height, cropping right offset, cropping bottom offset, and conformance windows
-            if(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->initialPicture) 
-            
-            {
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lumaWidth = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaWidth;
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lumaHeight = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaHeight;
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaWidth = (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaWidth >> subWidthCMinus1);
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaHeight = (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaHeight >> subHeightCMinus1);
+            if (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->initialPicture) {
+                sequenceControlSetPtr->lumaWidth    = sequenceControlSetPtr->maxInputLumaWidth;
+                sequenceControlSetPtr->lumaHeight   = sequenceControlSetPtr->maxInputLumaHeight;
+                sequenceControlSetPtr->chromaWidth  = sequenceControlSetPtr->maxInputLumaWidth >> subWidthCMinus1;
+                sequenceControlSetPtr->chromaHeight = sequenceControlSetPtr->maxInputLumaHeight >> subHeightCMinus1;
 
-                
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->padRight = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputPadRight;
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->croppingRightOffset = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->padRight;
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->padBottom = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputPadBottom;
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->croppingBottomOffset = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->padBottom;
+                sequenceControlSetPtr->padRight             = sequenceControlSetPtr->maxInputPadRight;
+                sequenceControlSetPtr->croppingRightOffset  = sequenceControlSetPtr->padRight;
+                sequenceControlSetPtr->padBottom            = sequenceControlSetPtr->maxInputPadBottom;
+                sequenceControlSetPtr->croppingBottomOffset = sequenceControlSetPtr->padBottom;
 
-                if(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->padRight != 0 || contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->padBottom != 0) {
-                    contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->conformanceWindowFlag = 1;
-                }
-                else {
-                    contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->conformanceWindowFlag = 0;
-                }
-                
-				inputSize = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lumaWidth * contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lumaHeight;
+                if (sequenceControlSetPtr->padRight != 0 || sequenceControlSetPtr->padBottom != 0)
+                    sequenceControlSetPtr->conformanceWindowFlag = 1;
+                else
+                    sequenceControlSetPtr->conformanceWindowFlag = 0;
+
+                inputSize = sequenceControlSetPtr->lumaWidth * sequenceControlSetPtr->lumaHeight;
             }
 
             // HDR BT2020
             if (sequenceControlSetPtr->staticConfig.videoUsabilityInfo)
             {
-                
-                AppVideoUsabilityInfo_t    *vuiPtr = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->videoUsabilityInfoPtr;
+                AppVideoUsabilityInfo_t *vuiPtr = sequenceControlSetPtr->videoUsabilityInfoPtr;
 
                 if (sequenceControlSetPtr->staticConfig.highDynamicRangeInput && is16BitInput){
                     vuiPtr->aspectRatioInfoPresentFlag = EB_TRUE;
@@ -630,21 +580,34 @@ void* ResourceCoordinationKernel(void *inputPtr)
             // Copy the contents of the active SequenceControlSet into the new empty SequenceControlSet
             CopySequenceControlSet(
                 (SequenceControlSet_t*) contextPtr->sequenceControlSetActiveArray[instanceIndex]->objectPtr,
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr);
+                sequenceControlSetPtr);
 
         }
         EbReleaseMutex(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->configMutex);
+        if (sequenceControlSetPtr->staticConfig.rateControlMode) {
+            // Sequence Control Set is released by Rate Control after passing through MDC->MD->ENCDEC->Packetization->RateControl
+            //   ,in the PictureManager after receiving the reference and in PictureManager after receiving the feedback
+            EbObjectIncLiveCount(
+                contextPtr->sequenceControlSetActiveArray[instanceIndex],
+                3);
+        }
+        else {
+            // Sequence Control Set is released by Rate Control after passing through MDC->MD->ENCDEC->Packetization->RateControl
+            //   and in the PictureManager
+            EbObjectIncLiveCount(
+                contextPtr->sequenceControlSetActiveArray[instanceIndex],
+                2);
 
-        // Sequence Control Set is released by Rate Control after passing through MDC->MD->ENCDEC->Packetization->RateControl
-        //   and in the PictureManager
-        EbObjectIncLiveCount(
-            contextPtr->sequenceControlSetActiveArray[instanceIndex],
-            2);
-
+        }
         // Set the current SequenceControlSet
         sequenceControlSetPtr   = (SequenceControlSet_t*) contextPtr->sequenceControlSetActiveArray[instanceIndex]->objectPtr;
         
-        InitTileInfo(sequenceControlSetPtr);
+        //Move to pcs init stage
+        //InitTileInfo(sequenceControlSetPtr);
+
+        sequenceControlSetPtr->pictureWidthInLcu  = (EB_U8)((sequenceControlSetPtr->lumaWidth + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize);
+        sequenceControlSetPtr->pictureHeightInLcu = (EB_U8)((sequenceControlSetPtr->lumaHeight + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize);
+        sequenceControlSetPtr->lcuTotalCount = sequenceControlSetPtr->pictureWidthInLcu * sequenceControlSetPtr->pictureHeightInLcu;
 
 		// Init LCU Params
         if (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->initialPicture) {
@@ -731,7 +694,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
         pictureControlSetPtr->qpOnTheFly                      = EB_FALSE;
            
-		pictureControlSetPtr->lcuTotalCount					  = sequenceControlSetPtr->lcuTotalCount;
+		//pictureControlSetPtr->lcuTotalCount					  = sequenceControlSetPtr->lcuTotalCount;
 
 		if (sequenceControlSetPtr->staticConfig.speedControlFlag) {
 			SpeedBufferControl(

@@ -410,8 +410,8 @@ void ProductResetModeDecision(
 	// Reset Neighbor Arrays at start of new Segment / Picture
     // Jing: Current segments will cross tiles
 	if (segmentIndex == 0) {
-        for (unsigned int tileIdx = tileRowIndex * sequenceControlSetPtr->tileColumnCount;
-                tileIdx < (tileRowIndex + 1) * sequenceControlSetPtr->tileColumnCount;
+        for (unsigned int tileIdx = tileRowIndex * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
+                tileIdx < (tileRowIndex + 1) * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
                 tileIdx++) {
             ResetModeDecisionNeighborArrays(pictureControlSetPtr, tileIdx);
             ResetMdRefinmentNeighborArrays(pictureControlSetPtr, tileIdx);
@@ -478,6 +478,11 @@ void ConfigureChroma(
         lcuPtr->chromaEncodeMode = chromaCond0 ?
             (EB_U8)CHROMA_MODE_FULL :
             (EB_U8)CHROMA_MODE_BEST;
+    }
+
+    // hack disable chroma search for P422/444 for known error
+    if (lcuPtr->chromaEncodeMode == CHROMA_MODE_FULL && pictureControlSetPtr->colorFormat >= EB_YUV422) {
+        lcuPtr->chromaEncodeMode = CHROMA_MODE_BEST;
     }
 
     contextPtr->useChromaInformationInFastLoop = (lcuEdgeNum > 0 || lcuPtr->chromaEncodeMode == CHROMA_MODE_FULL) ? 1 : 0;

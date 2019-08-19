@@ -160,6 +160,28 @@ typedef struct EdgeLcuResults_s {
 
 } EdgeLcuResults_t;
 
+typedef struct TileInfo_s {
+    EB_U16 tileLcuOriginX;
+    EB_U16 tileLcuOriginY;
+    EB_U16 tileLcuEndX;
+    EB_U16 tileLcuEndY;
+
+    EB_U16 tilePxlOriginX;
+    EB_U16 tilePxlOriginY;
+    EB_U16 tilePxlEndX;
+    EB_U16 tilePxlEndY;
+} TileInfo_t;
+
+typedef struct LcuTileInfo_s {
+    EB_U8     pictureLeftEdgeFlag                : 1;
+    EB_U8     pictureTopEdgeFlag                 : 1;
+    EB_U8     pictureRightEdgeFlag               : 1;
+    EB_U8     tileLeftEdgeFlag                   : 1;
+    EB_U8     tileTopEdgeFlag                    : 2;
+    EB_U8     tileRightEdgeFlag                  : 2;
+    EB_U16    tileIndexInRaster;
+} LcuEdgeInfo_t;
+
 typedef struct LargestCodingUnit_s {
     struct PictureControlSet_s     *pictureControlSetPtr;
     CodingUnit_t                  **codedLeafArrayPtr; 
@@ -169,11 +191,8 @@ typedef struct LargestCodingUnit_s {
 
     unsigned     qp                                 : 8;
     unsigned     size                               : 8;
-    unsigned     sizeLog2                           : 3;
-    unsigned     pictureLeftEdgeFlag                : 1;
-    unsigned     pictureTopEdgeFlag                 : 1;
-    unsigned     pictureRightEdgeFlag               : 1;
-    unsigned     pred64                             : 2;
+    unsigned     sizeLog2                           : 4;
+    unsigned     pred64                             : 4;
 
     unsigned     index                              : 14; // supports up to 8k resolution
     unsigned     originX                            : 13; // supports up to 8k resolution 8191
@@ -194,14 +213,10 @@ typedef struct LargestCodingUnit_s {
 	EB_U8							chromaEncodeMode;
 
     EB_INTRA4x4_SEARCH_METHOD       intra4x4SearchMethod;
-    // Tiles
-    EB_BOOL                         tileLeftEdgeFlag;
-    EB_BOOL                         tileTopEdgeFlag;
-    EB_BOOL                         tileRightEdgeFlag;
-    EB_U16                          tileOriginX;
-    EB_U16                          tileOriginY;
-    EB_U16                          tileEndX;
-    EB_U16                          tileEndY;
+
+    // Lcu/Tiles related info, stored in ppcs, double check if need to copy here
+    LcuEdgeInfo_t                   *lcuEdgeInfoPtr;
+    TileInfo_t                      *tileInfoPtr;
 } LargestCodingUnit_t;
 
 

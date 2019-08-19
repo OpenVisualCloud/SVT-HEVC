@@ -1,4 +1,4 @@
-From 6f0ea1627c58683e0c3a43ef570d21d433c4ad1c Mon Sep 17 00:00:00 2001
+From 0fb5a4e4d5f71b941eb5a79855dd834e8c05698f Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -8,14 +8,14 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  ext/Makefile.am                   |   12 +-
  ext/meson.build                   |    1 +
  ext/svthevcenc/Makefile.am        |   18 +
- ext/svthevcenc/gstsvthevcenc.c    | 1735 +++++++++++++++++++++++++++++++++++++
- ext/svthevcenc/gstsvthevcenc.h    |  118 +++
- ext/svthevcenc/meson.build        |   16 +
+ ext/svthevcenc/gstsvthevcenc.c    | 1694 +++++++++++++++++++++++++++++++++++++
+ ext/svthevcenc/gstsvthevcenc.h    |  119 +++
+ ext/svthevcenc/meson.build        |   18 +
  tests/check/Makefile.am           |    7 +
  tests/check/elements/.gitignore   |    1 +
  tests/check/elements/svthevcenc.c |  228 +++++
  tests/check/meson.build           |    1 +
- 11 files changed, 2143 insertions(+), 2 deletions(-)
+ 11 files changed, 2105 insertions(+), 2 deletions(-)
  create mode 100644 ext/svthevcenc/Makefile.am
  create mode 100644 ext/svthevcenc/gstsvthevcenc.c
  create mode 100644 ext/svthevcenc/gstsvthevcenc.h
@@ -23,12 +23,12 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  create mode 100644 tests/check/elements/svthevcenc.c
 
 diff --git a/configure.ac b/configure.ac
-index cb72ee8..a005e97 100644
+index c770006..f8ff236 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -2321,6 +2321,12 @@ AG_GST_CHECK_FEATURE(SCTP, [sctp plug-in], sctp, [
-   ])
- ])
+@@ -2111,6 +2111,12 @@ if test "x$HAVE_LTC" = "xyes"; then
+   AC_DEFINE(HAVE_LTC, 1, [Use libltc])
+ fi
  
 +dnl *** svthevcenc : works with libSVT-HEVC 1.3.0 ***
 +translit(dnm, m, l) AM_CONDITIONAL(USE_SVTHEVCENC, true)
@@ -39,24 +39,24 @@ index cb72ee8..a005e97 100644
  else
  
  dnl not building plugins with external dependencies,
-@@ -2403,6 +2409,7 @@ AM_CONDITIONAL(USE_DTLS, false)
- AM_CONDITIONAL(USE_VULKAN, false)
+@@ -2192,6 +2198,7 @@ AM_CONDITIONAL(USE_X265, false)
+ AM_CONDITIONAL(USE_DTLS, false)
  AM_CONDITIONAL(USE_TTML, false)
  AM_CONDITIONAL(USE_SCTP, false)
 +AM_CONDITIONAL(USE_SVTHEVCENC, false)
  
  fi dnl of EXT plugins
  
-@@ -2697,6 +2704,7 @@ ext/webrtc/Makefile
+@@ -2483,6 +2490,7 @@ ext/webrtc/Makefile
  ext/webrtcdsp/Makefile
  ext/wpe/Makefile
  ext/ttml/Makefile
 +ext/svthevcenc/Makefile
  po/Makefile.in
- docs/Makefile
- docs/plugins/Makefile
+ pkgconfig/Makefile
+ pkgconfig/gstreamer-plugins-bad.pc
 diff --git a/ext/Makefile.am b/ext/Makefile.am
-index 94d3bc4..49d3b28 100644
+index 17e427d..ab978a4 100644
 --- a/ext/Makefile.am
 +++ b/ext/Makefile.am
 @@ -400,6 +400,12 @@ else
@@ -92,10 +92,10 @@ index 94d3bc4..49d3b28 100644
  
  include $(top_srcdir)/common/parallel-subdirs.mak
 diff --git a/ext/meson.build b/ext/meson.build
-index e1ce405..7c2deb3 100644
+index 1d3320c..324e8cc 100644
 --- a/ext/meson.build
 +++ b/ext/meson.build
-@@ -63,3 +63,4 @@ subdir('wildmidi')
+@@ -64,3 +64,4 @@ subdir('wildmidi')
  subdir('wpe')
  subdir('x265')
  subdir('zbar')
@@ -127,10 +127,10 @@ index 0000000..6d7f55a
 +noinst_HEADERS = gstsvthevcenc.h
 diff --git a/ext/svthevcenc/gstsvthevcenc.c b/ext/svthevcenc/gstsvthevcenc.c
 new file mode 100644
-index 0000000..53be342
+index 0000000..dbbe93b
 --- /dev/null
 +++ b/ext/svthevcenc/gstsvthevcenc.c
-@@ -0,0 +1,1735 @@
+@@ -0,0 +1,1694 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 + *
@@ -199,13 +199,14 @@ index 0000000..53be342
 +  PROP_SOCKET,
 +  PROP_TILE_ROW,
 +  PROP_TILE_COL,
++  PROP_PRED_STRUCTURE,
 +};
 +
 +#define PROP_INSERT_VUI_DEFAULT             FALSE
 +#define PROP_AUD_DEFAULT                    FALSE
 +#define PROP_HIERARCHICAL_LEVEL_DEFAULT     3
 +#define PROP_LOOKAHEAD_DISTANCE_DEFAULT     40
-+#define PROP_ENCODER_MODE_DEFAULT           9
++#define PROP_ENCODER_MODE_DEFAULT           7
 +#define PROP_RC_MODE_DEFAULT                0
 +#define PROP_QP_DEFAULT                     25
 +#define PROP_QP_MAX_DEFAULT                 48
@@ -216,11 +217,12 @@ index 0000000..53be342
 +#define PROP_BASE_LAYER_SWITCH_MODE_DEFAULT 0
 +#define PROP_BITRATE_DEFAULT                (7 * 1000)
 +#define PROP_KEY_INT_MAX_DEFAULT            -2
-+#define PROP_INTRA_REFRESH_DEFAULT          1
++#define PROP_INTRA_REFRESH_DEFAULT          -1
 +#define PROP_CORES_DEFAULT                  0
 +#define PROP_SOCKET_DEFAULT                 -1
 +#define PROP_TILE_ROW_DEFAULT               1
 +#define PROP_TILE_COL_DEFAULT               1
++#define PROP_PRED_STRUCTURE_DEFAULT         2
 +
 +#define PROFILE_DEFAULT                     2
 +#define LEVEL_DEFAULT                       0
@@ -249,7 +251,7 @@ index 0000000..53be342
 +        "width = (int) [ 64, 8192 ], " "height = (int) [ 64, 4320 ], "
 +        "stream-format = (string) byte-stream, "
 +        "alignment = (string) au, "
-+        "profile = (string) { main, main-10, main-4:4:4 }")
++        "profile = (string) { main, main-10, main-444 }")
 +    );
 +
 +static void gst_svthevc_enc_finalize (GObject * object);
@@ -315,7 +317,7 @@ index 0000000..53be342
 +{
 +  if (g_str_has_prefix (str, "main-10"))
 +    *has_420 = *has_420_10 = TRUE;
-+  else if (g_str_has_prefix (str, "main-4:4:4"))
++  else if (g_str_has_prefix (str, "main-444"))
 +    *has_420 = *has_420_10 = *has_422 = *has_444 = TRUE;
 +  else if (g_str_has_prefix (str, "main"))
 +    *has_420 = TRUE;
@@ -520,8 +522,8 @@ index 0000000..53be342
 +
 +  g_object_class_install_property (gobject_class, PROP_ENCODER_MODE,
 +      g_param_spec_uint ("speed", "speed (Encoder Mode)",
-+          "Encoding preset [0, 12] (e,g, for subjective quality tuning mode and >=4k resolution), [0, 10] (for >= 1080p resolution), [0, 9] (for all resolution and modes)",
-+          0, 12, PROP_ENCODER_MODE_DEFAULT,
++          "Encoding preset [0, 11] (e.g. 0 is the highest quality mode, 11 is the highest), [0, 11] (for >= 4k resolution), [0, 10] (for >= 1080p resolution), [0, 9] (for all resolution)",
++          0, 11, PROP_ENCODER_MODE_DEFAULT,
 +          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 +
 +  g_object_class_install_property (gobject_class, PROP_RC_MODE,
@@ -556,7 +558,8 @@ index 0000000..53be342
 +  g_object_class_install_property (gobject_class, PROP_TUNE,
 +      g_param_spec_uint ("tune", "Tune",
 +          "Quality tuning mode: 0=SQ(visually optimized mode), 1=OQ(PSNR/SSIM optimized mode), 2=VMAF(VMAF optimized mode)",
-+          0, 2, PROP_TUNE_DEFAULT, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++          0, 2, PROP_TUNE_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_DEPRECATED));
 +
 +  g_object_class_install_property (gobject_class, PROP_LATENCY_MODE,
 +      g_param_spec_uint ("latency-mode", "Latency Mode",
@@ -583,9 +586,9 @@ index 0000000..53be342
 +          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 +
 +  g_object_class_install_property (gobject_class, PROP_INTRA_REFRESH,
-+      g_param_spec_uint ("intra-refresh", "Intra Refresh",
-+          "1=CRA (Open GOP), 2=IDR (Closed GOP)",
-+          1, 2, PROP_INTRA_REFRESH_DEFAULT,
++      g_param_spec_int ("intra-refresh", "Intra Refresh",
++          "-1:CRA (Open GOP), >=0:IDR (Closed GOP)",
++          -1, INT_MAX, PROP_INTRA_REFRESH_DEFAULT,
 +          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 +
 +  g_object_class_install_property (gobject_class, PROP_CORES,
@@ -610,6 +613,12 @@ index 0000000..53be342
 +      g_param_spec_uint ("tile-col", "Tile Column Count",
 +          "Tile count in the Column",
 +          1, 16, PROP_TILE_COL_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_PRED_STRUCTURE,
++      g_param_spec_uint ("pred-struct", "Prediction Structure",
++          "Prediction structure used to construct GOP. 0 : Low Delay P, 1 : Low Delay B, 2 : Random Access",
++          0, 2, PROP_PRED_STRUCTURE_DEFAULT,
 +          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 +
 +  gst_element_class_set_static_metadata (element_class,
@@ -661,6 +670,7 @@ index 0000000..53be342
 +  encoder->socket = PROP_SOCKET_DEFAULT;
 +  encoder->tile_row = PROP_TILE_ROW_DEFAULT;
 +  encoder->tile_col = PROP_TILE_COL_DEFAULT;
++  encoder->pred_structure = PROP_PRED_STRUCTURE_DEFAULT;
 +
 +  encoder->profile = PROFILE_DEFAULT;
 +  encoder->tier = TIER_DEFAULT;
@@ -882,6 +892,8 @@ index 0000000..53be342
 +  param->tileRowCount = encoder->tile_row;
 +  param->tileColumnCount = encoder->tile_col;
 +
++  param->predStructure = encoder->pred_structure;
++
 +  /* Send VPS, SPS and PPS Insertion in first IDR frame */
 +  param->codeVpsSpsPps = 1;
 +
@@ -1049,56 +1061,6 @@ index 0000000..53be342
 +  g_free (nal);
 +}
 +
-+static const gchar *
-+gst_svthevc_h265_get_format_range_ext_profile (guint16 val)
-+{
-+  GST_LOG ("format-range-extensions-profile : 0x%x", val);
-+
-+  switch (val) {
-+    case 0x1c1:
-+      return "main-4:4:4";
-+    case 0x181:
-+      return "main-4:4:4-10";
-+    default:
-+      break;
-+  }
-+
-+  return NULL;
-+}
-+
-+static const gchar *
-+gst_svthevc_h265_get_profile (const guint8 * profile_tier_level, guint len)
-+{
-+  const gchar *profile = NULL;
-+  gint profile_idc;
-+
-+  g_return_val_if_fail (profile_tier_level != NULL, NULL);
-+
-+  if (len < 2)
-+    return NULL;
-+
-+  profile_idc = (profile_tier_level[0] & 0x1f);
-+
-+  if (profile_idc == 1)
-+    profile = "main";
-+  else if (profile_idc == 2)
-+    profile = "main-10";
-+  else if (profile_idc == 3)
-+    profile = "main-still-picture";
-+  else if (profile_idc == 4 && len >= 11) {
-+    GstBitReader br = GST_BIT_READER_INIT (profile_tier_level, len);
-+    guint16 range_ext;
-+    if (!gst_bit_reader_skip (&br, 44))
-+      return NULL;
-+    if (!gst_bit_reader_get_bits_uint16 (&br, &range_ext, 9))
-+      return NULL;
-+    profile = gst_svthevc_h265_get_format_range_ext_profile (range_ext);
-+  } else
-+    profile = NULL;
-+
-+  return profile;
-+}
-+
 +static gboolean
 +gst_svthevc_enc_set_level_tier_and_profile (GstSvtHevcEnc * encoder,
 +    GstCaps * caps)
@@ -1107,6 +1069,7 @@ index 0000000..53be342
 +  EB_ERRORTYPE svt_ret;
 +  gboolean ret = TRUE;
 +  const gchar *level, *tier, *profile;
++  GstStructure *s;
 +
 +  GST_DEBUG_OBJECT (encoder, "set profile, level and tier");
 +
@@ -1122,23 +1085,13 @@ index 0000000..53be342
 +
 +  nal = gst_svthevc_enc_bytestream_to_nal (encoder, headerPtr);
 +
-+  level =
-+      gst_codec_utils_h265_get_level (nal->pBuffer + 6, nal->nFilledLen - 6);
-+  if (level != NULL)
-+    gst_caps_set_simple (caps, "level", G_TYPE_STRING, level, NULL);
++  gst_codec_utils_h265_caps_set_level_tier_and_profile (caps,
++      nal->pBuffer + 6, nal->nFilledLen - 6);
 +
-+  tier = gst_codec_utils_h265_get_tier (nal->pBuffer + 6, nal->nFilledLen - 6);
-+  if (tier != NULL)
-+    gst_caps_set_simple (caps, "tier", G_TYPE_STRING, tier, NULL);
-+
-+  /* codec_utils does not support h265 range extension profile yet.
-+   * If GStreamer supports this, it will be better handle the profile data.
-+   * https://gitlab.freedesktop.org/gstreamer/gst-plugins-base/issues/299
-+   */
-+  profile =
-+      gst_svthevc_h265_get_profile (nal->pBuffer + 6, nal->nFilledLen - 6);
-+  if (profile != NULL)
-+    gst_caps_set_simple (caps, "profile", G_TYPE_STRING, profile, NULL);
++  s = gst_caps_get_structure (caps, 0);
++  profile = gst_structure_get_string (s, "profile");
++  tier = gst_structure_get_string (s, "tier");
++  level = gst_structure_get_string (s, "level");
 +
 +  GST_DEBUG_OBJECT (encoder, "profile : %s", (profile) ? profile : "---");
 +  GST_DEBUG_OBJECT (encoder, "tier    : %s", (tier) ? tier : "---");
@@ -1311,7 +1264,7 @@ index 0000000..53be342
 +    if (profile) {
 +      if (g_str_has_prefix (profile, "main-10")) {
 +        encoder->profile = 2;
-+      } else if (g_str_has_prefix (profile, "main-4:4:4")) {
++      } else if (g_str_has_prefix (profile, "main-444")) {
 +        encoder->profile = 4;
 +      } else if (g_str_has_prefix (profile, "main")) {
 +        encoder->profile = 1;
@@ -1744,7 +1697,7 @@ index 0000000..53be342
 +      encoder->keyintmax = g_value_get_int (value);
 +      break;
 +    case PROP_INTRA_REFRESH:
-+      encoder->intra_refresh = g_value_get_uint (value);
++      encoder->intra_refresh = g_value_get_int (value);
 +      break;
 +    case PROP_CORES:
 +      encoder->cores = g_value_get_uint (value);
@@ -1757,6 +1710,9 @@ index 0000000..53be342
 +      break;
 +    case PROP_TILE_COL:
 +      encoder->tile_col = g_value_get_uint (value);
++      break;
++    case PROP_PRED_STRUCTURE:
++      encoder->pred_structure = g_value_get_uint (value);
 +      break;
 +    default:
 +      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1830,7 +1786,7 @@ index 0000000..53be342
 +      g_value_set_int (value, encoder->keyintmax);
 +      break;
 +    case PROP_INTRA_REFRESH:
-+      g_value_set_uint (value, encoder->intra_refresh);
++      g_value_set_int (value, encoder->intra_refresh);
 +      break;
 +    case PROP_CORES:
 +      g_value_set_uint (value, encoder->cores);
@@ -1843,6 +1799,9 @@ index 0000000..53be342
 +      break;
 +    case PROP_TILE_COL:
 +      g_value_set_uint (value, encoder->tile_col);
++      break;
++    case PROP_PRED_STRUCTURE:
++      g_value_set_uint (value, encoder->pred_structure);
 +      break;
 +    default:
 +      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1868,10 +1827,10 @@ index 0000000..53be342
 +    plugin_init, VERSION, "GPL", GST_PACKAGE_NAME, GST_PACKAGE_ORIGIN)
 diff --git a/ext/svthevcenc/gstsvthevcenc.h b/ext/svthevcenc/gstsvthevcenc.h
 new file mode 100644
-index 0000000..be1d492
+index 0000000..283027f
 --- /dev/null
 +++ b/ext/svthevcenc/gstsvthevcenc.h
-@@ -0,0 +1,118 @@
+@@ -0,0 +1,119 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 + *
@@ -1959,11 +1918,12 @@ index 0000000..be1d492
 +  guint base_layer_switch_mode;
 +  guint bitrate;
 +  gint keyintmax;
-+  guint intra_refresh;
++  gint intra_refresh;
 +  guint cores;
 +  gint socket;
 +  guint tile_row;
 +  guint tile_col;
++  guint pred_structure;
 +
 +  guint profile;
 +  guint tier;
@@ -1992,15 +1952,15 @@ index 0000000..be1d492
 +#endif /* __GST_SVTHEVC_ENC_H__ */
 diff --git a/ext/svthevcenc/meson.build b/ext/svthevcenc/meson.build
 new file mode 100644
-index 0000000..bac7572
+index 0000000..941d7ad
 --- /dev/null
 +++ b/ext/svthevcenc/meson.build
-@@ -0,0 +1,16 @@
+@@ -0,0 +1,18 @@
 +svthevcenc_sources = [
 +  'gstsvthevcenc.c',
 +]
 +
-+svthevcenc_dep = dependency('SvtHevcEnc', required: false)
++svthevcenc_dep = dependency('SvtHevcEnc', version : '>= 1.3.0', required: false)
 +
 +if svthevcenc_dep.found()
 +  gstsvthevcenc = library('gstsvthevcenc',
@@ -2011,12 +1971,14 @@ index 0000000..bac7572
 +    install : true,
 +    install_dir : plugins_install_dir,
 +  )
++  pkgconfig.generate(gstsvthevcenc, install_dir : plugins_pkgconfig_install_dir)
++  plugins += [gstsvthevcenc]
 +endif
 diff --git a/tests/check/Makefile.am b/tests/check/Makefile.am
-index a05bc57..6d627df 100644
+index c36fa9f..fb15aba 100644
 --- a/tests/check/Makefile.am
 +++ b/tests/check/Makefile.am
-@@ -229,6 +229,12 @@ else
+@@ -240,6 +240,12 @@ else
  check_nvenc=
  endif
  
@@ -2029,7 +1991,7 @@ index a05bc57..6d627df 100644
  VALGRIND_TO_FIX = \
  	elements/mpeg2enc \
  	elements/mplex    \
-@@ -313,6 +319,7 @@ check_PROGRAMS = \
+@@ -326,6 +332,7 @@ check_PROGRAMS = \
  	$(check_webrtc) \
  	$(check_msdk) \
  	$(check_nvenc) \
@@ -2038,10 +2000,10 @@ index a05bc57..6d627df 100644
  
  noinst_HEADERS = elements/mxfdemux.h libs/isoff.h
 diff --git a/tests/check/elements/.gitignore b/tests/check/elements/.gitignore
-index b7e836f..03e403d 100644
+index ca99cec..7a6834b 100644
 --- a/tests/check/elements/.gitignore
 +++ b/tests/check/elements/.gitignore
-@@ -59,4 +59,5 @@ voaacenc
+@@ -61,4 +61,5 @@ voaacenc
  voamrwbenc
  webrtcbin
  x265enc
@@ -2282,13 +2244,13 @@ index 0000000..0545b3c
 +
 +GST_CHECK_MAIN (svthevcenc);
 diff --git a/tests/check/meson.build b/tests/check/meson.build
-index cd77fb4..73476c6 100644
+index 2218dab..98183a6 100644
 --- a/tests/check/meson.build
 +++ b/tests/check/meson.build
-@@ -43,6 +43,7 @@ base_tests = [
+@@ -35,6 +35,7 @@ base_tests = [
    [['elements/mxfdemux.c']],
    [['elements/mxfmux.c']],
-   [['elements/nvenc.c'], not cuda_dep.found() or not cudart_dep.found(), nvenc_test_deps],
+   [['elements/nvenc.c'], false, [gmodule_dep, gstgl_dep]],
 +  [['elements/svthevcenc.c'], not svthevcenc_dep.found(), [svthevcenc_dep]],
    [['elements/pcapparse.c'], false, [libparser_dep]],
    [['elements/pnm.c']],
