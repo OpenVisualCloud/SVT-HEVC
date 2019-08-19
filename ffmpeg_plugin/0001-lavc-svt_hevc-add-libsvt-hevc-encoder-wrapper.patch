@@ -1,4 +1,4 @@
-From a6f622288d6d26b7eddf02dbc4dea8f7d5788a93 Mon Sep 17 00:00:00 2001
+From 80e3f410d1ad8807bd4a9f4d5cdf7a7b3c5962ce Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH 1/1] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -11,15 +11,15 @@ Signed-off-by: Jing Sun <jing.a.sun@intel.com>
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 501 +++++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 507 insertions(+)
+ libavcodec/libsvt_hevc.c | 497 +++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 503 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index a9644e2..2f61c82 100755
+index c09c842..648ea80 100755
 --- a/configure
 +++ b/configure
-@@ -262,6 +262,7 @@ External library support:
+@@ -264,6 +264,7 @@ External library support:
    --enable-libspeex        enable Speex de/encoding via libspeex [no]
    --enable-libsrt          enable Haivision SRT protocol via libsrt [no]
    --enable-libssh          enable SFTP protocol via libssh [no]
@@ -27,7 +27,7 @@ index a9644e2..2f61c82 100755
    --enable-libtensorflow   enable TensorFlow as a DNN module backend
                             for DNN based filters like sr [no]
    --enable-libtesseract    enable Tesseract, needed for ocr filter [no]
-@@ -1743,6 +1744,7 @@ EXTERNAL_LIBRARY_LIST="
+@@ -1793,6 +1794,7 @@ EXTERNAL_LIBRARY_LIST="
      libspeex
      libsrt
      libssh
@@ -35,7 +35,7 @@ index a9644e2..2f61c82 100755
      libtensorflow
      libtesseract
      libtheora
-@@ -3125,6 +3127,7 @@ libshine_encoder_select="audio_frame_queue"
+@@ -3194,6 +3196,7 @@ libshine_encoder_select="audio_frame_queue"
  libspeex_decoder_deps="libspeex"
  libspeex_encoder_deps="libspeex"
  libspeex_encoder_select="audio_frame_queue"
@@ -43,7 +43,7 @@ index a9644e2..2f61c82 100755
  libtheora_encoder_deps="libtheora"
  libtwolame_encoder_deps="libtwolame"
  libvo_amrwbenc_encoder_deps="libvo_amrwbenc"
-@@ -6135,6 +6138,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
+@@ -6269,6 +6272,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
  enabled libssh            && require_pkg_config libssh libssh libssh/sftp.h sftp_init
  enabled libspeex          && require_pkg_config libspeex speex speex/speex.h speex_decoder_init
  enabled libsrt            && require_pkg_config libsrt "srt >= 1.3.0" srt/srt.h srt_socket
@@ -52,10 +52,10 @@ index a9644e2..2f61c82 100755
  enabled libtesseract      && require_pkg_config libtesseract tesseract tesseract/capi.h TessBaseAPICreate
  enabled libtheora         && require libtheora theora/theoraenc.h th_info_init -ltheoraenc -ltheoradec -logg
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index 3e41497..728503b 100644
+index 3cd73fb..d39f568 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
-@@ -981,6 +981,7 @@ OBJS-$(CONFIG_LIBOPUS_ENCODER)            += libopusenc.o libopus.o     \
+@@ -991,6 +991,7 @@ OBJS-$(CONFIG_LIBOPUS_ENCODER)            += libopusenc.o libopus.o     \
  OBJS-$(CONFIG_LIBSHINE_ENCODER)           += libshine.o
  OBJS-$(CONFIG_LIBSPEEX_DECODER)           += libspeexdec.o
  OBJS-$(CONFIG_LIBSPEEX_ENCODER)           += libspeexenc.o
@@ -64,10 +64,10 @@ index 3e41497..728503b 100644
  OBJS-$(CONFIG_LIBTWOLAME_ENCODER)         += libtwolame.o
  OBJS-$(CONFIG_LIBVO_AMRWBENC_ENCODER)     += libvo-amrwbenc.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
-index 1b8144a..5739d53 100644
+index d2f9a39..d8788a7 100644
 --- a/libavcodec/allcodecs.c
 +++ b/libavcodec/allcodecs.c
-@@ -697,6 +697,7 @@ extern AVCodec ff_librsvg_decoder;
+@@ -707,6 +707,7 @@ extern AVCodec ff_librsvg_decoder;
  extern AVCodec ff_libshine_encoder;
  extern AVCodec ff_libspeex_encoder;
  extern AVCodec ff_libspeex_decoder;
@@ -77,10 +77,10 @@ index 1b8144a..5739d53 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000..d9ac04c
+index 0000000..24ab0ff
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,499 @@
+@@ -0,0 +1,497 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -124,6 +124,7 @@ index 0000000..d9ac04c
 +    EB_H265_ENC_CONFIGURATION enc_params;
 +    EB_COMPONENTTYPE *svt_handle;
 +    EB_BUFFERHEADERTYPE in_buf;
++    uint8_t *in_data;
 +    EOS_STATUS eos_flag;
 +
 +    // User options.
@@ -175,9 +176,10 @@ index 0000000..d9ac04c
 +
 +static void free_buffer(SvtContext *svt_enc)
 +{
-+    uint8_t *in_data = svt_enc->in_buf.pBuffer;
-+
-+    av_freep(&in_data);
++    if (svt_enc && svt_enc->in_data) {
++        av_freep(&svt_enc->in_data);
++        svt_enc->in_data = NULL;
++    }
 +}
 +
 +static EB_ERRORTYPE alloc_buffer(SvtContext *svt_enc)
@@ -191,7 +193,7 @@ index 0000000..d9ac04c
 +
 +    in_data = (EB_H265_ENC_INPUT *)av_mallocz(sizeof(*in_data));
 +    if (in_data) {
-+        in_buf->pBuffer = (uint8_t *)in_data;
++        svt_enc->in_data = in_buf->pBuffer = (uint8_t *)in_data;
 +        return EB_ErrorNone;
 +    } else {
 +        return EB_ErrorInsufficientResources;
@@ -259,11 +261,6 @@ index 0000000..d9ac04c
 +            avctx->time_base.num * avctx->ticks_per_frame;
 +    }
 +
-+    if (param->rateControlMode) {
-+        param->maxQpAllowed = avctx->qmax;
-+        param->minQpAllowed = avctx->qmin;
-+    }
-+
 +    param->hierarchicalLevels = svt_enc->hierarchical_level;
 +    param->encMode = svt_enc->enc_mode;
 +    param->tier = svt_enc->tier;
@@ -275,8 +272,12 @@ index 0000000..d9ac04c
 +    param->qp = svt_enc->qp;
 +    param->accessUnitDelimiter = svt_enc->aud;
 +    param->asmType = svt_enc->asm_type;
-+
 +    param->intraRefreshType =  svt_enc->forced_idr;
++
++    if (param->rateControlMode) {
++        param->maxQpAllowed = avctx->qmax;
++        param->minQpAllowed = avctx->qmin;
++    }
 +
 +    if (svt_enc->la_depth != -1)
 +        param->lookAheadDistance = svt_enc->la_depth;
@@ -368,7 +369,7 @@ index 0000000..d9ac04c
 +            goto failed_init_encoder;
 +        }
 +        memcpy(avctx->extradata, header_ptr->pBuffer, avctx->extradata_size);
-+        memset((void *)(avctx->extradata+avctx->extradata_size), 0, AV_INPUT_BUFFER_PADDING_SIZE);
++        memset(avctx->extradata+avctx->extradata_size, 0, AV_INPUT_BUFFER_PADDING_SIZE);
 +    }
 +
 +    svt_ret = alloc_buffer(svt_enc);
@@ -407,8 +408,8 @@ index 0000000..d9ac04c
 +            header_ptr->nAllocLen = 0;
 +            header_ptr->nFilledLen = 0;
 +            header_ptr->nTickCount = 0;
-+            header_ptr->pBuffer = NULL;
 +            header_ptr->nFlags = EB_BUFFERFLAG_EOS;
++            header_ptr->pBuffer = NULL;
 +
 +            EbH265EncSendPicture(svt_enc->svt_handle, header_ptr);
 +
@@ -474,8 +475,6 @@ index 0000000..d9ac04c
 +            EbDeinitHandle(svt_enc->svt_handle);
 +            svt_enc->svt_handle = NULL;
 +        }
-+
-+        svt_enc = NULL;
 +    }
 +
 +    return 0;
@@ -551,7 +550,6 @@ index 0000000..d9ac04c
 +
 +static const AVCodecDefault eb_enc_defaults[] = {
 +    { "b",         "7M"    },
-+    { "flags",     "+cgop" },
 +    { "qmin",      "10"    },
 +    { "qmax",      "48"    },
 +    { "g",         "-2"    },
