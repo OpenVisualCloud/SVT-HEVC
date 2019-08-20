@@ -376,14 +376,15 @@ typedef struct EbConfig_s
     /****************************************
     * Instance Info
     ****************************************/
-    uint32_t              channelId;
-    uint32_t              activeChannelCount;
-    uint32_t              logicalProcessors;
-    int32_t              targetSocket;
-    EB_BOOL             stopEncoder;         // to signal CTRL+C Event, need to stop encoding.
+    uint32_t     channelId;
+    uint32_t     activeChannelCount;
+    uint32_t     logicalProcessors;
+    int32_t      targetSocket;
+    uint32_t     threadCount;
+    EB_BOOL      stopEncoder;         // to signal CTRL+C Event, need to stop encoding.
 
-    uint64_t  processedFrameCount;
-    uint64_t  processedByteCount;
+    uint64_t     processedFrameCount;
+    uint64_t     processedByteCount;
 
     /****************************************
     * SEI parameters

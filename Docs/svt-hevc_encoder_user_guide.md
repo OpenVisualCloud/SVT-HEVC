@@ -231,6 +231,9 @@ This token sets the number of logical processors which the encoder threads run o
 
 For dual socket systems, this token specific which socket the encoder runs on.
 
+>-thread-count integer **[Optional]**
+
+This token sets the number of threads to get created and run.
 
 For example, the following command encodes 100 frames of the YUV video sequence into the bin bit stream file.  The picture is 1920 luma pixels wide and 1080 pixels high using the Sample.cfg configuration. The QP equals 30 and the md5 checksum is not included in the bit stream.
 
@@ -313,6 +316,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **AsmType** | -asm | [0,1] | 1 | Assembly instruction set <br>(0: C Only, 1: Automatically select highest assembly instruction set supported) |
 | **LogicalProcessors** | -lp | [0, total number of logical processor] | 0 | The number of logical processor which encoder threads run on.Refer to Appendix A.2 |
 | **TargetSocket** | -ss | [-1,1] | -1 | For dual socket systems, this can specify which socket the encoder runs on.Refer to Appendix A.2 |
+| **ThreadCount** | -thread-count | [0,N] | 0 | The number of threads to get created and run, 0 = AUTO |
 | **SwitchThreadsToRtPriority** | -rt | [0,1] | 1 | Enables or disables threads to real time priority, 0 = OFF, 1 = ON (only works on Linux) |
 | **FPSInVPS** | -fpsinvps | [0,1] | 1 | Enables or disables the VPS timing info, 0 = OFF, 1 = ON |
 | **TileRowCount** | -tile_row_cnt | [1,16] | 1 | Tile count in the Row |

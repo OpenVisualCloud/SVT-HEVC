@@ -1,4 +1,4 @@
-From 80e3f410d1ad8807bd4a9f4d5cdf7a7b3c5962ce Mon Sep 17 00:00:00 2001
+From 3248aee7fc94304cd5f41afa8dc502d92ae080ef Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH 1/1] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -11,8 +11,8 @@ Signed-off-by: Jing Sun <jing.a.sun@intel.com>
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 497 +++++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 503 insertions(+)
+ libavcodec/libsvt_hevc.c | 515 +++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 521 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
@@ -77,10 +77,10 @@ index d2f9a39..d8788a7 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000..24ab0ff
+index 0000000..77eae48
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,497 @@
+@@ -0,0 +1,515 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -142,6 +142,7 @@ index 0000000..24ab0ff
 +    int asm_type;
 +    int forced_idr;
 +    int la_depth;
++    int thread_count;
 +} SvtContext;
 +
 +static int error_mapping(EB_ERRORTYPE svt_ret)
@@ -281,6 +282,20 @@ index 0000000..24ab0ff
 +
 +    if (svt_enc->la_depth != -1)
 +        param->lookAheadDistance = svt_enc->la_depth;
++
++    if ((svt_enc->thread_count > 0) &&
++        (svt_enc->thread_count < (EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_FACTOR))) {
++        param->threadCount = EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_FACTOR;
++        av_log(avctx, AV_LOG_WARNING, "Thread count is set too small, forced to %"PRId32"\n",
++               param->threadCount);
++    } else if (svt_enc->thread_count % EB_THREAD_COUNT_MIN_CORE) {
++        param->threadCount = (svt_enc->thread_count + EB_THREAD_COUNT_MIN_CORE - 1)
++                             / EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_MIN_CORE;
++        av_log(avctx, AV_LOG_DEBUG, "Thread count is rounded to %"PRId32"\n",
++               param->threadCount);
++    } else {
++        param->threadCount = svt_enc->thread_count;
++    }
 +
 +    if (avctx->flags & AV_CODEC_FLAG_GLOBAL_HEADER)
 +        param->codeVpsSpsPps = 0;
@@ -525,6 +540,9 @@ index 0000000..24ab0ff
 +    { "sc_detection", "Scene change detection", OFFSET(scd),
 +      AV_OPT_TYPE_BOOL, { .i64 = 1 }, 0, 1, VE },
 +
++    { "thread_count", "Number of threads [0: Auto, 96: Min]", OFFSET(thread_count),
++      AV_OPT_TYPE_INT, {.i64 = 0}, 0, INT_MAX, VE },
++
 +    { "tier", "Set tier (general_tier_flag)", OFFSET(tier),
 +      AV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, VE, "tier" },
 +        { "main", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = 0 }, 0, 0, VE, "tier" },
@@ -565,7 +583,7 @@ index 0000000..24ab0ff
 +    .init           = eb_enc_init,
 +    .encode2        = eb_encode_frame,
 +    .close          = eb_enc_close,
-+    .capabilities   = AV_CODEC_CAP_DELAY | AV_CODEC_CAP_AUTO_THREADS,
++    .capabilities   = AV_CODEC_CAP_DELAY,
 +    .pix_fmts       = (const enum AVPixelFormat[]){ AV_PIX_FMT_YUV420P,
 +                                                    AV_PIX_FMT_YUV420P10,
 +                                                    AV_PIX_FMT_YUV422P,
