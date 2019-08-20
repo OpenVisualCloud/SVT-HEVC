@@ -1,36 +1,63 @@
 image: Visual Studio 2019
-configuration: Release
+configuration:
+  - Debug
+  - Release
 
+environment:
+  matrix:
+    - generator: Visual Studio 2019
+    - generator: Ninja
 install:
-  - ps: |
-      $wc = New-Object System.Net.WebClient
-      $wc.DownloadFile('http://repo.msys2.org/distrib/msys2-x86_64-latest.tar.xz', "$PWD\msys2-base.tar.xz")
-      $wc.DownloadFile((Invoke-RestMethod "https://www.powershellgallery.com/api/v2/Packages?`$filter=Id eq 'pscx' and IsLatestVersion").content.src, "$PWD\pscx.zip")
-      Add-Type -assembly "System.IO.Compression.FileSystem"
-      [System.IO.Compression.ZipFile]::ExtractToDirectory("$PWD\pscx.zip", "$PWD\pscx")
-      Remove-Item -Recurse $PWD\pscx.zip, $PWD\pscx\_rels, $PWD\pscx\package
-      powershell -noprofile -command {
-          Import-Module $PWD\pscx\Pscx.psd1 -Force -Cmdlet Expand-Archive -Prefix 7za
-          Expand-7zaArchive -Force -ShowProgress $PWD\msys2-base.tar.xz
-          Remove-Item $PWD\msys2-base.tar.xz
-          Expand-7zaArchive -Force -ShowProgress -OutputPath C:\ $PWD\msys2-base.tar
-          Remove-Item $PWD\msys2-base.tar
-      }
-      Remove-Item -Recurse $PWD\pscx
+  - ps: (New-Object System.Net.WebClient).DownloadFile('http://repo.msys2.org/distrib/msys2-x86_64-latest.tar.xz', "$PWD\msys2-base.tar.xz")
+  - 7z x -aoa msys2-base.tar.xz
+  - 7z x -aoa msys2-base.tar -oC:\
   - set "PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%"
   - set MSYSTEM=MINGW64
   - set MSYS2_PATH_TYPE=inherit
   - bash -lc 'exit'
-  - pacman -Sy --ask=20 --noconfirm --noprogressbar --needed mingw-w64-x86_64-yasm
+  - pacman -Sy --ask=20 --noconfirm --noprogressbar --needed mingw-w64-x86_64-yasm mingw-w64-x86_64-ccache mingw-w64-x86_64-cmake mingw-w64-x86_64-gcc mingw-w64-x86_64-ninja
   - cd Build
-  - cmake .. -G "Visual Studio 16 2019" -A x64
+  - ps: |
+      $configuration=$env:APPVEYOR_JOB_NAME.Split(" ")[-1]
+      if ("$env:generator" -match "Visual*") {
+        if ("$env:generator" -match "2019") {
+          cmake .. -G "Visual Studio 16 2019" -A x64
+        } else {
+          cmake .. -G "$env:generator"
+        }
+      } elseif ($null -ne $env:generator){
+        cmake .. -G "$env:generator" -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=$configuration
+      } else {
+        cmake .. -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=$configuration
+      }
 
-build:
-  project: Build\svt-hevc.sln
+for:
+  - matrix:
+      only:
+        - generator: Ninja
+    artifacts:
+      - path: bin\Release\*.*
+        name: $(APPVEYOR_PROJECT_NAME)_MINGW64
+    build_script:
+      - cmake --build .
+  - matrix:
+      only:
+        - generator: Visual Studio 2019
+    build:
+      project: Build\svt-hevc.sln
+    artifacts:
+      - path: bin\Release\*.*
+        name: $(APPVEYOR_PROJECT_NAME)_MSVC2019
+
+test_script:
+  - echo This is my custom test script
+
+cache:
+  - 'C:\msys64\home\%USERNAME%\.ccache'
 
 artifacts:
-    - path: bin\Release\*.*
-      name: $(APPVEYOR_PROJECT_NAME)
+  - path: bin\Release\*.*
+    name: $(APPVEYOR_PROJECT_NAME)
 
 deploy:
   - provider: GitHub
