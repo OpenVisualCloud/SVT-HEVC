@@ -46,30 +46,11 @@
 |42||43||46||47|     |58||59||62||63|
 -------------------------------------*/
 
-EB_ERRORTYPE SwapMeCandidateBuffer(
-	MeCandidate_t *a,
-	MeCandidate_t *b)
-{
-	EB_ERRORTYPE return_error = EB_ErrorNone;
-
-	MeCandidate_t tempPtr;
-	tempPtr = *a;
-	*a = *b;
-	*b = tempPtr;
-
-	return return_error;
-}
-
-
-
-
-
-
       
 /************************************************
  * Set ME/HME Params
  ************************************************/
-void* SetMeHmeParamsOq(
+static void* SetMeHmeParamsOq(
     MeContext_t                     *meContextPtr,
 	PictureParentControlSet_t       *pictureControlSetPtr,
 	SequenceControlSet_t            *sequenceControlSetPtr,
@@ -148,15 +129,13 @@ void* SetMeHmeParamsOq(
 /************************************************
  * Set ME/HME Params from Config
  ************************************************/
-void* SetMeHmeParamsFromConfig(
+static void SetMeHmeParamsFromConfig(
     SequenceControlSet_t	    *sequenceControlSetPtr,
     MeContext_t                 *meContextPtr)
 {
 
     meContextPtr->searchAreaWidth = (EB_U8)sequenceControlSetPtr->staticConfig.searchAreaWidth;
     meContextPtr->searchAreaHeight = (EB_U8)sequenceControlSetPtr->staticConfig.searchAreaHeight;
-
-	return EB_NULL;
 }
 
 /************************************************
@@ -192,7 +171,7 @@ EB_ERRORTYPE MotionEstimationContextCtor(
 /***************************************************************************************************
 * ZZ Decimated SAD Computation
 ***************************************************************************************************/
-EB_ERRORTYPE ComputeDecimatedZzSad(
+static EB_ERRORTYPE ComputeDecimatedZzSad(
 	MotionEstimationContext_t   *contextPtr,
 	SequenceControlSet_t        *sequenceControlSetPtr,
 	PictureParentControlSet_t   *pictureControlSetPtr,
@@ -478,10 +457,9 @@ void GetMeDist(
 /******************************************************
 * Derive Similar Collocated Flag
 ******************************************************/
-void DeriveSimilarCollocatedFlag(
+static void DeriveSimilarCollocatedFlag(
     PictureParentControlSet_t    *pictureControlSetPtr,
     EB_U32	                      lcuIndex)
-
 {
    // Similairty detector for collocated LCU
    pictureControlSetPtr->similarColocatedLcuArray[lcuIndex] = EB_FALSE;
@@ -519,12 +497,11 @@ void DeriveSimilarCollocatedFlag(
     return;
 }
 
-void StationaryEdgeOverUpdateOverTimeLcuPart1(
+static void StationaryEdgeOverUpdateOverTimeLcuPart1(
     SequenceControlSet_t        *sequenceControlSetPtr,
     PictureParentControlSet_t   *pictureControlSetPtr,
     EB_U32                       lcuIndex)
 {
-
     EB_S32	             xCurrentMv = 0;
     EB_S32	             yCurrentMv = 0;
 
@@ -572,12 +549,11 @@ void StationaryEdgeOverUpdateOverTimeLcuPart1(
     }
 }
 
-void StationaryEdgeOverUpdateOverTimeLcuPart2(
+static void StationaryEdgeOverUpdateOverTimeLcuPart2(
     SequenceControlSet_t        *sequenceControlSetPtr,
     PictureParentControlSet_t   *pictureControlSetPtr,
     EB_U32                       lcuIndex)
 {
-
     EB_U32               lowSadTh = (sequenceControlSetPtr->inputResolution < INPUT_SIZE_1080p_RANGE) ? 5 : 2;
 
     LcuParams_t  *lcuParams  = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];

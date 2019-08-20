@@ -27,7 +27,7 @@
 #define LOW_AMPLITUDE_TH                      64
 
 
-EB_BOOL CheckMvForPanHighAmp(
+static EB_BOOL CheckMvForPanHighAmp(
 	EB_U32   hierarchicalLevels,
 	EB_U32	 temporalLayerIndex,
 	EB_S32	*xCurrentMv,
@@ -47,7 +47,7 @@ EB_BOOL CheckMvForPanHighAmp(
 
 }
 
-EB_BOOL CheckMvForTiltHighAmp(
+static EB_BOOL CheckMvForTiltHighAmp(
 	EB_U32   hierarchicalLevels,
 	EB_U32	 temporalLayerIndex,
 	EB_S32	*yCurrentMv,
@@ -67,7 +67,7 @@ EB_BOOL CheckMvForTiltHighAmp(
 
 }
 
-EB_BOOL CheckMvForPan(
+static EB_BOOL CheckMvForPan(
 	EB_U32   hierarchicalLevels,
 	EB_U32	 temporalLayerIndex,
 	EB_S32	*xCurrentMv,
@@ -91,7 +91,7 @@ EB_BOOL CheckMvForPan(
 
 }
 
-EB_BOOL CheckMvForTilt(
+static EB_BOOL CheckMvForTilt(
 	EB_U32   hierarchicalLevels,
 	EB_U32	 temporalLayerIndex,
 	EB_S32	*xCurrentMv,
@@ -115,7 +115,7 @@ EB_BOOL CheckMvForTilt(
 
 }
 
-EB_BOOL CheckMvForNonUniformMotion(
+static EB_BOOL CheckMvForNonUniformMotion(
 	EB_S32	*xCurrentMv,
 	EB_S32	*yCurrentMv,
 	EB_S32	*xCandidateMv,
@@ -132,7 +132,7 @@ EB_BOOL CheckMvForNonUniformMotion(
 
 }
 
-void CheckForNonUniformMotionVectorField(
+static void CheckForNonUniformMotionVectorField(
     SequenceControlSet_t        *sequenceControlSetPtr,
 	PictureParentControlSet_t	*pictureControlSetPtr)
 {
@@ -867,15 +867,7 @@ void UpdateHistogramQueueEntry(
 	EbReleaseMutex(sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueueMutex);
 
 	return;
-
 }
-
-EB_AURA_STATUS AuraDetection64x64(
-	PictureControlSet_t           *pictureControlSetPtr,
-	EB_U8                          pictureQp,
-	EB_U32                         xLcuIndex,
-	EB_U32                         yLcuIndex
-	);
 
 /************************************************
 * Initial Rate Control Kernel

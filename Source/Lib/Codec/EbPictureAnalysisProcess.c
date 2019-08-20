@@ -3325,7 +3325,6 @@ static void SetPictureParametersForStatisticsGathering(
 	SequenceControlSet_t            *sequenceControlSetPtr
 	)
 {
-
 	sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerWidth = HIGHER_THAN_CLASS_1_REGION_SPLIT_PER_WIDTH;
 	sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerHeight = HIGHER_THAN_CLASS_1_REGION_SPLIT_PER_HEIGHT;
 	sequenceControlSetPtr->pictureActivityRegionTh = HIGHER_THAN_CLASS_1_PICTURE_ACTIVITY_REGIONS_TH;
@@ -4049,6 +4048,7 @@ static void GatheringPictureStatistics(
 
 	return;
 }
+
 /************************************************
  * Pad Picture at the right and bottom sides
  ** To match a multiple of min CU size in width and height
@@ -4121,7 +4121,7 @@ static void PadPictureToMultipleOfMinCuSizeDimensions(
  * Pad Picture at the right and bottom sides
  ** To complete border LCU smaller than LCU size
  ************************************************/
-void PadPictureToMultipleOfLcuDimensions(
+static void PadPictureToMultipleOfLcuDimensions(
 	EbPictureBufferDesc_t           *inputPaddedPicturePtr
         )
 {
@@ -4141,13 +4141,12 @@ void PadPictureToMultipleOfLcuDimensions(
 /************************************************
 * 1/4 & 1/16 input picture decimation
 ************************************************/
-void DecimateInputPicture(
+static void DecimateInputPicture(
     SequenceControlSet_t            *sequenceControlSetPtr,
 	PictureParentControlSet_t       *pictureControlSetPtr,
 	EbPictureBufferDesc_t           *inputPaddedPicturePtr,
 	EbPictureBufferDesc_t           *quarterDecimatedPicturePtr,
 	EbPictureBufferDesc_t           *sixteenthDecimatedPicturePtr) {
-
 
     // Decimate input picture for HME L1
     EB_BOOL  preformQuarterPellDecimationFlag;
