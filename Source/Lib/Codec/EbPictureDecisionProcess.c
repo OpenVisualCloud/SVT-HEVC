@@ -37,9 +37,6 @@
 #define QUEUE_GET_PREVIOUS_SPOT(h)  ((h == 0) ? PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH - 1 : h - 1)
 #define QUEUE_GET_NEXT_SPOT(h,off)  (( (h+off) >= PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH) ? h+off - PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH  : h + off)
 
-#define WTH 64
-#define OTH 64
-
 /************************************************
  * Picture Analysis Context Constructor
  ************************************************/
@@ -90,7 +87,7 @@ EB_ERRORTYPE PictureDecisionContextCtor(
     return EB_ErrorNone;
 }
 
-EB_BOOL SceneTransitionDetector(
+static EB_BOOL SceneTransitionDetector(
     PictureDecisionContext_t *contextPtr,
 	SequenceControlSet_t				 *sequenceControlSetPtr,
 	PictureParentControlSet_t           **ParentPcsWindow,
@@ -1404,7 +1401,8 @@ void* PictureDecisionKernel(void *inputPtr)
     
     return EB_NULL;
 }
-void UnusedVariablevoidFunc_PicDecision()
+
+static void UnusedVariablevoidFunc_PicDecision()
 {
     (void)NxMSadKernel_funcPtrArray;
 	(void)NxMSadLoopKernel_funcPtrArray;

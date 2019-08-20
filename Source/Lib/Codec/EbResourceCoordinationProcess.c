@@ -90,7 +90,7 @@ EB_ERRORTYPE ResourceCoordinationContextCtor(
 // Inputs: TargetSpeed, Status of the SCbuffer
 // Output: EncMod
 //******************************************************************************//
-void SpeedBufferControl(
+static void SpeedBufferControl(
 	ResourceCoordinationContext_t   *contextPtr,
 	PictureParentControlSet_t       *pictureControlSetPtr,
 	SequenceControlSet_t            *sequenceControlSetPtr)
@@ -261,7 +261,7 @@ void SpeedBufferControl(
 Input   : encoder mode and tune
 Output  : Pre-Analysis signal(s)
 ******************************************************/
-EB_ERRORTYPE SignalDerivationPreAnalysisOq(
+static EB_ERRORTYPE SignalDerivationPreAnalysisOq(
     SequenceControlSet_t       *sequenceControlSetPtr,
     PictureParentControlSet_t  *pictureControlSetPtr) {
 

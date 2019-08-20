@@ -52,6 +52,7 @@ typedef void(*EB_WEAKLUMAFILTER_TYPE)(
 	EB_U32                       lcuOriginY,
 	EB_U32						 lcuOriginX
 	);
+
 static EB_WEAKLUMAFILTER_TYPE FUNC_TABLE WeakLumaFilter_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
 	// C_DEFAULT

@@ -19,7 +19,7 @@
 #include "EbTime.h"
 #include "EbPictureDemuxResults.h"
 
-void HrdFullness(SequenceControlSet_t *sequenceControlSetPtr, PictureControlSet_t *pictureControlSetPtr, AppBufferingPeriodSei_t *seiBP)
+static void HrdFullness(SequenceControlSet_t *sequenceControlSetPtr, PictureControlSet_t *pictureControlSetPtr, AppBufferingPeriodSei_t *seiBP)
 {
     EB_U32 i;
     const AppVideoUsabilityInfo_t* vui = sequenceControlSetPtr->videoUsabilityInfoPtr;
@@ -60,7 +60,7 @@ static inline EB_S32 calcLength(EB_U32 x)
     return z + lut[x];
 }
 
-void InitHRD(SequenceControlSet_t *scsPtr)
+static void InitHRD(SequenceControlSet_t *scsPtr)
 {
     EB_U32 i, j, k;
     AppHrdParameters_t *hrd = scsPtr->videoUsabilityInfoPtr->hrdParametersPtr;

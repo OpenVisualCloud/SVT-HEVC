@@ -1523,7 +1523,7 @@ static void EncDecConfigureLcu(
  *   of the segment-row (B) as this would block other
  *   threads from performing an update (A).
  ******************************************************/
-EB_BOOL AssignEncDecSegments(
+static EB_BOOL AssignEncDecSegments(
     EncDecSegments_t   *segmentPtr,
     EB_U16             *segmentInOutIndex,
     EncDecTasks_t      *taskPtr,
@@ -1789,7 +1789,7 @@ static void ReconOutput(
     EbReleaseMutex(encodeContextPtr->terminatingConditionsMutex);
 }
 
-void PadRefAndSetFlags(
+static void PadRefAndSetFlags(
     PictureControlSet_t    *pictureControlSetPtr,
     SequenceControlSet_t   *sequenceControlSetPtr
     )
@@ -1878,7 +1878,7 @@ void PadRefAndSetFlags(
 }
 
 
-void CopyStatisticsToRefObject(
+static void CopyStatisticsToRefObject(
     PictureControlSet_t    *pictureControlSetPtr,
     SequenceControlSet_t   *sequenceControlSetPtr
     )

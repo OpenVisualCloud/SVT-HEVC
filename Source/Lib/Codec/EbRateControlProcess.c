@@ -20,14 +20,13 @@
 /*****************************
 * Internal Typedefs
 *****************************/
-void RateControlLayerReset(
+static void RateControlLayerReset(
     RateControlLayerContext_t   *rateControlLayerPtr,
     PictureControlSet_t         *pictureControlSetPtr,
     RateControlContext_t        *rateControlContextPtr,
     EB_U32                       pictureAreaInPixel,
     EB_BOOL                      wasUsed)
 {
-
     SequenceControlSet_t *sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
     EB_U32                sliceNum;
     EB_U32                temporalLayerIndex;
@@ -173,11 +172,10 @@ void RateControlLayerReset(
 }
 
 
-void RateControlLayerResetPart2(
+static void RateControlLayerResetPart2(
     RateControlLayerContext_t   *rateControlLayerPtr,
     PictureControlSet_t         *pictureControlSetPtr)
 {
-
     // update this based on temporal layers
     rateControlLayerPtr->maxQp = (EB_U32)CLIP3(0, 51, (EB_S32)(pictureControlSetPtr->pictureQp + QP_OFFSET_LAYER_ARRAY[pictureControlSetPtr->ParentPcsPtr->hierarchicalLevels][rateControlLayerPtr->temporalIndex]));
 
@@ -191,7 +189,7 @@ void RateControlLayerResetPart2(
     
 }
 
-EB_ERRORTYPE HighLevelRateControlContextCtor(
+static EB_ERRORTYPE HighLevelRateControlContextCtor(
     HighLevelRateControlContext_t   **entryDblPtr){
 
     HighLevelRateControlContext_t *entryPtr;
@@ -220,8 +218,7 @@ EB_ERRORTYPE RateControlLayerContextCtor(
 
 
 EB_ERRORTYPE RateControlIntervalParamContextCtor(
-    RateControlIntervalParamContext_t   **entryDblPtr){
-
+    RateControlIntervalParamContext_t   **entryDblPtr) {
     EB_U32 temporalIndex;
     EB_ERRORTYPE return_error = EB_ErrorNone;
     RateControlIntervalParamContext_t *entryPtr;
@@ -261,7 +258,7 @@ EB_ERRORTYPE RateControlIntervalParamContextCtor(
 
 EB_ERRORTYPE RateControlCodedFramesStatsContextCtor(
     CodedFramesStatsEntry_t   **entryDblPtr,
-    EB_U64                      pictureNumber){
+    EB_U64                      pictureNumber) {
 
     CodedFramesStatsEntry_t *entryPtr;
     EB_MALLOC(CodedFramesStatsEntry_t*, entryPtr, sizeof(CodedFramesStatsEntry_t), EB_N_PTR);
@@ -350,14 +347,13 @@ EB_ERRORTYPE RateControlContextCtor(
     return EB_ErrorNone;
 }
 
-void HighLevelRcInputPictureMode2(
+static void HighLevelRcInputPictureMode2(
     PictureParentControlSet_t         *pictureControlSetPtr,
     SequenceControlSet_t              *sequenceControlSetPtr,
     EncodeContext_t                   *encodeContextPtr,
     RateControlContext_t              *contextPtr,
     HighLevelRateControlContext_t     *highLevelRateControlPtr)
 {
-
     EB_BOOL                             endOfSequenceFlag = EB_TRUE;
 
     HlRateControlHistogramEntry_t      *hlRateControlHistogramPtrTemp;
@@ -932,7 +928,8 @@ void HighLevelRcInputPictureMode2(
     }
     EbReleaseMutex(sequenceControlSetPtr->encodeContextPtr->rateTableUpdateMutex);
 }
-void FrameLevelRcInputPictureMode2(
+
+static void FrameLevelRcInputPictureMode2(
     PictureControlSet_t               *pictureControlSetPtr,
     SequenceControlSet_t              *sequenceControlSetPtr,
     RateControlContext_t              *contextPtr,
@@ -940,7 +937,6 @@ void FrameLevelRcInputPictureMode2(
     RateControlIntervalParamContext_t *rateControlParamPtr,
     EB_U32                             bestOisCuIndex)
 {
-
     RateControlLayerContext_t   *rateControlLayerTempPtr;
 
     // Tiles
@@ -1718,14 +1714,12 @@ void FrameLevelRcInputPictureMode2(
     rateControlLayerPtr->previousKCoeff = rateControlLayerPtr->kCoeff;
     rateControlLayerPtr->previousCalculatedFrameQp = rateControlLayerPtr->calculatedFrameQp;
 }
-void FrameLevelRcFeedbackPictureMode2(
+
+static void FrameLevelRcFeedbackPictureMode2(
     PictureParentControlSet_t         *parentPictureControlSetPtr,
     SequenceControlSet_t              *sequenceControlSetPtr,
     RateControlContext_t              *contextPtr)
 {
-
-
-
     RateControlLayerContext_t           *rateControlLayerTempPtr;
     RateControlIntervalParamContext_t   *rateControlParamPtr;
     RateControlLayerContext_t           *rateControlLayerPtr;
@@ -2145,11 +2139,10 @@ void FrameLevelRcFeedbackPictureMode2(
     }
 }
 
-void HighLevelRcFeedBackPicture(
+static void HighLevelRcFeedBackPicture(
     PictureParentControlSet_t         *pictureControlSetPtr,
     SequenceControlSet_t              *sequenceControlSetPtr)
 {
-
     // Queue variables
     HlRateControlHistogramEntry_t      *hlRateControlHistogramPtrTemp;
     EB_U32                             queueEntryIndexHeadTemp;
@@ -2179,7 +2172,9 @@ void HighLevelRcFeedBackPicture(
     }
 }
 
-EB_U64 predictBits(SequenceControlSet_t *sequenceControlSetPtr, EncodeContext_t *encodeContextPtr, HlRateControlHistogramEntry_t *hlRateControlHistogramPtrTemp, EB_U32 qp)
+static EB_U64 predictBits(SequenceControlSet_t *sequenceControlSetPtr,
+        EncodeContext_t *encodeContextPtr,
+        HlRateControlHistogramEntry_t *hlRateControlHistogramPtrTemp, EB_U32 qp)
 {
 	EB_U64 totalBits = 0;
 	if (hlRateControlHistogramPtrTemp->isCoded) {
@@ -2233,7 +2228,9 @@ EB_U64 predictBits(SequenceControlSet_t *sequenceControlSetPtr, EncodeContext_t 
 	return totalBits;
 }
 
-EB_U8 Vbv_Buf_Calc(PictureControlSet_t *pictureControlSetPtr, SequenceControlSet_t *sequenceControlSetPtr, EncodeContext_t *encodeContextPtr)
+static EB_U8 Vbv_Buf_Calc(PictureControlSet_t *pictureControlSetPtr,
+        SequenceControlSet_t *sequenceControlSetPtr,
+        EncodeContext_t *encodeContextPtr)
 {
 	EB_S32 loopTerminate = 0;
 	EB_U32 q = pictureControlSetPtr->pictureQp;

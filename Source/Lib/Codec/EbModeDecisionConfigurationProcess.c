@@ -109,7 +109,7 @@ static const EB_U8 AdpLuminosityChangeThArray[MAX_HIERARCHICAL_LEVEL][MAX_TEMPOR
 /******************************************************
 * Compute picture and slice level chroma QP offsets 
 ******************************************************/
-void SetSliceAndPictureChromaQpOffsets(
+static void SetSliceAndPictureChromaQpOffsets(
 	PictureControlSet_t                    *pictureControlSetPtr,
     ModeDecisionConfigurationContext_t     *contextPtr)
 {
@@ -260,7 +260,6 @@ EB_ERRORTYPE ModeDecisionConfigurationContextCtor(
 
     EbFifo_t                            *modeDecisionConfigurationOutputFifoPtr,
     EB_U16						         lcuTotalCount)
-
 {
     ModeDecisionConfigurationContext_t *contextPtr;
 
@@ -286,11 +285,11 @@ EB_ERRORTYPE ModeDecisionConfigurationContextCtor(
 /******************************************************
 * Predict the LCU partitionning
 ******************************************************/
-void PerformEarlyLcuPartitionning(
+static void PerformEarlyLcuPartitionning(
 	ModeDecisionConfigurationContext_t     *contextPtr,
 	SequenceControlSet_t                   *sequenceControlSetPtr,
-	PictureControlSet_t                    *pictureControlSetPtr) {
-
+	PictureControlSet_t                    *pictureControlSetPtr)
+{
 	LargestCodingUnit_t			*lcuPtr;
 	EB_U32						 lcuIndex;
 	EB_U32						 sliceType;
@@ -344,12 +343,12 @@ void PerformEarlyLcuPartitionning(
 
 }
 
-void PerformEarlyLcuPartitionningLcu(
+static void PerformEarlyLcuPartitionningLcu(
 	ModeDecisionConfigurationContext_t     *contextPtr,
 	SequenceControlSet_t                   *sequenceControlSetPtr,
 	PictureControlSet_t                    *pictureControlSetPtr,
-    EB_U32						            lcuIndex) {
-
+    EB_U32						            lcuIndex)
+{
 	LargestCodingUnit_t			*lcuPtr;
 
 	// LCU Loop : Partitionnig Decision
@@ -367,11 +366,11 @@ void PerformEarlyLcuPartitionningLcu(
 }
 
 
-void Forward85CuToModeDecisionLCU(
+static void Forward85CuToModeDecisionLCU(
     SequenceControlSet_t  *sequenceControlSetPtr,
     PictureControlSet_t   *pictureControlSetPtr,
-    EB_U32                 lcuIndex) {
-
+    EB_U32                 lcuIndex)
+{
     const CodedUnitStats_t  *cuStatsPtr;
     EB_BOOL splitFlag;
     // LCU Loop : Partitionnig Decision
@@ -421,11 +420,11 @@ void Forward85CuToModeDecisionLCU(
     } // End CU Loop
 }
 
-void Forward84CuToModeDecisionLCU(
+static void Forward84CuToModeDecisionLCU(
     SequenceControlSet_t  *sequenceControlSetPtr,
     PictureControlSet_t   *pictureControlSetPtr,
-    EB_U32                 lcuIndex) {
-
+    EB_U32                 lcuIndex)
+{
     const CodedUnitStats_t  *cuStatsPtr;
     EB_BOOL splitFlag;
     // LCU Loop : Partitionnig Decision
@@ -474,10 +473,10 @@ void Forward84CuToModeDecisionLCU(
     } // End CU Loop
 }
 
-void Forward85CuToModeDecision(
+static void Forward85CuToModeDecision(
     SequenceControlSet_t                   *sequenceControlSetPtr,
-    PictureControlSet_t                    *pictureControlSetPtr) {
-
+    PictureControlSet_t                    *pictureControlSetPtr)
+{
     const CodedUnitStats_t  *cuStatsPtr;
     EB_U32                   lcuIndex;
     EB_BOOL splitFlag;
@@ -533,10 +532,10 @@ void Forward85CuToModeDecision(
 
 }
 
-void Forward84CuToModeDecision(
+static void Forward84CuToModeDecision(
     SequenceControlSet_t                   *sequenceControlSetPtr,
-    PictureControlSet_t                    *pictureControlSetPtr) {
-
+    PictureControlSet_t                    *pictureControlSetPtr)
+{
     const CodedUnitStats_t  *cuStatsPtr;
     EB_U32                   lcuIndex;
     EB_BOOL splitFlag;
@@ -594,8 +593,8 @@ void Forward84CuToModeDecision(
 void Forward8x816x16CuToModeDecisionLCU(
     SequenceControlSet_t  *sequenceControlSetPtr,
     PictureControlSet_t   *pictureControlSetPtr,
-    EB_U32                 lcuIndex) {
-
+    EB_U32                 lcuIndex)
+{
     const CodedUnitStats_t  *cuStatsPtr;
     EB_BOOL splitFlag;
 
@@ -647,11 +646,11 @@ void Forward8x816x16CuToModeDecisionLCU(
     } // End CU Loop
 }
 
-void Forward16x16CuToModeDecisionLCU(
+static void Forward16x16CuToModeDecisionLCU(
     SequenceControlSet_t  *sequenceControlSetPtr,
     PictureControlSet_t   *pictureControlSetPtr,
-    EB_U32                 lcuIndex) {
-
+    EB_U32                 lcuIndex)
+{
     const CodedUnitStats_t  *cuStatsPtr;
     EB_BOOL splitFlag;
 
@@ -703,7 +702,7 @@ void Forward16x16CuToModeDecisionLCU(
     } // End CU Loop
 }
 
-void PartitioningInitialization( 
+static void PartitioningInitialization( 
     SequenceControlSet_t                   *sequenceControlSetPtr,
     PictureControlSet_t                    *pictureControlSetPtr,
     ModeDecisionConfigurationContext_t     *contextPtr) {
@@ -742,11 +741,10 @@ void PartitioningInitialization(
 /******************************************************
 * Detect complex/non-flat/moving LCU in a non-complex area (used to refine MDC depth control)
 ******************************************************/
-void DetectComplexNonFlatMovingLcu(
+static void DetectComplexNonFlatMovingLcu(
     SequenceControlSet_t   *sequenceControlSetPtr,
 	PictureControlSet_t	   *pictureControlSetPtr,
 	EB_U32					pictureWidthInLcu) {
-
 
 	LargestCodingUnit_t *lcuPtr;
 	EB_U32               lcuIndex;
@@ -789,13 +787,12 @@ void DetectComplexNonFlatMovingLcu(
 	}
 }
 
-EB_AURA_STATUS AuraDetection64x64(
+static EB_AURA_STATUS AuraDetection64x64(
 	PictureControlSet_t           *pictureControlSetPtr,
 	EB_U8                          pictureQp,
 	EB_U32                         lcuIndex
 	)
 {
-
 	SequenceControlSet_t  *sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 	EB_S32                 pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + MAX_LCU_SIZE - 1) >> MAX_LOG2_LCU_SIZE;
 	EB_U32                 currDist;
@@ -904,19 +901,17 @@ EB_AURA_STATUS AuraDetection64x64(
 	auraClass = (auraClass2 > 0 || auraClass1 > 0) ? AURA_STATUS_1 : AURA_STATUS_0;
 
 	return   auraClass;
-
 }
 
 
 /******************************************************
 * Aura detection
 ******************************************************/
-void AuraDetection(
+static void AuraDetection(
 	SequenceControlSet_t         *sequenceControlSetPtr,
 	PictureControlSet_t			 *pictureControlSetPtr,
 	EB_U32					      pictureWidthInLcu,
 	EB_U32					      pictureHeightInLcu)
-
 {
 	EB_U32                      lcuIndex;
     EB_U32                      lcu_X;
@@ -940,10 +935,10 @@ void AuraDetection(
             }
         }
 	}
-return;
+    return;
 }
 
-EB_ERRORTYPE DeriveDefaultSegments(
+static EB_ERRORTYPE DeriveDefaultSegments(
     PictureControlSet_t                 *pictureControlSetPtr,
     ModeDecisionConfigurationContext_t  *contextPtr)
 {
@@ -1074,17 +1069,13 @@ EB_ERRORTYPE DeriveDefaultSegments(
     return return_error;
 }
 
-
-
-
-
 /******************************************************
 * Set the target budget
 Input   : cost per depth
 Output  : budget per picture
 ******************************************************/
 
-void SetTargetBudgetOq(
+static void SetTargetBudgetOq(
 	SequenceControlSet_t                *sequenceControlSetPtr,
 	PictureControlSet_t                 *pictureControlSetPtr,
 	ModeDecisionConfigurationContext_t  *contextPtr)
@@ -1224,7 +1215,6 @@ void SetTargetBudgetOq(
             pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * 100;
     }
 
-
     contextPtr->budget = budget;
 }
 
@@ -1238,7 +1228,7 @@ void SetTargetBudgetOq(
  * Input: Sharpe Edge, Potential Aura/Grass, B-Logo, S-Logo, Potential Blockiness Area signals
  * Output: TRUE if one of the above is TRUE
  ******************************************************/
-EB_BOOL IsAvcPartitioningMode(
+static EB_BOOL IsAvcPartitioningMode(
     SequenceControlSet_t  *sequenceControlSetPtr,
     PictureControlSet_t   *pictureControlSetPtr,
     LargestCodingUnit_t   *lcuPtr)
@@ -1285,21 +1275,15 @@ EB_BOOL IsAvcPartitioningMode(
     return EB_FALSE;
 }
 
-
-
-
-
-
 /******************************************************
 * Load the cost of the different partitioning method into a local array and derive sensitive picture flag
     Input   : the offline derived cost per search method, detection signals
     Output  : valid costDepthMode and valid sensitivePicture
 ******************************************************/
-void ConfigureAdp(
+static void ConfigureAdp(
     PictureControlSet_t                 *pictureControlSetPtr,
 	ModeDecisionConfigurationContext_t  *contextPtr) 
 {
-
     contextPtr->costDepthMode[LCU_FULL85_DEPTH_MODE - 1]               = FULL_SEARCH_COST;
     contextPtr->costDepthMode[LCU_FULL84_DEPTH_MODE - 1]               = FULL_SEARCH_COST;
     contextPtr->costDepthMode[LCU_BDP_DEPTH_MODE - 1]                  = BDP_COST;
@@ -1310,7 +1294,6 @@ void ConfigureAdp(
     contextPtr->costDepthMode[LCU_LIGHT_AVC_DEPTH_MODE - 1]            = LIGHT_AVC_COST;
     contextPtr->costDepthMode[LCU_PRED_OPEN_LOOP_DEPTH_MODE - 1]       = PRED_OPEN_LOOP_COST;
     contextPtr->costDepthMode[LCU_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE - 1] = PRED_OPEN_LOOP_1_NFL_COST;
-
 
     // Initialize the score based TH
     contextPtr->scoreTh[0] = ~0;
@@ -1360,7 +1343,7 @@ void ConfigureAdp(
     Input   : allocated budget per LCU
     Output  : search method per LCU
 ******************************************************/
-void DeriveSearchMethod(
+static void DeriveSearchMethod(
     PictureControlSet_t                 *pictureControlSetPtr,
     ModeDecisionConfigurationContext_t  *contextPtr)
 {
@@ -1415,11 +1398,12 @@ void DeriveSearchMethod(
     Input   : LCU score, detection signals, iteration
     Output  : predicted budget for the LCU
 ******************************************************/
-void SetLcuBudget(
+static void SetLcuBudget(
     SequenceControlSet_t                *sequenceControlSetPtr,
     PictureControlSet_t                 *pictureControlSetPtr,
     LargestCodingUnit_t                 *lcuPtr,
-    ModeDecisionConfigurationContext_t  *contextPtr) {
+    ModeDecisionConfigurationContext_t  *contextPtr)
+{
 	const EB_U32      lcuIndex = lcuPtr->index;
     EB_U32      maxToMinScore, scoreToMin;
 
@@ -1490,11 +1474,11 @@ void SetLcuBudget(
     Input   : budget per picture, ditortion, detection signals, iteration
     Output  : optimal budget for each LCU
 ******************************************************/
-void  DeriveOptimalBudgetPerLcu(
+static void  DeriveOptimalBudgetPerLcu(
     SequenceControlSet_t                *sequenceControlSetPtr,
     PictureControlSet_t                 *pictureControlSetPtr,
-    ModeDecisionConfigurationContext_t  *contextPtr) {
-
+    ModeDecisionConfigurationContext_t  *contextPtr)
+{
 
     EB_U32 lcuIndex;
     // Initialize the deviation between the picture predicted cost & the target budget to 100, 
@@ -1566,7 +1550,7 @@ void  DeriveOptimalBudgetPerLcu(
     Input   : budget per picture, and the cost of the refinment
     Output  : the refinment flag 
 ******************************************************/
-void ComputeRefinementCost(
+static void ComputeRefinementCost(
     SequenceControlSet_t                *sequenceControlSetPtr,
     PictureControlSet_t                 *pictureControlSetPtr,
     ModeDecisionConfigurationContext_t  *contextPtr)
@@ -1602,12 +1586,13 @@ void ComputeRefinementCost(
     }
 
 }
+
 /******************************************************
 * Compute the score of each LCU
     Input   : distortion, detection signals
     Output  : LCU score
 ******************************************************/
-void DeriveLcuScore(
+static void DeriveLcuScore(
     SequenceControlSet_t               *sequenceControlSetPtr,
 	PictureControlSet_t                *pictureControlSetPtr,
 	ModeDecisionConfigurationContext_t *contextPtr)
@@ -1747,7 +1732,7 @@ void DeriveLcuScore(
     MAX_SCORE = MAX_SCORE - MAX_D * I_Value.
 ******************************************************/
 
-void PerformOutlierRemoval(
+static void PerformOutlierRemoval(
 	SequenceControlSet_t                *sequenceControlSetPtr,
 	PictureParentControlSet_t           *pictureControlSetPtr,
     ModeDecisionConfigurationContext_t  *contextPtr)
@@ -1837,7 +1822,7 @@ void PerformOutlierRemoval(
     Input   : LCU score, detection signals
     Output  : search method for each LCU
 ******************************************************/
-void DeriveLcuMdMode(
+static void DeriveLcuMdMode(
     SequenceControlSet_t                *sequenceControlSetPtr,
 	PictureControlSet_t                 *pictureControlSetPtr,
     ModeDecisionConfigurationContext_t  *contextPtr) {
@@ -1896,7 +1881,7 @@ void DeriveLcuMdMode(
 Input   : encoder mode and tune
 Output  : EncDec Kernel signal(s)
 ******************************************************/
-EB_ERRORTYPE SignalDerivationModeDecisionConfigKernelOq(
+static EB_ERRORTYPE SignalDerivationModeDecisionConfigKernelOq(
     PictureControlSet_t                    *pictureControlSetPtr,
     ModeDecisionConfigurationContext_t     *contextPtr) {
 
