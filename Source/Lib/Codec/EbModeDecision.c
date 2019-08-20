@@ -47,6 +47,12 @@ const EB_U32 parentIndex[85] = { 0, 0, 0, 2, 2, 2, 2, 0, 7, 7, 7, 7, 0, 12, 12, 
 44, 44, 44, 44, 0, 49, 49, 49, 49, 0, 54, 54, 54, 54, 0, 59, 59, 59, 59, 0, 0,
 65, 65, 65, 65, 0, 70, 70, 70, 70, 0, 75, 75, 75, 75, 0, 80, 80, 80, 80 };
 
+static EB_BOOL CheckForMvOverBound(
+    EB_S16 mvx,
+    EB_S16 mvy,
+    ModeDecisionContext_t           *ctxtPtr,
+    const LargestCodingUnit_t *lcuPtr);
+
 EB_ERRORTYPE IntraPredOnSrc(
     ModeDecisionContext_t                  *mdContextPtr,
     EB_U32                                  componentMask,
@@ -600,6 +606,7 @@ void Amvp2Nx2NCandidatesInjection(
 
         for (amvpCandidateIndex = 0; amvpCandidateIndex < MAX_AMVP_CANDIDATES_PER_REF_LIST; amvpCandidateIndex++)
         {
+            EB_BOOL mvOutOfPicFlag = EB_FALSE;
             isAmvpCandidateAvailable = EB_TRUE;
 
             switch (amvpCandidateIndex)
@@ -656,7 +663,36 @@ void Amvp2Nx2NCandidatesInjection(
                 break;
             }
 
-            if (isAmvpCandidateAvailable) {
+            if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0) {
+                if (interDirection == UNI_PRED_LIST_0) {
+                    mvOutOfPicFlag = CheckForMvOverBound(
+                                candidateArray[canTotalCnt].motionVector_x_L0,
+                                candidateArray[canTotalCnt].motionVector_y_L0,
+                                contextPtr,
+                                contextPtr->lcuPtr);
+                }
+                else if (interDirection == UNI_PRED_LIST_1) {
+                    mvOutOfPicFlag = CheckForMvOverBound(
+                                candidateArray[canTotalCnt].motionVector_x_L1,
+                                candidateArray[canTotalCnt].motionVector_y_L1,
+                                contextPtr,
+                                contextPtr->lcuPtr);
+                }
+                else {
+                    mvOutOfPicFlag = CheckForMvOverBound(
+                                candidateArray[canTotalCnt].motionVector_x_L0,
+                                candidateArray[canTotalCnt].motionVector_y_L0,
+                                contextPtr,
+                                contextPtr->lcuPtr);
+                    mvOutOfPicFlag |= CheckForMvOverBound(
+                                candidateArray[canTotalCnt].motionVector_x_L1,
+                                candidateArray[canTotalCnt].motionVector_y_L1,
+                                contextPtr,
+                                contextPtr->lcuPtr);
+                }
+            }
+
+            if (isAmvpCandidateAvailable && mvOutOfPicFlag == EB_FALSE) {
                 candidateArray[canTotalCnt].distortionReady = 0;
 
                 candidateArray[canTotalCnt].predictionDirection[0] = (EB_PREDDIRECTION)interDirection;
@@ -734,6 +770,7 @@ void Unipred3x3CandidatesInjection(
 {
 	EB_U32                   bipredIndex;
 	EB_U32                   canTotalCnt = (*candidateTotalCnt);
+    EB_BOOL                  mvOutOfPicFlag = EB_FALSE;
 	const EB_U32             lcuAddr = lcuPtr->index;
 	const EB_U32             cuOriginX = contextPtr->cuOriginX;
 	const EB_U32             cuOriginY = contextPtr->cuOriginY;
@@ -757,6 +794,21 @@ void Unipred3x3CandidatesInjection(
 			RoundMv(candidateArray,
 				canTotalCnt);
 		}
+
+        if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0) {
+            mvOutOfPicFlag = CheckForMvOverBound(
+                        candidateArray[canTotalCnt].motionVector_x_L0,
+                        candidateArray[canTotalCnt].motionVector_y_L0,
+                        contextPtr,
+                        lcuPtr);
+            mvOutOfPicFlag |= CheckForMvOverBound(
+                        candidateArray[canTotalCnt].motionVector_x_L1,
+                        candidateArray[canTotalCnt].motionVector_y_L1,
+                        contextPtr,
+                        lcuPtr);
+            if(mvOutOfPicFlag)
+                continue;
+        }
 
 		candidateArray[canTotalCnt].distortionReady = 0;
 
@@ -814,6 +866,21 @@ void Unipred3x3CandidatesInjection(
 			RoundMv(candidateArray,
 				canTotalCnt);
 		}
+
+        if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0) {
+            mvOutOfPicFlag = CheckForMvOverBound(
+                        candidateArray[canTotalCnt].motionVector_x_L0,
+                        candidateArray[canTotalCnt].motionVector_y_L0,
+                        contextPtr,
+                        lcuPtr);
+            mvOutOfPicFlag |= CheckForMvOverBound(
+                        candidateArray[canTotalCnt].motionVector_x_L1,
+                        candidateArray[canTotalCnt].motionVector_y_L1,
+                        contextPtr,
+                        lcuPtr);
+            if(mvOutOfPicFlag)
+                continue;
+        }
 
 		candidateArray[canTotalCnt].distortionReady = 0;
 
@@ -878,6 +945,7 @@ void Bipred3x3CandidatesInjection(
 {
 	EB_U32                   bipredIndex;
 	EB_U32                   canTotalCnt = (*candidateTotalCnt);
+    EB_BOOL                  mvOutOfPicFlag = EB_FALSE;
 	const EB_U32             lcuAddr = lcuPtr->index;
 	const EB_U32             cuOriginX = contextPtr->cuOriginX;
 	const EB_U32             cuOriginY = contextPtr->cuOriginY;
@@ -903,6 +971,21 @@ void Bipred3x3CandidatesInjection(
 			RoundMv(candidateArray,
 				canTotalCnt);
 		}
+
+        if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0) {
+            mvOutOfPicFlag = CheckForMvOverBound(
+                        candidateArray[canTotalCnt].motionVector_x_L0,
+                        candidateArray[canTotalCnt].motionVector_y_L0,
+                        contextPtr,
+                        lcuPtr);
+            mvOutOfPicFlag |= CheckForMvOverBound(
+                        candidateArray[canTotalCnt].motionVector_x_L1,
+                        candidateArray[canTotalCnt].motionVector_y_L1,
+                        contextPtr,
+                        lcuPtr);
+            if(mvOutOfPicFlag)
+                continue;
+        }
 
 		candidateArray[canTotalCnt].distortionReady = 0;
 
@@ -961,6 +1044,21 @@ void Bipred3x3CandidatesInjection(
 			RoundMv(candidateArray,
 				canTotalCnt);
 		}
+
+        if (sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0) {
+            mvOutOfPicFlag = CheckForMvOverBound(
+                        candidateArray[canTotalCnt].motionVector_x_L0,
+                        candidateArray[canTotalCnt].motionVector_y_L0,
+                        contextPtr,
+                        lcuPtr);
+            mvOutOfPicFlag |= CheckForMvOverBound(
+                        candidateArray[canTotalCnt].motionVector_x_L1,
+                        candidateArray[canTotalCnt].motionVector_y_L1,
+                        contextPtr,
+                        lcuPtr);
+            if(mvOutOfPicFlag)
+                continue;
+        }
 
 		candidateArray[canTotalCnt].distortionReady = 0;
 
