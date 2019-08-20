@@ -377,7 +377,8 @@ const MiniGopStats_t* GetMiniGopStats(const EB_U32 miniGopIndex) {
     return &MiniGopStatsArray[miniGopIndex];
 }
 
-void EbStartTime(unsigned long long *Startseconds, unsigned long long *Startuseconds) {
+void EbStartTime(EB_U64 *Startseconds, EB_U64 *Startuseconds)
+{
 #ifdef _WIN32
     *Startseconds = (unsigned long long)clock();
     (void)(*Startuseconds);
@@ -389,7 +390,8 @@ void EbStartTime(unsigned long long *Startseconds, unsigned long long *Startusec
 #endif
 }
 
-void EbFinishTime(unsigned long long *Finishseconds, unsigned long long *Finishuseconds) {
+void EbFinishTime(EB_U64 *Finishseconds, EB_U64 *Finishuseconds)
+{
 #ifdef _WIN32
     *Finishseconds = (unsigned long long)clock();
     (void)(*Finishuseconds);
@@ -401,7 +403,8 @@ void EbFinishTime(unsigned long long *Finishseconds, unsigned long long *Finishu
 #endif
 }
 
-void EbComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration) {
+void EbComputeOverallElapsedTime(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U64 Finishseconds, EB_U64 Finishuseconds, double *duration)
+{
 #ifdef _WIN32
     //double  duration;
     *duration = (double)(Finishseconds - Startseconds) / CLOCKS_PER_SEC;
@@ -418,7 +421,8 @@ void EbComputeOverallElapsedTime(unsigned long long Startseconds, unsigned long 
 #endif
 }
 
-void EbComputeOverallElapsedTimeMs(unsigned long long Startseconds, unsigned long long Startuseconds, unsigned long long Finishseconds, unsigned long long Finishuseconds, double *duration) {
+void EbComputeOverallElapsedTimeMs(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U64 Finishseconds, EB_U64 Finishuseconds, double *duration)
+{
 #ifdef _WIN32
     //double  duration;
     *duration = (double)(Finishseconds - Startseconds);

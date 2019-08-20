@@ -37,9 +37,6 @@
 #define QUEUE_GET_PREVIOUS_SPOT(h)  ((h == 0) ? PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH - 1 : h - 1)
 #define QUEUE_GET_NEXT_SPOT(h,off)  (( (h+off) >= PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH) ? h+off - PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH  : h + off)
 
-#define WTH 64
-#define OTH 64
-
 /************************************************
  * Picture Analysis Context Constructor
  ************************************************/
@@ -90,7 +87,7 @@ EB_ERRORTYPE PictureDecisionContextCtor(
     return EB_ErrorNone;
 }
 
-EB_BOOL SceneTransitionDetector(
+static EB_BOOL SceneTransitionDetector(
     PictureDecisionContext_t *contextPtr,
 	SequenceControlSet_t				 *sequenceControlSetPtr,
 	PictureParentControlSet_t           **ParentPcsWindow,
@@ -387,198 +384,6 @@ EB_U8 PictureLevelSubPelSettingsOq(
 	return subPelMode;
 }
 
-EB_U8 PictureLevelSubPelSettingsVmaf(
-	EB_U8   inputResolution,
-	EB_U8   encMode,
-	EB_U8   temporalLayerIndex) {
-
-	EB_U8 subPelMode;
-
-	if (encMode <= ENC_MODE_8) {
-		subPelMode = 1;
-	}
-	else {
-		if (inputResolution >= INPUT_SIZE_4K_RANGE) {
-			subPelMode = (temporalLayerIndex == 0) ? 1 : 0;
-		}
-		else {
-			subPelMode = 1;
-		}
-	}
-
-	return subPelMode;
-}
-
-EB_U8 PictureLevelSubPelSettingsSq(
-	EB_U8   inputResolution,
-	EB_U8   encMode,
-	EB_U8   temporalLayerIndex,
-	EB_BOOL isUsedAsReferenceFlag) {
-    EB_U8 subPelMode;
-
-    if (inputResolution >= INPUT_SIZE_4K_RANGE) {
-        if (encMode <= ENC_MODE_4) {
-            subPelMode = 1;
-        }
-        else if (encMode <= ENC_MODE_7) {
-            subPelMode = isUsedAsReferenceFlag ? 1 : 0;
-        }
-        else if (encMode <= ENC_MODE_10) {
-            subPelMode = (temporalLayerIndex == 0) ? 1 : 0;
-        }
-        else {
-            subPelMode = 0;
-        }
-    }
-    else {
-        if (encMode <= ENC_MODE_4) {
-            subPelMode = 1;
-        }
-        else if (encMode <= ENC_MODE_8) {
-            subPelMode = isUsedAsReferenceFlag ? 1 : 0;
-        }
-        else if (encMode <= ENC_MODE_9) {
-            subPelMode = (temporalLayerIndex == 0) ? 1 : 0;
-        }
-        else {
-            subPelMode = 0;
-        }
-    }
-
-	return subPelMode;
-}
-
-
-/******************************************************
-* Derive Multi-Processes Settings for SQ
-Input   : encoder mode and tune
-Output  : Multi-Processes signal(s)
-******************************************************/
-EB_ERRORTYPE SignalDerivationMultiProcessesSq(
-    SequenceControlSet_t        *sequenceControlSetPtr,
-    PictureParentControlSet_t   *pictureControlSetPtr) {
-
-    EB_ERRORTYPE return_error = EB_ErrorNone;
-
-    // Set MD Partitioning Method
-    if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
-        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-            pictureControlSetPtr->depthMode = PICT_FULL84_DEPTH_MODE;
-        }
-        else {
-            pictureControlSetPtr->depthMode = PICT_FULL85_DEPTH_MODE;
-        }
-    }
-    else if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
-        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-                pictureControlSetPtr->depthMode = PICT_FULL84_DEPTH_MODE;
-            }
-            else {
-                pictureControlSetPtr->depthMode = PICT_FULL85_DEPTH_MODE;
-            }
-        }
-        else {
-            if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-                pictureControlSetPtr->depthMode = PICT_FULL84_DEPTH_MODE;
-            }
-            else {
-                pictureControlSetPtr->depthMode = PICT_LCU_SWITCH_DEPTH_MODE;
-            }
-        }
-    }
-    else if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
-        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-            pictureControlSetPtr->depthMode = PICT_FULL84_DEPTH_MODE;
-        }
-        else {
-            pictureControlSetPtr->depthMode = PICT_LCU_SWITCH_DEPTH_MODE;
-        }
-    }
-    else {
-        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-            if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_1080p_RANGE) {
-                pictureControlSetPtr->depthMode = PICT_FULL84_DEPTH_MODE;
-            }
-            else {
-                pictureControlSetPtr->depthMode = PICT_BDP_DEPTH_MODE;
-            }
-        }
-        else {
-            pictureControlSetPtr->depthMode = PICT_LCU_SWITCH_DEPTH_MODE;
-        }
-    }
-
-    // Set the default settings of  subpel
-    pictureControlSetPtr->useSubpelFlag = PictureLevelSubPelSettingsSq(
-        sequenceControlSetPtr->inputResolution,
-        pictureControlSetPtr->encMode,
-        pictureControlSetPtr->temporalLayerIndex,
-        pictureControlSetPtr->isUsedAsReferenceFlag);
-
-    // Limit OIS to DC
-    if (pictureControlSetPtr->encMode <= ENC_MODE_9) {
-        pictureControlSetPtr->limitOisToDcModeFlag = EB_FALSE;
-    } else if (pictureControlSetPtr->encMode <= ENC_MODE_10) {
-        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-            pictureControlSetPtr->limitOisToDcModeFlag = EB_FALSE;
-        }
-        else {
-            pictureControlSetPtr->limitOisToDcModeFlag = (pictureControlSetPtr->sliceType != EB_I_PICTURE) ? EB_TRUE : EB_FALSE;
-        }
-    }
-    else {
-        pictureControlSetPtr->limitOisToDcModeFlag = (pictureControlSetPtr->sliceType != EB_I_PICTURE) ? EB_TRUE : EB_FALSE;
-    }
-
-    // CU_8x8 Search Mode
-    if (pictureControlSetPtr->encMode == ENC_MODE_0) {
-        pictureControlSetPtr->cu8x8Mode = CU_8x8_MODE_0;
-    }
-    else if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
-        if (sequenceControlSetPtr->inputResolution  < INPUT_SIZE_4K_RANGE) {
-            pictureControlSetPtr->cu8x8Mode = CU_8x8_MODE_0;
-        } else {
-            pictureControlSetPtr->cu8x8Mode = (pictureControlSetPtr->temporalLayerIndex == 0) ? CU_8x8_MODE_0 : CU_8x8_MODE_1;
-        }
-    }
-    else if (pictureControlSetPtr->encMode <= ENC_MODE_8) {
-        if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER) {
-            pictureControlSetPtr->cu8x8Mode = CU_8x8_MODE_0;
-        }
-        else {
-            pictureControlSetPtr->cu8x8Mode = (pictureControlSetPtr->temporalLayerIndex == 0) ? CU_8x8_MODE_0 : CU_8x8_MODE_1;
-        }
-    }
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_11) {
-        pictureControlSetPtr->cu8x8Mode = (pictureControlSetPtr->temporalLayerIndex == 0) ? CU_8x8_MODE_0 : CU_8x8_MODE_1;
-    }
-	else {
-		pictureControlSetPtr->cu8x8Mode = CU_8x8_MODE_1;
-	}
-
-	// CU_16x16 Search Mode
-	if (pictureControlSetPtr->encMode <= ENC_MODE_11) {
-		pictureControlSetPtr->cu16x16Mode = CU_16x16_MODE_0;
-	}
-	else {
-		pictureControlSetPtr->cu16x16Mode = (pictureControlSetPtr->temporalLayerIndex == 0) ? CU_16x16_MODE_0 : CU_16x16_MODE_1;
-	}
-
-    // Set Skip OIS 8x8 Flag
-    if (pictureControlSetPtr->encMode == ENC_MODE_0) {
-        pictureControlSetPtr->skipOis8x8 = EB_FALSE;
-    }
-    else {
-        if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-            pictureControlSetPtr->skipOis8x8 = (pictureControlSetPtr->sliceType != EB_I_PICTURE) ? EB_TRUE : EB_FALSE;
-        } else {
-            pictureControlSetPtr->skipOis8x8 = EB_FALSE;
-        }
-    }
-
-    return return_error;
-}
 
 /******************************************************
 * Derive Multi-Processes Settings for OQ
@@ -667,72 +472,6 @@ EB_ERRORTYPE SignalDerivationMultiProcessesOq(
     pictureControlSetPtr->skipOis8x8 = (pictureControlSetPtr->sliceType == EB_I_PICTURE && (pictureControlSetPtr->encMode <= ENC_MODE_10)) ? EB_FALSE : EB_TRUE;
 
     return return_error;
-}
-
-/******************************************************
-* Derive Multi-Processes Settings for VMAF
-Input   : encoder mode and tune
-Output  : Multi-Processes signal(s)
-******************************************************/
-EB_ERRORTYPE SignalDerivationMultiProcessesVmaf(
-	SequenceControlSet_t        *sequenceControlSetPtr,
-	PictureParentControlSet_t   *pictureControlSetPtr) {
-
-	EB_ERRORTYPE return_error = EB_ErrorNone;
-
-	// Set MD Partitioning Method
-	if (pictureControlSetPtr->encMode <= ENC_MODE_1) {
-		if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-			pictureControlSetPtr->depthMode = PICT_FULL84_DEPTH_MODE;
-		}
-		else {
-			pictureControlSetPtr->depthMode = PICT_FULL85_DEPTH_MODE;
-		}
-	}
-	else {
-		if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
-			pictureControlSetPtr->depthMode = PICT_FULL84_DEPTH_MODE;
-		}
-		else {
-			pictureControlSetPtr->depthMode = PICT_LCU_SWITCH_DEPTH_MODE;
-		}
-	}
-
-	// Set the default settings of  subpel
-	pictureControlSetPtr->useSubpelFlag = PictureLevelSubPelSettingsVmaf(
-		sequenceControlSetPtr->inputResolution,
-		pictureControlSetPtr->encMode,
-		pictureControlSetPtr->temporalLayerIndex);
-
-	// Limit OIS to DC
-	if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
-		pictureControlSetPtr->limitOisToDcModeFlag = EB_FALSE;
-	}
-	else {
-		pictureControlSetPtr->limitOisToDcModeFlag = (pictureControlSetPtr->sliceType != EB_I_PICTURE) ? EB_TRUE : EB_FALSE;
-	}
-
-	// CU_8x8 Search Mode
-	if (pictureControlSetPtr->encMode <= ENC_MODE_1) { 
-		pictureControlSetPtr->cu8x8Mode = CU_8x8_MODE_0;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
-		pictureControlSetPtr->cu8x8Mode = (pictureControlSetPtr->isUsedAsReferenceFlag) ? CU_8x8_MODE_0 : CU_8x8_MODE_1;
-	}
-	else if (pictureControlSetPtr->encMode == ENC_MODE_7) {
-		pictureControlSetPtr->cu8x8Mode = (pictureControlSetPtr->temporalLayerIndex == 0) ? CU_8x8_MODE_0 : CU_8x8_MODE_1;
-	}
-	else {
-		pictureControlSetPtr->cu8x8Mode = CU_8x8_MODE_1;
-	}
-
-	// CU_16x16 Search Mode
-	pictureControlSetPtr->cu16x16Mode = CU_16x16_MODE_0;
-
-	// Set Skip OIS 8x8 Flag
-	pictureControlSetPtr->skipOis8x8 = EB_FALSE;
-
-	return return_error;
 }
 
 
@@ -1284,22 +1023,9 @@ void* PictureDecisionKernel(void *inputPtr)
                             EB_TRUE :
                             EB_FALSE;
 
-                        // ME Kernel Multi-Processes Signal(s) derivation
-                        if (sequenceControlSetPtr->staticConfig.tune == TUNE_SQ) {
-                            SignalDerivationMultiProcessesSq(
+                        SignalDerivationMultiProcessesOq(
                                 sequenceControlSetPtr,
                                 pictureControlSetPtr);
-                        }
-                        else if (sequenceControlSetPtr->staticConfig.tune == TUNE_VMAF) {
-                            SignalDerivationMultiProcessesVmaf(
-                                sequenceControlSetPtr,
-                                pictureControlSetPtr);
-                        }
-                        else {
-                            SignalDerivationMultiProcessesOq(
-                                sequenceControlSetPtr,
-                                pictureControlSetPtr);
-                        }
 
                         // Set the Decode Order
 						if ((sequenceControlSetPtr->staticConfig.predStructure == EB_PRED_RANDOM_ACCESS) && (contextPtr->miniGopIdrCount[miniGopIndex] == 0) &&
@@ -1675,7 +1401,8 @@ void* PictureDecisionKernel(void *inputPtr)
     
     return EB_NULL;
 }
-void UnusedVariablevoidFunc_PicDecision()
+
+static void UnusedVariablevoidFunc_PicDecision()
 {
     (void)NxMSadKernel_funcPtrArray;
 	(void)NxMSadLoopKernel_funcPtrArray;
