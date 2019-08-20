@@ -21,7 +21,6 @@ add_executable(SvtHevcEncApp
     EbAppConfig.h
     EbAppContext.h
     ../API/EbErrorCodes.h
-    ../API/EbTime.h
     EbAppInputy4m.c)
 
 #********** SET COMPILE FLAGS************
