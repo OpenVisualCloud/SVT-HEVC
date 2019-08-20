@@ -2809,6 +2809,7 @@ void* EncDecKernel(void *inputPtr)
 
                     // Derive cuUseRefSrcFlag Flag
                     contextPtr->mdContext->cuUseRefSrcFlag = (pictureControlSetPtr->ParentPcsPtr->useSrcRef) && (pictureControlSetPtr->ParentPcsPtr->edgeResultsPtr[lcuIndex].edgeBlockNum == EB_FALSE || pictureControlSetPtr->ParentPcsPtr->lcuFlatNoiseArray[lcuIndex]) ? EB_TRUE : EB_FALSE;
+
                     // Derive restrictIntraGlobalMotion Flag
                     contextPtr->mdContext->restrictIntraGlobalMotion = ((pictureControlSetPtr->ParentPcsPtr->isPan || pictureControlSetPtr->ParentPcsPtr->isTilt) && pictureControlSetPtr->ParentPcsPtr->nonMovingIndexArray[lcuIndex] < INTRA_GLOBAL_MOTION_NON_MOVING_INDEX_TH && pictureControlSetPtr->ParentPcsPtr->yMean[lcuIndex][RASTER_SCAN_CU_INDEX_64x64] < INTRA_GLOBAL_MOTION_DARK_LCU_TH);
 
@@ -2996,71 +2997,74 @@ void* EncDecKernel(void *inputPtr)
             }
 
             // Pad the reference picture and set up TMVP flag and ref POC
-            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE)
+            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE) {
                 PadRefAndSetFlags(
                         pictureControlSetPtr,
                         sequenceControlSetPtr);
 
-            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE &&
-                    pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr) {
-                EbPictureBufferDesc_t *inputPicturePtr = (EbPictureBufferDesc_t*)pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
-                EB_COLOR_FORMAT colorFormat = inputPicturePtr->colorFormat;
-                EB_U16 subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
-                EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
-                const EB_U32  SrclumaOffSet = inputPicturePtr->originX + inputPicturePtr->originY    *inputPicturePtr->strideY;
-                const EB_U32 SrccbOffset = (inputPicturePtr->originX >> subWidthCMinus1) + (inputPicturePtr->originY >> subHeightCMinus1) * inputPicturePtr->strideCb;
-                const EB_U32 SrccrOffset = (inputPicturePtr->originX >> subWidthCMinus1) + (inputPicturePtr->originY >> subHeightCMinus1) * inputPicturePtr->strideCr;
+                //Jing: Only copy/pad refDenSrcPicture if useSrcRef flag is set(in -sharp case)
+                //      Should not use pcs->useSrcRef directly
+                if (sequenceControlSetPtr->staticConfig.improveSharpness) {
+                    EbPictureBufferDesc_t *inputPicturePtr = (EbPictureBufferDesc_t*)pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
+                    EB_COLOR_FORMAT colorFormat = inputPicturePtr->colorFormat;
+                    EB_U16 subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
+                    EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
+                    const EB_U32  SrclumaOffSet = inputPicturePtr->originX + inputPicturePtr->originY    *inputPicturePtr->strideY;
+                    const EB_U32 SrccbOffset = (inputPicturePtr->originX >> subWidthCMinus1) + (inputPicturePtr->originY >> subHeightCMinus1) * inputPicturePtr->strideCb;
+                    const EB_U32 SrccrOffset = (inputPicturePtr->originX >> subWidthCMinus1) + (inputPicturePtr->originY >> subHeightCMinus1) * inputPicturePtr->strideCr;
 
-                EbReferenceObject_t   *referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr;
-                EbPictureBufferDesc_t *refDenPic = referenceObject->refDenSrcPicture;
-                const EB_U32           ReflumaOffSet = refDenPic->originX + refDenPic->originY    *refDenPic->strideY;
-                const EB_U32 RefcbOffset = (refDenPic->originX >> subWidthCMinus1) + (refDenPic->originY >> subHeightCMinus1) * refDenPic->strideCb;
-                const EB_U32 RefcrOffset = (refDenPic->originX >> subWidthCMinus1) + (refDenPic->originY >> subHeightCMinus1) * refDenPic->strideCr;
+                    EbReferenceObject_t   *referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr;
+                    EbPictureBufferDesc_t *refDenPic = referenceObject->refDenSrcPicture;
+                    const EB_U32           ReflumaOffSet = refDenPic->originX + refDenPic->originY    *refDenPic->strideY;
+                    const EB_U32 RefcbOffset = (refDenPic->originX >> subWidthCMinus1) + (refDenPic->originY >> subHeightCMinus1) * refDenPic->strideCb;
+                    const EB_U32 RefcrOffset = (refDenPic->originX >> subWidthCMinus1) + (refDenPic->originY >> subHeightCMinus1) * refDenPic->strideCr;
 
-                EB_U16  verticalIdx;
+                    EB_U16  verticalIdx;
 
-                for (verticalIdx = 0; verticalIdx < refDenPic->height; ++verticalIdx)
-                {
-                    EB_MEMCPY(refDenPic->bufferY + ReflumaOffSet + verticalIdx*refDenPic->strideY,
-                            inputPicturePtr->bufferY + SrclumaOffSet + verticalIdx* inputPicturePtr->strideY,
-                            inputPicturePtr->width);
+                    for (verticalIdx = 0; verticalIdx < refDenPic->height; ++verticalIdx)
+                    {
+                        EB_MEMCPY(refDenPic->bufferY + ReflumaOffSet + verticalIdx*refDenPic->strideY,
+                                inputPicturePtr->bufferY + SrclumaOffSet + verticalIdx* inputPicturePtr->strideY,
+                                inputPicturePtr->width);
+                    }
+
+                    for (verticalIdx = 0; verticalIdx < inputPicturePtr->height >> subHeightCMinus1; ++verticalIdx)
+                    {
+                        EB_MEMCPY(refDenPic->bufferCb + RefcbOffset + verticalIdx*refDenPic->strideCb,
+                                inputPicturePtr->bufferCb + SrccbOffset + verticalIdx* inputPicturePtr->strideCb,
+                                inputPicturePtr->width >> subWidthCMinus1);
+
+                        EB_MEMCPY(refDenPic->bufferCr + RefcrOffset + verticalIdx*refDenPic->strideCr,
+                                inputPicturePtr->bufferCr + SrccrOffset + verticalIdx* inputPicturePtr->strideCr,
+                                inputPicturePtr->width >> subWidthCMinus1 );
+                    }
+
+                    GeneratePadding(
+                            refDenPic->bufferY,
+                            refDenPic->strideY,
+                            refDenPic->width,
+                            refDenPic->height,
+                            refDenPic->originX,
+                            refDenPic->originY);
+
+                    GeneratePadding(
+                            refDenPic->bufferCb,
+                            refDenPic->strideCb,
+                            refDenPic->width >> subWidthCMinus1,
+                            refDenPic->height >> subHeightCMinus1,
+                            refDenPic->originX >> subWidthCMinus1,
+                            refDenPic->originY >> subHeightCMinus1);
+
+                    GeneratePadding(
+                            refDenPic->bufferCr,
+                            refDenPic->strideCr,
+                            refDenPic->width >> subWidthCMinus1,
+                            refDenPic->height >> subHeightCMinus1,
+                            refDenPic->originX >> subWidthCMinus1,
+                            refDenPic->originY >> subHeightCMinus1);
                 }
-
-                for (verticalIdx = 0; verticalIdx < inputPicturePtr->height >> subHeightCMinus1; ++verticalIdx)
-                {
-                    EB_MEMCPY(refDenPic->bufferCb + RefcbOffset + verticalIdx*refDenPic->strideCb,
-                            inputPicturePtr->bufferCb + SrccbOffset + verticalIdx* inputPicturePtr->strideCb,
-                            inputPicturePtr->width >> subWidthCMinus1);
-
-                    EB_MEMCPY(refDenPic->bufferCr + RefcrOffset + verticalIdx*refDenPic->strideCr,
-                            inputPicturePtr->bufferCr + SrccrOffset + verticalIdx* inputPicturePtr->strideCr,
-                            inputPicturePtr->width >> subWidthCMinus1 );
-                }
-
-                GeneratePadding(
-                        refDenPic->bufferY,
-                        refDenPic->strideY,
-                        refDenPic->width,
-                        refDenPic->height,
-                        refDenPic->originX,
-                        refDenPic->originY);
-
-                GeneratePadding(
-                        refDenPic->bufferCb,
-                        refDenPic->strideCb,
-                        refDenPic->width >> subWidthCMinus1,
-                        refDenPic->height >> subHeightCMinus1,
-                        refDenPic->originX >> subWidthCMinus1,
-                        refDenPic->originY >> subHeightCMinus1);
-
-                GeneratePadding(
-                        refDenPic->bufferCr,
-                        refDenPic->strideCr,
-                        refDenPic->width >> subWidthCMinus1,
-                        refDenPic->height >> subHeightCMinus1,
-                        refDenPic->originX >> subWidthCMinus1,
-                        refDenPic->originY >> subHeightCMinus1);
             }
+
 
             if (sequenceControlSetPtr->staticConfig.reconEnabled) {
                 ReconOutput(
