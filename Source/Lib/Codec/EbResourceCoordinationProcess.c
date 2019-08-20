@@ -18,7 +18,7 @@
 
 #include "EbResourceCoordinationResults.h"
 #include "EbReferenceObject.h"
-#include "EbTime.h"
+#include "EbUtility.h"
 
 /************************************************
  * Resource Coordination Context Constructor

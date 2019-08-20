@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
-
+#include "EbTime.h"
 #ifdef _WIN32
 #include <windows.h>
 #else

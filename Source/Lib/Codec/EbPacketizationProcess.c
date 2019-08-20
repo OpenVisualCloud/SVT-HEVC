@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #include "EbDefinitions.h"
+#include "EbUtility.h"
 #include "EbPacketizationProcess.h"
 #include "EbEntropyCodingResults.h"
 
@@ -16,7 +17,6 @@
 #include "EbEntropyCoding.h"
 #include "EbRateControlTasks.h"
 #include "EbRateControlProcess.h"
-#include "EbTime.h"
 #include "EbPictureDemuxResults.h"
 
 static void HrdFullness(SequenceControlSet_t *sequenceControlSetPtr, PictureControlSet_t *pictureControlSetPtr, AppBufferingPeriodSei_t *seiBP)
