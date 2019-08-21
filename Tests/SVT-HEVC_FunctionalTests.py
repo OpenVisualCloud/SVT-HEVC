@@ -293,6 +293,8 @@ class EB_Test(object):
                         'EncoderColorFormat'                : '-color-format',
                         'TileRowCount'                      : '-tile_row_cnt',
                         'TileColCount'                      : '-tile_col_cnt',
+                        'TileSliceMode'                     : '-tile_slice_mode',
+                        'UnrestrictedMotionVector'          : '-umv',
                         'VbvMaxRate'                        : '-vbvMaxrate',
                         'VbvBufSize'                        : '-vbvBufsize',
                         'VbvBufInit'                        : '-vbvBufInit',
@@ -402,9 +404,11 @@ class EB_Test(object):
             if encMode >= 12:
                 return -1
             if width*height < 3840*2160:
+                if encMode == 11:
+                    return -1
+            if width*height < 1920*1080:
                 if encMode == 10:
-                    if width*height < 1920*1080:
-                        return -1
+                    return -1
         if width %2 != 0 or height %2 != 0:
             return -1
         if bitdepth == 10 and height %8 != 0:
@@ -492,10 +496,12 @@ class EB_Test(object):
                         enc_params.update({cond: test_cond[cond]})
                         if not isinstance(test_cond[cond], list):
                             bitstream_name = bitstream_name + '_' + str(test_cond[cond])
+
                     # Check if sequence is supported with given combinations
                     error = self.check_seq_support(test_name, seq_name, enc_params)
                     if error != 0:
                         continue
+
                     # Test Specific
                     if test_name == 'defield_test':
                         if '_fields' in seq_name:
@@ -508,14 +514,59 @@ class EB_Test(object):
                     elif test_name == 'qp_file_test':
                         qp_file_name = self.generate_qp_file(bitstream_name, enc_params['frame_to_be_encoded'])
                         enc_params.update({'qp_file_name': 'qp_files' + slash + qp_file_name})
+                    elif test_name == 'mcts_test':
+                        # update maxRows and maxCols now that the video resolution for the test is known
+                        numLuma = enc_params['width'] * enc_params['height']
+                        maxRows = 16
+                        maxCols = 16
+                        if numLuma <= 36864:
+                            maxRows = 1
+                            maxCols = 1
+                            continue
+                        elif numLuma <= 122880:
+                            maxRows = 1
+                            maxCols = 1
+                            continue
+                        elif numLuma <= 245760:
+                            maxRows = 1
+                            maxCols = 1
+                            continue
+                        elif numLuma <= 552960:
+                            maxRows = 2
+                            maxCols = 2
+                        elif numLuma <= 983040:
+                            maxRows = 4
+                            maxCols = 4
+                        elif numLuma <= 2228224:
+                            maxRows = 5
+                            maxCols = 5
+                        elif numLuma <= 8912896:
+                            maxRows = 11
+                            maxCols = 10
+                        if maxRows == 1:
+                            enc_params.update({'TileRowCount': 1})
+                        else:
+                            enc_params.update({'TileRowCount' : random.randint(2,maxRows)})
+                        if maxCols == 1:
+                            enc_params.update({'TileColCount': 1})
+                        else:
+                            enc_params.update({'TileColCount' : random.randint(2,maxCols)})
+
+                    # get the encode command and log it
                     enc_cmd = self.get_enc_cmd(enc_params, seq_name, bitstream_name)
                     print(enc_cmd, file=open(test_name + '.txt', 'a'))
+
                     if DEBUG_MODE == 0:
+                        # non-debug mode.. execute the encode command
                         exit_code = subprocess.call(enc_cmd, shell = True)
-                        if exit_code == 0 and test_name == 'decode_test':
-                            dec_cmd = enc_params['tools_dir'] + slash + dec_exe + " -b " + enc_params['bitstream_dir'] + slash + bitstream_name + '.265 > NUL'
-                            print(dec_cmd, file=open(test_name + '.txt', 'a'))
-                            exit_code = subprocess.call(dec_cmd, shell = True)
+                        if exit_code == 0:
+                            # For the decode and mcts tests see if the encoded file can be decoded.
+                            # HM decoder version should have a check to verify that motion vectors are
+                            # constrained to same tile, otherwise encoder fail.
+                            if test_name == 'decode_test' or test_name == "mcts_test":
+                                dec_cmd = enc_params['tools_dir'] + slash + dec_exe + " -b " + enc_params['bitstream_dir'] + slash + bitstream_name + '.265 > NUL'
+                                print(dec_cmd, file=open(test_name + '.txt', 'a'))
+                                exit_code = subprocess.call(dec_cmd, shell = True)
                     else:
                         continue
                     if COMPARE == 0:
@@ -802,13 +853,18 @@ class EB_Test(object):
     def mcts_test(self,seq_list):
         # Test specific parameters:
         test_name = 'mcts_test'
+
         mcts_rows = []
         mcts_cols = []
         for count in range(MCTS_ITER):
-            mcts_rows.append(random.randint(2,16))
-            mcts_cols.append(random.randint(2,16))
-        combination_test_params = { 'TileRowCount'     : mcts_rows,
-                                    'TileColCount'     : mcts_cols,
+            # These values will change once actual video for the mcts test is known
+            # and appropriate max rows and max cols can be determined
+            mcts_rows.append(0)
+            mcts_cols.append(0)
+        combination_test_params = { 'TileRowCount'             : mcts_rows,
+                                    'TileColCount'             : mcts_cols,
+                                    'UnrestrictedMotionVector' : [0],
+                                    'TileSliceMode'            : [1]
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
