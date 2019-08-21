@@ -386,7 +386,7 @@ EB_ERRORTYPE InitThreadManagmentParams(){
     int maxSize = INITIAL_PROCESSOR_GROUP;
     if (processor_id_len < 0 || processor_id_len >= 128) return EB_ErrorInsufficientResources;
     if (physical_id_len < 0 || physical_id_len >= 128) return EB_ErrorInsufficientResources;
-	memset(lpGroup, 0, 16* sizeof(processorGroup));
+    memset(lpGroup, 0, INITIAL_PROCESSOR_GROUP * sizeof(processorGroup));
 
     FILE *fin = fopen("/proc/cpuinfo", "r");
     if (fin) {
@@ -408,9 +408,11 @@ EB_ERRORTYPE InitThreadManagmentParams(){
                 }
                 if (socket_id + 1 > numGroups)
                     numGroups = socket_id + 1;
-                if (socket_id > maxSize) {
-                    maxSize = maxSize*2;
-                    lpGroup = realloc(lpGroup,maxSize*sizeof(processorGroup));
+                if (socket_id >= maxSize) {
+                    maxSize = maxSize * 2;
+                    lpGroup = realloc(lpGroup,maxSize * sizeof(processorGroup));
+                    if (lpGroup == (processorGroup*) EB_NULL) 
+                        return EB_ErrorInsufficientResources; 
                 }
                 lpGroup[socket_id].group[lpGroup[socket_id].num++] = processor_id;
             }
