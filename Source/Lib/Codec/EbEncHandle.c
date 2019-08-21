@@ -131,7 +131,7 @@ typedef struct logicalProcessorGroup {
     uint32_t group[1024];
 }processorGroup;
 #define INITIAL_PROCESSOR_GROUP 16
-processorGroup                  *lpGroup;
+processorGroup                  *lpGroup = EB_NULL;
 #endif
 
 /**************************************
