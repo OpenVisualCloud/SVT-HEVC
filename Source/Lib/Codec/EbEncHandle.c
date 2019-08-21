@@ -786,7 +786,6 @@ static EB_ERRORTYPE EbEncHandleCtor(
 {
     EB_U32  instanceIndex;
     EB_ERRORTYPE return_error = EB_ErrorNone;
-
     // Allocate Memory
     EbEncHandle_t *encHandlePtr = (EbEncHandle_t*) malloc(sizeof(EbEncHandle_t));
     *encHandleDblPtr = encHandlePtr;
@@ -796,12 +795,6 @@ static EB_ERRORTYPE EbEncHandleCtor(
     encHandlePtr->memoryMap             = (EbMemoryMapEntry*) malloc(sizeof(EbMemoryMapEntry) * MAX_NUM_PTR);
     encHandlePtr->memoryMapIndex        = 0;
 	encHandlePtr->totalLibMemory		= sizeof(EbEncHandle_t) + sizeof(EbMemoryMapEntry) * MAX_NUM_PTR;
-
-    #if  defined(__linux__)
-        lpGroup = (processorGroup*)malloc(sizeof(processorGroup)*INITIAL_PROCESSOR_GROUP);
-        if (lpGroup == (processorGroup*) EB_NULL)
-            return EB_ErrorInsufficientResources;
-    #endif
 
     // Save Memory Map Pointers
     totalLibMemory                      = &encHandlePtr->totalLibMemory;
@@ -1952,7 +1945,6 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             //(void)(encHandlePtr);
         }
     }
-
     return return_error;
 }
 
@@ -1972,6 +1964,12 @@ EB_API EB_ERRORTYPE EbInitHandle(
 
 {
     EB_ERRORTYPE           return_error = EB_ErrorNone;
+
+    #if  defined(__linux__)
+        lpGroup = (processorGroup*) malloc(sizeof(processorGroup) * INITIAL_PROCESSOR_GROUP);
+        if (lpGroup == (processorGroup*) EB_NULL)
+            return EB_ErrorInsufficientResources;
+    #endif
 
     *pHandle = (EB_COMPONENTTYPE*) malloc(sizeof(EB_COMPONENTTYPE));
     if (*pHandle != (EB_HANDLETYPE) NULL) {
