@@ -18,7 +18,11 @@ install:
   - pacman -Sy --ask=20 --noconfirm --noprogressbar --needed mingw-w64-x86_64-yasm mingw-w64-x86_64-ccache mingw-w64-x86_64-cmake mingw-w64-x86_64-gcc mingw-w64-x86_64-ninja
   - cd Build
   - ps: |
-      $configuration=$env:APPVEYOR_JOB_NAME.Split(" ")[-1]
+      if ($env:APPVEYOR_JOB_NAME -match "Debug") {
+        $configuration="Debug"
+      } else {
+        $configuration="Release"
+      }
       if ("$env:generator" -match "Visual*") {
         if ("$env:generator" -match "2019") {
           cmake .. -G "Visual Studio 16 2019" -A x64
@@ -26,9 +30,9 @@ install:
           cmake .. -G "$env:generator"
         }
       } elseif ($null -ne $env:generator){
-        cmake .. -G "$env:generator" -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=$configuration
+        cmake .. -G "$env:generator" -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE="$configuration"
       } else {
-        cmake .. -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=$configuration
+        cmake .. -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE="$configuration"
       }
 
 for:
@@ -50,7 +54,11 @@ for:
         name: $(APPVEYOR_PROJECT_NAME)_MSVC2019
 
 test_script:
-  - echo This is my custom test script
+  - ps: cd ../Bin/$($env:APPVEYOR_JOB_NAME.Split(" ")[-1])
+  - ps: (New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/OpenVisualCloud/SVT-AV1-Resources/master/video.tar.gz', "$PWD\video.tar.gz")
+  - 7z x -aoa video.tar.gz
+  - 7z x -aoa video.tar
+  - SvtHevcEncApp -encMode 9 -i akiyo_cif.y4m -b test1.h265
 
 cache:
   - 'C:\msys64\home\%USERNAME%\.ccache'
@@ -63,7 +71,7 @@ deploy:
   - provider: GitHub
     artifact: $(APPVEYOR_PROJECT_NAME)
     auth_token:
-      secure: 'hY5Mk6KOwgQ97TzEBsM7Woqr1ZIm5QTvHg8EvxMV1x8j3wk/3mNBMqWFFbEIBK0i'
+      secure: "hY5Mk6KOwgQ97TzEBsM7Woqr1ZIm5QTvHg8EvxMV1x8j3wk/3mNBMqWFFbEIBK0i"
     prerelease: true
     on:
       appveyor_repo_tag: true
