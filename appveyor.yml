@@ -44,7 +44,7 @@ for:
       - path: bin\Release\*.*
         name: $(APPVEYOR_PROJECT_NAME)_MINGW64
     build_script:
-      - cmake --build .
+      - ninja -j10
   - matrix:
       only:
         - generator: Visual Studio 2019
