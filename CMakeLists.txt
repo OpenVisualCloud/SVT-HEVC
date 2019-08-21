@@ -117,8 +117,7 @@ set(release_flags_to_test
     -O2
     -O3)
 set(debug_flags_to_test
-    -O0
-    -Og)
+    -O0)
 
 if(MSVC)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NXCompat /DynamicBase")
