@@ -5,9 +5,12 @@ configuration:
 
 environment:
   matrix:
-    - generator: Visual Studio 2019
     - generator: Ninja
+      CC: cl
+    - generator: Ninja
+      CC: gcc
 install:
+  - '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64'
   - ps: (New-Object System.Net.WebClient).DownloadFile('http://repo.msys2.org/distrib/msys2-x86_64-latest.tar.xz', "$PWD\msys2-base.tar.xz")
   - 7z x -aoa msys2-base.tar.xz
   - 7z x -aoa msys2-base.tar -oC:\
@@ -25,9 +28,9 @@ install:
       }
       if ("$env:generator" -match "Visual*") {
         if ("$env:generator" -match "2019") {
-          cmake .. -G "Visual Studio 16 2019" -A x64
+          cmake .. -G "Visual Studio 16 2019" -A x64 -DCMAKE_C_COMPILER_LAUNCHER=ccache
         } else {
-          cmake .. -G "$env:generator"
+          cmake .. -G "$env:generator" -DCMAKE_C_COMPILER_LAUNCHER=ccache
         }
       } elseif ($null -ne $env:generator){
         cmake .. -G "$env:generator" -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE="$configuration"
@@ -60,9 +63,10 @@ test_script:
   - 7z x -aoa video.tar.gz
   - 7z x -aoa video.tar
   - SvtHevcEncApp -n 50 -encMode 9 -i akiyo_cif.y4m -b test1.h265
+  - del video.tar.gz video.tar akiyo_cif.y4m bus_cif.y4m test1.h265
 
 cache:
-  - 'C:\msys64\home\%USERNAME%\.ccache'
+  - 'C:\Users\appveyor\AppData\Roaming\.ccache'
 
 artifacts:
   - path: bin\Release\*.*
