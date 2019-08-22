@@ -293,8 +293,8 @@ class EB_Test(object):
                         'EncoderColorFormat'                : '-color-format',
                         'TileRowCount'                      : '-tile_row_cnt',
                         'TileColCount'                      : '-tile_col_cnt',
-						'TileSliceMode'                     : '-tile_slice_mode',
-						'UnrestrictedMotionVector'          : '-umv',
+                        'TileSliceMode'                     : '-tile_slice_mode',
+                        'UnrestrictedMotionVector'          : '-umv',
                         'VbvMaxRate'                        : '-vbvMaxrate',
                         'VbvBufSize'                        : '-vbvBufsize',
                         'VbvBufInit'                        : '-vbvBufInit',
@@ -496,7 +496,6 @@ class EB_Test(object):
                         enc_params.update({cond: test_cond[cond]})
                         if not isinstance(test_cond[cond], list):
                             bitstream_name = bitstream_name + '_' + str(test_cond[cond])
-
                     # Check if sequence is supported with given combinations
                     error = self.check_seq_support(test_name, seq_name, enc_params)
                     if error != 0:
@@ -562,7 +561,7 @@ class EB_Test(object):
                         if exit_code == 0:
                             # For the decode and mcts tests see if the encoded file can be decoded.
                             # HM decoder version should have a check to verify that motion vectors are
-                            # constrained to same tile, otherwise encoder fail.
+                            # constrained to same tile, otherwise the decoder fail.
                             if test_name == 'decode_test' or test_name == "mcts_test":
                                 dec_cmd = enc_params['tools_dir'] + slash + dec_exe + " -b " + enc_params['bitstream_dir'] + slash + bitstream_name + '.265 > NUL'
                                 print(dec_cmd, file=open(test_name + '.txt', 'a'))
@@ -859,11 +858,11 @@ class EB_Test(object):
         for count in range(MCTS_ITER):
             mcts_rows.append(0)
             mcts_cols.append(0)
-        combination_test_params = { 'TileRowCount'     : mcts_rows,
-                                    'TileColCount'     : mcts_cols,
-									'UnrestrictedMotionVector' : [0],
-									'TileSliceMode' : [1]
-                                  }
+            combination_test_params = { 'TileRowCount'             : mcts_rows,
+                                        'TileColCount'             : mcts_cols,
+                                        'UnrestrictedMotionVector' : [0],
+                                        'TileSliceMode'            : [1]
+                                      }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
 
