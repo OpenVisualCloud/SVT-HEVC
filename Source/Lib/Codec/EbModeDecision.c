@@ -622,11 +622,11 @@ void Amvp2Nx2NCandidatesInjection(
                 break;
 
             case AMVP0:
-                candidateArray[canTotalCnt].motionVector_x_L0 = firstPuAMVPCandArray_x[targetRefList][0];
-                candidateArray[canTotalCnt].motionVector_y_L0 = firstPuAMVPCandArray_y[targetRefList][0];
+                candidateArray[canTotalCnt].motionVector_x_L0 = firstPuAMVPCandArray_x[REF_LIST_0][0];
+                candidateArray[canTotalCnt].motionVector_y_L0 = firstPuAMVPCandArray_y[REF_LIST_0][0];
 
-                candidateArray[canTotalCnt].motionVector_x_L1 = firstPuAMVPCandArray_x[1 - targetRefList][0];
-                candidateArray[canTotalCnt].motionVector_y_L1 = firstPuAMVPCandArray_y[1 - targetRefList][0];
+                candidateArray[canTotalCnt].motionVector_x_L1 = firstPuAMVPCandArray_x[REF_LIST_1][0];
+                candidateArray[canTotalCnt].motionVector_y_L1 = firstPuAMVPCandArray_y[REF_LIST_1][0];
 
                 break;
 
@@ -648,12 +648,14 @@ void Amvp2Nx2NCandidatesInjection(
                 }
                 else {
                     if (firstPuNumAvailableAMVPCand[targetRefList] == 2) {
-                        candidateArray[canTotalCnt].motionVector_x_L0 = firstPuAMVPCandArray_x[targetRefList][1];
-                        candidateArray[canTotalCnt].motionVector_y_L0 = firstPuAMVPCandArray_y[targetRefList][1];
-
-                        candidateArray[canTotalCnt].motionVector_x_L1 = firstPuAMVPCandArray_x[targetRefList][1];
-                        candidateArray[canTotalCnt].motionVector_y_L1 = firstPuAMVPCandArray_y[targetRefList][1];
-
+                        if (targetRefList == REF_LIST_0) {
+                            candidateArray[canTotalCnt].motionVector_x_L0 = firstPuAMVPCandArray_x[targetRefList][1];
+                            candidateArray[canTotalCnt].motionVector_y_L0 = firstPuAMVPCandArray_y[targetRefList][1];
+                        }
+                        else {
+                            candidateArray[canTotalCnt].motionVector_x_L1 = firstPuAMVPCandArray_x[targetRefList][1];
+                            candidateArray[canTotalCnt].motionVector_y_L1 = firstPuAMVPCandArray_y[targetRefList][1];
+                        }
                     }
                     else {
                         isAmvpCandidateAvailable = EB_FALSE;
