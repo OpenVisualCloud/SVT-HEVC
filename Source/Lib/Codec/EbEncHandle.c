@@ -481,8 +481,8 @@ typedef struct logicalProcessorGroup {
     uint32_t num;
     uint32_t group[1024];
 }processorGroup;
-#define MAX_PROCESSOR_GROUP 16
-processorGroup                   lpGroup[MAX_PROCESSOR_GROUP];
+#define INITIAL_PROCESSOR_GROUP 16
+processorGroup                  *lpGroup = EB_NULL;
 #endif
 
 /**************************************
@@ -734,9 +734,10 @@ EB_ERRORTYPE InitThreadManagmentParams(){
     const char* PHYSICALID = "physical id";
     int processor_id_len = strnlen_ss(PROCESSORID, 128);
     int physical_id_len = strnlen_ss(PHYSICALID, 128);
+    int maxSize = INITIAL_PROCESSOR_GROUP;
     if (processor_id_len < 0 || processor_id_len >= 128) return EB_ErrorInsufficientResources;
     if (physical_id_len < 0 || physical_id_len >= 128) return EB_ErrorInsufficientResources;
-    memset(lpGroup, 0, 16* sizeof(processorGroup));
+    memset(lpGroup, 0, INITIAL_PROCESSOR_GROUP * sizeof(processorGroup));
 
     FILE *fin = fopen("/proc/cpuinfo", "r");
     if (fin) {
@@ -752,12 +753,18 @@ EB_ERRORTYPE InitThreadManagmentParams(){
                 char* p = line + physical_id_len;
                 while(*p < '0' || *p > '9') p++;
                 socket_id = strtol(p, NULL, 0);
-                if (socket_id < 0 || socket_id > 15) {
+                if (socket_id < 0) {
                     fclose(fin);
                     return EB_ErrorInsufficientResources;
                 }
                 if (socket_id + 1 > numGroups)
                     numGroups = socket_id + 1;
+                if (socket_id >= maxSize) {
+                    maxSize = maxSize * 2;
+                    lpGroup = realloc(lpGroup,maxSize * sizeof(processorGroup));
+                    if (lpGroup == (processorGroup*) EB_NULL) 
+                        return EB_ErrorInsufficientResources; 
+                }
                 lpGroup[socket_id].group[lpGroup[socket_id].num++] = processor_id;
             }
         }
@@ -1958,6 +1965,12 @@ EB_API EB_ERRORTYPE EbInitHandle(
 {
     EB_ERRORTYPE           return_error = EB_ErrorNone;
 
+    #if  defined(__linux__)
+        lpGroup = (processorGroup*) malloc(sizeof(processorGroup) * INITIAL_PROCESSOR_GROUP);
+        if (lpGroup == (processorGroup*) EB_NULL)
+            return EB_ErrorInsufficientResources;
+    #endif
+
     *pHandle = (EB_COMPONENTTYPE*) malloc(sizeof(EB_COMPONENTTYPE));
     if (*pHandle != (EB_HANDLETYPE) NULL) {
 
@@ -2020,6 +2033,10 @@ EB_API EB_ERRORTYPE EbDeinitHandle(
     else {
         return_error = EB_ErrorInvalidComponent;
     }
+
+    #if  defined(__linux__)
+        free(lpGroup);
+    #endif
 
     return return_error;
 }
