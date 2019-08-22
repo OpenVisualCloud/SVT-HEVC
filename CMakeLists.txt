@@ -13,6 +13,11 @@ endif()
 
 project(${project_name} C ASM_NASM)
 
+if(COMPILE_AS_CPP)
+    enable_language(CXX)
+    include(CheckCXXCompilerFlag)
+endif()
+
 if(NOT MSVC AND NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
