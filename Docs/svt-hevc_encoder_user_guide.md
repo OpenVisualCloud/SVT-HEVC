@@ -201,11 +201,11 @@ The resulting encoded bit stream file in binary format. If none specified, no ou
 
 >-w integer **[Required]**
 
-The width of each input image in units of picture luma pixels,  e.g. 1920
+The width of each input image in units of picture luma pixels,  e.g. 1920. This value should be a multiple of 8.
 
 >-h integer **[Required]**]
 
-The height of each input image in units of picture luma pixels,  e.g. 1080
+The height of each input image in units of picture luma pixels,  e.g. 1080. This value should be a multiple of 8.
 
 >-n integer **[Optional]**
 
