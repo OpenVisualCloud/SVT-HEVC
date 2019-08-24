@@ -761,7 +761,7 @@ EB_ERRORTYPE InitThreadManagmentParams(){
                     numGroups = socket_id + 1;
                 if (socket_id >= maxSize) {
                     maxSize = maxSize * 2;
-                    lpGroup = realloc(lpGroup,maxSize * sizeof(processorGroup));
+                    lpGroup = (processorGroup*)realloc(lpGroup,maxSize * sizeof(processorGroup));
                     if (lpGroup == (processorGroup*) EB_NULL) 
                         return EB_ErrorInsufficientResources; 
                 }

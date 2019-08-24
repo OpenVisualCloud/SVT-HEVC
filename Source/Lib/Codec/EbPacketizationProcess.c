@@ -898,7 +898,7 @@ void* PacketizationKernel(void *inputPtr)
                         for (EB_U32 i = 0; i < fillerBytes; i++)
                         {
                             ResetBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
-                            OutputBitstreamWrite(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr, 0xff, 8);
+                            OutputBitstreamWrite((OutputBitstreamUnit_t*)queueEntryPtr->bitStreamPtr2->outputBitstreamPtr, 0xff, 8);
                             FlushBitstream(
                                 queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
                             CopyRbspBitstreamToPayload(
@@ -911,7 +911,7 @@ void* PacketizationKernel(void *inputPtr)
                         ResetBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
                         // Byte Align the Bitstream: rbsp_trailing_bits
                         OutputBitstreamWrite(
-                            queueEntryPtr->bitStreamPtr2->outputBitstreamPtr,
+                            (OutputBitstreamUnit_t*)queueEntryPtr->bitStreamPtr2->outputBitstreamPtr,
                             1,
                             1);
                         FlushBitstream(
@@ -924,7 +924,7 @@ void* PacketizationKernel(void *inputPtr)
                             encodeContextPtr, NAL_UNIT_INVALID);
                         ResetBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
                         OutputBitstreamWriteAlignZero(
-                            queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
+                            (OutputBitstreamUnit_t*)queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
                         FlushBitstream(
                             queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
                         CopyRbspBitstreamToPayload(

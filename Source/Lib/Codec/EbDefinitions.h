@@ -208,9 +208,13 @@ API.  This is a 32 bit pointer and is aligned on a 32 bit word boundary.
 */
 typedef void * EB_PTR;
 
-/** The EB_NULL type is used to define the C style NULL pointer.
+/** The EB_NULL type is used to define NULL pointer.
 */
+#ifdef __cplusplus
+#define EB_NULL nullptr
+#else
 #define EB_NULL ((void*) 0)
+#endif
 
 typedef struct EbMemoryMapEntry
 {
