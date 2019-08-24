@@ -19,7 +19,92 @@ link_directories(${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/
     ${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
 
 # Encoder Lib Source Files
+set(Codec_Source
+    EbEncDecProcess.c
+    EbEncDecResults.c
+    EbEncDecSegments.c
+    EbEncDecTasks.c
+    EbEncHandle.c
+    EbEncodeContext.c
+    EbEntropyCodingProcess.c
+    EbEntropyCodingResults.c
+    EbInitialRateControlProcess.c
+    EbInitialRateControlReorderQueue.c
+    EbInitialRateControlResults.c
+    EbModeDecisionConfigurationProcess.c
+    EbModeDecisionProcess.c
+    EbMotionEstimationContext.c
+    EbMotionEstimationProcess.c
+    EbMotionEstimationResults.c
+    EbPacketizationProcess.c
+    EbPacketizationReorderQueue.c
+    EbPictureAnalysisProcess.c
+    EbPictureAnalysisResults.c
+    EbPictureBufferDesc.c
+    EbPictureControlSet.c
+    EbPictureDecisionProcess.c
+    EbPictureDecisionQueue.c
+    EbPictureDecisionReorderQueue.c
+    EbPictureDecisionResults.c
+    EbPictureDemuxResults.c
+    EbPictureManagerProcess.c
+    EbPictureManagerQueue.c
+    EbPictureManagerReorderQueue.c
+    EbRateControlProcess.c
+    EbRateControlResults.c
+    EbRateControlTasks.c
+    EbReferenceObject.c
+    EbResourceCoordinationProcess.c
+    EbResourceCoordinationResults.c
+    EbSequenceControlSet.c
+    EbSourceBasedOperationsProcess.c
+    EbSystemResourceManager.c
+    EbThreads.c
+    EbAdaptiveMotionVectorPrediction.c
+    EbAvailability.c
+    EbAvcStyleMcp.c
+    EbBitstreamUnit.c
+    EbCabacContextModel.c
+    EbCodingLoop.c
+    EbCodingUnit.c
+    EbCoeffEstimation_Intrinsic.c
+    EbDeblockingFilter.c
+    EbEntropyCoding.c
+    EbEntropyCodingUtil.c
+    EbFullLoop.c
+    EbHmCode.c
+    EbInterPrediction.c
+    EbIntraPrediction.c
+    EbMcp.c
+    EbMcpTables.c
+    EbMdRateEstimation.c
+    EbModeDecision.c
+    EbModeDecisionConfiguration.c
+    EbMotionEstimation.c
+    EbNeighborArrays.c
+    EbPictureOperators.c
+    EbPredictionStructure.c
+    EbProductCodingLoop.c
+    EbRateControlTables.c
+    EbRateDistortionCost.c
+    EbSampleAdaptiveOffsetGenerationDecision.c
+    EbSei.c
+    EbTransforms.c
+    EbTransQuantBuffers.c
+    EbUtility.c)
+
+if(COMPILE_AS_CPP)
+    set_source_files_properties(${Codec_Source}
+        PROPERTIES LANGUAGE CXX)
+endif()
+
 add_library(SvtHevcEnc
+    ${Codec_Source}
+    $<TARGET_OBJECTS:HEVC_C_DEFAULT>
+    $<TARGET_OBJECTS:HEVC_ASM_SSE2>
+    $<TARGET_OBJECTS:HEVC_ASM_SSSE3>
+    $<TARGET_OBJECTS:HEVC_ASM_SSE4_1>
+    $<TARGET_OBJECTS:HEVC_ASM_AVX2>
     EbAdaptiveMotionVectorPrediction.h
     EbAvailability.h
     EbAvcStyleMcp.h
@@ -102,84 +187,7 @@ add_library(SvtHevcEnc
     EbTransforms.h
     EbTransformUnit.h
     EbTransQuantBuffers.h
-    EbUtility.h
-    EbEncDecProcess.c
-    EbEncDecResults.c
-    EbEncDecSegments.c
-    EbEncDecTasks.c
-    EbEncHandle.c
-    EbEncodeContext.c
-    EbEntropyCodingProcess.c
-    EbEntropyCodingResults.c
-    EbInitialRateControlProcess.c
-    EbInitialRateControlReorderQueue.c
-    EbInitialRateControlResults.c
-    EbModeDecisionConfigurationProcess.c
-    EbModeDecisionProcess.c
-    EbMotionEstimationContext.c
-    EbMotionEstimationProcess.c
-    EbMotionEstimationResults.c
-    EbPacketizationProcess.c
-    EbPacketizationReorderQueue.c
-    EbPictureAnalysisProcess.c
-    EbPictureAnalysisResults.c
-    EbPictureBufferDesc.c
-    EbPictureControlSet.c
-    EbPictureDecisionProcess.c
-    EbPictureDecisionQueue.c
-    EbPictureDecisionReorderQueue.c
-    EbPictureDecisionResults.c
-    EbPictureDemuxResults.c
-    EbPictureManagerProcess.c
-    EbPictureManagerQueue.c
-    EbPictureManagerReorderQueue.c
-    EbRateControlProcess.c
-    EbRateControlResults.c
-    EbRateControlTasks.c
-    EbReferenceObject.c
-    EbResourceCoordinationProcess.c
-    EbResourceCoordinationResults.c
-    EbSequenceControlSet.c
-    EbSourceBasedOperationsProcess.c
-    EbSystemResourceManager.c
-    EbThreads.c
-    EbAdaptiveMotionVectorPrediction.c
-    EbAvailability.c
-    EbAvcStyleMcp.c
-    EbBitstreamUnit.c
-    EbCabacContextModel.c
-    EbCodingLoop.c
-    EbCodingUnit.c
-    EbCoeffEstimation_Intrinsic.c
-    EbDeblockingFilter.c
-    EbEntropyCoding.c
-    EbEntropyCodingUtil.c
-    EbFullLoop.c
-    EbHmCode.c
-    EbInterPrediction.c
-    EbIntraPrediction.c
-    EbMcp.c
-    EbMcpTables.c
-    EbMdRateEstimation.c
-    EbModeDecision.c
-    EbModeDecisionConfiguration.c
-    EbMotionEstimation.c
-    EbNeighborArrays.c
-    EbPictureOperators.c
-    EbPredictionStructure.c
-    EbProductCodingLoop.c
-    EbRateControlTables.c
-    EbRateDistortionCost.c
-    EbSampleAdaptiveOffsetGenerationDecision.c
-    EbSei.c
-    EbTransforms.c
-    EbTransQuantBuffers.c
-    EbUtility.c
-    $<TARGET_OBJECTS:HEVC_C_DEFAULT>
-    $<TARGET_OBJECTS:HEVC_ASM_SSE2>
-    $<TARGET_OBJECTS:HEVC_ASM_SSSE3>
-    $<TARGET_OBJECTS:HEVC_ASM_SSE4_1>
-    $<TARGET_OBJECTS:HEVC_ASM_AVX2>)
+    EbUtility.h)
 
 if(UNIX)
     set(LIBS "-lpthread")
