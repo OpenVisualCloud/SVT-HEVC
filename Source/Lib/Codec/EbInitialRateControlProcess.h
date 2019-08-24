@@ -10,7 +10,9 @@
 #include "EbSystemResourceManager.h"
 #include "EbRateControlProcess.h"
 
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**************************************
  * Context
@@ -36,4 +38,7 @@ extern void MeBasedGlobalMotionDetection(
     SequenceControlSet_t         *sequenceControlSetPtr,
     PictureParentControlSet_t    *pictureControlSetPtr);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // EbInitialRateControl_h

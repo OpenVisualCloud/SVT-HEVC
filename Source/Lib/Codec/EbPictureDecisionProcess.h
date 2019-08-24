@@ -9,6 +9,10 @@
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**************************************
  * Context
  **************************************/
@@ -56,4 +60,7 @@ extern EB_ERRORTYPE PictureDecisionContextCtor(
 
 extern void* PictureDecisionKernel(void *inputPtr);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // EbPictureDecision_h

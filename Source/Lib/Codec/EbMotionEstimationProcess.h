@@ -11,6 +11,9 @@
 #include "EbSequenceControlSet.h"
 #include "EbPictureControlSet.h"
 #include "EbMotionEstimationContext.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**************************************
  * Context
@@ -42,4 +45,7 @@ extern EB_ERRORTYPE MotionEstimationContextCtor(
 
 extern void* MotionEstimationKernel(void *inputPtr);  
 
+#ifdef __cplusplus
+}
+#endif
 #endif // EbMotionEstimationProcess_h

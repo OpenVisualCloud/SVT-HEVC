@@ -6,12 +6,13 @@
 #ifndef EbDefinitions_h
 #define EbDefinitions_h
 
-//#define BENCHMARK 0
-#define LATENCY_PROFILE 0
 #include "EbApi.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+//#define BENCHMARK 0
+#define LATENCY_PROFILE 0
 // Internal Marcos
 #define NON_AVX512_SUPPORT
 

@@ -8,6 +8,9 @@
 
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**************************************
  * Process Results
@@ -30,4 +33,7 @@ extern EB_ERRORTYPE PictureAnalysisResultCtor(
     EB_PTR objectInitDataPtr);
 
    
+#ifdef __cplusplus
+}
+#endif
 #endif //EbPictureAnalysisResults_h
