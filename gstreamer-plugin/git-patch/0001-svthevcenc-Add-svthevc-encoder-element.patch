@@ -1,4 +1,4 @@
-From bec356845f246158f2d9f377c4b72028312f3a1f Mon Sep 17 00:00:00 2001
+From 517b3d95feead6bc775d01d860d504265bda62b2 Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -9,13 +9,13 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  ext/meson.build                   |    1 +
  ext/svthevcenc/Makefile.am        |   18 +
  ext/svthevcenc/gstsvthevcenc.c    | 1803 +++++++++++++++++++++++++++++++++++++
- ext/svthevcenc/gstsvthevcenc.h    |  118 +++
+ ext/svthevcenc/gstsvthevcenc.h    |  116 +++
  ext/svthevcenc/meson.build        |   18 +
  tests/check/Makefile.am           |    7 +
  tests/check/elements/.gitignore   |    1 +
  tests/check/elements/svthevcenc.c |  228 +++++
  tests/check/meson.build           |    1 +
- 11 files changed, 2213 insertions(+), 2 deletions(-)
+ 11 files changed, 2211 insertions(+), 2 deletions(-)
  create mode 100644 ext/svthevcenc/Makefile.am
  create mode 100644 ext/svthevcenc/gstsvthevcenc.c
  create mode 100644 ext/svthevcenc/gstsvthevcenc.h
@@ -1936,10 +1936,10 @@ index 0000000..b98e19c
 +    plugin_init, VERSION, "GPL", GST_PACKAGE_NAME, GST_PACKAGE_ORIGIN)
 diff --git a/ext/svthevcenc/gstsvthevcenc.h b/ext/svthevcenc/gstsvthevcenc.h
 new file mode 100644
-index 0000000..b9681e2
+index 0000000..8ad57f7
 --- /dev/null
 +++ b/ext/svthevcenc/gstsvthevcenc.h
-@@ -0,0 +1,118 @@
+@@ -0,0 +1,116 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 + *
@@ -1966,8 +1966,6 @@ index 0000000..b9681e2
 +#include <gst/video/video.h>
 +#include <gst/video/gstvideoencoder.h>
 +
-+#include <EbErrorCodes.h>
-+#include <EbTime.h>
 +#include <EbApi.h>
 +
 +G_BEGIN_DECLS
