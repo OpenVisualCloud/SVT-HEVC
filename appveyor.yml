@@ -59,7 +59,7 @@ test_script:
   - ps: (New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/OpenVisualCloud/SVT-AV1-Resources/master/video.tar.gz', "$PWD\video.tar.gz")
   - 7z x -aoa video.tar.gz
   - 7z x -aoa video.tar
-  - SvtHevcEncApp -encMode 9 -i akiyo_cif.y4m -b test1.h265
+  - SvtHevcEncApp -n 50 -encMode 9 -i akiyo_cif.y4m -b test1.h265
 
 cache:
   - 'C:\msys64\home\%USERNAME%\.ccache'
