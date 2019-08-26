@@ -10,6 +10,9 @@
 #include "EbSystemResourceManager.h"
 #include "EbNoiseExtractAVX2.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**************************************
  * Context
@@ -141,5 +144,7 @@ static EB_WEAKCHROMAFILTER_TYPE FUNC_TABLE WeakChromaFilter_funcPtrArray[EB_ASM_
 
 };
 
-
+#ifdef __cplusplus
+}
+#endif
 #endif // EbPictureAnalysis_h

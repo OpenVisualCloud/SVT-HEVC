@@ -49,6 +49,9 @@ echo_help() {
 Usage: $0 [OPTION] ... -- [OPTIONS FOR CMAKE]
 -a, --all, all          Builds release and debug
     --cc, cc=*          Set C compiler [$CC]
+    --cpp, cpp          Compile source files with cpp compiler
+    --cxx, cxx          Set CPP compiler [$CXX], Only makes sense with
+                            --cpp
     --clean, clean      Remove build and Bin folders
     --debug, debug      Build debug
     --shared, shared    Build shared libs
@@ -151,6 +154,14 @@ parse_options() {
             fi
             shift
             ;;
+        cxx=*)
+            if check_executable "${1#*=}"; then
+                CXX="$(check_executable -p "${1#*=}")"
+                export CXX
+            fi
+            shift
+            ;;
+        cpp) CMAKE_EXTRA_FLAGS="$CMAKE_EXTRA_FLAGS -DCOMPILE_AS_CPP=ON" && shift ;;
         clean)
             for d in *; do
                 [ -d "$d" ] && rm -rf "$d"
@@ -218,6 +229,14 @@ else
                 parse_options cc="$2"
                 shift 2
                 ;;
+            cxx)
+                parse_options cxx="$2"
+                shift 2
+                ;;
+            cpp)
+                parse_options cpp
+                shift
+                ;;
             clean)
                 parse_options clean
                 shift
@@ -278,6 +297,14 @@ else
                 ;;
             cc=*)
                 parse_options cc="${1#*=}"
+                shift
+                ;;
+            cxx=*)
+                parse_options cxx="${1#*=}"
+                shift
+                ;;
+            cpp)
+                parse_options cpp
                 shift
                 ;;
             clean)

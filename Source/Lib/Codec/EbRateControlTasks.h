@@ -10,6 +10,9 @@
 #include "EbSystemResourceManager.h"
 #include "EbPictureControlSet.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**************************************
  * Tasks Types
@@ -50,5 +53,7 @@ extern EB_ERRORTYPE RateControlTasksCtor(
     EB_PTR *objectDblPtr, 
     EB_PTR objectInitDataPtr);
 
-
+#ifdef __cplusplus
+}
+#endif
 #endif // EbRateControlTasks_h

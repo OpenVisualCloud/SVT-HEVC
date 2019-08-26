@@ -18,6 +18,9 @@
 #include "EbReferenceObject.h"
 #include "EbNeighborArrays.h"
 #include "EbCodingUnit.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**************************************
  * Enc Dec Context
@@ -93,5 +96,8 @@ extern EB_ERRORTYPE EntropyCodingContextCtor(
     EB_BOOL                  is16bit);
     
 extern void* EntropyCodingKernel(void *inputPtr);
-    
+
+#ifdef __cplusplus
+}
+#endif
 #endif // EbEntropyCodingProcess_h

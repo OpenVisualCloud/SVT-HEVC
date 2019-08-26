@@ -9,6 +9,10 @@
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbNoiseExtractAVX2.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct CuComplexityInfo_s
 {
 	EB_U32 spatioTemporalWeight;
@@ -74,5 +78,7 @@ extern EB_ERRORTYPE SourceBasedOperationsContextCtor(
 
 extern void* SourceBasedOperationsKernel(void *inputPtr);
 
-
+#ifdef __cplusplus
+}
+#endif
 #endif // EbSourceBasedOperations_h

@@ -10,7 +10,9 @@
 #include "EbSystemResourceManager.h"
 #include "EbRateControlTables.h"
 #include "EbPictureControlSet.h"
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 /************************************************
  * Initial Rate Control Reorder Queue Entry
  ************************************************/
@@ -50,4 +52,7 @@ extern EB_ERRORTYPE HlRateControlHistogramEntryCtor(
     HlRateControlHistogramEntry_t   **entryDblPtr,
     EB_U32                            pictureNumber);
 
+#ifdef __cplusplus
+}
+#endif
 #endif //EbInitialRateControlReorderQueue_h

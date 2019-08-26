@@ -8,6 +8,9 @@
 
 #include "EbDefinitions.h"
 #include "EbAdaptiveMotionVectorPrediction.h" 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct EbReferenceObject_s {
     EbPictureBufferDesc_t          *referencePicture;
@@ -69,5 +72,7 @@ extern EB_ERRORTYPE EbPaReferenceObjectCtor(
     EB_PTR *objectDblPtr, 
     EB_PTR objectInitDataPtr);
 
-
+#ifdef __cplusplus
+}
+#endif
 #endif //EbReferenceObject_h

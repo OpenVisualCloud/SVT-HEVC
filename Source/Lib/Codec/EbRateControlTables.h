@@ -8,6 +8,9 @@
 
 #include "EbDefinitions.h"
 #include "EbUtility.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**************************************
  * Rate Control Defines
@@ -57,6 +60,7 @@ extern EB_ERRORTYPE RateControlTablesCtor(
     RateControlTables_t *rateControlTablesArray
 );
 
-
-
+#ifdef __cplusplus
+}
+#endif
 #endif //EbRateControlTables_h

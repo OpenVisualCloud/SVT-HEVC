@@ -7,6 +7,9 @@
 #define EbPictureResults_h
 
 #include "EbSystemResourceManager.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**************************************
  * Enums
@@ -47,5 +50,7 @@ extern EB_ERRORTYPE PictureResultsCtor(
     EB_PTR *objectDblPtr, 
     EB_PTR objectInitDataPtr);
 
-    
+#ifdef __cplusplus
+}
+#endif
 #endif //EbPictureResults_h
