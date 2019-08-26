@@ -1,4 +1,4 @@
-From 36076a5d6faf8e19e1ef8a4eb28bfe096b248c6b Mon Sep 17 00:00:00 2001
+From 6aa6816e6f217e02315e9bbd7cb5c7fc16026192 Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -23,17 +23,17 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  create mode 100644 tests/check/elements/svthevcenc.c
 
 diff --git a/configure.ac b/configure.ac
-index dbd1541..3b25d04 100644
+index dbd1541..3f128d8 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -2107,6 +2107,12 @@ if test "x$HAVE_LTC" = "xyes"; then
    AC_DEFINE(HAVE_LTC, 1, [Use libltc])
  fi
  
-+dnl *** svthevcenc : works with libSVT-HEVC 1.3.0 ***
++dnl *** svthevcenc : works with libSVT-HEVC 1.4.0 ***
 +translit(dnm, m, l) AM_CONDITIONAL(USE_SVTHEVCENC, true)
 +AG_GST_CHECK_FEATURE(SVTHEVCENC, [svthevcenc plug-in], svthevcenc, [
-+  AG_GST_PKG_CHECK_MODULES(SVTHEVCENC, SvtHevcEnc >= 1.3.0)
++  AG_GST_PKG_CHECK_MODULES(SVTHEVCENC, SvtHevcEnc >= 1.4.0)
 +])
 +
  else
@@ -2075,7 +2075,7 @@ index 0000000..92087e2
 +#endif /* __GST_SVTHEVC_ENC_H__ */
 diff --git a/ext/svthevcenc/meson.build b/ext/svthevcenc/meson.build
 new file mode 100644
-index 0000000..941d7ad
+index 0000000..8733aef
 --- /dev/null
 +++ b/ext/svthevcenc/meson.build
 @@ -0,0 +1,18 @@
@@ -2083,7 +2083,7 @@ index 0000000..941d7ad
 +  'gstsvthevcenc.c',
 +]
 +
-+svthevcenc_dep = dependency('SvtHevcEnc', version : '>= 1.3.0', required: false)
++svthevcenc_dep = dependency('SvtHevcEnc', version : '>= 1.4.0', required: false)
 +
 +if svthevcenc_dep.found()
 +  gstsvthevcenc = library('gstsvthevcenc',
