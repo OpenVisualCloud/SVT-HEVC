@@ -19,7 +19,6 @@
 3. [ Sample Application Guide](#sample-application-guide)
     - 3.1 [Input Video Format](#input-video-format)
     - 3.2 [Compressed 10-bit format](#compressed-10-bit-format)
-    - 3.2 [Compressed 10-bit format](#compressed-10-bit-format)
         - 3.2.1 [Unpack the 10 bit picture](#unpack-the-10-bit-picture)
         - 3.2.2 [Compress the 2 bit Plane](#compress-the-2-bit-plane)
         - 3.2.3 [Unroll the 64x64](#unroll-the-64x64)
