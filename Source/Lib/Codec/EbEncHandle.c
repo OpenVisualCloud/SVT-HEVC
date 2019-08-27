@@ -4101,25 +4101,25 @@ EB_ERRORTYPE InitH265EncoderHandle(
     EB_ERRORTYPE       return_error            = EB_ErrorNone;
     EB_COMPONENTTYPE  *h265EncComponent        = (EB_COMPONENTTYPE*) hComponent;
 
-    printf("SVT [version]:\tSVT-HEVC Encoder Lib v%d.%d.%d\n", SVT_VERSION_MAJOR, SVT_VERSION_MINOR,SVT_VERSION_PATCHLEVEL);
+    SVT_LOG("SVT [version]:\tSVT-HEVC Encoder Lib v%d.%d.%d\n", SVT_VERSION_MAJOR, SVT_VERSION_MINOR,SVT_VERSION_PATCHLEVEL);
 #ifdef _MSC_VER
 #if _MSC_VER < 1910
-    printf("SVT [build]  : Visual Studio 2013");
+    SVT_LOG("SVT [build]  : Visual Studio 2013");
 #elif (_MSC_VER >= 1910) && (_MSC_VER < 1920)
-    printf("SVT [build]  :\tVisual Studio 2017");
+    SVT_LOG("SVT [build]  :\tVisual Studio 2017");
 #elif (_MSC_VER >= 1920)
-    printf("SVT [build]  :\tVisual Studio 2019");
+    SVT_LOG("SVT [build]  :\tVisual Studio 2019");
 #else
-    printf("SVT [build]  :\tUnknown Visual Studio Version");
+    SVT_LOG("SVT [build]  :\tUnknown Visual Studio Version");
 #endif
 #elif defined(__GNUC__)
-    printf("SVT [build]  :\tGCC %s\t", __VERSION__);
+    SVT_LOG("SVT [build]  :\tGCC %s\t", __VERSION__);
 #else
-    printf("SVT [build]  :\tunknown compiler");
+    SVT_LOG("SVT [build]  :\tunknown compiler");
 #endif
-    printf(" %u bit\n", (unsigned) sizeof(void*) * 8);
-    printf("LIB Build date: %s %s\n",__DATE__,__TIME__);
-    printf("-------------------------------------------\n");
+    SVT_LOG(" %u bit\n", (unsigned) sizeof(void*) * 8);
+    SVT_LOG("LIB Build date: %s %s\n",__DATE__,__TIME__);
+    SVT_LOG("-------------------------------------------\n");
 
     // Set Component Size & Version
     h265EncComponent->nSize                     = sizeof(EB_COMPONENTTYPE);
