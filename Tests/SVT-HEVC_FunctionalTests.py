@@ -25,10 +25,12 @@ if platform == WINDOWS_PLATFORM_STR:
     slash = '\\'
     exe_name = 'SvtHevcEncApp.exe'
     dec_exe = 'TAppDecoder.exe'
+    mcts_dec_exe = 'MCTS_TAppDecoder.exe'
 else:
     slash = '/'
     exe_name = 'SvtHevcEncApp'
     dec_exe = 'TAppDecoder'
+    mcts_dec_exe = 'MCTS_TAppDecoder'
 
 def get_test_mode(mode):
     if len(mode) <= 1:
@@ -562,10 +564,16 @@ class EB_Test(object):
                             # For the decode and mcts tests see if the encoded file can be decoded.
                             # HM decoder version should have a check to verify that motion vectors are
                             # constrained to same tile, otherwise the decoder fail.
-                            if test_name == 'decode_test' or test_name == "mcts_test":
-                                dec_cmd = enc_params['tools_dir'] + slash + dec_exe + " -b " + enc_params['bitstream_dir'] + slash + bitstream_name + '.265 > NUL'
+                            if test_name == 'decode_test':
+                                dec_cmd = enc_params['tools_dir'] + slash + dec_exe + " -b " + enc_params[
+                                    'bitstream_dir'] + slash + bitstream_name + '.265 > NUL'
                                 print(dec_cmd, file=open(test_name + '.txt', 'a'))
-                                exit_code = subprocess.call(dec_cmd, shell = True)
+                                exit_code = subprocess.call(dec_cmd, shell=True)
+                            elif test_name == "mcts_test":
+                                dec_cmd = enc_params['tools_dir'] + slash + mcts_dec_exe + " -b " + enc_params[
+                                    'bitstream_dir'] + slash + bitstream_name + '.265 > NUL'
+                                print(dec_cmd, file=open(test_name + '.txt', 'a'))
+                                exit_code = subprocess.call(dec_cmd, shell=True)
                     else:
                         continue
                     if COMPARE == 0:
