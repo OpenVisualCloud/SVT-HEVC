@@ -1971,9 +1971,11 @@ EB_API EB_ERRORTYPE EbInitHandle(
     EB_ERRORTYPE           return_error = EB_ErrorNone;
 
     #if  defined(__linux__)
+    if(lpGroup == EB_NULL) {
         lpGroup = (processorGroup*) malloc(sizeof(processorGroup) * INITIAL_PROCESSOR_GROUP);
         if (lpGroup == (processorGroup*) EB_NULL)
             return EB_ErrorInsufficientResources;
+    }
     #endif
 
     *pHandle = (EB_COMPONENTTYPE*) malloc(sizeof(EB_COMPONENTTYPE));
@@ -2040,7 +2042,10 @@ EB_API EB_ERRORTYPE EbDeinitHandle(
     }
 
     #if  defined(__linux__)
+    if(lpGroup != EB_NULL) {
         free(lpGroup);
+        lpGroup = EB_NULL;
+    }
     #endif
 
     return return_error;
