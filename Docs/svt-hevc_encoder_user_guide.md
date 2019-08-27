@@ -19,6 +19,7 @@
 3. [ Sample Application Guide](#sample-application-guide)
     - 3.1 [Input Video Format](#input-video-format)
     - 3.2 [Compressed 10-bit format](#compressed-10-bit-format)
+    - 3.2 [Compressed 10-bit format](#compressed-10-bit-format)
         - 3.2.1 [Unpack the 10 bit picture](#unpack-the-10-bit-picture)
         - 3.2.2 [Compress the 2 bit Plane](#compress-the-2-bit-plane)
         - 3.2.3 [Unroll the 64x64](#unroll-the-64x64)
@@ -201,11 +202,11 @@ The resulting encoded bit stream file in binary format. If none specified, no ou
 
 >-w integer **[Required]**
 
-The width of each input image in units of picture luma pixels,  e.g. 1920. This value should be a multiple of 8.
+The width of each input image in units of picture luma pixels,  e.g. 1920. If width is not a multiple of 8, padding will be added.
 
 >-h integer **[Required]**]
 
-The height of each input image in units of picture luma pixels,  e.g. 1080. This value should be a multiple of 8.
+The height of each input image in units of picture luma pixels,  e.g. 1080. If height is not a multiple of 8, padding will be added.
 
 >-n integer **[Optional]**
 
