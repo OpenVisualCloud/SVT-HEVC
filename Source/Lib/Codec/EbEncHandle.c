@@ -1158,6 +1158,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
 
         inputData.encDecSegmentCol = 0;
         inputData.encDecSegmentRow = 0;
+        inputData.tileGroupCol = 0;
+        inputData.tileGroupRow = 0;
         for(i=0; i <= encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.hierarchicalLevels; ++i) {
             inputData.encDecSegmentCol = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->encDecSegmentColCountArray[i] > inputData.encDecSegmentCol ?
                 (EB_U16) encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->encDecSegmentColCountArray[i] :
@@ -1165,6 +1167,12 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             inputData.encDecSegmentRow = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->encDecSegmentRowCountArray[i] > inputData.encDecSegmentRow ?
                 (EB_U16) encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->encDecSegmentRowCountArray[i] :
                 inputData.encDecSegmentRow;
+            inputData.tileGroupCol= encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->tileGroupColCountArray[i] > inputData.tileGroupCol ?
+                (EB_U16) encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->tileGroupColCountArray[i] :
+                inputData.tileGroupCol;
+            inputData.tileGroupRow = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->tileGroupRowCountArray[i] > inputData.tileGroupRow ?
+                (EB_U16) encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->tileGroupRowCountArray[i] :
+                inputData.tileGroupRow;
         }
 
         inputData.pictureWidth      = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaWidth;
@@ -2090,6 +2098,9 @@ void LoadDefaultBufferConfigurationSettings(
     EB_U32 meSegH = (((sequenceControlSetPtr->maxInputLumaHeight + 32) / MAX_LCU_SIZE) < 6) ? 1 : 6;
     EB_U32 meSegW = (((sequenceControlSetPtr->maxInputLumaWidth + 32) / MAX_LCU_SIZE) < 10) ? 1 : 10;
 
+    EB_U16 tileColCount = sequenceControlSetPtr->staticConfig.tileColumnCount;
+    EB_U16 tileRowCount = sequenceControlSetPtr->staticConfig.tileRowCount;
+
     EB_U32 inputPic = SetParentPcs(&sequenceControlSetPtr->staticConfig);
 
     unsigned int lpCount = GetNumProcessors();
@@ -2147,6 +2158,27 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->encDecSegmentColCountArray[3] = encDecSegW;
     sequenceControlSetPtr->encDecSegmentColCountArray[4] = encDecSegW;
     sequenceControlSetPtr->encDecSegmentColCountArray[5] = encDecSegW;
+
+    // Jing: TODO:
+    // Tune it later, different layer may have different Tile Group
+    EB_U16 tileGroupColCount = tileColCount;// > 1 ? (tileColCount / 2) : 1;
+    EB_U16 tileGroupRowCount = tileRowCount;// > 1 ? (tileRowCount / 2) : 1;
+
+    // Tile group
+    sequenceControlSetPtr->tileGroupColCountArray[0] = tileGroupColCount;
+    sequenceControlSetPtr->tileGroupColCountArray[1] = tileGroupColCount;
+    sequenceControlSetPtr->tileGroupColCountArray[2] = tileGroupColCount;
+    sequenceControlSetPtr->tileGroupColCountArray[3] = tileGroupColCount;
+    sequenceControlSetPtr->tileGroupColCountArray[4] = tileGroupColCount;
+    sequenceControlSetPtr->tileGroupColCountArray[5] = tileGroupColCount;
+
+    sequenceControlSetPtr->tileGroupRowCountArray[0] = tileGroupRowCount;
+    sequenceControlSetPtr->tileGroupRowCountArray[1] = tileGroupRowCount;
+    sequenceControlSetPtr->tileGroupRowCountArray[2] = tileGroupRowCount;
+    sequenceControlSetPtr->tileGroupRowCountArray[3] = tileGroupRowCount;
+    sequenceControlSetPtr->tileGroupRowCountArray[4] = tileGroupRowCount;
+    sequenceControlSetPtr->tileGroupRowCountArray[5] = tileGroupRowCount;
+    printf("---tile group %dx%d\n",tileGroupColCount, tileGroupRowCount);
 
     //#====================== Data Structures and Picture Buffers ======================
     sequenceControlSetPtr->pictureControlSetPoolInitCount       = inputPic;

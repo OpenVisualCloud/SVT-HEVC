@@ -2081,22 +2081,25 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
         SVT_LOG("POC %lld MDC OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
         // Post the results to the MD processes
+        EB_U16 tileGroupRowCnt = sequenceControlSetPtr->tileGroupRowCountArray[pictureControlSetPtr->temporalLayerIndex];
+        EB_U16 tileGroupColCnt = sequenceControlSetPtr->tileGroupColCountArray[pictureControlSetPtr->temporalLayerIndex]; 
 
-        //printf("MDC, post POC %d, decoder order %d\n",
-        //        pictureControlSetPtr->pictureNumber, pictureControlSetPtr->ParentPcsPtr->decodeOrder);
-        for (unsigned tileRowIdx = 0; tileRowIdx < pictureControlSetPtr->ParentPcsPtr->tileRowCount; tileRowIdx++) {
-            // TODO: Too many objects may drain the FIFO and downgrade the perf
-            EbGetEmptyObject(
-                    contextPtr->modeDecisionConfigurationOutputFifoPtr,
-                    &encDecTasksWrapperPtr);
-            encDecTasksPtr = (EncDecTasks_t*) encDecTasksWrapperPtr->objectPtr;
-            encDecTasksPtr->pictureControlSetWrapperPtr = rateControlResultsPtr->pictureControlSetWrapperPtr;
-            encDecTasksPtr->inputType = ENCDEC_TASKS_MDC_INPUT;
-            encDecTasksPtr->tileRowIndex = tileRowIdx;
+        for (EB_U16 r = 0; r < tileGroupRowCnt; r++) {
+            for (EB_U16 c = 0; c < tileGroupColCnt; c++) {
+                unsigned tileGroupIdx = c + r * tileGroupColCnt;
+                EbGetEmptyObject(
+                        contextPtr->modeDecisionConfigurationOutputFifoPtr,
+                        &encDecTasksWrapperPtr);
+                encDecTasksPtr = (EncDecTasks_t*) encDecTasksWrapperPtr->objectPtr;
+                encDecTasksPtr->pictureControlSetWrapperPtr = rateControlResultsPtr->pictureControlSetWrapperPtr;
+                encDecTasksPtr->inputType = ENCDEC_TASKS_MDC_INPUT;
+                encDecTasksPtr->tileGroupIndex = tileGroupIdx;
 
-            // Post the Full Results Object
-            EbPostFullObject(encDecTasksWrapperPtr);
+                // Post the Full Results Object
+                EbPostFullObject(encDecTasksWrapperPtr);
+            }
         }
+
 #if LATENCY_PROFILE
         double latency = 0.0;
         EB_U64 finishTimeSeconds = 0;

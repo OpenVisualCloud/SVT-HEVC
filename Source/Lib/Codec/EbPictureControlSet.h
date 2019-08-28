@@ -175,6 +175,7 @@ typedef struct PictureControlSet_s
 
     EB_HANDLE                             intraMutex;
     EB_U32                                intraCodedArea;
+    EB_BOOL                               resetDone;
     EB_U32                                encDecCodedLcuCount;
 
     // Mode Decision Config
@@ -331,6 +332,18 @@ typedef struct LcuStat_s {
     EB_U8           lowDistLogo;
 
 } LcuStat_t;
+
+//Jing
+//Add logical tile group for parallelism in EncDec stage
+typedef struct TileGroupInfo_s {
+    EB_U16 tileGroupLcuOriginX;
+    EB_U16 tileGroupLcuOriginY;
+    EB_U16 tileGroupLcuEndX;
+    EB_U16 tileGroupLcuEndY;
+    EB_U16 tileGroupWidthInLcu;
+    EB_U16 tileGroupHeightInLcu;
+} TileGroupInfo_t;
+
                     
 //CHKN
 // Add the concept of PictureParentControlSet which is a subset of the old PictureControlSet.
@@ -386,6 +399,7 @@ typedef struct PictureParentControlSet_s
     EB_U16                                pictureHeightInLcu;
 
     TileInfo_t                           *tileInfoArray; //Tile info in raster scan order
+    TileGroupInfo_t                      *tileGroupInfoArray;
     LcuEdgeInfo_t                        *lcuEdgeInfoArray; //LCU tile/picture edge info
 
 
@@ -607,6 +621,8 @@ typedef struct PictureControlSetInitData_s
 	EB_U32                           compressedTenBitFormat;
     EB_U16                           encDecSegmentCol;
     EB_U16                           encDecSegmentRow;
+    EB_U16                           tileGroupCol;
+    EB_U16                           tileGroupRow;
 
 	EB_ENC_MODE                      encMode;
 

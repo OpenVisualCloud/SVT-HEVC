@@ -147,10 +147,14 @@ typedef struct SequenceControlSet_s
     EB_U32                      pictureActivityRegionTh;
 
     // Segments
-    EB_U32                     meSegmentColumnCountArray[MAX_TEMPORAL_LAYERS];
-    EB_U32                     meSegmentRowCountArray[MAX_TEMPORAL_LAYERS];
-    EB_U32                     encDecSegmentColCountArray[MAX_TEMPORAL_LAYERS];
-    EB_U32                     encDecSegmentRowCountArray[MAX_TEMPORAL_LAYERS];
+    EB_U16                     meSegmentColumnCountArray[MAX_TEMPORAL_LAYERS];
+    EB_U16                     meSegmentRowCountArray[MAX_TEMPORAL_LAYERS];
+    EB_U16                     encDecSegmentColCountArray[MAX_TEMPORAL_LAYERS];
+    EB_U16                     encDecSegmentRowCountArray[MAX_TEMPORAL_LAYERS];
+
+    // Tile Group
+    EB_U16                     tileGroupColCountArray[MAX_TEMPORAL_LAYERS];
+    EB_U16                     tileGroupRowCountArray[MAX_TEMPORAL_LAYERS];
 
     // Buffers
     EB_U32                      pictureControlSetPoolInitCount;      
