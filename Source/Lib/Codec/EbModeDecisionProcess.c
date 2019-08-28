@@ -13,9 +13,6 @@
 #include "EbTransforms.h"
 
 
-void PrecomputeCabacCost(CabacCost_t            *CabacCostPtr,
-                         CabacEncodeContext_t   *cabacEncodeCtxPtr);
-
 /******************************************************
  * Mode Decision Context Constructor
  ******************************************************/
