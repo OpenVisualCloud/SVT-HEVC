@@ -18,7 +18,7 @@ For Windows:
 - Install Visual Studio 2017
 - Install msys2-x86_64 to C:\msys64 following instructions found on http://www.msys2.org/
 - Run "C:\msys64\mingw64.exe" to open a msys2 mingw-w64 shell.  All subsequent build steps should be done in this shell.
-- Execute "pacman -S --needed make mingw-w64-x86_64-cmake mingw-w64-x86_64-gcc mingw-w64-x86_64-yasm mingw-w64-x86_64-SDL2 perl diffutils pkgconfig git tar" in the console
+- Execute "pacman -S --needed make mingw-w64-x86_64-cmake mingw-w64-x86_64-gcc mingw-w64-x86_64-yasm mingw-w64-x86_64-SDL2 perl diffutils pkg-config git tar" in the console
 
 1. Build and install SVT-HEVC
 - git clone https://github.com/OpenVisualCloud/SVT-HEVC
