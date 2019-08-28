@@ -185,6 +185,8 @@ void* PacketizationKernel(void *inputPtr)
         queueEntryPtr    = encodeContextPtr->packetizationReorderQueue[queueEntryIndex];
         queueEntryPtr->startTimeSeconds = pictureControlSetPtr->ParentPcsPtr->startTimeSeconds;
         queueEntryPtr->startTimeuSeconds = pictureControlSetPtr->ParentPcsPtr->startTimeuSeconds;
+        queueEntryPtr->isUsedAsReferenceFlag = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag;
+        queueEntryPtr->sliceType = pictureControlSetPtr->sliceType;
 
         //TODO: buffer should be big enough to avoid a deadlock here. Add an assert that make the warning       
         // Get Output Bitstream buffer
@@ -809,11 +811,13 @@ void* PacketizationKernel(void *inputPtr)
                 finishTimeSeconds,
                 finishTimeuSeconds,
                 &latency);
-            //printf("POC %d, PAK out, dts %d, Packetization latency %3.3f\n", outputStreamPtr->pts, outputStreamPtr->dts, latency);
 #if LATENCY_PROFILE
-            SVT_LOG("POC %lld PAK OUT, latency %3.3f\n", outputStreamPtr->pts, latency);
+            SVT_LOG("POC %lu (decoder order %lu) PAK OUT, slice type %d, used as reference %d, latency %3.3f\n",
+                    outputStreamPtr->pts,
+                    queueEntryPtr->pictureNumber, queueEntryPtr->sliceType,
+                    queueEntryPtr->isUsedAsReferenceFlag,
+                    latency);
 #endif
-
             outputStreamPtr->nTickCount = (EB_U32)latency;
             if (sequenceControlSetPtr->staticConfig.pictureTimingSEI) {
                 if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)

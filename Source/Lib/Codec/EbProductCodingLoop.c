@@ -4348,7 +4348,7 @@ void AddChromaEncDec(
 
 }
 
-void PerformFullLoop(
+static void PerformFullLoop(
     PictureControlSet_t     *pictureControlSetPtr,
     LargestCodingUnit_t     *lcuPtr,
     CodingUnit_t            *cuPtr,
