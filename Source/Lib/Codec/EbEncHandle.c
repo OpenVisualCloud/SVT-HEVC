@@ -2161,7 +2161,7 @@ void LoadDefaultBufferConfigurationSettings(
 
     // Jing: TODO:
     // Tune it later, different layer may have different Tile Group
-    EB_U16 tileGroupColCount = tileColCount;// > 1 ? (tileColCount / 2) : 1;
+    EB_U16 tileGroupColCount = 1;//1 col will have better perf for segments
     EB_U16 tileGroupRowCount = tileRowCount;// > 1 ? (tileRowCount / 2) : 1;
 
     // Tile group
@@ -2178,7 +2178,6 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->tileGroupRowCountArray[3] = tileGroupRowCount;
     sequenceControlSetPtr->tileGroupRowCountArray[4] = tileGroupRowCount;
     sequenceControlSetPtr->tileGroupRowCountArray[5] = tileGroupRowCount;
-    printf("---tile group %dx%d\n",tileGroupColCount, tileGroupRowCount);
 
     //#====================== Data Structures and Picture Buffers ======================
     sequenceControlSetPtr->pictureControlSetPoolInitCount       = inputPic;

@@ -1867,19 +1867,6 @@ static void PadRefAndSetFlags(
             refPic16BitPtr->originY >> subHeightCMinus1);   
     }
 
-    // set up TMVP flag for the reference picture
-    referenceObject->tmvpEnableFlag = (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) ? EB_TRUE : EB_FALSE;
-
-    // set up the ref POC
-    referenceObject->refPOC = pictureControlSetPtr->ParentPcsPtr->pictureNumber;
-
-    // set up the QP
-    referenceObject->qp = (EB_U8)pictureControlSetPtr->ParentPcsPtr->pictureQp;
-
-    // set up the Slice Type
-    referenceObject->sliceType = pictureControlSetPtr->ParentPcsPtr->sliceType;
-
-
 }
 
 
@@ -2772,6 +2759,20 @@ void* EncDecKernel(void *inputPtr)
             //this function could be optimized by removed chroma, and unessary TU sizes.
             PrecomputeCabacCost(&(*pictureControlSetPtr->cabacCost),
                     (CabacEncodeContext_t*)pictureControlSetPtr->coeffEstEntropyCoderPtr->cabacEncodeContextPtr);
+            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE) {
+                EbReferenceObject_t   *referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr;
+                // set up TMVP flag for the reference picture
+                referenceObject->tmvpEnableFlag = (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) ? EB_TRUE : EB_FALSE;
+
+                // set up the ref POC
+                referenceObject->refPOC = pictureControlSetPtr->ParentPcsPtr->pictureNumber;
+
+                // set up the QP
+                referenceObject->qp = (EB_U8)pictureControlSetPtr->ParentPcsPtr->pictureQp;
+
+                // set up the Slice Type
+                referenceObject->sliceType = pictureControlSetPtr->ParentPcsPtr->sliceType;
+            }
         }
         EbReleaseMutex(pictureControlSetPtr->intraMutex);
 
@@ -3062,6 +3063,7 @@ void* EncDecKernel(void *inputPtr)
 
             }
 
+
             // Pad the reference picture and set up TMVP flag and ref POC
             if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE) {
                 PadRefAndSetFlags(
@@ -3179,12 +3181,6 @@ void* EncDecKernel(void *inputPtr)
                 if (pictureControlSetPtr->refPicPtrArray[0] != EB_NULL) {
 
                     EbReleaseObject(pictureControlSetPtr->refPicPtrArray[0]);
-#if DEBUG_LIFE_CYCLE
-                    printf("\tED: [%lu] Release ref0 %p, liveCount %d\n",
-                            pictureControlSetPtr->pictureNumber,
-                            pictureControlSetPtr->refPicPtrArray[0],
-                            pictureControlSetPtr->refPicPtrArray[0]->liveCount);
-#endif
                 }
             }
 
@@ -3192,12 +3188,6 @@ void* EncDecKernel(void *inputPtr)
             for (EB_U8 refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList1Count; ++refIdx) {
                 if (pictureControlSetPtr->refPicPtrArray[1] != EB_NULL) {
                     EbReleaseObject(pictureControlSetPtr->refPicPtrArray[1]);
-#if DEBUG_LIFE_CYCLE
-                    printf("\tED: [%lu] Release ref1 %p, liveCount %d\n",
-                            pictureControlSetPtr->pictureNumber,
-                            pictureControlSetPtr->refPicPtrArray[1],
-                            pictureControlSetPtr->refPicPtrArray[1]->liveCount);
-#endif
                 }
             }
         }
