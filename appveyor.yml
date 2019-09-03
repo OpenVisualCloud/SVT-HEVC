@@ -11,13 +11,11 @@ environment:
       CC: gcc
 install:
   - '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64'
-  - ps: (New-Object System.Net.WebClient).DownloadFile('http://repo.msys2.org/distrib/msys2-x86_64-latest.tar.xz', "$PWD\msys2-base.tar.xz")
-  - 7z x -aoa msys2-base.tar.xz
-  - 7z x -aoa msys2-base.tar -oC:\
   - set "PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%"
   - set MSYSTEM=MINGW64
   - set MSYS2_PATH_TYPE=inherit
   - bash -lc 'exit'
+  - pacman -Syyuu --ask=20 --noconfirm --noprogressbar --needed
   - pacman -Sy --ask=20 --noconfirm --noprogressbar --needed mingw-w64-x86_64-yasm mingw-w64-x86_64-ccache mingw-w64-x86_64-cmake mingw-w64-x86_64-gcc mingw-w64-x86_64-ninja
   - cd Build
   - ps: |
@@ -38,6 +36,7 @@ install:
         cmake .. -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE="$configuration"
       }
   - ccache -s
+  - pacman -Sc --noconfirm
 
 for:
   - matrix:
@@ -67,6 +66,7 @@ test_script:
 
 cache:
   - 'C:\Users\appveyor\AppData\Roaming\.ccache'
+  - 'C:\msys64\var\cache\pacman\pkg'
 
 artifacts:
   - path: bin\Release\*.*
