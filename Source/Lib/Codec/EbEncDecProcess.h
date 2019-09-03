@@ -147,8 +147,7 @@ typedef struct EncDecContext_s
     EB_PM_MODE  				    pmMode;     // agressive vs. conservative
     EB_BOOL                         pmMethod;   // 1-stgae   vs. 2-stage 
 
-    EB_U16                          tileRowIndex;
-    EB_U16                          tileIndex;
+    EB_U16                          encDecTileIndex;
     ////
 } EncDecContext_t;
 

@@ -38,7 +38,7 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     EB_PTR objectInitDataPtr)
 {
     EbSequenceControlSetInitData_t *scsInitData = (EbSequenceControlSetInitData_t*) objectInitDataPtr;
-    EB_U32 segmentIndex; 
+    EB_U32 layerIndex; 
     EB_ERRORTYPE return_error = EB_ErrorNone;
     SequenceControlSet_t *sequenceControlSetPtr;
     EB_MALLOC(SequenceControlSet_t*, sequenceControlSetPtr, sizeof(SequenceControlSet_t), EB_N_PTR);
@@ -48,11 +48,13 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     sequenceControlSetPtr->staticConfig.qp                                  = 32;
 
     // Segments
-    for(segmentIndex=0; segmentIndex < MAX_TEMPORAL_LAYERS; ++segmentIndex) {
-        sequenceControlSetPtr->meSegmentColumnCountArray[segmentIndex] = 1;
-        sequenceControlSetPtr->meSegmentRowCountArray[segmentIndex]    = 1;
-        sequenceControlSetPtr->encDecSegmentColCountArray[segmentIndex] = 1;
-        sequenceControlSetPtr->encDecSegmentRowCountArray[segmentIndex]  = 1;
+    for(layerIndex=0; layerIndex < MAX_TEMPORAL_LAYERS; ++layerIndex) {
+        sequenceControlSetPtr->meSegmentColumnCountArray[layerIndex] = 1;
+        sequenceControlSetPtr->meSegmentRowCountArray[layerIndex]    = 1;
+        sequenceControlSetPtr->encDecSegmentColCountArray[layerIndex] = 1;
+        sequenceControlSetPtr->encDecSegmentRowCountArray[layerIndex]  = 1;
+        sequenceControlSetPtr->tileGroupColCountArray[layerIndex] = 1;
+        sequenceControlSetPtr->tileGroupRowCountArray[layerIndex] = 1;
     }
     
     // Encode Context

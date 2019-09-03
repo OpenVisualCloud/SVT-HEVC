@@ -176,32 +176,6 @@ EB_ERRORTYPE ModeDecisionContextCtor(
     return EB_ErrorNone;
 }
 
-/**************************************************
- * Reset Mode Decision Neighbor Arrays
- *************************************************/
-static void ResetModeDecisionNeighborArrays(PictureControlSet_t *pictureControlSetPtr, EB_U32 tileIdx)
-{
-    EB_U8 depth;
-    for (depth = 0; depth < NEIGHBOR_ARRAY_TOTAL_COUNT; depth++) {
-        NeighborArrayUnitReset(pictureControlSetPtr->mdIntraLumaModeNeighborArray[depth][tileIdx]);
-        NeighborArrayUnitReset(pictureControlSetPtr->mdMvNeighborArray[depth][tileIdx]);
-        NeighborArrayUnitReset(pictureControlSetPtr->mdSkipFlagNeighborArray[depth][tileIdx]);
-        NeighborArrayUnitReset(pictureControlSetPtr->mdModeTypeNeighborArray[depth][tileIdx]);
-        NeighborArrayUnitReset(pictureControlSetPtr->mdLeafDepthNeighborArray[depth][tileIdx]);
-    }
-
-    return;
-}
-
-
-static void ResetMdRefinmentNeighborArrays(PictureControlSet_t *pictureControlSetPtr, EB_U32 tileIdx)
-{
-	NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementIntraLumaModeNeighborArray[tileIdx]);
-	NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementModeTypeNeighborArray[tileIdx]);
-    NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementLumaReconNeighborArray[tileIdx]);
-
-	return;
-}
 
 
 extern void lambdaAssignLowDelay(
@@ -311,12 +285,9 @@ const EB_LAMBDA_ASSIGN_FUNC lambdaAssignmentFunctionTable[4]  = {
 void ProductResetModeDecision(
     ModeDecisionContext_t   *contextPtr,
     PictureControlSet_t     *pictureControlSetPtr,
-    SequenceControlSet_t    *sequenceControlSetPtr,
-    EB_U32                   tileRowIndex,
-    EB_U32                   segmentIndex)
+    SequenceControlSet_t    *sequenceControlSetPtr)
 {
 	EB_PICTURE                     sliceType;
-	EB_U32                       lcuRowIndex;
 	MdRateEstimationContext_t   *mdRateEstimationArray;
 	
 	// SAO
@@ -403,25 +374,6 @@ void ProductResetModeDecision(
 
 	// Reset CABAC Contexts
 	contextPtr->coeffEstEntropyCoderPtr = pictureControlSetPtr->coeffEstEntropyCoderPtr;
-
-	// Reset Neighbor Arrays at start of new Segment / Picture
-    // Jing: Current segments will cross tiles
-	if (segmentIndex == 0) {
-        for (unsigned int tileIdx = tileRowIndex * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
-                tileIdx < (tileRowIndex + 1) * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
-                tileIdx++) {
-            ResetModeDecisionNeighborArrays(pictureControlSetPtr, tileIdx);
-            ResetMdRefinmentNeighborArrays(pictureControlSetPtr, tileIdx);
-
-            //Jing: TODO Change to tile
-            //      Used in DLF, need to double check if need tile level parameters
-            for(lcuRowIndex = 0; lcuRowIndex< ((sequenceControlSetPtr->lumaHeight + MAX_LCU_SIZE - 1)/MAX_LCU_SIZE); lcuRowIndex++){
-                pictureControlSetPtr->encPrevCodedQp[tileIdx][lcuRowIndex] = (EB_U8)pictureControlSetPtr->pictureQp;
-                pictureControlSetPtr->encPrevQuantGroupCodedQp[tileIdx][lcuRowIndex] = (EB_U8)pictureControlSetPtr->pictureQp;
-            }
-        }
-
-	}
 
 	return;
 }

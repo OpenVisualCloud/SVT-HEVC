@@ -71,6 +71,7 @@ EB_ERRORTYPE PictureControlSetCtor(
     EB_U32 encDecSegCol = initDataPtr->encDecSegmentCol;
     EB_U16 pictureWidthInLcu = (EB_U16)((initDataPtr->pictureWidth + initDataPtr->lcuSize - 1) / initDataPtr->lcuSize);
     EB_U16 pictureHeightInLcu = (EB_U16)((initDataPtr->pictureHeight + initDataPtr->lcuSize - 1) / initDataPtr->lcuSize);
+    EB_U32 tileGroupCnt = initDataPtr->tileGroupRow * initDataPtr->tileGroupCol;
 
     EB_U16 tileIdx;
     EB_U16 r, c;
@@ -626,17 +627,12 @@ EB_ERRORTYPE PictureControlSetCtor(
     //Jing:
     //Alloc segment per tile group
     // Segments
-    EB_MALLOC(EncDecSegments_t**, objectPtr->encDecSegmentCtrl, sizeof(EncDecSegments_t*) * initDataPtr->tileRowCount, EB_N_PTR);
-    
-    for (tileIdx = 0; tileIdx < initDataPtr->tileRowCount; tileIdx++) {
-        if (totalTileCount > 1) {
-            //Jing: Tuning segments number, put tile info to pps
-            encDecSegRow = pictureHeightInLcu / initDataPtr->tileRowCount;
-            encDecSegCol = pictureWidthInLcu; 
-        }
+    EB_MALLOC(EncDecSegments_t**, objectPtr->encDecSegmentCtrl, sizeof(EncDecSegments_t*) * tileGroupCnt, EB_N_PTR);
 
+    for (EB_U32 tileGroupIdx = 0; tileGroupIdx < tileGroupCnt; tileGroupIdx++) {
+        //Can reduce encDecSegCol and encDecSegRow a bit to save memory
         return_error = EncDecSegmentsCtor(
-                &(objectPtr->encDecSegmentCtrl[tileIdx]),
+                &(objectPtr->encDecSegmentCtrl[tileGroupIdx]),
                 encDecSegCol,
                 encDecSegRow);
         if (return_error == EB_ErrorInsufficientResources){
@@ -666,8 +662,9 @@ EB_ERRORTYPE PictureControlSetCtor(
     EB_CREATEMUTEX(EB_HANDLE, objectPtr->intraMutex, sizeof(EB_HANDLE), EB_MUTEX);
 
     objectPtr->encDecCodedLcuCount = 0;
-    return EB_ErrorNone;
+    objectPtr->resetDone = EB_FALSE;
 
+    return EB_ErrorNone;
 }
 
 
@@ -691,6 +688,8 @@ EB_ERRORTYPE PictureParentControlSetCtor(
     // Jing: Tiles
     EB_U32 totalTileCount = initDataPtr->tileRowCount * initDataPtr->tileColumnCount;
 	EB_MALLOC(TileInfo_t*, objectPtr->tileInfoArray, sizeof(TileInfo_t) * totalTileCount, EB_N_PTR);
+    EB_MALLOC(TileGroupInfo_t*, objectPtr->tileGroupInfoArray, sizeof(TileGroupInfo_t) * totalTileCount, EB_N_PTR);
+
     objectPtr->pictureWidthInLcu = (EB_U16)((initDataPtr->pictureWidth + initDataPtr->lcuSize - 1) / initDataPtr->lcuSize);
     objectPtr->pictureHeightInLcu = (EB_U16)((initDataPtr->pictureHeight + initDataPtr->lcuSize - 1) / initDataPtr->lcuSize);
     objectPtr->tileRowCount = initDataPtr->tileRowCount;

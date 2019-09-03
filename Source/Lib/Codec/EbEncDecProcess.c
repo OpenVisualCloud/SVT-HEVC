@@ -56,7 +56,6 @@ EB_ERRORTYPE EncDecContextCtor(
 
     contextPtr->is16bit = is16bit;
     contextPtr->colorFormat = colorFormat;
-    contextPtr->tileRowIndex = 0;
 
     // Input/Output System Resource Manager FIFOs
     contextPtr->modeDecisionInputFifoPtr = modeDecisionConfigurationInputFifoPtr;
@@ -1300,6 +1299,37 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture16bit(
 /**************************************************
  * Reset Mode Decision Neighbor Arrays
  *************************************************/
+/**************************************************
+ * Reset Mode Decision Neighbor Arrays
+ *************************************************/
+static void ResetModeDecisionNeighborArrays(PictureControlSet_t *pictureControlSetPtr, EB_U32 tileIdx)
+{
+    EB_U8 depth;
+    for (depth = 0; depth < NEIGHBOR_ARRAY_TOTAL_COUNT; depth++) {
+        NeighborArrayUnitReset(pictureControlSetPtr->mdIntraLumaModeNeighborArray[depth][tileIdx]);
+        NeighborArrayUnitReset(pictureControlSetPtr->mdMvNeighborArray[depth][tileIdx]);
+        NeighborArrayUnitReset(pictureControlSetPtr->mdSkipFlagNeighborArray[depth][tileIdx]);
+        NeighborArrayUnitReset(pictureControlSetPtr->mdModeTypeNeighborArray[depth][tileIdx]);
+        NeighborArrayUnitReset(pictureControlSetPtr->mdLeafDepthNeighborArray[depth][tileIdx]);
+        NeighborArrayUnitReset(pictureControlSetPtr->mdLumaReconNeighborArray[depth][tileIdx]);
+        NeighborArrayUnitReset(pictureControlSetPtr->mdCbReconNeighborArray[depth][tileIdx]);
+        NeighborArrayUnitReset(pictureControlSetPtr->mdCrReconNeighborArray[depth][tileIdx]);
+    }
+
+    return;
+}
+
+
+static void ResetMdRefinmentNeighborArrays(PictureControlSet_t *pictureControlSetPtr, EB_U32 tileIdx)
+{
+    NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementIntraLumaModeNeighborArray[tileIdx]);
+    NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementModeTypeNeighborArray[tileIdx]);
+    NeighborArrayUnitReset(pictureControlSetPtr->mdRefinementLumaReconNeighborArray[tileIdx]);
+
+    return;
+}
+
+
 static void ResetEncodePassNeighborArrays(PictureControlSet_t *pictureControlSetPtr, unsigned tileIdx)
 {
     NeighborArrayUnitReset(pictureControlSetPtr->epIntraLumaModeNeighborArray[tileIdx]);
@@ -1320,8 +1350,7 @@ static void ResetEncodePassNeighborArrays(PictureControlSet_t *pictureControlSet
 static void ResetEncDec(
     EncDecContext_t         *contextPtr,
     PictureControlSet_t     *pictureControlSetPtr,
-    SequenceControlSet_t    *sequenceControlSetPtr,
-    EB_U32                   segmentIndex)
+    SequenceControlSet_t    *sequenceControlSetPtr)
 {
     EB_PICTURE                     sliceType;
     MdRateEstimationContext_t   *mdRateEstimationArray;
@@ -1389,30 +1418,6 @@ static void ResetEncDec(
     }
     else {
         entropyCodingQp = pictureControlSetPtr->pictureQp;
-    }
-
-    if (segmentIndex == 0) {
-        //Jing: Double check the entropy context here
-        //      Not good here, better to use a mutex, but should be OK since input from MDC is FIFO
-        if (contextPtr->tileRowIndex == 0) {
-            // Reset CABAC Contexts
-            ResetEntropyCoder(
-                    sequenceControlSetPtr->encodeContextPtr,
-                    pictureControlSetPtr->coeffEstEntropyCoderPtr,
-                    entropyCodingQp,
-                    pictureControlSetPtr->sliceType);
-
-            //this function could be optimized by removed chroma, and unessary TU sizes.
-            PrecomputeCabacCost(&(*pictureControlSetPtr->cabacCost),
-                    (CabacEncodeContext_t*)pictureControlSetPtr->coeffEstEntropyCoderPtr->cabacEncodeContextPtr);
-        }
-
-
-        for (int tileIdx = contextPtr->tileRowIndex * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
-                tileIdx < (contextPtr->tileRowIndex + 1) * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
-                tileIdx++) {
-            ResetEncodePassNeighborArrays(pictureControlSetPtr, tileIdx);
-        }
     }
 
     if (contextPtr->mdContext->coeffCabacUpdate)
@@ -1648,7 +1653,7 @@ static EB_BOOL AssignEncDecSegments(
             feedbackTaskPtr->inputType = ENCDEC_TASKS_ENCDEC_INPUT;
             feedbackTaskPtr->encDecSegmentRow = feedbackRowIndex;
             feedbackTaskPtr->pictureControlSetWrapperPtr = taskPtr->pictureControlSetWrapperPtr;
-            feedbackTaskPtr->tileRowIndex = taskPtr->tileRowIndex;
+            feedbackTaskPtr->tileGroupIndex = taskPtr->tileGroupIndex;
 
             EbPostFullObject(wrapperPtr);
         }
@@ -1861,19 +1866,6 @@ static void PadRefAndSetFlags(
             refPic16BitPtr->originX << (1 - subWidthCMinus1),
             refPic16BitPtr->originY >> subHeightCMinus1);   
     }
-
-    // set up TMVP flag for the reference picture
-    referenceObject->tmvpEnableFlag = (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) ? EB_TRUE : EB_FALSE;
-
-    // set up the ref POC
-    referenceObject->refPOC = pictureControlSetPtr->ParentPcsPtr->pictureNumber;
-
-    // set up the QP
-    referenceObject->qp = (EB_U8)pictureControlSetPtr->ParentPcsPtr->pictureQp;
-
-    // set up the Slice Type
-    referenceObject->sliceType = pictureControlSetPtr->ParentPcsPtr->sliceType;
-
 
 }
 
@@ -2631,6 +2623,7 @@ void* EncDecKernel(void *inputPtr)
     // Context & SCS & PCS
     EncDecContext_t        *contextPtr = (EncDecContext_t*)inputPtr;
     PictureControlSet_t    *pictureControlSetPtr;
+    PictureParentControlSet_t *ppcsPtr;
     SequenceControlSet_t   *sequenceControlSetPtr;
                            
     // Input               
@@ -2648,17 +2641,16 @@ void* EncDecKernel(void *inputPtr)
     EB_U16                  lcuIndex;
     EB_U8                   lcuSize;
     EB_U8                   lcuSizeLog2;
-    EB_U32                  xLcuIndex;
-    EB_U32                  yLcuIndex;
-    EB_U32                  lcuOriginX;
-    EB_U32                  lcuOriginY;
+    EB_U16                  xLcuIndex;
+    EB_U16                  yLcuIndex;
+    EB_U16                  lcuOriginX;
+    EB_U16                  lcuOriginY;
     EB_BOOL                 lastLcuFlag;
-    EB_BOOL                 endOfRowFlag;
+    EB_S32                  lcuRowTileIdx;     //Line ready tile idx
+
     EB_U32                  lcuRowIndexStart;
     EB_U32                  lcuRowIndexCount;
-    EB_U32                  pictureWidthInLcu;
-    EB_U32                  tileRowWidthInLcu;
-    //EB_U32                  currentTileWidthInLcu;
+    EB_U32                  tileGroupWidthInLcu;
     MdcLcuData_t           *mdcPtr;
     // Variables           
     EB_BOOL                 enableSaoFlag = EB_TRUE;
@@ -2676,7 +2668,7 @@ void* EncDecKernel(void *inputPtr)
     EB_U32                  segmentBandIndex;
     EB_U32                  segmentBandSize;
     EncDecSegments_t       *segmentsPtr;
-    EB_U32                  tileX, tileY, tileRowIndex;
+    EB_U32                  tileGroupIdx;
     EB_U32                  tileGroupLcuStartX, tileGroupLcuStartY;
 
 
@@ -2690,19 +2682,18 @@ void* EncDecKernel(void *inputPtr)
 
         encDecTasksPtr = (EncDecTasks_t*)encDecTasksWrapperPtr->objectPtr;
         pictureControlSetPtr = (PictureControlSet_t*)encDecTasksPtr->pictureControlSetWrapperPtr->objectPtr;
+        ppcsPtr = pictureControlSetPtr->ParentPcsPtr;
         sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
         enableSaoFlag = (sequenceControlSetPtr->staticConfig.enableSaoFlag) ? EB_TRUE : EB_FALSE;
-        tileRowIndex = encDecTasksPtr->tileRowIndex;
+        tileGroupIdx = encDecTasksPtr->tileGroupIndex;
 
-        segmentsPtr = pictureControlSetPtr->encDecSegmentCtrl[tileRowIndex];
-        (void)tileX;
-        (void)tileY;
+        segmentsPtr = pictureControlSetPtr->encDecSegmentCtrl[tileGroupIdx];
 
-        contextPtr->tileRowIndex = tileRowIndex;
-        contextPtr->tileIndex = 0;
+        contextPtr->encDecTileIndex = 0;
 
-        tileGroupLcuStartX = tileGroupLcuStartY = 0;
-        tileGroupLcuStartY = pictureControlSetPtr->ParentPcsPtr->tileRowStartLcu[tileRowIndex];
+        tileGroupLcuStartX = ppcsPtr->tileGroupInfoArray[tileGroupIdx].tileGroupLcuOriginX;
+        tileGroupLcuStartY = ppcsPtr->tileGroupInfoArray[tileGroupIdx].tileGroupLcuOriginY;
+
         lastLcuFlag = EB_FALSE;
         is16bit = (EB_BOOL)(sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
 #if DEADLOCK_DEBUG
@@ -2713,10 +2704,7 @@ void* EncDecKernel(void *inputPtr)
         lcuSize = (EB_U8)sequenceControlSetPtr->lcuSize;
         lcuSizeLog2 = (EB_U8)Log2f(lcuSize);
         contextPtr->lcuSize = lcuSize;
-        pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + lcuSize - 1) >> lcuSizeLog2;
-        tileRowWidthInLcu = pictureWidthInLcu;
-        endOfRowFlag = EB_FALSE;
-        lcuRowIndexStart = lcuRowIndexCount = 0;
+        tileGroupWidthInLcu = ppcsPtr->tileGroupInfoArray[tileGroupIdx].tileGroupWidthInLcu;
         contextPtr->totIntraCodedArea = 0;
         contextPtr->codedLcuCount = 0;
 
@@ -2740,14 +2728,72 @@ void* EncDecKernel(void *inputPtr)
             EB_TRUE :
             EB_FALSE;
 
+        // Jing: Reset picture-wise parameters 
+        EbBlockOnMutex(pictureControlSetPtr->intraMutex);
+        if (!pictureControlSetPtr->resetDone) {
+            pictureControlSetPtr->resetDone = EB_TRUE;
+            // Jing: Reset Neighbor Arrays at start of new Segment / Picture
+            EB_U16 tileCnt = pictureControlSetPtr->ParentPcsPtr->tileColumnCount * pictureControlSetPtr->ParentPcsPtr->tileRowCount;
+
+            for (EB_U16 tileIdx = 0; tileIdx < tileCnt; tileIdx++) {
+                // MD neighbors 
+                ResetModeDecisionNeighborArrays(pictureControlSetPtr, tileIdx);
+                ResetMdRefinmentNeighborArrays(pictureControlSetPtr, tileIdx);
+
+                // ED neighbors
+                ResetEncodePassNeighborArrays(pictureControlSetPtr, tileIdx);
+
+                for(EB_U16 lcuRowIndex = 0; lcuRowIndex < ppcsPtr->pictureHeightInLcu; lcuRowIndex++) {
+                    pictureControlSetPtr->encPrevCodedQp[tileIdx][lcuRowIndex] = (EB_U8)pictureControlSetPtr->pictureQp;
+                    pictureControlSetPtr->encPrevQuantGroupCodedQp[tileIdx][lcuRowIndex] = (EB_U8)pictureControlSetPtr->pictureQp;
+                }
+            }
+
+            // Reset CABAC Contexts
+            ResetEntropyCoder(
+                    sequenceControlSetPtr->encodeContextPtr,
+                    pictureControlSetPtr->coeffEstEntropyCoderPtr,
+                    pictureControlSetPtr->pictureQp,
+                    pictureControlSetPtr->sliceType);
+
+            //this function could be optimized by removed chroma, and unessary TU sizes.
+            PrecomputeCabacCost(&(*pictureControlSetPtr->cabacCost),
+                    (CabacEncodeContext_t*)pictureControlSetPtr->coeffEstEntropyCoderPtr->cabacEncodeContextPtr);
+            if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE) {
+                EbReferenceObject_t   *referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr;
+                // set up TMVP flag for the reference picture
+                referenceObject->tmvpEnableFlag = (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag) ? EB_TRUE : EB_FALSE;
+
+                // set up the ref POC
+                referenceObject->refPOC = pictureControlSetPtr->ParentPcsPtr->pictureNumber;
+
+                // set up the QP
+                referenceObject->qp = (EB_U8)pictureControlSetPtr->ParentPcsPtr->pictureQp;
+
+                // set up the Slice Type
+                referenceObject->sliceType = pictureControlSetPtr->ParentPcsPtr->sliceType;
+            }
+        }
+        EbReleaseMutex(pictureControlSetPtr->intraMutex);
+
+
+        // Jing: If it's the last LCU, we should increase the reference count of Child PCS
+        //       Otherwise we may have MT issue.
+        //       entropy/pak finishes early and release the Child PCS while we are still doing SAO
+        EbObjectIncLiveCount(encDecTasksPtr->pictureControlSetWrapperPtr, 1);
+        //EbObjectIncLiveCount(pictureControlSetPtr->ParentPcsPtr->pPcsWrapperPtr, 1);
+
         // Segment-loop
-        while (AssignEncDecSegments(segmentsPtr, &segmentIndex, encDecTasksPtr, contextPtr->encDecFeedbackFifoPtr) == EB_TRUE)
-        {
+        while (AssignEncDecSegments(segmentsPtr, &segmentIndex, encDecTasksPtr, contextPtr->encDecFeedbackFifoPtr) == EB_TRUE) {
+            lcuRowTileIdx = -1;
+            lcuRowIndexStart = 0;
+            lcuRowIndexCount = 0;
+
             // Per tile group(tile row)
             xLcuStartIndex = segmentsPtr->xStartArray[segmentIndex];
             yLcuStartIndex = segmentsPtr->yStartArray[segmentIndex];
 
-            lcuStartIndex = yLcuStartIndex * tileRowWidthInLcu + xLcuStartIndex;
+            lcuStartIndex = yLcuStartIndex * tileGroupWidthInLcu + xLcuStartIndex;
             lcuSegmentCount = segmentsPtr->validLcuCountArray[segmentIndex];
 
             segmentRowIndex = segmentIndex / segmentsPtr->segmentBandCount;
@@ -2759,16 +2805,13 @@ void* EncDecKernel(void *inputPtr)
             ProductResetModeDecision( // HT done 
                     contextPtr->mdContext,
                     pictureControlSetPtr,
-                    sequenceControlSetPtr,
-                    contextPtr->tileRowIndex,
-                    segmentIndex);
+                    sequenceControlSetPtr);
 
             // Reset EncDec Coding State
             ResetEncDec(    // HT done
                     contextPtr,
                     pictureControlSetPtr,
-                    sequenceControlSetPtr,
-                    segmentIndex);
+                    sequenceControlSetPtr);
 
             contextPtr->mdContext->CabacCost = pictureControlSetPtr->cabacCost;
 
@@ -2785,10 +2828,9 @@ void* EncDecKernel(void *inputPtr)
             }
 
             for (yLcuIndex = yLcuStartIndex, lcuSegmentIndex = lcuStartIndex; lcuSegmentIndex < lcuStartIndex + lcuSegmentCount; ++yLcuIndex) {
-                for (xLcuIndex = xLcuStartIndex; xLcuIndex < tileRowWidthInLcu && (xLcuIndex + yLcuIndex < segmentBandSize) && lcuSegmentIndex < lcuStartIndex + lcuSegmentCount; ++xLcuIndex, ++lcuSegmentIndex) {
-
+                for (xLcuIndex = xLcuStartIndex; xLcuIndex < tileGroupWidthInLcu && (xLcuIndex + yLcuIndex < segmentBandSize) && lcuSegmentIndex < lcuStartIndex + lcuSegmentCount; ++xLcuIndex, ++lcuSegmentIndex) {
                     // LCU per picture-wise
-                    lcuIndex = (EB_U16)((tileGroupLcuStartY + yLcuIndex) * pictureWidthInLcu + (tileGroupLcuStartX + xLcuIndex));
+                    lcuIndex = (EB_U16)((tileGroupLcuStartY + yLcuIndex) * ppcsPtr->pictureWidthInLcu + (tileGroupLcuStartX + xLcuIndex));
                     lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuIndex];
                     lcuOriginX = (xLcuIndex+tileGroupLcuStartX) << lcuSizeLog2;
                     lcuOriginY = (yLcuIndex+tileGroupLcuStartY) << lcuSizeLog2;
@@ -2796,14 +2838,15 @@ void* EncDecKernel(void *inputPtr)
                     
                     // Set current LCU tile Index
                     contextPtr->mdContext->tileIndex = lcuPtr->lcuEdgeInfoPtr->tileIndexInRaster;
-                    contextPtr->tileIndex = lcuPtr->lcuEdgeInfoPtr->tileIndexInRaster;
+                    contextPtr->encDecTileIndex = lcuPtr->lcuEdgeInfoPtr->tileIndexInRaster;
 
+                    if (xLcuIndex + tileGroupLcuStartX + 1 == ppcsPtr->tileInfoArray[contextPtr->mdContext->tileIndex].tileLcuEndX) {
+                        // Reach end of line in current tile, store the info
+                        lcuRowTileIdx = contextPtr->mdContext->tileIndex;
+                        lcuRowIndexStart = (lcuRowIndexCount == 0) ? yLcuIndex : lcuRowIndexStart;
+                        lcuRowIndexCount = lcuRowIndexCount + 1;
+                    }
 
-                    endOfRowFlag = (xLcuIndex == tileRowWidthInLcu - 1) ? EB_TRUE : EB_FALSE;
-                    lcuRowIndexStart = (xLcuIndex == tileRowWidthInLcu - 1 && lcuRowIndexCount == 0) ? yLcuIndex : lcuRowIndexStart;
-
-                    // Jing: Send to entropy at tile group ends, not each tile for simplicity
-                    lcuRowIndexCount = (xLcuIndex == tileRowWidthInLcu - 1) ? lcuRowIndexCount + 1 : lcuRowIndexCount;
                     mdcPtr = &pictureControlSetPtr->mdcLcuArray[lcuIndex];
                     contextPtr->lcuIndex = lcuIndex;
 
@@ -2953,6 +2996,30 @@ void* EncDecKernel(void *inputPtr)
                 }
                 xLcuStartIndex = (xLcuStartIndex > 0) ? xLcuStartIndex - 1 : 0;
             }
+
+            // Jing: Send to entropy at end of each segment (if tile line ends) 
+            //       Shall we 
+            //          1). consider the case that one segment will may cover 2 tiles?
+            //          2). Or just assume segments is smaller than tiles
+            //       For simplicity just use the 2). assumption
+            if (lcuRowTileIdx != -1) {
+                // Get Empty EncDec Results
+                EbGetEmptyObject(
+                        contextPtr->encDecOutputFifoPtr,
+                        &encDecResultsWrapperPtr);
+                encDecResultsPtr = (EncDecResults_t*)encDecResultsWrapperPtr->objectPtr;
+                encDecResultsPtr->pictureControlSetWrapperPtr = encDecTasksPtr->pictureControlSetWrapperPtr;
+                // Jing: Need to get the LCU start row according to current tile, not current tile group
+                encDecResultsPtr->completedLcuRowIndexStart =
+                    lcuRowIndexStart + ppcsPtr->tileGroupInfoArray[tileGroupIdx].tileGroupLcuOriginY - ppcsPtr->tileInfoArray[lcuRowTileIdx].tileLcuOriginY;
+                encDecResultsPtr->completedLcuRowCount = lcuRowIndexCount;
+                encDecResultsPtr->tileIndex = lcuRowTileIdx;
+
+                //printf("Post tile %d, line [%d, %d) to entropy\n", lcuRowTileIdx, lcuRowIndexStart, lcuRowIndexStart + lcuRowIndexCount);
+                // Post EncDec Results
+                EbPostFullObject(encDecResultsWrapperPtr);
+            }
+
         }
 
         EbBlockOnMutex(pictureControlSetPtr->intraMutex);
@@ -2995,6 +3062,7 @@ void* EncDecKernel(void *inputPtr)
                 }
 
             }
+
 
             // Pad the reference picture and set up TMVP flag and ref POC
             if (pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_TRUE) {
@@ -3108,39 +3176,26 @@ void* EncDecKernel(void *inputPtr)
 #endif
             }
 
-            // When de interlacing is performed in the lib, each two consecutive pictures (fields: top & bottom) are going to use the same input buffer     
-            // only when both fields are encoded we can free the input buffer
-            // using the current prediction structure, bottom fields are usually encoded after top fields
-            // so that when picture scan type is interlaced we free the input buffer after encoding the bottom field
-            // we are trying to avoid making a such change in the APP (ideally an input buffer live count should be set in the APP (under EB_BUFFERHEADERTYPE data structure))
+            // Release the List 0 Reference Pictures
+            for (EB_U8 refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList0Count; ++refIdx) {
+                if (pictureControlSetPtr->refPicPtrArray[0] != EB_NULL) {
 
+                    EbReleaseObject(pictureControlSetPtr->refPicPtrArray[0]);
+                }
+            }
+
+            // Release the List 1 Reference Pictures
+            for (EB_U8 refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList1Count; ++refIdx) {
+                if (pictureControlSetPtr->refPicPtrArray[1] != EB_NULL) {
+                    EbReleaseObject(pictureControlSetPtr->refPicPtrArray[1]);
+                }
+            }
         }
+        EbReleaseObject(encDecTasksPtr->pictureControlSetWrapperPtr);
 
 #if DEADLOCK_DEBUG
         SVT_LOG("POC %lld ENCDEC OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
-
-        // Send the Entropy Coder incremental updates as each LCU row becomes available
-        {
-            if (endOfRowFlag == EB_TRUE) {
-                for (unsigned int tileIdx = tileRowIndex * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
-                        tileIdx < (tileRowIndex + 1) * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
-                        tileIdx++) {
-                    // Get Empty EncDec Results
-                    EbGetEmptyObject(
-                            contextPtr->encDecOutputFifoPtr,
-                            &encDecResultsWrapperPtr);
-                    encDecResultsPtr = (EncDecResults_t*)encDecResultsWrapperPtr->objectPtr;
-                    encDecResultsPtr->pictureControlSetWrapperPtr = encDecTasksPtr->pictureControlSetWrapperPtr;
-                    encDecResultsPtr->completedLcuRowIndexStart = lcuRowIndexStart;
-                    encDecResultsPtr->completedLcuRowCount = lcuRowIndexCount;
-                    encDecResultsPtr->tileIndex = tileIdx;
-
-                    // Post EncDec Results
-                    EbPostFullObject(encDecResultsWrapperPtr);
-                }
-            }
-        }
 
         // Release Mode Decision Results
         EbReleaseObject(encDecTasksWrapperPtr);

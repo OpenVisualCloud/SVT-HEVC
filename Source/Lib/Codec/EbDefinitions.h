@@ -13,6 +13,7 @@ extern "C" {
 
 //#define BENCHMARK 0
 #define LATENCY_PROFILE 0
+//#define DEBUG_LIFE_CYCLE 0
 // Internal Marcos
 #define NON_AVX512_SUPPORT
 
