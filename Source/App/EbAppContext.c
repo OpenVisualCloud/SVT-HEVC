@@ -207,9 +207,21 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.activeChannelCount = config->activeChannelCount;
     callbackData->ebEncParameters.logicalProcessors = config->logicalProcessors;
     callbackData->ebEncParameters.targetSocket = config->targetSocket;
+    if ((config->threadCount > 0) && (config->threadCount < EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_FACTOR)) {
+        callbackData->ebEncParameters.threadCount = EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_FACTOR;
+        printf("\nWarning: the thread count %u is set too small and is forced to the min value %u\n",
+                config->threadCount, callbackData->ebEncParameters.threadCount);
+    } else {
+        callbackData->ebEncParameters.threadCount = (config->threadCount + EB_THREAD_COUNT_MIN_CORE - 1)
+                                                    / EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_MIN_CORE;
+        if (callbackData->ebEncParameters.threadCount != config->threadCount)
+            printf("\nInformation: the thread count %u is rounded to %u\n",
+                    config->threadCount, callbackData->ebEncParameters.threadCount);
+    }
+
     callbackData->ebEncParameters.unrestrictedMotionVector = config->unrestrictedMotionVector;
-	callbackData->ebEncParameters.bitRateReduction = (uint8_t)config->bitRateReduction;
-	callbackData->ebEncParameters.improveSharpness = (uint8_t)config->improveSharpness;
+    callbackData->ebEncParameters.bitRateReduction = (uint8_t)config->bitRateReduction;
+    callbackData->ebEncParameters.improveSharpness = (uint8_t)config->improveSharpness;
     callbackData->ebEncParameters.videoUsabilityInfo = config->videoUsabilityInfo;
     callbackData->ebEncParameters.highDynamicRangeInput = config->highDynamicRangeInput;
     callbackData->ebEncParameters.accessUnitDelimiter = config->accessUnitDelimiter;

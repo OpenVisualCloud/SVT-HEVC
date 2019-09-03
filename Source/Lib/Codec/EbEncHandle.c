@@ -2105,9 +2105,14 @@ void LoadDefaultBufferConfigurationSettings(
 
     unsigned int lpCount = GetNumProcessors();
     unsigned int coreCount = lpCount;
+
+    unsigned int totalThreadCount;
+    unsigned int threadUnit;
+
 #if defined(_WIN32) || defined(__linux__)
     if (sequenceControlSetPtr->staticConfig.targetSocket != -1)
         coreCount /= numGroups;
+
     if (sequenceControlSetPtr->staticConfig.logicalProcessors != 0)
         coreCount = sequenceControlSetPtr->staticConfig.logicalProcessors < coreCount ?
             sequenceControlSetPtr->staticConfig.logicalProcessors: coreCount;
@@ -2126,6 +2131,23 @@ void LoadDefaultBufferConfigurationSettings(
         sequenceControlSetPtr->staticConfig.logicalProcessors > lpCount / numGroups)
         coreCount = lpCount;
 #endif
+
+    // Thread count computation
+    if (sequenceControlSetPtr->staticConfig.threadCount != 0)
+        totalThreadCount = sequenceControlSetPtr->staticConfig.threadCount;
+    else
+        totalThreadCount = coreCount * EB_THREAD_COUNT_FACTOR;
+
+    if (totalThreadCount < EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_FACTOR) {
+        coreCount = EB_THREAD_COUNT_MIN_CORE;
+        totalThreadCount = coreCount * EB_THREAD_COUNT_FACTOR;
+    }
+
+    if (totalThreadCount % EB_THREAD_COUNT_MIN_CORE) {
+        totalThreadCount = (totalThreadCount + EB_THREAD_COUNT_MIN_CORE - 1)
+                           / EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_MIN_CORE;
+    }
+    threadUnit = totalThreadCount / EB_THREAD_COUNT_MIN_CORE;
 
     sequenceControlSetPtr->inputOutputBufferFifoInitCount = inputPic + SCD_LAD;
 
@@ -2202,14 +2224,15 @@ void LoadDefaultBufferConfigurationSettings(
 
     //#====================== Processes number ======================
     sequenceControlSetPtr->totalProcessInitCount = 0;
-    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->pictureAnalysisProcessInitCount              = MAX(15, coreCount / 6);
-    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->motionEstimationProcessInitCount             = MAX(20, coreCount / 3);
-    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->sourceBasedOperationsProcessInitCount        = MAX(3, coreCount / 12);
-    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount    = MAX(3, coreCount / 12);
-    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->encDecProcessInitCount                       = MAX(40, coreCount);
-    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->entropyCodingProcessInitCount                = MAX(3, coreCount / 6);
-
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->pictureAnalysisProcessInitCount           = threadUnit * 4;
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->motionEstimationProcessInitCount          = threadUnit * 8;
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->sourceBasedOperationsProcessInitCount     = threadUnit * 2;
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount = threadUnit * 2;
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->entropyCodingProcessInitCount             = threadUnit * 4;
     sequenceControlSetPtr->totalProcessInitCount += 6; // single processes count
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->encDecProcessInitCount =
+                                                    totalThreadCount - sequenceControlSetPtr->totalProcessInitCount;
+
     SVT_LOG("Number of logical cores available: %u\nNumber of PPCS %u\n", coreCount, inputPic);
 
     return;
@@ -3238,10 +3261,10 @@ EB_ERRORTYPE EbH265EncInitParameter(
     // ASM Type
     configPtr->asmType = 1;
 
-
     // Channel info
     configPtr->logicalProcessors = 0;
     configPtr->targetSocket = -1;
+    configPtr->threadCount = 0;
     configPtr->channelId = 0;
     configPtr->activeChannelCount   = 1;
 
