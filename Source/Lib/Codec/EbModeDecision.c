@@ -418,37 +418,40 @@ static void LimitMvOverBound(
     EB_S32 endY   = lcuPtr->tileInfoPtr->tilePxlEndY << 2;
     EB_S32 cuSize = (EB_S32)ctxtPtr->cuStats->size << 2;
     EB_S32 pad = (4 << 2);
+    EB_S32 deltaX = 0;
+    EB_S32 deltaY = 0;
+    EB_S32 deltaX16 = 0;
+    EB_S32 deltaY16 = 0;
 
-    //Jing: if MV is quarter/half, the 7,8 tap interpolation will cross the boundary
-    //Just clamp the MV to integer
-
+    //if MV is quarter/half, the 7,8 tap interpolation will cross the boundary
+    //calculate delta for luma/chroma MVs to be integer values
     // Horizontal
-    if (((mvxF % 4) != 0) &&
+    if (((mvxF % 16) != 0) &&
             (cuOriginX + mvxF + cuSize > (endX - pad) || (cuOriginX + mvxF < (startX + pad)))) {
-        //half/quarter interpolation, and cross the boundary, clamp to integer first 
-        mvxF = ((mvxF >> 2) << 2);
+        deltaX = (mvxF % 16);
+        deltaX16 = 16 - deltaX;
     }
 
-    if (cuOriginX + mvxF + cuSize >= endX) {
+    if (cuOriginX + mvxF + deltaX16 + cuSize >= endX) {
         *mvx = endX - cuSize - cuOriginX;
     }
 
-    if (cuOriginX + mvxF < startX) {
+    if (cuOriginX + mvxF - deltaX <= startX) {
         *mvx = startX - cuOriginX;
     }
 
     // Vertical
-    if (((mvyF % 4) != 0) &&
+    if (((mvyF % 16) != 0) &&
             (cuOriginY + mvyF + cuSize > (endY - pad) || (cuOriginY + mvyF < (startY + pad)))) {
-        //half/quarter interpolation, and cross the boundary, clamp to integer first
-        mvyF = ((mvyF >> 2) << 2);
+        deltaY = (mvyF % 16);
+        deltaY16 = 16 - deltaY;
     }
 
-    if (cuOriginY + mvyF + cuSize >= endY) {
+    if (cuOriginY + mvyF + deltaY16 + cuSize >= endY) {
         *mvy = endY - cuSize - cuOriginY;
     }
 
-    if (cuOriginY + mvyF < startY) {
+    if (cuOriginY + mvyF - deltaY <= startY) {
         *mvy = startY - cuOriginY;
     }
 }
