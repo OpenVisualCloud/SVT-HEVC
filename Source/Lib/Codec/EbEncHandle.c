@@ -1020,8 +1020,10 @@ void EbSetThreadManagementParameters(
     if (numGroups == 1) {
         EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
             configPtr->logicalProcessors < numLogicProcessors ? configPtr->logicalProcessors : numLogicProcessors;
-        for(EB_U32 i=0; i<lps; i++)
-            CPU_SET(lpGroup[0].group[i], &groupAffinity);
+            if (configPtr->targetSocket != -1) {
+                for(EB_U32 i=0; i<lps; i++)
+                    CPU_SET(lpGroup[0].group[i], &groupAffinity);
+            }
     }
     else if (numGroups > 1) {
         EB_U32 numLpPerGroup = numLogicProcessors / numGroups;
