@@ -58,9 +58,14 @@ void EncDecSegmentsInit(
 {
     unsigned x, y, yLast;
     unsigned rowIndex, bandIndex, segmentIndex;
+    EB_U32 max_row_count = segmentsPtr->segmentMaxRowCount;
+    EB_U32 max_col_count = segmentsPtr->segmentMaxBandCount - segmentsPtr->segmentMaxRowCount;
 
     segColCount = (segColCount <= picWidthLcu) ? segColCount : picWidthLcu;
+    segColCount = (segColCount <= max_col_count) ? segColCount : max_row_count;
     segRowCount = (segRowCount <= picHeightLcu) ? segRowCount : picHeightLcu;
+    segRowCount = (segRowCount <= max_row_count) ? segRowCount : max_row_count;
+
     segmentsPtr->lcuRowCount = picHeightLcu;
     segmentsPtr->lcuBandCount = BAND_TOTAL_COUNT(picHeightLcu, picWidthLcu);
     segmentsPtr->segmentRowCount = segRowCount;
