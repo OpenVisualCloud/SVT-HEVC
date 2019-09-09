@@ -1,4 +1,4 @@
-From 51a65a6a772cba2d5b030b2094f849ad7523bf59 Mon Sep 17 00:00:00 2001
+From d61986d829fe80870103c3c5788321cec7d54597 Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -8,14 +8,14 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  ext/Makefile.am                   |   12 +-
  ext/meson.build                   |    1 +
  ext/svthevcenc/Makefile.am        |   18 +
- ext/svthevcenc/gstsvthevcenc.c    | 1824 +++++++++++++++++++++++++++++
+ ext/svthevcenc/gstsvthevcenc.c    | 1863 +++++++++++++++++++++++++++++
  ext/svthevcenc/gstsvthevcenc.h    |  116 ++
  ext/svthevcenc/meson.build        |   18 +
  tests/check/Makefile.am           |    7 +
  tests/check/elements/.gitignore   |    1 +
  tests/check/elements/svthevcenc.c |  228 ++++
  tests/check/meson.build           |    1 +
- 11 files changed, 2232 insertions(+), 2 deletions(-)
+ 11 files changed, 2271 insertions(+), 2 deletions(-)
  create mode 100644 ext/svthevcenc/Makefile.am
  create mode 100644 ext/svthevcenc/gstsvthevcenc.c
  create mode 100644 ext/svthevcenc/gstsvthevcenc.h
@@ -127,10 +127,10 @@ index 000000000..6d7f55aa9
 +noinst_HEADERS = gstsvthevcenc.h
 diff --git a/ext/svthevcenc/gstsvthevcenc.c b/ext/svthevcenc/gstsvthevcenc.c
 new file mode 100644
-index 000000000..0ab79a44e
+index 000000000..80b2fe085
 --- /dev/null
 +++ b/ext/svthevcenc/gstsvthevcenc.c
-@@ -0,0 +1,1824 @@
+@@ -0,0 +1,1863 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 + *
@@ -1090,9 +1090,11 @@ index 000000000..0ab79a44e
 +{
 +  EB_BUFFERHEADERTYPE *headerPtr = NULL, *nal = NULL;
 +  EB_ERRORTYPE svt_ret;
-+  gboolean ret = TRUE;
 +  const gchar *level, *tier, *profile;
 +  GstStructure *s;
++  GstCaps *allowed_caps;
++  GstStructure *s2;
++  const gchar *allowed_profile;
 +
 +  GST_DEBUG_OBJECT (encoder, "set profile, level and tier");
 +
@@ -1111,6 +1113,8 @@ index 000000000..0ab79a44e
 +  gst_codec_utils_h265_caps_set_level_tier_and_profile (caps,
 +      nal->pBuffer + 6, nal->nFilledLen - 6);
 +
++  svthevc_nal_free (nal);
++
 +  s = gst_caps_get_structure (caps, 0);
 +  profile = gst_structure_get_string (s, "profile");
 +  tier = gst_structure_get_string (s, "tier");
@@ -1120,9 +1124,44 @@ index 000000000..0ab79a44e
 +  GST_DEBUG_OBJECT (encoder, "tier    : %s", (tier) ? tier : "---");
 +  GST_DEBUG_OBJECT (encoder, "level   : %s", (level) ? level : "---");
 +
-+  svthevc_nal_free (nal);
++  /* Relaxing the profile condition since libSvtHevcEnc can generate
++   * wrong bitstream indication for conformance to profile than requested one.
++   * See : https://github.com/OpenVisualCloud/SVT-HEVC/pull/320
++   */
++  allowed_caps = gst_pad_get_allowed_caps (GST_VIDEO_ENCODER_SRC_PAD (encoder));
 +
-+  return ret;
++  if (allowed_caps == NULL)
++    goto no_peer;
++
++  if (!gst_caps_can_intersect (allowed_caps, caps)) {
++    guint peer_bitdepth = 0;
++    guint peer_chroma_format = 0;
++    guint bitdepth = 0;
++    guint chroma_format = 0;
++
++    allowed_caps = gst_caps_make_writable (allowed_caps);
++    allowed_caps = gst_caps_truncate (allowed_caps);
++    s2 = gst_caps_get_structure (allowed_caps, 0);
++    gst_structure_fixate_field_string (s2, "profile", profile);
++    allowed_profile = gst_structure_get_string (s2, "profile");
++
++    check_formats (allowed_profile, &peer_chroma_format, &peer_bitdepth);
++    check_formats (profile, &chroma_format, &bitdepth);
++
++    if (chroma_format <= peer_chroma_format && bitdepth <= peer_bitdepth) {
++      GST_INFO_OBJECT (encoder, "downstream requested %s profile, but "
++          "encoder will now output %s profile (which is a subset), due "
++          "to how it's been configured", allowed_profile, profile);
++      gst_structure_set (s, "profile", G_TYPE_STRING, allowed_profile, NULL);
++    } else {
++      gst_caps_unref (allowed_caps);
++      return FALSE;
++    }
++  }
++  gst_caps_unref (allowed_caps);
++
++no_peer:
++  return TRUE;
 +}
 +
 +static GstBuffer *
