@@ -1,4 +1,4 @@
-From d61986d829fe80870103c3c5788321cec7d54597 Mon Sep 17 00:00:00 2001
+From f384eea601907fdfd0ac8f32a281b93b78cbd9fd Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -8,14 +8,14 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  ext/Makefile.am                   |   12 +-
  ext/meson.build                   |    1 +
  ext/svthevcenc/Makefile.am        |   18 +
- ext/svthevcenc/gstsvthevcenc.c    | 1863 +++++++++++++++++++++++++++++
+ ext/svthevcenc/gstsvthevcenc.c    | 1865 +++++++++++++++++++++++++++++
  ext/svthevcenc/gstsvthevcenc.h    |  116 ++
  ext/svthevcenc/meson.build        |   18 +
  tests/check/Makefile.am           |    7 +
  tests/check/elements/.gitignore   |    1 +
  tests/check/elements/svthevcenc.c |  228 ++++
  tests/check/meson.build           |    1 +
- 11 files changed, 2271 insertions(+), 2 deletions(-)
+ 11 files changed, 2273 insertions(+), 2 deletions(-)
  create mode 100644 ext/svthevcenc/Makefile.am
  create mode 100644 ext/svthevcenc/gstsvthevcenc.c
  create mode 100644 ext/svthevcenc/gstsvthevcenc.h
@@ -127,10 +127,10 @@ index 000000000..6d7f55aa9
 +noinst_HEADERS = gstsvthevcenc.h
 diff --git a/ext/svthevcenc/gstsvthevcenc.c b/ext/svthevcenc/gstsvthevcenc.c
 new file mode 100644
-index 000000000..80b2fe085
+index 000000000..6096f6cf0
 --- /dev/null
 +++ b/ext/svthevcenc/gstsvthevcenc.c
-@@ -0,0 +1,1863 @@
+@@ -0,0 +1,1865 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 + *
@@ -943,22 +943,24 @@ index 000000000..80b2fe085
 +read_in_data (EB_H265_ENC_CONFIGURATION * config,
 +    FrameData * fdata, EB_BUFFERHEADERTYPE * headerPtr)
 +{
-+  uint8_t is16bit = config->encoderBitDepth > 8;
-+  uint64_t luma_size =
-+      (uint64_t) config->sourceWidth * config->sourceHeight << is16bit;
 +  EB_H265_ENC_INPUT *in_data = (EB_H265_ENC_INPUT *) headerPtr->pBuffer;
 +
 +  in_data->luma = GST_VIDEO_FRAME_PLANE_DATA (&fdata->vframe, 0);
 +  in_data->cb = GST_VIDEO_FRAME_PLANE_DATA (&fdata->vframe, 1);
 +  in_data->cr = GST_VIDEO_FRAME_PLANE_DATA (&fdata->vframe, 2);
 +
-+  in_data->yStride = GST_VIDEO_FRAME_COMP_STRIDE (&fdata->vframe, 0) >> is16bit;
++  in_data->yStride =
++      GST_VIDEO_FRAME_COMP_STRIDE (&fdata->vframe,
++      0) / GST_VIDEO_FRAME_COMP_PSTRIDE (&fdata->vframe, 0);
 +  in_data->cbStride =
-+      GST_VIDEO_FRAME_COMP_STRIDE (&fdata->vframe, 1) >> is16bit;
++      GST_VIDEO_FRAME_COMP_STRIDE (&fdata->vframe,
++      1) / GST_VIDEO_FRAME_COMP_PSTRIDE (&fdata->vframe, 1);
 +  in_data->crStride =
-+      GST_VIDEO_FRAME_COMP_STRIDE (&fdata->vframe, 2) >> is16bit;
++      GST_VIDEO_FRAME_COMP_STRIDE (&fdata->vframe,
++      2) / GST_VIDEO_FRAME_COMP_PSTRIDE (&fdata->vframe, 2);
 +
-+  headerPtr->nAllocLen = headerPtr->nFilledLen = luma_size * 3 / 2u;
++  headerPtr->nAllocLen = headerPtr->nFilledLen =
++      GST_VIDEO_FRAME_SIZE (&fdata->vframe);
 +}
 +
 +/*
