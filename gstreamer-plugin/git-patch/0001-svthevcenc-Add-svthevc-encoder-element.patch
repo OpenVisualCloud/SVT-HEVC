@@ -1,4 +1,4 @@
-From 2191e0446947bcfb217df49a6e5459e1a2a29ee9 Mon Sep 17 00:00:00 2001
+From 0b082bc3b45081cea26633c000aa8c7e65d0993c Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -23,10 +23,10 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  create mode 100644 tests/check/elements/svthevcenc.c
 
 diff --git a/configure.ac b/configure.ac
-index c77000645..5d71ed6f0 100644
+index dbd15419d..3f128d83b 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -2111,6 +2111,12 @@ if test "x$HAVE_LTC" = "xyes"; then
+@@ -2107,6 +2107,12 @@ if test "x$HAVE_LTC" = "xyes"; then
    AC_DEFINE(HAVE_LTC, 1, [Use libltc])
  fi
  
@@ -39,7 +39,7 @@ index c77000645..5d71ed6f0 100644
  else
  
  dnl not building plugins with external dependencies,
-@@ -2192,6 +2198,7 @@ AM_CONDITIONAL(USE_X265, false)
+@@ -2188,6 +2194,7 @@ AM_CONDITIONAL(USE_X265, false)
  AM_CONDITIONAL(USE_DTLS, false)
  AM_CONDITIONAL(USE_TTML, false)
  AM_CONDITIONAL(USE_SCTP, false)
@@ -47,7 +47,7 @@ index c77000645..5d71ed6f0 100644
  
  fi dnl of EXT plugins
  
-@@ -2483,6 +2490,7 @@ ext/webrtc/Makefile
+@@ -2479,6 +2486,7 @@ ext/webrtc/Makefile
  ext/webrtcdsp/Makefile
  ext/wpe/Makefile
  ext/ttml/Makefile
@@ -2421,13 +2421,13 @@ index 000000000..0545b3c68
 +
 +GST_CHECK_MAIN (svthevcenc);
 diff --git a/tests/check/meson.build b/tests/check/meson.build
-index 2218dab00..98183a68b 100644
+index 9ad6439be..76a25f28d 100644
 --- a/tests/check/meson.build
 +++ b/tests/check/meson.build
-@@ -35,6 +35,7 @@ base_tests = [
-   [['elements/mxfdemux.c']],
+@@ -36,6 +36,7 @@ base_tests = [
    [['elements/mxfmux.c']],
    [['elements/nvenc.c'], false, [gmodule_dep, gstgl_dep]],
+   [['elements/nvdec.c'], not gstgl_dep.found(), [gmodule_dep, gstgl_dep]],
 +  [['elements/svthevcenc.c'], not svthevcenc_dep.found(), [svthevcenc_dep]],
    [['elements/pcapparse.c'], false, [libparser_dep]],
    [['elements/pnm.c']],
