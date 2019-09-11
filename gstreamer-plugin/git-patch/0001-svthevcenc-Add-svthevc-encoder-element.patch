@@ -1,4 +1,4 @@
-From 0b082bc3b45081cea26633c000aa8c7e65d0993c Mon Sep 17 00:00:00 2001
+From 5dd397a8945000e72dedb5b970b0e9c29f435a1d Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -8,14 +8,14 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  ext/Makefile.am                   |   12 +-
  ext/meson.build                   |    1 +
  ext/svthevcenc/Makefile.am        |   18 +
- ext/svthevcenc/gstsvthevcenc.c    | 1874 +++++++++++++++++++++++++++++
+ ext/svthevcenc/gstsvthevcenc.c    | 1868 +++++++++++++++++++++++++++++
  ext/svthevcenc/gstsvthevcenc.h    |  116 ++
  ext/svthevcenc/meson.build        |   18 +
  tests/check/Makefile.am           |    7 +
  tests/check/elements/.gitignore   |    1 +
  tests/check/elements/svthevcenc.c |  228 ++++
  tests/check/meson.build           |    1 +
- 11 files changed, 2282 insertions(+), 2 deletions(-)
+ 11 files changed, 2276 insertions(+), 2 deletions(-)
  create mode 100644 ext/svthevcenc/Makefile.am
  create mode 100644 ext/svthevcenc/gstsvthevcenc.c
  create mode 100644 ext/svthevcenc/gstsvthevcenc.h
@@ -127,10 +127,10 @@ index 000000000..6d7f55aa9
 +noinst_HEADERS = gstsvthevcenc.h
 diff --git a/ext/svthevcenc/gstsvthevcenc.c b/ext/svthevcenc/gstsvthevcenc.c
 new file mode 100644
-index 000000000..e61fbbe05
+index 000000000..7230e439b
 --- /dev/null
 +++ b/ext/svthevcenc/gstsvthevcenc.c
-@@ -0,0 +1,1874 @@
+@@ -0,0 +1,1868 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 + *
@@ -808,12 +808,6 @@ index 000000000..e61fbbe05
 +gst_svthevc_enc_finalize (GObject * object)
 +{
 +  GstSvtHevcEnc *encoder = GST_SVTHEVC_ENC (object);
-+
-+  if (encoder->input_state)
-+    gst_video_codec_state_unref (encoder->input_state);
-+  encoder->input_state = NULL;
-+
-+  gst_svthevc_enc_close_encoder (encoder);
 +
 +  if (encoder->in_buf) {
 +    EB_H265_ENC_INPUT *in_data = (EB_H265_ENC_INPUT *) encoder->in_buf->pBuffer;
