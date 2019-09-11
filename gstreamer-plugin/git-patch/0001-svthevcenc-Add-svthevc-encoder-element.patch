@@ -1,4 +1,4 @@
-From 5dd397a8945000e72dedb5b970b0e9c29f435a1d Mon Sep 17 00:00:00 2001
+From 7ce46057db9daae39a188352c89c0397c2945a3d Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -8,14 +8,14 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  ext/Makefile.am                   |   12 +-
  ext/meson.build                   |    1 +
  ext/svthevcenc/Makefile.am        |   18 +
- ext/svthevcenc/gstsvthevcenc.c    | 1868 +++++++++++++++++++++++++++++
- ext/svthevcenc/gstsvthevcenc.h    |  116 ++
+ ext/svthevcenc/gstsvthevcenc.c    | 1878 +++++++++++++++++++++++++++++
+ ext/svthevcenc/gstsvthevcenc.h    |  117 ++
  ext/svthevcenc/meson.build        |   18 +
  tests/check/Makefile.am           |    7 +
  tests/check/elements/.gitignore   |    1 +
  tests/check/elements/svthevcenc.c |  228 ++++
  tests/check/meson.build           |    1 +
- 11 files changed, 2276 insertions(+), 2 deletions(-)
+ 11 files changed, 2287 insertions(+), 2 deletions(-)
  create mode 100644 ext/svthevcenc/Makefile.am
  create mode 100644 ext/svthevcenc/gstsvthevcenc.c
  create mode 100644 ext/svthevcenc/gstsvthevcenc.h
@@ -127,10 +127,10 @@ index 000000000..6d7f55aa9
 +noinst_HEADERS = gstsvthevcenc.h
 diff --git a/ext/svthevcenc/gstsvthevcenc.c b/ext/svthevcenc/gstsvthevcenc.c
 new file mode 100644
-index 000000000..7230e439b
+index 000000000..b49fbca3a
 --- /dev/null
 +++ b/ext/svthevcenc/gstsvthevcenc.c
-@@ -0,0 +1,1868 @@
+@@ -0,0 +1,1878 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 + *
@@ -700,6 +700,7 @@ index 000000000..7230e439b
 +
 +  encoder->svthevc_version = (const gchar *) g_string_free (string, FALSE);
 +  encoder->push_header = TRUE;
++  encoder->first_buffer = TRUE;
 +}
 +
 +typedef struct
@@ -1013,6 +1014,7 @@ index 000000000..7230e439b
 +  }
 +
 +  encoder->push_header = TRUE;
++  encoder->first_buffer = TRUE;
 +  encoder->reconfig = FALSE;
 +
 +  /* good start, will be corrected if needed */
@@ -1622,6 +1624,13 @@ index 000000000..7230e439b
 +out:
 +  if (!headerPtr) {
 +    EB_BUFFERHEADERTYPE headerPtrLast;
++
++    if (encoder->first_buffer) {
++      GST_DEBUG_OBJECT (encoder, "No need to send eos buffer");
++      encoder->svt_eos_flag = EOS_TOTRIGGER;
++      return GST_FLOW_OK;
++    }
++
 +    headerPtrLast.nAllocLen = 0;
 +    headerPtrLast.nFilledLen = 0;
 +    headerPtrLast.nTickCount = 0;
@@ -1635,6 +1644,7 @@ index 000000000..7230e439b
 +  } else {
 +    GST_INFO_OBJECT (encoder, "encode frame");
 +    svt_ret = EbH265EncSendPicture (encoder->svt_handle, headerPtr);
++    encoder->first_buffer = FALSE;
 +  }
 +
 +  GST_DEBUG_OBJECT (encoder, "encoder result (%d)", svt_ret);
@@ -2001,10 +2011,10 @@ index 000000000..7230e439b
 +    plugin_init, VERSION, "GPL", GST_PACKAGE_NAME, GST_PACKAGE_ORIGIN)
 diff --git a/ext/svthevcenc/gstsvthevcenc.h b/ext/svthevcenc/gstsvthevcenc.h
 new file mode 100644
-index 000000000..8ad57f7f4
+index 000000000..5a2bdcd14
 --- /dev/null
 +++ b/ext/svthevcenc/gstsvthevcenc.h
-@@ -0,0 +1,116 @@
+@@ -0,0 +1,117 @@
 +/* GStreamer H265 encoder plugin
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 + *
@@ -2069,6 +2079,7 @@ index 000000000..8ad57f7f4
 +
 +  GstClockTime dts_offset;
 +  gboolean push_header;
++  gboolean first_buffer;
 +
 +  /* List of frame/buffer mapping structs for
 +   * pending frames */
