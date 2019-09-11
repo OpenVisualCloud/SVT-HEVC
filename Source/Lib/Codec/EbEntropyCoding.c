@@ -4978,7 +4978,7 @@ static void CodeProfileTier(
         // "general_max_8bit_constraint_flag"
         WriteFlagCavlc(
            bitstreamPtr,
-           (scsPtr->encoderBitDepth <= EB_8BIT && scsPtr->chromaFormatIdc != EB_YUV422));
+           (scsPtr->encoderBitDepth <= EB_8BIT));
 
         // "general_max_422chroma_constraint_flag"
         WriteFlagCavlc(
