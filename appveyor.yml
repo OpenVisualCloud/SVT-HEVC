@@ -117,3 +117,5 @@ deploy:
     prerelease: true
     on:
       appveyor_repo_tag: true
+      generator: Visual Studio 2019
+      configuration: Release
