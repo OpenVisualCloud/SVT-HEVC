@@ -99,6 +99,7 @@
 #define ASM_TYPE_TOKEN				    "-asm" // no Eval
 #define THREAD_MGMNT                    "-lp"
 #define TARGET_SOCKET                   "-ss"
+#define THREAD_COUNT                    "-thread-count"
 #define SWITCHTHREADSTOREALTIME_TOKEN   "-rt"
 #define FPSINVPS_TOKEN                  "-fpsinvps"
 #define UNRESTRICTED_MOTION_VECTOR      "-umv"
@@ -265,6 +266,7 @@ static void SetAsmType                          (const char *value, EbConfig_t *
 static void SetLogicalProcessors                (const char *value, EbConfig_t *cfg)  {cfg->logicalProcessors               = (uint32_t)strtoul(value, NULL, 0);};
 static void SetTargetSocket                     (const char *value, EbConfig_t *cfg)  {cfg->targetSocket                    = (int32_t)strtol(value, NULL, 0);};
 static void SetSwitchThreadsToRtPriority        (const char *value, EbConfig_t *cfg)  {cfg->switchThreadsToRtPriority       = (EB_BOOL)strtol(value, NULL, 0);};
+static void SetThreadCount                      (const char *value, EbConfig_t *cfg)  {cfg->threadCount                     = (uint32_t)strtoul(value, NULL, 0); };
 static void SetFpsInVps                         (const char *value, EbConfig_t *cfg)  {cfg->fpsInVps                        = (EB_BOOL)strtol(value, NULL, 0);};
 static void SetUnrestrictedMotionVector         (const char *value, EbConfig_t *cfg)  {cfg->unrestrictedMotionVector        = (EB_BOOL)strtol(value, NULL, 0);};
 
@@ -415,6 +417,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, ASM_TYPE_TOKEN, "AsmType", SetAsmType },
     { SINGLE_INPUT, TARGET_SOCKET, "TargetSocket", SetTargetSocket },
     { SINGLE_INPUT, THREAD_MGMNT, "LogicalProcessors", SetLogicalProcessors },
+    { SINGLE_INPUT, THREAD_COUNT, "ThreadCount", SetThreadCount },
 
     // Termination
     { SINGLE_INPUT, NULL, NULL, NULL }
@@ -557,6 +560,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->asmType                              = 1;
     configPtr->targetSocket                         = -1;
     configPtr->logicalProcessors                    = 0;
+    configPtr->threadCount                          = 0;
 
     // vbv
     configPtr->vbvMaxRate                           = 0;

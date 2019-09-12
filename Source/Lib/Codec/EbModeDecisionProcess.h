@@ -308,9 +308,8 @@ extern const EB_LAMBDA_ASSIGN_FUNC lambdaAssignmentFunctionTable[4];
 extern void ProductResetModeDecision(
     ModeDecisionContext_t   *contextPtr,
     PictureControlSet_t     *pictureControlSetPtr,
-    SequenceControlSet_t    *sequenceControlSetPtr,
-    EB_U32                   tileRowIndex,
-    EB_U32                   segmentIndex);
+    SequenceControlSet_t    *sequenceControlSetPtr);
+
 extern void ModeDecisionConfigureLcu(
     ModeDecisionContext_t   *contextPtr,
     LargestCodingUnit_t     *lcuPtr,

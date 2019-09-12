@@ -18,6 +18,9 @@ extern "C" {
 #define EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT     2
 #define EB_HME_SEARCH_AREA_ROW_MAX_COUNT        2
 
+#define EB_THREAD_COUNT_MIN_CORE               48
+#define EB_THREAD_COUNT_FACTOR                  2
+
 #ifdef _WIN32
 #define EB_API __declspec(dllexport)
 #else
@@ -560,6 +563,8 @@ typedef struct EB_H265_ENC_CONFIGURATION
      * Default is 1. */
     uint8_t                 switchThreadsToRtPriority;
 
+    /* The total number of working threads to create. */
+    uint32_t                threadCount;
 
     // ASM Type
     

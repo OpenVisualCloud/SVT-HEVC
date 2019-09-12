@@ -6,12 +6,14 @@
 #ifndef EbDefinitions_h
 #define EbDefinitions_h
 
-//#define BENCHMARK 0
-#define LATENCY_PROFILE 0
 #include "EbApi.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+//#define BENCHMARK 0
+#define LATENCY_PROFILE 0
+//#define DEBUG_LIFE_CYCLE 0
 // Internal Marcos
 #define NON_AVX512_SUPPORT
 
@@ -208,9 +210,13 @@ API.  This is a 32 bit pointer and is aligned on a 32 bit word boundary.
 */
 typedef void * EB_PTR;
 
-/** The EB_NULL type is used to define the C style NULL pointer.
+/** The EB_NULL type is used to define NULL pointer.
 */
+#ifdef __cplusplus
+#define EB_NULL nullptr
+#else
 #define EB_NULL ((void*) 0)
+#endif
 
 typedef struct EbMemoryMapEntry
 {

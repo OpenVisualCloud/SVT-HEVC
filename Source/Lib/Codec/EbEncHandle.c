@@ -481,8 +481,8 @@ typedef struct logicalProcessorGroup {
     uint32_t num;
     uint32_t group[1024];
 }processorGroup;
-#define MAX_PROCESSOR_GROUP 16
-processorGroup                   lpGroup[MAX_PROCESSOR_GROUP];
+#define INITIAL_PROCESSOR_GROUP 16
+processorGroup                  *lpGroup = EB_NULL;
 #endif
 
 /**************************************
@@ -734,9 +734,10 @@ EB_ERRORTYPE InitThreadManagmentParams(){
     const char* PHYSICALID = "physical id";
     int processor_id_len = strnlen_ss(PROCESSORID, 128);
     int physical_id_len = strnlen_ss(PHYSICALID, 128);
+    int maxSize = INITIAL_PROCESSOR_GROUP;
     if (processor_id_len < 0 || processor_id_len >= 128) return EB_ErrorInsufficientResources;
     if (physical_id_len < 0 || physical_id_len >= 128) return EB_ErrorInsufficientResources;
-    memset(lpGroup, 0, 16* sizeof(processorGroup));
+    memset(lpGroup, 0, INITIAL_PROCESSOR_GROUP * sizeof(processorGroup));
 
     FILE *fin = fopen("/proc/cpuinfo", "r");
     if (fin) {
@@ -752,12 +753,18 @@ EB_ERRORTYPE InitThreadManagmentParams(){
                 char* p = line + physical_id_len;
                 while(*p < '0' || *p > '9') p++;
                 socket_id = strtol(p, NULL, 0);
-                if (socket_id < 0 || socket_id > 15) {
+                if (socket_id < 0) {
                     fclose(fin);
                     return EB_ErrorInsufficientResources;
                 }
                 if (socket_id + 1 > numGroups)
                     numGroups = socket_id + 1;
+                if (socket_id >= maxSize) {
+                    maxSize = maxSize * 2;
+                    lpGroup = (processorGroup*)realloc(lpGroup,maxSize * sizeof(processorGroup));
+                    if (lpGroup == (processorGroup*) EB_NULL) 
+                        return EB_ErrorInsufficientResources; 
+                }
                 lpGroup[socket_id].group[lpGroup[socket_id].num++] = processor_id;
             }
         }
@@ -1013,8 +1020,10 @@ void EbSetThreadManagementParameters(
     if (numGroups == 1) {
         EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
             configPtr->logicalProcessors < numLogicProcessors ? configPtr->logicalProcessors : numLogicProcessors;
-        for(EB_U32 i=0; i<lps; i++)
-            CPU_SET(lpGroup[0].group[i], &groupAffinity);
+            if (configPtr->targetSocket != -1) {
+                for(EB_U32 i=0; i<lps; i++)
+                    CPU_SET(lpGroup[0].group[i], &groupAffinity);
+            }
     }
     else if (numGroups > 1) {
         EB_U32 numLpPerGroup = numLogicProcessors / numGroups;
@@ -1151,6 +1160,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
 
         inputData.encDecSegmentCol = 0;
         inputData.encDecSegmentRow = 0;
+        inputData.tileGroupCol = 0;
+        inputData.tileGroupRow = 0;
         for(i=0; i <= encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.hierarchicalLevels; ++i) {
             inputData.encDecSegmentCol = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->encDecSegmentColCountArray[i] > inputData.encDecSegmentCol ?
                 (EB_U16) encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->encDecSegmentColCountArray[i] :
@@ -1158,6 +1169,12 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             inputData.encDecSegmentRow = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->encDecSegmentRowCountArray[i] > inputData.encDecSegmentRow ?
                 (EB_U16) encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->encDecSegmentRowCountArray[i] :
                 inputData.encDecSegmentRow;
+            inputData.tileGroupCol= encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->tileGroupColCountArray[i] > inputData.tileGroupCol ?
+                (EB_U16) encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->tileGroupColCountArray[i] :
+                inputData.tileGroupCol;
+            inputData.tileGroupRow = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->tileGroupRowCountArray[i] > inputData.tileGroupRow ?
+                (EB_U16) encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->tileGroupRowCountArray[i] :
+                inputData.tileGroupRow;
         }
 
         inputData.pictureWidth      = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaWidth;
@@ -1171,7 +1188,12 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         inputData.lcuSize           = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lcuSize;
         inputData.maxDepth          = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxLcuDepth;
         inputData.is16bit           = is16bit;
+        inputData.compressedTenBitFormat = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.compressedTenBitFormat;
+        inputData.tileRowCount = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.tileRowCount;
+        inputData.tileColumnCount = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.tileColumnCount;
 
+        inputData.encMode = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.encMode;
+        inputData.speedControl = (EB_U8)encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.speedControlFlag;
         return_error = EbSystemResourceCtor(
             &(encHandlePtr->pictureControlSetPoolPtrArray[instanceIndex]),
             encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->pictureControlSetPoolInitCountChild, //EB_PictureControlSetPoolInitCountChild,
@@ -1958,6 +1980,14 @@ EB_API EB_ERRORTYPE EbInitHandle(
 {
     EB_ERRORTYPE           return_error = EB_ErrorNone;
 
+    #if  defined(__linux__)
+    if(lpGroup == EB_NULL) {
+        lpGroup = (processorGroup*) malloc(sizeof(processorGroup) * INITIAL_PROCESSOR_GROUP);
+        if (lpGroup == (processorGroup*) EB_NULL)
+            return EB_ErrorInsufficientResources;
+    }
+    #endif
+
     *pHandle = (EB_COMPONENTTYPE*) malloc(sizeof(EB_COMPONENTTYPE));
     if (*pHandle != (EB_HANDLETYPE) NULL) {
 
@@ -2021,6 +2051,13 @@ EB_API EB_ERRORTYPE EbDeinitHandle(
         return_error = EB_ErrorInvalidComponent;
     }
 
+    #if  defined(__linux__)
+    if(lpGroup != EB_NULL) {
+        free(lpGroup);
+        lpGroup = EB_NULL;
+    }
+    #endif
+
     return return_error;
 }
 
@@ -2063,13 +2100,21 @@ void LoadDefaultBufferConfigurationSettings(
     EB_U32 meSegH = (((sequenceControlSetPtr->maxInputLumaHeight + 32) / MAX_LCU_SIZE) < 6) ? 1 : 6;
     EB_U32 meSegW = (((sequenceControlSetPtr->maxInputLumaWidth + 32) / MAX_LCU_SIZE) < 10) ? 1 : 10;
 
+    EB_U16 tileColCount = sequenceControlSetPtr->staticConfig.tileColumnCount;
+    EB_U16 tileRowCount = sequenceControlSetPtr->staticConfig.tileRowCount;
+
     EB_U32 inputPic = SetParentPcs(&sequenceControlSetPtr->staticConfig);
 
     unsigned int lpCount = GetNumProcessors();
     unsigned int coreCount = lpCount;
+
+    unsigned int totalThreadCount;
+    unsigned int threadUnit;
+
 #if defined(_WIN32) || defined(__linux__)
     if (sequenceControlSetPtr->staticConfig.targetSocket != -1)
         coreCount /= numGroups;
+
     if (sequenceControlSetPtr->staticConfig.logicalProcessors != 0)
         coreCount = sequenceControlSetPtr->staticConfig.logicalProcessors < coreCount ?
             sequenceControlSetPtr->staticConfig.logicalProcessors: coreCount;
@@ -2088,6 +2133,23 @@ void LoadDefaultBufferConfigurationSettings(
         sequenceControlSetPtr->staticConfig.logicalProcessors > lpCount / numGroups)
         coreCount = lpCount;
 #endif
+
+    // Thread count computation
+    if (sequenceControlSetPtr->staticConfig.threadCount != 0)
+        totalThreadCount = sequenceControlSetPtr->staticConfig.threadCount;
+    else
+        totalThreadCount = coreCount * EB_THREAD_COUNT_FACTOR;
+
+    if (totalThreadCount < EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_FACTOR) {
+        coreCount = EB_THREAD_COUNT_MIN_CORE;
+        totalThreadCount = coreCount * EB_THREAD_COUNT_FACTOR;
+    }
+
+    if (totalThreadCount % EB_THREAD_COUNT_MIN_CORE) {
+        totalThreadCount = (totalThreadCount + EB_THREAD_COUNT_MIN_CORE - 1)
+                           / EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_MIN_CORE;
+    }
+    threadUnit = totalThreadCount / EB_THREAD_COUNT_MIN_CORE;
 
     sequenceControlSetPtr->inputOutputBufferFifoInitCount = inputPic + SCD_LAD;
 
@@ -2121,6 +2183,26 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->encDecSegmentColCountArray[4] = encDecSegW;
     sequenceControlSetPtr->encDecSegmentColCountArray[5] = encDecSegW;
 
+    // Jing: TODO:
+    // Tune it later, different layer may have different Tile Group
+    EB_U16 tileGroupColCount = 1;//1 col will have better perf for segments
+    EB_U16 tileGroupRowCount = tileRowCount;// > 1 ? (tileRowCount / 2) : 1;
+
+    // Tile group
+    sequenceControlSetPtr->tileGroupColCountArray[0] = tileGroupColCount;
+    sequenceControlSetPtr->tileGroupColCountArray[1] = tileGroupColCount;
+    sequenceControlSetPtr->tileGroupColCountArray[2] = tileGroupColCount;
+    sequenceControlSetPtr->tileGroupColCountArray[3] = tileGroupColCount;
+    sequenceControlSetPtr->tileGroupColCountArray[4] = tileGroupColCount;
+    sequenceControlSetPtr->tileGroupColCountArray[5] = tileGroupColCount;
+
+    sequenceControlSetPtr->tileGroupRowCountArray[0] = tileGroupRowCount;
+    sequenceControlSetPtr->tileGroupRowCountArray[1] = tileGroupRowCount;
+    sequenceControlSetPtr->tileGroupRowCountArray[2] = tileGroupRowCount;
+    sequenceControlSetPtr->tileGroupRowCountArray[3] = tileGroupRowCount;
+    sequenceControlSetPtr->tileGroupRowCountArray[4] = tileGroupRowCount;
+    sequenceControlSetPtr->tileGroupRowCountArray[5] = tileGroupRowCount;
+
     //#====================== Data Structures and Picture Buffers ======================
     sequenceControlSetPtr->pictureControlSetPoolInitCount       = inputPic;
     sequenceControlSetPtr->pictureControlSetPoolInitCountChild  = MAX(4, coreCount / 6);
@@ -2144,14 +2226,15 @@ void LoadDefaultBufferConfigurationSettings(
 
     //#====================== Processes number ======================
     sequenceControlSetPtr->totalProcessInitCount = 0;
-    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->pictureAnalysisProcessInitCount              = MAX(15, coreCount / 6);
-    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->motionEstimationProcessInitCount             = MAX(20, coreCount / 3);
-    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->sourceBasedOperationsProcessInitCount        = MAX(3, coreCount / 12);
-    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount    = MAX(3, coreCount / 12);
-    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->encDecProcessInitCount                       = MAX(40, coreCount);
-    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->entropyCodingProcessInitCount                = MAX(3, coreCount / 6);
-
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->pictureAnalysisProcessInitCount           = threadUnit * 4;
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->motionEstimationProcessInitCount          = threadUnit * 8;
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->sourceBasedOperationsProcessInitCount     = threadUnit * 2;
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount = threadUnit * 2;
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->entropyCodingProcessInitCount             = threadUnit * 4;
     sequenceControlSetPtr->totalProcessInitCount += 6; // single processes count
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->encDecProcessInitCount =
+                                                    totalThreadCount - sequenceControlSetPtr->totalProcessInitCount;
+
     SVT_LOG("Number of logical cores available: %u\nNumber of PPCS %u\n", coreCount, inputPic);
 
     return;
@@ -3180,10 +3263,10 @@ EB_ERRORTYPE EbH265EncInitParameter(
     // ASM Type
     configPtr->asmType = 1;
 
-
     // Channel info
     configPtr->logicalProcessors = 0;
     configPtr->targetSocket = -1;
+    configPtr->threadCount = 0;
     configPtr->channelId = 0;
     configPtr->activeChannelCount   = 1;
 
@@ -4079,25 +4162,25 @@ EB_ERRORTYPE InitH265EncoderHandle(
     EB_ERRORTYPE       return_error            = EB_ErrorNone;
     EB_COMPONENTTYPE  *h265EncComponent        = (EB_COMPONENTTYPE*) hComponent;
 
-    printf("SVT [version]:\tSVT-HEVC Encoder Lib v%d.%d.%d\n", SVT_VERSION_MAJOR, SVT_VERSION_MINOR,SVT_VERSION_PATCHLEVEL);
+    SVT_LOG("SVT [version]:\tSVT-HEVC Encoder Lib v%d.%d.%d\n", SVT_VERSION_MAJOR, SVT_VERSION_MINOR,SVT_VERSION_PATCHLEVEL);
 #ifdef _MSC_VER
 #if _MSC_VER < 1910
-    printf("SVT [build]  : Visual Studio 2013");
+    SVT_LOG("SVT [build]  : Visual Studio 2013");
 #elif (_MSC_VER >= 1910) && (_MSC_VER < 1920)
-    printf("SVT [build]  :\tVisual Studio 2017");
+    SVT_LOG("SVT [build]  :\tVisual Studio 2017");
 #elif (_MSC_VER >= 1920)
-    printf("SVT [build]  :\tVisual Studio 2019");
+    SVT_LOG("SVT [build]  :\tVisual Studio 2019");
 #else
-    printf("SVT [build]  :\tUnknown Visual Studio Version");
+    SVT_LOG("SVT [build]  :\tUnknown Visual Studio Version");
 #endif
 #elif defined(__GNUC__)
-    printf("SVT [build]  :\tGCC %s\t", __VERSION__);
+    SVT_LOG("SVT [build]  :\tGCC %s\t", __VERSION__);
 #else
-    printf("SVT [build]  :\tunknown compiler");
+    SVT_LOG("SVT [build]  :\tunknown compiler");
 #endif
-    printf(" %u bit\n", (unsigned) sizeof(void*) * 8);
-    printf("LIB Build date: %s %s\n",__DATE__,__TIME__);
-    printf("-------------------------------------------\n");
+    SVT_LOG(" %u bit\n", (unsigned) sizeof(void*) * 8);
+    SVT_LOG("LIB Build date: %s %s\n",__DATE__,__TIME__);
+    SVT_LOG("-------------------------------------------\n");
 
     // Set Component Size & Version
     h265EncComponent->nSize                     = sizeof(EB_COMPONENTTYPE);

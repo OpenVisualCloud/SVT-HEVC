@@ -22,6 +22,10 @@
 #include "EbPredictionStructure.h"
 #include "EbRateControlTables.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // *Note - the queues are small for testing purposes.  They should be increased when they are done.
 #define PRE_ASSIGNMENT_MAX_DEPTH                    128     // should be large enough to hold an entire prediction period
 #define INPUT_QUEUE_MAX_DEPTH                       5000
@@ -173,5 +177,7 @@ extern EB_ERRORTYPE EncodeContextCtor(
     EB_PTR *objectDblPtr, 
     EB_PTR objectInitDataPtr);
     
-
+#ifdef __cplusplus
+}
+#endif
 #endif // EbEncodeContext_h

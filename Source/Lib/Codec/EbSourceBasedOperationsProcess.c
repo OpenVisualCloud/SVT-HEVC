@@ -316,7 +316,8 @@ static void CalculateAcEnergy(
 	EB_U8       *meanPtr = pictureControlSetPtr->yMean[lcuIndex];
 	inputOriginIndex = (lcuParams->originY + inputPicturePtr->originY) * inputLumaStride + (lcuParams->originX + inputPicturePtr->originX);
 
-	if (lcuParams->isCompleteLcu && pictureControlSetPtr->sliceType == EB_I_PICTURE){
+	if (lcuParams->isCompleteLcu && pictureControlSetPtr->sliceType == EB_I_PICTURE &&
+            pictureControlSetPtr->predStructure != EB_PRED_LOW_DELAY_P) {
 
 		EB_U32 inputCuOriginIndex;
 		EB_U32 cuNum, cuSize;

@@ -111,7 +111,7 @@ void EbInjector(
         QueryPerformanceFrequency(&counterFreq);
         QueryPerformanceCounter(&startCount);
 #else
-        EbStartTime((uint64_t*)&startTimesSeconds, (uint64_t*)&startTimesuSeconds);
+        EbAppStartTime((uint64_t*)&startTimesSeconds, (uint64_t*)&startTimesuSeconds);
 #endif
     }
     else
@@ -121,8 +121,8 @@ void EbInjector(
         QueryPerformanceCounter(&nowCount);
         elapsedTime = (double)(nowCount.QuadPart - startCount.QuadPart) / (double)counterFreq.QuadPart;
 #else
-        EbFinishTime((uint64_t*)&currentTimesSeconds, (uint64_t*)&currentTimesuSeconds);
-        EbComputeOverallElapsedTime(startTimesSeconds, startTimesuSeconds, currentTimesSeconds, currentTimesuSeconds, &elapsedTime);
+        EbAppFinishTime((uint64_t*)&currentTimesSeconds, (uint64_t*)&currentTimesuSeconds);
+        EbAppComputeOverallElapsedTime(startTimesSeconds, startTimesuSeconds, currentTimesSeconds, currentTimesuSeconds, &elapsedTime);
 #endif
 
         predictedTime = (processedFrameCount - bufferFrames) * injectorInterval;

@@ -3,6 +3,9 @@
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #define MACRO_VERTICAL_LUMA_8(ARG1, ARG2, ARG3)\
     _mm_storeu_si128((__m128i *)predictionPtr, _mm_or_si128(_mm_and_si128(ARG1, ARG2), ARG3));\
     ARG1 = _mm_srli_si128(ARG1, 2);\
@@ -30,3 +33,7 @@
     ARG4  = _mm_unpacklo_epi##ARG1(ARG4, ARG5);\
     ARG6  = _mm_unpacklo_epi##ARG1(ARG6, ARG7);\
     ARG8  = _mm_unpacklo_epi##ARG1(ARG8, ARG9);
+
+#ifdef __cplusplus
+}
+#endif

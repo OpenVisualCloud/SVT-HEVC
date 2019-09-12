@@ -479,7 +479,6 @@ void* EntropyCodingKernel(void *inputPtr)
 					// If the picture is complete, terminate the slice
 					if (pictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingCurrentRow == pictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingRowCount)
 					{
-						EB_U32 refIdx;
                         EB_BOOL pic_ready = EB_TRUE;
 
                         //assert(lastLcuFlagInTile == EB_TRUE);
@@ -507,22 +506,6 @@ void* EntropyCodingKernel(void *inputPtr)
                         EbReleaseMutex(pictureControlSetPtr->entropyCodingPicMutex);
 
                         if (pic_ready) {
-                            // Release the List 0 Reference Pictures
-                            for (refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList0Count; ++refIdx) {
-                                if (pictureControlSetPtr->refPicPtrArray[0] != EB_NULL) {
-
-                                    EbReleaseObject(pictureControlSetPtr->refPicPtrArray[0]);
-                                }
-                            }
-
-                            // Release the List 1 Reference Pictures
-                            for (refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList1Count; ++refIdx) {
-                                if (pictureControlSetPtr->refPicPtrArray[1] != EB_NULL) {
-
-                                    EbReleaseObject(pictureControlSetPtr->refPicPtrArray[1]);
-                                }
-                            }
-
                             // Get Empty Entropy Coding Results
                             EbGetEmptyObject(
                                     contextPtr->entropyCodingOutputFifoPtr,
