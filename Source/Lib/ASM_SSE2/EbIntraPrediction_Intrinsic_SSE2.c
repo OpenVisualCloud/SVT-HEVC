@@ -939,3 +939,93 @@ void IntraModePlanar16bit_SSE2_INTRIN(
         }
     }
 }
+
+void IntraModeVerticalChroma_SSE2_INTRIN(
+    const EB_U32      size,                   //input parameter, denotes the size of the current PU
+    EB_U8            *refSamples,             //input parameter, pointer to the reference samples
+    EB_U8            *predictionPtr,          //output parameter, pointer to the prediction
+    const EB_U32      predictionBufferStride, //input parameter, denotes the stride for the prediction ptr
+    const EB_BOOL     skip)                   //skip one row
+{
+    EB_U32 pStride = predictionBufferStride;
+    EB_U32 topOffset = (size << 1) + 1;
+
+    if (!skip) {
+        if (size == 16) {
+            __m128i xmm0 = _mm_loadu_si128((__m128i *)(refSamples + topOffset));
+            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);
+            predictionPtr = predictionPtr + (pStride << 2);
+            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);
+            predictionPtr = predictionPtr + (pStride << 2);
+            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);
+            predictionPtr = predictionPtr + (pStride << 2);
+            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);
+        } else if (size == 8) {
+            __m128i xmm0 = _mm_loadl_epi64((__m128i *)(refSamples + topOffset));
+            _mm_storel_epi64((__m128i *)(predictionPtr), xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), xmm0);
+            predictionPtr = predictionPtr + (pStride << 2);
+            _mm_storel_epi64((__m128i *)predictionPtr, xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), xmm0);
+        } else {
+            EB_U32 top = *(EB_U32*)(refSamples + topOffset);
+            *(EB_U32*)(predictionPtr) = top;
+            *(EB_U32*)(predictionPtr + pStride) = top;
+            *(EB_U32*)(predictionPtr + 2 * pStride) = top;
+            *(EB_U32*)(predictionPtr + 3 * pStride) = top;
+        }
+    } else {
+        pStride <<= 1;
+        if (size == 32) {
+            EB_U32 columnIndex, rowIndex;
+            EB_U32 writeIndex;
+            EB_U32 topOffset = (size << 1) + 1;
+            EB_U32 rowStride = skip ? 2 : 1;
+
+            for (columnIndex = 0; columnIndex < size; ++columnIndex) {
+                writeIndex = columnIndex;
+                for (rowIndex = 0; rowIndex < size; rowIndex += rowStride) {
+                    predictionPtr[writeIndex] = refSamples[topOffset + columnIndex];
+                    writeIndex += rowStride * predictionBufferStride;
+                }
+            }
+        } else if (size == 16) {
+            __m128i xmm0 = _mm_loadu_si128((__m128i *)(refSamples + topOffset));
+            _mm_storeu_si128((__m128i *)(predictionPtr), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);
+            predictionPtr = predictionPtr + (pStride << 2);
+            _mm_storeu_si128((__m128i *)(predictionPtr), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);
+        } else if (size == 8) {
+            __m128i xmm0 = _mm_loadl_epi64((__m128i *)(refSamples + topOffset));
+            _mm_storel_epi64((__m128i *)predictionPtr, xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), xmm0);
+        } else {
+            EB_U32 top = *(EB_U32*)(refSamples + topOffset);
+            *(EB_U32*)(predictionPtr) = top;
+            *(EB_U32*)(predictionPtr + pStride) = top;
+        }
+    }
+}

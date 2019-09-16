@@ -3680,6 +3680,7 @@ EB_ERRORTYPE IntraPredictionCl(
 
     (void) pictureControlSetPtr;
 
+    EB_U8 funcIdx = 0;
 
     CHECK_REPORT_ERROR(
 		(puWidth == puHeight),
@@ -3839,25 +3840,32 @@ EB_ERRORTYPE IntraPredictionCl(
             break;
 
         case 2:
-              
+            if (!!(ASM_TYPES & PREAVX2_MASK)) {
+                if (chromaPuSize != 32)
+                    funcIdx = 1;
+                else
+                    funcIdx = 2;
+            } else
+                funcIdx = 0;
+
             // Cb Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-                IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
-                    chromaPuSize,
-                    contextPtr->cbIntraReferenceArray,
-                    &(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
-                    candidateBufferPtr->predictionPtr->strideCb,
-                    EB_FALSE);
+                IntraVerticalChroma_funcPtrArray[funcIdx](
+                        chromaPuSize,
+                        contextPtr->cbIntraReferenceArray,
+                        &(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
+                        candidateBufferPtr->predictionPtr->strideCb,
+                        EB_FALSE);
             }
-       
+
             // Cr Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-				IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
-                    chromaPuSize,
-                    contextPtr->crIntraReferenceArray,
-                    &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
-                    candidateBufferPtr->predictionPtr->strideCr,
-                    EB_FALSE);
+                IntraVerticalChroma_funcPtrArray[funcIdx](
+                        chromaPuSize,
+                        contextPtr->crIntraReferenceArray,
+                        &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
+                        candidateBufferPtr->predictionPtr->strideCr,
+                        EB_FALSE);
             }
 
             break;
@@ -3992,6 +4000,8 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
 
     (void) puIndex;
     (void)pictureControlSetPtr;
+
+    EB_U8 funcIdx = 0;
 
     CHECK_REPORT_ERROR(
 		(puWidth == puHeight),
@@ -4135,25 +4145,32 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
             break;
 
         case 2:
-              
+            if (!!(ASM_TYPES & PREAVX2_MASK)) {
+                if (chromaPuSize != 32)
+                    funcIdx = 1;
+                else
+                    funcIdx = 2;
+            } else
+                funcIdx = 0;
+
             // Cb Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-				IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
-                    chromaPuSize,
-                    contextPtr->cbIntraReferenceArray,
-                    &(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
-                    candidateBufferPtr->predictionPtr->strideCb,
-                    EB_FALSE);
+                IntraVerticalChroma_funcPtrArray[funcIdx](
+                        chromaPuSize,
+                        contextPtr->cbIntraReferenceArray,
+                        &(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
+                        candidateBufferPtr->predictionPtr->strideCb,
+                        EB_FALSE);
             }
-       
+
             // Cr Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-				IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
-                    chromaPuSize,
-                    contextPtr->crIntraReferenceArray,
-                    &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
-                    candidateBufferPtr->predictionPtr->strideCr,
-                    EB_FALSE);
+                IntraVerticalChroma_funcPtrArray[funcIdx](
+                        chromaPuSize,
+                        contextPtr->crIntraReferenceArray,
+                        &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
+                        candidateBufferPtr->predictionPtr->strideCr,
+                        EB_FALSE);
             }
 
             break;
@@ -4388,6 +4405,8 @@ EB_ERRORTYPE EncodePassIntraPrediction(
     EB_U16 subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
     EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
 
+    EB_U8 funcIdx = 0;
+
     //***********************************
     // Luma
     //***********************************
@@ -4528,22 +4547,29 @@ EB_ERRORTYPE EncodePassIntraPrediction(
             break;
 
         case EB_INTRA_VERTICAL:
-              
+            if (!!(ASM_TYPES & PREAVX2_MASK)) {
+                if (puChromaSize != 32)
+                    funcIdx = 1;
+                else
+                    funcIdx = 2;
+            } else
+                funcIdx = 0;
+
             // Cb Intra Prediction
-			IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
-                puChromaSize,
-                cbIntraReferenceArrayReverse,
-                predictionPtr->bufferCb + chromaOffset,
-                predictionPtr->strideCb,
-                EB_FALSE);
-       
+            IntraVerticalChroma_funcPtrArray[funcIdx](
+                    puChromaSize,
+                    cbIntraReferenceArrayReverse,
+                    predictionPtr->bufferCb + chromaOffset,
+                    predictionPtr->strideCb,
+                    EB_FALSE);
+
             // Cr Intra Prediction
-			IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
-                puChromaSize,
-                crIntraReferenceArrayReverse,
-                predictionPtr->bufferCr + chromaOffset,
-                predictionPtr->strideCr,
-                EB_FALSE);
+            IntraVerticalChroma_funcPtrArray[funcIdx](
+                    puChromaSize,
+                    crIntraReferenceArrayReverse,
+                    predictionPtr->bufferCr + chromaOffset,
+                    predictionPtr->strideCr,
+                    EB_FALSE);
 
             break;
 
@@ -5404,6 +5430,8 @@ EB_ERRORTYPE IntraPredictionOl(
     const EB_U32 puSize        = puWidth;
     const EB_U32 puIndex = mdContextPtr->puItr;
       
+    EB_U8 funcIdx = 0;
+
     // Map the mode to the function table index
     EB_U32 funcIndex =
         (openLoopIntraCandidateIndex < 2)                        ?       openLoopIntraCandidateIndex  :
@@ -5547,10 +5575,17 @@ EB_ERRORTYPE IntraPredictionOl(
 			break;
 
 		case 2:
+			if (!!(ASM_TYPES & PREAVX2_MASK)) {
+				if (chromaPuSize != 32)
+					funcIdx = 1;
+				else
+					funcIdx = 2;
+			} else
+				funcIdx = 0;
 
 			// Cb Intra Prediction
 			if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-				IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+				IntraVerticalChroma_funcPtrArray[funcIdx](
 					chromaPuSize,
 					intraRefPtr->cbIntraReferenceArray,
 					&(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
@@ -5560,7 +5595,7 @@ EB_ERRORTYPE IntraPredictionOl(
 
 			// Cr Intra Prediction
 			if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-				IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+				IntraVerticalChroma_funcPtrArray[funcIdx](
 					chromaPuSize,
 					intraRefPtr->crIntraReferenceArray,
 					&(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),

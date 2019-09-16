@@ -485,9 +485,11 @@ static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraVerticalLuma_16bit_funcPtrArray
     IntraModeVerticalLuma16bit_SSE2_INTRIN,
 };
 
-static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraVerticalChroma_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
+static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraVerticalChroma_funcPtrArray[3] = {
     // C_DEFAULT
     IntraModeVerticalChroma,
+    // SSE2
+    IntraModeVerticalChroma_SSE2_INTRIN,
     // AVX2
     IntraModeVerticalChroma_AVX2_INTRIN,
 };

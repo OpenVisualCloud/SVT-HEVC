@@ -106,6 +106,12 @@ void IntraModeAngular16bit_Horizontal_Kernel_SSE2_INTRIN(
     const EB_BOOL  skip,
     EB_S32         intraPredAngle);
 
+void IntraModeVerticalChroma_SSE2_INTRIN(
+    const EB_U32      size,                   //input parameter, denotes the size of the current PU
+    EB_U8            *refSamples,             //input parameter, pointer to the reference samples
+    EB_U8            *predictionPtr,          //output parameter, pointer to the prediction
+    const EB_U32      predictionBufferStride, //input parameter, denotes the stride for the prediction ptr
+    const EB_BOOL     skip);                  //skip one row
 
 #ifdef __cplusplus
 }
