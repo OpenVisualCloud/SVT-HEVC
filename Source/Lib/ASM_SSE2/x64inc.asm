@@ -323,3 +323,17 @@ bits 64
   %endif
 %endmacro
 %define NEED_EMMS 1
+
+%define FORMAT_ELF 0
+%ifidn __OUTPUT_FORMAT__,elf
+    %define FORMAT_ELF 1
+%elifidn __OUTPUT_FORMAT__,elf32
+    %define FORMAT_ELF 1
+%elifidn __OUTPUT_FORMAT__,elf64
+    %define FORMAT_ELF 1
+%endif
+
+; This is needed for ELF, otherwise the GNU linker assumes the stack is executable by default.
+%if FORMAT_ELF
+    [SECTION .note.GNU-stack noalloc noexec nowrite progbits]
+%endif

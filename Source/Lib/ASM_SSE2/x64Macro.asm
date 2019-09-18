@@ -28,3 +28,17 @@
     punpckl%1       xmm%8,          xmm%9       ; 67 66 65 64 63 62 61 60     73 63 72 62 71 61 70 60     75 65 55 45 74 64 54 44      76 66 56 46 36 26 16 06
     punpckh%1       xmm%13,         xmm%9       ; 77 76 75 74 73 72 71 70     77 67 76 66 75 65 74 64     77 67 57 47 76 66 56 46      77 67 57 47 37 27 17 07
 %endmacro
+
+%define FORMAT_ELF 0
+%ifidn __OUTPUT_FORMAT__,elf
+    %define FORMAT_ELF 1
+%elifidn __OUTPUT_FORMAT__,elf32
+    %define FORMAT_ELF 1
+%elifidn __OUTPUT_FORMAT__,elf64
+    %define FORMAT_ELF 1
+%endif
+
+; This is needed for ELF, otherwise the GNU linker assumes the stack is executable by default.
+%if FORMAT_ELF
+    [SECTION .note.GNU-stack noalloc noexec nowrite progbits]
+%endif
