@@ -1,4 +1,4 @@
-From 7ce46057db9daae39a188352c89c0397c2945a3d Mon Sep 17 00:00:00 2001
+From 1d1cfa17a2cfa33ff76bb99288184f969f465182 Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -13,9 +13,9 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  ext/svthevcenc/meson.build        |   18 +
  tests/check/Makefile.am           |    7 +
  tests/check/elements/.gitignore   |    1 +
- tests/check/elements/svthevcenc.c |  228 ++++
+ tests/check/elements/svthevcenc.c |  261 ++++
  tests/check/meson.build           |    1 +
- 11 files changed, 2287 insertions(+), 2 deletions(-)
+ 11 files changed, 2320 insertions(+), 2 deletions(-)
  create mode 100644 ext/svthevcenc/Makefile.am
  create mode 100644 ext/svthevcenc/gstsvthevcenc.c
  create mode 100644 ext/svthevcenc/gstsvthevcenc.h
@@ -2193,10 +2193,10 @@ index ca99cecfa..7a6834bd7 100644
  zbar
 diff --git a/tests/check/elements/svthevcenc.c b/tests/check/elements/svthevcenc.c
 new file mode 100644
-index 000000000..0545b3c68
+index 000000000..bb25a1ede
 --- /dev/null
 +++ b/tests/check/elements/svthevcenc.c
-@@ -0,0 +1,228 @@
+@@ -0,0 +1,261 @@
 +/* GStreamer
 + * Copyright (C) 2019 Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 + *
@@ -2410,6 +2410,38 @@ index 000000000..0545b3c68
 +
 +GST_END_TEST;
 +
++GST_START_TEST (test_no_encoding)
++{
++  GstElement *svthevcenc;
++  GstCaps *outcaps, *srccaps;
++  GstSegment seg;
++
++  svthevcenc =
++      setup_svthevcenc
++      ("video/x-raw,format=(string)I420,width=(int)320,height=(int)240,framerate=(fraction)25/1",
++      &srccaps);
++
++  ASSERT_SET_STATE (svthevcenc, GST_STATE_PLAYING, GST_STATE_CHANGE_SUCCESS);
++
++  gst_segment_init (&seg, GST_FORMAT_TIME);
++  seg.stop = gst_util_uint64_scale (10, GST_SECOND, 25);
++
++  gst_check_setup_events (srcpad, svthevcenc, srccaps, GST_FORMAT_TIME);
++  fail_unless (gst_pad_push_event (srcpad, gst_event_new_segment (&seg)));
++  fail_unless (gst_pad_push_event (srcpad, gst_event_new_eos ()));
++
++  outcaps =
++      gst_caps_from_string
++      ("video/x-h265,width=(int)320,height=(int)240,framerate=(fraction)25/1");
++
++  gst_caps_unref (outcaps);
++  gst_caps_unref (srccaps);
++
++  cleanup_svthevcenc (svthevcenc);
++}
++
++GST_END_TEST;
++
 +static Suite *
 +svthevcenc_suite (void)
 +{
@@ -2420,13 +2452,14 @@ index 000000000..0545b3c68
 +
 +  tcase_add_test (tc_chain, test_encode_simple);
 +  tcase_add_test (tc_chain, test_reuse);
++  tcase_add_test (tc_chain, test_no_encoding);
 +
 +  return s;
 +}
 +
 +GST_CHECK_MAIN (svthevcenc);
 diff --git a/tests/check/meson.build b/tests/check/meson.build
-index 9ad6439be..76a25f28d 100644
+index 3f08a6973..e34091dc9 100644
 --- a/tests/check/meson.build
 +++ b/tests/check/meson.build
 @@ -36,6 +36,7 @@ base_tests = [
