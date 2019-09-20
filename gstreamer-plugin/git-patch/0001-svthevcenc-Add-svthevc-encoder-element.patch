@@ -1,4 +1,4 @@
-From 1d1cfa17a2cfa33ff76bb99288184f969f465182 Mon Sep 17 00:00:00 2001
+From 2c2ad0d7a3fd2540d6cf65a7c154f1ecd88194b6 Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
 Subject: [PATCH] svthevcenc: Add svthevc encoder element
@@ -23,17 +23,17 @@ Subject: [PATCH] svthevcenc: Add svthevc encoder element
  create mode 100644 tests/check/elements/svthevcenc.c
 
 diff --git a/configure.ac b/configure.ac
-index dbd15419d..3f128d83b 100644
+index dbd15419d..9c38c427a 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -2107,6 +2107,12 @@ if test "x$HAVE_LTC" = "xyes"; then
    AC_DEFINE(HAVE_LTC, 1, [Use libltc])
  fi
  
-+dnl *** svthevcenc : works with libSVT-HEVC 1.4.0 ***
++dnl *** svthevcenc : works with libSVT-HEVC 1.4.1 ***
 +translit(dnm, m, l) AM_CONDITIONAL(USE_SVTHEVCENC, true)
 +AG_GST_CHECK_FEATURE(SVTHEVCENC, [svthevcenc plug-in], svthevcenc, [
-+  AG_GST_PKG_CHECK_MODULES(SVTHEVCENC, SvtHevcEnc >= 1.4.0)
++  AG_GST_PKG_CHECK_MODULES(SVTHEVCENC, SvtHevcEnc >= 1.4.1)
 +])
 +
  else
@@ -127,7 +127,7 @@ index 000000000..6d7f55aa9
 +noinst_HEADERS = gstsvthevcenc.h
 diff --git a/ext/svthevcenc/gstsvthevcenc.c b/ext/svthevcenc/gstsvthevcenc.c
 new file mode 100644
-index 000000000..b49fbca3a
+index 000000000..cb95d55e9
 --- /dev/null
 +++ b/ext/svthevcenc/gstsvthevcenc.c
 @@ -0,0 +1,1878 @@
@@ -918,7 +918,7 @@ index 000000000..b49fbca3a
 +   * before receiving encoded packets, It cause bug which encoded packets
 +   * are not output.
 +   */
-+  if (SVT_CHECK_VERSION (1, 5, 0))
++  if (SVT_CHECK_VERSION (1, 4, 1))
 +    param->codeVpsSpsPps = 1;
 +  else
 +    param->codeVpsSpsPps = 0;
@@ -2134,7 +2134,7 @@ index 000000000..5a2bdcd14
 +#endif /* __GST_SVTHEVC_ENC_H__ */
 diff --git a/ext/svthevcenc/meson.build b/ext/svthevcenc/meson.build
 new file mode 100644
-index 000000000..8733aef60
+index 000000000..2c672deec
 --- /dev/null
 +++ b/ext/svthevcenc/meson.build
 @@ -0,0 +1,18 @@
@@ -2142,7 +2142,7 @@ index 000000000..8733aef60
 +  'gstsvthevcenc.c',
 +]
 +
-+svthevcenc_dep = dependency('SvtHevcEnc', version : '>= 1.4.0', required: false)
++svthevcenc_dep = dependency('SvtHevcEnc', version : '>= 1.4.1', required: false)
 +
 +if svthevcenc_dep.found()
 +  gstsvthevcenc = library('gstsvthevcenc',
