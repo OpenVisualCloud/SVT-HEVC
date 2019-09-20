@@ -3357,7 +3357,7 @@ EB_ERRORTYPE EncodeTransform(
 
     if (transCoeffShape == DEFAULT_SHAPE) {
         if (!((!!(ASM_TYPES & AVX2_MASK)))) { // C Only
-            (*transformFunctionTableEncode0[(!!(ASM_TYPES & PREAVX2_MASK))][transformSizeFlag + dstTransformFlag])(
+            (*transformFunctionTableEncode0[/*ASM_TYPES*/((bitIncrement & BIT_INCREMENT_10BIT) ? EB_ASM_C : (!!(ASM_TYPES & PREAVX2_MASK)))][transformSizeFlag + dstTransformFlag])(
                 residualBuffer,
                 residualStride,
                 coeffBuffer,
@@ -3367,7 +3367,7 @@ EB_ERRORTYPE EncodeTransform(
                 );
         }
         else {
-            (*transformFunctionTableEncode1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_C : (!!(ASM_TYPES & PREAVX2_MASK)))][transformSizeFlag + dstTransformFlag])(
+            (*transformFunctionTableEncode1[/*ASM_TYPES*/((bitIncrement & BIT_INCREMENT_10BIT) ? EB_ASM_C : (!!(ASM_TYPES & PREAVX2_MASK)))][transformSizeFlag + dstTransformFlag])(
                 residualBuffer,
                 residualStride,
                 coeffBuffer,
@@ -3380,7 +3380,7 @@ EB_ERRORTYPE EncodeTransform(
 
     else if (transCoeffShape == N2_SHAPE) {
             if (!((!!(ASM_TYPES & AVX2_MASK)))) { // C Only
-                (*PfreqN2TransformTable0[(!!(ASM_TYPES & AVX2_MASK))][transformSizeFlag + dstTransformFlag])(
+                (*PfreqN2TransformTable0[/*ASM_TYPES*/((bitIncrement & BIT_INCREMENT_10BIT) ? EB_ASM_C : (!!(ASM_TYPES & AVX2_MASK)))][transformSizeFlag + dstTransformFlag])(
                     residualBuffer,
                     residualStride,
                     coeffBuffer,
@@ -3390,7 +3390,7 @@ EB_ERRORTYPE EncodeTransform(
                     );
             }
             else {
-                (*PfreqN2TransformTable1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_C : (!!(ASM_TYPES & AVX2_MASK)))][transformSizeFlag + dstTransformFlag])(
+                (*PfreqN2TransformTable1[/*ASM_TYPES*/((bitIncrement & BIT_INCREMENT_10BIT) ? EB_ASM_C : (!!(ASM_TYPES & AVX2_MASK)))][transformSizeFlag + dstTransformFlag])(
                     residualBuffer,
                     residualStride,
                     coeffBuffer,
@@ -3403,7 +3403,7 @@ EB_ERRORTYPE EncodeTransform(
 
     else if (transCoeffShape == N4_SHAPE) {
         if (!((!!(ASM_TYPES & AVX2_MASK)))) { // C Only
-            (*PfreqN4TransformTable0[!!(ASM_TYPES & AVX2_MASK)][transformSizeFlag + dstTransformFlag])(
+            (*PfreqN4TransformTable0[/*ASM_TYPES*/((bitIncrement & BIT_INCREMENT_10BIT) ? EB_ASM_C : (!!(ASM_TYPES & AVX2_MASK)))][transformSizeFlag + dstTransformFlag])(
                 residualBuffer,
                 residualStride,
                 coeffBuffer,
@@ -3412,7 +3412,7 @@ EB_ERRORTYPE EncodeTransform(
                 bitIncrement);
         }
         else {
-            (*PfreqN4TransformTable1[/*ASM_TYPES*/((bitIncrement & 2) ? EB_ASM_C : (!!(ASM_TYPES & AVX2_MASK)))][transformSizeFlag + dstTransformFlag])(
+            (*PfreqN4TransformTable1[/*ASM_TYPES*/((bitIncrement & BIT_INCREMENT_10BIT) ? EB_ASM_C : (!!(ASM_TYPES & AVX2_MASK)))][transformSizeFlag + dstTransformFlag])(
                 residualBuffer,
                 residualStride,
                 coeffBuffer,
