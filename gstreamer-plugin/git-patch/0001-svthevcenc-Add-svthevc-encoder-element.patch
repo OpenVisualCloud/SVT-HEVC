@@ -1,8 +1,14 @@
-From 2c2ad0d7a3fd2540d6cf65a7c154f1ecd88194b6 Mon Sep 17 00:00:00 2001
+From 96ed5ca5ed0fa2125c69d0cf1b9e3ba2873e7210 Mon Sep 17 00:00:00 2001
 From: Yeongjin Jeong <yeongjin.jeong@navercorp.com>
 Date: Sat, 23 Mar 2019 21:01:51 +0900
-Subject: [PATCH] svthevcenc: Add svthevc encoder element
+Subject: [PATCH] svthevcenc: Add new SVT-HEVC encoder element
 
+The SVT-HEVC (Scalable Video Technology[0] for HEVC) Encoder is an
+open source video coding technology[1] that is highly optimized for
+Intel Xeon Scalable processors and Intel Xeon D processors.
+
+[0] https://01.org/svt
+[1] https://github.com/OpenVisualCloud/SVT-HEVC
 ---
  configure.ac                      |    8 +
  ext/Makefile.am                   |   12 +-
