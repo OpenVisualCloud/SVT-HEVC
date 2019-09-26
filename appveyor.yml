@@ -113,7 +113,9 @@ deploy:
   - provider: GitHub
     artifact: $(APPVEYOR_PROJECT_NAME)
     auth_token:
-      secure: "hY5Mk6KOwgQ97TzEBsM7Woqr1ZIm5QTvHg8EvxMV1x8j3wk/3mNBMqWFFbEIBK0i"
+      secure: 'sf0pQXlPI+X6LoAR8QUJB74jjzNxcLGOXI3H0nbxJq8llvGPG/TAUd87hq5iHZXo'
     prerelease: true
     on:
       appveyor_repo_tag: true
+      generator: Visual Studio 2019
+      configuration: Release
