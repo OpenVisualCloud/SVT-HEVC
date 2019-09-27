@@ -921,6 +921,10 @@ static void ReadInputFrames(
             headerPtr->nFilledLen = (uint32_t)(uint64_t)SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, colorFormat, is16bit);
 
         }
+
+        // Continue to read and process the following frames after the preloaded ones.
+        if ((uint64_t)config->bufferedInput == (config->processedFrameCount + 1))
+            config->bufferedInput = -1;
     }
 
     // If we reached the end of file, loop over again
