@@ -366,6 +366,8 @@ typedef EB_U8 EB_MODETYPE;
 #endif
 #define ASM_AVX2_BIT    3
 
+#define BIT(nr)         (1UL << (nr))
+
 /** INTRA_4x4 offsets
 */
 static const EB_U8 INTRA_4x4_OFFSET_X[4] = { 0, 4, 0, 4 };
