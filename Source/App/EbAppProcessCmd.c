@@ -777,7 +777,7 @@ static void ReadInputFrames(
     inputPtr->cbStride = inputPaddedWidth >> subWidthCMinus1;
     inputPtr->dolbyVisionRpu.payloadSize = 0;
 
-    if (config->bufferedInput == -1) {
+    if ((config->bufferedInput == -1) || (config->bufferedInput == 0)) {
         if (is16bit == 0 || (is16bit == 1 && config->compressedTenBitFormat == 0)) {
 
             uint32_t readSize = SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, colorFormat, is16bit);
