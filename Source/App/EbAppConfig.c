@@ -121,7 +121,7 @@
 /**********************************
  * Set Cfg Functions
  **********************************/
-static void SetCfgInputFile                     (const char *value, EbConfig_t *cfg)
+static void SetCfgInputFile(const char *value, EbConfig_t *cfg)
 {
     if (cfg->inputFile && cfg->inputFile != stdin) {
         fclose(cfg->inputFile);
@@ -129,18 +129,19 @@ static void SetCfgInputFile                     (const char *value, EbConfig_t *
     if (!strcmp(value, "stdin")) {
         cfg->inputFile = stdin;
     }
-    else {
+    else
+    {
         FOPEN(cfg->inputFile, value, "rb");
-        /* if input is a YUV4MPEG2 (y4m) file, read header and parse parameters */
-        if (cfg->inputFile != NULL) {
-            if ((EB_BOOL)(check_if_y4m(cfg)) == EB_TRUE)
-                cfg->y4m_input = EB_TRUE;
-            else
-                cfg->y4m_input = EB_FALSE;
-        }
-        else {
+    }
+    /* if input is a YUV4MPEG2 (y4m) file, read header and parse parameters */
+    if (cfg->inputFile != NULL) {
+        if ((EB_BOOL)(check_if_y4m(cfg)) == EB_TRUE)
+            cfg->y4m_input = EB_TRUE;
+        else
             cfg->y4m_input = EB_FALSE;
-        }
+    }
+    else {
+        cfg->y4m_input = EB_FALSE;
     }
 };
 static void SetCfgStreamFile                    (const char *value, EbConfig_t *cfg)
