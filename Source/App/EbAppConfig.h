@@ -151,8 +151,8 @@ extern errno_t strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t sle
 /* string length */
 extern rsize_t strnlen_ss(const char *s, rsize_t smax);
 
-#define EB_STRNCPY(dst, src, count) \
-	strncpy_ss(dst, sizeof(dst), src, count)
+#define EB_STRNCPY(dst, max_size, src, count) \
+	strncpy_ss(dst, max_size, src, count)
 
 #define EB_STRCPY(dst, size, src) \
 	strcpy_ss(dst, size, src)

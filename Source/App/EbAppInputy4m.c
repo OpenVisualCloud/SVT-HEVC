@@ -5,7 +5,6 @@
 
 #include "EbAppInputy4m.h"
 #define YFM_HEADER_MAX 80
-#define YUV4MPEG2_IND_SIZE 9
 
 #define CHROMA_MAX 4
 
@@ -13,7 +12,7 @@
 #include <ctype.h>
 
 /* copy a string until a specified character or a new line is found */
-char* copyUntilCharacterOrNewLine(char *src, char *dst, char chr) {
+char *copyUntilCharacterOrNewLine(char *src, char *dst, rsize_t max_size, char chr) {
     rsize_t count = 0;
     char * src_init = src;
 
@@ -22,8 +21,7 @@ char* copyUntilCharacterOrNewLine(char *src, char *dst, char chr) {
         count++;
     }
 
-    //EB_STRNCPY(dst, YFM_HEADER_MAX, src_init, count);
-    EB_STRNCPY(dst, src_init, count);
+    EB_STRNCPY(dst, max_size, src_init, count);
 
     return src;
 }
@@ -107,7 +105,7 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
 #endif
             break;
         case 'C': /* color space, not required: default "420" */
-            tokstart = copyUntilCharacterOrNewLine(tokstart, format_str, 0x20);
+            tokstart = copyUntilCharacterOrNewLine(tokstart, format_str, sizeof(format_str), ' ');
             if (EB_STRCMP("420mpeg2", format_str) == 0) {
                 EB_STRCPY(chroma, CHROMA_MAX, "420");
                 // chroma left
@@ -228,10 +226,10 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
 #endif
             break;
         case 'F': /* frame rate, required */
-            tokstart = copyUntilCharacterOrNewLine(tokstart, format_str, ':');
+            tokstart = copyUntilCharacterOrNewLine(tokstart, format_str, sizeof(format_str), ':');
             fr_n = (uint32_t)strtol(format_str, (char **)NULL, 10);
             tokstart++;
-            tokstart = copyUntilCharacterOrNewLine(tokstart, format_str, 0x20);
+            tokstart = copyUntilCharacterOrNewLine(tokstart, format_str, sizeof(format_str), ' ');
             fr_d = (uint32_t)strtol(format_str, (char **)NULL, 10);
 #ifdef PRINT_HEADER
             printf("framerate_n = %d\n", fr_n);
@@ -239,10 +237,10 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
 #endif
             break;
         case 'A': /* aspect ratio, not required */
-            tokstart = copyUntilCharacterOrNewLine(tokstart, format_str, ':');
+            tokstart = copyUntilCharacterOrNewLine(tokstart, format_str, sizeof(format_str), ':');
             aspect_n = (uint32_t)strtol(format_str, (char **)NULL, 10);
             tokstart++;
-            tokstart = copyUntilCharacterOrNewLine(tokstart, format_str, 0x20);
+            tokstart = copyUntilCharacterOrNewLine(tokstart, format_str, sizeof(format_str), ' ');
             aspect_d = (uint32_t)strtol(format_str, (char **)NULL, 10);
 #ifdef PRINT_HEADER
             printf("aspect_n = %d\n", aspect_n);
@@ -352,7 +350,7 @@ EB_BOOL check_if_y4m(EbConfig_t *cfg) {
             fseek(cfg->inputFile, 0, SEEK_SET);
         }
         else {
-            EB_STRNCPY((char*)cfg->y4m_buf, (char*)buffer, YUV4MPEG2_IND_SIZE);
+            EB_STRNCPY((char*)cfg->y4m_buf, sizeof(cfg->y4m_buf), (char*)buffer, YUV4MPEG2_IND_SIZE);
         }
         return EB_FALSE; /* Not a YUV4MPEG2 file */
     }
