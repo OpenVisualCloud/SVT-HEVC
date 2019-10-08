@@ -1594,29 +1594,29 @@ static void ComputeRefinementCost(
 ******************************************************/
 static void DeriveLcuScore(
     SequenceControlSet_t               *sequenceControlSetPtr,
-	PictureControlSet_t                *pictureControlSetPtr,
-	ModeDecisionConfigurationContext_t *contextPtr)
+    PictureControlSet_t                *pictureControlSetPtr,
+    ModeDecisionConfigurationContext_t *contextPtr)
 {
-	EB_U32  lcuIndex;
+    EB_U32  lcuIndex;
     EB_U32  lcuScore;
     EB_U32  distortion;
 
     contextPtr->lcuMinScore = ~0u;
     contextPtr->lcuMaxScore =  0u;
 
-	for (lcuIndex = 0; lcuIndex < pictureControlSetPtr->lcuTotalCount; lcuIndex++) {
+    for (lcuIndex = 0; lcuIndex < pictureControlSetPtr->lcuTotalCount; lcuIndex++) {
 
-		LcuParams_t *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
+        LcuParams_t *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
 
-		if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
+        if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
             if (lcuParams->rasterScanCuValidity[RASTER_SCAN_CU_INDEX_64x64] == EB_FALSE) {
 
                 EB_U8 cu8x8Index;
                 EB_U8 validCu8x8Count = 0;
                 distortion = 0;
-                for (cu8x8Index = 0; cu8x8Index < 64; cu8x8Index++) {
+                for (cu8x8Index = RASTER_SCAN_CU_INDEX_8x8_0; cu8x8Index <= RASTER_SCAN_CU_INDEX_8x8_63; cu8x8Index++) {
                     if (lcuParams->rasterScanCuValidity[cu8x8Index]) {
-                        distortion += pictureControlSetPtr->ParentPcsPtr->oisCu8Results[lcuIndex]->sortedOisCandidate[cu8x8Index][0].distortion;
+                        distortion += pictureControlSetPtr->ParentPcsPtr->oisCu8Results[lcuIndex]->sortedOisCandidate[cu8x8Index - RASTER_SCAN_CU_INDEX_8x8_0][0].distortion;
                         validCu8x8Count++;
                     }
                 }
@@ -1631,8 +1631,8 @@ static void DeriveLcuScore(
             }
             lcuScore = distortion;
 
-		}
-		else {
+        }
+        else {
             if (lcuParams->rasterScanCuValidity[RASTER_SCAN_CU_INDEX_64x64] == EB_FALSE) {
 
                 EB_U8 cu8x8Index;
@@ -1703,13 +1703,13 @@ static void DeriveLcuScore(
                 }
 
             }
-		}
-            
-            contextPtr->lcuScoreArray[lcuIndex] = lcuScore;
+        }
 
-            // Track MIN & MAX LCU scores
-            contextPtr->lcuMinScore = MIN(contextPtr->lcuScoreArray[lcuIndex], contextPtr->lcuMinScore);
-            contextPtr->lcuMaxScore = MAX(contextPtr->lcuScoreArray[lcuIndex], contextPtr->lcuMaxScore);
+        contextPtr->lcuScoreArray[lcuIndex] = lcuScore;
+
+        // Track MIN & MAX LCU scores
+        contextPtr->lcuMinScore = MIN(contextPtr->lcuScoreArray[lcuIndex], contextPtr->lcuMinScore);
+        contextPtr->lcuMaxScore = MAX(contextPtr->lcuScoreArray[lcuIndex], contextPtr->lcuMaxScore);
     }
 
 
