@@ -368,7 +368,7 @@ EB_ERRORTYPE AllocateInputBuffers(
 
         EB_APP_MALLOC(uint8_t*, callbackData->inputBufferPool->pBuffer, sizeof(EB_H265_ENC_INPUT), EB_N_PTR, EB_ErrorInsufficientResources);
 
-        if ((config->bufferedInput == -1) || (config->bufferedInput == 0)) {
+        if (config->bufferedInput == -1) {
 
             // Allocate frame buffer for the pBuffer
             AllocateInputBuffer(
@@ -675,7 +675,7 @@ EB_ERRORTYPE InitEncoder(
     }
 
 	// Allocate the Sequence Buffer
-    if (config->bufferedInput > 0) {
+    if (config->bufferedInput != -1) {
 
         // Preload frames into the ram for a faster yuv access time
         PreloadFramesIntoRam(
