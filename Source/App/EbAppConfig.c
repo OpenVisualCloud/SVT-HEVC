@@ -768,7 +768,7 @@ static void ParseConfigFile(
                 // Cap the length of the variable name
                 argLen[0] = (argLen[0] > CONFIG_FILE_MAX_VAR_LEN - 1) ? CONFIG_FILE_MAX_VAR_LEN - 1 : argLen[0];
                 // Copy the variable name
-                EB_STRNCPY(varName, argv[0], argLen[0]);
+                EB_STRNCPY(varName, sizeof(varName), argv[0], argLen[0]);
                 // Null terminate the variable name
                 varName[argLen[0]] = CONFIG_FILE_NULL_CHAR;
 
@@ -777,7 +777,7 @@ static void ParseConfigFile(
                     // Cap the length of the variable
                     argLen[valueIndex+2] = (argLen[valueIndex+2] > CONFIG_FILE_MAX_VAR_LEN - 1) ? CONFIG_FILE_MAX_VAR_LEN - 1 : argLen[valueIndex+2];
                     // Copy the variable name
-                    EB_STRNCPY(varValue[valueIndex], argv[valueIndex+2], argLen[valueIndex+2]);
+                    EB_STRNCPY(varValue[valueIndex], sizeof(varValue[valueIndex]), argv[valueIndex + 2], argLen[valueIndex + 2]);
                     // Null terminate the variable name
                     varValue[valueIndex][argLen[valueIndex+2]] = CONFIG_FILE_NULL_CHAR;
 

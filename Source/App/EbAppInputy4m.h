@@ -10,6 +10,8 @@
 
 #include "EbAppConfig.h"
 
+#define YUV4MPEG2_IND_SIZE 9 // EB_STRLEN("YUV4MPEG2", MAX_STRING_LENGTH)
+
 int32_t read_y4m_header(EbConfig_t *cfg);
 
 int32_t read_y4m_frame_delimiter(EbConfig_t *cfg);
