@@ -880,8 +880,8 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->bufferedInput < -1) {
-        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid BufferedInput. BufferedInput must greater or equal to -1\n", channelNumber + 1);
+    if ((config->bufferedInput < -1) || (config->bufferedInput == 0)) {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid BufferedInput. BufferedInput must be greater than 0 or equal to -1\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 

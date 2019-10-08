@@ -777,7 +777,7 @@ static void ReadInputFrames(
     inputPtr->cbStride = inputPaddedWidth >> subWidthCMinus1;
     inputPtr->dolbyVisionRpu.payloadSize = 0;
 
-    if ((config->bufferedInput == -1) || (config->bufferedInput == 0)) {
+    if (config->bufferedInput == -1) {
         if (is16bit == 0 || (is16bit == 1 && config->compressedTenBitFormat == 0)) {
 
             uint32_t readSize = SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, colorFormat, is16bit);
@@ -921,10 +921,6 @@ static void ReadInputFrames(
             headerPtr->nFilledLen = (uint32_t)(uint64_t)SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, colorFormat, is16bit);
 
         }
-
-        // Continue to read and process the following frames after the preloaded ones.
-        if ((uint64_t)config->bufferedInput == (config->processedFrameCount + 1))
-            config->bufferedInput = -1;
     }
 
     // If we reached the end of file, loop over again
