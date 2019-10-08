@@ -271,7 +271,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **SourceWidth** | -w | [64 - 8192] | 0 | Input source width |
 | **SourceHeight** | -h | [64 - 4320] | 0 | Input source height |
 | **FrameToBeEncoded** | -n | [0 - 2^31 -1] | 0 | Number of frames to be encoded, if number of frames is > number of frames in file, the encoder will loop to the beginning and continue the encode. 0 encodes the full clip. |
-| **BufferedInput** | -nb | [-1, 1 to 2^31 -1] | -1 | number of frames to preload to the RAM before the start of the encode. If -nb = 100 and –n 1000 --> the encoder will encode the first 100 frames of the video 10 times. Use -1 to not preload any frames. Note: 0 is not valid input. This parameter is best used to measure the impact of disk reading on encoding speed and is most noticeable when frames sizes are 4k or 8k.  Because frames are repeated when value specified is less than the frame count, you should expect bitstreams to be different. |
+| **BufferedInput** | -nb | [-1, 1 to 2^31 -1] | -1 | number of frames to preload to the RAM before the start of the encode. If -nb = 100 and –n 1000 --> the encoder will encode the first 100 frames of the video 10 times. Use -1 to not preload any frames.  This parameter is best used to eliminate the impact of disk reading on encoding speed and is most noticeable when frames sizes are 4k or 8k.  Because frames are repeated when value specified (-nb) is less than the total frame count, you should expect bitstreams to be different. |
 | **Profile** | -profile | [1,2] | 2 | 1: Main, 2: Main 10 |
 | **Tier** | -tier | [0, 1] | 0 | 0: Main, 1: High |
 | **Level** | -level | [1, 2, 2.1,3, 3.1, 4, 4.1, 5, 5.1, 5.2, 6, 6.1, 6.2] | 0 | 0 to 6.2 [0 for auto determine Level] |
@@ -280,7 +280,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **FrameRateDenominator** | -fps-denom | [0 - 2^64 -1] | 0 | Frame rate denominator e.g. 100 When zero, the encoder will use –fps if FrameRateNumerator is also zero, otherwise an error is returned |
 | **Injector** | -inj | [0,1] | 0 | Enable injection of input frames at the specified framerate (0: OFF, 1: ON) |
 | **InjectorFrameRate** | -inj-frm-rt | [1 - 240] | 60 | Frame Rate used for the injector. Recommended to match the encoder speed. |
-| **SpeedControlFlag** | -speed-ctrl | [0,1] | 0 | Enables the Speed Control functionality to achieve the real-time encoding speed defined by –fps. When this parameter is set to 1 it forces –inj to be 1 and inj-frm-rt to be set to the –fps. |
+| **SpeedControlFlag** | -speed-ctrl | [0,1] | 0 | Enables the Speed Control functionality to achieve the real-time encoding speed defined by –fps. When this parameter is set to 1 it forces –inj to be 1 and -inj-frm-rt to be set to –fps. |
 | **InterlacedVideo** | -interlaced-video | [0,1] | 0 | 1 : encoder will signal interlaced signal in the stream <br>0 : assumes progressive signal |
 | **SeparateFields** | -separate-fields | [0,1] | 0 | 1 : Interlaced input, application will separate top and bottom fields and encode it as progressive. <br>0 : Treat video as progressive video |
 | **HierarchicalLevels** | -hierarchical-levels | [0 – 3] | 3 | 0 : Flat<br>1: 2-Level Hierarchy<br>2: 3-Level Hierarchy<br>3: 4-Level Hierarchy<br>Minigop Size = (2^HierarchicalLevels) <br>(e.g. 3 == > 7B pyramid, 2 ==> 3B Pyramid)<br>Refer to Appendix A.1 |
