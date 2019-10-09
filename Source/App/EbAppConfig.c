@@ -1043,9 +1043,7 @@ uint32_t GetHelp(
         }
         return 1;
     }
-    else {
-        return 0;
-    }
+    return 0;
 }
 
 uint32_t GetSVTVersion(
@@ -1061,9 +1059,7 @@ uint32_t GetSVTVersion(
         printf("https://github.com/OpenVisualCloud/SVT-HEVC\n");
         return 1;
     }
-    else {
-        return 0;
-    }
+    return 0;
 }
 
 /******************************************************

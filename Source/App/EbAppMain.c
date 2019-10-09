@@ -112,9 +112,8 @@ int32_t main(int32_t argc, char* argv[])
 
     // Get NumChannels
     numChannels = GetNumberOfChannels(argc, argv);
-    if (numChannels == 0) {
+    if (numChannels == 0)
         return EB_ErrorBadParameter;
-    }
 
     // Initialize config
     for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
