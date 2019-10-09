@@ -1,6 +1,6 @@
 # GStreamer-SVT-HEVC
 ## Overview
-This plugin provides svthevcenc element to GStreamer in order to use the Scalable Video Technology for HEVC Encoder ([SVT-HEVC](https://github.com/intel/SVT-HEVC)). 
+This plugin provides the svthevcenc element to GStreamer in order to use the Scalable Video Technology for HEVC Encoder ([SVT-HEVC](https://github.com/intel/SVT-HEVC)). 
 
 ## Requirements
   * GStreamer 1.8 or later
@@ -19,7 +19,7 @@ Then a sample GStreamer pipeline is:
 
     gst-launch-1.0 -e videotestsrc ! video/x-raw ! svthevcenc ! mpegtsmux ! filesink location=out.ts
 
-If you're not familiar with GStreamer, gst-launch-1.0 is part of GStreamer tools, and mpegtsmux is part of GStreamer Bad plugins, `-e` option allows CTRL+C to translate to an EOS (end of stream) signal on the pipeline.
+If you're not familiar with GStreamer, gst-launch-1.0 is part of GStreamer tools, mpegtsmux is part of GStreamer Bad plugins, and the `-e` option allows CTRL+C to translate to an EOS (end of stream) signal on the pipeline.
 
 ## Compiling and Installing
 ### Build Dependencies
@@ -32,9 +32,11 @@ If you're not familiar with GStreamer, gst-launch-1.0 is part of GStreamer tools
   * pkg-config
 	  * on Debian/Ubuntu: `apt-get install pkg-config`
 	  * on Windows, we recommend [pkgconfiglite](https://sourceforge.net/projects/pkgconfiglite/)
-  * *(optional on Windows)* ninja
-	  * install python3 and run `pip3 install ninja`
-	  * or on Ubuntu: `apt install ninja-build`
+  * ninja
+	  * on Windows (ninja is optional.  Review instructions on https://github.com/GStreamer/gst-build#windows-prerequisites-setup)
+	  * on Debian/Ubuntu: 
+	    * install python3 and run `pip3 install ninja`
+	    * apt install ninja-build
 
 This plugin uses `meson` build tools and the dependency on SVT-HEVC library is set-up using `pkg-config`. 
 
@@ -65,3 +67,13 @@ Then the plugin can be compiled and installed using Ninja:
 Or made available as a Visual Studio project:
 
 	meson -Dprefix=%GSTREAMER_1_0_ROOT_X86_64% build --backend=vs2017
+
+### Verifying installation
+
+You can verify that the svthevcenc GStreamer plugin is properly built and installed by running:
+
+```
+gst-inspect-1.0 svthevcenc
+```
+
+Inspect the output for usage instructions.
