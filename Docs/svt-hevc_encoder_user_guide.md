@@ -111,7 +111,7 @@ The list below includes the build tools necessary for the encoder application an
   - GCC 5.4.0
   - CMake 3.5.1
   - YASM Assembler version 1.2.0 or later
-
+  
 <u>Build instructions</u>
   - In the main repository, run
     
