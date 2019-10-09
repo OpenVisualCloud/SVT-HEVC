@@ -50,6 +50,7 @@ For Both:
 - cd ffmpeg
 - git checkout release/4.2
 - git am ../SVT-HEVC/ffmpeg_plugin/0001*.patch
+- git am ../SVT-HEVC/ffmpeg_plugin/0002*.patch
 - ./configure --enable-libsvthevc
 - make -j $(nproc)
 
