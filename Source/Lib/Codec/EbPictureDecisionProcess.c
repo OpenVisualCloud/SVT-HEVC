@@ -646,7 +646,7 @@ void* PictureDecisionKernel(void *inputPtr)
         queueEntryIndex                                         +=  encodeContextPtr->pictureDecisionReorderQueueHeadIndex;
         queueEntryIndex                                         =   (queueEntryIndex > PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH - 1) ? queueEntryIndex - PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH : queueEntryIndex;        
         queueEntryPtr                                           =   encodeContextPtr->pictureDecisionReorderQueue[queueEntryIndex];         
-        if(queueEntryPtr->parentPcsWrapperPtr != NULL){
+        if ((queueEntryPtr->parentPcsWrapperPtr != NULL) && !pictureControlSetPtr->endOfSequenceFlag) {
             CHECK_REPORT_ERROR_NC(
                 encodeContextPtr->appCallbackPtr, 
                 EB_ENC_PD_ERROR8);

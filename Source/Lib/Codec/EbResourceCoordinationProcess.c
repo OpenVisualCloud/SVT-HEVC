@@ -658,21 +658,25 @@ void* ResourceCoordinationKernel(void *inputPtr)
         ((EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr)->inputPaddedPicturePtr->bufferY = inputPicturePtr->bufferY;
 
         // Get Empty Output Results Object
-		if (pictureControlSetPtr->pictureNumber > 0 && prevPictureControlSetWrapperPtr != (EbObjectWrapper_t*)EB_NULL)
-		{
-			((PictureParentControlSet_t       *)prevPictureControlSetWrapperPtr->objectPtr)->endOfSequenceFlag = endOfSequenceFlag;
+        if (((pictureControlSetPtr->pictureNumber > 0) && (prevPictureControlSetWrapperPtr != (EbObjectWrapper_t*)EB_NULL)) || endOfSequenceFlag) {
+            if (prevPictureControlSetWrapperPtr && prevPictureControlSetWrapperPtr->objectPtr)
+                ((PictureParentControlSet_t *)prevPictureControlSetWrapperPtr->objectPtr)->endOfSequenceFlag = endOfSequenceFlag;
 
-			EbGetEmptyObject(
-				contextPtr->resourceCoordinationResultsOutputFifoPtr,
-				&outputWrapperPtr);
-			outputResultsPtr = (ResourceCoordinationResults_t*)outputWrapperPtr->objectPtr;
-			outputResultsPtr->pictureControlSetWrapperPtr = prevPictureControlSetWrapperPtr;
+            EbGetEmptyObject(
+                    contextPtr->resourceCoordinationResultsOutputFifoPtr,
+                    &outputWrapperPtr);
+            outputResultsPtr = (ResourceCoordinationResults_t *)outputWrapperPtr->objectPtr;
+            if (endOfSequenceFlag && (pictureControlSetPtr->pictureNumber == 0)) {
+                ((PictureParentControlSet_t *)pictureControlSetWrapperPtr->objectPtr)->endOfSequenceFlag = endOfSequenceFlag;
+                outputResultsPtr->pictureControlSetWrapperPtr = pictureControlSetWrapperPtr;
+            } else
+                outputResultsPtr->pictureControlSetWrapperPtr = prevPictureControlSetWrapperPtr;
 
-			// Post the finished Results Object
-			EbPostFullObject(outputWrapperPtr);
-		}
+            // Post the finished Results Object
+            EbPostFullObject(outputWrapperPtr);
+        }
 
-		prevPictureControlSetWrapperPtr = pictureControlSetWrapperPtr;
+        prevPictureControlSetWrapperPtr = pictureControlSetWrapperPtr;
 
 
 
