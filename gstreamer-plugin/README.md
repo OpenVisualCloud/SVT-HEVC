@@ -33,10 +33,10 @@ If you're not familiar with GStreamer, gst-launch-1.0 is part of GStreamer tools
 	  * on Debian/Ubuntu: `apt-get install pkg-config`
 	  * on Windows, we recommend [pkgconfiglite](https://sourceforge.net/projects/pkgconfiglite/)
   * ninja
-	    * on Windows (ninja is optional.  Review instructions on https://github.com/GStreamer/gst-build#windows-prerequisites-setup)
-	* on Debian/Ubuntu: 
-	  * install python3 and run `pip3 install ninja`
-	  * apt install ninja-build
+	  * on Windows (ninja is optional.  Review instructions on https://github.com/GStreamer/gst-build#windows-prerequisites-setup)
+	  * on Debian/Ubuntu: 
+	    * install python3 and run `pip3 install ninja`
+	    * apt install ninja-build
 
 This plugin uses `meson` build tools and the dependency on SVT-HEVC library is set-up using `pkg-config`. 
 
