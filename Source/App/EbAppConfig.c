@@ -10,6 +10,7 @@
 
 #include "EbAppConfig.h"
 #include "EbApi.h"
+#include "EbApiVersion.h"
 #include "EbAppInputy4m.h"
 
 #ifdef _WIN32
@@ -21,6 +22,9 @@
  * Defines
  **********************************/
 #define HELP_TOKEN                      "-help"
+#define HELP_TOKEN_COMMON               "--help"
+#define VERSION_TOKEN                   "-v"
+#define VERSION_TOKEN_COMMON            "--version"
 #define CHANNEL_NUMBER_TOKEN            "-nch"
 #define COMMAND_LINE_MAX_SIZE           2048
 #define CONFIG_FILE_TOKEN               "-c"
@@ -1029,16 +1033,33 @@ uint32_t GetHelp(
     char *const argv[])
 {
     char config_string[COMMAND_LINE_MAX_SIZE];
-    if (FindToken(argc, argv, HELP_TOKEN, config_string) == 0) {
+    if (FindToken(argc, argv, HELP_TOKEN, config_string) == 0 ||
+        FindToken(argc, argv, HELP_TOKEN_COMMON, config_string) == 0) {
         int32_t token_index = -1;
-
         printf("\n%-25s\t%-25s\t%-25s\t\n\n" ,"TOKEN", "DESCRIPTION", "INPUT TYPE");
         printf("%-25s\t%-25s\t%-25s\t\n" ,"-nch", "NumberOfChannels", "Single input");
         while (config_entry[++token_index].token != NULL) {
             printf("%-25s\t%-25s\t%-25s\t\n", config_entry[token_index].token, config_entry[token_index].name, config_entry[token_index].type ? "Array input": "Single input");
         }
         return 1;
+    }
+    else {
+        return 0;
+    }
+}
 
+uint32_t GetSVTVersion(
+    int32_t     argc,
+    char *const argv[])
+{
+    char config_string[COMMAND_LINE_MAX_SIZE];
+    if (FindToken(argc, argv, VERSION_TOKEN, config_string) == 0 ||
+        FindToken(argc, argv, VERSION_TOKEN_COMMON, config_string) == 0) {
+        printf("SVT-HEVC version %d.%d.%d\n", SVT_VERSION_MAJOR, SVT_VERSION_MINOR, SVT_VERSION_PATCHLEVEL);
+        printf("Copyright(c) 2018 Intel Corporation\n");
+        printf("BSD-2-Clause Plus Patent License\n");
+        printf("https://github.com/OpenVisualCloud/SVT-HEVC\n");
+        return 1;
     }
     else {
         return 0;
