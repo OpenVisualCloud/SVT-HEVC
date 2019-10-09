@@ -111,7 +111,7 @@ The list below includes the build tools necessary for the encoder application an
   - GCC 5.4.0
   - CMake 3.5.1
   - YASM Assembler version 1.2.0 or later
-  
+
 <u>Build instructions</u>
   - In the main repository, run
     
@@ -271,7 +271,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **SourceWidth** | -w | [64 - 8192] | 0 | Input source width |
 | **SourceHeight** | -h | [64 - 4320] | 0 | Input source height |
 | **FrameToBeEncoded** | -n | [0 - 2^31 -1] | 0 | Number of frames to be encoded, if number of frames is > number of frames in file, the encoder will loop to the beginning and continue the encode. 0 encodes the full clip. |
-| **BufferedInput** | -nb | [-1, 1 to 2^31 -1] | -1 | number of frames to preload to the RAM before the start of the encode. If -nb = 100 and –n 1000 --> the encoder will encode the first 100 frames of the video 10 times. Use -1 to not preload any frames.  This parameter is best used to eliminate the impact of disk reading on encoding speed and is most noticeable when frames sizes are 4k or 8k.  Because frames are repeated when value specified (-nb) is less than the total frame count, you should expect bitstreams to be different. |
+| **BufferedInput** | -nb | [-1, 1 to 2^31 -1] | -1 | number of frames to preload to the RAM before the start of the encode. If -nb = 100 and –n 1000 --> the encoder will encode the first 100 frames of the video 10 times. Use -1 to not preload any frames.  This parameter is best used to eliminate the impact of disk reading on encoding speed and is most noticeable when frames sizes are 4k or 8k.  Because frames are repeated when value specified (-nb) is less than the total frame count (-n), you should expect bitstreams to be different. |
 | **Profile** | -profile | [1,2] | 2 | 1: Main, 2: Main 10 |
 | **Tier** | -tier | [0, 1] | 0 | 0: Main, 1: High |
 | **Level** | -level | [1, 2, 2.1,3, 3.1, 4, 4.1, 5, 5.1, 5.2, 6, 6.1, 6.2] | 0 | 0 to 6.2 [0 for auto determine Level] |
