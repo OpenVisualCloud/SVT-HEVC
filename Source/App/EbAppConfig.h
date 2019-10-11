@@ -412,6 +412,7 @@ extern void EbConfigDtor(EbConfig_t *configPtr);
 
 extern EB_ERRORTYPE	ReadCommandLine(int32_t argc, char *const argv[], EbConfig_t **config, uint32_t  numChannels,	EB_ERRORTYPE *return_errors);
 extern uint32_t     GetHelp(int32_t argc, char *const argv[]);
+extern uint32_t     GetSVTVersion(int32_t argc, char *const argv[]);
 extern uint32_t		GetNumberOfChannels(int32_t argc, char *const argv[]);
 
 #endif //EbAppConfig_h
