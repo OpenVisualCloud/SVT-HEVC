@@ -151,8 +151,8 @@ extern errno_t strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t sle
 /* string length */
 extern rsize_t strnlen_ss(const char *s, rsize_t smax);
 
-#define EB_STRNCPY(dst, src, count) \
-	strncpy_ss(dst, sizeof(dst), src, count)
+#define EB_STRNCPY(dst, max_size, src, count) \
+	strncpy_ss(dst, max_size, src, count)
 
 #define EB_STRCPY(dst, size, src) \
 	strcpy_ss(dst, size, src)
@@ -412,6 +412,7 @@ extern void EbConfigDtor(EbConfig_t *configPtr);
 
 extern EB_ERRORTYPE	ReadCommandLine(int32_t argc, char *const argv[], EbConfig_t **config, uint32_t  numChannels,	EB_ERRORTYPE *return_errors);
 extern uint32_t     GetHelp(int32_t argc, char *const argv[]);
+extern uint32_t     GetSVTVersion(int32_t argc, char *const argv[]);
 extern uint32_t		GetNumberOfChannels(int32_t argc, char *const argv[]);
 
 #endif //EbAppConfig_h

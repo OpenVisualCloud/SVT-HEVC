@@ -10,6 +10,7 @@
 
 #include "EbAppConfig.h"
 #include "EbApi.h"
+#include "EbApiVersion.h"
 #include "EbAppInputy4m.h"
 
 #ifdef _WIN32
@@ -20,7 +21,8 @@
 /**********************************
  * Defines
  **********************************/
-#define HELP_TOKEN                      "-help"
+#define HELP_TOKEN                      "--help"
+#define VERSION_TOKEN                   "--version"
 #define CHANNEL_NUMBER_TOKEN            "-nch"
 #define COMMAND_LINE_MAX_SIZE           2048
 #define CONFIG_FILE_TOKEN               "-c"
@@ -121,7 +123,7 @@
 /**********************************
  * Set Cfg Functions
  **********************************/
-static void SetCfgInputFile                     (const char *value, EbConfig_t *cfg)
+static void SetCfgInputFile(const char *value, EbConfig_t *cfg)
 {
     if (cfg->inputFile && cfg->inputFile != stdin) {
         fclose(cfg->inputFile);
@@ -129,18 +131,19 @@ static void SetCfgInputFile                     (const char *value, EbConfig_t *
     if (!strcmp(value, "stdin")) {
         cfg->inputFile = stdin;
     }
-    else {
+    else
+    {
         FOPEN(cfg->inputFile, value, "rb");
-        /* if input is a YUV4MPEG2 (y4m) file, read header and parse parameters */
-        if (cfg->inputFile != NULL) {
-            if ((EB_BOOL)(check_if_y4m(cfg)) == EB_TRUE)
-                cfg->y4m_input = EB_TRUE;
-            else
-                cfg->y4m_input = EB_FALSE;
-        }
-        else {
+    }
+    /* if input is a YUV4MPEG2 (y4m) file, read header and parse parameters */
+    if (cfg->inputFile != NULL) {
+        if ((EB_BOOL)(check_if_y4m(cfg)) == EB_TRUE)
+            cfg->y4m_input = EB_TRUE;
+        else
             cfg->y4m_input = EB_FALSE;
-        }
+    }
+    else {
+        cfg->y4m_input = EB_FALSE;
     }
 };
 static void SetCfgStreamFile                    (const char *value, EbConfig_t *cfg)
@@ -767,7 +770,7 @@ static void ParseConfigFile(
                 // Cap the length of the variable name
                 argLen[0] = (argLen[0] > CONFIG_FILE_MAX_VAR_LEN - 1) ? CONFIG_FILE_MAX_VAR_LEN - 1 : argLen[0];
                 // Copy the variable name
-                EB_STRNCPY(varName, argv[0], argLen[0]);
+                EB_STRNCPY(varName, sizeof(varName), argv[0], argLen[0]);
                 // Null terminate the variable name
                 varName[argLen[0]] = CONFIG_FILE_NULL_CHAR;
 
@@ -776,7 +779,7 @@ static void ParseConfigFile(
                     // Cap the length of the variable
                     argLen[valueIndex+2] = (argLen[valueIndex+2] > CONFIG_FILE_MAX_VAR_LEN - 1) ? CONFIG_FILE_MAX_VAR_LEN - 1 : argLen[valueIndex+2];
                     // Copy the variable name
-                    EB_STRNCPY(varValue[valueIndex], argv[valueIndex+2], argLen[valueIndex+2]);
+                    EB_STRNCPY(varValue[valueIndex], sizeof(varValue[valueIndex]), argv[valueIndex + 2], argLen[valueIndex + 2]);
                     // Null terminate the variable name
                     varValue[valueIndex][argLen[valueIndex+2]] = CONFIG_FILE_NULL_CHAR;
 
@@ -879,8 +882,8 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->bufferedInput < -1) {
-        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid BufferedInput. BufferedInput must greater or equal to -1\n", channelNumber + 1);
+    if ((config->bufferedInput < -1) || (config->bufferedInput == 0)) {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid BufferedInput. BufferedInput must be greater than 0 or equal to -1\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -1030,18 +1033,29 @@ uint32_t GetHelp(
     char config_string[COMMAND_LINE_MAX_SIZE];
     if (FindToken(argc, argv, HELP_TOKEN, config_string) == 0) {
         int32_t token_index = -1;
-
         printf("\n%-25s\t%-25s\t%-25s\t\n\n" ,"TOKEN", "DESCRIPTION", "INPUT TYPE");
         printf("%-25s\t%-25s\t%-25s\t\n" ,"-nch", "NumberOfChannels", "Single input");
         while (config_entry[++token_index].token != NULL) {
             printf("%-25s\t%-25s\t%-25s\t\n", config_entry[token_index].token, config_entry[token_index].name, config_entry[token_index].type ? "Array input": "Single input");
         }
         return 1;
+    }
+    return 0;
+}
 
+uint32_t GetSVTVersion(
+    int32_t     argc,
+    char *const argv[])
+{
+    char config_string[COMMAND_LINE_MAX_SIZE];
+    if (FindToken(argc, argv, VERSION_TOKEN, config_string) == 0) {
+        printf("SVT-HEVC version %d.%d.%d\n", SVT_VERSION_MAJOR, SVT_VERSION_MINOR, SVT_VERSION_PATCHLEVEL);
+        printf("Copyright(c) 2018 Intel Corporation\n");
+        printf("BSD-2-Clause Plus Patent License\n");
+        printf("https://github.com/OpenVisualCloud/SVT-HEVC\n");
+        return 1;
     }
-    else {
-        return 0;
-    }
+    return 0;
 }
 
 /******************************************************

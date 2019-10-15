@@ -522,14 +522,20 @@ int CheckXcr0Ymm()
 EB_S32 Check4thGenIntelCoreFeatures()
 {
     int abcd[4];
-    int fma_movbe_osxsave_mask = ((1 << 12) | (1 << 22) | (1 << 27));
+#define ECX_REG_FMA     BIT(12)
+#define ECX_REG_MOVBE   BIT(22)
+#define ECX_REG_XSAVE   BIT(26)
+#define ECX_REG_OSXSAVE BIT(27)
+    int ecx_reg_mask = ECX_REG_FMA | ECX_REG_MOVBE | ECX_REG_XSAVE | ECX_REG_OSXSAVE;
     int avx2_bmi12_mask = (1 << 5) | (1 << 3) | (1 << 8);
 
     /* CPUID.(EAX=01H, ECX=0H):ECX.FMA[bit 12]==1   &&
        CPUID.(EAX=01H, ECX=0H):ECX.MOVBE[bit 22]==1 &&
+       CPUID.(EAX=01H, ECX=0H):ECX.XSAVE[bit 26]==1 &&
        CPUID.(EAX=01H, ECX=0H):ECX.OSXSAVE[bit 27]==1 */
     RunCpuid( 1, 0, abcd );
-    if ( (abcd[2] & fma_movbe_osxsave_mask) != fma_movbe_osxsave_mask )
+    /* To make sure the processor supports XGETBV instruction, and OS has enabled it. */
+    if ((abcd[2] & ecx_reg_mask) != ecx_reg_mask)
         return 0;
 
     if ( ! CheckXcr0Ymm() )
@@ -571,19 +577,22 @@ int CheckXcr0Zmm()
 static EB_S32 CanUseIntelAVX512()
 {
     int abcd[4];
+    int avx512_ebx_mask = 0;
 
-    /*  CPUID.(EAX=07H, ECX=0):EBX[bit 16]==1 AVX512F
-        CPUID.(EAX=07H, ECX=0):EBX[bit 17] AVX512DQ
-        CPUID.(EAX=07H, ECX=0):EBX[bit 28] AVX512CD
-        CPUID.(EAX=07H, ECX=0):EBX[bit 30] AVX512BW
-        CPUID.(EAX=07H, ECX=0):EBX[bit 31] AVX512VL */
+#define ECX_REG_FMA     BIT(12)
+#define ECX_REG_MOVBE   BIT(22)
+#define ECX_REG_XSAVE   BIT(26)
+#define ECX_REG_OSXSAVE BIT(27)
+    int ecx_reg_mask = ECX_REG_FMA | ECX_REG_MOVBE | ECX_REG_XSAVE | ECX_REG_OSXSAVE;
 
-    int avx512_ebx_mask =
-          (1 << 16)  // AVX-512F
-        | (1 << 17)  // AVX-512DQ
-        | (1 << 28)  // AVX-512CD
-        | (1 << 30)  // AVX-512BW
-        | (1 << 31); // AVX-512VL
+    /* CPUID.(EAX=01H, ECX=0H):ECX.FMA[bit 12]==1   &&
+       CPUID.(EAX=01H, ECX=0H):ECX.MOVBE[bit 22]==1 &&
+       CPUID.(EAX=01H, ECX=0H):ECX.XSAVE[bit 26]==1 &&
+       CPUID.(EAX=01H, ECX=0H):ECX.OSXSAVE[bit 27]==1 */
+    RunCpuid( 1, 0, abcd );
+    /* To make sure the processor supports XGETBV instruction, and OS has enabled it. */
+    if ((abcd[2] & ecx_reg_mask) != ecx_reg_mask)
+        return 0;
 
     // ensure OS supports ZMM registers (and YMM, and XMM)
     if ( ! CheckXcr0Zmm() )
@@ -591,6 +600,19 @@ static EB_S32 CanUseIntelAVX512()
 
     if ( ! Check4thGenIntelCoreFeatures() )
         return 0;
+
+    /* CPUID.(EAX=07H, ECX=0):EBX[bit 16]==1 AVX512F
+       CPUID.(EAX=07H, ECX=0):EBX[bit 17] AVX512DQ
+       CPUID.(EAX=07H, ECX=0):EBX[bit 28] AVX512CD
+       CPUID.(EAX=07H, ECX=0):EBX[bit 30] AVX512BW
+       CPUID.(EAX=07H, ECX=0):EBX[bit 31] AVX512VL */
+
+    avx512_ebx_mask =
+        (1 << 16)  // AVX-512F
+        | (1 << 17)  // AVX-512DQ
+        | (1 << 28)  // AVX-512CD
+        | (1 << 30)  // AVX-512BW
+        | (1 << 31); // AVX-512VL
 
     RunCpuid( 7, 0, abcd );
     if ( (abcd[1] & avx512_ebx_mask) != avx512_ebx_mask )
@@ -2534,6 +2556,7 @@ void CopyApiFromApp(
         sequenceControlSetPtr->staticConfig.encoderColorFormat = EB_YUV420;
     }
     sequenceControlSetPtr->chromaFormatIdc = (EB_U32)(sequenceControlSetPtr->staticConfig.encoderColorFormat);
+    sequenceControlSetPtr->encoderBitDepth = (EB_U32)(sequenceControlSetPtr->staticConfig.encoderBitDepth);
     sequenceControlSetPtr->enableTmvpSps = sequenceControlSetPtr->staticConfig.unrestrictedMotionVector;
 
     // Copying to masteringDisplayColorVolume structure
