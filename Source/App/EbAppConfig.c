@@ -983,6 +983,11 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         return_error = EB_ErrorBadParameter;
     }
 
+    if (config->encoderColorFormat != EB_YUV420 && config->compressedTenBitFormat ) {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u : -compressed-ten-bit-format 1 is only supported for 420 color format\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
     return return_error;
 }
 
