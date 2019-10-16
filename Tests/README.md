@@ -13,26 +13,26 @@ Test cases can be run on both Linux and Windows platforms.
 
 ### Paths
 
-The following relative paths are defined in the script:\
-ENC_PATH   = folder where the SvtHevcEncApp executable can be found - default: "encoders"\
-BIN_PATH   = folder where the created bitstreams are stored - default: "bitstreams"\
-YUV_PATH   = folder where the input yuv media file are stored - default: "yuvs"\
-TOOLS_PATH = folder where the tools are located (e.g. reference decoder, MCTS decoder) - default: "tools"\
-These folders should be created prior to running the script.\
-The bitstream folder should be empty and cleared for each run.\
-Note: You should build the SVT encoder and place the executable in the folder specified under "ENC_PATH"\
-Note: Download the reference decoder from https://hevc.hhi.fraunhofer.de/ and place in the folder specified under "TOOLS_PATH"\
+The following relative paths are defined in the script:
+ENC_PATH   = folder where the SvtHevcEncApp executable can be found - default: "encoders"
+BIN_PATH   = folder where the created bitstreams are stored - default: "bitstreams"
+YUV_PATH   = folder where the input yuv media file are stored - default: "yuvs"
+TOOLS_PATH = folder where the tools are located (e.g. reference decoder, MCTS decoder) - default: "tools"
+These folders should be created prior to running the script.
+The bitstream folder should be empty and cleared for each run.
+Note: You should build the SVT encoder and place the executable in the folder specified under "ENC_PATH"
+Note: Download the reference decoder from https://hevc.hhi.fraunhofer.de/ and place in the folder specified under "TOOLS_PATH"
 Note: The MCTS check decoder can be found at: https://github.com/kelvinhu325/HM/tree/mcts_check .  The binary should be build and place in the folder specified under "TOOLS_PATH"
 
 
 
 ### Validation Test Modes
 
-VALIDATION_TEST_MODE defines which of the 3 validation test modes that the script runs in:\
-0 = Fast - Used to quickly verify code check-ins.  Should take around 2 hours\
-1 = Nightly - Used as a daily stability check-ins_support. Should take around 18 hours\
-2 = Full - Used to verify releases of the products.  Should take around 2 days.\
-Note: Estimated time is based on tests ran on Intel Xeon Gold 6140 CPU w/ 94.7 GB memory.\
+VALIDATION_TEST_MODE defines which of the 3 validation test modes that the script runs in:
+0 = Fast - Used to quickly verify code check-ins.  Should take around 2 hours
+1 = Nightly - Used as a daily stability check-ins_support. Should take around 18 hours
+2 = Full - Used to verify releases of the products.  Should take around 2 days.
+Note: Estimated time is based on tests ran on Intel Xeon Gold 6140 CPU w/ 94.7 GB memory.
 The script modes differ by the total number of tests that are run.
 
 
@@ -41,21 +41,21 @@ The script modes differ by the total number of tests that are run.
 
 COLOR_MODE defines which subset of media files are used in the test
 
-0 = P420, P422, and P444\
-1 = P420 Only\
-2 = P422 Only\
+0 = P420, P422, and P444
+1 = P420 Only
+2 = P422 Only
 3 = P444 Only
 
 
 
 ### QP/VBR
 
-QP_VBR_MODE defines how the quantization parameter, variable bitrate, and constant rate factor parameters are specified in the tests:\
+QP_VBR_MODE defines how the quantization parameter, variable bitrate, and constant rate factor parameters are specified in the tests:
 
-0 =QP, VBR, and CRF parameters are used\
-1 = QP Only\
-2 = VBR Only\
-3 = CRF Only\
+0 =QP, VBR, and CRF parameters are used
+1 = QP Only
+2 = VBR Only
+3 = CRF Only
 4 = QP and VBR Only
 	
 
@@ -72,29 +72,29 @@ NUM_FRAMES is a variable that defines the number of frames encoded in each test.
 
 ### Quantization Iterations
 
-MIN_QP and MAX_QP define the range of quantization that the tests can be run with.\
-QP_ITERATIONS defines the number of random quantization values used in that range.\
-MIN_QP defaults to 30\
-MAX_QP defaults to  50\
-QP_ITERATIONS defaults to 1\
+MIN_QP and MAX_QP define the range of quantization that the tests can be run with.
+QP_ITERATIONS defines the number of random quantization values used in that range.
+MIN_QP defaults to 30
+MAX_QP defaults to  50
+QP_ITERATIONS defaults to 1
 QP iteration is only used when the QP parameter is being used
 
 
 
 ### Variable Bitrate Iterations
 
-MIN_BR and MAX_BR define the range of bitrates (bytes/second) that the tests can be run with.\
-VBR_ITERATIONS defines the number of variable bitrate values used in that range.\
-MIN_BR defaults to 1000\
-MAX_BR defaults to 10000000\
-VBR_ITERATIONS defaults to 1 for fast and nightly test modes, and 2 for full test modes\
+MIN_BR and MAX_BR define the range of bitrates (bytes/second) that the tests can be run with.
+VBR_ITERATIONS defines the number of variable bitrate values used in that range.
+MIN_BR defaults to 1000
+MAX_BR defaults to 10000000
+VBR_ITERATIONS defaults to 1 for fast and nightly test modes, and 2 for full test modes
 VBR iteration is only used when VBR parameter is being used
 
 
 
 ### CRF Iterations
 
-MIN_CRF and MAX_CRF define the range of rate factors that the tests can be run with.\
+MIN_CRF and MAX_CRF define the range of rate factors that the tests can be run with.
 CRF_ITERATIONS defines the number of iterations to set when Constant Rate Factor testing is specified.
 
 
@@ -124,8 +124,8 @@ MCTS_ITER defines the number of motion constrained tileset iterations that are u
 
 ### Width Height Iterations
 
-WH_ITER defines the number of width/height pairs are used in the tests\
-MIN_WIDTH and MAX_WIDTH define the range of widths (default: 832-4096)\
+WH_ITER defines the number of width/height pairs are used in the tests
+MIN_WIDTH and MAX_WIDTH define the range of widths (default: 832-4096)
 MIN_HEIGHT and MAX_HEIGHT define the range of heights (default: 480-2304)
 
 
@@ -138,8 +138,8 @@ Setting DEBUG_MODE to a non-zero value will allow the script to run and configur
 
 ### Configuration
 
-TEST_CONFIGURATION can be set to 0 or 1\
-        0 = Validation Test - Verify that encoder parameters are functioning properly\
+TEST_CONFIGURATION can be set to 0 or 1
+        0 = Validation Test - Verify that encoder parameters are functioning properly
         1 = Speed Test - Check the speed of encoding
 
 Both set of tests use different set of media files (VALIDATION_TEST_SEQUENCES
@@ -166,46 +166,45 @@ Here are the basic steps to follow when adding a test to validate the correct pr
      - self - standard Python instance variable
 
      - seq_list - list of sequences (videos) that are to be run
-       These parameters are not used in the body of the function, but are passed in the \
-       return when the function ends.
-
-       Example Function signature:
-
-       ```
+       These parameters are not used in the body of the function, but are passed in the return when the function ends.
+       
+Example Function signature:
+       
+```
        def myparameter_test(self,seq_list)
        ```
-
-   - Add a body to function\
-
-     - create a variable that defines the name of the test (e.g. test_name = 'myparameter_test')
-
-     - create a dictionary that defines parameters and a list of values.  More than one parameter can be included in the dictionary (e.g.)
-
-       ```
+     
+- Add a body to function
+   
+  - create a variable that defines the name of the test (e.g. test_name = 'myparameter_test')
+   
+  - create a dictionary that defines parameters and a list of values.  More than one parameter can be included in the dictionary (e.g.)
+   
+    ```
        combination_test_params = { 'MyParameterName'     : [0, 1],
                                    'MyOtherParameterName'     : [0, 1],
        }					   
        ```
-
-     - make sure that all parameters used in the dictionary are also included in the default_tokens dictionary created in the get_param_tokens	function (e.g.)
-
-       ```
+   
+  - make sure that all parameters used in the dictionary are also included in the default_tokens dictionary created in the get_param_tokens	function (e.g.)
+   
+    ```
         default_tokens = {
         ...
         'MyParameterName' : '-mp',
         'MyOtherParameterName' : '-mop',
         ...
        ```
-
-     - Add a return statement to the function which calls run_functional_tests passing  the sequence list, test name, and test parameters (e.g.)
-
-       ```
+   
+  - Add a return statement to the function which calls run_functional_tests passing  the sequence list, test name, and test parameters (e.g.)
+   
+    ```
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
        ```
-
-   - Here's the resulting function:
-
-     ```
+   
+- Here's the resulting function:
+   
+  ```
      def myparameter_test(self,seq_list){
          # Test specific parameters:
          test_name = 'myparameter_test'
@@ -215,7 +214,7 @@ Here are the basic steps to follow when adding a test to validate the correct pr
          # Run tests
          return self.run_functional_tests(seq_list, test_name, combination_test_params)
      ```
-
+   
 2. Add a call to the new function at the end of the set of validation tests that are run.  In the function run_validation_test, add these lines that call your function and tabulate the num_tests and num_passed counters (e.g.)
 
    ```
@@ -235,8 +234,8 @@ Here are the basic steps to follow when adding a test to validate the correct pr
 3. Download the reference decoder from https://hevc.hhi.fraunhofer.de/
 4. Build the reference decoder and place it in the folder specified under "TOOLS_PATH"(Windows:TAppDecoder.exe , Linux: TAppDecoder)
 5. Download the MCTS decoder from https://github.com/kelvinhu325/HM/tree/mcts_check
-6. Build the MTCS decoder and place it in the folder specified under "TOOLS_PATH"\ (Windows:MCTS_TAppDecoder.exe , Linux: MCTS_TAppDecoder)
-7. Obtain the YUV media files and copy to YUV_PATH\
+6. Build the MTCS decoder and place it in the folder specified under "TOOLS_PATH"(Windows:MCTS_TAppDecoder.exe , Linux: MCTS_TAppDecoder)
+7. Obtain the YUV media files and copy to YUV_PATH
 8. Run script as follows:
 
 ```
