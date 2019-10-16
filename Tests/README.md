@@ -50,7 +50,7 @@ COLOR_MODE defines which subset of media files are used in the test
 
 ### QP/VBR
 
-QP_VBR_MODE defines how the quantization parameter, variable bitrate, and constant rate factor parameters are specified in the tests:\
+QP_VBR_MODE defines how the quantization parameter, variable bitrate, and constant rate factor parameters are specified in the tests:
 
 0 =QP, VBR, and CRF parameters are used\
 1 = QP Only\
@@ -175,7 +175,7 @@ Here are the basic steps to follow when adding a test to validate the correct pr
        def myparameter_test(self,seq_list)
        ```
 
-   - Add a body to function\
+   - Add a body to function
 
      - create a variable that defines the name of the test (e.g. test_name = 'myparameter_test')
 
@@ -235,8 +235,8 @@ Here are the basic steps to follow when adding a test to validate the correct pr
 3. Download the reference decoder from https://hevc.hhi.fraunhofer.de/
 4. Build the reference decoder and place it in the folder specified under "TOOLS_PATH"(Windows:TAppDecoder.exe , Linux: TAppDecoder)
 5. Download the MCTS decoder from https://github.com/kelvinhu325/HM/tree/mcts_check
-6. Build the MTCS decoder and place it in the folder specified under "TOOLS_PATH"\ (Windows:MCTS_TAppDecoder.exe , Linux: MCTS_TAppDecoder)
-7. Obtain the YUV media files and copy to YUV_PATH\
+6. Build the MTCS decoder and place it in the folder specified under "TOOLS_PATH"(Windows:MCTS_TAppDecoder.exe , Linux: MCTS_TAppDecoder)
+7. Obtain the YUV media files and copy to YUV_PATH
 8. Run script as follows:
 
 ```
