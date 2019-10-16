@@ -8,7 +8,7 @@
 
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
-#include "EbNoiseExtractAVX2.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
