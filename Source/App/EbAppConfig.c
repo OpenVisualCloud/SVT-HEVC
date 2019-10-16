@@ -895,7 +895,6 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         return_error = EB_ErrorBadParameter;
     }
 
-
 #define MAX_LCU_SIZE                                64
 
     int32_t pictureWidthInLcu = (config->sourceWidth + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE;
@@ -952,6 +951,12 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
     if (config->encoderBitDepth == 10 && config->separateFields == 1)
     {
         fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Separate fields is not supported for 10 bit input \n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->encoderBitDepth != 10 && config->compressedTenBitFormat == EB_TRUE)
+    {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Compressed 10 bit format inconsistent with encoder bit depth\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
