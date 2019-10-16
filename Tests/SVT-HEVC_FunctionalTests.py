@@ -915,7 +915,7 @@ class EB_Test(object):
 
 ## ------------ FUNCTIONAL TESTS ------------- ##
 # These tests put the encoder through various combinations to ensure the encoder does not crash
-    def qp_file_test(self,seq_list):        
+    def qp_file_test(self,seq_list):
         # Test specific parameters:
         test_name = 'qp_file_test'
         combination_test_params = { 'use_qp_file'       : [1]
@@ -923,7 +923,7 @@ class EB_Test(object):
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
 
-    def intra_period_test(self,seq_list):        
+    def intra_period_test(self,seq_list):
         # Test specific parameters:
         test_name = 'intra_period_test'
         intra = []
@@ -959,7 +959,7 @@ class EB_Test(object):
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
 
-    def dlf_test(self,seq_list):        
+    def dlf_test(self,seq_list):
         # Test specific parameters:
         test_name = 'dlf_test'
         combination_test_params = { 'LoopFilterDisable'     : [0, 1],
