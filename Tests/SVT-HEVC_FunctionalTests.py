@@ -556,7 +556,7 @@ class EB_Test(object):
                         if iter <= 40 and enc_params['height']*enc_params['width'] > 4096*2160:
                             iter = random.randint(41, MAX_QP)
                         enc_params.update({'rc': 0, 'qp': iter})
-                        bitstream_name = bitstream_name + '_Q' + str(iter) 
+                        bitstream_name = bitstream_name + '_Q' + str(iter)
                     elif VBR == 1:
                         enc_params.update({'rc': 1, 'tbr': iter})
                         bitstream_name = bitstream_name + '_TBR' + str(iter)

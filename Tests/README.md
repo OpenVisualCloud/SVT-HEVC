@@ -171,7 +171,7 @@ Here are the basic steps to follow when adding a test to validate the correct pr
 
        Example Function signature:
 
-       ```
+       ```python
        def myparameter_test(self,seq_list)
        ```
 
@@ -181,7 +181,7 @@ Here are the basic steps to follow when adding a test to validate the correct pr
 
      - create a dictionary that defines parameters and a list of values.  More than one parameter can be included in the dictionary (e.g.)
 
-       ```
+       ```python
        combination_test_params = { 'MyParameterName'     : [0, 1],
                                    'MyOtherParameterName'     : [0, 1],
        }					   
@@ -189,7 +189,7 @@ Here are the basic steps to follow when adding a test to validate the correct pr
 
      - make sure that all parameters used in the dictionary are also included in the default_tokens dictionary created in the get_param_tokens	function (e.g.)
 
-       ```
+       ```python
         default_tokens = {
         ...
         'MyParameterName' : '-mp',
@@ -199,13 +199,13 @@ Here are the basic steps to follow when adding a test to validate the correct pr
 
      - Add a return statement to the function which calls run_functional_tests passing  the sequence list, test name, and test parameters (e.g.)
 
-       ```
+       ```python
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
        ```
 
    - Here's the resulting function:
 
-     ```
+     ```python
      def myparameter_test(self,seq_list){
          # Test specific parameters:
          test_name = 'myparameter_test'
@@ -218,7 +218,7 @@ Here are the basic steps to follow when adding a test to validate the correct pr
 
 2. Add a call to the new function at the end of the set of validation tests that are run.  In the function run_validation_test, add these lines that call your function and tabulate the num_tests and num_passed counters (e.g.)
 
-   ```
+   ```python
     num_tests, num_passed = self.myparameter_test(seq_list)
     total_tests = total_tests + num_tests
     total_passed = total_passed + num_passed
