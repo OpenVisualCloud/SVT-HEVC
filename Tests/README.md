@@ -22,7 +22,6 @@ These folders should be created prior to running the script.\
 The bitstream folder should be empty and cleared for each run.\
 Note: You should build the SVT encoder and place the executable in the folder specified under "ENC_PATH"\
 Note: Download the reference decoder from https://hevc.hhi.fraunhofer.de/ and place in the folder specified under "TOOLS_PATH"\
-
 Note: The MCTS check decoder can be found at: https://github.com/kelvinhu325/HM/tree/mcts_check .  The binary should be build and place in the folder specified under "TOOLS_PATH"
 
 
