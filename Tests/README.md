@@ -21,7 +21,9 @@ TOOLS_PATH = folder where the tools are located (e.g. reference decoder, MCTS de
 These folders should be created prior to running the script.\
 The bitstream folder should be empty and cleared for each run.\
 Note: You should build the SVT encoder and place the executable in the folder specified under "ENC_PATH"\
-Note: Download the reference decoder from https://hevc.hhi.fraunhofer.de/ and place in the folder specified under "TOOLS_PATH"\		
+Note: Download the reference decoder from https://hevc.hhi.fraunhofer.de/ and placed in the folder specified under "TOOLS_PATH"\
+
+Note: The MCTS check decoder can be found at: https://github.com/kelvinhu325/HM/tree/mcts_check .  The binary should be build and placed in the folder specified under "TOOLS_PATH"\	
 
 
 
@@ -29,25 +31,40 @@ Note: Download the reference decoder from https://hevc.hhi.fraunhofer.de/ and pl
 
 VALIDATION_TEST_MODE defines which of the 3 validation test modes that the script runs in:\
 0 = Fast - Used to quickly verify code check-ins.  Should take around 2 hours\
-1 = Nightly - Used as a daily stability check_seq_support. Should take around 18 hours\
+1 = Nightly - Used as a daily stability check-ins_support. Should take around 18 hours\
 2 = Full - Used to verify releases of the products.  Should take around 2 days.\
 Note: Estimated time is based on tests ran on Intel Xeon Gold 6140 CPU w/ 94.7 GB memory.\
 The script modes differ by the total number of tests that are run. \
 
 
 
+### COLOR_MODE
+
+COLOR_MODE defines which subset of media files are used in the test
+
+0 = P420, P422, and P444\
+1 = P420 Only\
+2 = P422 Only\
+3 = P444 Only\
+
+
+
 ### QP/VBR
 
-QP_VBR_MODE defines how the quantization parameter and variable bitrate parameters are specified in the tests:\
-0 = Both QP and VBR parameters are used\
-1 = Only QP parameter is used\
-2 = Only VBR parameter is used\
+QP_VBR_MODE defines how the quantization parameter, variable bitrate, and constant rate factor parameters are specified in the tests:\
+
+0 =QP, VBR, and CRF parameters are used\
+1 = QP Only\
+2 = VBR Only\
+3 = CRF Only\
+4 = QP and VBR Only\
 	
 
 ### Encoder Modes
 
-SPEED_ENC_MODES is a list variable that defines which encoding modes (0-11) are used in the tests. It defaults to [0,6,9]
-	
+SPEED_ENC_MODES is a list variable that defines which encoding modes (0-11) are used in the speed tests. It defaults to [0,6,9]
+
+ENC_MODES is a list variable that defines which encoding modes (0-11) are used in each of the validation test modes.	
 
 ### Number of Frames
 
@@ -73,19 +90,40 @@ MIN_BR defaults to 1000\
 MAX_BR defaults to 10000000\
 VBR_ITERATIONS defaults to 1 for fast and nightly test modes, and 2 for full test modes\
 VBR iteration is only used when VBR parameter is being used\
-	
+
+
+
+### CRF Iterations
+
+MIN_CRF and MAX_CRF define the range of rate factors that the tests can be run with.\
+CRF_ITERATIONS defines the number of iterations to set when Constant Rate Factor testing is specified.\
+
+
 
 ### Search Area Iterations
 
-SA_ITER defines the size of the search area used in the tests
+SA_ITER defines the size of the search area used in the tests\
 	
 
 ### Look Ahead Distance Iterations
 
-LAD_ITER defines the number of intra-periods are used in the tests
-	
+LAD_ITER defines the number of look ahead iterations that are used in the tests\
 
-### Width Height
+
+
+### Intra Period Iterations
+
+INTRA_PERIOD_ITER defines the number of intra period iterations that are used in the tests\	
+
+
+
+### MCTS Iterations
+
+MCTS_ITER defines the number of motion constrained tileset iterations that are used in the tests\	
+
+
+
+### Width Height Iterations
 
 WH_ITER defines the number of width/height pairs are used in the tests\
 MIN_WIDTH and MAX_WIDTH define the range of widths (default: 832-4096)\
@@ -95,7 +133,7 @@ MIN_HEIGHT and MAX_HEIGHT define the range of heights (default: 480-2304)\
 
 ### Debugging
 
-Setting DEBUG_MODE to a non-zero value will allow the script to run and configure each test to be run, but not actually run the test.
+Setting DEBUG_MODE to a non-zero value will allow the script to run and configure each test to be run, but not actually run the test.\
 
 
 
