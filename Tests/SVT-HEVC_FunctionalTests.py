@@ -301,14 +301,14 @@ class EB_Test(object):
             else:
                 intra_period = int(int(frame_rate)/8)*8 - 1
             enc_params.update({'frame_rate' : frame_rate, 'intra_period': intra_period})
-            
+
         if "_P420" in seq_name:
             enc_params.update({'color_format' : 1})
         elif "_P422" in seq_name:
             enc_params.update({'color_format' : 2})
         elif "_P444" in seq_name:
             enc_params.update({'color_format' : 3})
-            
+
         return enc_params
 
     def get_param_tokens(self):
@@ -355,7 +355,6 @@ class EB_Test(object):
                         'VbvBufSize'                        : '-vbv-bufsize',
                         'VbvBufInit'                        : '-vbv-init',
                         'crf'                               : '-crf'
-
                         }
         return default_tokens
 
