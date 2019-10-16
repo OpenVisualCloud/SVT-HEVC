@@ -407,26 +407,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         //   of the previous Active SequenceControlSet
         EbBlockOnMutex(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->configMutex);
         if (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->initialPicture) {
-
-            // Update picture width, picture height, cropping right offset, cropping bottom offset, and conformance windows
-            if (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->initialPicture) {
-                sequenceControlSetPtr->lumaWidth    = sequenceControlSetPtr->maxInputLumaWidth;
-                sequenceControlSetPtr->lumaHeight   = sequenceControlSetPtr->maxInputLumaHeight;
-                sequenceControlSetPtr->chromaWidth  = sequenceControlSetPtr->maxInputLumaWidth >> subWidthCMinus1;
-                sequenceControlSetPtr->chromaHeight = sequenceControlSetPtr->maxInputLumaHeight >> subHeightCMinus1;
-
-                sequenceControlSetPtr->padRight             = sequenceControlSetPtr->maxInputPadRight;
-                sequenceControlSetPtr->croppingRightOffset  = sequenceControlSetPtr->padRight;
-                sequenceControlSetPtr->padBottom            = sequenceControlSetPtr->maxInputPadBottom;
-                sequenceControlSetPtr->croppingBottomOffset = sequenceControlSetPtr->padBottom;
-
-                if (sequenceControlSetPtr->padRight != 0 || sequenceControlSetPtr->padBottom != 0)
-                    sequenceControlSetPtr->conformanceWindowFlag = 1;
-                else
-                    sequenceControlSetPtr->conformanceWindowFlag = 0;
-
-                inputSize = sequenceControlSetPtr->lumaWidth * sequenceControlSetPtr->lumaHeight;
-            }
+            inputSize = sequenceControlSetPtr->lumaWidth * sequenceControlSetPtr->lumaHeight;
 
             // HDR BT2020
             if (sequenceControlSetPtr->staticConfig.videoUsabilityInfo)
