@@ -154,22 +154,22 @@ which can executed outside of this batch file.
 
 ### Adding a validation test
 
-Here are the basic steps to follow when adding a test to validate the correct processing of an encoder parameter.  You can refer to existing tests functions (e.g. sao_test) for reference on creating a new test function.\
+Here are the basic steps to follow when adding a test to validate the correct processing of an encoder parameter.  You can refer to existing tests functions (e.g. sao_test) for reference on creating a new test function.
 	
 
-1. Add a function that runs a test at the bottom of the section labeled FUNCTIONAL TESTS.\
+1. Add a function that runs a test at the bottom of the section labeled FUNCTIONAL TESTS.
 
-   - The name of the function should reflect the test(s) scope (e.g. myparameter_test)\
+   - The name of the function should reflect the test(s) scope (e.g. myparameter_test)
 
-   - The two parameters to the function should be:\
+   - The two parameters to the function should be:
 
-     - self - standard Python instance variable\
+     - self - standard Python instance variable
 
-     - seq_list - list of sequences (videos) that are to be run\
+     - seq_list - list of sequences (videos) that are to be run
        These parameters are not used in the body of the function, but are passed in the \
-       return when the function ends.\
+       return when the function ends.
 
-       Example Function signature:\
+       Example Function signature:
 
        ```
        def myparameter_test(self,seq_list)
@@ -177,9 +177,9 @@ Here are the basic steps to follow when adding a test to validate the correct pr
 
    - Add a body to function\
 
-     - create a variable that defines the name of the test (e.g. test_name = 'myparameter_test')\
+     - create a variable that defines the name of the test (e.g. test_name = 'myparameter_test')
 
-     - create a dictionary that defines parameters and a list of values.  More than one parameter can be included in the dictionary (e.g.)\
+     - create a dictionary that defines parameters and a list of values.  More than one parameter can be included in the dictionary (e.g.)
 
        ```
        combination_test_params = { 'MyParameterName'     : [0, 1],
@@ -187,7 +187,7 @@ Here are the basic steps to follow when adding a test to validate the correct pr
        }					   
        ```
 
-     - make sure that all parameters used in the dictionary are also included in the default_tokens dictionary created in the get_param_tokens	function (e.g.)\
+     - make sure that all parameters used in the dictionary are also included in the default_tokens dictionary created in the get_param_tokens	function (e.g.)
 
        ```
         default_tokens = {
@@ -197,13 +197,13 @@ Here are the basic steps to follow when adding a test to validate the correct pr
         ...
        ```
 
-     - Add a return statement to the function which calls run_functional_tests passing  the sequence list, test name, and test parameters (e.g.)\    
+     - Add a return statement to the function which calls run_functional_tests passing  the sequence list, test name, and test parameters (e.g.)
 
        ```
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
        ```
 
-   - Here's the resulting function:\	 
+   - Here's the resulting function:
 
      ```
      def myparameter_test(self,seq_list){
@@ -216,7 +216,7 @@ Here are the basic steps to follow when adding a test to validate the correct pr
          return self.run_functional_tests(seq_list, test_name, combination_test_params)
      ```
 
-2. Add a call to the new function at the end of the set of validation tests that are run.  In the function run_validation_test, add these lines that call your function and tabulate the num_tests and num_passed counters (e.g.)\
+2. Add a call to the new function at the end of the set of validation tests that are run.  In the function run_validation_test, add these lines that call your function and tabulate the num_tests and num_passed counters (e.g.)
 
    ```
     num_tests, num_passed = self.myparameter_test(seq_list)
@@ -224,20 +224,20 @@ Here are the basic steps to follow when adding a test to validate the correct pr
     total_passed = total_passed + num_passed
    ```
 
-3. Try running the script in debug mode.  There should be a txt file with a name based on your test name (e.g. myparameter_test.txt).  Open the text file and verify that  the individual tests run match with the parameters you've specified in your function.\
+3. Try running the script in debug mode.  There should be a txt file with a name based on your test name (e.g. myparameter_test.txt).  Open the text file and verify that  the individual tests run match with the parameters you've specified in your function.
 
    
 
 ### How to use the test script:
 
-1. Make sure ENC_PATH, BIN_PATH,YUV_PATH, and TOOLS_PATH folders are created relative to the location of  where the script is located.  The bitstream folder should be empty and cleared for each run.\
-2. Build SVT encoder and place the executable in the folder specified under "ENC_PATH"\
-3. Download the reference decoder from https://hevc.hhi.fraunhofer.de/\
-4. Build the reference decoder and place it in the folder specified under "TOOLS_PATH"\ (Windows:TAppDecoder.exe , Linux: TAppDecoder)
+1. Make sure ENC_PATH, BIN_PATH,YUV_PATH, and TOOLS_PATH folders are created relative to the location of  where the script is located.  The bitstream folder should be empty and cleared for each run.
+2. Build SVT encoder and place the executable in the folder specified under "ENC_PATH"
+3. Download the reference decoder from https://hevc.hhi.fraunhofer.de/
+4. Build the reference decoder and place it in the folder specified under "TOOLS_PATH"(Windows:TAppDecoder.exe , Linux: TAppDecoder)
 5. Download the MCTS decoder from https://github.com/kelvinhu325/HM/tree/mcts_check
 6. Build the MTCS decoder and place it in the folder specified under "TOOLS_PATH"\ (Windows:MCTS_TAppDecoder.exe , Linux: MCTS_TAppDecoder)
 7. Obtain the YUV media files and copy to YUV_PATH\
-8. Run script as follows:\
+8. Run script as follows:
 
 ```
 python SVT-HEVC_FunctionalTests.py Fast
