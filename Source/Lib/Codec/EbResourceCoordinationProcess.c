@@ -18,7 +18,7 @@
 
 #include "EbResourceCoordinationResults.h"
 #include "EbReferenceObject.h"
-#include "EbTime.h"
+#include "EbUtility.h"
 
 /************************************************
  * Resource Coordination Context Constructor
@@ -90,7 +90,7 @@ EB_ERRORTYPE ResourceCoordinationContextCtor(
 // Inputs: TargetSpeed, Status of the SCbuffer
 // Output: EncMod
 //******************************************************************************//
-void SpeedBufferControl(
+static void SpeedBufferControl(
 	ResourceCoordinationContext_t   *contextPtr,
 	PictureParentControlSet_t       *pictureControlSetPtr,
 	SequenceControlSet_t            *sequenceControlSetPtr)
@@ -255,79 +255,13 @@ void SpeedBufferControl(
 }
 
 
-/******************************************************
-* Derive Pre-Analysis settings for SQ
-Input   : encoder mode and tune
-Output  : Pre-Analysis signal(s)
-******************************************************/
-EB_ERRORTYPE SignalDerivationPreAnalysisSq(
-    SequenceControlSet_t      *sequenceControlSetPtr,
-    PictureParentControlSet_t *pictureControlSetPtr) {
-
-    EB_ERRORTYPE return_error = EB_ErrorNone;
-
-    EB_U8 inputResolution = sequenceControlSetPtr->inputResolution;
-
-    // Derive Noise Detection Method
-    if (inputResolution == INPUT_SIZE_4K_RANGE) {
-        if (pictureControlSetPtr->encMode <= ENC_MODE_8) {
-            pictureControlSetPtr->noiseDetectionMethod = NOISE_DETECT_FULL_PRECISION;
-        }
-        else {
-            pictureControlSetPtr->noiseDetectionMethod = NOISE_DETECT_HALF_PRECISION;
-        }
-
-    }
-    else if (inputResolution == INPUT_SIZE_1080p_RANGE) {
-        if (pictureControlSetPtr->encMode <= ENC_MODE_8) {
-            pictureControlSetPtr->noiseDetectionMethod = NOISE_DETECT_FULL_PRECISION;
-        }
-        else {
-            pictureControlSetPtr->noiseDetectionMethod = NOISE_DETECT_QUARTER_PRECISION;
-        }
-
-    }
-    else {
-        pictureControlSetPtr->noiseDetectionMethod = NOISE_DETECT_FULL_PRECISION;
-    }
-
-	pictureControlSetPtr->enableDenoiseSrcFlag = pictureControlSetPtr->encMode <= ENC_MODE_11 ? sequenceControlSetPtr->enableDenoiseFlag :	EB_FALSE;
-	pictureControlSetPtr->disableVarianceFlag =  (pictureControlSetPtr->encMode <= ENC_MODE_11) ? EB_FALSE : EB_TRUE;
-    // Derive Noise Detection Threshold
-    if (pictureControlSetPtr->encMode <= ENC_MODE_8) {
-        pictureControlSetPtr->noiseDetectionTh = 0;
-    }
-    else {
-        pictureControlSetPtr->noiseDetectionTh = 1;
-    }
-
-    EB_U8  hmeMeLevel       = pictureControlSetPtr->encMode;
-
-    EB_U32 inputRatio       = sequenceControlSetPtr->lumaWidth / sequenceControlSetPtr->lumaHeight;
-    EB_U8 resolutionIndex   = inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ?               0   : // 480P
-                                (inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio < 2) ?    1   : // 720P
-                                (inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio > 3) ?    2   : // 1080I
-                                (inputResolution <= INPUT_SIZE_1080p_RANGE) ?                      3   : // 1080I
-                                                                                                4;    // 4K
-    
-    // Derive HME Flag
-    if (sequenceControlSetPtr->staticConfig.useDefaultMeHme)
-        pictureControlSetPtr->enableHmeFlag = EB_TRUE;
-    else
-        pictureControlSetPtr->enableHmeFlag = sequenceControlSetPtr->staticConfig.enableHmeFlag;
-    pictureControlSetPtr->enableHmeLevel0Flag   = EnableHmeLevel0FlagSq[resolutionIndex][hmeMeLevel];
-    pictureControlSetPtr->enableHmeLevel1Flag   = EnableHmeLevel1FlagSq[resolutionIndex][hmeMeLevel];
-    pictureControlSetPtr->enableHmeLevel2Flag   = EnableHmeLevel2FlagSq[resolutionIndex][hmeMeLevel];
-
-    return return_error;
-}
 
 /******************************************************
 * Derive Pre-Analysis settings for OQ
 Input   : encoder mode and tune
 Output  : Pre-Analysis signal(s)
 ******************************************************/
-EB_ERRORTYPE SignalDerivationPreAnalysisOq(
+static EB_ERRORTYPE SignalDerivationPreAnalysisOq(
     SequenceControlSet_t       *sequenceControlSetPtr,
     PictureParentControlSet_t  *pictureControlSetPtr) {
 
@@ -412,50 +346,6 @@ EB_ERRORTYPE SignalDerivationPreAnalysisOq(
     return return_error;
 }
 
-/******************************************************
-* Derive Pre-Analysis settings for VMAF
-Input   : encoder mode and tune
-Output  : Pre-Analysis signal(s)
-******************************************************/
-EB_ERRORTYPE SignalDerivationPreAnalysisVmaf(
-	SequenceControlSet_t       *sequenceControlSetPtr,
-	PictureParentControlSet_t  *pictureControlSetPtr) {
-
-	EB_ERRORTYPE return_error = EB_ErrorNone;
-
-	EB_U8 inputResolution = sequenceControlSetPtr->inputResolution;
-
-	// Derive Noise Detection Method
-	pictureControlSetPtr->noiseDetectionMethod = NOISE_DETECT_QUARTER_PRECISION;
-
-	// Derive Noise Detection Threshold
-	pictureControlSetPtr->noiseDetectionTh = 1;
-
-	EB_U8  hmeMeLevel = pictureControlSetPtr->encMode;
-	EB_U32 inputRatio = sequenceControlSetPtr->lumaWidth / sequenceControlSetPtr->lumaHeight;
-	EB_U8 resolutionIndex = inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ? 0 : // 480P
-		(inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio < 2) ? 1 : // 720P
-		(inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio > 3) ? 2 : // 1080I
-		(inputResolution <= INPUT_SIZE_1080p_RANGE) ? 3 : // 1080I
-		4;    // 4K
-	resolutionIndex = 3;
-    // Derive HME Flag
-    if (sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
-        pictureControlSetPtr->enableHmeFlag = EB_TRUE;
-    }
-    else {
-        pictureControlSetPtr->enableHmeFlag = sequenceControlSetPtr->staticConfig.enableHmeFlag;
-    }
-	pictureControlSetPtr->enableHmeLevel0Flag = EnableHmeLevel0FlagVmaf[resolutionIndex][hmeMeLevel];
-	pictureControlSetPtr->enableHmeLevel1Flag = EnableHmeLevel1FlagVmaf[resolutionIndex][hmeMeLevel];
-    pictureControlSetPtr->enableHmeLevel2Flag = EnableHmeLevel2FlagVmaf[resolutionIndex][hmeMeLevel];
-
-	pictureControlSetPtr->enableDenoiseSrcFlag = EB_FALSE;
-	pictureControlSetPtr->disableVarianceFlag = EB_TRUE;
-
-	return return_error;
-}
-
 
 
 /***************************************
@@ -516,38 +406,13 @@ void* ResourceCoordinationKernel(void *inputPtr)
         //   prepare a new sequenceControlSetPtr containing the new changes and update the state
         //   of the previous Active SequenceControlSet
         EbBlockOnMutex(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->configMutex);
-        if(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->initialPicture) {
-            
-            // Update picture width, picture height, cropping right offset, cropping bottom offset, and conformance windows
-            if(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->initialPicture) 
-            
-            {
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lumaWidth = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaWidth;
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lumaHeight = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaHeight;
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaWidth = (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaWidth >> subWidthCMinus1);
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->chromaHeight = (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaHeight >> subHeightCMinus1);
-
-                
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->padRight = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputPadRight;
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->croppingRightOffset = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->padRight;
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->padBottom = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputPadBottom;
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->croppingBottomOffset = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->padBottom;
-
-                if(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->padRight != 0 || contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->padBottom != 0) {
-                    contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->conformanceWindowFlag = 1;
-                }
-                else {
-                    contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->conformanceWindowFlag = 0;
-                }
-                
-				inputSize = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lumaWidth * contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lumaHeight;
-            }
+        if (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->initialPicture) {
+            inputSize = sequenceControlSetPtr->lumaWidth * sequenceControlSetPtr->lumaHeight;
 
             // HDR BT2020
             if (sequenceControlSetPtr->staticConfig.videoUsabilityInfo)
             {
-                
-                AppVideoUsabilityInfo_t    *vuiPtr = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->videoUsabilityInfoPtr;
+                AppVideoUsabilityInfo_t *vuiPtr = sequenceControlSetPtr->videoUsabilityInfoPtr;
 
                 if (sequenceControlSetPtr->staticConfig.highDynamicRangeInput && is16BitInput){
                     vuiPtr->aspectRatioInfoPresentFlag = EB_TRUE;
@@ -586,7 +451,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
             // Copy the contents of the active SequenceControlSet into the new empty SequenceControlSet
             CopySequenceControlSet(
                 (SequenceControlSet_t*) contextPtr->sequenceControlSetActiveArray[instanceIndex]->objectPtr,
-                contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr);
+                sequenceControlSetPtr);
 
         }
         EbReleaseMutex(contextPtr->sequenceControlSetInstanceArray[instanceIndex]->configMutex);
@@ -717,23 +582,9 @@ void* ResourceCoordinationKernel(void *inputPtr)
 			SCD_MODE_0 :
 			SCD_MODE_1 ;
      
-
-        // Pre-Analysis Signal(s) derivation
-        if (sequenceControlSetPtr->staticConfig.tune == TUNE_SQ) {
-            SignalDerivationPreAnalysisSq(
+        SignalDerivationPreAnalysisOq(
                 sequenceControlSetPtr,
                 pictureControlSetPtr);
-        }
-        else if (sequenceControlSetPtr->staticConfig.tune == TUNE_VMAF) {
-            SignalDerivationPreAnalysisVmaf(
-                sequenceControlSetPtr,
-                pictureControlSetPtr);
-		}
-        else {
-            SignalDerivationPreAnalysisOq(
-                sequenceControlSetPtr,
-                pictureControlSetPtr);
-        }
 
 	    // Rate Control                                            
 		// Set the ME Distortion and OIS Historgrams to zero

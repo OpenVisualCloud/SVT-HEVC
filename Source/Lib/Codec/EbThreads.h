@@ -9,7 +9,7 @@
 #include "EbDefinitions.h"
 
 #ifdef _WIN32
-#include <Windows.h>
+#include <windows.h>
 #endif
 
 #ifdef __cplusplus
@@ -93,8 +93,10 @@ extern    EB_BOOL                  alternateGroups;
     } \
     libThreadCount++;
 #elif defined(__linux__)
+#ifndef __cplusplus
 #define __USE_GNU
 #define _GNU_SOURCE
+#endif
 #include <sched.h>
 #include <pthread.h>
 extern    cpu_set_t                   groupAffinity;

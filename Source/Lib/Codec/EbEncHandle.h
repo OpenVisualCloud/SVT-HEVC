@@ -16,7 +16,9 @@
 #include "EbResourceCoordinationResults.h"
 #include "EbPictureDemuxResults.h"
 #include "EbRateControlResults.h"
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 /**************************************
  * Component Private Data
  **************************************/  
@@ -172,5 +174,8 @@ extern EB_ERRORTYPE EbOutputBufferHeaderCtor(
 extern EB_ERRORTYPE EbOutputReconBufferHeaderCtor(
     EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
-    
+
+#ifdef __cplusplus
+}
+#endif
 #endif // EbEncHandle_h

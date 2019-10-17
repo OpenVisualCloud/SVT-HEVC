@@ -8,6 +8,9 @@
 
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /************************************************
  * Packetization Reorder Queue Entry
@@ -21,4 +24,7 @@ extern EB_ERRORTYPE PictureDecisionReorderEntryCtor(
     PictureDecisionReorderEntry_t       **entryDblPtr,
     EB_U32                                pictureNumber);
 
+#ifdef __cplusplus
+}
+#endif
 #endif //EbPictureDecisionReorderQueue_h

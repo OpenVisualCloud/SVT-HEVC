@@ -10,6 +10,7 @@
 
 #include "EbAppConfig.h"
 #include "EbApi.h"
+#include "EbApiVersion.h"
 #include "EbAppInputy4m.h"
 
 #ifdef _WIN32
@@ -20,7 +21,8 @@
 /**********************************
  * Defines
  **********************************/
-#define HELP_TOKEN                      "-help"
+#define HELP_TOKEN                      "--help"
+#define VERSION_TOKEN                   "--version"
 #define CHANNEL_NUMBER_TOKEN            "-nch"
 #define COMMAND_LINE_MAX_SIZE           2048
 #define CONFIG_FILE_TOKEN               "-c"
@@ -101,6 +103,7 @@
 #define ASM_TYPE_TOKEN				    "-asm" // no Eval
 #define THREAD_MGMNT                    "-lp"
 #define TARGET_SOCKET                   "-ss"
+#define THREAD_COUNT                    "-thread-count"
 #define SWITCHTHREADSTOREALTIME_TOKEN   "-rt"
 #define FPSINVPS_TOKEN                  "-fpsinvps"
 #define UNRESTRICTED_MOTION_VECTOR      "-umv"
@@ -122,7 +125,7 @@
 /**********************************
  * Set Cfg Functions
  **********************************/
-static void SetCfgInputFile                     (const char *value, EbConfig_t *cfg)
+static void SetCfgInputFile(const char *value, EbConfig_t *cfg)
 {
     if (cfg->inputFile && cfg->inputFile != stdin) {
         fclose(cfg->inputFile);
@@ -130,18 +133,19 @@ static void SetCfgInputFile                     (const char *value, EbConfig_t *
     if (!strcmp(value, "stdin")) {
         cfg->inputFile = stdin;
     }
-    else {
+    else
+    {
         FOPEN(cfg->inputFile, value, "rb");
-        /* if input is a YUV4MPEG2 (y4m) file, read header and parse parameters */
-        if (cfg->inputFile != NULL) {
-            if ((EB_BOOL)(check_if_y4m(cfg)) == EB_TRUE)
-                cfg->y4m_input = EB_TRUE;
-            else
-                cfg->y4m_input = EB_FALSE;
-        }
-        else {
+    }
+    /* if input is a YUV4MPEG2 (y4m) file, read header and parse parameters */
+    if (cfg->inputFile != NULL) {
+        if ((EB_BOOL)(check_if_y4m(cfg)) == EB_TRUE)
+            cfg->y4m_input = EB_TRUE;
+        else
             cfg->y4m_input = EB_FALSE;
-        }
+    }
+    else {
+        cfg->y4m_input = EB_FALSE;
     }
 };
 static void SetCfgStreamFile                    (const char *value, EbConfig_t *cfg)
@@ -270,6 +274,7 @@ static void SetAsmType                          (const char *value, EbConfig_t *
 static void SetLogicalProcessors                (const char *value, EbConfig_t *cfg)  {cfg->logicalProcessors               = (uint32_t)strtoul(value, NULL, 0);};
 static void SetTargetSocket                     (const char *value, EbConfig_t *cfg)  {cfg->targetSocket                    = (int32_t)strtol(value, NULL, 0);};
 static void SetSwitchThreadsToRtPriority        (const char *value, EbConfig_t *cfg)  {cfg->switchThreadsToRtPriority       = (EB_BOOL)strtol(value, NULL, 0);};
+static void SetThreadCount                      (const char *value, EbConfig_t *cfg)  {cfg->threadCount                     = (uint32_t)strtoul(value, NULL, 0); };
 static void SetFpsInVps                         (const char *value, EbConfig_t *cfg)  {cfg->fpsInVps                        = (EB_BOOL)strtol(value, NULL, 0);};
 static void SetUnrestrictedMotionVector         (const char *value, EbConfig_t *cfg)  {cfg->unrestrictedMotionVector        = (EB_BOOL)strtol(value, NULL, 0);};
 
@@ -422,6 +427,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, ASM_TYPE_TOKEN, "AsmType", SetAsmType },
     { SINGLE_INPUT, TARGET_SOCKET, "TargetSocket", SetTargetSocket },
     { SINGLE_INPUT, THREAD_MGMNT, "LogicalProcessors", SetLogicalProcessors },
+    { SINGLE_INPUT, THREAD_COUNT, "ThreadCount", SetThreadCount },
 
     // Termination
     { SINGLE_INPUT, NULL, NULL, NULL }
@@ -509,7 +515,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->baseLayerSwitchMode                  = 0;
     configPtr->predStructure                        = 2;
     configPtr->intraPeriod                          = -2;
-    configPtr->intraRefreshType                     = 1;
+    configPtr->intraRefreshType                     = 0;
 
     // DLF
     configPtr->disableDlfFlag                       = EB_FALSE;
@@ -564,6 +570,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->asmType                              = 1;
     configPtr->targetSocket                         = -1;
     configPtr->logicalProcessors                    = 0;
+    configPtr->threadCount                          = 0;
 
     // vbv
     configPtr->vbvMaxRate                           = 0;
@@ -772,7 +779,7 @@ static void ParseConfigFile(
                 // Cap the length of the variable name
                 argLen[0] = (argLen[0] > CONFIG_FILE_MAX_VAR_LEN - 1) ? CONFIG_FILE_MAX_VAR_LEN - 1 : argLen[0];
                 // Copy the variable name
-                EB_STRNCPY(varName, argv[0], argLen[0]);
+                EB_STRNCPY(varName, sizeof(varName), argv[0], argLen[0]);
                 // Null terminate the variable name
                 varName[argLen[0]] = CONFIG_FILE_NULL_CHAR;
 
@@ -781,7 +788,7 @@ static void ParseConfigFile(
                     // Cap the length of the variable
                     argLen[valueIndex+2] = (argLen[valueIndex+2] > CONFIG_FILE_MAX_VAR_LEN - 1) ? CONFIG_FILE_MAX_VAR_LEN - 1 : argLen[valueIndex+2];
                     // Copy the variable name
-                    EB_STRNCPY(varValue[valueIndex], argv[valueIndex+2], argLen[valueIndex+2]);
+                    EB_STRNCPY(varValue[valueIndex], sizeof(varValue[valueIndex]), argv[valueIndex + 2], argLen[valueIndex + 2]);
                     // Null terminate the variable name
                     varValue[valueIndex][argLen[valueIndex+2]] = CONFIG_FILE_NULL_CHAR;
 
@@ -884,8 +891,8 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->bufferedInput < -1) {
-        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid BufferedInput. BufferedInput must greater or equal to -1\n", channelNumber + 1);
+    if ((config->bufferedInput < -1) || (config->bufferedInput == 0)) {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid BufferedInput. BufferedInput must be greater than 0 or equal to -1\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -985,6 +992,11 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         return_error = EB_ErrorBadParameter;
     }
 
+    if (config->encoderColorFormat != EB_YUV420 && config->compressedTenBitFormat ) {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u : -compressed-ten-bit-format 1 is only supported for 420 color format\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
     return return_error;
 }
 
@@ -1035,18 +1047,29 @@ uint32_t GetHelp(
     char config_string[COMMAND_LINE_MAX_SIZE];
     if (FindToken(argc, argv, HELP_TOKEN, config_string) == 0) {
         int32_t token_index = -1;
-
         printf("\n%-25s\t%-25s\t%-25s\t\n\n" ,"TOKEN", "DESCRIPTION", "INPUT TYPE");
         printf("%-25s\t%-25s\t%-25s\t\n" ,"-nch", "NumberOfChannels", "Single input");
         while (config_entry[++token_index].token != NULL) {
             printf("%-25s\t%-25s\t%-25s\t\n", config_entry[token_index].token, config_entry[token_index].name, config_entry[token_index].type ? "Array input": "Single input");
         }
         return 1;
+    }
+    return 0;
+}
 
+uint32_t GetSVTVersion(
+    int32_t     argc,
+    char *const argv[])
+{
+    char config_string[COMMAND_LINE_MAX_SIZE];
+    if (FindToken(argc, argv, VERSION_TOKEN, config_string) == 0) {
+        printf("SVT-HEVC version %d.%d.%d\n", SVT_VERSION_MAJOR, SVT_VERSION_MINOR, SVT_VERSION_PATCHLEVEL);
+        printf("Copyright(c) 2018 Intel Corporation\n");
+        printf("BSD-2-Clause Plus Patent License\n");
+        printf("https://github.com/OpenVisualCloud/SVT-HEVC\n");
+        return 1;
     }
-    else {
-        return 0;
-    }
+    return 0;
 }
 
 /******************************************************

@@ -4744,7 +4744,7 @@ static void WriteUvlc(
 	EB_U32 numberOfBits = 1;
 	EB_U32 tempBits = ++bits;
 
-	while (1 != tempBits)
+	while (tempBits > 1)
 	{
 		tempBits >>= 1;
 		numberOfBits += 2;
@@ -4968,70 +4968,37 @@ static void CodeProfileTier(
         // "general_max_12bit_constraint_flag"
         WriteFlagCavlc(
            bitstreamPtr,
-           1);
+           (scsPtr->encoderBitDepth <= EB_12BIT));
 
         // "general_max_10bit_constraint_flag"
-        if(scsPtr->encoderBitDepth <= EB_10BIT || scsPtr->staticConfig.constrainedIntra == EB_TRUE)
-        {
-            WriteFlagCavlc(
-               bitstreamPtr,
-               1);
-        } else
-        {
-            WriteFlagCavlc(
-               bitstreamPtr,
-               0);
-        }
+        WriteFlagCavlc(
+           bitstreamPtr,
+           (scsPtr->encoderBitDepth <= EB_10BIT));
 
         // "general_max_8bit_constraint_flag"
-        //if(scsPtr->encoderBitDepth == EB_8BIT)
-        if(scsPtr->encoderBitDepth == EB_8BIT && (scsPtr->chromaFormatIdc == EB_YUV444 || scsPtr->staticConfig.constrainedIntra == EB_TRUE))
-        {
-            WriteFlagCavlc(
-               bitstreamPtr,
-               1);
-        } else
-        {
-            WriteFlagCavlc(
-               bitstreamPtr,
-               0);
-        }
+        WriteFlagCavlc(
+           bitstreamPtr,
+           (scsPtr->encoderBitDepth <= EB_8BIT));
 
         // "general_max_422chroma_constraint_flag"
-        if(scsPtr->chromaFormatIdc == EB_YUV422 || (scsPtr->chromaFormatIdc == EB_YUV420 && scsPtr->staticConfig.constrainedIntra == EB_TRUE))
-        {
-            WriteFlagCavlc(
-               bitstreamPtr,
-               1);
-        } else
-        {
-            WriteFlagCavlc(
-               bitstreamPtr,
-               0);
-        }
+        WriteFlagCavlc(
+           bitstreamPtr,
+           (scsPtr->chromaFormatIdc <= EB_YUV422));
 
         // "general_max_420chroma_constraint_flag"
-        if(scsPtr->chromaFormatIdc == EB_YUV420)
-        {
-            WriteFlagCavlc(
-               bitstreamPtr,
-               1);
-        } else
-        {
-            WriteFlagCavlc(
-               bitstreamPtr,
-               0);
-        }
+        WriteFlagCavlc(
+           bitstreamPtr,
+           (scsPtr->chromaFormatIdc <= EB_YUV420));
 
         // "general_max_monochrome_constraint_flag"
         WriteFlagCavlc(
            bitstreamPtr,
-           0);
+           (scsPtr->chromaFormatIdc <= EB_YUV400));
 
         // "general_intra_constraint_flag"
         WriteFlagCavlc(
            bitstreamPtr,
-           (scsPtr->staticConfig.constrainedIntra == EB_TRUE));
+           (scsPtr->intraPeriodLength == 0));
 
         // "general_one_picture_only_constraint_flag"
         WriteFlagCavlc(

@@ -1,42 +1,121 @@
 image: Visual Studio 2019
-configuration: Release
+configuration:
+  - Debug
+  - Release
+  - Release ffmpeg
+
+environment:
+  APPVEYOR_SAVE_CACHE_ON_ERROR: true
+  matrix:
+    - generator: Visual Studio 2019
+      CC: cl
+    - generator: Unix Makefiles
+      CC: ccache gcc
+
+matrix:
+  exclude:
+    - configuration: Release ffmpeg
+      generator: Visual Studio 2019
 
 install:
-  - ps: |
-      $wc = New-Object System.Net.WebClient
-      $wc.DownloadFile('http://repo.msys2.org/distrib/msys2-x86_64-latest.tar.xz', "$PWD\msys2-base.tar.xz")
-      $wc.DownloadFile((Invoke-RestMethod "https://www.powershellgallery.com/api/v2/Packages?`$filter=Id eq 'pscx' and IsLatestVersion").content.src, "$PWD\pscx.zip")
-      Add-Type -assembly "System.IO.Compression.FileSystem"
-      [System.IO.Compression.ZipFile]::ExtractToDirectory("$PWD\pscx.zip", "$PWD\pscx")
-      Remove-Item -Recurse $PWD\pscx.zip, $PWD\pscx\_rels, $PWD\pscx\package
-      powershell -noprofile -command {
-          Import-Module $PWD\pscx\Pscx.psd1 -Force -Cmdlet Expand-Archive -Prefix 7za
-          Expand-7zaArchive -Force -ShowProgress $PWD\msys2-base.tar.xz
-          Remove-Item $PWD\msys2-base.tar.xz
-          Expand-7zaArchive -Force -ShowProgress -OutputPath C:\ $PWD\msys2-base.tar
-          Remove-Item $PWD\msys2-base.tar
-      }
-      Remove-Item -Recurse $PWD\pscx
+  - '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64'
   - set "PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%"
   - set MSYSTEM=MINGW64
   - set MSYS2_PATH_TYPE=inherit
   - bash -lc 'exit'
-  - pacman -Sy --ask=20 --noconfirm --noprogressbar --needed mingw-w64-x86_64-yasm
+  - pacman -Syyuu --ask=20 --noconfirm --noprogressbar --needed
+  - pacman -Sy --ask=20 --noconfirm --noprogressbar --needed mingw-w64-x86_64-yasm mingw-w64-x86_64-ccache mingw-w64-x86_64-cmake mingw-w64-x86_64-gcc pkg-config make
   - cd Build
-  - cmake .. -G "Visual Studio 16 2019" -A x64
+  - ps: |
+      if ($env:APPVEYOR_JOB_NAME -match "Debug") {
+        $configuration="Debug"
+      } else {
+        $configuration="Release"
+      }
+      if ("$env:generator" -match "Visual*") {
+        if ("$env:generator" -match "2019") {
+          cmake .. -G "Visual Studio 16 2019" -A x64 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=C:/msys2/mingw64 -DBUILD_SHARED_LIBS=off
+        } else {
+          cmake .. -G "$env:generator" -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=C:/msys2/mingw64 -DBUILD_SHARED_LIBS=off
+        }
+      } elseif ($null -ne $env:generator){
+        cmake .. -G "$env:generator" -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE="$configuration" -DCMAKE_INSTALL_PREFIX=C:/msys2/mingw64 -DBUILD_SHARED_LIBS=off
+      } else {
+        cmake .. -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE="$configuration" -DCMAKE_INSTALL_PREFIX=C:/msys2/mingw64 -DBUILD_SHARED_LIBS=off
+      }
+  - ccache -s
+  - bash -lc 'ccache -s'
+  - pacman -Sc --noconfirm
 
-build:
-  project: Build\svt-hevc.sln
+for:
+  - matrix:
+      only:
+        - configuration: Release ffmpeg
+    build_script:
+      - if "%APPVEYOR_JOB_NAME:~0,5%"=="Debug" (set config=Debug) else set config=Release
+      - if "%GENERATOR:~0,6%"=="Visual" set config=%config% -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+      - cmake --build . --config %config%
+      - cmake --build . --target install
+      - set "PKG_CONFIG_PATH=C:/msys2/mingw64/lib/pkgconfig"
+      - pkg-config --debug --exists --print-errors SvtHevcEnc
+      - git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg
+      - cd ffmpeg
+      - curl -L https://raw.githubusercontent.com/OpenVisualCloud/SVT-HEVC/master/ffmpeg_plugin/0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch | patch --binary -sN -p1
+      - ps: |
+          $path = [System.Environment]::GetEnvironmentVariable('PATH', 'Machine')
+          $path = ($path.Split(';') | Where-Object { $_ -notmatch 'Git' }) -join ';'
+          [System.Environment]::SetEnvironmentVariable('PATH', $path, 'Machine')
+      - bash -c 'if test "$(echo $generator | cut -c1-6)" = "Visual"; then
+        ./configure --target-os=win64 --arch=x86_64 --toolchain=msvc --cc=cl --cxx=cl --extra-cflags="-MD" --disable-everything --enable-libsvthevc --enable-encoder=libsvt_hevc;
+        else
+        ./configure --arch=x86_64 --cc="ccache gcc" --cxx="ccache g++" --enable-libsvthevc --enable-encoder=libsvt_hevc;
+        fi || cat ffbuild/config.log'
+      - make -j 10
+      - ps: (New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/OpenVisualCloud/SVT-AV1-Resources/master/video.tar.gz', "$PWD\video.tar.gz")
+      - tar xf video.tar.gz
+      - ffmpeg -i akiyo_cif.y4m -c:v libsvt_hevc akiyo.h265
+      - cd ..
+
+  - matrix:
+      only:
+        - generator: Unix Makefiles
+    artifacts:
+      - path: bin\Release\*.*
+        name: $(APPVEYOR_PROJECT_NAME)_MINGW64
+    build_script:
+      - make -j
+  - matrix:
+      only:
+        - generator: Visual Studio 2019
+    build:
+      project: Build\svt-hevc.sln
+    artifacts:
+      - path: bin\Release\*.*
+        name: $(APPVEYOR_PROJECT_NAME)_MSVC2019
+
+test_script:
+  - ps: if ($env:APPVEYOR_JOB_NAME -match "Debug") {cd ../Bin/Debug} else {cd ../Bin/Release}
+  - ps: (New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/OpenVisualCloud/SVT-AV1-Resources/master/video.tar.gz', "$PWD\video.tar.gz")
+  - tar xf video.tar.gz
+  - SvtHevcEncApp -n 50 -encMode 9 -i akiyo_cif.y4m -b test1.h265
+  - del video.tar.gz video.tar akiyo_cif.y4m bus_cif.y4m test1.h265
+
+cache:
+  - 'C:\Users\appveyor\AppData\Roaming\.ccache'
+  - 'C:\msys64\home\appveyor\.ccache'
+  - 'C:\msys64\var\cache\pacman\pkg'
 
 artifacts:
-    - path: bin\Release\*.*
-      name: $(APPVEYOR_PROJECT_NAME)
+  - path: bin\Release\*.*
+    name: $(APPVEYOR_PROJECT_NAME)
 
 deploy:
   - provider: GitHub
     artifact: $(APPVEYOR_PROJECT_NAME)
     auth_token:
-      secure: 'hY5Mk6KOwgQ97TzEBsM7Woqr1ZIm5QTvHg8EvxMV1x8j3wk/3mNBMqWFFbEIBK0i'
+      secure: 'sf0pQXlPI+X6LoAR8QUJB74jjzNxcLGOXI3H0nbxJq8llvGPG/TAUd87hq5iHZXo'
     prerelease: true
     on:
       appveyor_repo_tag: true
+      generator: Visual Studio 2019
+      configuration: Release

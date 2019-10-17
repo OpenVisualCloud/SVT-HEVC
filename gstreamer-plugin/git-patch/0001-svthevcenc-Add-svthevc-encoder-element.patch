@@ -217,7 +217,7 @@ index 0000000..dbbe93b
 +#define PROP_BASE_LAYER_SWITCH_MODE_DEFAULT 0
 +#define PROP_BITRATE_DEFAULT                (7 * 1000)
 +#define PROP_KEY_INT_MAX_DEFAULT            -2
-+#define PROP_INTRA_REFRESH_DEFAULT          1
++#define PROP_INTRA_REFRESH_DEFAULT          -1
 +#define PROP_CORES_DEFAULT                  0
 +#define PROP_SOCKET_DEFAULT                 -1
 +#define PROP_TILE_ROW_DEFAULT               1
@@ -586,9 +586,9 @@ index 0000000..dbbe93b
 +          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 +
 +  g_object_class_install_property (gobject_class, PROP_INTRA_REFRESH,
-+      g_param_spec_uint ("intra-refresh", "Intra Refresh",
-+          "1=CRA (Open GOP), 2=IDR (Closed GOP)",
-+          1, 2, PROP_INTRA_REFRESH_DEFAULT,
++      g_param_spec_int ("intra-refresh", "Intra Refresh",
++          "-1:CRA (Open GOP), >=0:IDR (Closed GOP)",
++          -1, INT_MAX, PROP_INTRA_REFRESH_DEFAULT,
 +          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 +
 +  g_object_class_install_property (gobject_class, PROP_CORES,
@@ -1697,7 +1697,7 @@ index 0000000..dbbe93b
 +      encoder->keyintmax = g_value_get_int (value);
 +      break;
 +    case PROP_INTRA_REFRESH:
-+      encoder->intra_refresh = g_value_get_uint (value);
++      encoder->intra_refresh = g_value_get_int (value);
 +      break;
 +    case PROP_CORES:
 +      encoder->cores = g_value_get_uint (value);
@@ -1786,7 +1786,7 @@ index 0000000..dbbe93b
 +      g_value_set_int (value, encoder->keyintmax);
 +      break;
 +    case PROP_INTRA_REFRESH:
-+      g_value_set_uint (value, encoder->intra_refresh);
++      g_value_set_int (value, encoder->intra_refresh);
 +      break;
 +    case PROP_CORES:
 +      g_value_set_uint (value, encoder->cores);
@@ -1918,7 +1918,7 @@ index 0000000..283027f
 +  guint base_layer_switch_mode;
 +  guint bitrate;
 +  gint keyintmax;
-+  guint intra_refresh;
++  gint intra_refresh;
 +  guint cores;
 +  gint socket;
 +  guint tile_row;

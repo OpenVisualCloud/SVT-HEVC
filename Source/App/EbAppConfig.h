@@ -10,18 +10,14 @@
 
 #include "EbApi.h"
 
-#ifdef __GNUC__
-#define fseeko64 fseek
-#define ftello64 ftell
-#endif
 // Define Cross-Platform 64-bit fseek() and ftell()
-#ifdef _MSC_VER
+#ifdef _WIN32
 typedef __int64 off64_t;
 #define fseeko64 _fseeki64
 #define ftello64 _ftelli64
-
-#elif _WIN32 // MinGW
-
+#elif __GNUC__
+#define fseeko64 fseek
+#define ftello64 ftell
 #endif
 
 #ifndef _RSIZE_T_DEFINED
@@ -155,8 +151,8 @@ extern errno_t strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t sle
 /* string length */
 extern rsize_t strnlen_ss(const char *s, rsize_t smax);
 
-#define EB_STRNCPY(dst, src, count) \
-	strncpy_ss(dst, sizeof(dst), src, count)
+#define EB_STRNCPY(dst, max_size, src, count) \
+	strncpy_ss(dst, max_size, src, count)
 
 #define EB_STRCPY(dst, size, src) \
 	strcpy_ss(dst, size, src)
@@ -176,13 +172,13 @@ extern rsize_t strnlen_ss(const char *s, rsize_t smax);
 
 #define MAX_STRING_LENGTH       1024
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #define FOPEN(f,s,m) fopen_s(&f,s,m)
 #else
 #define FOPEN(f,s,m) f=fopen(s,m)
 #endif
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #define EB_STRTOK(str,delim,next) strtok_s((char*)str,(const char*)delim,(char**)next)
 #else
 #define EB_STRTOK(str,delim,next) strtok_r((char*)str,(const char*)delim,(char**)next)
@@ -278,8 +274,8 @@ typedef struct EbConfig_s
      *****************************************/
     uint32_t                 baseLayerSwitchMode;
     uint8_t                  encMode;
-    int32_t                 intraPeriod;
-    uint32_t                 intraRefreshType;
+    int32_t                  intraPeriod;
+    int32_t                  intraRefreshType;
 	uint32_t                 hierarchicalLevels;
 	uint32_t                 predStructure;
 
@@ -310,7 +306,7 @@ typedef struct EbConfig_s
      ****************************************/
     uint32_t               searchAreaWidth;
     uint32_t               searchAreaHeight;
-    
+
     /****************************************
      * MD Parameters
      ****************************************/
@@ -382,14 +378,15 @@ typedef struct EbConfig_s
     /****************************************
     * Instance Info
     ****************************************/
-    uint32_t              channelId;
-    uint32_t              activeChannelCount;
-    uint32_t              logicalProcessors;
-    int32_t              targetSocket;
-    EB_BOOL             stopEncoder;         // to signal CTRL+C Event, need to stop encoding.
+    uint32_t     channelId;
+    uint32_t     activeChannelCount;
+    uint32_t     logicalProcessors;
+    int32_t      targetSocket;
+    uint32_t     threadCount;
+    EB_BOOL      stopEncoder;         // to signal CTRL+C Event, need to stop encoding.
 
-    uint64_t  processedFrameCount;
-    uint64_t  processedByteCount;
+    uint64_t     processedFrameCount;
+    uint64_t     processedByteCount;
 
     /****************************************
     * SEI parameters
@@ -417,6 +414,7 @@ extern void EbConfigDtor(EbConfig_t *configPtr);
 
 extern EB_ERRORTYPE	ReadCommandLine(int32_t argc, char *const argv[], EbConfig_t **config, uint32_t  numChannels,	EB_ERRORTYPE *return_errors);
 extern uint32_t     GetHelp(int32_t argc, char *const argv[]);
+extern uint32_t     GetSVTVersion(int32_t argc, char *const argv[]);
 extern uint32_t		GetNumberOfChannels(int32_t argc, char *const argv[]);
 
 #endif //EbAppConfig_h

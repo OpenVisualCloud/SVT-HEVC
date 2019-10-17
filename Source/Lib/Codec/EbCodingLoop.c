@@ -1882,8 +1882,8 @@ static void EncodePassMvPrediction(
             contextPtr->cuPtr->predictionUnitArray->interPredDirectionIndex == BI_PRED)
         {
             FillAMVPCandidates(
-                pictureControlSetPtr->epMvNeighborArray[contextPtr->tileIndex],
-                pictureControlSetPtr->epModeTypeNeighborArray[contextPtr->tileIndex],
+                pictureControlSetPtr->epMvNeighborArray[contextPtr->encDecTileIndex],
+                pictureControlSetPtr->epModeTypeNeighborArray[contextPtr->encDecTileIndex],
                 contextPtr->cuOriginX,
                 contextPtr->cuOriginY,
                 contextPtr->cuStats->size,
@@ -1929,8 +1929,8 @@ static void EncodePassMvPrediction(
             contextPtr->cuPtr->predictionUnitArray->interPredDirectionIndex == BI_PRED)
         {
             FillAMVPCandidates(
-                pictureControlSetPtr->epMvNeighborArray[contextPtr->tileIndex],
-                pictureControlSetPtr->epModeTypeNeighborArray[contextPtr->tileIndex],
+                pictureControlSetPtr->epMvNeighborArray[contextPtr->encDecTileIndex],
+                pictureControlSetPtr->epModeTypeNeighborArray[contextPtr->encDecTileIndex],
                 contextPtr->cuOriginX,
                 contextPtr->cuOriginY,
                 contextPtr->cuStats->size,
@@ -2988,7 +2988,7 @@ EB_EXTERN void EncodePass(
     EB_COLOR_FORMAT         colorFormat = contextPtr->colorFormat;
     const EB_U16 subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
 
-    EB_U32                   tileIdx = contextPtr->tileIndex;
+    EB_U32                   tileIdx = contextPtr->encDecTileIndex;
     EbPictureBufferDesc_t *reconBuffer = is16bit ? pictureControlSetPtr->reconPicture16bitPtr : pictureControlSetPtr->reconPicturePtr;
     EbPictureBufferDesc_t *coeffBufferTB = lcuPtr->quantizedCoeff;
 

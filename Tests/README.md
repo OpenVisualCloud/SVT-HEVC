@@ -17,7 +17,7 @@ The following relative paths are defined in the script:\
 ENC_PATH   = folder where the SvtHevcEncApp executable can be found - default: "encoders"\
 BIN_PATH   = folder where the created bitstreams are stored - default: "bitstreams"\
 YUV_PATH   = folder where the input yuv media file are stored - default: "yuvs"\
-TOOLS_PATH = folder where the tools are located (e.g. reference decoder) - default: "tools"\
+TOOLS_PATH = folder where the tools are located (e.g. reference decoder, MCTS decoder) - default: "tools"\
 These folders should be created prior to running the script.\
 The bitstream folder should be empty and cleared for each run.\
 Note: You should build the SVT encoder and place the executable in the folder specified under "ENC_PATH"\
@@ -196,9 +196,11 @@ Here are the basic steps to follow when adding a test to validate the correct pr
 1. Make sure ENC_PATH, BIN_PATH,YUV_PATH, and TOOLS_PATH folders are created relative to the location of  where the script is located.  The bitstream folder should be empty and cleared for each run.\
 2. Build SVT encoder and place the executable in the folder specified under "ENC_PATH"\
 3. Download the reference decoder from https://hevc.hhi.fraunhofer.de/\
-4. Build the decoder and place it in the folder specified under "TOOLS_PATH"\
-5. Obtain the YUV media files and copy to YUV_PATH\
-6. Run script as follows:\
+4. Build the reference decoder and place it in the folder specified under "TOOLS_PATH"\ (Windows:TAppDecoder.exe , Linux: TAppDecoder)
+5. Download the MCTS decoder from https://github.com/kelvinhu325/HM/tree/mcts_check
+6. Build the MTCS decoder and place it in the folder specified under "TOOLS_PATH"\ (Windows:MCTS_TAppDecoder.exe , Linux: MCTS_TAppDecoder)
+7. Obtain the YUV media files and copy to YUV_PATH\
+8. Run script as follows:\
 
 ```
 python SVT-HEVC_FunctionalTests.py Fast

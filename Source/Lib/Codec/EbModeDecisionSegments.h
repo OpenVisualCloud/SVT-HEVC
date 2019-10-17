@@ -7,6 +7,10 @@
 
 #include "EbDefinitions.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**************************************
  * Mode Decision Segments
  **************************************/
@@ -33,4 +37,7 @@ extern void ModeDecisionSegmentsCtor(
 extern void ModeDecisionSegmentsDtor(
     MdSegments_t *contextPtr);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // EbModeDecisionSegments_h

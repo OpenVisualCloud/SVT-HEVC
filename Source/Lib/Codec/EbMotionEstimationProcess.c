@@ -46,113 +46,11 @@
 |42||43||46||47|     |58||59||62||63|
 -------------------------------------*/
 
-EB_ERRORTYPE SwapMeCandidateBuffer(
-	MeCandidate_t *a,
-	MeCandidate_t *b)
-{
-	EB_ERRORTYPE return_error = EB_ErrorNone;
-
-	MeCandidate_t tempPtr;
-	tempPtr = *a;
-	*a = *b;
-	*b = tempPtr;
-
-	return return_error;
-}
-
-
-
-
-
-/************************************************
- * Set ME/HME Params
- ************************************************/
-void* SetMeHmeParamsSq(
-    MeContext_t                     *meContextPtr,
-	PictureParentControlSet_t       *pictureControlSetPtr,
-	SequenceControlSet_t            *sequenceControlSetPtr,
-	EB_INPUT_RESOLUTION				 inputResolution)
-{
-
-	EB_U8  hmeMeLevel  = pictureControlSetPtr->encMode;
-
-	EB_U32 inputRatio = sequenceControlSetPtr->lumaWidth / sequenceControlSetPtr->lumaHeight;
-
-	EB_U8 resolutionIndex = inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER   ?   0 : // 480P
-		(inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio < 2)           ?   1 : // 720P
-		(inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio > 3)           ?   2 : // 1080I
-		(inputResolution <= INPUT_SIZE_1080p_RANGE)                             ?   3 : // 1080I
-		                                                                            4;  // 4K
-		   
-    // HME/ME default settings
-	meContextPtr->numberHmeSearchRegionInWidth          = EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT;
-	meContextPtr->numberHmeSearchRegionInHeight         = EB_HME_SEARCH_AREA_ROW_MAX_COUNT;
-    
-    // HME Level0
-	meContextPtr->hmeLevel0TotalSearchAreaWidth         = HmeLevel0TotalSearchAreaWidthSq[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel0TotalSearchAreaHeight        = HmeLevel0TotalSearchAreaHeightSq[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel0SearchAreaInWidthArray[0]    = HmeLevel0SearchAreaInWidthArrayRightSq[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel0SearchAreaInWidthArray[1]    = HmeLevel0SearchAreaInWidthArrayLeftSq[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel0SearchAreaInHeightArray[0]   = HmeLevel0SearchAreaInHeightArrayTopSq[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel0SearchAreaInHeightArray[1]   = HmeLevel0SearchAreaInHeightArrayBottomSq[resolutionIndex][hmeMeLevel];
-    // HME Level1
-	meContextPtr->hmeLevel1SearchAreaInWidthArray[0]    = HmeLevel1SearchAreaInWidthArrayRightSq[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel1SearchAreaInWidthArray[1]    = HmeLevel1SearchAreaInWidthArrayLeftSq[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel1SearchAreaInHeightArray[0]   = HmeLevel1SearchAreaInHeightArrayTopSq[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel1SearchAreaInHeightArray[1]   = HmeLevel1SearchAreaInHeightArrayBottomSq[resolutionIndex][hmeMeLevel];
-    // HME Level2
-	meContextPtr->hmeLevel2SearchAreaInWidthArray[0]    = HmeLevel2SearchAreaInWidthArrayRightSq[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel2SearchAreaInWidthArray[1]    = HmeLevel2SearchAreaInWidthArrayLeftSq[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel2SearchAreaInHeightArray[0]   = HmeLevel2SearchAreaInHeightArrayTopSq[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel2SearchAreaInHeightArray[1]   = HmeLevel2SearchAreaInHeightArrayBottomSq[resolutionIndex][hmeMeLevel];
-
-    // ME
-	meContextPtr->searchAreaWidth                       = SearchAreaWidthSq[resolutionIndex][hmeMeLevel];
-	meContextPtr->searchAreaHeight                      = SearchAreaHeightSq[resolutionIndex][hmeMeLevel];
-
-	// HME Level0 adjustment for low frame rate contents (frame rate <= 30)
-    if (inputResolution == INPUT_SIZE_4K_RANGE) {
-        if ((sequenceControlSetPtr->staticConfig.frameRate >> 16) <= 30) {
-
-            if (hmeMeLevel == ENC_MODE_5 || hmeMeLevel == ENC_MODE_6) {
-                meContextPtr->hmeLevel0TotalSearchAreaWidth         = MAX(128, meContextPtr->hmeLevel0TotalSearchAreaWidth        );
-                meContextPtr->hmeLevel0TotalSearchAreaHeight        = MAX(64 , meContextPtr->hmeLevel0TotalSearchAreaHeight       );
-                meContextPtr->hmeLevel0SearchAreaInWidthArray[0]    = MAX(64 , meContextPtr->hmeLevel0SearchAreaInWidthArray[0]   );
-                meContextPtr->hmeLevel0SearchAreaInWidthArray[1]    = MAX(64 , meContextPtr->hmeLevel0SearchAreaInWidthArray[1]   );
-                meContextPtr->hmeLevel0SearchAreaInHeightArray[0]   = MAX(32 , meContextPtr->hmeLevel0SearchAreaInHeightArray[0]  );
-                meContextPtr->hmeLevel0SearchAreaInHeightArray[1]   = MAX(32 , meContextPtr->hmeLevel0SearchAreaInHeightArray[1]  );
-            }
-            else if (hmeMeLevel == ENC_MODE_7 || hmeMeLevel == ENC_MODE_8) {
-                meContextPtr->hmeLevel0TotalSearchAreaWidth         = MAX(96  , meContextPtr->hmeLevel0TotalSearchAreaWidth        );
-                meContextPtr->hmeLevel0TotalSearchAreaHeight        = MAX(64  , meContextPtr->hmeLevel0TotalSearchAreaHeight       );
-                meContextPtr->hmeLevel0SearchAreaInWidthArray[0]    = MAX(48  , meContextPtr->hmeLevel0SearchAreaInWidthArray[0]   ); 
-                meContextPtr->hmeLevel0SearchAreaInWidthArray[1]    = MAX(48  , meContextPtr->hmeLevel0SearchAreaInWidthArray[1]   );
-                meContextPtr->hmeLevel0SearchAreaInHeightArray[0]   = MAX(32  , meContextPtr->hmeLevel0SearchAreaInHeightArray[0]  );
-                meContextPtr->hmeLevel0SearchAreaInHeightArray[1]   = MAX(32  , meContextPtr->hmeLevel0SearchAreaInHeightArray[1]  );
-            }
-            else if (hmeMeLevel >= ENC_MODE_9) {
-                meContextPtr->hmeLevel0TotalSearchAreaWidth         = MAX(64  , meContextPtr->hmeLevel0TotalSearchAreaWidth        );
-                meContextPtr->hmeLevel0TotalSearchAreaHeight        = MAX(48  , meContextPtr->hmeLevel0TotalSearchAreaHeight       );
-                meContextPtr->hmeLevel0SearchAreaInWidthArray[0]    = MAX(32  , meContextPtr->hmeLevel0SearchAreaInWidthArray[0]   ); 
-                meContextPtr->hmeLevel0SearchAreaInWidthArray[1]    = MAX(32  , meContextPtr->hmeLevel0SearchAreaInWidthArray[1]   );
-                meContextPtr->hmeLevel0SearchAreaInHeightArray[0]   = MAX(24  , meContextPtr->hmeLevel0SearchAreaInHeightArray[0]  );
-                meContextPtr->hmeLevel0SearchAreaInHeightArray[1]   = MAX(24  , meContextPtr->hmeLevel0SearchAreaInHeightArray[1]  );
-            }
-        }
-    }
-
-    if ((inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER) && (sequenceControlSetPtr->staticConfig.tune > 0)) {
-        meContextPtr->updateHmeSearchCenter = EB_TRUE;
-    }
-	return EB_NULL;
-};
-
-
       
 /************************************************
  * Set ME/HME Params
  ************************************************/
-void* SetMeHmeParamsOq(
+static void* SetMeHmeParamsOq(
     MeContext_t                     *meContextPtr,
 	PictureParentControlSet_t       *pictureControlSetPtr,
 	SequenceControlSet_t            *sequenceControlSetPtr,
@@ -227,74 +125,17 @@ void* SetMeHmeParamsOq(
 
 
 
-/************************************************
- * Set ME/HME Params
- ************************************************/
-void* SetMeHmeParamsVmaf(
-	MeContext_t                     *meContextPtr,
-	PictureParentControlSet_t       *pictureControlSetPtr,
-	SequenceControlSet_t            *sequenceControlSetPtr,
-	EB_INPUT_RESOLUTION				 inputResolution)
-{
-
-	EB_U8  hmeMeLevel = pictureControlSetPtr->encMode;
-	
-
-	EB_U32 inputRatio = sequenceControlSetPtr->lumaWidth / sequenceControlSetPtr->lumaHeight;
-
-	EB_U8 resolutionIndex = inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ? 0 : // 480P
-		(inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio < 2) ? 1 : // 720P
-		(inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio > 3) ? 2 : // 1080I
-		(inputResolution <= INPUT_SIZE_1080p_RANGE) ? 3 : // 1080I
-		4;  // 4K
-
-	// HME/ME default settings
-	meContextPtr->numberHmeSearchRegionInWidth          = EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT;
-	meContextPtr->numberHmeSearchRegionInHeight         = EB_HME_SEARCH_AREA_ROW_MAX_COUNT;
-
-	resolutionIndex = 3;
-	// HME Level0
-	meContextPtr->hmeLevel0TotalSearchAreaWidth = HmeLevel0TotalSearchAreaWidthVmaf[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel0TotalSearchAreaHeight = HmeLevel0TotalSearchAreaHeightVmaf[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel0SearchAreaInWidthArray[0] = HmeLevel0SearchAreaInWidthArrayRightVmaf[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel0SearchAreaInWidthArray[1] = HmeLevel0SearchAreaInWidthArrayLeftVmaf[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel0SearchAreaInHeightArray[0] = HmeLevel0SearchAreaInHeightArrayTopVmaf[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel0SearchAreaInHeightArray[1] = HmeLevel0SearchAreaInHeightArrayBottomVmaf[resolutionIndex][hmeMeLevel];
-	// HME Level1
-	meContextPtr->hmeLevel1SearchAreaInWidthArray[0] = HmeLevel1SearchAreaInWidthArrayRightVmaf[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel1SearchAreaInWidthArray[1] = HmeLevel1SearchAreaInWidthArrayLeftVmaf[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel1SearchAreaInHeightArray[0] = HmeLevel1SearchAreaInHeightArrayTopVmaf[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel1SearchAreaInHeightArray[1] = HmeLevel1SearchAreaInHeightArrayBottomVmaf[resolutionIndex][hmeMeLevel];
-	// HME Level2
-	meContextPtr->hmeLevel2SearchAreaInWidthArray[0] = HmeLevel2SearchAreaInWidthArrayRightVmaf[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel2SearchAreaInWidthArray[1] = HmeLevel2SearchAreaInWidthArrayLeftVmaf[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel2SearchAreaInHeightArray[0] = HmeLevel2SearchAreaInHeightArrayTopVmaf[resolutionIndex][hmeMeLevel];
-	meContextPtr->hmeLevel2SearchAreaInHeightArray[1] = HmeLevel2SearchAreaInHeightArrayBottomVmaf[resolutionIndex][hmeMeLevel];
-
-	// ME
-	meContextPtr->searchAreaWidth = SearchAreaWidthVmaf[resolutionIndex][hmeMeLevel];
-	meContextPtr->searchAreaHeight = SearchAreaHeightVmaf[resolutionIndex][hmeMeLevel];
-
-    if ((inputResolution > INPUT_SIZE_576p_RANGE_OR_LOWER) && (sequenceControlSetPtr->staticConfig.tune > 0)) {
-        meContextPtr->updateHmeSearchCenter = EB_TRUE;
-    }
-
-	return EB_NULL;
-};
-
 
 /************************************************
  * Set ME/HME Params from Config
  ************************************************/
-void* SetMeHmeParamsFromConfig(
+static void SetMeHmeParamsFromConfig(
     SequenceControlSet_t	    *sequenceControlSetPtr,
     MeContext_t                 *meContextPtr)
 {
 
     meContextPtr->searchAreaWidth = (EB_U8)sequenceControlSetPtr->staticConfig.searchAreaWidth;
     meContextPtr->searchAreaHeight = (EB_U8)sequenceControlSetPtr->staticConfig.searchAreaHeight;
-
-	return EB_NULL;
 }
 
 /************************************************
@@ -330,7 +171,7 @@ EB_ERRORTYPE MotionEstimationContextCtor(
 /***************************************************************************************************
 * ZZ Decimated SAD Computation
 ***************************************************************************************************/
-EB_ERRORTYPE ComputeDecimatedZzSad(
+static EB_ERRORTYPE ComputeDecimatedZzSad(
 	MotionEstimationContext_t   *contextPtr,
 	SequenceControlSet_t        *sequenceControlSetPtr,
 	PictureParentControlSet_t   *pictureControlSetPtr,
@@ -456,142 +297,6 @@ EB_ERRORTYPE ComputeDecimatedZzSad(
 
 	return return_error;
 }
-/******************************************************
-* Derive ME Settings for SQ
-  Input   : encoder mode and tune
-  Output  : ME Kernel signal(s)
-******************************************************/
-EB_ERRORTYPE SignalDerivationMeKernelSq(
-    SequenceControlSet_t        *sequenceControlSetPtr,
-    PictureParentControlSet_t   *pictureControlSetPtr ,
-    MotionEstimationContext_t   *contextPtr) {
-
-    EB_ERRORTYPE return_error = EB_ErrorNone;
-    
-    
-    // Set ME/HME search regions
-    SetMeHmeParamsSq(
-        contextPtr->meContextPtr,
-        pictureControlSetPtr,
-        sequenceControlSetPtr,
-        sequenceControlSetPtr->inputResolution);
-    if (!sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
-        SetMeHmeParamsFromConfig(
-            sequenceControlSetPtr,
-            contextPtr->meContextPtr);
-    }
-
-    // Set number of quadrant(s)
-    if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
-        contextPtr->meContextPtr->oneQuadrantHME = EB_FALSE;
-    } else {
-        if (sequenceControlSetPtr->inputResolution >= INPUT_SIZE_4K_RANGE) {
-            contextPtr->meContextPtr->oneQuadrantHME = EB_TRUE;
-        }
-        else {
-            contextPtr->meContextPtr->oneQuadrantHME = EB_FALSE;
-        }
-    }
-
-    // Set ME Fractional Search Method
-    if (pictureControlSetPtr->encMode == ENC_MODE_0) {
-        contextPtr->meContextPtr->fractionalSearchMethod = SSD_SEARCH;
-    }
-    else if (pictureControlSetPtr->encMode == ENC_MODE_1) {
-        if (sequenceControlSetPtr->inputResolution < INPUT_SIZE_4K_RANGE) {
-            contextPtr->meContextPtr->fractionalSearchMethod = SSD_SEARCH;
-        }
-        else {
-            contextPtr->meContextPtr->fractionalSearchMethod = SUB_SAD_SEARCH;
-        }
-    }
-    else {
-        contextPtr->meContextPtr->fractionalSearchMethod = SUB_SAD_SEARCH;
-    }
-
-    // Set 64x64 Fractional Search Flag
-     contextPtr->meContextPtr->fractionalSearch64x64 = (pictureControlSetPtr->encMode == ENC_MODE_0) ?
-         EB_TRUE :
-         EB_FALSE;
-
-
-    // Set OIS Kernel (used by P/B Slices)
-    // 0:  9 
-    // 1: 18  
-    if (pictureControlSetPtr->encMode == ENC_MODE_0) {
-        if (sequenceControlSetPtr->inputResolution < INPUT_SIZE_4K_RANGE) {
-            contextPtr->oisKernelLevel = (pictureControlSetPtr->temporalLayerIndex == 0) ? 1 : 0;
-        }
-        else {
-            contextPtr->oisKernelLevel = 0;
-        }
-    }
-    else {
-        contextPtr->oisKernelLevel = 0;
-    }
-
-   // Set OIS TH (used by P/B Slices)
-
-   // Set OIS TH
-   // 0: Agressive 
-   // 1: Default
-   // 2: Conservative
-    if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-        if (pictureControlSetPtr->encMode == ENC_MODE_0) {
-            if (pictureControlSetPtr->isUsedAsReferenceFlag == EB_TRUE) {
-                contextPtr->oisThSet = 2; 
-            }
-            else {
-                contextPtr->oisThSet = 1; 
-            }
-        }
-        else {
-            contextPtr->oisThSet = 0; 
-        }
-    }
-    else {
-        if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
-            contextPtr->oisThSet = 2; 
-        }
-        else {
-            contextPtr->oisThSet = 1; 
-        }
-    }
-
-    // Set valid flag for the best OIS
-    if (pictureControlSetPtr->encMode > ENC_MODE_0) {
-        contextPtr->setBestOisDistortionToValid = EB_TRUE;
-    }
-    else {
-        contextPtr->setBestOisDistortionToValid = EB_FALSE;
-    }
-
-    // Set fractional search model
-    // 0: search all blocks 
-    // 1: selective based on Full-Search SAD & MV.
-    // 2: off
-    if (pictureControlSetPtr->useSubpelFlag == 1) {
-        if (pictureControlSetPtr->encMode <= ENC_MODE_5) {
-            contextPtr->meContextPtr->fractionalSearchModel = 0;
-        }
-        else if (pictureControlSetPtr->encMode <= ENC_MODE_7) {
-            if (sequenceControlSetPtr->inputResolution < INPUT_SIZE_1080p_RANGE) {
-                contextPtr->meContextPtr->fractionalSearchModel = 0;
-            }
-            else {
-                contextPtr->meContextPtr->fractionalSearchModel = 1;
-
-            }
-        }
-        else {
-            contextPtr->meContextPtr->fractionalSearchModel = 1;
-        }
-    } else {
-        contextPtr->meContextPtr->fractionalSearchModel = 2;
-    }
-    
-    return return_error;
-}
 
 /******************************************************
 * Derive ME Settings for OQ
@@ -715,96 +420,6 @@ EB_ERRORTYPE SignalDerivationMeKernelOq(
     return return_error;
 }
 
-/******************************************************
-* Derive ME Settings for VMAF
-  Input   : encoder mode and tune
-  Output  : ME Kernel signal(s)
-******************************************************/
-EB_ERRORTYPE SignalDerivationMeKernelVmaf(
-	SequenceControlSet_t        *sequenceControlSetPtr,
-	PictureParentControlSet_t   *pictureControlSetPtr,
-	MotionEstimationContext_t   *contextPtr) {
-
-	EB_ERRORTYPE return_error = EB_ErrorNone;
-
-	// Set ME/HME search regions
-	SetMeHmeParamsVmaf(
-		contextPtr->meContextPtr,
-		pictureControlSetPtr,
-		sequenceControlSetPtr,
-		sequenceControlSetPtr->inputResolution);
-    if (!sequenceControlSetPtr->staticConfig.useDefaultMeHme) {
-		SetMeHmeParamsFromConfig(
-			sequenceControlSetPtr,
-			contextPtr->meContextPtr);
-	}
-
-	// Set number of quadrant(s)
-	contextPtr->meContextPtr->oneQuadrantHME = EB_FALSE;
-
-	// Set ME Fractional Search Method
-	if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
-		contextPtr->meContextPtr->fractionalSearchMethod = SSD_SEARCH;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_5) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			contextPtr->meContextPtr->fractionalSearchMethod = SUB_SAD_SEARCH;
-		}
-		else {
-			contextPtr->meContextPtr->fractionalSearchMethod = SSD_SEARCH;
-		}
-	}
-	else {
-		contextPtr->meContextPtr->fractionalSearchMethod = SUB_SAD_SEARCH;
-	}
-
-	// Set 64x64 Fractional Search Flag
-	contextPtr->meContextPtr->fractionalSearch64x64 = (pictureControlSetPtr->encMode <= ENC_MODE_1) ? EB_TRUE : EB_FALSE;
-
-	// Set OIS Kernel
-	if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
-		contextPtr->oisKernelLevel = (pictureControlSetPtr->temporalLayerIndex == 0) ? EB_TRUE : EB_FALSE;
-	}
-	else if (pictureControlSetPtr->encMode <= ENC_MODE_5) {
-		if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
-			contextPtr->oisKernelLevel = EB_FALSE;
-		}
-		else {
-			contextPtr->oisKernelLevel = (pictureControlSetPtr->temporalLayerIndex == 0) ? EB_TRUE : EB_FALSE;
-		}
-	}
-	else {
-		contextPtr->oisKernelLevel = EB_FALSE;
-	}
-
-	// Set OIS TH
-	// 0: Agressive 
-	// 1: Default
-	// 2: Conservative
-	contextPtr->oisThSet = (pictureControlSetPtr->encMode <= ENC_MODE_6) ? 2 : 1;
-
-	// Set valid flag for the best OIS
-	contextPtr->setBestOisDistortionToValid = EB_FALSE;
-	
-	// Set fractional search model
-	// 0: search all blocks 
-	// 1: selective based on Full-Search SAD & MV.
-	// 2: off
-	if (pictureControlSetPtr->useSubpelFlag == 1) {
-		if (pictureControlSetPtr->encMode <= ENC_MODE_8) {
-			contextPtr->meContextPtr->fractionalSearchModel = 0;
-		}
-		else {
-			contextPtr->meContextPtr->fractionalSearchModel = 1;
-		}
-	}
-	else {
-		contextPtr->meContextPtr->fractionalSearchModel = 2;
-	}
-
-	return return_error;
-}
-
 
 /******************************************************
 * GetMv
@@ -842,10 +457,9 @@ void GetMeDist(
 /******************************************************
 * Derive Similar Collocated Flag
 ******************************************************/
-void DeriveSimilarCollocatedFlag(
+static void DeriveSimilarCollocatedFlag(
     PictureParentControlSet_t    *pictureControlSetPtr,
     EB_U32	                      lcuIndex)
-
 {
    // Similairty detector for collocated LCU
    pictureControlSetPtr->similarColocatedLcuArray[lcuIndex] = EB_FALSE;
@@ -883,12 +497,11 @@ void DeriveSimilarCollocatedFlag(
     return;
 }
 
-void StationaryEdgeOverUpdateOverTimeLcuPart1(
+static void StationaryEdgeOverUpdateOverTimeLcuPart1(
     SequenceControlSet_t        *sequenceControlSetPtr,
     PictureParentControlSet_t   *pictureControlSetPtr,
     EB_U32                       lcuIndex)
 {
-
     EB_S32	             xCurrentMv = 0;
     EB_S32	             yCurrentMv = 0;
 
@@ -936,12 +549,11 @@ void StationaryEdgeOverUpdateOverTimeLcuPart1(
     }
 }
 
-void StationaryEdgeOverUpdateOverTimeLcuPart2(
+static void StationaryEdgeOverUpdateOverTimeLcuPart2(
     SequenceControlSet_t        *sequenceControlSetPtr,
     PictureParentControlSet_t   *pictureControlSetPtr,
     EB_U32                       lcuIndex)
 {
-
     EB_U32               lowSadTh = (sequenceControlSetPtr->inputResolution < INPUT_SIZE_1080p_RANGE) ? 5 : 2;
 
     LcuParams_t  *lcuParams  = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
@@ -1071,25 +683,10 @@ void* MotionEstimationKernel(void *inputPtr)
 		// Reset MD rate Estimation table to initial values by copying from mdRateEstimationArray
 		EB_MEMCPY(&(contextPtr->meContextPtr->mvdBitsArray[0]), &(mdRateEstimationArray->mvdBits[0]), sizeof(EB_BitFraction)*NUMBER_OF_MVD_CASES);
 
-        // ME Kernel Signal(s) derivation
-        if (sequenceControlSetPtr->staticConfig.tune == TUNE_SQ) {
-            SignalDerivationMeKernelSq(
-                sequenceControlSetPtr,
-                pictureControlSetPtr,
-                contextPtr);
-        }
-        else if (sequenceControlSetPtr->staticConfig.tune == TUNE_VMAF) {
-            SignalDerivationMeKernelVmaf(
-                sequenceControlSetPtr,
-                pictureControlSetPtr,
-                contextPtr);
-        }
-        else {
-            SignalDerivationMeKernelOq(
+        SignalDerivationMeKernelOq(
                 sequenceControlSetPtr,
                 pictureControlSetPtr,
                 contextPtr);     
-        }
 
 		// Lambda Assignement
         if (pictureControlSetPtr->temporalLayerIndex == 0) {

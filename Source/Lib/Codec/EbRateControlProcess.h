@@ -10,6 +10,9 @@
 #include "EbSystemResourceManager.h"
 #include "EbApi.h"
 #include "EbPictureControlSet.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define CCOEFF_INIT_FACT              2
 #define SAD_CLIP_COEFF                5
@@ -326,4 +329,7 @@ extern EB_ERRORTYPE RateControlContextCtor(
     
 extern void* RateControlKernel(void *inputPtr);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // EbRateControl_h

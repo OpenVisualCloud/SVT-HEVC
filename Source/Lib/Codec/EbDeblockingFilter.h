@@ -3,19 +3,19 @@
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
 
+#ifndef EbDeblockingFilter_h
+#define EbDeblockingFilter_h
+
 #include "EbDeblockingFilter_C.h"
 #include "EbDeblockingFilter_SSE2.h"
 #include "EbDeblockingFilter_SSSE3.h"
-
-
 #include "EbPredictionUnit.h"
 #include "EbNeighborArrays.h"
 
-#ifndef EbDeblockingFilter_h
-#define EbDeblockingFilter_h
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 #define BLK4X4_ADDR_TO_VERTICAL_EDGE_BS_ARRAY_IDX(blk4x4Addr)                   (((blk4x4Addr) & (MAX_LCU_SIZE_IN_4X4BLK - 1)) + (((blk4x4Addr) / MAX_LCU_SIZE_IN_4X4BLK) * MAX_LCU_SIZE_IN_4X4BLK))
 #define BLK4X4_ADDR_TO_HORIZONTAL_EDGE_BS_ARRAY_IDX(blk4x4Addr)                 (((blk4x4Addr) & (MAX_LCU_SIZE_IN_4X4BLK - 1)) + (((blk4x4Addr) / MAX_LCU_SIZE_IN_4X4BLK) * MAX_LCU_SIZE_IN_4X4BLK))
 #define GET_LUMA_4X4BLK_ADDR(lumaLcuWise4x4BlkPos_x, lumaLcuWise4x4BlkPos_y, logMaxLcuSizeIn4x4blk)           (((lumaLcuWise4x4BlkPos_x)>>2) + (((lumaLcuWise4x4BlkPos_y)>>2) << (logMaxLcuSizeIn4x4blk)))

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Copyright(c) 2018 Intel Corporation
 # SPDX-License-Identifier: BSD-2-Clause-Patent
@@ -49,6 +49,9 @@ echo_help() {
 Usage: $0 [OPTION] ... -- [OPTIONS FOR CMAKE]
 -a, --all, all          Builds release and debug
     --cc, cc=*          Set C compiler [$CC]
+    --cpp, cpp          Compile source files with cpp compiler
+    --cxx, cxx          Set CPP compiler [$CXX], Only makes sense with
+                            --cpp
     --clean, clean      Remove build and Bin folders
     --debug, debug      Build debug
     --shared, shared    Build shared libs
@@ -64,7 +67,7 @@ EOF
 
 # Usage: build <release|debug> "$@"
 build() (
-    local build_type match
+    unset build_type
     while [ -n "$*" ]; do
         match=$(echo "$1" | tr '[:upper:]' '[:lower:]')
         case "$match" in
@@ -79,7 +82,8 @@ build() (
     [ -f CMakeCache.txt ] && rm CMakeCache.txt
     [ -d CMakeFiles ] && rm -rf CMakeFiles
     [ -f Makefile ] && rm Makefile
-    cmake ../../.. -DCMAKE_BUILD_TYPE="${build_type:-Release}" "${CMAKE_EXTRA_FLAGS[@]}" "$@"
+    # shellcheck disable=SC2086
+    cmake ../../.. -DCMAKE_BUILD_TYPE="${build_type:-Release}" $CMAKE_EXTRA_FLAGS "$@"
 
     # Compile the Library
     if [ -f Makefile ]; then
@@ -90,8 +94,8 @@ build() (
     cd_safe ..
 )
 
-check_executable() {
-    local print_exec command_to_check
+check_executable() (
+    unset print_exec command_to_check
     while true; do
         case "$1" in
         -p)
@@ -108,9 +112,7 @@ check_executable() {
     else
         if [ $# -gt 1 ]; then
             shift
-            local hints
-            hints=("$@")
-            for d in "${hints[@]}"; do
+            for d in "$@"; do
                 if [ -e "$d/$command_to_check" ]; then
                     [ -n "$print_exec" ] && echo "$d/$command_to_check"
                     return 0
@@ -119,15 +121,21 @@ check_executable() {
         fi
         return 127
     fi
-}
+)
 
 install_build() {
-    local build_type sudo
-    build_type="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+    unset sudo build_type
+    while [ -n "$*" ]; do
+        case "$(echo "$1" | tr '[:upper:]' '[:lower:]')" in
+        release) build_type="Release" && shift ;;
+        debug) build_type="Debug" && shift ;;
+        *) break ;;
+        esac
+    done
     check_executable sudo && sudo -v > /dev/null 2>&1 && sudo=sudo
-    [ -d "${build_type:-release}" ] &&
-        cd_safe "${build_type:-release}" "Unable to find the build folder. Did the build command run?"
-    $sudo cmake --build . --target install --config "${build_type:-release}" ||
+    [ -d "${build_type:-Release}" ] &&
+        cd_safe "${build_type:-Release}" "Unable to find the build folder. Did the build command run?"
+    $sudo cmake --build . --target install --config "${build_type:-Release}" ||
         die "Unable to run install"
     cd_safe ..
 }
@@ -146,6 +154,14 @@ parse_options() {
             fi
             shift
             ;;
+        cxx=*)
+            if check_executable "${1#*=}"; then
+                CXX="$(check_executable -p "${1#*=}")"
+                export CXX
+            fi
+            shift
+            ;;
+        cpp) CMAKE_EXTRA_FLAGS="$CMAKE_EXTRA_FLAGS -DCOMPILE_AS_CPP=ON" && shift ;;
         clean)
             for d in *; do
                 [ -d "$d" ] && rm -rf "$d"
@@ -156,19 +172,18 @@ parse_options() {
             exit
             ;;
         debug) build_debug=y && shift ;;
-        build_shared) CMAKE_EXTRA_FLAGS=("${CMAKE_EXTRA_FLAGS[@]}" "-DBUILD_SHARED_LIBS=ON") && shift ;;
-        build_static) CMAKE_EXTRA_FLAGS=("${CMAKE_EXTRA_FLAGS[@]}" "-DBUILD_SHARED_LIBS=OFF") && shift ;;
+        build_shared) CMAKE_EXTRA_FLAGS="$CMAKE_EXTRA_FLAGS -DBUILD_SHARED_LIBS=ON" && shift ;;
+        build_static) CMAKE_EXTRA_FLAGS="$CMAKE_EXTRA_FLAGS -DBUILD_SHARED_LIBS=OFF" && shift ;;
         install) build_install=y && shift ;;
-        prefix=*) CMAKE_EXTRA_FLAGS=("${CMAKE_EXTRA_FLAGS[@]}" "-DCMAKE_INSTALL_PREFIX=${1#*=}") && shift ;;
+        prefix=*) CMAKE_EXTRA_FLAGS="$CMAKE_EXTRA_FLAGS -DCMAKE_INSTALL_PREFIX=${1#*=}" && shift ;;
         release) build_release=y && shift ;;
-        verbose) CMAKE_EXTRA_FLAGS=("${CMAKE_EXTRA_FLAGS[@]}" "-DCMAKE_VERBOSE_MAKEFILE=1") && shift ;;
+        verbose) CMAKE_EXTRA_FLAGS="$CMAKE_EXTRA_FLAGS -DCMAKE_VERBOSE_MAKEFILE=1" && shift ;;
         esac
     done
 }
 
 # Defines
-uname=$(uname -a)
-if [ -z "$CC" ] && [ "${uname:0:5}" != "MINGW" ]; then
+if [ -z "$CC" ] && [ "$(uname -a | cut -c1-5)" != "MINGW" ]; then
     if check_executable icc "/opt/intel/bin"; then
         CC=$(check_executable -p icc "/opt/intel/bin")
     elif check_executable gcc; then
@@ -197,13 +212,11 @@ if [ -z "$*" ]; then
     build_release=y
 else
     while [ -n "$*" ]; do
-        match=""
         # Handle --* based args
-        if [ "${1:0:2}" = "--" ]; then
+        if [ "$(echo "$1" | cut -c1-2)" = "--" ]; then
             # Stop on "--", pass the rest to cmake
-            [ -z "${1:2}" ] && shift && break
-            match=$(echo "${1:2}" | tr '[:upper:]' '[:lower:]')
-            case "$match" in
+            [ -z "$(echo "$1" | cut -c3-)" ] && shift && break
+            case "$(echo "$1" | cut -c3- | tr '[:upper:]' '[:lower:]')" in
             help)
                 parse_options help
                 shift
@@ -215,6 +228,14 @@ else
             cc)
                 parse_options cc="$2"
                 shift 2
+                ;;
+            cxx)
+                parse_options cxx="$2"
+                shift 2
+                ;;
+            cpp)
+                parse_options cpp
+                shift
                 ;;
             clean)
                 parse_options clean
@@ -251,33 +272,39 @@ else
             *) die "Error, unknown option: $1" ;;
             esac
         # Handle -* based args, one letter at a time
-        elif [ "${1:0:1}" = "-" ]; then
-            i=1
-            opt=""
-            while [ $i -lt ${#1} ]; do
-                opt=$(echo "${1:i:1}" | tr '[:upper:]' '[:lower:]')
-                case "$opt" in
+        elif [ "$(echo "$1" | cut -c1)" = "-" ]; then
+            i=2
+            match="$1"
+            shift
+            while [ $i -ne $((${#match} + 1)) ]; do
+                case "$(echo "$match" | cut -c$i | tr '[:upper:]' '[:lower:]')" in
                 h) parse_options help ;;
                 a) parse_options all && i=$((i + 1)) ;;
                 i) parse_options install && i=$((i + 1)) ;;
                 p) parse_options prefix="$1" && i=$((i + 1)) ;;
                 x) parse_options build_static && i=$((i + 1)) ;;
                 v) parse_options verbose && i=$((i + 1)) ;;
-                *) die "Error, unknown option: -$opt" ;;
+                *) die "Error, unknown option: -$(echo "$match" | cut -c$i | tr '[:upper:]' '[:lower:]')" ;;
                 esac
-                i=$((i + 1))
             done
             shift
         # Handle single word args
         else
-            match=$(echo "$1" | tr '[:upper:]' '[:lower:]')
-            case "$match" in
+            case "$(echo "$1" | tr '[:upper:]' '[:lower:]')" in
             all)
                 parse_options release debug
                 shift
                 ;;
             cc=*)
                 parse_options cc="${1#*=}"
+                shift
+                ;;
+            cxx=*)
+                parse_options cxx="${1#*=}"
+                shift
+                ;;
+            cpp)
+                parse_options cpp
                 shift
                 ;;
             clean)
@@ -323,7 +350,9 @@ else
     done
 fi
 
-[[ ":$PATH:" != *":/usr/local/bin:"* ]] && PATH="$PATH:/usr/local/bin"
+if [ "${PATH#*\/usr\/local\/bin}" = "$PATH" ]; then
+    PATH="$PATH:/usr/local/bin"
+fi
 
 if [ "$build_debug" = "y" ] && [ "$build_release" = "y" ]; then
     build release "$@"

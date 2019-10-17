@@ -69,6 +69,54 @@ static void ConfigureLcuInfo(PictureControlSet_t *pcsPtr)
     return;
 }
 
+// Jing: segments will be parallelized within tile group
+static void ConfigureTileGroupInfo(PictureParentControlSet_t *ppcsPtr, EB_U16 tg_col, EB_U16 tg_row)
+{
+    // Sanity check
+    tg_col = CLIP3(1,  ppcsPtr->tileColumnCount, tg_col);
+    tg_row = CLIP3(1,  ppcsPtr->tileRowCount, tg_row);
+
+    // Tiles Group Initialisation
+    EB_U16 tileGroupColStartTile[EB_TILE_COLUMN_MAX_COUNT + 1];
+    EB_U16 tileGroupRowStartTile[EB_TILE_ROW_MAX_COUNT + 1];
+
+    // Get the tile start index for tile group
+    for (EB_U16 c = 0; c <= tg_col; c++) {
+        tileGroupColStartTile[c] = c *  ppcsPtr->tileColumnCount / tg_col;
+    }
+    for (EB_U16 r = 0; r <= tg_row; r++) {
+        tileGroupRowStartTile[r] = r * ppcsPtr->tileRowCount / tg_row;
+    }
+
+    for (EB_U16 r = 0; r < tg_row; r++) {
+        for (EB_U16 c = 0; c < tg_col; c++) {
+            // Get the tile/tile group index in raster order
+            EB_U16 tileGroupIdx = r * tg_col + c;
+            EB_U16 topLeftTileIdx = tileGroupColStartTile[c] + tileGroupRowStartTile[r] * ppcsPtr->tileColumnCount;
+            EB_U16 bottomRightTileIdx =  (tileGroupColStartTile[c + 1] - 1)
+                + (tileGroupRowStartTile[r + 1] - 1) * ppcsPtr->tileColumnCount;
+            TileGroupInfo_t *tileGroupInfoPtr = &ppcsPtr->tileGroupInfoArray[tileGroupIdx];
+
+            // Get the LCU origin of the top left tile
+            tileGroupInfoPtr->tileGroupLcuOriginX = ppcsPtr->tileInfoArray[topLeftTileIdx].tileLcuOriginX;
+            tileGroupInfoPtr->tileGroupLcuOriginY = ppcsPtr->tileInfoArray[topLeftTileIdx].tileLcuOriginY;
+
+            // Get the LCU end of the bottom right tile
+            tileGroupInfoPtr->tileGroupLcuEndX = ppcsPtr->tileInfoArray[bottomRightTileIdx].tileLcuEndX;
+            tileGroupInfoPtr->tileGroupLcuEndY = ppcsPtr->tileInfoArray[bottomRightTileIdx].tileLcuEndY;
+
+            // Get the width/height of tile group in LCU
+            tileGroupInfoPtr->tileGroupHeightInLcu = tileGroupInfoPtr->tileGroupLcuEndY - tileGroupInfoPtr->tileGroupLcuOriginY;
+            tileGroupInfoPtr->tileGroupWidthInLcu = tileGroupInfoPtr->tileGroupLcuEndX - tileGroupInfoPtr->tileGroupLcuOriginX;
+            //printf("---TileGroupIdx %d,TL (%d, %d), BR (%d, %d), ColXRow %dX%d\n",
+            //        tileGroupIdx, tileGroupInfoPtr->tileGroupLcuOriginX, tileGroupInfoPtr->tileGroupLcuOriginY,
+            //        tileGroupInfoPtr->tileGroupLcuEndX, tileGroupInfoPtr->tileGroupLcuEndY,
+            //        tileGroupInfoPtr->tileGroupWidthInLcu, tileGroupInfoPtr->tileGroupHeightInLcu);
+        }
+    }
+
+    return;
+}
 
  
 /***************************************************************************************************
@@ -676,8 +724,10 @@ void* PictureManagerKernel(void *inputPtr)
                     ChildPictureControlSetPtr->ParentPcsPtr->quantizedCoeffNumBits      = 0;      
                     ChildPictureControlSetPtr->encMode                                  = entryPictureControlSetPtr->encMode; 
 
-                    ChildPictureControlSetPtr->encDecCodedLcuCount = 0;
+                    ChildPictureControlSetPtr->encDecCodedLcuCount 						= 0;
+                    ChildPictureControlSetPtr->resetDone 								= EB_FALSE;
                     
+                   // printf("POC [%lu], use pcs %p\n", ChildPictureControlSetPtr->pictureNumber, ChildPictureControlSetPtr);
 
 
                     // Update temporal ID
@@ -688,28 +738,35 @@ void* PictureManagerKernel(void *inputPtr)
                     }
 
                     //3.make all init for ChildPCS
+                    EB_U16 tileGroupRowCnt = entrySequenceControlSetPtr->tileGroupRowCountArray[entryPictureControlSetPtr->temporalLayerIndex];
+                    EB_U16 tileGroupColCnt = entrySequenceControlSetPtr->tileGroupColCountArray[entryPictureControlSetPtr->temporalLayerIndex]; 
+                    ConfigureTileGroupInfo(entryPictureControlSetPtr, tileGroupColCnt, tileGroupRowCnt);
 
-                    EB_U32 encDecSegRow = entrySequenceControlSetPtr->encDecSegmentRowCountArray[entryPictureControlSetPtr->temporalLayerIndex];
-                    EB_U32 encDecSegCol = entrySequenceControlSetPtr->encDecSegmentColCountArray[entryPictureControlSetPtr->temporalLayerIndex]; 
+                    // Configure tile group and segments for EncDec
+                    for (EB_U16 r = 0; r < tileGroupRowCnt; r++) {
+                        for (EB_U16 c = 0; c < tileGroupColCnt; c++) {
+                            unsigned tileGroupIdx = c + r * tileGroupColCnt;
+                            EB_U16 tileGroupHeightInLcu = entryPictureControlSetPtr->tileGroupInfoArray[tileGroupIdx].tileGroupHeightInLcu;
+                            EB_U16 tileGroupWidthInLcu = entryPictureControlSetPtr->tileGroupInfoArray[tileGroupIdx].tileGroupWidthInLcu;
 
-                    if (entryPictureControlSetPtr->tileRowCount * entryPictureControlSetPtr->tileColumnCount > 1) {
-                        encDecSegCol = entryPictureControlSetPtr->pictureWidthInLcu;//  / entrySequenceControlSetPtr->tileColumnCount;
-                        encDecSegRow = entryPictureControlSetPtr->pictureHeightInLcu / entryPictureControlSetPtr->tileRowCount;
+                            EB_U32 encDecSegRow = entrySequenceControlSetPtr->encDecSegmentRowCountArray[entryPictureControlSetPtr->temporalLayerIndex];
+                            EB_U32 encDecSegCol = entrySequenceControlSetPtr->encDecSegmentColCountArray[entryPictureControlSetPtr->temporalLayerIndex];
+                            // Jing: Can tune this later
+                            encDecSegRow = tileGroupHeightInLcu;
+                            encDecSegCol = tileGroupWidthInLcu;
+
+                            EncDecSegmentsInit(
+                                    ChildPictureControlSetPtr->encDecSegmentCtrl[tileGroupIdx],
+                                    encDecSegCol,
+                                    encDecSegRow,
+                                    tileGroupWidthInLcu,
+                                    tileGroupHeightInLcu);
+                        }
                     }
 
-                    // EncDec Segments 
+                    // Configure tiles for entropy
                     for (int r = 0; r < entryPictureControlSetPtr->tileRowCount; r++) {
                         EB_U16 tileHeightInLcu = entryPictureControlSetPtr->tileRowStartLcu[r + 1] - entryPictureControlSetPtr->tileRowStartLcu[r];
-                        EncDecSegmentsInit(
-                                ChildPictureControlSetPtr->encDecSegmentCtrl[r],
-                                encDecSegCol,
-                                encDecSegRow,
-                                //sequenceControlSetPtr->tileColumnArray[c],
-                                entryPictureControlSetPtr->pictureWidthInLcu,
-                                tileHeightInLcu);
-
-                        // Jing: Apply with tile row for better parallelism..
-                        // Entropy Coding Rows
                         for (int c = 0; c < entryPictureControlSetPtr->tileColumnCount; c++) {
                             int tileIdx = r * entryPictureControlSetPtr->tileColumnCount + c;
                             ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingCurrentRow = 0;
@@ -725,7 +782,6 @@ void* PictureManagerKernel(void *inputPtr)
                         ChildPictureControlSetPtr->entropyCodingPicResetFlag = EB_TRUE;
                     }
 
-                    //Jing: Move to PCS_Ctor
                     //Configure tile/picture edges
                     ConfigureLcuInfo(ChildPictureControlSetPtr);
                     

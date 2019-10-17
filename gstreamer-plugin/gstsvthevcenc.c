@@ -115,7 +115,7 @@ enum
 #define PROP_BASE_LAYER_SWITCH_MODE_DEFAULT 0
 #define PROP_PRED_STRUCTURE_DEFAULT         2
 #define PROP_KEY_INT_MAX_DEFAULT            -2
-#define PROP_INTRA_REFRESH_DEFAULT          1
+#define PROP_INTRA_REFRESH_DEFAULT          -1
 #define PROP_QP_DEFAULT                     25
 #define PROP_DEBLOCKING_DEFAULT             TRUE
 #define PROP_SAO_DEFAULT                    TRUE
@@ -265,8 +265,8 @@ gst_svthevcenc_class_init (GstSvtHevcEncClass * klass)
 
   g_object_class_install_property(gobject_class, PROP_INTRA_REFRESH,
       g_param_spec_int ("intra-refresh", "Intra refresh type",
-          "1=CRA (Open GOP), 2=IDR (Closed GOP)",
-          1, 2, PROP_INTRA_REFRESH_DEFAULT,
+          "-1:CRA (Open GOP), >=0:IDR (Closed GOP)",
+          -1, INT_MAX, PROP_INTRA_REFRESH_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_QP,
@@ -904,7 +904,7 @@ gst_svthevcenc_encode (GstSvtHevcEnc * svthevcenc, GstVideoCodecFrame * frame)
 
   if (GST_VIDEO_CODEC_FRAME_IS_FORCE_KEYFRAME (frame)) {
     input_buffer->sliceType =
-        (svthevcenc->svt_config->intraRefreshType == 2) ?
+        (svthevcenc->svt_config->intraRefreshType >= 0) ?
         EB_IDR_PICTURE : EB_I_PICTURE;
   }
 

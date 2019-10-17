@@ -113,7 +113,8 @@ EB_ERRORTYPE EbDestroyThread(
 
 #ifdef _WIN32
     //error_return = TerminateThread((HANDLE) threadHandle, 0) ? EB_ErrorDestroyThreadFailed : EB_ErrorNone;
-    error_return = WaitForSingleObject(threadHandle, INFINITE);
+    WaitForSingleObject(threadHandle, INFINITE);
+    error_return = CloseHandle(threadHandle) ? EB_ErrorNone : EB_ErrorDestroyThreadFailed;
 #elif __linux__
     //error_return = pthread_cancel(*((pthread_t*) threadHandle)) ? EB_ErrorDestroyThreadFailed : EB_ErrorNone;
     pthread_join(*((pthread_t*) threadHandle), NULL);
@@ -163,7 +164,7 @@ EB_ERRORTYPE EbPostSemaphore(
                        semaphoreHandle,    // semaphore handle
                        1,                  // amount to increment the semaphore
                        NULL)               // pointer to previous count (optional)
-                   ? EB_ErrorSemaphoreUnresponsive : EB_ErrorNone;
+                       ? EB_ErrorNone : EB_ErrorSemaphoreUnresponsive;
 #elif __linux__
     return_error = sem_post((sem_t*) semaphoreHandle) ? EB_ErrorSemaphoreUnresponsive : EB_ErrorNone;
 #endif // _WIN32
@@ -197,7 +198,7 @@ EB_ERRORTYPE EbDestroySemaphore(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
 #ifdef _WIN32
-    return_error = CloseHandle((HANDLE) semaphoreHandle) ? EB_ErrorDestroySemaphoreFailed : EB_ErrorNone;
+    return_error = CloseHandle((HANDLE) semaphoreHandle) ? EB_ErrorNone : EB_ErrorDestroySemaphoreFailed;
 #elif __linux__
     return_error = sem_destroy((sem_t*) semaphoreHandle) ? EB_ErrorDestroySemaphoreFailed : EB_ErrorNone;
     free(semaphoreHandle);
@@ -241,7 +242,7 @@ EB_ERRORTYPE EbReleaseMutex(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
 #ifdef _WIN32
-    return_error = ReleaseMutex((HANDLE) mutexHandle)? EB_ErrorCreateMutexFailed : EB_ErrorNone;
+    return_error = ReleaseMutex((HANDLE) mutexHandle) ? EB_ErrorNone : EB_ErrorCreateMutexFailed;
 #elif __linux__
     return_error = pthread_mutex_unlock((pthread_mutex_t*) mutexHandle) ? EB_ErrorCreateMutexFailed : EB_ErrorNone;
 #endif // _WIN32
@@ -276,7 +277,7 @@ EB_ERRORTYPE EbBlockOnMutexTimeout(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
 #ifdef _WIN32
-    WaitForSingleObject((HANDLE) mutexHandle, timeout);
+    return_error = WaitForSingleObject((HANDLE) mutexHandle, timeout) ? EB_ErrorMutexUnresponsive : EB_ErrorNone;
 #elif __linux__
     return_error = pthread_mutex_lock((pthread_mutex_t*) mutexHandle) ? EB_ErrorMutexUnresponsive : EB_ErrorNone;
     (void) timeout;
@@ -294,7 +295,7 @@ EB_ERRORTYPE EbDestroyMutex(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
 #ifdef _WIN32
-    return_error = CloseHandle((HANDLE) mutexHandle) ? EB_ErrorDestroyMutexFailed : EB_ErrorNone;
+    return_error = CloseHandle((HANDLE) mutexHandle) ? EB_ErrorNone : EB_ErrorDestroyMutexFailed;
 #elif __linux__
     return_error = pthread_mutex_destroy((pthread_mutex_t*) mutexHandle) ? EB_ErrorDestroyMutexFailed : EB_ErrorNone;
     free(mutexHandle);

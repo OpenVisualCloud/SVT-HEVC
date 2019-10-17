@@ -82,10 +82,9 @@ EB_ERRORTYPE SourceBasedOperationsContextCtor(
 * Derives BEA statistics and set activity flags
 ***************************************************/
 
-void DerivePictureActivityStatistics(
+static void DerivePictureActivityStatistics(
 	SequenceControlSet_t            *sequenceControlSetPtr,
 	PictureParentControlSet_t       *pictureControlSetPtr)
-
 {
 
 	EB_U64               nonMovingIndexSum      = 0;
@@ -118,13 +117,13 @@ void DerivePictureActivityStatistics(
 
 	return;
 }
+
 /***************************************************
 * complexity Classification
 ***************************************************/
-void ComplexityClassifier32x32(
+static void ComplexityClassifier32x32(
     SequenceControlSet_t      *sequenceControlSetPtr,
     PictureParentControlSet_t *pictureControlSetPtr) {
-
 
     //No need to have Threshold depending on TempLayer. Higher Temoral Layer would have smaller classes
     //TODO: add more classes using above threshold when needed.
@@ -168,14 +167,10 @@ void ComplexityClassifier32x32(
     }
 }
 
-
-
-
-
 /******************************************************
 * Pre-MD Uncovered Area Detection
 ******************************************************/
-void FailingMotionLcu(
+static void FailingMotionLcu(
     SequenceControlSet_t			*sequenceControlSetPtr,
     PictureParentControlSet_t		*pictureControlSetPtr,
     EB_U32							 lcuIndex) {
@@ -234,7 +229,7 @@ void FailingMotionLcu(
 /******************************************************
 * Pre-MD Uncovered Area Detection
 ******************************************************/
-void DetectUncoveredLcu(
+static void DetectUncoveredLcu(
 	SequenceControlSet_t			*sequenceControlSetPtr,
 	PictureParentControlSet_t		*pictureControlSetPtr,
 	EB_U32							 lcuIndex) {
@@ -308,7 +303,7 @@ void DetectUncoveredLcu(
 /******************************************************
 * Calculates AC Energy
 ******************************************************/
-void CalculateAcEnergy(
+static void CalculateAcEnergy(
 	SequenceControlSet_t	        *sequenceControlSetPtr,
 	PictureParentControlSet_t		*pictureControlSetPtr,
 	EB_U32							 lcuIndex) {
@@ -321,7 +316,8 @@ void CalculateAcEnergy(
 	EB_U8       *meanPtr = pictureControlSetPtr->yMean[lcuIndex];
 	inputOriginIndex = (lcuParams->originY + inputPicturePtr->originY) * inputLumaStride + (lcuParams->originX + inputPicturePtr->originX);
 
-	if (lcuParams->isCompleteLcu && pictureControlSetPtr->sliceType == EB_I_PICTURE){
+	if (lcuParams->isCompleteLcu && pictureControlSetPtr->sliceType == EB_I_PICTURE &&
+            pictureControlSetPtr->predStructure != EB_PRED_LOW_DELAY_P) {
 
 		EB_U32 inputCuOriginIndex;
 		EB_U32 cuNum, cuSize;
@@ -369,7 +365,7 @@ void CalculateAcEnergy(
 	}
 }
 
-void LumaContrastDetectorLcu(
+static void LumaContrastDetectorLcu(
 	SourceBasedOperationsContext_t *contextPtr,
 	SequenceControlSet_t           *sequenceControlSetPtr,
 	PictureParentControlSet_t	   *pictureControlSetPtr,
@@ -414,7 +410,7 @@ void LumaContrastDetectorLcu(
 	}
 }
 
-void LumaContrastDetectorPicture(
+static void LumaContrastDetectorPicture(
 	SourceBasedOperationsContext_t		*contextPtr,
 	PictureParentControlSet_t			*pictureControlSetPtr) {
 
@@ -432,7 +428,7 @@ void LumaContrastDetectorPicture(
 	}
 }
 
-void GrassSkinLcu(
+static void GrassSkinLcu(
 	SourceBasedOperationsContext_t		*contextPtr,
 	SequenceControlSet_t                *sequenceControlSetPtr,
 	PictureParentControlSet_t			*pictureControlSetPtr,
@@ -532,7 +528,7 @@ void GrassSkinLcu(
 	contextPtr->pictureNumGrassLcu += lcuGrassFlag ? 1 : 0;
 }
 
-void GrassSkinPicture(
+static void GrassSkinPicture(
 	SourceBasedOperationsContext_t		*contextPtr,
 	PictureParentControlSet_t			*pictureControlSetPtr) {
 	pictureControlSetPtr->grassPercentageInPicture = (EB_U8)(contextPtr->pictureNumGrassLcu * 100 / pictureControlSetPtr->lcuTotalCount);
@@ -614,7 +610,7 @@ static inline void DetermineIsolatedNonHomogeneousRegionInPicture(
 }
 
 
-void SetDefaultDeltaQpRange(
+static void SetDefaultDeltaQpRange(
 	SourceBasedOperationsContext_t	*contextPtr,
 	PictureParentControlSet_t		*pictureControlSetPtr) {
 
@@ -689,7 +685,7 @@ static inline void DetermineMorePotentialAuraAreas(
 /***************************************************
 * Detects the presence of dark area
 ***************************************************/
-void DeriveHighDarkAreaDensityFlag(
+static void DeriveHighDarkAreaDensityFlag(
 	SequenceControlSet_t                *sequenceControlSetPtr,
 	PictureParentControlSet_t           *pictureControlSetPtr) {
 
@@ -746,7 +742,7 @@ void DeriveHighDarkAreaDensityFlag(
 /******************************************************
 * High  contrast classifier
 ******************************************************/
-void TemporalHighContrastClassifier(
+static void TemporalHighContrastClassifier(
 	SourceBasedOperationsContext_t	*contextPtr,
 	PictureParentControlSet_t       *pictureControlSetPtr,
 	EB_U32                           lcuIndex)
@@ -773,12 +769,11 @@ void TemporalHighContrastClassifier(
 	contextPtr->highDist = meDist>0 ? EB_TRUE : EB_FALSE;
 }
 
-void SpatialHighContrastClassifier(
+static void SpatialHighContrastClassifier(
 	SourceBasedOperationsContext_t	*contextPtr,
 	PictureParentControlSet_t       *pictureControlSetPtr,
 	EB_U32                           lcuIndex)
 {
-
 	EB_U32                 blkIt;
 
 	contextPtr->highContrastNum = 0;
@@ -810,7 +805,7 @@ void SpatialHighContrastClassifier(
 Input   : current LCU value
 Output  : populate to neighbor LCUs
 ******************************************************/
-void PopulateFromCurrentLcuToNeighborLcus(
+static void PopulateFromCurrentLcuToNeighborLcus(
     PictureParentControlSet_t   *pictureControlSetPtr,
     EB_BOOL	                     inputToPopulate,
     EB_BOOL	                    *outputBuffer,
@@ -866,8 +861,7 @@ void PopulateFromCurrentLcuToNeighborLcus(
 Input   : variance
 Output  : true if current & neighbors are spatially complex
 ******************************************************/
-EB_BOOL IsSpatiallyComplexArea(
-
+static EB_BOOL IsSpatiallyComplexArea(
     PictureParentControlSet_t	*pictureControlSetPtr,
     EB_U32                       lcuAddr,
     EB_U32                       lcuOriginX,
@@ -965,7 +959,7 @@ EB_BOOL IsSpatiallyComplexArea(
 Input   : activity, layer index
 Output  : LCU complexity level
 ******************************************************/
-void DeriveBlockinessPresentFlag(
+static void DeriveBlockinessPresentFlag(
     SequenceControlSet_t        *sequenceControlSetPtr,
     PictureParentControlSet_t   *pictureControlSetPtr)
 {
@@ -1006,12 +1000,11 @@ void DeriveBlockinessPresentFlag(
     }
 }
 
-void QpmGatherStatistics(
+static void QpmGatherStatistics(
     SequenceControlSet_t		*sequenceControlSetPtr,
     PictureParentControlSet_t   *pictureControlSetPtr,
     EB_U32                       lcuIndex)
 {
-
     EB_U32 rasterScanCuIndex;
     EB_U32 mdScanCuIndex;
     EB_U32 oisSad;
@@ -1150,7 +1143,7 @@ void QpmGatherStatistics(
 }
 
 
-void StationaryEdgeOverUpdateOverTimeLcu(
+static void StationaryEdgeOverUpdateOverTimeLcu(
     SequenceControlSet_t        *sequenceControlSetPtr,
     EB_U32						totalCheckedPictures,
     PictureParentControlSet_t   *pictureControlSetPtr,

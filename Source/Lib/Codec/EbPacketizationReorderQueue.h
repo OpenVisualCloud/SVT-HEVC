@@ -36,6 +36,7 @@ typedef struct PacketizationReorderEntry_s {
     EB_U32                          startSplicing;
     EB_U64                          fillerBitsSent;
     EB_U64                          fillerBitsFinal;
+    EB_BOOL                         isUsedAsReferenceFlag;
 } PacketizationReorderEntry_t;   
 
 extern EB_ERRORTYPE PacketizationReorderEntryCtor(   

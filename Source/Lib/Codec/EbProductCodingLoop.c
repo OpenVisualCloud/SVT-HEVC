@@ -3806,7 +3806,7 @@ EB_EXTERN EB_ERRORTYPE LinkBdptoMd(
     LargestCodingUnit_t     *lcuPtr,
     ModeDecisionContext_t   *contextPtr)
 {
-	EB_ERRORTYPE return_error = EB_ErrorNone;
+    EB_ERRORTYPE return_error = EB_ErrorNone;
 
     EB_U8 leafIndex = 0;
 
@@ -3835,7 +3835,7 @@ EB_EXTERN EB_ERRORTYPE LinkBdptoMd(
             // the upper right INTRA4x4 mode (partition index 0) is used to update the intra mode neighbor array
             EB_U8 intraLumaMode = (cuPtr->predictionModeFlag == INTRA_MODE && contextPtr->cuStats->size == MIN_CU_SIZE && cuPtr->predictionUnitArray->intraLumaMode == EB_INTRA_MODE_4x4) ?
                 (EB_U8)lcuPtr->intra4x4Mode[((MD_SCAN_TO_RASTER_SCAN[leafIndex] - 21) << 2)] :
-                (EB_U8)contextPtr->cuPtr->predictionModeFlag;
+                (EB_U8)cuPtr->predictionUnitArray->intraLumaMode;
 
             EB_U8 skipFlag = (EB_U8)contextPtr->cuPtr->skipFlag;
 
@@ -3852,7 +3852,7 @@ EB_EXTERN EB_ERRORTYPE LinkBdptoMd(
                 contextPtr->cuOriginX,
                 contextPtr->cuOriginY,
                 contextPtr->cuStats->size,
-				lcuPtr->chromaEncodeMode == CHROMA_MODE_FULL);
+                lcuPtr->chromaEncodeMode == CHROMA_MODE_FULL);
 
 
             leafIndex += DepthOffset[contextPtr->cuStats->depth];
@@ -3868,9 +3868,9 @@ EB_EXTERN EB_ERRORTYPE LinkBdptoMd(
 void UpdateBdpNeighborArrays(
     PictureControlSet_t     *pictureControlSetPtr,
     ModeDecisionContext_t   *contextPtr,
-	EbPictureBufferDesc_t   *reconBuffer,
-	EB_U32                   lcuSize,
-	EB_U8                   *depth,
+    EbPictureBufferDesc_t   *reconBuffer,
+    EB_U32                   lcuSize,
+    EB_U8                   *depth,
     EB_U8                   *modeType,
     EB_U8                   *lumaMode,
     MvUnit_t                *mvUnit,
@@ -3974,7 +3974,7 @@ EB_EXTERN EB_ERRORTYPE LinkMdtoBdp(
     LargestCodingUnit_t     *lcuPtr,
     ModeDecisionContext_t   *contextPtr)
 {
-	EB_ERRORTYPE return_error = EB_ErrorNone;
+    EB_ERRORTYPE return_error = EB_ErrorNone;
 
     EB_U8 leafIndex = 0;
 
@@ -4003,7 +4003,7 @@ EB_EXTERN EB_ERRORTYPE LinkMdtoBdp(
             // the upper right INTRA4x4 mode (partition index 0) is used to update the intra mode neighbor array
             EB_U8 intraLumaMode = (cuPtr->predictionModeFlag == INTRA_MODE && contextPtr->cuStats->size == MIN_CU_SIZE && cuPtr->predictionUnitArray->intraLumaMode == EB_INTRA_MODE_4x4) ?
                 (EB_U8)lcuPtr->intra4x4Mode[((MD_SCAN_TO_RASTER_SCAN[leafIndex] - 21) << 2)] :
-                (EB_U8)contextPtr->cuPtr->predictionModeFlag;
+                (EB_U8)cuPtr->predictionUnitArray->intraLumaMode;
 
             EB_U8 skipFlag = (EB_U8)contextPtr->cuPtr->skipFlag;
 
@@ -4020,7 +4020,7 @@ EB_EXTERN EB_ERRORTYPE LinkMdtoBdp(
                 contextPtr->cuOriginX,
                 contextPtr->cuOriginY,
                 contextPtr->cuStats->size,
-				lcuPtr->chromaEncodeMode == CHROMA_MODE_FULL);
+                lcuPtr->chromaEncodeMode == CHROMA_MODE_FULL);
 
             leafIndex += DepthOffset[contextPtr->cuStats->depth];
         }
@@ -4034,13 +4034,13 @@ EB_EXTERN EB_ERRORTYPE LinkMdtoBdp(
 
 
 EB_EXTERN EB_ERRORTYPE ModeDecisionRefinementLcu(
-	PictureControlSet_t                 *pictureControlSetPtr,
-	LargestCodingUnit_t                 *lcuPtr,
+    PictureControlSet_t                 *pictureControlSetPtr,
+    LargestCodingUnit_t                 *lcuPtr,
     EB_U32                               lcuOriginX,
     EB_U32                               lcuOriginY,
-	ModeDecisionContext_t               *contextPtr)
+    ModeDecisionContext_t               *contextPtr)
 {
-	EB_ERRORTYPE    return_error = EB_ErrorNone;
+    EB_ERRORTYPE    return_error = EB_ErrorNone;
 
     EB_U16 tileIdx = contextPtr->tileIndex;
     contextPtr->intraLumaModeNeighborArray  = pictureControlSetPtr->mdRefinementIntraLumaModeNeighborArray[tileIdx];
@@ -4049,7 +4049,7 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionRefinementLcu(
 
 
     contextPtr->lcuPtr = lcuPtr;
-    
+
     EB_U8 leafIndex = 0;
 
     while (leafIndex < CU_MAX_COUNT) {
@@ -4071,7 +4071,7 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionRefinementLcu(
 
             // Generate Split, Skip and intra mode contexts for the rate estimation
             ModeDecisionRefinementContextGeneration(
-				contextPtr,
+                contextPtr,
                 contextPtr->cuPtr,
                 contextPtr->cuOriginX,
                 contextPtr->cuOriginY,
@@ -4348,7 +4348,7 @@ void AddChromaEncDec(
 
 }
 
-void PerformFullLoop(
+static void PerformFullLoop(
     PictureControlSet_t     *pictureControlSetPtr,
     LargestCodingUnit_t     *lcuPtr,
     CodingUnit_t            *cuPtr,
