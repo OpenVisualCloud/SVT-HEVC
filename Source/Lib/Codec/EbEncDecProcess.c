@@ -1358,7 +1358,6 @@ static void EntropyCodingResetTempNeighborArrays(PictureControlSet_t *pictureCon
 }
 
 static void ResetTempEntropy(
-    EncDecContext_t         *contextPtr,
     PictureControlSet_t     *pictureControlSetPtr,
     SequenceControlSet_t    *sequenceControlSetPtr) {
     EB_U32 tileCnt = pictureControlSetPtr->ParentPcsPtr->tileRowCount * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
@@ -3003,8 +3002,9 @@ void* EncDecKernel(void *inputPtr)
           
             //Reset Stats required for low level vbv
             if (segmentIndex == 0) {
-                if (contextPtr->tileRowIndex == 0) {
-                    ResetTempEntropy(contextPtr, pictureControlSetPtr, sequenceControlSetPtr);
+                // Reset for the tiles in the 1st row.
+                if ((tileGroupIdx / tileGroupWidthInLcu) == 0) {
+                    ResetTempEntropy(pictureControlSetPtr, sequenceControlSetPtr);
                     ResetRowStats(pictureControlSetPtr,sequenceControlSetPtr);
                 }
             }
@@ -3173,7 +3173,7 @@ void* EncDecKernel(void *inputPtr)
 
                         //Assign the base qp for the LCU
                         if (xLcuIndex <= yLcuIndex && yLcuIndex)
-                            lcuPtr->qp = pictureControlSetPtr->lcuPtrArray[lcuIndex - pictureWidthInLcu]->qp;
+                            lcuPtr->qp = pictureControlSetPtr->lcuPtrArray[lcuIndex - tileGroupWidthInLcu]->qp;
                         else
                             lcuPtr->qp = pictureControlSetPtr->rowStats[rowPtr->rowIndex]->rowQp;
 
@@ -3211,31 +3211,31 @@ void* EncDecKernel(void *inputPtr)
                     if (sequenceControlSetPtr->staticConfig.lowLevelVbv && sequenceControlSetPtr->staticConfig.lookAheadDistance > 0) {
                         /*Entropy Estimation for LCU*/
 					    tempCoeffPicturePtr = lcuPtr->quantizedCoeff;
-                        tempWrittenBitsBeforeQuantizedCoeff = ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->entropyCodingInfo[contextPtr->tileIndex]->tempEntropyCoderPtr))->writtenBitsCount +
-                            32 - ((CabacEncodeContext_t*)pictureControlSetPtr->entropyCodingInfo[contextPtr->tileIndex]->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
-                            (((CabacEncodeContext_t*)pictureControlSetPtr->entropyCodingInfo[contextPtr->tileIndex]->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum << 3);
+                        tempWrittenBitsBeforeQuantizedCoeff = ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->entropyCodingInfo[contextPtr->mdContext->tileIndex]->tempEntropyCoderPtr))->writtenBitsCount +
+                            32 - ((CabacEncodeContext_t*)pictureControlSetPtr->entropyCodingInfo[contextPtr->mdContext->tileIndex]->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
+                            (((CabacEncodeContext_t*)pictureControlSetPtr->entropyCodingInfo[contextPtr->mdContext->tileIndex]->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum << 3);
                         EstimateLcu(
                             lcuPtr,
                             lcuOriginX,
                             lcuOriginY,
                             pictureControlSetPtr,
                             sequenceControlSetPtr->lcuSize,
-                            pictureControlSetPtr->entropyCodingInfo[contextPtr->tileIndex]->tempEntropyCoderPtr,
+                            pictureControlSetPtr->entropyCodingInfo[contextPtr->mdContext->tileIndex]->tempEntropyCoderPtr,
                             tempCoeffPicturePtr,
-                            pictureControlSetPtr->tempModeTypeNeighborArray[contextPtr->tileIndex],
-                            pictureControlSetPtr->tempLeafDepthNeighborArray[contextPtr->tileIndex],
-                            pictureControlSetPtr->tempIntraLumaModeNeighborArray[contextPtr->tileIndex],
-                            pictureControlSetPtr->tempSkipFlagNeighborArray[contextPtr->tileIndex],
-                            contextPtr->tileIndex,
+                            pictureControlSetPtr->tempModeTypeNeighborArray[contextPtr->mdContext->tileIndex],
+                            pictureControlSetPtr->tempLeafDepthNeighborArray[contextPtr->mdContext->tileIndex],
+                            pictureControlSetPtr->tempIntraLumaModeNeighborArray[contextPtr->mdContext->tileIndex],
+                            pictureControlSetPtr->tempSkipFlagNeighborArray[contextPtr->mdContext->tileIndex],
+                            contextPtr->mdContext->tileIndex,
                             0,
                             0);
 
-                        tempWrittenBitsAfterQuantizedCoeff = ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->entropyCodingInfo[contextPtr->tileIndex]->tempEntropyCoderPtr))->writtenBitsCount +
-                            32 - ((CabacEncodeContext_t*)pictureControlSetPtr->entropyCodingInfo[contextPtr->tileIndex]->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
-                            (((CabacEncodeContext_t*)pictureControlSetPtr->entropyCodingInfo[contextPtr->tileIndex]->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum << 3);
+                        tempWrittenBitsAfterQuantizedCoeff = ((OutputBitstreamUnit_t*)EntropyCoderGetBitstreamPtr(pictureControlSetPtr->entropyCodingInfo[contextPtr->mdContext->tileIndex]->tempEntropyCoderPtr))->writtenBitsCount +
+                            32 - ((CabacEncodeContext_t*)pictureControlSetPtr->entropyCodingInfo[contextPtr->mdContext->tileIndex]->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.bitsRemainingNum +
+                            (((CabacEncodeContext_t*)pictureControlSetPtr->entropyCodingInfo[contextPtr->mdContext->tileIndex]->tempEntropyCoderPtr->cabacEncodeContextPtr)->bacEncContext.tempBufferedBytesNum << 3);
                         lcuPtr->proxytotalBits = tempWrittenBitsAfterQuantizedCoeff - tempWrittenBitsBeforeQuantizedCoeff;
-                        lcuWidth = (sequenceControlSetPtr->lumaWidth - lcuOriginX) < MAX_LCU_SIZE ? sequenceControlSetPtr->lumaWidth - lcuOriginX : MAX_LCU_SIZE;
-                        lcuHeight = (sequenceControlSetPtr->lumaHeight - lcuOriginY) < MAX_LCU_SIZE ? sequenceControlSetPtr->lumaHeight - lcuOriginY : MAX_LCU_SIZE;
+                        lcuWidth = (sequenceControlSetPtr->lumaWidth - lcuOriginX) < (EB_U16)MAX_LCU_SIZE ? (sequenceControlSetPtr->lumaWidth - lcuOriginX) : (EB_U16)MAX_LCU_SIZE;
+                        lcuHeight = (sequenceControlSetPtr->lumaHeight - lcuOriginY) < (EB_U16)MAX_LCU_SIZE ? (sequenceControlSetPtr->lumaHeight - lcuOriginY) : (EB_U16)MAX_LCU_SIZE;
                         lcuPtr->fullLcu = 0;
                         if (pictureControlSetPtr->sliceType == EB_I_PICTURE) {
                             if (lcuWidth == MAX_LCU_SIZE && lcuHeight == MAX_LCU_SIZE) {

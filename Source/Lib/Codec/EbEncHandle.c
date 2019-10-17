@@ -2122,7 +2122,7 @@ void LoadDefaultBufferConfigurationSettings(
     EB_U32 meSegH = (((sequenceControlSetPtr->maxInputLumaHeight + 32) / MAX_LCU_SIZE) < 6) ? 1 : 6;
     EB_U32 meSegW = (((sequenceControlSetPtr->maxInputLumaWidth + 32) / MAX_LCU_SIZE) < 10) ? 1 : 10;
 
-    EB_U16 tileColCount = sequenceControlSetPtr->staticConfig.tileColumnCount;
+    // EB_U16 tileColCount = sequenceControlSetPtr->staticConfig.tileColumnCount;
     EB_U16 tileRowCount = sequenceControlSetPtr->staticConfig.tileRowCount;
 
     EB_U32 inputPic = SetParentPcs(&sequenceControlSetPtr->staticConfig);

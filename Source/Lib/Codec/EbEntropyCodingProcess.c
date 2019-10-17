@@ -425,8 +425,9 @@ void* EntropyCodingKernel(void *inputPtr)
                         lastLcuFlagInSlice = lastLcuFlagInTile;
                     }
             
-                   if (sequenceControlSetPtr->staticConfig.lowLevelVbv)
-                    contextPtr->qp = lcuPtr->qp;
+                    if (sequenceControlSetPtr->staticConfig.lowLevelVbv)
+                        contextPtr->qp = lcuPtr->qp;
+
                     // Configure the LCU
                     EntropyCodingConfigureLcu(
                         contextPtr,
