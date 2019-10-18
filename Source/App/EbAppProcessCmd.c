@@ -25,6 +25,7 @@
 #define FUTURE_WINDOW_WIDTH                 4
 #define SIZE_OF_ONE_FRAME_IN_BYTES(width, height, csp, is16bit) \
     ( (((width)*(height)) + 2*(((width)*(height))>>(3-csp)) )<<is16bit)
+#define YUV4MPEG2_IND_SIZE 9
 extern volatile int32_t keepRunning;
 
 /***************************************
@@ -1120,7 +1121,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(EbConfig_t *config, EbAppContext_t *appC
     int64_t                  remainingByteCount;
     const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)config->encoderColorFormat;
     int ret;
-    uint32_t compressed10bitFrameSize = (uint32_t)((inputPaddedWidth*inputPaddedHeight) + 2 * ((inputPaddedWidth*inputPaddedWidth) >> (3 - colorFormat)));
+    uint32_t compressed10bitFrameSize = (uint32_t)((inputPaddedWidth*inputPaddedHeight) + 2 * ((inputPaddedWidth*inputPaddedHeight) >> (3 - colorFormat)));
     compressed10bitFrameSize += compressed10bitFrameSize / 4;
 
     if (config->injector && config->processedFrameCount)

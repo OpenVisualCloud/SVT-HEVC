@@ -2867,11 +2867,11 @@ void EncodePassPackLcu(
     if ((sequenceControlSetPtr->staticConfig.compressedTenBitFormat == 1))
     {
 
-        const EB_U32 inputLumaOffset = ((lcuOriginY + inputPicture->originY)       * inputPicture->strideY) + (lcuOriginX + inputPicture->originX);
-        const EB_U32 inputCbOffset = (((lcuOriginY + inputPicture->originY) >> 1)  * inputPicture->strideCb) + ((lcuOriginX + inputPicture->originX) >> 1);
-        const EB_U32 inputCrOffset = (((lcuOriginY + inputPicture->originY) >> 1)  * inputPicture->strideCr) + ((lcuOriginX + inputPicture->originX) >> 1);
+        const EB_U32 inputLumaOffset = ((lcuOriginY + inputPicture->originY)                      * inputPicture->strideY) + (lcuOriginX + inputPicture->originX);
+        const EB_U32 inputCbOffset = (((lcuOriginY + inputPicture->originY) >> subHeightCMinus1)  * inputPicture->strideCb) + ((lcuOriginX + inputPicture->originX) >> subWidthCMinus1);
+        const EB_U32 inputCrOffset = (((lcuOriginY + inputPicture->originY) >> subHeightCMinus1)  * inputPicture->strideCr) + ((lcuOriginX + inputPicture->originX) >> subWidthCMinus1);
         const EB_U16 luma2BitWidth = inputPicture->width / 4;
-        const EB_U16 chroma2BitWidth = inputPicture->width / 8;
+        const EB_U16 chroma2BitWidth = (inputPicture->width / 4) >> subWidthCMinus1;
 
 
         CompressedPackLcu(
@@ -2887,22 +2887,22 @@ void EncodePassPackLcu(
         CompressedPackLcu(
             inputPicture->bufferCb + inputCbOffset,
             inputPicture->strideCb,
-            inputPicture->bufferBitIncCb + lcuOriginY / 2 * chroma2BitWidth + (lcuOriginX / 8)*(lcuHeight / 2),
-            lcuWidth / 8,
+            inputPicture->bufferBitIncCb + (lcuOriginY >> subHeightCMinus1) * chroma2BitWidth + ((lcuOriginX >> subWidthCMinus1) / 4)*(lcuHeight  >> subHeightCMinus1),
+            (lcuWidth >> subWidthCMinus1) / 4,
             (EB_U16 *)contextPtr->inputSample16bitBuffer->bufferCb,
             MAX_LCU_SIZE_CHROMA,
-            lcuWidth >> 1,
-            lcuHeight >> 1);
+            lcuWidth >> subWidthCMinus1,
+            lcuHeight >> subHeightCMinus1);
 
         CompressedPackLcu(
             inputPicture->bufferCr + inputCrOffset,
             inputPicture->strideCr,
-            inputPicture->bufferBitIncCr + lcuOriginY / 2 * chroma2BitWidth + (lcuOriginX / 8)*(lcuHeight / 2),
-            lcuWidth / 8,
+            inputPicture->bufferBitIncCr + (lcuOriginY >> subHeightCMinus1) * chroma2BitWidth + ((lcuOriginX >> subWidthCMinus1 / 4))*(lcuHeight >> subHeightCMinus1),
+            (lcuWidth >> subWidthCMinus1) / 4,
             (EB_U16 *)contextPtr->inputSample16bitBuffer->bufferCr,
             MAX_LCU_SIZE_CHROMA,
-            lcuWidth >> 1,
-            lcuHeight >> 1);
+            lcuWidth >> subWidthCMinus1,
+            lcuHeight >> subHeightCMinus1);
 
     }
     else {
