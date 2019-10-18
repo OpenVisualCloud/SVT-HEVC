@@ -3001,13 +3001,11 @@ static EB_ERRORTYPE VerifySettings(\
         SVT_LOG("SVT [Error]: Instance %u: The rate control mode must be [0 - 2] \n", channelNumber + 1); 
         return_error = EB_ErrorBadParameter;
     }
-    if (((config->rateControlMode == 0) || (config->rateControlMode == 1)) && (config->crf != 28))
-    {
+    if (((config->rateControlMode == 0) || (config->rateControlMode == 1)) && (config->crf != 28)) {
         SVT_LOG("SVT [Warning]: Instance %u: The crf setting with %u wouldn't take effect with rc %u\n",
                 channelNumber + 1, config->crf, config->rateControlMode);
     }
-    if ((config->rateControlMode == 2) && (config->crf > 51))
-    {
+    if ((config->rateControlMode == 2) && (config->crf > 51)) {
         SVT_LOG("SVT [Error]: Instance %u:The crf value must be [0-51] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
