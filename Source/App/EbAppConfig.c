@@ -957,6 +957,12 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         return_error = EB_ErrorBadParameter;
     }
 
+    if (config->encoderBitDepth != 10 && config->compressedTenBitFormat == EB_TRUE)
+    {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Compressed 10 bit format inconsistent with encoder bit depth\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
     if (config->injector > 1 ){
         fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid injector [0 - 1]\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
