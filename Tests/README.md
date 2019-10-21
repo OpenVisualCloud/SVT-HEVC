@@ -231,16 +231,49 @@ Here are the basic steps to follow when adding a test to validate the correct pr
 ### How to use the test script:
 
 1. Make sure ENC_PATH, BIN_PATH,YUV_PATH, and TOOLS_PATH folders are created relative to the location of  where the script is located.  The bitstream folder should be empty and cleared for each run.
+
 2. Build SVT encoder and place the executable in the folder specified under "ENC_PATH"
+
 3. Download the reference decoder from https://hevc.hhi.fraunhofer.de/
+
 4. Build the reference decoder and place it in the folder specified under "TOOLS_PATH"(Windows:TAppDecoder.exe , Linux: TAppDecoder)
+
 5. Download the MCTS decoder from https://github.com/kelvinhu325/HM/tree/mcts_check
+
 6. Build the MTCS decoder and place it in the folder specified under "TOOLS_PATH"(Windows:MCTS_TAppDecoder.exe , Linux: MCTS_TAppDecoder)
+
 7. Obtain the YUV media files and copy to YUV_PATH
+
 8. Run script as follows:
+   
+Run all test suites：
 
 ```
-python SVT-HEVC_FunctionalTests.py Fast
-python SVT-HEVC_FunctionalTests.py Nightly
-python SVT-HEVC_FunctionalTests.py Full
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type all
 ```
+
+​Run test suites separately:
+
+```
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type vbv_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type mcts_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type hdr_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type intra_period_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type width_height_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type buffered_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type run_to_run_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type qp_file_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type enc_struct_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type unpacked_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type dlf_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type sao_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type constrained_intra_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type scene_change_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type me_hme_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type asm_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type decode_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type defield_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type tile_test
+python SVT-HEVC_FunctionalTests.py [Fast|Nightly|Full ] -type multi_channel_test
+```
+

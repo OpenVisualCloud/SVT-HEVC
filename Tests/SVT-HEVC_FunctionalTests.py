@@ -62,7 +62,7 @@ TOOLS_PATH = "tools"
 TEST_CONFIGURATION = 0 # 0 - Validation Test, 1 - Speed Test (Refer to Validation/Speed Test specific configurations)
 
 #------------- Validation Test Specific -------------#
-VALIDATION_TEST_MODE = get_test_mode(sys.argv[1]) # 0 - Fast Test, 1 - Overnight Test, 2- Full Test
+VALIDATION_TEST_MODE = get_test_mode(sys.argv) # 0 - Fast Test, 1 - Overnight Test, 2- Full Test
 COLOR_MODE = 0  # 0 - P420, P422 and P444, 1 - P420 Only, 2 - P422 Only, 3 - P444 Only
 QP_VBR_MODE = 4 # 0 - QP, VBR, CRF,  1 - QP Only, 2 - VBR Only, 3 - CRF, 4 - QP and VBR
 
@@ -141,7 +141,7 @@ if VALIDATION_TEST_MODE == 0:
 
 
 elif VALIDATION_TEST_MODE == 1:
-    ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11,12]
+    ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11]
     NUM_FRAMES                      = 40
     QP_ITERATIONS                   = 1
     VBR_ITERATIONS                  = 1
@@ -153,7 +153,7 @@ elif VALIDATION_TEST_MODE == 1:
     VBV_ITER                        = 1 # VBV per test
     MCTS_ITER                       = 1 # MCTS per test
 elif VALIDATION_TEST_MODE == 2:
-    ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11,12]
+    ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11]
     NUM_FRAMES                      = 40
     QP_ITERATIONS                   = 2
     VBR_ITERATIONS                  = 2
@@ -855,8 +855,6 @@ class EB_Test(object):
     def unpacked_test(self, seq_list):
         # Test specific parameters:
         test_name = 'unpacked_test'
-        # Get default encoding params
-        enc_params = self.get_default_params().copy()
         if os.path.exists(test_name + '.txt'):
             return 0, 0
         print ("Running Test: " + test_name)
@@ -872,6 +870,8 @@ class EB_Test(object):
             ]
             # Run test
             for VBR in QP_VBR_COMBINATION:
+                # Get default encoding params
+                enc_params = self.get_default_params().copy()
                 num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, VBR)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
@@ -881,8 +881,6 @@ class EB_Test(object):
     def defield_test(self, seq_list):
         # Test specific parameters:
         test_name = 'defield_test'
-        # Get default encoding params
-        enc_params = self.get_default_params().copy()
         if os.path.exists(test_name + '.txt'):
             return 0, 0
         print ("Running Test: " + test_name)
@@ -903,6 +901,8 @@ class EB_Test(object):
             ]
             # Run test
             for VBR in QP_VBR_COMBINATION:
+                # Get default encoding params
+                enc_params = self.get_default_params().copy()
                 num_tests, num_passed = self.run_test(test_name, test_params, enc_params,VBR, VBR)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
@@ -1159,6 +1159,9 @@ class EB_Test(object):
             print ("10 bits sequences need to have the 2bitspacked counterpart")
         return exit_code
 
+    def update_totals(self, total_tests, total_passed, num_tests, num_passed):
+        return total_tests + num_tests, total_passed + num_passed
+
     def run_validation_test(self, seq_list, test_type):
         if self.error_check(seq_list) != 0:
             return
@@ -1168,86 +1171,107 @@ class EB_Test(object):
         start_time = time.time()
         total_tests = 0
         total_passed = 0
+        if test_type == "all":
+            num_tests, num_passed = self.vbv_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.mcts_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.hdr_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.intra_period_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.width_height_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.buffered_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.run_to_run_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.qp_file_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.enc_struct_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.unpacked_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.dlf_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.sao_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.constrained_intra_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.scene_change_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.me_hme_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.asm_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.decode_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.defield_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.tile_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.multi_channel_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         if test_type == "vbv_test":
             num_tests, num_passed = self.vbv_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "mcts_test":
             num_tests, num_passed = self.mcts_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "hdr_test":
             num_tests, num_passed = self.hdr_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "intra_period_test":
             num_tests, num_passed = self.intra_period_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "width_height_test":
             num_tests, num_passed = self.width_height_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "buffered_test":
             num_tests, num_passed = self.buffered_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "run_to_run_test":
             num_tests, num_passed = self.run_to_run_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "qp_file_test":
             num_tests, num_passed = self.qp_file_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "enc_struct_test":
             num_tests, num_passed = self.enc_struct_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "unpacked_test":
             num_tests, num_passed = self.unpacked_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "dlf_test":
             num_tests, num_passed = self.dlf_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "sao_test":
             num_tests, num_passed = self.sao_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "constrained_intra_test":
             num_tests, num_passed = self.constrained_intra_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "scene_change_test":
             num_tests, num_passed = self.scene_change_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "me_hme_test":
             num_tests, num_passed = self.me_hme_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "asm_test":
             num_tests, num_passed = self.asm_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "decode_test":
             num_tests, num_passed = self.decode_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "defield_test":
             num_tests, num_passed = self.defield_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "tile_test":
             num_tests, num_passed = self.tile_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         elif test_type == "multi_channel_test":
             num_tests, num_passed = self.multi_channel_test(seq_list)
-            total_tests = total_tests + num_tests
-            total_passed = total_passed + num_passed
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         finish_time = time.time()
         if total_tests == 0 and total_passed == 0:
             print ("No tests were ran.. Exiting...", file=open(file_name + '.txt', 'a'))
@@ -1398,43 +1422,41 @@ class EB_Test(object):
             print("", file=open('speed_script.bat', 'w'))
         else:
             print("", file=open('speed_script.bat', 'w'))
-        for OQ in SQ_OQ_COMBINATION:
-            for seq in seq_dict:
-                enc_params.update(self.get_stream_info(seq['name']))
-                if 'qp' in seq and 'tbr' in seq:
-                    print("Please only have \"qp\" or \"tbr\" for each sequence")
-                    continue
-                elif not 'qp' in seq and not 'tbr' in seq:
-                    print("Please have \"qp\" or \"tbr\" for each sequence")
-                    continue
-                elif 'qp' in seq:
-                    VBR = 0
-                    iter_list = seq['qp']
-                elif 'tbr' in seq:
-                    VBR = 1
-                    iter_list = seq['tbr']
-                if OQ == 1 and VBR == 1:
-                    continue
-                for enc_mode in SPEED_ENC_MODES:
-                    num_channels = self.get_num_channels(enc_mode, enc_params)
-                    num_frames = self.get_num_frames(enc_mode)
-                    if OQ == 0:
-                        quality_mode = '_SQ'
-                    elif OQ == 1:
-                        quality_mode = '_OQ'
-                    else:
-                        quality_mode = '_VMAF'
-                    if VBR == 0:
-                        enc_params.update({'enc_mode': enc_mode, 'qp': iter_list, 'rc': 0, 'tune': OQ, 'frame_to_be_encoded': num_frames})
-                        cmd = self.get_enc_cmd(enc_params, seq['name'], 'Speed_Test_M' + str(enc_mode) + '_' + seq['name'] + quality_mode + '_Q' + str(iter_list), num_channels)
-                    else:
-                        enc_params.update({'enc_mode': enc_mode, 'tbr': iter_list, 'rc': 1, 'tune': OQ, 'frame_to_be_encoded': num_frames})
-                        cmd = self.get_enc_cmd(enc_params, seq['name'], 'Speed_Test_M' + str(enc_mode) + '_' + seq['name'] + quality_mode + '_TBR' + str(iter_list), num_channels)
-                    print (cmd)
-                    if platform == WINDOWS_PLATFORM_STR:
-                        print(cmd, file=open('speed_script.bat', 'a'))
-                    else:
-                        print(cmd, file=open('speed_script.sh', 'a'))
+        for seq in seq_dict:
+            enc_params.update(self.get_stream_info(seq['name']))
+            if 'qp' in seq and 'tbr' in seq:
+                print("Please only have \"qp\" or \"tbr\" for each sequence")
+                continue
+            elif not 'qp' in seq and not 'tbr' in seq:
+                print("Please have \"qp\" or \"tbr\" for each sequence")
+                continue
+            elif 'qp' in seq:
+                VBR = 0
+                iter_list = seq['qp']
+            elif 'tbr' in seq:
+                VBR = 1
+                iter_list = seq['tbr']
+            if VBR == 1:
+                continue
+            for enc_mode in SPEED_ENC_MODES:
+                num_channels = self.get_num_channels(enc_mode, enc_params)
+                num_frames = self.get_num_frames(enc_mode)
+                if VBR == 0:
+                    enc_params.update({'enc_mode': enc_mode, 'qp': iter_list, 'rc': 0, 'frame_to_be_encoded': num_frames})
+                    cmd = self.get_enc_cmd(enc_params, seq['name'],
+                                           'Speed_Test_M' + str(enc_mode) + '_' + seq['name'] + '_Q' + str(iter_list),
+                                           num_channels)
+                else:
+                    enc_params.update(
+                        {'enc_mode': enc_mode, 'tbr': iter_list, 'rc': 1, 'frame_to_be_encoded': num_frames})
+                    cmd = self.get_enc_cmd(enc_params, seq['name'],
+                                           'Speed_Test_M' + str(enc_mode) + '_' + seq['name'] + '_TBR' + str(iter_list),
+                                           num_channels)
+                print (cmd)
+                if platform == WINDOWS_PLATFORM_STR:
+                    print(cmd, file=open('speed_script.bat', 'a'))
+                else:
+                    print(cmd, file=open('speed_script.sh', 'a'))
 
 ##----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------##
 small_test = EB_Test(ENC_PATH, BIN_PATH, YUV_PATH, TOOLS_PATH)
