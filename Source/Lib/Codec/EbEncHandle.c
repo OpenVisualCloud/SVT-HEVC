@@ -2459,6 +2459,10 @@ void SetParamBasedOnInput(
     SequenceControlSet_t       *sequenceControlSetPtr)
 
 {
+    EB_U32 chromaFormat = EB_YUV420;
+    EB_U32 subWidthCMinus1 = 1;
+    EB_U32 subHeightCMinus1 = 1;
+
     if (sequenceControlSetPtr->interlacedVideo == EB_FALSE) {
 
         sequenceControlSetPtr->generalFrameOnlyConstraintFlag = 0;
@@ -2501,10 +2505,25 @@ void SetParamBasedOnInput(
     sequenceControlSetPtr->topPadding   = MAX_LCU_SIZE + 4;
     sequenceControlSetPtr->rightPadding = MAX_LCU_SIZE + 4;
     sequenceControlSetPtr->botPadding   = MAX_LCU_SIZE + 4;
-    sequenceControlSetPtr->chromaWidth  = sequenceControlSetPtr->maxInputLumaWidth >> 1;
-    sequenceControlSetPtr->chromaHeight = sequenceControlSetPtr->maxInputLumaHeight >> 1;
     sequenceControlSetPtr->lumaWidth    = sequenceControlSetPtr->maxInputLumaWidth;
     sequenceControlSetPtr->lumaHeight   = sequenceControlSetPtr->maxInputLumaHeight;
+
+    chromaFormat = sequenceControlSetPtr->chromaFormatIdc;
+    subWidthCMinus1 = (chromaFormat == EB_YUV444 ? 1 : 2) - 1;
+    subHeightCMinus1 = (chromaFormat >= EB_YUV422 ? 1 : 2) - 1;
+
+    sequenceControlSetPtr->chromaWidth = sequenceControlSetPtr->maxInputLumaWidth >> subWidthCMinus1;
+    sequenceControlSetPtr->chromaHeight = sequenceControlSetPtr->maxInputLumaHeight >> subHeightCMinus1;
+
+    sequenceControlSetPtr->padRight = sequenceControlSetPtr->maxInputPadRight;
+    sequenceControlSetPtr->croppingRightOffset = sequenceControlSetPtr->padRight;
+    sequenceControlSetPtr->padBottom = sequenceControlSetPtr->maxInputPadBottom;
+    sequenceControlSetPtr->croppingBottomOffset = sequenceControlSetPtr->padBottom;
+
+    if (sequenceControlSetPtr->padRight != 0 || sequenceControlSetPtr->padBottom != 0)
+        sequenceControlSetPtr->conformanceWindowFlag = 1;
+    else
+        sequenceControlSetPtr->conformanceWindowFlag = 0;
 
     DeriveInputResolution(
         sequenceControlSetPtr,
