@@ -2896,6 +2896,16 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
+    if ((config->rateControlMode == 0) && ((config->vbvBufsize > 0) || (config->vbvMaxrate > 0))) {
+        SVT_LOG("SVT [Error]: Instance %u: VBV options can not be used when RateControlMode is 1 (CQP).", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->vbvBufInit > 100) {
+        SVT_LOG("SVT [Error]: Instance %u: Invalid vbvBufInit [0 - 100]\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
     if ( config->enableSaoFlag > 1) {
        SVT_LOG("SVT [Error]: Instance %u: Invalid SAO. SAO range must be [0 - 1]\n",channelNumber+1);
        return_error = EB_ErrorBadParameter;
@@ -3164,11 +3174,6 @@ static EB_ERRORTYPE VerifySettings(\
 
     if (config->fpsInVps > 1) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid FPS in VPS flag [0 - 1]\n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
-    }
-
-    if (config->vbvBufInit > 100) {
-        SVT_LOG("SVT [Error]: Instance %u: Invalid vbvBufInit [0 - 100]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
