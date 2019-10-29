@@ -2505,6 +2505,7 @@ void SetParamBasedOnInput(
     sequenceControlSetPtr->topPadding   = MAX_LCU_SIZE + 4;
     sequenceControlSetPtr->rightPadding = MAX_LCU_SIZE + 4;
     sequenceControlSetPtr->botPadding   = MAX_LCU_SIZE + 4;
+
     sequenceControlSetPtr->lumaWidth    = sequenceControlSetPtr->maxInputLumaWidth;
     sequenceControlSetPtr->lumaHeight   = sequenceControlSetPtr->maxInputLumaHeight;
 
@@ -2512,12 +2513,12 @@ void SetParamBasedOnInput(
     subWidthCMinus1 = (chromaFormat == EB_YUV444 ? 1 : 2) - 1;
     subHeightCMinus1 = (chromaFormat >= EB_YUV422 ? 1 : 2) - 1;
 
-    sequenceControlSetPtr->chromaWidth = sequenceControlSetPtr->maxInputLumaWidth >> subWidthCMinus1;
+    sequenceControlSetPtr->chromaWidth  = sequenceControlSetPtr->maxInputLumaWidth >> subWidthCMinus1;
     sequenceControlSetPtr->chromaHeight = sequenceControlSetPtr->maxInputLumaHeight >> subHeightCMinus1;
 
-    sequenceControlSetPtr->padRight = sequenceControlSetPtr->maxInputPadRight;
-    sequenceControlSetPtr->croppingRightOffset = sequenceControlSetPtr->padRight;
-    sequenceControlSetPtr->padBottom = sequenceControlSetPtr->maxInputPadBottom;
+    sequenceControlSetPtr->padRight             = sequenceControlSetPtr->maxInputPadRight;
+    sequenceControlSetPtr->croppingRightOffset  = sequenceControlSetPtr->padRight;
+    sequenceControlSetPtr->padBottom            = sequenceControlSetPtr->maxInputPadBottom;
     sequenceControlSetPtr->croppingBottomOffset = sequenceControlSetPtr->padBottom;
 
     if (sequenceControlSetPtr->padRight != 0 || sequenceControlSetPtr->padBottom != 0)
