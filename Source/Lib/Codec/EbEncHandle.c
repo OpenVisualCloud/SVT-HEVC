@@ -3282,7 +3282,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->improveSharpness = EB_FALSE;
 
     // Bitstream options
-    configPtr->codeVpsSpsPps = 0;
+    configPtr->codeVpsSpsPps = 1;
     configPtr->codeEosNal    = 0;
     configPtr->switchThreadsToRtPriority = EB_TRUE;
     configPtr->fpsInVps      = EB_TRUE;
