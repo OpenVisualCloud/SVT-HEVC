@@ -25,7 +25,6 @@
 #define FUTURE_WINDOW_WIDTH                 4
 #define SIZE_OF_ONE_FRAME_IN_BYTES(width, height, csp, is16bit) \
     ( (((width)*(height)) + 2*(((width)*(height))>>(3-csp)) )<<is16bit)
-#define YUV4MPEG2_IND_SIZE 9
 extern volatile int32_t keepRunning;
 
 /***************************************
