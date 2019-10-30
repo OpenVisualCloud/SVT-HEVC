@@ -881,7 +881,9 @@ void* PacketizationKernel(void *inputPtr)
                     {
                         filler = buffer - encodeContextPtr->vbvBufsize;
                         queueEntryPtr->fillerBitsFinal = filler;
-                        fillerBytes = ((EB_U32)(filler >> 3)) - FILLER_DATA_OVERHEAD;
+                        fillerBytes = (EB_U32)(filler >> 3);
+                        fillerBytes = (fillerBytes < FILLER_DATA_OVERHEAD) ? 0 : fillerBytes - FILLER_DATA_OVERHEAD;
+
                         // Reset the bitstream
                         ResetBitstream(queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
 
