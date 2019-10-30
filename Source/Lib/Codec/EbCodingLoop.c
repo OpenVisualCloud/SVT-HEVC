@@ -2863,7 +2863,6 @@ void EncodePassPackLcu(
     const EB_U16 subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
     const EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
 
-    //TODO: Jing, need change here later 
     if ((sequenceControlSetPtr->staticConfig.compressedTenBitFormat == 1))
     {
 
