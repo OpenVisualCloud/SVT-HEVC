@@ -3397,7 +3397,7 @@ static void PrintLibParams(
     SVT_LOG("\nSVT [config]: MV Search Area Width / Height \t\t\t\t\t\t: %d / %d ", config->searchAreaWidth, config->searchAreaHeight);
     SVT_LOG("\nSVT [config]: HRD / VBV MaxRate / BufSize / BufInit\t\t\t\t\t: %d / %d / %d / %ld", config->hrdFlag, config->vbvMaxrate, config->vbvBufsize, config->vbvBufInit);
 
-#ifdef DEBUG
+#ifndef NDEBUG
     SVT_LOG("\nSVT [config]: More configurations for debugging:");
     SVT_LOG("\nSVT [config]: Channel ID / ActiveChannelCount\t\t\t\t\t\t: %d / %d", config->channelId, config->activeChannelCount);
     SVT_LOG("\nSVT [config]: Number of Logical Processors / Target Socket\t\t\t\t: %d / %d", config->logicalProcessors, config->targetSocket);
