@@ -2866,7 +2866,7 @@ void EncodePassPackLcu(
     if ((sequenceControlSetPtr->staticConfig.compressedTenBitFormat == 1))
     {
 
-        const EB_U32 inputLumaOffset = ((lcuOriginY + inputPicture->originY)                      * inputPicture->strideY) + (lcuOriginX + inputPicture->originX);
+        const EB_U32 inputLumaOffset = ((lcuOriginY + inputPicture->originY)       * inputPicture->strideY) + (lcuOriginX + inputPicture->originX);
         const EB_U32 inputCbOffset = (((lcuOriginY + inputPicture->originY) >> subHeightCMinus1)  * inputPicture->strideCb) + ((lcuOriginX + inputPicture->originX) >> subWidthCMinus1);
         const EB_U32 inputCrOffset = (((lcuOriginY + inputPicture->originY) >> subHeightCMinus1)  * inputPicture->strideCr) + ((lcuOriginX + inputPicture->originX) >> subWidthCMinus1);
         const EB_U16 luma2BitWidth = inputPicture->width / 4;
