@@ -569,7 +569,7 @@ void* PacketizationKernel(void *inputPtr)
         // Encode slice header and write it into the bitstream.
         packetizationQp = pictureControlSetPtr->pictureQp;
      
-        if(sequenceControlSetPtr->staticConfig.accessUnitDelimiter && (pictureControlSetPtr->pictureNumber > 0)) 
+        if (sequenceControlSetPtr->staticConfig.accessUnitDelimiter && !(sequenceControlSetPtr->staticConfig.codeVpsSpsPps && toInsertHeaders))
         {
             EncodeAUD(
                 pictureControlSetPtr->bitstreamPtr,
