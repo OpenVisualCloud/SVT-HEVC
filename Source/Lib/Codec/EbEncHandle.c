@@ -3996,14 +3996,15 @@ static EB_ERRORTYPE  CopyInputBuffer(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
     // Copy the higher level structure
-    dst->nAllocLen  = src->nAllocLen;
-    dst->nFilledLen = src->nFilledLen;
-    dst->nFlags     = src->nFlags;
-    dst->pts        = src->pts;
-    dst->nTickCount = src->nTickCount;
-    dst->nSize      = src->nSize;
-    dst->qpValue    = src->qpValue;
-    dst->sliceType  = src->sliceType;
+    dst->nAllocLen   = src->nAllocLen;
+    dst->nFilledLen  = src->nFilledLen;
+    dst->pAppPrivate = src->pAppPrivate;
+    dst->nFlags      = src->nFlags;
+    dst->pts         = src->pts;
+    dst->nTickCount  = src->nTickCount;
+    dst->nSize       = src->nSize;
+    dst->qpValue     = src->qpValue;
+    dst->sliceType   = src->sliceType;
 
     // Copy the picture buffer
     if(src->pBuffer != NULL)
