@@ -646,6 +646,7 @@ void* PictureDecisionKernel(void *inputPtr)
         queueEntryIndex                                         +=  encodeContextPtr->pictureDecisionReorderQueueHeadIndex;
         queueEntryIndex                                         =   (queueEntryIndex > PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH - 1) ? queueEntryIndex - PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH : queueEntryIndex;        
         queueEntryPtr                                           =   encodeContextPtr->pictureDecisionReorderQueue[queueEntryIndex];         
+        // Parent PCS could be NULL, especailly when the 1st frame is an EOS one.
         if ((queueEntryPtr->parentPcsWrapperPtr != NULL) && !pictureControlSetPtr->endOfSequenceFlag) {
             CHECK_REPORT_ERROR_NC(
                 encodeContextPtr->appCallbackPtr, 
