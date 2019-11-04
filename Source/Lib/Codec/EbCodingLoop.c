@@ -2896,7 +2896,7 @@ void EncodePassPackLcu(
         CompressedPackLcu(
             inputPicture->bufferCr + inputCrOffset,
             inputPicture->strideCr,
-            inputPicture->bufferBitIncCr + (lcuOriginY >> subHeightCMinus1) * chroma2BitWidth + ((lcuOriginX >> subWidthCMinus1 / 4))*(lcuHeight >> subHeightCMinus1),
+            inputPicture->bufferBitIncCr + (lcuOriginY >> subHeightCMinus1) * chroma2BitWidth + ((lcuOriginX >> subWidthCMinus1) / 4)*(lcuHeight >> subHeightCMinus1),
             (lcuWidth >> subWidthCMinus1) / 4,
             (EB_U16 *)contextPtr->inputSample16bitBuffer->bufferCr,
             MAX_LCU_SIZE_CHROMA,
