@@ -2892,12 +2892,12 @@ static EB_ERRORTYPE VerifySettings(\
     }
 
     if (config->hrdFlag == 1 && ((config->vbvBufsize <= 0) || (config->vbvMaxrate <= 0))) {
-        SVT_LOG("SVT [Error]: Instance %u: hrd requires vbv max rate and vbv bufsize to be greater than 0 ", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: hrd requires vbv max rate and vbv bufsize to be greater than 0 \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if ((config->rateControlMode == 0) && ((config->vbvBufsize > 0) || (config->vbvMaxrate > 0))) {
-        SVT_LOG("SVT [Error]: Instance %u: VBV options can not be used when RateControlMode is 1 (CQP).", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: VBV options can not be used when RateControlMode is 1 (CQP) \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -3339,6 +3339,12 @@ EB_ERRORTYPE EbH265EncInitParameter(
 
     // Debug info
     configPtr->reconEnabled = 0;
+
+    // VBV
+    configPtr->vbvMaxrate = 0;
+    configPtr->vbvBufsize = 0;
+    configPtr->vbvBufInit = 90;
+    configPtr->hrdFlag = 0;
 
     return return_error;
 }
