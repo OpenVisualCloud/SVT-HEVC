@@ -275,7 +275,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **Profile** | -profile | [1,2] | 2 | 1: Main, 2: Main 10 |
 | **Tier** | -tier | [0, 1] | 0 | 0: Main, 1: High |
 | **Level** | -level | [1, 2, 2.1,3, 3.1, 4, 4.1, 5, 5.1, 5.2, 6, 6.1, 6.2] | 0 | 0 to 6.2 [0 for auto determine Level] |
-| **FrameRate** | -fps | [0 - 2^64 -1] | 25 | If the number is less than 1000, the input frame rate is an integer number between 1 and 60, else the input number is in Q16 format (shifted by 16 bits) [Max allowed is 240 fps]. If FrameRateNumerator and FrameRateDenominator are both !=0 the encoder will ignore this parameter |
+| **FrameRate** | -fps | [0 - 2^64 -1] | 60 | If the number is less than 1000, the input frame rate is an integer number between 1 and 60, else the input number is in Q16 format (shifted by 16 bits) [Max allowed is 240 fps]. If FrameRateNumerator and FrameRateDenominator are both !=0 the encoder will ignore this parameter |
 | **FrameRateNumerator** | -fps-num | [0 - 2^64 -1] | 0 | Frame rate numerator e.g. 6000 When zero, the encoder will use –fps if FrameRateDenominator is also zero, otherwise an error is returned |
 | **FrameRateDenominator** | -fps-denom | [0 - 2^64 -1] | 0 | Frame rate denominator e.g. 100 When zero, the encoder will use –fps if FrameRateNumerator is also zero, otherwise an error is returned |
 | **Injector** | -inj | [0,1] | 0 | Enable injection of input frames at the specified framerate (0: OFF, 1: ON) |
@@ -288,7 +288,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **PredStructure** | -pred-struct | [0 – 2] | 2 | 0: Low Delay P<br>1: Low Delay B<br>2: Random Access<br>Refer to Appendix A.1 |
 | **IntraPeriod** | -intra-period | [-2 - 255] | -2 | Distance between Intra Frame inserted. <br>-1 denotes no intra update. <br>-2 denotes auto. |
 | **IntraRefreshType** | -irefresh-type | [-1,N] | -1 | -1: CRA (Open GOP)<br>>=0: IDR (Closed GOP, N is headers insertion interval, 0 supported if CQP, >=0 supported if VBR) |
-| **QP** | -q | [0 - 51] | 25 | Initial quantization parameter for the Intra pictures used when RateControlMode 0 (CQP) |
+| **QP** | -q | [0 - 51] | 32 | Initial quantization parameter for the Intra pictures used when RateControlMode 0 (CQP) |
 | **LoopFilterDisable** | -dlf | [0, 1] | 0 | When set to 1 disables the Deblocking Loop Filtering |
 | **SAO** | -sao | [0,1] | 1 | When set to 0 the encoder will not use the Sample Adaptive Filter |
 | **UseDefaultMeHme** | -use-default-me-hme | [0, 1] | 1 | 0 : Overwrite Default ME HME parameters<br>1 : Use default ME HME parameters, dependent on width and height |
@@ -308,8 +308,8 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **MinQpAllowed** | -min-qp | [0 - 50] | 10 | Minimum QP value allowed for rate control use. Only used when RateControlMode is set to 1. Has to be < MaxQpAllowed |
 | **LookAheadDistance** | -lad | [0 - 250] | Depending on BRC mode | When RateControlMode is set to 1 it&#39;s best to set this parameter to be equal to the Intra period value (such is the default set by the encoder).  When CQP is chosen, then a (2 \* minigopsize +1) look ahead is recommended. |
 | **SceneChangeDetection** | -scd | [0,1] | 1 | Enables or disables the scene change detection algorithm <br> 0 = OFF, 1 = ON |
-| **BitRateReduction** | -brr | [0,1] | 1 | Enables visual quality algorithms to reduce the output bitrate with minimal or no subjective visual quality impact. <br>0 = OFF, 1 = ON |
-| **ImproveSharpness** | -sharp | [0,1] | 1 | This is a visual quality knob that allows the use of adaptive quantization within the picture and enables visual quality algorithms that improve the sharpness of the background. This feature is only available for 4k and 8k resolutions <br> 0 = OFF, 1 = ON |
+| **BitRateReduction** | -brr | [0,1] | 0 | Enables visual quality algorithms to reduce the output bitrate with minimal or no subjective visual quality impact. <br>0 = OFF, 1 = ON |
+| **ImproveSharpness** | -sharp | [0,1] | 0 | This is a visual quality knob that allows the use of adaptive quantization within the picture and enables visual quality algorithms that improve the sharpness of the background. This feature is only available for 4k and 8k resolutions <br> 0 = OFF, 1 = ON |
 | **VideoUsabilityInfo** | -vid-info | [0,1] | 0 | Enables or disables sending a vui structure in the HEVC Elementary bitstream. 0 = OFF, 1 = ON |
 | **HighDynamicRangeInput** | -hdr | [0,1] | 0 | When set to 1, signals HDR10 input in the output HEVC elementary bitstream and forces VideoUsabilityInfo to 1. <br>0 = OFF, 1 = ON |
 | **AccessUnitDelimiter** | -ua-delm | [0,1] | 0 | SEI message, 0 = OFF, 1 = ON |

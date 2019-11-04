@@ -990,9 +990,8 @@ gst_svthevcenc_dequeue_encoded_frames (GstSvtHevcEnc * svthevcenc,
       GST_ERROR_OBJECT (svthevcenc, "Error while encoding, return\n");
       return GST_FLOW_ERROR;
     } else if (res != EB_NoErrorEmptyQueue && output_frames && output_buf) {
-      /* if pAppPrivate is indeed propagated, get the frame through it
-       * it's not currently the case with SVT-HEVC 1.3.0
-       * so we fallback on using its PTS to find it back */
+      /* pAppPrivate is not propagated with SVT-HEVC 1.3.0, so we fallback on using its PTS to find it back.
+       * It is fixed post SVT-HEVC 1.4.1 */
       if (output_buf->pAppPrivate) {
         frame = (GstVideoCodecFrame *) output_buf->pAppPrivate;
       } else {

@@ -1,7 +1,7 @@
-From 3248aee7fc94304cd5f41afa8dc502d92ae080ef Mon Sep 17 00:00:00 2001
+From a8f5eeaeebb6f3968c9b4406c648c2ca3a461387 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
-Subject: [PATCH 1/1] lavc/svt_hevc: add libsvt hevc encoder wrapper
+Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
 
 Signed-off-by: Zhengxu Huang <zhengxu.huang@intel.com>
 Signed-off-by: Hassene Tmar <hassene.tmar@intel.com>
@@ -11,12 +11,12 @@ Signed-off-by: Jing Sun <jing.a.sun@intel.com>
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 515 +++++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 521 insertions(+)
+ libavcodec/libsvt_hevc.c | 517 +++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 523 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index c09c842..648ea80 100755
+index 34c2adb..dc5f74f 100755
 --- a/configure
 +++ b/configure
 @@ -264,6 +264,7 @@ External library support:
@@ -35,7 +35,7 @@ index c09c842..648ea80 100755
      libtensorflow
      libtesseract
      libtheora
-@@ -3194,6 +3196,7 @@ libshine_encoder_select="audio_frame_queue"
+@@ -3191,6 +3193,7 @@ libshine_encoder_select="audio_frame_queue"
  libspeex_decoder_deps="libspeex"
  libspeex_encoder_deps="libspeex"
  libspeex_encoder_select="audio_frame_queue"
@@ -43,7 +43,7 @@ index c09c842..648ea80 100755
  libtheora_encoder_deps="libtheora"
  libtwolame_encoder_deps="libtwolame"
  libvo_amrwbenc_encoder_deps="libvo_amrwbenc"
-@@ -6269,6 +6272,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
+@@ -6263,6 +6266,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
  enabled libssh            && require_pkg_config libssh libssh libssh/sftp.h sftp_init
  enabled libspeex          && require_pkg_config libspeex speex speex/speex.h speex_decoder_init
  enabled libsrt            && require_pkg_config libsrt "srt >= 1.3.0" srt/srt.h srt_socket
@@ -77,10 +77,10 @@ index d2f9a39..d8788a7 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000..77eae48
+index 0000000..61bf490
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,515 @@
+@@ -0,0 +1,517 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -248,6 +248,8 @@ index 0000000..77eae48
 +    }
 +
 +    param->targetBitRate = avctx->bit_rate;
++    param->vbvMaxrate = avctx->rc_max_rate;
++    param->vbvBufsize = avctx->rc_buffer_size;
 +
 +    if (avctx->gop_size > 0)
 +        param->intraPeriodLength = avctx->gop_size - 1;
@@ -597,5 +599,5 @@ index 0000000..77eae48
 +    .wrapper_name   = "libsvt_hevc",
 +};
 -- 
-1.8.3.1
+2.7.4
 

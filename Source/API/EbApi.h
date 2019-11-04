@@ -240,7 +240,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
      * If FrameRateNumerator and FrameRateDenominator are both not equal to zero,
      * the encoder will ignore this parameter.
      *
-     * Default is 25. */
+     * Default is 60. */
     uint32_t                frameRate;
 
     /* Frame rate numerator. When zero, the encoder will use –fps if
@@ -263,6 +263,13 @@ typedef struct EB_H265_ENC_CONFIGURATION
      * Default is 8. */
     uint32_t                encoderBitDepth;
 
+    /* Specifies the chroma subsampling of input video.
+     *
+     * 1 = 420.
+     * 2 = 422.
+     * 3 = 444.
+     *
+     * Default is 1 (420). */
     EB_COLOR_FORMAT         encoderColorFormat;
 
     /* Offline packing of the 2bits: requires two bits packed input.
@@ -285,7 +292,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     /* Enables subjective quality algorithms to reduce the output bitrate with
      * minimal or no subjective visual quality impact. Only applicable to tune 0.
      * 
-     * Default is 1. */
+     * Default is 0. */
     uint8_t                 bitRateReduction;
 
     /* The visual quality knob that allows the use of adaptive quantization
@@ -293,7 +300,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
      * sharpness of the background. Only available for 4k and 8k resolutions and
      * tune 0.
      *
-     * Default is 1. */
+     * Default is 0. */
     uint8_t                 improveSharpness;
 
 
@@ -313,7 +320,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
     /* Initial quantization parameter for the Intra pictures used under constant
      * qp rate control mode.
      *
-     * Default is 25. */
+     * Default is 32. */
     uint32_t                qp;
 
     /* Path to file that contains qp values.
@@ -431,7 +438,7 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
     /* Flag to code end of squence Network Abstraction Layer.
      *
-     * Default is 1. */
+     * Default is 0. */
     uint8_t                 codeEosNal;
 
     /* Flag to enable sending extra information to enhance the use of video for

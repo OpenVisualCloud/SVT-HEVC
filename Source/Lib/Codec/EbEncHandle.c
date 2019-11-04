@@ -2892,7 +2892,27 @@ static EB_ERRORTYPE VerifySettings(\
     }
 
     if (config->hrdFlag == 1 && ((config->vbvBufsize <= 0) || (config->vbvMaxrate <= 0))) {
-        SVT_LOG("SVT [Error]: Instance %u: hrd requires vbv max rate and vbv bufsize to be greater than 0 ", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: hrd requires vbv max rate and vbv bufsize to be greater than 0 \n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if ((config->rateControlMode == 0) && ((config->vbvBufsize > 0) || (config->vbvMaxrate > 0))) {
+        SVT_LOG("SVT [Error]: Instance %u: VBV options can not be used when RateControlMode is 1 (CQP) \n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->vbvBufInit > 100) {
+        SVT_LOG("SVT [Error]: Instance %u: Invalid vbvBufInit [0 - 100]\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+  
+    if (config->lowLevelVbv > 1) {
+        SVT_LOG("SVT [Error]: Instance %u : Invalid lowLevelVbv flag [0 - 1]\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->lowLevelVbv == 1 && ((config->vbvBufsize <= 0) || (config->vbvMaxrate <= 0))) {
+        SVT_LOG("SVT [Error]: Instance %u: Enabling Low level vbv requires Frame Level Vbv to be enabled", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -3174,22 +3194,6 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->vbvBufInit > 100) {
-        SVT_LOG("SVT [Error]: Instance %u: Invalid vbvBufInit [0 - 100]\n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
-    }
-
-    if (config->lowLevelVbv > 1) {
-        SVT_LOG("SVT [Error]: Instance %u : Invalid lowLevelVbv flag [0 - 1]\n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
-    }
-
-
-    if (config->lowLevelVbv == 1 && ((config->vbvBufsize <= 0) || (config->vbvMaxrate <= 0))) {
-        SVT_LOG("SVT [Error]: Instance %u: Enabling Low level vbv requires Frame Level Vbv to be enabled", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
-    }
-
     if (config->tileColumnCount < 1 || config->tileColumnCount > 20) {
         SVT_LOG("SVT [Error]: Instance %u : Invalid tile column count\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
@@ -3295,7 +3299,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->improveSharpness = EB_FALSE;
 
     // Bitstream options
-    configPtr->codeVpsSpsPps = 0;
+    configPtr->codeVpsSpsPps = 1;
     configPtr->codeEosNal    = 0;
     configPtr->switchThreadsToRtPriority = EB_TRUE;
     configPtr->fpsInVps      = EB_TRUE;
@@ -3353,6 +3357,12 @@ EB_ERRORTYPE EbH265EncInitParameter(
     // Debug info
     configPtr->reconEnabled = 0;
 
+    // VBV
+    configPtr->vbvMaxrate = 0;
+    configPtr->vbvBufsize = 0;
+    configPtr->vbvBufInit = 90;
+    configPtr->hrdFlag = 0;
+
     return return_error;
 }
 static void PrintLibParams(
@@ -3382,28 +3392,54 @@ static void PrintLibParams(
 
     }
 
-    SVT_LOG("\nSVT [config]: EncoderMode / Tune\t\t\t\t\t: %d / %d ", config->encMode, config->tune);
-    SVT_LOG("\nSVT [config]: EncoderBitDepth / CompressedTenBitFormat / EncoderColorFormat \t: %d / %d / %d", config->encoderBitDepth, config->compressedTenBitFormat, config->encoderColorFormat);
-    SVT_LOG("\nSVT [config]: SourceWidth / SourceHeight\t\t\t\t\t: %d / %d ", config->sourceWidth, config->sourceHeight);
+    SVT_LOG("\nSVT [config]: EncoderMode / Tune\t\t\t\t\t\t\t: %d / %d ", config->encMode, config->tune);
+    SVT_LOG("\nSVT [config]: EncoderBitDepth / CompressedTenBitFormat / EncoderColorFormat \t\t: %d / %d / %d", config->encoderBitDepth, config->compressedTenBitFormat, config->encoderColorFormat);
+    SVT_LOG("\nSVT [config]: SourceWidth / SourceHeight / InterlacedVideo\t\t\t\t: %d / %d / %d", config->sourceWidth, config->sourceHeight, config->interlacedVideo);
+
     if (config->frameRateDenominator != 0 && config->frameRateNumerator != 0)
-        SVT_LOG("\nSVT [config]: Fps_Numerator / Fps_Denominator / Gop Size / IntraRefreshType \t: %d / %d / %d / %d", config->frameRateNumerator > (1<<16) ? config->frameRateNumerator >> 16: config->frameRateNumerator,
+        SVT_LOG("\nSVT [config]: Fps_Numerator / Fps_Denominator / Gop Size / IntraRefreshType \t\t: %d / %d / %d / %d", config->frameRateNumerator > (1<<16) ? config->frameRateNumerator >> 16: config->frameRateNumerator,
             config->frameRateDenominator > (1<<16) ? config->frameRateDenominator >> 16: config->frameRateDenominator,
             config->intraPeriodLength + 1,
             config->intraRefreshType);
     else
-        SVT_LOG("\nSVT [config]: FrameRate / Gop Size\t\t\t\t\t\t: %d / %d ", config->frameRate > 1000 ? config->frameRate >> 16 : config->frameRate, config->intraPeriodLength + 1);
-    SVT_LOG("\nSVT [config]: HierarchicalLevels / BaseLayerSwitchMode / PredStructure\t\t: %d / %d / %d ", config->hierarchicalLevels, config->baseLayerSwitchMode, config->predStructure);
+        SVT_LOG("\nSVT [config]: FrameRate / Gop Size\t\t\t\t\t\t\t: %d / %d ", config->frameRate > 1000 ? config->frameRate >> 16 : config->frameRate, config->intraPeriodLength + 1);
+
+    SVT_LOG("\nSVT [config]: HierarchicalLevels / BaseLayerSwitchMode / PredStructure\t\t\t: %d / %d / %d ", config->hierarchicalLevels, config->baseLayerSwitchMode, config->predStructure);
+
     if (config->rateControlMode == 1)
-        SVT_LOG("\nSVT [config]: RCMode / TargetBitrate / LookaheadDistance / SceneChange\t\t: VBR / %d / %d / %d ", config->targetBitRate, config->lookAheadDistance, config->sceneChangeDetection);
-    else if(config->rateControlMode == 2)
-        SVT_LOG("\nSVT [config]: RCMode / TargetQuality / LookaheadDistance / SceneChange\t\t: CRF / %d / %d / %d ", config->crf, config->lookAheadDistance, config->sceneChangeDetection);
+        SVT_LOG("\nSVT [config]: RCMode / TargetBitrate / LAD / SceneChange / QP Range [%u ~ %u]\t\t: VBR / %d / %d / %d ",
+                config->minQpAllowed, config->maxQpAllowed, config->targetBitRate, config->lookAheadDistance, config->sceneChangeDetection);
+    else if (config->rateControlMode == 2)
+        SVT_LOG("\nSVT [config]: RCMode / TargetQuality / LAD / SceneChange\t\t: CRF / %d / %d / %d ", config->crf, config->lookAheadDistance, config->sceneChangeDetection);
     else
-        SVT_LOG("\nSVT [config]: BRC Mode / QP  / LookaheadDistance / SceneChange\t\t\t: CQP / %d / %d / %d ", config->qp, config->lookAheadDistance, config->sceneChangeDetection);
+        SVT_LOG("\nSVT [config]: RCMode / QP / LAD / SceneChange\t\t\t\t: CQP / %d / %d / %d ", config->qp, config->lookAheadDistance, config->sceneChangeDetection);
 
     if (config->tune <= 1)
-        SVT_LOG("\nSVT [config]: BitRateReduction / ImproveSharpness\t\t\t\t: %d / %d ", config->bitRateReduction, config->improveSharpness);
+        SVT_LOG("\nSVT [config]: BitRateReduction / ImproveSharpness\t\t\t\t\t: %d / %d ", config->bitRateReduction, config->improveSharpness);
 
-    SVT_LOG("\nSVT [config]: tileColumnCount / tileRowCount / tileSliceMode / Constraint MV \t: %d / %d / %d / %d", config->tileColumnCount, config->tileRowCount, config->tileSliceMode, !config->unrestrictedMotionVector);
+    SVT_LOG("\nSVT [config]: tileColumnCount / tileRowCount / tileSliceMode / Constraint MV \t\t: %d / %d / %d / %d", config->tileColumnCount, config->tileRowCount, config->tileSliceMode, !config->unrestrictedMotionVector);
+    SVT_LOG("\nSVT [config]: De-blocking Filter / SAO Filter\t\t\t\t\t\t: %d / %d ", !config->disableDlfFlag, config->enableSaoFlag);
+    SVT_LOG("\nSVT [config]: HME / UseDefaultHME\t\t\t\t\t\t\t: %d / %d ", config->enableHmeFlag, config->useDefaultMeHme);
+    SVT_LOG("\nSVT [config]: MV Search Area Width / Height \t\t\t\t\t\t: %d / %d ", config->searchAreaWidth, config->searchAreaHeight);
+    SVT_LOG("\nSVT [config]: HRD / VBV MaxRate / BufSize / BufInit\t\t\t\t\t: %d / %d / %d / %ld", config->hrdFlag, config->vbvMaxrate, config->vbvBufsize, config->vbvBufInit);
+
+#ifndef NDEBUG
+    SVT_LOG("\nSVT [config]: More configurations for debugging:");
+    SVT_LOG("\nSVT [config]: Channel ID / ActiveChannelCount\t\t\t\t\t\t: %d / %d", config->channelId, config->activeChannelCount);
+    SVT_LOG("\nSVT [config]: Number of Logical Processors / Target Socket\t\t\t\t: %d / %d", config->logicalProcessors, config->targetSocket);
+    SVT_LOG("\nSVT [config]: Threads To RT / Thread Count / ASM Type\t\t\t\t\t: %d / %d / %d", config->switchThreadsToRtPriority, config->threadCount, config->asmType);
+    SVT_LOG("\nSVT [config]: Speed Control / Injector Frame Rate\t\t\t\t\t: %d / %d", config->speedControlFlag, (config->injectorFrameRate >> 16));
+    SVT_LOG("\nSVT [config]: MaxCLL / MaxFALL / Output Reconstructed YUV\t\t\t\t: %d / %d / %d", config->maxCLL, config->maxFALL, config->reconEnabled);
+    SVT_LOG("\nSVT [config]: MasterDisplayColorVolume / DolbyVisionProfile\t\t\t\t: %d / %d", config->useMasteringDisplayColorVolume, config->dolbyVisionProfile);
+    SVT_LOG("\nSVT [config]: DisplayPrimaryX[0], DisplayPrimaryX[1], DisplayPrimaryX[2]\t\t: %d / %d / %d", config->displayPrimaryX[0], config->displayPrimaryX[1], config->displayPrimaryX[2]);
+    SVT_LOG("\nSVT [config]: DisplayPrimaryY[0], DisplayPrimaryY[1], DisplayPrimaryY[2]\t\t: %d / %d / %d", config->displayPrimaryY[0], config->displayPrimaryY[1], config->displayPrimaryY[2]);
+    SVT_LOG("\nSVT [config]: WhitePointX (%d, %d) / DisplayMasteringLuminance Range [%d ~ %d]\t\t\t", config->whitePointX, config->whitePointY, config->maxDisplayMasteringLuminance, config->minDisplayMasteringLuminance);
+    SVT_LOG("\nSVT [config]: Constrained Intra / HDR / Code VPS SPS PPS / Code EOS\t\t\t: %d / %d / %d / %d", config->constrainedIntra, config->highDynamicRangeInput, config->codeVpsSpsPps, config->codeEosNal);
+    SVT_LOG("\nSVT [config]: Sending VUI / Temporal ID / VPS Timing Info\t\t\t\t: %d / %d / %d", config->videoUsabilityInfo, config->enableTemporalId, config->fpsInVps);
+    SVT_LOG("\nSVT [config]: SEI Message:");
+    SVT_LOG("\nSVT [config]: AccessUnitDelimiter / BufferingPeriod / PictureTiming\t\t\t: %d / %d / %d", config->accessUnitDelimiter, config->bufferingPeriodSEI, config->pictureTimingSEI);
+    SVT_LOG("\nSVT [config]: RegisteredUserData / UnregisteredUserData / RecoveryPoint\t\t\t: %d / %d / %d", config->registeredUserDataSeiFlag, config->unregisteredUserDataSeiFlag, config->recoveryPointSeiFlag);
+#endif
     SVT_LOG("\n------------------------------------------- ");
     SVT_LOG("\n");
 
@@ -3986,14 +4022,15 @@ static EB_ERRORTYPE  CopyInputBuffer(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
     // Copy the higher level structure
-    dst->nAllocLen  = src->nAllocLen;
-    dst->nFilledLen = src->nFilledLen;
-    dst->nFlags     = src->nFlags;
-    dst->pts        = src->pts;
-    dst->nTickCount = src->nTickCount;
-    dst->nSize      = src->nSize;
-    dst->qpValue    = src->qpValue;
-    dst->sliceType  = src->sliceType;
+    dst->nAllocLen   = src->nAllocLen;
+    dst->nFilledLen  = src->nFilledLen;
+    dst->pAppPrivate = src->pAppPrivate;
+    dst->nFlags      = src->nFlags;
+    dst->pts         = src->pts;
+    dst->nTickCount  = src->nTickCount;
+    dst->nSize       = src->nSize;
+    dst->qpValue     = src->qpValue;
+    dst->sliceType   = src->sliceType;
 
     // Copy the picture buffer
     if(src->pBuffer != NULL)
