@@ -1947,37 +1947,53 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         EB_SEND_END_OBJ(encHandlePtr->entropyCodingResultsProducerFifoPtrArray, EB_PacketizationProcessInitCount)
 
         if (encHandlePtr->memoryMapIndex){
-    // Loop through the ptr table and free all malloc'd pointers per channel
-            for (ptrIndex = (encHandlePtr->memoryMapIndex) - 1; ptrIndex >= 0; --ptrIndex){
+            // Loop through the ptr table and free all malloc'd pointers per channel
+
+            // Destroy all the kernel threads at first as the work around for race condition.
+            // Because the EbDeinitEncoder() interface could be called by encoder application
+            // at any time, when some kernel threads may keep processing. So that some of them
+            // (such as EncDecKernel) still need to access to the memory resources which would
+            // be freed (but should have been unreferenced).
+            for (ptrIndex = (encHandlePtr->memoryMapIndex) - 1; ptrIndex >= 0; --ptrIndex) {
                 memoryEntry = &encHandlePtr->memoryMap[ptrIndex];
-        switch (memoryEntry->ptrType){
-        case EB_N_PTR:
-            free(memoryEntry->ptr);
-            break;
-        case EB_A_PTR:
+                switch (memoryEntry->ptrType) {
+                case EB_THREAD:
+                    EbDestroyThread(memoryEntry->ptr);
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            for (ptrIndex = (encHandlePtr->memoryMapIndex) - 1; ptrIndex >= 0; --ptrIndex) {
+                memoryEntry = &encHandlePtr->memoryMap[ptrIndex];
+                switch (memoryEntry->ptrType) {
+                case EB_N_PTR:
+                    free(memoryEntry->ptr);
+                    //memoryEntry->ptr = EB_NULL;
+                    break;
+                case EB_A_PTR:
 #ifdef _WIN32
-            _aligned_free(memoryEntry->ptr);
+                    _aligned_free(memoryEntry->ptr);
 #else
-            free(memoryEntry->ptr);
+                    free(memoryEntry->ptr);
 #endif
-            break;
-        case EB_SEMAPHORE:
-            EbDestroySemaphore(memoryEntry->ptr);
-            break;
-        case EB_THREAD:
-            EbDestroyThread(memoryEntry->ptr);
-            break;
-        case EB_MUTEX:
-            EbDestroyMutex(memoryEntry->ptr);
-            break;
-        default:
-            return_error = EB_ErrorMax;
-            break;
-        }
-    }
+                    break;
+                case EB_SEMAPHORE:
+                    EbDestroySemaphore(memoryEntry->ptr);
+                    break;
+                case EB_MUTEX:
+                    EbDestroyMutex(memoryEntry->ptr);
+                    break;
+                default:
+                    return_error = EB_ErrorMax;
+                    break;
+                }
+            }
+
             if (encHandlePtr->memoryMap != (EbMemoryMapEntry*) NULL) {
                 free(encHandlePtr->memoryMap);
-	}
+            }
 
             //(void)(encHandlePtr);
         }
