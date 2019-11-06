@@ -1970,7 +1970,6 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
                 switch (memoryEntry->ptrType) {
                 case EB_N_PTR:
                     free(memoryEntry->ptr);
-                    //memoryEntry->ptr = EB_NULL;
                     break;
                 case EB_A_PTR:
 #ifdef _WIN32
