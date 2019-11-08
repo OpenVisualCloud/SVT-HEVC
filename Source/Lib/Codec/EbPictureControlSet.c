@@ -889,6 +889,10 @@ EB_ERRORTYPE PictureParentControlSetCtor(
 
     EB_MALLOC(EB_LCU_DEPTH_MODE*, objectPtr->lcuMdModeArray, sizeof(EB_LCU_DEPTH_MODE) * objectPtr->lcuTotalCount, EB_N_PTR);
 
+    if (initDataPtr->segmentOvEnabled) {
+        EB_MALLOC(SegmentOverride_t*, objectPtr->segmentOvArray, sizeof(SegmentOverride_t) * objectPtr->lcuTotalCount, EB_N_PTR);
+    }
+
     return return_error;
 }
 

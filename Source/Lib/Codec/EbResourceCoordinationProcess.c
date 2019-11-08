@@ -665,7 +665,9 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
         prevPictureControlSetWrapperPtr = pictureControlSetWrapperPtr;
 
-
+        if (sequenceControlSetPtr->staticConfig.segmentOvEnabled) {
+            EB_MEMCPY(pictureControlSetPtr->segmentOvArray, ebInputPtr->segmentOvPtr, sizeof(SegmentOverride_t) * sequenceControlSetPtr->lcuTotalCount);
+        }
 
 #if DEADLOCK_DEBUG
         SVT_LOG("POC %lld RESCOOR OUT \n", pictureControlSetPtr->pictureNumber);

@@ -1,0 +1,19 @@
+# Copyright(c) 2019 Intel Corporation 
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+
+#====================== Segment Override File ======================
+# One input frame have to be preceded by the number of regions
+# Each region consist of 6 numbers (X1,Y1,X2,Y2, data, mode) i.e (X1,Y1)top left and (X2,Y2)bottom right corner
+# Mode parameter have to be in range [1..5]. This allow user to specify what to override by the [data]
+#    1.   Set qp value for each region, [data] is clipped to [0:51]
+#    2.   Change qp value i.e increase or decrease by the [data] clipped to [-25:25]
+#    3.   Use this mode to modify not only quality but also blocks splitting, behaviour depends on parameter 1 and 2
+#    4.   Use this mode to modify blocks splitting i.e increase or decrease by the [data] clipped to [-25:25], negative value increase block division
+#    5.   Update first stage of quantization in range [-7;7] positive value reduce bitrate, negative increase
+3
+0 0 500 500 50 1
+500 500 1000 0 -20 4
+500 500 1000 1000 20 4
+2
+0 0 500 500 20 1
+0 0 300 200 20 1

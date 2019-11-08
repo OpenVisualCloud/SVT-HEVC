@@ -6240,9 +6240,9 @@ static void CodePPS(
 	// "cu_qp_delta_enabled_flag"
 	WriteFlagCavlc(
 		bitstreamPtr,
-        scsPtr->staticConfig.improveSharpness || scsPtr->staticConfig.bitRateReduction);// pcsPtr->useDeltaQp);
+        scsPtr->staticConfig.improveSharpness || scsPtr->staticConfig.bitRateReduction || scsPtr->staticConfig.segmentOvEnabled);// pcsPtr->useDeltaQp);
 
-	if (scsPtr->staticConfig.improveSharpness || scsPtr->staticConfig.bitRateReduction) { //pcsPtr->useDeltaQp) {
+	if (scsPtr->staticConfig.improveSharpness || scsPtr->staticConfig.bitRateReduction || scsPtr->staticConfig.segmentOvEnabled) { //pcsPtr->useDeltaQp) {
 		// "diff_cu_qp_delta_depth"
 		WriteUvlc(
 			bitstreamPtr,
@@ -7440,7 +7440,7 @@ EB_ERRORTYPE EncodeLcu(
                     cuOriginY,
                     cuSize,
                     sequenceControlSetPtr->lcuSize,
-					sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction ? EB_TRUE : EB_FALSE,
+					sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction || sequenceControlSetPtr->staticConfig.segmentOvEnabled ? EB_TRUE : EB_FALSE,
                     &entropyDeltaQpNotCoded,
                     pictureControlSetPtr->difCuDeltaQpDepth,
                     &pictureControlSetPtr->prevCodedQp[tileIdx],

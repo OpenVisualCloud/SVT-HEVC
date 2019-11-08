@@ -1446,7 +1446,7 @@ static void EncDecConfigureLcu(
 {
 
     //RC is off
-    if (sequenceControlSetPtr->staticConfig.rateControlMode == 0 && sequenceControlSetPtr->staticConfig.improveSharpness == 0 && sequenceControlSetPtr->staticConfig.bitRateReduction == 0) {
+    if (sequenceControlSetPtr->staticConfig.rateControlMode == 0 && sequenceControlSetPtr->staticConfig.improveSharpness == 0 && sequenceControlSetPtr->staticConfig.bitRateReduction == 0 && sequenceControlSetPtr->staticConfig.segmentOvEnabled == 0) {
         contextPtr->qp = pictureQp;
     }
     //RC is on
@@ -2836,6 +2836,24 @@ void* EncDecKernel(void *inputPtr)
                     lcuOriginY = (yLcuIndex+tileGroupLcuStartY) << lcuSizeLog2;
                     //printf("Process lcu (%d, %d), lcuIndex %d, segmentIndex %d\n", lcuOriginX, lcuOriginY, lcuIndex, segmentIndex);
                     
+                    if (sequenceControlSetPtr->staticConfig.segmentOvEnabled && pictureControlSetPtr->ParentPcsPtr->segmentOvArray != NULL) {
+                        SegmentOverride_t* segmentOvPtr = pictureControlSetPtr->ParentPcsPtr->segmentOvArray;
+                        if ((segmentOvPtr[lcuIndex].ovFlags & EB_DENSITY_QP_OV) && (segmentOvPtr[lcuIndex].ovFlags & EB_QP_OV_DIRECT)) {
+                            lcuPtr->qp = CLIP3(sequenceControlSetPtr->staticConfig.minQpAllowed,
+                                sequenceControlSetPtr->staticConfig.maxQpAllowed, (uint32_t)segmentOvPtr[lcuIndex].qpOv);
+                        }
+                        else if ((segmentOvPtr[lcuIndex].ovFlags & EB_DENSITY_QP_OV) && (segmentOvPtr[lcuIndex].ovFlags & EB_QP_OV_DELTA)) {
+                            lcuPtr->qp += segmentOvPtr[lcuIndex].qpOv;
+                            lcuPtr->qp = CLIP3(sequenceControlSetPtr->staticConfig.minQpAllowed,
+                                sequenceControlSetPtr->staticConfig.maxQpAllowed, lcuPtr->qp);
+                        }
+                        else if (segmentOvPtr[lcuIndex].ovFlags & EB_DENSITY_DEBLOCK_OV) {
+                            lcuPtr->qp += segmentOvPtr[lcuIndex].deblockOv;
+                            lcuPtr->qp = CLIP3(sequenceControlSetPtr->staticConfig.minQpAllowed,
+                                sequenceControlSetPtr->staticConfig.maxQpAllowed, lcuPtr->qp);
+                        }
+                    }
+
                     // Set current LCU tile Index
                     contextPtr->mdContext->tileIndex = lcuPtr->lcuEdgeInfoPtr->tileIndexInRaster;
                     contextPtr->encDecTileIndex = lcuPtr->lcuEdgeInfoPtr->tileIndexInRaster;

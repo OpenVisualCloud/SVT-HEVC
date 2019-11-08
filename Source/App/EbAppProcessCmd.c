@@ -20,7 +20,8 @@
 /***************************************
  * Macros
  ***************************************/
-
+#define MAX(x, y)                       ((x)>(y)?(x):(y))
+#define MIN(x, y)                       ((x)<(y)?(x):(y))
 #define CLIP3(MinVal, MaxVal, a)        (((a)<(MinVal)) ? (MinVal) : (((a)>(MaxVal)) ? (MaxVal) :(a)))
 #define FUTURE_WINDOW_WIDTH                 4
 #define SIZE_OF_ONE_FRAME_IN_BYTES(width, height, csp, is16bit) \
@@ -969,6 +970,107 @@ void SendQpOnTheFly(
     return;
 }
 
+void fillOneSegment(
+    EbConfig_t                *config,
+    EB_BUFFERHEADERTYPE       *headerPtr)
+{
+    uint32_t pictureWidthInLcu = (config->sourceWidth + EB_SEGMENT_BLOCK_SIZE - 1) / EB_SEGMENT_BLOCK_SIZE;
+    uint32_t pictureHeightInLcu = (config->sourceHeight + EB_SEGMENT_BLOCK_SIZE - 1) / EB_SEGMENT_BLOCK_SIZE;
+
+    uint32_t x1, y1, x2, y2, mode;
+    int32_t value;
+    int32_t result = 0;
+
+#if __linux
+    result = fscanf(config->segmentOvFile, "%u %u %u %u %d %u\n", &x1, &y1, &x2, &y2, &value, &mode);
+#else
+    result = fscanf_s(config->segmentOvFile, "%u %u %u %u %d %u\n", &x1, &y1, &x2, &y2, &value, &mode);
+#endif
+
+    if (result != 6) {
+        printf("\nSVT [Warning]: SegmentOvFile is corrupted, cannot load segment");
+        return;
+    }
+
+    uint32_t widthMinInLCU = MIN(x1, x2) / EB_SEGMENT_BLOCK_SIZE;
+    uint32_t widthMaxInLCU = MIN((MAX(x1, x2) + EB_SEGMENT_BLOCK_SIZE - 1) / EB_SEGMENT_BLOCK_SIZE,pictureWidthInLcu);
+
+    uint32_t heightMinInLCU = MIN(y1, y2) / EB_SEGMENT_BLOCK_SIZE;
+    uint32_t heightMaxInLCU = MIN((MAX(y1, y2) + EB_SEGMENT_BLOCK_SIZE - 1) / EB_SEGMENT_BLOCK_SIZE,pictureHeightInLcu);
+
+    for (uint32_t i = heightMinInLCU; i < heightMaxInLCU; ++i) {
+        for (uint32_t j = widthMinInLCU; j < widthMaxInLCU; ++j) {
+            switch (mode) {
+            case(1): //EB_QP_OV_DIRECT
+                headerPtr->segmentOvPtr[i * pictureWidthInLcu + j].ovFlags |= EB_QP_OV_DIRECT;
+                headerPtr->segmentOvPtr[i * pictureWidthInLcu + j].qpOv = CLIP3(0, 51, value);
+                break;
+            case(2): //EB_QP_OV_DELTA
+                headerPtr->segmentOvPtr[i * pictureWidthInLcu + j].ovFlags |= EB_QP_OV_DELTA;
+                headerPtr->segmentOvPtr[i * pictureWidthInLcu + j].qpOv = CLIP3(-25, 25, value);
+                break;
+            case(3): //EB_DENSITY_QP_OV
+                headerPtr->segmentOvPtr[i * pictureWidthInLcu + j].ovFlags |= EB_DENSITY_QP_OV;
+                break;
+            case(4): //EB_DENSITY_DEBLOCK_OV
+                headerPtr->segmentOvPtr[i * pictureWidthInLcu + j].ovFlags |= EB_DENSITY_DEBLOCK_OV;
+                headerPtr->segmentOvPtr[i * pictureWidthInLcu + j].deblockOv = CLIP3(-25, 25, value);
+                break;
+            case(5): //EB_TU_FILTER_OV
+                headerPtr->segmentOvPtr[i * pictureWidthInLcu + j].ovFlags |= EB_TU_FILTER_OV;
+                headerPtr->segmentOvPtr[i * pictureWidthInLcu + j].filterOv = CLIP3(-7, 7, value);
+                break;
+            default:
+                printf("\nSVT [Warning]: Unrecognized mode for SegmentOv");
+                return;
+            }
+        }
+    }
+}
+
+void fillSegmentOv(
+    EbConfig_t                *config,
+    EB_BUFFERHEADERTYPE       *headerPtr)
+{
+    uint32_t pictureWidthInLcu = (config->sourceWidth + EB_SEGMENT_BLOCK_SIZE - 1) / EB_SEGMENT_BLOCK_SIZE;
+    uint32_t pictureHeightInLcu = (config->sourceHeight + EB_SEGMENT_BLOCK_SIZE - 1) / EB_SEGMENT_BLOCK_SIZE;
+    uint32_t lcuTotalCount = pictureWidthInLcu * pictureHeightInLcu;
+
+    memset(headerPtr->segmentOvPtr, 0, sizeof(SegmentOverride_t) * lcuTotalCount);
+    //read values from file
+    uint32_t segmentNo = 0;
+    int32_t result = 0;
+    int32_t invalidFile = 0;
+
+    do {
+        //read number of segments
+#if __linux
+        result = fscanf(config->segmentOvFile, "%d", &segmentNo);
+#else
+        result = fscanf_s(config->segmentOvFile, "%u", &segmentNo);
+#endif
+        if (result == 1) {
+            for (uint32_t segment = 0; segment < segmentNo; segment++) {
+                fillOneSegment(config, headerPtr);
+            }
+        }
+        if (result == 0) //line is corrupted skip it
+#if __linux
+        result = fscanf(config->segmentOvFile, "%*[^\n]\n");
+#else
+        result = fscanf_s(config->segmentOvFile, "%*[^\n]\n");
+#endif
+        if (result == -1) {//eof
+            fseek(config->segmentOvFile, 0, SEEK_SET);
+            invalidFile++;
+            if (invalidFile > 1) {
+                printf("\nSVT [Warning]: segmentOvFile did not contain any valid segments");
+            }
+        }
+    } while (result <= 0 && invalidFile < 2);
+
+}
+
 void SendNaluOnTheFly(
     EbConfig_t                  *config,
     EB_BUFFERHEADERTYPE        *headerPtr)
@@ -1177,6 +1279,11 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(EbConfig_t *config, EbAppContext_t *appC
                 printf("\n Warning : Dolby vision RPU not parsed for POC %" PRId64 "\t", headerPtr->pts);
             }
         }
+
+        if (config->segmentOvEnabled && config->segmentOvFile)
+            fillSegmentOv(
+                config,
+                headerPtr);
 
         // Send the picture
         EbH265EncSendPicture(componentHandle, headerPtr);

@@ -602,6 +602,8 @@ typedef struct PictureParentControlSet_s
     EB_BOOL                               enableHmeLevel1Flag;
     EB_BOOL                               enableHmeLevel2Flag;
 	EB_BOOL                               disableVarianceFlag;
+
+    SegmentOverride_t                    *segmentOvArray;
 } PictureParentControlSet_t;
 
 
@@ -632,6 +634,8 @@ typedef struct PictureControlSetInitData_s
 
     EB_U16                           tileRowCount;
     EB_U16                           tileColumnCount;
+
+    EB_BOOL                          segmentOvEnabled;
 } PictureControlSetInitData_t;
 
 /**************************************
