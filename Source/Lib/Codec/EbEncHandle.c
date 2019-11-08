@@ -3360,7 +3360,7 @@ static void PrintLibParams(
         SVT_LOG("\nSVT [config]: MainEXT Profile\t");
 
     if (config->tier != 0 && config->level !=0)
-        SVT_LOG("Tier %d\tLevel %.1f\t", config->tier, (float)(config->level / 10));
+        SVT_LOG("Tier %d\tLevel %.1f\t", config->tier, (float)(config->level) / 10);
     else {
         if (config->tier == 0 )
             SVT_LOG("Tier (auto)\t");
@@ -3370,7 +3370,7 @@ static void PrintLibParams(
         if (config->level == 0 )
             SVT_LOG("Level (auto)\t");
         else
-            SVT_LOG("Level %.1f\t", (float)(config->level / 10));
+            SVT_LOG("Level %.1f\t", (float)(config->level) / 10);
 
 
     }
