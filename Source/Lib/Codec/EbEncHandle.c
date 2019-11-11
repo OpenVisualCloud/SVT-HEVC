@@ -135,7 +135,7 @@ typedef void(*constraint_handler_t) (const char * /* msg */,
 
 static constraint_handler_t str_handler = NULL;
 
-static void ignore_handler_s(const char *msg, void *ptr, errno_t error)
+static void eb_ignore_handler_s(const char *msg, void *ptr, errno_t error)
 {
     (void)msg;
     (void)ptr;
@@ -154,7 +154,7 @@ invoke_safe_str_constraint_handler(const char *msg,
        str_handler(msg, ptr, error);
     }
     else {
-        ignore_handler_s(msg, ptr, error);
+        eb_ignore_handler_s(msg, ptr, error);
     }
 }
 
