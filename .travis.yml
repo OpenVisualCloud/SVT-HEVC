@@ -60,7 +60,7 @@ script:
     cmake $TRAVIS_BUILD_DIR -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=$build_type ${CMAKE_EFLAGS[@]}
     cmake -j $(if [ $TRAVIS_OS_NAME = osx ]; then sysctl -n hw.ncpu; else nproc; fi) --build . &&
     sudo cmake --build . --target install && cd $TRAVIS_BUILD_DIR
-  - travis_wait SvtHevcEncApp -encMode 9 -i akiyo_cif.y4m -b test1.h265
+  - SvtHevcEncApp -encMode 9 -i akiyo_cif.y4m -b test1.h265 $(if [ "$(uname -s)" == "Darwin" ]; then echo "-asm 0"; fi)
 before_cache:
   - "sudo chown -R travis: $HOME/.ccache"
 matrix:
