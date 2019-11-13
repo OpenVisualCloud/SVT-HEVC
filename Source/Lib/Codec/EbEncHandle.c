@@ -2143,12 +2143,14 @@ void LoadDefaultBufferConfigurationSettings(
     unsigned int totalThreadCount;
     unsigned int threadUnit;
 
+#if defined(_WIN32) || defined(__linux__)
     if (sequenceControlSetPtr->staticConfig.targetSocket != -1)
         coreCount /= numGroups;
 
     if (sequenceControlSetPtr->staticConfig.logicalProcessors != 0)
         coreCount = sequenceControlSetPtr->staticConfig.logicalProcessors < coreCount ?
             sequenceControlSetPtr->staticConfig.logicalProcessors: coreCount;
+#endif
 
 #ifdef _WIN32
     //Handle special case on Windows
