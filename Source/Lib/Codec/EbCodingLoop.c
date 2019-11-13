@@ -3966,7 +3966,7 @@ EB_EXTERN void EncodePass(
                             tuSizeChroma = (colorFormat == EB_YUV444 ? 32: 16);
                         }
 
-                        //TU LOOP for MV mode + Luma CBF decision.
+                        //TU LOOP for MV mode + Luma CBF decision. 
                         contextPtr->forceCbfFlag = (contextPtr->skipQpmFlag) ?
                             EB_FALSE :
                             lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag && ((tuOriginX & 63) == 0) && (tuOriginY == lcuOriginY);
@@ -3978,7 +3978,7 @@ EB_EXTERN void EncodePass(
                                 lcuStatPtr->stationaryEdgeOverTimeFlag,
                                 pictureControlSetPtr->temporalLayerIndex > 0 ? lcuStatPtr->pmStationaryEdgeOverTimeFlag : lcuStatPtr->stationaryEdgeOverTimeFlag);
 
-                        // Set Fast El coef shaping method
+                        // Set Fast El coef shaping method 
                         contextPtr->transCoeffShapeLuma     = DEFAULT_SHAPE;
                         contextPtr->transCoeffShapeChroma   = DEFAULT_SHAPE;
 
@@ -4167,7 +4167,7 @@ EB_EXTERN void EncodePass(
                                 lcuStatPtr->stationaryEdgeOverTimeFlag,
                                 pictureControlSetPtr->temporalLayerIndex > 0 ? lcuStatPtr->pmStationaryEdgeOverTimeFlag : lcuStatPtr->stationaryEdgeOverTimeFlag);
 
-                        // Set Fast El coef shaping method
+                        // Set Fast El coef shaping method 
                         contextPtr->transCoeffShapeLuma     = DEFAULT_SHAPE;
                         contextPtr->transCoeffShapeChroma   = DEFAULT_SHAPE;
 
