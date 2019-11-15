@@ -16,7 +16,7 @@ EB_EXTERN EB_ALIGN(16) const EB_S16 lumaIFCoeff16_SSE2_INTRIN[]= {
     -10,  4, -10,  4, -10,  4, -10,  4,
 };
 
-EB_EXTERN EB_ALIGN(16) const EB_S16 chromaFilterCoeffSR1[8][4] =
+EB_EXTERN EB_ALIGN(16) const EB_S16 EbHevcchromaFilterCoeffSR1[8][4] =
 {
   { 0, 32,  0,  0},
   {-1, 29,  5, -1},
@@ -28,7 +28,7 @@ EB_EXTERN EB_ALIGN(16) const EB_S16 chromaFilterCoeffSR1[8][4] =
   {-1,  5, 29, -1},
 };
 
-//extern const EB_S16 chromaFilterCoeff[8][4];
+//extern const EB_S16 EbHevcchromaFilterCoeff[8][4];
 
 void PictureCopyKernelOutRaw16bit_SSE2_INTRIN(
   EB_U16               *refPic,
@@ -36,12 +36,12 @@ void PictureCopyKernelOutRaw16bit_SSE2_INTRIN(
   EB_S16               *dst,
   EB_U32                puWidth,
   EB_U32                puHeight)
-{ 
+{
   EB_U32 rowCount, colCount;
   __m128i a0, a1, a2, a3;
 
   //PrefetchBlock(refPic, srcStride, puWidth, puHeight);
-  
+
   if (puWidth & 2) {
     EB_U16 *ptr = refPic;
     rowCount = puHeight;
@@ -56,20 +56,20 @@ void PictureCopyKernelOutRaw16bit_SSE2_INTRIN(
       a0 = _mm_slli_epi16(a0, BI_SHIFT_10BIT);
       a0 = _mm_sub_epi16(a0, _mm_set1_epi16(BI_OFFSET_10BIT));
       _mm_storeu_si128((__m128i *)dst, a0);
-      
+
       dst += 8;
       rowCount -= 4;
     }
     while (rowCount != 0);
-    
+
     puWidth -= 2;
     if (puWidth == 0) {
       return;
     }
-    
+
     refPic += 2;
   }
-  
+
   if (puWidth & 4) {
     EB_U16 *ptr = refPic;
     rowCount = puHeight;
@@ -81,20 +81,20 @@ void PictureCopyKernelOutRaw16bit_SSE2_INTRIN(
       a0 = _mm_slli_epi16(a0, BI_SHIFT_10BIT);
       a0 = _mm_sub_epi16(a0, _mm_set1_epi16(BI_OFFSET_10BIT));
       _mm_storeu_si128((__m128i *)dst, a0);
-      
+
       dst += 8;
       rowCount -= 2;
     }
     while (rowCount != 0);
-    
+
     puWidth -= 4;
     if (puWidth == 0) {
       return;
     }
-    
+
     refPic += 4;
   }
-  
+
   colCount = puWidth;
   do {
     __m128i a0;
@@ -108,7 +108,7 @@ void PictureCopyKernelOutRaw16bit_SSE2_INTRIN(
       dst += 8;
     }
     while (--rowCount != 0);
-    
+
     colCount -= 8;
     refPic += 8;
   }
@@ -1982,8 +1982,8 @@ EB_U16 *refPic, EB_U32 srcStride, EB_U16 *dst, EB_U32 dstStride, EB_U32 puWidth,
   refPic--;
   //PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
-  c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeffSR1[fracPosx]);
-  c0 = _mm_unpacklo_epi16(c0, c0);  
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeffSR1[fracPosx]);
+  c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
   c2 = _mm_shuffle_epi32(c0, 0xaa);
   c1 = _mm_shuffle_epi32(c0, 0x55);
@@ -2111,8 +2111,8 @@ EB_U16 *refPic, EB_U32 srcStride, EB_U16 *dst, EB_U32 dstStride, EB_U32 puWidth,
   (void)firstPassIFDst;
   (void)fracPosx;
 
-  c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeffSR1[fracPosy]);
-  c0 = _mm_unpacklo_epi16(c0, c0);  
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeffSR1[fracPosy]);
+  c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
   c2 = _mm_shuffle_epi32(c0, 0xaa);
   c1 = _mm_shuffle_epi32(c0, 0x55);
@@ -2248,8 +2248,8 @@ void ChromaInterpolationFilterOneDOutRaw16bitHorizontal_SSE2_INTRIN(
   refPic--;
   //PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
-  c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeffSR1[fracPosx]);
-  c0 = _mm_unpacklo_epi16(c0, c0);  
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeffSR1[fracPosx]);
+  c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
   c2 = _mm_shuffle_epi32(c0, 0xaa);
   c1 = _mm_shuffle_epi32(c0, 0x55);
@@ -2374,8 +2374,8 @@ void ChromaInterpolationFilterOneDOutRaw16bitVertical_SSE2_INTRIN(
   (void)firstPassIFDst;
   (void)fracPosx;
 
-  c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeffSR1[fracPosy]);
-  c0 = _mm_unpacklo_epi16(c0, c0);  
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeffSR1[fracPosy]);
+  c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
   c2 = _mm_shuffle_epi32(c0, 0xaa);
   c1 = _mm_shuffle_epi32(c0, 0x55);
@@ -2494,7 +2494,7 @@ void ChromaInterpolationFilterTwoDInRaw16bit_SSE2_INTRIN(
 
   //PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
-  c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeffSR1[fracPosy]);
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeffSR1[fracPosy]);
   c1 = _mm_shuffle_epi32(c0, 0x55);
   c0 = _mm_shuffle_epi32(c0, 0);
 
@@ -2622,7 +2622,7 @@ void ChromaInterpolationFilterTwoDInRawOutRaw_SSE2_INTRIN(
 
   //PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
-  c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeffSR1[fracPosy]);
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeffSR1[fracPosy]);
   c1 = _mm_shuffle_epi32(c0, 0x55);
   c0 = _mm_shuffle_epi32(c0, 0);
 
@@ -2728,7 +2728,7 @@ void BiPredClipping16bit_SSE2_INTRIN(
 {
   EB_U32 rowCount, colCount;
   __m128i a0, a1;
-  
+
   if (puWidth & 2) {
     EB_U16 *qtr = dst;
     rowCount = puHeight;
@@ -2737,12 +2737,12 @@ void BiPredClipping16bit_SSE2_INTRIN(
       a1 = _mm_load_si128((__m128i *)list1Src);
       list0Src += 8;
       list1Src += 8;
-      
+
       a0 = _mm_adds_epi16(a0, a1);
       a0 = _mm_adds_epi16(a0, _mm_set1_epi16(BI_AVG_OFFSET_10BIT));
       a0 = _mm_srai_epi16(a0, BI_AVG_SHIFT_10BIT);
       a0 = _mm_max_epi16(a0, _mm_setzero_si128());
-      
+
       *(EB_U32 *)qtr = _mm_cvtsi128_si32(a0); a0 = _mm_srli_si128(a0, 4); qtr += dstStride;
       *(EB_U32 *)qtr = _mm_cvtsi128_si32(a0); a0 = _mm_srli_si128(a0, 4); qtr += dstStride;
       *(EB_U32 *)qtr = _mm_cvtsi128_si32(a0); a0 = _mm_srli_si128(a0, 4); qtr += dstStride;
@@ -2750,14 +2750,14 @@ void BiPredClipping16bit_SSE2_INTRIN(
       rowCount -= 4;
     }
     while (rowCount != 0);
-    
+
     puWidth -= 2;
     if (puWidth == 0) {
       return;
-    }    
+    }
     dst += 2;
   }
-  
+
   if (puWidth & 4) {
     EB_U16 *qtr = dst;
     rowCount = puHeight;
@@ -2766,7 +2766,7 @@ void BiPredClipping16bit_SSE2_INTRIN(
       a1 = _mm_load_si128((__m128i *)list1Src);
       list0Src += 8;
       list1Src += 8;
-      
+
       a0 = _mm_adds_epi16(a0, a1);
       a0 = _mm_adds_epi16(a0, _mm_set1_epi16(BI_AVG_OFFSET_10BIT));
       a0 = _mm_srai_epi16(a0, BI_AVG_SHIFT_10BIT);
@@ -2777,14 +2777,14 @@ void BiPredClipping16bit_SSE2_INTRIN(
       rowCount -= 2;
     }
     while (rowCount != 0);
-    
+
     puWidth -= 4;
     if (puWidth == 0) {
       return;
-    }    
+    }
     dst += 4;
   }
-  
+
   colCount = puWidth;
   do {
     __m128i a2, a3;
@@ -2812,11 +2812,11 @@ void BiPredClipping16bit_SSE2_INTRIN(
       _mm_storeu_si128((__m128i *)qtr,             a0);
       _mm_storeu_si128((__m128i *)(qtr+dstStride), a2);
       qtr += 2*dstStride;
-      
+
       rowCount -= 2;
     }
     while (rowCount != 0);
-    
+
     colCount -= 8;
     dst += 8;
   }

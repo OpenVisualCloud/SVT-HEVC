@@ -1,7 +1,7 @@
-; 
+;
 ; Copyright(c) 2018 Intel Corporation
 ; SPDX - License - Identifier: BSD - 2 - Clause - Patent
-; 
+;
 
 %include "x64inc.asm"
 %include "x64Macro.asm"
@@ -520,7 +520,7 @@ Label_PictureAverageKernel_SSE2_WIDTH48:
 	pavgb           xmm0,			xmm6
 	movdqu          xmm6,			[src1+16]
 	pavgb           xmm1,			xmm6
-	movdqu          xmm6,			[src1+32]			
+	movdqu          xmm6,			[src1+32]
 	pavgb           xmm2,			xmm6
 	movdqu          xmm6,			[src1+src1Stride]
 	pavgb           xmm3,			xmm6
@@ -620,7 +620,6 @@ Label_PictureAverageKernel_SSE2_WIDTH16:
     ret
 
 ; ----------------------------------------------------------------------------------------
-	cglobal Log2f_SSE2
+	cglobal EbHevcLog2f_SSE2
 	bsr rax, r0
 	ret
-

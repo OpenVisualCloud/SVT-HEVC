@@ -23,7 +23,7 @@
 __attribute__((visibility("hidden")))
 #endif
 #endif
-const EB_S16 lumaFilterCoeff[4][8] =
+const EB_S16 EbHevclumaFilterCoeff[4][8] =
 {
   { 0, 0,  0, 64,  0,  0, 0,  0},
   {-1, 4,-10, 58, 17, -5, 1,  0},
@@ -36,7 +36,7 @@ const EB_S16 lumaFilterCoeff[4][8] =
 __attribute__((visibility("hidden")))
 #endif
 #endif
-const EB_S16 lumaFilterCoeff7[4][8] =
+const EB_S16 EbHevclumaFilterCoeff7[4][8] =
 {
   { 0, 0,  0, 64,  0,  0, 0,  0},
   {-1, 4,-10, 58, 17, -5, 1,  0},
@@ -49,7 +49,7 @@ const EB_S16 lumaFilterCoeff7[4][8] =
 __attribute__((visibility("hidden")))
 #endif
 #endif
-const EB_S16 chromaFilterCoeff[8][4] =
+const EB_S16 EbHevcchromaFilterCoeff[8][4] =
 {
   { 0, 64,  0,  0},
   {-2, 58, 10, -2},
@@ -231,7 +231,7 @@ void LumaInterpolationCopy_SSSE3(
   PictureCopyKernel_SSSE3(refPic, srcStride, dst, dstStride, puWidth, puHeight, 1);
 }
 
-void LumaInterpolationFilterTwoDInRaw7_SSSE3(EB_S16 *firstPassIFDst, EB_BYTE dst, EB_U32 dstStride, EB_U32 puWidth, EB_U32 puHeight, EB_U32 fracPosy)
+void EbHevcLumaInterpolationFilterTwoDInRaw7_SSSE3(EB_S16 *firstPassIFDst, EB_BYTE dst, EB_U32 dstStride, EB_U32 puWidth, EB_U32 puHeight, EB_U32 fracPosy)
 {
   EB_S32 rowCount, colCount;
   __m128i c0, c1, c2;
@@ -241,7 +241,7 @@ void LumaInterpolationFilterTwoDInRaw7_SSSE3(EB_S16 *firstPassIFDst, EB_BYTE dst
 
   EB_BYTE qtr;
 
-  c0 = _mm_loadu_si128((__m128i *)lumaFilterCoeff7[fracPosy]);
+  c0 = _mm_loadu_si128((__m128i *)EbHevclumaFilterCoeff7[fracPosy]);
   c2 = _mm_shuffle_epi32(c0, 0xaa);
   c1 = _mm_shuffle_epi32(c0, 0x55);
   c0 = _mm_shuffle_epi32(c0, 0x00);
@@ -350,13 +350,13 @@ void LumaInterpolationFilterTwoDInRaw7_SSSE3(EB_S16 *firstPassIFDst, EB_BYTE dst
   while (colCount > 0);
 }
 
-void LumaInterpolationFilterTwoDInRawOutRaw7_SSSE3(EB_S16 *firstPassIFDst, EB_S16 *dst, EB_U32 puWidth, EB_U32 puHeight, EB_U32 fracPosy)
+void EbHevcLumaInterpolationFilterTwoDInRawOutRaw7_SSSE3(EB_S16 *firstPassIFDst, EB_S16 *dst, EB_U32 puWidth, EB_U32 puHeight, EB_U32 fracPosy)
 {
   EB_S32 rowCount, colCount;
 
   __m128i a0, a1, a2, a3, a4, a5, a6;
   __m128i c0, c1, c2;
-  c0 = _mm_loadu_si128((__m128i *)lumaFilterCoeff7[fracPosy]);
+  c0 = _mm_loadu_si128((__m128i *)EbHevclumaFilterCoeff7[fracPosy]);
   c2 = _mm_shuffle_epi32(c0, 0xaa);
   c1 = _mm_shuffle_epi32(c0, 0x55);
   c0 = _mm_shuffle_epi32(c0, 0x00);
@@ -455,7 +455,7 @@ void LumaInterpolationFilterTwoDInRawOutRaw7_SSSE3(EB_S16 *firstPassIFDst, EB_S1
   while (colCount > 0);
 }
 
-void LumaInterpolationFilterTwoDInRawM_SSSE3(EB_S16 *firstPassIFDst, EB_BYTE dst, EB_U32 dstStride, EB_U32 puWidth, EB_U32 puHeight)
+void EbHevcLumaInterpolationFilterTwoDInRawM_SSSE3(EB_S16 *firstPassIFDst, EB_BYTE dst, EB_U32 dstStride, EB_U32 puWidth, EB_U32 puHeight)
 {
   EB_S32 rowCount, colCount;
 
@@ -465,7 +465,7 @@ void LumaInterpolationFilterTwoDInRawM_SSSE3(EB_S16 *firstPassIFDst, EB_BYTE dst
 
   EB_BYTE qtr;
 
-  c0 = _mm_loadu_si128((__m128i *)lumaFilterCoeff7[2]);
+  c0 = _mm_loadu_si128((__m128i *)EbHevclumaFilterCoeff7[2]);
   c1 = _mm_shuffle_epi32(c0, 0x55);
   c0 = _mm_shuffle_epi32(c0, 0x00);
 
@@ -566,13 +566,13 @@ void LumaInterpolationFilterTwoDInRawM_SSSE3(EB_S16 *firstPassIFDst, EB_BYTE dst
   while (colCount > 0);
 }
 
-void LumaInterpolationFilterTwoDInRawOutRawM_SSSE3(EB_S16 *firstPassIFDst, EB_S16 *dst, EB_U32 puWidth, EB_U32 puHeight)
+void EbHevcLumaInterpolationFilterTwoDInRawOutRawM_SSSE3(EB_S16 *firstPassIFDst, EB_S16 *dst, EB_U32 puWidth, EB_U32 puHeight)
 {
   EB_S32 rowCount, colCount;
 
   __m128i a0, a1, a2, a3, a4, a5, a6, a7;
   __m128i c0, c1;
-  c0 = _mm_loadu_si128((__m128i *)lumaFilterCoeff7[2]);
+  c0 = _mm_loadu_si128((__m128i *)EbHevclumaFilterCoeff7[2]);
   c1 = _mm_shuffle_epi32(c0, 0x55);
   c0 = _mm_shuffle_epi32(c0, 0x00);
 
@@ -662,7 +662,7 @@ void LumaInterpolationFilterTwoDInRawOutRawM_SSSE3(EB_S16 *firstPassIFDst, EB_S1
   while (colCount > 0);
 }
 
-void PictureCopyKernelOutRaw_SSSE3(
+void EbHevcPictureCopyKernelOutRaw_SSSE3(
 	EB_BYTE                  refPic,
 	EB_U32                   srcStride,
 	EB_S16                  *dst,
@@ -776,7 +776,7 @@ void ChromaInterpolationCopyOutRaw_SSSE3(
   (void)firstPassIFDst;
   (void)fracPosx;
   (void)fracPosy;
-  PictureCopyKernelOutRaw_SSSE3(refPic, srcStride, dst, puWidth, puHeight, 0);
+  EbHevcPictureCopyKernelOutRaw_SSSE3(refPic, srcStride, dst, puWidth, puHeight, 0);
 }
 void ChromaInterpolationFilterTwoDInRaw_SSSE3(EB_S16 *firstPassIFDst, EB_BYTE dst, EB_U32 dstStride, EB_U32 puWidth, EB_U32 puHeight, EB_U32 fracPosy)
 {
@@ -787,7 +787,7 @@ void ChromaInterpolationFilterTwoDInRaw_SSSE3(EB_S16 *firstPassIFDst, EB_BYTE ds
   __m128i a0,a1,a2,a3,b0, b1, b2, b3;
   __m128i sum0, sum1;
 
-  c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeff[fracPosy]);
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeff[fracPosy]);
   c1 = _mm_shuffle_epi32(c0, 0x55);
   c0 = _mm_shuffle_epi32(c0, 0);
   offset = _mm_set1_epi32(1 << 11);
@@ -955,7 +955,7 @@ void ChromaInterpolationFilterOneDHorizontal_SSSE3(
 
   PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
-  c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeff[fracPosx]);
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeff[fracPosx]);
   c0 = _mm_packs_epi16(c0, c0);
   c0 = _mm_unpacklo_epi16(c0, c0);
   c2 = _mm_shuffle_epi32(c0, 0x55);
@@ -1099,7 +1099,7 @@ void ChromaInterpolationFilterOneDOutRawHorizontal_SSSE3(
   refPic--;
   PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
-  c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeff[fracPosx]);
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeff[fracPosx]);
   c0 = _mm_packs_epi16(c0, c0);
   c0 = _mm_unpacklo_epi16(c0, c0);
   c2 = _mm_shuffle_epi32(c0, 0x55);
@@ -1228,7 +1228,7 @@ void ChromaInterpolationFilterOneDVertical_SSSE3(
   PrefetchBlock(refPic, srcStride, puWidth, puHeight+3);
 
 
-  c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeff[fracPosy]);
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeff[fracPosy]);
   c0 = _mm_packs_epi16(c0, c0);
   c0 = _mm_unpacklo_epi16(c0, c0);
   c2 = _mm_shuffle_epi32(c0, 0x55);
@@ -1381,7 +1381,7 @@ void ChromaInterpolationFilterOneDOutRawVertical_SSSE3(
   refPic -= srcStride;
   PrefetchBlock(refPic, srcStride, puWidth, puHeight+3);
 
-  c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeff[fracPosy]);
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeff[fracPosy]);
   c0 = _mm_packs_epi16(c0, c0);
   c0 = _mm_unpacklo_epi16(c0, c0);
   c2 = _mm_shuffle_epi32(c0, 0x55);
@@ -1511,7 +1511,7 @@ void ChromaInterpolationFilterTwoDInRawOutRaw_SSSE3(EB_S16 *firstPassIFDst, EB_S
   EB_S32 rowCount, colCount;
   __m128i c0, c1; // coeffs
 
-  c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeff[fracPosy]);
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeff[fracPosy]);
   c1 = _mm_shuffle_epi32(c0, 0x55);
   c0 = _mm_shuffle_epi32(c0, 0);
 
@@ -1671,7 +1671,7 @@ void LumaInterpolationFilterOneDHorizontal_SSSE3(
 
   PrefetchBlock(refPic, srcStride, (puWidth == 4) ? 16 : puWidth+8, (puWidth == 4) ? ((puHeight+1)&~1) : puHeight);
 
-  c0 = _mm_loadu_si128((__m128i *)lumaFilterCoeff[fracPosx]);
+  c0 = _mm_loadu_si128((__m128i *)EbHevclumaFilterCoeff[fracPosx]);
   c0 = _mm_packs_epi16(c0, c0);
   c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
@@ -1769,7 +1769,7 @@ void LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(
   PrefetchBlock(refPic, srcStride, (puWidth == 4) ? 16 : puWidth+8, (puWidth == 4) ? ((puHeight+1)&~1) : puHeight);
 
 
-  c0 = _mm_loadu_si128((__m128i *)lumaFilterCoeff[fracPosx]);
+  c0 = _mm_loadu_si128((__m128i *)EbHevclumaFilterCoeff[fracPosx]);
   c0 = _mm_packs_epi16(c0, c0);
   c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
@@ -1859,7 +1859,7 @@ void LumaInterpolationFilterOneDOutRawHorizontalOut_SSSE3(
   PrefetchBlock(refPic, srcStride, (puWidth == 4) ? 16 : puWidth+8, (puWidth == 4) ? ((puHeight+1)&~1) : puHeight);
 
 
-  c0 = _mm_loadu_si128((__m128i *)lumaFilterCoeff[fracPosx]);
+  c0 = _mm_loadu_si128((__m128i *)EbHevclumaFilterCoeff[fracPosx]);
   c0 = _mm_packs_epi16(c0, c0);
   c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
@@ -1950,7 +1950,7 @@ void LumaInterpolationFilterOneDVertical_SSSE3(
 
   PrefetchBlock(refPic, srcStride, puWidth, puHeight+7);
 
-  c0 = _mm_loadu_si128((__m128i *)lumaFilterCoeff[fracPosx]);
+  c0 = _mm_loadu_si128((__m128i *)EbHevclumaFilterCoeff[fracPosx]);
   c0 = _mm_packs_epi16(c0, c0); // Convert 16-bit coefficients to 8 bits
   c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
@@ -2099,7 +2099,7 @@ void LumaInterpolationFilterOneDOutRawVertical_SSSE3(
 
   PrefetchBlock(refPic, srcStride, puWidth, puHeight+7);
 
-  c0 = _mm_loadu_si128((__m128i *)lumaFilterCoeff[fracPosx]);
+  c0 = _mm_loadu_si128((__m128i *)EbHevclumaFilterCoeff[fracPosx]);
   c0 = _mm_packs_epi16(c0, c0); // Convert 16-bit coefficients to 8 bits
   c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
@@ -2314,7 +2314,7 @@ void LumaInterpolationFilterPose_SSSE3(
                                         EB_S16               *firstPassIFDst)
 {
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic-3*srcStride, srcStride, firstPassIFDst, puWidth, puHeight+6, 1);
-  LumaInterpolationFilterTwoDInRaw7_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight, 1);
+  EbHevcLumaInterpolationFilterTwoDInRaw7_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight, 1);
 }
 
 
@@ -2330,7 +2330,7 @@ void LumaInterpolationFilterPosf_SSSE3(
   EB_U32 puHeight1 = puHeight + 6;
   EB_BYTE refPic1 = refPic - 3 * srcStride;
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic1, srcStride, firstPassIFDst, puWidth, puHeight1, 2);
-  LumaInterpolationFilterTwoDInRaw7_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight, 1);
+  EbHevcLumaInterpolationFilterTwoDInRaw7_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight, 1);
 }
 
 void LumaInterpolationFilterPosg_SSSE3(
@@ -2343,7 +2343,7 @@ void LumaInterpolationFilterPosg_SSSE3(
                                         EB_S16               *firstPassIFDst)
 {
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic-3*srcStride, srcStride, firstPassIFDst, puWidth, puHeight+6, 3);
-  LumaInterpolationFilterTwoDInRaw7_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight, 1);
+  EbHevcLumaInterpolationFilterTwoDInRaw7_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight, 1);
 }
 
 void LumaInterpolationFilterPosi_SSSE3(
@@ -2356,7 +2356,7 @@ void LumaInterpolationFilterPosi_SSSE3(
                                         EB_S16               *firstPassIFDst)
 {
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic-3*srcStride, srcStride, firstPassIFDst, puWidth, puHeight+7, 1);
-  LumaInterpolationFilterTwoDInRawM_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight);
+  EbHevcLumaInterpolationFilterTwoDInRawM_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight);
 }
 
 
@@ -2371,7 +2371,7 @@ void LumaInterpolationFilterPosj_SSSE3(
 	EB_S16               *firstPassIFDst)
 {
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic-3*srcStride, srcStride, firstPassIFDst, puWidth, puHeight+7, 2);
-  LumaInterpolationFilterTwoDInRawM_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight);
+  EbHevcLumaInterpolationFilterTwoDInRawM_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight);
 }
 
 void LumaInterpolationFilterPosk_SSSE3(
@@ -2384,7 +2384,7 @@ void LumaInterpolationFilterPosk_SSSE3(
 	EB_S16               *firstPassIFDst)
 {
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic-3*srcStride, srcStride, firstPassIFDst, puWidth, puHeight+7, 3);
-  LumaInterpolationFilterTwoDInRawM_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight);
+  EbHevcLumaInterpolationFilterTwoDInRawM_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight);
 }
 
 void LumaInterpolationFilterPosp_SSSE3(
@@ -2397,7 +2397,7 @@ void LumaInterpolationFilterPosp_SSSE3(
 	EB_S16               *firstPassIFDst)
 {
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic-2*srcStride, srcStride, firstPassIFDst, puWidth, puHeight+6, 1);
-  LumaInterpolationFilterTwoDInRaw7_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight, 3);
+  EbHevcLumaInterpolationFilterTwoDInRaw7_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight, 3);
 }
 
 void LumaInterpolationFilterPosq_SSSE3(
@@ -2412,7 +2412,7 @@ void LumaInterpolationFilterPosq_SSSE3(
   EB_U32 puHeight1 = puHeight + 6;
   EB_BYTE refPic1 = refPic - 2 * srcStride;
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic1, srcStride, firstPassIFDst, puWidth, puHeight1, 2);
-  LumaInterpolationFilterTwoDInRaw7_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight, 3);
+  EbHevcLumaInterpolationFilterTwoDInRaw7_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight, 3);
 }
 
 void LumaInterpolationFilterPosr_SSSE3(
@@ -2425,7 +2425,7 @@ void LumaInterpolationFilterPosr_SSSE3(
 	EB_S16               *firstPassIFDst)
 {
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic-2*srcStride, srcStride, firstPassIFDst, puWidth, puHeight+6, 3);
-  LumaInterpolationFilterTwoDInRaw7_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight, 3);
+  EbHevcLumaInterpolationFilterTwoDInRaw7_SSSE3(firstPassIFDst, dst, dstStride, puWidth, puHeight, 3);
 }
 
 
@@ -2438,7 +2438,7 @@ void LumaInterpolationCopyOutRaw_SSSE3(
 	EB_S16               *firstPassIFDst)
 {
   (void)firstPassIFDst;
-  PictureCopyKernelOutRaw_SSSE3(refPic, srcStride, dst, puWidth, puHeight, 128*64);
+  EbHevcPictureCopyKernelOutRaw_SSSE3(refPic, srcStride, dst, puWidth, puHeight, 128*64);
 }
 
 
@@ -2822,7 +2822,7 @@ void LumaInterpolationFilterPoseOutRaw_SSSE3(
                                               EB_S16               *firstPassIFDst)
 {
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic-3*srcStride, srcStride, firstPassIFDst, puWidth, puHeight+6, 1);
-  LumaInterpolationFilterTwoDInRawOutRaw7_SSSE3(firstPassIFDst, dst, puWidth, puHeight, 1);
+  EbHevcLumaInterpolationFilterTwoDInRawOutRaw7_SSSE3(firstPassIFDst, dst, puWidth, puHeight, 1);
 }
 
 void LumaInterpolationFilterPosfOutRaw_SSSE3(
@@ -2836,7 +2836,7 @@ void LumaInterpolationFilterPosfOutRaw_SSSE3(
   EB_U32 puHeight1 = puHeight + 6;
   EB_BYTE refPic1 = refPic - 3 * srcStride;
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic1, srcStride, firstPassIFDst, puWidth, puHeight1, 2);
-  LumaInterpolationFilterTwoDInRawOutRaw7_SSSE3(firstPassIFDst, dst, puWidth, puHeight, 1);
+  EbHevcLumaInterpolationFilterTwoDInRawOutRaw7_SSSE3(firstPassIFDst, dst, puWidth, puHeight, 1);
 }
 
 void LumaInterpolationFilterPosgOutRaw_SSSE3(
@@ -2848,7 +2848,7 @@ void LumaInterpolationFilterPosgOutRaw_SSSE3(
                                               EB_S16               *firstPassIFDst)
 {
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic-3*srcStride, srcStride, firstPassIFDst, puWidth, puHeight+6, 3);
-  LumaInterpolationFilterTwoDInRawOutRaw7_SSSE3(firstPassIFDst, dst, puWidth, puHeight, 1);
+  EbHevcLumaInterpolationFilterTwoDInRawOutRaw7_SSSE3(firstPassIFDst, dst, puWidth, puHeight, 1);
 }
 
 void LumaInterpolationFilterPosiOutRaw_SSSE3(
@@ -2860,7 +2860,7 @@ void LumaInterpolationFilterPosiOutRaw_SSSE3(
                                               EB_S16               *firstPassIFDst)
 {
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic-3*srcStride, srcStride, firstPassIFDst, puWidth, puHeight+7, 1);
-  LumaInterpolationFilterTwoDInRawOutRawM_SSSE3(firstPassIFDst, dst, puWidth, puHeight);
+  EbHevcLumaInterpolationFilterTwoDInRawOutRawM_SSSE3(firstPassIFDst, dst, puWidth, puHeight);
 }
 
 void LumaInterpolationFilterPosjOutRaw_SSSE3(
@@ -2872,7 +2872,7 @@ void LumaInterpolationFilterPosjOutRaw_SSSE3(
                                               EB_S16               *firstPassIFDst)
 {
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic-3*srcStride, srcStride, firstPassIFDst, puWidth, puHeight+7, 2);
-  LumaInterpolationFilterTwoDInRawOutRawM_SSSE3(firstPassIFDst, dst, puWidth, puHeight);
+  EbHevcLumaInterpolationFilterTwoDInRawOutRawM_SSSE3(firstPassIFDst, dst, puWidth, puHeight);
 }
 
 void LumaInterpolationFilterPoskOutRaw_SSSE3(
@@ -2884,7 +2884,7 @@ void LumaInterpolationFilterPoskOutRaw_SSSE3(
                                               EB_S16               *firstPassIFDst)
 {
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic-3*srcStride, srcStride, firstPassIFDst, puWidth, puHeight+7, 3);
-  LumaInterpolationFilterTwoDInRawOutRawM_SSSE3(firstPassIFDst, dst, puWidth, puHeight);
+  EbHevcLumaInterpolationFilterTwoDInRawOutRawM_SSSE3(firstPassIFDst, dst, puWidth, puHeight);
 }
 
 void LumaInterpolationFilterPospOutRaw_SSSE3(
@@ -2896,7 +2896,7 @@ void LumaInterpolationFilterPospOutRaw_SSSE3(
                                               EB_S16               *firstPassIFDst)
 {
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic-2*srcStride, srcStride, firstPassIFDst, puWidth, puHeight+6, 1);
-  LumaInterpolationFilterTwoDInRawOutRaw7_SSSE3(firstPassIFDst, dst, puWidth, puHeight, 3);
+  EbHevcLumaInterpolationFilterTwoDInRawOutRaw7_SSSE3(firstPassIFDst, dst, puWidth, puHeight, 3);
 }
 
 void LumaInterpolationFilterPosqOutRaw_SSSE3(
@@ -2910,7 +2910,7 @@ void LumaInterpolationFilterPosqOutRaw_SSSE3(
   EB_U32 puHeight1 = puHeight + 6;
   EB_BYTE refPic1 = refPic - 2 * srcStride;
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic1, srcStride, firstPassIFDst, puWidth, puHeight1, 2);
-  LumaInterpolationFilterTwoDInRawOutRaw7_SSSE3(firstPassIFDst, dst, puWidth, puHeight, 3);
+  EbHevcLumaInterpolationFilterTwoDInRawOutRaw7_SSSE3(firstPassIFDst, dst, puWidth, puHeight, 3);
 }
 
 void LumaInterpolationFilterPosrOutRaw_SSSE3(
@@ -2922,7 +2922,5 @@ void LumaInterpolationFilterPosrOutRaw_SSSE3(
                                               EB_S16               *firstPassIFDst)
 {
   LumaInterpolationFilterOneDOutRawHorizontal_SSSE3(refPic-2*srcStride, srcStride, firstPassIFDst, puWidth, puHeight+6, 3);
-  LumaInterpolationFilterTwoDInRawOutRaw7_SSSE3(firstPassIFDst, dst, puWidth, puHeight, 3);
+  EbHevcLumaInterpolationFilterTwoDInRawOutRaw7_SSSE3(firstPassIFDst, dst, puWidth, puHeight, 3);
 }
-
-

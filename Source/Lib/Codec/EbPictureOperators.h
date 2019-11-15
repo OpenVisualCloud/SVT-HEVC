@@ -166,30 +166,30 @@ void CompressedPackLcu(
     EB_U32     width,
     EB_U32     height);
 
-void Pack2D_SRC( 
+void Pack2D_SRC(
    EB_U8     *in8BitBuffer,
-   EB_U32     in8Stride, 
-   EB_U8     *innBitBuffer, 
-   EB_U32     innStride, 
-   EB_U16    *out16BitBuffer, 
-   EB_U32     outStride, 
+   EB_U32     in8Stride,
+   EB_U8     *innBitBuffer,
+   EB_U32     innStride,
+   EB_U16    *out16BitBuffer,
+   EB_U32     outStride,
    EB_U32     width,
    EB_U32     height);
 
-void UnPack2D( 
+void UnPack2D(
    EB_U16      *in16BitBuffer,
-   EB_U32       inStride, 
+   EB_U32       inStride,
    EB_U8       *out8BitBuffer,
-   EB_U32       out8Stride, 
-   EB_U8       *outnBitBuffer,  
-   EB_U32       outnStride, 
+   EB_U32       out8Stride,
+   EB_U8       *outnBitBuffer,
+   EB_U32       outnStride,
    EB_U32       width,
    EB_U32       height);
 void extract8Bitdata(
     EB_U16      *in16BitBuffer,
     EB_U32       inStride,
     EB_U8       *out8BitBuffer,
-    EB_U32       out8Stride,   
+    EB_U32       out8Stride,
     EB_U32       width,
     EB_U32       height
     );
@@ -199,14 +199,14 @@ void UnpackL0L1Avg(
         EB_U16 *ref16L1,
         EB_U32  refL1Stride,
         EB_U8  *dstPtr,
-        EB_U32  dstStride,      
+        EB_U32  dstStride,
         EB_U32  width,
         EB_U32  height);
 void Extract8BitdataSafeSub(
     EB_U16      *in16BitBuffer,
     EB_U32       inStride,
     EB_U8       *out8BitBuffer,
-    EB_U32       out8Stride,   
+    EB_U32       out8Stride,
     EB_U32       width,
     EB_U32       height
     );
@@ -216,13 +216,13 @@ void UnpackL0L1AvgSafeSub(
         EB_U16 *ref16L1,
         EB_U32  refL1Stride,
         EB_U8  *dstPtr,
-        EB_U32  dstStride,      
+        EB_U32  dstStride,
         EB_U32  width,
         EB_U32  height);
 
-void memcpy16bit(
+void EbHevcmemcpy16bit(
     EB_U16                     * outPtr,
-    EB_U16                     * inPtr,   
+    EB_U16                     * inPtr,
     EB_U64                       numOfElements );
 void memset16bit(
     EB_U16                     * inPtr,
@@ -422,8 +422,8 @@ typedef void(*EB_RESDKERNELSUBSAMPLED_TYPE)(
     EB_S16  *residual,
     EB_U32   residualStride,
     EB_U32   areaWidth,
-    EB_U32   areaHeight , 
-    EB_U8    lastLine  
+    EB_U32   areaHeight ,
+    EB_U8    lastLine
     );
 static EB_RESDKERNELSUBSAMPLED_TYPE FUNC_TABLE ResidualKernelSubSampled_funcPtrArray[EB_ASM_TYPE_TOTAL][9] = {
 	// C_DEFAULT
@@ -481,9 +481,9 @@ static EB_RESDKERNEL_TYPE FUNC_TABLE ResidualKernel_funcPtrArray[EB_ASM_TYPE_TOT
 
 
 static EB_RESDKERNEL_TYPE_16BIT FUNC_TABLE ResidualKernel_funcPtrArray16Bit[EB_ASM_TYPE_TOTAL] = {
-    // C_DEFAULT     
+    // C_DEFAULT
     ResidualKernel16bit,
-    // AVX2     
+    // AVX2
     ResidualKernel16bit_SSE2_INTRIN
 };
 
@@ -506,7 +506,7 @@ static EB_ZEROCOEFF_TYPE FUNC_TABLE PicZeroOutCoef_funcPtrArray[EB_ASM_TYPE_TOTA
         },
 };
 
-static EB_FULLDIST_TYPE FUNC_TABLE FullDistortionIntrinsic_funcPtrArray[EB_ASM_TYPE_TOTAL][2][2][9] = {     
+static EB_FULLDIST_TYPE FUNC_TABLE FullDistortionIntrinsic_funcPtrArray[EB_ASM_TYPE_TOTAL][2][2][9] = {
     // C_DEFAULT
     // It was found that the SSE2 intrinsic code is much faster (~2x) than the SSE4.1 code
     {
@@ -559,7 +559,7 @@ static EB_FULLDIST_TYPE FUNC_TABLE FullDistortionIntrinsic_funcPtrArray[EB_ASM_T
             }
 
         }
-    },    
+    },
     // AVX2
     // It was found that the SSE2 intrinsic code is much faster (~2x) than the SSE4.1 code
     {
@@ -611,7 +611,7 @@ static EB_FULLDIST_TYPE FUNC_TABLE FullDistortionIntrinsic_funcPtrArray[EB_ASM_T
                 /*8 64x64 */    FullDistortionKernelIntra16MxN_32bit_BT_SSE2,
             }
         }
-    },   
+    },
 };
 
 static EB_SATD_TYPE FUNC_TABLE Compute8x8Satd_funcPtrArray[EB_ASM_TYPE_TOTAL] = {

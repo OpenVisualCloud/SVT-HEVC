@@ -11,7 +11,7 @@
 #include "tmmintrin.h"
 
 
-EB_EXTERN EB_ALIGN(16) const EB_S8 AvcStyleLumaIFCoeff8_SSSE3[]= {
+EB_EXTERN EB_ALIGN(16) const EB_S8 EbHevcAvcStyleLumaIFCoeff8_SSSE3[]= {
     -1, 25, -1, 25, -1, 25, -1, 25, -1, 25, -1, 25, -1, 25, -1, 25,
      9, -1,  9, -1,  9, -1,  9, -1,  9, -1,  9, -1,  9, -1,  9, -1,
     -2, 18, -2, 18, -2, 18, -2, 18, -2, 18, -2, 18, -2, 18, -2, 18,
@@ -47,8 +47,8 @@ void AvcStyleLumaInterpolationFilterHorizontal_SSSE3_INTRIN(
 
     fracPos <<= 5;
     IFOffset = _mm_set1_epi16(0x0010);
-    IFCoeff_1_0 = _mm_load_si128((__m128i *)(AvcStyleLumaIFCoeff8_SSSE3 + fracPos - 32));
-    IFCoeff_3_2 = _mm_load_si128((__m128i *)(AvcStyleLumaIFCoeff8_SSSE3 + fracPos - 16));
+    IFCoeff_1_0 = _mm_load_si128((__m128i *)(EbHevcAvcStyleLumaIFCoeff8_SSSE3 + fracPos - 32));
+    IFCoeff_3_2 = _mm_load_si128((__m128i *)(EbHevcAvcStyleLumaIFCoeff8_SSSE3 + fracPos - 16));
 
     if (!(puWidth & 15)) { // 16x
         __m128i ref0, ref1, ref2, ref3, ref01_lo, ref01_hi, ref23_lo, ref23_hi, sum_lo, sum_hi;
@@ -117,12 +117,12 @@ void AvcStyleLumaInterpolationFilterVertical_SSSE3_INTRIN(
     fracPos <<= 5;
     refPic -= srcStride;
     IFOffset = _mm_set1_epi16(0x0010);
-    IFCoeff_1_0 = _mm_load_si128((__m128i *)(AvcStyleLumaIFCoeff8_SSSE3 + fracPos - 32));
-    IFCoeff_3_2 = _mm_load_si128((__m128i *)(AvcStyleLumaIFCoeff8_SSSE3 + fracPos - 16));
+    IFCoeff_1_0 = _mm_load_si128((__m128i *)(EbHevcAvcStyleLumaIFCoeff8_SSSE3 + fracPos - 32));
+    IFCoeff_3_2 = _mm_load_si128((__m128i *)(EbHevcAvcStyleLumaIFCoeff8_SSSE3 + fracPos - 16));
     if (!(puWidth & 15)) { //16x
 
         __m128i sum_lo, sum_hi, ref0, refs, ref2s, ref3s;
-        
+
         for (width_cnt = 0; width_cnt < puWidth; width_cnt += 16) {
 
             refPicTemp = refPic;
@@ -133,7 +133,7 @@ void AvcStyleLumaInterpolationFilterVertical_SSSE3_INTRIN(
                 refs = _mm_loadu_si128((__m128i *)(refPicTemp + srcStride));
                 ref2s = _mm_loadu_si128((__m128i *)(refPicTemp + 2 * srcStride));
                 ref3s = _mm_loadu_si128((__m128i *)(refPicTemp + 3 * srcStride));
-                
+
                 sum_lo = _mm_add_epi16(_mm_maddubs_epi16(_mm_unpacklo_epi8(ref0, refs), IFCoeff_1_0),
                     _mm_maddubs_epi16(_mm_unpacklo_epi8(ref2s, ref3s), IFCoeff_3_2));
 
@@ -155,21 +155,21 @@ void AvcStyleLumaInterpolationFilterVertical_SSSE3_INTRIN(
         __m128i sum, sum01, sum23;
 
         for (width_cnt = 0; width_cnt < puWidth; width_cnt += 8) {
-            
+
             refPicTemp = refPic;
             dstTemp = dst;
-            
+
             for (height_cnt = 0; height_cnt < puHeight; ++height_cnt) {
                 sum01 = _mm_maddubs_epi16(_mm_unpacklo_epi8(_mm_loadl_epi64((__m128i *)(refPicTemp)),
                                                             _mm_loadl_epi64((__m128i *)(refPicTemp + srcStride))), IFCoeff_1_0);
 
                 sum23 = _mm_maddubs_epi16(_mm_unpacklo_epi8(_mm_loadl_epi64((__m128i *)(refPicTemp + 2 * srcStride)),
                                                             _mm_loadl_epi64((__m128i *)(refPicTemp + 3 * srcStride))), IFCoeff_3_2);
-                
+
                 sum = _mm_srai_epi16(_mm_add_epi16(_mm_add_epi16(sum01, sum23), IFOffset), IFShift);
                 sum_clip_U8 = _mm_packus_epi16(sum, sum);
                 _mm_storel_epi64((__m128i *)(dstTemp), sum_clip_U8);
-                
+
                 dstTemp += dstStride;
                 refPicTemp += srcStrideSkip;
             }

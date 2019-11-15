@@ -46,7 +46,7 @@
 |42||43||46||47|     |58||59||62||63|
 -------------------------------------*/
 
-      
+
 /************************************************
  * Set ME/HME Params
  ************************************************/
@@ -66,11 +66,11 @@ static void* SetMeHmeParamsOq(
 		(inputResolution <= INPUT_SIZE_1080i_RANGE && inputRatio > 3)           ?   2 : // 1080I
 		(inputResolution <= INPUT_SIZE_1080p_RANGE)                             ?   3 : // 1080I
 		                                                                            4;  // 4K
-		   
+
     // HME/ME default settings
 	meContextPtr->numberHmeSearchRegionInWidth          = EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT;
 	meContextPtr->numberHmeSearchRegionInHeight         = EB_HME_SEARCH_AREA_ROW_MAX_COUNT;
-    
+
     // HME Level0
 	meContextPtr->hmeLevel0TotalSearchAreaWidth         = HmeLevel0TotalSearchAreaWidthOq[resolutionIndex][hmeMeLevel];
 	meContextPtr->hmeLevel0TotalSearchAreaHeight        = HmeLevel0TotalSearchAreaHeightOq[resolutionIndex][hmeMeLevel];
@@ -101,7 +101,7 @@ static void* SetMeHmeParamsOq(
             if (hmeMeLevel == ENC_MODE_6 || hmeMeLevel == ENC_MODE_7) {
                 meContextPtr->hmeLevel0TotalSearchAreaWidth         = MAX(96  , meContextPtr->hmeLevel0TotalSearchAreaWidth        );
                 meContextPtr->hmeLevel0TotalSearchAreaHeight        = MAX(64  , meContextPtr->hmeLevel0TotalSearchAreaHeight       );
-                meContextPtr->hmeLevel0SearchAreaInWidthArray[0]    = MAX(48  , meContextPtr->hmeLevel0SearchAreaInWidthArray[0]   ); 
+                meContextPtr->hmeLevel0SearchAreaInWidthArray[0]    = MAX(48  , meContextPtr->hmeLevel0SearchAreaInWidthArray[0]   );
                 meContextPtr->hmeLevel0SearchAreaInWidthArray[1]    = MAX(48  , meContextPtr->hmeLevel0SearchAreaInWidthArray[1]   );
                 meContextPtr->hmeLevel0SearchAreaInHeightArray[0]   = MAX(32  , meContextPtr->hmeLevel0SearchAreaInHeightArray[0]  );
                 meContextPtr->hmeLevel0SearchAreaInHeightArray[1]   = MAX(32  , meContextPtr->hmeLevel0SearchAreaInHeightArray[1]  );
@@ -109,7 +109,7 @@ static void* SetMeHmeParamsOq(
             else if (hmeMeLevel >= ENC_MODE_8) {
                 meContextPtr->hmeLevel0TotalSearchAreaWidth         = MAX(64  , meContextPtr->hmeLevel0TotalSearchAreaWidth        );
                 meContextPtr->hmeLevel0TotalSearchAreaHeight        = MAX(48  , meContextPtr->hmeLevel0TotalSearchAreaHeight       );
-                meContextPtr->hmeLevel0SearchAreaInWidthArray[0]    = MAX(32  , meContextPtr->hmeLevel0SearchAreaInWidthArray[0]   ); 
+                meContextPtr->hmeLevel0SearchAreaInWidthArray[0]    = MAX(32  , meContextPtr->hmeLevel0SearchAreaInWidthArray[0]   );
                 meContextPtr->hmeLevel0SearchAreaInWidthArray[1]    = MAX(32  , meContextPtr->hmeLevel0SearchAreaInWidthArray[1]   );
                 meContextPtr->hmeLevel0SearchAreaInHeightArray[0]   = MAX(24  , meContextPtr->hmeLevel0SearchAreaInHeightArray[0]  );
                 meContextPtr->hmeLevel0SearchAreaInHeightArray[1]   = MAX(24  , meContextPtr->hmeLevel0SearchAreaInHeightArray[1]  );
@@ -232,7 +232,7 @@ static EB_ERRORTYPE ComputeDecimatedZzSad(
 				blkDisplacementDecimated = (sixteenthDecimatedPicturePtr->originY + (lcuOriginY >> 2)) * sixteenthDecimatedPicturePtr->strideY + sixteenthDecimatedPicturePtr->originX + (lcuOriginX >> 2);
                 blkDisplacementFull = (previousInputPictureFull->originY + lcuOriginY)* previousInputPictureFull->strideY + (previousInputPictureFull->originX + lcuOriginX);
 
-				// 1/16 collocated LCU decimation 
+				// 1/16 collocated LCU decimation
 				Decimation2D(
 					&previousInputPictureFull->bufferY[blkDisplacementFull],
 					previousInputPictureFull->strideY,
@@ -254,7 +254,7 @@ static EB_ERRORTYPE ComputeDecimatedZzSad(
 				// Classification is important to:
 				// 1. Avoid improving moving objects.
 				// 2. Do not modulate when all the picture is background
-				// 3. Do give different importance to different regions 
+				// 3. Do give different importance to different regions
 				if (decimatedLcuCollocatedSad < BEA_CLASS_0_0_DEC_TH) {
 					previousPictureControlSetWrapperPtr->zzCostArray[lcuIndex] = BEA_CLASS_0_ZZ_COST;
 				}
@@ -363,22 +363,22 @@ EB_ERRORTYPE SignalDerivationMeKernelOq(
     else {
         contextPtr->oisKernelLevel = EB_FALSE;
     }
-    
+
     // Set OIS TH
-    // 0: Agressive 
+    // 0: Agressive
     // 1: Default
     // 2: Conservative
     if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
         if (pictureControlSetPtr->encMode <= ENC_MODE_5) {
             if (pictureControlSetPtr->isUsedAsReferenceFlag == EB_TRUE) {
-                contextPtr->oisThSet = 2;  
+                contextPtr->oisThSet = 2;
             }
             else {
-                contextPtr->oisThSet = 1;  
+                contextPtr->oisThSet = 1;
             }
         }
         else {
-            contextPtr->oisThSet = 1;        
+            contextPtr->oisThSet = 1;
         }
     }
     else {
@@ -386,15 +386,15 @@ EB_ERRORTYPE SignalDerivationMeKernelOq(
 			contextPtr->oisThSet = 2;
 		}
         else {
-            contextPtr->oisThSet = 1; 
+            contextPtr->oisThSet = 1;
         }
     }
-    
+
     // Set valid flag for the best OIS
 	contextPtr->setBestOisDistortionToValid = EB_FALSE;
 
     // Set fractional search model
-    // 0: search all blocks 
+    // 0: search all blocks
     // 1: selective based on Full-Search SAD & MV.
     // 2: off
     if (pictureControlSetPtr->useSubpelFlag == 1) {
@@ -415,18 +415,18 @@ EB_ERRORTYPE SignalDerivationMeKernelOq(
     }
     else {
         contextPtr->meContextPtr->fractionalSearchModel = 2;
-    }              
+    }
 
     return return_error;
 }
 
 
 /******************************************************
-* GetMv
+* EbHevcGetMv
   Input   : LCU Index
   Output  : List0 MV
 ******************************************************/
-void GetMv(
+void EbHevcGetMv(
     PictureParentControlSet_t	*pictureControlSetPtr,
     EB_U32						 lcuIndex,
     EB_S32						*xCurrentMv,
@@ -440,11 +440,11 @@ void GetMv(
 }
 
 /******************************************************
-* GetMeDist
+* EbHevcGetMeDist
  Input   : LCU Index
  Output  : Best ME Distortion
 ******************************************************/
-void GetMeDist(
+void EbHevcGetMeDist(
     PictureParentControlSet_t	*pictureControlSetPtr,
     EB_U32						 lcuIndex,
     EB_U32                      *distortion)
@@ -510,9 +510,9 @@ static void StationaryEdgeOverUpdateOverTimeLcuPart1(
 
     if (lcuParams->potentialLogoLcu && lcuParams->isCompleteLcu) {
 
-        // Current MV   
+        // Current MV
         if (pictureControlSetPtr->temporalLayerIndex > 0)
-            GetMv(pictureControlSetPtr, lcuIndex, &xCurrentMv, &yCurrentMv);
+            EbHevcGetMv(pictureControlSetPtr, lcuIndex, &xCurrentMv, &yCurrentMv);
 
         EB_BOOL lowMotion = pictureControlSetPtr->temporalLayerIndex == 0 ? EB_TRUE : (ABS(xCurrentMv) < 16) && (ABS(yCurrentMv) < 16) ? EB_TRUE : EB_FALSE;
         EB_U16 *yVariancePtr = pictureControlSetPtr->variance[lcuIndex];
@@ -558,36 +558,36 @@ static void StationaryEdgeOverUpdateOverTimeLcuPart2(
 
     LcuParams_t  *lcuParams  = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
     LcuStat_t    *lcuStatPtr = &pictureControlSetPtr->lcuStatArray[lcuIndex];
-    
+
     if (lcuParams->potentialLogoLcu && lcuParams->isCompleteLcu) {
         EB_U32 meDist = 0;
-    
+
         EB_BOOL lowSad = EB_FALSE;
-    
+
         if (pictureControlSetPtr->sliceType == EB_B_PICTURE) {
-            GetMeDist(pictureControlSetPtr, lcuIndex, &meDist);
+            EbHevcGetMeDist(pictureControlSetPtr, lcuIndex, &meDist);
         }
         lowSad = (pictureControlSetPtr->sliceType != EB_B_PICTURE) ?
-    
+
             EB_FALSE : (meDist < 64 * 64 * lowSadTh) ? EB_TRUE : EB_FALSE;
-    
+
         if (lowSad) {
             lcuStatPtr->check2ForLogoStationaryEdgeOverTimeFlag = 0;
             lcuStatPtr->lowDistLogo = 1;
         }
         else {
             lcuStatPtr->check2ForLogoStationaryEdgeOverTimeFlag = 1;
-    
+
             lcuStatPtr->lowDistLogo = 0;
         }
     }
     else {
         lcuStatPtr->check2ForLogoStationaryEdgeOverTimeFlag = 0;
-    
+
         lcuStatPtr->lowDistLogo = 0;
     }
     lcuStatPtr->check2ForLogoStationaryEdgeOverTimeFlag = 1;
-    
+
 }
 
 /************************************************
@@ -677,7 +677,7 @@ void* MotionEstimationKernel(void *inputPtr)
 		xLcuEndIndex = SEGMENT_END_IDX(xSegmentIndex, pictureWidthInLcu, pictureControlSetPtr->meSegmentsColumnCount);
 		yLcuStartIndex = SEGMENT_START_IDX(ySegmentIndex, pictureHeightInLcu, pictureControlSetPtr->meSegmentsRowCount);
 		yLcuEndIndex = SEGMENT_END_IDX(ySegmentIndex, pictureHeightInLcu, pictureControlSetPtr->meSegmentsRowCount);
-		// Increment the MD Rate Estimation array pointer to point to the right address based on the QP and slice type 
+		// Increment the MD Rate Estimation array pointer to point to the right address based on the QP and slice type
 		mdRateEstimationArray = (MdRateEstimationContext_t*)sequenceControlSetPtr->encodeContextPtr->mdRateEstimationArray;
 		mdRateEstimationArray += pictureControlSetPtr->sliceType * TOTAL_NUMBER_OF_QP_VALUES + pictureControlSetPtr->pictureQp;
 		// Reset MD rate Estimation table to initial values by copying from mdRateEstimationArray
@@ -686,7 +686,7 @@ void* MotionEstimationKernel(void *inputPtr)
         SignalDerivationMeKernelOq(
                 sequenceControlSetPtr,
                 pictureControlSetPtr,
-                contextPtr);     
+                contextPtr);
 
 		// Lambda Assignement
         if (pictureControlSetPtr->temporalLayerIndex == 0) {
@@ -830,7 +830,7 @@ void* MotionEstimationKernel(void *inputPtr)
                         xLcuEndIndex,
                         yLcuStartIndex,
                         yLcuEndIndex);
-					
+
 				}
 			}
 		}
@@ -849,14 +849,14 @@ void* MotionEstimationKernel(void *inputPtr)
 						lcuWidth = (sequenceControlSetPtr->lumaWidth - lcuOriginX) < MAX_LCU_SIZE ? sequenceControlSetPtr->lumaWidth - lcuOriginX : MAX_LCU_SIZE;
 						lcuHeight = (sequenceControlSetPtr->lumaHeight - lcuOriginY) < MAX_LCU_SIZE ? sequenceControlSetPtr->lumaHeight - lcuOriginY : MAX_LCU_SIZE;
 
-                        lcuIndex = (EB_U16)(xLcuIndex + yLcuIndex * pictureWidthInLcu);                         
+                        lcuIndex = (EB_U16)(xLcuIndex + yLcuIndex * pictureWidthInLcu);
                         pictureControlSetPtr->interSadIntervalIndex[lcuIndex] = 0;
                         pictureControlSetPtr->intraSadIntervalIndex[lcuIndex] = 0;
 
 						if (lcuWidth == MAX_LCU_SIZE && lcuHeight == MAX_LCU_SIZE) {
 
 
-							sadIntervalIndex = (EB_U16)(pictureControlSetPtr->rcMEdistortion[lcuIndex] >> (12 - SAD_PRECISION_INTERVAL));//change 12 to 2*log2(64) 
+							sadIntervalIndex = (EB_U16)(pictureControlSetPtr->rcMEdistortion[lcuIndex] >> (12 - SAD_PRECISION_INTERVAL));//change 12 to 2*log2(64)
 
                             sadIntervalIndex = (EB_U16)(sadIntervalIndex >> 2);
                             if (sadIntervalIndex > (NUMBER_OF_SAD_INTERVALS>>1) -1){
@@ -867,12 +867,12 @@ void* MotionEstimationKernel(void *inputPtr)
                             }
                             if (sadIntervalIndex >= NUMBER_OF_SAD_INTERVALS - 1)
                                 sadIntervalIndex = NUMBER_OF_SAD_INTERVALS - 1;
-                  
 
-                         
-                            pictureControlSetPtr->interSadIntervalIndex[lcuIndex] = sadIntervalIndex;   
+
+
+                            pictureControlSetPtr->interSadIntervalIndex[lcuIndex] = sadIntervalIndex;
                             pictureControlSetPtr->meDistortionHistogram[sadIntervalIndex] ++;
-							
+
                             EB_U32                       bestOisCuIndex = 0;
 
 							//DOUBLE CHECK THIS PIECE OF CODE
@@ -892,9 +892,9 @@ void* MotionEstimationKernel(void *inputPtr)
                             if (intraSadIntervalIndex >= NUMBER_OF_SAD_INTERVALS - 1)
                                 intraSadIntervalIndex = NUMBER_OF_SAD_INTERVALS - 1;
 
-                   
-                            pictureControlSetPtr->intraSadIntervalIndex[lcuIndex] = intraSadIntervalIndex; 
-                            pictureControlSetPtr->oisDistortionHistogram[intraSadIntervalIndex] ++; 
+
+                            pictureControlSetPtr->intraSadIntervalIndex[lcuIndex] = intraSadIntervalIndex;
+                            pictureControlSetPtr->oisDistortionHistogram[intraSadIntervalIndex] ++;
 
 
 
@@ -917,7 +917,7 @@ void* MotionEstimationKernel(void *inputPtr)
 						lcuHeight = (sequenceControlSetPtr->lumaHeight - lcuOriginY) < MAX_LCU_SIZE ? sequenceControlSetPtr->lumaHeight - lcuOriginY : MAX_LCU_SIZE;
 
                         lcuIndex = (EB_U16)(xLcuIndex + yLcuIndex * pictureWidthInLcu);
-                       
+
                         pictureControlSetPtr->interSadIntervalIndex[lcuIndex] = 0;
                         pictureControlSetPtr->intraSadIntervalIndex[lcuIndex] = 0;
 
@@ -925,13 +925,13 @@ void* MotionEstimationKernel(void *inputPtr)
 
 
 							//DOUBLE CHECK THIS PIECE OF CODE
-						
+
 							intraSadIntervalIndex = (EB_U32)
 								(((pictureControlSetPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[1][bestOisCuIndex].distortion +
 								pictureControlSetPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[2][bestOisCuIndex].distortion +
 								pictureControlSetPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[3][bestOisCuIndex].distortion +
 								pictureControlSetPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[4][bestOisCuIndex].distortion)) >> (12 - SAD_PRECISION_INTERVAL));//change 12 to 2*log2(64) ;
- 
+
                             intraSadIntervalIndex = (EB_U16)(intraSadIntervalIndex >> 2);
                             if (intraSadIntervalIndex > (NUMBER_OF_SAD_INTERVALS >> 1) - 1){
                                 EB_U32 sadIntervalIndexTemp = intraSadIntervalIndex - ((NUMBER_OF_SAD_INTERVALS >> 1) - 1);

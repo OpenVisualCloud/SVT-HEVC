@@ -122,47 +122,47 @@ typedef void(*constraint_handler_t) (const char * /* msg */,
 * Function used by the libraries to invoke the registered
 * runtime-constraint handler. Always needed.
 */
-extern void eb_hevc_invoke_safe_str_constraint_handler(
+extern void EbHevcinvoke_safe_str_constraint_handler(
     const char *msg,
     void *ptr,
     errno_t error);
 
-static inline void eb_hevc_handle_error(char *orig_dest, rsize_t orig_dmax,
+static inline void EbHevchandle_error(char *orig_dest, rsize_t orig_dmax,
     char *err_msg, errno_t err_code)
 {
     (void)orig_dmax;
     *orig_dest = '\0';
 
-    eb_hevc_invoke_safe_str_constraint_handler(err_msg, NULL, err_code);
+    EbHevcinvoke_safe_str_constraint_handler(err_msg, NULL, err_code);
     return;
 }
 
-#define sl_default_handler eb_hevc_ignore_handler_s
-extern void eb_hevc_ignore_handler_s(const char *msg, void *ptr, errno_t error);
+#define sl_default_handler EbHevcignore_handler_s
+extern void EbHevcignore_handler_s(const char *msg, void *ptr, errno_t error);
 
 /* string copy */
-errno_t eb_hevc_strcpy_ss(
+errno_t EbHevcstrcpy_ss(
     char *dest, rsize_t dmax, const char *src);
 
 /* fitted string copy */
-errno_t eb_hevc_strncpy_ss(
+errno_t EbHevcstrncpy_ss(
     char *dest, rsize_t dmax, const char *src, rsize_t slen);
 
 /* string length */
-rsize_t eb_hevc_strnlen_ss(
+rsize_t EbHevcstrnlen_ss(
     const char *s, rsize_t smax);
 
 #define EB_STRNCPY(dst, dst_size, src, count) \
-    eb_hevc_strncpy_ss(dst, dst_size, src, count)
+    EbHevcstrncpy_ss(dst, dst_size, src, count)
 
 #define EB_STRCPY(dst, size, src) \
-    eb_hevc_strcpy_ss(dst, size, src)
+    EbHevcstrcpy_ss(dst, size, src)
 
 #define EB_STRCMP(target,token) \
     strcmp(target,token)
 
 #define EB_STRLEN(target, max_size) \
-    eb_hevc_strnlen_ss(target, max_size)
+    EbHevcstrnlen_ss(target, max_size)
 
 #ifdef __cplusplus
 }

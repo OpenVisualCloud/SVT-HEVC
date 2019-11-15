@@ -65,7 +65,7 @@ EB_ERRORTYPE GetRefIndexFractionBits(
     return return_error;
 }
 /*********************************************************************
- * GetMvdFractionBits
+ * EbHevcGetMvdFractionBits
  *   Gets the motion vector difference Fraction Bits
  *
  *  mvdX
@@ -80,7 +80,7 @@ EB_ERRORTYPE GetRefIndexFractionBits(
  *  fractionBitNum
  *   output for the fraction number of bits needed for motion vector difference
  *********************************************************************/
-EB_ERRORTYPE GetMvdFractionBits(
+EB_ERRORTYPE EbHevcGetMvdFractionBits(
     EB_S32                      mvdX,
     EB_S32                      mvdY,
     MdRateEstimationContext_t  *mdRateEstimationArray,
@@ -154,7 +154,7 @@ EB_ERRORTYPE GetMvdFractionBits(
     return return_error;
 }
 /*********************************************************************
- * MeGetMvdFractionBits
+ * MeEbHevcGetMvdFractionBits
  *   Gets the motion vector difference Fraction Bits for ME
  *
  *  mvdX
@@ -169,7 +169,7 @@ EB_ERRORTYPE GetMvdFractionBits(
  *  fractionBitNum
  *   output for the fraction number of bits needed for motion vector difference
  *********************************************************************/
-EB_ERRORTYPE MeGetMvdFractionBits(
+EB_ERRORTYPE MeEbHevcGetMvdFractionBits(
     EB_S32                      mvdX,
     EB_S32                      mvdY,
     EB_BitFraction             *mvdBitsPtr,

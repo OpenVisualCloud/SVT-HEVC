@@ -9,11 +9,11 @@
 #include "immintrin.h"
 #include "EbUtility.h"
 
-EB_EXTERN EB_ALIGN(16) const EB_U8 filterType[] = {
+EB_EXTERN EB_ALIGN(16) const EB_U8 EbHevcfilterType[] = {
 	1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4
 };
 
-EB_EXTERN EB_ALIGN(16) const EB_U8 WeakChromafilter[2][32] = {
+EB_EXTERN EB_ALIGN(16) const EB_U8 EbHevcWeakChromafilter[2][32] = {
 		{ 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4 },
 		{ 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2 },
 };
@@ -39,7 +39,7 @@ inline void lumaWeakFilter_AVX2_INTRIN(
 	currPrevPermutation = _mm256_permute4x64_epi64(currPrev, 216);
 	currPermutation = _mm256_permute4x64_epi64(curr, 216);
 	currLeftMidFirstHalflo = _mm256_unpacklo_epi8(currPrevPermutation, currPermutation);
-	weights = _mm256_loadu_si256((__m256i*)filterType);
+	weights = _mm256_loadu_si256((__m256i*)EbHevcfilterType);
 	currLeftMidFirstHalfWeight = _mm256_maddubs_epi16(currLeftMidFirstHalflo, weights);
 	currNextPermutation = _mm256_permute4x64_epi64(currNext, 88);
 	currNextFirstHalf = _mm256_unpacklo_epi8(currNextPermutation, _mm256_setzero_si256());
@@ -100,7 +100,7 @@ inline void chromaWeakLumaStrongFilter_AVX2_INTRIN(
 	currPrevPermutation = _mm256_permute4x64_epi64(currPrev, 216);
 	currPermutation = _mm256_permute4x64_epi64(curr, 216);
 	currLeftMidFirstHalflo = _mm256_unpacklo_epi8(currPrevPermutation, currPermutation);
-	weights = _mm256_loadu_si256((__m256i*)WeakChromafilter[0]);
+	weights = _mm256_loadu_si256((__m256i*)EbHevcWeakChromafilter[0]);
 	currLeftMidFirstHalfWeight = _mm256_maddubs_epi16(currLeftMidFirstHalflo, weights);
 	currNextPermutation = _mm256_permute4x64_epi64(currNext, 88);
 	currNextFirstHalf = _mm256_unpacklo_epi8(currNextPermutation, _mm256_setzero_si256());
@@ -118,7 +118,7 @@ inline void chromaWeakLumaStrongFilter_AVX2_INTRIN(
 	topPrevPermutation = _mm256_permute4x64_epi64(topPrev, 216);
 	topPermutation = _mm256_permute4x64_epi64(top, 216);
 	topLeftMidFirstHalflo = _mm256_unpacklo_epi8(topPrevPermutation, topPermutation);
-	weights = _mm256_loadu_si256((__m256i*)WeakChromafilter[1]);
+	weights = _mm256_loadu_si256((__m256i*)EbHevcWeakChromafilter[1]);
 	topLeftMidFirstHalfWeight = _mm256_maddubs_epi16(topLeftMidFirstHalflo, weights);
 	topNextPermutation = _mm256_permute4x64_epi64(topNext, 88);
 	topNextFirstHalf = _mm256_unpacklo_epi8(topNextPermutation, _mm256_setzero_si256());
@@ -135,7 +135,7 @@ inline void chromaWeakLumaStrongFilter_AVX2_INTRIN(
 	bottomPrevPermutation = _mm256_permute4x64_epi64(bottomPrev, 216);
 	bottomPermutation = _mm256_permute4x64_epi64(bottom, 216);
 	bottomLeftMidFirstHalflo = _mm256_unpacklo_epi8(bottomPrevPermutation, bottomPermutation);
-	weights = _mm256_loadu_si256((__m256i*)WeakChromafilter[1]);
+	weights = _mm256_loadu_si256((__m256i*)EbHevcWeakChromafilter[1]);
 	bottomLeftMidFirstHalfWeight = _mm256_maddubs_epi16(bottomLeftMidFirstHalflo, weights);
 	bottomNextPermutation = _mm256_permute4x64_epi64(bottomNext, 88);
 	bottomNextFirstHalf = _mm256_unpacklo_epi8(bottomNextPermutation, _mm256_setzero_si256());
@@ -305,7 +305,7 @@ void noiseExtractLumaWeak_AVX2_INTRIN(
 		//	p[1 + 2 * stride]) / 8;
 
 		top = curr =  secondtop = secondcurr = _mm256_setzero_si256();
-	
+
 		for (kk = 0; kk + MAX_LCU_SIZE <= picWidth; kk += MAX_LCU_SIZE)
 		{
 			for (jj = 0; jj < lcuHeight; jj++)
