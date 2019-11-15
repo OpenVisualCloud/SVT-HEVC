@@ -29,7 +29,7 @@ add_executable(SvtHevcEncApp
     ../API/EbApi.h
     EbAppConfig.h
     EbAppContext.h
-	EbAppString.h
+    EbAppString.h
     ../API/EbErrorCodes.h)
 
 #********** SET COMPILE FLAGS************
