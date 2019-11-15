@@ -13,7 +13,7 @@ include_directories(${PROJECT_SOURCE_DIR}/Source/API/
 set(SvtHevcEncApp_Source
     EbAppConfig.c
     EbAppContext.c
-    EbAppFifo.c
+    EbAppString.c
     EbAppMain.c
     EbAppProcessCmd.c
     EbTime.c
@@ -29,6 +29,7 @@ add_executable(SvtHevcEncApp
     ../API/EbApi.h
     EbAppConfig.h
     EbAppContext.h
+	EbAppString.h
     ../API/EbErrorCodes.h)
 
 #********** SET COMPILE FLAGS************
