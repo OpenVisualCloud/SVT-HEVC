@@ -57,9 +57,6 @@
 #include <windows.h>
 #else
 #include <unistd.h>
-#endif
-
-#if __linux__
 #include <pthread.h>
 #include <errno.h>
 #endif
@@ -784,8 +781,8 @@ EB_ERRORTYPE InitThreadManagmentParams(){
                 if (socket_id >= maxSize) {
                     maxSize = maxSize * 2;
                     lpGroup = (processorGroup*)realloc(lpGroup,maxSize * sizeof(processorGroup));
-                    if (lpGroup == (processorGroup*) EB_NULL) 
-                        return EB_ErrorInsufficientResources; 
+                    if (lpGroup == (processorGroup*) EB_NULL)
+                        return EB_ErrorInsufficientResources;
                 }
                 lpGroup[socket_id].group[lpGroup[socket_id].num++] = processor_id;
             }
@@ -981,8 +978,7 @@ EB_U64 GetAffinityMask(EB_U32 lpnum) {
 
 void SwitchToRealTime()
 {
-
-#if  __linux__
+#ifndef _WIN32
 
     struct sched_param schedParam = {
         .sched_priority = sched_get_priority_max(SCHED_FIFO)
@@ -998,13 +994,11 @@ void SwitchToRealTime()
 void EbSetThreadManagementParameters(
     EB_H265_ENC_CONFIGURATION   *configPtr)
 {
-    EB_U32 numLogicProcessors = GetNumProcessors();
-
-    if (configPtr->switchThreadsToRtPriority == 1) {
+    if (configPtr->switchThreadsToRtPriority == 1)
         SwitchToRealTime();
-    }
 
 #ifdef _WIN32
+    EB_U32 numLogicProcessors = GetNumProcessors();
     // For system with a single processor group(no more than 64 logic processors all together)
     // Affinity of the thread can be set to one or more logical processors
     if (numGroups == 1) {
@@ -1038,6 +1032,7 @@ void EbSetThreadManagementParameters(
         }
     }
 #elif defined(__linux__)
+    EB_U32 numLogicProcessors = GetNumProcessors();
     CPU_ZERO(&groupAffinity);
     if (numGroups == 1) {
         EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
@@ -1084,7 +1079,7 @@ void EbSetThreadManagementParameters(
 /**********************************
  * Initialize Encoder Library
  **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
@@ -1921,7 +1916,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
 /**********************************
  * DeInitialize Encoder Library
  **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
@@ -2006,7 +2001,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
 /**********************************
  * GetHandle
  **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbInitHandle(
@@ -2071,7 +2066,7 @@ EB_ERRORTYPE EbH265EncComponentDeInit(EB_COMPONENTTYPE  *h265EncComponent)
 /**********************************
  * EbDeinitHandle
  **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbDeinitHandle(
@@ -3243,7 +3238,7 @@ static EB_ERRORTYPE VerifySettings(\
 /**********************************
  Set Parameter
 **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_ERRORTYPE EbH265EncInitParameter(
@@ -3445,7 +3440,7 @@ static void PrintLibParams(
 
  * Set Parameter
  **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265EncSetParameter(
@@ -3509,7 +3504,7 @@ EB_API EB_ERRORTYPE EbH265EncSetParameter(
 
     return return_error;
 }
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265EncStreamHeader(
@@ -3608,7 +3603,7 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     return return_error;
 }
 
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265EncEosNal(
@@ -4046,7 +4041,7 @@ static EB_ERRORTYPE  CopyInputBuffer(
 /**********************************
  * Empty This Buffer
  **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265EncSendPicture(
@@ -4125,7 +4120,7 @@ static void CopyOutputReconBuffer(
 /**********************************
  * EbH265GetPacket sends out packet
  **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265GetPacket(
@@ -4167,7 +4162,7 @@ EB_API EB_ERRORTYPE EbH265GetPacket(
     return return_error;
 }
 
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API void EbH265ReleaseOutBuffer(
@@ -4183,7 +4178,7 @@ EB_API void EbH265ReleaseOutBuffer(
 /**********************************
 * Fill This Buffer
 **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265GetRecon(
