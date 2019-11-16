@@ -91,7 +91,7 @@ set(Codec_Source
     EbSei.c
     EbTransforms.c
     EbTransQuantBuffers.c
-	EbString.c
+    EbString.c
     EbUtility.c)
 
 if(COMPILE_AS_CPP)
@@ -188,7 +188,7 @@ add_library(SvtHevcEnc
     EbTransforms.h
     EbTransformUnit.h
     EbTransQuantBuffers.h
-	EbString.h
+    EbString.h
     EbUtility.h)
 
 if(UNIX)
