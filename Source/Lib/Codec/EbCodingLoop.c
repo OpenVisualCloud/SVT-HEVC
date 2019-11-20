@@ -2889,7 +2889,7 @@ void EncodePassPackLcu(
             inputPicture->bufferBitIncCb + (lcuOriginY >> subHeightCMinus1) * chroma2BitWidth + ((lcuOriginX >> subWidthCMinus1) / 4)*(lcuHeight  >> subHeightCMinus1),
             (lcuWidth >> subWidthCMinus1) / 4,
             (EB_U16 *)contextPtr->inputSample16bitBuffer->bufferCb,
-            MAX_LCU_SIZE_CHROMA,
+            MAX_LCU_SIZE >> subWidthCMinus1,
             lcuWidth >> subWidthCMinus1,
             lcuHeight >> subHeightCMinus1);
 
@@ -2899,7 +2899,7 @@ void EncodePassPackLcu(
             inputPicture->bufferBitIncCr + (lcuOriginY >> subHeightCMinus1) * chroma2BitWidth + ((lcuOriginX >> subWidthCMinus1) / 4)*(lcuHeight >> subHeightCMinus1),
             (lcuWidth >> subWidthCMinus1) / 4,
             (EB_U16 *)contextPtr->inputSample16bitBuffer->bufferCr,
-            MAX_LCU_SIZE_CHROMA,
+            MAX_LCU_SIZE >> subWidthCMinus1,
             lcuWidth >> subWidthCMinus1,
             lcuHeight >> subHeightCMinus1);
 
