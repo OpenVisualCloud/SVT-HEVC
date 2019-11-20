@@ -1,4 +1,4 @@
-From a8f5eeaeebb6f3968c9b4406c648c2ca3a461387 Mon Sep 17 00:00:00 2001
+From d3d98c5bb0f64685a2b7daa5e172d5098ac36e25 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -11,12 +11,12 @@ Signed-off-by: Jing Sun <jing.a.sun@intel.com>
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 517 +++++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 523 insertions(+)
+ libavcodec/libsvt_hevc.c | 505 +++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 511 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index 34c2adb..dc5f74f 100755
+index 34c2adb4a4..dc5f74f4a9 100755
 --- a/configure
 +++ b/configure
 @@ -264,6 +264,7 @@ External library support:
@@ -52,7 +52,7 @@ index 34c2adb..dc5f74f 100755
  enabled libtesseract      && require_pkg_config libtesseract tesseract tesseract/capi.h TessBaseAPICreate
  enabled libtheora         && require libtheora theora/theoraenc.h th_info_init -ltheoraenc -ltheoradec -logg
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index 3cd73fb..d39f568 100644
+index 3cd73fbcc6..d39f568585 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
 @@ -991,6 +991,7 @@ OBJS-$(CONFIG_LIBOPUS_ENCODER)            += libopusenc.o libopus.o     \
@@ -64,7 +64,7 @@ index 3cd73fb..d39f568 100644
  OBJS-$(CONFIG_LIBTWOLAME_ENCODER)         += libtwolame.o
  OBJS-$(CONFIG_LIBVO_AMRWBENC_ENCODER)     += libvo-amrwbenc.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
-index d2f9a39..d8788a7 100644
+index d2f9a39ce5..d8788a7954 100644
 --- a/libavcodec/allcodecs.c
 +++ b/libavcodec/allcodecs.c
 @@ -707,6 +707,7 @@ extern AVCodec ff_librsvg_decoder;
@@ -77,10 +77,10 @@ index d2f9a39..d8788a7 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000..61bf490
+index 0000000000..5dd9724528
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,517 @@
+@@ -0,0 +1,505 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -285,19 +285,7 @@ index 0000000..61bf490
 +    if (svt_enc->la_depth != -1)
 +        param->lookAheadDistance = svt_enc->la_depth;
 +
-+    if ((svt_enc->thread_count > 0) &&
-+        (svt_enc->thread_count < (EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_FACTOR))) {
-+        param->threadCount = EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_FACTOR;
-+        av_log(avctx, AV_LOG_WARNING, "Thread count is set too small, forced to %"PRId32"\n",
-+               param->threadCount);
-+    } else if (svt_enc->thread_count % EB_THREAD_COUNT_MIN_CORE) {
-+        param->threadCount = (svt_enc->thread_count + EB_THREAD_COUNT_MIN_CORE - 1)
-+                             / EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_MIN_CORE;
-+        av_log(avctx, AV_LOG_DEBUG, "Thread count is rounded to %"PRId32"\n",
-+               param->threadCount);
-+    } else {
-+        param->threadCount = svt_enc->thread_count;
-+    }
++    param->threadCount = svt_enc->thread_count;
 +
 +    if (avctx->flags & AV_CODEC_FLAG_GLOBAL_HEADER)
 +        param->codeVpsSpsPps = 0;
@@ -542,7 +530,7 @@ index 0000000..61bf490
 +    { "sc_detection", "Scene change detection", OFFSET(scd),
 +      AV_OPT_TYPE_BOOL, { .i64 = 1 }, 0, 1, VE },
 +
-+    { "thread_count", "Number of threads [0: Auto, 96: Min]", OFFSET(thread_count),
++    { "thread_count", "Number of threads [0: Auto]", OFFSET(thread_count),
 +      AV_OPT_TYPE_INT, {.i64 = 0}, 0, INT_MAX, VE },
 +
 +    { "tier", "Set tier (general_tier_flag)", OFFSET(tier),
@@ -599,5 +587,5 @@ index 0000000..61bf490
 +    .wrapper_name   = "libsvt_hevc",
 +};
 -- 
-2.7.4
+2.17.1
 
