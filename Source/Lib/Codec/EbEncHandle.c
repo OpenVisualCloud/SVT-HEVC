@@ -1823,8 +1823,7 @@ void LoadDefaultBufferConfigurationSettings(
         totalThreadCount = coreCount * EB_THREAD_COUNT_FACTOR;
 
     if (totalThreadCount < EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_FACTOR) {
-        coreCount = EB_THREAD_COUNT_MIN_CORE;
-        totalThreadCount = coreCount * EB_THREAD_COUNT_FACTOR;
+        totalThreadCount = EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_FACTOR;
     }
 
     if (totalThreadCount % EB_THREAD_COUNT_MIN_CORE) {
