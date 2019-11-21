@@ -738,9 +738,6 @@ void* PictureDecisionKernel(void *inputPtr)
            ReleasePrevPictureFromReorderQueue(
                encodeContextPtr);
 
-            pictureControlSetPtr->craFlag = EB_FALSE;
-            pictureControlSetPtr->idrFlag = EB_FALSE;
-
             // If the Intra period length is 0, then introduce an intra for every picture
             if ((sequenceControlSetPtr->intraPeriodLength == 0) || (pictureControlSetPtr->pictureNumber == 0)) {
                 if (sequenceControlSetPtr->intraRefreshType == CRA_REFRESH)
