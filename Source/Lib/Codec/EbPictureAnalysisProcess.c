@@ -952,13 +952,13 @@ static EB_U64 ComputeVariance64x64(
 
 static EB_U8  getFilteredTypes(EB_U8  *ptr,
 	EB_U32  stride,
-	EB_U8   EbHevcfilterType)
+	EB_U8   EbHevcFilterType)
 {
 	EB_U8 *p = ptr - 1 - stride;
 
 	EB_U32 a = 0;
 
-	if (EbHevcfilterType == 0){
+	if (EbHevcFilterType == 0){
 
 		//Luma
 		a = (p[1] +
@@ -966,7 +966,7 @@ static EB_U8  getFilteredTypes(EB_U8  *ptr,
 			p[1 + 2 * stride]) / 8;
 
 	}
-	else if (EbHevcfilterType == 1){
+	else if (EbHevcFilterType == 1){
         a = (                    2 * p[1] +
 			 2 * p[0 + stride] + 4 * p[1 + stride] + 2 * p[2 + stride] +
 			                     2 * p[1 + 2 * stride]  );
@@ -976,14 +976,14 @@ static EB_U8  getFilteredTypes(EB_U8  *ptr,
         //fixed point version of a=a/12 to mimic x86 instruction _mm256_mulhrs_epi16;
         //a= (a*2730)>>15;
 	}
-	else if (EbHevcfilterType == 2){
+	else if (EbHevcFilterType == 2){
 
 
 		a = (4 * p[1] +
 			4 * p[0 + stride] + 4 * p[1 + stride] + 4 * p[2 + stride] +
 			4 * p[1 + 2 * stride]) / 20;
 	}
-	else if (EbHevcfilterType == 3){
+	else if (EbHevcFilterType == 3){
 
 		a = (1 * p[0] + 1 * p[1] + 1 * p[2] +
 			1 * p[0 + stride] + 4 * p[1 + stride] + 1 * p[2 + stride] +
@@ -991,7 +991,7 @@ static EB_U8  getFilteredTypes(EB_U8  *ptr,
 
 
 	}
-	else if (EbHevcfilterType == 4){
+	else if (EbHevcFilterType == 4){
 
 		//gaussian matrix(Chroma)
 		a = (1 * p[0] + 2 * p[1] + 1 * p[2] +
@@ -999,14 +999,14 @@ static EB_U8  getFilteredTypes(EB_U8  *ptr,
 			1 * p[0 + 2 * stride] + 2 * p[1 + 2 * stride] + 1 * p[2 + 2 * stride]) / 16;
 
 	}
-	else if (EbHevcfilterType == 5){
+	else if (EbHevcFilterType == 5){
 
 		a = (2 * p[0] + 2 * p[1] + 2 * p[2] +
 			2 * p[0 + stride] + 4 * p[1 + stride] + 2 * p[2 + stride] +
 			2 * p[0 + 2 * stride] + 2 * p[1 + 2 * stride] + 2 * p[2 + 2 * stride]) / 20;
 
 	}
-	else if (EbHevcfilterType == 6){
+	else if (EbHevcFilterType == 6){
 
 		a = (4 * p[0] + 4 * p[1] + 4 * p[2] +
 			4 * p[0 + stride] + 4 * p[1 + stride] + 4 * p[2 + stride] +

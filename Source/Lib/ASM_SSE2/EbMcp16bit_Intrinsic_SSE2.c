@@ -16,7 +16,7 @@ EB_EXTERN EB_ALIGN(16) const EB_S16 lumaIFCoeff16_SSE2_INTRIN[]= {
     -10,  4, -10,  4, -10,  4, -10,  4,
 };
 
-EB_EXTERN EB_ALIGN(16) const EB_S16 EbHevcchromaFilterCoeffSR1[8][4] =
+EB_EXTERN EB_ALIGN(16) const EB_S16 EbHevcChromaFilterCoeffSR1[8][4] =
 {
   { 0, 32,  0,  0},
   {-1, 29,  5, -1},
@@ -28,7 +28,7 @@ EB_EXTERN EB_ALIGN(16) const EB_S16 EbHevcchromaFilterCoeffSR1[8][4] =
   {-1,  5, 29, -1},
 };
 
-//extern const EB_S16 EbHevcchromaFilterCoeff[8][4];
+//extern const EB_S16 EbHevcChromaFilterCoeff[8][4];
 
 void PictureCopyKernelOutRaw16bit_SSE2_INTRIN(
   EB_U16               *refPic,
@@ -1982,7 +1982,7 @@ EB_U16 *refPic, EB_U32 srcStride, EB_U16 *dst, EB_U32 dstStride, EB_U32 puWidth,
   refPic--;
   //PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
-  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeffSR1[fracPosx]);
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcChromaFilterCoeffSR1[fracPosx]);
   c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
   c2 = _mm_shuffle_epi32(c0, 0xaa);
@@ -2111,7 +2111,7 @@ EB_U16 *refPic, EB_U32 srcStride, EB_U16 *dst, EB_U32 dstStride, EB_U32 puWidth,
   (void)firstPassIFDst;
   (void)fracPosx;
 
-  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeffSR1[fracPosy]);
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcChromaFilterCoeffSR1[fracPosy]);
   c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
   c2 = _mm_shuffle_epi32(c0, 0xaa);
@@ -2248,7 +2248,7 @@ void ChromaInterpolationFilterOneDOutRaw16bitHorizontal_SSE2_INTRIN(
   refPic--;
   //PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
-  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeffSR1[fracPosx]);
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcChromaFilterCoeffSR1[fracPosx]);
   c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
   c2 = _mm_shuffle_epi32(c0, 0xaa);
@@ -2374,7 +2374,7 @@ void ChromaInterpolationFilterOneDOutRaw16bitVertical_SSE2_INTRIN(
   (void)firstPassIFDst;
   (void)fracPosx;
 
-  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeffSR1[fracPosy]);
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcChromaFilterCoeffSR1[fracPosy]);
   c0 = _mm_unpacklo_epi16(c0, c0);
   c3 = _mm_shuffle_epi32(c0, 0xff);
   c2 = _mm_shuffle_epi32(c0, 0xaa);
@@ -2494,7 +2494,7 @@ void ChromaInterpolationFilterTwoDInRaw16bit_SSE2_INTRIN(
 
   //PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
-  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeffSR1[fracPosy]);
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcChromaFilterCoeffSR1[fracPosy]);
   c1 = _mm_shuffle_epi32(c0, 0x55);
   c0 = _mm_shuffle_epi32(c0, 0);
 
@@ -2622,7 +2622,7 @@ void ChromaInterpolationFilterTwoDInRawOutRaw_SSE2_INTRIN(
 
   //PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
-  c0 = _mm_loadl_epi64((__m128i *)EbHevcchromaFilterCoeffSR1[fracPosy]);
+  c0 = _mm_loadl_epi64((__m128i *)EbHevcChromaFilterCoeffSR1[fracPosy]);
   c1 = _mm_shuffle_epi32(c0, 0x55);
   c0 = _mm_shuffle_epi32(c0, 0);
 

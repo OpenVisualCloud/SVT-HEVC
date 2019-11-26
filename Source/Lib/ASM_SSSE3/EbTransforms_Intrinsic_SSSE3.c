@@ -16,11 +16,11 @@
 
 
 #ifdef __cplusplus
-extern "C" const EB_S16 EbHevccoeff_tbl[48*8];
-extern "C" const EB_S16 EbHevccoeff_tbl2[48*8];
+extern "C" const EB_S16 EbHevcCoeff_tbl[48*8];
+extern "C" const EB_S16 EbHevcCoeff_tbl2[48*8];
 #else
-extern const EB_S16 EbHevccoeff_tbl[48*8];
-extern const EB_S16 EbHevccoeff_tbl2[48*8];
+extern const EB_S16 EbHevcCoeff_tbl[48*8];
+extern const EB_S16 EbHevcCoeff_tbl2[48*8];
 #endif
 
 
@@ -246,7 +246,7 @@ static void transform16(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_
   EB_U32 i;
   __m128i s0 = _mm_cvtsi32_si128(shift);
   __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-  const __m128i *coeff32 = (const __m128i *)EbHevccoeff_tbl;
+  const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
   for (i = 0; i < 16; i++)
   {
@@ -306,7 +306,7 @@ static void invTransform16(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 d
 {
   __m128i s0 = _mm_cvtsi32_si128(shift);
   __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-  const __m128i *coeff32 = (const __m128i *)EbHevccoeff_tbl2;
+  const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl2;
 
   do
   {
@@ -381,7 +381,7 @@ static void invTransform16Half(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U
 {
   __m128i s0 = _mm_cvtsi32_si128(shift);
   __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-  const __m128i *coeff32 = (const __m128i *)EbHevccoeff_tbl2;
+  const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl2;
 
   do
   {
@@ -678,7 +678,7 @@ static void transform32(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_
 {
   __m128i s0 = _mm_cvtsi32_si128(shift);
   __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-  const __m128i *coeff32 = (const __m128i *)EbHevccoeff_tbl;
+  const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
   EB_U32 numRows = 32;
   do
@@ -809,7 +809,7 @@ static void invTransform32(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 d
 {
   __m128i s0 = _mm_cvtsi32_si128(shift);
   __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-  const __m128i *coeff32 = (const __m128i *)EbHevccoeff_tbl2;
+  const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl2;
 
   do
   {
@@ -1015,7 +1015,7 @@ static void invTransform32ThreeQuarter(EB_S16 *src, EB_U32 src_stride, EB_S16 *d
 {
   __m128i s0 = _mm_cvtsi32_si128(shift);
   __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-  const __m128i *coeff32 = (const __m128i *)EbHevccoeff_tbl2;
+  const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl2;
 
   do
   {
@@ -1196,7 +1196,7 @@ static void invTransform32Half(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U
 {
   __m128i s0 = _mm_cvtsi32_si128(shift);
   __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-  const __m128i *coeff32 = (const __m128i *)EbHevccoeff_tbl2;
+  const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl2;
 
   do
   {
@@ -1346,7 +1346,7 @@ static void invTransform32Quarter(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, E
 {
   __m128i s0 = _mm_cvtsi32_si128(shift);
   __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-  const __m128i *coeff32 = (const __m128i *)EbHevccoeff_tbl2;
+  const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl2;
 
   do
   {

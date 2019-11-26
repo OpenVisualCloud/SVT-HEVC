@@ -42,7 +42,7 @@ static const EB_U8 parentCuIndex[85] =
     36, 0, 0, 1, 2, 3, 5, 0, 1, 2, 3, 10, 0, 1, 2, 3, 15, 0, 1, 2, 3,
 };
 
-const EB_U8 EbHevcincrementalCount[85] = {
+const EB_U8 EbHevcIncrementalCount[85] = {
 
     //64x64
     0,
@@ -1030,11 +1030,11 @@ void EbHevcPredictionPartitionLoop(
                 cuPtr->earlyCost = pictureControlSetPtr->sliceType == EB_I_PICTURE ? cuIntraCost : cuInterCost;
 
                 if (endDepth == 2){
-                    contextPtr->groupOf8x8BlocksCount = depth == 2 ? EbHevcincrementalCount[cuIndexInRaterScan] : 0;
+                    contextPtr->groupOf8x8BlocksCount = depth == 2 ? EbHevcIncrementalCount[cuIndexInRaterScan] : 0;
                 }
 
                 if (endDepth == 1){
-                    contextPtr->groupOf16x16BlocksCount = depth == 1 ? EbHevcincrementalCount[cuIndexInRaterScan] : 0;
+                    contextPtr->groupOf16x16BlocksCount = depth == 1 ? EbHevcIncrementalCount[cuIndexInRaterScan] : 0;
                 }
                 EbHevcMdcInterDepthDecision(
                     contextPtr,

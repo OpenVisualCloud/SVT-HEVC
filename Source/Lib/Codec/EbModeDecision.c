@@ -42,7 +42,7 @@ EB_BOOL AntiContouringIntraModeValidityPerDepth[35] =
 };
 
 
-const EB_U32 EbHevcparentIndex[85] = { 0, 0, 0, 2, 2, 2, 2, 0, 7, 7, 7, 7, 0, 12, 12, 12, 12, 0, 17, 17, 17, 17, 0, 0,
+const EB_U32 EbHevcParentIndex[85] = { 0, 0, 0, 2, 2, 2, 2, 0, 7, 7, 7, 7, 0, 12, 12, 12, 12, 0, 17, 17, 17, 17, 0, 0,
 23, 23, 23, 23, 0, 28, 28, 28, 28, 0, 33, 33, 33, 33, 0, 38, 38, 38, 38, 0, 0,
 44, 44, 44, 44, 0, 49, 49, 49, 49, 0, 54, 54, 54, 54, 0, 59, 59, 59, 59, 0, 0,
 65, 65, 65, 65, 0, 70, 70, 70, 70, 0, 75, 75, 75, 75, 0, 80, 80, 80, 80 };
@@ -1464,7 +1464,7 @@ void  ProductIntraCandidateInjection(
 
 
                             if (lcuParams->isCompleteLcu) {
-                                const CodedUnitStats_t  *cuStats = GetCodedUnitStats(EbHevcparentIndex[leafIndex]);
+                                const CodedUnitStats_t  *cuStats = GetCodedUnitStats(EbHevcParentIndex[leafIndex]);
                                 const EB_U32 me2Nx2NTableOffset = cuStats->cuNumInDepth + me2Nx2NOffset[cuStats->depth];
                                 OisCu32Cu16Results_t	        *oisCu32Cu16ResultsPtr = pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuAddr];
                                 const OisCandidate_t    *oisCandidate = oisCu32Cu16ResultsPtr->sortedOisCandidate[me2Nx2NTableOffset];

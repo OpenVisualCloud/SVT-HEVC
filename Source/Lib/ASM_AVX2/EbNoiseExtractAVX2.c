@@ -9,7 +9,7 @@
 #include "immintrin.h"
 #include "EbUtility.h"
 
-EB_EXTERN EB_ALIGN(16) const EB_U8 EbHevcfilterType[] = {
+EB_EXTERN EB_ALIGN(16) const EB_U8 EbHevcFilterType[] = {
 	1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4
 };
 
@@ -39,7 +39,7 @@ inline void lumaWeakFilter_AVX2_INTRIN(
 	currPrevPermutation = _mm256_permute4x64_epi64(currPrev, 216);
 	currPermutation = _mm256_permute4x64_epi64(curr, 216);
 	currLeftMidFirstHalflo = _mm256_unpacklo_epi8(currPrevPermutation, currPermutation);
-	weights = _mm256_loadu_si256((__m256i*)EbHevcfilterType);
+	weights = _mm256_loadu_si256((__m256i*)EbHevcFilterType);
 	currLeftMidFirstHalfWeight = _mm256_maddubs_epi16(currLeftMidFirstHalflo, weights);
 	currNextPermutation = _mm256_permute4x64_epi64(currNext, 88);
 	currNextFirstHalf = _mm256_unpacklo_epi8(currNextPermutation, _mm256_setzero_si256());

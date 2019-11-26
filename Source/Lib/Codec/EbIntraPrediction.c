@@ -2041,9 +2041,9 @@ EB_ERRORTYPE GenerateIntraReference16bitSamplesEncodePass(
         if(neighborAvailable == EB_TRUE) {
 
             // Copy samples in reverse order
-            EbHevcmemcpy16bit(lumaWritePtr, &topLumaReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
-            EbHevcmemcpy16bit(cbWritePtr, &topCbReconNeighborArray[reconArrayIndex >> chromaRatio], MIN_PU_SIZE >> chromaRatio);
-            EbHevcmemcpy16bit(crWritePtr, &topCrReconNeighborArray[reconArrayIndex >> chromaRatio], MIN_PU_SIZE >> chromaRatio);
+            EbHevcMemcpy16bit(lumaWritePtr, &topLumaReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
+            EbHevcMemcpy16bit(cbWritePtr, &topCbReconNeighborArray[reconArrayIndex >> chromaRatio], MIN_PU_SIZE >> chromaRatio);
+            EbHevcMemcpy16bit(crWritePtr, &topCrReconNeighborArray[reconArrayIndex >> chromaRatio], MIN_PU_SIZE >> chromaRatio);
 
             // Set pad value (end of block)
             lumaPadValue    = topLumaReconNeighborArray[reconArrayIndex + MIN_PU_SIZE - 1];
@@ -2153,8 +2153,8 @@ EB_ERRORTYPE GenerateIntraReference16bitSamplesEncodePass(
     */
 
     //Luma
-    EbHevcmemcpy16bit(yBorderReverse     + (size<<1),  yBorder     + (size<<1),  (size<<1)+1);
-    EbHevcmemcpy16bit(yBorderFiltReverse + (size<<1),  yBorderFilt + (size<<1),  (size<<1)+1);
+    EbHevcMemcpy16bit(yBorderReverse     + (size<<1),  yBorder     + (size<<1),  (size<<1)+1);
+    EbHevcMemcpy16bit(yBorderFiltReverse + (size<<1),  yBorderFilt + (size<<1),  (size<<1)+1);
 
     sampleWriteLoc     = yBorderReverse      + (size<<1) - 1 ;
     sampleWriteLocFilt = yBorderFiltReverse  + (size<<1) - 1 ;
@@ -2167,8 +2167,8 @@ EB_ERRORTYPE GenerateIntraReference16bitSamplesEncodePass(
     }
 
     //Chroma
-    EbHevcmemcpy16bit(cbBorderReverse + (puChromaSize<<1),  cbBorder + (puChromaSize<<1),  (puChromaSize<<1)+1);
-    EbHevcmemcpy16bit(crBorderReverse + (puChromaSize<<1),  crBorder + (puChromaSize<<1),  (puChromaSize<<1)+1);
+    EbHevcMemcpy16bit(cbBorderReverse + (puChromaSize<<1),  cbBorder + (puChromaSize<<1),  (puChromaSize<<1)+1);
+    EbHevcMemcpy16bit(crBorderReverse + (puChromaSize<<1),  crBorder + (puChromaSize<<1),  (puChromaSize<<1)+1);
 
     sampleWriteLocCb     = cbBorderReverse      + (puChromaSize<<1) - 1 ;
     sampleWriteLocCr     = crBorderReverse      + (puChromaSize<<1) - 1 ;
@@ -2529,7 +2529,7 @@ EB_ERRORTYPE GenerateLumaIntraReference16bitSamplesEncodePass(
         if(neighborAvailable == EB_TRUE) {
 
             // Copy samples in reverse order
-            EbHevcmemcpy16bit(lumaWritePtr, &topLumaReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
+            EbHevcMemcpy16bit(lumaWritePtr, &topLumaReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
 
             // Set pad value (end of block)
             lumaPadValue    = topLumaReconNeighborArray[reconArrayIndex + MIN_PU_SIZE - 1];
@@ -2628,8 +2628,8 @@ EB_ERRORTYPE GenerateLumaIntraReference16bitSamplesEncodePass(
                                                                junk
     */
 
-	EbHevcmemcpy16bit(yBorderReverse + (size<<1), yBorder + (size<<1), (size<<1)+1);
-	EbHevcmemcpy16bit(yBorderFiltReverse + (size<<1), yBorderFilt + (size<<1), (size<<1)+1);
+	EbHevcMemcpy16bit(yBorderReverse + (size<<1), yBorder + (size<<1), (size<<1)+1);
+	EbHevcMemcpy16bit(yBorderFiltReverse + (size<<1), yBorderFilt + (size<<1), (size<<1)+1);
 
     sampleWriteLoc = yBorderReverse + (size<<1) - 1 ;
     sampleWriteLocFilt = yBorderFiltReverse + (size<<1) - 1 ;
@@ -3030,8 +3030,8 @@ EB_ERRORTYPE GenerateChromaIntraReference16bitSamplesEncodePass(
 
         if(neighborAvailable == EB_TRUE) {
 
-			EbHevcmemcpy16bit(cbWritePtr, &topCbReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
-			EbHevcmemcpy16bit(crWritePtr, &topCrReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
+			EbHevcMemcpy16bit(cbWritePtr, &topCbReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
+			EbHevcMemcpy16bit(crWritePtr, &topCrReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
 
             // Set pad value (end of block)
             cbPadValue      = topCbReconNeighborArray[reconArrayIndex + MIN_PU_SIZE - 1];
@@ -3104,8 +3104,8 @@ EB_ERRORTYPE GenerateChromaIntraReference16bitSamplesEncodePass(
                                                                junk
     */
 
-	EbHevcmemcpy16bit(cbBorderReverse + (puChromaSize << 1), cbBorder + (puChromaSize << 1), (puChromaSize << 1) + 1);
-	EbHevcmemcpy16bit(crBorderReverse + (puChromaSize << 1), crBorder + (puChromaSize << 1), (puChromaSize << 1) + 1);
+	EbHevcMemcpy16bit(cbBorderReverse + (puChromaSize << 1), cbBorder + (puChromaSize << 1), (puChromaSize << 1) + 1);
+	EbHevcMemcpy16bit(crBorderReverse + (puChromaSize << 1), crBorder + (puChromaSize << 1), (puChromaSize << 1) + 1);
 
     sampleWriteLocCb = cbBorderReverse + (puChromaSize<<1) - 1 ;
     sampleWriteLocCr = crBorderReverse + (puChromaSize<<1) - 1 ;
@@ -3118,9 +3118,9 @@ EB_ERRORTYPE GenerateChromaIntraReference16bitSamplesEncodePass(
     }
 
     if (colorFormat == EB_YUV444) {
-        EbHevcmemcpy16bit(cbBorderFiltReverse + (puChromaSize<<1),
+        EbHevcMemcpy16bit(cbBorderFiltReverse + (puChromaSize<<1),
                 cbBorderFilt + (puChromaSize << 1), (puChromaSize << 1) + 1);
-        EbHevcmemcpy16bit(crBorderFiltReverse + (puChromaSize<<1),
+        EbHevcMemcpy16bit(crBorderFiltReverse + (puChromaSize<<1),
                 crBorderFilt + (puChromaSize << 1), (puChromaSize << 1) + 1);
 
         sampleWriteLocCbFilt = cbBorderFiltReverse + (puChromaSize << 1) - 1 ;

@@ -18,19 +18,19 @@
 void PrecomputeCabacCost(CabacCost_t            *CabacCostPtr,
     CabacEncodeContext_t   *cabacEncodeCtxPtr);
 
-const EB_S16 EbHevcencMinDeltaQpWeightTab[MAX_TEMPORAL_LAYERS] = { 100, 100, 100, 100, 100, 100 };
-const EB_S16 EbHevcencMaxDeltaQpWeightTab[MAX_TEMPORAL_LAYERS] = { 100, 100, 100, 100, 100, 100 };
+const EB_S16 EbHevcEncMinDeltaQpWeightTab[MAX_TEMPORAL_LAYERS] = { 100, 100, 100, 100, 100, 100 };
+const EB_S16 EbHevcEncMaxDeltaQpWeightTab[MAX_TEMPORAL_LAYERS] = { 100, 100, 100, 100, 100, 100 };
 
-const EB_S8  EbHevcencMinDeltaQpISliceTab[4] = { -5, -5, -3, -2 };
+const EB_S8  EbHevcEncMinDeltaQpISliceTab[4] = { -5, -5, -3, -2 };
 
-const EB_S8  EbHevcencMinDeltaQpTab[4][MAX_TEMPORAL_LAYERS] = {
+const EB_S8  EbHevcEncMinDeltaQpTab[4][MAX_TEMPORAL_LAYERS] = {
     { -4, -2, -2, -1, -1, -1 },
     { -4, -2, -2, -1, -1, -1 },
     { -3, -1, -1, -1, -1, -1 },
     { -1, -0, -0, -0, -0, -0 },
 };
 
-const EB_S8  EbHevcencMaxDeltaQpTab[4][MAX_TEMPORAL_LAYERS] = {
+const EB_S8  EbHevcEncMaxDeltaQpTab[4][MAX_TEMPORAL_LAYERS] = {
     { 4, 5, 5, 5, 5, 5 },
     { 4, 5, 5, 5, 5, 5 },
     { 4, 5, 5, 5, 5, 5 },
@@ -1118,7 +1118,7 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture16bit(
 
                     reconSampleYPtr = (EB_U16*)(recBuf16bit->bufferY) + reconSampleLumaIndex + (lcuHeight - 1)*recBuf16bit->strideY;
                     //Save last pixel row of this LCU row for next LCU row
-                    EbHevcmemcpy16bit(contextPtr->saoUpBuffer16[pingpongIdxUp], reconSampleYPtr, sequenceControlSetPtr->lumaWidth);
+                    EbHevcMemcpy16bit(contextPtr->saoUpBuffer16[pingpongIdxUp], reconSampleYPtr, sequenceControlSetPtr->lumaWidth);
 
                 }
 
@@ -1187,7 +1187,7 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture16bit(
                     reconSampleCbPtr = (EB_U16*)(recBuf16bit->bufferCb) + reconSampleChromaIndex + (lcuHeight - 1)*recBuf16bit->strideCb;
 
                     //Save last pixel row of this LCU row for next LCU row
-                    EbHevcmemcpy16bit(contextPtr->saoUpBuffer16[pingpongIdxUp], reconSampleCbPtr, sequenceControlSetPtr->chromaWidth);
+                    EbHevcMemcpy16bit(contextPtr->saoUpBuffer16[pingpongIdxUp], reconSampleCbPtr, sequenceControlSetPtr->chromaWidth);
                 }
 
                 //Save last pixel colunm of this LCU  for next LCU
@@ -1251,7 +1251,7 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture16bit(
 
                     reconSampleCrPtr = (EB_U16*)(recBuf16bit->bufferCr) + reconSampleChromaIndex + (lcuHeight - 1)*recBuf16bit->strideCr;
                     //Save last pixel row of this LCU row for next LCU row
-                    EbHevcmemcpy16bit(contextPtr->saoUpBuffer16[pingpongIdxUp], reconSampleCrPtr, sequenceControlSetPtr->chromaWidth);
+                    EbHevcMemcpy16bit(contextPtr->saoUpBuffer16[pingpongIdxUp], reconSampleCrPtr, sequenceControlSetPtr->chromaWidth);
                 }
 
                 //Save last pixel colunm of this LCU  for next LCU
@@ -1913,8 +1913,8 @@ EB_ERRORTYPE QpmDeriveWeightsMinAndMax(
 {
     EB_ERRORTYPE                    return_error = EB_ErrorNone;
     EB_U32 cuDepth;
-    contextPtr->minDeltaQpWeight = EbHevcencMinDeltaQpWeightTab[pictureControlSetPtr->temporalLayerIndex];
-    contextPtr->maxDeltaQpWeight = EbHevcencMaxDeltaQpWeightTab[pictureControlSetPtr->temporalLayerIndex];
+    contextPtr->minDeltaQpWeight = EbHevcEncMinDeltaQpWeightTab[pictureControlSetPtr->temporalLayerIndex];
+    contextPtr->maxDeltaQpWeight = EbHevcEncMaxDeltaQpWeightTab[pictureControlSetPtr->temporalLayerIndex];
     //QpmDeriveDeltaQpMapWeights
 
 
@@ -1962,8 +1962,8 @@ EB_ERRORTYPE QpmDeriveWeightsMinAndMax(
 
 
     for (cuDepth = 0; cuDepth < 4; cuDepth++){
-        contextPtr->minDeltaQp[cuDepth] = pictureControlSetPtr->sliceType == EB_I_PICTURE ? EbHevcencMinDeltaQpISliceTab[cuDepth] : EbHevcencMinDeltaQpTab[cuDepth][pictureControlSetPtr->temporalLayerIndex];
-        contextPtr->maxDeltaQp[cuDepth] = EbHevcencMaxDeltaQpTab[cuDepth][pictureControlSetPtr->temporalLayerIndex];
+        contextPtr->minDeltaQp[cuDepth] = pictureControlSetPtr->sliceType == EB_I_PICTURE ? EbHevcEncMinDeltaQpISliceTab[cuDepth] : EbHevcEncMinDeltaQpTab[cuDepth][pictureControlSetPtr->temporalLayerIndex];
+        contextPtr->maxDeltaQp[cuDepth] = EbHevcEncMaxDeltaQpTab[cuDepth][pictureControlSetPtr->temporalLayerIndex];
     }
 
     return return_error;
@@ -2652,7 +2652,7 @@ void* EncDecKernel(void *inputPtr)
     EB_U32                  lcuRowIndexCount;
     EB_U32                  tileGroupWidthInLcu;
     MdcLcuData_t           *mdcPtr;
-    // Variables           
+    // Variables
     EB_BOOL                 enableSaoFlag = EB_TRUE;
     EB_BOOL                 is16bit;
 
@@ -2978,7 +2978,7 @@ void* EncDecKernel(void *inputPtr)
 
 
                     // Encode Pass
-                    EncodePass(                 // HT done 
+                    EncodePass(                 // HT done
                             sequenceControlSetPtr,
                             pictureControlSetPtr,
                             lcuPtr,

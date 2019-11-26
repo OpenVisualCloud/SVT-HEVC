@@ -644,9 +644,9 @@ void memset16bit(
     }
 }
 /*******************************************
- * EbHevcmemcpy16bit
+ * EbHevcMemcpy16bit
  *******************************************/
-void EbHevcmemcpy16bit(
+void EbHevcMemcpy16bit(
     EB_U16                     * outPtr,
     EB_U16                     * inPtr,
     EB_U64                       numOfElements )

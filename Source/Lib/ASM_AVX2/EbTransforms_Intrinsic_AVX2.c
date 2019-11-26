@@ -13,7 +13,7 @@
 #ifdef __GNUC__
 __attribute__((aligned(16)))
 #endif
-EB_ALIGN(32) const EB_S16 EbHevccoeff_tbl_AVX2[48 * 16] =
+EB_ALIGN(32) const EB_S16 EbHevcCoeff_tbl_AVX2[48 * 16] =
 {
     64, 64, 89, 75, 83, 36, 75, -18, 64, 64, 89, 75, 83, 36, 75, -18, 64, -64, 50, -89, 36, -83, 18, -50, 64, -64, 50, -89, 36, -83, 18, -50,
     64, 64, 50, 18, -36, -83, -89, -50, 64, 64, 50, 18, -36, -83, -89, -50, -64, 64, 18, 75, 83, -36, 75, -89, -64, 64, 18, 75, 83, -36, 75, -89,
@@ -282,7 +282,7 @@ void QuantizeInvQuantize8x8_AVX2_INTRIN(
 
 
 // transpose 16x16 block of data
-void EbHevctranspose16_AVX2_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_stride)
+void EbHevcTranspose16_AVX2_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_stride)
 {
     EB_U32 i;
     for (i = 0; i < 2; i++)
@@ -346,7 +346,7 @@ void EbHevctranspose16_AVX2_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, 
 }
 
 // transpose 32x32 block of data
-void EbHevctranspose32_AVX2_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_stride)
+void EbHevcTranspose32_AVX2_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_stride)
 {
     EB_U32 i, j;
     for (i = 0; i < 4; i++)
@@ -553,7 +553,7 @@ void transform16_AVX2_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m256i o0 = _mm256_set1_epi32(1 << (shift - 1));
-    const __m256i *coeff32 = (const __m256i *)EbHevccoeff_tbl_AVX2;
+    const __m256i *coeff32 = (const __m256i *)EbHevcCoeff_tbl_AVX2;
 
     for (i = 0; i < 16; i += 2)
     {
@@ -610,12 +610,12 @@ void transform16_AVX2_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32
 }
 
 // 32-point forward transform (32 rows)
-void EbHevctransform32_AVX2_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_stride, EB_U32 shift)
+void EbHevcTransform32_AVX2_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_stride, EB_U32 shift)
 {
     EB_U32 i;
     __m128i s0;
     __m256i o0;
-    const __m256i *coeff32 = (const __m256i *)EbHevccoeff_tbl_AVX2;
+    const __m256i *coeff32 = (const __m256i *)EbHevcCoeff_tbl_AVX2;
 
     shift &= 0x0000FFFF; // Redundant code to fix Visual Studio 2012 AVX2 compiler error
     s0 = _mm_cvtsi32_si128(shift);
@@ -755,7 +755,7 @@ void Pfreq1DTransform32_AVX2_INTRIN(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m256i o0 = _mm256_set1_epi32(1 << (shift - 1));
-    const __m256i *coeff32 = (const __m256i *)EbHevccoeff_tbl_AVX2;
+    const __m256i *coeff32 = (const __m256i *)EbHevcCoeff_tbl_AVX2;
 
     for (i = 0; i < 32; i += 2)
     {
@@ -889,7 +889,7 @@ void Pfreq2DTransform32_AVX2_INTRIN(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m256i o0 = _mm256_set1_epi32(1 << (shift - 1));
-    const __m256i *coeff32 = (const __m256i *)EbHevccoeff_tbl_AVX2;
+    const __m256i *coeff32 = (const __m256i *)EbHevcCoeff_tbl_AVX2;
 
     for (i = 0; i < 16; i += 2)
     {
@@ -1038,7 +1038,7 @@ void PfreqN41DTransform32_AVX2_INTRIN(
 	EB_U32 i;
 	__m128i s0 = _mm_cvtsi32_si128(shift);
 	__m256i o0 = _mm256_set1_epi32(1 << (shift - 1));
-	const __m256i *coeff32 = (const __m256i *)EbHevccoeff_tbl_AVX2;
+	const __m256i *coeff32 = (const __m256i *)EbHevcCoeff_tbl_AVX2;
 
 	for (i = 0; i < 32; i += 2)
 	{
@@ -1175,7 +1175,7 @@ void PfreqN42DTransform32_AVX2_INTRIN(
 	EB_U32 i;
 	__m128i s0 = _mm_cvtsi32_si128(shift);
 	__m256i o0 = _mm256_set1_epi32(1 << (shift - 1));
-	const __m256i *coeff32 = (const __m256i *)EbHevccoeff_tbl_AVX2;
+	const __m256i *coeff32 = (const __m256i *)EbHevcCoeff_tbl_AVX2;
 
 	//for (i = 0; i < 16; i += 2)
 	for (i = 0; i < 8; i += 2)
@@ -1458,20 +1458,20 @@ void PfreqN4Transform32x32_AVX2_INTRIN(
 EB_EXTERN void lowPrecisionTransform16x16_AVX2_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_stride, EB_S16 *intermediate, EB_U32 addshift)
 {
     transform16_AVX2_INTRIN(src, src_stride, intermediate, 16, (EB_S16)(4 + addshift));
-    EbHevctranspose16_AVX2_INTRIN(intermediate, 16, dst, dst_stride);
+    EbHevcTranspose16_AVX2_INTRIN(intermediate, 16, dst, dst_stride);
 
     transform16_AVX2_INTRIN(dst, dst_stride, intermediate, 16, 9);
-    EbHevctranspose16_AVX2_INTRIN(intermediate, 16, dst, dst_stride);
+    EbHevcTranspose16_AVX2_INTRIN(intermediate, 16, dst, dst_stride);
 
 }
 
 // forward 32x32 transform
 EB_EXTERN void lowPrecisionTransform32x32_AVX2_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_stride, EB_S16 *intermediate, EB_U32 addshift)
 {
-    EbHevctransform32_AVX2_INTRIN(src, src_stride, intermediate, 32, 6 + addshift);
-    EbHevctranspose32_AVX2_INTRIN(intermediate, 32, dst, dst_stride);
-    EbHevctransform32_AVX2_INTRIN(dst, dst_stride, intermediate, 32, 9);
-    EbHevctranspose32_AVX2_INTRIN(intermediate, 32, dst, dst_stride);
+    EbHevcTransform32_AVX2_INTRIN(src, src_stride, intermediate, 32, 6 + addshift);
+    EbHevcTranspose32_AVX2_INTRIN(intermediate, 32, dst, dst_stride);
+    EbHevcTransform32_AVX2_INTRIN(dst, dst_stride, intermediate, 32, 9);
+    EbHevcTranspose32_AVX2_INTRIN(intermediate, 32, dst, dst_stride);
 }
 
 void MatMult4x4_OutBuff_AVX2_INTRIN(

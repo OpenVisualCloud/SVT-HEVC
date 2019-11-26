@@ -249,7 +249,7 @@ void lambdaAssignRandomAccess(
 
 }
 
-void EbHevclambdaAssignISlice(
+void EbHevcLambdaAssignISlice(
     PictureParentControlSet_t *pictureControlSetPtr,
 	EB_U32                    *fastLambda,
 	EB_U32                    *fullLambda,
@@ -279,7 +279,7 @@ const EB_LAMBDA_ASSIGN_FUNC lambdaAssignmentFunctionTable[4]  = {
     lambdaAssignLowDelay,		// low delay P
     lambdaAssignLowDelay,		// low delay B
     lambdaAssignRandomAccess,	// Random Access
-    EbHevclambdaAssignISlice			// I_SLICE
+    EbHevcLambdaAssignISlice			// I_SLICE
 };
 
 void ProductResetModeDecision(

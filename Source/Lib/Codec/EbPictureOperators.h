@@ -220,7 +220,7 @@ void UnpackL0L1AvgSafeSub(
         EB_U32  width,
         EB_U32  height);
 
-void EbHevcmemcpy16bit(
+void EbHevcMemcpy16bit(
     EB_U16                     * outPtr,
     EB_U16                     * inPtr,
     EB_U64                       numOfElements );
