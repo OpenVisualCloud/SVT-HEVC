@@ -639,21 +639,31 @@ void* ResourceCoordinationKernel(void *inputPtr)
         ((EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr)->inputPaddedPicturePtr->bufferY = inputPicturePtr->bufferY;
 
         // Get Empty Output Results Object
-		if (pictureControlSetPtr->pictureNumber > 0 && prevPictureControlSetWrapperPtr != (EbObjectWrapper_t*)EB_NULL)
-		{
-			((PictureParentControlSet_t       *)prevPictureControlSetWrapperPtr->objectPtr)->endOfSequenceFlag = endOfSequenceFlag;
+        // Note: record the PCS object into output of the Resource Coordination process for EOS frame(s).
+        //       Because EbH265GetPacket() can get the encoded bit stream only if Packetization process has
+        //       posted the buffer as its result, and the buffer belonging to a PCS object is recorded in
+        //       the Initial Rate Control process. So need to record the PCS object immediately once the
+        //       1st frame is EOS, to make it go through the whole encoding kernels.
+        if (((pictureControlSetPtr->pictureNumber > 0) && (prevPictureControlSetWrapperPtr != (EbObjectWrapper_t*)EB_NULL)) ||
+                endOfSequenceFlag) {
+            if (prevPictureControlSetWrapperPtr && prevPictureControlSetWrapperPtr->objectPtr)
+                ((PictureParentControlSet_t *)prevPictureControlSetWrapperPtr->objectPtr)->endOfSequenceFlag = endOfSequenceFlag;
 
-			EbGetEmptyObject(
-				contextPtr->resourceCoordinationResultsOutputFifoPtr,
-				&outputWrapperPtr);
-			outputResultsPtr = (ResourceCoordinationResults_t*)outputWrapperPtr->objectPtr;
-			outputResultsPtr->pictureControlSetWrapperPtr = prevPictureControlSetWrapperPtr;
+            EbGetEmptyObject(
+                    contextPtr->resourceCoordinationResultsOutputFifoPtr,
+                    &outputWrapperPtr);
+            outputResultsPtr = (ResourceCoordinationResults_t *)outputWrapperPtr->objectPtr;
+            if (endOfSequenceFlag && (pictureControlSetPtr->pictureNumber == 0)) {
+                ((PictureParentControlSet_t *)pictureControlSetWrapperPtr->objectPtr)->endOfSequenceFlag = endOfSequenceFlag;
+                outputResultsPtr->pictureControlSetWrapperPtr = pictureControlSetWrapperPtr;
+            } else
+                outputResultsPtr->pictureControlSetWrapperPtr = prevPictureControlSetWrapperPtr;
 
-			// Post the finished Results Object
-			EbPostFullObject(outputWrapperPtr);
-		}
+            // Post the finished Results Object
+            EbPostFullObject(outputWrapperPtr);
+        }
 
-		prevPictureControlSetWrapperPtr = pictureControlSetWrapperPtr;
+        prevPictureControlSetWrapperPtr = pictureControlSetWrapperPtr;
 
 
 

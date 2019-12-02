@@ -63,15 +63,39 @@ TEST_CONFIGURATION = 0 # 0 - Validation Test, 1 - Speed Test (Refer to Validatio
 
 #------------- Validation Test Specific -------------#
 VALIDATION_TEST_MODE = get_test_mode(sys.argv) # 0 - Fast Test, 1 - Overnight Test, 2- Full Test
-QP_VBR_MODE = 0 # 0 - Both QP and VBR, 1 - QP Only, 2 - VBR Only
+COLOR_MODE = 0  # 0 - P420, P422 and P444, 1 - P420 Only, 2 - P422 Only, 3 - P444 Only
+QP_VBR_MODE = 4 # 0 - QP, VBR, CRF,  1 - QP Only, 2 - VBR Only, 3 - CRF, 4 - QP and VBR
 
-VALIDATION_TEST_SEQUENCES = [
-'Netflix_Crosswalk_3840x2160_10bit_60Hz_P420',
-'Fallout4_1920x1080_8bit_60Hz_P420',
-'DucksTakeOff_1280x720_8bit_50Hz_P420',
-'ParkJoy_864x480_10bit_50Hz_P420'
-]
+VALIDATION_TEST_SEQUENCES = []
+#P420 Sequences
+if COLOR_MODE == 1 or COLOR_MODE == 0:
+    VALIDATION_TEST_SEQUENCES.extend([
+    '8k2D_musician_7680x3840_8bit_30Hz_P420',
+    'Netflix_Crosswalk_3840x2160_10bit_60Hz_P420',
+    'Fallout4_1920x1080_8bit_60Hz_P420',
+    'DucksTakeOff_1280x720_8bit_50Hz_P420',
+    'ParkJoy_864x480_10bit_50Hz_P420']
+    )
+#P422 Sequences
+if COLOR_MODE == 2 or COLOR_MODE == 0:
+    VALIDATION_TEST_SEQUENCES.extend([
+    '8k2D_musician_7680x3840_8bit_30Hz_P422',
+    'Netflix_Crosswalk_3840x2160_10bit_60Hz_P422',
+    'Fallout4_1920x1080_8bit_60Hz_P422',
+    'DucksTakeOff_1280x720_8bit_50Hz_P422',
+    'ParkJoy_864x480_10bit_50Hz_P422']
+    )
+#P444 Sequences
+if COLOR_MODE == 3 or COLOR_MODE == 0:
+    VALIDATION_TEST_SEQUENCES.extend([
+    '8k2D_musician_7680x3840_8bit_30Hz_P444',
+    'Netflix_Crosswalk_3840x2160_10bit_60Hz_P444',
+    'Fallout4_1920x1080_8bit_60Hz_P444',
+    'DucksTakeOff_1280x720_8bit_50Hz_P444',
+    'ParkJoy_864x480_10bit_50Hz_P444']
+    )
 
+TEST_TYPE = sys.argv[3]
 #-------------  Speed Test Specific -------------#
 # Number of channels is enc_mode and resolution specific
 SPEED_ENC_MODES = [0,6,9]
@@ -107,34 +131,39 @@ if VALIDATION_TEST_MODE == 0:
     NUM_FRAMES                      = 20
     QP_ITERATIONS                   = 1
     VBR_ITERATIONS                  = 1
+    CRF_ITERATIONS                  = 1
     SA_ITER                         = 1 # Search Area WidthxHeight per test
     LAD_ITER                        = 1 # LAD per test
     INTRA_PERIOD_ITER               = 1 # Intra Period per test
     WH_ITER                         = 1 # WidthxHeight per test
-    MCTS_ITER                       = 8 # MCTS per test
     VBV_ITER                        = 1 # VBV per test
+    MCTS_ITER                       = 1 # MCTS per test
+
+
 elif VALIDATION_TEST_MODE == 1:
     ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11]
     NUM_FRAMES                      = 40
     QP_ITERATIONS                   = 1
     VBR_ITERATIONS                  = 1
+    CRF_ITERATIONS                  = 1
     SA_ITER                         = 1 # Search Area WidthxHeight per test
     LAD_ITER                        = 1 # LAD per test
     INTRA_PERIOD_ITER               = 1 # Intra Period per test
     WH_ITER                         = 1 # WidthxHeight per test
-    MCTS_ITER                       = 1 # MCTS per test
     VBV_ITER                        = 1 # VBV per test
+    MCTS_ITER                       = 1 # MCTS per test
 elif VALIDATION_TEST_MODE == 2:
     ENC_MODES                       = [0,1,2,3,4,5,6,7,8,9,10,11]
     NUM_FRAMES                      = 40
     QP_ITERATIONS                   = 2
     VBR_ITERATIONS                  = 2
+    CRF_ITERATIONS                  = 2
     SA_ITER                         = 2 # Search Area WidthxHeight per test
     LAD_ITER                        = 2 # LAD per test
     INTRA_PERIOD_ITER               = 2 # Intra Period per test
     WH_ITER                         = 2 # WidthxHeight per test
-    MCTS_ITER                       = 2 # MCTS per test
     VBV_ITER                        = 2 # VBV per test
+    MCTS_ITER                       = 2 # MCTS per test
 ##--------------------------------------------------------##
 
 ##-------------------- Global Defines --------------------##
@@ -146,16 +175,23 @@ MIN_QP                          = 30
 MAX_QP                          = 51
 MIN_BR                          = 1000
 MAX_BR                          = 10000000
+MIN_CRF                         = 18
+MAX_CRF                         = 51
 MIN_VBV_BUFFER_DURATION         = 0.5
 MAX_VBV_BUFFER_DURATION         = 4.0
+
 ##--------------------------------------------------------##
 
 if QP_VBR_MODE == 0:
-    QP_VBR_COMBINATION = [0, 1]
+    QP_VBR_COMBINATION = [0, 1, 2]
 elif QP_VBR_MODE == 1:
     QP_VBR_COMBINATION = [0]
 elif QP_VBR_MODE == 2:
     QP_VBR_COMBINATION = [1]
+elif QP_VBR_MODE == 3:
+    QP_VBR_COMBINATION = [2]
+elif QP_VBR_MODE == 4:
+    QP_VBR_COMBINATION = [0, 1]
 
 class EB_Test(object):
     # Initialization parameters for folders
@@ -207,7 +243,15 @@ class EB_Test(object):
 
     def get_stream_info(self, seq_name):
         enc_params = {}
-        if "_4096x2160_" in seq_name:
+        if "_8192x4096_" in seq_name:
+            width = 8192
+            height = 4096
+            enc_params.update({'width' : width, 'height': height})
+        elif "_7680x3840_" in seq_name:
+            width = 7680
+            height = 3840
+            enc_params.update({'width' : width, 'height': height})
+        elif "_4096x2160_" in seq_name:
             width = 4096
             height = 2160
             enc_params.update({'width' : width, 'height': height})
@@ -257,12 +301,21 @@ class EB_Test(object):
             else:
                 intra_period = int(int(frame_rate)/8)*8 - 1
             enc_params.update({'frame_rate' : frame_rate, 'intra_period': intra_period})
+
+        if "_P420" in seq_name:
+            enc_params.update({'color_format' : 1})
+        elif "_P422" in seq_name:
+            enc_params.update({'color_format' : 2})
+        elif "_P444" in seq_name:
+            enc_params.update({'color_format' : 3})
+
         return enc_params
 
     def get_param_tokens(self):
         # Dictionary of all input parameters
         default_tokens = {
                         'buffered_input'                    : '-nb',
+                        'color_format'                      : '-color-format',
                         'compressed_ten_bit_format'         : '-compressed-ten-bit-format',
                         'interlaced_video'                  : '-interlaced-video',
                         'deinterlace_input'                 : '-separate-fields',
@@ -292,14 +345,16 @@ class EB_Test(object):
                         'HME'                               : '-hme',
                         'SearchAreaWidth'                   : '-search-w',
                         'SearchAreaHeight'                  : '-search-h',
-                        'EncoderColorFormat'                : '-color-format',
+                        'Recon'                             : '-o',
+                        'asm'                               : '-asm',
                         'TileRowCount'                      : '-tile_row_cnt',
                         'TileColCount'                      : '-tile_col_cnt',
                         'TileSliceMode'                     : '-tile_slice_mode',
                         'UnrestrictedMotionVector'          : '-umv',
-                        'VbvMaxRate'                        : '-vbvMaxrate',
-                        'VbvBufSize'                        : '-vbvBufsize',
-                        'VbvBufInit'                        : '-vbvBufInit',
+                        'VbvMaxRate'                        : '-vbv-maxrate',
+                        'VbvBufSize'                        : '-vbv-bufsize',
+                        'VbvBufInit'                        : '-vbv-init',
+                        'crf'                               : '-crf'
                         }
         return default_tokens
 
@@ -393,7 +448,6 @@ class EB_Test(object):
                     break
         return search_area
 
-
     # Check if sequence and combination is supported
     def check_seq_support(self, test_name, seq, enc_params):
         width       = enc_params['width']
@@ -403,14 +457,14 @@ class EB_Test(object):
         if 'enc_mode' in enc_params:
             encMode     = enc_params['enc_mode']
             # Check if encMode is valid
-            if encMode >= 12:
-                return -1
             if width*height < 3840*2160:
+                if encMode == 10:
+                    if width*height < 1920*1080:
+                        return -1
                 if encMode == 11:
                     return -1
-            if width*height < 1920*1080:
-                if encMode == 10:
-                    return -1
+            if encMode >=12:
+                return -1
         if width %2 != 0 or height %2 != 0:
             return -1
         if bitdepth == 10 and height %8 != 0:
@@ -419,11 +473,19 @@ class EB_Test(object):
         if test_name == 'unpacked_test':
             if bitdepth == 8:
                 return -1
+            if 'color_format' in enc_params:
+                color_format = enc_params['color_format'] 
+                if color_format != 1:
+                    return -1
         if test_name == 'defield_test':
             if bitdepth == 10:
                 return -1
             if encMode == 10:
                 if width*height == 1920*1080:
+                    return -1
+            if 'color_format' in enc_params:
+                color_format = enc_params['color_format'] 
+                if color_format != 1:
                     return -1
         if test_name == 'enc_struct_test':
             hierar_levels   = enc_params['HierarchicalLevels']
@@ -436,7 +498,7 @@ class EB_Test(object):
         if test_name == 'qp_file_test':
             if 'rc' in enc_params:
                 rc = enc_params['rc']
-                if rc == 1:
+                if rc == 1 or rc == 2:
                     return -1
         # VALIDATION_TEST_MODE dependent settings
         if VALIDATION_TEST_MODE == 0:
@@ -475,8 +537,10 @@ class EB_Test(object):
         passed_tests = 0
         if VBR == 0:
             iter_list = [random.randint(MIN_QP,MAX_QP) for x in range(QP_ITERATIONS)]
-        else:
+        elif VBR == 1:
             iter_list = [random.randint(MIN_BR,MAX_BR) for x in range(VBR_ITERATIONS)]
+        else:
+            iter_list = [random.randint(MIN_CRF,MAX_CRF) for x in range(CRF_ITERATIONS)]
 
         for enc_mode in ENC_MODES:
             for iter in iter_list: # QP or Bitrate
@@ -489,11 +553,17 @@ class EB_Test(object):
                     enc_params.update({'enc_mode': enc_mode})
                     bitstream_name = test_name + '_M' + str(enc_mode) + '_' + seq_name
                     if VBR == 0:
+                        if iter <= 40 and enc_params['height']*enc_params['width'] > 4096*2160:
+                            iter = random.randint(41, MAX_QP)
                         enc_params.update({'rc': 0, 'qp': iter})
                         bitstream_name = bitstream_name + '_Q' + str(iter)
-                    else:
+                    elif VBR == 1:
                         enc_params.update({'rc': 1, 'tbr': iter})
                         bitstream_name = bitstream_name + '_TBR' + str(iter)
+                    else:
+                        enc_params.update({'rc': 2, 'crf': iter})
+                        bitstream_name = bitstream_name + '_CRF' + str(iter)
+
                     for cond in test_cond:
                         enc_params.update({cond: test_cond[cond]})
                         if not isinstance(test_cond[cond], list):
@@ -502,7 +572,6 @@ class EB_Test(object):
                     error = self.check_seq_support(test_name, seq_name, enc_params)
                     if error != 0:
                         continue
-
                     # Test Specific
                     if test_name == 'defield_test':
                         if '_fields' in seq_name:
@@ -515,6 +584,10 @@ class EB_Test(object):
                     elif test_name == 'qp_file_test':
                         qp_file_name = self.generate_qp_file(bitstream_name, enc_params['frame_to_be_encoded'])
                         enc_params.update({'qp_file_name': 'qp_files' + slash + qp_file_name})
+                    elif test_name == 'decode_test':
+                        enc_params.update({'Recon': 'recon.yuv'})
+                        enc_params.update({'SAO': '0'})
+                        enc_params.update({'LoopFilterDisable': '1'})
                     elif test_name == 'mcts_test':
                         # update maxRows and maxCols now that the video resolution for the test is known
                         numLuma = enc_params['width'] * enc_params['height']
@@ -553,30 +626,36 @@ class EB_Test(object):
                         else:
                             enc_params.update({'TileColCount' : random.randint(2,maxCols)})
 
-                    # get the encode command and log it
                     enc_cmd = self.get_enc_cmd(enc_params, seq_name, bitstream_name)
                     print(enc_cmd, file=open(test_name + '.txt', 'a'))
-
                     if DEBUG_MODE == 0:
-                        # non-debug mode.. execute the encode command
+                        #exit_code = 0
                         exit_code = subprocess.call(enc_cmd, shell = True)
                         if exit_code == 0:
-                            # For the decode and mcts tests see if the encoded file can be decoded.
-                            # HM decoder version should have a check to verify that motion vectors are
-                            # constrained to same tile, otherwise the decoder fail.
                             if test_name == 'decode_test':
-                                dec_cmd = enc_params['tools_dir'] + slash + dec_exe + " -b " + enc_params[
-                                    'bitstream_dir'] + slash + bitstream_name + '.265 > NUL'
+
+                                dec_cmd = enc_params['tools_dir'] + slash + dec_exe + " -b " + enc_params['bitstream_dir'] + slash + bitstream_name + '.265' + ' -o  decoded.yuv > NUL'
                                 print(dec_cmd, file=open(test_name + '.txt', 'a'))
-                                exit_code = subprocess.call(dec_cmd, shell=True)
-                            elif test_name == "mcts_test":
+                                exit_code = subprocess.call(dec_cmd, shell = True)
+                                if exit_code == 0:
+                                    cmp_code = filecmp.cmp('decoded.yuv', 'recon.yuv')
+                                    if cmp_code == True:
+                                        exit_code = 0
+                                    else:
+                                        exit_code = 1
+                                    if os.path.exists('recon.yuv'):
+                                        os.remove('recon.yuv')
+                                    if os.path.exists('decoded.yuv'):
+                                        os.remove('decoded.yuv')
+                            elif test_name == "mcts_test" or test_name == "tile_test":
                                 dec_cmd = enc_params['tools_dir'] + slash + mcts_dec_exe + " -b " + enc_params[
                                     'bitstream_dir'] + slash + bitstream_name + '.265 > NUL'
                                 print(dec_cmd, file=open(test_name + '.txt', 'a'))
                                 exit_code = subprocess.call(dec_cmd, shell=True)
+
                     else:
                         continue
-                    if COMPARE == 0:
+                    if COMPARE == 1:
                         total_tests = total_tests + 1
                         if exit_code == 0:
                             print('------------Passed-------------', file=open(test_name + '.txt', 'a'))
@@ -603,9 +682,71 @@ class EB_Test(object):
                         compare_bitstream = bitstream_name
         return total_tests, passed_tests
 
+    #To get TileRow and TileCol
+    def get_tile_row_col(self,seq_name,combination_test_params):
+        rows=[]
+        cols=[]
+        if "_7680x3840_" in seq_name:
+            max_cols = 20
+            max_rows = 22
+            n_min=0
+            rows_iter = 3
+            cols_iter = 3
+        elif "_3840x2160_" in seq_name:
+            max_cols = 15
+            max_rows = 22
+            n_min=0
+            rows_iter = 3
+            cols_iter = 3
+        elif "_1920x1080_" in seq_name:
+            max_cols = 7
+            max_rows = 17
+            n_min=0
+            rows_iter = 3
+            cols_iter = 3
+        elif "_1280x720_" in seq_name:
+            max_cols = 5
+            max_rows = 12
+            n_min = 0
+            rows_iter = 3
+            cols_iter = 2
+        elif "_864x480_" in seq_name:
+            max_cols = 3
+            max_rows = 8
+            n_min = 0
+            rows_iter = 3
+            cols_iter = 1
+
+        rows_bin = (float(max_rows) - float(n_min))/float(rows_iter)
+        count = 0
+        while count < rows_iter:
+            if count == 0:
+                rand_int = random.randint(int(rows_bin*count)+2, int(rows_bin*(count+1)))
+                if not rand_int in rows:
+                    rows.append(rand_int)
+                    count = count + 1
+            else:
+                rand_int = random.randint(int(rows_bin*count), int(rows_bin*(count+1)))
+                if not rand_int in rows:
+                    rows.append(rand_int)
+                    count = count + 1
+        cols_bin = (float(max_cols) - float(n_min))/float(cols_iter)
+        count = 0
+        while count < cols_iter:
+            if count == 0:
+                rand_int = random.randint(int(cols_bin*count)+2, int(cols_bin*(count+1)))
+                if not rand_int in cols:
+                    cols.append(rand_int)
+                    count = count + 1
+            else:
+                rand_int = random.randint(int(cols_bin*count), int(cols_bin*(count+1)))
+                if not rand_int in cols:
+                    cols.append(rand_int)
+                    count = count + 1
+        combination_test_params.update({'TileRowCount': rows,'TileColCount': cols})
+        return combination_test_params
+
     def run_functional_tests(self, seq_list, test_name, combination_test_params):
-        # Get default encoding params
-        enc_params = self.get_default_params().copy()
         # Print Test Information:
         total_test = 0
         total_passed = 0
@@ -615,10 +756,16 @@ class EB_Test(object):
         print ("---------------------------------------", file=open(test_name + '.txt', 'w'))
         print ("Test Name: " + test_name, file=open(test_name + '.txt', 'a'))
         for seq in seq_list:
+            if test_name == "tile_test":
+                combination_test_params = self.get_tile_row_col(seq,combination_test_params)
             # Run test
             test_params = self.get_test_params(seq, combination_test_params)
             for VBR in QP_VBR_COMBINATION:
-                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, 0)
+                if VBR != 1 and test_name == "vbv_test":
+                    continue
+                #Get default encoding params
+                enc_params = self.get_default_params().copy()
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, 1)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
@@ -630,7 +777,7 @@ class EB_Test(object):
         # Test specific parameters:
         test_name = 'buffered_test'
         # Get default encoding params
-        enc_params = self.get_default_params().copy()
+        #enc_params = self.get_default_params().copy()
         if os.path.exists(test_name + '.txt'):
             return 0, 0
         print ("Running Test: " + test_name)
@@ -645,7 +792,8 @@ class EB_Test(object):
             ]
             # Run test
             for VBR in QP_VBR_COMBINATION:
-                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, not VBR)
+                enc_params = self.get_default_params().copy()
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, VBR)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
@@ -655,7 +803,7 @@ class EB_Test(object):
         # Test specific parameters:
         test_name = 'run_to_run_test'
         # Get default encoding params
-        enc_params = self.get_default_params().copy()
+        # enc_params = self.get_default_params().copy()
         if os.path.exists(test_name + '.txt'):
             return 0, 0
         print ("Running Test: " + test_name)
@@ -669,17 +817,44 @@ class EB_Test(object):
             [seq, {'frame_to_be_encoded': 150}]
             ]
             # Run test
-            num_tests, num_passed = self.run_test(test_name, test_params, enc_params, 0, 1)
-            total_test = total_test + num_tests
-            total_passed = total_passed + num_passed
+            for VBR in QP_VBR_COMBINATION:
+                if VBR == 1:
+                    continue
+                enc_params = self.get_default_params().copy()
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, 0)
+                total_test = total_test + num_tests
+                total_passed = total_passed + num_passed
+        print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
+        return total_test, total_passed
+
+    def asm_test(self, seq_list):
+        # Test specific parameters:
+        test_name = 'asm_test'
+        # Get default encoding params
+        if os.path.exists(test_name + '.txt'):
+            return 0, 0
+        print ("Running Test: " + test_name)
+        print ("---------------------------------------", file=open(test_name + '.txt', 'w'))
+        print ("Test Name: " + test_name, file=open(test_name + '.txt', 'a'))
+        total_test = 0
+        total_passed = 0
+        for seq in seq_list:
+            test_params = [
+            [seq, {'asm': 0}],
+            [seq, {'asm': 1}]
+            ]
+            # Run test
+            for VBR in QP_VBR_COMBINATION:
+                enc_params = self.get_default_params().copy()
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, VBR)
+                total_test = total_test + num_tests
+                total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
         return total_test, total_passed
 
     def unpacked_test(self, seq_list):
         # Test specific parameters:
         test_name = 'unpacked_test'
-        # Get default encoding params
-        enc_params = self.get_default_params().copy()
         if os.path.exists(test_name + '.txt'):
             return 0, 0
         print ("Running Test: " + test_name)
@@ -695,7 +870,9 @@ class EB_Test(object):
             ]
             # Run test
             for VBR in QP_VBR_COMBINATION:
-                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, not VBR)
+                # Get default encoding params
+                enc_params = self.get_default_params().copy()
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, VBR)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
@@ -704,8 +881,6 @@ class EB_Test(object):
     def defield_test(self, seq_list):
         # Test specific parameters:
         test_name = 'defield_test'
-        # Get default encoding params
-        enc_params = self.get_default_params().copy()
         if os.path.exists(test_name + '.txt'):
             return 0, 0
         print ("Running Test: " + test_name)
@@ -726,10 +901,12 @@ class EB_Test(object):
             ]
             # Run test
             for VBR in QP_VBR_COMBINATION:
-                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, not VBR)
+                # Get default encoding params
+                enc_params = self.get_default_params().copy()
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params,VBR, VBR)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
-                num_tests, num_passed = self.run_test(test_name, test_params_2, enc_params, VBR, not VBR)
+                num_tests, num_passed = self.run_test(test_name, test_params_2, enc_params, VBR, VBR)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
@@ -840,19 +1017,26 @@ class EB_Test(object):
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
-        
-    def hdr_test(self,seq_list):
+
+    def tile_test(self,seq_list):
         # Test specific parameters:
-        test_name = 'hdr_test'
-        combination_test_params = { 'high_dyanmic_range_input'     : [0, 1],
+        test_name = 'tile_test'
+        rows = []
+        cols = []
+        umv = [0]
+        tile_slice_mode = [1]
+        combination_test_params = { 'TileRowCount'     : rows,
+                                    'TileColCount'     : cols,
+                                    'TileSliceMode'    : tile_slice_mode,
+                                    'UnrestrictedMotionVector': umv,
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
 
-    def encoder_color_format_test(self,seq_list):
+    def hdr_test(self,seq_list):
         # Test specific parameters:
-        test_name = 'encoder_color_format_test'
-        combination_test_params = { 'EncoderColorFormat'     : [1, 2, 3],
+        test_name = 'hdr_test'
+        combination_test_params = { 'high_dyanmic_range_input'     : [0, 1],
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
@@ -876,26 +1060,26 @@ class EB_Test(object):
 
     def vbv_test(self,seq_list):
         # Test specific parameters:
-        test_name = 'vbv test'
+        test_name = 'vbv_test'
         vbv_maxRate = []
         vbv_bufferSize = []
         vbv_bufferInit = []
-        rateControl=[]
+        #rateControl=[]
         for count in range(VBV_ITER):
             maxBitRate = random.randint(MIN_BR,MAX_BR)
             duration = random.uniform(MIN_VBV_BUFFER_DURATION,MAX_VBV_BUFFER_DURATION)
             vbv_maxRate.append(maxBitRate)
             vbv_bufferSize.append(int(duration * maxBitRate))
             vbv_bufferInit.append(random.randint(10,100))
-            rateControl.append(1)
-        combination_test_params = { 
+            #rateControl.append(1)
+        combination_test_params = {
                                     'VbvMaxRate'       : vbv_maxRate,
                                     'VbvBufSize'       : vbv_bufferSize,
                                     'VbvBufInit'       : vbv_bufferInit,
-                                    'rc'               : rateControl,
                                   }
         # Run tests
         return self.run_functional_tests(seq_list, test_name, combination_test_params)
+
 ## ------------------------------------------- ##
 
 ## --------------- DECODE TEST --------------- ##
@@ -904,9 +1088,11 @@ class EB_Test(object):
         # Test specific parameters:
         test_name = 'decode_test'
         # Get default encoding params
-        enc_params = self.get_default_params().copy()
+        #enc_params = self.get_default_params().copy()
         if os.path.exists(test_name + '.txt'):
             return 0, 0
+        if os.path.exists('recon.yuv'):
+            os.remove('recon.yuv')
         print ("Running Test: " + test_name)
         print ("---------------------------------------", file=open(test_name + '.txt', 'w'))
         print ("Test Name: " + test_name, file=open(test_name + '.txt', 'a'))
@@ -914,14 +1100,14 @@ class EB_Test(object):
         total_passed = 0
         for seq in seq_list:
             for VBR in QP_VBR_COMBINATION:
+            	enc_params = self.get_default_params().copy()
                 test_params = [
                 [seq, {'frame_to_be_encoded': 20}],
                 ]
-                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, 0)
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, 1)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
         return total_test, total_passed
-
 
 ## ------------------------------------------- ##
 
@@ -960,11 +1146,11 @@ class EB_Test(object):
                 print ("Cannot find " + seq + ".yuv in yuv_path")
                 exit_code = -2
             if TEST_CONFIGURATION == 0:
-                if "_8bit_" in seq:
+                if "_P420" in seq and "_8bit_" in seq:
                     if not os.path.exists(self.yuv_path + slash + seq + '_fields' + '.yuv'):
                         print ("Cannot find " + seq + "_fields.yuv in yuv_path")
                         exit_code = -2
-                elif "_10bit_" in seq:
+                elif "_P420" in seq and "_10bit_" in seq:
                     if not os.path.exists(self.yuv_path + slash + seq + '_2bitspacked' + '.yuv'):
                         print ("Cannot find " + seq + "_2bitspacked.yuv in yuv_path")
                         exit_code = -2
@@ -973,7 +1159,10 @@ class EB_Test(object):
             print ("10 bits sequences need to have the 2bitspacked counterpart")
         return exit_code
 
-    def run_validation_test(self, seq_list):
+    def update_totals(self, total_tests, total_passed, num_tests, num_passed):
+        return total_tests + num_tests, total_passed + num_passed
+
+    def run_validation_test(self, seq_list, test_type):
         if self.error_check(seq_list) != 0:
             return
         file_name = "Test_Results"
@@ -982,42 +1171,107 @@ class EB_Test(object):
         start_time = time.time()
         total_tests = 0
         total_passed = 0
-        num_tests, num_passed = self.defield_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.intra_period_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.width_height_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.buffered_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.run_to_run_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.qp_file_test(seq_list)
-        stotal_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.enc_struct_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.unpacked_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.dlf_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.sao_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.constrained_intra_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.scene_change_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.me_hme_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.hdr_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.encoder_color_format_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.mcts_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.vbv_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
-        num_tests, num_passed = self.decode_test(seq_list)
-        total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        if test_type == "all":
+            num_tests, num_passed = self.vbv_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.mcts_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.hdr_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.intra_period_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.width_height_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.buffered_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.run_to_run_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.qp_file_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.enc_struct_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.unpacked_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.dlf_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.sao_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.constrained_intra_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.scene_change_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.me_hme_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.asm_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.decode_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.defield_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.tile_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+            num_tests, num_passed = self.multi_channel_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        if test_type == "vbv_test":
+            num_tests, num_passed = self.vbv_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "mcts_test":
+            num_tests, num_passed = self.mcts_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "hdr_test":
+            num_tests, num_passed = self.hdr_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "intra_period_test":
+            num_tests, num_passed = self.intra_period_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "width_height_test":
+            num_tests, num_passed = self.width_height_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "buffered_test":
+            num_tests, num_passed = self.buffered_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "run_to_run_test":
+            num_tests, num_passed = self.run_to_run_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "qp_file_test":
+            num_tests, num_passed = self.qp_file_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "enc_struct_test":
+            num_tests, num_passed = self.enc_struct_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "unpacked_test":
+            num_tests, num_passed = self.unpacked_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "dlf_test":
+            num_tests, num_passed = self.dlf_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "sao_test":
+            num_tests, num_passed = self.sao_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "constrained_intra_test":
+            num_tests, num_passed = self.constrained_intra_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "scene_change_test":
+            num_tests, num_passed = self.scene_change_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "me_hme_test":
+            num_tests, num_passed = self.me_hme_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "asm_test":
+            num_tests, num_passed = self.asm_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "decode_test":
+            num_tests, num_passed = self.decode_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "defield_test":
+            num_tests, num_passed = self.defield_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "tile_test":
+            num_tests, num_passed = self.tile_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
+        elif test_type == "multi_channel_test":
+            num_tests, num_passed = self.multi_channel_test(seq_list)
+            total_tests, total_passed = self.update_totals(total_tests, total_passed, num_tests, num_passed)
         finish_time = time.time()
         if total_tests == 0 and total_passed == 0:
             print ("No tests were ran.. Exiting...", file=open(file_name + '.txt', 'a'))
@@ -1028,9 +1282,6 @@ class EB_Test(object):
         print ("Percentage Passed: " + str(float(total_passed)/float(total_tests)*100) + "%", file=open(file_name + '.txt', 'a'))
         print ("Time Elapsed: " + self.get_time(finish_time - start_time), file=open(file_name + '.txt', 'a'))
         print ("---------------------------------------------------------", file=open(file_name + '.txt', 'a'))
-
-    def update_totals(self, total_tests, total_passed, num_tests, num_passed):
-        return total_tests + num_tests, total_passed + num_passed;
 
     def show_speed_test_instructions(self):
         print ("To run speed test:", file=open('Running_Speed_Test.txt', 'w'))
@@ -1074,6 +1325,87 @@ class EB_Test(object):
             num_frames = 4000
         return num_frames
 
+    def multi_channel_test(self, seq_list):
+        test_name = 'multi_channel_test'
+        total_tests = 0
+        passed_tests = 0
+        if os.path.exists(test_name + '.txt'):
+            return 0, 0
+        print("Running Test: " + test_name)
+        print("---------------------------------------", file=open(test_name + '.txt', 'w'))
+        print("Test Name: " + test_name, file=open(test_name + '.txt', 'a'))
+        for seq in seq_list:
+            for VBR in QP_VBR_COMBINATION:
+                enc_params = self.get_default_params().copy()
+                enc_params.update(self.get_stream_info(seq))
+                if VBR == 0:
+                    iter_list = random.randint(MIN_QP, MAX_QP)
+                elif VBR == 1:
+                    iter_list = random.randint(MIN_BR, MAX_BR)
+                else:
+                    iter_list = random.randint(MIN_CRF, MAX_CRF)
+                for enc_mode in ENC_MODES:
+                    bitstreams_list = []
+                    num_channels = self.get_num_channels(enc_mode, enc_params)
+                    if num_channels == 1:
+                        continue
+                    # num_frames = self.get_num_frames(enc_mode)
+
+                    num_frames = 40
+                    if VBR == 0:
+                        enc_params.update(
+                            {'enc_mode': enc_mode, 'qp': iter_list, 'rc': 0, 'frame_to_be_encoded': num_frames})
+                        cmd = self.get_enc_cmd(enc_params, seq,
+                                               test_name + '_M' + str(enc_mode) + '_' + seq + '_Q' + str(
+                                                   iter_list) + '_nch' + str(num_channels), num_channels)
+                        bitstreams_name = test_name + '_M' + str(enc_mode) + '_' + seq + '_Q' + str(
+                            iter_list) + '_nch' + str(num_channels)
+                    elif VBR == 1:
+                        enc_params.update(
+                            {'enc_mode': enc_mode, 'tbr': iter_list, 'rc': 1, 'frame_to_be_encoded': num_frames})
+                        cmd = self.get_enc_cmd(enc_params, seq,
+                                               test_name + '_M' + str(enc_mode) + '_' + seq + '_TBR' + str(
+                                                   iter_list) + '_nch' + str(num_channels), num_channels)
+                    else:
+                        enc_params.update(
+                            {'enc_mode': enc_mode, 'crf': iter_list, 'rc': 2, 'frame_to_be_encoded': num_frames})
+                        cmd = self.get_enc_cmd(enc_params, seq,
+                                               test_name + '_M' + str(enc_mode) + '_' + seq + '_CRF' + str(
+                                                   iter_list) + '_nch' + str(num_channels), num_channels)
+                        bitstreams_name = test_name + '_M' + str(enc_mode) + '_' + seq + '_CRF' + str(
+                            iter_list) + '_nch' + str(num_channels)
+                    error = self.check_seq_support(test_name, seq, enc_params)
+                    if error != 0:
+                        continue
+                    print(cmd, file=open(test_name + '.txt', 'a'))
+                    exit_code = subprocess.call(cmd, shell=True)
+                    total_tests = total_tests + 1
+
+                    if exit_code == 0:
+                        if VBR != 1:
+                            for i in range(num_channels):
+                                if i == 0:
+                                    i = i + 1
+                                compare_result = filecmp.cmp(BIN_PATH + slash + bitstreams_name + '.265',
+                                                             BIN_PATH + slash + bitstreams_name + "_" + str(i) + '.265')
+                                if compare_result == True:
+                                    continue
+                                else:
+                                    print('------------Failed-------------', file=open(test_name + '.txt', 'a'))
+                                    break
+                            if compare_result == True:
+                                print('------------Passed-------------', file=open(test_name + '.txt', 'a'))
+                                passed_tests = passed_tests + 1
+                        # passed_tests = passed_tests + 1
+                        else:
+                            print('------------Passed-------------', file=open(test_name + '.txt', 'a'))
+                            passed_tests = passed_tests + 1
+                    else:
+                        print('------------Failed-------------', file=open(test_name + '.txt', 'a'))
+                        continue
+        print("---------------------------------------", file=open(test_name + '.txt', 'a'))
+        return total_tests, passed_tests
+
     def run_speed_test(self, seq_dict):
         seq_list = []
         for x in seq_dict:
@@ -1111,10 +1443,15 @@ class EB_Test(object):
                 num_frames = self.get_num_frames(enc_mode)
                 if VBR == 0:
                     enc_params.update({'enc_mode': enc_mode, 'qp': iter_list, 'rc': 0, 'frame_to_be_encoded': num_frames})
-                    cmd = self.get_enc_cmd(enc_params, seq['name'], 'Speed_Test_M' + str(enc_mode) + '_' + seq['name'] + '_Q' + str(iter_list), num_channels)
+                    cmd = self.get_enc_cmd(enc_params, seq['name'],
+                                           'Speed_Test_M' + str(enc_mode) + '_' + seq['name'] + '_Q' + str(iter_list),
+                                           num_channels)
                 else:
-                    enc_params.update({'enc_mode': enc_mode, 'tbr': iter_list, 'rc': 1, 'frame_to_be_encoded': num_frames})
-                    cmd = self.get_enc_cmd(enc_params, seq['name'], 'Speed_Test_M' + str(enc_mode) + '_' + seq['name'] + '_TBR' + str(iter_list), num_channels)
+                    enc_params.update(
+                        {'enc_mode': enc_mode, 'tbr': iter_list, 'rc': 1, 'frame_to_be_encoded': num_frames})
+                    cmd = self.get_enc_cmd(enc_params, seq['name'],
+                                           'Speed_Test_M' + str(enc_mode) + '_' + seq['name'] + '_TBR' + str(iter_list),
+                                           num_channels)
                 print (cmd)
                 if platform == WINDOWS_PLATFORM_STR:
                     print(cmd, file=open('speed_script.bat', 'a'))
@@ -1124,6 +1461,6 @@ class EB_Test(object):
 ##----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------##
 small_test = EB_Test(ENC_PATH, BIN_PATH, YUV_PATH, TOOLS_PATH)
 if TEST_CONFIGURATION == 0:
-    small_test.run_validation_test(VALIDATION_TEST_SEQUENCES)
+    small_test.run_validation_test(VALIDATION_TEST_SEQUENCES, TEST_TYPE)
 elif TEST_CONFIGURATION == 1:
     small_test.run_speed_test(SPEED_TEST_SEQUENCES)
