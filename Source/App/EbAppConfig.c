@@ -957,6 +957,12 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         return_error = EB_ErrorBadParameter;
     }
 
+    if (config->encoderBitDepth != 10 && config->compressedTenBitFormat == EB_TRUE)
+    {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Compressed 10 bit format inconsistent with encoder bit depth\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
     if (config->injector > 1 ){
         fprintf(config->errorLogFile, "SVT [Error]: Instance %u: Invalid injector [0 - 1]\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
@@ -980,6 +986,11 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
 
     if (config->useNaluFile == 1 && config->naluFile == NULL) {
         fprintf(config->errorLogFile, "SVT [Error]: Instance %u : Invalid Nalu File\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if ((config->encoderColorFormat != EB_YUV420 && config->encoderColorFormat != EB_YUV422 && config->encoderColorFormat != EB_YUV444) && config->compressedTenBitFormat) {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u : -compressed-ten-bit-format 1 is only supported for 420, 422 and 444 color formats\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 

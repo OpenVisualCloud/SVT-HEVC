@@ -8,7 +8,6 @@
 
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
-#include "EbNoiseExtractAVX2.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,6 +47,13 @@ void noiseExtractLumaWeak(
 	EB_U32                       lcuOriginY,
 	EB_U32						 lcuOriginX
 	);
+void noiseExtractLumaWeak_AVX2_INTRIN(
+	EbPictureBufferDesc_t       *inputPicturePtr,	
+	EbPictureBufferDesc_t       *denoisedPicturePtr,
+	EbPictureBufferDesc_t       *noisePicturePtr,   
+	EB_U32                       lcuOriginY,
+	EB_U32                       lcuOriginX
+	);
 typedef void(*EB_WEAKLUMAFILTER_TYPE)(
 	EbPictureBufferDesc_t       *inputPicturePtr,
 	EbPictureBufferDesc_t       *denoisedPicturePtr,
@@ -72,6 +78,13 @@ void noiseExtractLumaWeakLcu(
 	EB_U32                       lcuOriginY,
 	EB_U32						 lcuOriginX
 	);
+void noiseExtractLumaWeakLcu_AVX2_INTRIN(
+	EbPictureBufferDesc_t       *inputPicturePtr,
+	EbPictureBufferDesc_t       *denoisedPicturePtr,
+	EbPictureBufferDesc_t       *noisePicturePtr,
+	EB_U32                       lcuOriginY,
+	EB_U32                       lcuOriginX
+	);
 static EB_WEAKLUMAFILTER_TYPE FUNC_TABLE WeakLumaFilterLcu_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 {
 	// C_DEFAULT
@@ -88,6 +101,11 @@ void noiseExtractLumaStrong(
 	EB_U32                       lcuOriginY,
 	EB_U32						 lcuOriginX
 	);
+void noiseExtractLumaStrong_AVX2_INTRIN(
+	EbPictureBufferDesc_t       *inputPicturePtr,
+	EbPictureBufferDesc_t       *denoisedPicturePtr,
+	EB_U32                       lcuOriginY,
+	EB_U32                       lcuOriginX);
 typedef void(*EB_STRONGLUMAFILTER_TYPE)(
 	EbPictureBufferDesc_t       *inputPicturePtr,
 	EbPictureBufferDesc_t       *denoisedPicturePtr,
@@ -108,6 +126,11 @@ void noiseExtractChromaStrong(
 	EB_U32                       lcuOriginY,
 	EB_U32						 lcuOriginX
 	);
+void noiseExtractChromaStrong_AVX2_INTRIN(
+	EbPictureBufferDesc_t       *inputPicturePtr,
+	EbPictureBufferDesc_t       *denoisedPicturePtr,
+	EB_U32                       lcuOriginY,
+	EB_U32						 lcuOriginX);
 typedef void(*EB_STRONGCHROMAFILTER_TYPE)(
 	EbPictureBufferDesc_t       *inputPicturePtr,
 	EbPictureBufferDesc_t       *denoisedPicturePtr,
@@ -129,6 +152,11 @@ void noiseExtractChromaWeak(
 	EB_U32                       lcuOriginY,
 	EB_U32						 lcuOriginX
 	);
+void noiseExtractChromaWeak_AVX2_INTRIN(
+	EbPictureBufferDesc_t       *inputPicturePtr,
+	EbPictureBufferDesc_t       *denoisedPicturePtr,
+	EB_U32                       lcuOriginY,
+	EB_U32						 lcuOriginX);
 typedef void(*EB_WEAKCHROMAFILTER_TYPE)(
 	EbPictureBufferDesc_t       *inputPicturePtr,
 	EbPictureBufferDesc_t       *denoisedPicturePtr,

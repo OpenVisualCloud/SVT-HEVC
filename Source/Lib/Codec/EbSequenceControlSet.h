@@ -230,11 +230,6 @@ extern EB_ERRORTYPE CopySequenceControlSet(
         
 extern EB_ERRORTYPE EbSequenceControlSetInstanceCtor(
     EbSequenceControlSetInstance_t **objectDblPtr);
-    
-
-
-extern EB_ERRORTYPE LcuParamsCtor(
-    SequenceControlSet_t *sequenceControlSetPtr);
 
 extern EB_ERRORTYPE LcuParamsInit(
     SequenceControlSet_t *sequenceControlSetPtr);
