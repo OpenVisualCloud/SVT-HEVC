@@ -508,7 +508,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->baseLayerSwitchMode                  = 0;
     configPtr->predStructure                        = 2;
     configPtr->intraPeriod                          = -2;
-    configPtr->intraRefreshType                     = 0;
+    configPtr->intraRefreshType                     = -1;
 
     // DLF
     configPtr->disableDlfFlag                       = EB_FALSE;
