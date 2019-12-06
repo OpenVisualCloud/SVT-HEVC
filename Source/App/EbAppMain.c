@@ -53,10 +53,14 @@ extern APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
 
 volatile int32_t keepRunning = 1;
 
-void EventHandler(int32_t dummy) {
+void EventHandlerILL(int32_t dummy) {
+    printf("Executing unsupported instruction set, stop encoder.\n");
+    exit(EXIT_SUCCESS);
+}
+
+void EventHandlerINT(int32_t dummy) {
     (void)dummy;
     keepRunning = 0;
-
     // restore default signal handler
     signal(SIGINT, SIG_DFL);
 }
@@ -106,7 +110,8 @@ int32_t main(int32_t argc, char* argv[])
     uint32_t                numChannels = 0;
     uint32_t                instanceCount=0;
     EbAppContext_t         *appCallbacks[MAX_CHANNEL_NUMBER];   // Instances App callback data
-    signal(SIGINT, EventHandler);
+    signal(SIGINT, EventHandlerINT);
+    signal(SIGILL, EventHandlerILL);
     printf("-------------------------------------------\n");
     printf("SVT-HEVC Encoder\n");
 
