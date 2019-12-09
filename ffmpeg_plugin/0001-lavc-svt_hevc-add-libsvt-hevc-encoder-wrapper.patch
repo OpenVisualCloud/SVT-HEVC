@@ -1,4 +1,4 @@
-From fe5bd76fb61cecf0c784610d01343511d64cc248 Mon Sep 17 00:00:00 2001
+From 7ddcc6c50b9b70535a7109e2f67cb18b54849621 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -77,7 +77,7 @@ index d2f9a39..d8788a7 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000..f4a5684
+index 0000000..9a28836
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
 @@ -0,0 +1,518 @@
@@ -558,7 +558,7 @@ index 0000000..f4a5684
 +          AV_OPT_TYPE_CONST, { .i64 = 1 },  INT_MIN, INT_MAX, VE, "tune" },
 +        { "vmaf", "VMAF optimized mode", 0,
 +          AV_OPT_TYPE_CONST, { .i64 = 2 },  INT_MIN, INT_MAX, VE, "tune" },
-+    { "hdr", "High dynamic range input", OFFSET(high_dynamic_range), AV_OPT_TYPE_INT, { .i64 = 0}, 0, 1, VE, "hdr" },
++    { "hdr", "High dynamic range input (HDR10)", OFFSET(high_dynamic_range), AV_OPT_TYPE_INT, { .i64 = 0}, 0, 1, VE, "hdr" },
 +    {NULL},
 +};
 +
