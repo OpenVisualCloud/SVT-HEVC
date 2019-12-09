@@ -38,6 +38,7 @@ set(Codec_Source
     EbMotionEstimationResults.c
     EbPacketizationProcess.c
     EbPacketizationReorderQueue.c
+    EbPerFramePrediction.c
     EbPictureAnalysisProcess.c
     EbPictureAnalysisResults.c
     EbPictureBufferDesc.c
@@ -155,6 +156,7 @@ add_library(SvtHevcEnc
     EbPacketizationProcess.h
     EbPacketizationReorderQueue.h
     EbPackUnPack.h
+    EbPerFramePrediction.h
     EbPictureAnalysisProcess.h
     EbPictureAnalysisResults.h
     EbPictureBufferDesc.h
@@ -193,6 +195,7 @@ add_library(SvtHevcEnc
 
 if(UNIX)
     set(LIBS "-lpthread")
+    set(LIBS "${LIBS} -lm")
     # Set version number for SONAME.
     set_target_properties(SvtHevcEnc
         PROPERTIES SOVERSION ${SVT_HEVC_SOVERSION})

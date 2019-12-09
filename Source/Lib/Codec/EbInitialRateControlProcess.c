@@ -812,6 +812,7 @@ void GetHistogramQueueData(
 	histogramQueueEntryIndex = (histogramQueueEntryIndex > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ?
 		histogramQueueEntryIndex - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
 		histogramQueueEntryIndex;
+    pictureControlSetPtr->hlHistogramQueueIndex = histogramQueueEntryIndex;
 	histogramQueueEntryPtr = encodeContextPtr->hlRateControlHistorgramQueue[histogramQueueEntryIndex];
 
 
@@ -945,7 +946,7 @@ void* InitialRateControlKernel(void *inputPtr)
 				pictureControlSetPtr,
 				inputResultsPtr);
 
-			if (sequenceControlSetPtr->staticConfig.rateControlMode)
+			if (sequenceControlSetPtr->staticConfig.rateControlMode != 0)
 			{
 				if (sequenceControlSetPtr->staticConfig.lookAheadDistance != 0){
 
@@ -1032,7 +1033,7 @@ void* InitialRateControlKernel(void *inputPtr)
 					else
 						pictureControlSetPtr->endOfSequenceRegion = EB_FALSE;
 
-					if (sequenceControlSetPtr->staticConfig.rateControlMode)
+					if (sequenceControlSetPtr->staticConfig.rateControlMode != 0)
 					{
 						// Determine offset from the Head Ptr for HLRC histogram queue and set the life count
 						if (sequenceControlSetPtr->staticConfig.lookAheadDistance != 0){

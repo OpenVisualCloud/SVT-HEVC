@@ -247,6 +247,15 @@ typedef struct RateControlContext_s
 
     EB_U64                       frameRate;   
 
+    //CRF
+    EB_U32                       crf;
+    double                       shorttermComplexSum;
+    double                       shorttermComplexCount;
+    double                       rateFactorConstant;
+    double                       qcompress;
+    double                       frameDuration;
+
+
     EB_U64                       virtualBufferSize; 
 
     EB_S64                       virtualBufferLevelInitialValue;

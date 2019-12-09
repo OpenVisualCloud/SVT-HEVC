@@ -81,6 +81,7 @@ EB_ERRORTYPE PictureControlSetCtor(
     
     // LCUs
     EB_U16 lcuIndex;
+    EB_U16 rowIndex;
     EB_U16 lcuOriginX;
     EB_U16 lcuOriginY;
     EB_ERRORTYPE return_error = EB_ErrorNone;
@@ -140,7 +141,7 @@ EB_ERRORTYPE PictureControlSetCtor(
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
-	
+
 	// Cabaccost
     EB_MALLOC(CabacCost_t*, objectPtr->cabacCost, sizeof(CabacCost_t), EB_N_PTR);
 
@@ -192,6 +193,16 @@ EB_ERRORTYPE PictureControlSetCtor(
         lcuOriginX = (lcuOriginX == pictureWidthInLcu - 1) ? 0 : lcuOriginX + 1;
     }
 
+    //Row stats Array
+    EB_MALLOC(RCStatRow_t**, objectPtr->rowStats, sizeof(RCStatRow_t*) * pictureHeightInLcu, EB_N_PTR);
+    for (rowIndex = 0; rowIndex < pictureHeightInLcu; ++rowIndex)
+    {
+        return_error = RCStatRowCtor(
+            &(objectPtr->rowStats[rowIndex]), (EB_U16)rowIndex);
+        if (return_error == EB_ErrorInsufficientResources) {
+            return EB_ErrorInsufficientResources;
+        }
+    }
     //ConfigureEdges(objectPtr, maxCuSize);
 
     // Mode Decision Control config
@@ -245,6 +256,12 @@ EB_ERRORTYPE PictureControlSetCtor(
     EB_MALLOC(NeighborArrayUnit_t**, objectPtr->leafDepthNeighborArray, sizeof(NeighborArrayUnit_t*) * totalTileCount, EB_N_PTR);
     EB_MALLOC(NeighborArrayUnit_t**, objectPtr->intraLumaModeNeighborArray, sizeof(NeighborArrayUnit_t*) * totalTileCount, EB_N_PTR);
     EB_MALLOC(NeighborArrayUnit_t**, objectPtr->skipFlagNeighborArray, sizeof(NeighborArrayUnit_t*) * totalTileCount, EB_N_PTR);
+
+    // For proxy entropy
+    EB_MALLOC(NeighborArrayUnit_t**, objectPtr->tempModeTypeNeighborArray, sizeof(NeighborArrayUnit_t*) * totalTileCount, EB_N_PTR);
+    EB_MALLOC(NeighborArrayUnit_t**, objectPtr->tempLeafDepthNeighborArray, sizeof(NeighborArrayUnit_t*) * totalTileCount, EB_N_PTR);
+    EB_MALLOC(NeighborArrayUnit_t**, objectPtr->tempIntraLumaModeNeighborArray, sizeof(NeighborArrayUnit_t*) * totalTileCount, EB_N_PTR);
+    EB_MALLOC(NeighborArrayUnit_t**, objectPtr->tempSkipFlagNeighborArray, sizeof(NeighborArrayUnit_t*) * totalTileCount, EB_N_PTR);
 
     // Mode Decision Neighbor Arrays
     EB_U8 depth;
@@ -605,6 +622,56 @@ EB_ERRORTYPE PictureControlSetCtor(
             if (return_error == EB_ErrorInsufficientResources){
                 return EB_ErrorInsufficientResources;
             }
+
+            //Proxy entropy Neighbor Arrays
+            return_error = NeighborArrayUnitCtor(
+                &objectPtr->tempModeTypeNeighborArray[tileIdx],
+                MAX_PICTURE_WIDTH_SIZE,
+                MAX_PICTURE_HEIGHT_SIZE,
+                sizeof(EB_U8),
+                PU_NEIGHBOR_ARRAY_GRANULARITY,
+                PU_NEIGHBOR_ARRAY_GRANULARITY,
+                NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+
+            if (return_error == EB_ErrorInsufficientResources) {
+                return EB_ErrorInsufficientResources;
+            }
+            return_error = NeighborArrayUnitCtor(
+                &objectPtr->tempLeafDepthNeighborArray[tileIdx],
+                MAX_PICTURE_WIDTH_SIZE,
+                MAX_PICTURE_HEIGHT_SIZE,
+                sizeof(EB_U8),
+                CU_NEIGHBOR_ARRAY_GRANULARITY,
+                CU_NEIGHBOR_ARRAY_GRANULARITY,
+                NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+
+            if (return_error == EB_ErrorInsufficientResources) {
+                return EB_ErrorInsufficientResources;
+            }
+            return_error = NeighborArrayUnitCtor(
+                &objectPtr->tempSkipFlagNeighborArray[tileIdx],
+                MAX_PICTURE_WIDTH_SIZE,
+                MAX_PICTURE_HEIGHT_SIZE,
+                sizeof(EB_U8),
+                CU_NEIGHBOR_ARRAY_GRANULARITY,
+                CU_NEIGHBOR_ARRAY_GRANULARITY,
+                NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+
+            if (return_error == EB_ErrorInsufficientResources) {
+                return EB_ErrorInsufficientResources;
+            }
+
+            return_error = NeighborArrayUnitCtor(
+                &objectPtr->tempIntraLumaModeNeighborArray[tileIdx],
+                MAX_PICTURE_WIDTH_SIZE,
+                MAX_PICTURE_HEIGHT_SIZE,
+                sizeof(EB_U8),
+                PU_NEIGHBOR_ARRAY_GRANULARITY,
+                PU_NEIGHBOR_ARRAY_GRANULARITY,
+                NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+            if (return_error == EB_ErrorInsufficientResources) {
+                return EB_ErrorInsufficientResources;
+            }
         }
     }
 
@@ -648,14 +715,20 @@ EB_ERRORTYPE PictureControlSetCtor(
 
         // Entropy Coder
         return_error = EntropyCoderCtor(
-                &objectPtr->entropyCodingInfo[tileIdx]->entropyCoderPtr,
-                SEGMENT_ENTROPY_BUFFER_SIZE);
+            &objectPtr->entropyCodingInfo[tileIdx]->entropyCoderPtr,
+            SEGMENT_ENTROPY_BUFFER_SIZE);
 
-        if (return_error == EB_ErrorInsufficientResources){
+        if (return_error == EB_ErrorInsufficientResources) {
+            return EB_ErrorInsufficientResources;
+        }
+        //Proxy Entropy Coder to be used in Encdec
+        return_error = EntropyCoderCtor(
+            &objectPtr->entropyCodingInfo[tileIdx]->tempEntropyCoderPtr,
+            SEGMENT_ENTROPY_BUFFER_SIZE);
+        if (return_error == EB_ErrorInsufficientResources) {
             return EB_ErrorInsufficientResources;
         }
     }
-
     // Entropy picture level mutex
     EB_CREATEMUTEX(EB_HANDLE, objectPtr->entropyCodingPicMutex, sizeof(EB_HANDLE), EB_MUTEX);
 
@@ -795,6 +868,7 @@ EB_ERRORTYPE PictureParentControlSetCtor(
 
 		EB_U32 cuIdx;
 		for (cuIdx = 0; cuIdx < 21; ++cuIdx){
+            contigousCand[cuIdx*maxOisCand] = (OisCandidate_t) { 0 };
 			objectPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[cuIdx] = &contigousCand[cuIdx*maxOisCand];
 		}
 	}
@@ -825,9 +899,8 @@ EB_ERRORTYPE PictureParentControlSetCtor(
 	}
 
 	EB_MALLOC(EB_U32*, objectPtr->rcMEdistortion, sizeof(EB_U32) * objectPtr->lcuTotalCount, EB_N_PTR);
+	EB_MALLOC(EB_U32*, objectPtr->rcMESatdDistortion, sizeof(EB_U32) * objectPtr->lcuTotalCount, EB_N_PTR);
 	
-
-
 	// ME and OIS Distortion Histograms
     EB_MALLOC(EB_U16*, objectPtr->meDistortionHistogram, sizeof(EB_U16) * NUMBER_OF_SAD_INTERVALS, EB_N_PTR);
 

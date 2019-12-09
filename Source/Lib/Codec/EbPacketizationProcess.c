@@ -711,7 +711,7 @@ void* PacketizationKernel(void *inputPtr)
             }
 
         }
-        
+
         // Send the number of bytes per frame to RC
         pictureControlSetPtr->ParentPcsPtr->totalNumBits = outputStreamPtr->nFilledLen << 3;    
 

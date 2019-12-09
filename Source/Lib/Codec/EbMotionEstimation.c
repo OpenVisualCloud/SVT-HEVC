@@ -16,6 +16,7 @@
 #include "EbReferenceObject.h"
 #include "EbAvcStyleMcp.h"
 #include "EbMeSadCalculation.h"
+#include "EbMeSatdCalculation_C.h"
 
 #include "EbIntraPrediction.h"
 #include "EbLambdaRateTables.h"
@@ -3743,8 +3744,7 @@ EB_ERRORTYPE MotionEstimateLcu(
                             
 	EB_U64                  ref0Poc = 0;
 	EB_U64                  ref1Poc = 0;
-                            
-	EB_U64                  i;
+                           
 
 	EB_S16                  hmeLevel1SearchAreaInWidth;
 	EB_S16                  hmeLevel1SearchAreaInHeight;
@@ -4440,8 +4440,14 @@ EB_ERRORTYPE MotionEstimateLcu(
 
 		// Compute the sum of the distortion of all 16 16x16 (best) blocks in the LCU
 		pictureControlSetPtr->rcMEdistortion[lcuIndex] = 0;
-		for (i = 0; i < 16; i++) {
-			pictureControlSetPtr->rcMEdistortion[lcuIndex] += pictureControlSetPtr->meResults[lcuIndex][5 + i].distortionDirection[0].distortion;
+		pictureControlSetPtr->rcMESatdDistortion[lcuIndex] = 0;
+		for (puIndex = ME_TIER_ZERO_PU_16x16_0; puIndex <= ME_TIER_ZERO_PU_16x16_15; puIndex++) {
+			referenceObject = (EbPaReferenceObject_t*)pictureControlSetPtr->refPaPicPtrArray[0]->objectPtr;
+			refPicPtr = (EbPictureBufferDesc_t*)referenceObject->inputPaddedPicturePtr;
+			searchRegionIndex = (EB_S16)refPicPtr->originX + originX + ((EB_S16)refPicPtr->originY + originY) * refPicPtr->strideY;
+			pictureControlSetPtr->rcMESatdDistortion[lcuIndex] += SatdCalculation_16x16
+			(contextPtr->lcuSrcPtr, contextPtr->lcuSrcStride, &(refPicPtr->bufferY[searchRegionIndex]), refPicPtr->strideY);
+			pictureControlSetPtr->rcMEdistortion[lcuIndex] += pictureControlSetPtr->meResults[lcuIndex][puIndex].distortionDirection[0].distortion;
 		}
 
 	}
@@ -5112,13 +5118,11 @@ EB_ERRORTYPE OpenLoopIntraSearchLcu(
 						(EB_U32)EB_INTRA_PLANAR);
 
 					//Distortion
-					oisCuPtr[0].distortion = (EB_U32)NxMSadKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][cuSize >> 3]( // Always SAD without weighting 
+					oisCuPtr[0].distortion = SatdCalculation_16x16(
 						&(inputPtr->bufferY[(inputPtr->originY + cuOriginY) * inputPtr->strideY + (inputPtr->originX + cuOriginX)]),
 						inputPtr->strideY,
 						&(contextPtr->meContextPtr->lcuBuffer[0]),
-						MAX_LCU_SIZE,
-						cuSize,
-						cuSize);
+						MAX_LCU_SIZE);
 
 
 					oisCuPtr[0].intraMode = EB_INTRA_PLANAR;

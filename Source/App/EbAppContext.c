@@ -187,9 +187,11 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.maxQpAllowed = config->maxQpAllowed;
     callbackData->ebEncParameters.minQpAllowed = config->minQpAllowed;
     callbackData->ebEncParameters.qp = config->qp;
+    callbackData->ebEncParameters.crf = config->crf;
     callbackData->ebEncParameters.vbvMaxrate = config->vbvMaxRate;
     callbackData->ebEncParameters.vbvBufsize = config->vbvBufsize;
     callbackData->ebEncParameters.vbvBufInit = config->vbvBufInit;
+    callbackData->ebEncParameters.lowLevelVbv = config->lowLevelVbv;
     callbackData->ebEncParameters.useQpFile = (EB_BOOL)config->useQpFile;
     callbackData->ebEncParameters.tileColumnCount = (EB_BOOL)config->tileColumnCount;
     callbackData->ebEncParameters.tileRowCount = (EB_BOOL)config->tileRowCount;

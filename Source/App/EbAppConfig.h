@@ -291,6 +291,7 @@ typedef struct EbConfig_s
     uint32_t                 targetBitRate;
     uint32_t                 maxQpAllowed;
     uint32_t                 minQpAllowed;
+    uint32_t                 crf;
     uint32_t                 vbvMaxRate;
     uint32_t                 vbvBufsize;
     uint64_t                 vbvBufInit;
@@ -318,6 +319,7 @@ typedef struct EbConfig_s
     EB_BOOL                switchThreadsToRtPriority;
     EB_BOOL                fpsInVps;
     uint32_t                 hrdFlag;
+    EB_BOOL                  lowLevelVbv;
     EB_BOOL                unrestrictedMotionVector;
 
     /****************************************

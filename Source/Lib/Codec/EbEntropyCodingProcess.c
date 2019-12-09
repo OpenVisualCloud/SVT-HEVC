@@ -115,7 +115,6 @@ static void EntropyCodingConfigureLcu(
     LargestCodingUnit_t     *lcuPtr,
     PictureControlSet_t     *pictureControlSetPtr)
 {
-    contextPtr->qp = pictureControlSetPtr->pictureQp;
 
 	// Asuming cb and cr offset to be the same for chroma QP in both slice and pps for lambda computation
 
@@ -426,6 +425,9 @@ void* EntropyCodingKernel(void *inputPtr)
                         lastLcuFlagInSlice = lastLcuFlagInTile;
                     }
             
+                    if (sequenceControlSetPtr->staticConfig.lowLevelVbv)
+                        contextPtr->qp = lcuPtr->qp;
+
                     // Configure the LCU
                     EntropyCodingConfigureLcu(
                         contextPtr,

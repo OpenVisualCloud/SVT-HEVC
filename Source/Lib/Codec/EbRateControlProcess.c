@@ -4,6 +4,7 @@
 */
 
 #include <stdlib.h>
+#include <math.h>
 
 #include "EbDefinitions.h"
 #include "EbRateControlProcess.h"
@@ -16,6 +17,7 @@
 
 #include "EbRateControlResults.h"
 #include "EbRateControlTasks.h"
+#include "EbPerFramePrediction.h"
 
 /*****************************
 * Internal Typedefs
@@ -344,7 +346,21 @@ EB_ERRORTYPE RateControlContextCtor(
     contextPtr->extraBitsGen = 0;
     contextPtr->maxRateAdjustDeltaQP = 0;
 
+    contextPtr->shorttermComplexSum = 0;
+    contextPtr->shorttermComplexCount = 0;
+    contextPtr->qcompress = 0.6;
+
     return EB_ErrorNone;
+}
+
+double qp2qScale(double qp)
+{
+    return 0.85 * pow(2.0, (qp - 12.0) / 6.0);
+}
+
+double qScale2qp(double qScale)
+{
+    return 12.0 + 6.0 * (double)LOG2(qScale / 0.85);
 }
 
 static void HighLevelRcInputPictureMode2(
@@ -718,7 +734,7 @@ static void HighLevelRcInputPictureMode2(
 
                 queueEntryIndexTemp = queueEntryIndexHeadTemp;
 
-                // This is set to false, so the last frame would go inside the loop
+               // This is set to false, so the last frame would go inside the loop
                 endOfSequenceFlag = EB_FALSE;
 
                 while (!endOfSequenceFlag &&
@@ -927,6 +943,86 @@ static void HighLevelRcInputPictureMode2(
         //}
     }
     EbReleaseMutex(sequenceControlSetPtr->encodeContextPtr->rateTableUpdateMutex);
+}
+
+void FrameLevelRcInputPictureMode3(
+    PictureControlSet_t               *pictureControlSetPtr,
+    SequenceControlSet_t              *sequenceControlSetPtr,
+    RateControlContext_t              *contextPtr,
+    EB_U32                             bestOisCuIndex)
+    {
+
+    double q = 0;
+    EB_U16 lcuTotalCount = pictureControlSetPtr->lcuTotalCount;
+    pictureControlSetPtr->sadCost = 0;
+    // Calculate the sad cost from the rcMEDistortion and OISDistortion by looping over the LCUs
+    if (pictureControlSetPtr->sliceType == EB_I_PICTURE)
+    {
+        for (EB_U16 lcuIndex = 0; lcuIndex < lcuTotalCount; lcuIndex++)
+
+             pictureControlSetPtr->sadCost += pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[1][bestOisCuIndex].distortion +
+             pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[2][bestOisCuIndex].distortion +
+             pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[3][bestOisCuIndex].distortion +
+             pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[4][bestOisCuIndex].distortion;
+    }
+    else
+    {
+        for (EB_U16 lcuIndex = 0; lcuIndex < lcuTotalCount; lcuIndex++)
+            pictureControlSetPtr->sadCost += pictureControlSetPtr->ParentPcsPtr->rcMESatdDistortion[lcuIndex];
+    }
+
+    //pictureControlSetPtr->sadCost /= SAD_SATD_CONSTANT;
+
+    if (pictureControlSetPtr->temporalLayerIndex > 1 && pictureControlSetPtr->sliceType != EB_I_PICTURE)
+    {
+        //Take the average of reference frame's QP and tune with Offset
+        double q0, q1;
+        EB_BOOL i0, i1;
+        EB_U8 d0, d1;
+        i0 = pictureControlSetPtr->refSliceTypeArray[0] == EB_I_PICTURE;
+        q0 = i0 ? pictureControlSetPtr->refPicQpArray[0] : (pictureControlSetPtr->refPicQpArray[0] - MOD_QP_OFFSET_LAYER_ARRAY[pictureControlSetPtr->ParentPcsPtr->hierarchicalLevels][pictureControlSetPtr->refPicTemporalLayerArray[0]]);
+        if (pictureControlSetPtr->sliceType == EB_P_PICTURE)
+            q = q0;
+        else
+        {
+            i1 = pictureControlSetPtr->refSliceTypeArray[1] == EB_I_PICTURE;
+            q1 = i1 ? pictureControlSetPtr->refPicQpArray[1] : (pictureControlSetPtr->refPicQpArray[1] - MOD_QP_OFFSET_LAYER_ARRAY[pictureControlSetPtr->ParentPcsPtr->hierarchicalLevels][pictureControlSetPtr->refPicTemporalLayerArray[1]]);
+            d0 = (EB_U8)ABS(((EB_S64)pictureControlSetPtr->pictureNumber - (EB_S64)pictureControlSetPtr->ParentPcsPtr->refPicPocArray[0]));
+            d1 = (EB_U8)ABS(((EB_S64)pictureControlSetPtr->pictureNumber - (EB_S64)pictureControlSetPtr->ParentPcsPtr->refPicPocArray[1]));
+
+            if (i0&&i1)
+                 q = (q0 + q1) / 2.0;
+            else if (i0)
+                q = q1;
+            else if (i1)
+                q = q0;
+            else
+                q = (q0*d1 + q1 * d0) / (d0 + d1);
+        }
+            q += MOD_QP_OFFSET_LAYER_ARRAY[pictureControlSetPtr->ParentPcsPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex];
+    }
+    else
+    {
+        double blurredComplexity;
+
+        /*Calculate the blurred Complexity of the Frame */
+        contextPtr->shorttermComplexSum *= 0.5;
+        contextPtr->shorttermComplexCount *= 0.5;
+        contextPtr->shorttermComplexSum += pictureControlSetPtr->sadCost / (contextPtr->frameDuration / BASE_FRAME_DURATION);
+        contextPtr->shorttermComplexCount++;
+        blurredComplexity = contextPtr->shorttermComplexSum / contextPtr->shorttermComplexCount;
+        q = pow(blurredComplexity, 1 - contextPtr->qcompress);
+        q /= contextPtr->rateFactorConstant;
+        if (pictureControlSetPtr->sliceType != EB_I_PICTURE)
+            q = qScale2qp(q) + MOD_QP_OFFSET_LAYER_ARRAY[pictureControlSetPtr->ParentPcsPtr->hierarchicalLevels][pictureControlSetPtr->temporalLayerIndex];
+        else
+            q = qScale2qp(q);
+    }
+    if (pictureControlSetPtr->pictureNumber == 0)
+        pictureControlSetPtr->pictureQp = (EB_U8)contextPtr->crf;
+    else
+        pictureControlSetPtr->pictureQp = (EB_U8)(q + 0.5);
+    pictureControlSetPtr->pictureQp = (EB_U8)CLIP3((EB_U8)sequenceControlSetPtr->staticConfig.minQpAllowed,(EB_U8)sequenceControlSetPtr->staticConfig.maxQpAllowed, pictureControlSetPtr->pictureQp);
 }
 
 static void FrameLevelRcInputPictureMode2(
@@ -2172,62 +2268,6 @@ static void HighLevelRcFeedBackPicture(
     }
 }
 
-static EB_U64 predictBits(SequenceControlSet_t *sequenceControlSetPtr,
-        EncodeContext_t *encodeContextPtr,
-        HlRateControlHistogramEntry_t *hlRateControlHistogramPtrTemp, EB_U32 qp)
-{
-	EB_U64 totalBits = 0;
-	if (hlRateControlHistogramPtrTemp->isCoded) {
-		// If the frame is already coded, use the actual number of bits
-		totalBits = hlRateControlHistogramPtrTemp->totalNumBitsCoded;
-	}
-	else {
-		RateControlTables_t *rateControlTablesPtr = &encodeContextPtr->rateControlTablesArray[qp];
-		EB_Bit_Number *sadBitsArrayPtr = rateControlTablesPtr->sadBitsArray[hlRateControlHistogramPtrTemp->temporalLayerIndex];
-		EB_Bit_Number *intraSadBitsArrayPtr = rateControlTablesPtr->intraSadBitsArray[0];
-		EB_U32 predBitsRefQp = 0;
-		EB_U32 numOfFullLcus = 0;
-		EB_U32 areaInPixel = sequenceControlSetPtr->lumaWidth * sequenceControlSetPtr->lumaHeight;
-
-		if (hlRateControlHistogramPtrTemp->sliceType == EB_I_PICTURE) {
-			// Loop over block in the frame and calculated the predicted bits at reg QP
-			EB_U32 i;
-			EB_U32 accum = 0;
-			for (i = 0; i < NUMBER_OF_INTRA_SAD_INTERVALS; ++i)
-			{
-				accum += (EB_U32)(hlRateControlHistogramPtrTemp->oisDistortionHistogram[i] * intraSadBitsArrayPtr[i]);
-			}
-
-			predBitsRefQp = accum;
-			numOfFullLcus = hlRateControlHistogramPtrTemp->fullLcuCount;
-			totalBits += predBitsRefQp;
-		}
-		else {
-			EB_U32 i;
-			EB_U32 accum = 0;
-			EB_U32 accumIntra = 0;
-			for (i = 0; i < NUMBER_OF_SAD_INTERVALS; ++i)
-			{
-				accum += (EB_U32)(hlRateControlHistogramPtrTemp->meDistortionHistogram[i] * sadBitsArrayPtr[i]);
-				accumIntra += (EB_U32)(hlRateControlHistogramPtrTemp->oisDistortionHistogram[i] * intraSadBitsArrayPtr[i]);
-
-			}
-			if (accum > accumIntra * 3)
-				predBitsRefQp = accumIntra;
-			else
-				predBitsRefQp = accum;
-			numOfFullLcus = hlRateControlHistogramPtrTemp->fullLcuCount;
-			totalBits += predBitsRefQp;
-		}
-
-		// Scale for in complete LCSs
-		//  predBitsRefQp is normalized based on the area because of the LCUs at the picture boundries
-		totalBits = totalBits * (EB_U64)areaInPixel / (numOfFullLcus << 12);
-	}
-	hlRateControlHistogramPtrTemp->predBitsRefQp[qp] = totalBits;
-	return totalBits;
-}
-
 static EB_U8 Vbv_Buf_Calc(PictureControlSet_t *pictureControlSetPtr,
         SequenceControlSet_t *sequenceControlSetPtr,
         EncodeContext_t *encodeContextPtr)
@@ -2352,6 +2392,7 @@ void* RateControlKernel(void *inputPtr)
     EB_U32                       bestOisCuIndex = 0;
 
     RATE_CONTROL_TASKTYPES       taskType;
+    HlRateControlHistogramEntry_t      *hlRateControlHistogramPtrTemp;
 
     for (;;) {
 
@@ -2417,10 +2458,24 @@ void* RateControlKernel(void *inputPtr)
                 contextPtr->vbFillThreshold2                = (contextPtr->virtualBufferSize << 3) >> 3;
                 contextPtr->baseLayerFramesAvgQp            = sequenceControlSetPtr->qp;
                 contextPtr->baseLayerIntraFramesAvgQp       = sequenceControlSetPtr->qp;
+
+                contextPtr->crf                             = sequenceControlSetPtr->staticConfig.crf;
+
+                if (sequenceControlSetPtr->staticConfig.rateControlMode == 2)
+                {
+                    int bFrames = pictureControlSetPtr->ParentPcsPtr->predStructure == EB_PRED_LOW_DELAY_P ? 80 : 120;
+                    double baseCplx = pictureControlSetPtr->lcuTotalCount * bFrames * 16;
+                    double frameDuration = 1.0 / (sequenceControlSetPtr->frameRate >> RC_PRECISION);
+                    contextPtr->rateFactorConstant = pow(baseCplx, 1 - contextPtr->qcompress) / qp2qScale(contextPtr->crf);
+                    contextPtr->frameDuration = CLIP3(MIN_FRAME_DURATION, MAX_FRAME_DURATION, frameDuration);
+
+                }
+
                 encodeContextPtr->vbvMaxrate                = sequenceControlSetPtr->staticConfig.vbvMaxrate;
                 encodeContextPtr->vbvBufsize                = sequenceControlSetPtr->staticConfig.vbvBufsize;
+
             }
-            if (sequenceControlSetPtr->staticConfig.rateControlMode)
+            if (sequenceControlSetPtr->staticConfig.rateControlMode == 1)
             {
                 pictureControlSetPtr->ParentPcsPtr->intraSelectedOrgQp = 0;
                 HighLevelRcInputPictureMode2(
@@ -2429,11 +2484,9 @@ void* RateControlKernel(void *inputPtr)
                     sequenceControlSetPtr->encodeContextPtr,
                     contextPtr,
                     contextPtr->highLevelRateControlPtr);
-
-			}
-			
-            // Frame level RC
-            if (sequenceControlSetPtr->intraPeriodLength == -1 || sequenceControlSetPtr->staticConfig.rateControlMode == 0){
+            }
+           // Frame level RC
+            if (sequenceControlSetPtr->intraPeriodLength == -1 || sequenceControlSetPtr->staticConfig.rateControlMode == 0 || sequenceControlSetPtr->staticConfig.rateControlMode == 2){
                 rateControlParamPtr = contextPtr->rateControlParamQueue[0];
                 prevGopRateControlParamPtr = contextPtr->rateControlParamQueue[0];
                 nextGopRateControlParamPtr = contextPtr->rateControlParamQueue[0];
@@ -2493,6 +2546,16 @@ void* RateControlKernel(void *inputPtr)
 
                     pictureControlSetPtr->pictureQp = (EB_U8)CLIP3((EB_S32)sequenceControlSetPtr->staticConfig.minQpAllowed, (EB_S32)sequenceControlSetPtr->staticConfig.maxQpAllowed,pictureControlSetPtr->ParentPcsPtr->pictureQp);
                 }
+
+            }
+            else if (sequenceControlSetPtr->staticConfig.rateControlMode == 2)
+
+            {
+                FrameLevelRcInputPictureMode3(
+                    pictureControlSetPtr,
+                    sequenceControlSetPtr,
+                    contextPtr,
+                    bestOisCuIndex);
 
             }
             else{
@@ -2598,11 +2661,19 @@ void* RateControlKernel(void *inputPtr)
                         pictureControlSetPtr->pictureQp);
                 }
             }
-            if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize && sequenceControlSetPtr->staticConfig.lookAheadDistance > 0)
-            {
+            if (encodeContextPtr->vbvMaxrate && encodeContextPtr->vbvBufsize && sequenceControlSetPtr->staticConfig.lookAheadDistance > 0) {
                 EbBlockOnMutex(encodeContextPtr->bufferFillMutex);
+                pictureControlSetPtr->qpNoVbv = pictureControlSetPtr->pictureQp;
                 pictureControlSetPtr->pictureQp = (EB_U8)Vbv_Buf_Calc(pictureControlSetPtr, sequenceControlSetPtr, encodeContextPtr);
-
+                hlRateControlHistogramPtrTemp = encodeContextPtr->hlRateControlHistorgramQueue[pictureControlSetPtr->ParentPcsPtr->hlHistogramQueueIndex];
+                pictureControlSetPtr->frameSizePlanned = predictBits(sequenceControlSetPtr, encodeContextPtr, hlRateControlHistogramPtrTemp, pictureControlSetPtr->pictureQp);
+                /* Update low level VBV Plan*/
+                EB_S64 bufferfill_plan = (EB_S64)(encodeContextPtr->bufferFill);
+                bufferfill_plan -= pictureControlSetPtr->frameSizePlanned;
+                bufferfill_plan = MAX(bufferfill_plan, 0);
+                bufferfill_plan = (EB_S64)(bufferfill_plan + (encodeContextPtr->vbvMaxrate * (1.0 / (sequenceControlSetPtr->frameRate >> RC_PRECISION))));
+                bufferfill_plan = MIN(bufferfill_plan, encodeContextPtr->vbvBufsize);
+                pictureControlSetPtr->bufferFillPerFrame = (EB_U64)(bufferfill_plan);
                 EbReleaseMutex(encodeContextPtr->bufferFillMutex);
             }
             pictureControlSetPtr->ParentPcsPtr->pictureQp = pictureControlSetPtr->pictureQp;
@@ -2667,7 +2738,7 @@ void* RateControlKernel(void *inputPtr)
             sequenceControlSetPtr = (SequenceControlSet_t*)parentPictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 
             // Frame level RC
-            if (sequenceControlSetPtr->intraPeriodLength == -1 || sequenceControlSetPtr->staticConfig.rateControlMode == 0){
+            if (sequenceControlSetPtr->intraPeriodLength == -1 || sequenceControlSetPtr->staticConfig.rateControlMode == 0 || sequenceControlSetPtr->staticConfig.rateControlMode == 2){
                 rateControlParamPtr = contextPtr->rateControlParamQueue[0];
                 prevGopRateControlParamPtr = contextPtr->rateControlParamQueue[0];
                 if (parentPictureControlSetPtr->sliceType == EB_I_PICTURE){
@@ -2707,7 +2778,7 @@ void* RateControlKernel(void *inputPtr)
                     contextPtr->rateControlParamQueue[intervalIndexTemp - 1];
 
             }
-            if (sequenceControlSetPtr->staticConfig.rateControlMode != 0){
+            if (sequenceControlSetPtr->staticConfig.rateControlMode == 1){
 
                 contextPtr->previousVirtualBufferLevel = contextPtr->virtualBufferLevel;
 

@@ -39,12 +39,12 @@ target_link_libraries(SvtHevcEncApp
     SvtHevcEnc)
 
 if(UNIX)
-    target_link_libraries(SvtHevcEncApp
-        pthread)
-    if(NOT APPLE)
-        target_link_libraries(SvtHevcEncApp
-            rt)
-    endif()
+	target_link_libraries(SvtHevcEncApp
+        pthread m)
+  if(NOT APPLE)
+      target_link_libraries(SvtHevcEncApp
+          rt)
+  endif()
 endif()
 
 install(TARGETS SvtHevcEncApp RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

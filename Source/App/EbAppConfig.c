@@ -86,9 +86,11 @@
 #define NALU_FILE_TOKEN                 "-nalu-file"
 #define RATE_CONTROL_ENABLE_TOKEN       "-rc"
 #define TARGET_BIT_RATE_TOKEN           "-tbr"
+#define CRF_TOKEN                       "-crf"
 #define VBV_MAX_RATE_TOKEN              "-vbv-maxrate"
 #define VBV_BUFFER_SIZE_TOKEN           "-vbv-bufsize"
 #define VBV_BUFFER_INIT_TOKEN           "-vbv-init"
+#define ENABLE_LOW_LEVEL_VBV_TOKEN      "-low-level-vbv"
 #define HRD_TOKEN                       "-hrd"
 #define MAX_QP_TOKEN                    "-max-qp"
 #define MIN_QP_TOKEN                    "-min-qp"
@@ -192,6 +194,7 @@ static void SetFrameRate                        (const char *value, EbConfig_t *
         cfg->frameRate = cfg->frameRate << 16;
     }
 }
+
 static void SetFrameRateNumerator               (const char *value, EbConfig_t *cfg) {cfg->frameRateNumerator               = strtoul(value, NULL, 0);};
 static void SetFrameRateDenominator             (const char *value, EbConfig_t *cfg) {cfg->frameRateDenominator             = strtoul(value, NULL, 0);};
 static void SetEncoderBitDepth                  (const char *value, EbConfig_t *cfg) {cfg->encoderBitDepth                  = strtoul(value, NULL, 0);}
@@ -204,6 +207,7 @@ static void SetCfgIntraRefreshType              (const char *value, EbConfig_t *
 static void SetHierarchicalLevels               (const char *value, EbConfig_t *cfg) {cfg->hierarchicalLevels               = strtol(value, NULL, 0); };
 static void SetCfgPredStructure                 (const char *value, EbConfig_t *cfg) {cfg->predStructure                    = strtol(value, NULL, 0); };
 static void SetCfgQp                            (const char *value, EbConfig_t *cfg) {cfg->qp                               = strtoul(value, NULL, 0);};
+static void SetCfgCrf                           (const char *value, EbConfig_t *cfg) {cfg->crf                              = strtoul(value, NULL, 0); };
 static void SetCfgUseQpFile                     (const char *value, EbConfig_t *cfg) {cfg->useQpFile                        = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetCfgTileColumnCount               (const char *value, EbConfig_t *cfg) { cfg->tileColumnCount                 = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetCfgTileRowCount                  (const char *value, EbConfig_t *cfg) { cfg->tileRowCount                    = (EB_BOOL)strtol(value, NULL, 0); };
@@ -228,6 +232,7 @@ static void SetVbvMaxrate                       (const char *value, EbConfig_t *
 static void SetVbvBufsize                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufsize						= strtoul(value, NULL, 0);};
 static void SetVbvBufInit                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufInit						= strtoul(value, NULL, 0);};
 static void SetHrdFlag                          (const char *value, EbConfig_t *cfg) { cfg->hrdFlag							= strtoul(value, NULL, 0);};
+static void SetLowLevelVbv                      (const char *value, EbConfig_t *cfg) { cfg->lowLevelVbv                     = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetVideoUsabilityInfo               (const char *value, EbConfig_t *cfg) {cfg->videoUsabilityInfo               = strtol(value,  NULL, 0);};
 static void SetHighDynamicRangeInput            (const char *value, EbConfig_t *cfg) {cfg->highDynamicRangeInput            = strtol(value,  NULL, 0);};
 static void SetAccessUnitDelimiter              (const char *value, EbConfig_t *cfg) {cfg->accessUnitDelimiter              = strtol(value,  NULL, 0);};
@@ -348,6 +353,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, VBV_BUFFER_SIZE_TOKEN, "vbvBufsize", SetVbvBufsize },
     { SINGLE_INPUT, HRD_TOKEN, "hrd", SetHrdFlag },
     { SINGLE_INPUT, VBV_BUFFER_INIT_TOKEN, "vbvBufInit", SetVbvBufInit},
+    { SINGLE_INPUT, ENABLE_LOW_LEVEL_VBV_TOKEN,"lowLevelVbv",SetLowLevelVbv},
 
 
     // Deblock Filter
@@ -368,7 +374,8 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, CONSTRAINED_INTRA_ENABLE_TOKEN, "ConstrainedIntra", SetEnableConstrainedIntra },
 
     // Rate Control
-	{ SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "RateControlMode", SetRateControlMode },
+    { SINGLE_INPUT, CRF_TOKEN, "CRF", SetCfgCrf },
+    { SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "RateControlMode", SetRateControlMode },
     { SINGLE_INPUT, TARGET_BIT_RATE_TOKEN, "TargetBitRate", SetTargetBitRate },
     { SINGLE_INPUT, MAX_QP_TOKEN, "MaxQpAllowed", SetMaxQpAllowed },
     { SINGLE_INPUT, MIN_QP_TOKEN, "MinQpAllowed", SetMinQpAllowed },
@@ -570,6 +577,8 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->vbvBufsize                           = 0;
     configPtr->vbvBufInit                           = 90;
     configPtr->hrdFlag                              = 0;
+    configPtr->crf                                  = 28;
+    configPtr->lowLevelVbv                          = 0;
 
     // Testing
     configPtr->testUserData                         = 0;

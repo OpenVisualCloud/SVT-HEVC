@@ -1782,7 +1782,7 @@ void LoadDefaultBufferConfigurationSettings(
     EB_U32 meSegH = (((sequenceControlSetPtr->maxInputLumaHeight + 32) / MAX_LCU_SIZE) < 6) ? 1 : 6;
     EB_U32 meSegW = (((sequenceControlSetPtr->maxInputLumaWidth + 32) / MAX_LCU_SIZE) < 10) ? 1 : 10;
 
-    EB_U16 tileColCount = sequenceControlSetPtr->staticConfig.tileColumnCount;
+    // EB_U16 tileColCount = sequenceControlSetPtr->staticConfig.tileColumnCount;
     EB_U16 tileRowCount = sequenceControlSetPtr->staticConfig.tileRowCount;
 
     EB_U32 inputPic = SetParentPcs(&sequenceControlSetPtr->staticConfig);
@@ -2237,7 +2237,7 @@ void CopyApiFromApp(
     sequenceControlSetPtr->chromaFormatIdc = (EB_U32)(sequenceControlSetPtr->staticConfig.encoderColorFormat);
     sequenceControlSetPtr->encoderBitDepth = (EB_U32)(sequenceControlSetPtr->staticConfig.encoderBitDepth);
     sequenceControlSetPtr->enableTmvpSps = sequenceControlSetPtr->staticConfig.unrestrictedMotionVector;
-
+ 
     // Copying to masteringDisplayColorVolume structure
     sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryX[0] = sequenceControlSetPtr->staticConfig.displayPrimaryX[0];
     sequenceControlSetPtr->masteringDisplayColorVolume.displayPrimaryX[1] = sequenceControlSetPtr->staticConfig.displayPrimaryX[1];
@@ -2564,6 +2564,16 @@ static EB_ERRORTYPE VerifySettings(\
         SVT_LOG("SVT [Error]: Instance %u: Invalid vbvBufInit [0 - 100]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
+  
+    if (config->lowLevelVbv > 1) {
+        SVT_LOG("SVT [Error]: Instance %u : Invalid lowLevelVbv flag [0 - 1]\n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->lowLevelVbv == 1 && ((config->vbvBufsize <= 0) || (config->vbvMaxrate <= 0))) {
+        SVT_LOG("SVT [Error]: Instance %u: Enabling Low level vbv requires Frame Level Vbv to be enabled", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
 
     if ( config->enableSaoFlag > 1) {
        SVT_LOG("SVT [Error]: Instance %u: Invalid SAO. SAO range must be [0 - 1]\n",channelNumber+1);
@@ -2664,13 +2674,20 @@ static EB_ERRORTYPE VerifySettings(\
     }
     if (config->constrainedIntra > 1) {
         SVT_LOG("SVT [Error]: Instance %u: The constrained intra must be [0 - 1] \n", channelNumber + 1);
-	    return_error = EB_ErrorBadParameter;
-    }
-    if (config->rateControlMode > 1) {
-        SVT_LOG("SVT [Error]: Instance %u: The rate control mode must be [0 - 1] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
-
+    if (config->rateControlMode > 2) {
+        SVT_LOG("SVT [Error]: Instance %u: The rate control mode must be [0 - 2] \n", channelNumber + 1); 
+        return_error = EB_ErrorBadParameter;
+    }
+    if (((config->rateControlMode == 0) || (config->rateControlMode == 1)) && (config->crf != 28)) {
+        SVT_LOG("SVT [Warning]: Instance %u: The crf setting with %u wouldn't take effect with rc %u\n",
+                channelNumber + 1, config->crf, config->rateControlMode);
+    }
+    if ((config->rateControlMode == 2) && (config->crf > 51)) {
+        SVT_LOG("SVT [Error]: Instance %u:The crf value must be [0-51] \n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
     if (config->lookAheadDistance > 250 && config->lookAheadDistance != (EB_U32)~0) {
         SVT_LOG("SVT [Error]: Instance %u: The lookahead distance must be [0 - 250] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
@@ -3049,9 +3066,12 @@ static void PrintLibParams(
     SVT_LOG("\nSVT [config]: HierarchicalLevels / BaseLayerSwitchMode / PredStructure\t\t\t: %d / %d / %d ", config->hierarchicalLevels, config->baseLayerSwitchMode, config->predStructure);
 
     if (config->rateControlMode == 1)
-        SVT_LOG("\nSVT [config]: RCMode / TargetBitrate / LAD / SceneChange / QP Range [%u ~ %u]\t\t: VBR / %d / %d / %d ", config->minQpAllowed, config->maxQpAllowed, config->targetBitRate, config->lookAheadDistance, config->sceneChangeDetection);
+        SVT_LOG("\nSVT [config]: RCMode / TargetBitrate / LAD / SceneChange / QP Range [%u ~ %u]\t\t: VBR / %d / %d / %d ",
+                config->minQpAllowed, config->maxQpAllowed, config->targetBitRate, config->lookAheadDistance, config->sceneChangeDetection);
+    else if (config->rateControlMode == 2)
+        SVT_LOG("\nSVT [config]: RCMode / TargetQuality / LAD / SceneChange\t\t: CRF / %d / %d / %d ", config->crf, config->lookAheadDistance, config->sceneChangeDetection);
     else
-        SVT_LOG("\nSVT [config]: BRC Mode / QP / LookaheadDistance / SceneChange\t\t\t\t: CQP / %d / %d / %d ", config->qp, config->lookAheadDistance, config->sceneChangeDetection);
+        SVT_LOG("\nSVT [config]: RCMode / QP / LAD / SceneChange\t\t\t\t: CQP / %d / %d / %d ", config->qp, config->lookAheadDistance, config->sceneChangeDetection);
 
     if (config->tune <= 1)
         SVT_LOG("\nSVT [config]: BitRateReduction / ImproveSharpness\t\t\t\t\t: %d / %d ", config->bitRateReduction, config->improveSharpness);

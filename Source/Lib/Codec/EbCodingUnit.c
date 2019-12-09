@@ -9,6 +9,7 @@
 #include "EbUtility.h"
 #include "EbTransformUnit.h"
 #include "EbPictureControlSet.h"
+#include "EbThreads.h"
 
 /*
 Tasks & Questions
@@ -19,6 +20,28 @@ Tasks & Questions
     -Need a ReconPicture for each candidate.
     -I don't see a way around doing the copies in temp memory and then copying it in...
 */
+EB_ERRORTYPE RCStatRowCtor(
+    RCStatRow_t         **rcStatRowDblPtr,
+    EB_U16                rowIndex)
+{
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    RCStatRow_t *rcStatRowPtr;
+    EB_MALLOC(RCStatRow_t*, rcStatRowPtr, sizeof(RCStatRow_t), EB_N_PTR);
+    *rcStatRowDblPtr = rcStatRowPtr;
+    rcStatRowPtr->rowIndex = rowIndex;
+    rcStatRowPtr->predictedBits = 0;
+    rcStatRowPtr->encodedBits = 0;
+    rcStatRowPtr->rowQp = 0;
+    rcStatRowPtr->totalCUEncoded = 0;
+    rcStatRowPtr->lastEncodedCU = 0;
+    EB_CREATEMUTEX(EB_HANDLE, rcStatRowPtr->rowUpdateMutex, sizeof(EB_HANDLE), EB_MUTEX);
+    if (return_error == EB_ErrorInsufficientResources) {
+        return EB_ErrorInsufficientResources;
+    }
+
+    return EB_ErrorNone;
+}
+
 EB_ERRORTYPE LargestCodingUnitCtor(
     LargestCodingUnit_t        **largetCodingUnitDblPtr,
     EB_U8                        lcuSize,
@@ -64,7 +87,10 @@ EB_ERRORTYPE LargestCodingUnitCtor(
     largestCodingUnitPtr->originY                       = lcuOriginY;
     
     largestCodingUnitPtr->index                         = lcuIndex; 
-
+    largestCodingUnitPtr->proxytotalBits                = 0;
+    largestCodingUnitPtr->rowInd                        = 0;
+    largestCodingUnitPtr->intraSadInterval              = 0;
+    largestCodingUnitPtr->interSadInterval              = 0;
     EB_MALLOC(CodingUnit_t**, largestCodingUnitPtr->codedLeafArrayPtr, sizeof(CodingUnit_t*) * CU_MAX_COUNT, EB_N_PTR);
     for(codedLeafIndex=0; codedLeafIndex < CU_MAX_COUNT; ++codedLeafIndex) {
         EB_MALLOC(CodingUnit_t*, largestCodingUnitPtr->codedLeafArrayPtr[codedLeafIndex], sizeof(CodingUnit_t) , EB_N_PTR);

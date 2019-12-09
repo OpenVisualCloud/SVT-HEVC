@@ -422,6 +422,11 @@ typedef struct EB_H265_ENC_CONFIGURATION
      *
      * Default is 10. */
     uint32_t                minQpAllowed;
+    /* CRF value allowed for rate control use, only apllicable when rate
+     * control mode is set to 2.
+     *
+     * Default is 28. */
+    uint32_t                crf;
 
 
     // bitstream options
@@ -545,7 +550,13 @@ typedef struct EB_H265_ENC_CONFIGURATION
 
     /* Active channel count. */
     uint32_t                activeChannelCount;
-
+	/* Enables lowLevelVBV Algorithm
+    *
+	* 0 = disable.
+	* 1 = enable.
+	*
+	* Default is 0. */
+    uint8_t                 lowLevelVbv;
 
     // Threads management
 

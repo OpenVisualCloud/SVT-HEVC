@@ -380,7 +380,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
 	EbObjectWrapper_t              *prevPictureControlSetWrapperPtr = 0;
     EB_U32                          chromaFormat = EB_YUV420;
     EB_U32                          subWidthCMinus1 = 1;
-    EB_U32                          subHeightCMinus1 = 1;
+    // EB_U32                          subHeightCMinus1 = 1;
     
     for(;;) {
 
@@ -401,7 +401,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
         chromaFormat = sequenceControlSetPtr->chromaFormatIdc;
         subWidthCMinus1 = (chromaFormat == EB_YUV444 ? 1 : 2) - 1;
-        subHeightCMinus1 = (chromaFormat >= EB_YUV422 ? 1 : 2) - 1;
+        // subHeightCMinus1 = (chromaFormat >= EB_YUV422 ? 1 : 2) - 1;
         // If config changes occured since the last picture began encoding, then
         //   prepare a new sequenceControlSetPtr containing the new changes and update the state
         //   of the previous Active SequenceControlSet
@@ -588,7 +588,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
 	    // Rate Control                                            
 		// Set the ME Distortion and OIS Historgrams to zero
-        if (sequenceControlSetPtr->staticConfig.rateControlMode){
+        if (sequenceControlSetPtr->staticConfig.rateControlMode != 0){
 	            EB_MEMSET(pictureControlSetPtr->meDistortionHistogram, 0, NUMBER_OF_SAD_INTERVALS*sizeof(EB_U16));
 	            EB_MEMSET(pictureControlSetPtr->oisDistortionHistogram, 0, NUMBER_OF_INTRA_SAD_INTERVALS*sizeof(EB_U16));
         }

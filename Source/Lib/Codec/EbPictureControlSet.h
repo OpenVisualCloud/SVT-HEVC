@@ -141,6 +141,7 @@ typedef struct EntropyTileInfo_s
     EB_BOOL                               entropyCodingInProgress;
 	EB_BOOL                               entropyCodingPicDone;
     EntropyCoder_t                       *entropyCoderPtr;
+    EntropyCoder_t                       *tempEntropyCoderPtr;
 } EntropyTileInfo;
 
 typedef struct PictureControlSet_s 
@@ -155,10 +156,10 @@ typedef struct PictureControlSet_s
     
     // Reference Lists
     EbObjectWrapper_t                    *refPicPtrArray[MAX_NUM_OF_REF_PIC_LIST];
-
     EB_U8                                 refPicQpArray[MAX_NUM_OF_REF_PIC_LIST];
-    EB_PICTURE                            refSliceTypeArray[MAX_NUM_OF_REF_PIC_LIST];    
-    
+    EB_PICTURE                              refSliceTypeArray[MAX_NUM_OF_REF_PIC_LIST];
+    EB_U8                                 refPicTemporalLayerArray[MAX_NUM_OF_REF_PIC_LIST];
+
     // GOP
     EB_U64                                pictureNumber;        
     EB_U8                                 temporalLayerIndex;
@@ -191,6 +192,7 @@ typedef struct PictureControlSet_s
     EB_U8                                 pictureQp;
     EB_U8                                 difCuDeltaQpDepth;
     EB_U8                                 useDeltaQp;
+    EB_U64                                sadCost;
     
     // LCU Array
     EB_U8                                 lcuMaxDepth;
@@ -209,6 +211,10 @@ typedef struct PictureControlSet_s
     // QP Assignment
     EB_U8                                 prevCodedQp[EB_TILE_MAX_COUNT];
     EB_U8                                 prevQuantGroupCodedQp[EB_TILE_MAX_COUNT];
+
+    // Temp QP Assignment
+    EB_U8                                 tempprevCodedQp[EB_TILE_MAX_COUNT];
+    EB_U8                                 tempprevQuantGroupCodedQp[EB_TILE_MAX_COUNT];
 
     // Enc/DecQP Assignment
     EB_U8                                 encPrevCodedQp[EB_TILE_MAX_COUNT][MAX_PICTURE_HEIGHT_SIZE / MAX_LCU_SIZE];
@@ -257,6 +263,11 @@ typedef struct PictureControlSet_s
     NeighborArrayUnit_t                  **intraLumaModeNeighborArray;
     NeighborArrayUnit_t                  **skipFlagNeighborArray;
 
+    NeighborArrayUnit_t                  **tempModeTypeNeighborArray;
+    NeighborArrayUnit_t                  **tempLeafDepthNeighborArray;
+    NeighborArrayUnit_t                  **tempIntraLumaModeNeighborArray;
+    NeighborArrayUnit_t                  **tempSkipFlagNeighborArray;
+
     EB_REFLIST                            colocatedPuRefList;
     EB_BOOL                               isLowDelay;
 
@@ -285,6 +296,15 @@ typedef struct PictureControlSet_s
 
     EB_BOOL                               bdpPresentFlag;
     EB_BOOL                               mdPresentFlag;
+
+    //Row level vbv data
+    RCStatRow_t                           **rowStats;
+    EB_BOOL                               firstRowOfPicture;
+
+    EB_U64                                frameSizePlanned;
+    EB_U64                                frameSizeEstimated;
+    EB_U64                                bufferFillPerFrame;
+    EB_U8                                 qpNoVbv;
 
 } PictureControlSet_t;
 
@@ -417,6 +437,7 @@ typedef struct PictureParentControlSet_s
     EB_BOOL                               tablesUpdated;
     EB_BOOL                               percentageUpdated;
     EB_U32                                targetBitRate;
+    EB_U32                                crf;
     EB_BOOL                               minTargetRateAssigned;
     EB_U32                                frameRate;
     EB_BOOL                               frameRateIsUpdated;
@@ -424,6 +445,8 @@ typedef struct PictureParentControlSet_s
     EB_U16                                lcuTotalCount;
     EB_BOOL                               endOfSequenceRegion;
     EB_BOOL                               sceneChangeInGop;
+    EB_S32                                hlHistogramQueueIndex;
+
     // used for Look ahead
     EB_U8                                 framesInSw;
     EB_S16                                historgramLifeCount;
@@ -440,6 +463,7 @@ typedef struct PictureParentControlSet_s
     EB_U64                                averageQp;
  
     EB_U64                                lastIdrPicture;
+    EB_U64                                lastIdrPictureOrder;
 
     EB_U64                                startTimeSeconds;
     EB_U64                                startTimeuSeconds;
@@ -479,6 +503,7 @@ typedef struct PictureParentControlSet_s
 
 	MeCuResults_t						**meResults;
 	EB_U32								 *rcMEdistortion;
+	EB_U32								 *rcMESatdDistortion;
 
     // Motion Estimation Distortion and OIS Historgram 
     EB_U16                               *meDistortionHistogram;

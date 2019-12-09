@@ -1052,6 +1052,11 @@ typedef enum EB_SEI {
 #define MIN_QP_VALUE                     0
 #define MAX_QP_VALUE                    51
 #define MAX_CHROMA_MAP_QP_VALUE         57
+#define BASE_FRAME_DURATION             0.04
+#define MIN_FRAME_DURATION              0.01
+#define MAX_FRAME_DURATION              1.00
+#define SAD_SATD_CONSTANT               5
+
 
 
 //***Transforms***
@@ -1090,6 +1095,10 @@ typedef enum EB_SEI {
 //HRD constants
 #define BR_SHIFT               6
 #define CPB_SHIFT              4
+
+#define STEP_SIZE              1
+#define RC_TOL                 0
+#define RC_TOL_FACTOR          0
 
 // INTRA restriction for global motion
 #define INTRA_GLOBAL_MOTION_NON_MOVING_INDEX_TH  2
