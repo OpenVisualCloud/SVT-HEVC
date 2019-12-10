@@ -53,7 +53,7 @@ EB_ERRORTYPE PictureDecisionContextCtor(
 
     contextPtr->pictureAnalysisResultsInputFifoPtr  = pictureAnalysisResultsInputFifoPtr;
     contextPtr->pictureDecisionResultsOutputFifoPtr = pictureDecisionResultsOutputFifoPtr;
-    
+
 	EB_MALLOC(EB_U32**, contextPtr->ahdRunningAvgCb, sizeof(EB_U32*) * MAX_NUMBER_OF_REGIONS_IN_WIDTH, EB_N_PTR);
 
 	EB_MALLOC(EB_U32**, contextPtr->ahdRunningAvgCr, sizeof(EB_U32*) * MAX_NUMBER_OF_REGIONS_IN_WIDTH, EB_N_PTR);
@@ -120,7 +120,7 @@ static EB_BOOL SceneTransitionDetector(
     EB_U32 **ahdRunningAvgCb = contextPtr->ahdRunningAvgCb;
     EB_U32 **ahdRunningAvgCr = contextPtr->ahdRunningAvgCr;
     EB_U32 **ahdRunningAvg = contextPtr->ahdRunningAvg;
-	
+
 	EB_U32  ahdError = 0; // the difference between the ahd and the running average at the current frame.
 
 	EB_U8   aidFuturePast = 0; // this variable denotes the average intensity difference between the next and the past frames
@@ -143,19 +143,19 @@ static EB_BOOL SceneTransitionDetector(
 	EB_U32  regionCountThreshold = (sequenceControlSetPtr->scdMode == SCD_MODE_2) ?
 		(EB_U32)(((float)((sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerWidth * sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerHeight) * 75) / 100) + 0.5) :
 		(EB_U32)(((float)((sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerWidth * sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerHeight) * 50) / 100) + 0.5) ;
-	
+
 	regionWidth = ParentPcsWindow[1]->enhancedPicturePtr->width / sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerWidth;
 	regionHeight = ParentPcsWindow[1]->enhancedPicturePtr->height / sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerHeight;
-	
+
 	// Loop over regions inside the picture
 	for (regionInPictureWidthIndex = 0; regionInPictureWidthIndex < sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerWidth; regionInPictureWidthIndex++){  // loop over horizontal regions
 		for (regionInPictureHeightIndex = 0; regionInPictureHeightIndex < sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerHeight; regionInPictureHeightIndex++){ // loop over vertical regions
 
-            isAbruptChange = EB_FALSE; 
+            isAbruptChange = EB_FALSE;
             isSceneChange = EB_FALSE;
             isFlash = EB_FALSE;
-            gradualChange = EB_FALSE; 
-			
+            gradualChange = EB_FALSE;
+
 			// Reset accumulative histogram (absolute) differences between the past and current frame
 			ahd = 0;
 			ahdCb = 0;
@@ -175,7 +175,7 @@ static EB_BOOL SceneTransitionDetector(
 			regionThreshHold = (
 				// Noise insertion/removal detection
 				((ABS((EB_S64)currentPictureControlSetPtr->picAvgVariance - (EB_S64)previousPictureControlSetPtr->picAvgVariance)) > NOISE_VARIANCE_TH) &&
-				(currentPictureControlSetPtr->picAvgVariance > HIGH_PICTURE_VARIANCE_TH || previousPictureControlSetPtr->picAvgVariance > HIGH_PICTURE_VARIANCE_TH)) ? 
+				(currentPictureControlSetPtr->picAvgVariance > HIGH_PICTURE_VARIANCE_TH || previousPictureControlSetPtr->picAvgVariance > HIGH_PICTURE_VARIANCE_TH)) ?
 				NOISY_SCENE_TH * NUM64x64INPIC(regionWidth, regionHeight) : // SCD TH function of noise insertion/removal.
 				SCENE_TH * NUM64x64INPIC(regionWidth, regionHeight) ;
 
@@ -267,17 +267,17 @@ static EB_BOOL SceneTransitionDetector(
     if ((isSceneChangeCount >= regionCountThreshold)){
 
 		return(EB_TRUE);
-	} 
+	}
 	else {
 		return(EB_FALSE);
 	}
-	
+
 }
 
 /***************************************************************************************************
-* ReleasePrevPictureFromReorderQueue
+* EbHevcReleasePrevPictureFromReorderQueue
 ***************************************************************************************************/
-EB_ERRORTYPE ReleasePrevPictureFromReorderQueue(
+EB_ERRORTYPE EbHevcReleasePrevPictureFromReorderQueue(
 	EncodeContext_t                 *encodeContextPtr) {
 
 	EB_ERRORTYPE return_error = EB_ErrorNone;
@@ -285,17 +285,17 @@ EB_ERRORTYPE ReleasePrevPictureFromReorderQueue(
 	PictureDecisionReorderEntry_t   *queuePreviousEntryPtr;
 	EB_S32                           previousEntryIndex;
 
-	
+
 	// Get the previous entry from the Picture Decision Reordering Queue (Entry N-1)
 	// P.S. The previous entry in display order is needed for Scene Change Detection
 	previousEntryIndex = (encodeContextPtr->pictureDecisionReorderQueueHeadIndex == 0) ? PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH - 1 : encodeContextPtr->pictureDecisionReorderQueueHeadIndex - 1;
 	queuePreviousEntryPtr = encodeContextPtr->pictureDecisionReorderQueue[previousEntryIndex];
 
-	// LCU activity classification based on (0,0) SAD & picture activity derivation 
+	// LCU activity classification based on (0,0) SAD & picture activity derivation
 	if (queuePreviousEntryPtr->parentPcsWrapperPtr) {
 
 		// Reset the Picture Decision Reordering Queue Entry
-		// P.S. The reset of the Picture Decision Reordering Queue Entry could not be done before running the Scene Change Detector 
+		// P.S. The reset of the Picture Decision Reordering Queue Entry could not be done before running the Scene Change Detector
 		queuePreviousEntryPtr->pictureNumber += PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH;
 		queuePreviousEntryPtr->parentPcsWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
 	}
@@ -307,9 +307,9 @@ EB_ERRORTYPE ReleasePrevPictureFromReorderQueue(
 /***************************************************************************************************
 * Generates mini GOP RPSs
 *
-*   
+*
 ***************************************************************************************************/
-EB_ERRORTYPE GenerateMiniGopRps(
+EB_ERRORTYPE EbHevcGenerateMiniGopRps(
 	PictureDecisionContext_t        *contextPtr,
 	EncodeContext_t                 *encodeContextPtr) {
 
@@ -355,7 +355,7 @@ EB_U8 PictureLevelSubPelSettingsOq(
 	EB_BOOL isUsedAsReferenceFlag) {
 
 	EB_U8 subPelMode;
-   
+
 	if (encMode <= ENC_MODE_8) {
 		subPelMode = 1;
 	}
@@ -422,7 +422,7 @@ EB_ERRORTYPE SignalDerivationMultiProcessesOq(
             pictureControlSetPtr->depthMode = PICT_LCU_SWITCH_DEPTH_MODE;
         }
     }
-    
+
     // Set the default settings of  subpel
     pictureControlSetPtr->useSubpelFlag = PictureLevelSubPelSettingsOq(
         sequenceControlSetPtr->inputResolution,
@@ -464,7 +464,7 @@ EB_ERRORTYPE SignalDerivationMultiProcessesOq(
 	else {
 		pictureControlSetPtr->cu8x8Mode = CU_8x8_MODE_1;
     }
-   
+
     // CU_16x16 Search Mode
 	  pictureControlSetPtr->cu16x16Mode = CU_16x16_MODE_0;
 
@@ -477,109 +477,109 @@ EB_ERRORTYPE SignalDerivationMultiProcessesOq(
 
 /***************************************************************************************************
  * Picture Decision Kernel
- *                                                                                                        
- * Notes on the Picture Decision:                                                                                                       
- *                                                                                                        
- * The Picture Decision process performs multi-picture level decisions, including setting of the prediction structure, 
+ *
+ * Notes on the Picture Decision:
+ *
+ * The Picture Decision process performs multi-picture level decisions, including setting of the prediction structure,
  * setting the picture type and scene change detection.
  *
  * Inputs:
- * Input Picture                                                                                                       
- *   -Input Picture Data                                                                                
- *                                                                                                                         
- *  Outputs:                                                                                                      
- *   -Picture Control Set with fully available PA Reference List                                                                                              
- *                                                                                                                                                                                                                                                                                       
- *  For Low Delay Sequences, pictures are started into the encoder pipeline immediately.                                                                                                      
- *                                                                                                        
+ * Input Picture
+ *   -Input Picture Data
+ *
+ *  Outputs:
+ *   -Picture Control Set with fully available PA Reference List
+ *
+ *  For Low Delay Sequences, pictures are started into the encoder pipeline immediately.
+ *
  *  For Random Access Sequences, pictures are held for up to a PredictionStructurePeriod
- *    in order to determine if a Scene Change or Intra Frame is forthcoming. Either of 
- *    those events (and additionally a End of Sequence Flag) will change the expected 
+ *    in order to determine if a Scene Change or Intra Frame is forthcoming. Either of
+ *    those events (and additionally a End of Sequence Flag) will change the expected
  *    prediction structure.
  *
- *  Below is an example worksheet for how Intra Flags and Scene Change Flags interact 
+ *  Below is an example worksheet for how Intra Flags and Scene Change Flags interact
  *    together to affect the prediction structure.
  *
- *  The base prediction structure for this example is a 3-Level Hierarchical Random Access, 
- *    Single Reference Prediction Structure:                                                                                                        
- *                                                                                                        
- *        b   b                                                                                                      
- *       / \ / \                                                                                                     
- *      /   B   \                                                                                                    
- *     /   / \   \                                                                                                     
- *    I-----------B                                                                                                    
- *                                                                                                        
- *  From this base structure, the following RPS positions are derived:                                                                                                   
- *                                                                                                        
- *    p   p       b   b       p   p                                                                                                    
- *     \   \     / \ / \     /   /                                                                                                     
- *      P   \   /   B   \   /   P                                                                                                      
- *       \   \ /   / \   \ /   /                                                                                                       
- *        ----I-----------B----                                                                                                        
- *                                                                                                        
- *    L L L   I  [ Normal ]   T T T                                                                                              
- *    2 1 0   n               0 1 2                                                                           
- *            t                                                                                            
- *            r                                                                                            
- *            a                                                                                            
- *                                                                                                        
+ *  The base prediction structure for this example is a 3-Level Hierarchical Random Access,
+ *    Single Reference Prediction Structure:
+ *
+ *        b   b
+ *       / \ / \
+ *      /   B   \
+ *     /   / \   \
+ *    I-----------B
+ *
+ *  From this base structure, the following RPS positions are derived:
+ *
+ *    p   p       b   b       p   p
+ *     \   \     / \ / \     /   /
+ *      P   \   /   B   \   /   P
+ *       \   \ /   / \   \ /   /
+ *        ----I-----------B----
+ *
+ *    L L L   I  [ Normal ]   T T T
+ *    2 1 0   n               0 1 2
+ *            t
+ *            r
+ *            a
+ *
  *  The RPS is composed of Leading Picture [L2-L0], Intra (CRA), Base/Normal Pictures,
  *    and Trailing Pictures [T0-T2]. Generally speaking, Leading Pictures are useful
- *    for handling scene changes without adding extraneous I-pictures and the Trailing 
+ *    for handling scene changes without adding extraneous I-pictures and the Trailing
  *    pictures are useful for terminating GOPs.
  *
  *  Here is a table of possible combinations of pictures needed to handle intra and
  *    scene changes happening in quick succession.
- *                                                                                                     
- *        Distance to scene change ------------>                                                                                                      
- *                                                                                                        
- *                  0              1                 2                3+                                                                                            
- *   I                                                                                                                      
- *   n                                                                                                                     
- *   t   0        I   I           n/a               n/a              n/a                                                                      
- *   r                                                                                                                     
- *   a              p              p                                                                                             
- *                   \            /                                                                                              
- *   P   1        I   I          I   I              n/a              n/a                                                                               
- *   e                                                                                                             
- *   r               p                               p                                                                                                
- *   i                \                             /                                                                                                 
- *   o            p    \         p   p             /   p                                                                                           
- *   d             \    \       /     \           /   /                                                                                          
+ *
+ *        Distance to scene change ------------>
+ *
+ *                  0              1                 2                3+
+ *   I
+ *   n
+ *   t   0        I   I           n/a               n/a              n/a
+ *   r
+ *   a              p              p
+ *                   \            /
+ *   P   1        I   I          I   I              n/a              n/a
+ *   e
+ *   r               p                               p
+ *   i                \                             /
+ *   o            p    \         p   p             /   p
+ *   d             \    \       /     \           /   /
  *       2     I    -----I     I       I         I----    I          n/a
- *   |                                                                                               
- *   |            p   p           p   p            p   p            p   p                                                                                           
- *   |             \   \         /     \          /     \          /   /                                                                                       
- *   |              P   \       /   p   \        /   p   \        /   P                                                                                        
- *   |               \   \     /     \   \      /   /     \      /   /                                                                                         
- *   V   3+   I       ----I   I       ----I    I----       I    I----       I                                                                                 
- *                                                                                                
- *   The table is interpreted as follows:                                                                                             
- *                                                                                                
- *   If there are no SCs or Intras encountered for a PredPeriod, then the normal                                                                                             
- *     prediction structure is applied.                                                                                          
- *                                                                                              
+ *   |
+ *   |            p   p           p   p            p   p            p   p
+ *   |             \   \         /     \          /     \          /   /
+ *   |              P   \       /   p   \        /   p   \        /   P
+ *   |               \   \     /     \   \      /   /     \      /   /
+ *   V   3+   I       ----I   I       ----I    I----       I    I----       I
+ *
+ *   The table is interpreted as follows:
+ *
+ *   If there are no SCs or Intras encountered for a PredPeriod, then the normal
+ *     prediction structure is applied.
+ *
  *   If there is an intra in the PredPeriod, then one of the above combinations of
  *     Leading and Trailing pictures is used.  If there is no scene change, the last
  *     valid column consisting of Trailing Pictures only is used.  However, if there
- *     is an upcoming scene change before the next intra, then one of the above patterns 
+ *     is an upcoming scene change before the next intra, then one of the above patterns
  *     is used. In the case of End of Sequence flags, only the last valid column of Trailing
  *     Pictures is used. The intention here is that any combination of Intra Flag and Scene
- *     Change flag can be coded.                                                                                            
- *                                                                                              
+ *     Change flag can be coded.
+ *
  ***************************************************************************************************/
 void* PictureDecisionKernel(void *inputPtr)
 {
-    PictureDecisionContext_t        *contextPtr = (PictureDecisionContext_t*) inputPtr;     
+    PictureDecisionContext_t        *contextPtr = (PictureDecisionContext_t*) inputPtr;
 
-    PictureParentControlSet_t       *pictureControlSetPtr;  
+    PictureParentControlSet_t       *pictureControlSetPtr;
 
     EncodeContext_t                 *encodeContextPtr;
     SequenceControlSet_t            *sequenceControlSetPtr;
-    
+
     EbObjectWrapper_t               *inputResultsWrapperPtr;
     PictureAnalysisResults_t        *inputResultsPtr;
-    
+
     EbObjectWrapper_t               *outputResultsWrapperPtr;
     PictureDecisionResults_t        *outputResultsPtr;
 
@@ -587,17 +587,17 @@ void* PictureDecisionKernel(void *inputPtr)
 
     EB_BOOL                          preAssignmentBufferFirstPassFlag;
     EB_PICTURE                         pictureType;
-    
-    PictureDecisionReorderEntry_t   *queueEntryPtr; 
+
+    PictureDecisionReorderEntry_t   *queueEntryPtr;
     EB_S32                           queueEntryIndex;
 
-    EB_S32                           previousEntryIndex;  
+    EB_S32                           previousEntryIndex;
 
     PaReferenceQueueEntry_t         *inputEntryPtr;
     EB_U32                           inputQueueIndex;
 
     PaReferenceQueueEntry_t         *paReferenceEntryPtr;
-    EB_U32                           paReferenceQueueIndex;  
+    EB_U32                           paReferenceQueueIndex;
 
     EB_U64                           refPoc;
 
@@ -617,16 +617,16 @@ void* PictureDecisionKernel(void *inputPtr)
 
     // Debug
     EB_U64                           loopCount = 0;
-    
+
     for(;;) {
-    
+
         // Get Input Full Object
         EbGetFullObject(
             contextPtr->pictureAnalysisResultsInputFifoPtr,
             &inputResultsWrapperPtr);
         EB_CHECK_END_OBJ(inputResultsWrapperPtr);
-        
-        inputResultsPtr         = (PictureAnalysisResults_t*)   inputResultsWrapperPtr->objectPtr;     
+
+        inputResultsPtr         = (PictureAnalysisResults_t*)   inputResultsWrapperPtr->objectPtr;
         pictureControlSetPtr    = (PictureParentControlSet_t*)  inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;
         sequenceControlSetPtr   = (SequenceControlSet_t*)       pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
         encodeContextPtr        = (EncodeContext_t*)            sequenceControlSetPtr->encodeContextPtr;
@@ -638,28 +638,29 @@ void* PictureDecisionKernel(void *inputPtr)
         loopCount ++;
 
         // Input Picture Analysis Results into the Picture Decision Reordering Queue
-        // P.S. Since the prior Picture Analysis processes stage is multithreaded, inputs to the Picture Decision Process 
-        // can arrive out-of-display-order, so a the Picture Decision Reordering Queue is used to enforce processing of 
+        // P.S. Since the prior Picture Analysis processes stage is multithreaded, inputs to the Picture Decision Process
+        // can arrive out-of-display-order, so a the Picture Decision Reordering Queue is used to enforce processing of
         // pictures in display order
 
-        queueEntryIndex                                         =   (EB_S32) (pictureControlSetPtr->pictureNumber - encodeContextPtr->pictureDecisionReorderQueue[encodeContextPtr->pictureDecisionReorderQueueHeadIndex]->pictureNumber);        
+        queueEntryIndex                                         =   (EB_S32) (pictureControlSetPtr->pictureNumber - encodeContextPtr->pictureDecisionReorderQueue[encodeContextPtr->pictureDecisionReorderQueueHeadIndex]->pictureNumber);
         queueEntryIndex                                         +=  encodeContextPtr->pictureDecisionReorderQueueHeadIndex;
-        queueEntryIndex                                         =   (queueEntryIndex > PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH - 1) ? queueEntryIndex - PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH : queueEntryIndex;        
-        queueEntryPtr                                           =   encodeContextPtr->pictureDecisionReorderQueue[queueEntryIndex];         
-        if(queueEntryPtr->parentPcsWrapperPtr != NULL){
+        queueEntryIndex                                         =   (queueEntryIndex > PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH - 1) ? queueEntryIndex - PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH : queueEntryIndex;
+        queueEntryPtr                                           =   encodeContextPtr->pictureDecisionReorderQueue[queueEntryIndex];
+        // Parent PCS could be NULL, especailly when the 1st frame is an EOS one.
+        if ((queueEntryPtr->parentPcsWrapperPtr != NULL) && !pictureControlSetPtr->endOfSequenceFlag) {
             CHECK_REPORT_ERROR_NC(
-                encodeContextPtr->appCallbackPtr, 
+                encodeContextPtr->appCallbackPtr,
                 EB_ENC_PD_ERROR8);
         }else{
             queueEntryPtr->parentPcsWrapperPtr                      =   inputResultsPtr->pictureControlSetWrapperPtr;
             queueEntryPtr->pictureNumber                            =   pictureControlSetPtr->pictureNumber;
         }
-        // Process the head of the Picture Decision Reordering Queue (Entry N) 
+        // Process the head of the Picture Decision Reordering Queue (Entry N)
         // P.S. The Picture Decision Reordering Queue should be parsed in the display order to be able to construct a pred structure
         queueEntryPtr = encodeContextPtr->pictureDecisionReorderQueue[encodeContextPtr->pictureDecisionReorderQueueHeadIndex];
-        
+
         while(queueEntryPtr->parentPcsWrapperPtr != EB_NULL) {
-            
+
             if(queueEntryPtr->pictureNumber == 0 ||
                 sequenceControlSetPtr->staticConfig.sceneChangeDetection == 0 ||
                 ((PictureParentControlSet_t *)(queueEntryPtr->parentPcsWrapperPtr->objectPtr))->endOfSequenceFlag == EB_TRUE){
@@ -667,8 +668,8 @@ void* PictureDecisionKernel(void *inputPtr)
             }else{
                  framePasseThru = EB_FALSE;
             }
-            windowAvail                = EB_TRUE; 
-            previousEntryIndex         = QUEUE_GET_PREVIOUS_SPOT(encodeContextPtr->pictureDecisionReorderQueueHeadIndex); 
+            windowAvail                = EB_TRUE;
+            previousEntryIndex         = QUEUE_GET_PREVIOUS_SPOT(encodeContextPtr->pictureDecisionReorderQueueHeadIndex);
 
             if(encodeContextPtr->pictureDecisionReorderQueue[previousEntryIndex]->parentPcsWrapperPtr == NULL){
                 windowAvail = EB_FALSE;
@@ -690,7 +691,7 @@ void* PictureDecisionKernel(void *inputPtr)
                         ParentPcsWindow[2+windowIndex] =(PictureParentControlSet_t *) encodeContextPtr->pictureDecisionReorderQueue[entryIndex]->parentPcsWrapperPtr->objectPtr;
                     }
                 }
-            } 
+            }
             pictureControlSetPtr                        = (PictureParentControlSet_t*)  queueEntryPtr->parentPcsWrapperPtr->objectPtr;
 
             if(pictureControlSetPtr->idrFlag == EB_TRUE)
@@ -716,10 +717,10 @@ void* PictureDecisionKernel(void *inputPtr)
             // Place the PCS into the Pre-Assignment Buffer
             // P.S. The Pre-Assignment Buffer is used to store a whole pre-structure
             encodeContextPtr->preAssignmentBuffer[encodeContextPtr->preAssignmentBufferCount] = queueEntryPtr->parentPcsWrapperPtr;
-            
+
             // Setup the PCS & SCS
             pictureControlSetPtr                        = (PictureParentControlSet_t*)  encodeContextPtr->preAssignmentBuffer[encodeContextPtr->preAssignmentBufferCount]->objectPtr;
-            
+
             // Set the POC Number
             pictureControlSetPtr->pictureNumber    = (encodeContextPtr->currentInputPoc + 1) /*& ((1 << sequenceControlSetPtr->bitsForPictureOrderCount)-1)*/;
             encodeContextPtr->currentInputPoc      = pictureControlSetPtr->pictureNumber;
@@ -728,17 +729,14 @@ void* PictureDecisionKernel(void *inputPtr)
 			pictureControlSetPtr->predStructure = sequenceControlSetPtr->staticConfig.predStructure;
 
 			pictureControlSetPtr->hierarchicalLayersDiff = 0;
-          
+
            pictureControlSetPtr->initPredStructPositionFlag    = EB_FALSE;
-    
+
            pictureControlSetPtr->targetBitRate          = sequenceControlSetPtr->staticConfig.targetBitRate;
-           pictureControlSetPtr->droppedFramesNumber    = 0;    
+           pictureControlSetPtr->droppedFramesNumber    = 0;
 
-           ReleasePrevPictureFromReorderQueue(
+           EbHevcReleasePrevPictureFromReorderQueue(
                encodeContextPtr);
-
-            pictureControlSetPtr->craFlag = EB_FALSE;
-            pictureControlSetPtr->idrFlag = EB_FALSE;
 
             // If the Intra period length is 0, then introduce an intra for every picture
             if ((sequenceControlSetPtr->intraPeriodLength == 0) || (pictureControlSetPtr->pictureNumber == 0)) {
@@ -785,7 +783,7 @@ void* PictureDecisionKernel(void *inputPtr)
 				(pictureControlSetPtr->predStructure == EB_PRED_LOW_DELAY_B))
 			{
 
-				// Initialize Picture Block Params 
+				// Initialize Picture Block Params
 				contextPtr->miniGopStartIndex[0]		 = 0;
 				contextPtr->miniGopEndIndex	 [0]		 = encodeContextPtr->preAssignmentBufferCount - 1;
 				contextPtr->miniGopLenght	 [0]		 = encodeContextPtr->preAssignmentBufferCount;
@@ -794,16 +792,16 @@ void* PictureDecisionKernel(void *inputPtr)
 				contextPtr->miniGopIntraCount[0]		 = encodeContextPtr->preAssignmentBufferIntraCount;
 				contextPtr->miniGopIdrCount  [0]		 = encodeContextPtr->preAssignmentBufferIdrCount;
 				contextPtr->totalNumberOfMiniGops		 = 1;
-				
+
 				encodeContextPtr->previousMiniGopHierarchicalLevels = (pictureControlSetPtr->pictureNumber == 0) ?
 					sequenceControlSetPtr->staticConfig.hierarchicalLevels :
 					encodeContextPtr->previousMiniGopHierarchicalLevels;
 
-				GenerateMiniGopRps(
+				EbHevcGenerateMiniGopRps(
 					contextPtr,
 					encodeContextPtr);
-           
-                // Loop over Mini GOPs 
+
+                // Loop over Mini GOPs
 
 				for (miniGopIndex = 0; miniGopIndex < contextPtr->totalNumberOfMiniGops; ++miniGopIndex) {
 
@@ -815,7 +813,7 @@ void* PictureDecisionKernel(void *inputPtr)
 						pictureControlSetPtr = (PictureParentControlSet_t*)encodeContextPtr->preAssignmentBuffer[pictureIndex]->objectPtr;
 						sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 
-						// Keep track of the mini GOP size to which the input picture belongs - needed @ PictureManagerProcess() 
+						// Keep track of the mini GOP size to which the input picture belongs - needed @ PictureManagerProcess()
 						pictureControlSetPtr->preAssignmentBufferCount = contextPtr->miniGopLenght[miniGopIndex];
 
 						// Update the Pred Structure if cutting short a Random Access period
@@ -901,9 +899,9 @@ void* PictureDecisionKernel(void *inputPtr)
 						}
 
 						// The poc number of the latest IDR picture is stored so that lastIdrPicture (present in PCS) for the incoming pictures can be updated.
-						// The lastIdrPicture is used in reseting the poc (in entropy coding) whenever IDR is encountered. 
-						// Note IMP: This logic only works when display and decode order are the same. Currently for Random Access, IDR is inserted (similar to CRA) by using trailing P pictures (low delay fashion) and breaking prediction structure. 
-						// Note: When leading P pictures are implemented, this logic has to change.. 
+						// The lastIdrPicture is used in reseting the poc (in entropy coding) whenever IDR is encountered.
+						// Note IMP: This logic only works when display and decode order are the same. Currently for Random Access, IDR is inserted (similar to CRA) by using trailing P pictures (low delay fashion) and breaking prediction structure.
+						// Note: When leading P pictures are implemented, this logic has to change..
 						if (pictureControlSetPtr->idrFlag == EB_TRUE) {
 							encodeContextPtr->lastIdrPicture = pictureControlSetPtr->pictureNumber;
 						}
@@ -926,7 +924,7 @@ void* PictureDecisionKernel(void *inputPtr)
 						else if (pictureControlSetPtr->craFlag == EB_TRUE) {
 							pictureControlSetPtr->nalUnit = NAL_UNIT_CODED_SLICE_CRA;
 						}
-						// User specify of use of non-reference picture is OFF 
+						// User specify of use of non-reference picture is OFF
 						else {
 							// If we have an open GOP situation, where pictures are forward-referencing to a CRA, then those pictures have to be tagged as RASL.
 							if ((contextPtr->miniGopIntraCount[miniGopIndex] > 0) && (contextPtr->miniGopIdrCount[miniGopIndex] == 0) &&
@@ -957,7 +955,7 @@ void* PictureDecisionKernel(void *inputPtr)
 
 						case EB_I_PICTURE:
 
-							// Reset Prediction Structure Position & Reference Struct Position 
+							// Reset Prediction Structure Position & Reference Struct Position
 							if (pictureControlSetPtr->pictureNumber == 0){
 								encodeContextPtr->intraPeriodPosition = 0;
 							}
@@ -1040,18 +1038,18 @@ void* PictureDecisionKernel(void *inputPtr)
                         }
                         EbBlockOnMutex(encodeContextPtr->terminatingConditionsMutex);
 
-                        encodeContextPtr->terminatingSequenceFlagReceived = (pictureControlSetPtr->endOfSequenceFlag == EB_TRUE) ? 
-                            EB_TRUE :  
+                        encodeContextPtr->terminatingSequenceFlagReceived = (pictureControlSetPtr->endOfSequenceFlag == EB_TRUE) ?
+                            EB_TRUE :
                             encodeContextPtr->terminatingSequenceFlagReceived;
 
-                        encodeContextPtr->terminatingPictureNumber = (pictureControlSetPtr->endOfSequenceFlag == EB_TRUE) ? 
+                        encodeContextPtr->terminatingPictureNumber = (pictureControlSetPtr->endOfSequenceFlag == EB_TRUE) ?
                             pictureControlSetPtr->pictureNumber :
                             encodeContextPtr->terminatingPictureNumber;
 
                         EbReleaseMutex(encodeContextPtr->terminatingConditionsMutex);
 
                         preAssignmentBufferFirstPassFlag = EB_FALSE;
-                    
+
                         // Update the Dependant List Count - If there was an I-frame or Scene Change, then cleanup the Picture Decision PA Reference Queue Dependent Counts
                         if (pictureControlSetPtr->sliceType == EB_I_PICTURE)
                         {
@@ -1059,25 +1057,25 @@ void* PictureDecisionKernel(void *inputPtr)
                             inputQueueIndex = encodeContextPtr->pictureDecisionPaReferenceQueueHeadIndex;
 
                             while(inputQueueIndex != encodeContextPtr->pictureDecisionPaReferenceQueueTailIndex) {
-                        
+
                                 inputEntryPtr = encodeContextPtr->pictureDecisionPaReferenceQueue[inputQueueIndex];
-                            
+
                                 // Modify Dependent List0
                                 depListCount = inputEntryPtr->list0.listCount;
                                 for(depIdx=0; depIdx < depListCount; ++depIdx) {
 
-                        
-                                    // Adjust the latest currentInputPoc in case we're in a POC rollover scenario 
+
+                                    // Adjust the latest currentInputPoc in case we're in a POC rollover scenario
                                     // currentInputPoc += (currentInputPoc < inputEntryPtr->pocNumber) ? (1 << sequenceControlSetPtr->bitsForPictureOrderCount) : 0;
-                            
+
                                     depPoc = POC_CIRCULAR_ADD(
                                         inputEntryPtr->pictureNumber, // can't use a value that gets reset
                                         inputEntryPtr->list0.list[depIdx]/*,
                                         sequenceControlSetPtr->bitsForPictureOrderCount*/);
-                            
+
                                     // If Dependent POC is greater or equal to the IDR POC
                                     if(depPoc >= pictureControlSetPtr->pictureNumber && inputEntryPtr->list0.list[depIdx]) {
-                                
+
                                         inputEntryPtr->list0.list[depIdx] = 0;
 
                                         // Decrement the Reference's referenceCount
@@ -1085,23 +1083,23 @@ void* PictureDecisionKernel(void *inputPtr)
 
                                         CHECK_REPORT_ERROR(
                                             (inputEntryPtr->dependentCount != ~0u),
-                                            encodeContextPtr->appCallbackPtr, 
-                                            EB_ENC_PD_ERROR3);  
+                                            encodeContextPtr->appCallbackPtr,
+                                            EB_ENC_PD_ERROR3);
                                     }
                                 }
-                            
+
                                 // Modify Dependent List1
                                 depListCount = inputEntryPtr->list1.listCount;
                                 for(depIdx=0; depIdx < depListCount; ++depIdx) {
-                                
-                                    // Adjust the latest currentInputPoc in case we're in a POC rollover scenario 
+
+                                    // Adjust the latest currentInputPoc in case we're in a POC rollover scenario
                                     // currentInputPoc += (currentInputPoc < inputEntryPtr->pocNumber) ? (1 << sequenceControlSetPtr->bitsForPictureOrderCount) : 0;
-                            
+
                                     depPoc = POC_CIRCULAR_ADD(
                                         inputEntryPtr->pictureNumber,
                                         inputEntryPtr->list1.list[depIdx]/*,
                                         sequenceControlSetPtr->bitsForPictureOrderCount*/);
-                            
+
                                     // If Dependent POC is greater or equal to the IDR POC
                                     if(((depPoc >= pictureControlSetPtr->pictureNumber) || (((pictureControlSetPtr->preAssignmentBufferCount != pictureControlSetPtr->predStructPtr->predStructPeriod) || (pictureControlSetPtr->idrFlag == EB_TRUE)) && (depPoc >  (pictureControlSetPtr->pictureNumber - pictureControlSetPtr->preAssignmentBufferCount)))) && inputEntryPtr->list1.list[depIdx]) {
                                         inputEntryPtr->list1.list[depIdx] = 0;
@@ -1111,18 +1109,18 @@ void* PictureDecisionKernel(void *inputPtr)
 
                                         CHECK_REPORT_ERROR(
                                             (inputEntryPtr->dependentCount != ~0u),
-                                            encodeContextPtr->appCallbackPtr, 
-                                            EB_ENC_PD_ERROR3); 
+                                            encodeContextPtr->appCallbackPtr,
+                                            EB_ENC_PD_ERROR3);
                                     }
-                                
-                                }                                                                                                                                
-                            
+
+                                }
+
                                 // Increment the inputQueueIndex Iterator
                                 inputQueueIndex = (inputQueueIndex == PICTURE_DECISION_PA_REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : inputQueueIndex + 1;
-                            } 
-                    
+                            }
+
                         } else if(pictureControlSetPtr->idrFlag == EB_TRUE) {
-                        
+
                             // Set the Picture Decision PA Reference Entry pointer
                             inputEntryPtr                           = (PaReferenceQueueEntry_t*) EB_NULL;
                         }
@@ -1132,25 +1130,25 @@ void* PictureDecisionKernel(void *inputPtr)
                         inputEntryPtr->inputObjectPtr                       = pictureControlSetPtr->paReferencePictureWrapperPtr;
                         inputEntryPtr->pictureNumber                        = pictureControlSetPtr->pictureNumber;
                         inputEntryPtr->referenceEntryIndex                  = encodeContextPtr->pictureDecisionPaReferenceQueueTailIndex;
-                        inputEntryPtr->pPcsPtr = pictureControlSetPtr;                      
-                        encodeContextPtr->pictureDecisionPaReferenceQueueTailIndex     = 
+                        inputEntryPtr->pPcsPtr = pictureControlSetPtr;
+                        encodeContextPtr->pictureDecisionPaReferenceQueueTailIndex     =
                             (encodeContextPtr->pictureDecisionPaReferenceQueueTailIndex == PICTURE_DECISION_PA_REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : encodeContextPtr->pictureDecisionPaReferenceQueueTailIndex + 1;
-                    
+
                         // Check if the Picture Decision PA Reference is full
                         CHECK_REPORT_ERROR(
                             (((encodeContextPtr->pictureDecisionPaReferenceQueueHeadIndex != encodeContextPtr->pictureDecisionPaReferenceQueueTailIndex) ||
                             (encodeContextPtr->pictureDecisionPaReferenceQueue[encodeContextPtr->pictureDecisionPaReferenceQueueHeadIndex]->inputObjectPtr == EB_NULL))),
-                            encodeContextPtr->appCallbackPtr, 
+                            encodeContextPtr->appCallbackPtr,
                             EB_ENC_PD_ERROR4);
 
-                        // Copy the reference lists into the inputEntry and 
+                        // Copy the reference lists into the inputEntry and
                         // set the Reference Counts Based on Temporal Layer and how many frames are active
                         pictureControlSetPtr->refList0Count = (pictureType == EB_I_PICTURE) ? 0 : (EB_U8)predPositionPtr->refList0.referenceListCount;
                         pictureControlSetPtr->refList1Count = (pictureType == EB_I_PICTURE) ? 0 : (EB_U8)predPositionPtr->refList1.referenceListCount;
 
 						inputEntryPtr->list0Ptr             = &predPositionPtr->refList0;
                         inputEntryPtr->list1Ptr             = &predPositionPtr->refList1;
-                                
+
                         {
 
                             // Copy the Dependent Lists
@@ -1191,61 +1189,61 @@ void* PictureDecisionKernel(void *inputPtr)
 
                         CHECK_REPORT_ERROR(
                             (pictureControlSetPtr->predStructPtr->predStructPeriod < MAX_ELAPSED_IDR_COUNT),
-                            encodeContextPtr->appCallbackPtr, 
+                            encodeContextPtr->appCallbackPtr,
                             EB_ENC_PD_ERROR5);
 
                         // Reset the PA Reference Lists
 						EB_MEMSET(pictureControlSetPtr->refPaPicPtrArray, 0, 2 * sizeof(EbObjectWrapper_t*));
-                    
+
 						EB_MEMSET(pictureControlSetPtr->refPaPicPtrArray, 0, 2 * sizeof(EB_U32));
-               
+
                     }
-                
+
                     // 2nd Loop over Pictures in the Pre-Assignment Buffer
 					for (pictureIndex = contextPtr->miniGopStartIndex[miniGopIndex]; pictureIndex <= contextPtr->miniGopEndIndex[miniGopIndex]; ++pictureIndex) {
-						
+
 						pictureControlSetPtr = (PictureParentControlSet_t*)	encodeContextPtr->preAssignmentBuffer[pictureIndex]->objectPtr;
 
                         // Find the Reference in the Picture Decision PA Reference Queue
                         inputQueueIndex = encodeContextPtr->pictureDecisionPaReferenceQueueHeadIndex;
 
                         do {
-                        
+
                             // Setup the Picture Decision PA Reference Queue Entry
                             inputEntryPtr   = encodeContextPtr->pictureDecisionPaReferenceQueue[inputQueueIndex];
-                        
+
                             // Increment the referenceQueueIndex Iterator
                             inputQueueIndex = (inputQueueIndex == PICTURE_DECISION_PA_REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : inputQueueIndex + 1;
-                    
+
                         } while ((inputQueueIndex != encodeContextPtr->pictureDecisionPaReferenceQueueTailIndex) && (inputEntryPtr->pictureNumber != pictureControlSetPtr->pictureNumber));
 
                         CHECK_REPORT_ERROR(
                             (inputEntryPtr->pictureNumber == pictureControlSetPtr->pictureNumber),
-                            encodeContextPtr->appCallbackPtr, 
+                            encodeContextPtr->appCallbackPtr,
                             EB_ENC_PD_ERROR7);
 
                         // Reset the PA Reference Lists
 						EB_MEMSET(pictureControlSetPtr->refPaPicPtrArray, 0, 2 * sizeof(EbObjectWrapper_t*));
-						
+
 						EB_MEMSET(pictureControlSetPtr->refPicPocArray, 0, 2 * sizeof(EB_U64));
-                    
+
 
                         // Configure List0
                         if ((pictureControlSetPtr->sliceType == EB_P_PICTURE) || (pictureControlSetPtr->sliceType == EB_B_PICTURE)) {
-                    
+
 							if (pictureControlSetPtr->refList0Count){
                                 paReferenceQueueIndex = (EB_U32) CIRCULAR_ADD(
-                                    ((EB_S32) inputEntryPtr->referenceEntryIndex) - inputEntryPtr->list0Ptr->referenceList,      
+                                    ((EB_S32) inputEntryPtr->referenceEntryIndex) - inputEntryPtr->list0Ptr->referenceList,
                                     PICTURE_DECISION_PA_REFERENCE_QUEUE_MAX_DEPTH);                                                                                             // Max
-                                
+
                                 paReferenceEntryPtr = encodeContextPtr->pictureDecisionPaReferenceQueue[paReferenceQueueIndex];
-                        
+
                                 // Calculate the Ref POC
                                 refPoc = POC_CIRCULAR_ADD(
                                     pictureControlSetPtr->pictureNumber,
                                     -inputEntryPtr->list0Ptr->referenceList/*,
                                     sequenceControlSetPtr->bitsForPictureOrderCount*/);
-                       
+
                                 // Set the Reference Object
                                 pictureControlSetPtr->refPaPicPtrArray[REF_LIST_0] = paReferenceEntryPtr->inputObjectPtr;
                                 pictureControlSetPtr->refPicPocArray[REF_LIST_0] = refPoc;
@@ -1261,21 +1259,21 @@ void* PictureDecisionKernel(void *inputPtr)
                                 EbObjectIncLiveCount(
                                     paReferenceEntryPtr->pPcsPtr->pPcsWrapperPtr,
                                     1);
-                                
+
                                 --paReferenceEntryPtr->dependentCount;
                             }
                         }
-                 
+
                         // Configure List1
                         if (pictureControlSetPtr->sliceType == EB_B_PICTURE) {
-                        
+
 							if (pictureControlSetPtr->refList1Count){
                                 paReferenceQueueIndex = (EB_U32) CIRCULAR_ADD(
-                                    ((EB_S32) inputEntryPtr->referenceEntryIndex) - inputEntryPtr->list1Ptr->referenceList,      
+                                    ((EB_S32) inputEntryPtr->referenceEntryIndex) - inputEntryPtr->list1Ptr->referenceList,
                                     PICTURE_DECISION_PA_REFERENCE_QUEUE_MAX_DEPTH);                                                                                             // Max
-                                
+
                                 paReferenceEntryPtr = encodeContextPtr->pictureDecisionPaReferenceQueue[paReferenceQueueIndex];
-                        
+
                                 // Calculate the Ref POC
                                 refPoc = POC_CIRCULAR_ADD(
                                     pictureControlSetPtr->pictureNumber,
@@ -1285,7 +1283,7 @@ void* PictureDecisionKernel(void *inputPtr)
                                 // Set the Reference Object
                                 pictureControlSetPtr->refPaPicPtrArray[REF_LIST_1] = paReferenceEntryPtr->inputObjectPtr;
                                 pictureControlSetPtr->refPicPocArray[REF_LIST_1] = refPoc;
-                                                            
+
                                 // Increment the PA Reference's liveCount by the number of tiles in the input picture
                                 EbObjectIncLiveCount(
                                     paReferenceEntryPtr->inputObjectPtr,
@@ -1296,19 +1294,19 @@ void* PictureDecisionKernel(void *inputPtr)
                                 EbObjectIncLiveCount(
                                     paReferenceEntryPtr->pPcsPtr->pPcsWrapperPtr,
                                     1);
-                        
+
                                 --paReferenceEntryPtr->dependentCount;
                             }
                         }
 
-   
+
                         // Initialize Segments
                         pictureControlSetPtr->meSegmentsColumnCount    =  (EB_U8)(sequenceControlSetPtr->meSegmentColumnCountArray[pictureControlSetPtr->temporalLayerIndex]);
                         pictureControlSetPtr->meSegmentsRowCount       =  (EB_U8)(sequenceControlSetPtr->meSegmentRowCountArray[pictureControlSetPtr->temporalLayerIndex]);
                         pictureControlSetPtr->meSegmentsTotalCount     =  (EB_U16)(pictureControlSetPtr->meSegmentsColumnCount  * pictureControlSetPtr->meSegmentsRowCount);
                         pictureControlSetPtr->meSegmentsCompletionMask = 0;
 
-                        // Post the results to the ME processes                  
+                        // Post the results to the ME processes
                         {
                             EB_U32 segmentIndex;
 
@@ -1323,8 +1321,8 @@ void* PictureDecisionKernel(void *inputPtr)
 
 								outputResultsPtr->pictureControlSetWrapperPtr = encodeContextPtr->preAssignmentBuffer[pictureIndex];
 
-                                outputResultsPtr->segmentIndex = segmentIndex;  
-                        
+                                outputResultsPtr->segmentIndex = segmentIndex;
+
                                 // Post the Full Results Object
                                 EbPostFullObject(outputResultsWrapperPtr);
                             }
@@ -1337,7 +1335,7 @@ void* PictureDecisionKernel(void *inputPtr)
 						}
 
 						if (pictureIndex == encodeContextPtr->preAssignmentBufferCount - 1) {
-                                    
+
                             // Reset the Pre-Assignment Buffer
                             encodeContextPtr->preAssignmentBufferCount              = 0;
                             encodeContextPtr->preAssignmentBufferIdrCount           = 0;
@@ -1350,25 +1348,25 @@ void* PictureDecisionKernel(void *inputPtr)
 
                 } // End MINI GOPs loop
             }
-            
+
             // Walk the pictureDecisionPaReferenceQueue and remove entries that have been completely referenced.
             inputQueueIndex = encodeContextPtr->pictureDecisionPaReferenceQueueHeadIndex;
 
             while(inputQueueIndex != encodeContextPtr->pictureDecisionPaReferenceQueueTailIndex) {
-        
+
                 inputEntryPtr = encodeContextPtr->pictureDecisionPaReferenceQueue[inputQueueIndex];
-            
+
                 // Remove the entry
                 if((inputEntryPtr->dependentCount == 0) &&
-                   (inputEntryPtr->inputObjectPtr)) { 
+                   (inputEntryPtr->inputObjectPtr)) {
                     EbReleaseObject(inputEntryPtr->pPcsPtr->pPcsWrapperPtr);
                        // Release the nominal liveCount value
                        EbReleaseObject(inputEntryPtr->inputObjectPtr);
                        inputEntryPtr->inputObjectPtr = (EbObjectWrapper_t*) EB_NULL;
                 }
-                
+
                 // Increment the HeadIndex if the head is null
-                encodeContextPtr->pictureDecisionPaReferenceQueueHeadIndex = 
+                encodeContextPtr->pictureDecisionPaReferenceQueueHeadIndex =
                     (encodeContextPtr->pictureDecisionPaReferenceQueue[encodeContextPtr->pictureDecisionPaReferenceQueueHeadIndex]->inputObjectPtr)   ? encodeContextPtr->pictureDecisionPaReferenceQueueHeadIndex :
                     (encodeContextPtr->pictureDecisionPaReferenceQueueHeadIndex == PICTURE_DECISION_PA_REFERENCE_QUEUE_MAX_DEPTH - 1)                 ? 0
                                                                                                                                                         : encodeContextPtr->pictureDecisionPaReferenceQueueHeadIndex + 1;
@@ -1376,29 +1374,29 @@ void* PictureDecisionKernel(void *inputPtr)
                  CHECK_REPORT_ERROR(
                     (((encodeContextPtr->pictureDecisionPaReferenceQueueHeadIndex != encodeContextPtr->pictureDecisionPaReferenceQueueTailIndex) ||
                     (encodeContextPtr->pictureDecisionPaReferenceQueue[encodeContextPtr->pictureDecisionPaReferenceQueueHeadIndex]->inputObjectPtr == EB_NULL))),
-                    encodeContextPtr->appCallbackPtr, 
+                    encodeContextPtr->appCallbackPtr,
                     EB_ENC_PD_ERROR4);
 
                 // Increment the inputQueueIndex Iterator
                 inputQueueIndex = (inputQueueIndex == PICTURE_DECISION_PA_REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : inputQueueIndex + 1;
             }
-            
+
             // Increment the Picture Decision Reordering Queue Head Ptr
             encodeContextPtr->pictureDecisionReorderQueueHeadIndex  =   (encodeContextPtr->pictureDecisionReorderQueueHeadIndex == PICTURE_DECISION_REORDER_QUEUE_MAX_DEPTH - 1) ? 0 : encodeContextPtr->pictureDecisionReorderQueueHeadIndex + 1;
-            
-            // Get the next entry from the Picture Decision Reordering Queue (Entry N+1) 
+
+            // Get the next entry from the Picture Decision Reordering Queue (Entry N+1)
             queueEntryPtr                                           = encodeContextPtr->pictureDecisionReorderQueue[encodeContextPtr->pictureDecisionReorderQueueHeadIndex];
         }
             if(windowAvail == EB_FALSE  && framePasseThru == EB_FALSE)
                 break;
-        }        
+        }
 #if DEADLOCK_DEBUG
         SVT_LOG("POC %lld PD OUT \n", pictureControlSetPtr->pictureNumber);
-#endif        
+#endif
         // Release the Input Results
         EbReleaseObject(inputResultsWrapperPtr);
     }
-    
+
     return EB_NULL;
 }
 

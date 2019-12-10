@@ -33,9 +33,9 @@ static EB_BOOL CheckMvForPanHighAmp(
 	EB_S32	*xCurrentMv,
 	EB_S32	*xCandidateMv)
 {
-	if (*xCurrentMv * *xCandidateMv		> 0						// both negative or both positives and both different than 0 i.e. same direction and non Stationary) 
-		&& ABS(*xCurrentMv) >= GLOBAL_MOTION_THRESHOLD[hierarchicalLevels][temporalLayerIndex]	// high amplitude 
-		&& ABS(*xCandidateMv) >= GLOBAL_MOTION_THRESHOLD[hierarchicalLevels][temporalLayerIndex]	// high amplitude 
+	if (*xCurrentMv * *xCandidateMv		> 0						// both negative or both positives and both different than 0 i.e. same direction and non Stationary)
+		&& ABS(*xCurrentMv) >= GLOBAL_MOTION_THRESHOLD[hierarchicalLevels][temporalLayerIndex]	// high amplitude
+		&& ABS(*xCandidateMv) >= GLOBAL_MOTION_THRESHOLD[hierarchicalLevels][temporalLayerIndex]	// high amplitude
 		&& ABS(*xCurrentMv - *xCandidateMv) < LOW_AMPLITUDE_TH) {	// close amplitude
 
 		return(EB_TRUE);
@@ -53,9 +53,9 @@ static EB_BOOL CheckMvForTiltHighAmp(
 	EB_S32	*yCurrentMv,
 	EB_S32	*yCandidateMv)
 {
-	if (*yCurrentMv * *yCandidateMv > 0						// both negative or both positives and both different than 0 i.e. same direction and non Stationary) 
-		&& ABS(*yCurrentMv) >= GLOBAL_MOTION_THRESHOLD[hierarchicalLevels][temporalLayerIndex]	// high amplitude 
-		&& ABS(*yCandidateMv) >= GLOBAL_MOTION_THRESHOLD[hierarchicalLevels][temporalLayerIndex]	// high amplitude 
+	if (*yCurrentMv * *yCandidateMv > 0						// both negative or both positives and both different than 0 i.e. same direction and non Stationary)
+		&& ABS(*yCurrentMv) >= GLOBAL_MOTION_THRESHOLD[hierarchicalLevels][temporalLayerIndex]	// high amplitude
+		&& ABS(*yCandidateMv) >= GLOBAL_MOTION_THRESHOLD[hierarchicalLevels][temporalLayerIndex]	// high amplitude
 		&& ABS(*yCurrentMv - *yCandidateMv) < LOW_AMPLITUDE_TH) {	// close amplitude
 
 		return(EB_TRUE);
@@ -77,9 +77,9 @@ static EB_BOOL CheckMvForPan(
 {
 	if (*yCurrentMv < LOW_AMPLITUDE_TH
 		&& *yCandidateMv < LOW_AMPLITUDE_TH
-		&& *xCurrentMv * *xCandidateMv		> 0						// both negative or both positives and both different than 0 i.e. same direction and non Stationary) 
-		&& ABS(*xCurrentMv) >= GLOBAL_MOTION_THRESHOLD[hierarchicalLevels][temporalLayerIndex]	// high amplitude 
-		&& ABS(*xCandidateMv) >= GLOBAL_MOTION_THRESHOLD[hierarchicalLevels][temporalLayerIndex]	// high amplitude 
+		&& *xCurrentMv * *xCandidateMv		> 0						// both negative or both positives and both different than 0 i.e. same direction and non Stationary)
+		&& ABS(*xCurrentMv) >= GLOBAL_MOTION_THRESHOLD[hierarchicalLevels][temporalLayerIndex]	// high amplitude
+		&& ABS(*xCandidateMv) >= GLOBAL_MOTION_THRESHOLD[hierarchicalLevels][temporalLayerIndex]	// high amplitude
 		&& ABS(*xCurrentMv - *xCandidateMv) < LOW_AMPLITUDE_TH) {	// close amplitude
 
 		return(EB_TRUE);
@@ -101,9 +101,9 @@ static EB_BOOL CheckMvForTilt(
 {
 	if (*xCurrentMv < LOW_AMPLITUDE_TH
 		&& *xCandidateMv < LOW_AMPLITUDE_TH
-		&& *yCurrentMv * *yCandidateMv		> 0						// both negative or both positives and both different than 0 i.e. same direction and non Stationary) 
-		&& ABS(*yCurrentMv) >= GLOBAL_MOTION_THRESHOLD[hierarchicalLevels][temporalLayerIndex]	// high amplitude 
-		&& ABS(*yCandidateMv) >= GLOBAL_MOTION_THRESHOLD[hierarchicalLevels][temporalLayerIndex]	// high amplitude 
+		&& *yCurrentMv * *yCandidateMv		> 0						// both negative or both positives and both different than 0 i.e. same direction and non Stationary)
+		&& ABS(*yCurrentMv) >= GLOBAL_MOTION_THRESHOLD[hierarchicalLevels][temporalLayerIndex]	// high amplitude
+		&& ABS(*yCandidateMv) >= GLOBAL_MOTION_THRESHOLD[hierarchicalLevels][temporalLayerIndex]	// high amplitude
 		&& ABS(*yCurrentMv - *yCandidateMv) < LOW_AMPLITUDE_TH) {	// close amplitude
 
 		return(EB_TRUE);
@@ -164,49 +164,49 @@ static void CheckForNonUniformMotionVectorField(
 
         if (lcuParams->isCompleteLcu) {
 
-			// Current MV   
-			GetMv(pictureControlSetPtr, lcuIndex, &xCurrentMv, &yCurrentMv);
+			// Current MV
+			EbHevcGetMv(pictureControlSetPtr, lcuIndex, &xCurrentMv, &yCurrentMv);
 
-			// Left MV   
+			// Left MV
 			if (lcuOriginX == 0) {
 				xLeftMv = 0;
 				yLeftMv = 0;
 			}
 			else {
-				GetMv(pictureControlSetPtr, lcuIndex - 1, &xLeftMv, &yLeftMv);
+				EbHevcGetMv(pictureControlSetPtr, lcuIndex - 1, &xLeftMv, &yLeftMv);
 			}
 
 			countOfNonUniformNeighbors += CheckMvForNonUniformMotion(&xCurrentMv, &yCurrentMv, &xLeftMv, &yLeftMv);
 
-			// Top MV   
+			// Top MV
 			if (lcuOriginY == 0) {
 				xTopMv = 0;
 				yTopMv = 0;
 			}
 			else {
-				GetMv(pictureControlSetPtr, lcuIndex - pictureWidthInLcu, &xTopMv, &yTopMv);
+				EbHevcGetMv(pictureControlSetPtr, lcuIndex - pictureWidthInLcu, &xTopMv, &yTopMv);
 			}
 
 			countOfNonUniformNeighbors += CheckMvForNonUniformMotion(&xCurrentMv, &yCurrentMv, &xTopMv, &yTopMv);
 
-			// Right MV   
+			// Right MV
 			if ((lcuOriginX + (MAX_LCU_SIZE << 1)) > pictureControlSetPtr->enhancedPicturePtr->width) {
 				xRightMv = 0;
 				yRightMv = 0;
 			}
 			else {
-				GetMv(pictureControlSetPtr, lcuIndex + 1, &xRightMv, &yRightMv);
+				EbHevcGetMv(pictureControlSetPtr, lcuIndex + 1, &xRightMv, &yRightMv);
 			}
 
 			countOfNonUniformNeighbors += CheckMvForNonUniformMotion(&xCurrentMv, &yCurrentMv, &xRightMv, &yRightMv);
 
-			// Bottom MV   
+			// Bottom MV
 			if ((lcuOriginY + (MAX_LCU_SIZE << 1)) > pictureControlSetPtr->enhancedPicturePtr->height) {
 				xBottomMv = 0;
 				yBottomMv = 0;
 			}
 			else {
-				GetMv(pictureControlSetPtr, lcuIndex + pictureWidthInLcu, &xBottomMv, &yBottomMv);
+				EbHevcGetMv(pictureControlSetPtr, lcuIndex + pictureWidthInLcu, &xBottomMv, &yBottomMv);
 			}
 
 			countOfNonUniformNeighbors += CheckMvForNonUniformMotion(&xCurrentMv, &yCurrentMv, &xBottomMv, &yBottomMv);
@@ -215,7 +215,7 @@ static void CheckForNonUniformMotionVectorField(
 }
 
 
-void DetectGlobalMotion(
+void EbHevcDetectGlobalMotion(
     SequenceControlSet_t        *sequenceControlSetPtr,
 	PictureParentControlSet_t	*pictureControlSetPtr)
 {
@@ -252,45 +252,45 @@ void DetectGlobalMotion(
         lcuOriginX = lcuParams->originX;
         lcuOriginY = lcuParams->originY;
 
-        if (lcuParams->isCompleteLcu) { 
+        if (lcuParams->isCompleteLcu) {
 
-			// Current MV   
-			GetMv(pictureControlSetPtr, lcuIndex, &xCurrentMv, &yCurrentMv);
+			// Current MV
+			EbHevcGetMv(pictureControlSetPtr, lcuIndex, &xCurrentMv, &yCurrentMv);
 
-			// Left MV   
+			// Left MV
 			if (lcuOriginX == 0) {
 				xLeftMv = 0;
 				yLeftMv = 0;
 			}
 			else {
-				GetMv(pictureControlSetPtr, lcuIndex - 1, &xLeftMv, &yLeftMv);
+				EbHevcGetMv(pictureControlSetPtr, lcuIndex - 1, &xLeftMv, &yLeftMv);
 			}
 
-			// Top MV   
+			// Top MV
 			if (lcuOriginY == 0) {
 				xTopMv = 0;
 				yTopMv = 0;
 			}
 			else {
-				GetMv(pictureControlSetPtr, lcuIndex - pictureWidthInLcu, &xTopMv, &yTopMv);
+				EbHevcGetMv(pictureControlSetPtr, lcuIndex - pictureWidthInLcu, &xTopMv, &yTopMv);
 			}
 
-			// Right MV   
+			// Right MV
 			if ((lcuOriginX + (MAX_LCU_SIZE << 1)) > pictureControlSetPtr->enhancedPicturePtr->width) {
 				xRightMv = 0;
 				yRightMv = 0;
 			}
 			else {
-				GetMv(pictureControlSetPtr, lcuIndex + 1, &xRightMv, &yRightMv);
+				EbHevcGetMv(pictureControlSetPtr, lcuIndex + 1, &xRightMv, &yRightMv);
 			}
 
-			// Bottom MV   
+			// Bottom MV
 			if ((lcuOriginY + (MAX_LCU_SIZE << 1)) > pictureControlSetPtr->enhancedPicturePtr->height) {
 				xBottomMv = 0;
 				yBottomMv = 0;
 			}
 			else {
-				GetMv(pictureControlSetPtr, lcuIndex + pictureWidthInLcu, &xBottomMv, &yBottomMv);
+				EbHevcGetMv(pictureControlSetPtr, lcuIndex + pictureWidthInLcu, &xBottomMv, &yBottomMv);
 			}
 
 			totalCheckedLcus++;
@@ -375,7 +375,7 @@ EB_ERRORTYPE InitialRateControlContextCtor(
 ** Check if reference pictures are needed
 ** release them when appropriate
 ************************************************/
-void ReleasePaReferenceObjects(
+void EbHevcReleasePaReferenceObjects(
 	PictureParentControlSet_t         *pictureControlSetPtr)
 {
 	// PA Reference Pictures
@@ -385,7 +385,7 @@ void ReleasePaReferenceObjects(
 
 		numOfListToSearch = (pictureControlSetPtr->sliceType == EB_P_PICTURE) ? REF_LIST_0 : REF_LIST_1;
 
-		// List Loop 
+		// List Loop
 		for (listIndex = REF_LIST_0; listIndex <= numOfListToSearch; ++listIndex) {
 
 				// Release PA Reference Pictures
@@ -398,11 +398,11 @@ void ReleasePaReferenceObjects(
 	}
 
 	if (pictureControlSetPtr->paReferencePictureWrapperPtr != EB_NULL) {
-  
+
         EbReleaseObject(pictureControlSetPtr->pPcsWrapperPtr);
 		EbReleaseObject(pictureControlSetPtr->paReferencePictureWrapperPtr);
 	}
-    
+
 	return;
 }
 
@@ -412,7 +412,7 @@ void ReleasePaReferenceObjects(
 ** Mark pictures for tilt
 ** No lookahead information used in this function
 ************************************************/
-void MeBasedGlobalMotionDetection(
+void EbHevcMeBasedGlobalMotionDetection(
     SequenceControlSet_t              *sequenceControlSetPtr,
 	PictureParentControlSet_t         *pictureControlSetPtr)
 {
@@ -421,7 +421,7 @@ void MeBasedGlobalMotionDetection(
 	pictureControlSetPtr->isTilt                = EB_FALSE;
 
 	if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
-        DetectGlobalMotion(
+        EbHevcDetectGlobalMotion(
             sequenceControlSetPtr,
             pictureControlSetPtr);
 	}
@@ -430,7 +430,7 @@ void MeBasedGlobalMotionDetection(
 }
 
 
-void StationaryEdgeCountLcu(
+void EbHevcStationaryEdgeCountLcu(
     SequenceControlSet_t        *sequenceControlSetPtr,
     PictureParentControlSet_t   *pictureControlSetPtr,
     PictureParentControlSet_t   *temporalPictureControlSetPtr,
@@ -477,7 +477,7 @@ void StationaryEdgeCountLcu(
 ** Mark pictures for tilt
 ** LAD Window: min (8 or sliding window size)
 ************************************************/
-void UpdateGlobalMotionDetectionOverTime(
+void EbHevcUpdateGlobalMotionDetectionOverTime(
 	EncodeContext_t                   *encodeContextPtr,
 	SequenceControlSet_t              *sequenceControlSetPtr,
 	PictureParentControlSet_t         *pictureControlSetPtr)
@@ -555,7 +555,7 @@ void UpdateGlobalMotionDetectionOverTime(
 ** LAD Window: min (2xmgpos+1 or sliding window size)
 ************************************************/
 
-void UpdateBeaInfoOverTime(
+void EbHevcUpdateBeaInfoOverTime(
 	EncodeContext_t                   *encodeContextPtr,
 	PictureParentControlSet_t         *pictureControlSetPtr)
 {
@@ -609,7 +609,7 @@ void UpdateBeaInfoOverTime(
 * Init ZZ Cost array to default values
 ** Used when no Lookahead is available
 ****************************************/
-void InitZzCostInfo(
+void EbHevcInitZzCostInfo(
 	PictureParentControlSet_t         *pictureControlSetPtr)
 {
     EB_U16 lcuIdx;
@@ -634,7 +634,7 @@ void InitZzCostInfo(
 ** collocated LCUs infor in lookahead pictures
 ** LAD Window: min (2xmgpos+1 or sliding window size)
 ************************************************/
-void UpdateMotionFieldUniformityOverTime(
+void EbHevcUpdateMotionFieldUniformityOverTime(
 	EncodeContext_t                   *encodeContextPtr,
     SequenceControlSet_t              *sequenceControlSetPtr,
 	PictureParentControlSet_t         *pictureControlSetPtr)
@@ -662,7 +662,7 @@ void UpdateMotionFieldUniformityOverTime(
 		}
         // The values are calculated for every 4th frame
         if ((temporaryPictureControlSetPtr->pictureNumber & 3) == 0){
-            StationaryEdgeCountLcu(
+            EbHevcStationaryEdgeCountLcu(
                 sequenceControlSetPtr,
                 pictureControlSetPtr,
                 temporaryPictureControlSetPtr,
@@ -708,7 +708,7 @@ void UpdateHomogeneityOverTime(
 		meanSqrvariance64x64Based = 0;
 		meanvariance64x64Based = 0;
 
-		// Initialize 
+		// Initialize
 		pictureControlSetPtr->lcuVarianceOfVarianceOverTime[lcuIdx] = 0xFFFFFFFFFFFFFFFF;
 
 		pictureControlSetPtr->isLcuHomogeneousOverTime[lcuIdx] = EB_FALSE;
@@ -767,7 +767,7 @@ void ResetHomogeneityStructures(
 
 	pictureControlSetPtr->picHomogenousOverTimeLcuPercentage = 0;
 
-	// Reset the structure 
+	// Reset the structure
 	for (lcuIdx = 0; lcuIdx < pictureControlSetPtr->lcuTotalCount; ++lcuIdx) {
 		pictureControlSetPtr->lcuVarianceOfVarianceOverTime[lcuIdx] = 0xFFFFFFFFFFFFFFFF;
 		pictureControlSetPtr->isLcuHomogeneousOverTime[lcuIdx] = EB_FALSE;
@@ -776,7 +776,7 @@ void ResetHomogeneityStructures(
 	return;
 }
 
-InitialRateControlReorderEntry_t  * DeterminePictureOffsetInQueue(
+InitialRateControlReorderEntry_t  * EbHevcDeterminePictureOffsetInQueue(
 	EncodeContext_t                   *encodeContextPtr,
 	PictureParentControlSet_t         *pictureControlSetPtr,
 	MotionEstimationResults_t         *inputResultsPtr)
@@ -797,7 +797,7 @@ InitialRateControlReorderEntry_t  * DeterminePictureOffsetInQueue(
 	return queueEntryPtr;
 }
 
-void GetHistogramQueueData(
+void EbHevcGetHistogramQueueData(
 	SequenceControlSet_t              *sequenceControlSetPtr,
 	EncodeContext_t                   *encodeContextPtr,
 	PictureParentControlSet_t         *pictureControlSetPtr)
@@ -805,7 +805,7 @@ void GetHistogramQueueData(
 	HlRateControlHistogramEntry_t     *histogramQueueEntryPtr;
 	EB_S32                             histogramQueueEntryIndex;
 
-	// Determine offset from the Head Ptr for HLRC histogram queue 
+	// Determine offset from the Head Ptr for HLRC histogram queue
 	EbBlockOnMutex(sequenceControlSetPtr->encodeContextPtr->hlRateControlHistorgramQueueMutex);
 	histogramQueueEntryIndex = (EB_S32)(pictureControlSetPtr->pictureNumber - encodeContextPtr->hlRateControlHistorgramQueue[encodeContextPtr->hlRateControlHistorgramQueueHeadIndex]->pictureNumber);
 	histogramQueueEntryIndex += encodeContextPtr->hlRateControlHistorgramQueueHeadIndex;
@@ -843,7 +843,7 @@ void GetHistogramQueueData(
 
 }
 
-void UpdateHistogramQueueEntry(
+void EbHevcUpdateHistogramQueueEntry(
 	SequenceControlSet_t              *sequenceControlSetPtr,
 	EncodeContext_t                   *encodeContextPtr,
 	PictureParentControlSet_t         *pictureControlSetPtr)
@@ -927,20 +927,20 @@ void* InitialRateControlKernel(void *inputPtr)
 
             // Mark picture when global motion is detected using ME results
             //reset intraCodedEstimationLcu
-            MeBasedGlobalMotionDetection(
+            EbHevcMeBasedGlobalMotionDetection(
                 sequenceControlSetPtr,
                 pictureControlSetPtr);
 
-			// Release Pa Ref pictures when not needed 
-			ReleasePaReferenceObjects(
+			// Release Pa Ref pictures when not needed
+			EbHevcReleasePaReferenceObjects(
 				pictureControlSetPtr);
 
 			//****************************************************
 			// Input Motion Analysis Results into Reordering Queue
 			//****************************************************
 
-			// Determine offset from the Head Ptr          
-			queueEntryPtr = DeterminePictureOffsetInQueue(
+			// Determine offset from the Head Ptr
+			queueEntryPtr = EbHevcDeterminePictureOffsetInQueue(
 				encodeContextPtr,
 				pictureControlSetPtr,
 				inputResultsPtr);
@@ -949,8 +949,8 @@ void* InitialRateControlKernel(void *inputPtr)
 			{
 				if (sequenceControlSetPtr->staticConfig.lookAheadDistance != 0){
 
-					// Getting the Histogram Queue Data 
-					GetHistogramQueueData(
+					// Getting the Histogram Queue Data
+					EbHevcGetHistogramQueueData(
 						sequenceControlSetPtr,
 						encodeContextPtr,
 						pictureControlSetPtr);
@@ -964,7 +964,7 @@ void* InitialRateControlKernel(void *inputPtr)
 			pictureControlSetPtr->framesInSw                 = 0;
 			pictureControlSetPtr->historgramLifeCount        = 0;
             pictureControlSetPtr->sceneChangeInGop = EB_FALSE;
- 
+
 			moveSlideWondowFlag = EB_TRUE;
 			while (moveSlideWondowFlag){
 
@@ -1025,7 +1025,7 @@ void* InitialRateControlKernel(void *inputPtr)
 						queueEntryIndexTemp++;
 					}
 
-					
+
 
 					if ((sequenceControlSetPtr->staticConfig.lookAheadDistance != 0) && (framesInSw < (sequenceControlSetPtr->staticConfig.lookAheadDistance + 1)))
 						pictureControlSetPtr->endOfSequenceRegion = EB_TRUE;
@@ -1038,7 +1038,7 @@ void* InitialRateControlKernel(void *inputPtr)
 						if (sequenceControlSetPtr->staticConfig.lookAheadDistance != 0){
 
 							// Update Histogram Queue Entry Life count
-							UpdateHistogramQueueEntry(
+							EbHevcUpdateHistogramQueueEntry(
 								sequenceControlSetPtr,
 								encodeContextPtr,
 								pictureControlSetPtr);
@@ -1050,30 +1050,30 @@ void* InitialRateControlKernel(void *inputPtr)
 					if (!pictureControlSetPtr->endOfSequenceFlag && sequenceControlSetPtr->staticConfig.lookAheadDistance != 0) {
 
 						// Check for Pan,Tilt, Zoom and other global motion detectors over the future pictures in the lookahead
-						UpdateGlobalMotionDetectionOverTime(
+						EbHevcUpdateGlobalMotionDetectionOverTime(
 							encodeContextPtr,
 							sequenceControlSetPtr,
 							pictureControlSetPtr);
 					}
 					else {
 						if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
-							DetectGlobalMotion(
-                                sequenceControlSetPtr, 
+							EbHevcDetectGlobalMotion(
+                                sequenceControlSetPtr,
                                 pictureControlSetPtr);
 						}
 					}
 
-					// BACKGROUND ENHANCEMENT PART II 
+					// BACKGROUND ENHANCEMENT PART II
 					if (!pictureControlSetPtr->endOfSequenceFlag && sequenceControlSetPtr->staticConfig.lookAheadDistance != 0) {
 						// Update BEA information based on Lookahead information
-						UpdateBeaInfoOverTime(
+						EbHevcUpdateBeaInfoOverTime(
 							encodeContextPtr,
 							pictureControlSetPtr);
 
 					}
 					else {
 						// Reset zzCost information to default When there's no lookahead available
-						InitZzCostInfo(
+						EbHevcInitZzCostInfo(
 							pictureControlSetPtr);
 					}
 
@@ -1081,7 +1081,7 @@ void* InitialRateControlKernel(void *inputPtr)
 					if (!pictureControlSetPtr->endOfSequenceFlag && sequenceControlSetPtr->staticConfig.lookAheadDistance != 0) {
 
 						// Updat uniformly moving LCUs based on Collocated LCUs in LookAhead window
-						UpdateMotionFieldUniformityOverTime(
+						EbHevcUpdateMotionFieldUniformityOverTime(
 							encodeContextPtr,
                             sequenceControlSetPtr,
 							pictureControlSetPtr);
@@ -1115,7 +1115,7 @@ void* InitialRateControlKernel(void *inputPtr)
 						sequenceControlSetPtr->encodeContextPtr->streamOutputFifoPtr,
 						&outputStreamWrapperPtr);
 
-					pictureControlSetPtr->outputStreamWrapperPtr = outputStreamWrapperPtr;					
+					pictureControlSetPtr->outputStreamWrapperPtr = outputStreamWrapperPtr;
 
                     // Get Empty Results Object
 					EbGetEmptyObject(
@@ -1131,9 +1131,9 @@ void* InitialRateControlKernel(void *inputPtr)
         double latency = 0.0;
         EB_U64 finishTimeSeconds = 0;
         EB_U64 finishTimeuSeconds = 0;
-        EbFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
+        EbHevcFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
 
-        EbComputeOverallElapsedTimeMs(
+        EbHevcComputeOverallElapsedTimeMs(
                 pictureControlSetPtr->startTimeSeconds,
                 pictureControlSetPtr->startTimeuSeconds,
                 finishTimeSeconds,
@@ -1167,4 +1167,3 @@ void* InitialRateControlKernel(void *inputPtr)
 	}
 	return EB_NULL;
 }
-

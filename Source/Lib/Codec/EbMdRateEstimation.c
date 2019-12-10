@@ -65,7 +65,7 @@ EB_ERRORTYPE GetRefIndexFractionBits(
     return return_error;
 }
 /*********************************************************************
- * GetMvdFractionBits
+ * EbHevcGetMvdFractionBits
  *   Gets the motion vector difference Fraction Bits
  *
  *  mvdX
@@ -80,7 +80,7 @@ EB_ERRORTYPE GetRefIndexFractionBits(
  *  fractionBitNum
  *   output for the fraction number of bits needed for motion vector difference
  *********************************************************************/
-EB_ERRORTYPE GetMvdFractionBits(
+EB_ERRORTYPE EbHevcGetMvdFractionBits(
     EB_S32                      mvdX,
     EB_S32                      mvdY,
     MdRateEstimationContext_t  *mdRateEstimationArray,
@@ -154,7 +154,7 @@ EB_ERRORTYPE GetMvdFractionBits(
     return return_error;
 }
 /*********************************************************************
- * MeGetMvdFractionBits
+ * MeEbHevcGetMvdFractionBits
  *   Gets the motion vector difference Fraction Bits for ME
  *
  *  mvdX
@@ -169,7 +169,7 @@ EB_ERRORTYPE GetMvdFractionBits(
  *  fractionBitNum
  *   output for the fraction number of bits needed for motion vector difference
  *********************************************************************/
-EB_ERRORTYPE MeGetMvdFractionBits(
+EB_ERRORTYPE MeEbHevcGetMvdFractionBits(
     EB_S32                      mvdX,
     EB_S32                      mvdY,
     EB_BitFraction             *mvdBitsPtr,
@@ -258,6 +258,10 @@ EB_ERRORTYPE GetSaoOffsetsFractionBits(
     *fractionBitNum = 0;
 
     if(saoType != 0) {
+        EB_U32 offset0 = MIN(NUMBER_OF_SAO_OFFSET_TRUNUNARY_CASES - 1, ABS(offset[0]));
+        EB_U32 offset1 = MIN(NUMBER_OF_SAO_OFFSET_TRUNUNARY_CASES - 1, ABS(offset[1]));
+        EB_U32 offset2 = MIN(NUMBER_OF_SAO_OFFSET_TRUNUNARY_CASES - 1, ABS(offset[2]));
+        EB_U32 offset3 = MIN(NUMBER_OF_SAO_OFFSET_TRUNUNARY_CASES - 1, ABS(offset[3]));
 
         // Band Offset
         if(saoType == 5) { // Add macros
@@ -266,24 +270,24 @@ EB_ERRORTYPE GetSaoOffsetsFractionBits(
             *fractionBitNum += 163840; //32768*5
 
             // code abs value of offsets
-            *fractionBitNum +=  mdRateEstimationArray->saoOffsetTrunUnaryBits[ABS(offset[0])];
-            *fractionBitNum +=  mdRateEstimationArray->saoOffsetTrunUnaryBits[ABS(offset[1])];
-            *fractionBitNum +=  mdRateEstimationArray->saoOffsetTrunUnaryBits[ABS(offset[2])];
-            *fractionBitNum +=  mdRateEstimationArray->saoOffsetTrunUnaryBits[ABS(offset[3])];
+            *fractionBitNum += mdRateEstimationArray->saoOffsetTrunUnaryBits[offset0];
+            *fractionBitNum += mdRateEstimationArray->saoOffsetTrunUnaryBits[offset1];
+            *fractionBitNum += mdRateEstimationArray->saoOffsetTrunUnaryBits[offset2];
+            *fractionBitNum += mdRateEstimationArray->saoOffsetTrunUnaryBits[offset3];
 
             // code the sign of offsets
-            *fractionBitNum += (offset[0] != 0) ? 32768: 0;
-            *fractionBitNum += (offset[1] != 0) ? 32768: 0;
-            *fractionBitNum += (offset[2] != 0) ? 32768: 0;
-            *fractionBitNum += (offset[3] != 0) ? 32768: 0;
+            *fractionBitNum += (offset0 != 0) ? 32768: 0;
+            *fractionBitNum += (offset1 != 0) ? 32768: 0;
+            *fractionBitNum += (offset2 != 0) ? 32768: 0;
+            *fractionBitNum += (offset3 != 0) ? 32768: 0;
         }
         // Edge Offset
         else {
             // code the offset values
-            *fractionBitNum +=  mdRateEstimationArray->saoOffsetTrunUnaryBits[ABS(offset[0])];
-            *fractionBitNum +=  mdRateEstimationArray->saoOffsetTrunUnaryBits[ABS(offset[1])];
-            *fractionBitNum +=  mdRateEstimationArray->saoOffsetTrunUnaryBits[ABS(offset[2])];
-            *fractionBitNum +=  mdRateEstimationArray->saoOffsetTrunUnaryBits[ABS(offset[3])];
+            *fractionBitNum += mdRateEstimationArray->saoOffsetTrunUnaryBits[offset0];
+            *fractionBitNum += mdRateEstimationArray->saoOffsetTrunUnaryBits[offset1];
+            *fractionBitNum += mdRateEstimationArray->saoOffsetTrunUnaryBits[offset2];
+            *fractionBitNum += mdRateEstimationArray->saoOffsetTrunUnaryBits[offset3];
         }
     }
     return return_error;

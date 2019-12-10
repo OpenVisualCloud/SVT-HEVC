@@ -105,7 +105,7 @@ static void SpeedBufferControl(
 	EB_S8 changeCond        = 0;
 	EB_S64 targetFps        = (sequenceControlSetPtr->staticConfig.injectorFrameRate >> 16);
 
-    
+
     EB_S64 bufferTrshold1 = SC_FRAMES_INTERVAL_T1;
     EB_S64 bufferTrshold2 = SC_FRAMES_INTERVAL_T2;
     EB_S64 bufferTrshold3 = SC_FRAMES_INTERVAL_T3;
@@ -113,23 +113,23 @@ static void SpeedBufferControl(
 	EbBlockOnMutex(sequenceControlSetPtr->encodeContextPtr->scBufferMutex);
 
 	if (sequenceControlSetPtr->encodeContextPtr->scFrameIn == 0) {
-        EbStartTime((uint64_t*)&contextPtr->firstInPicArrivedTimeSeconds, (uint64_t*)&contextPtr->firstInPicArrivedTimeuSeconds);
+        EbHevcStartTime((uint64_t*)&contextPtr->firstInPicArrivedTimeSeconds, (uint64_t*)&contextPtr->firstInPicArrivedTimeuSeconds);
 	}
 	else if (sequenceControlSetPtr->encodeContextPtr->scFrameIn == SC_FRAMES_TO_IGNORE) {
 		contextPtr->startFlag = EB_TRUE;
 	}
 
     // Compute duration since the start of the encode and since the previous checkpoint
-    EbFinishTime((uint64_t*)&cursTimeSeconds, (uint64_t*)&cursTimeuSeconds);
+    EbHevcFinishTime((uint64_t*)&cursTimeSeconds, (uint64_t*)&cursTimeuSeconds);
 
-    EbComputeOverallElapsedTimeMs(
+    EbHevcComputeOverallElapsedTimeMs(
         contextPtr->firstInPicArrivedTimeSeconds,
         contextPtr->firstInPicArrivedTimeuSeconds,
         cursTimeSeconds,
         cursTimeuSeconds,
         &overallDuration);
 
-    EbComputeOverallElapsedTimeMs(
+    EbHevcComputeOverallElapsedTimeMs(
         contextPtr->prevsTimeSeconds,
         contextPtr->prevsTimeuSeconds,
         cursTimeSeconds,
@@ -266,7 +266,7 @@ static EB_ERRORTYPE SignalDerivationPreAnalysisOq(
     PictureParentControlSet_t  *pictureControlSetPtr) {
 
     EB_ERRORTYPE return_error = EB_ErrorNone;
-    
+
     EB_U8 inputResolution = sequenceControlSetPtr->inputResolution;
 
 
@@ -290,7 +290,7 @@ static EB_ERRORTYPE SignalDerivationPreAnalysisOq(
     else {
         pictureControlSetPtr->noiseDetectionMethod = NOISE_DETECT_FULL_PRECISION;
     }
-    
+
 
     // Derive Noise Detection Threshold
     if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
@@ -393,7 +393,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
             &ebInputWrapperPtr);
         EB_CHECK_END_OBJ(ebInputWrapperPtr);
         ebInputPtr = (EB_BUFFERHEADERTYPE*) ebInputWrapperPtr->objectPtr;
-     
+
         sequenceControlSetPtr       = contextPtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr;
 
         // Get source video bit depth
@@ -439,9 +439,9 @@ void* ResourceCoordinationKernel(void *inputPtr)
                 }
                 else {
                     vuiPtr->vuiTimeScale = (sequenceControlSetPtr->staticConfig.frameRate) > 1000 ? (sequenceControlSetPtr->staticConfig.frameRate) : (sequenceControlSetPtr->staticConfig.frameRate)<<16;
-                    vuiPtr->vuiNumUnitsInTick = 1 << 16;                
+                    vuiPtr->vuiNumUnitsInTick = 1 << 16;
                 }
-                    
+
             }
             // Get empty SequenceControlSet [BLOCKING]
             EbGetEmptyObject(
@@ -472,7 +472,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         }
         // Set the current SequenceControlSet
         sequenceControlSetPtr   = (SequenceControlSet_t*) contextPtr->sequenceControlSetActiveArray[instanceIndex]->objectPtr;
-        
+
         //Move to pcs init stage
         //InitTileInfo(sequenceControlSetPtr);
 
@@ -504,7 +504,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         pictureControlSetPtr->pPcsWrapperPtr = pictureControlSetWrapperPtr;
 
         // Set the Encoder mode
-        pictureControlSetPtr->encMode = sequenceControlSetPtr->staticConfig.encMode; 
+        pictureControlSetPtr->encMode = sequenceControlSetPtr->staticConfig.encMode;
 
 		// Keep track of the previous input for the ZZ SADs computation
 		pictureControlSetPtr->previousPictureControlSetWrapperPtr = (contextPtr->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->initialPicture) ?
@@ -524,7 +524,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         pictureControlSetPtr->startTimeSeconds = 0;
         pictureControlSetPtr->startTimeuSeconds = 0;
 
-        EbStartTime((uint64_t*)&pictureControlSetPtr->startTimeSeconds, (uint64_t*)&pictureControlSetPtr->startTimeuSeconds);
+        EbHevcStartTime((uint64_t*)&pictureControlSetPtr->startTimeSeconds, (uint64_t*)&pictureControlSetPtr->startTimeuSeconds);
 
         inputPicturePtr = pictureControlSetPtr->enhancedPicturePtr;
 
@@ -549,7 +549,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
 		inputPicturePtr->strideBitIncY      = inputPicturePtr->strideY;
 		inputPicturePtr->strideBitIncCb     = inputPicturePtr->strideCb;
 		inputPicturePtr->strideBitIncCr     = inputPicturePtr->strideCr;
-        
+
         pictureControlSetPtr->ebInputPtr    = ebInputPtr;
         pictureControlSetPtr->ebInputWrapperPtr = ebInputWrapperPtr;
 
@@ -564,7 +564,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         pictureControlSetPtr->sceneChangeFlag                 = EB_FALSE;
 
         pictureControlSetPtr->qpOnTheFly                      = EB_FALSE;
-           
+
 		//pictureControlSetPtr->lcuTotalCount					  = sequenceControlSetPtr->lcuTotalCount;
 
 		if (sequenceControlSetPtr->staticConfig.speedControlFlag) {
@@ -581,12 +581,12 @@ void* ResourceCoordinationKernel(void *inputPtr)
 		sequenceControlSetPtr->scdMode = sequenceControlSetPtr->staticConfig.sceneChangeDetection == 0 ?
 			SCD_MODE_0 :
 			SCD_MODE_1 ;
-     
+
         SignalDerivationPreAnalysisOq(
                 sequenceControlSetPtr,
                 pictureControlSetPtr);
 
-	    // Rate Control                                            
+	    // Rate Control
 		// Set the ME Distortion and OIS Historgrams to zero
         if (sequenceControlSetPtr->staticConfig.rateControlMode){
 	            EB_MEMSET(pictureControlSetPtr->meDistortionHistogram, 0, NUMBER_OF_SAD_INTERVALS*sizeof(EB_U16));
@@ -610,10 +610,10 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
 #if DEADLOCK_DEBUG
         SVT_LOG("POC %lld RESCOOR IN \n", pictureControlSetPtr->pictureNumber);
-#endif    
+#endif
         // Set the picture structure: 0: progressive, 1: top, 2: bottom
-        pictureControlSetPtr->pictStruct = sequenceControlSetPtr->interlacedVideo == EB_FALSE ? 
-            PROGRESSIVE_PICT_STRUCT : 
+        pictureControlSetPtr->pictStruct = sequenceControlSetPtr->interlacedVideo == EB_FALSE ?
+            PROGRESSIVE_PICT_STRUCT :
             pictureControlSetPtr->pictureNumber % 2 == 0 ?
                 TOP_FIELD_PICT_STRUCT :
                 BOTTOM_FIELD_PICT_STRUCT ;
@@ -631,7 +631,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         EbObjectIncLiveCount(
         	pictureControlSetPtr->paReferencePictureWrapperPtr,
             2);
-   
+
         EbObjectIncLiveCount(
             pictureControlSetWrapperPtr,
             2);
@@ -639,21 +639,31 @@ void* ResourceCoordinationKernel(void *inputPtr)
         ((EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr)->inputPaddedPicturePtr->bufferY = inputPicturePtr->bufferY;
 
         // Get Empty Output Results Object
-		if (pictureControlSetPtr->pictureNumber > 0 && prevPictureControlSetWrapperPtr != (EbObjectWrapper_t*)EB_NULL)
-		{
-			((PictureParentControlSet_t       *)prevPictureControlSetWrapperPtr->objectPtr)->endOfSequenceFlag = endOfSequenceFlag;
+        // Note: record the PCS object into output of the Resource Coordination process for EOS frame(s).
+        //       Because EbH265GetPacket() can get the encoded bit stream only if Packetization process has
+        //       posted the buffer as its result, and the buffer belonging to a PCS object is recorded in
+        //       the Initial Rate Control process. So need to record the PCS object immediately once the
+        //       1st frame is EOS, to make it go through the whole encoding kernels.
+        if (((pictureControlSetPtr->pictureNumber > 0) && (prevPictureControlSetWrapperPtr != (EbObjectWrapper_t*)EB_NULL)) ||
+                endOfSequenceFlag) {
+            if (prevPictureControlSetWrapperPtr && prevPictureControlSetWrapperPtr->objectPtr)
+                ((PictureParentControlSet_t *)prevPictureControlSetWrapperPtr->objectPtr)->endOfSequenceFlag = endOfSequenceFlag;
 
-			EbGetEmptyObject(
-				contextPtr->resourceCoordinationResultsOutputFifoPtr,
-				&outputWrapperPtr);
-			outputResultsPtr = (ResourceCoordinationResults_t*)outputWrapperPtr->objectPtr;
-			outputResultsPtr->pictureControlSetWrapperPtr = prevPictureControlSetWrapperPtr;
+            EbGetEmptyObject(
+                    contextPtr->resourceCoordinationResultsOutputFifoPtr,
+                    &outputWrapperPtr);
+            outputResultsPtr = (ResourceCoordinationResults_t *)outputWrapperPtr->objectPtr;
+            if (endOfSequenceFlag && (pictureControlSetPtr->pictureNumber == 0)) {
+                ((PictureParentControlSet_t *)pictureControlSetWrapperPtr->objectPtr)->endOfSequenceFlag = endOfSequenceFlag;
+                outputResultsPtr->pictureControlSetWrapperPtr = pictureControlSetWrapperPtr;
+            } else
+                outputResultsPtr->pictureControlSetWrapperPtr = prevPictureControlSetWrapperPtr;
 
-			// Post the finished Results Object
-			EbPostFullObject(outputWrapperPtr);
-		}
+            // Post the finished Results Object
+            EbPostFullObject(outputWrapperPtr);
+        }
 
-		prevPictureControlSetWrapperPtr = pictureControlSetWrapperPtr;
+        prevPictureControlSetWrapperPtr = pictureControlSetWrapperPtr;
 
 
 

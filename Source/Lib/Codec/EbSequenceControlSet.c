@@ -167,10 +167,6 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     EbUnRegUserDataSEICtor(
         &sequenceControlSetPtr->unRegUserDataSeiPtr);
 
-    // Initialize LCU params
-    LcuParamsCtor(
-        sequenceControlSetPtr);
-
     sequenceControlSetPtr->maxDpbSize	= 0;
     
     return EB_ErrorNone;
@@ -230,17 +226,6 @@ EB_ERRORTYPE EbSequenceControlSetInstanceCtor(
         
     return EB_ErrorNone;
 }    
-       
-
-extern EB_ERRORTYPE LcuParamsCtor(
-	SequenceControlSet_t *sequenceControlSetPtr) {
-
-	EB_ERRORTYPE return_error = EB_ErrorNone;
-
-	EB_MALLOC(LcuParams_t*, sequenceControlSetPtr->lcuParamsArray, sizeof(LcuParams_t) * ((MAX_PICTURE_WIDTH_SIZE + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize) * ((MAX_PICTURE_HEIGHT_SIZE + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize), EB_N_PTR);
-	return return_error;
-}
-
 
 extern EB_ERRORTYPE LcuParamsInit(
 	SequenceControlSet_t *sequenceControlSetPtr) {

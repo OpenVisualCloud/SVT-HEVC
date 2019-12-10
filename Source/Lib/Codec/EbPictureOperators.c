@@ -100,7 +100,7 @@ EB_ERRORTYPE PictureCopy8Bit(
 
 /*******************************************
 * Picture Residue : subsampled version
-  Computes the residual data 
+  Computes the residual data
 *******************************************/
 void PictureSubSampledResidual(
     EB_U8   *input,
@@ -183,7 +183,7 @@ void PictureResidual16bit(
     return;
 }
 
-EB_U64 ComputeNxMSatd8x8Units_U8(
+EB_U64 EbHevcComputeNxMSatd8x8Units_U8(
 	EB_U8  *src,      //EB_S16 *diff,       // input parameter, diff samples Ptr
 	EB_U32  srcStride, //EB_U32  diffStride, // input parameter, source stride
 	EB_U32  width,      // input parameter, block width (N)
@@ -205,7 +205,7 @@ EB_U64 ComputeNxMSatd8x8Units_U8(
 }
 
 
-EB_U64 ComputeNxMSatd4x4Units_U8(
+EB_U64 EbHevcComputeNxMSatd4x4Units_U8(
 	EB_U8  *src,       //EB_S16 *diff,       // input parameter, diff samples Ptr
 	EB_U32  srcStride, //EB_U32  diffStride, // input parameter, source stride
 	EB_U32  width,      // input parameter, block width (N)
@@ -233,14 +233,14 @@ EB_U64 ComputeNxMSatdSadLCU(
     EB_U8  *src,        // input parameter, source samples Ptr
     EB_U32  srcStride,  // input parameter, source stride
     EB_U32  width,      // input parameter, block width (N)
-    EB_U32  height)     // input parameter, block height (M) 
+    EB_U32  height)     // input parameter, block height (M)
 {
     EB_U64 satd = 0;
     EB_U64  dcValue = 0;
     EB_U64  acValue = 0;
 
     if (width >= 8 && height >= 8){
-        satd = ComputeNxMSatd8x8Units_U8(
+        satd = EbHevcComputeNxMSatd8x8Units_U8(
             src,
             srcStride,
             width,
@@ -249,7 +249,7 @@ EB_U64 ComputeNxMSatdSadLCU(
     }
     else{
         satd =
-            ComputeNxMSatd4x4Units_U8(
+            EbHevcComputeNxMSatd4x4Units_U8(
             src,
             srcStride,
             width,
@@ -348,25 +348,25 @@ EB_ERRORTYPE PictureFullDistortion_R(
 
     // Y
     if (componentMask & PICTURE_BUFFER_DESC_Y_FLAG) {
-			
+
 		FullDistortionIntrinsic_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][countNonZeroCoeffs[0] != 0][mode == INTRA_MODE][areaSize>>3](
             &(((EB_S16*) coeff->bufferY)[coeffLumaOriginIndex]),
             coeff->strideY,
             &(((EB_S16*) reconCoeff->bufferY)[coeffLumaOriginIndex]),
-            reconCoeff->strideY,           
+            reconCoeff->strideY,
             lumaDistortion,
-            areaSize,	
+            areaSize,
             areaSize);
     }
 
     // Cb
     if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-        
+
 		FullDistortionIntrinsic_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][countNonZeroCoeffs[1] != 0][mode == INTRA_MODE][chromaAreaSize >> 3](
             &(((EB_S16*) coeff->bufferCb)[coeffChromaOriginIndex]),
             coeff->strideCb,
             &(((EB_S16*) reconCoeff->bufferCb)[coeffChromaOriginIndex]),
-            reconCoeff->strideCb,           
+            reconCoeff->strideCb,
             cbDistortion,
             chromaAreaSize,
             chromaAreaSize);
@@ -379,7 +379,7 @@ EB_ERRORTYPE PictureFullDistortion_R(
             &(((EB_S16*) coeff->bufferCr)[coeffChromaOriginIndex]),
             coeff->strideCr,
             &(((EB_S16*) reconCoeff->bufferCr)[coeffChromaOriginIndex]),
-            reconCoeff->strideCr,         
+            reconCoeff->strideCr,
             crDistortion,
             chromaAreaSize,
             chromaAreaSize);
@@ -405,17 +405,17 @@ EB_ERRORTYPE PictureFullDistortionLuma(
 	EB_MODETYPE				 mode)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
-    
+
     //TODO due to a change in full kernel distortion , ASM has to be updated to not accumulate the input distortion by the output
     lumaDistortion[0]   = 0;
     lumaDistortion[1]   = 0;
-	
+
     // Y
 	FullDistortionIntrinsic_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][countNonZeroCoeffsY != 0][mode == INTRA_MODE][areaSize >> 3](
         &(((EB_S16*) coeff->bufferY)[coeffLumaOriginIndex]),
         coeff->strideY,
         &(((EB_S16*) reconCoeff->bufferY)[reconCoeffLumaOriginIndex]),
-        reconCoeff->strideY,           
+        reconCoeff->strideY,
         lumaDistortion,
         areaSize,
         areaSize);
@@ -429,17 +429,17 @@ void extract8Bitdata(
     EB_U16      *in16BitBuffer,
     EB_U32       inStride,
     EB_U8       *out8BitBuffer,
-    EB_U32       out8Stride,   
+    EB_U32       out8Stride,
     EB_U32       width,
     EB_U32       height
     )
 {
-    
+
     UnPack8BIT_funcPtrArray_16Bit[((width & 3) == 0) && ((height & 1)== 0)][!!(ASM_TYPES & PREAVX2_MASK)](
         in16BitBuffer,
         inStride,
-        out8BitBuffer,    
-        out8Stride,   
+        out8BitBuffer,
+        out8Stride,
         width,
         height);
 }
@@ -449,28 +449,28 @@ void UnpackL0L1Avg(
         EB_U16 *ref16L1,
         EB_U32  refL1Stride,
         EB_U8  *dstPtr,
-        EB_U32  dstStride,      
+        EB_U32  dstStride,
         EB_U32  width,
         EB_U32  height)
  {
- 
+
      UnPackAvg_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
         ref16L0,
         refL0Stride,
         ref16L1,
         refL1Stride,
         dstPtr,
-        dstStride,      
+        dstStride,
         width,
         height);
-     
- 
+
+
  }
 void Extract8BitdataSafeSub(
     EB_U16      *in16BitBuffer,
     EB_U32       inStride,
     EB_U8       *out8BitBuffer,
-    EB_U32       out8Stride,   
+    EB_U32       out8Stride,
     EB_U32       width,
     EB_U32       height
     )
@@ -479,8 +479,8 @@ void Extract8BitdataSafeSub(
     UnPack8BITSafeSub_funcPtrArray_16Bit[!!(ASM_TYPES & AVX2_MASK)](
         in16BitBuffer,
         inStride,
-        out8BitBuffer,    
-        out8Stride,   
+        out8BitBuffer,
+        out8Stride,
         width,
         height
         );
@@ -491,7 +491,7 @@ void UnpackL0L1AvgSafeSub(
         EB_U16 *ref16L1,
         EB_U32  refL1Stride,
         EB_U8  *dstPtr,
-        EB_U32  dstStride,      
+        EB_U32  dstStride,
         EB_U32  width,
         EB_U32  height)
  {
@@ -503,11 +503,11 @@ void UnpackL0L1AvgSafeSub(
         ref16L1,
         refL1Stride,
         dstPtr,
-        dstStride,   
+        dstStride,
         width,
         height);
-     
- 
+
+
  }
 void UnPack2D(
     EB_U16      *in16BitBuffer,
@@ -546,7 +546,7 @@ void Pack2D_SRC(
     EB_U32     height
    )
 {
-	 
+
     Pack2D_funcPtrArray_16Bit_SRC[((width & 3) == 0) && ((height & 1)== 0)][!!(ASM_TYPES & AVX2_MASK)](
         in8BitBuffer,
         in8Stride,
@@ -644,9 +644,9 @@ void memset16bit(
     }
 }
 /*******************************************
- * memcpy16bit
+ * EbHevcMemcpy16bit
  *******************************************/
-void memcpy16bit(
+void EbHevcMemcpy16bit(
     EB_U16                     * outPtr,
     EB_U16                     * inPtr,
     EB_U64                       numOfElements )
@@ -658,7 +658,7 @@ void memcpy16bit(
     }
 }
 
- 
+
 EB_S32  sumResidual( EB_S16 * inPtr,
                      EB_U32   size,
                      EB_U32   strideIn )
@@ -686,7 +686,7 @@ void memset16bitBlock (
     for (i = 0; i < size; i++)
        memset16bit((EB_U16*)inPtr + i*strideIn, value, size);
 
-}  
+}
 
 
 void UnusedVariablevoidFunc_PicOper()

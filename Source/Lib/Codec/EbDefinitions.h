@@ -339,7 +339,7 @@ FORCE_INLINE void eb_memcpy(void  *dstPtr, void  *srcPtr, size_t size)
 #define       EB_TYPE_PIC_STRUCT             5             // It is a requirement (for the application) that if pictureStruct is present for 1 picture it shall be present for every picture
 
 
-#define	Log2f					          Log2f_SSE2
+#define	Log2f					          EbHevcLog2f_SSE2
 extern EB_U32 Log2f(EB_U32 x);
 
 

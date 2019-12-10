@@ -18,6 +18,7 @@
 #include "EbApi.h"
 #include "EbThreads.h"
 #include "EbUtility.h"
+#include "EbString.h"
 #include "EbEncHandle.h"
 
 #include "EbSystemResourceManager.h"
@@ -57,363 +58,9 @@
 #include <windows.h>
 #else
 #include <unistd.h>
-#endif
-
-#if __linux__
 #include <pthread.h>
 #include <errno.h>
 #endif
-
-/* SAFE STRING LIBRARY */
-
-#ifndef EOK
-#define EOK             ( 0 )
-#endif
-
-#ifndef ESZEROL
-#define ESZEROL         ( 401 )       /* length is zero              */
-#endif
-
-#ifndef ESLEMIN
-#define ESLEMIN         ( 402 )       /* length is below min         */
-#endif
-
-#ifndef ESLEMAX
-#define ESLEMAX         ( 403 )       /* length exceeds max          */
-#endif
-
-#ifndef ESNULLP
-#define ESNULLP         ( 400 )       /* null ptr                    */
-#endif
-
-#ifndef ESOVRLP
-#define ESOVRLP         ( 404 )       /* overlap undefined           */
-#endif
-
-#ifndef ESEMPTY
-#define ESEMPTY         ( 405 )       /* empty string                */
-#endif
-
-#ifndef ESNOSPC
-#define ESNOSPC         ( 406 )       /* not enough space for s2     */
-#endif
-
-#ifndef ESUNTERM
-#define ESUNTERM        ( 407 )       /* unterminated string         */
-#endif
-
-#ifndef ESNODIFF
-#define ESNODIFF        ( 408 )       /* no difference               */
-#endif
-
-#ifndef ESNOTFND
-#define ESNOTFND        ( 409 )       /* not found                   */
-#endif
-
-#define RSIZE_MAX_MEM      ( 256UL << 20 )     /* 256MB */
-
-#define RCNEGATE(x)  (x)
-#define RSIZE_MAX_STR      ( 4UL << 10 )      /* 4KB */
-
-#ifndef sldebug_printf
-#define sldebug_printf(...)
-#endif
-
-#ifndef _RSIZE_T_DEFINED
-typedef size_t rsize_t;
-#define _RSIZE_T_DEFINED
-#endif  /* _RSIZE_T_DEFINED */
-
-#ifndef _ERRNO_T_DEFINED
-#define _ERRNO_T_DEFINED
-typedef int errno_t;
-#endif  /* _ERRNO_T_DEFINED */
-
-typedef void(*constraint_handler_t) (const char * /* msg */,
-    void *       /* ptr */,
-    errno_t      /* error */);
-
-static constraint_handler_t str_handler = NULL;
-
-static void ignore_handler_s(const char *msg, void *ptr, errno_t error)
-{
-    (void)msg;
-    (void)ptr;
-    (void)error;
-    sldebug_printf("IGNORE CONSTRAINT HANDLER: (%u) %s\n", error,
-        (msg) ? msg : "Null message");
-    return;
-}
-
-static void
-invoke_safe_str_constraint_handler(const char *msg,
-    void *ptr,
-    errno_t error)
-{
-    if (NULL != str_handler) {
-       str_handler(msg, ptr, error);
-    }
-    else {
-        ignore_handler_s(msg, ptr, error);
-    }
-}
-
-static inline void handle_error(char *orig_dest, rsize_t orig_dmax,
-    char *err_msg, errno_t err_code)
-{
-    (void)orig_dmax;
-    *orig_dest = '\0';
-
-    invoke_safe_str_constraint_handler(err_msg, NULL, err_code);
-    return;
-}
-
-static errno_t
-strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t slen)
-{
-    rsize_t orig_dmax;
-    char *orig_dest;
-    const char *overlap_bumper;
-
-    if (dest == NULL) {
-        invoke_safe_str_constraint_handler((char*) ("strncpy_ss: dest is null"),
-            NULL, ESNULLP);
-        return RCNEGATE(ESNULLP);
-    }
-
-    if (dmax == 0) {
-        invoke_safe_str_constraint_handler((char*)("strncpy_ss: dmax is 0"),
-            NULL, ESZEROL);
-        return RCNEGATE(ESZEROL);
-    }
-    if (dmax > RSIZE_MAX_STR) {
-        invoke_safe_str_constraint_handler((char*)("strncpy_ss: dmax exceeds max"),
-            NULL, ESLEMAX);
-        return RCNEGATE(ESLEMAX);
-    }
-
-    /* hold base in case src was not copied */
-    orig_dmax = dmax;
-    orig_dest = dest;
-
-    if (src == NULL) {
-        handle_error(orig_dest, orig_dmax, (char*)("strncpy_ss: "
-            "src is null"),
-            ESNULLP);
-        return RCNEGATE(ESNULLP);
-    }
-
-    if (slen == 0) {
-        handle_error(orig_dest, orig_dmax, (char*)("strncpy_ss: "
-            "slen is zero"),
-            ESZEROL);
-        return RCNEGATE(ESZEROL);
-    }
-
-    if (slen > RSIZE_MAX_STR) {
-        handle_error(orig_dest, orig_dmax, (char*)("strncpy_ss: "
-            "slen exceeds max"),
-            ESLEMAX);
-        return RCNEGATE(ESLEMAX);
-    }
-
-    if (dest < src) {
-        overlap_bumper = src;
-
-        while (dmax > 0) {
-            if (dest == overlap_bumper) {
-                handle_error(orig_dest, orig_dmax, (char*)("strncpy_ss: "
-                    "overlapping objects"),
-                    ESOVRLP);
-                return RCNEGATE(ESOVRLP);
-            }
-            if (slen == 0) {
-                /*
-                * Copying truncated to slen chars.  Note that the TR says to
-                * copy slen chars plus the null char.  We null the slack.
-                */
-                *dest = '\0';
-                return RCNEGATE(EOK);
-            }
-
-            *dest = *src;
-            if (*dest == '\0') {
-                return RCNEGATE(EOK);
-            }
-
-            dmax--;
-            slen--;
-            dest++;
-            src++;
-        }
-    }
-    else {
-        overlap_bumper = dest;
-
-        while (dmax > 0) {
-            if (src == overlap_bumper) {
-                handle_error(orig_dest, orig_dmax, (char*)("strncpy_s: "
-                    "overlapping objects"),
-                    ESOVRLP);
-                return RCNEGATE(ESOVRLP);
-            }
-
-            if (slen == 0) {
-                /*
-                * Copying truncated to slen chars.  Note that the TR says to
-                * copy slen chars plus the null char.  We null the slack.
-                */
-                *dest = '\0';
-                return RCNEGATE(EOK);
-            }
-
-            *dest = *src;
-            if (*dest == '\0') {
-                return RCNEGATE(EOK);
-            }
-
-            dmax--;
-            slen--;
-            dest++;
-            src++;
-        }
-    }
-
-    /*
-    * the entire src was not copied, so zero the string
-    */
-    handle_error(orig_dest, orig_dmax, (char*)("strncpy_ss: not enough "
-        "space for src"),
-        ESNOSPC);
-    return RCNEGATE(ESNOSPC);
- }
-
-static errno_t
-strcpy_ss(char *dest, rsize_t dmax, const char *src)
-{
-    rsize_t orig_dmax;
-    char *orig_dest;
-    const char *overlap_bumper;
-
-    if (dest == NULL) {
-        invoke_safe_str_constraint_handler((char*)("strcpy_ss: dest is null"),
-            NULL, ESNULLP);
-        return RCNEGATE(ESNULLP);
-    }
-
-    if (dmax == 0) {
-        invoke_safe_str_constraint_handler((char*)("strcpy_ss: dmax is 0"),
-            NULL, ESZEROL);
-        return RCNEGATE(ESZEROL);
-    }
-
-    if (dmax > RSIZE_MAX_STR) {
-        invoke_safe_str_constraint_handler((char*)("strcpy_ss: dmax exceeds max"),
-            NULL, ESLEMAX);
-        return RCNEGATE(ESLEMAX);
-    }
-
-    if (src == NULL) {
-        *dest = '\0';
-        invoke_safe_str_constraint_handler((char*)("strcpy_ss: src is null"),
-            NULL, ESNULLP);
-        return RCNEGATE(ESNULLP);
-    }
-
-    if (dest == src) {
-        return RCNEGATE(EOK);
-    }
-
-    /* hold base of dest in case src was not copied */
-    orig_dmax = dmax;
-    orig_dest = dest;
-
-    if (dest < src) {
-        overlap_bumper = src;
-
-        while (dmax > 0) {
-            if (dest == overlap_bumper) {
-                handle_error(orig_dest, orig_dmax, (char*)("strcpy_ss: "
-                    "overlapping objects"),
-                    ESOVRLP);
-                return RCNEGATE(ESOVRLP);
-            }
-
-            *dest = *src;
-            if (*dest == '\0') {
-                return RCNEGATE(EOK);
-            }
-
-            dmax--;
-            dest++;
-            src++;
-        }
-
-    }
-    else {
-        overlap_bumper = dest;
-
-        while (dmax > 0) {
-            if (src == overlap_bumper) {
-                handle_error(orig_dest, orig_dmax, (char*)("strcpy_ss: "
-                    "overlapping objects"),
-                    ESOVRLP);
-                return RCNEGATE(ESOVRLP);
-            }
-
-            *dest = *src;
-            if (*dest == '\0') {
-                return RCNEGATE(EOK);
-            }
-
-            dmax--;
-            dest++;
-            src++;
-        }
-    }
-
-    /*
-    * the entire src must have been copied, if not reset dest
-    * to null the string.
-    */
-    handle_error(orig_dest, orig_dmax, (char*)("strcpy_ss: not "
-        "enough space for src"),
-        ESNOSPC);
-    return RCNEGATE(ESNOSPC);
-}
-
-static rsize_t
-strnlen_ss(const char *dest, rsize_t dmax)
-{
-    rsize_t count;
-
-    if (dest == NULL) {
-        return RCNEGATE(0);
-    }
-
-    if (dmax == 0) {
-        invoke_safe_str_constraint_handler("strnlen_ss: dmax is 0",
-            NULL, ESZEROL);
-        return RCNEGATE(0);
-    }
-
-    if (dmax > RSIZE_MAX_STR) {
-        invoke_safe_str_constraint_handler("strnlen_ss: dmax exceeds max",
-            NULL, ESLEMAX);
-        return RCNEGATE(0);
-    }
-
-    count = 0;
-    while (*dest && dmax) {
-        count++;
-        dmax--;
-        dest++;
-    }
-
-    return RCNEGATE(count);
-}
-
-/* SAFE STRING LIBRARY */
 
 /**************************************
  * Defines
@@ -519,7 +166,7 @@ int CheckXcr0Ymm()
 #endif
     return ((xcr0 & 6) == 6); /* checking if xmm and ymm state are enabled in XCR0 */
 }
-EB_S32 Check4thGenIntelCoreFeatures()
+static EB_S32 Check4thGenIntelCoreFeatures()
 {
     int abcd[4];
 #define ECX_REG_FMA     BIT(12)
@@ -624,7 +271,7 @@ static EB_S32 CanUseIntelAVX512()
 
 // Returns ASM Type based on system configuration. AVX512 - 111, AVX2 - 011, NONAVX2 - 001, C - 000
 // Using bit-fields, the fastest function will always be selected based on the available functions in the function arrays
-EB_U32 GetCpuAsmType()
+EB_U32 EbHevcGetCpuAsmType()
 {
 	EB_U32 asmType = 0;
 
@@ -645,7 +292,7 @@ EB_U32 GetCpuAsmType()
 }
 
 //Get Number of logical processors
-EB_U32 GetNumProcessors() {
+EB_U32 EbHevcGetNumProcessors() {
 #ifdef WIN32
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
@@ -746,7 +393,7 @@ static EB_U32 EncDecPortTotalCount(void)
     return totalCount;
 }
 
-EB_ERRORTYPE InitThreadManagmentParams(){
+EB_ERRORTYPE EbHevcInitThreadManagmentParams(){
 #ifdef _WIN32
     // Initialize groupAffinity structure with Current thread info
     GetThreadGroupAffinity(GetCurrentThread(),&groupAffinity);
@@ -754,8 +401,8 @@ EB_ERRORTYPE InitThreadManagmentParams(){
 #elif defined(__linux__)
     const char* PROCESSORID = "processor";
     const char* PHYSICALID = "physical id";
-    int processor_id_len = strnlen_ss(PROCESSORID, 128);
-    int physical_id_len = strnlen_ss(PHYSICALID, 128);
+    int processor_id_len = EB_STRLEN(PROCESSORID, 128);
+    int physical_id_len = EB_STRLEN(PHYSICALID, 128);
     int maxSize = INITIAL_PROCESSOR_GROUP;
     if (processor_id_len < 0 || processor_id_len >= 128) return EB_ErrorInsufficientResources;
     if (physical_id_len < 0 || physical_id_len >= 128) return EB_ErrorInsufficientResources;
@@ -784,8 +431,8 @@ EB_ERRORTYPE InitThreadManagmentParams(){
                 if (socket_id >= maxSize) {
                     maxSize = maxSize * 2;
                     lpGroup = (processorGroup*)realloc(lpGroup,maxSize * sizeof(processorGroup));
-                    if (lpGroup == (processorGroup*) EB_NULL) 
-                        return EB_ErrorInsufficientResources; 
+                    if (lpGroup == (processorGroup*) EB_NULL)
+                        return EB_ErrorInsufficientResources;
                 }
                 lpGroup[socket_id].group[lpGroup[socket_id].num++] = processor_id;
             }
@@ -831,7 +478,7 @@ static EB_ERRORTYPE EbEncHandleCtor(
         return EB_ErrorInsufficientResources;
     }
 
-    return_error = InitThreadManagmentParams();
+    return_error = EbHevcInitThreadManagmentParams();
     if (return_error == EB_ErrorInsufficientResources) {
         return EB_ErrorInsufficientResources;
     }
@@ -979,10 +626,9 @@ EB_U64 GetAffinityMask(EB_U32 lpnum) {
 }
 #endif
 
-void SwitchToRealTime()
+void EbHevcSwitchToRealTime()
 {
-
-#if  __linux__
+#ifndef _WIN32
 
     struct sched_param schedParam = {
         .sched_priority = sched_get_priority_max(SCHED_FIFO)
@@ -995,16 +641,14 @@ void SwitchToRealTime()
 #endif
 }
 
-void EbSetThreadManagementParameters(
+void EbHevcSetThreadManagementParameters(
     EB_H265_ENC_CONFIGURATION   *configPtr)
 {
-    EB_U32 numLogicProcessors = GetNumProcessors();
-
-    if (configPtr->switchThreadsToRtPriority == 1) {
-        SwitchToRealTime();
-    }
+    if (configPtr->switchThreadsToRtPriority == 1)
+        EbHevcSwitchToRealTime();
 
 #ifdef _WIN32
+    EB_U32 numLogicProcessors = EbHevcGetNumProcessors();
     // For system with a single processor group(no more than 64 logic processors all together)
     // Affinity of the thread can be set to one or more logical processors
     if (numGroups == 1) {
@@ -1038,6 +682,7 @@ void EbSetThreadManagementParameters(
         }
     }
 #elif defined(__linux__)
+    EB_U32 numLogicProcessors = EbHevcGetNumProcessors();
     CPU_ZERO(&groupAffinity);
     if (numGroups == 1) {
         EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
@@ -1084,7 +729,7 @@ void EbSetThreadManagementParameters(
 /**********************************
  * Initialize Encoder Library
  **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
@@ -1101,7 +746,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     * Plateform detection
     ************************************/
     if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == EB_ASM_AUTO) {
-        ASM_TYPES = GetCpuAsmType(); // Use highest assembly
+        ASM_TYPES = EbHevcGetCpuAsmType(); // Use highest assembly
     }
     else if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == EB_ASM_C) {
         ASM_TYPES = EB_ASM_C; // Use C_only
@@ -1850,7 +1495,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
      ************************************/
     EB_H265_ENC_CONFIGURATION   *configPtr = &encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig;
 
-    EbSetThreadManagementParameters(configPtr);
+    EbHevcSetThreadManagementParameters(configPtr);
 
     // Resource Coordination
     EB_CREATETHREAD(EB_HANDLE, encHandlePtr->resourceCoordinationThreadHandle, sizeof(EB_HANDLE), EB_THREAD, ResourceCoordinationKernel, encHandlePtr->resourceCoordinationContextPtr);
@@ -1921,7 +1566,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
 /**********************************
  * DeInitialize Encoder Library
  **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
@@ -1947,37 +1592,52 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         EB_SEND_END_OBJ(encHandlePtr->entropyCodingResultsProducerFifoPtrArray, EB_PacketizationProcessInitCount)
 
         if (encHandlePtr->memoryMapIndex){
-    // Loop through the ptr table and free all malloc'd pointers per channel
-            for (ptrIndex = (encHandlePtr->memoryMapIndex) - 1; ptrIndex >= 0; --ptrIndex){
+            // Loop through the ptr table and free all malloc'd pointers per channel
+
+            // Destroy all the kernel threads at first as the work around for race condition.
+            // Because the EbDeinitEncoder() interface could be called by encoder application
+            // at any time, when some kernel threads may keep processing. So that some of them
+            // (such as EncDecKernel) still need to access to the memory resources which would
+            // be freed (but should have been unreferenced).
+            for (ptrIndex = (encHandlePtr->memoryMapIndex) - 1; ptrIndex >= 0; --ptrIndex) {
                 memoryEntry = &encHandlePtr->memoryMap[ptrIndex];
-        switch (memoryEntry->ptrType){
-        case EB_N_PTR:
-            free(memoryEntry->ptr);
-            break;
-        case EB_A_PTR:
+                switch (memoryEntry->ptrType) {
+                case EB_THREAD:
+                    EbDestroyThread(memoryEntry->ptr);
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            for (ptrIndex = (encHandlePtr->memoryMapIndex) - 1; ptrIndex >= 0; --ptrIndex) {
+                memoryEntry = &encHandlePtr->memoryMap[ptrIndex];
+                switch (memoryEntry->ptrType) {
+                case EB_N_PTR:
+                    free(memoryEntry->ptr);
+                    break;
+                case EB_A_PTR:
 #ifdef _WIN32
-            _aligned_free(memoryEntry->ptr);
+                    _aligned_free(memoryEntry->ptr);
 #else
-            free(memoryEntry->ptr);
+                    free(memoryEntry->ptr);
 #endif
-            break;
-        case EB_SEMAPHORE:
-            EbDestroySemaphore(memoryEntry->ptr);
-            break;
-        case EB_THREAD:
-            EbDestroyThread(memoryEntry->ptr);
-            break;
-        case EB_MUTEX:
-            EbDestroyMutex(memoryEntry->ptr);
-            break;
-        default:
-            return_error = EB_ErrorMax;
-            break;
-        }
-    }
+                    break;
+                case EB_SEMAPHORE:
+                    EbDestroySemaphore(memoryEntry->ptr);
+                    break;
+                case EB_MUTEX:
+                    EbDestroyMutex(memoryEntry->ptr);
+                    break;
+                default:
+                    return_error = EB_ErrorMax;
+                    break;
+                }
+            }
+
             if (encHandlePtr->memoryMap != (EbMemoryMapEntry*) NULL) {
                 free(encHandlePtr->memoryMap);
-	}
+            }
 
             //(void)(encHandlePtr);
         }
@@ -1991,7 +1651,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
 /**********************************
  * GetHandle
  **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbInitHandle(
@@ -2056,7 +1716,7 @@ EB_ERRORTYPE EbH265EncComponentDeInit(EB_COMPONENTTYPE  *h265EncComponent)
 /**********************************
  * EbDeinitHandle
  **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbDeinitHandle(
@@ -2127,7 +1787,7 @@ void LoadDefaultBufferConfigurationSettings(
 
     EB_U32 inputPic = SetParentPcs(&sequenceControlSetPtr->staticConfig);
 
-    unsigned int lpCount = GetNumProcessors();
+    unsigned int lpCount = EbHevcGetNumProcessors();
     unsigned int coreCount = lpCount;
 
     unsigned int totalThreadCount;
@@ -2163,8 +1823,7 @@ void LoadDefaultBufferConfigurationSettings(
         totalThreadCount = coreCount * EB_THREAD_COUNT_FACTOR;
 
     if (totalThreadCount < EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_FACTOR) {
-        coreCount = EB_THREAD_COUNT_MIN_CORE;
-        totalThreadCount = coreCount * EB_THREAD_COUNT_FACTOR;
+        totalThreadCount = EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_FACTOR;
     }
 
     if (totalThreadCount % EB_THREAD_COUNT_MIN_CORE) {
@@ -2418,7 +2077,7 @@ EB_ERRORTYPE EbAppVideoUsabilityInfoInit(
 }
 
 // Set configurations for the hardcoded parameters
-void SetDefaultConfigurationParameters(
+void EbHevcSetDefaultConfigurationParameters(
     SequenceControlSet_t       *sequenceControlSetPtr)
 {
 
@@ -2455,7 +2114,7 @@ EB_U32 ComputeDefaultLookAhead(
     return lad;
 }
 
-void SetParamBasedOnInput(
+void EbHevcSetParamBasedOnInput(
     SequenceControlSet_t       *sequenceControlSetPtr)
 
 {
@@ -2532,7 +2191,7 @@ void SetParamBasedOnInput(
 
 }
 
-void CopyApiFromApp(
+void EbHevcCopyApiFromApp(
     SequenceControlSet_t       *sequenceControlSetPtr,
     EB_H265_ENC_CONFIGURATION* pComponentParameterStructure
 )
@@ -2892,12 +2551,12 @@ static EB_ERRORTYPE VerifySettings(\
     }
 
     if (config->hrdFlag == 1 && ((config->vbvBufsize <= 0) || (config->vbvMaxrate <= 0))) {
-        SVT_LOG("SVT [Error]: Instance %u: hrd requires vbv max rate and vbv bufsize to be greater than 0 ", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: hrd requires vbv max rate and vbv bufsize to be greater than 0 \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
     if ((config->rateControlMode == 0) && ((config->vbvBufsize > 0) || (config->vbvMaxrate > 0))) {
-        SVT_LOG("SVT [Error]: Instance %u: VBV options can not be used when RateControlMode is 1 (CQP).", channelNumber + 1);
+        SVT_LOG("SVT [Error]: Instance %u: VBV options can not be used when RateControlMode is 1 (CQP) \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -3228,7 +2887,7 @@ static EB_ERRORTYPE VerifySettings(\
 /**********************************
  Set Parameter
 **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_ERRORTYPE EbH265EncInitParameter(
@@ -3282,7 +2941,7 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->improveSharpness = EB_FALSE;
 
     // Bitstream options
-    configPtr->codeVpsSpsPps = 0;
+    configPtr->codeVpsSpsPps = 1;
     configPtr->codeEosNal    = 0;
     configPtr->switchThreadsToRtPriority = EB_TRUE;
     configPtr->fpsInVps      = EB_TRUE;
@@ -3340,6 +2999,12 @@ EB_ERRORTYPE EbH265EncInitParameter(
     // Debug info
     configPtr->reconEnabled = 0;
 
+    // VBV
+    configPtr->vbvMaxrate = 0;
+    configPtr->vbvBufsize = 0;
+    configPtr->vbvBufInit = 90;
+    configPtr->hrdFlag = 0;
+
     return return_error;
 }
 static void PrintLibParams(
@@ -3354,7 +3019,7 @@ static void PrintLibParams(
         SVT_LOG("\nSVT [config]: MainEXT Profile\t");
 
     if (config->tier != 0 && config->level !=0)
-        SVT_LOG("Tier %d\tLevel %.1f\t", config->tier, (float)(config->level / 10));
+        SVT_LOG("Tier %d\tLevel %.1f\t", config->tier, (float)(config->level) / 10);
     else {
         if (config->tier == 0 )
             SVT_LOG("Tier (auto)\t");
@@ -3364,31 +3029,56 @@ static void PrintLibParams(
         if (config->level == 0 )
             SVT_LOG("Level (auto)\t");
         else
-            SVT_LOG("Level %.1f\t", (float)(config->level / 10));
+            SVT_LOG("Level %.1f\t", (float)(config->level) / 10);
 
 
     }
 
-    SVT_LOG("\nSVT [config]: EncoderMode / Tune\t\t\t\t\t: %d / %d ", config->encMode, config->tune);
-    SVT_LOG("\nSVT [config]: EncoderBitDepth / CompressedTenBitFormat / EncoderColorFormat \t: %d / %d / %d", config->encoderBitDepth, config->compressedTenBitFormat, config->encoderColorFormat);
-    SVT_LOG("\nSVT [config]: SourceWidth / SourceHeight\t\t\t\t\t: %d / %d ", config->sourceWidth, config->sourceHeight);
+    SVT_LOG("\nSVT [config]: EncoderMode / Tune\t\t\t\t\t\t\t: %d / %d ", config->encMode, config->tune);
+    SVT_LOG("\nSVT [config]: EncoderBitDepth / CompressedTenBitFormat / EncoderColorFormat \t\t: %d / %d / %d", config->encoderBitDepth, config->compressedTenBitFormat, config->encoderColorFormat);
+    SVT_LOG("\nSVT [config]: SourceWidth / SourceHeight / InterlacedVideo\t\t\t\t: %d / %d / %d", config->sourceWidth, config->sourceHeight, config->interlacedVideo);
+
     if (config->frameRateDenominator != 0 && config->frameRateNumerator != 0)
-        SVT_LOG("\nSVT [config]: Fps_Numerator / Fps_Denominator / Gop Size / IntraRefreshType \t: %d / %d / %d / %d", config->frameRateNumerator > (1<<16) ? config->frameRateNumerator >> 16: config->frameRateNumerator,
+        SVT_LOG("\nSVT [config]: Fps_Numerator / Fps_Denominator / Gop Size / IntraRefreshType \t\t: %d / %d / %d / %d", config->frameRateNumerator > (1<<16) ? config->frameRateNumerator >> 16: config->frameRateNumerator,
             config->frameRateDenominator > (1<<16) ? config->frameRateDenominator >> 16: config->frameRateDenominator,
             config->intraPeriodLength + 1,
             config->intraRefreshType);
     else
-        SVT_LOG("\nSVT [config]: FrameRate / Gop Size\t\t\t\t\t\t: %d / %d ", config->frameRate > 1000 ? config->frameRate >> 16 : config->frameRate, config->intraPeriodLength + 1);
-    SVT_LOG("\nSVT [config]: HierarchicalLevels / BaseLayerSwitchMode / PredStructure\t\t: %d / %d / %d ", config->hierarchicalLevels, config->baseLayerSwitchMode, config->predStructure);
+        SVT_LOG("\nSVT [config]: FrameRate / Gop Size\t\t\t\t\t\t\t: %d / %d ", config->frameRate > 1000 ? config->frameRate >> 16 : config->frameRate, config->intraPeriodLength + 1);
+
+    SVT_LOG("\nSVT [config]: HierarchicalLevels / BaseLayerSwitchMode / PredStructure\t\t\t: %d / %d / %d ", config->hierarchicalLevels, config->baseLayerSwitchMode, config->predStructure);
+
     if (config->rateControlMode == 1)
-        SVT_LOG("\nSVT [config]: RCMode / TargetBitrate / LookaheadDistance / SceneChange\t\t: VBR / %d / %d / %d ", config->targetBitRate, config->lookAheadDistance, config->sceneChangeDetection);
+        SVT_LOG("\nSVT [config]: RCMode / TargetBitrate / LAD / SceneChange / QP Range [%u ~ %u]\t\t: VBR / %d / %d / %d ", config->minQpAllowed, config->maxQpAllowed, config->targetBitRate, config->lookAheadDistance, config->sceneChangeDetection);
     else
-        SVT_LOG("\nSVT [config]: BRC Mode / QP  / LookaheadDistance / SceneChange\t\t\t: CQP / %d / %d / %d ", config->qp, config->lookAheadDistance, config->sceneChangeDetection);
+        SVT_LOG("\nSVT [config]: BRC Mode / QP / LookaheadDistance / SceneChange\t\t\t\t: CQP / %d / %d / %d ", config->qp, config->lookAheadDistance, config->sceneChangeDetection);
 
     if (config->tune <= 1)
-        SVT_LOG("\nSVT [config]: BitRateReduction / ImproveSharpness\t\t\t\t: %d / %d ", config->bitRateReduction, config->improveSharpness);
+        SVT_LOG("\nSVT [config]: BitRateReduction / ImproveSharpness\t\t\t\t\t: %d / %d ", config->bitRateReduction, config->improveSharpness);
 
-    SVT_LOG("\nSVT [config]: tileColumnCount / tileRowCount / tileSliceMode / Constraint MV \t: %d / %d / %d / %d", config->tileColumnCount, config->tileRowCount, config->tileSliceMode, !config->unrestrictedMotionVector);
+    SVT_LOG("\nSVT [config]: tileColumnCount / tileRowCount / tileSliceMode / Constraint MV \t\t: %d / %d / %d / %d", config->tileColumnCount, config->tileRowCount, config->tileSliceMode, !config->unrestrictedMotionVector);
+    SVT_LOG("\nSVT [config]: De-blocking Filter / SAO Filter\t\t\t\t\t\t: %d / %d ", !config->disableDlfFlag, config->enableSaoFlag);
+    SVT_LOG("\nSVT [config]: HME / UseDefaultHME\t\t\t\t\t\t\t: %d / %d ", config->enableHmeFlag, config->useDefaultMeHme);
+    SVT_LOG("\nSVT [config]: MV Search Area Width / Height \t\t\t\t\t\t: %d / %d ", config->searchAreaWidth, config->searchAreaHeight);
+    SVT_LOG("\nSVT [config]: HRD / VBV MaxRate / BufSize / BufInit\t\t\t\t\t: %d / %d / %d / %ld", config->hrdFlag, config->vbvMaxrate, config->vbvBufsize, config->vbvBufInit);
+
+#ifndef NDEBUG
+    SVT_LOG("\nSVT [config]: More configurations for debugging:");
+    SVT_LOG("\nSVT [config]: Channel ID / ActiveChannelCount\t\t\t\t\t\t: %d / %d", config->channelId, config->activeChannelCount);
+    SVT_LOG("\nSVT [config]: Number of Logical Processors / Target Socket\t\t\t\t: %d / %d", config->logicalProcessors, config->targetSocket);
+    SVT_LOG("\nSVT [config]: Threads To RT / Thread Count / ASM Type\t\t\t\t\t: %d / %d / %d", config->switchThreadsToRtPriority, config->threadCount, config->asmType);
+    SVT_LOG("\nSVT [config]: Speed Control / Injector Frame Rate\t\t\t\t\t: %d / %d", config->speedControlFlag, (config->injectorFrameRate >> 16));
+    SVT_LOG("\nSVT [config]: MaxCLL / MaxFALL / Output Reconstructed YUV\t\t\t\t: %d / %d / %d", config->maxCLL, config->maxFALL, config->reconEnabled);
+    SVT_LOG("\nSVT [config]: MasterDisplayColorVolume / DolbyVisionProfile\t\t\t\t: %d / %d", config->useMasteringDisplayColorVolume, config->dolbyVisionProfile);
+    SVT_LOG("\nSVT [config]: DisplayPrimaryX[0], DisplayPrimaryX[1], DisplayPrimaryX[2]\t\t: %d / %d / %d", config->displayPrimaryX[0], config->displayPrimaryX[1], config->displayPrimaryX[2]);
+    SVT_LOG("\nSVT [config]: DisplayPrimaryY[0], DisplayPrimaryY[1], DisplayPrimaryY[2]\t\t: %d / %d / %d", config->displayPrimaryY[0], config->displayPrimaryY[1], config->displayPrimaryY[2]);
+    SVT_LOG("\nSVT [config]: WhitePointX (%d, %d) / DisplayMasteringLuminance Range [%d ~ %d]\t\t\t", config->whitePointX, config->whitePointY, config->maxDisplayMasteringLuminance, config->minDisplayMasteringLuminance);
+    SVT_LOG("\nSVT [config]: Constrained Intra / HDR / Code VPS SPS PPS / Code EOS\t\t\t: %d / %d / %d / %d", config->constrainedIntra, config->highDynamicRangeInput, config->codeVpsSpsPps, config->codeEosNal);
+    SVT_LOG("\nSVT [config]: Sending VUI / Temporal ID / VPS Timing Info\t\t\t\t: %d / %d / %d", config->videoUsabilityInfo, config->enableTemporalId, config->fpsInVps);
+    SVT_LOG("\nSVT [config]: SEI Message:");
+    SVT_LOG("\nSVT [config]: AccessUnitDelimiter / BufferingPeriod / PictureTiming\t\t\t: %d / %d / %d", config->accessUnitDelimiter, config->bufferingPeriodSEI, config->pictureTimingSEI);
+    SVT_LOG("\nSVT [config]: RegisteredUserData / UnregisteredUserData / RecoveryPoint\t\t\t: %d / %d / %d", config->registeredUserDataSeiFlag, config->unregisteredUserDataSeiFlag, config->recoveryPointSeiFlag);
+#endif
     SVT_LOG("\n------------------------------------------- ");
     SVT_LOG("\n");
 
@@ -3399,7 +3089,7 @@ static void PrintLibParams(
 
  * Set Parameter
  **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265EncSetParameter(
@@ -3419,10 +3109,10 @@ EB_API EB_ERRORTYPE EbH265EncSetParameter(
     // Acquire Config Mutex
     EbBlockOnMutex(pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->configMutex);
 
-    SetDefaultConfigurationParameters(
+    EbHevcSetDefaultConfigurationParameters(
         pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr);
 
-    CopyApiFromApp(
+    EbHevcCopyApiFromApp(
         pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr,
         (EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure);
 
@@ -3433,7 +3123,7 @@ EB_API EB_ERRORTYPE EbH265EncSetParameter(
         return EB_ErrorBadParameter;
     }
 
-    SetParamBasedOnInput(
+    EbHevcSetParamBasedOnInput(
         pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr);
 
     // Initialize the Prediction Structure Group
@@ -3463,7 +3153,7 @@ EB_API EB_ERRORTYPE EbH265EncSetParameter(
 
     return return_error;
 }
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265EncStreamHeader(
@@ -3562,7 +3252,7 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     return return_error;
 }
 
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265EncEosNal(
@@ -3971,14 +3661,15 @@ static EB_ERRORTYPE  CopyInputBuffer(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
     // Copy the higher level structure
-    dst->nAllocLen  = src->nAllocLen;
-    dst->nFilledLen = src->nFilledLen;
-    dst->nFlags     = src->nFlags;
-    dst->pts        = src->pts;
-    dst->nTickCount = src->nTickCount;
-    dst->nSize      = src->nSize;
-    dst->qpValue    = src->qpValue;
-    dst->sliceType  = src->sliceType;
+    dst->nAllocLen   = src->nAllocLen;
+    dst->nFilledLen  = src->nFilledLen;
+    dst->pAppPrivate = src->pAppPrivate;
+    dst->nFlags      = src->nFlags;
+    dst->pts         = src->pts;
+    dst->nTickCount  = src->nTickCount;
+    dst->nSize       = src->nSize;
+    dst->qpValue     = src->qpValue;
+    dst->sliceType   = src->sliceType;
 
     // Copy the picture buffer
     if(src->pBuffer != NULL)
@@ -3999,7 +3690,7 @@ static EB_ERRORTYPE  CopyInputBuffer(
 /**********************************
  * Empty This Buffer
  **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265EncSendPicture(
@@ -4078,7 +3769,7 @@ static void CopyOutputReconBuffer(
 /**********************************
  * EbH265GetPacket sends out packet
  **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265GetPacket(
@@ -4120,7 +3811,7 @@ EB_API EB_ERRORTYPE EbH265GetPacket(
     return return_error;
 }
 
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API void EbH265ReleaseOutBuffer(
@@ -4136,7 +3827,7 @@ EB_API void EbH265ReleaseOutBuffer(
 /**********************************
 * Fill This Buffer
 **********************************/
-#if __linux
+#ifdef __GNUC__
 __attribute__((visibility("default")))
 #endif
 EB_API EB_ERRORTYPE EbH265GetRecon(
@@ -4284,10 +3975,13 @@ EB_ERRORTYPE AllocateFrameBuffer(
     }
 
     if (is16bit && config->compressedTenBitFormat == 1) {
+
+        const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)sequenceControlSetPtr->chromaFormatIdc;
+
         //pack 4 2bit pixels into 1Byte
-        EB_ALLIGN_MALLOC(EB_U8*, ((EbPictureBufferDesc_t*)(inputBuffer->pBuffer))->bufferBitIncY, sizeof(EB_U8) * (inputPictureBufferDescInitData.maxWidth / 4)*(inputPictureBufferDescInitData.maxHeight), EB_A_PTR);
-        EB_ALLIGN_MALLOC(EB_U8*, ((EbPictureBufferDesc_t*)(inputBuffer->pBuffer))->bufferBitIncCb, sizeof(EB_U8) * (inputPictureBufferDescInitData.maxWidth / 8)*(inputPictureBufferDescInitData.maxHeight / 2), EB_A_PTR);
-        EB_ALLIGN_MALLOC(EB_U8*, ((EbPictureBufferDesc_t*)(inputBuffer->pBuffer))->bufferBitIncCr, sizeof(EB_U8) * (inputPictureBufferDescInitData.maxWidth / 8)*(inputPictureBufferDescInitData.maxHeight / 2), EB_A_PTR);
+        EB_ALLIGN_MALLOC(EB_U8*, ((EbPictureBufferDesc_t*)(inputBuffer->pBuffer))->bufferBitIncY,  sizeof(EB_U8) * (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4), EB_A_PTR);
+        EB_ALLIGN_MALLOC(EB_U8*, ((EbPictureBufferDesc_t*)(inputBuffer->pBuffer))->bufferBitIncCb, sizeof(EB_U8) * (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4) >> (3 - colorFormat), EB_A_PTR);
+        EB_ALLIGN_MALLOC(EB_U8*, ((EbPictureBufferDesc_t*)(inputBuffer->pBuffer))->bufferBitIncCr, sizeof(EB_U8) * (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4) >> (3 - colorFormat), EB_A_PTR);
     }
 
     return return_error;

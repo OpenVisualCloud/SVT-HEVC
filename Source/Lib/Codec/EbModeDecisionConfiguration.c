@@ -42,7 +42,7 @@ static const EB_U8 parentCuIndex[85] =
     36, 0, 0, 1, 2, 3, 5, 0, 1, 2, 3, 10, 0, 1, 2, 3, 15, 0, 1, 2, 3,
 };
 
-const EB_U8 incrementalCount[85] = {
+const EB_U8 EbHevcIncrementalCount[85] = {
 
     //64x64
     0,
@@ -79,7 +79,7 @@ mdcSetDepth : set depth to be tested
 
 
 
-EB_ERRORTYPE MdcRefinement(
+EB_ERRORTYPE EbHevcMdcRefinement(
     MdcpLocalCodingUnit_t                   *localCuArray,
     EB_U32                                  cuIndex,
     EB_U32                                  depth,
@@ -100,7 +100,7 @@ EB_ERRORTYPE MdcRefinement(
     }
 
     if (refinementLevel & REFINEMENT_Pp1){
-		
+
         if (depth < 3 && cuIndex < 81){
             localCuArray[cuIndex + 1].slectedCu = EB_TRUE;
             localCuArray[cuIndex + 1 + DepthOffset[depth + 1]].slectedCu = EB_TRUE;
@@ -265,7 +265,7 @@ EB_ERRORTYPE MdcIntraCuRate(
     EB_U64 chromaRate;
 
     EncodeContext_t *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
-    
+
     CHECK_REPORT_ERROR(
         (partitionMode == SIZE_2Nx2N),
         encodeContextPtr->appCallbackPtr,
@@ -325,7 +325,7 @@ EB_U64 MdcInterCuRate(
         // Estimate the Motion Vector Prediction Index Bits
         rate += 23196;
 
-        // Estimate the Motion Vector Difference Bits   
+        // Estimate the Motion Vector Difference Bits
         MVs_0 = ABS(xMvL0);
         MVs_1 = ABS(yMvL0);
         MVs_0 = MVs_0 > 499 ? 499 : MVs_0;
@@ -338,7 +338,7 @@ EB_U64 MdcInterCuRate(
         // Estimate the Motion Vector Prediction Index Bits
         rate += 23196;
 
-        // Estimate the Motion Vector Difference Bits  
+        // Estimate the Motion Vector Difference Bits
 
         MVs_2 = ABS(xMvL1);
         MVs_3 = ABS(yMvL1);
@@ -360,7 +360,7 @@ EB_U64 MdcInterCuRate(
 
         rate += 46392;
 
-        // Estimate the Motion Vector Difference Bits   
+        // Estimate the Motion Vector Difference Bits
 
         MVs_0 = ABS(xMvL0);
         MVs_1 = ABS(yMvL0);
@@ -370,7 +370,7 @@ EB_U64 MdcInterCuRate(
 
         rate += mvBitTable[MVs_0][MVs_1];
 
-        // Estimate the Motion Vector Difference Bits    
+        // Estimate the Motion Vector Difference Bits
         MVs_2 = ABS(xMvL1);
         MVs_3 = ABS(yMvL1);
         MVs_2 = MVs_2 > 499 ? 499 : MVs_2;
@@ -433,7 +433,7 @@ EB_U8 DeriveContouringClass(
 }
 
 
-void RefinementPredictionLoop(
+void EbHevcRefinementPredictionLoop(
     SequenceControlSet_t                   *sequenceControlSetPtr,
     PictureControlSet_t                    *pictureControlSetPtr,
     LargestCodingUnit_t                    *lcuPtr,
@@ -463,7 +463,7 @@ void RefinementPredictionLoop(
                     EB_U8 lowestLevel = 0x00;
 
                     if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE)
-                        refinementLevel = NdpRefinementControl_ISLICE[depth]; 
+                        refinementLevel = NdpRefinementControl_ISLICE[depth];
                     else
                         refinementLevel = NdpRefinementControl_ISLICE_Sub4K[depth];
 
@@ -478,7 +478,7 @@ void RefinementPredictionLoop(
                         (refinementLevel & REFINEMENT_P) ? REFINEMENT_P :
                         (refinementLevel & REFINEMENT_Pm1) ? REFINEMENT_Pm1 : (refinementLevel & REFINEMENT_Pm2) ? REFINEMENT_Pm2 : (refinementLevel & REFINEMENT_Pm3) ? REFINEMENT_Pm3 : 0x00;
 
-                    MdcRefinement(
+                    EbHevcMdcRefinement(
                         &(*contextPtr->localCuArray),
                         cuIndex,
                         depth,
@@ -490,8 +490,8 @@ void RefinementPredictionLoop(
                 if (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_LCU_SWITCH_DEPTH_MODE && (pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_PRED_OPEN_LOOP_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE)) {
                     refinementLevel = Pred;
                 }
-                else 
-            
+                else
+
 				if  (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_OPEN_LOOP_DEPTH_MODE ||
                     (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_LCU_SWITCH_DEPTH_MODE && pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_OPEN_LOOP_DEPTH_MODE))
 
@@ -511,7 +511,7 @@ void RefinementPredictionLoop(
                     (refinementLevel & REFINEMENT_P) ? REFINEMENT_P :
                     (refinementLevel & REFINEMENT_Pm1) ? REFINEMENT_Pm1 : (refinementLevel & REFINEMENT_Pm2) ? REFINEMENT_Pm2 : (refinementLevel & REFINEMENT_Pm3) ? REFINEMENT_Pm3 : 0x00;
 
-                MdcRefinement(
+                EbHevcMdcRefinement(
                     &(*contextPtr->localCuArray),
                     cuIndex,
                     depth,
@@ -568,7 +568,7 @@ void PrePredictionRefinement(
     }
 
 
-    // S-LOGO           
+    // S-LOGO
 
     if (stationaryEdgeOverTimeFlag > 0){
 
@@ -583,7 +583,7 @@ void PrePredictionRefinement(
 }
 
 
-void ForwardCuToModeDecision(
+void EbHevcForwardCuToModeDecision(
     SequenceControlSet_t                   *sequenceControlSetPtr,
     PictureControlSet_t                    *pictureControlSetPtr,
 
@@ -650,7 +650,7 @@ void ForwardCuToModeDecision(
 
                 }
 
-                // Take into account MAX CU size & MAX intra size (from the API)   
+                // Take into account MAX CU size & MAX intra size (from the API)
                 cuClass = (cuStatsPtr->size > MAX_CU_SIZE || (sliceType == EB_I_PICTURE && cuStatsPtr->size > MAX_INTRA_SIZE)) ?
                 DO_NOT_ADD_CU_CONTINUE_SPLIT :
                                              cuClass;
@@ -712,7 +712,7 @@ void ForwardCuToModeDecision(
 
 
 
-void MdcInterDepthDecision(
+void EbHevcMdcInterDepthDecision(
     ModeDecisionConfigurationContext_t     *contextPtr,
     EB_U32                                 originX,
     EB_U32                                 originY,
@@ -845,7 +845,7 @@ void MdcInterDepthDecision(
         }
     }
 
-    // Stage 2: Inter depth decision: depth 0 vs depth 1 
+    // Stage 2: Inter depth decision: depth 0 vs depth 1
 
     // Walks to the last coded 32x32 block for merging
     // Stage 2 isn't performed in I slices since the abcense of 64x64 candidates
@@ -900,7 +900,7 @@ void MdcInterDepthDecision(
     contextPtr->groupOf16x16BlocksCount = groupOf16x16BlocksCount;
 }
 
-void PredictionPartitionLoop(
+void EbHevcPredictionPartitionLoop(
     SequenceControlSet_t                   *sequenceControlSetPtr,
     PictureControlSet_t                    *pictureControlSetPtr,
     EB_U32                                  lcuIndex,
@@ -1001,7 +1001,7 @@ void PredictionPartitionLoop(
 							}
 						}
 					}
-            
+
 
                     cuIntraCost = (cuIntraSad << COST_PRECISION) + ((contextPtr->lambda * cuIntraRate + MD_OFFSET) >> MD_SHIFT);
                     cuPtr->earlyCost = cuIntraCost;
@@ -1010,7 +1010,7 @@ void PredictionPartitionLoop(
 
                 if (pictureControlSetPtr->sliceType != EB_I_PICTURE){
 
-		
+
 
 					MeCuResults_t * mePuResult = &pictureControlSetPtr->ParentPcsPtr->meResults[lcuIndex][cuIndexInRaterScan];
 					cuInterRate = MdcInterCuRate(
@@ -1030,13 +1030,13 @@ void PredictionPartitionLoop(
                 cuPtr->earlyCost = pictureControlSetPtr->sliceType == EB_I_PICTURE ? cuIntraCost : cuInterCost;
 
                 if (endDepth == 2){
-                    contextPtr->groupOf8x8BlocksCount = depth == 2 ? incrementalCount[cuIndexInRaterScan] : 0;
+                    contextPtr->groupOf8x8BlocksCount = depth == 2 ? EbHevcIncrementalCount[cuIndexInRaterScan] : 0;
                 }
 
                 if (endDepth == 1){
-                    contextPtr->groupOf16x16BlocksCount = depth == 1 ? incrementalCount[cuIndexInRaterScan] : 0;
+                    contextPtr->groupOf16x16BlocksCount = depth == 1 ? EbHevcIncrementalCount[cuIndexInRaterScan] : 0;
                 }
-                MdcInterDepthDecision(
+                EbHevcMdcInterDepthDecision(
                     contextPtr,
                     cuStatsPtr->originX,
                     cuStatsPtr->originY,
@@ -1089,7 +1089,7 @@ EB_ERRORTYPE EarlyModeDecisionLcu(
             &endDepth);
     }
 
-    PredictionPartitionLoop(
+    EbHevcPredictionPartitionLoop(
         sequenceControlSetPtr,
         pictureControlSetPtr,
         lcuIndex,
@@ -1100,14 +1100,14 @@ EB_ERRORTYPE EarlyModeDecisionLcu(
         contextPtr
         );
 
-    RefinementPredictionLoop(
+    EbHevcRefinementPredictionLoop(
         sequenceControlSetPtr,
         pictureControlSetPtr,
         lcuPtr,
         lcuIndex,
         contextPtr);
 
-    ForwardCuToModeDecision(
+    EbHevcForwardCuToModeDecision(
         sequenceControlSetPtr,
         pictureControlSetPtr,
 
@@ -1117,6 +1117,3 @@ EB_ERRORTYPE EarlyModeDecisionLcu(
     return return_error;
 
 }
-
-
-

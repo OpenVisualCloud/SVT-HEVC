@@ -1,92 +1,8 @@
 
-#include "EbAppConfig.h"
+#include "EbAppString.h"
 
 /* SAFE STRING LIBRARY */
 
-#ifndef EOK
-#define EOK             ( 0 )
-#endif
-
-#ifndef ESZEROL
-#define ESZEROL         ( 401 )       /* length is zero              */
-#endif
-
-#ifndef ESLEMIN
-#define ESLEMIN         ( 402 )       /* length is below min         */
-#endif
-
-#ifndef ESLEMAX
-#define ESLEMAX         ( 403 )       /* length exceeds max          */
-#endif
-
-#ifndef ESNULLP
-#define ESNULLP         ( 400 )       /* null ptr                    */
-#endif
-
-#ifndef ESOVRLP
-#define ESOVRLP         ( 404 )       /* overlap undefined           */
-#endif
-
-#ifndef ESEMPTY
-#define ESEMPTY         ( 405 )       /* empty string                */
-#endif
-
-#ifndef ESNOSPC
-#define ESNOSPC         ( 406 )       /* not enough space for s2     */
-#endif
-
-#ifndef ESUNTERM
-#define ESUNTERM        ( 407 )       /* unterminated string         */
-#endif
-
-#ifndef ESNODIFF
-#define ESNODIFF        ( 408 )       /* no difference               */
-#endif
-
-#ifndef ESNOTFND
-#define ESNOTFND        ( 409 )       /* not found                   */
-#endif
-
-#define RSIZE_MAX_MEM      ( 256UL << 20 )     /* 256MB */
-
-#define RCNEGATE(x)  (x)
-#define RSIZE_MAX_STR      ( 4UL << 10 )      /* 4KB */
-#define sl_default_handler ignore_handler_s
-#define EXPORT_SYMBOL(sym)
-
-#ifndef sldebug_printf
-#define sldebug_printf(...)
-#endif
-
-/*
-* Function used by the libraries to invoke the registered
-* runtime-constraint handler. Always needed.
-*/
-
-typedef void(*constraint_handler_t) (const char * /* msg */,
-    void *       /* ptr */,
-    errno_t      /* error */);
-extern void ignore_handler_s(const char *msg, void *ptr, errno_t error);
-
-/*
-* Function used by the libraries to invoke the registered
-* runtime-constraint handler. Always needed.
-*/
-extern void invoke_safe_str_constraint_handler(
-    const char *msg,
-    void *ptr,
-    errno_t error);
-
-
-static inline void handle_error(char *orig_dest, rsize_t orig_dmax,
-    char *err_msg, errno_t err_code)
-{
-    (void)orig_dmax;
-    *orig_dest = '\0';
-
-    invoke_safe_str_constraint_handler(err_msg, NULL, err_code);
-    return;
-}
 static constraint_handler_t str_handler = NULL;
 
 void
@@ -111,7 +27,6 @@ void ignore_handler_s(const char *msg, void *ptr, errno_t error)
 		(msg) ? msg : "Null message");
 	return;
 }
-EXPORT_SYMBOL(ignore_handler_s)
 
 errno_t
 strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t slen)
@@ -236,7 +151,6 @@ strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t slen)
 		ESNOSPC);
 	return RCNEGATE(ESNOSPC);
 }
-EXPORT_SYMBOL(strncpy_ss)
 
 errno_t
 strcpy_ss(char *dest, rsize_t dmax, const char *src)
@@ -331,7 +245,6 @@ strcpy_ss(char *dest, rsize_t dmax, const char *src)
 		ESNOSPC);
 	return RCNEGATE(ESNOSPC);
 }
-EXPORT_SYMBOL(strcpy_ss)
 
 rsize_t
 strnlen_ss(const char *dest, rsize_t dmax)
@@ -363,6 +276,5 @@ strnlen_ss(const char *dest, rsize_t dmax)
 
 	return RCNEGATE(count);
 }
-EXPORT_SYMBOL(strnlen_ss)
 
 /* SAFE STRING LIBRARY */
