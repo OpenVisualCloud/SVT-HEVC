@@ -9,7 +9,7 @@
 #include "EbPictureBufferDesc.h"
 #include "EbReferenceObject.h"
 
-void InitializeSamplesNeighboringReferencePicture16Bit(
+void EbHevcInitializeSamplesNeighboringReferencePicture16Bit(
     EB_BYTE  reconSamplesBufferPtr,
     EB_U16   stride,
     EB_U16   reconWidth,
@@ -25,9 +25,9 @@ void InitializeSamplesNeighboringReferencePicture16Bit(
     EB_MEMSET((EB_U8*)reconSamplesPtr, 0, sizeof(EB_U16)*(1 + reconWidth + 1));
 
     // 2. Zero out the bottom row
-    reconSamplesPtr = (EB_U16*)reconSamplesBufferPtr + (topPadding + reconHeight) * stride + leftPadding - 1; 
+    reconSamplesPtr = (EB_U16*)reconSamplesBufferPtr + (topPadding + reconHeight) * stride + leftPadding - 1;
     EB_MEMSET((EB_U8*)reconSamplesPtr, 0, sizeof(EB_U16)*(1 + reconWidth + 1));
-    
+
     // 3. Zero out the left column
     reconSamplesPtr = (EB_U16*)reconSamplesBufferPtr + topPadding * stride + leftPadding - 1;
     for (sampleCount = 0; sampleCount < reconHeight; sampleCount++) {
@@ -41,7 +41,7 @@ void InitializeSamplesNeighboringReferencePicture16Bit(
     }
 }
 
-void InitializeSamplesNeighboringReferencePicture8Bit(
+void EbHevcInitializeSamplesNeighboringReferencePicture8Bit(
     EB_BYTE  reconSamplesBufferPtr,
     EB_U16   stride,
     EB_U16   reconWidth,
@@ -57,9 +57,9 @@ void InitializeSamplesNeighboringReferencePicture8Bit(
     EB_MEMSET(reconSamplesPtr, 0, sizeof(EB_U8)*(1 + reconWidth + 1));
 
     // 2. Zero out the bottom row
-    reconSamplesPtr = reconSamplesBufferPtr + (topPadding + reconHeight) * stride + leftPadding - 1; 
+    reconSamplesPtr = reconSamplesBufferPtr + (topPadding + reconHeight) * stride + leftPadding - 1;
     EB_MEMSET(reconSamplesPtr, 0, sizeof(EB_U8)*(1 + reconWidth + 1));
-    
+
     // 3. Zero out the left column
     reconSamplesPtr = reconSamplesBufferPtr + topPadding * stride + leftPadding - 1;
     for (sampleCount = 0; sampleCount < reconHeight; sampleCount++) {
@@ -73,14 +73,14 @@ void InitializeSamplesNeighboringReferencePicture8Bit(
     }
 }
 
-void InitializeSamplesNeighboringReferencePicture(
+void EbHevcInitializeSamplesNeighboringReferencePicture(
     EbReferenceObject_t              *referenceObject,
     EbPictureBufferDescInitData_t    *pictureBufferDescInitDataPtr,
     EB_BITDEPTH                       bitDepth) {
 
     if (bitDepth == EB_10BIT){
 
-        InitializeSamplesNeighboringReferencePicture16Bit(
+        EbHevcInitializeSamplesNeighboringReferencePicture16Bit(
             referenceObject->referencePicture16bit->bufferY,
             referenceObject->referencePicture16bit->strideY,
             referenceObject->referencePicture16bit->width,
@@ -88,7 +88,7 @@ void InitializeSamplesNeighboringReferencePicture(
             pictureBufferDescInitDataPtr->leftPadding,
             pictureBufferDescInitDataPtr->topPadding);
 
-        InitializeSamplesNeighboringReferencePicture16Bit(
+        EbHevcInitializeSamplesNeighboringReferencePicture16Bit(
             referenceObject->referencePicture16bit->bufferCb,
             referenceObject->referencePicture16bit->strideCb,
             referenceObject->referencePicture16bit->width >> 1,
@@ -96,7 +96,7 @@ void InitializeSamplesNeighboringReferencePicture(
             pictureBufferDescInitDataPtr->leftPadding >> 1,
             pictureBufferDescInitDataPtr->topPadding >> 1);
 
-        InitializeSamplesNeighboringReferencePicture16Bit(
+        EbHevcInitializeSamplesNeighboringReferencePicture16Bit(
             referenceObject->referencePicture16bit->bufferCr,
             referenceObject->referencePicture16bit->strideCr,
             referenceObject->referencePicture16bit->width >> 1,
@@ -105,8 +105,8 @@ void InitializeSamplesNeighboringReferencePicture(
             pictureBufferDescInitDataPtr->topPadding >> 1);
     }
     else {
-    
-        InitializeSamplesNeighboringReferencePicture8Bit(
+
+        EbHevcInitializeSamplesNeighboringReferencePicture8Bit(
             referenceObject->referencePicture->bufferY,
             referenceObject->referencePicture->strideY,
             referenceObject->referencePicture->width,
@@ -114,7 +114,7 @@ void InitializeSamplesNeighboringReferencePicture(
             pictureBufferDescInitDataPtr->leftPadding,
             pictureBufferDescInitDataPtr->topPadding);
 
-        InitializeSamplesNeighboringReferencePicture8Bit(
+        EbHevcInitializeSamplesNeighboringReferencePicture8Bit(
             referenceObject->referencePicture->bufferCb,
             referenceObject->referencePicture->strideCb,
             referenceObject->referencePicture->width >> 1,
@@ -122,7 +122,7 @@ void InitializeSamplesNeighboringReferencePicture(
             pictureBufferDescInitDataPtr->leftPadding >> 1,
             pictureBufferDescInitDataPtr->topPadding >> 1);
 
-        InitializeSamplesNeighboringReferencePicture8Bit(
+        EbHevcInitializeSamplesNeighboringReferencePicture8Bit(
             referenceObject->referencePicture->bufferCr,
             referenceObject->referencePicture->strideCr,
             referenceObject->referencePicture->width >> 1,
@@ -135,12 +135,12 @@ void InitializeSamplesNeighboringReferencePicture(
 
 /*****************************************
  * EbPictureBufferDescCtor
- *  Initializes the Buffer Descriptor's 
+ *  Initializes the Buffer Descriptor's
  *  values that are fixed for the life of
  *  the descriptor.
  *****************************************/
 EB_ERRORTYPE EbReferenceObjectCtor(
-    EB_PTR  *objectDblPtr, 
+    EB_PTR  *objectDblPtr,
     EB_PTR   objectInitDataPtr)
 {
 
@@ -160,7 +160,7 @@ EB_ERRORTYPE EbReferenceObjectCtor(
             (EB_PTR*)&(referenceObject->referencePicture16bit),
             (EB_PTR)&pictureBufferDescInitData16BitPtr);
 
-        InitializeSamplesNeighboringReferencePicture(
+        EbHevcInitializeSamplesNeighboringReferencePicture(
             referenceObject,
             &pictureBufferDescInitData16BitPtr,
             pictureBufferDescInitData16BitPtr.bitDepth);
@@ -172,7 +172,7 @@ EB_ERRORTYPE EbReferenceObjectCtor(
             (EB_PTR*)&(referenceObject->referencePicture),
             (EB_PTR)pictureBufferDescInitDataPtr);
 
-        InitializeSamplesNeighboringReferencePicture(
+        EbHevcInitializeSamplesNeighboringReferencePicture(
             referenceObject,
             pictureBufferDescInitDataPtr,
             pictureBufferDescInitData16BitPtr.bitDepth);
@@ -184,7 +184,7 @@ EB_ERRORTYPE EbReferenceObjectCtor(
 
 
 
-    // Allocate LCU based TMVP map   
+    // Allocate LCU based TMVP map
     EB_MALLOC(TmvpUnit_t *, referenceObject->tmvpMap, (sizeof(TmvpUnit_t) * (((pictureBufferDescInitDataPtr->maxWidth + (64 - 1)) >> 6) * ((pictureBufferDescInitDataPtr->maxHeight + (64 - 1)) >> 6))), EB_N_PTR);
 
     //RESTRICT THIS TO M4
@@ -194,7 +194,7 @@ EB_ERRORTYPE EbReferenceObjectCtor(
         bufDesc.maxWidth = pictureBufferDescInitDataPtr->maxWidth;
         bufDesc.maxHeight = pictureBufferDescInitDataPtr->maxHeight;
         bufDesc.bitDepth = EB_8BIT;
-        bufDesc.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK; 
+        bufDesc.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
         bufDesc.leftPadding  = pictureBufferDescInitDataPtr->leftPadding;
         bufDesc.rightPadding = pictureBufferDescInitDataPtr->rightPadding;
         bufDesc.topPadding   = pictureBufferDescInitDataPtr->topPadding;
@@ -207,19 +207,19 @@ EB_ERRORTYPE EbReferenceObjectCtor(
                                                 (EB_PTR)&bufDesc);
         if (return_error == EB_ErrorInsufficientResources)
             return EB_ErrorInsufficientResources;
-    }    
+    }
 
     return EB_ErrorNone;
 }
 
 /*****************************************
  * EbPaReferenceObjectCtor
- *  Initializes the Buffer Descriptor's 
+ *  Initializes the Buffer Descriptor's
  *  values that are fixed for the life of
  *  the descriptor.
  *****************************************/
 EB_ERRORTYPE EbPaReferenceObjectCtor(
-    EB_PTR  *objectDblPtr, 
+    EB_PTR  *objectDblPtr,
     EB_PTR   objectInitDataPtr)
 {
 
@@ -254,9 +254,6 @@ EB_ERRORTYPE EbPaReferenceObjectCtor(
 		if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
-    
+
     return EB_ErrorNone;
 }
-
-
-

@@ -44,7 +44,7 @@ EB_ERRORTYPE ModeDecisionContextCtor(
     EB_MALLOC(ModeDecisionCandidate_t*, contextPtr->fastCandidateArray, sizeof(ModeDecisionCandidate_t) * MODE_DECISION_CANDIDATE_MAX_COUNT, EB_N_PTR);
 
     EB_MALLOC(ModeDecisionCandidate_t**, contextPtr->fastCandidatePtrArray, sizeof(ModeDecisionCandidate_t*) * MODE_DECISION_CANDIDATE_MAX_COUNT, EB_N_PTR);
-    
+
     for(candidateIndex = 0; candidateIndex < MODE_DECISION_CANDIDATE_MAX_COUNT; ++candidateIndex) {
         contextPtr->fastCandidatePtrArray[candidateIndex] = &contextPtr->fastCandidateArray[candidateIndex];
         contextPtr->fastCandidatePtrArray[candidateIndex]->mdRateEstimationPtr  = contextPtr->mdRateEstimationPtr;
@@ -249,7 +249,7 @@ void lambdaAssignRandomAccess(
 
 }
 
-void lambdaAssignISlice(
+void EbHevcLambdaAssignISlice(
     PictureParentControlSet_t *pictureControlSetPtr,
 	EB_U32                    *fastLambda,
 	EB_U32                    *fullLambda,
@@ -279,7 +279,7 @@ const EB_LAMBDA_ASSIGN_FUNC lambdaAssignmentFunctionTable[4]  = {
     lambdaAssignLowDelay,		// low delay P
     lambdaAssignLowDelay,		// low delay B
     lambdaAssignRandomAccess,	// Random Access
-    lambdaAssignISlice			// I_SLICE
+    EbHevcLambdaAssignISlice			// I_SLICE
 };
 
 void ProductResetModeDecision(
@@ -289,7 +289,7 @@ void ProductResetModeDecision(
 {
 	EB_PICTURE                     sliceType;
 	MdRateEstimationContext_t   *mdRateEstimationArray;
-	
+
 	// SAO
 	pictureControlSetPtr->saoFlag[0] = EB_TRUE;
 	pictureControlSetPtr->saoFlag[1] = EB_TRUE;
@@ -394,7 +394,7 @@ void ConfigureChroma(
     EB_BOOL chromaCond2 = !lcuStatPtr->cuStatArray[0].highLuma;
     EB_BOOL chromaCond3 = ((pictureControlSetPtr->ParentPcsPtr->grassPercentageInPicture > 60) || (lcuPtr->auraStatus == AURA_STATUS_1) || (pictureControlSetPtr->ParentPcsPtr->isPan));
 
-    // 0: Full Search Chroma for All 
+    // 0: Full Search Chroma for All
     // 1: Best Search Chroma for All LCUs; Chroma OFF if I_SLICE, Chroma for only MV_Merge if P/B_SLICE
     // 2: Full vs. Best Swicth Method 0: chromaCond0 || chromaCond1 || chromaCond2
     // 3: Full vs. Best Swicth Method 1: chromaCond0 || chromaCond1
@@ -578,9 +578,9 @@ void DeriveIntra4x4SearchMethod(
     if (pictureControlSetPtr->ParentPcsPtr->lcuFlatNoiseArray[lcuPtr->index] == EB_FALSE) {
 
         // Set INTRA4x4 Search Level
-        // Level    Settings 
-        // 0        INLINE if not BDP, refinment otherwise 
-        // 1        REFINMENT   
+        // Level    Settings
+        // 0        INLINE if not BDP, refinment otherwise
+        // 1        REFINMENT
         // 2        OFF
         if (contextPtr->intra4x4Level == 0) {
             if ((pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_FULL85_DEPTH_MODE ||
@@ -616,12 +616,12 @@ void DeriveDepthRefinment(
 
     EB_U32      lcuAddr = lcuPtr->index;
     LcuStat_t  *lcuStatPtr = &(pictureControlSetPtr->ParentPcsPtr->lcuStatArray[lcuAddr]);
-             
+
     EB_U8       stationaryEdgeOverTimeFlag = lcuStatPtr->stationaryEdgeOverTimeFlag;
 
     contextPtr->depthRefinment = 0;
 
-    // S-LOGO                                       
+    // S-LOGO
     if (stationaryEdgeOverTimeFlag > 0) {
         if (lcuStatPtr->lowDistLogo)
             contextPtr->depthRefinment = 1;
@@ -663,7 +663,7 @@ void ModeDecisionConfigureLcu(
         pictureControlSetPtr,
         contextPtr,
         lcuPtr);
-   
+
     // Load MPM Settings
     ConfigureMpm(
         contextPtr);
@@ -686,7 +686,7 @@ void ModeDecisionConfigureLcu(
         lcuPtr);
 
     if (sequenceControlSetPtr->staticConfig.rateControlMode == 0 && sequenceControlSetPtr->staticConfig.improveSharpness == 0 && sequenceControlSetPtr->staticConfig.segmentOvEnabled == 0) {
-		contextPtr->qp = (EB_U8)pictureQp;
+        contextPtr->qp = (EB_U8)pictureQp;
         lcuPtr->qp = (EB_U8)contextPtr->qp;
     }
     //RC is on

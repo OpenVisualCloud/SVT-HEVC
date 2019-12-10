@@ -1,7 +1,7 @@
-; 
+;
 ; Copyright(c) 2018 Intel Corporation
 ; SPDX - License - Identifier: BSD - 2 - Clause - Patent
-; 
+;
 
 %include "x64inc.asm"
 
@@ -18,16 +18,16 @@ section .text
 ;     threads in cooperative operating systems, unless it is certain that more MMX
 ;     instructions will be executed before any x87 FPU code.
 
-; So if RunEmms() is called according to the above cases,
+; So if EbHevcRunEmms() is called according to the above cases,
 ; then the "emms" instruction in all other assembly functions can be removed.
 
-cglobal RunEmms
+cglobal EbHevcRunEmms
     emms
     ret
 
 ; ----------------------------------------------------------------------------------------
 
-cglobal SaveRegister
+cglobal EbHevcSaveRegister
 %ifdef WIN64
     movdqa          [r0],           xmm6
     movdqa          [r0+0x10],      xmm7
@@ -44,7 +44,7 @@ cglobal SaveRegister
 
 ; ----------------------------------------------------------------------------------------
 
-cglobal RestoreRegister
+cglobal EbHevcRestoreRegister
 %ifdef WIN64
     movdqa          xmm6,           [r0]
     movdqa          xmm7,           [r0+0x10]

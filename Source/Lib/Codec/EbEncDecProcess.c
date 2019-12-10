@@ -18,19 +18,19 @@
 void PrecomputeCabacCost(CabacCost_t            *CabacCostPtr,
     CabacEncodeContext_t   *cabacEncodeCtxPtr);
 
-const EB_S16 encMinDeltaQpWeightTab[MAX_TEMPORAL_LAYERS] = { 100, 100, 100, 100, 100, 100 };
-const EB_S16 encMaxDeltaQpWeightTab[MAX_TEMPORAL_LAYERS] = { 100, 100, 100, 100, 100, 100 };
+const EB_S16 EbHevcEncMinDeltaQpWeightTab[MAX_TEMPORAL_LAYERS] = { 100, 100, 100, 100, 100, 100 };
+const EB_S16 EbHevcEncMaxDeltaQpWeightTab[MAX_TEMPORAL_LAYERS] = { 100, 100, 100, 100, 100, 100 };
 
-const EB_S8  encMinDeltaQpISliceTab[4] = { -5, -5, -3, -2 };
+const EB_S8  EbHevcEncMinDeltaQpISliceTab[4] = { -5, -5, -3, -2 };
 
-const EB_S8  encMinDeltaQpTab[4][MAX_TEMPORAL_LAYERS] = {
+const EB_S8  EbHevcEncMinDeltaQpTab[4][MAX_TEMPORAL_LAYERS] = {
     { -4, -2, -2, -1, -1, -1 },
     { -4, -2, -2, -1, -1, -1 },
     { -3, -1, -1, -1, -1, -1 },
     { -1, -0, -0, -0, -0, -0 },
 };
 
-const EB_S8  encMaxDeltaQpTab[4][MAX_TEMPORAL_LAYERS] = {
+const EB_S8  EbHevcEncMaxDeltaQpTab[4][MAX_TEMPORAL_LAYERS] = {
     { 4, 5, 5, 5, 5, 5 },
     { 4, 5, 5, 5, 5, 5 },
     { 4, 5, 5, 5, 5, 5 },
@@ -159,8 +159,8 @@ EB_ERRORTYPE EncDecContextCtor(
 
     // Mode Decision Context
     return_error = ModeDecisionContextCtor(
-        &contextPtr->mdContext, 
-        0, 
+        &contextPtr->mdContext,
+        0,
         0,
         is16bit);
     if (return_error == EB_ErrorInsufficientResources){
@@ -506,7 +506,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu(
 
         break;
     }
-    
+
     return return_error;
 }
 
@@ -560,7 +560,7 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture(
     if (pictureControlSetPtr->saoFlag[0]) {
 
         lcuIndex = 0;
-        for (lcuNumberInHeight = 0; lcuNumberInHeight < pictureHeightInLcu; ++lcuNumberInHeight) { 
+        for (lcuNumberInHeight = 0; lcuNumberInHeight < pictureHeightInLcu; ++lcuNumberInHeight) {
 
             for (lcuNumberInWidth = 0; lcuNumberInWidth < pictureWidthInLcu; ++lcuNumberInWidth, ++lcuIndex) {
 
@@ -1048,7 +1048,7 @@ static EB_ERRORTYPE ApplySaoOffsetsLcu16bit(
             EB_ENC_SAO_ERROR1);
         break;
     }
-    
+
     return return_error;
 }
 /********************************************
@@ -1118,7 +1118,7 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture16bit(
 
                     reconSampleYPtr = (EB_U16*)(recBuf16bit->bufferY) + reconSampleLumaIndex + (lcuHeight - 1)*recBuf16bit->strideY;
                     //Save last pixel row of this LCU row for next LCU row
-                    memcpy16bit(contextPtr->saoUpBuffer16[pingpongIdxUp], reconSampleYPtr, sequenceControlSetPtr->lumaWidth);
+                    EbHevcMemcpy16bit(contextPtr->saoUpBuffer16[pingpongIdxUp], reconSampleYPtr, sequenceControlSetPtr->lumaWidth);
 
                 }
 
@@ -1187,7 +1187,7 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture16bit(
                     reconSampleCbPtr = (EB_U16*)(recBuf16bit->bufferCb) + reconSampleChromaIndex + (lcuHeight - 1)*recBuf16bit->strideCb;
 
                     //Save last pixel row of this LCU row for next LCU row
-                    memcpy16bit(contextPtr->saoUpBuffer16[pingpongIdxUp], reconSampleCbPtr, sequenceControlSetPtr->chromaWidth);
+                    EbHevcMemcpy16bit(contextPtr->saoUpBuffer16[pingpongIdxUp], reconSampleCbPtr, sequenceControlSetPtr->chromaWidth);
                 }
 
                 //Save last pixel colunm of this LCU  for next LCU
@@ -1251,7 +1251,7 @@ static EB_ERRORTYPE ApplySaoOffsetsPicture16bit(
 
                     reconSampleCrPtr = (EB_U16*)(recBuf16bit->bufferCr) + reconSampleChromaIndex + (lcuHeight - 1)*recBuf16bit->strideCr;
                     //Save last pixel row of this LCU row for next LCU row
-                    memcpy16bit(contextPtr->saoUpBuffer16[pingpongIdxUp], reconSampleCrPtr, sequenceControlSetPtr->chromaWidth);
+                    EbHevcMemcpy16bit(contextPtr->saoUpBuffer16[pingpongIdxUp], reconSampleCrPtr, sequenceControlSetPtr->chromaWidth);
                 }
 
                 //Save last pixel colunm of this LCU  for next LCU
@@ -1364,7 +1364,7 @@ static void ResetEncDec(
 
     // QP
     contextPtr->qp = pictureControlSetPtr->pictureQp;
-    // Asuming cb and cr offset to be the same for chroma QP in both slice and pps for lambda computation 
+    // Asuming cb and cr offset to be the same for chroma QP in both slice and pps for lambda computation
 
     EB_U8	qpScaled = CLIP3(MIN_QP_VALUE, MAX_CHROMA_MAP_QP_VALUE, (EB_S32)(contextPtr->qp + pictureControlSetPtr->cbQpOffset + pictureControlSetPtr->sliceCbQpOffset));
     contextPtr->chromaQp = (EB_U8)MapChromaQp(qpScaled);
@@ -1423,7 +1423,7 @@ static void ResetEncDec(
     if (contextPtr->mdContext->coeffCabacUpdate)
     {
         ContextModelEncContext_t  *cabacCtxModelArray = (ContextModelEncContext_t*)sequenceControlSetPtr->encodeContextPtr->cabacContextModelArray;
-        // Increment the context model array pointer to point to the right address based on the QP and slice type 
+        // Increment the context model array pointer to point to the right address based on the QP and slice type
         cabacCtxModelArray += pictureControlSetPtr->sliceType * TOTAL_NUMBER_OF_QP_VALUES + entropyCodingQp;
 
         //LatestValid  <--  init
@@ -1561,7 +1561,7 @@ static EB_BOOL AssignEncDecSegments(
         // The entire picture is provided by the MDC process, so
         //   no logic is necessary to clear input dependencies.
 
-        // Start on Segment 0 immediately 
+        // Start on Segment 0 immediately
         *segmentInOutIndex = segmentPtr->rowArray[0].currentSegIndex;
         taskPtr->inputType = ENCDEC_TASKS_CONTINUE;
         ++segmentPtr->rowArray[0].currentSegIndex;
@@ -1679,7 +1679,7 @@ static void ReconOutput(
     const EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
 
     // Get Recon Buffer
-    EbGetEmptyObject( 
+    EbGetEmptyObject(
         sequenceControlSetPtr->encodeContextPtr->reconOutputFifoPtr,
         &outputReconWrapperPtr);
     outputReconPtr = (EB_BUFFERHEADERTYPE*)outputReconWrapperPtr->objectPtr;
@@ -1864,7 +1864,7 @@ static void PadRefAndSetFlags(
             refPic16BitPtr->width << (1 - subWidthCMinus1),
             refPic16BitPtr->height >> subHeightCMinus1,
             refPic16BitPtr->originX << (1 - subWidthCMinus1),
-            refPic16BitPtr->originY >> subHeightCMinus1);   
+            refPic16BitPtr->originY >> subHeightCMinus1);
     }
 
 }
@@ -1888,7 +1888,7 @@ static void CopyStatisticsToRefObject(
 
     EbReferenceObject_t  * refObjL0, *refObjL1;
     ((EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr)->penalizeSkipflag = EB_FALSE;
-    if (pictureControlSetPtr->sliceType == EB_B_PICTURE){ 
+    if (pictureControlSetPtr->sliceType == EB_B_PICTURE){
         refObjL0 = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr;
         refObjL1 = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_1]->objectPtr;
 
@@ -1913,8 +1913,8 @@ EB_ERRORTYPE QpmDeriveWeightsMinAndMax(
 {
     EB_ERRORTYPE                    return_error = EB_ErrorNone;
     EB_U32 cuDepth;
-    contextPtr->minDeltaQpWeight = encMinDeltaQpWeightTab[pictureControlSetPtr->temporalLayerIndex];
-    contextPtr->maxDeltaQpWeight = encMaxDeltaQpWeightTab[pictureControlSetPtr->temporalLayerIndex];
+    contextPtr->minDeltaQpWeight = EbHevcEncMinDeltaQpWeightTab[pictureControlSetPtr->temporalLayerIndex];
+    contextPtr->maxDeltaQpWeight = EbHevcEncMaxDeltaQpWeightTab[pictureControlSetPtr->temporalLayerIndex];
     //QpmDeriveDeltaQpMapWeights
 
 
@@ -1955,15 +1955,15 @@ EB_ERRORTYPE QpmDeriveWeightsMinAndMax(
         }
     }
 
-    // Refine maxDeltaQpWeight; apply conservative max_degrade_weight when most of the picture is homogenous over time.  
+    // Refine maxDeltaQpWeight; apply conservative max_degrade_weight when most of the picture is homogenous over time.
     if (pictureControlSetPtr->ParentPcsPtr->picHomogenousOverTimeLcuPercentage > 90) {
         contextPtr->maxDeltaQpWeight = contextPtr->maxDeltaQpWeight >> 1;
     }
 
 
     for (cuDepth = 0; cuDepth < 4; cuDepth++){
-        contextPtr->minDeltaQp[cuDepth] = pictureControlSetPtr->sliceType == EB_I_PICTURE ? encMinDeltaQpISliceTab[cuDepth] : encMinDeltaQpTab[cuDepth][pictureControlSetPtr->temporalLayerIndex];
-        contextPtr->maxDeltaQp[cuDepth] = encMaxDeltaQpTab[cuDepth][pictureControlSetPtr->temporalLayerIndex];
+        contextPtr->minDeltaQp[cuDepth] = pictureControlSetPtr->sliceType == EB_I_PICTURE ? EbHevcEncMinDeltaQpISliceTab[cuDepth] : EbHevcEncMinDeltaQpTab[cuDepth][pictureControlSetPtr->temporalLayerIndex];
+        contextPtr->maxDeltaQp[cuDepth] = EbHevcEncMaxDeltaQpTab[cuDepth][pictureControlSetPtr->temporalLayerIndex];
     }
 
     return return_error;
@@ -1980,7 +1980,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     EncDecContext_t      *contextPtr)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
-    
+
     // Set MD Open Loop Flag
 	if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
 		contextPtr->mdContext->intraMdOpenLoopFlag = EB_FALSE;
@@ -2004,8 +2004,8 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     }
     // Derive INTRA Injection Method
     // 0 : Default (OIS)
-    // 1 : Enhanced I_PICTURE, Default (OIS) otherwise 
-    // 2 : 35 modes 
+    // 1 : Enhanced I_PICTURE, Default (OIS) otherwise
+    // 2 : 35 modes
     if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
 		contextPtr->mdContext->intraInjectionMethod = 2;
 	}
@@ -2015,7 +2015,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     else {
         contextPtr->mdContext->intraInjectionMethod = 0;
     }
-    
+
     // Derive Spatial SSE Flag
 	if (pictureControlSetPtr->sliceType == EB_I_PICTURE && contextPtr->mdContext->intraMdOpenLoopFlag == EB_FALSE && pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_2) {
 		contextPtr->mdContext->spatialSseFullLoop = EB_TRUE;
@@ -2023,7 +2023,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
 	else {
 		contextPtr->mdContext->spatialSseFullLoop = EB_FALSE;
 	}
-    
+
     // Set Allow EncDec Mismatch Flag
 	if (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_6) {
 		contextPtr->allowEncDecMismatch = EB_FALSE;
@@ -2046,7 +2046,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
 
     // Set CHROMA Level
     // 0: Full Search Chroma for All LCUs
-    // 1: Best Search Chroma for All LCUs; Chroma OFF if I_PICTURE, Chroma for only MV_Merge if P/B_PICTURE 
+    // 1: Best Search Chroma for All LCUs; Chroma OFF if I_PICTURE, Chroma for only MV_Merge if P/B_PICTURE
     // 2: Full vs. Best Swicth Method 0: chromaCond0 || chromaCond1 || chromaCond2
     // 3: Full vs. Best Swicth Method 1: chromaCond0 || chromaCond1
     // 4: Full vs. Best Swicth Method 2: chromaCond2 || chromaCond3
@@ -2112,7 +2112,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     else {
         contextPtr->mdContext->coeffCabacUpdate = EB_FALSE;
     }
-  
+
     // Set INTRA8x8 Restriction @ P/B Slices
 	if (pictureControlSetPtr->encMode <= ENC_MODE_3) {
 		contextPtr->mdContext->intra8x8RestrictionInterSlice = EB_FALSE;
@@ -2171,7 +2171,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     else {
         contextPtr->mdContext->amvpInjection = EB_FALSE;
     }
-    
+
     // Set Unipred 3x3 Injection Flag
     if (pictureControlSetPtr->encMode <= ENC_MODE_1) {
         contextPtr->mdContext->unipred3x3Injection = EB_TRUE;
@@ -2179,7 +2179,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     else {
         contextPtr->mdContext->unipred3x3Injection = EB_FALSE;
     }
-    
+
     // Set Bipred 3x3 Injection Flag
 	if (pictureControlSetPtr->encMode <= ENC_MODE_1) {
 		contextPtr->mdContext->bipred3x3Injection = EB_TRUE;
@@ -2201,11 +2201,11 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     // Set Fast EL Flag
     contextPtr->fastEl      = (pictureControlSetPtr->encMode <= ENC_MODE_10) ? EB_FALSE : EB_TRUE;
 	contextPtr->yBitsThsld  = (pictureControlSetPtr->encMode <= ENC_MODE_10) ? YBITS_THSHLD_1(0) : YBITS_THSHLD_1(12);
-    
+
     // Set SAO Mode
     contextPtr->saoMode = (pictureControlSetPtr->ParentPcsPtr->encMode <= ENC_MODE_10) ? 1 : 0;
-    
-    // Set Exit Partitioning Flag 
+
+    // Set Exit Partitioning Flag
     if (pictureControlSetPtr->encMode >= ENC_MODE_10) {
         if (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
             contextPtr->mdContext->enableExitPartitioning = EB_TRUE;
@@ -2218,7 +2218,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
         contextPtr->mdContext->enableExitPartitioning = EB_FALSE;
     }
 
-    // Set Limit INTRA Flag 
+    // Set Limit INTRA Flag
 	if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
 		contextPtr->mdContext->limitIntra = EB_FALSE;
 	}
@@ -2232,10 +2232,10 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     }
 
     // Set MPM Level
-    // Level    Settings 
+    // Level    Settings
     // 0        Full MPM: 3
     // 1        ON but 1
-    // 2        OFF    
+    // 2        OFF
     if (pictureControlSetPtr->encMode <= ENC_MODE_4) {
         contextPtr->mdContext->mpmLevel = 0;
     }
@@ -2265,9 +2265,9 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     }
 
     // Set PF @ MD Level
-    // Level    Settings 
+    // Level    Settings
     // 0        OFF
-    // 1        N2    
+    // 1        N2
     // 2        M2 if 8x8 or 16x16 or Detector, N4 otherwise
     // 3        M2 if 8x8, N4 otherwise
 	if (pictureControlSetPtr->encMode <= ENC_MODE_6) {
@@ -2324,9 +2324,9 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     }
 
     // Set INTRA4x4 Search Level
-    // Level    Settings 
-    // 0        INLINE if not BDP, refinment otherwise 
-    // 1        REFINMENT   
+    // Level    Settings
+    // 0        INLINE if not BDP, refinment otherwise
+    // 1        REFINMENT
     // 2        OFF
 	if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
 		contextPtr->mdContext->intra4x4Level = 0;
@@ -2342,7 +2342,7 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
 	else {
 		contextPtr->mdContext->intra4x4Nfl = 2;
 	}
-    
+
     // Set INTRA4x4 Injection
     // 0: 35 mdoes
     // 1: up to 4: DC, Best INTR8x8, +3, -0
@@ -2483,14 +2483,14 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
     // NFL Level Pillar/8x8 Refinement         Settings
     // 0                                       4
     // 1                                       4 if depthRefinment, 3 if 32x32, 2 otherwise
-    // 2                                       3 
+    // 2                                       3
     // 3                                       3 if depthRefinment or 32x32, 2 otherwise
     // 4                                       3 if 32x32, 2 otherwise
-    // 5                                       2    
+    // 5                                       2
     // 6                                       2 if Detectors, 1 otherwise
     // 7                                       2 if 64x64 or 32x32 or 16x16, 1 otherwise
     // 8                                       2 if 64x64 or 332x32, 1 otherwise
-    // 9                                       1      
+    // 9                                       1
     if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
 		contextPtr->mdContext->nflLevelPillar8x8ref = 0;
 	}
@@ -2551,14 +2551,14 @@ static EB_ERRORTYPE SignalDerivationEncDecKernelOq(
 
     // NFL Level MvMerge/64x64 Refinement      Settings
     // 0                                       4
-    // 1                                       3 
+    // 1                                       3
     // 2                                       3 if depthRefinment or 32x32, 2 otherwise
     // 3                                       3 if 32x32, 2 otherwise
-    // 4                                       2    
+    // 4                                       2
     // 5                                       2 if Detectors, 1 otherwise
     // 6                                       2 if 64x64 or 32x32 or 16x16, 1 otherwise
     // 7                                       2 if 64x64 or 332x32, 1 otherwise
-    // 8                                       1     
+    // 8                                       1
     if (pictureControlSetPtr->encMode <= ENC_MODE_2) {
 		contextPtr->mdContext->nflLevelMvMerge64x64ref = 0;
 	}
@@ -2625,18 +2625,18 @@ void* EncDecKernel(void *inputPtr)
     PictureControlSet_t    *pictureControlSetPtr;
     PictureParentControlSet_t *ppcsPtr;
     SequenceControlSet_t   *sequenceControlSetPtr;
-                           
-    // Input               
+
+    // Input
     EbObjectWrapper_t      *encDecTasksWrapperPtr;
     EncDecTasks_t          *encDecTasksPtr;
-                           
-    // Output              
+
+    // Output
     EbObjectWrapper_t      *encDecResultsWrapperPtr;
     EncDecResults_t        *encDecResultsPtr;
     EbObjectWrapper_t      *pictureDemuxResultsWrapperPtr;
     PictureDemuxResults_t  *pictureDemuxResultsPtr;
-                           
-    // LCU Loop variables  
+
+    // LCU Loop variables
     LargestCodingUnit_t    *lcuPtr;
     EB_U16                  lcuIndex;
     EB_U8                   lcuSize;
@@ -2652,11 +2652,11 @@ void* EncDecKernel(void *inputPtr)
     EB_U32                  lcuRowIndexCount;
     EB_U32                  tileGroupWidthInLcu;
     MdcLcuData_t           *mdcPtr;
-    // Variables           
+    // Variables
     EB_BOOL                 enableSaoFlag = EB_TRUE;
     EB_BOOL                 is16bit;
-                           
-    // Segments            
+
+    // Segments
     //EB_BOOL                 initialProcessCall;
     EB_U16                  segmentIndex = 0;
     EB_U32                  xLcuStartIndex;
@@ -2713,7 +2713,7 @@ void* EncDecKernel(void *inputPtr)
                 pictureControlSetPtr,
                 contextPtr);
 
-        // Derive Interpoldation Method @ Fast-Loop 
+        // Derive Interpoldation Method @ Fast-Loop
         contextPtr->mdContext->interpolationMethod = (pictureControlSetPtr->ParentPcsPtr->useSubpelFlag == EB_FALSE) ?
             INTERPOLATION_FREE_PATH  :
             INTERPOLATION_METHOD_HEVC;
@@ -2723,12 +2723,12 @@ void* EncDecKernel(void *inputPtr)
             PM_MODE_1:
             PM_MODE_0;
 
-        // Set Constrained INTRA Flag 
+        // Set Constrained INTRA Flag
         pictureControlSetPtr->constrainedIntraFlag = (sequenceControlSetPtr->staticConfig.constrainedIntra == EB_TRUE && pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag == EB_FALSE) ?
             EB_TRUE :
             EB_FALSE;
 
-        // Jing: Reset picture-wise parameters 
+        // Jing: Reset picture-wise parameters
         EbBlockOnMutex(pictureControlSetPtr->intraMutex);
         if (!pictureControlSetPtr->resetDone) {
             pictureControlSetPtr->resetDone = EB_TRUE;
@@ -2736,7 +2736,7 @@ void* EncDecKernel(void *inputPtr)
             EB_U16 tileCnt = pictureControlSetPtr->ParentPcsPtr->tileColumnCount * pictureControlSetPtr->ParentPcsPtr->tileRowCount;
 
             for (EB_U16 tileIdx = 0; tileIdx < tileCnt; tileIdx++) {
-                // MD neighbors 
+                // MD neighbors
                 ResetModeDecisionNeighborArrays(pictureControlSetPtr, tileIdx);
                 ResetMdRefinmentNeighborArrays(pictureControlSetPtr, tileIdx);
 
@@ -2802,7 +2802,7 @@ void* EncDecKernel(void *inputPtr)
 
 
             // Reset Coding Loop State
-            ProductResetModeDecision( // HT done 
+            ProductResetModeDecision( // HT done
                     contextPtr->mdContext,
                     pictureControlSetPtr,
                     sequenceControlSetPtr);
@@ -2885,9 +2885,9 @@ void* EncDecKernel(void *inputPtr)
 
                     LcuParams_t * lcuParamPtr = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
 
-                    if ( 
-                            pictureControlSetPtr->ParentPcsPtr->depthMode  == PICT_FULL85_DEPTH_MODE || 
-                            pictureControlSetPtr->ParentPcsPtr->depthMode  == PICT_FULL84_DEPTH_MODE || 
+                    if (
+                            pictureControlSetPtr->ParentPcsPtr->depthMode  == PICT_FULL85_DEPTH_MODE ||
+                            pictureControlSetPtr->ParentPcsPtr->depthMode  == PICT_FULL84_DEPTH_MODE ||
                             pictureControlSetPtr->ParentPcsPtr->depthMode  == PICT_OPEN_LOOP_DEPTH_MODE ||
                             (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_LCU_SWITCH_DEPTH_MODE && (pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_FULL85_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_FULL84_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_OPEN_LOOP_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_LIGHT_OPEN_LOOP_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_AVC_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_LIGHT_AVC_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_PRED_OPEN_LOOP_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE))) {
 
@@ -2996,7 +2996,7 @@ void* EncDecKernel(void *inputPtr)
 
 
                     // Encode Pass
-                    EncodePass(                 // HT done 
+                    EncodePass(                 // HT done
                             sequenceControlSetPtr,
                             pictureControlSetPtr,
                             lcuPtr,
@@ -3015,8 +3015,8 @@ void* EncDecKernel(void *inputPtr)
                 xLcuStartIndex = (xLcuStartIndex > 0) ? xLcuStartIndex - 1 : 0;
             }
 
-            // Jing: Send to entropy at end of each segment (if tile line ends) 
-            //       Shall we 
+            // Jing: Send to entropy at end of each segment (if tile line ends)
+            //       Shall we
             //          1). consider the case that one segment will may cover 2 tiles?
             //          2). Or just assume segments is smaller than tiles
             //       For simplicity just use the 2). assumption
@@ -3178,9 +3178,9 @@ void* EncDecKernel(void *inputPtr)
                     double latency = 0.0;
                     EB_U64 finishTimeSeconds = 0;
                     EB_U64 finishTimeuSeconds = 0;
-                    EbFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
+                    EbHevcFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
 
-                    EbComputeOverallElapsedTimeMs(
+                    EbHevcComputeOverallElapsedTimeMs(
                             pictureControlSetPtr->ParentPcsPtr->startTimeSeconds,
                             pictureControlSetPtr->ParentPcsPtr->startTimeuSeconds,
                             finishTimeSeconds,

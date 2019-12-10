@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 
+#include "EbAppString.h"
 #include "EbApi.h"
 
 // Define Cross-Platform 64-bit fseek() and ftell()
@@ -19,16 +20,6 @@ typedef __int64 off64_t;
 #define fseeko64 fseek
 #define ftello64 ftell
 #endif
-
-#ifndef _RSIZE_T_DEFINED
-typedef size_t rsize_t;
-#define _RSIZE_T_DEFINED
-#endif  /* _RSIZE_T_DEFINED */
-
-#ifndef _ERRNO_T_DEFINED
-#define _ERRNO_T_DEFINED
-typedef int32_t errno_t;
-#endif  /* _ERRNO_T_DEFINED */
 
 /** The APPEXITCONDITIONTYPE type is used to define the App main loop exit
 conditions.
@@ -141,27 +132,6 @@ typedef struct EB_PARAM_PORTDEFINITIONTYPE {
         return; \
 		        } \
     appMallocCount++;
-
-/* string copy */
-extern errno_t strcpy_ss(char *dest, rsize_t dmax, const char *src);
-
-/* fitted string copy */
-extern errno_t strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t slen);
-
-/* string length */
-extern rsize_t strnlen_ss(const char *s, rsize_t smax);
-
-#define EB_STRNCPY(dst, max_size, src, count) \
-	strncpy_ss(dst, max_size, src, count)
-
-#define EB_STRCPY(dst, size, src) \
-	strcpy_ss(dst, size, src)
-
-#define EB_STRCMP(target,token) \
-	strcmp(target,token)
-
-#define EB_STRLEN(target, max_size) \
-	strnlen_ss(target, max_size)
 
 #define EB_APP_MEMORY() \
     printf("Total Number of Mallocs in App: %d\n", appMallocCount); \

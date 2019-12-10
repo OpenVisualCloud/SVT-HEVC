@@ -18,7 +18,7 @@ extern "C" {
  * Context
  **************************************/
 typedef struct InitialRateControlContext_s
-{      
+{
     EbFifo_t                    *motionEstimationResultsInputFifoPtr;
 	EbFifo_t                    *initialrateControlResultsOutputFifoPtr;
 
@@ -31,10 +31,10 @@ extern EB_ERRORTYPE InitialRateControlContextCtor(
     InitialRateControlContext_t **contextDblPtr,
     EbFifo_t                     *motionEstimationResultsInputFifoPtr,
     EbFifo_t                     *pictureDemuxResultsOutputFifoPtr);
-    
+
 extern void* InitialRateControlKernel(void *inputPtr);
 
-extern void MeBasedGlobalMotionDetection(
+extern void EbHevcMeBasedGlobalMotionDetection(
     SequenceControlSet_t         *sequenceControlSetPtr,
     PictureParentControlSet_t    *pictureControlSetPtr);
 

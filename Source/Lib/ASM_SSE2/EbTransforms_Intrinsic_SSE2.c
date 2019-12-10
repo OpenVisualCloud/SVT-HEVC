@@ -13,8 +13,8 @@
 *****************************/
 
 #define MACRO_TRANS_2MAC_NO_SAVE(XMM_1, XMM_2, XMM_3, XMM_4, XMM_OFFSET, OFFSET1, OFFSET2, SHIFT)\
-    XMM_3 = _mm_load_si128((__m128i *)(TransformAsmConst + OFFSET1));\
-    XMM_4 = _mm_load_si128((__m128i *)(TransformAsmConst + OFFSET2));\
+    XMM_3 = _mm_load_si128((__m128i *)(EbHevcTransformAsmConst + OFFSET1));\
+    XMM_4 = _mm_load_si128((__m128i *)(EbHevcTransformAsmConst + OFFSET2));\
     XMM_3 = _mm_madd_epi16(XMM_3, XMM_1);\
     XMM_4 = _mm_madd_epi16(XMM_4, XMM_2);\
     XMM_3 = _mm_srai_epi32(_mm_add_epi32(XMM_4, _mm_add_epi32(XMM_3, XMM_OFFSET)), SHIFT);\
@@ -100,7 +100,7 @@
 	sum = _mm_packs_epi32(sum1, sum1);\
     INSTR((__m128i *)(DST + OFST5), sum);
 
-#ifdef __linux__
+#ifdef __GNUC__
 #ifndef __cplusplus
 __attribute__((visibility("hidden")))
 #endif
@@ -121,7 +121,7 @@ EB_ALIGN(16) const EB_S16 DstTransformAsmConst_SSE2[] = {
     //55,  -29,   55,  -29,   55,  -29,   55,  -29,
 };
 
-#ifdef __linux__
+#ifdef __GNUC__
 #ifndef __cplusplus
 __attribute__((visibility("hidden")))
 #endif
@@ -318,7 +318,7 @@ EB_ALIGN(16) const EB_S16 InvTransformAsmConst_SSE2[] = {
     54, 90, 54, 90, 54, 90, 54, 90
 };
 
-#ifdef __linux__
+#ifdef __GNUC__
 #ifndef __cplusplus
 __attribute__((visibility("hidden")))
 #endif
@@ -337,7 +337,7 @@ EB_ALIGN(16) const EB_S16 InvDstTransformAsmConst_SSE2[] = {
 
 
 // Coefficients for inverse 32-point transform
-EB_EXTERN const EB_S16 coeff_tbl2[48 * 8] =
+EB_EXTERN const EB_S16 EbHevcCoeff_tbl2[48 * 8] =
 {
     64, 89, 64, 75, 64, 50, 64, 18, 64, -18, 64, -50, 64, -75, 64, -89,
     83, 75, 36, -18, -36, -89, -83, -50, -83, 50, -36, 89, 36, 18, 83, -75,
@@ -365,12 +365,12 @@ EB_EXTERN const EB_S16 coeff_tbl2[48 * 8] =
     54, 67, -31, -73, 4, 78, 22, -82, -46, 85, 67, -88, -82, 90, 90, -90
 };
 
-#ifdef __linux__
+#ifdef __GNUC__
 #ifndef __cplusplus
 __attribute__((visibility("hidden")))
 #endif
 #endif
-EB_EXTERN const EB_S16 coeff_tbl[48 * 8] =
+EB_EXTERN const EB_S16 EbHevcCoeff_tbl[48 * 8] =
 {
     64, 64, 89, 75, 83, 36, 75, -18, 64, -64, 50, -89, 36, -83, 18, -50,
     64, 64, 50, 18, -36, -83, -89, -50, -64, 64, 18, 75, 83, -36, 75, -89,
@@ -412,7 +412,7 @@ static void Transform16(short *src, int src_stride, short *dst, int dst_stride, 
     int i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
     for (i = 0; i < 16; i++)
     {
@@ -478,7 +478,7 @@ static void InvTransform16(
     int i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl2;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl2;
 
     for (i = 0; i < 16; i++)
     {
@@ -801,7 +801,7 @@ static void PfreqN4FirstTranspose32_SSE2(
 	}
 		}
 
-void PfreqTranspose32Type1_SSE2(
+void EbHevcPfreqTranspose32Type1_SSE2(
     EB_S16 *src,
     EB_U32  src_stride,
     EB_S16 *dst,
@@ -996,7 +996,7 @@ void Pfreq2DInvTransform32_SSE2(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl2;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl2;
 
     for (i = 0; i < 32; i++)
     {
@@ -1105,7 +1105,7 @@ void Pfreq1DInvTransform32_SSE2(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl2;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl2;
 
     for (i = 0; i < 16; i++)
     {
@@ -1213,7 +1213,7 @@ void PfreqEstimateInvTransform32x32_SSE2(
     EB_S16 *intermediate,
     EB_U32  addshift)
 {
-    PfreqTranspose32Type1_SSE2(src, src_stride, intermediate, 32);
+    EbHevcPfreqTranspose32Type1_SSE2(src, src_stride, intermediate, 32);
     Pfreq1DInvTransform32_SSE2(intermediate, 32, dst, dst_stride, 7);
     PfreqTranspose32Type2_SSE2(dst, dst_stride, intermediate, 32);
     Pfreq2DInvTransform32_SSE2(intermediate, 32, dst, dst_stride, 12 - addshift);
@@ -1230,7 +1230,7 @@ static void InvTransform32_SSE2(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl2;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl2;
 
     for (i = 0; i < 32; i++)
     {
@@ -1420,7 +1420,7 @@ static void Transform32_SSE2(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
     for (i = 0; i < 32; i++)
     {
@@ -1549,7 +1549,7 @@ static void Pfreq1DTransform32_SSE2(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
     for (i = 0; i < 32; i++)
     {
@@ -1685,7 +1685,7 @@ static void Pfreq2DTransform32_SSE2(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
     for (i = 0; i < 16; i++)
     {
@@ -1821,7 +1821,7 @@ static void PfreqN41DTransform32_SSE2(
 	EB_U32 i;
 	__m128i s0 = _mm_cvtsi32_si128(shift);
 	__m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-	const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+	const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
 	for (i = 0; i < 32; i++)
 	{
@@ -1958,7 +1958,7 @@ static void PfreqN42DTransform32_SSE2(
 	EB_U32 i;
 	__m128i s0 = _mm_cvtsi32_si128(shift);
 	__m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-	const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+	const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
 	for (i = 0; i < 8; i++)
 
@@ -2129,7 +2129,7 @@ static void Pfreq1DTransform16_SSE2(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
     for (i = 0; i < 16; i++)
     {
@@ -2183,7 +2183,7 @@ static void Pfreq2DTransform16_SSE2(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
     for (i = 0; i < 8; i++)
     {
@@ -2315,7 +2315,7 @@ static void PfreqN42DTransform16_SSE2(
 	EB_U32 i;
 	__m128i s0 = _mm_cvtsi32_si128(shift);
 	__m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-	const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+	const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
 	for (i = 0; i < 4; i++)
 
@@ -2525,7 +2525,7 @@ void Transform4x4_SSE2_INTRIN(
          36, -83,  36, -83,  36, -83,  36, -83,
          83, -36,  83, -36,  83, -36,  83, -36
     };
-     EB_ALIGN(16) const EB_S16 * TransformAsmConst = transformIntrinConst_SSE2;
+     EB_ALIGN(16) const EB_S16 * EbHevcTransformAsmConst = transformIntrinConst_SSE2;
     __m128i xmm0, xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm_offset, xmm_shift;
 
     xmm_shift = _mm_cvtsi32_si128(5 - bitIncrement);
@@ -2535,12 +2535,12 @@ void Transform4x4_SSE2_INTRIN(
     xmm3 = _mm_loadl_epi64((__m128i *)(residual + 3 * srcStride));
     xmm0 = _mm_unpacklo_epi16(xmm0, xmm1);
     xmm2 = _mm_unpacklo_epi16(xmm2, xmm3);
-    
+
     xmm1 = _mm_unpackhi_epi32(xmm0, xmm2);
     xmm0 = _mm_unpacklo_epi32(xmm0, xmm2);
     xmm1 = _mm_unpacklo_epi64(_mm_srli_si128(xmm1, 8), xmm1);
     xmm3 = _mm_sub_epi16(xmm0, xmm1);
-    xmm0 = _mm_add_epi16(xmm0, xmm1);   
+    xmm0 = _mm_add_epi16(xmm0, xmm1);
 
     xmm4 = xmm2 = xmm0;
     xmm0 = _mm_srli_si128(xmm0, 8);
@@ -2551,7 +2551,7 @@ void Transform4x4_SSE2_INTRIN(
     xmm_shift = _mm_cvtsi32_si128(bitIncrement + 1);
 
     xmm1 = _mm_unpacklo_epi16(xmm3, _mm_srli_si128(xmm3, 8));
-    
+
     xmm3 = _mm_madd_epi16(xmm1, _mm_load_si128((__m128i *)(transformIntrinConst_SSE2 + OFFSET_36_N83)));
     xmm1 = _mm_madd_epi16(xmm1, _mm_load_si128((__m128i *)(transformIntrinConst_SSE2 + OFFSET_83_36)));
     xmm1 = _mm_add_epi32(xmm1, xmm_offset);
@@ -2577,14 +2577,14 @@ void Transform4x4_SSE2_INTRIN(
     (void)transformCoefficients;
     (void)transformInnerArrayPtr;
 
-#undef OFFSET_128 
-#undef OFFSET_64_64 
-#undef OFFSET_83_36 
+#undef OFFSET_128
+#undef OFFSET_64_64
+#undef OFFSET_83_36
 #undef OFFSET_N36_N83
-#undef OFFSET_64_N64 
-#undef OFFSET_N64_64 
-#undef OFFSET_36_N83 
-#undef OFFSET_83_N36 
+#undef OFFSET_64_N64
+#undef OFFSET_N64_64
+#undef OFFSET_36_N83
+#undef OFFSET_83_N36
 }
 
 void DstTransform4x4_SSE2_INTRIN(
@@ -2612,14 +2612,14 @@ void DstTransform4x4_SSE2_INTRIN(
     __m128i xmm_temp;
 
     EB_U32 shift = bitIncrement + 1;
-    EB_ALIGN(16) const EB_S16 * TransformAsmConst = DstTransformAsmConst_SSE2;
+    EB_ALIGN(16) const EB_S16 * EbHevcTransformAsmConst = DstTransformAsmConst_SSE2;
 
     xmm_res0 = _mm_loadl_epi64((__m128i *)(residual));
     xmm_res1 = _mm_loadl_epi64((__m128i *)(residual + srcStride));
     xmm_res2 = _mm_loadl_epi64((__m128i *)(residual + 2 * srcStride));
     xmm_res3 = _mm_loadl_epi64((__m128i *)(residual + 3 * srcStride));
     xmm_offset = _mm_srli_epi32(_mm_slli_epi32(_mm_load_si128((__m128i *)(DstTransformAsmConst_SSE2 + OFFSET_DST_1)), shift), 1);
-    
+
     xmm_res0_1 = _mm_unpacklo_epi32(xmm_res0, xmm_res1); // |res01    |res-S1-01|res23    |res-S1-23|
     xmm_res2_3 = _mm_unpacklo_epi32(xmm_res2, xmm_res3); // |res-S2-01|res-S3-01|res-S2-23|res-S3-23|
     xmm_res_hi = _mm_unpackhi_epi64(xmm_res0_1, xmm_res2_3); // |res23    |res-S1-23|res-S2-23|res-S3-23|
@@ -2629,7 +2629,7 @@ void DstTransform4x4_SSE2_INTRIN(
     MACRO_TRANS_2MAC_NO_SAVE(xmm_res_lo, xmm_res_hi, xmm_trans1, xmm_temp, xmm_offset, OFFSET_DST_74_74, OFFSET_DST_0_N74, shift)
     MACRO_TRANS_2MAC_NO_SAVE(xmm_res_lo, xmm_res_hi, xmm_trans2, xmm_temp, xmm_offset, OFFSET_DST_84_N29, OFFSET_DST_N74_55, shift)
     MACRO_TRANS_2MAC_NO_SAVE(xmm_res_lo, xmm_res_hi, xmm_trans3, xmm_temp, xmm_offset, OFFSET_DST_55_N84, OFFSET_DST_74_N29, shift)
-    
+
     // Second Partial Bufferfly
     xmm_offset = _mm_set1_epi32(0x00000080); // 128
     xmm_trans0_1 = _mm_unpacklo_epi32(xmm_trans0, xmm_trans1);
@@ -2641,7 +2641,7 @@ void DstTransform4x4_SSE2_INTRIN(
     MACRO_TRANS_2MAC(xmm_trans_lo, xmm_trans_hi, xmm_trans1, xmm_temp, xmm_offset, OFFSET_DST_74_74, OFFSET_DST_0_N74, 8, dstStride)
     MACRO_TRANS_2MAC(xmm_trans_lo, xmm_trans_hi, xmm_trans2, xmm_temp, xmm_offset, OFFSET_DST_84_N29, OFFSET_DST_N74_55, 8, (2 * dstStride))
     MACRO_TRANS_2MAC(xmm_trans_lo, xmm_trans_hi, xmm_trans3, xmm_temp, xmm_offset, OFFSET_DST_55_N84, OFFSET_DST_74_N29, 8, (3 * dstStride))
-    
+
     (void)transformInnerArrayPtr;
 }
 
@@ -2656,7 +2656,7 @@ void Transform8x8_SSE2_INTRIN(
     // Transform8x8 has its own table because the larger table's offset macros exceed 256 (which is maximum macro expansion depth
     // Use a smaller table with values just for Transform8x8.
 
-    EB_ALIGN(16) EB_S16 transformIntrinConst_8x8[] = {        
+    EB_ALIGN(16) EB_S16 transformIntrinConst_8x8[] = {
         83,  36,  83,  36,  83,  36,  83,  36,
         36, -83,  36, -83,  36, -83,  36, -83,
         89,  75,  89,  75,  89,  75,  89,  75,
@@ -2676,15 +2676,15 @@ void Transform8x8_SSE2_INTRIN(
         36,  83,  36,  83,  36,  83,  36,  83,
         50,  89,  50,  89,  50,  89,  50,  89,
         18, -75,  18, -75,  18, -75,  18, -75,
-       -64,  64, -64,  64, -64,  64, -64,  64, 
+       -64,  64, -64,  64, -64,  64, -64,  64,
         64, -64,  64, -64,  64, -64,  64, -64,
        -75, -18, -75, -18, -75, -18, -75, -18,
         89, -50,  89, -50,  89, -50,  89, -50,
-        83, -36,  83, -36,  83, -36,  83, -36, 
-       -36,  83, -36,  83, -36,  83, -36,  83, 
-       -83,  36, -83,  36, -83,  36, -83,  36, 
+        83, -36,  83, -36,  83, -36,  83, -36,
+       -36,  83, -36,  83, -36,  83, -36,  83,
+       -83,  36, -83,  36, -83,  36, -83,  36,
         89, -75,  89, -75,  89, -75,  89, -75,
-        50, -18,  50, -18,  50, -18,  50, -18,  
+        50, -18,  50, -18,  50, -18,  50, -18,
     };
     __m128i sum, sum1, sum2, sum3, sum4;
     __m128i res0, res1, res2, res3, res4, res5, res6, res7;
@@ -2711,7 +2711,7 @@ void Transform8x8_SSE2_INTRIN(
     MACRO_UNPACK(32, res0, res2, res01, res23, res4, res6, res45, res67, res02, res0123, res46, res4567)
     MACRO_UNPACK(64, res0, res4, res02, res46, res01, res45, res0123, res4567, res04, res0246, res0145, res0_to_7)
     MACRO_CALC_EVEN_ODD(res0, res04, res02, res0246, res01, res0145, res0123, res0_to_7)
-    
+
     evenEven0 = _mm_add_epi16(even0, even3);
     evenEven1 = _mm_add_epi16(even1, even2);
     evenOdd0 = _mm_sub_epi16(even0, even3);
@@ -2719,7 +2719,7 @@ void Transform8x8_SSE2_INTRIN(
 
     shift = 4 - bitIncrement;
     trans0 = _mm_slli_epi16(_mm_add_epi16(evenEven0, evenEven1), shift);
-    trans4 = _mm_slli_epi16(_mm_sub_epi16(evenEven0, evenEven1), shift);  
+    trans4 = _mm_slli_epi16(_mm_sub_epi16(evenEven0, evenEven1), shift);
 
     xmm_offset = _mm_slli_epi32(_mm_set1_epi32(0x00000002), bitIncrement);
     shift = bitIncrement + 2;
@@ -2729,13 +2729,13 @@ void Transform8x8_SSE2_INTRIN(
 
     trans6 = _mm_packs_epi32(_mm_srai_epi32(_mm_add_epi32(_mm_madd_epi16(_mm_load_si128((__m128i *)(TransformIntrinConst + TRANS8x8_OFFSET_36_N83)),_mm_unpacklo_epi16(evenOdd0, evenOdd1)), xmm_offset), shift),
                              _mm_srai_epi32(_mm_add_epi32(_mm_madd_epi16(_mm_load_si128((__m128i *)(TransformIntrinConst + TRANS8x8_OFFSET_36_N83)),_mm_unpackhi_epi16(evenOdd0, evenOdd1)), xmm_offset), shift));
-     
+
     // TransformCoefficients 1, 3, 5, 7
     odd01_lo = _mm_unpacklo_epi16(odd0, odd1);
     odd01_hi = _mm_unpackhi_epi16(odd0, odd1);
     odd23_lo = _mm_unpacklo_epi16(odd2, odd3);
     odd23_hi = _mm_unpackhi_epi16(odd2, odd3);
-    
+
     MACRO_TRANS_4MAC_NO_SAVE(odd01_lo, odd01_hi, odd23_lo, odd23_hi, trans1, xmm_offset, TransformIntrinConst, TRANS8x8_OFFSET_89_75,  TRANS8x8_OFFSET_50_18, shift)
     MACRO_TRANS_4MAC_NO_SAVE(odd01_lo, odd01_hi, odd23_lo, odd23_hi, trans3, xmm_offset, TransformIntrinConst, TRANS8x8_OFFSET_75_N18, TRANS8x8_OFFSET_N89_N50, shift)
     MACRO_TRANS_4MAC_NO_SAVE(odd01_lo, odd01_hi, odd23_lo, odd23_hi, trans5, xmm_offset, TransformIntrinConst, TRANS8x8_OFFSET_50_N89, TRANS8x8_OFFSET_18_75, shift)
@@ -2745,17 +2745,17 @@ void Transform8x8_SSE2_INTRIN(
     MACRO_UNPACK(64, trans0, trans2, trans01, trans23, trans4, trans6, trans45, trans67, trans02, trans0123, trans46, trans4567)
 
     xmm_offset = _mm_loadu_si128((__m128i *)(TransformIntrinConst + TRANS8x8_OFFSET_256));
-    
+
     MACRO_TRANS_8MAC(trans0, trans02, trans01, trans0123, trans4, trans46, trans45, trans4567, xmm_offset, TransformIntrinConst, TRANS8x8_OFFSET_64_64, TRANS8x8_OFFSET_64_64,    TRANS8x8_OFFSET_64_64,   TRANS8x8_OFFSET_64_64, 9, _mm_storeu_si128, transformCoefficients, 0)
     MACRO_TRANS_8MAC(trans0, trans02, trans01, trans0123, trans4, trans46, trans45, trans4567, xmm_offset, TransformIntrinConst, TRANS8x8_OFFSET_89_75, TRANS8x8_OFFSET_50_18,    TRANS8x8_OFFSET_N18_N50, TRANS8x8_OFFSET_N75_N89, 9, _mm_storeu_si128, transformCoefficients, (dstStride))
     MACRO_TRANS_8MAC(trans0, trans02, trans01, trans0123, trans4, trans46, trans45, trans4567, xmm_offset, TransformIntrinConst, TRANS8x8_OFFSET_83_36, TRANS8x8_OFFSET_N36_N83,  TRANS8x8_OFFSET_N83_N36, TRANS8x8_OFFSET_36_83, 9, _mm_storeu_si128, transformCoefficients, (2 * dstStride))
     MACRO_TRANS_8MAC(trans0, trans02, trans01, trans0123, trans4, trans46, trans45, trans4567, xmm_offset, TransformIntrinConst, TRANS8x8_OFFSET_75_N18, TRANS8x8_OFFSET_N89_N50, TRANS8x8_OFFSET_50_89,   TRANS8x8_OFFSET_18_N75, 9, _mm_storeu_si128, transformCoefficients, (3 * dstStride))
-    transformCoefficients += 4 * dstStride;    
+    transformCoefficients += 4 * dstStride;
     MACRO_TRANS_8MAC(trans0, trans02, trans01, trans0123, trans4, trans46, trans45, trans4567, xmm_offset, TransformIntrinConst, TRANS8x8_OFFSET_64_N64, TRANS8x8_OFFSET_N64_64, TRANS8x8_OFFSET_64_N64, TRANS8x8_OFFSET_N64_64, 9, _mm_storeu_si128, transformCoefficients, 0)
     MACRO_TRANS_8MAC(trans0, trans02, trans01, trans0123, trans4, trans46, trans45, trans4567, xmm_offset, TransformIntrinConst, TRANS8x8_OFFSET_50_N89, TRANS8x8_OFFSET_18_75,  TRANS8x8_OFFSET_N75_N18, TRANS8x8_OFFSET_89_N50, 9, _mm_storeu_si128, transformCoefficients, (dstStride))
     MACRO_TRANS_8MAC(trans0, trans02, trans01, trans0123, trans4, trans46, trans45, trans4567, xmm_offset, TransformIntrinConst, TRANS8x8_OFFSET_36_N83, TRANS8x8_OFFSET_83_N36, TRANS8x8_OFFSET_N36_83, TRANS8x8_OFFSET_N83_36, 9, _mm_storeu_si128, transformCoefficients, (2 * dstStride))
     MACRO_TRANS_8MAC(trans0, trans02, trans01, trans0123, trans4, trans46, trans45, trans4567, xmm_offset, TransformIntrinConst, TRANS8x8_OFFSET_18_N50, TRANS8x8_OFFSET_75_N89, TRANS8x8_OFFSET_89_N75, TRANS8x8_OFFSET_50_N18, 9, _mm_storeu_si128, transformCoefficients, (3 * dstStride))
-    
+
     (void)transformInnerArrayPtr;
 }
 
@@ -2855,10 +2855,10 @@ void PfreqTransform8x8_SSE2_INTRIN(
     MACRO_TRANS_4MAC_NO_SAVE(odd01_lo, odd01_hi, odd23_lo, odd23_hi, trans3, xmm_offset, TransformIntrinConst, TRANS8x8_OFFSET_75_N18, TRANS8x8_OFFSET_N89_N50, shift)
     //MACRO_TRANS_4MAC_NO_SAVE(odd01_lo, odd01_hi, odd23_lo, odd23_hi, trans5, xmm_offset, TransformIntrinConst, TRANS8x8_OFFSET_50_N89, TRANS8x8_OFFSET_18_75, shift)
     //MACRO_TRANS_4MAC_NO_SAVE(odd01_lo, odd01_hi, odd23_lo, odd23_hi, trans7, xmm_offset, TransformIntrinConst, TRANS8x8_OFFSET_18_N50, TRANS8x8_OFFSET_75_N89, shift)
-    
+
 	MACRO_UNPACK(32, trans0, trans1, trans2, trans3, trans4/*, trans5, trans6, trans7*/, trans1, trans1, trans1, trans01, trans23, trans45, trans67)
 	MACRO_UNPACK_V2(64, trans0, trans2, trans01, trans23, trans4, trans0, /*trans6,*/ trans45, trans67, trans02, trans0123)
-    
+
     xmm_offset = _mm_loadu_si128((__m128i *)(TransformIntrinConst + TRANS8x8_OFFSET_256));
 
 	MACRO_TRANS_8MAC_PF_N2(trans0, trans02, trans01, trans0123, trans4, trans45, trans45, trans45, xmm_offset, TransformIntrinConst, TRANS8x8_OFFSET_64_64, TRANS8x8_OFFSET_64_64, TRANS8x8_OFFSET_64_64, TRANS8x8_OFFSET_64_64, 9, _mm_storeu_si128, transformCoefficients, 0)

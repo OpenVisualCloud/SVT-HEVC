@@ -46,7 +46,7 @@ message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
 set(SVT_HEVC_VERSION_MAJOR           "1")
 set(SVT_HEVC_VERSION_MINOR           "4")
-set(SVT_HEVC_VERSION_PATCHLEVEL      "1")
+set(SVT_HEVC_VERSION_PATCHLEVEL      "2")
 
 configure_file(${PROJECT_SOURCE_DIR}/Source/API/EbApiVersion.h.in ${PROJECT_SOURCE_DIR}/Source/API/EbApiVersion.h @ONLY)
 
@@ -81,12 +81,6 @@ else()
 endif()
 set(CAN_USE_ASSEMBLER TRUE)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-if(WIN32)
-    set(CMAKE_ASM_NASM_FLAGS "${CMAKE_ASM_NASM_FLAGS} -DWIN64")
-else()
-    set(CMAKE_ASM_NASM_FLAGS "${CMAKE_ASM_NASM_FLAGS} -DUNIX64")
-endif()
 
 if(UNIX)
     if(APPLE)

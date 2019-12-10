@@ -822,9 +822,9 @@ static void ReadInputFrames(
                     read_y4m_frame_delimiter(config);
                 const uint32_t lumaReadSize = inputPaddedWidth * inputPaddedHeight << is16bit;
                 ebInputPtr = inputPtr->luma;
-                if (config->y4m_input == EB_FALSE && config->processedFrameCount == 0 && config->inputFile == stdin) {
-                    /* if not a y4m file and input is read from stdin, 9 bytes were already read when checking
-                       or the YUV4MPEG2 string in the stream, so copy those bytes over */
+                if (config->y4m_input == EB_FALSE && config->processedFrameCount == 0) {
+                    /* if not a y4m file, 9 bytes were already read when checking
+                       the YUV4MPEG2 string in the stream, so copy those bytes over */
                     memcpy(ebInputPtr, config->y4m_buf, YUV4MPEG2_IND_SIZE);
                     headerPtr->nFilledLen += YUV4MPEG2_IND_SIZE;
                     ebInputPtr += YUV4MPEG2_IND_SIZE;

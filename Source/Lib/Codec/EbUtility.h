@@ -15,7 +15,7 @@ extern "C" {
  ****************************/
 
 // CU Stats Helper Functions
-typedef struct CodedUnitStats_s 
+typedef struct CodedUnitStats_s
 {
     EB_U8   depth;
     EB_U8   size;
@@ -31,14 +31,14 @@ typedef struct CodedUnitStats_s
 typedef struct PredictionUnitStats_t
 {
     EB_U8  width;
-    EB_U8  height; 
+    EB_U8  height;
     EB_U8  offsetX;
     EB_U8  offsetY;
 
 } PredictionUnitStats_t;
 
 // TU Stats Helper Functions
-typedef struct TransformUnitStats_s 
+typedef struct TransformUnitStats_s
 {
     EB_U8  depth;
     EB_U8  offsetX;
@@ -58,14 +58,14 @@ extern const TransformUnitStats_t* GetTransformUnitStats(const EB_U32 tuIdx);
 #define TU_SIZE_ADJUST(cuSize, tuDepth) ((cuSize) >> (tuDepth))
 
 extern EB_ERRORTYPE ZOrderIncrement(EB_U32 *xLoc, EB_U32 *yLoc);
-extern void ZOrderIncrementWithLevel(
-    EB_U32 *xLoc,   
-    EB_U32 *yLoc,   
-    EB_U32 *level,  
+extern void EbHevcZOrderIncrementWithLevel(
+    EB_U32 *xLoc,
+    EB_U32 *yLoc,
+    EB_U32 *level,
     EB_U32 *index);
 
 extern EB_U32 Log2f(EB_U32 x);
-extern EB_U64 Log2f64(EB_U64 x);
+extern EB_U64 EbHevcLog2f64(EB_U64 x);
 extern EB_U32 EndianSwap(EB_U32 ui);
 
 /****************************
@@ -151,7 +151,7 @@ extern EB_U32 EndianSwap(EB_U32 ui);
 
 #define TWO_D_INDEX(x, y, stride)   \
     (((y) * (stride)) + (x))
-        
+
 // MAX_CU_COUNT is used to find the total number of partitions for the max partition depth and for
 // each parent partition up to the root partition level (i.e. LCU level).
 
@@ -199,10 +199,10 @@ typedef enum MINI_GOP_INDEX {
 	L3_7_INDEX = 14
 } MINI_GOP_INDEX;
 
-void EbStartTime(EB_U64 *Startseconds, EB_U64 *Startuseconds);
-void EbFinishTime(EB_U64 *Finishseconds, EB_U64 *Finishuseconds);
-void EbComputeOverallElapsedTime(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U64 Finishseconds, EB_U64 Finishuseconds, double *duration);
-void EbComputeOverallElapsedTimeMs(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U64 Finishseconds, EB_U64 Finishuseconds, double *duration);
+void EbHevcStartTime(EB_U64 *Startseconds, EB_U64 *Startuseconds);
+void EbHevcFinishTime(EB_U64 *Finishseconds, EB_U64 *Finishuseconds);
+void EbHevcComputeOverallElapsedTime(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U64 Finishseconds, EB_U64 Finishuseconds, double *duration);
+void EbHevcComputeOverallElapsedTimeMs(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U64 Finishseconds, EB_U64 Finishuseconds, double *duration);
 #ifdef __cplusplus
 }
 #endif

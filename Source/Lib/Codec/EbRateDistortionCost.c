@@ -17,7 +17,7 @@ static const EB_U32 interBiDirBits[8] = { 29856, 36028, 15752, 59703, 8692, 8442
 static const EB_U32 interUniDirBits[2] = { 2742, 136034 };
 static const EB_U32 mvpIndexBits[2] = { 23196, 44891 };
 
-#define WEIGHT_FACTOR_FOR_AURA_CU   4 
+#define WEIGHT_FACTOR_FOR_AURA_CU   4
 
 EB_ERRORTYPE  MergeSkipFullLumaCost(
 	CodingUnit_t                           *cuPtr,
@@ -289,7 +289,7 @@ EB_ERRORTYPE TuCalcCost(
 EB_ERRORTYPE TuCalcCostLuma(
 	EB_U32                   cuSize,
 	ModeDecisionCandidate_t *candidatePtr,                        // input parameter, prediction result Ptr
-	EB_U32                   tuIndex,                             // input parameter, TU index inside the CU 
+	EB_U32                   tuIndex,                             // input parameter, TU index inside the CU
 	EB_U32                   transformSize,
 	EB_U32                   yCountNonZeroCoeffs,                 // input parameter, number of non zero Y quantized coefficients
 	EB_U64                   yTuDistortion[DIST_CALC_TOTAL],      // input parameter, Y distortion for both Normal and Cbf zero modes
@@ -326,13 +326,13 @@ EB_ERRORTYPE TuCalcCostLuma(
 	(void)qp;
 
 	// **Compute distortion
-	// Non Zero Distortion   
-	// *Note - As of Oct 2011, the JCT-VC uses the PSNR forumula 
+	// Non Zero Distortion
+	// *Note - As of Oct 2011, the JCT-VC uses the PSNR forumula
 	//  PSNR = (LUMA_WEIGHT * PSNRy + PSNRu + PSNRv) / (2+LUMA_WEIGHT)
 	yNonZeroCbfDistortion = LUMA_WEIGHT * (yNonZeroCbfDistortion << COST_PRECISION);
 
 	// Zero distortion
-	// *Note - As of Oct 2011, the JCT-VC uses the PSNR forumula 
+	// *Note - As of Oct 2011, the JCT-VC uses the PSNR forumula
 	//  PSNR = (LUMA_WEIGHT * PSNRy + PSNRu + PSNRv) / (2+LUMA_WEIGHT)
 	yZeroCbfDistortion = LUMA_WEIGHT * (yZeroCbfDistortion << COST_PRECISION);
 
@@ -476,7 +476,7 @@ struct ModeDecisionCandidateBuffer_s       *candidateBufferPtr,
 	candidateBufferPtr->residualLumaSad = lumaDistortion;
 
 	// include luma only in total distortion
-	
+
 	lumaSad = (LUMA_WEIGHT * lumaDistortion) << COST_PRECISION;
 	chromaSad = (((chromaDistortion * ChromaWeightFactorLd[qp]) + CHROMA_WEIGHT_OFFSET) >> CHROMA_WEIGHT_SHIFT); // Low delay and Random access have the same value of chroma weight
 	totalDistortion = lumaSad + chromaSad;
@@ -603,7 +603,7 @@ EB_ERRORTYPE Intra2Nx2NFastCostPsliceOpt(
 
 	// Estimate Chroma Mode Bits
 	chromaRate = 12368; // mdRateEstimationPtr->intraChromaBits[chromaMode];
-	// Estimate Partition Size Bits 
+	// Estimate Partition Size Bits
     lumaRate = contextPtr->cuStats->depth == 3 ? 31523 : ZERO_COST;
 
 	// Estimate Pred Mode Bits
@@ -935,7 +935,7 @@ EB_ERRORTYPE IntraFullCostPslice(
     *candidateBufferPtr->fullCostPtr = distortion + (((lambda * coeffRate + lambda * lumaRate + lambdaChroma * chromaRate) + MD_OFFSET) >> MD_SHIFT);
 
 	candidateBufferPtr->fullLambdaRate = *candidateBufferPtr->fullCostPtr - distortion;
-   
+
     (void)lcuPtr;
 
     coeffRate = (*yCoeffBits) << 15;
@@ -1222,7 +1222,7 @@ EB_ERRORTYPE InterFastCostPsliceOpt(
 		mvRefX = candidatePtr->motionVector_x_L0;
 		mvRefY = candidatePtr->motionVector_y_L0;
 
-			
+
 
 		EB_S32 mvdX = EB_ABS_DIFF(predRefX, mvRefX);
 		EB_S32 mvdY = EB_ABS_DIFF(predRefY, mvRefY);
@@ -1233,8 +1233,8 @@ EB_ERRORTYPE InterFastCostPsliceOpt(
 		lumaRate += mvBitTable[mvdX][mvdY];
 		lumaRate += mvpIndexBits[amvpIdx];
 
-	
-		
+
+
 		// *Note- store the fast rate to avoid the recomputation of the rate of each syntax element
 		// the full cost module
 		candidatePtr->fastLumaRate = lumaRate;
@@ -1309,7 +1309,7 @@ EB_ERRORTYPE InterFastCostBsliceOpt(
 	EB_ERRORTYPE  return_error = EB_ErrorNone;
 	ModeDecisionCandidate_t *candidatePtr = candidateBufferPtr->candidatePtr;
     // Luma rate
-    EB_U64           lumaRate;   
+    EB_U64           lumaRate;
 	EB_U64           distortion;                                        // Luma and chroma distortion
 	EB_U64           lumaSad, chromaSad;
 	if (candidatePtr->mergeFlag == EB_TRUE){
@@ -1358,13 +1358,13 @@ EB_ERRORTYPE InterFastCostBsliceOpt(
 
 		lumaRate = 86440; // mergeFlagBits + skipFlagBits + predModeBits + interPartSizeBits;
         lumaRate += interBiDirBits[(contextPtr->cuStats->depth << 1) + biPred];
-		
+
 		if (predDirection < 2 && predDirection != BI_PRED) {
-			
+
 			lumaRate += interUniDirBits[predDirection];
 
 			if (predDirection == UNI_PRED_LIST_0){
-				
+
 				amvpIdx = candidatePtr->motionVectorPredIdx[REF_LIST_0];
 				predRefX = candidatePtr->motionVectorPred_x[REF_LIST_0];
 				predRefY = candidatePtr->motionVectorPred_y[REF_LIST_0];
@@ -1389,10 +1389,10 @@ EB_ERRORTYPE InterFastCostBsliceOpt(
 			mvdY = mvdY > 499 ? 499 : mvdY;
 			lumaRate += mvBitTable[mvdX][mvdY];
 			lumaRate += mvpIndexBits[amvpIdx];
-			
+
 		}
 		else{
-			
+
 			// LIST 0 Rate Estimation
 			amvpIdx = candidatePtr->motionVectorPredIdx[REF_LIST_0];
 			predRefX = candidatePtr->motionVectorPred_x[REF_LIST_0];
@@ -1422,7 +1422,7 @@ EB_ERRORTYPE InterFastCostBsliceOpt(
 			lumaRate += mvBitTable[mvdX][mvdY];
 			lumaRate += mvpIndexBits[amvpIdx];
 
-			
+
 		}
 
 		// *Note- store the fast rate to avoid the recomputation of the rate of each syntax element
@@ -1508,7 +1508,7 @@ EB_ERRORTYPE EstimateTuFlags(
 		tuPtr->splitFlag = EB_TRUE;
 		tuPtr->cbCbf = EB_FALSE;
 		tuPtr->crCbf = EB_FALSE;
-		tuPtr->chromaCbfContext = 0; //at TU level 
+		tuPtr->chromaCbfContext = 0; //at TU level
 	}
 	else {
 		tuTotalCount = 1;
@@ -1529,7 +1529,7 @@ EB_ERRORTYPE EstimateTuFlags(
 		tuPtr->lumaCbf = (EB_BOOL)(((candidatePtr->yCbf)  & (1 << tuIndex))   > 0);
 		tuPtr->cbCbf = (EB_BOOL)(((candidatePtr->cbCbf) & (1 << (tuIndex))) > 0);
 		tuPtr->crCbf = (EB_BOOL)(((candidatePtr->crCbf) & (1 << (tuIndex))) > 0);
-		tuPtr->chromaCbfContext = (tuIndex == 0) ? 0 : (cuSizeLog2 - Log2f(tuSize)); //at TU level 
+		tuPtr->chromaCbfContext = (tuIndex == 0) ? 0 : (cuSizeLog2 - Log2f(tuSize)); //at TU level
 		tuPtr->lumaCbfContext = (cuSizeLog2 - Log2f(tuSize)) == 0 ? 1 : 0;
 
 		if (tuPtr->cbCbf){
@@ -1554,7 +1554,7 @@ EB_ERRORTYPE EstimateTuFlags(
 	subDivContext = 5 - Log2f(tuSize);
 
 	if (cuSize != 64) {
-		// Encode split flag 
+		// Encode split flag
 		*tranSubDivFlagBitsNum +=
 			candidateBufferPtr->candidatePtr->mdRateEstimationPtr->transSubDivFlagBits[(EB_U32)(tuPtr->splitFlag) * (NUMBER_OF_TRANSFORM_SUBDIV_FLAG_CASES >> 1) + subDivContext];
 	}
@@ -1572,7 +1572,7 @@ EB_ERRORTYPE EstimateTuFlags(
 
 			if (GetCodedUnitStats(cuPtr->leafIndex)->size != 8) {
 				subDivContext = 5 - Log2f(tuSize);
-				// Encode split flag 
+				// Encode split flag
 				*tranSubDivFlagBitsNum +=
 					candidateBufferPtr->candidatePtr->mdRateEstimationPtr->transSubDivFlagBits[(EB_U32)(tuPtr->splitFlag) * (NUMBER_OF_TRANSFORM_SUBDIV_FLAG_CASES >> 1) + subDivContext];
 			}
@@ -1580,13 +1580,13 @@ EB_ERRORTYPE EstimateTuFlags(
 			if (tuPtr->splitFlag) {
 				cbfContext = tuPtr->chromaCbfContext;
 				if ((cuPtr->transformUnitArray[0].cbCbf) != 0){
-					// Cb CBF  
+					// Cb CBF
 					*cbfChromaFlagBitsNum +=
 						candidateBufferPtr->candidatePtr->mdRateEstimationPtr->chromaCbfBits[(tuPtr->cbCbf > 0) * (NUMBER_OF_CBF_CASES >> 1) + cbfContext];
 				}
 
 				if ((cuPtr->transformUnitArray[0].crCbf) != 0){
-					// Cr CBF  
+					// Cr CBF
 					*cbfChromaFlagBitsNum +=
 						candidateBufferPtr->candidatePtr->mdRateEstimationPtr->chromaCbfBits[(tuPtr->crCbf > 0) * (NUMBER_OF_CBF_CASES >> 1) + cbfContext];
 
@@ -1599,13 +1599,13 @@ EB_ERRORTYPE EstimateTuFlags(
                 tuPtr = (tuIndexDepth2 < TRANSFORM_UNIT_MAX_COUNT) ? &cuPtr->transformUnitArray[tuIndexDepth2] : tuPtr;
 				cbfContext = tuPtr->chromaCbfContext;
 
-				// Cb CBF  
+				// Cb CBF
 				if ((cuPtr->transformUnitArray[tuIndex].cbCbf) && (tuSize != 8)){
 					*cbfChromaFlagBitsNum +=
 						candidateBufferPtr->candidatePtr->mdRateEstimationPtr->chromaCbfBits[(tuPtr->cbCbf > 0) * (NUMBER_OF_CBF_CASES >> 1) + cbfContext];
 				}
 
-				// Cr CBF  
+				// Cr CBF
 				if ((cuPtr->transformUnitArray[tuIndex].crCbf) && (tuSize != 8)){
 					*cbfChromaFlagBitsNum +=
 						candidateBufferPtr->candidatePtr->mdRateEstimationPtr->chromaCbfBits[(tuPtr->crCbf > 0) * (NUMBER_OF_CBF_CASES >> 1) + cbfContext];
@@ -1619,13 +1619,13 @@ EB_ERRORTYPE EstimateTuFlags(
 				tuIndexDepth2++;
                 tuPtr = (tuIndexDepth2 < TRANSFORM_UNIT_MAX_COUNT) ? &cuPtr->transformUnitArray[tuIndexDepth2] : tuPtr;
 				cbfContext = tuPtr->chromaCbfContext;
-				// Cb CBF  
+				// Cb CBF
 				if ((cuPtr->transformUnitArray[tuIndex].cbCbf) && (tuSize != 8)){
 					*cbfChromaFlagBitsNum +=
 						candidateBufferPtr->candidatePtr->mdRateEstimationPtr->chromaCbfBits[(tuPtr->cbCbf > 0) * (NUMBER_OF_CBF_CASES >> 1) + cbfContext];
 				}
 
-				// Cr CBF  
+				// Cr CBF
 				if ((cuPtr->transformUnitArray[tuIndex].crCbf) && (tuSize != 8)){
 					*cbfChromaFlagBitsNum +=
 						candidateBufferPtr->candidatePtr->mdRateEstimationPtr->chromaCbfBits[(tuPtr->crCbf > 0) * (NUMBER_OF_CBF_CASES >> 1) + cbfContext];
@@ -1641,13 +1641,13 @@ EB_ERRORTYPE EstimateTuFlags(
                 tuPtr = (tuIndexDepth2 < TRANSFORM_UNIT_MAX_COUNT) ? &cuPtr->transformUnitArray[tuIndexDepth2] : tuPtr;
 				cbfContext = tuPtr->chromaCbfContext;
 
-				// Cb CBF  
+				// Cb CBF
 				if ((cuPtr->transformUnitArray[tuIndex].cbCbf) && (tuSize != 8)){
 					*cbfChromaFlagBitsNum +=
 						candidateBufferPtr->candidatePtr->mdRateEstimationPtr->chromaCbfBits[(tuPtr->cbCbf > 0) * (NUMBER_OF_CBF_CASES >> 1) + cbfContext];
 				}
 
-				// Cr CBF  
+				// Cr CBF
 				if ((cuPtr->transformUnitArray[tuIndex].crCbf) && (tuSize != 8)){
 					*cbfChromaFlagBitsNum +=
 						candidateBufferPtr->candidatePtr->mdRateEstimationPtr->chromaCbfBits[(tuPtr->crCbf > 0) * (NUMBER_OF_CBF_CASES >> 1) + cbfContext];
@@ -1664,13 +1664,13 @@ EB_ERRORTYPE EstimateTuFlags(
                 tuPtr = (tuIndexDepth2 < TRANSFORM_UNIT_MAX_COUNT) ? &cuPtr->transformUnitArray[tuIndexDepth2] : tuPtr;
 				cbfContext = tuPtr->chromaCbfContext;
 
-				// Cb CBF  
+				// Cb CBF
 				if ((cuPtr->transformUnitArray[tuIndex].cbCbf) && (tuSize != 8)){
 					*cbfChromaFlagBitsNum +=
 						candidateBufferPtr->candidatePtr->mdRateEstimationPtr->chromaCbfBits[(tuPtr->cbCbf > 0) * (NUMBER_OF_CBF_CASES >> 1) + cbfContext];
 				}
 
-				// Cr CBF  
+				// Cr CBF
 				if ((cuPtr->transformUnitArray[tuIndex].crCbf) && (tuSize != 8)){
 					*cbfChromaFlagBitsNum +=
 						candidateBufferPtr->candidatePtr->mdRateEstimationPtr->chromaCbfBits[(tuPtr->crCbf > 0) * (NUMBER_OF_CBF_CASES >> 1) + cbfContext];
@@ -1687,13 +1687,13 @@ EB_ERRORTYPE EstimateTuFlags(
 
 				cbfContext = tuPtr->chromaCbfContext;
 
-				// Cb CBF  
+				// Cb CBF
 				if ((cuPtr->transformUnitArray[0].cbCbf) && (tuSize != 8)){
 					*cbfChromaFlagBitsNum +=
 						candidateBufferPtr->candidatePtr->mdRateEstimationPtr->chromaCbfBits[(tuPtr->cbCbf > 0) * (NUMBER_OF_CBF_CASES >> 1) + cbfContext];
 				}
 
-				// Cr CBF  
+				// Cr CBF
 				if ((cuPtr->transformUnitArray[0].crCbf) && (tuSize != 8)){
 					*cbfChromaFlagBitsNum +=
 						candidateBufferPtr->candidatePtr->mdRateEstimationPtr->chromaCbfBits[(tuPtr->crCbf > 0) * (NUMBER_OF_CBF_CASES >> 1) + cbfContext];
@@ -1714,7 +1714,7 @@ EB_ERRORTYPE EstimateTuFlags(
 		*cbfChromaFlagBitsNum +=
 			candidateBufferPtr->candidatePtr->mdRateEstimationPtr->chromaCbfBits[(tuPtr->cbCbf > 0) * (NUMBER_OF_CBF_CASES >> 1) + cbfContext];
 
-		// Cr CBF  
+		// Cr CBF
 		*cbfChromaFlagBitsNum +=
 			candidateBufferPtr->candidatePtr->mdRateEstimationPtr->chromaCbfBits[(tuPtr->crCbf > 0) * (NUMBER_OF_CBF_CASES >> 1) + cbfContext];
 
@@ -2225,7 +2225,7 @@ EB_ERRORTYPE  MergeSkipFullCost(
 				cbfChromaFlagBitsNum += (crCbf > 0) ? candidateBufferPtr->candidatePtr->mdRateEstimationPtr->chromaCbfBits[crCbfBlock * (NUMBER_OF_CBF_CASES >> 1) + chromaCbfCtx] : 0;
 				cbfChromaFlagBitsNum += (cbCbf > 0) ? candidateBufferPtr->candidatePtr->mdRateEstimationPtr->chromaCbfBits[cbCbfBlock * (NUMBER_OF_CBF_CASES >> 1) + chromaCbfCtx] : 0;
 				tuIndex += 1;
-				
+
 			}
 		}
 		else {
@@ -2617,7 +2617,7 @@ EB_ERRORTYPE EncodeTuCalcCost(
 
 	// Luma and chroma transform size shift for the distortion
 
-	
+
 
 
 	// **Compute distortion
@@ -2681,13 +2681,13 @@ EB_ERRORTYPE EncodeTuCalcCost(
 	return return_error;
 }
 
-EB_U64 GetPMCost(
-	EB_U64                   lambda,	
+EB_U64 EbHevcGetPMCost(
+	EB_U64                   lambda,
 	EB_U64                   tuDistortion,
-	EB_U64                   yTuCoeffBits	
+	EB_U64                   yTuCoeffBits
 	)
 {
-	
+
 	EB_U64 yNonZeroCbfDistortion = LUMA_WEIGHT * (tuDistortion << COST_PRECISION);
     EB_U64 yNonZeroCbfRate = (yTuCoeffBits );
 	EB_U64 yNonZeroCbfCost = yNonZeroCbfDistortion + (((lambda       * yNonZeroCbfRate) + MD_OFFSET) >> MD_SHIFT);
@@ -3145,7 +3145,7 @@ EB_ERRORTYPE IntraNxNFastCostIslice(
 	candidateBufferPtr->residualLumaSad = lumaDistortion;
 
 	totalDistortion = (LUMA_WEIGHT * (lumaDistortion + chromaDistortion)) << COST_PRECISION;
-	
+
 	// include luma only in rate calculation
 	rate = ((lambda * (lumaRate + chromaRate)) + MD_OFFSET) >> MD_SHIFT;
 
@@ -3232,7 +3232,7 @@ EB_ERRORTYPE IntraNxNFastCostPslice(
 
 	// include luma only in total distortion
 	totalDistortion = (LUMA_WEIGHT * (lumaDistortion + chromaDistortion)) << COST_PRECISION;
-	
+
 
 	// include luma only in rate calculation
 	rate = ((lambda * (lumaRate + chromaRate)) + MD_OFFSET) >> MD_SHIFT;

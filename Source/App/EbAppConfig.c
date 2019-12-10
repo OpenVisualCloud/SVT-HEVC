@@ -520,7 +520,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->baseLayerSwitchMode                  = 0;
     configPtr->predStructure                        = 2;
     configPtr->intraPeriod                          = -2;
-    configPtr->intraRefreshType                     = 0;
+    configPtr->intraRefreshType                     = -1;
 
     // DLF
     configPtr->disableDlfFlag                       = EB_FALSE;
@@ -1007,8 +1007,8 @@ static EB_ERRORTYPE VerifySettings(EbConfig_t *config, uint32_t channelNumber)
         return_error = EB_ErrorBadParameter;
     }
 
-    if ((config->encoderColorFormat != EB_YUV420 && config->encoderColorFormat != EB_YUV422) && config->compressedTenBitFormat) {
-        fprintf(config->errorLogFile, "SVT [Error]: Instance %u : -compressed-ten-bit-format 1 is only supported for 420 and 422 color formats\n", channelNumber + 1);
+    if ((config->encoderColorFormat != EB_YUV420 && config->encoderColorFormat != EB_YUV422 && config->encoderColorFormat != EB_YUV444) && config->compressedTenBitFormat) {
+        fprintf(config->errorLogFile, "SVT [Error]: Instance %u : -compressed-ten-bit-format 1 is only supported for 420, 422 and 444 color formats\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
