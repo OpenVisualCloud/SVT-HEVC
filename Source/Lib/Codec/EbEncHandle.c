@@ -166,7 +166,7 @@ int CheckXcr0Ymm()
 #endif
     return ((xcr0 & 6) == 6); /* checking if xmm and ymm state are enabled in XCR0 */
 }
-EB_S32 Check4thGenIntelCoreFeatures()
+static EB_S32 Check4thGenIntelCoreFeatures()
 {
     int abcd[4];
 #define ECX_REG_FMA     BIT(12)
@@ -271,7 +271,7 @@ static EB_S32 CanUseIntelAVX512()
 
 // Returns ASM Type based on system configuration. AVX512 - 111, AVX2 - 011, NONAVX2 - 001, C - 000
 // Using bit-fields, the fastest function will always be selected based on the available functions in the function arrays
-EB_U32 GetCpuAsmType()
+EB_U32 EbHevcGetCpuAsmType()
 {
 	EB_U32 asmType = 0;
 
@@ -292,7 +292,7 @@ EB_U32 GetCpuAsmType()
 }
 
 //Get Number of logical processors
-EB_U32 GetNumProcessors() {
+EB_U32 EbHevcGetNumProcessors() {
 #ifdef WIN32
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
@@ -393,7 +393,7 @@ static EB_U32 EncDecPortTotalCount(void)
     return totalCount;
 }
 
-EB_ERRORTYPE InitThreadManagmentParams(){
+EB_ERRORTYPE EbHevcInitThreadManagmentParams(){
 #ifdef _WIN32
     // Initialize groupAffinity structure with Current thread info
     GetThreadGroupAffinity(GetCurrentThread(),&groupAffinity);
@@ -478,7 +478,7 @@ static EB_ERRORTYPE EbEncHandleCtor(
         return EB_ErrorInsufficientResources;
     }
 
-    return_error = InitThreadManagmentParams();
+    return_error = EbHevcInitThreadManagmentParams();
     if (return_error == EB_ErrorInsufficientResources) {
         return EB_ErrorInsufficientResources;
     }
@@ -626,7 +626,7 @@ EB_U64 GetAffinityMask(EB_U32 lpnum) {
 }
 #endif
 
-void SwitchToRealTime()
+void EbHevcSwitchToRealTime()
 {
 #ifndef _WIN32
 
@@ -641,14 +641,14 @@ void SwitchToRealTime()
 #endif
 }
 
-void EbSetThreadManagementParameters(
+void EbHevcSetThreadManagementParameters(
     EB_H265_ENC_CONFIGURATION   *configPtr)
 {
     if (configPtr->switchThreadsToRtPriority == 1)
-        SwitchToRealTime();
+        EbHevcSwitchToRealTime();
 
 #ifdef _WIN32
-    EB_U32 numLogicProcessors = GetNumProcessors();
+    EB_U32 numLogicProcessors = EbHevcGetNumProcessors();
     // For system with a single processor group(no more than 64 logic processors all together)
     // Affinity of the thread can be set to one or more logical processors
     if (numGroups == 1) {
@@ -682,7 +682,7 @@ void EbSetThreadManagementParameters(
         }
     }
 #elif defined(__linux__)
-    EB_U32 numLogicProcessors = GetNumProcessors();
+    EB_U32 numLogicProcessors = EbHevcGetNumProcessors();
     CPU_ZERO(&groupAffinity);
     if (numGroups == 1) {
         EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
@@ -746,7 +746,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     * Plateform detection
     ************************************/
     if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == EB_ASM_AUTO) {
-        ASM_TYPES = GetCpuAsmType(); // Use highest assembly
+        ASM_TYPES = EbHevcGetCpuAsmType(); // Use highest assembly
     }
     else if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.asmType == EB_ASM_C) {
         ASM_TYPES = EB_ASM_C; // Use C_only
@@ -1495,7 +1495,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
      ************************************/
     EB_H265_ENC_CONFIGURATION   *configPtr = &encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig;
 
-    EbSetThreadManagementParameters(configPtr);
+    EbHevcSetThreadManagementParameters(configPtr);
 
     // Resource Coordination
     EB_CREATETHREAD(EB_HANDLE, encHandlePtr->resourceCoordinationThreadHandle, sizeof(EB_HANDLE), EB_THREAD, ResourceCoordinationKernel, encHandlePtr->resourceCoordinationContextPtr);
@@ -1787,7 +1787,7 @@ void LoadDefaultBufferConfigurationSettings(
 
     EB_U32 inputPic = SetParentPcs(&sequenceControlSetPtr->staticConfig);
 
-    unsigned int lpCount = GetNumProcessors();
+    unsigned int lpCount = EbHevcGetNumProcessors();
     unsigned int coreCount = lpCount;
 
     unsigned int totalThreadCount;
@@ -2077,7 +2077,7 @@ EB_ERRORTYPE EbAppVideoUsabilityInfoInit(
 }
 
 // Set configurations for the hardcoded parameters
-void SetDefaultConfigurationParameters(
+void EbHevcSetDefaultConfigurationParameters(
     SequenceControlSet_t       *sequenceControlSetPtr)
 {
 
@@ -2114,7 +2114,7 @@ EB_U32 ComputeDefaultLookAhead(
     return lad;
 }
 
-void SetParamBasedOnInput(
+void EbHevcSetParamBasedOnInput(
     SequenceControlSet_t       *sequenceControlSetPtr)
 
 {
@@ -2191,7 +2191,7 @@ void SetParamBasedOnInput(
 
 }
 
-void CopyApiFromApp(
+void EbHevcCopyApiFromApp(
     SequenceControlSet_t       *sequenceControlSetPtr,
     EB_H265_ENC_CONFIGURATION* pComponentParameterStructure
 )
@@ -3109,10 +3109,10 @@ EB_API EB_ERRORTYPE EbH265EncSetParameter(
     // Acquire Config Mutex
     EbBlockOnMutex(pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->configMutex);
 
-    SetDefaultConfigurationParameters(
+    EbHevcSetDefaultConfigurationParameters(
         pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr);
 
-    CopyApiFromApp(
+    EbHevcCopyApiFromApp(
         pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr,
         (EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure);
 
@@ -3123,7 +3123,7 @@ EB_API EB_ERRORTYPE EbH265EncSetParameter(
         return EB_ErrorBadParameter;
     }
 
-    SetParamBasedOnInput(
+    EbHevcSetParamBasedOnInput(
         pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr);
 
     // Initialize the Prediction Structure Group

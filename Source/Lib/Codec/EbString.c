@@ -50,7 +50,7 @@
 static constraint_handler_t str_handler = NULL;
 
 void
-eb_hevc_invoke_safe_str_constraint_handler(const char *msg,
+EbHevcInvoke_safe_str_constraint_handler(const char *msg,
 void *ptr,
 errno_t error)
 {
@@ -60,7 +60,7 @@ errno_t error)
         sl_default_handler(msg, ptr, error);
 }
 
-void eb_hevc_ignore_handler_s(const char *msg, void *ptr, errno_t error)
+void EbHevcIgnore_handler_s(const char *msg, void *ptr, errno_t error)
 {
     (void)msg;
     (void)ptr;
@@ -71,26 +71,26 @@ void eb_hevc_ignore_handler_s(const char *msg, void *ptr, errno_t error)
 }
 
 errno_t
-eb_hevc_strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t slen)
+EbHevcStrncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t slen)
 {
     rsize_t orig_dmax;
     char *orig_dest;
     const char *overlap_bumper;
 
     if (dest == NULL) {
-        eb_hevc_invoke_safe_str_constraint_handler("strncpy_ss: dest is null",
+        EbHevcInvoke_safe_str_constraint_handler("strncpy_ss: dest is null",
             NULL, ESNULLP);
         return RCNEGATE(ESNULLP);
     }
 
     if (dmax == 0) {
-        eb_hevc_invoke_safe_str_constraint_handler("strncpy_ss: dmax is 0",
+        EbHevcInvoke_safe_str_constraint_handler("strncpy_ss: dmax is 0",
             NULL, ESZEROL);
         return RCNEGATE(ESZEROL);
     }
 
     if (dmax > RSIZE_MAX_STR) {
-        eb_hevc_invoke_safe_str_constraint_handler("strncpy_ss: dmax exceeds max",
+        EbHevcInvoke_safe_str_constraint_handler("strncpy_ss: dmax exceeds max",
             NULL, ESLEMAX);
         return RCNEGATE(ESLEMAX);
     }
@@ -100,21 +100,21 @@ eb_hevc_strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t slen)
     orig_dest = dest;
 
     if (src == NULL) {
-        eb_hevc_handle_error(orig_dest, orig_dmax, (char*) ("strncpy_ss: "
+        EbHevcHandle_error(orig_dest, orig_dmax, (char*) ("strncpy_ss: "
             "src is null"),
             ESNULLP);
         return RCNEGATE(ESNULLP);
     }
 
     if (slen == 0) {
-        eb_hevc_handle_error(orig_dest, orig_dmax, (char*)("strncpy_ss: "
+        EbHevcHandle_error(orig_dest, orig_dmax, (char*)("strncpy_ss: "
             "slen is zero"),
             ESZEROL);
         return RCNEGATE(ESZEROL);
     }
 
     if (slen > RSIZE_MAX_STR) {
-        eb_hevc_handle_error(orig_dest, orig_dmax, (char*)("strncpy_ss: "
+        EbHevcHandle_error(orig_dest, orig_dmax, (char*)("strncpy_ss: "
             "slen exceeds max"),
             ESLEMAX);
         return RCNEGATE(ESLEMAX);
@@ -125,7 +125,7 @@ eb_hevc_strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t slen)
 
         while (dmax > 0) {
             if (dest == overlap_bumper) {
-                eb_hevc_handle_error(orig_dest, orig_dmax, (char*)("strncpy_ss: "
+                EbHevcHandle_error(orig_dest, orig_dmax, (char*)("strncpy_ss: "
                     "overlapping objects"),
                     ESOVRLP);
                 return RCNEGATE(ESOVRLP);
@@ -154,7 +154,7 @@ eb_hevc_strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t slen)
 
         while (dmax > 0) {
             if (src == overlap_bumper) {
-                eb_hevc_handle_error(orig_dest, orig_dmax, (char*)( "strncpy_s: "
+                EbHevcHandle_error(orig_dest, orig_dmax, (char*)( "strncpy_s: "
                     "overlapping objects"),
                     ESOVRLP);
                 return RCNEGATE(ESOVRLP);
@@ -182,40 +182,40 @@ eb_hevc_strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t slen)
     /*
     * the entire src was not copied, so zero the string
     */
-    eb_hevc_handle_error(orig_dest, orig_dmax, (char*)("strncpy_ss: not enough "
+    EbHevcHandle_error(orig_dest, orig_dmax, (char*)("strncpy_ss: not enough "
         "space for src"),
         ESNOSPC);
     return RCNEGATE(ESNOSPC);
 }
 
 errno_t
-eb_hevc_strcpy_ss(char *dest, rsize_t dmax, const char *src)
+EbHevcStrcpy_ss(char *dest, rsize_t dmax, const char *src)
 {
     rsize_t orig_dmax;
     char *orig_dest;
     const char *overlap_bumper;
 
     if (dest == NULL) {
-        eb_hevc_invoke_safe_str_constraint_handler((char*)("strcpy_ss: dest is null"),
+        EbHevcInvoke_safe_str_constraint_handler((char*)("strcpy_ss: dest is null"),
             NULL, ESNULLP);
         return RCNEGATE(ESNULLP);
     }
 
     if (dmax == 0) {
-        eb_hevc_invoke_safe_str_constraint_handler((char*)("strcpy_ss: dmax is 0"),
+        EbHevcInvoke_safe_str_constraint_handler((char*)("strcpy_ss: dmax is 0"),
             NULL, ESZEROL);
         return RCNEGATE(ESZEROL);
     }
 
     if (dmax > RSIZE_MAX_STR) {
-        eb_hevc_invoke_safe_str_constraint_handler((char*)("strcpy_ss: dmax exceeds max"),
+        EbHevcInvoke_safe_str_constraint_handler((char*)("strcpy_ss: dmax exceeds max"),
             NULL, ESLEMAX);
         return RCNEGATE(ESLEMAX);
     }
 
     if (src == NULL) {
         *dest = '\0';
-        eb_hevc_invoke_safe_str_constraint_handler((char*)("strcpy_ss: src is null"),
+        EbHevcInvoke_safe_str_constraint_handler((char*)("strcpy_ss: src is null"),
             NULL, ESNULLP);
         return RCNEGATE(ESNULLP);
     }
@@ -231,7 +231,7 @@ eb_hevc_strcpy_ss(char *dest, rsize_t dmax, const char *src)
 
         while (dmax > 0) {
             if (dest == overlap_bumper) {
-                eb_hevc_handle_error(orig_dest, orig_dmax, (char*)("strcpy_ss: "
+                EbHevcHandle_error(orig_dest, orig_dmax, (char*)("strcpy_ss: "
                     "overlapping objects"),
                     ESOVRLP);
                 return RCNEGATE(ESOVRLP);
@@ -250,7 +250,7 @@ eb_hevc_strcpy_ss(char *dest, rsize_t dmax, const char *src)
 
         while (dmax > 0) {
             if (src == overlap_bumper) {
-                eb_hevc_handle_error(orig_dest, orig_dmax, (char*)("strcpy_ss: "
+                EbHevcHandle_error(orig_dest, orig_dmax, (char*)("strcpy_ss: "
                     "overlapping objects"),
                     ESOVRLP);
                 return RCNEGATE(ESOVRLP);
@@ -269,27 +269,27 @@ eb_hevc_strcpy_ss(char *dest, rsize_t dmax, const char *src)
     * the entire src must have been copied, if not reset dest
     * to null the string.
     */
-    eb_hevc_handle_error(orig_dest, orig_dmax, (char*)("strcpy_ss: not "
+    EbHevcHandle_error(orig_dest, orig_dmax, (char*)("strcpy_ss: not "
         "enough space for src"),
         ESNOSPC);
     return RCNEGATE(ESNOSPC);
 }
 
 rsize_t
-eb_hevc_strnlen_ss(const char *dest, rsize_t dmax)
+EbHevcStrnlen_ss(const char *dest, rsize_t dmax)
 {
     rsize_t count;
 
     if (dest == NULL)
         return RCNEGATE(0);
     if (dmax == 0) {
-        eb_hevc_invoke_safe_str_constraint_handler((char*)("strnlen_ss: dmax is 0"),
+        EbHevcInvoke_safe_str_constraint_handler((char*)("strnlen_ss: dmax is 0"),
             NULL, ESZEROL);
         return RCNEGATE(0);
     }
 
     if (dmax > RSIZE_MAX_STR) {
-        eb_hevc_invoke_safe_str_constraint_handler((char*)("strnlen_ss: dmax exceeds max"),
+        EbHevcInvoke_safe_str_constraint_handler((char*)("strnlen_ss: dmax exceeds max"),
             NULL, ESLEMAX);
         return RCNEGATE(0);
     }

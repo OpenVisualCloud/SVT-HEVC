@@ -62,7 +62,7 @@ EB_ERRORTYPE ZOrderIncrement(
  *   the true CU size, multiple the xLoc, yLoc
  *   by the smallest CU size.
  *****************************************/
-void ZOrderIncrementWithLevel(
+void EbHevcZOrderIncrementWithLevel(
     EB_U32 *xLoc,   // x location, units of smallest block size
     EB_U32 *yLoc,   // y location, units of smallest block size
     EB_U32 *level,  // level, number of block size-steps from the smallest block size
@@ -304,7 +304,7 @@ const TransformUnitStats_t* GetTransformUnitStats(const EB_U32 tuIdx)
  *  Leading Zeros (NLZ) algorithm to get
  *  the log2f of a 64-bit number
  *****************************************/
-inline EB_U64 Log2f64(EB_U64 x)
+inline EB_U64 EbHevcLog2f64(EB_U64 x)
 {
     EB_U64 y;
     EB_S64 n = 64, c = 32;
@@ -340,7 +340,7 @@ EB_U32 EndianSwap(EB_U32 ui)
 EB_U64 Log2fHighPrecision(EB_U64 x, EB_U8 precision)
 {
 
-    EB_U64 sigBitLocation = Log2f64(x);
+    EB_U64 sigBitLocation = EbHevcLog2f64(x);
     EB_U64 Remainder = x - ((EB_U64)1 << (EB_U8) sigBitLocation);
     EB_U64 result;
 
@@ -377,7 +377,7 @@ const MiniGopStats_t* GetMiniGopStats(const EB_U32 miniGopIndex) {
     return &MiniGopStatsArray[miniGopIndex];
 }
 
-void EbStartTime(EB_U64 *Startseconds, EB_U64 *Startuseconds)
+void EbHevcStartTime(EB_U64 *Startseconds, EB_U64 *Startuseconds)
 {
 #ifdef _WIN32
     *Startseconds = (unsigned long long)clock();
@@ -390,7 +390,7 @@ void EbStartTime(EB_U64 *Startseconds, EB_U64 *Startuseconds)
 #endif
 }
 
-void EbFinishTime(EB_U64 *Finishseconds, EB_U64 *Finishuseconds)
+void EbHevcFinishTime(EB_U64 *Finishseconds, EB_U64 *Finishuseconds)
 {
 #ifdef _WIN32
     *Finishseconds = (unsigned long long)clock();
@@ -403,7 +403,7 @@ void EbFinishTime(EB_U64 *Finishseconds, EB_U64 *Finishuseconds)
 #endif
 }
 
-void EbComputeOverallElapsedTime(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U64 Finishseconds, EB_U64 Finishuseconds, double *duration)
+void EbHevcComputeOverallElapsedTime(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U64 Finishseconds, EB_U64 Finishuseconds, double *duration)
 {
 #ifdef _WIN32
     //double  duration;
@@ -421,7 +421,7 @@ void EbComputeOverallElapsedTime(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U
 #endif
 }
 
-void EbComputeOverallElapsedTimeMs(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U64 Finishseconds, EB_U64 Finishuseconds, double *duration)
+void EbHevcComputeOverallElapsedTimeMs(EB_U64 Startseconds, EB_U64 Startuseconds, EB_U64 Finishseconds, EB_U64 Finishuseconds, double *duration)
 {
 #ifdef _WIN32
     //double  duration;

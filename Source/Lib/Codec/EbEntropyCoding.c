@@ -16,7 +16,7 @@
 #include "EbErrorCodes.h"
 #include "EbErrorHandling.h"
 
-// SSE2 Intrinsics 
+// SSE2 Intrinsics
 #include "emmintrin.h"
 
 /*****************************
@@ -32,8 +32,8 @@
 enum COEFF_SCAN_TYPE
 {
 	SCAN_ZIGZAG = 0,      // zigzag scan
-	SCAN_HOR,             // first scan is horizontal 
-	SCAN_VER,             // first scan is vertical 
+	SCAN_HOR,             // first scan is horizontal
+	SCAN_VER,             // first scan is vertical
 	SCAN_DIAG             // up-right diagonal scan
 };
 
@@ -41,7 +41,7 @@ enum COEFF_SCAN_TYPE
 /*****************************
 * Static consts
 *****************************/
-//LUT used for LPSxRange calculation 
+//LUT used for LPSxRange calculation
 
 static EB_U64 maxLumaPictureSize[TOTAL_LEVEL_COUNT] =
 { 36864U, 122880U, 245760U, 552960U, 983040U, 2228224U, 2228224U, 8912896U, 8912896U, 8912896U, 35651584U, 35651584U, 35651584U };
@@ -97,7 +97,7 @@ static void BacEncContextFinish(BacEncContext_t *bacEncContextPtr)
 /************************************************
 * CABAC Encoder Constructor
 ************************************************/
-void CabacCtor(
+void EbHevcCabacCtor(
 	CabacEncodeContext_t *cabacEncContextPtr)
 {
 	EB_MEMSET(cabacEncContextPtr, 0, sizeof(CabacEncodeContext_t));
@@ -522,7 +522,7 @@ static void EncodeIntraLumaModeFirstStage(
 		lumaPredictionArray[1] = topNeighborMode;
 
 		if (leftNeighborMode && topNeighborMode) {
-			lumaPredictionArray[2] = EB_INTRA_PLANAR; // when both modes are non planar 
+			lumaPredictionArray[2] = EB_INTRA_PLANAR; // when both modes are non planar
 		}
 		else {
 			lumaPredictionArray[2] = (leftNeighborMode + topNeighborMode) < 2 ? EB_INTRA_VERTICAL : EB_INTRA_DC;
@@ -587,7 +587,7 @@ static void EncodeIntraLumaModeSecondStage(
 		lumaPredictionArray[1] = topNeighborMode;
 
 		if (leftNeighborMode && topNeighborMode) {
-			lumaPredictionArray[2] = EB_INTRA_PLANAR; // when both modes are non planar 
+			lumaPredictionArray[2] = EB_INTRA_PLANAR; // when both modes are non planar
 		}
 		else {
 			lumaPredictionArray[2] = (leftNeighborMode + topNeighborMode) < 2 ? EB_INTRA_VERTICAL : EB_INTRA_DC;
@@ -1016,7 +1016,7 @@ EB_ERRORTYPE EncodeSaoOffsets(
 	EB_U32                  *saoType,
 	EB_S32                  *offset,
     EB_U32                   bandPosition,
-	
+
 	EB_U8                    bitdepth)
 {
 	EB_ERRORTYPE return_error = EB_ErrorNone;
@@ -1249,7 +1249,7 @@ void EncodeQuantizedCoefficients_generic(
 	EB_S32 numCoeffWithCodedGt1Flag; // Number of coefficients for which >1 flag is coded
 
 
-	 EB_U32      numNonZeroCoeffs = tuPtr->nzCoefCount[ (componentType == COMPONENT_LUMA)      ? 0 : 
+	 EB_U32      numNonZeroCoeffs = tuPtr->nzCoefCount[ (componentType == COMPONENT_LUMA)      ? 0 :
                                                         (componentType == COMPONENT_CHROMA_CB) ? 1 : 2
                                                       ];
                  numNonZeroCoeffs = (componentType == COMPONENT_CHROMA_CB2) ? tuPtr->nzCoefCount2[0] :
@@ -1359,7 +1359,7 @@ void EncodeQuantizedCoefficients_generic(
 	if (type == INTRA_MODE)
 	{
 		// The test on partition size should be commented out to get conformance for Intra 4x4 !
-		// if (partitionSize == SIZE_2Nx2N) To do - update asm 
+		// if (partitionSize == SIZE_2Nx2N) To do - update asm
 		{
 			// note that for Intra 2Nx2N, each CU is one PU. So this mode is the same as
 			// the mode of upper-left corner of current CU
@@ -1900,14 +1900,14 @@ void EncodeQuantizedCoefficients_SSE2(
 
         EB_BOOL isCGin;
 
-        if(isChroma==EB_FALSE){        
+        if(isChroma==EB_FALSE){
             isCGin  =  ((EB_U32)coeffGroupPositionY < (size >>(tuPtr->transCoeffShapeLuma+2))) && ((EB_U32)coeffGroupPositionX < (size >>(tuPtr->transCoeffShapeLuma+2)));
         }else{
             isCGin  =  ((EB_U32)coeffGroupPositionY < (size >>(transCoeffShapeChroma+2))) && ((EB_U32)coeffGroupPositionX < (size >>(transCoeffShapeChroma+2)));
         }
- 
+
         if(isCGin == EB_FALSE){
-        
+
             a0 = _mm_setzero_si128();
 		    a1 = _mm_setzero_si128();
 		    a2 = _mm_setzero_si128();
@@ -2913,7 +2913,7 @@ EB_ERRORTYPE EstimateQuantizedCoefficients_SSE2(
 					// Loop over coefficients until base value of Exp-Golomb coding changes
 					// Base value changes after either
 					// - 8th coefficient
-					// - a coefficient larger than 1                
+					// - a coefficient larger than 1
 
 					for (index = 0; index < numCoeffWithCodedGt1Flag; index++)
 					{
@@ -3972,7 +3972,7 @@ EB_ERRORTYPE EstimateQuantizedCoefficients_generic(
 *   pointer to the CABAC structure passed as input
 *
 *********************************************************************/
-// The functionality of coding delta Qp is implemented for HM 7.0 and needs to be updated for HM 8.0 
+// The functionality of coding delta Qp is implemented for HM 7.0 and needs to be updated for HM 8.0
 EB_ERRORTYPE EncodeDeltaQp(
 	CabacEncodeContext_t   *cabacEncodeCtxPtr,
 	EB_S32                  deltaQp)
@@ -4245,7 +4245,7 @@ static EB_ERRORTYPE EncodeTuCoeff(
 	subDivContext = 5 - Log2f(tuSize);
 
 	if (GetCodedUnitStats(cuPtr->leafIndex)->size != 64) {
-		// Encode split flag 
+		// Encode split flag
 		EncodeOneBin(
 			&(cabacEncodeCtxPtr->bacEncContext),
 			tuPtr->splitFlag,
@@ -4255,13 +4255,13 @@ static EB_ERRORTYPE EncodeTuCoeff(
 	if (tuPtr->splitFlag) {
         // Jing: only comes here for inter 64x64
 
-		// Cb CBF  
+		// Cb CBF
 		EncodeOneBin(
 			&(cabacEncodeCtxPtr->bacEncContext),
 			(tuPtr->cbCbf | tuPtr->cbCbf2),
 			&(cabacEncodeCtxPtr->contextModelEncContext.cbfContextModel[cbfContext + NUMBER_OF_CBF_CONTEXT_MODELS]));
 
-		// Cr CBF  
+		// Cr CBF
 		EncodeOneBin(
 			&(cabacEncodeCtxPtr->bacEncContext),
 			(tuPtr->crCbf | tuPtr->crCbf2),
@@ -4278,7 +4278,7 @@ static EB_ERRORTYPE EncodeTuCoeff(
 
 			if (GetCodedUnitStats(cuPtr->leafIndex)->size != 8) {
 				subDivContext = 5 - Log2f(tuSize);
-				// Encode split flag 
+				// Encode split flag
 				EncodeOneBin(
 					&(cabacEncodeCtxPtr->bacEncContext),
 					tuPtr->splitFlag,
@@ -4290,7 +4290,7 @@ static EB_ERRORTYPE EncodeTuCoeff(
 				cbfContext = tuPtr->chromaCbfContext;
 
 				if (cuPtr->transformUnitArray[0].cbCbf | cuPtr->transformUnitArray[0].cbCbf2) {
-					// Cb CBF  
+					// Cb CBF
 					EncodeOneBin(
 						&(cabacEncodeCtxPtr->bacEncContext),
 						tuPtr->cbCbf,
@@ -4298,7 +4298,7 @@ static EB_ERRORTYPE EncodeTuCoeff(
 				}
 
 				if (cuPtr->transformUnitArray[0].crCbf |  cuPtr->transformUnitArray[0].crCbf2){
-					// Cr CBF  
+					// Cr CBF
 					EncodeOneBin(
 						&(cabacEncodeCtxPtr->bacEncContext),
 						tuPtr->crCbf,
@@ -4317,7 +4317,7 @@ static EB_ERRORTYPE EncodeTuCoeff(
 				tuOriginX = TU_ORIGIN_ADJUST(cuStatsPtr->originX, cuStatsPtr->size, tuStatsPtr->offsetX);
 				tuOriginY = TU_ORIGIN_ADJUST(cuStatsPtr->originY, cuStatsPtr->size, tuStatsPtr->offsetY);
 
-				// Cb CBF  
+				// Cb CBF
 				if ((cuPtr->transformUnitArray[tuIndex].cbCbf) && (tuSize != 8)){
 					EncodeOneBin(
 						&(cabacEncodeCtxPtr->bacEncContext),
@@ -4325,7 +4325,7 @@ static EB_ERRORTYPE EncodeTuCoeff(
 						&(cabacEncodeCtxPtr->contextModelEncContext.cbfContextModel[cbfContext + NUMBER_OF_CBF_CONTEXT_MODELS]));
 				}
 
-				// Cr CBF  
+				// Cr CBF
 				if ((cuPtr->transformUnitArray[tuIndex].crCbf) && (tuSize != 8)){
 					EncodeOneBin(
 						&(cabacEncodeCtxPtr->bacEncContext),
@@ -4368,7 +4368,7 @@ static EB_ERRORTYPE EncodeTuCoeff(
 				tuOriginX = TU_ORIGIN_ADJUST(cuStatsPtr->originX, cuStatsPtr->size, tuStatsPtr->offsetX);
 				tuOriginY = TU_ORIGIN_ADJUST(cuStatsPtr->originY, cuStatsPtr->size, tuStatsPtr->offsetY);
 
-				// Cb CBF  
+				// Cb CBF
 				if ((cuPtr->transformUnitArray[tuIndex].cbCbf) && (tuSize != 8)){
 					EncodeOneBin(
 						&(cabacEncodeCtxPtr->bacEncContext),
@@ -4376,7 +4376,7 @@ static EB_ERRORTYPE EncodeTuCoeff(
 						&(cabacEncodeCtxPtr->contextModelEncContext.cbfContextModel[cbfContext + NUMBER_OF_CBF_CONTEXT_MODELS]));
 				}
 
-				// Cr CBF  
+				// Cr CBF
 				if ((cuPtr->transformUnitArray[tuIndex].crCbf) && (tuSize != 8)){
 					EncodeOneBin(
 						&(cabacEncodeCtxPtr->bacEncContext),
@@ -4419,7 +4419,7 @@ static EB_ERRORTYPE EncodeTuCoeff(
 				tuOriginX = TU_ORIGIN_ADJUST(cuStatsPtr->originX, cuStatsPtr->size, tuStatsPtr->offsetX);
 				tuOriginY = TU_ORIGIN_ADJUST(cuStatsPtr->originY, cuStatsPtr->size, tuStatsPtr->offsetY);
 
-				// Cb CBF  
+				// Cb CBF
 				if ((cuPtr->transformUnitArray[tuIndex].cbCbf) && (tuSize != 8)){
 					EncodeOneBin(
 						&(cabacEncodeCtxPtr->bacEncContext),
@@ -4427,7 +4427,7 @@ static EB_ERRORTYPE EncodeTuCoeff(
 						&(cabacEncodeCtxPtr->contextModelEncContext.cbfContextModel[cbfContext + NUMBER_OF_CBF_CONTEXT_MODELS]));
 				}
 
-				// Cr CBF  
+				// Cr CBF
 				if ((cuPtr->transformUnitArray[tuIndex].crCbf) && (tuSize != 8)){
 					EncodeOneBin(
 						&(cabacEncodeCtxPtr->bacEncContext),
@@ -4461,7 +4461,7 @@ static EB_ERRORTYPE EncodeTuCoeff(
 
 
 				tuIndexDepth2++;
-				
+
 				tuPtr = (tuIndexDepth2 < TRANSFORM_UNIT_MAX_COUNT) ? &cuPtr->transformUnitArray[tuIndexDepth2] : tuPtr;
 				cbfContext = tuPtr->chromaCbfContext;
 
@@ -4470,7 +4470,7 @@ static EB_ERRORTYPE EncodeTuCoeff(
 				tuOriginX = TU_ORIGIN_ADJUST(cuStatsPtr->originX, cuStatsPtr->size, tuStatsPtr->offsetX);
 				tuOriginY = TU_ORIGIN_ADJUST(cuStatsPtr->originY, cuStatsPtr->size, tuStatsPtr->offsetY);
 
-				// Cb CBF  
+				// Cb CBF
 				if ((cuPtr->transformUnitArray[tuIndex].cbCbf) && (tuSize != 8)) {
 					EncodeOneBin(
 						&(cabacEncodeCtxPtr->bacEncContext),
@@ -4478,7 +4478,7 @@ static EB_ERRORTYPE EncodeTuCoeff(
 						&(cabacEncodeCtxPtr->contextModelEncContext.cbfContextModel[cbfContext + NUMBER_OF_CBF_CONTEXT_MODELS]));
 				}
 
-				// Cr CBF  
+				// Cr CBF
 				if ((cuPtr->transformUnitArray[tuIndex].crCbf) && (tuSize != 8)){
 					EncodeOneBin(
 						&(cabacEncodeCtxPtr->bacEncContext),
@@ -4516,7 +4516,7 @@ static EB_ERRORTYPE EncodeTuCoeff(
 
 				cbfContext = tuPtr->chromaCbfContext;
 
-				// Cb CBF  
+				// Cb CBF
                 if (cuPtr->transformUnitArray[0].cbCbf | cuPtr->transformUnitArray[0].cbCbf2) {
                     EncodeOneBin(
                             &(cabacEncodeCtxPtr->bacEncContext),
@@ -4530,7 +4530,7 @@ static EB_ERRORTYPE EncodeTuCoeff(
                     }
                 }
 
-				// Cr CBF  
+				// Cr CBF
                 if (cuPtr->transformUnitArray[0].crCbf | cuPtr->transformUnitArray[0].crCbf2) {
 					EncodeOneBin(
 						&(cabacEncodeCtxPtr->bacEncContext),
@@ -4591,7 +4591,7 @@ static EB_ERRORTYPE EncodeTuCoeff(
 		    	&(cabacEncodeCtxPtr->contextModelEncContext.cbfContextModel[cbfContext + NUMBER_OF_CBF_CONTEXT_MODELS]));
         }
 
-		// Cr CBF  
+		// Cr CBF
 		EncodeOneBin(
 			&(cabacEncodeCtxPtr->bacEncContext),
 			tuPtr->crCbf,
@@ -4666,8 +4666,8 @@ static EB_ERRORTYPE EncodeTuSplitCoeff(
 	EB_U32 writtenBitsBeforeQuantizedCoeff;
 	EB_U32 writtenBitsAfterQuantizedCoeff;
 
-	//store the number of written bits before coding quantized coeffs (flush is not called yet): 
-	// The total number of bits is 
+	//store the number of written bits before coding quantized coeffs (flush is not called yet):
+	// The total number of bits is
 	// number of written bits
 	// + 32  - bits remaining in interval Low Value
 	// + number of buffered byte * 8
@@ -4695,8 +4695,8 @@ static EB_ERRORTYPE EncodeTuSplitCoeff(
 			isdeltaQpNotCoded);
 	}
 
-	//store the number of written bits after coding quantized coeffs (flush is not called yet): 
-	// The total number of bits is 
+	//store the number of written bits after coding quantized coeffs (flush is not called yet):
+	// The total number of bits is
 	// number of written bits
 	// + 32  - bits remaining in interval Low Value
 	// + number of buffered byte * 8
@@ -4816,7 +4816,7 @@ static void CodeNALUnitHeader(
 	//bsNALUHeader.write(nalu.m_temporalId+1, 3); // nuh_temporal_id_plus1
 
 	WriteCodeCavlc(bitstreamPtr, 0, 1);    // forbidden_zero_bit
-	WriteCodeCavlc(bitstreamPtr, eNalUnitType, 6); // nal_unit_type 
+	WriteCodeCavlc(bitstreamPtr, eNalUnitType, 6); // nal_unit_type
 	WriteCodeCavlc(bitstreamPtr, 0, 6); // nuh_reserved_zero_6bits
 	WriteCodeCavlc(bitstreamPtr, TemporalId + 1, 3); // nuh_temporal_id_plus1
 
@@ -5064,7 +5064,7 @@ EB_ERRORTYPE ComputeProfileTierLevelInfo(
 		else if ((lumaSampleRate <= maxLumaSampleRate[2]) && (lumaPictureSize <= maxLumaPictureSize[2]) && (lumaWidthSquare <= maxLumaPictureSize[2] * 8) && (lumaHeightSquare <= maxLumaPictureSize[2] * 8))
 			scsPtr->levelIdc = 63;//2.1*30
 		else if ((lumaSampleRate <= maxLumaSampleRate[3]) && (lumaPictureSize <= maxLumaPictureSize[3]) && (lumaWidthSquare <= maxLumaPictureSize[3] * 8) && (lumaHeightSquare <= maxLumaPictureSize[3] * 8))
-			scsPtr->levelIdc = 90;//3*30 
+			scsPtr->levelIdc = 90;//3*30
 		else if ((lumaSampleRate <= maxLumaSampleRate[4]) && (lumaPictureSize <= maxLumaPictureSize[4]) && (lumaWidthSquare <= maxLumaPictureSize[4] * 8) && (lumaHeightSquare <= maxLumaPictureSize[4] * 8))
 			scsPtr->levelIdc = 93;//3.1*30
 		else if ((lumaSampleRate <= maxLumaSampleRate[5]) && (lumaPictureSize <= maxLumaPictureSize[5]) && (lumaWidthSquare <= maxLumaPictureSize[5] * 8) && (lumaHeightSquare <= maxLumaPictureSize[5] * 8))
@@ -5119,7 +5119,7 @@ EB_ERRORTYPE ComputeProfileTierLevelInfo(
 		}
 		else if ((lumaSampleRate <= maxLumaSampleRate[3]) && (lumaPictureSize <= maxLumaPictureSize[3]) && (lumaWidthSquare <= maxLumaPictureSize[3] * 8) && (lumaHeightSquare <= maxLumaPictureSize[3] * 8)
 			&& ((scsPtr->staticConfig.targetBitRate * 2) <= highTierMaxBitrate[3]) && ((scsPtr->staticConfig.targetBitRate * 3) <= highTierMaxCPBsize[3])){
-			scsPtr->levelIdc = 90;//3*30 
+			scsPtr->levelIdc = 90;//3*30
 
 			if (((scsPtr->staticConfig.targetBitRate * 2) <= mainTierMaxBitrate[3]) && ((scsPtr->staticConfig.targetBitRate * 3) <= mainTierMaxCPBsize[3]))
 				scsPtr->tierIdc = 0;
@@ -5470,12 +5470,12 @@ static void CodeVPS(
                     32);
         }
 
-        // vps_poc_proportional_to_timing_flag 
+        // vps_poc_proportional_to_timing_flag
         WriteFlagCavlc(
                 bitstreamPtr,
                 0);
 
-        // vps_num_hrd_parameters 
+        // vps_num_hrd_parameters
         WriteUvlc(
                 bitstreamPtr,
                 0);
@@ -5625,7 +5625,7 @@ static void CodeHrdParameters(
 
 				//CHECK_REPORT_ERROR(
 				//    (hrdParamterPtr->cpbCountMinus1[layerIndex] < MAX_CPB_COUNT),
-				//    encodeContextPtr->appCallbackPtr, 
+				//    encodeContextPtr->appCallbackPtr,
 				//    EB_ENC_EC_ERROR14);
 
 				for (cpbIndex = 0; cpbIndex <= hrdParamterPtr->cpbCountMinus1[layerIndex]; ++cpbIndex){
@@ -6008,7 +6008,7 @@ static void CodeSPS(
 	}
 
 
-	// Luma Bit Increment 
+	// Luma Bit Increment
 	// "bit_depth_luma_minus8"
 	WriteUvlc(
 		bitstreamPtr,
@@ -6346,7 +6346,7 @@ static void CodePPS(
 	// "deblocking_filter_control_present_flag"
 	WriteFlagCavlc(
 		bitstreamPtr,
-		1); 
+		1);
 
 	//if(pcPPS->getDeblockingFilterControlPresentFlag())
 	{
@@ -6453,10 +6453,10 @@ static void CodeSliceHeader(
 
 	NalUnitType nalUnit = pcsPtr->ParentPcsPtr->nalUnit;
 
-	// here someone can add an appropriated NalRefIdc type 
+	// here someone can add an appropriated NalRefIdc type
 	//CodeNALUnitHeader (pcSlice->getNalUnitType(), NAL_REF_IDC_PRIORITY_HIGHEST, 1, true);
 
-	// *Note - there seems to be a bug with the temporal layers in the NALU or I don't 
+	// *Note - there seems to be a bug with the temporal layers in the NALU or I don't
 	// understand what the issue is.  Hardcoding to 0 for now...
 
 	// Note - The NAL unit type has to be more sophisticated than this
@@ -6506,7 +6506,7 @@ static void CodeSliceHeader(
 
 	// "slice_type"
 
-	// Slice Type 
+	// Slice Type
 	WriteUvlc(
 		bitstreamPtr,
 		sliceType);
@@ -6886,7 +6886,7 @@ static void EntropyCodingUpdateQp(
 	EB_U8                  *prevCodedQp,
 	EB_U8                  *prevQuantGroupCodedQp,
     EB_U8                   lcuQp,
-	
+
 	PictureControlSet_t     *pictureControlSetPtr,
 	EB_U32                  pictureOriginX,
 	EB_U32                  pictureOriginY)
@@ -7177,8 +7177,8 @@ static EB_ERRORTYPE Intra4x4EncodeCoeff(
     EB_BOOL sum_cbCbf;
     EB_BOOL sum_crCbf;
 
-	//store the number of written bits before coding quantized coeffs (flush is not called yet): 
-	// The total number of bits is 
+	//store the number of written bits before coding quantized coeffs (flush is not called yet):
+	// The total number of bits is
 	// number of written bits
 	// + 32  - bits remaining in interval Low Value
 	// + number of buffered byte * 8
@@ -7216,7 +7216,7 @@ static EB_ERRORTYPE Intra4x4EncodeCoeff(
                 (&cuPtr->transformUnitArray[3])->cbCbf,
                 &(cabacEncodeCtxPtr->contextModelEncContext.cbfContextModel[cbfContext + NUMBER_OF_CBF_CONTEXT_MODELS]));
     }
-	// Cr CBF  
+	// Cr CBF
 	EncodeOneBin(
 		&(cabacEncodeCtxPtr->bacEncContext),
         sum_crCbf,
@@ -7293,7 +7293,7 @@ static EB_ERRORTYPE Intra4x4EncodeCoeff(
 	}
 
     if (cabacEncodeCtxPtr->colorFormat != EB_YUV444) {
-        // Encode Chroma coeff for non-444 case, 
+        // Encode Chroma coeff for non-444 case,
         // Jing TODO: see if can move to above loop
         tuStatsPtr = GetTransformUnitStats(1);
         tuOriginX = TU_ORIGIN_ADJUST(cuStatsPtr->originX, cuStatsPtr->size, tuStatsPtr->offsetX);
@@ -7309,8 +7309,8 @@ static EB_ERRORTYPE Intra4x4EncodeCoeff(
                 coeffPtr);
     }
 
-	//store the number of written bits after coding quantized coeffs (flush is not called yet): 
-	// The total number of bits is 
+	//store the number of written bits after coding quantized coeffs (flush is not called yet):
+	// The total number of bits is
 	// number of written bits
 	// + 32  - bits remaining in interval Low Value
 	// + number of buffered byte * 8
@@ -7390,7 +7390,7 @@ EB_ERRORTYPE EncodeLcu(
             cuOriginY = lcuOriginY + cuStatsPtr->originY;
             cuDepth = (EB_U8)cuStatsPtr->depth;
 
-            // Code Split Flag         
+            // Code Split Flag
             EncodeSplitFlag(
                 cabacEncodeCtxPtr,
                 cuDepth,
@@ -7490,7 +7490,7 @@ EB_ERRORTYPE EncodeLcu(
                     }
 
                     switch (cuPtr->predictionModeFlag) {
-                    case INTRA_MODE: 
+                    case INTRA_MODE:
                         if (cuPtr->predictionModeFlag == INTRA_MODE &&
                                 cuPtr->predictionUnitArray->intraLumaMode == EB_INTRA_MODE_4x4) {
                             // Code Partition Size
@@ -7502,7 +7502,7 @@ EB_ERRORTYPE EncodeLcu(
                             // Get the PU Ptr
                             puPtr = cuPtr->predictionUnitArray;
 
-              
+
                             EB_U8 partitionIndex;
 
                             EB_U8 intraLumaLeftModeArray[4];
@@ -7531,7 +7531,7 @@ EB_ERRORTYPE EncodeLcu(
                                     intraLumaMode,
                                     modeTypeNeighborArray,
                                     intraLumaModeNeighborArray);
-                                
+
                                 intraLumaLeftModeArray[partitionIndex] = intraLumaLeftMode;
                                 intraLumaTopModeArray[partitionIndex]  = intraLumaTopMode;
 
@@ -7543,7 +7543,7 @@ EB_ERRORTYPE EncodeLcu(
                                     MIN_PU_SIZE,
                                     MIN_PU_SIZE,
                                     NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
-             
+
                                 NeighborArrayUnitModeWrite(
                                     modeTypeNeighborArray,
                                     &predictionModeFlag,
@@ -7565,7 +7565,7 @@ EB_ERRORTYPE EncodeLcu(
                                     intraLumaTopModeArray[partitionIndex],
                                     intraLumaMode);
                             }
-                            
+
                             // Code Chroma Mode for Intra
                             for (partitionIndex = 0;
                                     partitionIndex < ((cabacEncodeCtxPtr->colorFormat == EB_YUV444) ? 4 : 1);
@@ -8067,7 +8067,7 @@ EB_ERRORTYPE TuEstimateCoeffBits_R(
 
 		if (crCountNonZeroCoeffs) {
 
-            if (coeffCabacUpdate) 
+            if (coeffCabacUpdate)
                 EstimateQuantizedCoefficientsUpdate[!!(ASM_TYPES & PREAVX2_MASK)](
                     updatedCoeffCtxModel,
                     CabacCost,
@@ -8183,13 +8183,13 @@ EB_ERRORTYPE ResetEntropyCoder(
 	CabacEncodeContext_t      *cabacEncCtxPtr = (CabacEncodeContext_t*)entropyCoderPtr->cabacEncodeContextPtr;
 	ContextModelEncContext_t  *cabacCtxModelArray = (ContextModelEncContext_t*)encodeContextPtr->cabacContextModelArray;
 
-	// Increment the context model array pointer to point to the right address based on the QP and slice type 
+	// Increment the context model array pointer to point to the right address based on the QP and slice type
 	cabacCtxModelArray += sliceType * TOTAL_NUMBER_OF_QP_VALUES + qp;
 
 	// Reset context models to initial values by copying from cabacContextModelArray
 	EB_MEMCPY(&(cabacEncCtxPtr->contextModelEncContext.splitFlagContextModel[0]), &(cabacCtxModelArray->splitFlagContextModel[0]), sizeof(EB_ContextModel)* TOTAL_NUMBER_OF_CABAC_CONTEXT_MODELS);
 
-	// Reset Binary Arithmetic Coder (BAC) to initial values 
+	// Reset Binary Arithmetic Coder (BAC) to initial values
 	ResetBacEnc(
 		&(cabacEncCtxPtr->bacEncContext));
 
@@ -8646,7 +8646,7 @@ EB_ERRORTYPE EncodePictureTimingSEI(
         pictStruct);
 
 
-	// Byte Align the Bitstream    
+	// Byte Align the Bitstream
 	OutputBitstreamWrite(
 		outputBitstreamPtr,
 		1,
@@ -8710,7 +8710,7 @@ EB_ERRORTYPE EncodeBufferingPeriodSEI(
 		vuiPtr,
 		encodeContextPtr);
 
-	// Byte Align the Bitstream    
+	// Byte Align the Bitstream
 	OutputBitstreamWrite(
 		outputBitstreamPtr,
 		1,
@@ -8857,7 +8857,7 @@ EB_ERRORTYPE EncodeRegUserDataSEI(
 		}
 	}
 
-	// Byte Align the Bitstream    
+	// Byte Align the Bitstream
 	OutputBitstreamWrite(
 		outputBitstreamPtr,
 		1,
@@ -8945,7 +8945,7 @@ EB_ERRORTYPE EncodeUnregUserDataSEI(
 		}
 	}
 
-	// Byte Align the Bitstream    
+	// Byte Align the Bitstream
 	OutputBitstreamWrite(
 		outputBitstreamPtr,
 		1,
@@ -9028,7 +9028,7 @@ EB_ERRORTYPE EncodeRecoveryPointSEI(
 		}
 	}
 
-	// Byte Align the Bitstream    
+	// Byte Align the Bitstream
 	OutputBitstreamWrite(
 		outputBitstreamPtr,
 		1,
@@ -9295,7 +9295,7 @@ EB_ERRORTYPE BitstreamCtor(
 }
 
 
-    
+
 
 EB_ERRORTYPE EntropyCoderCtor(
 	EntropyCoder_t **entropyCoderDblPtr,
@@ -9306,7 +9306,7 @@ EB_ERRORTYPE EntropyCoderCtor(
 
     EB_MALLOC(EB_PTR, (*entropyCoderDblPtr)->cabacEncodeContextPtr, sizeof(CabacEncodeContext_t), EB_N_PTR);
 
-	CabacCtor(
+	EbHevcCabacCtor(
 		(CabacEncodeContext_t *)(*entropyCoderDblPtr)->cabacEncodeContextPtr);
 
 
@@ -9760,11 +9760,11 @@ EB_ERRORTYPE EstimateQuantizedCoefficients_Update_SSE2(
                                 numCoeffWithCodedGt1Flag = MIN(GREATER_THAN1_MAX_NUMBER, numNonZero);
 
                                 coeffBits += ONE_BIT * numNonZero; // Add bits for coeff_sign_flag (all coefficients in subblock)
-                                
+
                                 // Loop over coefficients until base value of Exp-Golomb coding changes
                                 // Base value changes after either
                                 // - 8th coefficient
-                                // - a coefficient larger than 1                
+                                // - a coefficient larger than 1
 
                                 for (index = 0; index < numCoeffWithCodedGt1Flag; index++)
                                 {

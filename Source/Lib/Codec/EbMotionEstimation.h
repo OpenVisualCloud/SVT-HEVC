@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 extern EB_ERRORTYPE MotionEstimateLcu(
-    PictureParentControlSet_t   *pictureControlSetPtr, 
+    PictureParentControlSet_t   *pictureControlSetPtr,
     EB_U32                       lcuIndex,
     EB_U32                       lcuOriginX,
     EB_U32                       lcuOriginY,
@@ -47,13 +47,13 @@ extern EB_ERRORTYPE OpenLoopIntraSearchLcu(
 	MotionEstimationContext_t   *contextPtr,
 	EbPictureBufferDesc_t       *inputPtr);
 
-extern void GetMv(
+extern void EbHevcGetMv(
     PictureParentControlSet_t	*pictureControlSetPtr,
     EB_U32						 lcuIndex,
     EB_S32						*xCurrentMv,
     EB_S32						*yCurrentMv);
 
-extern void GetMeDist(
+extern void EbHevcGetMeDist(
     PictureParentControlSet_t	*pictureControlSetPtr,
     EB_U32						 lcuIndex,
     EB_U32                      *distortion);

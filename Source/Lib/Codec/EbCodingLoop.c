@@ -573,7 +573,7 @@ static void EncodePassUpdateReconSampleNeighborArrays(
 /************************************************************
 * Update Intra Luma Neighbor Modes
 ************************************************************/
-void GeneratePuIntraLumaNeighborModes(
+void EbHevcGeneratePuIntraLumaNeighborModes(
 	CodingUnit_t            *cuPtr,
 	EB_U32                   puOriginX,
 	EB_U32                   puOriginY,
@@ -1901,12 +1901,12 @@ static void EncodePassMvPrediction(
 
             xMvdIdx0 = (contextPtr->cuPtr->predictionUnitArray->mv[REF_LIST_0].x - contextPtr->xMvAmvpCandidateArrayList0[0]);
             yMvdIdx0 = (contextPtr->cuPtr->predictionUnitArray->mv[REF_LIST_0].y - contextPtr->yMvAmvpCandidateArrayList0[0]);
-            GetMvdFractionBits(xMvdIdx0, yMvdIdx0, contextPtr->mdRateEstimationPtr, &mvdBitsIdx0);
+            EbHevcGetMvdFractionBits(xMvdIdx0, yMvdIdx0, contextPtr->mdRateEstimationPtr, &mvdBitsIdx0);
 
             if (contextPtr->amvpCandidateCountRefList0 > 1) {
                 xMvdIdx1 = (contextPtr->cuPtr->predictionUnitArray->mv[REF_LIST_0].x - contextPtr->xMvAmvpCandidateArrayList0[1]);
                 yMvdIdx1 = (contextPtr->cuPtr->predictionUnitArray->mv[REF_LIST_0].y - contextPtr->yMvAmvpCandidateArrayList0[1]);
-                GetMvdFractionBits(xMvdIdx1, yMvdIdx1, contextPtr->mdRateEstimationPtr, &mvdBitsIdx1);
+                EbHevcGetMvdFractionBits(xMvdIdx1, yMvdIdx1, contextPtr->mdRateEstimationPtr, &mvdBitsIdx1);
 
                 // Assign the AMVP predictor index
                 contextPtr->cuPtr->predictionUnitArray->mvd[REF_LIST_0].predIdx = (mvdBitsIdx1 < mvdBitsIdx0);
@@ -1949,12 +1949,12 @@ static void EncodePassMvPrediction(
             // Assign the MV Predictor
             xMvdIdx0 = (contextPtr->cuPtr->predictionUnitArray->mv[REF_LIST_1].x - contextPtr->xMvAmvpCandidateArrayList1[0]);
             yMvdIdx0 = (contextPtr->cuPtr->predictionUnitArray->mv[REF_LIST_1].y - contextPtr->yMvAmvpCandidateArrayList1[0]);
-            GetMvdFractionBits(xMvdIdx0, yMvdIdx0, contextPtr->mdRateEstimationPtr, &mvdBitsIdx0);
+            EbHevcGetMvdFractionBits(xMvdIdx0, yMvdIdx0, contextPtr->mdRateEstimationPtr, &mvdBitsIdx0);
 
             if (contextPtr->amvpCandidateCountRefList1 > 1) {
                 xMvdIdx1 = (contextPtr->cuPtr->predictionUnitArray->mv[REF_LIST_1].x - contextPtr->xMvAmvpCandidateArrayList1[1]);
                 yMvdIdx1 = (contextPtr->cuPtr->predictionUnitArray->mv[REF_LIST_1].y - contextPtr->yMvAmvpCandidateArrayList1[1]);
-                GetMvdFractionBits(xMvdIdx1, yMvdIdx1, contextPtr->mdRateEstimationPtr, &mvdBitsIdx1);
+                EbHevcGetMvdFractionBits(xMvdIdx1, yMvdIdx1, contextPtr->mdRateEstimationPtr, &mvdBitsIdx1);
 
                 // Assign the AMVP predictor index
                 contextPtr->cuPtr->predictionUnitArray->mvd[REF_LIST_1].predIdx = (mvdBitsIdx1 < mvdBitsIdx0);
@@ -3262,7 +3262,7 @@ EB_EXTERN void EncodePass(
                     // Set the PU Loop Variables
                     puPtr = cuPtr->predictionUnitArray;
                     // Generate Intra Luma Neighbor Modes
-                    GeneratePuIntraLumaNeighborModes( // HT done
+                    EbHevcGeneratePuIntraLumaNeighborModes( // HT done
                         cuPtr,
                         contextPtr->cuOriginX,
                         contextPtr->cuOriginY,
@@ -3362,7 +3362,7 @@ EB_EXTERN void EncodePass(
                                 lcuStatPtr->stationaryEdgeOverTimeFlag,
                                 pictureControlSetPtr->temporalLayerIndex > 0 ? lcuStatPtr->pmStationaryEdgeOverTimeFlag : lcuStatPtr->stationaryEdgeOverTimeFlag);
 
-                            // Set Fast El coef shaping method
+                            // Set Fast El coef shaping method 
                             contextPtr->transCoeffShapeLuma   = DEFAULT_SHAPE;
                             contextPtr->transCoeffShapeChroma = DEFAULT_SHAPE;
 							if (fastEl && contextPtr->pmpMaskingLevelEncDec > MASK_THSHLD_1) {
@@ -3586,7 +3586,7 @@ EB_EXTERN void EncodePass(
                     puPtr = cuPtr->predictionUnitArray;
 
                     // Generate Intra Luma Neighbor Modes
-                    GeneratePuIntraLumaNeighborModes( // HT done
+                    EbHevcGeneratePuIntraLumaNeighborModes( // HT done
                         cuPtr,
                         partitionOriginX,
                         partitionOriginY,
