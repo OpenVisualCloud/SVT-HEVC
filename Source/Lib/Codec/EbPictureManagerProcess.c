@@ -561,7 +561,7 @@ void* PictureManagerKernel(void *inputPtr)
                 encodeContextPtr->appCallbackPtr,
                 EB_ENC_PM_ERROR8);
 
-            //keep the relase of SCS here because we still need the encodeContext strucutre here
+            //keep the release of SCS here because we still need the encodeContext strucutre here
             // Release the Reference's SequenceControlSet
             EbReleaseObject(inputPictureDemuxPtr->sequenceControlSetWrapperPtr);
 
