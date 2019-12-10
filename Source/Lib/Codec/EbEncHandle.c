@@ -797,6 +797,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
 
         inputData.encMode = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.encMode;
         inputData.speedControl = (EB_U8)encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.speedControlFlag;
+        inputData.segmentOvEnabled = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.segmentOvEnabled;
         //inputData.tune = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.tune;
 	    return_error = EbSystemResourceCtor(
             &(encHandlePtr->pictureParentControlSetPoolPtrArray[instanceIndex]),
@@ -2189,6 +2190,10 @@ void EbHevcSetParamBasedOnInput(
         sequenceControlSetPtr,
         sequenceControlSetPtr->lumaWidth*sequenceControlSetPtr->lumaHeight);
 
+	sequenceControlSetPtr->pictureWidthInLcu = (EB_U8)((sequenceControlSetPtr->lumaWidth + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize);
+	sequenceControlSetPtr->pictureHeightInLcu = (EB_U8)((sequenceControlSetPtr->lumaHeight + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize);
+	sequenceControlSetPtr->lcuTotalCount = sequenceControlSetPtr->pictureWidthInLcu * sequenceControlSetPtr->pictureHeightInLcu;
+
 }
 
 void EbHevcCopyApiFromApp(
@@ -2283,6 +2288,18 @@ void EbHevcCopyApiFromApp(
         sequenceControlSetPtr->staticConfig.pictureTimingSEI = 1;
         sequenceControlSetPtr->videoUsabilityInfoPtr->hrdParametersPtr->nalHrdParametersPresentFlag = 1;
         sequenceControlSetPtr->videoUsabilityInfoPtr->hrdParametersPtr->cpbDpbDelaysPresentFlag = 1;
+    }
+
+    if (sequenceControlSetPtr->staticConfig.segmentOvEnabled) {
+        if (sequenceControlSetPtr->staticConfig.improveSharpness) {
+            SVT_LOG("SVT [Warning]: improveSharpness does not work with segment override, set to false\n");
+            sequenceControlSetPtr->staticConfig.improveSharpness = EB_FALSE;
+        }
+
+        if (sequenceControlSetPtr->staticConfig.bitRateReduction) {
+            SVT_LOG("SVT [Warning]: bitRateReduction does not work with segment override, set to false\n");
+            sequenceControlSetPtr->staticConfig.bitRateReduction = EB_FALSE;
+        }
     }
 
     return;
@@ -3005,6 +3022,8 @@ EB_ERRORTYPE EbH265EncInitParameter(
     configPtr->vbvBufInit = 90;
     configPtr->hrdFlag = 0;
 
+    //segmentOv
+    configPtr->segmentOvEnabled = 0;
     return return_error;
 }
 static void PrintLibParams(
@@ -3683,6 +3702,10 @@ static EB_ERRORTYPE  CopyInputBuffer(
     if (src->pBuffer != NULL)
         CopyUserSei(sequenceControlSet, dst, src);
 
+    if (src->segmentOvPtr != NULL && dst->segmentOvPtr != NULL && sequenceControlSet->staticConfig.segmentOvEnabled) {
+        EB_MEMCPY(dst->segmentOvPtr, src->segmentOvPtr, sequenceControlSet->lcuTotalCount * sizeof(SegmentOverride_t));
+    }
+
     return return_error;
 
 }
@@ -4007,6 +4030,13 @@ EB_ERRORTYPE EbInputBufferHeaderCtor(
         inputBuffer);
 
     inputBuffer->pAppPrivate = NULL;
+
+    if (sequenceControlSetPtr->staticConfig.segmentOvEnabled) {
+        EB_MALLOC(SegmentOverride_t*, inputBuffer->segmentOvPtr, sizeof(SegmentOverride_t) * sequenceControlSetPtr->lcuTotalCount, EB_N_PTR);
+    }
+    else {
+        inputBuffer->segmentOvPtr = NULL;
+    }
 
     return EB_ErrorNone;
 }

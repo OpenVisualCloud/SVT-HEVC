@@ -685,8 +685,8 @@ void ModeDecisionConfigureLcu(
         contextPtr,
         lcuPtr);
 
-    if (sequenceControlSetPtr->staticConfig.rateControlMode == 0 && sequenceControlSetPtr->staticConfig.improveSharpness == 0) {
-		contextPtr->qp = (EB_U8)pictureQp;
+    if (sequenceControlSetPtr->staticConfig.rateControlMode == 0 && sequenceControlSetPtr->staticConfig.improveSharpness == 0 && sequenceControlSetPtr->staticConfig.segmentOvEnabled == 0) {
+        contextPtr->qp = (EB_U8)pictureQp;
         lcuPtr->qp = (EB_U8)contextPtr->qp;
     }
     //RC is on

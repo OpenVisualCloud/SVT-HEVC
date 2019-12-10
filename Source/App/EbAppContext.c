@@ -273,6 +273,8 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.maxDisplayMasteringLuminance = config->maxDisplayMasteringLuminance;
     callbackData->ebEncParameters.minDisplayMasteringLuminance = config->minDisplayMasteringLuminance;
 
+    callbackData->ebEncParameters.segmentOvEnabled = config->segmentOvEnabled;
+
     return return_error;
 
 }
@@ -379,6 +381,13 @@ EB_ERRORTYPE AllocateInputBuffers(
         // Assign the variables
         callbackData->inputBufferPool->pAppPrivate = NULL;
         callbackData->inputBufferPool->sliceType   = EB_INVALID_PICTURE;
+    }
+
+    if (callbackData->ebEncParameters.segmentOvEnabled) {
+        size_t pictureWidthInLcu = (config->sourceWidth + EB_SEGMENT_BLOCK_SIZE - 1) / EB_SEGMENT_BLOCK_SIZE;
+        size_t pictureHeightInLcu = (config->sourceHeight + EB_SEGMENT_BLOCK_SIZE - 1) / EB_SEGMENT_BLOCK_SIZE;
+        size_t lcuTotalCount = pictureWidthInLcu * pictureHeightInLcu;
+        EB_APP_MALLOC(SegmentOverride_t*, callbackData->inputBufferPool->segmentOvPtr, sizeof(SegmentOverride_t) * lcuTotalCount, EB_N_PTR, EB_ErrorInsufficientResources);
     }
 
     return return_error;

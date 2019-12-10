@@ -203,6 +203,7 @@ typedef struct EbConfig_s
 
     FILE                   *qpFile;
 
+    FILE                   *segmentOvFile;
     // y4m format support
     EB_BOOL                 y4m_input;
     unsigned char           y4m_buf[9];
@@ -375,6 +376,7 @@ typedef struct EbConfig_s
     uint32_t     maxDisplayMasteringLuminance;
     uint32_t     minDisplayMasteringLuminance;
 
+    EB_BOOL      segmentOvEnabled;
 } EbConfig_t;
 
 extern void EbConfigCtor(EbConfig_t *configPtr);

@@ -2272,6 +2272,13 @@ void SetPmEncDecMode(
 
         }
     }
+
+    if (pictureControlSetPtr->ParentPcsPtr->segmentOvArray != NULL && sequenceControlSetPtr->staticConfig.segmentOvEnabled) {
+        SegmentOverride_t *segmentOvPtr = pictureControlSetPtr->ParentPcsPtr->segmentOvArray;
+        if (segmentOvPtr[lcuIndex].ovFlags & EB_TU_FILTER_OV)
+            contextPtr->pmpMaskingLevelEncDec = CLIP3(0, 7, contextPtr->pmpMaskingLevelEncDec + segmentOvPtr[lcuIndex].filterOv);
+    }
+
 }
 
 
@@ -2339,12 +2346,19 @@ EB_ERRORTYPE QpmDeriveBeaAndSkipQpmFlagLcu(
 {
 
     EB_ERRORTYPE                    return_error = EB_ErrorNone;
-    EB_U8                           pictureQp = pictureControlSetPtr->pictureQp;
+    EB_S8                           pictureQp = pictureControlSetPtr->pictureQp;
     EB_U8                           minQpAllowed = (EB_U8)sequenceControlSetPtr->staticConfig.minQpAllowed;
     EB_U8                           maxQpAllowed = (EB_U8)sequenceControlSetPtr->staticConfig.maxQpAllowed;
 
 
-	contextPtr->qpmQp = pictureQp;
+    if (sequenceControlSetPtr->staticConfig.segmentOvEnabled && pictureControlSetPtr->ParentPcsPtr->segmentOvArray != NULL) {
+        SegmentOverride_t *segmentOvPtr = pictureControlSetPtr->ParentPcsPtr->segmentOvArray;
+        if (segmentOvPtr[lcuIndex].ovFlags & EB_QP_OV_DIRECT)
+            pictureQp = segmentOvPtr[lcuIndex].qpOv;
+        else if (segmentOvPtr[lcuIndex].ovFlags & EB_QP_OV_DELTA)
+            pictureQp += segmentOvPtr[lcuIndex].qpOv;
+    }
+    contextPtr->qpmQp = CLIP3(minQpAllowed, maxQpAllowed, pictureQp);
 
     LcuStat_t *lcuStatPtr = &(pictureControlSetPtr->ParentPcsPtr->lcuStatArray[lcuIndex]);
 
@@ -3144,11 +3158,11 @@ EB_EXTERN void EncodePass(
     }
 
 
-    EB_BOOL useDeltaQp = (EB_BOOL)(sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction);
+    EB_BOOL useDeltaQp = (EB_BOOL)(sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction || sequenceControlSetPtr->staticConfig.segmentOvEnabled);
 
     EB_BOOL singleSegment = (sequenceControlSetPtr->encDecSegmentColCountArray[pictureControlSetPtr->temporalLayerIndex] == 1) && (sequenceControlSetPtr->encDecSegmentRowCountArray[pictureControlSetPtr->temporalLayerIndex] == 1);
 
-    EB_BOOL useDeltaQpSegments = singleSegment ? 0 : (EB_BOOL)(sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction);
+    EB_BOOL useDeltaQpSegments = singleSegment ? 0 : (EB_BOOL)(sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction || sequenceControlSetPtr->staticConfig.segmentOvEnabled);
 
     if (is16bit) {
         EncodePassPackLcu(
@@ -3196,8 +3210,8 @@ EB_EXTERN void EncodePass(
 
             cuPtr->deltaQp = 0;
 
-			cuPtr->qp = (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction) ? contextPtr->qpmQp : pictureControlSetPtr->pictureQp;
-			lcuPtr->qp = (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction) ? contextPtr->qpmQp : pictureControlSetPtr->pictureQp;
+			cuPtr->qp = (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction || sequenceControlSetPtr->staticConfig.segmentOvEnabled) ? contextPtr->qpmQp : pictureControlSetPtr->pictureQp;
+			lcuPtr->qp = (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction || sequenceControlSetPtr->staticConfig.segmentOvEnabled) ? contextPtr->qpmQp : pictureControlSetPtr->pictureQp;
             cuPtr->orgDeltaQp = cuPtr->deltaQp;
 
 			if (!contextPtr->skipQpmFlag &&
