@@ -618,7 +618,7 @@ static EB_ERRORTYPE EbEncHandleCtor(
 }
 
 #ifdef _WIN32
-EB_U64 GetAffinityMask(EB_U32 lpnum) {
+static EB_U64 EbHevcGetAffinityMask(EB_U32 lpnum) {
     EB_U64 mask = 0x1;
     for (EB_U32 i = lpnum - 1; i > 0; i--)
         mask += (EB_U64)1 << i;
@@ -654,7 +654,7 @@ void EbHevcSetThreadManagementParameters(
     if (numGroups == 1) {
         EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
             configPtr->logicalProcessors < numLogicProcessors ? configPtr->logicalProcessors : numLogicProcessors;
-        groupAffinity.Mask = GetAffinityMask(lps);
+        groupAffinity.Mask = EbHevcGetAffinityMask(lps);
     }
     else if (numGroups > 1) { // For system with multiple processor group
         if (configPtr->logicalProcessors == 0) {
@@ -670,13 +670,13 @@ void EbHevcSetThreadManagementParameters(
                     SVT_LOG("SVT [WARNING]: -lp(logical processors) setting is ignored. Run on both sockets. \n");
                 }
                 else {
-                    groupAffinity.Mask = GetAffinityMask(configPtr->logicalProcessors);
+                    groupAffinity.Mask = EbHevcGetAffinityMask(configPtr->logicalProcessors);
                 }
             }
             else {
                 EB_U32 lps = configPtr->logicalProcessors == 0 ? numLpPerGroup :
                     configPtr->logicalProcessors < numLpPerGroup ? configPtr->logicalProcessors : numLpPerGroup;
-                groupAffinity.Mask = GetAffinityMask(lps);
+                groupAffinity.Mask = EbHevcGetAffinityMask(lps);
                 groupAffinity.Group = configPtr->targetSocket;
             }
         }
