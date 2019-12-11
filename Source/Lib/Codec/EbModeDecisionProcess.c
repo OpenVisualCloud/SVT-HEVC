@@ -20,14 +20,15 @@ EB_ERRORTYPE ModeDecisionContextCtor(
     ModeDecisionContext_t  **contextDblPtr,
     EbFifo_t                *modeDecisionConfigurationInputFifoPtr,
     EbFifo_t                *modeDecisionOutputFifoPtr,
-    EB_BOOL                  is16bit)
+    EB_BOOL                  is16bit,
+    EB_HANDLE                encHandle)
 {
     EB_U32 bufferIndex;
     EB_U32 candidateIndex;
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
     ModeDecisionContext_t *contextPtr;
-    EB_MALLOC(ModeDecisionContext_t*, contextPtr, sizeof(ModeDecisionContext_t), EB_N_PTR);
+    EB_MALLOC(ModeDecisionContext_t*, contextPtr, sizeof(ModeDecisionContext_t), EB_N_PTR, encHandle);
     *contextDblPtr = contextPtr;
 
     // Input/Output System Resource Manager FIFOs
@@ -35,15 +36,15 @@ EB_ERRORTYPE ModeDecisionContextCtor(
     contextPtr->modeDecisionOutputFifoPtr             = modeDecisionOutputFifoPtr;
 
     // Trasform Scratch Memory
-    EB_MALLOC(EB_S16*, contextPtr->transformInnerArrayPtr, 3120, EB_N_PTR); //refer to EbInvTransform_SSE2.as. case 32x32
+    EB_MALLOC(EB_S16*, contextPtr->transformInnerArrayPtr, 3120, EB_N_PTR, encHandle); //refer to EbInvTransform_SSE2.as. case 32x32
 
     // MD rate Estimation tables
-    EB_MALLOC(MdRateEstimationContext_t*, contextPtr->mdRateEstimationPtr, sizeof(MdRateEstimationContext_t), EB_N_PTR);
+    EB_MALLOC(MdRateEstimationContext_t*, contextPtr->mdRateEstimationPtr, sizeof(MdRateEstimationContext_t), EB_N_PTR, encHandle);
 
     // Fast Candidate Array
-    EB_MALLOC(ModeDecisionCandidate_t*, contextPtr->fastCandidateArray, sizeof(ModeDecisionCandidate_t) * MODE_DECISION_CANDIDATE_MAX_COUNT, EB_N_PTR);
+    EB_MALLOC(ModeDecisionCandidate_t*, contextPtr->fastCandidateArray, sizeof(ModeDecisionCandidate_t) * MODE_DECISION_CANDIDATE_MAX_COUNT, EB_N_PTR, encHandle);
 
-    EB_MALLOC(ModeDecisionCandidate_t**, contextPtr->fastCandidatePtrArray, sizeof(ModeDecisionCandidate_t*) * MODE_DECISION_CANDIDATE_MAX_COUNT, EB_N_PTR);
+    EB_MALLOC(ModeDecisionCandidate_t**, contextPtr->fastCandidatePtrArray, sizeof(ModeDecisionCandidate_t*) * MODE_DECISION_CANDIDATE_MAX_COUNT, EB_N_PTR, encHandle);
 
     for(candidateIndex = 0; candidateIndex < MODE_DECISION_CANDIDATE_MAX_COUNT; ++candidateIndex) {
         contextPtr->fastCandidatePtrArray[candidateIndex] = &contextPtr->fastCandidateArray[candidateIndex];
@@ -51,28 +52,28 @@ EB_ERRORTYPE ModeDecisionContextCtor(
     }
 
     // Transform and Quantization Buffers
-    EB_MALLOC(EbTransQuantBuffers_t*, contextPtr->transQuantBuffersPtr, sizeof(EbTransQuantBuffers_t), EB_N_PTR);
+    EB_MALLOC(EbTransQuantBuffers_t*, contextPtr->transQuantBuffersPtr, sizeof(EbTransQuantBuffers_t), EB_N_PTR, encHandle);
 
 	// Cabac cost
-    EB_MALLOC(CabacCost_t*, contextPtr->CabacCost, sizeof(CabacCost_t), EB_N_PTR);
+    EB_MALLOC(CabacCost_t*, contextPtr->CabacCost, sizeof(CabacCost_t), EB_N_PTR, encHandle);
 
     return_error = EbTransQuantBuffersCtor(
-        contextPtr->transQuantBuffersPtr);
+        contextPtr->transQuantBuffersPtr, encHandle);
 
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
     // Cost Arrays
-    EB_MALLOC(EB_U64*, contextPtr->fastCostArray, sizeof(EB_U64) * MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT, EB_N_PTR);
+    EB_MALLOC(EB_U64*, contextPtr->fastCostArray, sizeof(EB_U64) * MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT, EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U64*, contextPtr->fullCostArray, sizeof(EB_U64) * MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT, EB_N_PTR);
+    EB_MALLOC(EB_U64*, contextPtr->fullCostArray, sizeof(EB_U64) * MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT, EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U64*, contextPtr->fullCostSkipPtr, sizeof(EB_U64) * MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT, EB_N_PTR);
+    EB_MALLOC(EB_U64*, contextPtr->fullCostSkipPtr, sizeof(EB_U64) * MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT, EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U64*, contextPtr->fullCostMergePtr, sizeof(EB_U64) * MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT, EB_N_PTR);
+    EB_MALLOC(EB_U64*, contextPtr->fullCostMergePtr, sizeof(EB_U64) * MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT, EB_N_PTR, encHandle);
 
     // Candidate Buffers
-    EB_MALLOC(ModeDecisionCandidateBuffer_t**, contextPtr->candidateBufferPtrArray, sizeof(ModeDecisionCandidateBuffer_t*) * MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT, EB_N_PTR);
+    EB_MALLOC(ModeDecisionCandidateBuffer_t**, contextPtr->candidateBufferPtrArray, sizeof(ModeDecisionCandidateBuffer_t*) * MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT, EB_N_PTR, encHandle);
 
     for(bufferIndex = 0; bufferIndex < MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT; ++bufferIndex) {
         return_error = ModeDecisionCandidateBufferCtor(
@@ -82,7 +83,8 @@ EB_ERRORTYPE ModeDecisionContextCtor(
             &(contextPtr->fastCostArray[bufferIndex]),
             &(contextPtr->fullCostArray[bufferIndex]),
             &(contextPtr->fullCostSkipPtr[bufferIndex]),
-            &(contextPtr->fullCostMergePtr[bufferIndex]));
+            &(contextPtr->fullCostMergePtr[bufferIndex]),
+            encHandle);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -93,7 +95,8 @@ EB_ERRORTYPE ModeDecisionContextCtor(
         &contextPtr->interPredictionContext,
         MAX_LCU_SIZE,
         MAX_LCU_SIZE,
-        is16bit);
+        is16bit,
+        encHandle);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
@@ -115,7 +118,8 @@ EB_ERRORTYPE ModeDecisionContextCtor(
 
         return_error = EbPictureBufferDescCtor(
             (EB_PTR*) &contextPtr->predictionBuffer,
-            (EB_PTR) &initData);
+            (EB_PTR) &initData,
+            encHandle);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -123,7 +127,7 @@ EB_ERRORTYPE ModeDecisionContextCtor(
     }
 
     // Intra Reference Samples
-    return_error = IntraReferenceSamplesCtor(&contextPtr->intraRefPtr, EB_YUV420);
+    return_error = IntraReferenceSamplesCtor(&contextPtr->intraRefPtr, EB_YUV420, encHandle);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
@@ -133,7 +137,8 @@ EB_ERRORTYPE ModeDecisionContextCtor(
         &contextPtr->mcpContext,
         MAX_LCU_SIZE,
         MAX_LCU_SIZE,
-        is16bit);
+        is16bit,
+        encHandle);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
@@ -154,7 +159,8 @@ EB_ERRORTYPE ModeDecisionContextCtor(
 
         return_error = EbPictureBufferDescCtor(
             (EB_PTR*)&contextPtr->pillarReconBuffer,
-            (EB_PTR)&initData);
+            (EB_PTR)&initData,
+            encHandle);
 
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
@@ -162,7 +168,8 @@ EB_ERRORTYPE ModeDecisionContextCtor(
 
         return_error = EbPictureBufferDescCtor(
             (EB_PTR*) &contextPtr->mdReconBuffer,
-            (EB_PTR) &initData);
+            (EB_PTR) &initData,
+            encHandle);
 
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
@@ -170,7 +177,7 @@ EB_ERRORTYPE ModeDecisionContextCtor(
     }
 
 
-    EB_MALLOC(LcuBasedDetectors_t*, contextPtr->mdPicLcuDetect, sizeof(LcuBasedDetectors_t), EB_N_PTR);
+    EB_MALLOC(LcuBasedDetectors_t*, contextPtr->mdPicLcuDetect, sizeof(LcuBasedDetectors_t), EB_N_PTR, encHandle);
     EB_MEMSET(contextPtr->mdPicLcuDetect,0,sizeof(LcuBasedDetectors_t));
 
     return EB_ErrorNone;

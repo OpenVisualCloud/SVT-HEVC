@@ -109,8 +109,8 @@ static EB_ERRORTYPE InitH265EncoderHandle(EB_HANDLETYPE hComponent);
  * Globals
  **************************************/
 
-EbMemoryMapEntry               *memoryMap;
-EB_U32                         *memoryMapIndex;
+struct list_head enc_ctx_mem_map_manager;
+
 EB_U64                         *totalLibMemory;
 
 EB_U32                         libMallocCount = 0;
@@ -455,28 +455,42 @@ static EB_ERRORTYPE EbEncHandleCtor(
 {
     EB_U32  instanceIndex;
     EB_ERRORTYPE return_error = EB_ErrorNone;
+    enc_ctx_mem_map_t *enc_ctx_mem_map = EB_NULL;
     // Allocate Memory
     EbEncHandle_t *encHandlePtr = (EbEncHandle_t*) malloc(sizeof(EbEncHandle_t));
     *encHandleDblPtr = encHandlePtr;
     if (encHandlePtr == (EbEncHandle_t*) EB_NULL){
         return EB_ErrorInsufficientResources;
     }
-    encHandlePtr->memoryMap             = (EbMemoryMapEntry*) malloc(sizeof(EbMemoryMapEntry) * MAX_NUM_PTR);
-    encHandlePtr->memoryMapIndex        = 0;
+
+    if (!enc_ctx_mem_map_manager.prev || !enc_ctx_mem_map_manager.next) {
+        INIT_LIST_HEAD(&enc_ctx_mem_map_manager);
+    }
+
+    enc_ctx_mem_map = (enc_ctx_mem_map_t *)malloc(sizeof(*enc_ctx_mem_map));
+    if (enc_ctx_mem_map == EB_NULL) {
+        return EB_ErrorInsufficientResources;
+    }
+
+    enc_ctx_mem_map->encHandlePtr = (EB_HANDLE)encHandlePtr;
+    enc_ctx_mem_map->memoryMap = (EbMemoryMapEntry *)malloc(sizeof(EbMemoryMapEntry) * MAX_NUM_PTR);
+    if (enc_ctx_mem_map->memoryMap == EB_NULL) {
+        free(enc_ctx_mem_map);
+        free(encHandlePtr);
+        return EB_ErrorInsufficientResources;
+    }
+
+    enc_ctx_mem_map->memoryMapIndex = 0;
+    list_add_tail(&enc_ctx_mem_map->list, &enc_ctx_mem_map_manager);
+
 	encHandlePtr->totalLibMemory		= sizeof(EbEncHandle_t) + sizeof(EbMemoryMapEntry) * MAX_NUM_PTR;
 
     // Save Memory Map Pointers
     totalLibMemory                      = &encHandlePtr->totalLibMemory;
-    memoryMap                           =  encHandlePtr->memoryMap;
-    memoryMapIndex                      = &encHandlePtr->memoryMapIndex;
     libMallocCount                      = 0;
     libThreadCount                      = 0;
     libMutexCount                       = 0;
     libSemaphoreCount                   = 0;
-
-    if (memoryMap == (EbMemoryMapEntry*) EB_NULL){
-        return EB_ErrorInsufficientResources;
-    }
 
     return_error = EbHevcInitThreadManagmentParams();
     if (return_error == EB_ErrorInsufficientResources) {
@@ -485,7 +499,7 @@ static EB_ERRORTYPE EbEncHandleCtor(
 
     encHandlePtr->encodeInstanceTotalCount                          = EB_EncodeInstancesTotalCount;
 
-    EB_MALLOC(EB_U32*, encHandlePtr->computeSegmentsTotalCountArray, sizeof(EB_U32) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
+    EB_MALLOC(EB_U32*, encHandlePtr->computeSegmentsTotalCountArray, sizeof(EB_U32) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
 
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
         encHandlePtr->computeSegmentsTotalCountArray[instanceIndex] = EB_ComputeSegmentInitCount;
@@ -573,19 +587,19 @@ static EB_ERRORTYPE EbEncHandleCtor(
     encHandlePtr->entropyCodingResultsConsumerFifoPtrArray          = (EbFifo_t**) EB_NULL;
 
     // Initialize Callbacks
-    EB_MALLOC(EbCallback_t**, encHandlePtr->appCallbackPtrArray, sizeof(EbCallback_t*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
+    EB_MALLOC(EbCallback_t**, encHandlePtr->appCallbackPtrArray, sizeof(EbCallback_t*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
 
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
-        EB_MALLOC(EbCallback_t*, encHandlePtr->appCallbackPtrArray[instanceIndex], sizeof(EbCallback_t), EB_N_PTR);
+        EB_MALLOC(EbCallback_t*, encHandlePtr->appCallbackPtrArray[instanceIndex], sizeof(EbCallback_t), EB_N_PTR, encHandlePtr);
         encHandlePtr->appCallbackPtrArray[instanceIndex]->ErrorHandler                          = libSvtEncoderSendErrorExit;
         encHandlePtr->appCallbackPtrArray[instanceIndex]->handle                                = ebHandlePtr;
     }
 
     // Initialize Input Video Port
-    EB_MALLOC(EB_PARAM_PORTDEFINITIONTYPE**, encHandlePtr->inputVideoPortPtrArray, sizeof(EB_PARAM_PORTDEFINITIONTYPE*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
+    EB_MALLOC(EB_PARAM_PORTDEFINITIONTYPE**, encHandlePtr->inputVideoPortPtrArray, sizeof(EB_PARAM_PORTDEFINITIONTYPE*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
 
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
-        EB_MALLOC(EB_PARAM_PORTDEFINITIONTYPE*, encHandlePtr->inputVideoPortPtrArray[instanceIndex], sizeof(EB_PARAM_PORTDEFINITIONTYPE) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
+        EB_MALLOC(EB_PARAM_PORTDEFINITIONTYPE*, encHandlePtr->inputVideoPortPtrArray[instanceIndex], sizeof(EB_PARAM_PORTDEFINITIONTYPE) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
 
         encHandlePtr->inputVideoPortPtrArray[instanceIndex]->nSize                              = sizeof(EB_PARAM_PORTDEFINITIONTYPE);
         encHandlePtr->inputVideoPortPtrArray[instanceIndex]->nFrameWidth                        = 0;
@@ -594,10 +608,10 @@ static EB_ERRORTYPE EbEncHandleCtor(
     }
 
     // Initialize Output Bitstream Port
-    EB_MALLOC(EB_PARAM_PORTDEFINITIONTYPE**, encHandlePtr->outputStreamPortPtrArray, sizeof(EB_PARAM_PORTDEFINITIONTYPE*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
+    EB_MALLOC(EB_PARAM_PORTDEFINITIONTYPE**, encHandlePtr->outputStreamPortPtrArray, sizeof(EB_PARAM_PORTDEFINITIONTYPE*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
 
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
-        EB_MALLOC(EB_PARAM_PORTDEFINITIONTYPE*, encHandlePtr->outputStreamPortPtrArray[instanceIndex], sizeof(EB_PARAM_PORTDEFINITIONTYPE) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
+        EB_MALLOC(EB_PARAM_PORTDEFINITIONTYPE*, encHandlePtr->outputStreamPortPtrArray[instanceIndex], sizeof(EB_PARAM_PORTDEFINITIONTYPE) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
 
         encHandlePtr->outputStreamPortPtrArray[instanceIndex]->nSize                            = sizeof(EB_PARAM_PORTDEFINITIONTYPE);
         encHandlePtr->outputStreamPortPtrArray[instanceIndex]->nStride                          = EB_OUTPUTSTREAMBUFFERSIZE;
@@ -605,10 +619,10 @@ static EB_ERRORTYPE EbEncHandleCtor(
 
 
     // Initialize Sequence Control Set Instance Array
-    EB_MALLOC(EbSequenceControlSetInstance_t**, encHandlePtr->sequenceControlSetInstanceArray, sizeof(EbSequenceControlSetInstance_t*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
+    EB_MALLOC(EbSequenceControlSetInstance_t**, encHandlePtr->sequenceControlSetInstanceArray, sizeof(EbSequenceControlSetInstance_t*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
 
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
-        return_error = EbSequenceControlSetInstanceCtor(&encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]);
+        return_error = EbSequenceControlSetInstanceCtor(&encHandlePtr->sequenceControlSetInstanceArray[instanceIndex], (EB_HANDLE)encHandlePtr);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -764,7 +778,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         (EbFifo_t ***)EB_NULL,
         EB_FALSE,
         EbSequenceControlSetCtor,
-        EB_NULL);
+        EB_NULL,
+        encHandlePtr);
 
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
@@ -772,8 +787,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     /************************************
      * Picture Control Set: Parent
      ************************************/
-    EB_MALLOC(EbSystemResource_t**, encHandlePtr->pictureParentControlSetPoolPtrArray, sizeof(EbSystemResource_t*)  * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-    EB_MALLOC(EbFifo_t***, encHandlePtr->pictureParentControlSetPoolProducerFifoPtrDblArray, sizeof(EbSystemResource_t**) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
+    EB_MALLOC(EbSystemResource_t**, encHandlePtr->pictureParentControlSetPoolPtrArray, sizeof(EbSystemResource_t*)  * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
+    EB_MALLOC(EbFifo_t***, encHandlePtr->pictureParentControlSetPoolProducerFifoPtrDblArray, sizeof(EbSystemResource_t**) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
 
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
 
@@ -808,7 +823,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             (EbFifo_t ***)EB_NULL,
             EB_FALSE,
             PictureParentControlSetCtor,
-            &inputData);
+            &inputData,
+            encHandlePtr);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -817,8 +833,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     /************************************
      * Picture Control Set: Child
      ************************************/
-    EB_MALLOC(EbSystemResource_t**, encHandlePtr->pictureControlSetPoolPtrArray, sizeof(EbSystemResource_t*)  * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-    EB_MALLOC(EbFifo_t***, encHandlePtr->pictureControlSetPoolProducerFifoPtrDblArray, sizeof(EbSystemResource_t**) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
+    EB_MALLOC(EbSystemResource_t**, encHandlePtr->pictureControlSetPoolPtrArray, sizeof(EbSystemResource_t*)  * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
+    EB_MALLOC(EbFifo_t***, encHandlePtr->pictureControlSetPoolProducerFifoPtrDblArray, sizeof(EbSystemResource_t**) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
 
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
 
@@ -862,6 +878,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
 
         inputData.encMode = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.encMode;
         inputData.speedControl = (EB_U8)encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.speedControlFlag;
+
         return_error = EbSystemResourceCtor(
             &(encHandlePtr->pictureControlSetPoolPtrArray[instanceIndex]),
             encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->pictureControlSetPoolInitCountChild, //EB_PictureControlSetPoolInitCountChild,
@@ -871,7 +888,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             (EbFifo_t ***)EB_NULL,
             EB_FALSE,
             PictureControlSetCtor,
-            &inputData);
+            &inputData,
+            encHandlePtr);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -882,12 +900,12 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
      ************************************/
 
     // Allocate Resource Arrays
-    EB_MALLOC(EbSystemResource_t**, encHandlePtr->referencePicturePoolPtrArray, sizeof(EbSystemResource_t*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-    EB_MALLOC(EbSystemResource_t**, encHandlePtr->paReferencePicturePoolPtrArray, sizeof(EbSystemResource_t*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
+    EB_MALLOC(EbSystemResource_t**, encHandlePtr->referencePicturePoolPtrArray, sizeof(EbSystemResource_t*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
+    EB_MALLOC(EbSystemResource_t**, encHandlePtr->paReferencePicturePoolPtrArray, sizeof(EbSystemResource_t*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
 
     // Allocate Producer Fifo Arrays
-    EB_MALLOC(EbFifo_t***, encHandlePtr->referencePicturePoolProducerFifoPtrDblArray, sizeof(EbFifo_t**) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-    EB_MALLOC(EbFifo_t***, encHandlePtr->paReferencePicturePoolProducerFifoPtrDblArray, sizeof(EbFifo_t**) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
+    EB_MALLOC(EbFifo_t***, encHandlePtr->referencePicturePoolProducerFifoPtrDblArray, sizeof(EbFifo_t**) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
+    EB_MALLOC(EbFifo_t***, encHandlePtr->paReferencePicturePoolProducerFifoPtrDblArray, sizeof(EbFifo_t**) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
 
     // Rate Control
     rateControlPorts[0].count = EB_PictureManagerProcessInitCount;
@@ -934,7 +952,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             (EbFifo_t ***)EB_NULL,
             EB_FALSE,
             EbReferenceObjectCtor,
-            &(EbReferenceObjectDescInitDataStructure));
+            &(EbReferenceObjectDescInitDataStructure),
+            encHandlePtr);
 
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
@@ -990,7 +1009,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             (EbFifo_t ***)EB_NULL,
             EB_FALSE,
             EbPaReferenceObjectCtor,
-            &(EbPaReferenceObjectDescInitDataStructure));
+            &(EbPaReferenceObjectDescInitDataStructure),
+            encHandlePtr);
 		if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
 		}
@@ -1014,15 +1034,16 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         &encHandlePtr->inputBufferConsumerFifoPtrArray,
         EB_TRUE,
         EbInputBufferHeaderCtor,
-        encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr);
+        encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr,
+        encHandlePtr);
 
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
     // EB_BUFFERHEADERTYPE Output Stream
-    EB_MALLOC(EbSystemResource_t**, encHandlePtr->outputStreamBufferResourcePtrArray, sizeof(EbSystemResource_t*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-    EB_MALLOC(EbFifo_t***, encHandlePtr->outputStreamBufferProducerFifoPtrDblArray, sizeof(EbFifo_t**)          * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-    EB_MALLOC(EbFifo_t***, encHandlePtr->outputStreamBufferConsumerFifoPtrDblArray, sizeof(EbFifo_t**)          * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
+    EB_MALLOC(EbSystemResource_t**, encHandlePtr->outputStreamBufferResourcePtrArray, sizeof(EbSystemResource_t*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
+    EB_MALLOC(EbFifo_t***, encHandlePtr->outputStreamBufferProducerFifoPtrDblArray, sizeof(EbFifo_t**)          * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
+    EB_MALLOC(EbFifo_t***, encHandlePtr->outputStreamBufferConsumerFifoPtrDblArray, sizeof(EbFifo_t**)          * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
 
     for(instanceIndex=0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
         return_error = EbSystemResourceCtor(
@@ -1034,16 +1055,17 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             &encHandlePtr->outputStreamBufferConsumerFifoPtrDblArray[instanceIndex],
             EB_TRUE,
             EbOutputBufferHeaderCtor,
-            &encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig);
+            &encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig,
+            encHandlePtr);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
     }
     if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.reconEnabled) {
         // EB_BUFFERHEADERTYPE Output Recon
-        EB_MALLOC(EbSystemResource_t**, encHandlePtr->outputReconBufferResourcePtrArray, sizeof(EbSystemResource_t*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-        EB_MALLOC(EbFifo_t***, encHandlePtr->outputReconBufferProducerFifoPtrDblArray, sizeof(EbFifo_t**)          * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
-        EB_MALLOC(EbFifo_t***, encHandlePtr->outputReconBufferConsumerFifoPtrDblArray, sizeof(EbFifo_t**)          * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
+        EB_MALLOC(EbSystemResource_t**, encHandlePtr->outputReconBufferResourcePtrArray, sizeof(EbSystemResource_t*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
+        EB_MALLOC(EbFifo_t***, encHandlePtr->outputReconBufferProducerFifoPtrDblArray, sizeof(EbFifo_t**)          * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
+        EB_MALLOC(EbFifo_t***, encHandlePtr->outputReconBufferConsumerFifoPtrDblArray, sizeof(EbFifo_t**)          * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR, encHandlePtr);
         for (instanceIndex = 0; instanceIndex < encHandlePtr->encodeInstanceTotalCount; ++instanceIndex) {
             return_error = EbSystemResourceCtor(
                 &encHandlePtr->outputReconBufferResourcePtrArray[instanceIndex],
@@ -1054,7 +1076,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
                 &encHandlePtr->outputReconBufferConsumerFifoPtrDblArray[instanceIndex],
                 EB_TRUE,
                 EbOutputReconBufferHeaderCtor,
-                encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr);
+                encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr,
+                encHandlePtr);
             if (return_error == EB_ErrorInsufficientResources) {
                 return EB_ErrorInsufficientResources;
             }
@@ -1074,7 +1097,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             &encHandlePtr->resourceCoordinationResultsConsumerFifoPtrArray,
             EB_TRUE,
             ResourceCoordinationResultCtor,
-            &resourceCoordinationResultInitData);
+            &resourceCoordinationResultInitData,
+            encHandlePtr);
 
 		if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
@@ -1095,7 +1119,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             &encHandlePtr->pictureAnalysisResultsConsumerFifoPtrArray,
             EB_TRUE,
             PictureAnalysisResultCtor,
-            &pictureAnalysisResultInitData);
+            &pictureAnalysisResultInitData,
+            encHandlePtr);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -1114,7 +1139,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             &encHandlePtr->pictureDecisionResultsConsumerFifoPtrArray,
             EB_TRUE,
             PictureDecisionResultCtor,
-            &pictureDecisionResultInitData);
+            &pictureDecisionResultInitData,
+            encHandlePtr);
 	    if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -1133,7 +1159,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             &encHandlePtr->motionEstimationResultsConsumerFifoPtrArray,
             EB_TRUE,
             MotionEstimationResultsCtor,
-            &motionEstimationResultInitData);
+            &motionEstimationResultInitData,
+            encHandlePtr);
 		if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -1152,7 +1179,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
 			&encHandlePtr->initialRateControlResultsConsumerFifoPtrArray,
 			EB_TRUE,
 			InitialRateControlResultsCtor,
-			&initialRateControlResultInitData);
+			&initialRateControlResultInitData,
+            encHandlePtr);
 
 		if (return_error == EB_ErrorInsufficientResources){
 			return EB_ErrorInsufficientResources;
@@ -1172,7 +1200,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             &encHandlePtr->pictureDemuxResultsConsumerFifoPtrArray,
             EB_TRUE,
             PictureResultsCtor,
-            &pictureResultInitData);
+            &pictureResultInitData,
+            encHandlePtr);
 		if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -1191,7 +1220,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             &encHandlePtr->rateControlTasksConsumerFifoPtrArray,
             EB_TRUE,
             RateControlTasksCtor,
-            &rateControlTasksInitData);
+            &rateControlTasksInitData,
+            encHandlePtr);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -1210,7 +1240,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             &encHandlePtr->rateControlResultsConsumerFifoPtrArray,
             EB_TRUE,
             RateControlResultsCtor,
-            &rateControlResultInitData);
+            &rateControlResultInitData,
+            encHandlePtr);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -1239,7 +1270,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             &encHandlePtr->encDecTasksConsumerFifoPtrArray,
             EB_TRUE,
             EncDecTasksCtor,
-            &ModeDecisionResultInitData);
+            &ModeDecisionResultInitData,
+            encHandlePtr);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -1258,7 +1290,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             &encHandlePtr->encDecResultsConsumerFifoPtrArray,
             EB_TRUE,
             EncDecResultsCtor,
-            &encDecResultInitData);
+            &encDecResultInitData,
+            encHandlePtr);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -1277,7 +1310,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             &encHandlePtr->entropyCodingResultsConsumerFifoPtrArray,
             EB_TRUE,
             EntropyCodingResultsCtor,
-            &entropyCodingResultInitData);
+            &entropyCodingResultInitData,
+            encHandlePtr);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -1313,13 +1347,14 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         encHandlePtr->sequenceControlSetPoolProducerFifoPtrArray[0],
         encHandlePtr->appCallbackPtrArray,
         encHandlePtr->computeSegmentsTotalCountArray,
-        encHandlePtr->encodeInstanceTotalCount);
+        encHandlePtr->encodeInstanceTotalCount,
+        encHandlePtr);
 
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
     // Picture Analysis Context
-    EB_MALLOC(EB_PTR*, encHandlePtr->pictureAnalysisContextPtrArray, sizeof(EB_PTR) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->pictureAnalysisProcessInitCount, EB_N_PTR);
+    EB_MALLOC(EB_PTR*, encHandlePtr->pictureAnalysisContextPtrArray, sizeof(EB_PTR) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->pictureAnalysisProcessInitCount, EB_N_PTR, encHandlePtr);
 
 	for(processIndex=0; processIndex < encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->pictureAnalysisProcessInitCount; ++processIndex) {
 
@@ -1342,7 +1377,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             encHandlePtr->resourceCoordinationResultsConsumerFifoPtrArray[processIndex],
             encHandlePtr->pictureAnalysisResultsProducerFifoPtrArray[processIndex],
             ((encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->maxInputLumaWidth  + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE) *
-            ((encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->maxInputLumaHeight + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE));
+            ((encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->maxInputLumaHeight + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE),
+            encHandlePtr);
 
 
 	    if (return_error == EB_ErrorInsufficientResources){
@@ -1357,21 +1393,23 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         return_error = PictureDecisionContextCtor(
             (PictureDecisionContext_t**) &encHandlePtr->pictureDecisionContextPtr,
             encHandlePtr->pictureAnalysisResultsConsumerFifoPtrArray[0],
-            encHandlePtr->pictureDecisionResultsProducerFifoPtrArray[0]);
+            encHandlePtr->pictureDecisionResultsProducerFifoPtrArray[0],
+            encHandlePtr);
 	   if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
     	}
     }
 
     // Motion Analysis Context
-    EB_MALLOC(EB_PTR*, encHandlePtr->motionEstimationContextPtrArray, sizeof(EB_PTR) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->motionEstimationProcessInitCount, EB_N_PTR);
+    EB_MALLOC(EB_PTR*, encHandlePtr->motionEstimationContextPtrArray, sizeof(EB_PTR) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->motionEstimationProcessInitCount, EB_N_PTR, encHandlePtr);
 
     for(processIndex=0; processIndex < encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->motionEstimationProcessInitCount; ++processIndex) {
 
 	     return_error = MotionEstimationContextCtor(
 		    (MotionEstimationContext_t**) &encHandlePtr->motionEstimationContextPtrArray[processIndex],
 		    encHandlePtr->pictureDecisionResultsConsumerFifoPtrArray[processIndex],
-		    encHandlePtr->motionEstimationResultsProducerFifoPtrArray[processIndex]);
+             encHandlePtr->motionEstimationResultsProducerFifoPtrArray[processIndex],
+             encHandlePtr);
 
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
@@ -1382,19 +1420,21 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     return_error = InitialRateControlContextCtor(
         (InitialRateControlContext_t**) &encHandlePtr->initialRateControlContextPtr,
         encHandlePtr->motionEstimationResultsConsumerFifoPtrArray[0],
-        encHandlePtr->initialRateControlResultsProducerFifoPtrArray[0]);
+        encHandlePtr->initialRateControlResultsProducerFifoPtrArray[0],
+        encHandlePtr);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
 
 	// Source Based Operations Context
-    EB_MALLOC(EB_PTR*, encHandlePtr->sourceBasedOperationsContextPtrArray, sizeof(EB_PTR) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->sourceBasedOperationsProcessInitCount, EB_N_PTR);
+    EB_MALLOC(EB_PTR*, encHandlePtr->sourceBasedOperationsContextPtrArray, sizeof(EB_PTR) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->sourceBasedOperationsProcessInitCount, EB_N_PTR, encHandlePtr);
 
     for (processIndex = 0; processIndex < encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->sourceBasedOperationsProcessInitCount; ++processIndex) {
         return_error = SourceBasedOperationsContextCtor(
             (SourceBasedOperationsContext_t**)&encHandlePtr->sourceBasedOperationsContextPtrArray[processIndex],
             encHandlePtr->initialRateControlResultsConsumerFifoPtrArray[processIndex],
-            encHandlePtr->pictureDemuxResultsProducerFifoPtrArray[processIndex]);
+            encHandlePtr->pictureDemuxResultsProducerFifoPtrArray[processIndex],
+            encHandlePtr);
 	    if (return_error == EB_ErrorInsufficientResources){
 		    return EB_ErrorInsufficientResources;
 		}
@@ -1406,7 +1446,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         (PictureManagerContext_t**) &encHandlePtr->pictureManagerContextPtr,
         encHandlePtr->pictureDemuxResultsConsumerFifoPtrArray[0],
         encHandlePtr->rateControlTasksProducerFifoPtrArray[RateControlPortLookup(RATE_CONTROL_INPUT_PORT_PICTURE_MANAGER, 0)],
-        encHandlePtr->pictureControlSetPoolProducerFifoPtrDblArray[0]);//The Child PCS Pool here
+        encHandlePtr->pictureControlSetPoolProducerFifoPtrDblArray[0],
+        encHandlePtr);//The Child PCS Pool here
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
@@ -1415,7 +1456,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         (RateControlContext_t**) &encHandlePtr->rateControlContextPtr,
         encHandlePtr->rateControlTasksConsumerFifoPtrArray[0],
         encHandlePtr->rateControlResultsProducerFifoPtrArray[0],
-        encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->intraPeriodLength);
+        encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->intraPeriodLength,
+        encHandlePtr);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
@@ -1424,7 +1466,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
 	// Mode Decision Configuration Contexts
     {
 		// Mode Decision Configuration Contexts
-        EB_MALLOC(EB_PTR*, encHandlePtr->modeDecisionConfigurationContextPtrArray, sizeof(EB_PTR) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount, EB_N_PTR);
+        EB_MALLOC(EB_PTR*, encHandlePtr->modeDecisionConfigurationContextPtrArray, sizeof(EB_PTR) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount, EB_N_PTR, encHandlePtr);
 
         for(processIndex=0; processIndex < encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount; ++processIndex) {
             return_error = ModeDecisionConfigurationContextCtor(
@@ -1433,7 +1475,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
 
                 encHandlePtr->encDecTasksProducerFifoPtrArray[EncDecPortLookup(ENCDEC_INPUT_PORT_MDC, processIndex)],
                 ((encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->maxInputLumaWidth  + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE) *
-                ((encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->maxInputLumaHeight + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE) );
+                ((encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->maxInputLumaHeight + MAX_LCU_SIZE - 1) / MAX_LCU_SIZE),
+                encHandlePtr);
 
             if (return_error == EB_ErrorInsufficientResources){
                 return EB_ErrorInsufficientResources;
@@ -1449,7 +1492,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     }
 
     // EncDec Contexts
-    EB_MALLOC(EB_PTR*, encHandlePtr->encDecContextPtrArray, sizeof(EB_PTR) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->encDecProcessInitCount, EB_N_PTR);
+    EB_MALLOC(EB_PTR*, encHandlePtr->encDecContextPtrArray, sizeof(EB_PTR) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->encDecProcessInitCount, EB_N_PTR, encHandlePtr);
 
     for(processIndex=0; processIndex < encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->encDecProcessInitCount; ++processIndex) {
         return_error = EncDecContextCtor(
@@ -1459,14 +1502,15 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             encHandlePtr->encDecTasksProducerFifoPtrArray[EncDecPortLookup(ENCDEC_INPUT_PORT_ENCDEC, processIndex)],
             encHandlePtr->pictureDemuxResultsProducerFifoPtrArray[encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->sourceBasedOperationsProcessInitCount + processIndex], // Add port lookup logic here JMJ
             is16bit,
-            (EB_COLOR_FORMAT)encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->chromaFormatIdc);
+            (EB_COLOR_FORMAT)encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->chromaFormatIdc,
+            encHandlePtr);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
     }
 
     // Entropy Coding Contexts
-    EB_MALLOC(EB_PTR*, encHandlePtr->entropyCodingContextPtrArray, sizeof(EB_PTR) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->entropyCodingProcessInitCount, EB_N_PTR);
+    EB_MALLOC(EB_PTR*, encHandlePtr->entropyCodingContextPtrArray, sizeof(EB_PTR) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->entropyCodingProcessInitCount, EB_N_PTR, encHandlePtr);
 
     for(processIndex=0; processIndex < encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->entropyCodingProcessInitCount; ++processIndex) {
         return_error = EntropyCodingContextCtor(
@@ -1474,7 +1518,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             encHandlePtr->encDecResultsConsumerFifoPtrArray[processIndex],
             encHandlePtr->entropyCodingResultsProducerFifoPtrArray[processIndex],
             encHandlePtr->rateControlTasksProducerFifoPtrArray[RateControlPortLookup(RATE_CONTROL_INPUT_PORT_ENTROPY_CODING, processIndex)],
-            is16bit);
+            is16bit,
+            encHandlePtr);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -1485,8 +1530,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         (PacketizationContext_t**) &encHandlePtr->packetizationContextPtr,
         encHandlePtr->entropyCodingResultsConsumerFifoPtrArray[0],
         encHandlePtr->rateControlTasksProducerFifoPtrArray[RateControlPortLookup(RATE_CONTROL_INPUT_PORT_PACKETIZATION, 0)],
-        encHandlePtr->pictureDemuxResultsProducerFifoPtrArray[encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->sourceBasedOperationsProcessInitCount + encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->encDecProcessInitCount] // Add port lookup logic here JMJ
-    );
+        encHandlePtr->pictureDemuxResultsProducerFifoPtrArray[encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->sourceBasedOperationsProcessInitCount + encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->encDecProcessInitCount], // Add port lookup logic here JMJ
+        encHandlePtr);
 
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
@@ -1499,64 +1544,64 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     EbHevcSetThreadManagementParameters(configPtr);
 
     // Resource Coordination
-    EB_CREATETHREAD(EB_HANDLE, encHandlePtr->resourceCoordinationThreadHandle, sizeof(EB_HANDLE), EB_THREAD, ResourceCoordinationKernel, encHandlePtr->resourceCoordinationContextPtr);
+    EB_CREATETHREAD(EB_HANDLE, encHandlePtr->resourceCoordinationThreadHandle, sizeof(EB_HANDLE), EB_THREAD, ResourceCoordinationKernel, encHandlePtr->resourceCoordinationContextPtr, encHandlePtr);
 
     // Picture Analysis
-    EB_MALLOC(EB_HANDLE*, encHandlePtr->pictureAnalysisThreadHandleArray, sizeof(EB_HANDLE) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->pictureAnalysisProcessInitCount, EB_N_PTR);
+    EB_MALLOC(EB_HANDLE*, encHandlePtr->pictureAnalysisThreadHandleArray, sizeof(EB_HANDLE) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->pictureAnalysisProcessInitCount, EB_N_PTR, encHandlePtr);
 
     for(processIndex=0; processIndex < encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->pictureAnalysisProcessInitCount; ++processIndex) {
-        EB_CREATETHREAD(EB_HANDLE, encHandlePtr->pictureAnalysisThreadHandleArray[processIndex], sizeof(EB_HANDLE), EB_THREAD, PictureAnalysisKernel, encHandlePtr->pictureAnalysisContextPtrArray[processIndex]);
+        EB_CREATETHREAD(EB_HANDLE, encHandlePtr->pictureAnalysisThreadHandleArray[processIndex], sizeof(EB_HANDLE), EB_THREAD, PictureAnalysisKernel, encHandlePtr->pictureAnalysisContextPtrArray[processIndex], encHandlePtr);
     }
 
     // Picture Decision
-    EB_CREATETHREAD(EB_HANDLE, encHandlePtr->pictureDecisionThreadHandle, sizeof(EB_HANDLE), EB_THREAD, PictureDecisionKernel, encHandlePtr->pictureDecisionContextPtr);
+    EB_CREATETHREAD(EB_HANDLE, encHandlePtr->pictureDecisionThreadHandle, sizeof(EB_HANDLE), EB_THREAD, PictureDecisionKernel, encHandlePtr->pictureDecisionContextPtr, encHandlePtr);
 
     // Motion Estimation
-    EB_MALLOC(EB_HANDLE*, encHandlePtr->motionEstimationThreadHandleArray, sizeof(EB_HANDLE) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->motionEstimationProcessInitCount, EB_N_PTR);
+    EB_MALLOC(EB_HANDLE*, encHandlePtr->motionEstimationThreadHandleArray, sizeof(EB_HANDLE) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->motionEstimationProcessInitCount, EB_N_PTR, encHandlePtr);
 
     for(processIndex=0; processIndex < encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->motionEstimationProcessInitCount; ++processIndex) {
-        EB_CREATETHREAD(EB_HANDLE, encHandlePtr->motionEstimationThreadHandleArray[processIndex], sizeof(EB_HANDLE), EB_THREAD, MotionEstimationKernel, encHandlePtr->motionEstimationContextPtrArray[processIndex]);
+        EB_CREATETHREAD(EB_HANDLE, encHandlePtr->motionEstimationThreadHandleArray[processIndex], sizeof(EB_HANDLE), EB_THREAD, MotionEstimationKernel, encHandlePtr->motionEstimationContextPtrArray[processIndex], encHandlePtr);
     }
 
     // Initial Rate Control
-    EB_CREATETHREAD(EB_HANDLE, encHandlePtr->initialRateControlThreadHandle, sizeof(EB_HANDLE), EB_THREAD, InitialRateControlKernel, encHandlePtr->initialRateControlContextPtr);
+    EB_CREATETHREAD(EB_HANDLE, encHandlePtr->initialRateControlThreadHandle, sizeof(EB_HANDLE), EB_THREAD, InitialRateControlKernel, encHandlePtr->initialRateControlContextPtr, encHandlePtr);
 
 	// Source Based Oprations
-    EB_MALLOC(EB_HANDLE*, encHandlePtr->sourceBasedOperationsThreadHandleArray, sizeof(EB_HANDLE) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->sourceBasedOperationsProcessInitCount, EB_N_PTR);
+    EB_MALLOC(EB_HANDLE*, encHandlePtr->sourceBasedOperationsThreadHandleArray, sizeof(EB_HANDLE) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->sourceBasedOperationsProcessInitCount, EB_N_PTR, encHandlePtr);
 
     for (processIndex = 0; processIndex < encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->sourceBasedOperationsProcessInitCount; ++processIndex) {
-	    EB_CREATETHREAD(EB_HANDLE, encHandlePtr->sourceBasedOperationsThreadHandleArray[processIndex], sizeof(EB_HANDLE), EB_THREAD, SourceBasedOperationsKernel, encHandlePtr->sourceBasedOperationsContextPtrArray[processIndex]);
+	    EB_CREATETHREAD(EB_HANDLE, encHandlePtr->sourceBasedOperationsThreadHandleArray[processIndex], sizeof(EB_HANDLE), EB_THREAD, SourceBasedOperationsKernel, encHandlePtr->sourceBasedOperationsContextPtrArray[processIndex], encHandlePtr);
     }
 
     // Picture Manager
-    EB_CREATETHREAD(EB_HANDLE, encHandlePtr->pictureManagerThreadHandle, sizeof(EB_HANDLE), EB_THREAD, PictureManagerKernel, encHandlePtr->pictureManagerContextPtr);
+    EB_CREATETHREAD(EB_HANDLE, encHandlePtr->pictureManagerThreadHandle, sizeof(EB_HANDLE), EB_THREAD, PictureManagerKernel, encHandlePtr->pictureManagerContextPtr, encHandlePtr);
 
     // Rate Control
-    EB_CREATETHREAD(EB_HANDLE, encHandlePtr->rateControlThreadHandle, sizeof(EB_HANDLE), EB_THREAD, RateControlKernel, encHandlePtr->rateControlContextPtr);
+    EB_CREATETHREAD(EB_HANDLE, encHandlePtr->rateControlThreadHandle, sizeof(EB_HANDLE), EB_THREAD, RateControlKernel, encHandlePtr->rateControlContextPtr, encHandlePtr);
 
     // Mode Decision Configuration Process
-    EB_MALLOC(EB_HANDLE*, encHandlePtr->modeDecisionConfigurationThreadHandleArray, sizeof(EB_HANDLE) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount, EB_N_PTR);
+    EB_MALLOC(EB_HANDLE*, encHandlePtr->modeDecisionConfigurationThreadHandleArray, sizeof(EB_HANDLE) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount, EB_N_PTR, encHandlePtr);
 
     for(processIndex=0; processIndex < encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount; ++processIndex) {
-        EB_CREATETHREAD(EB_HANDLE, encHandlePtr->modeDecisionConfigurationThreadHandleArray[processIndex], sizeof(EB_HANDLE), EB_THREAD, ModeDecisionConfigurationKernel, encHandlePtr->modeDecisionConfigurationContextPtrArray[processIndex]);
+        EB_CREATETHREAD(EB_HANDLE, encHandlePtr->modeDecisionConfigurationThreadHandleArray[processIndex], sizeof(EB_HANDLE), EB_THREAD, ModeDecisionConfigurationKernel, encHandlePtr->modeDecisionConfigurationContextPtrArray[processIndex], encHandlePtr);
     }
 
     // EncDec Process
-    EB_MALLOC(EB_HANDLE*, encHandlePtr->encDecThreadHandleArray, sizeof(EB_HANDLE) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->encDecProcessInitCount, EB_N_PTR);
+    EB_MALLOC(EB_HANDLE*, encHandlePtr->encDecThreadHandleArray, sizeof(EB_HANDLE) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->encDecProcessInitCount, EB_N_PTR, encHandlePtr);
 
     for(processIndex=0; processIndex < encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->encDecProcessInitCount; ++processIndex) {
-        EB_CREATETHREAD(EB_HANDLE, encHandlePtr->encDecThreadHandleArray[processIndex], sizeof(EB_HANDLE), EB_THREAD, EncDecKernel, encHandlePtr->encDecContextPtrArray[processIndex]);
+        EB_CREATETHREAD(EB_HANDLE, encHandlePtr->encDecThreadHandleArray[processIndex], sizeof(EB_HANDLE), EB_THREAD, EncDecKernel, encHandlePtr->encDecContextPtrArray[processIndex], encHandlePtr);
     }
 
     // Entropy Coding Process
-    EB_MALLOC(EB_HANDLE*, encHandlePtr->entropyCodingThreadHandleArray, sizeof(EB_HANDLE) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->entropyCodingProcessInitCount, EB_N_PTR);
+    EB_MALLOC(EB_HANDLE*, encHandlePtr->entropyCodingThreadHandleArray, sizeof(EB_HANDLE) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->entropyCodingProcessInitCount, EB_N_PTR, encHandlePtr);
 
     for(processIndex=0; processIndex < encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->entropyCodingProcessInitCount; ++processIndex) {
-        EB_CREATETHREAD(EB_HANDLE, encHandlePtr->entropyCodingThreadHandleArray[processIndex], sizeof(EB_HANDLE), EB_THREAD, EntropyCodingKernel, encHandlePtr->entropyCodingContextPtrArray[processIndex]);
+        EB_CREATETHREAD(EB_HANDLE, encHandlePtr->entropyCodingThreadHandleArray[processIndex], sizeof(EB_HANDLE), EB_THREAD, EntropyCodingKernel, encHandlePtr->entropyCodingContextPtrArray[processIndex], encHandlePtr);
     }
 
     // Packetization
-    EB_CREATETHREAD(EB_HANDLE, encHandlePtr->packetizationThreadHandle, sizeof(EB_HANDLE), EB_THREAD, PacketizationKernel, encHandlePtr->packetizationContextPtr);
+    EB_CREATETHREAD(EB_HANDLE, encHandlePtr->packetizationThreadHandle, sizeof(EB_HANDLE), EB_THREAD, PacketizationKernel, encHandlePtr->packetizationContextPtr, encHandlePtr);
 
 #if DISPLAY_MEMORY
     EB_MEMORY();
@@ -1576,6 +1621,8 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_S32              ptrIndex     = 0 ;
     EbMemoryMapEntry*   memoryEntry  = (EbMemoryMapEntry*)EB_NULL;
+    struct list_head *pos, *n;
+    enc_ctx_mem_map_t *enc_ctx_mm_entry = EB_NULL;
 
     if (encHandlePtr){
         //Jing: Send signal to quit thread
@@ -1592,7 +1639,14 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         EB_SEND_END_OBJ(encHandlePtr->encDecResultsProducerFifoPtrArray, encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->entropyCodingProcessInitCount)
         EB_SEND_END_OBJ(encHandlePtr->entropyCodingResultsProducerFifoPtrArray, EB_PacketizationProcessInitCount)
 
-        if (encHandlePtr->memoryMapIndex){
+        list_for_each_safe(pos, n, &enc_ctx_mem_map_manager) {
+            enc_ctx_mm_entry = list_entry(pos, enc_ctx_mem_map_t, list);
+            if (enc_ctx_mm_entry->encHandlePtr == encHandlePtr) {
+                break;
+            }
+        }
+
+        if (enc_ctx_mm_entry && enc_ctx_mm_entry->memoryMapIndex){
             // Loop through the ptr table and free all malloc'd pointers per channel
 
             // Destroy all the kernel threads at first as the work around for race condition.
@@ -1600,8 +1654,8 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             // at any time, when some kernel threads may keep processing. So that some of them
             // (such as EncDecKernel) still need to access to the memory resources which would
             // be freed (but should have been unreferenced).
-            for (ptrIndex = (encHandlePtr->memoryMapIndex) - 1; ptrIndex >= 0; --ptrIndex) {
-                memoryEntry = &encHandlePtr->memoryMap[ptrIndex];
+            for (ptrIndex = (enc_ctx_mm_entry->memoryMapIndex) - 1; ptrIndex >= 0; --ptrIndex) {
+                memoryEntry = &enc_ctx_mm_entry->memoryMap[ptrIndex];
                 switch (memoryEntry->ptrType) {
                 case EB_THREAD:
                     EbDestroyThread(memoryEntry->ptr);
@@ -1611,8 +1665,8 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
                 }
             }
 
-            for (ptrIndex = (encHandlePtr->memoryMapIndex) - 1; ptrIndex >= 0; --ptrIndex) {
-                memoryEntry = &encHandlePtr->memoryMap[ptrIndex];
+            for (ptrIndex = (enc_ctx_mm_entry->memoryMapIndex) - 1; ptrIndex >= 0; --ptrIndex) {
+                memoryEntry = &enc_ctx_mm_entry->memoryMap[ptrIndex];
                 switch (memoryEntry->ptrType) {
                 case EB_N_PTR:
                     free(memoryEntry->ptr);
@@ -1636,8 +1690,10 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
                 }
             }
 
-            if (encHandlePtr->memoryMap != (EbMemoryMapEntry*) NULL) {
-                free(encHandlePtr->memoryMap);
+            if (enc_ctx_mm_entry->memoryMap != (EbMemoryMapEntry*) NULL) {
+                list_del(&enc_ctx_mm_entry->list);
+                free(enc_ctx_mm_entry->memoryMap);
+                free(enc_ctx_mm_entry);
             }
 
             //(void)(encHandlePtr);
@@ -3148,7 +3204,8 @@ EB_API EB_ERRORTYPE EbH265EncSetParameter(
     // Initialize the Prediction Structure Group
     return_error = (EB_ERRORTYPE)PredictionStructureGroupCtor(
         &pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->encodeContextPtr->predictionStructureGroupPtr,
-        pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.baseLayerSwitchMode);
+        pEncCompData->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->staticConfig.baseLayerSwitchMode,
+        pEncCompData);
 
     if (return_error == EB_ErrorInsufficientResources) {
         return EB_ErrorInsufficientResources;
@@ -3189,8 +3246,8 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     EB_BUFFERHEADERTYPE    *outputStreamBuffer;
 
     // Output buffer Allocation
-    EB_MALLOC(EB_BUFFERHEADERTYPE*, outputStreamBuffer, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR);
-    EB_MALLOC(EB_U8*, outputStreamBuffer->pBuffer, sizeof(EB_U8) * PACKETIZATION_PROCESS_BUFFER_SIZE, EB_N_PTR);
+    EB_MALLOC(EB_BUFFERHEADERTYPE*, outputStreamBuffer, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, pEncCompData);
+    EB_MALLOC(EB_U8*, outputStreamBuffer->pBuffer, sizeof(EB_U8) * PACKETIZATION_PROCESS_BUFFER_SIZE, EB_N_PTR, pEncCompData);
     outputStreamBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
     outputStreamBuffer->nAllocLen = PACKETIZATION_PROCESS_BUFFER_SIZE;
     outputStreamBuffer->pAppPrivate = NULL;
@@ -3198,13 +3255,14 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     outputStreamBuffer->nFilledLen = 0;
 
     // Intermediate buffers
-    EB_MALLOC(EbPPSConfig_t*, ppsConfig, sizeof(EbPPSConfig_t), EB_N_PTR);
-    EB_MALLOC(Bitstream_t*, bitstreamPtr, sizeof(Bitstream_t), EB_N_PTR);
-    EB_MALLOC(OutputBitstreamUnit_t*, bitstreamPtr->outputBitstreamPtr, sizeof(OutputBitstreamUnit_t), EB_N_PTR);
+    EB_MALLOC(EbPPSConfig_t*, ppsConfig, sizeof(EbPPSConfig_t), EB_N_PTR, pEncCompData);
+    EB_MALLOC(Bitstream_t*, bitstreamPtr, sizeof(Bitstream_t), EB_N_PTR, pEncCompData);
+    EB_MALLOC(OutputBitstreamUnit_t*, bitstreamPtr->outputBitstreamPtr, sizeof(OutputBitstreamUnit_t), EB_N_PTR, pEncCompData);
 
     return_error = OutputBitstreamUnitCtor(
         (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr,
-        PACKETIZATION_PROCESS_BUFFER_SIZE);
+        PACKETIZATION_PROCESS_BUFFER_SIZE,
+        pEncCompData);
 
     // Reset the bitstream before writing to it
     ResetBitstream(
@@ -3287,8 +3345,8 @@ EB_API EB_ERRORTYPE EbH265EncEosNal(
     EB_BUFFERHEADERTYPE    *outputStreamBuffer;
 
     // Output buffer Allocation
-    EB_MALLOC(EB_BUFFERHEADERTYPE*, outputStreamBuffer, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR);
-    EB_MALLOC(EB_U8*, outputStreamBuffer->pBuffer, sizeof(EB_U8) * PACKETIZATION_PROCESS_BUFFER_SIZE, EB_N_PTR);
+    EB_MALLOC(EB_BUFFERHEADERTYPE*, outputStreamBuffer, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, pEncCompData);
+    EB_MALLOC(EB_U8*, outputStreamBuffer->pBuffer, sizeof(EB_U8) * PACKETIZATION_PROCESS_BUFFER_SIZE, EB_N_PTR, pEncCompData);
     outputStreamBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
     outputStreamBuffer->nAllocLen = PACKETIZATION_PROCESS_BUFFER_SIZE;
     outputStreamBuffer->pAppPrivate = NULL;
@@ -3296,12 +3354,13 @@ EB_API EB_ERRORTYPE EbH265EncEosNal(
     outputStreamBuffer->nFilledLen = 0;
 
     //
-    EB_MALLOC(Bitstream_t*, bitstreamPtr, sizeof(Bitstream_t), EB_N_PTR);
-    EB_MALLOC(OutputBitstreamUnit_t*, bitstreamPtr->outputBitstreamPtr, sizeof(OutputBitstreamUnit_t), EB_N_PTR);
+    EB_MALLOC(Bitstream_t*, bitstreamPtr, sizeof(Bitstream_t), EB_N_PTR, pEncCompData);
+    EB_MALLOC(OutputBitstreamUnit_t*, bitstreamPtr->outputBitstreamPtr, sizeof(OutputBitstreamUnit_t), EB_N_PTR, pEncCompData);
 
     return_error = OutputBitstreamUnitCtor(
         (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr,
-        EOS_NAL_BUFFER_SIZE);
+        EOS_NAL_BUFFER_SIZE,
+        pEncCompData);
 
     // Reset the bitstream before writing to it
     ResetBitstream(
@@ -3386,7 +3445,8 @@ static EB_ERRORTYPE BaseDecodeFunction(EB_U8* encodedString, EB_U32 base64Encode
 
 static EB_ERRORTYPE ParseSeiMetaData(
     EB_BUFFERHEADERTYPE         *dst,
-    EB_BUFFERHEADERTYPE         *src)
+    EB_BUFFERHEADERTYPE         *src,
+    EB_HANDLE                    encHandle)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
@@ -3403,7 +3463,7 @@ static EB_ERRORTYPE ParseSeiMetaData(
     base64Encode = src->naluBase64Encode;
     base64EncodeLength = (uint32_t)strlen((char*)base64Encode);
     base64DecodeLength = (base64EncodeLength / 4) * 3;
-    EB_MALLOC(EB_U8*, base64Decode, base64DecodeLength, EB_N_PTR);
+    EB_MALLOC(EB_U8*, base64Decode, base64DecodeLength, EB_N_PTR, encHandle);
 
     return_error = BaseDecodeFunction(base64Encode, base64EncodeLength, base64Decode, base64DecodeLength);
 
@@ -3417,7 +3477,7 @@ static EB_ERRORTYPE ParseSeiMetaData(
         EB_U64 currentPOC = src->pts;
         if (currentPOC == src->naluPOC) {
             headerPtr->userSeiMsg.payloadSize = (base64EncodeLength / 4) * 3;
-            EB_MALLOC(EB_U8*, headerPtr->userSeiMsg.payload, headerPtr->userSeiMsg.payloadSize, EB_N_PTR);
+            EB_MALLOC(EB_U8*, headerPtr->userSeiMsg.payload, headerPtr->userSeiMsg.payloadSize, EB_N_PTR, encHandle);
             if (src->naluPayloadType == 4)
                 headerPtr->userSeiMsg.payloadType = USER_DATA_REGISTERED_ITU_T_T35;
             else if (src->naluPayloadType == 5)
@@ -3446,7 +3506,8 @@ static EB_ERRORTYPE ParseSeiMetaData(
 static EB_ERRORTYPE CopyUserSei(
     SequenceControlSet_t*    sequenceControlSetPtr,
     EB_BUFFERHEADERTYPE*     dst,
-    EB_BUFFERHEADERTYPE*     src)
+    EB_BUFFERHEADERTYPE*     src,
+    EB_HANDLE                encHandle)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_H265_ENC_CONFIGURATION   *config = &sequenceControlSetPtr->staticConfig;
@@ -3458,7 +3519,7 @@ static EB_ERRORTYPE CopyUserSei(
 
     // Copy User SEI metadata from input
     if (config->useNaluFile) {
-        return_error = ParseSeiMetaData(dst, src);
+        return_error = ParseSeiMetaData(dst, src, encHandle);
     }
     else {
         dstPicturePtr->userSeiMsg.payloadSize = 0;
@@ -3474,7 +3535,8 @@ static EB_ERRORTYPE CopyUserSei(
 static EB_ERRORTYPE CopyFrameBuffer(
     SequenceControlSet_t        *sequenceControlSetPtr,
     EB_U8      			        *dst,
-    EB_U8      			        *src)
+    EB_U8      			        *src,
+    EB_HANDLE                    encHandle)
 {
     EB_H265_ENC_CONFIGURATION   *config = &sequenceControlSetPtr->staticConfig;
     EB_ERRORTYPE   return_error = EB_ErrorNone;
@@ -3660,7 +3722,7 @@ static EB_ERRORTYPE CopyFrameBuffer(
     // Copy Dolby Vision RPU metadata from input
     if (inputPtr->dolbyVisionRpu.payloadSize) {
         inputPicturePtr->dolbyVisionRpu.payloadSize = inputPtr->dolbyVisionRpu.payloadSize;
-        EB_MALLOC(EB_U8*, inputPicturePtr->dolbyVisionRpu.payload, inputPtr->dolbyVisionRpu.payloadSize, EB_N_PTR);
+        EB_MALLOC(EB_U8*, inputPicturePtr->dolbyVisionRpu.payload, inputPtr->dolbyVisionRpu.payloadSize, EB_N_PTR, encHandle);
         EB_MEMCPY(inputPicturePtr->dolbyVisionRpu.payload, inputPtr->dolbyVisionRpu.payload, inputPtr->dolbyVisionRpu.payloadSize);
     }
     else {
@@ -3674,7 +3736,8 @@ static EB_ERRORTYPE CopyFrameBuffer(
 static EB_ERRORTYPE  CopyInputBuffer(
     SequenceControlSet_t*    sequenceControlSet,
     EB_BUFFERHEADERTYPE*     dst,
-    EB_BUFFERHEADERTYPE*     src
+    EB_BUFFERHEADERTYPE*     src,
+    EB_HANDLE                encHandle
 )
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
@@ -3692,7 +3755,7 @@ static EB_ERRORTYPE  CopyInputBuffer(
 
     // Copy the picture buffer
     if(src->pBuffer != NULL)
-        return_error = CopyFrameBuffer(sequenceControlSet, dst->pBuffer, src->pBuffer);
+        return_error = CopyFrameBuffer(sequenceControlSet, dst->pBuffer, src->pBuffer, encHandle);
 
     if (return_error != EB_ErrorNone)
         return return_error;
@@ -3700,7 +3763,7 @@ static EB_ERRORTYPE  CopyInputBuffer(
 
     // Copy User SEI
     if (src->pBuffer != NULL)
-        CopyUserSei(sequenceControlSet, dst, src);
+        CopyUserSei(sequenceControlSet, dst, src, encHandle);
 
     if (src->segmentOvPtr != NULL && dst->segmentOvPtr != NULL && sequenceControlSet->staticConfig.segmentOvEnabled) {
         EB_MEMCPY(dst->segmentOvPtr, src->segmentOvPtr, sequenceControlSet->lcuTotalCount * sizeof(SegmentOverride_t));
@@ -3735,7 +3798,8 @@ EB_API EB_ERRORTYPE EbH265EncSendPicture(
         return_error = CopyInputBuffer(
             encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr,
             (EB_BUFFERHEADERTYPE*)ebWrapperPtr->objectPtr,
-            pBuffer);
+            pBuffer,
+            encHandlePtr);
 
         if (return_error != EB_ErrorNone)
         {
@@ -3956,12 +4020,14 @@ EB_ERRORTYPE InitH265EncoderHandle(
 }
 EB_ERRORTYPE AllocateFrameBuffer(
     SequenceControlSet_t       *sequenceControlSetPtr,
-    EB_BUFFERHEADERTYPE        *inputBuffer)
+    EB_BUFFERHEADERTYPE        *inputBuffer,
+    EB_HANDLE                   encHandle)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
     EbPictureBufferDescInitData_t inputPictureBufferDescInitData;
     EB_H265_ENC_CONFIGURATION   * config = &sequenceControlSetPtr->staticConfig;
     EB_U8 is16bit = config->encoderBitDepth > 8 ? 1 : 0;
+
     // Init Picture Init data
     inputPictureBufferDescInitData.maxWidth  = (EB_U16)sequenceControlSetPtr->maxInputLumaWidth;
     inputPictureBufferDescInitData.maxHeight = (EB_U16)sequenceControlSetPtr->maxInputLumaHeight;
@@ -3991,7 +4057,8 @@ EB_ERRORTYPE AllocateFrameBuffer(
     // Enhanced Picture Buffer
     return_error = EbPictureBufferDescCtor(
         (EB_PTR*) &(inputBuffer->pBuffer),
-        (EB_PTR)&inputPictureBufferDescInitData);
+        (EB_PTR)&inputPictureBufferDescInitData,
+        encHandle);
 
     if (return_error == EB_ErrorInsufficientResources) {
         return EB_ErrorInsufficientResources;
@@ -4002,9 +4069,9 @@ EB_ERRORTYPE AllocateFrameBuffer(
         const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)sequenceControlSetPtr->chromaFormatIdc;
 
         //pack 4 2bit pixels into 1Byte
-        EB_ALLIGN_MALLOC(EB_U8*, ((EbPictureBufferDesc_t*)(inputBuffer->pBuffer))->bufferBitIncY,  sizeof(EB_U8) * (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4), EB_A_PTR);
-        EB_ALLIGN_MALLOC(EB_U8*, ((EbPictureBufferDesc_t*)(inputBuffer->pBuffer))->bufferBitIncCb, sizeof(EB_U8) * (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4) >> (3 - colorFormat), EB_A_PTR);
-        EB_ALLIGN_MALLOC(EB_U8*, ((EbPictureBufferDesc_t*)(inputBuffer->pBuffer))->bufferBitIncCr, sizeof(EB_U8) * (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4) >> (3 - colorFormat), EB_A_PTR);
+        EB_ALLIGN_MALLOC(EB_U8*, ((EbPictureBufferDesc_t*)(inputBuffer->pBuffer))->bufferBitIncY,  sizeof(EB_U8) * (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4), EB_A_PTR, encHandle);
+        EB_ALLIGN_MALLOC(EB_U8*, ((EbPictureBufferDesc_t*)(inputBuffer->pBuffer))->bufferBitIncCb, sizeof(EB_U8) * (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4) >> (3 - colorFormat), EB_A_PTR, encHandle);
+        EB_ALLIGN_MALLOC(EB_U8*, ((EbPictureBufferDesc_t*)(inputBuffer->pBuffer))->bufferBitIncCr, sizeof(EB_U8) * (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4) >> (3 - colorFormat), EB_A_PTR, encHandle);
     }
 
     return return_error;
@@ -4016,23 +4083,25 @@ EB_ERRORTYPE AllocateFrameBuffer(
 **************************************/
 EB_ERRORTYPE EbInputBufferHeaderCtor(
     EB_PTR *objectDblPtr,
-    EB_PTR  objectInitDataPtr)
+    EB_PTR  objectInitDataPtr,
+    EB_HANDLE encHandle)
 {
     EB_BUFFERHEADERTYPE* inputBuffer;
     SequenceControlSet_t        *sequenceControlSetPtr = (SequenceControlSet_t*)objectInitDataPtr;
-    EB_MALLOC(EB_BUFFERHEADERTYPE*, inputBuffer, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR);
+    EB_MALLOC(EB_BUFFERHEADERTYPE*, inputBuffer, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, encHandle);
     *objectDblPtr = (EB_PTR)inputBuffer;
     // Initialize Header
     inputBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
 
     AllocateFrameBuffer(
         sequenceControlSetPtr,
-        inputBuffer);
+        inputBuffer,
+        encHandle);
 
     inputBuffer->pAppPrivate = NULL;
 
     if (sequenceControlSetPtr->staticConfig.segmentOvEnabled) {
-        EB_MALLOC(SegmentOverride_t*, inputBuffer->segmentOvPtr, sizeof(SegmentOverride_t) * sequenceControlSetPtr->lcuTotalCount, EB_N_PTR);
+        EB_MALLOC(SegmentOverride_t*, inputBuffer->segmentOvPtr, sizeof(SegmentOverride_t) * sequenceControlSetPtr->lcuTotalCount, EB_N_PTR, encHandle);
     }
     else {
         inputBuffer->segmentOvPtr = NULL;
@@ -4046,13 +4115,14 @@ EB_ERRORTYPE EbInputBufferHeaderCtor(
  **************************************/
 EB_ERRORTYPE EbOutputBufferHeaderCtor(
     EB_PTR *objectDblPtr,
-    EB_PTR objectInitDataPtr)
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle)
 {
     EB_H265_ENC_CONFIGURATION   * config = (EB_H265_ENC_CONFIGURATION*)objectInitDataPtr;
     EB_U32 nStride = (EB_U32)(EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->sourceWidth * config->sourceHeight));  //TBC
 	EB_BUFFERHEADERTYPE* outBufPtr;
 
-	EB_MALLOC(EB_BUFFERHEADERTYPE*, outBufPtr, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR);
+	EB_MALLOC(EB_BUFFERHEADERTYPE*, outBufPtr, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, encHandle);
 	*objectDblPtr = (EB_PTR)outBufPtr;
 
     //Jing:TODO
@@ -4066,7 +4136,7 @@ EB_ERRORTYPE EbOutputBufferHeaderCtor(
 	// Initialize Header
 	outBufPtr->nSize = sizeof(EB_BUFFERHEADERTYPE);
 
-	EB_MALLOC(EB_U8*, outBufPtr->pBuffer, nStride, EB_N_PTR);
+	EB_MALLOC(EB_U8*, outBufPtr->pBuffer, nStride, EB_N_PTR, encHandle);
 
 	outBufPtr->nAllocLen =  nStride;
 	outBufPtr->pAppPrivate = NULL;
@@ -4081,7 +4151,8 @@ EB_ERRORTYPE EbOutputBufferHeaderCtor(
 **************************************/
 EB_ERRORTYPE EbOutputReconBufferHeaderCtor(
     EB_PTR *objectDblPtr,
-    EB_PTR  objectInitDataPtr)
+    EB_PTR  objectInitDataPtr,
+    EB_HANDLE encHandle)
 {
     EB_BUFFERHEADERTYPE         *reconBuffer;
     SequenceControlSet_t        *sequenceControlSetPtr = (SequenceControlSet_t*)objectInitDataPtr;
@@ -4092,14 +4163,14 @@ EB_ERRORTYPE EbOutputReconBufferHeaderCtor(
     const EB_U32 tenBit = (sequenceControlSetPtr->staticConfig.encoderBitDepth > 8);
     const EB_U32 frameSize = (lumaSize + 2 * chromaSize) << tenBit;
 
-    EB_MALLOC(EB_BUFFERHEADERTYPE*, reconBuffer, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR);
+    EB_MALLOC(EB_BUFFERHEADERTYPE*, reconBuffer, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, encHandle);
     *objectDblPtr = (EB_PTR)reconBuffer;
 
     // Initialize Header
     reconBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
 
     // Assign the variables
-    EB_MALLOC(EB_U8*, reconBuffer->pBuffer, frameSize, EB_N_PTR);
+    EB_MALLOC(EB_U8*, reconBuffer->pBuffer, frameSize, EB_N_PTR, encHandle);
 
     reconBuffer->nAllocLen   = frameSize;
     reconBuffer->pAppPrivate = NULL;

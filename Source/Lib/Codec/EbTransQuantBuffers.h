@@ -24,7 +24,8 @@ typedef struct EbTransQuantBuffers_s
 
   
 extern EB_ERRORTYPE EbTransQuantBuffersCtor(
-	EbTransQuantBuffers_t			*transQuantBuffersPtr);  
+	EbTransQuantBuffers_t			*transQuantBuffersPtr,
+    EB_HANDLE                        encHandle);
     
    
 #ifdef __cplusplus

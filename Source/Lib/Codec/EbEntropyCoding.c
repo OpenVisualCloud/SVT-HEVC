@@ -9280,16 +9280,17 @@ EB_ERRORTYPE CopyRbspBitstreamToPayload(
 
 EB_ERRORTYPE BitstreamCtor(
 	Bitstream_t **bitstreamDblPtr,
-	EB_U32 bufferSize)
+	EB_U32 bufferSize,
+    EB_HANDLE encHandle)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
-    EB_MALLOC(Bitstream_t*, *bitstreamDblPtr, sizeof(Bitstream_t), EB_N_PTR);
+    EB_MALLOC(Bitstream_t*, *bitstreamDblPtr, sizeof(Bitstream_t), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_PTR, (*bitstreamDblPtr)->outputBitstreamPtr, sizeof(OutputBitstreamUnit_t), EB_N_PTR);
+    EB_MALLOC(EB_PTR, (*bitstreamDblPtr)->outputBitstreamPtr, sizeof(OutputBitstreamUnit_t), EB_N_PTR, encHandle);
 
     return_error = OutputBitstreamUnitCtor(
 		(OutputBitstreamUnit_t *)(*bitstreamDblPtr)->outputBitstreamPtr,
-		bufferSize);
+		bufferSize, encHandle);
 
     return return_error;
 }
@@ -9299,12 +9300,13 @@ EB_ERRORTYPE BitstreamCtor(
 
 EB_ERRORTYPE EntropyCoderCtor(
 	EntropyCoder_t **entropyCoderDblPtr,
-	EB_U32 bufferSize)
+	EB_U32 bufferSize,
+    EB_HANDLE encHandle)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
-    EB_MALLOC(EntropyCoder_t*, *entropyCoderDblPtr, sizeof(EntropyCoder_t), EB_N_PTR);
+    EB_MALLOC(EntropyCoder_t*, *entropyCoderDblPtr, sizeof(EntropyCoder_t), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_PTR, (*entropyCoderDblPtr)->cabacEncodeContextPtr, sizeof(CabacEncodeContext_t), EB_N_PTR);
+    EB_MALLOC(EB_PTR, (*entropyCoderDblPtr)->cabacEncodeContextPtr, sizeof(CabacEncodeContext_t), EB_N_PTR, encHandle);
 
 	EbHevcCabacCtor(
 		(CabacEncodeContext_t *)(*entropyCoderDblPtr)->cabacEncodeContextPtr);
@@ -9312,7 +9314,7 @@ EB_ERRORTYPE EntropyCoderCtor(
 
     return_error = OutputBitstreamUnitCtor(
 		&((((CabacEncodeContext_t*)(*entropyCoderDblPtr)->cabacEncodeContextPtr)->bacEncContext).m_pcTComBitIf),
-		bufferSize);
+		bufferSize, encHandle);
 
     return return_error;
 }

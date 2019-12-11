@@ -259,11 +259,12 @@ EB_ERRORTYPE ModeDecisionConfigurationContextCtor(
     EbFifo_t                            *rateControlInputFifoPtr,
 
     EbFifo_t                            *modeDecisionConfigurationOutputFifoPtr,
-    EB_U16						         lcuTotalCount)
+    EB_U16						         lcuTotalCount,
+    EB_HANDLE                            encHandle)
 {
     ModeDecisionConfigurationContext_t *contextPtr;
 
-    EB_MALLOC(ModeDecisionConfigurationContext_t*, contextPtr, sizeof(ModeDecisionConfigurationContext_t), EB_N_PTR);
+    EB_MALLOC(ModeDecisionConfigurationContext_t*, contextPtr, sizeof(ModeDecisionConfigurationContext_t), EB_N_PTR, encHandle);
 
     *contextDblPtr = contextPtr;
 
@@ -271,12 +272,12 @@ EB_ERRORTYPE ModeDecisionConfigurationContextCtor(
     contextPtr->rateControlInputFifoPtr                      = rateControlInputFifoPtr;
     contextPtr->modeDecisionConfigurationOutputFifoPtr       = modeDecisionConfigurationOutputFifoPtr;
     // Rate estimation
-    EB_MALLOC(MdRateEstimationContext_t*, contextPtr->mdRateEstimationPtr, sizeof(MdRateEstimationContext_t), EB_N_PTR);
+    EB_MALLOC(MdRateEstimationContext_t*, contextPtr->mdRateEstimationPtr, sizeof(MdRateEstimationContext_t), EB_N_PTR, encHandle);
 
 
     // Budgeting
-    EB_MALLOC(EB_U32*,contextPtr->lcuScoreArray,sizeof(EB_U32) * lcuTotalCount, EB_N_PTR);
-    EB_MALLOC(EB_U8 *,contextPtr->lcuCostArray ,sizeof(EB_U8 ) * lcuTotalCount, EB_N_PTR);
+    EB_MALLOC(EB_U32*,contextPtr->lcuScoreArray,sizeof(EB_U32) * lcuTotalCount, EB_N_PTR, encHandle);
+    EB_MALLOC(EB_U8 *,contextPtr->lcuCostArray ,sizeof(EB_U8 ) * lcuTotalCount, EB_N_PTR, encHandle);
 
 
     return EB_ErrorNone;

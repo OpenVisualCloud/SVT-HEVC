@@ -161,7 +161,8 @@ extern EB_ERRORTYPE EncDecContextCtor(
     EbFifo_t                *feedbackFifoPtr,
     EbFifo_t                *pictureDemuxFifoPtr,
     EB_BOOL                  is16bit,
-    EB_COLOR_FORMAT          colorFormat);
+    EB_COLOR_FORMAT          colorFormat,
+    EB_HANDLE                encHandle);
 
 
     

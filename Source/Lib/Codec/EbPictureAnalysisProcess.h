@@ -36,7 +36,8 @@ extern EB_ERRORTYPE PictureAnalysisContextCtor(
     PictureAnalysisContext_t      **contextDblPtr,
     EbFifo_t                       *resourceCoordinationResultsInputFifoPtr,
     EbFifo_t                       *pictureAnalysisResultsOutputFifoPtr,
-    EB_U16						    lcuTotalCount);
+    EB_U16						    lcuTotalCount,
+    EB_HANDLE                       encHandle);
     
 extern void* PictureAnalysisKernel(void *inputPtr);
 

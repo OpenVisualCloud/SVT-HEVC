@@ -16,13 +16,14 @@ static EB_ERRORTYPE EbFifoCtor(
     EB_U32              maxCount,
     EbObjectWrapper_t  *firstWrapperPtr,
     EbObjectWrapper_t  *lastWrapperPtr,
-    EbMuxingQueue_t    *queuePtr)
+    EbMuxingQueue_t    *queuePtr,
+    EB_HANDLE           encHandle)
 {
     // Create Counting Semaphore
-    EB_CREATESEMAPHORE(EB_HANDLE, fifoPtr->countingSemaphore, sizeof(EB_HANDLE), EB_SEMAPHORE, initialCount, maxCount);
+    EB_CREATESEMAPHORE(EB_HANDLE, fifoPtr->countingSemaphore, sizeof(EB_HANDLE), EB_SEMAPHORE, initialCount, maxCount, encHandle);
 
     // Create Buffer Pool Mutex
-    EB_CREATEMUTEX(EB_HANDLE, fifoPtr->lockoutMutex, sizeof(EB_HANDLE), EB_MUTEX);
+    EB_CREATEMUTEX(EB_HANDLE, fifoPtr->lockoutMutex, sizeof(EB_HANDLE), EB_MUTEX, encHandle);
 
     // Initialize Fifo First & Last ptrs
     fifoPtr->firstPtr           = firstWrapperPtr;
@@ -101,18 +102,19 @@ static EB_BOOL EbFifoPeakFront(
  **************************************/
 static EB_ERRORTYPE EbCircularBufferCtor(
     EbCircularBuffer_t  **bufferDblPtr,
-    EB_U32                bufferTotalCount)
+    EB_U32                bufferTotalCount,
+    EB_HANDLE             encHandle)
 {
     EB_U32 bufferIndex;
     EbCircularBuffer_t *bufferPtr;
 
-    EB_MALLOC(EbCircularBuffer_t*, bufferPtr, sizeof(EbCircularBuffer_t), EB_N_PTR);
+    EB_MALLOC(EbCircularBuffer_t*, bufferPtr, sizeof(EbCircularBuffer_t), EB_N_PTR, encHandle);
 
     *bufferDblPtr = bufferPtr;
 
     bufferPtr->bufferTotalCount = bufferTotalCount;
 
-    EB_MALLOC(EB_PTR*, bufferPtr->arrayPtr, sizeof(EB_PTR) * bufferPtr->bufferTotalCount, EB_N_PTR);
+    EB_MALLOC(EB_PTR*, bufferPtr->arrayPtr, sizeof(EB_PTR) * bufferPtr->bufferTotalCount, EB_N_PTR, encHandle);
 
     for(bufferIndex=0; bufferIndex < bufferPtr->bufferTotalCount; ++bufferIndex) {
         bufferPtr->arrayPtr[bufferIndex] = EB_NULL;
@@ -208,46 +210,50 @@ static EB_ERRORTYPE EbMuxingQueueCtor(
     EbMuxingQueue_t   **queueDblPtr,
     EB_U32              objectTotalCount,
     EB_U32              processTotalCount,
-    EbFifo_t         ***processFifoPtrArrayPtr)
+    EbFifo_t         ***processFifoPtrArrayPtr,
+    EB_HANDLE           encHandle)
 {
     EbMuxingQueue_t *queuePtr;
     EB_U32 processIndex;
     EB_ERRORTYPE     return_error = EB_ErrorNone;
 
-    EB_MALLOC(EbMuxingQueue_t *, queuePtr, sizeof(EbMuxingQueue_t), EB_N_PTR);
+    EB_MALLOC(EbMuxingQueue_t *, queuePtr, sizeof(EbMuxingQueue_t), EB_N_PTR, encHandle);
     *queueDblPtr = queuePtr;
 
     queuePtr->processTotalCount = processTotalCount;
 
     // Lockout Mutex
-    EB_CREATEMUTEX(EB_HANDLE, queuePtr->lockoutMutex, sizeof(EB_HANDLE), EB_MUTEX);
+    EB_CREATEMUTEX(EB_HANDLE, queuePtr->lockoutMutex, sizeof(EB_HANDLE), EB_MUTEX, encHandle);
 
     // Construct Object Circular Buffer
     return_error = EbCircularBufferCtor(
         &queuePtr->objectQueue,
-        objectTotalCount);
+        objectTotalCount,
+        encHandle);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
     // Construct Process Circular Buffer
     return_error = EbCircularBufferCtor(
         &queuePtr->processQueue,
-        queuePtr->processTotalCount);
+        queuePtr->processTotalCount,
+        encHandle);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
     // Construct the Process Fifos
-    EB_MALLOC(EbFifo_t**, queuePtr->processFifoPtrArray, sizeof(EbFifo_t*) * queuePtr->processTotalCount, EB_N_PTR);
+    EB_MALLOC(EbFifo_t**, queuePtr->processFifoPtrArray, sizeof(EbFifo_t*) * queuePtr->processTotalCount, EB_N_PTR, encHandle);
 
     for(processIndex=0; processIndex < queuePtr->processTotalCount; ++processIndex) {
-        EB_MALLOC(EbFifo_t*, queuePtr->processFifoPtrArray[processIndex], sizeof(EbFifo_t), EB_N_PTR);
+        EB_MALLOC(EbFifo_t*, queuePtr->processFifoPtrArray[processIndex], sizeof(EbFifo_t), EB_N_PTR, encHandle);
         return_error = EbFifoCtor(
             queuePtr->processFifoPtrArray[processIndex],
             0,
             objectTotalCount,
             (EbObjectWrapper_t *)EB_NULL,
             (EbObjectWrapper_t *)EB_NULL,
-            queuePtr);
+            queuePtr,
+            encHandle);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -457,24 +463,25 @@ EB_ERRORTYPE EbSystemResourceCtor(
     EbFifo_t          ***consumerFifoPtrArrayPtr,
     EB_BOOL              fullFifoEnabled,
     EB_CTOR              ObjectCtor,
-    EB_PTR               objectInitDataPtr)
+    EB_PTR               objectInitDataPtr,
+    EB_HANDLE            encHandle)
 {
     EB_U32 wrapperIndex;
     EB_ERRORTYPE return_error = EB_ErrorNone;
     // Allocate the System Resource
     EbSystemResource_t *resourcePtr;
 
-    EB_MALLOC(EbSystemResource_t*, resourcePtr, sizeof(EbSystemResource_t), EB_N_PTR);
+    EB_MALLOC(EbSystemResource_t*, resourcePtr, sizeof(EbSystemResource_t), EB_N_PTR, encHandle);
     *resourceDblPtr = resourcePtr;
 
     resourcePtr->objectTotalCount = objectTotalCount;
 
     // Allocate array for wrapper pointers
-    EB_MALLOC(EbObjectWrapper_t**, resourcePtr->wrapperPtrPool, sizeof(EbObjectWrapper_t*) * resourcePtr->objectTotalCount, EB_N_PTR);
+    EB_MALLOC(EbObjectWrapper_t**, resourcePtr->wrapperPtrPool, sizeof(EbObjectWrapper_t*) * resourcePtr->objectTotalCount, EB_N_PTR, encHandle);
 
     // Initialize each wrapper
     for (wrapperIndex=0; wrapperIndex < resourcePtr->objectTotalCount; ++wrapperIndex) {
-        EB_MALLOC(EbObjectWrapper_t*, resourcePtr->wrapperPtrPool[wrapperIndex], sizeof(EbObjectWrapper_t), EB_N_PTR);
+        EB_MALLOC(EbObjectWrapper_t*, resourcePtr->wrapperPtrPool[wrapperIndex], sizeof(EbObjectWrapper_t), EB_N_PTR, encHandle);
         resourcePtr->wrapperPtrPool[wrapperIndex]->liveCount            = 0;
         resourcePtr->wrapperPtrPool[wrapperIndex]->releaseEnable        = EB_TRUE;
         resourcePtr->wrapperPtrPool[wrapperIndex]->systemResourcePtr    = resourcePtr;
@@ -483,7 +490,8 @@ EB_ERRORTYPE EbSystemResourceCtor(
         if(ObjectCtor) {
             return_error = ObjectCtor(
                 &resourcePtr->wrapperPtrPool[wrapperIndex]->objectPtr,
-                objectInitDataPtr);
+                objectInitDataPtr,
+                encHandle);
             if (return_error == EB_ErrorInsufficientResources){
                 return EB_ErrorInsufficientResources;
             }
@@ -495,7 +503,8 @@ EB_ERRORTYPE EbSystemResourceCtor(
         &resourcePtr->emptyQueue,
         resourcePtr->objectTotalCount,
         producerProcessTotalCount,
-        producerFifoPtrArrayPtr);
+        producerFifoPtrArrayPtr,
+        encHandle);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
@@ -512,7 +521,8 @@ EB_ERRORTYPE EbSystemResourceCtor(
             &resourcePtr->fullQueue,
             resourcePtr->objectTotalCount,
             consumerProcessTotalCount,
-            consumerFifoPtrArrayPtr);
+            consumerFifoPtrArrayPtr,
+            encHandle);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }

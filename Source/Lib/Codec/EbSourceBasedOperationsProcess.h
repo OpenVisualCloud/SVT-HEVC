@@ -64,7 +64,6 @@ typedef struct SourceBasedOperationsContext_s
     EB_U8   *yMeanPtr;
 	EB_U8   *crMeanPtr;
 	EB_U8   *cbMeanPtr;
-
 } SourceBasedOperationsContext_t;
 
 /***************************************
@@ -74,7 +73,8 @@ typedef struct SourceBasedOperationsContext_s
 extern EB_ERRORTYPE SourceBasedOperationsContextCtor(
     SourceBasedOperationsContext_t **contextDblPtr,
     EbFifo_t						*initialrateControlResultsInputFifoPtr,
-    EbFifo_t					    *pictureDemuxResultsOutputFifoPtr);
+    EbFifo_t					    *pictureDemuxResultsOutputFifoPtr,
+    EB_HANDLE                        encHandle);
 
 extern void* SourceBasedOperationsKernel(void *inputPtr);
 

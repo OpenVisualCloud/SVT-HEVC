@@ -9,10 +9,11 @@
 
 EB_ERRORTYPE PictureAnalysisResultCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr)
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle)
 {
     PictureAnalysisResults_t *objectPtr;
-    EB_MALLOC(PictureAnalysisResults_t *, objectPtr, sizeof(PictureAnalysisResults_t), EB_N_PTR);
+    EB_MALLOC(PictureAnalysisResults_t *, objectPtr, sizeof(PictureAnalysisResults_t), EB_N_PTR, encHandle);
 
     *objectDblPtr = (EB_PTR) objectPtr;
     objectInitDataPtr = 0;

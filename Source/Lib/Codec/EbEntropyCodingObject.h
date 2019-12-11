@@ -21,12 +21,14 @@ typedef struct EntropyCoder_s {
 
 extern EB_ERRORTYPE BitstreamCtor(
     Bitstream_t **bitstreamDblPtr,
-    EB_U32 bufferSize);
+    EB_U32 bufferSize,
+    EB_HANDLE encHandle);
 
 
 extern EB_ERRORTYPE EntropyCoderCtor(
     EntropyCoder_t **entropyCoderDblPtr,
-    EB_U32 bufferSize);
+    EB_U32 bufferSize,
+    EB_HANDLE encHandle);
 
 
 

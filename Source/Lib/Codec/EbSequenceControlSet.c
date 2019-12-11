@@ -35,13 +35,15 @@
  ***************************************************************************************************/
 EB_ERRORTYPE EbSequenceControlSetCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr)
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle)
 {
     EbSequenceControlSetInitData_t *scsInitData = (EbSequenceControlSetInitData_t*) objectInitDataPtr;
     EB_U32 layerIndex; 
     EB_ERRORTYPE return_error = EB_ErrorNone;
     SequenceControlSet_t *sequenceControlSetPtr;
-    EB_MALLOC(SequenceControlSet_t*, sequenceControlSetPtr, sizeof(SequenceControlSet_t), EB_N_PTR);
+
+    EB_MALLOC(SequenceControlSet_t*, sequenceControlSetPtr, sizeof(SequenceControlSet_t), EB_N_PTR, encHandle);
 
     *objectDblPtr = (EB_PTR) sequenceControlSetPtr;
     
@@ -126,11 +128,12 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     sequenceControlSetPtr->mvMergeTotalCount                                = 5;
 
     // Video Usability Info
-    EB_MALLOC(AppVideoUsabilityInfo_t*, sequenceControlSetPtr->videoUsabilityInfoPtr, sizeof(AppVideoUsabilityInfo_t), EB_N_PTR);
+    EB_MALLOC(AppVideoUsabilityInfo_t*, sequenceControlSetPtr->videoUsabilityInfoPtr, sizeof(AppVideoUsabilityInfo_t), EB_N_PTR, encHandle);
     
     // Initialize vui parameters
     return_error = EbVideoUsabilityInfoCtor(
-        sequenceControlSetPtr->videoUsabilityInfoPtr);
+        sequenceControlSetPtr->videoUsabilityInfoPtr,
+        encHandle);
 
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
@@ -200,15 +203,16 @@ EB_ERRORTYPE CopySequenceControlSet(
 }
     
 EB_ERRORTYPE EbSequenceControlSetInstanceCtor(
-    EbSequenceControlSetInstance_t **objectDblPtr)
+    EbSequenceControlSetInstance_t **objectDblPtr,
+    EB_HANDLE encHandle)
 {
     EbSequenceControlSetInitData_t scsInitData;
     EB_ERRORTYPE return_error = EB_ErrorNone;
-    EB_MALLOC(EbSequenceControlSetInstance_t*, *objectDblPtr, sizeof(EbSequenceControlSetInstance_t), EB_N_PTR);
+    EB_MALLOC(EbSequenceControlSetInstance_t*, *objectDblPtr, sizeof(EbSequenceControlSetInstance_t), EB_N_PTR, encHandle);
 
     return_error = EncodeContextCtor(
         (void **) &(*objectDblPtr)->encodeContextPtr,
-        EB_NULL);
+        EB_NULL, encHandle);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
@@ -216,27 +220,30 @@ EB_ERRORTYPE EbSequenceControlSetInstanceCtor(
     
     return_error = EbSequenceControlSetCtor(
         (void **) &(*objectDblPtr)->sequenceControlSetPtr,
-        (void *) &scsInitData);
+        (void *) &scsInitData,
+        encHandle);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
     
-    EB_CREATEMUTEX(EB_HANDLE*, (*objectDblPtr)->configMutex, sizeof(EB_HANDLE), EB_MUTEX);
+    EB_CREATEMUTEX(EB_HANDLE*, (*objectDblPtr)->configMutex, sizeof(EB_HANDLE), EB_MUTEX, encHandle);
 
         
     return EB_ErrorNone;
 }    
 
 extern EB_ERRORTYPE LcuParamsInit(
-	SequenceControlSet_t *sequenceControlSetPtr) {
-
+        SequenceControlSet_t *sequenceControlSetPtr,
+        EB_HANDLE encHandle)
+{
 	EB_ERRORTYPE return_error = EB_ErrorNone;
 	EB_U16	lcuIndex;
 	EB_U16	rasterScanCuIndex;
 
 	EB_U8   pictureLcuWidth  = sequenceControlSetPtr->pictureWidthInLcu;
 	EB_U8	pictureLcuHeight = sequenceControlSetPtr->pictureHeightInLcu;
-	EB_MALLOC(LcuParams_t*, sequenceControlSetPtr->lcuParamsArray, sizeof(LcuParams_t) * pictureLcuWidth * pictureLcuHeight, EB_N_PTR);
+    // Note: the only resource (till now) allocated by a kernel thread, rather than by the main thread.
+    EB_MALLOC(LcuParams_t*, sequenceControlSetPtr->lcuParamsArray, sizeof(LcuParams_t) * pictureLcuWidth * pictureLcuHeight, EB_N_PTR, encHandle);
 
 	for (lcuIndex = 0; lcuIndex < pictureLcuWidth * pictureLcuHeight; ++lcuIndex) {
 		sequenceControlSetPtr->lcuParamsArray[lcuIndex].horizontalIndex = (EB_U8)(lcuIndex % pictureLcuWidth);

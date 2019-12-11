@@ -18,7 +18,7 @@ extern "C" {
 #endif
 struct PictureControlSet_s;
 
-extern EB_ERRORTYPE SaoStatsCtor(SaoStats_t **saoStatsPtr);
+extern EB_ERRORTYPE SaoStatsCtor(SaoStats_t **saoStatsPtr, EB_HANDLE encHandle);
 
 
 extern EB_ERRORTYPE SaoGenerationDecision(

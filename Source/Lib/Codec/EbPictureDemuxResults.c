@@ -8,10 +8,11 @@
 
 EB_ERRORTYPE PictureResultsCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr)
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle)
 {
     PictureDemuxResults_t *objectPtr;
-    EB_MALLOC(PictureDemuxResults_t*, objectPtr, sizeof(PictureDemuxResults_t), EB_N_PTR);
+    EB_MALLOC(PictureDemuxResults_t*, objectPtr, sizeof(PictureDemuxResults_t), EB_N_PTR, encHandle);
 
     *objectDblPtr                    = objectPtr;
     

@@ -130,14 +130,15 @@ EB_ERRORTYPE ModeDecisionCandidateBufferCtor(
 	EB_U64                         *fastCostPtr,
 	EB_U64                         *fullCostPtr,
 	EB_U64                         *fullCostSkipPtr,
-	EB_U64                         *fullCostMergePtr)
+	EB_U64                         *fullCostMergePtr,
+    EB_HANDLE                       encHandle)
 {
 	EbPictureBufferDescInitData_t pictureBufferDescInitData;
 	EbPictureBufferDescInitData_t doubleWidthPictureBufferDescInitData;
 	EB_ERRORTYPE return_error = EB_ErrorNone;
 	// Allocate Buffer
 	ModeDecisionCandidateBuffer_t *bufferPtr;
-	EB_MALLOC(ModeDecisionCandidateBuffer_t*, bufferPtr, sizeof(ModeDecisionCandidateBuffer_t), EB_N_PTR);
+	EB_MALLOC(ModeDecisionCandidateBuffer_t*, bufferPtr, sizeof(ModeDecisionCandidateBuffer_t), EB_N_PTR, encHandle);
 	*bufferDblPtr = bufferPtr;
 
 	// Init Picture Data
@@ -169,14 +170,16 @@ EB_ERRORTYPE ModeDecisionCandidateBufferCtor(
 	// Video Buffers
 	return_error = EbPictureBufferDescCtor(
 		(EB_PTR*)&(bufferPtr->predictionPtr),
-		(EB_PTR)&pictureBufferDescInitData);
+		(EB_PTR)&pictureBufferDescInitData,
+        encHandle);
 
 	if (return_error == EB_ErrorInsufficientResources){
 		return EB_ErrorInsufficientResources;
 	}
 	return_error = EbPictureBufferDescCtor(
 		(EB_PTR*)&(bufferPtr->residualQuantCoeffPtr),
-		(EB_PTR)&doubleWidthPictureBufferDescInitData);
+		(EB_PTR)&doubleWidthPictureBufferDescInitData,
+        encHandle);
 
 	if (return_error == EB_ErrorInsufficientResources){
 		return EB_ErrorInsufficientResources;
@@ -184,14 +187,16 @@ EB_ERRORTYPE ModeDecisionCandidateBufferCtor(
 
 	return_error = EbPictureBufferDescCtor(
 		(EB_PTR*)&(bufferPtr->reconCoeffPtr),
-		(EB_PTR)&doubleWidthPictureBufferDescInitData);
+		(EB_PTR)&doubleWidthPictureBufferDescInitData,
+        encHandle);
 
 	if (return_error == EB_ErrorInsufficientResources){
 		return EB_ErrorInsufficientResources;
 	}
 	return_error = EbPictureBufferDescCtor(
 		(EB_PTR*)&(bufferPtr->reconPtr),
-		(EB_PTR)&pictureBufferDescInitData);
+		(EB_PTR)&pictureBufferDescInitData,
+        encHandle);
 
 	if (return_error == EB_ErrorInsufficientResources){
 		return EB_ErrorInsufficientResources;

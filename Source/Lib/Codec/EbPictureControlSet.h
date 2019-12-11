@@ -643,11 +643,13 @@ typedef struct PictureControlSetInitData_s
  **************************************/
 extern EB_ERRORTYPE PictureControlSetCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr);
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle);
 
 extern EB_ERRORTYPE PictureParentControlSetCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr);
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle);
 
 #ifdef __cplusplus
 }

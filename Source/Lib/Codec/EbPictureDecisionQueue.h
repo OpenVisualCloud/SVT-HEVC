@@ -34,7 +34,8 @@ typedef struct PaReferenceQueueEntry_s {
 } PaReferenceQueueEntry_t;
 
 extern EB_ERRORTYPE PaReferenceQueueEntryCtor(   
-    PaReferenceQueueEntry_t  **entryDblPtr);
+    PaReferenceQueueEntry_t  **entryDblPtr,
+    EB_HANDLE encHandle);
 
 #ifdef __cplusplus
 }

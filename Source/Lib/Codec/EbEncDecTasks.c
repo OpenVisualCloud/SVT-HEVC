@@ -10,10 +10,11 @@
 
 EB_ERRORTYPE EncDecTasksCtor(
     EB_PTR *objectDblPtr,
-    EB_PTR objectInitDataPtr)
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle)
 {
     EncDecTasks_t *contextPtr;
-    EB_MALLOC(EncDecTasks_t*, contextPtr, sizeof(EncDecTasks_t), EB_N_PTR);
+    EB_MALLOC(EncDecTasks_t*, contextPtr, sizeof(EncDecTasks_t), EB_N_PTR, encHandle);
     
     *objectDblPtr = (EB_PTR) contextPtr;
 

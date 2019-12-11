@@ -290,7 +290,8 @@ extern EB_ERRORTYPE ModeDecisionContextCtor(
     ModeDecisionContext_t  **contextDblPtr,
     EbFifo_t                *modeDecisionConfigurationInputFifoPtr,
     EbFifo_t                *modeDecisionOutputFifoPtr,
-    EB_BOOL                  is16bit);
+    EB_BOOL                  is16bit,
+    EB_HANDLE                encHandle);
 
 
 //extern void ResetModeDecisionNeighborArrays(

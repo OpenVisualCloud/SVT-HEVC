@@ -194,7 +194,8 @@ typedef struct PredictionStructureGroup_s {
  ************************************************/
 extern EB_ERRORTYPE PredictionStructureGroupCtor(
     PredictionStructureGroup_t   **predictionStructureGroupDblPtr,
-    EB_U32                        baseLayerSwitchMode);
+    EB_U32                        baseLayerSwitchMode,
+    EB_HANDLE                     encHandle);
 
 extern PredictionStructure_t* GetPredictionStructure(
     PredictionStructureGroup_t    *predictionStructureGroupPtr,

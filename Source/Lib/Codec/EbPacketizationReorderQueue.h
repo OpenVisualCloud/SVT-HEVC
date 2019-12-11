@@ -41,7 +41,8 @@ typedef struct PacketizationReorderEntry_s {
 
 extern EB_ERRORTYPE PacketizationReorderEntryCtor(   
     PacketizationReorderEntry_t   **entryDblPtr,
-    EB_U32                          pictureNumber);
+    EB_U32                          pictureNumber,
+    EB_HANDLE                       encHandle);
 
   
 #ifdef __cplusplus

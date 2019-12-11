@@ -153,9 +153,6 @@ typedef struct EbEncHandle_s
     // *Note - Recon Video buffers will have distortion data appended to 
     // the end of the buffer.  This distortion data aids in the calculation
     // of PSNR.
-    // Memory Map
-    EbMemoryMapEntry                       *memoryMap; 
-    EB_U32                                  memoryMapIndex;
     EB_U64                                  totalLibMemory;
 
 } EbEncHandle_t;
@@ -165,15 +162,18 @@ typedef struct EbEncHandle_s
  **************************************/  
 extern EB_ERRORTYPE EbInputBufferHeaderCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr);
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle);
 
 extern EB_ERRORTYPE EbOutputBufferHeaderCtor(
     EB_PTR *objectDblPtr,
-    EB_PTR objectInitDataPtr);
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle);
 
 extern EB_ERRORTYPE EbOutputReconBufferHeaderCtor(
     EB_PTR *objectDblPtr,
-    EB_PTR objectInitDataPtr);
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle);
 
 #ifdef __cplusplus
 }

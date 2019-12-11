@@ -73,27 +73,27 @@ static const EB_S32 intraLumaFilterTable[] = {
 /**********************************************
  * Intra Reference Samples Ctor
  **********************************************/
-EB_ERRORTYPE IntraReferenceSamplesCtor(IntraReferenceSamples_t **contextDblPtr, EB_COLOR_FORMAT colorFormat)
+EB_ERRORTYPE IntraReferenceSamplesCtor(IntraReferenceSamples_t **contextDblPtr, EB_COLOR_FORMAT colorFormat, EB_HANDLE encHandle)
 {
     IntraReferenceSamples_t *contextPtr;
-    EB_MALLOC(IntraReferenceSamples_t*, contextPtr, sizeof(IntraReferenceSamples_t), EB_N_PTR);
+    EB_MALLOC(IntraReferenceSamples_t*, contextPtr, sizeof(IntraReferenceSamples_t), EB_N_PTR, encHandle);
     *contextDblPtr = contextPtr;
 
-    EB_MALLOC(EB_U8*, contextPtr->yIntraReferenceArray, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR);
+    EB_MALLOC(EB_U8*, contextPtr->yIntraReferenceArray, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U8*, contextPtr->cbIntraReferenceArray, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR);
+    EB_MALLOC(EB_U8*, contextPtr->cbIntraReferenceArray, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U8*, contextPtr->crIntraReferenceArray, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR);
+    EB_MALLOC(EB_U8*, contextPtr->crIntraReferenceArray, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U8*, contextPtr->yIntraFilteredReferenceArray, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR);
+    EB_MALLOC(EB_U8*, contextPtr->yIntraFilteredReferenceArray, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U8*, contextPtr->yIntraReferenceArrayReverse, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR);
+    EB_MALLOC(EB_U8*, contextPtr->yIntraReferenceArrayReverse, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U8*, contextPtr->yIntraFilteredReferenceArrayReverse, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR);
+    EB_MALLOC(EB_U8*, contextPtr->yIntraFilteredReferenceArrayReverse, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U8*, contextPtr->cbIntraReferenceArrayReverse, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR);
+    EB_MALLOC(EB_U8*, contextPtr->cbIntraReferenceArrayReverse, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U8*, contextPtr->crIntraReferenceArrayReverse, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR);
+    EB_MALLOC(EB_U8*, contextPtr->crIntraReferenceArrayReverse, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR, encHandle);
 
     contextPtr->yIntraReferenceArrayReverse++; //Jing: mem leak? bad here
     contextPtr->yIntraFilteredReferenceArrayReverse++;
@@ -101,10 +101,10 @@ EB_ERRORTYPE IntraReferenceSamplesCtor(IntraReferenceSamples_t **contextDblPtr, 
     contextPtr->crIntraReferenceArrayReverse++;
 
     if (colorFormat == EB_YUV444) {
-        EB_MALLOC(EB_U8*, contextPtr->cbIntraFilteredReferenceArray, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR);
-        EB_MALLOC(EB_U8*, contextPtr->crIntraFilteredReferenceArray, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR);
-        EB_MALLOC(EB_U8*, contextPtr->cbIntraFilteredReferenceArrayReverse, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR);
-        EB_MALLOC(EB_U8*, contextPtr->crIntraFilteredReferenceArrayReverse, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR);
+        EB_MALLOC(EB_U8*, contextPtr->cbIntraFilteredReferenceArray, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR, encHandle);
+        EB_MALLOC(EB_U8*, contextPtr->crIntraFilteredReferenceArray, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR, encHandle);
+        EB_MALLOC(EB_U8*, contextPtr->cbIntraFilteredReferenceArrayReverse, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR, encHandle);
+        EB_MALLOC(EB_U8*, contextPtr->crIntraFilteredReferenceArrayReverse, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR, encHandle);
         contextPtr->cbIntraFilteredReferenceArrayReverse++;
         contextPtr->crIntraFilteredReferenceArrayReverse++;
     } else {
@@ -122,27 +122,28 @@ EB_ERRORTYPE IntraReferenceSamplesCtor(IntraReferenceSamples_t **contextDblPtr, 
  **********************************************/
 EB_ERRORTYPE IntraReference16bitSamplesCtor(
     IntraReference16bitSamples_t **contextDblPtr,
-    EB_COLOR_FORMAT colorFormat)
+    EB_COLOR_FORMAT colorFormat,
+    EB_HANDLE encHandle)
 {
     IntraReference16bitSamples_t *contextPtr;
-    EB_MALLOC(IntraReference16bitSamples_t*, contextPtr, sizeof(IntraReference16bitSamples_t), EB_N_PTR);
+    EB_MALLOC(IntraReference16bitSamples_t*, contextPtr, sizeof(IntraReference16bitSamples_t), EB_N_PTR, encHandle);
     *contextDblPtr = contextPtr;
 
-    EB_MALLOC(EB_U16*, contextPtr->yIntraReferenceArray, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR);
+    EB_MALLOC(EB_U16*, contextPtr->yIntraReferenceArray, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U16*, contextPtr->cbIntraReferenceArray, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR);
+    EB_MALLOC(EB_U16*, contextPtr->cbIntraReferenceArray, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U16*, contextPtr->crIntraReferenceArray, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR);
+    EB_MALLOC(EB_U16*, contextPtr->crIntraReferenceArray, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U16*, contextPtr->yIntraFilteredReferenceArray, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR);
+    EB_MALLOC(EB_U16*, contextPtr->yIntraFilteredReferenceArray, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U16*, contextPtr->yIntraReferenceArrayReverse, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR);
+    EB_MALLOC(EB_U16*, contextPtr->yIntraReferenceArrayReverse, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U16*, contextPtr->yIntraFilteredReferenceArrayReverse, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR);
+    EB_MALLOC(EB_U16*, contextPtr->yIntraFilteredReferenceArrayReverse, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U16*, contextPtr->cbIntraReferenceArrayReverse, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR);
+    EB_MALLOC(EB_U16*, contextPtr->cbIntraReferenceArrayReverse, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U16*, contextPtr->crIntraReferenceArrayReverse, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR);
+    EB_MALLOC(EB_U16*, contextPtr->crIntraReferenceArrayReverse, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR, encHandle);
 
     contextPtr->yIntraReferenceArrayReverse++;
     contextPtr->yIntraFilteredReferenceArrayReverse++;
@@ -150,10 +151,10 @@ EB_ERRORTYPE IntraReference16bitSamplesCtor(
     contextPtr->crIntraReferenceArrayReverse++;
 
     if (colorFormat == EB_YUV444) {
-        EB_MALLOC(EB_U16*, contextPtr->cbIntraFilteredReferenceArray, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR);
-        EB_MALLOC(EB_U16*, contextPtr->crIntraFilteredReferenceArray, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR);
-        EB_MALLOC(EB_U16*, contextPtr->cbIntraFilteredReferenceArrayReverse, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR);
-        EB_MALLOC(EB_U16*, contextPtr->crIntraFilteredReferenceArrayReverse, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR);
+        EB_MALLOC(EB_U16*, contextPtr->cbIntraFilteredReferenceArray, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR, encHandle);
+        EB_MALLOC(EB_U16*, contextPtr->crIntraFilteredReferenceArray, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR, encHandle);
+        EB_MALLOC(EB_U16*, contextPtr->cbIntraFilteredReferenceArrayReverse, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR, encHandle);
+        EB_MALLOC(EB_U16*, contextPtr->crIntraFilteredReferenceArrayReverse, sizeof(EB_U16) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR, encHandle);
         contextPtr->cbIntraFilteredReferenceArrayReverse++;
         contextPtr->crIntraFilteredReferenceArrayReverse++;
     } else {
@@ -4891,16 +4892,17 @@ EB_ERRORTYPE EncodePassIntraPrediction16bit(
  * Intra Reference Samples Ctor
  **********************************************/
 EB_ERRORTYPE IntraOpenLoopReferenceSamplesCtor(
-    IntraReferenceSamplesOpenLoop_t **contextDblPtr)
+    IntraReferenceSamplesOpenLoop_t **contextDblPtr,
+    EB_HANDLE encHandle)
 {
     IntraReferenceSamplesOpenLoop_t *contextPtr;
-    EB_MALLOC(IntraReferenceSamplesOpenLoop_t*, contextPtr, sizeof(IntraReferenceSamplesOpenLoop_t), EB_N_PTR);
+    EB_MALLOC(IntraReferenceSamplesOpenLoop_t*, contextPtr, sizeof(IntraReferenceSamplesOpenLoop_t), EB_N_PTR, encHandle);
 
     *contextDblPtr = contextPtr;
 
-    EB_MALLOC(EB_U8*, contextPtr->yIntraReferenceArray, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR);
+    EB_MALLOC(EB_U8*, contextPtr->yIntraReferenceArray, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 1), EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U8*, contextPtr->yIntraReferenceArrayReverse, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR);
+    EB_MALLOC(EB_U8*, contextPtr->yIntraReferenceArrayReverse, sizeof(EB_U8) * (4 * MAX_LCU_SIZE + 2), EB_N_PTR, encHandle);
 
     contextPtr->yIntraReferenceArrayReverse++;
 

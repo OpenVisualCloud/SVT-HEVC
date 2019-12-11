@@ -35,10 +35,11 @@ EB_ERRORTYPE PictureManagerContextCtor(
     PictureManagerContext_t **contextDblPtr,
     EbFifo_t                 *pictureInputFifoPtr,
     EbFifo_t                 *pictureManagerOutputFifoPtr,
-    EbFifo_t                **pictureControlSetFifoPtrArray)
+    EbFifo_t                **pictureControlSetFifoPtrArray,
+    EB_HANDLE                 encHandle)
 {
     PictureManagerContext_t *contextPtr;
-    EB_MALLOC(PictureManagerContext_t*, contextPtr, sizeof(PictureManagerContext_t), EB_N_PTR);
+    EB_MALLOC(PictureManagerContext_t*, contextPtr, sizeof(PictureManagerContext_t), EB_N_PTR, encHandle);
 
     *contextDblPtr = contextPtr;
 

@@ -19,7 +19,6 @@ typedef struct PictureManagerContext_s
     EbFifo_t                 *pictureInputFifoPtr;
     EbFifo_t                 *pictureManagerOutputFifoPtr;
     EbFifo_t                **pictureControlSetFifoPtrArray;
-     
 } PictureManagerContext_t;
 
 /***************************************
@@ -29,7 +28,8 @@ extern EB_ERRORTYPE PictureManagerContextCtor(
     PictureManagerContext_t **contextDblPtr,
     EbFifo_t                 *pictureInputFifoPtr,
     EbFifo_t                 *pictureManagerOutputFifoPtr,   
-    EbFifo_t                **pictureControlSetFifoPtrArray);
+    EbFifo_t                **pictureControlSetFifoPtrArray,
+    EB_HANDLE                 encHandle);
     
    
 

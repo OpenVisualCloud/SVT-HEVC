@@ -72,7 +72,6 @@ typedef struct ModeDecisionConfigurationContext_s
     // Multi - Mode signal(s)
     EB_U8                               adpLevel;
     EB_U8                               chromaQpOffsetLevel;
-
 } ModeDecisionConfigurationContext_t;
 
 
@@ -85,7 +84,8 @@ extern EB_ERRORTYPE ModeDecisionConfigurationContextCtor(
     EbFifo_t                            *rateControlInputFifoPtr,
 
     EbFifo_t                            *modeDecisionConfigurationOutputFifoPtr,
-    EB_U16						         lcuTotalCount);
+    EB_U16						         lcuTotalCount,
+    EB_HANDLE                            encHandle);
 
    
 extern void* ModeDecisionConfigurationKernel(void *inputPtr);

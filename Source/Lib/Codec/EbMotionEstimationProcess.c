@@ -145,21 +145,22 @@ static void SetMeHmeParamsFromConfig(
 EB_ERRORTYPE MotionEstimationContextCtor(
 	MotionEstimationContext_t   **contextDblPtr,
 	EbFifo_t                     *pictureDecisionResultsInputFifoPtr,
-	EbFifo_t                     *motionEstimationResultsOutputFifoPtr) {
+	EbFifo_t                     *motionEstimationResultsOutputFifoPtr,
+    EB_HANDLE                     encHandle) {
 
 	EB_ERRORTYPE return_error = EB_ErrorNone;
 	MotionEstimationContext_t *contextPtr;
-	EB_MALLOC(MotionEstimationContext_t*, contextPtr, sizeof(MotionEstimationContext_t), EB_N_PTR);
+	EB_MALLOC(MotionEstimationContext_t*, contextPtr, sizeof(MotionEstimationContext_t), EB_N_PTR, encHandle);
 
 	*contextDblPtr = contextPtr;
 
 	contextPtr->pictureDecisionResultsInputFifoPtr = pictureDecisionResultsInputFifoPtr;
 	contextPtr->motionEstimationResultsOutputFifoPtr = motionEstimationResultsOutputFifoPtr;
-	return_error = IntraOpenLoopReferenceSamplesCtor(&contextPtr->intraRefPtr);
+	return_error = IntraOpenLoopReferenceSamplesCtor(&contextPtr->intraRefPtr, encHandle);
 	if (return_error == EB_ErrorInsufficientResources){
 		return EB_ErrorInsufficientResources;
 	}
-	return_error = MeContextCtor(&(contextPtr->meContextPtr));
+	return_error = MeContextCtor(&(contextPtr->meContextPtr), encHandle);
 	if (return_error == EB_ErrorInsufficientResources){
 		return EB_ErrorInsufficientResources;
 	}

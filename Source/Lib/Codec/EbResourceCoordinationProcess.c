@@ -32,12 +32,14 @@ EB_ERRORTYPE ResourceCoordinationContextCtor(
     EbFifo_t                        *sequenceControlSetEmptyFifoPtr,
     EbCallback_t                **appCallbackPtrArray,
     EB_U32                          *computeSegmentsTotalCountArray,
-    EB_U32                           encodeInstancesTotalCount)
+    EB_U32                           encodeInstancesTotalCount,
+    EB_HANDLE                        encHandle)
 {
     EB_U32 instanceIndex;
 
     ResourceCoordinationContext_t *contextPtr;
-    EB_MALLOC(ResourceCoordinationContext_t*, contextPtr, sizeof(ResourceCoordinationContext_t), EB_N_PTR);
+
+    EB_MALLOC(ResourceCoordinationContext_t*, contextPtr, sizeof(ResourceCoordinationContext_t), EB_N_PTR, encHandle);
 
     *contextDblPtr = contextPtr;
 
@@ -51,14 +53,14 @@ EB_ERRORTYPE ResourceCoordinationContextCtor(
     contextPtr->encodeInstancesTotalCount                   = encodeInstancesTotalCount;
 
     // Allocate SequenceControlSetActiveArray
-    EB_MALLOC(EbObjectWrapper_t**, contextPtr->sequenceControlSetActiveArray, sizeof(EbObjectWrapper_t*) * contextPtr->encodeInstancesTotalCount, EB_N_PTR);
+    EB_MALLOC(EbObjectWrapper_t**, contextPtr->sequenceControlSetActiveArray, sizeof(EbObjectWrapper_t*) * contextPtr->encodeInstancesTotalCount, EB_N_PTR, encHandle);
 
     for(instanceIndex=0; instanceIndex < contextPtr->encodeInstancesTotalCount; ++instanceIndex) {
         contextPtr->sequenceControlSetActiveArray[instanceIndex] = 0;
     }
 
     // Picture Stats
-    EB_MALLOC(EB_U64*, contextPtr->pictureNumberArray, sizeof(EB_U64) * contextPtr->encodeInstancesTotalCount, EB_N_PTR);
+    EB_MALLOC(EB_U64*, contextPtr->pictureNumberArray, sizeof(EB_U64) * contextPtr->encodeInstancesTotalCount, EB_N_PTR, encHandle);
 
     for(instanceIndex=0; instanceIndex < contextPtr->encodeInstancesTotalCount; ++instanceIndex) {
         contextPtr->pictureNumberArray[instanceIndex] = 0;
@@ -82,6 +84,8 @@ EB_ERRORTYPE ResourceCoordinationContextCtor(
 
 	contextPtr->previousBufferCheck1 = 0;
 	contextPtr->prevChangeCond = 0;
+
+    contextPtr->encHandle = encHandle;
     return EB_ErrorNone;
 }
 
@@ -486,7 +490,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
                 sequenceControlSetPtr,
                 inputSize);
 
-            LcuParamsInit(sequenceControlSetPtr);
+            LcuParamsInit(sequenceControlSetPtr, contextPtr->encHandle);
         }
 
         //Get a New ParentPCS where we will hold the new inputPicture

@@ -23,7 +23,8 @@ typedef struct InitialRateControlReorderEntry_s {
 
 extern EB_ERRORTYPE InitialRateControlReorderEntryCtor(   
     InitialRateControlReorderEntry_t   **entryDblPtr,
-    EB_U32                               pictureNumber);
+    EB_U32                               pictureNumber,
+    EB_HANDLE                            encHandle);
 
 
 /************************************************
@@ -50,7 +51,8 @@ typedef struct HlRateControlHistogramEntry_s {
 
 extern EB_ERRORTYPE HlRateControlHistogramEntryCtor(   
     HlRateControlHistogramEntry_t   **entryDblPtr,
-    EB_U32                            pictureNumber);
+    EB_U32                            pictureNumber,
+    EB_HANDLE                         encHandle);
 
 #ifdef __cplusplus
 }

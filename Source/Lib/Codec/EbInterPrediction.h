@@ -43,7 +43,8 @@ extern EB_ERRORTYPE InterPredictionContextCtor(
 	InterPredictionContext_t **interPredictionContext,
 	EB_U16                     maxCUWidth,
     EB_U16                     maxCUHeight,
-    EB_BOOL                    is16bit);
+    EB_BOOL                    is16bit,
+    EB_HANDLE                  encHandle);
 
 
 extern EB_ERRORTYPE InterPredictionContextDtor(

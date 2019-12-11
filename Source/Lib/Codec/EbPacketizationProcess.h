@@ -31,7 +31,6 @@ typedef struct PacketizationContext_s
     EbFifo_t                *rateControlTasksOutputFifoPtr;
     EbPPSConfig_t           *ppsConfig;
     EbFifo_t                *pictureManagerOutputFifoPtr;   // to picture-manager
-    
 } PacketizationContext_t;
 
 /**************************************
@@ -41,7 +40,8 @@ extern EB_ERRORTYPE PacketizationContextCtor(
     PacketizationContext_t **contextDblPtr,
     EbFifo_t                *entropyCodingInputFifoPtr,
     EbFifo_t                *rateControlTasksOutputFifoPtr,
-    EbFifo_t                *pictureManagerOutputFifoPtr
+    EbFifo_t                *pictureManagerOutputFifoPtr,
+    EB_HANDLE                encHandle
 );
     
     

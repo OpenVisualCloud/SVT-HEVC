@@ -22,7 +22,8 @@ typedef struct PictureDecisionReorderEntry_s {
 
 extern EB_ERRORTYPE PictureDecisionReorderEntryCtor(   
     PictureDecisionReorderEntry_t       **entryDblPtr,
-    EB_U32                                pictureNumber);
+    EB_U32                                pictureNumber,
+    EB_HANDLE                             encHandle);
 
 #ifdef __cplusplus
 }

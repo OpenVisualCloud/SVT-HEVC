@@ -220,7 +220,8 @@ typedef struct EbSequenceControlSetInstance_s
  **************************************/
 extern EB_ERRORTYPE EbSequenceControlSetCtor(
     EB_PTR                          *objectDblPtr, 
-    EB_PTR                           objectInitDataPtr);
+    EB_PTR                           objectInitDataPtr,
+    EB_HANDLE                        encHandle);
     
 
 
@@ -229,10 +230,12 @@ extern EB_ERRORTYPE CopySequenceControlSet(
     SequenceControlSet_t            *src);
         
 extern EB_ERRORTYPE EbSequenceControlSetInstanceCtor(
-    EbSequenceControlSetInstance_t **objectDblPtr);
+    EbSequenceControlSetInstance_t **objectDblPtr,
+    EB_HANDLE encHandle);
 
 extern EB_ERRORTYPE LcuParamsInit(
-    SequenceControlSet_t *sequenceControlSetPtr);
+    SequenceControlSet_t *sequenceControlSetPtr,
+    EB_HANDLE encHandle);
 extern EB_ERRORTYPE DeriveInputResolution(
     SequenceControlSet_t *sequenceControlSetPtr,
     EB_U32                inputSize);

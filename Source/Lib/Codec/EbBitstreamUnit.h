@@ -36,7 +36,8 @@ typedef struct OutputBitstreamUnit_s {
  **********************************/
 extern EB_ERRORTYPE OutputBitstreamUnitCtor(
     OutputBitstreamUnit_t   *bitstreamPtr,
-    EB_U32                   bufferSize );
+    EB_U32                   bufferSize,
+    EB_PTR                   encHandle);
 
 
 extern EB_ERRORTYPE OutputBitstreamReset(OutputBitstreamUnit_t *bitstreamPtr);

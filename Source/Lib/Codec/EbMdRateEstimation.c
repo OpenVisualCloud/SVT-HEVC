@@ -294,7 +294,8 @@ EB_ERRORTYPE GetSaoOffsetsFractionBits(
 }
 
 EB_ERRORTYPE MdRateEstimationContextCtor(MdRateEstimationContext_t *mdRateEstimationArray,
-                                 ContextModelEncContext_t  *cabacContextModelArray)
+                                 ContextModelEncContext_t  *cabacContextModelArray,
+                                 EB_HANDLE                  encHandle)
 {
     EB_U32                      caseIndex1;
     EB_U32                      caseIndex2;
@@ -306,7 +307,7 @@ EB_ERRORTYPE MdRateEstimationContextCtor(MdRateEstimationContext_t *mdRateEstima
     EB_U32                      cabacContextModelArrayOffset2;
     ContextModelEncContext_t   *cabacContextModelPtr;
     EB_ContextModel            *contextModelPtr;
-    EB_MALLOC(EB_ContextModel*, contextModelPtr, sizeof(EB_ContextModel), EB_N_PTR);
+    EB_MALLOC(EB_ContextModel*, contextModelPtr, sizeof(EB_ContextModel), EB_N_PTR, encHandle);
 
     // Loop over all slice types
     for(sliceIndex = 0; sliceIndex < TOTAL_NUMBER_OF_SLICE_TYPES; sliceIndex++) {

@@ -18,10 +18,11 @@ EB_ERRORTYPE EntropyCodingContextCtor(
     EbFifo_t                *encDecInputFifoPtr,
     EbFifo_t                *packetizationOutputFifoPtr,
     EbFifo_t                *rateControlOutputFifoPtr,
-    EB_BOOL                  is16bit)
+    EB_BOOL                  is16bit,
+    EB_HANDLE                encHandle)
 {
     EntropyCodingContext_t *contextPtr;
-    EB_MALLOC(EntropyCodingContext_t*, contextPtr, sizeof(EntropyCodingContext_t), EB_N_PTR);
+    EB_MALLOC(EntropyCodingContext_t*, contextPtr, sizeof(EntropyCodingContext_t), EB_N_PTR, encHandle);
     *contextDblPtr = contextPtr;
 
     contextPtr->is16bit = is16bit;

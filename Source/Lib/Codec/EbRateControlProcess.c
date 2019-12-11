@@ -190,10 +190,11 @@ static void RateControlLayerResetPart2(
 }
 
 static EB_ERRORTYPE HighLevelRateControlContextCtor(
-    HighLevelRateControlContext_t   **entryDblPtr){
-
+    HighLevelRateControlContext_t   **entryDblPtr,
+    EB_HANDLE                         encHandle)
+{
     HighLevelRateControlContext_t *entryPtr;
-    EB_MALLOC(HighLevelRateControlContext_t*, entryPtr, sizeof(HighLevelRateControlContext_t), EB_N_PTR);
+    EB_MALLOC(HighLevelRateControlContext_t*, entryPtr, sizeof(HighLevelRateControlContext_t), EB_N_PTR, encHandle);
     *entryDblPtr = entryPtr;
 
     return EB_ErrorNone;
@@ -201,10 +202,11 @@ static EB_ERRORTYPE HighLevelRateControlContextCtor(
 
 
 EB_ERRORTYPE RateControlLayerContextCtor(
-    RateControlLayerContext_t   **entryDblPtr){
-
+    RateControlLayerContext_t   **entryDblPtr,
+    EB_HANDLE encHandle)
+{
     RateControlLayerContext_t *entryPtr;
-    EB_MALLOC(RateControlLayerContext_t*, entryPtr, sizeof(RateControlLayerContext_t), EB_N_PTR);
+    EB_MALLOC(RateControlLayerContext_t*, entryPtr, sizeof(RateControlLayerContext_t), EB_N_PTR, encHandle);
 
     *entryDblPtr = entryPtr;
 
@@ -218,11 +220,13 @@ EB_ERRORTYPE RateControlLayerContextCtor(
 
 
 EB_ERRORTYPE RateControlIntervalParamContextCtor(
-    RateControlIntervalParamContext_t   **entryDblPtr) {
+    RateControlIntervalParamContext_t   **entryDblPtr,
+    EB_HANDLE encHandle) {
     EB_U32 temporalIndex;
     EB_ERRORTYPE return_error = EB_ErrorNone;
     RateControlIntervalParamContext_t *entryPtr;
-    EB_MALLOC(RateControlIntervalParamContext_t*, entryPtr, sizeof(RateControlIntervalParamContext_t), EB_N_PTR);
+
+    EB_MALLOC(RateControlIntervalParamContext_t*, entryPtr, sizeof(RateControlIntervalParamContext_t), EB_N_PTR, encHandle);
 
     *entryDblPtr = entryPtr;
 
@@ -230,10 +234,10 @@ EB_ERRORTYPE RateControlIntervalParamContextCtor(
     entryPtr->wasUsed = EB_FALSE;
     entryPtr->lastGop = EB_FALSE;
     entryPtr->processedFramesNumber = 0;
-    EB_MALLOC(RateControlLayerContext_t**, entryPtr->rateControlLayerArray, sizeof(RateControlLayerContext_t*)*EB_MAX_TEMPORAL_LAYERS, EB_N_PTR);
+    EB_MALLOC(RateControlLayerContext_t**, entryPtr->rateControlLayerArray, sizeof(RateControlLayerContext_t*)*EB_MAX_TEMPORAL_LAYERS, EB_N_PTR, encHandle);
 
     for (temporalIndex = 0; temporalIndex < EB_MAX_TEMPORAL_LAYERS; temporalIndex++){
-        return_error = RateControlLayerContextCtor(&entryPtr->rateControlLayerArray[temporalIndex]);
+        return_error = RateControlLayerContextCtor(&entryPtr->rateControlLayerArray[temporalIndex], encHandle);
         entryPtr->rateControlLayerArray[temporalIndex]->temporalIndex = temporalIndex;
         entryPtr->rateControlLayerArray[temporalIndex]->frameRate = 1 << RC_PRECISION;
         if (return_error == EB_ErrorInsufficientResources){
@@ -258,10 +262,11 @@ EB_ERRORTYPE RateControlIntervalParamContextCtor(
 
 EB_ERRORTYPE RateControlCodedFramesStatsContextCtor(
     CodedFramesStatsEntry_t   **entryDblPtr,
-    EB_U64                      pictureNumber) {
-
+    EB_U64                      pictureNumber,
+    EB_HANDLE                   encHandle)
+{
     CodedFramesStatsEntry_t *entryPtr;
-    EB_MALLOC(CodedFramesStatsEntry_t*, entryPtr, sizeof(CodedFramesStatsEntry_t), EB_N_PTR);
+    EB_MALLOC(CodedFramesStatsEntry_t*, entryPtr, sizeof(CodedFramesStatsEntry_t), EB_N_PTR, encHandle);
 
     *entryDblPtr = entryPtr;
 
@@ -276,7 +281,8 @@ EB_ERRORTYPE RateControlContextCtor(
     RateControlContext_t   **contextDblPtr,
     EbFifo_t                *rateControlInputTasksFifoPtr,
     EbFifo_t                *rateControlOutputResultsFifoPtr,
-    EB_S32                   intraPeriodLength)
+    EB_S32                   intraPeriodLength,
+    EB_HANDLE                encHandle)
 {
     EB_U32 temporalIndex;
     EB_U32 intervalIndex;
@@ -287,7 +293,8 @@ EB_ERRORTYPE RateControlContextCtor(
 
     EB_ERRORTYPE return_error = EB_ErrorNone;
     RateControlContext_t *contextPtr;
-    EB_MALLOC(RateControlContext_t*, contextPtr, sizeof(RateControlContext_t), EB_N_PTR);
+
+    EB_MALLOC(RateControlContext_t*, contextPtr, sizeof(RateControlContext_t), EB_N_PTR, encHandle);
 
     *contextDblPtr = contextPtr;
 
@@ -296,7 +303,7 @@ EB_ERRORTYPE RateControlContextCtor(
 
     // High level RC
     return_error = HighLevelRateControlContextCtor(
-        &contextPtr->highLevelRateControlPtr);
+        &contextPtr->highLevelRateControlPtr, encHandle);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
@@ -305,12 +312,13 @@ EB_ERRORTYPE RateControlContextCtor(
         contextPtr->framesInInterval[temporalIndex] = 0;
     }
 
-    EB_MALLOC(RateControlIntervalParamContext_t**, contextPtr->rateControlParamQueue, sizeof(RateControlIntervalParamContext_t*)*PARALLEL_GOP_MAX_NUMBER, EB_N_PTR);
+    EB_MALLOC(RateControlIntervalParamContext_t**, contextPtr->rateControlParamQueue, sizeof(RateControlIntervalParamContext_t*)*PARALLEL_GOP_MAX_NUMBER, EB_N_PTR, encHandle);
 
     contextPtr->rateControlParamQueueHeadIndex = 0;
     for (intervalIndex = 0; intervalIndex < PARALLEL_GOP_MAX_NUMBER; intervalIndex++){
         return_error = RateControlIntervalParamContextCtor(
-            &contextPtr->rateControlParamQueue[intervalIndex]);
+            &contextPtr->rateControlParamQueue[intervalIndex],
+            encHandle);
         contextPtr->rateControlParamQueue[intervalIndex]->firstPoc = (intervalIndex*(EB_U32)(intraPeriodLength + 1));
         contextPtr->rateControlParamQueue[intervalIndex]->lastPoc = ((intervalIndex + 1)*(EB_U32)(intraPeriodLength + 1)) - 1;
         if (return_error == EB_ErrorInsufficientResources){
@@ -321,12 +329,13 @@ EB_ERRORTYPE RateControlContextCtor(
 #if OVERSHOOT_STAT_PRINT
     contextPtr->codedFramesStatQueueHeadIndex = 0;
     contextPtr->codedFramesStatQueueTailIndex = 0;
-    EB_MALLOC(CodedFramesStatsEntry_t**, contextPtr->codedFramesStatQueue, sizeof(CodedFramesStatsEntry_t*)*CODED_FRAMES_STAT_QUEUE_MAX_DEPTH, EB_N_PTR);
+    EB_MALLOC(CodedFramesStatsEntry_t**, contextPtr->codedFramesStatQueue, sizeof(CodedFramesStatsEntry_t*)*CODED_FRAMES_STAT_QUEUE_MAX_DEPTH, EB_N_PTR, encHandle);
 
     for (pictureIndex = 0; pictureIndex < CODED_FRAMES_STAT_QUEUE_MAX_DEPTH; ++pictureIndex) {
         return_error = RateControlCodedFramesStatsContextCtor(
             &contextPtr->codedFramesStatQueue[pictureIndex],
-            pictureIndex);
+            pictureIndex,
+            encHandle);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }

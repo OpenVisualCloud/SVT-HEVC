@@ -9,10 +9,11 @@
 
 EB_ERRORTYPE InitialRateControlResultsCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr)
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle)
 {
     InitialRateControlResults_t *objectPtr;
-    EB_MALLOC(InitialRateControlResults_t *, objectPtr, sizeof(InitialRateControlResults_t), EB_N_PTR);
+    EB_MALLOC(InitialRateControlResults_t *, objectPtr, sizeof(InitialRateControlResults_t), EB_N_PTR, encHandle);
 
     *objectDblPtr = (EB_PTR) objectPtr;
     objectInitDataPtr = 0;

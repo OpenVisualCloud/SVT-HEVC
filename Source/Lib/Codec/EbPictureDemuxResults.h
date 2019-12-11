@@ -48,7 +48,8 @@ typedef struct PictureResultInitData_s
  **************************************/
 extern EB_ERRORTYPE PictureResultsCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr);
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle);
 
 #ifdef __cplusplus
 }

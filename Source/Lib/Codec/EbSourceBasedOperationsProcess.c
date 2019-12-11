@@ -66,11 +66,12 @@ const EB_U8 EbHevcMaxDeltaQPdefault[3] = {
 EB_ERRORTYPE SourceBasedOperationsContextCtor(
     SourceBasedOperationsContext_t **contextDblPtr,
     EbFifo_t						*initialRateControlResultsInputFifoPtr,
-    EbFifo_t						*pictureDemuxResultsOutputFifoPtr)
+    EbFifo_t						*pictureDemuxResultsOutputFifoPtr,
+    EB_HANDLE                        encHandle)
 {
 	SourceBasedOperationsContext_t *contextPtr;
 
-	EB_MALLOC(SourceBasedOperationsContext_t*, contextPtr, sizeof(SourceBasedOperationsContext_t), EB_N_PTR);
+	EB_MALLOC(SourceBasedOperationsContext_t*, contextPtr, sizeof(SourceBasedOperationsContext_t), EB_N_PTR, encHandle);
 	*contextDblPtr = contextPtr;
 	contextPtr->initialrateControlResultsInputFifoPtr = initialRateControlResultsInputFifoPtr;
 	contextPtr->pictureDemuxResultsOutputFifoPtr = pictureDemuxResultsOutputFifoPtr;

@@ -262,7 +262,8 @@ extern EB_ERRORTYPE MotionCompensationPredictionContextCtor(
 	MotionCompensationPredictionContext_t **contextDblPtr,
 	EB_U16                                  maxCUWidth,
     EB_U16                                  maxCUHeight,
-    EB_BOOL                                 is16bit);
+    EB_BOOL                                 is16bit,
+    EB_HANDLE                               encHandle);
 
 extern void UniPredHevcInterpolationMd(
 	EbPictureBufferDesc_t *refPic,

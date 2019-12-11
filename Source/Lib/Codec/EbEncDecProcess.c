@@ -47,11 +47,12 @@ EB_ERRORTYPE EncDecContextCtor(
     EbFifo_t                *feedbackFifoPtr,
     EbFifo_t                *pictureDemuxFifoPtr,
     EB_BOOL                  is16bit,
-    EB_COLOR_FORMAT          colorFormat)
+    EB_COLOR_FORMAT          colorFormat,
+    EB_HANDLE                encHandle)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
     EncDecContext_t *contextPtr;
-    EB_MALLOC(EncDecContext_t*, contextPtr, sizeof(EncDecContext_t), EB_N_PTR);
+    EB_MALLOC(EncDecContext_t*, contextPtr, sizeof(EncDecContext_t), EB_N_PTR, encHandle);
     *contextDblPtr = contextPtr;
 
     contextPtr->is16bit = is16bit;
@@ -64,12 +65,12 @@ EB_ERRORTYPE EncDecContextCtor(
     contextPtr->pictureDemuxOutputFifoPtr = pictureDemuxFifoPtr;
 
     // Trasform Scratch Memory
-    EB_MALLOC(EB_S16*, contextPtr->transformInnerArrayPtr, 3152, EB_N_PTR); //refer to EbInvTransform_SSE2.as. case 32x32
+    EB_MALLOC(EB_S16*, contextPtr->transformInnerArrayPtr, 3152, EB_N_PTR, encHandle); //refer to EbInvTransform_SSE2.as. case 32x32
     // MD rate Estimation tables
-    EB_MALLOC(MdRateEstimationContext_t*, contextPtr->mdRateEstimationPtr, sizeof(MdRateEstimationContext_t), EB_N_PTR);
+    EB_MALLOC(MdRateEstimationContext_t*, contextPtr->mdRateEstimationPtr, sizeof(MdRateEstimationContext_t), EB_N_PTR, encHandle);
 
     // Sao Stats
-    return_error = SaoStatsCtor(&contextPtr->saoStats);
+    return_error = SaoStatsCtor(&contextPtr->saoStats, encHandle);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
@@ -95,7 +96,8 @@ EB_ERRORTYPE EncDecContextCtor(
 
             return_error = EbPictureBufferDescCtor(
                 (EB_PTR*)&contextPtr->inputSample16bitBuffer,
-                (EB_PTR)&initData);
+                (EB_PTR)&initData,
+                encHandle);
             if (return_error == EB_ErrorInsufficientResources){
                 return EB_ErrorInsufficientResources;
             }
@@ -120,14 +122,16 @@ EB_ERRORTYPE EncDecContextCtor(
 
         return_error = EbPictureBufferDescCtor(
             (EB_PTR*)&contextPtr->residualBuffer,
-            (EB_PTR)&initData);
+            (EB_PTR)&initData,
+            encHandle);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
 
         return_error = EbPictureBufferDescCtor(
             (EB_PTR*)&contextPtr->transformBuffer,
-            (EB_PTR)&initData);
+            (EB_PTR)&initData,
+            encHandle);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -135,13 +139,13 @@ EB_ERRORTYPE EncDecContextCtor(
     }
 
     // Intra Reference Samples
-    return_error = IntraReferenceSamplesCtor(&contextPtr->intraRefPtr, colorFormat);
+    return_error = IntraReferenceSamplesCtor(&contextPtr->intraRefPtr, colorFormat, encHandle);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
     contextPtr->intraRefPtr16 = (IntraReference16bitSamples_t *)EB_NULL;
     if (is16bit) {
-        return_error = IntraReference16bitSamplesCtor(&contextPtr->intraRefPtr16, colorFormat);
+        return_error = IntraReference16bitSamplesCtor(&contextPtr->intraRefPtr16, colorFormat, encHandle);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
@@ -152,7 +156,8 @@ EB_ERRORTYPE EncDecContextCtor(
         &contextPtr->mcpContext,
         MAX_LCU_SIZE,
         MAX_LCU_SIZE,
-        is16bit);
+        is16bit,
+        encHandle);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
@@ -162,7 +167,8 @@ EB_ERRORTYPE EncDecContextCtor(
         &contextPtr->mdContext,
         0,
         0,
-        is16bit);
+        is16bit,
+        encHandle);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
@@ -173,13 +179,13 @@ EB_ERRORTYPE EncDecContextCtor(
     //TODO: we need to allocate Up buffer using current frame Width (not MAX_PICTURE_WIDTH_SIZE)
     //Need one pixel at position(x=-1) and another at position(x=width) to accomodate SIMD optimization of SAO
     if (!is16bit) {
-        EB_MALLOC(EB_U8 *, contextPtr->saoUpBuffer[0], sizeof(EB_U8) * (MAX_PICTURE_WIDTH_SIZE + 2) * 2, EB_N_PTR);
+        EB_MALLOC(EB_U8 *, contextPtr->saoUpBuffer[0], sizeof(EB_U8) * (MAX_PICTURE_WIDTH_SIZE + 2) * 2, EB_N_PTR, encHandle);
 
         EB_MEMSET(contextPtr->saoUpBuffer[0], 0, (MAX_PICTURE_WIDTH_SIZE + 2) * 2);
         contextPtr->saoUpBuffer[0] ++;
         contextPtr->saoUpBuffer[1] = contextPtr->saoUpBuffer[0] + (MAX_PICTURE_WIDTH_SIZE + 2);
 
-        EB_MALLOC(EB_U8 *, contextPtr->saoLeftBuffer[0], sizeof(EB_U8) *(MAX_LCU_SIZE + 2) * 2 + 14, EB_N_PTR);
+        EB_MALLOC(EB_U8 *, contextPtr->saoLeftBuffer[0], sizeof(EB_U8) *(MAX_LCU_SIZE + 2) * 2 + 14, EB_N_PTR, encHandle);
 
         EB_MEMSET(contextPtr->saoLeftBuffer[0], 0, (MAX_LCU_SIZE + 2) * 2 + 14);
         contextPtr->saoLeftBuffer[1] = contextPtr->saoLeftBuffer[0] + (MAX_LCU_SIZE + 2);
@@ -187,14 +193,14 @@ EB_ERRORTYPE EncDecContextCtor(
     else{
 
         //CHKN only allocate in 16 bit mode
-        EB_MALLOC(EB_U16 *, contextPtr->saoUpBuffer16[0], sizeof(EB_U16) * (MAX_PICTURE_WIDTH_SIZE + 2) * 2, EB_N_PTR);
+        EB_MALLOC(EB_U16 *, contextPtr->saoUpBuffer16[0], sizeof(EB_U16) * (MAX_PICTURE_WIDTH_SIZE + 2) * 2, EB_N_PTR, encHandle);
 
         EB_MEMSET(contextPtr->saoUpBuffer16[0], 0, sizeof(EB_U16) * (MAX_PICTURE_WIDTH_SIZE + 2) * 2);
         contextPtr->saoUpBuffer16[0] ++;
         contextPtr->saoUpBuffer16[1] = contextPtr->saoUpBuffer16[0] + (MAX_PICTURE_WIDTH_SIZE + 2);
 
         //CHKN the add of 14 should be justified, also the left ping pong buffers are not symetric which is not ok
-        EB_MALLOC(EB_U16 *, contextPtr->saoLeftBuffer16[0], sizeof(EB_U16) *(MAX_LCU_SIZE + 2) * 2 + 14, EB_N_PTR);
+        EB_MALLOC(EB_U16 *, contextPtr->saoLeftBuffer16[0], sizeof(EB_U16) *(MAX_LCU_SIZE + 2) * 2 + 14, EB_N_PTR, encHandle);
 
         EB_MEMSET(contextPtr->saoLeftBuffer16[0], 0, sizeof(EB_U16) *(MAX_LCU_SIZE + 2) * 2 + 14);
         contextPtr->saoLeftBuffer16[1] = contextPtr->saoLeftBuffer16[0] + (MAX_LCU_SIZE + 2);

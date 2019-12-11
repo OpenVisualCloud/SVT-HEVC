@@ -30,7 +30,8 @@ typedef struct ResourceCoordinationResultInitData_s
  **************************************/
 extern EB_ERRORTYPE ResourceCoordinationResultCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr);
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle);
 
 
 #ifdef __cplusplus

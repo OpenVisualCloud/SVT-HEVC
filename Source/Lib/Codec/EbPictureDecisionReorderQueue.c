@@ -8,9 +8,10 @@
 
 EB_ERRORTYPE PictureManagerReorderEntryCtor(   
     PictureManagerReorderEntry_t   **entryDblPtr,
-    EB_U32                           pictureNumber)
+    EB_U32                           pictureNumber,
+    EB_HANDLE                        encHandle)
 {
-    EB_MALLOC(PictureManagerReorderEntry_t*, *entryDblPtr, sizeof(PictureManagerReorderEntry_t), EB_N_PTR);
+    EB_MALLOC(PictureManagerReorderEntry_t*, *entryDblPtr, sizeof(PictureManagerReorderEntry_t), EB_N_PTR, encHandle);
 
     (*entryDblPtr)->pictureNumber       = pictureNumber;
     (*entryDblPtr)->parentPcsWrapperPtr = (EbObjectWrapper_t *)EB_NULL;

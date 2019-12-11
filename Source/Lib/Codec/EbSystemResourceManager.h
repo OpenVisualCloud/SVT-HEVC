@@ -220,7 +220,8 @@ extern EB_ERRORTYPE EbSystemResourceCtor(
     EbFifo_t          ***consumerFifoPtrArrayPtr,
     EB_BOOL              fullFifoEnabled,
     EB_CTOR              ObjectCtor,
-    EB_PTR               objectInitDataPtr);
+    EB_PTR               objectInitDataPtr,
+    EB_HANDLE            encHandle);
 
 /*********************************************************************
  * EbSystemResourceDtor

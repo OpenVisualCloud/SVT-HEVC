@@ -55,7 +55,8 @@ typedef struct PictureDecisionContext_s
 extern EB_ERRORTYPE PictureDecisionContextCtor(
     PictureDecisionContext_t    **contextDblPtr,
     EbFifo_t                     *pictureAnalysisResultsInputFifoPtr,
-    EbFifo_t                     *pictureDecisionResultsOutputFifoPtr);
+    EbFifo_t                     *pictureDecisionResultsOutputFifoPtr,
+    EB_HANDLE                     encHandle);
     
 
 extern void* PictureDecisionKernel(void *inputPtr);

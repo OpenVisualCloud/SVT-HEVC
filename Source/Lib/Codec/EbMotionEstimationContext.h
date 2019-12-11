@@ -466,7 +466,8 @@ typedef struct MeContext_s {
 } MeContext_t;
 
 extern EB_ERRORTYPE MeContextCtor(
-    MeContext_t     **objectDblPtr);
+    MeContext_t     **objectDblPtr,
+    EB_HANDLE         encHandle);
     
 #ifdef __cplusplus
 }

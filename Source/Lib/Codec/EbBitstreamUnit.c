@@ -13,14 +13,15 @@
  **********************************/
 EB_ERRORTYPE OutputBitstreamUnitCtor(
     OutputBitstreamUnit_t   *bitstreamPtr,
-    EB_U32                   bufferSize )
+    EB_U32                   bufferSize,
+    EB_PTR                   encHandle)
 {
 
     EB_U32       sliceIndex;
 
     if(bufferSize) {
         bitstreamPtr->size             = bufferSize / sizeof(unsigned int);
-        EB_MALLOC(EB_U32*, bitstreamPtr->bufferBegin, sizeof(EB_U32) * bitstreamPtr->size, EB_N_PTR);
+        EB_MALLOC(EB_U32*, bitstreamPtr->bufferBegin, sizeof(EB_U32) * bitstreamPtr->size, EB_N_PTR, encHandle);
         bitstreamPtr->buffer           = bitstreamPtr->bufferBegin;
     }
     else {

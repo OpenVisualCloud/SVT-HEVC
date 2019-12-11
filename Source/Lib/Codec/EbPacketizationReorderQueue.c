@@ -8,9 +8,10 @@
 #include "EbPictureControlSet.h"
 
 EB_ERRORTYPE PicTimingCtor(
-    PicTimingEntry_t*   *entryPtr)
+    PicTimingEntry_t*   *entryPtr,
+    EB_HANDLE            encHandle)
 {
-    EB_MALLOC(PicTimingEntry_t*, *entryPtr, sizeof(PicTimingEntry_t), EB_N_PTR);
+    EB_MALLOC(PicTimingEntry_t*, *entryPtr, sizeof(PicTimingEntry_t), EB_N_PTR, encHandle);
     (*entryPtr)->picStruct = 0;
     (*entryPtr)->temporalId = 0;
     (*entryPtr)->decodeOrder = 0;
@@ -18,15 +19,18 @@ EB_ERRORTYPE PicTimingCtor(
 }
 EB_ERRORTYPE PacketizationReorderEntryCtor(
     PacketizationReorderEntry_t   **entryDblPtr,
-    EB_U32                          pictureNumber)
+    EB_U32                          pictureNumber,
+    EB_HANDLE                       encHandle)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
-    EB_MALLOC(PacketizationReorderEntry_t*, *entryDblPtr, sizeof(PacketizationReorderEntry_t), EB_N_PTR);
+    EB_MALLOC(PacketizationReorderEntry_t*, *entryDblPtr, sizeof(PacketizationReorderEntry_t), EB_N_PTR, encHandle);
     return_error = PicTimingCtor(
-        &(*entryDblPtr)->picTimingEntry);
+        &(*entryDblPtr)->picTimingEntry,
+        encHandle);
     return_error = BitstreamCtor(
         &(*entryDblPtr)->bitStreamPtr2,
-        PACKETIZATION_PROCESS_BUFFER_SIZE);
+        PACKETIZATION_PROCESS_BUFFER_SIZE,
+        encHandle);
     (*entryDblPtr)->pictureNumber                   = pictureNumber;
     (*entryDblPtr)->outputStreamWrapperPtr          = (EbObjectWrapper_t *)EB_NULL;
     (*entryDblPtr)->startSplicing = 0;

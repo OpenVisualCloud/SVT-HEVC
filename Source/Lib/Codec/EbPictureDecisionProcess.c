@@ -43,30 +43,31 @@
 EB_ERRORTYPE PictureDecisionContextCtor(
     PictureDecisionContext_t **contextDblPtr,
     EbFifo_t *pictureAnalysisResultsInputFifoPtr,
-    EbFifo_t *pictureDecisionResultsOutputFifoPtr)
+    EbFifo_t *pictureDecisionResultsOutputFifoPtr,
+    EB_HANDLE encHandle)
 {
     PictureDecisionContext_t *contextPtr;
     EB_U32 arrayIndex;
     EB_U32 arrayRow , arrowColumn;
-    EB_MALLOC(PictureDecisionContext_t*, contextPtr, sizeof(PictureDecisionContext_t), EB_N_PTR);
+    EB_MALLOC(PictureDecisionContext_t*, contextPtr, sizeof(PictureDecisionContext_t), EB_N_PTR, encHandle);
     *contextDblPtr = contextPtr;
 
     contextPtr->pictureAnalysisResultsInputFifoPtr  = pictureAnalysisResultsInputFifoPtr;
     contextPtr->pictureDecisionResultsOutputFifoPtr = pictureDecisionResultsOutputFifoPtr;
 
-	EB_MALLOC(EB_U32**, contextPtr->ahdRunningAvgCb, sizeof(EB_U32*) * MAX_NUMBER_OF_REGIONS_IN_WIDTH, EB_N_PTR);
+	EB_MALLOC(EB_U32**, contextPtr->ahdRunningAvgCb, sizeof(EB_U32*) * MAX_NUMBER_OF_REGIONS_IN_WIDTH, EB_N_PTR, encHandle);
 
-	EB_MALLOC(EB_U32**, contextPtr->ahdRunningAvgCr, sizeof(EB_U32*) * MAX_NUMBER_OF_REGIONS_IN_WIDTH, EB_N_PTR);
+	EB_MALLOC(EB_U32**, contextPtr->ahdRunningAvgCr, sizeof(EB_U32*) * MAX_NUMBER_OF_REGIONS_IN_WIDTH, EB_N_PTR, encHandle);
 
-	EB_MALLOC(EB_U32**, contextPtr->ahdRunningAvg, sizeof(EB_U32*) * MAX_NUMBER_OF_REGIONS_IN_WIDTH, EB_N_PTR);
+	EB_MALLOC(EB_U32**, contextPtr->ahdRunningAvg, sizeof(EB_U32*) * MAX_NUMBER_OF_REGIONS_IN_WIDTH, EB_N_PTR, encHandle);
 
 	for (arrayIndex = 0; arrayIndex < MAX_NUMBER_OF_REGIONS_IN_WIDTH; arrayIndex++)
 	{
-		EB_MALLOC(EB_U32*, contextPtr->ahdRunningAvgCb[arrayIndex], sizeof(EB_U32) * MAX_NUMBER_OF_REGIONS_IN_HEIGHT, EB_N_PTR);
+		EB_MALLOC(EB_U32*, contextPtr->ahdRunningAvgCb[arrayIndex], sizeof(EB_U32) * MAX_NUMBER_OF_REGIONS_IN_HEIGHT, EB_N_PTR, encHandle);
 
-		EB_MALLOC(EB_U32*, contextPtr->ahdRunningAvgCr[arrayIndex], sizeof(EB_U32) * MAX_NUMBER_OF_REGIONS_IN_HEIGHT, EB_N_PTR);
+		EB_MALLOC(EB_U32*, contextPtr->ahdRunningAvgCr[arrayIndex], sizeof(EB_U32) * MAX_NUMBER_OF_REGIONS_IN_HEIGHT, EB_N_PTR, encHandle);
 
-		EB_MALLOC(EB_U32*, contextPtr->ahdRunningAvg[arrayIndex], sizeof(EB_U32) * MAX_NUMBER_OF_REGIONS_IN_HEIGHT, EB_N_PTR);
+		EB_MALLOC(EB_U32*, contextPtr->ahdRunningAvg[arrayIndex], sizeof(EB_U32) * MAX_NUMBER_OF_REGIONS_IN_HEIGHT, EB_N_PTR, encHandle);
 	}
 
 	for (arrayRow = 0; arrayRow < MAX_NUMBER_OF_REGIONS_IN_HEIGHT; arrayRow++)

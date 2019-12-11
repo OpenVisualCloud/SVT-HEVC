@@ -30,7 +30,8 @@ typedef struct
  **************************************/
 extern EB_ERRORTYPE EntropyCodingResultsCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr);
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle);
 
 
 #ifdef __cplusplus

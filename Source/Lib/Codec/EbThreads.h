@@ -55,43 +55,48 @@ extern EB_ERRORTYPE EbBlockOnMutexTimeout(
 extern EB_ERRORTYPE EbDestroyMutex(
     EB_HANDLE mutexHandle);
 
-extern    EbMemoryMapEntry        *memoryMap;               // library Memory table
-extern    EB_U32                  *memoryMapIndex;          // library memory index
 extern    EB_U64                  *totalLibMemory;          // library Memory malloc'd
 
 #ifdef _WIN32
 extern    GROUP_AFFINITY           groupAffinity;
 extern    EB_U8                    numGroups;
 extern    EB_BOOL                  alternateGroups;
-#define EB_CREATETHREAD(type, pointer, nElements, pointerClass, threadFunction, threadContext) \
-    pointer = EbCreateThread(threadFunction, threadContext); \
-    if (pointer == (type)EB_NULL) { \
-        return EB_ErrorInsufficientResources; \
-    } \
-    else { \
-        memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
-        memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-        if (nElements % 8 == 0) { \
-            *totalLibMemory += (nElements); \
+#define EB_CREATETHREAD(type, pointer, nElements, pointerClass, threadFunction, threadContext, encHandle) \
+    do { \
+        enc_ctx_mem_map_t *enc_ctx_mm_entry = EB_NULL; \
+        if (!get_enc_ctx_mem_map_entry(&enc_ctx_mm_entry, encHandle)) { \
+            return EB_ErrorInsufficientResources; \
+        } \
+        pointer = EbCreateThread(threadFunction, threadContext); \
+        if (pointer == (type)EB_NULL) { \
+            return EB_ErrorInsufficientResources; \
         } \
         else { \
-            *totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
+            enc_ctx_mm_entry->memoryMap[enc_ctx_mm_entry->memoryMapIndex].ptrType = pointerClass; \
+            enc_ctx_mm_entry->memoryMap[enc_ctx_mm_entry->memoryMapIndex++].ptr = pointer; \
+            if (nElements % 8 == 0) { \
+                *totalLibMemory += (nElements); \
+            } \
+            else { \
+                *totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
+            } \
+            if(numGroups == 1) {\
+                SetThreadAffinityMask(pointer, groupAffinity.Mask);\
+            }\
+            else if (numGroups == 2 && alternateGroups){ \
+                groupAffinity.Group = 1 - groupAffinity.Group; \
+                SetThreadGroupAffinity(pointer,&groupAffinity,NULL); \
+            } \
+            else if (numGroups == 2 && !alternateGroups){ \
+                SetThreadGroupAffinity(pointer,&groupAffinity,NULL); \
+            } \
         } \
-        if(numGroups == 1) {\
-            SetThreadAffinityMask(pointer, groupAffinity.Mask);\
-        }\
-        else if (numGroups == 2 && alternateGroups){ \
-            groupAffinity.Group = 1 - groupAffinity.Group; \
-            SetThreadGroupAffinity(pointer,&groupAffinity,NULL); \
+        if (enc_ctx_mm_entry->memoryMapIndex >= MAX_NUM_PTR) { \
+            EbDestroyThread(pointer); \
+            return EB_ErrorInsufficientResources; \
         } \
-        else if (numGroups == 2 && !alternateGroups){ \
-            SetThreadGroupAffinity(pointer,&groupAffinity,NULL); \
-        } \
-    } \
-    if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
-        return EB_ErrorInsufficientResources; \
-    } \
-    libThreadCount++;
+        libThreadCount++; \
+    } while (0)
 #elif defined(__linux__)
 #ifndef __cplusplus
 #define __USE_GNU
@@ -100,48 +105,61 @@ extern    EB_BOOL                  alternateGroups;
 #include <sched.h>
 #include <pthread.h>
 extern    cpu_set_t                   groupAffinity;
-#define EB_CREATETHREAD(type, pointer, nElements, pointerClass, threadFunction, threadContext) \
-    pointer = EbCreateThread(threadFunction, threadContext); \
-    if (pointer == (type)EB_NULL) { \
-        return EB_ErrorInsufficientResources; \
-    } \
-    else { \
-        pthread_setaffinity_np(*((pthread_t*)pointer),sizeof(cpu_set_t),&groupAffinity); \
-        memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
-        memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-		if (nElements % 8 == 0) { \
-			*totalLibMemory += (nElements); \
-		} \
-		else { \
-			*totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
-		} \
-    } \
-    if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
-        return EB_ErrorInsufficientResources; \
-    } \
-    libThreadCount++;
+#define EB_CREATETHREAD(type, pointer, nElements, pointerClass, threadFunction, threadContext, encHandle) \
+    do { \
+        enc_ctx_mem_map_t *enc_ctx_mm_entry = EB_NULL; \
+        if (!get_enc_ctx_mem_map_entry(&enc_ctx_mm_entry, encHandle)) { \
+            return EB_ErrorInsufficientResources; \
+        } \
+        pointer = EbCreateThread(threadFunction, threadContext); \
+        if (pointer == (type)EB_NULL) { \
+            return EB_ErrorInsufficientResources; \
+        } \
+        else { \
+            pthread_setaffinity_np(*((pthread_t*)pointer),sizeof(cpu_set_t),&groupAffinity); \
+            enc_ctx_mm_entry->memoryMap[enc_ctx_mm_entry->memoryMapIndex].ptrType = pointerClass; \
+            enc_ctx_mm_entry->memoryMap[enc_ctx_mm_entry->memoryMapIndex++].ptr = pointer; \
+            if (nElements % 8 == 0) { \
+                *totalLibMemory += (nElements); \
+            } \
+            else { \
+                *totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
+            } \
+        } \
+        if (enc_ctx_mm_entry->memoryMapIndex >= MAX_NUM_PTR) { \
+            EbDestroyThread(pointer); \
+            return EB_ErrorInsufficientResources; \
+        } \
+        libThreadCount++; \
+    } while (0)
 #else
-#define EB_CREATETHREAD(type, pointer, nElements, pointerClass, threadFunction, threadContext) \
-    pointer = EbCreateThread(threadFunction, threadContext); \
-    if (pointer == (type)EB_NULL) { \
-        return EB_ErrorInsufficientResources; \
-    } \
-    else { \
-        memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
-        memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-		if (nElements % 8 == 0) { \
-			*totalLibMemory += (nElements); \
-		} \
-		else { \
-			*totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
-		} \
-    } \
-    if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
-        return EB_ErrorInsufficientResources; \
-    } \
-    libThreadCount++;
+#define EB_CREATETHREAD(type, pointer, nElements, pointerClass, threadFunction, threadContext, encHandle) \
+    do { \
+        enc_ctx_mem_map_t *enc_ctx_mm_entry = EB_NULL; \
+        if (!get_enc_ctx_mem_map_entry(&enc_ctx_mm_entry, encHandle)) { \
+            return EB_ErrorInsufficientResources; \
+        } \
+        pointer = EbCreateThread(threadFunction, threadContext); \
+        if (pointer == (type)EB_NULL) { \
+            return EB_ErrorInsufficientResources; \
+        } \
+        else { \
+            enc_ctx_mm_entry->memoryMap[enc_ctx_mm_entry->memoryMapIndex].ptrType = pointerClass; \
+            enc_ctx_mm_entry->memoryMap[enc_ctx_mm_entry->memoryMapIndex++].ptr = pointer; \
+            if (nElements % 8 == 0) { \
+                *totalLibMemory += (nElements); \
+            } \
+            else { \
+                *totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
+            } \
+        } \
+        if (enc_ctx_mm_entry->memoryMapIndex >= MAX_NUM_PTR) { \
+            EbDestroyThread(pointer); \
+            return EB_ErrorInsufficientResources; \
+        } \
+        libThreadCount++; \
+    } while (0)
 #endif
-
 
 #ifdef __cplusplus
 }

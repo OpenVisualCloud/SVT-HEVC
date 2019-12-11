@@ -57,7 +57,8 @@ extern EB_ERRORTYPE NeighborArrayUnitCtor(
     EB_U32   unitSize,          
     EB_U32   granularityNormal,
     EB_U32   granularityTopLeft,
-    EB_U32   typeMask);
+    EB_U32   typeMask,
+    EB_HANDLE encHandle);
 
 extern void NeighborArrayUnitDtor(NeighborArrayUnit_t  *naUnitPtr);
 

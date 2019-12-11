@@ -233,7 +233,8 @@ extern EB_ERRORTYPE LargestCodingUnitCtor(
     EB_U16                       lcuOriginX,
     EB_U16                       lcuOriginY,
     EB_U16                       lcuIndex,
-    struct PictureControlSet_s  *pictureControlSet);
+    struct PictureControlSet_s  *pictureControlSet,
+    EB_HANDLE                    encHandle);
 
 #ifdef __cplusplus
 }

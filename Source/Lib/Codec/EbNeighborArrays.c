@@ -19,10 +19,12 @@ EB_ERRORTYPE NeighborArrayUnitCtor(
     EB_U32   unitSize,
     EB_U32   granularityNormal,
     EB_U32   granularityTopLeft,
-    EB_U32   typeMask)
+    EB_U32   typeMask,
+    EB_HANDLE encHandle)
 {
     NeighborArrayUnit_t *naUnitPtr;
-    EB_MALLOC(NeighborArrayUnit_t*, naUnitPtr, sizeof(NeighborArrayUnit_t), EB_N_PTR);
+
+    EB_MALLOC(NeighborArrayUnit_t*, naUnitPtr, sizeof(NeighborArrayUnit_t), EB_N_PTR, encHandle);
     
     *naUnitDblPtr = naUnitPtr;
     naUnitPtr->unitSize                 = (EB_U8)(unitSize);
@@ -35,21 +37,21 @@ EB_ERRORTYPE NeighborArrayUnitCtor(
     naUnitPtr->topLeftArraySize         = (EB_U16)((typeMask & NEIGHBOR_ARRAY_UNIT_TOPLEFT_MASK) ? (maxPictureWidth + maxPictureHeight) >> naUnitPtr->granularityTopLeftLog2 : 0);
 
     if(naUnitPtr->leftArraySize) {
-        EB_MALLOC(EB_U8*, naUnitPtr->leftArray, naUnitPtr->unitSize * naUnitPtr->leftArraySize, EB_N_PTR);
+        EB_MALLOC(EB_U8*, naUnitPtr->leftArray, naUnitPtr->unitSize * naUnitPtr->leftArraySize, EB_N_PTR, encHandle);
     }
     else {
         naUnitPtr->leftArray = (EB_U8*) EB_NULL;
     }
 
     if(naUnitPtr->topArraySize) {
-        EB_MALLOC(EB_U8*, naUnitPtr->topArray, naUnitPtr->unitSize * naUnitPtr->topArraySize, EB_N_PTR);
+        EB_MALLOC(EB_U8*, naUnitPtr->topArray, naUnitPtr->unitSize * naUnitPtr->topArraySize, EB_N_PTR, encHandle);
     }
     else {
         naUnitPtr->topArray = (EB_U8*) EB_NULL;
     }
 
     if(naUnitPtr->topLeftArraySize) {
-        EB_MALLOC(EB_U8*, naUnitPtr->topLeftArray, naUnitPtr->unitSize * naUnitPtr->topLeftArraySize, EB_N_PTR);
+        EB_MALLOC(EB_U8*, naUnitPtr->topLeftArray, naUnitPtr->unitSize * naUnitPtr->topLeftArraySize, EB_N_PTR, encHandle);
     }
     else {
         naUnitPtr->topLeftArray = (EB_U8*) EB_NULL;

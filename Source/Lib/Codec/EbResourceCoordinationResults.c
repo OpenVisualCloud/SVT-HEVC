@@ -9,10 +9,11 @@
 
 EB_ERRORTYPE ResourceCoordinationResultCtor(
     EB_PTR *objectDblPtr,
-    EB_PTR objectInitDataPtr)
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle)
 {
     ResourceCoordinationResults_t *objectPtr;
-    EB_MALLOC(ResourceCoordinationResults_t*, objectPtr, sizeof(ResourceCoordinationResults_t), EB_N_PTR);
+    EB_MALLOC(ResourceCoordinationResults_t*, objectPtr, sizeof(ResourceCoordinationResults_t), EB_N_PTR, encHandle);
 
     *objectDblPtr = objectPtr;
 

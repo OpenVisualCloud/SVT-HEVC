@@ -22,12 +22,13 @@ EB_ERRORTYPE InterPredictionContextCtor(
     InterPredictionContext_t **interPredictionContext,
 	EB_U16                     maxCUWidth,
     EB_U16                     maxCUHeight,
-    EB_BOOL                    is16bit)
+    EB_BOOL                    is16bit,
+    EB_HANDLE                  encHandle)
 
 {
     EB_ERRORTYPE              return_error = EB_ErrorNone;
     InterPredictionContext_t *contextPtr;
-    EB_MALLOC(InterPredictionContext_t*, contextPtr, sizeof(InterPredictionContext_t), EB_N_PTR);
+    EB_MALLOC(InterPredictionContext_t*, contextPtr, sizeof(InterPredictionContext_t), EB_N_PTR, encHandle);
 
     (*interPredictionContext) = contextPtr;
 
@@ -35,7 +36,8 @@ EB_ERRORTYPE InterPredictionContextCtor(
         &contextPtr->mcpContext,
         maxCUWidth,
         maxCUHeight,
-        is16bit);
+        is16bit,
+        encHandle);
 
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;

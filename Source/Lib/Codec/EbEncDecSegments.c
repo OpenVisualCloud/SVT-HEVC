@@ -13,11 +13,12 @@
 EB_ERRORTYPE EncDecSegmentsCtor(
     EncDecSegments_t **segmentsDblPtr,
     EB_U32             segmentColCount,
-    EB_U32             segmentRowCount)
+    EB_U32             segmentRowCount,
+    EB_HANDLE          encHandle)
 {
     EB_U32 rowIndex;
     EncDecSegments_t *segmentsPtr;
-    EB_MALLOC(EncDecSegments_t*, segmentsPtr, sizeof(EncDecSegments_t), EB_N_PTR);
+    EB_MALLOC(EncDecSegments_t*, segmentsPtr, sizeof(EncDecSegments_t), EB_N_PTR, encHandle);
     
     *segmentsDblPtr = segmentsPtr;
 
@@ -26,22 +27,22 @@ EB_ERRORTYPE EncDecSegmentsCtor(
     segmentsPtr->segmentMaxTotalCount = segmentsPtr->segmentMaxRowCount * segmentsPtr->segmentMaxBandCount;
 
     // Start Arrays
-    EB_MALLOC(EB_U16*, segmentsPtr->xStartArray, sizeof(EB_U16) * segmentsPtr->segmentMaxTotalCount, EB_N_PTR);
+    EB_MALLOC(EB_U16*, segmentsPtr->xStartArray, sizeof(EB_U16) * segmentsPtr->segmentMaxTotalCount, EB_N_PTR, encHandle);
 
-    EB_MALLOC(EB_U16*, segmentsPtr->yStartArray, sizeof(EB_U16) * segmentsPtr->segmentMaxTotalCount, EB_N_PTR);
+    EB_MALLOC(EB_U16*, segmentsPtr->yStartArray, sizeof(EB_U16) * segmentsPtr->segmentMaxTotalCount, EB_N_PTR, encHandle);
     
-    EB_MALLOC(EB_U16*, segmentsPtr->validLcuCountArray, sizeof(EB_U16) * segmentsPtr->segmentMaxTotalCount, EB_N_PTR);
+    EB_MALLOC(EB_U16*, segmentsPtr->validLcuCountArray, sizeof(EB_U16) * segmentsPtr->segmentMaxTotalCount, EB_N_PTR, encHandle);
     
     // Dependency map
-    EB_MALLOC(EB_U8*, segmentsPtr->depMap.dependencyMap, sizeof(EB_U8) * segmentsPtr->segmentMaxTotalCount, EB_N_PTR);
+    EB_MALLOC(EB_U8*, segmentsPtr->depMap.dependencyMap, sizeof(EB_U8) * segmentsPtr->segmentMaxTotalCount, EB_N_PTR, encHandle);
     
-    EB_CREATEMUTEX(EB_HANDLE, segmentsPtr->depMap.updateMutex, sizeof(EB_HANDLE), EB_MUTEX);
+    EB_CREATEMUTEX(EB_HANDLE, segmentsPtr->depMap.updateMutex, sizeof(EB_HANDLE), EB_MUTEX, encHandle);
     
     // Segment rows
-    EB_MALLOC(EncDecSegSegmentRow_t*, segmentsPtr->rowArray, sizeof(EncDecSegSegmentRow_t) * segmentsPtr->segmentMaxRowCount, EB_N_PTR)
+    EB_MALLOC(EncDecSegSegmentRow_t*, segmentsPtr->rowArray, sizeof(EncDecSegSegmentRow_t) * segmentsPtr->segmentMaxRowCount, EB_N_PTR, encHandle);
     
     for(rowIndex=0; rowIndex < segmentsPtr->segmentMaxRowCount; ++rowIndex) {
-        EB_CREATEMUTEX(EB_HANDLE, segmentsPtr->rowArray[rowIndex].assignmentMutex, sizeof(EB_HANDLE), EB_MUTEX);
+        EB_CREATEMUTEX(EB_HANDLE, segmentsPtr->rowArray[rowIndex].assignmentMutex, sizeof(EB_HANDLE), EB_MUTEX, encHandle);
     }
 
     return EB_ErrorNone;

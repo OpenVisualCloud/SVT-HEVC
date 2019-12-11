@@ -97,18 +97,19 @@ EB_ERRORTYPE PacketizationContextCtor(
     PacketizationContext_t **contextDblPtr,
     EbFifo_t                *entropyCodingInputFifoPtr,
     EbFifo_t                *rateControlTasksOutputFifoPtr,
-    EbFifo_t                *pictureManagerOutputFifoPtr
+    EbFifo_t                *pictureManagerOutputFifoPtr,
+    EB_HANDLE                encHandle
 )
 {
     PacketizationContext_t *contextPtr;
-    EB_MALLOC(PacketizationContext_t*, contextPtr, sizeof(PacketizationContext_t), EB_N_PTR);
+    EB_MALLOC(PacketizationContext_t*, contextPtr, sizeof(PacketizationContext_t), EB_N_PTR, encHandle);
     *contextDblPtr = contextPtr;
 
     contextPtr->entropyCodingInputFifoPtr      = entropyCodingInputFifoPtr;
     contextPtr->rateControlTasksOutputFifoPtr  = rateControlTasksOutputFifoPtr;
     contextPtr->pictureManagerOutputFifoPtr    = pictureManagerOutputFifoPtr;
 
-    EB_MALLOC(EbPPSConfig_t*, contextPtr->ppsConfig, sizeof(EbPPSConfig_t), EB_N_PTR);
+    EB_MALLOC(EbPPSConfig_t*, contextPtr->ppsConfig, sizeof(EbPPSConfig_t), EB_N_PTR, encHandle);
 
 	return EB_ErrorNone;
 }

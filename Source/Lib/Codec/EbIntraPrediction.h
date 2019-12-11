@@ -99,13 +99,15 @@ typedef struct IntraReference16bitSamples_s {
 
 extern EB_ERRORTYPE IntraReferenceSamplesCtor(
         IntraReferenceSamples_t **contextDblPtr,
-        EB_COLOR_FORMAT colorFormat);
+        EB_COLOR_FORMAT colorFormat,
+        EB_HANDLE encHandle);
 
 
 
 extern EB_ERRORTYPE IntraReference16bitSamplesCtor(
     IntraReference16bitSamples_t **contextDblPtr,
-    EB_COLOR_FORMAT colorFormat);
+    EB_COLOR_FORMAT colorFormat,
+    EB_HANDLE encHandle);
 
 
 
@@ -377,7 +379,8 @@ extern EB_ERRORTYPE UpdateChromaNeighborSamplesArrayOL(
     LargestCodingUnit_t             *lcuPtr);
 
 extern EB_ERRORTYPE IntraOpenLoopReferenceSamplesCtor(
-    IntraReferenceSamplesOpenLoop_t **contextDblPtr);
+    IntraReferenceSamplesOpenLoop_t **contextDblPtr,
+    EB_HANDLE encHandle);
 extern void IntraOpenLoopReferenceSamplesDtor(
     IntraReferenceSamplesOpenLoop_t  *contextPtr);
 

@@ -31,7 +31,8 @@ typedef struct RateControlResultsInitData_s
  **************************************/
 extern EB_ERRORTYPE RateControlResultsCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr);
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle);
 
 
 #ifdef __cplusplus

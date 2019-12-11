@@ -82,7 +82,6 @@ typedef struct EntropyCodingContext_s
     
     // MCP Context
     EB_BOOL                         is16bit; //enable 10 bit encode in CL
-
 } EntropyCodingContext_t;
 
 /**************************************
@@ -93,7 +92,8 @@ extern EB_ERRORTYPE EntropyCodingContextCtor(
     EbFifo_t                *encDecInputFifoPtr,
     EbFifo_t                *packetizationOutputFifoPtr,
     EbFifo_t                *rateControlOutputFifoPtr,
-    EB_BOOL                  is16bit);
+    EB_BOOL                  is16bit,
+    EB_HANDLE                encHandle);
     
 extern void* EntropyCodingKernel(void *inputPtr);
 

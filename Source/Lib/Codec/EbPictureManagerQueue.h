@@ -90,12 +90,14 @@ typedef struct RcFeedbackQueueEntry_s {
 } RcFeedbackQueueEntry_t;   
 
 extern EB_ERRORTYPE InputQueueEntryCtor(   
-    InputQueueEntry_t      **entryDblPtr);
+    InputQueueEntry_t      **entryDblPtr,
+    EB_HANDLE                encHandle);
 
    
 
 extern EB_ERRORTYPE ReferenceQueueEntryCtor(   
-    ReferenceQueueEntry_t  **entryDblPtr);
+    ReferenceQueueEntry_t  **entryDblPtr,
+    EB_HANDLE                encHandle);
 
 
 #ifdef __cplusplus

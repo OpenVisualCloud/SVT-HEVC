@@ -31,7 +31,6 @@ typedef struct MotionEstimationContext_s
     EB_BOOL                          oisKernelLevel;                // used by P/B Slices
     EB_U8                            oisThSet;                      // used by P/B Slices
     EB_BOOL                          setBestOisDistortionToValid;   // used by I/P/B Slices
-
 } MotionEstimationContext_t;
 
 /***************************************
@@ -40,7 +39,8 @@ typedef struct MotionEstimationContext_s
 extern EB_ERRORTYPE MotionEstimationContextCtor(
 	MotionEstimationContext_t   **contextDblPtr,
 	EbFifo_t                     *pictureDecisionResultsInputFifoPtr,
-	EbFifo_t                     *motionEstimationResultsOutputFifoPtr);
+	EbFifo_t                     *motionEstimationResultsOutputFifoPtr,
+    EB_HANDLE                     encHandle);
 
 
 extern void* MotionEstimationKernel(void *inputPtr);  

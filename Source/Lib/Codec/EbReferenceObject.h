@@ -66,11 +66,13 @@ typedef struct EbPaReferenceObjectDescInitData_s {
  **************************************/
 extern EB_ERRORTYPE EbReferenceObjectCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr);
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle);
 
 extern EB_ERRORTYPE EbPaReferenceObjectCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr);
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle);
 
 #ifdef __cplusplus
 }

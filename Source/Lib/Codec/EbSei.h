@@ -307,7 +307,8 @@ extern "C" {
 
 
 EB_ERRORTYPE EbVideoUsabilityInfoCtor(
-    AppVideoUsabilityInfo_t *vuiPtr);
+    AppVideoUsabilityInfo_t *vuiPtr,
+    EB_HANDLE encHandle);
 
 
 

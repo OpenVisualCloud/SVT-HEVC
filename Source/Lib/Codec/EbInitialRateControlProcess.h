@@ -21,7 +21,6 @@ typedef struct InitialRateControlContext_s
 {
     EbFifo_t                    *motionEstimationResultsInputFifoPtr;
 	EbFifo_t                    *initialrateControlResultsOutputFifoPtr;
-
 } InitialRateControlContext_t;
 
 /***************************************
@@ -30,7 +29,8 @@ typedef struct InitialRateControlContext_s
 extern EB_ERRORTYPE InitialRateControlContextCtor(
     InitialRateControlContext_t **contextDblPtr,
     EbFifo_t                     *motionEstimationResultsInputFifoPtr,
-    EbFifo_t                     *pictureDemuxResultsOutputFifoPtr);
+    EbFifo_t                     *pictureDemuxResultsOutputFifoPtr,
+    EB_HANDLE                     encHandle);
 
 extern void* InitialRateControlKernel(void *inputPtr);
 

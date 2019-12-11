@@ -10,10 +10,11 @@
 
 EB_ERRORTYPE MotionEstimationResultsCtor(
     EB_PTR *objectDblPtr,
-    EB_PTR objectInitDataPtr)
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle)
 {
     MotionEstimationResults_t *contextPtr;
-    EB_MALLOC(MotionEstimationResults_t*, contextPtr, sizeof(MotionEstimationResults_t), EB_N_PTR);
+    EB_MALLOC(MotionEstimationResults_t*, contextPtr, sizeof(MotionEstimationResults_t), EB_N_PTR, encHandle);
     
     *objectDblPtr = (EB_PTR) contextPtr;
     objectInitDataPtr = 0;

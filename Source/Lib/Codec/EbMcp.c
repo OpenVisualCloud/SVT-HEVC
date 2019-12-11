@@ -27,27 +27,29 @@ EB_ERRORTYPE MotionCompensationPredictionContextCtor(
     MotionCompensationPredictionContext_t **contextDblPtr,
 	EB_U16                                  maxCUWidth,
     EB_U16                                  maxCUHeight,
-    EB_BOOL                                 is16bit)
+    EB_BOOL                                 is16bit,
+    EB_HANDLE                               encHandle)
 
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
     MotionCompensationPredictionContext_t *contextPtr;
-    EB_MALLOC(MotionCompensationPredictionContext_t *, contextPtr, sizeof(MotionCompensationPredictionContext_t), EB_N_PTR);
+
+    EB_MALLOC(MotionCompensationPredictionContext_t *, contextPtr, sizeof(MotionCompensationPredictionContext_t), EB_N_PTR, encHandle);
     *(contextDblPtr) = contextPtr;
 
     // Jing: increase the size for 422/444
-    EB_MALLOC(EB_S16*, contextPtr->motionCompensationIntermediateResultBuf0, sizeof(EB_S16)*(maxCUWidth*maxCUHeight * 3 + 8), EB_N_PTR);        //Y + U + V
+    EB_MALLOC(EB_S16*, contextPtr->motionCompensationIntermediateResultBuf0, sizeof(EB_S16)*(maxCUWidth*maxCUHeight * 3 + 8), EB_N_PTR, encHandle);        //Y + U + V
 
-    EB_MALLOC(EB_S16*, contextPtr->motionCompensationIntermediateResultBuf1, sizeof(EB_S16)*(maxCUWidth*maxCUHeight * 3 + 8), EB_N_PTR);        //Y + U + V
+    EB_MALLOC(EB_S16*, contextPtr->motionCompensationIntermediateResultBuf1, sizeof(EB_S16)*(maxCUWidth*maxCUHeight * 3 + 8), EB_N_PTR, encHandle);        //Y + U + V
 
-    EB_MALLOC(EB_BYTE, contextPtr->avcStyleMcpIntermediateResultBuf0, sizeof(EB_U8)*maxCUWidth*maxCUHeight * 6 * 3 + 16, EB_N_PTR);        //Y + U + V;
+    EB_MALLOC(EB_BYTE, contextPtr->avcStyleMcpIntermediateResultBuf0, sizeof(EB_U8)*maxCUWidth*maxCUHeight * 6 * 3 + 16, EB_N_PTR, encHandle);        //Y + U + V;
 
-    EB_MALLOC(EB_BYTE, contextPtr->avcStyleMcpIntermediateResultBuf1, sizeof(EB_U8)*maxCUWidth*maxCUHeight * 6 * 3 + 16, EB_N_PTR);        //Y + U + V;
+    EB_MALLOC(EB_BYTE, contextPtr->avcStyleMcpIntermediateResultBuf1, sizeof(EB_U8)*maxCUWidth*maxCUHeight * 6 * 3 + 16, EB_N_PTR, encHandle);        //Y + U + V;
 
 #if !USE_PRE_COMPUTE
-    EB_MALLOC(EB_S16*, contextPtr->TwoDInterpolationFirstPassFilterResultBuf, sizeof(EB_S16)*(maxCUWidth + MaxHorizontalLumaFliterTag - 1)*(maxCUHeight + MaxVerticalLumaFliterTag - 1), EB_N_PTR);   // to be modified
+    EB_MALLOC(EB_S16*, contextPtr->TwoDInterpolationFirstPassFilterResultBuf, sizeof(EB_S16)*(maxCUWidth + MaxHorizontalLumaFliterTag - 1)*(maxCUHeight + MaxVerticalLumaFliterTag - 1), EB_N_PTR, encHandle);   // to be modified
 
-    EB_MALLOC(EB_BYTE, contextPtr->avcStyleMcpTwoDInterpolationFirstPassFilterResultBuf, sizeof(EB_U8)*(6 * maxCUWidth + MaxHorizontalLumaFliterTag - 1)*(maxCUHeight + MaxVerticalLumaFliterTag - 1), EB_N_PTR);
+    EB_MALLOC(EB_BYTE, contextPtr->avcStyleMcpTwoDInterpolationFirstPassFilterResultBuf, sizeof(EB_U8)*(6 * maxCUWidth + MaxHorizontalLumaFliterTag - 1)*(maxCUHeight + MaxVerticalLumaFliterTag - 1), EB_N_PTR, encHandle);
 
 #endif
 
@@ -69,24 +71,26 @@ EB_ERRORTYPE MotionCompensationPredictionContextCtor(
 
         return_error = EbPictureBufferDescCtor(
             (EB_PTR*)&contextPtr->localReferenceBlockL0,
-            (EB_PTR)&initData);
+            (EB_PTR)&initData,
+            encHandle);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
         return_error = EbPictureBufferDescCtor(
             (EB_PTR*)&contextPtr->localReferenceBlockL1,
-            (EB_PTR)&initData);
+            (EB_PTR)&initData,
+            encHandle);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
 
         initData.bitDepth = EB_8BIT;
 
-        return_error = EbPictureBufferDescCtor( (EB_PTR*)&contextPtr->localReferenceBlock8BITL0,  (EB_PTR)&initData);
+        return_error = EbPictureBufferDescCtor( (EB_PTR*)&contextPtr->localReferenceBlock8BITL0,  (EB_PTR)&initData, encHandle);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
-        return_error = EbPictureBufferDescCtor( (EB_PTR*)&contextPtr->localReferenceBlock8BITL1,  (EB_PTR)&initData);
+        return_error = EbPictureBufferDescCtor( (EB_PTR*)&contextPtr->localReferenceBlock8BITL1,  (EB_PTR)&initData, encHandle);
         if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }

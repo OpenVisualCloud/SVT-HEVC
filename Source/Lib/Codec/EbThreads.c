@@ -317,3 +317,19 @@ EB_ERRORTYPE EbDestroyMutex(
 
     return return_error;
 }
+
+EB_BOOL get_enc_ctx_mem_map_entry(enc_ctx_mem_map_t **enc_ctx_mm_entry, EB_HANDLE encHandle)
+{
+    struct list_head *pos, *n;
+    EB_BOOL ret = EB_FALSE;
+
+    list_for_each_safe(pos, n, &enc_ctx_mem_map_manager) {
+        *enc_ctx_mm_entry = list_entry(pos, enc_ctx_mem_map_t, list);
+        if ((*enc_ctx_mm_entry)->encHandlePtr == encHandle) {
+            ret = EB_TRUE;
+            break;
+        }
+    }
+
+    return ret;
+}

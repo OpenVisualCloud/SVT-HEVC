@@ -179,7 +179,8 @@ typedef struct MdRateEstimationContext_s {
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE MdRateEstimationContextCtor(MdRateEstimationContext_t *mdRateEstimationArray,
-                                        ContextModelEncContext_t  *cabacContextModelArray);
+                                        ContextModelEncContext_t  *cabacContextModelArray,
+                                        EB_HANDLE                  encHandle);
 
 extern EB_ERRORTYPE EbHevcGetMvdFractionBits(
     EB_S32                      mvdX,

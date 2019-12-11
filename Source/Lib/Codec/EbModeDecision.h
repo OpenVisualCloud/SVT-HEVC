@@ -231,7 +231,8 @@ extern EB_ERRORTYPE ModeDecisionCandidateBufferCtor(
 		EB_U64                         *fastCostPtr,
 		EB_U64                         *fullCostPtr,
 		EB_U64                         *fullCostSkipPtr,
-		EB_U64                         *fullCostMergePtr);
+		EB_U64                         *fullCostMergePtr,
+        EB_HANDLE                     encHandle);
 
 
     EB_ERRORTYPE ProductGenerateAmvpMergeInterIntraMdCandidatesCU(

@@ -22,7 +22,8 @@ typedef struct PictureManagerReorderEntry_s {
 
 extern EB_ERRORTYPE PictureManagerReorderEntryCtor(   
     PictureManagerReorderEntry_t       **entryDblPtr,
-    EB_U32                                pictureNumber);
+    EB_U32                                pictureNumber,
+    EB_HANDLE                             encHandle);
 
 #ifdef __cplusplus
 }

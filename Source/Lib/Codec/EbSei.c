@@ -22,10 +22,11 @@ void EbVideoUsabilityInfoCopy(
 }
 
 EB_ERRORTYPE EbVideoUsabilityInfoCtor(
-    AppVideoUsabilityInfo_t *vuiPtr)
+    AppVideoUsabilityInfo_t *vuiPtr,
+    EB_HANDLE encHandle)
 {
     AppHrdParameters_t* hrdParamPtr;
-    EB_MALLOC(AppHrdParameters_t*, vuiPtr->hrdParametersPtr, sizeof(AppHrdParameters_t), EB_N_PTR);
+    EB_MALLOC(AppHrdParameters_t*, vuiPtr->hrdParametersPtr, sizeof(AppHrdParameters_t), EB_N_PTR, encHandle);
 
     hrdParamPtr = vuiPtr->hrdParametersPtr;
 

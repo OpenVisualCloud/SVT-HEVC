@@ -30,7 +30,8 @@ typedef struct PictureAnalysisResultInitData_s
  **************************************/
 extern EB_ERRORTYPE PictureAnalysisResultCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr);
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle);
 
    
 #ifdef __cplusplus

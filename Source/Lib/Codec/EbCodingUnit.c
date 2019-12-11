@@ -27,7 +27,8 @@ EB_ERRORTYPE LargestCodingUnitCtor(
     EB_U16                       lcuOriginX,
     EB_U16                       lcuOriginY,
     EB_U16                       lcuIndex,
-    struct PictureControlSet_s  *pictureControlSet)
+    struct PictureControlSet_s  *pictureControlSet,
+    EB_HANDLE                    encHandle)
 
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
@@ -37,7 +38,7 @@ EB_ERRORTYPE LargestCodingUnitCtor(
     EbPictureBufferDescInitData_t coeffInitData;
     
     LargestCodingUnit_t *largestCodingUnitPtr;
-    EB_MALLOC(LargestCodingUnit_t*, largestCodingUnitPtr, sizeof(LargestCodingUnit_t), EB_N_PTR);
+    EB_MALLOC(LargestCodingUnit_t*, largestCodingUnitPtr, sizeof(LargestCodingUnit_t), EB_N_PTR, encHandle);
 
     *largetCodingUnitDblPtr = largestCodingUnitPtr;
     
@@ -65,9 +66,9 @@ EB_ERRORTYPE LargestCodingUnitCtor(
     
     largestCodingUnitPtr->index                         = lcuIndex; 
 
-    EB_MALLOC(CodingUnit_t**, largestCodingUnitPtr->codedLeafArrayPtr, sizeof(CodingUnit_t*) * CU_MAX_COUNT, EB_N_PTR);
+    EB_MALLOC(CodingUnit_t**, largestCodingUnitPtr->codedLeafArrayPtr, sizeof(CodingUnit_t*) * CU_MAX_COUNT, EB_N_PTR, encHandle);
     for(codedLeafIndex=0; codedLeafIndex < CU_MAX_COUNT; ++codedLeafIndex) {
-        EB_MALLOC(CodingUnit_t*, largestCodingUnitPtr->codedLeafArrayPtr[codedLeafIndex], sizeof(CodingUnit_t) , EB_N_PTR);
+        EB_MALLOC(CodingUnit_t*, largestCodingUnitPtr->codedLeafArrayPtr[codedLeafIndex], sizeof(CodingUnit_t) , EB_N_PTR, encHandle);
         for(tuIndex = 0; tuIndex < TRANSFORM_UNIT_MAX_COUNT; ++tuIndex){
             largestCodingUnitPtr->codedLeafArrayPtr[codedLeafIndex]->transformUnitArray[tuIndex].tuIndex = tuIndex;
         }
@@ -90,7 +91,8 @@ EB_ERRORTYPE LargestCodingUnitCtor(
 
     return_error = EbPictureBufferDescCtor(
         (EB_PTR*) &(largestCodingUnitPtr->quantizedCoeff),
-        (EB_PTR)  &coeffInitData);
+        (EB_PTR)  &coeffInitData,
+        encHandle);
 	if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }

@@ -10,7 +10,6 @@
 
 #include "EbDefinitions.h"
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -86,11 +85,13 @@ typedef struct EbPictureBufferDescInitData_s
  **************************************/
 extern EB_ERRORTYPE EbPictureBufferDescCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr);
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle);
 
 extern EB_ERRORTYPE EbReconPictureBufferDescCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr);
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle);
 
 #ifdef __cplusplus
 }

@@ -848,7 +848,8 @@ static EB_ERRORTYPE PredictionStructureCtor(
     PredictionStructure_t       **predictionStructureDblPtr,
     const PredictionStructureConfig_t  *predictionStructureConfigPtr,
     EB_PRED                       predType,
-    EB_U32                        numberOfReferences)
+    EB_U32                        numberOfReferences,
+    EB_HANDLE                     encHandle)
 {
     EB_U32                  entryIndex;
     EB_U32                  configEntryIndex;
@@ -860,7 +861,8 @@ static EB_ERRORTYPE PredictionStructureCtor(
     EB_U32                  steadyStatePicCount;
 
     PredictionStructure_t  *predictionStructurePtr;
-    EB_MALLOC(PredictionStructure_t*, predictionStructurePtr, sizeof(PredictionStructure_t), EB_N_PTR);
+
+    EB_MALLOC(PredictionStructure_t*, predictionStructurePtr, sizeof(PredictionStructure_t), EB_N_PTR, encHandle);
     *predictionStructureDblPtr = predictionStructurePtr;
     EB_MEMSET(predictionStructurePtr, 0, sizeof(PredictionStructure_t));
 
@@ -935,10 +937,10 @@ static EB_ERRORTYPE PredictionStructureCtor(
     }
 
     // Allocate the entry array
-    EB_MALLOC(PredictionStructureEntry_t**, predictionStructurePtr->predStructEntryPtrArray, sizeof(PredictionStructureEntry_t*) * predictionStructurePtr->predStructEntryCount, EB_N_PTR);
+    EB_MALLOC(PredictionStructureEntry_t**, predictionStructurePtr->predStructEntryPtrArray, sizeof(PredictionStructureEntry_t*) * predictionStructurePtr->predStructEntryCount, EB_N_PTR, encHandle);
     // Allocate the entries
     for(entryIndex = 0; entryIndex < predictionStructurePtr->predStructEntryCount; ++entryIndex) {
-        EB_MALLOC(PredictionStructureEntry_t*, predictionStructurePtr->predStructEntryPtrArray[entryIndex], sizeof(PredictionStructureEntry_t), EB_N_PTR);
+        EB_MALLOC(PredictionStructureEntry_t*, predictionStructurePtr->predStructEntryPtrArray[entryIndex], sizeof(PredictionStructureEntry_t), EB_N_PTR, encHandle);
         EB_MEMSET(predictionStructurePtr->predStructEntryPtrArray[entryIndex], 0, sizeof(PredictionStructureEntry_t));
     }
 
@@ -1285,7 +1287,7 @@ static EB_ERRORTYPE PredictionStructureCtor(
 
             // If the dependent list count is non-zero, allocate the list, else the list is NULL.
             if(predictionStructurePtr->predStructEntryPtrArray[entryIndex]->depList0.listCount > 0) {
-                EB_MALLOC(EB_S32*, predictionStructurePtr->predStructEntryPtrArray[entryIndex]->depList0.list, sizeof(EB_S32) * predictionStructurePtr->predStructEntryPtrArray[entryIndex]->depList0.listCount, EB_N_PTR);
+                EB_MALLOC(EB_S32*, predictionStructurePtr->predStructEntryPtrArray[entryIndex]->depList0.list, sizeof(EB_S32) * predictionStructurePtr->predStructEntryPtrArray[entryIndex]->depList0.listCount, EB_N_PTR, encHandle);
             }
             else {
                 predictionStructurePtr->predStructEntryPtrArray[entryIndex]->depList0.list = (EB_S32*) EB_NULL;
@@ -1393,7 +1395,7 @@ static EB_ERRORTYPE PredictionStructureCtor(
 
             // If the dependent list count is non-zero, allocate the list, else the list is NULL.
             if(predictionStructurePtr->predStructEntryPtrArray[entryIndex]->depList1.listCount > 0) {
-                EB_MALLOC(EB_S32*, predictionStructurePtr->predStructEntryPtrArray[entryIndex]->depList1.list, sizeof(EB_S32) * predictionStructurePtr->predStructEntryPtrArray[entryIndex]->depList1.listCount, EB_N_PTR);
+                EB_MALLOC(EB_S32*, predictionStructurePtr->predStructEntryPtrArray[entryIndex]->depList1.list, sizeof(EB_S32) * predictionStructurePtr->predStructEntryPtrArray[entryIndex]->depList1.listCount, EB_N_PTR, encHandle);
             }
             else {
                 predictionStructurePtr->predStructEntryPtrArray[entryIndex]->depList1.list = (EB_S32*) EB_NULL;
@@ -1495,13 +1497,13 @@ static EB_ERRORTYPE PredictionStructureCtor(
         // Allocate & Initialize the Timeline map
         timelineSize = predictionStructurePtr->predStructEntryCount;
         decodeOrderTableSize = CEILING(predictionStructurePtr->predStructEntryCount + predictionStructurePtr->maximumExtent, predictionStructurePtr->predStructEntryCount);
-        EB_MALLOC(EB_BOOL*, timelineMap, sizeof(EB_BOOL) * SQR(timelineSize), EB_N_PTR);
+        EB_MALLOC(EB_BOOL*, timelineMap, sizeof(EB_BOOL) * SQR(timelineSize), EB_N_PTR, encHandle);
         EB_MEMSET(timelineMap, 0, sizeof(EB_BOOL) * SQR(timelineSize));
 
         // Construct the Decode & Display Order
-        EB_MALLOC(EB_S32*, decodeOrderTable, sizeof(EB_S32) * decodeOrderTableSize, EB_N_PTR);
+        EB_MALLOC(EB_S32*, decodeOrderTable, sizeof(EB_S32) * decodeOrderTableSize, EB_N_PTR, encHandle);
 
-        EB_MALLOC(EB_U32*, displayOrderTable, sizeof(EB_U32) * decodeOrderTableSize, EB_N_PTR);
+        EB_MALLOC(EB_U32*, displayOrderTable, sizeof(EB_U32) * decodeOrderTableSize, EB_N_PTR, encHandle);
 
         for(currentPocIndex = 0, entryIndex=0; currentPocIndex < decodeOrderTableSize; ++currentPocIndex) {
 
@@ -1765,7 +1767,8 @@ static EB_ERRORTYPE PredictionStructureCtor(
  *************************************************/
 EB_ERRORTYPE PredictionStructureGroupCtor(
     PredictionStructureGroup_t   **predictionStructureGroupDblPtr,
-    EB_U32                         baseLayerSwitchMode)
+    EB_U32                         baseLayerSwitchMode,
+    EB_HANDLE                      encHandle)
 {
     EB_U32          predStructIndex = 0;
     EB_U32          refIdx = 0;
@@ -1775,7 +1778,7 @@ EB_ERRORTYPE PredictionStructureGroupCtor(
     EB_ERRORTYPE    return_error = EB_ErrorNone;
 
     PredictionStructureGroup_t *predictionStructureGroupPtr;
-    EB_MALLOC(PredictionStructureGroup_t*, predictionStructureGroupPtr, sizeof(PredictionStructureGroup_t), EB_N_PTR);
+    EB_MALLOC(PredictionStructureGroup_t*, predictionStructureGroupPtr, sizeof(PredictionStructureGroup_t), EB_N_PTR, encHandle);
     *predictionStructureGroupDblPtr = predictionStructureGroupPtr;
 
     // Count the number of Prediction Structures
@@ -1788,7 +1791,7 @@ EB_ERRORTYPE PredictionStructureGroupCtor(
     }
 
     predictionStructureGroupPtr->predictionStructureCount = MAX_TEMPORAL_LAYERS * EB_PRED_TOTAL_COUNT;
-    EB_MALLOC(PredictionStructure_t**, predictionStructureGroupPtr->predictionStructurePtrArray, sizeof(PredictionStructure_t*) * predictionStructureGroupPtr->predictionStructureCount, EB_N_PTR);
+    EB_MALLOC(PredictionStructure_t**, predictionStructureGroupPtr->predictionStructurePtrArray, sizeof(PredictionStructure_t*) * predictionStructureGroupPtr->predictionStructureCount, EB_N_PTR, encHandle);
     for(hierarchicalLevelIdx = 0; hierarchicalLevelIdx < MAX_TEMPORAL_LAYERS; ++hierarchicalLevelIdx) {
         for(predTypeIdx = 0; predTypeIdx < EB_PRED_TOTAL_COUNT; ++predTypeIdx) {
                 predStructIndex = PRED_STRUCT_INDEX(hierarchicalLevelIdx, predTypeIdx, refIdx);
@@ -1798,7 +1801,8 @@ EB_ERRORTYPE PredictionStructureGroupCtor(
                     &(predictionStructureGroupPtr->predictionStructurePtrArray[predStructIndex]),
                     &(PredictionStructureConfigArray[hierarchicalLevelIdx]),
                     (EB_PRED) predTypeIdx,
-                    numberOfReferences);
+                    numberOfReferences,
+                    encHandle);
                 if (return_error == EB_ErrorInsufficientResources){
                     return EB_ErrorInsufficientResources;
                 }

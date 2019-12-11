@@ -10,10 +10,11 @@
 
 EB_ERRORTYPE RateControlTasksCtor(
     EB_PTR *objectDblPtr,
-    EB_PTR objectInitDataPtr)
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle)
 {
     RateControlTasks_t *contextPtr;
-    EB_MALLOC(RateControlTasks_t*, contextPtr, sizeof(RateControlTasks_t), EB_N_PTR);
+    EB_MALLOC(RateControlTasks_t*, contextPtr, sizeof(RateControlTasks_t), EB_N_PTR, encHandle);
 
     *objectDblPtr = (EB_PTR) contextPtr;
     objectInitDataPtr = EB_NULL;

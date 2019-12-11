@@ -77,7 +77,8 @@ typedef struct
 extern EB_ERRORTYPE EncDecSegmentsCtor(
     EncDecSegments_t **segmentsDblPtr,
     EB_U32             segmentColCount,
-    EB_U32             segmentRowCount);
+    EB_U32             segmentRowCount,
+    EB_HANDLE          encHandle);
 
 
 extern void EncDecSegmentsInit(

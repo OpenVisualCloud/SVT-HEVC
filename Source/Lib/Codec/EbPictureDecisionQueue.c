@@ -8,10 +8,12 @@
 
 
 EB_ERRORTYPE PaReferenceQueueEntryCtor(   
-    PaReferenceQueueEntry_t   **entryDblPtr)
+    PaReferenceQueueEntry_t   **entryDblPtr,
+    EB_HANDLE encHandle)
 {
     PaReferenceQueueEntry_t *entryPtr;
-    EB_MALLOC(PaReferenceQueueEntry_t*, entryPtr, sizeof(PaReferenceQueueEntry_t), EB_N_PTR);
+
+    EB_MALLOC(PaReferenceQueueEntry_t*, entryPtr, sizeof(PaReferenceQueueEntry_t), EB_N_PTR, encHandle);
     *entryDblPtr = entryPtr;
 
     entryPtr->inputObjectPtr        = (EbObjectWrapper_t*) EB_NULL;
@@ -20,9 +22,9 @@ EB_ERRORTYPE PaReferenceQueueEntryCtor(
     entryPtr->dependentCount        = 0;
     entryPtr->list0Ptr              = (ReferenceList_t*) EB_NULL;
     entryPtr->list1Ptr              = (ReferenceList_t*) EB_NULL;
-    EB_MALLOC(EB_S32*, entryPtr->list0.list, sizeof(EB_S32) * (1 << MAX_TEMPORAL_LAYERS) , EB_N_PTR);
+    EB_MALLOC(EB_S32*, entryPtr->list0.list, sizeof(EB_S32) * (1 << MAX_TEMPORAL_LAYERS) , EB_N_PTR, encHandle);
     
-    EB_MALLOC(EB_S32*, entryPtr->list1.list, sizeof(EB_S32) * (1 << MAX_TEMPORAL_LAYERS) , EB_N_PTR);
+    EB_MALLOC(EB_S32*, entryPtr->list1.list, sizeof(EB_S32) * (1 << MAX_TEMPORAL_LAYERS) , EB_N_PTR, encHandle);
 
     return EB_ErrorNone;
 }

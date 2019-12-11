@@ -284,9 +284,7 @@ typedef struct RateControlContext_s
     EB_U64                       framesInInterval [EB_MAX_TEMPORAL_LAYERS];
     EB_S64                       extraBits;  
     EB_S64                       extraBitsGen;
-    EB_S16                      maxRateAdjustDeltaQP;
-   
-   
+    EB_S16                       maxRateAdjustDeltaQP;
 } RateControlContext_t;
 
 
@@ -295,18 +293,21 @@ typedef struct RateControlContext_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE RateControlLayerContextCtor(
-    RateControlLayerContext_t   **entryDblPtr);
+    RateControlLayerContext_t   **entryDblPtr,
+    EB_HANDLE encHandle);
 
   
 
 extern EB_ERRORTYPE RateControlIntervalParamContextCtor(
-    RateControlIntervalParamContext_t   **entryDblPtr);
+    RateControlIntervalParamContext_t   **entryDblPtr,
+    EB_HANDLE encHandle);
 
 
 
 extern EB_ERRORTYPE RateControlCodedFramesStatsContextCtor(
     CodedFramesStatsEntry_t   **entryDblPtr,
-    EB_U64                      pictureNumber);
+    EB_U64                      pictureNumber,
+    EB_HANDLE                   encHandle);
 
 
 
@@ -314,7 +315,8 @@ extern EB_ERRORTYPE RateControlContextCtor(
     RateControlContext_t   **contextDblPtr,
     EbFifo_t                *rateControlInputTasksFifoPtr,
     EbFifo_t                *rateControlOutputResultsFifoPtr,
-    EB_S32                   intraPeriodLength);
+    EB_S32                   intraPeriodLength,
+    EB_HANDLE                encHandle);
     
    
     

@@ -9,10 +9,11 @@
 
 EB_ERRORTYPE PictureDecisionResultCtor(
     EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr)
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle)
 {
     PictureDecisionResults_t *objectPtr;
-    EB_MALLOC(PictureDecisionResults_t *, objectPtr, sizeof(PictureDecisionResults_t), EB_N_PTR);
+    EB_MALLOC(PictureDecisionResults_t *, objectPtr, sizeof(PictureDecisionResults_t), EB_N_PTR, encHandle);
 
     *objectDblPtr = (EB_PTR) objectPtr;
     objectInitDataPtr = 0;

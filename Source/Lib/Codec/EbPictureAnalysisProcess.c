@@ -48,10 +48,12 @@ EB_ERRORTYPE PictureAnalysisContextCtor(
     PictureAnalysisContext_t      **contextDblPtr,
     EbFifo_t                       *resourceCoordinationResultsInputFifoPtr,
     EbFifo_t                       *pictureAnalysisResultsOutputFifoPtr,
-    EB_U16						    lcuTotalCount)
+    EB_U16						    lcuTotalCount,
+    EB_HANDLE                       encHandle)
 {
 	PictureAnalysisContext_t *contextPtr;
-	EB_MALLOC(PictureAnalysisContext_t*, contextPtr, sizeof(PictureAnalysisContext_t), EB_N_PTR);
+
+	EB_MALLOC(PictureAnalysisContext_t*, contextPtr, sizeof(PictureAnalysisContext_t), EB_N_PTR, encHandle);
 	*contextDblPtr = contextPtr;
 
 	contextPtr->resourceCoordinationResultsInputFifoPtr = resourceCoordinationResultsInputFifoPtr;
@@ -72,7 +74,8 @@ EB_ERRORTYPE PictureAnalysisContextCtor(
 
 		return_error = EbPictureBufferDescCtor(
 			(EB_PTR*)&(contextPtr->denoisedPicturePtr),
-			(EB_PTR)inputPictureBufferDescInitData);
+			(EB_PTR)inputPictureBufferDescInitData,
+            encHandle);
 
 		if (return_error == EB_ErrorInsufficientResources){
 			return EB_ErrorInsufficientResources;
@@ -91,16 +94,17 @@ EB_ERRORTYPE PictureAnalysisContextCtor(
 
 		return_error = EbPictureBufferDescCtor(
 			(EB_PTR*)&(contextPtr->noisePicturePtr),
-			(EB_PTR)inputPictureBufferDescInitData);
+			(EB_PTR)inputPictureBufferDescInitData,
+            encHandle);
 
 		if (return_error == EB_ErrorInsufficientResources){
 			return EB_ErrorInsufficientResources;
 		}
 	}
 
-    EB_MALLOC(EB_U16**, contextPtr->grad, sizeof(EB_U16*) * lcuTotalCount, EB_N_PTR);
+    EB_MALLOC(EB_U16**, contextPtr->grad, sizeof(EB_U16*) * lcuTotalCount, EB_N_PTR, encHandle);
     for (EB_U16 lcuIndex = 0; lcuIndex < lcuTotalCount; ++lcuIndex) {
-        EB_MALLOC(EB_U16*, contextPtr->grad[lcuIndex], sizeof(EB_U16) * CU_MAX_COUNT, EB_N_PTR);
+        EB_MALLOC(EB_U16*, contextPtr->grad[lcuIndex], sizeof(EB_U16) * CU_MAX_COUNT, EB_N_PTR, encHandle);
     }
 
 

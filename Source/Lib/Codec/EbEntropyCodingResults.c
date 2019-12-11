@@ -10,10 +10,11 @@
 
 EB_ERRORTYPE EntropyCodingResultsCtor(
     EB_PTR *objectDblPtr,
-    EB_PTR objectInitDataPtr)
+    EB_PTR objectInitDataPtr,
+    EB_HANDLE encHandle)
 {
     EntropyCodingResults_t *contextPtr;
-    EB_MALLOC(EntropyCodingResults_t*, contextPtr, sizeof(EntropyCodingResults_t), EB_N_PTR);
+    EB_MALLOC(EntropyCodingResults_t*, contextPtr, sizeof(EntropyCodingResults_t), EB_N_PTR, encHandle);
 
     *objectDblPtr = (EB_PTR) contextPtr;
 

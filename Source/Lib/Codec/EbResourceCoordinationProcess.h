@@ -54,6 +54,7 @@ typedef struct ResourceCoordinationContext_s
     EB_U64                               firstInPicArrivedTimeuSeconds;
 	EB_BOOL                              startFlag;
 
+    EB_HANDLE                            encHandle;
 } ResourceCoordinationContext_t;
 
 /***************************************
@@ -68,7 +69,8 @@ extern EB_ERRORTYPE ResourceCoordinationContextCtor(
     EbFifo_t                            *sequenceControlSetEmptyFifoPtr,
     EbCallback_t                    **appCallbackPtrArray,
     EB_U32                              *computeSegmentsTotalCountArray,
-    EB_U32                               encodeInstancesTotalCount);
+    EB_U32                               encodeInstancesTotalCount,
+    EB_HANDLE                            encHandle);
     
   
 
