@@ -87,7 +87,13 @@
 #define EB_OUTPUTRECONBUFFERSIZE                        (MAX_PICTURE_WIDTH_SIZE*MAX_PICTURE_HEIGHT_SIZE*2)   // Recon Slice Size
 #define EB_OUTPUTSTREAMQUANT                            27
 #define EB_OUTPUTSTATISTICSBUFFERSIZE                   0x30            // 6X8 (8 Bytes for Y, U, V, number of bits, picture number, QP)
-#define EB_OUTPUTSTREAMBUFFERSIZE_MACRO(ResolutionSize)                ((ResolutionSize) < (INPUT_SIZE_1080i_TH) ? 0x1E8480 : (ResolutionSize) < (INPUT_SIZE_1080p_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_4K_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_8K_TH) ? 0x2DC6C0:0x5B8D80)
+
+// For compressed 10-bit format, the Y/U/V 2-bit samples of each pixel are packed
+// into 1 byte for any YUV format.
+#define SIZE_OF_ONE_FRAME_IN_BYTES(width, height, format, is16bit, compressedTenBitFormat) \
+    (compressedTenBitFormat ? \
+    ((width) * (height) + 2 * (((width) * (height)) >> (3 - format)) + (width) * (height)) : \
+    ((((width) * (height)) + 2 * (((width) * (height)) >> (3 - format))) << (is16bit)))
 
 static EB_U64 maxLumaPictureSize[TOTAL_LEVEL_COUNT] = { 36864U, 122880U, 245760U, 552960U, 983040U, 2228224U, 2228224U, 8912896U, 8912896U, 8912896U, 35651584U, 35651584U, 35651584U };
 static EB_U64 maxLumaSampleRate[TOTAL_LEVEL_COUNT] = { 552960U, 3686400U, 7372800U, 16588800U, 33177600U, 66846720U, 133693440U, 267386880U, 534773760U, 1069547520U, 1069547520U, 2139095040U, 4278190080U };
@@ -4049,19 +4055,12 @@ EB_ERRORTYPE EbOutputBufferHeaderCtor(
     EB_PTR objectInitDataPtr)
 {
     EB_H265_ENC_CONFIGURATION   * config = (EB_H265_ENC_CONFIGURATION*)objectInitDataPtr;
-    EB_U32 nStride = (EB_U32)(EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->sourceWidth * config->sourceHeight));  //TBC
+    EB_U32 nStride = SIZE_OF_ONE_FRAME_IN_BYTES(config->sourceWidth, config->sourceHeight,
+            config->encoderColorFormat, (config->encoderBitDepth > 8), config->compressedTenBitFormat);
 	EB_BUFFERHEADERTYPE* outBufPtr;
 
 	EB_MALLOC(EB_BUFFERHEADERTYPE*, outBufPtr, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR);
 	*objectDblPtr = (EB_PTR)outBufPtr;
-
-    //Jing:TODO
-    //Simple work around here, for 8K case.
-    //Will improve here if memory is limited
-    //Can use fps/tbr/intra_period to compute a ideal maximum size
-    if (config->rateControlMode == 1 && config->targetBitRate >= 50000000) {
-        nStride = 10000000;
-    }
 
 	// Initialize Header
 	outBufPtr->nSize = sizeof(EB_BUFFERHEADERTYPE);

@@ -9,6 +9,13 @@
 #include "EbApi.h"
 #include "EbAppConfig.h"
 
+// For compressed 10-bit format, the Y/U/V 2-bit samples of each pixel are packed
+// into 1 byte for any YUV format.
+#define SIZE_OF_ONE_FRAME_IN_BYTES(width, height, format, is16bit, compressedTenBitFormat) \
+    (compressedTenBitFormat ? \
+    ((width) * (height) + 2 * (((width) * (height)) >> (3 - format)) + (width) * (height)) : \
+    ((((width) * (height)) + 2 * (((width) * (height)) >> (3 - format))) << (is16bit)))
+
 /***************************************
 
  * App Callback data struct

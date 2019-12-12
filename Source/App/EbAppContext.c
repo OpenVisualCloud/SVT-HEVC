@@ -19,9 +19,7 @@
 #define INPUT_SIZE_4K_TH				0x29F630    // 2.75 Million
 #define INPUT_SIZE_8K_TH				0xB71B00    // 12 Million
 
-#define SIZE_OF_ONE_FRAME_IN_BYTES(width, height,is16bit) ( ( ((width)*(height)*3)>>1 )<<is16bit)
 #define IS_16_BIT(bit_depth) (bit_depth==10?1:0)
-#define EB_OUTPUTSTREAMBUFFERSIZE_MACRO(ResolutionSize)                ((ResolutionSize) < (INPUT_SIZE_1080i_TH) ? 0x1E8480 : (ResolutionSize) < (INPUT_SIZE_1080p_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_4K_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_8K_TH) ? 0x2DC6C0:0x5B8D80)
 
  /***************************************
  * Variables Defining a memory table
@@ -423,7 +421,8 @@ EB_ERRORTYPE AllocateOutputBuffers(
 {
 
     EB_ERRORTYPE   return_error = EB_ErrorNone;
-    uint32_t		   outputStreamBufferSize = (uint32_t)(EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->inputPaddedHeight * config->inputPaddedWidth));;
+    uint32_t outputStreamBufferSize = SIZE_OF_ONE_FRAME_IN_BYTES(config->sourceWidth, config->sourceHeight,
+            config->encoderColorFormat, (config->encoderBitDepth > 8), config->compressedTenBitFormat);
     {
         EB_APP_MALLOC(EB_BUFFERHEADERTYPE*, callbackData->streamBufferPool, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, EB_ErrorInsufficientResources);
 

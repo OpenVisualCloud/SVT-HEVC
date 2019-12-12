@@ -24,8 +24,6 @@
 #define MIN(x, y)                       ((x)<(y)?(x):(y))
 #define CLIP3(MinVal, MaxVal, a)        (((a)<(MinVal)) ? (MinVal) : (((a)>(MaxVal)) ? (MaxVal) :(a)))
 #define FUTURE_WINDOW_WIDTH                 4
-#define SIZE_OF_ONE_FRAME_IN_BYTES(width, height, csp, is16bit) \
-    ( (((width)*(height)) + 2*(((width)*(height))>>(3-csp)) )<<is16bit)
 extern volatile int32_t keepRunning;
 
 /***************************************
@@ -780,7 +778,8 @@ static void ReadInputFrames(
     if (config->bufferedInput == -1) {
         if (is16bit == 0 || (is16bit == 1 && config->compressedTenBitFormat == 0)) {
 
-            uint32_t readSize = SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, colorFormat, is16bit);
+            uint32_t readSize = SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight,
+                    colorFormat, is16bit, config->compressedTenBitFormat);
 
             headerPtr->nFilledLen = 0;
 
@@ -918,8 +917,8 @@ static void ReadInputFrames(
             inputPtr->cb = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + lumaSize;
             inputPtr->cr = config->sequenceBuffer[config->processedFrameCount % config->bufferedInput] + lumaSize + chromaSize;
 
-            headerPtr->nFilledLen = (uint32_t)(uint64_t)SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, colorFormat, is16bit);
-
+            headerPtr->nFilledLen = (uint32_t)(uint64_t)SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight,
+                    colorFormat, is16bit, config->compressedTenBitFormat);
         }
     }
 
@@ -1232,7 +1231,7 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(EbConfig_t *config, EbAppContext_t *appC
 
 	totalBytesToProcessCount = (framesToBeEncoded < 0) ? -1 : (config->encoderBitDepth == 10 && config->compressedTenBitFormat == 1) ?
 		framesToBeEncoded * compressed10bitFrameSize:
-        framesToBeEncoded * SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, colorFormat, is16bit);
+        framesToBeEncoded * SIZE_OF_ONE_FRAME_IN_BYTES(inputPaddedWidth, inputPaddedHeight, colorFormat, is16bit, config->compressedTenBitFormat);
 
 
     remainingByteCount       = (totalBytesToProcessCount < 0) ?   -1 :  totalBytesToProcessCount - (int64_t)config->processedByteCount;
