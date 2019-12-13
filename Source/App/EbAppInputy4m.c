@@ -345,7 +345,12 @@ EB_BOOL check_if_y4m(EbConfig_t *cfg) {
         return EB_TRUE; /* YUV4MPEG2 file */
     }
     else {
-        EB_STRNCPY((char*)cfg->y4m_buf, sizeof(cfg->y4m_buf), (char*)buffer, YUV4MPEG2_IND_SIZE);
+        if (cfg->inputFile != stdin) {
+            fseek(cfg->inputFile, 0, SEEK_SET);
+        }
+        else {
+            EB_STRNCPY((char*)cfg->y4m_buf, sizeof(cfg->y4m_buf), (char*)buffer, YUV4MPEG2_IND_SIZE);
+        }
         return EB_FALSE; /* Not a YUV4MPEG2 file */
     }
 }
