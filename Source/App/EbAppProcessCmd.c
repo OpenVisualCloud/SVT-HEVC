@@ -981,10 +981,10 @@ void fillOneSegment(
     int32_t value;
     int32_t result = 0;
 
-#if __GNUC__
-    result = fscanf(config->segmentOvFile, "%u %u %u %u %d %u\n", &x1, &y1, &x2, &y2, &value, &mode);
-#else
+#ifdef _WIN32
     result = fscanf_s(config->segmentOvFile, "%u %u %u %u %d %u\n", &x1, &y1, &x2, &y2, &value, &mode);
+#else
+    result = fscanf(config->segmentOvFile, "%u %u %u %u %d %u\n", &x1, &y1, &x2, &y2, &value, &mode);
 #endif
 
     if (result != 6) {
@@ -1044,10 +1044,10 @@ void fillSegmentOv(
 
     do {
         //read number of segments
-#if __GNUC__
-        result = fscanf(config->segmentOvFile, "%d", &segmentNo);
-#else
+#ifdef _WIN32
         result = fscanf_s(config->segmentOvFile, "%u", &segmentNo);
+#else
+        result = fscanf(config->segmentOvFile, "%d", &segmentNo);
 #endif
         if (result == 1) {
             for (uint32_t segment = 0; segment < segmentNo; segment++) {
@@ -1055,10 +1055,10 @@ void fillSegmentOv(
             }
         }
         if (result == 0) //line is corrupted skip it
-#if __GNUC__
-        result = fscanf(config->segmentOvFile, "%*[^\n]\n");
-#else
+#ifdef _WIN32
         result = fscanf_s(config->segmentOvFile, "%*[^\n]\n");
+#else
+        result = fscanf(config->segmentOvFile, "%*[^\n]\n");
 #endif
         if (result == -1) {//eof
             fseek(config->segmentOvFile, 0, SEEK_SET);
