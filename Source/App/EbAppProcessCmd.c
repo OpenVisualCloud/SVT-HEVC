@@ -981,7 +981,7 @@ void fillOneSegment(
     int32_t value;
     int32_t result = 0;
 
-#if __linux
+#if __GNUC__
     result = fscanf(config->segmentOvFile, "%u %u %u %u %d %u\n", &x1, &y1, &x2, &y2, &value, &mode);
 #else
     result = fscanf_s(config->segmentOvFile, "%u %u %u %u %d %u\n", &x1, &y1, &x2, &y2, &value, &mode);
@@ -1044,7 +1044,7 @@ void fillSegmentOv(
 
     do {
         //read number of segments
-#if __linux
+#if __GNUC__
         result = fscanf(config->segmentOvFile, "%d", &segmentNo);
 #else
         result = fscanf_s(config->segmentOvFile, "%u", &segmentNo);
@@ -1055,7 +1055,7 @@ void fillSegmentOv(
             }
         }
         if (result == 0) //line is corrupted skip it
-#if __linux
+#if __GNUC__
         result = fscanf(config->segmentOvFile, "%*[^\n]\n");
 #else
         result = fscanf_s(config->segmentOvFile, "%*[^\n]\n");
