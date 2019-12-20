@@ -2207,6 +2207,8 @@ void EbHevcCopyApiFromApp(
     sequenceControlSetPtr->maxInputLumaWidth  = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceWidth;
     sequenceControlSetPtr->maxInputLumaHeight = (EB_U16)((EB_H265_ENC_CONFIGURATION*)pComponentParameterStructure)->sourceHeight;
 
+    sequenceControlSetPtr->interlacedVideo = sequenceControlSetPtr->staticConfig.interlacedVideo;
+
     sequenceControlSetPtr->intraPeriodLength = sequenceControlSetPtr->staticConfig.intraPeriodLength;
     sequenceControlSetPtr->intraRefreshType = sequenceControlSetPtr->staticConfig.intraRefreshType;
     sequenceControlSetPtr->maxTemporalLayers = sequenceControlSetPtr->staticConfig.hierarchicalLevels;
