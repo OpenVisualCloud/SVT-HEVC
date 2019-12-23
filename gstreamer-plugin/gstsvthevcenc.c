@@ -88,7 +88,7 @@ enum
   PROP_PRED_STRUCTURE,
   PROP_KEY_INT_MAX,
   PROP_INTRA_REFRESH,
-  PROP_QP,
+  PROP_QP_I,
   PROP_QP_MAX,
   PROP_QP_MIN,
   PROP_DEBLOCKING,
@@ -97,7 +97,7 @@ enum
   PROP_RC_MODE,
   PROP_BITRATE,
   PROP_LOOKAHEAD,
-  PROP_SCD,
+  PROP_ENABLE_SCD,
   PROP_AUD,
   PROP_CORES,
   PROP_SOCKET,
@@ -116,7 +116,7 @@ enum
 #define PROP_PRED_STRUCTURE_DEFAULT         2
 #define PROP_KEY_INT_MAX_DEFAULT            -2
 #define PROP_INTRA_REFRESH_DEFAULT          -1
-#define PROP_QP_DEFAULT                     25
+#define PROP_QP_I_DEFAULT                   25
 #define PROP_DEBLOCKING_DEFAULT             TRUE
 #define PROP_SAO_DEFAULT                    TRUE
 #define PROP_CONSTRAINED_INTRA_DEFAULT      FALSE
@@ -125,7 +125,7 @@ enum
 #define PROP_QP_MAX_DEFAULT                 48
 #define PROP_QP_MIN_DEFAULT                 10
 #define PROP_LOOKAHEAD_DEFAULT              (unsigned int)-1
-#define PROP_SCD_DEFAULT                    TRUE
+#define PROP_ENABLE_SCD_DEFAULT             TRUE
 #define PROP_AUD_DEFAULT                    FALSE
 #define PROP_CORES_DEFAULT                  0
 #define PROP_SOCKET_DEFAULT                 -1
@@ -269,21 +269,21 @@ gst_svthevcenc_class_init (GstSvtHevcEncClass * klass)
           -1, INT_MAX, PROP_INTRA_REFRESH_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
-  g_object_class_install_property (gobject_class, PROP_QP,
-      g_param_spec_uint ("qp", "Quantization parameter",
+  g_object_class_install_property (gobject_class, PROP_QP_I,
+      g_param_spec_uint ("qp-i", "Quantization parameter",
           "Initial quantization parameter for the Intra pictures in CQP mode",
-          0, 51, PROP_QP_DEFAULT,
+          0, 51, PROP_QP_I_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property(gobject_class, PROP_QP_MAX,
-      g_param_spec_uint ("max-qp", "Max Quantization parameter",
+      g_param_spec_uint ("qp-max", "Max Quantization parameter",
           "Maximum QP value allowed for rate control use"
           " Only used in VBR mode.",
           0, 51, PROP_QP_MAX_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property(gobject_class, PROP_QP_MIN,
-      g_param_spec_uint ("min-qp", "Min Quantization parameter",
+      g_param_spec_uint ("qp-min", "Min Quantization parameter",
           "Minimum QP value allowed for rate control use"
           " Only used in VBR mode.",
           0, 50, PROP_QP_MIN_DEFAULT,
@@ -326,10 +326,10 @@ gst_svthevcenc_class_init (GstSvtHevcEncClass * klass)
           -1, 250, PROP_LOOKAHEAD_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
-  g_object_class_install_property (gobject_class, PROP_SCD,
-      g_param_spec_boolean ("scd", "Scene Change Detection",
+  g_object_class_install_property (gobject_class, PROP_ENABLE_SCD,
+      g_param_spec_boolean ("enable-scd", "Scene Change Detection",
           "Enable Scene Change Detection algorithm",
-          PROP_SCD_DEFAULT,
+          PROP_ENABLE_SCD_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_AUD,
@@ -439,7 +439,7 @@ gst_svthevcenc_set_property (GObject * object, guint property_id,
     case PROP_INTRA_REFRESH:
       svthevcenc->svt_config->intraRefreshType = g_value_get_int(value);
       break;
-    case PROP_QP:
+    case PROP_QP_I:
       svthevcenc->svt_config->qp = g_value_get_uint (value);
       break;
     case PROP_QP_MAX:
@@ -467,7 +467,7 @@ gst_svthevcenc_set_property (GObject * object, guint property_id,
       svthevcenc->svt_config->lookAheadDistance =
           (unsigned int) g_value_get_int (value);
       break;
-    case PROP_SCD:
+    case PROP_ENABLE_SCD:
       svthevcenc->svt_config->sceneChangeDetection =
           g_value_get_boolean (value);
       break;
@@ -530,7 +530,7 @@ gst_svthevcenc_get_property (GObject * object, guint property_id,
     case PROP_INTRA_REFRESH:
       g_value_set_int (value, svthevcenc->svt_config->intraRefreshType);
       break;
-    case PROP_QP:
+    case PROP_QP_I:
       g_value_set_uint (value, svthevcenc->svt_config->qp);
       break;
     case PROP_QP_MAX:
@@ -558,7 +558,7 @@ gst_svthevcenc_get_property (GObject * object, guint property_id,
     case PROP_LOOKAHEAD:
       g_value_set_int (value, (int) svthevcenc->svt_config->lookAheadDistance);
       break;
-    case PROP_SCD:
+    case PROP_ENABLE_SCD:
       g_value_set_boolean (value,
           svthevcenc->svt_config->sceneChangeDetection == 1);
       break;
@@ -811,14 +811,14 @@ set_default_svt_configuration (EB_H265_ENC_CONFIGURATION * svt_config)
   svt_config->frameRateNumerator = 60;
   svt_config->hierarchicalLevels = PROP_B_PYRAMID_DEFAULT;
   svt_config->predStructure = PROP_PRED_STRUCTURE_DEFAULT;
-  svt_config->sceneChangeDetection = PROP_SCD_DEFAULT;
+  svt_config->sceneChangeDetection = PROP_ENABLE_SCD_DEFAULT;
   svt_config->lookAheadDistance = PROP_LOOKAHEAD_DEFAULT;
   svt_config->framesToBeEncoded = 0;
   svt_config->rateControlMode = PROP_RC_MODE_DEFAULT;
   svt_config->targetBitRate = PROP_BITRATE_DEFAULT;
   svt_config->maxQpAllowed = PROP_QP_MAX_DEFAULT;
   svt_config->minQpAllowed = PROP_QP_MIN_DEFAULT;
-  svt_config->qp = PROP_QP_DEFAULT;
+  svt_config->qp = PROP_QP_I_DEFAULT;
   svt_config->useQpFile = FALSE;
   svt_config->disableDlfFlag = (PROP_DEBLOCKING_DEFAULT == FALSE);
   svt_config->enableSaoFlag = PROP_SAO_DEFAULT;
