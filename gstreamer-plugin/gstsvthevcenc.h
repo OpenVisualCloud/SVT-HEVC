@@ -34,6 +34,10 @@ typedef struct _GstSvtHevcEnc
   /* GStreamer Codec state */
   GstVideoCodecState *state;
 
+  /* GStreamer properties */
+  gboolean enable_open_gop;
+  guint config_interval;
+
   /* SVT-HEVC configuration */
   EB_H265_ENC_CONFIGURATION *svt_config;
 

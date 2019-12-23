@@ -87,7 +87,8 @@ enum
   PROP_BASE_LAYER_SWITCH_MODE,
   PROP_PRED_STRUCTURE,
   PROP_KEY_INT_MAX,
-  PROP_INTRA_REFRESH,
+  PROP_ENABLE_OPEN_GOP,
+  PROP_CONFIG_INTERVAL,
   PROP_QP_I,
   PROP_QP_MAX,
   PROP_QP_MIN,
@@ -115,7 +116,8 @@ enum
 #define PROP_BASE_LAYER_SWITCH_MODE_DEFAULT 0
 #define PROP_PRED_STRUCTURE_DEFAULT         2
 #define PROP_KEY_INT_MAX_DEFAULT            -2
-#define PROP_INTRA_REFRESH_DEFAULT          -1
+#define PROP_ENABLE_OPEN_GOP_DEFAULT        TRUE
+#define PROP_CONFIG_INTERVAL_DEFAULT        0
 #define PROP_QP_I_DEFAULT                   25
 #define PROP_DEBLOCKING_DEFAULT             TRUE
 #define PROP_SAO_DEFAULT                    TRUE
@@ -263,10 +265,16 @@ gst_svthevcenc_class_init (GstSvtHevcEncClass * klass)
           -2, 255, PROP_KEY_INT_MAX_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
-  g_object_class_install_property(gobject_class, PROP_INTRA_REFRESH,
-      g_param_spec_int ("intra-refresh", "Intra refresh type",
-          "-1:CRA (Open GOP), >=0:IDR (Closed GOP)",
-          -1, INT_MAX, PROP_INTRA_REFRESH_DEFAULT,
+  g_object_class_install_property (gobject_class, PROP_ENABLE_OPEN_GOP,
+      g_param_spec_boolean ("enable-open-gop", "Enable Open GOP",
+          "Allow intra-refresh using the CRA, not IDR",
+          PROP_ENABLE_OPEN_GOP_DEFAULT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_CONFIG_INTERVAL,
+      g_param_spec_uint ("config-interval", "VPS SPS PPS Send Interval",
+          "Send VPS, SPS and PPS Insertion Interval per every few IDR. 0: disabled",
+          0, UINT_MAX, PROP_CONFIG_INTERVAL_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_QP_I,
@@ -374,6 +382,8 @@ gst_svthevcenc_init (GstSvtHevcEnc * svthevcenc)
     return;
   }
   memset (&svthevcenc->svt_encoder, 0, sizeof (svthevcenc->svt_encoder));
+  svthevcenc->enable_open_gop = PROP_ENABLE_OPEN_GOP_DEFAULT;
+  svthevcenc->config_interval = PROP_CONFIG_INTERVAL_DEFAULT;
   svthevcenc->frame_count = 0;
   svthevcenc->dts_offset = 0;
   svthevcenc->inited = FALSE;
@@ -436,8 +446,11 @@ gst_svthevcenc_set_property (GObject * object, guint property_id,
       svthevcenc->svt_config->intraPeriodLength = gop > 0 ? gop - 1 : gop;
       break;
     }
-    case PROP_INTRA_REFRESH:
-      svthevcenc->svt_config->intraRefreshType = g_value_get_int(value);
+    case PROP_ENABLE_OPEN_GOP:
+      svthevcenc->enable_open_gop = g_value_get_boolean (value);
+      break;
+    case PROP_CONFIG_INTERVAL:
+      svthevcenc->config_interval = g_value_get_uint (value);
       break;
     case PROP_QP_I:
       svthevcenc->svt_config->qp = g_value_get_uint (value);
@@ -527,8 +540,11 @@ gst_svthevcenc_get_property (GObject * object, guint property_id,
       g_value_set_int (value, svthevcenc->svt_config->intraPeriodLength < 0 ?
               svthevcenc->svt_config->intraPeriodLength : svthevcenc->svt_config->intraPeriodLength + 1);
       break;
-    case PROP_INTRA_REFRESH:
-      g_value_set_int (value, svthevcenc->svt_config->intraRefreshType);
+    case PROP_ENABLE_OPEN_GOP:
+      g_value_set_boolean (value, svthevcenc->enable_open_gop);
+      break;
+    case PROP_CONFIG_INTERVAL:
+      g_value_set_uint (value, svthevcenc->config_interval);
       break;
     case PROP_QP_I:
       g_value_set_uint (value, svthevcenc->svt_config->qp);
@@ -684,6 +700,12 @@ gst_svthevcenc_configure_svt (GstSvtHevcEnc * svthevcenc)
     return FALSE;
   }
 
+  /* set properties out of element variable*/
+  if (svthevcenc->enable_open_gop)
+    svthevcenc->svt_config->intraRefreshType = -1;
+  else
+    svthevcenc->svt_config->intraRefreshType = svthevcenc->config_interval;
+
   /* set properties out of GstVideoInfo */
   GstVideoInfo *info = &svthevcenc->state->info;
   svthevcenc->svt_config->encoderBitDepth = GST_VIDEO_INFO_COMP_DEPTH (info, 0);
@@ -803,7 +825,8 @@ set_default_svt_configuration (EB_H265_ENC_CONFIGURATION * svt_config)
   svt_config->sourceHeight = 64;
   svt_config->interlacedVideo = FALSE;
   svt_config->intraPeriodLength = PROP_KEY_INT_MAX_DEFAULT;
-  svt_config->intraRefreshType = PROP_INTRA_REFRESH_DEFAULT;
+  svt_config->intraRefreshType =
+      (PROP_ENABLE_OPEN_GOP_DEFAULT == TRUE) ? -1 : PROP_CONFIG_INTERVAL_DEFAULT;
   svt_config->baseLayerSwitchMode = PROP_BASE_LAYER_SWITCH_MODE_DEFAULT;
   svt_config->encMode = PROP_ENCMODE_DEFAULT;
   svt_config->frameRate = 60;
