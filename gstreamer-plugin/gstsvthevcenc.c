@@ -246,7 +246,7 @@ gst_svthevcenc_class_init (GstSvtHevcEncClass * klass)
           0, 3, PROP_B_PYRAMID_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
-  g_object_class_install_property (gobject_class, PROP_BASE_LAYER_SWITCH_MODE_DEFAULT,
+  g_object_class_install_property (gobject_class, PROP_BASE_LAYER_SWITCH_MODE,
       g_param_spec_uint ("baselayer-mode", "Base Layer Switch Mode",
           "Random Access Prediction Structure type setting: "
           "0=Use B-frames in the base layer pointing to the same past picture, 1=Use P-frames in the base layer",
