@@ -104,6 +104,8 @@ enum
   PROP_SOCKET,
   PROP_TILE_ROW,
   PROP_TILE_COL,
+  PROP_VBV_MAX_RATE,
+  PROP_VBV_BUFFER_SIZE,
 };
 
 #define PROP_INSERT_VUI_DEFAULT             FALSE
@@ -131,6 +133,8 @@ enum
 #define PROP_SOCKET_DEFAULT                 -1
 #define PROP_TILE_ROW_DEFAULT               1
 #define PROP_TILE_COL_DEFAULT               1
+#define PROP_VBV_MAX_RATE_DEFAULT           0
+#define PROP_VBV_BUFFER_SIZE_DEFAULT        0
 
 #if G_BYTE_ORDER == G_LITTLE_ENDIAN
 #define FORMATS "I420, Y42B, Y444, I420_10LE, I422_10LE, Y444_10LE"
@@ -471,6 +475,18 @@ gst_svthevcenc_class_init (GstSvtHevcEncClass * klass)
           "Tile count in the Column",
           1, 16, PROP_TILE_COL_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_VBV_MAX_RATE,
+      g_param_spec_uint ("vbv-max-rate", "VBV Maxrate",
+          "VBV maxrate in kbit/sec for VBR mode",
+          0, G_MAXINT, PROP_VBV_MAX_RATE_DEFAULT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_VBV_BUFFER_SIZE,
+      g_param_spec_uint ("vbv-buffer-size", "VBV Buffer Size",
+          "VBV buffer size in kbits for VBR mode",
+          0, G_MAXINT, PROP_VBV_BUFFER_SIZE_DEFAULT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 }
 
 static void
@@ -604,6 +620,12 @@ gst_svthevcenc_set_property (GObject * object, guint property_id,
     case PROP_TILE_COL:
       svthevcenc->svt_config->tileColumnCount = g_value_get_uint (value);
       break;
+    case PROP_VBV_MAX_RATE:
+      svthevcenc->svt_config->vbvMaxrate = g_value_get_uint (value);
+      break;
+    case PROP_VBV_BUFFER_SIZE:
+      svthevcenc->svt_config->vbvBufsize = g_value_get_uint (value);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
@@ -699,6 +721,12 @@ gst_svthevcenc_get_property (GObject * object, guint property_id,
       break;
     case PROP_TILE_COL:
       g_value_set_uint (value, svthevcenc->svt_config->tileColumnCount);
+      break;
+    case PROP_VBV_MAX_RATE:
+      g_value_set_uint (value, svthevcenc->svt_config->vbvMaxrate);
+      break;
+    case PROP_VBV_BUFFER_SIZE:
+      g_value_set_uint (value, svthevcenc->svt_config->vbvBufsize);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -985,6 +1013,8 @@ set_default_svt_configuration (EB_H265_ENC_CONFIGURATION * svt_config)
   svt_config->asmType = 1;
   svt_config->tileRowCount = PROP_TILE_ROW_DEFAULT;
   svt_config->tileColumnCount = PROP_TILE_COL_DEFAULT;
+  svt_config->vbvMaxrate = PROP_VBV_MAX_RATE_DEFAULT;
+  svt_config->vbvBufsize = PROP_VBV_BUFFER_SIZE_DEFAULT;
 }
 
 GstFlowReturn
