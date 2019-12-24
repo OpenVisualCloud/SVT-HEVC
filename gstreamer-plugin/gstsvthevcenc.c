@@ -327,8 +327,8 @@ gst_svthevcenc_class_init (GstSvtHevcEncClass * klass)
       g_param_spec_uint ("speed", "speed (Encoder Mode)",
           "Quality vs density tradeoff point"
           " that the encoding is to be performed at"
-          " (0 is the highest quality mode, 12 is the highest density mode) ",
-          0, 12, PROP_ENCMODE_DEFAULT,
+          " (0 is the highest quality mode, 11 is the highest density mode) ",
+          0, 11, PROP_ENCMODE_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_TUNE,
@@ -457,7 +457,7 @@ gst_svthevcenc_class_init (GstSvtHevcEncClass * klass)
   g_object_class_install_property (gobject_class, PROP_SOCKET,
       g_param_spec_int ("socket", "Target socket",
           "Target socket to run on. -1: all available",
-          -1, 15, PROP_SOCKET_DEFAULT,
+          -1, 1, PROP_SOCKET_DEFAULT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property(gobject_class, PROP_TILE_ROW,
