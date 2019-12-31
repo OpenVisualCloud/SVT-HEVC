@@ -636,7 +636,9 @@ void* ResourceCoordinationKernel(void *inputPtr)
             pictureControlSetWrapperPtr,
             2);
 
+#if !PAREF_OUT
         ((EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr)->inputPaddedPicturePtr->bufferY = inputPicturePtr->bufferY;
+#endif
 
         // Get Empty Output Results Object
         // Note: record the PCS object into output of the Resource Coordination process for EOS frame(s).

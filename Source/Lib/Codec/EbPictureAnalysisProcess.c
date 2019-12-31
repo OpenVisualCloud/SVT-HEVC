@@ -4258,6 +4258,32 @@ void* PictureAnalysisKernel(void *inputPtr)
 		pictureHeighInLcu = (sequenceControlSetPtr->lumaHeight + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize;
 		lcuTotalCount = pictureWidthInLcu * pictureHeighInLcu;
 
+#if PAREF_OUT
+        if (sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT) {
+            GeneratePadding16Bit(
+                    inputPicturePtr->bufferY,
+                    inputPicturePtr->strideY,
+                    inputPicturePtr->width,
+                    inputPicturePtr->height,
+                    inputPicturePtr->originX,
+                    inputPicturePtr->originY);
+        } else {
+            GeneratePadding(
+                    inputPicturePtr->bufferY,
+                    inputPicturePtr->strideY,
+                    inputPicturePtr->width,
+                    inputPicturePtr->height,
+                    inputPicturePtr->originX,
+                    inputPicturePtr->originY);
+        }
+
+        EB_U8 *pa = inputPaddedPicturePtr->bufferY + inputPaddedPicturePtr->originX + inputPaddedPicturePtr->originY * inputPaddedPicturePtr->strideY;
+        EB_U8 *in = inputPicturePtr->bufferY + inputPicturePtr->originX + inputPicturePtr->originY * inputPicturePtr->strideY;
+        for (EB_U32 row = 0; row < inputPicturePtr->height; row++) {
+            EB_MEMCPY(pa + row * inputPaddedPicturePtr->strideY, in + row * inputPicturePtr->strideY, sizeof(EB_U8) * inputPicturePtr->width);
+        }
+#endif
+
         // Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
 		SetPictureParametersForStatisticsGathering(
 			sequenceControlSetPtr);
