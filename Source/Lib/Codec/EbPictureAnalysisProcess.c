@@ -4259,24 +4259,9 @@ void* PictureAnalysisKernel(void *inputPtr)
 		lcuTotalCount = pictureWidthInLcu * pictureHeighInLcu;
 
 #if PAREF_OUT
-        if (sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT) {
-            GeneratePadding16Bit(
-                    inputPicturePtr->bufferY,
-                    inputPicturePtr->strideY,
-                    inputPicturePtr->width,
-                    inputPicturePtr->height,
-                    inputPicturePtr->originX,
-                    inputPicturePtr->originY);
-        } else {
-            GeneratePadding(
-                    inputPicturePtr->bufferY,
-                    inputPicturePtr->strideY,
-                    inputPicturePtr->width,
-                    inputPicturePtr->height,
-                    inputPicturePtr->originX,
-                    inputPicturePtr->originY);
-        }
-
+        // Backup the Y component data from input picture into PA reference picture, to work arond the race condition that
+        // the input picture buffer pointed by PA reference picture (in ResourceCoordination) would be updated even though
+        // it's still being referenced.
         EB_U8 *pa = inputPaddedPicturePtr->bufferY + inputPaddedPicturePtr->originX + inputPaddedPicturePtr->originY * inputPaddedPicturePtr->strideY;
         EB_U8 *in = inputPicturePtr->bufferY + inputPicturePtr->originX + inputPicturePtr->originY * inputPicturePtr->strideY;
         for (EB_U32 row = 0; row < inputPicturePtr->height; row++) {
