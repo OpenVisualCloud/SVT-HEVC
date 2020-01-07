@@ -3842,6 +3842,11 @@ __attribute__((visibility("default")))
 EB_API void EbH265ReleaseOutBuffer(
     EB_BUFFERHEADERTYPE  **pBuffer)
 {
+#if OUT_ALLOC
+    if ((*pBuffer)->pBuffer)
+        free((*pBuffer)->pBuffer);
+#endif
+
     if ((*pBuffer)->wrapperPtr)
         // Release out put buffer back into the pool
         EbReleaseObject((EbObjectWrapper_t  *)(*pBuffer)->wrapperPtr);
@@ -4067,9 +4072,9 @@ EB_ERRORTYPE EbOutputBufferHeaderCtor(
 
 	// Initialize Header
 	outBufPtr->nSize = sizeof(EB_BUFFERHEADERTYPE);
-
+#if !OUT_ALLOC
 	EB_MALLOC(EB_U8*, outBufPtr->pBuffer, nStride, EB_N_PTR);
-
+#endif
 	outBufPtr->nAllocLen =  nStride;
 	outBufPtr->pAppPrivate = NULL;
 

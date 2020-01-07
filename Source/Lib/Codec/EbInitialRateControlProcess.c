@@ -905,7 +905,9 @@ void* InitialRateControlKernel(void *inputPtr)
     EB_U8                               temporalLayerIndex;
 	EbObjectWrapper_t                  *referencePictureWrapperPtr;
 
+#if !OUT_ALLOC
 	EbObjectWrapper_t                *outputStreamWrapperPtr;
+#endif
 
 	for (;;) {
 
@@ -1111,11 +1113,13 @@ void* InitialRateControlKernel(void *inputPtr)
 						1);
 					//OPTION 1:  get the buffer in resource coordination
 
+#if !OUT_ALLOC
 					EbGetEmptyObject(
 						sequenceControlSetPtr->encodeContextPtr->streamOutputFifoPtr,
 						&outputStreamWrapperPtr);
 
 					pictureControlSetPtr->outputStreamWrapperPtr = outputStreamWrapperPtr;
+#endif
 
                     // Get Empty Results Object
 					EbGetEmptyObject(

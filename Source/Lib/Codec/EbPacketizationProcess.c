@@ -4,6 +4,7 @@
 */
 
 #include <stdlib.h>
+#include <assert.h>
 
 #include "EbDefinitions.h"
 #include "EbUtility.h"
@@ -188,10 +189,20 @@ void* PacketizationKernel(void *inputPtr)
         queueEntryPtr->isUsedAsReferenceFlag = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag;
         queueEntryPtr->sliceType = pictureControlSetPtr->sliceType;
 
-        //TODO: buffer should be big enough to avoid a deadlock here. Add an assert that make the warning
+#if OUT_ALLOC
+        EbGetEmptyObject(sequenceControlSetPtr->encodeContextPtr->streamOutputFifoPtr,
+                &pictureControlSetPtr->ParentPcsPtr->outputStreamWrapperPtr);
+        outputStreamWrapperPtr   = pictureControlSetPtr->ParentPcsPtr->outputStreamWrapperPtr;
+        outputStreamPtr          = (EB_BUFFERHEADERTYPE*) outputStreamWrapperPtr->objectPtr;
+        // Not use EB_MALLOC due to lacking of EB_FREE which needs to parse all the memoryMap entries.
+        outputStreamPtr->pBuffer = (EB_U8 *)malloc(outputStreamPtr->nAllocLen);
+        assert(outputStreamPtr->pBuffer != EB_NULL && "bit-stream memory allocation failure");
+#else
         // Get Output Bitstream buffer
         outputStreamWrapperPtr   = pictureControlSetPtr->ParentPcsPtr->outputStreamWrapperPtr;
         outputStreamPtr          = (EB_BUFFERHEADERTYPE*) outputStreamWrapperPtr->objectPtr;
+#endif
+
         outputStreamPtr->nFlags  = 0;
         EbBlockOnMutex(encodeContextPtr->terminatingConditionsMutex);
         outputStreamPtr->nFlags |= (encodeContextPtr->terminatingSequenceFlagReceived == EB_TRUE && pictureControlSetPtr->ParentPcsPtr->decodeOrder == encodeContextPtr->terminatingPictureNumber) ? EB_BUFFERFLAG_EOS : 0;
