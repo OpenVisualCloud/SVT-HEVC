@@ -343,7 +343,7 @@ void* PacketizationKernel(void *inputPtr)
             // Copy SPS & PPS to the Output Bitstream
             CopyRbspBitstreamToPayload(
                 pictureControlSetPtr->bitstreamPtr,
-                outputStreamPtr->pBuffer,
+                &outputStreamPtr->pBuffer,
                 (EB_U32*) &(outputStreamPtr->nFilledLen),
                 (EB_U32*) &(outputStreamPtr->nAllocLen),
                 encodeContextPtr,
@@ -614,7 +614,7 @@ void* PacketizationKernel(void *inputPtr)
         // Copy Buffering Period SEI to the Output Bitstream
         CopyRbspBitstreamToPayload(
             pictureControlSetPtr->bitstreamPtr,
-            outputStreamPtr->pBuffer,
+            &outputStreamPtr->pBuffer,
             (EB_U32*) &(outputStreamPtr->nFilledLen),
             (EB_U32*) &(outputStreamPtr->nAllocLen),
             encodeContextPtr,
@@ -680,7 +680,7 @@ void* PacketizationKernel(void *inputPtr)
                 // Copy Slice Header to the Output Bitstream
                 CopyRbspBitstreamToPayload(
                         pictureControlSetPtr->bitstreamPtr,
-                        outputStreamPtr->pBuffer,
+                        &outputStreamPtr->pBuffer,
                         (EB_U32*) &(outputStreamPtr->nFilledLen),
                         (EB_U32*) &(outputStreamPtr->nAllocLen),
                         encodeContextPtr,
@@ -697,7 +697,7 @@ void* PacketizationKernel(void *inputPtr)
 
             CopyRbspBitstreamToPayload(
                 &bitstream,
-                outputStreamPtr->pBuffer,
+                &outputStreamPtr->pBuffer,
                 (EB_U32*) &(outputStreamPtr->nFilledLen),
                 (EB_U32*) &(outputStreamPtr->nAllocLen),
 			    encodeContextPtr,
@@ -744,7 +744,7 @@ void* PacketizationKernel(void *inputPtr)
             // Copy payload to the Output Bitstream
             CopyRbspBitstreamToPayload(
                 pictureControlSetPtr->bitstreamPtr,
-                outputStreamPtr->pBuffer,
+                &outputStreamPtr->pBuffer,
                 (EB_U32*) &(outputStreamPtr->nFilledLen),
                 (EB_U32*) &(outputStreamPtr->nAllocLen),
                 ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr,
@@ -765,7 +765,7 @@ void* PacketizationKernel(void *inputPtr)
             // Copy SPS & PPS to the Output Bitstream
             CopyRbspBitstreamToPayload(
                 pictureControlSetPtr->bitstreamPtr,
-                outputStreamPtr->pBuffer,
+                &outputStreamPtr->pBuffer,
                 (EB_U32*) &(outputStreamPtr->nFilledLen),
                 (EB_U32*) &(outputStreamPtr->nAllocLen),
                 ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr,
@@ -864,7 +864,7 @@ void* PacketizationKernel(void *inputPtr)
                 // Copy Picture Timing SEI to the Output Bitstream
                 CopyRbspBitstreamToPayload(
                     queueEntryPtr->bitStreamPtr2,
-                    outputStreamPtr->pBuffer,
+                    &outputStreamPtr->pBuffer,
                     (EB_U32*) &(queueEntryPtr->startSplicing),
                     (EB_U32*) &(outputStreamPtr->nAllocLen),
                     sequenceControlSetPtr->encodeContextPtr,
@@ -907,7 +907,7 @@ void* PacketizationKernel(void *inputPtr)
                         // Copy filler bits to the Output Bitstream
                         CopyRbspBitstreamToPayload(
                             queueEntryPtr->bitStreamPtr2,
-                            outputStreamPtr->pBuffer,
+                            &outputStreamPtr->pBuffer,
                             (EB_U32*) &(outputStreamPtr->nFilledLen),
                             (EB_U32*) &(outputStreamPtr->nAllocLen),
                             encodeContextPtr, NAL_UNIT_INVALID);
@@ -920,7 +920,7 @@ void* PacketizationKernel(void *inputPtr)
                                 queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
                             CopyRbspBitstreamToPayload(
                                 queueEntryPtr->bitStreamPtr2,
-                                outputStreamPtr->pBuffer,
+                                &outputStreamPtr->pBuffer,
                                 (EB_U32*) &(outputStreamPtr->nFilledLen),
                                 (EB_U32*) &(outputStreamPtr->nAllocLen),
                                 encodeContextPtr, NAL_UNIT_INVALID);
@@ -935,7 +935,7 @@ void* PacketizationKernel(void *inputPtr)
                             queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
                         CopyRbspBitstreamToPayload(
                             queueEntryPtr->bitStreamPtr2,
-                            outputStreamPtr->pBuffer,
+                            &outputStreamPtr->pBuffer,
                             (EB_U32*) &(outputStreamPtr->nFilledLen),
                             (EB_U32*) &(outputStreamPtr->nAllocLen),
                             encodeContextPtr, NAL_UNIT_INVALID);
@@ -946,7 +946,7 @@ void* PacketizationKernel(void *inputPtr)
                             queueEntryPtr->bitStreamPtr2->outputBitstreamPtr);
                         CopyRbspBitstreamToPayload(
                             queueEntryPtr->bitStreamPtr2,
-                            outputStreamPtr->pBuffer,
+                            &outputStreamPtr->pBuffer,
                             (EB_U32*) &(outputStreamPtr->nFilledLen),
                             (EB_U32*) &(outputStreamPtr->nAllocLen),
                             encodeContextPtr, NAL_UNIT_INVALID);

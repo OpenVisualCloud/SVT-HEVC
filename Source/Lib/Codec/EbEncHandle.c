@@ -3262,7 +3262,7 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     // Copy SPS & PPS to the Output Bitstream
     CopyRbspBitstreamToPayload(
         bitstreamPtr,
-        outputStreamBuffer->pBuffer,
+        &outputStreamBuffer->pBuffer,
         (EB_U32*) &(outputStreamBuffer->nFilledLen),
         (EB_U32*) &(outputStreamBuffer->nAllocLen),
         encodeContextPtr,
@@ -3318,7 +3318,7 @@ EB_API EB_ERRORTYPE EbH265EncEosNal(
     // Copy SPS & PPS to the Output Bitstream
     CopyRbspBitstreamToPayload(
         bitstreamPtr,
-        outputStreamBuffer->pBuffer,
+        &outputStreamBuffer->pBuffer,
         (EB_U32*) &(outputStreamBuffer->nFilledLen),
         (EB_U32*) &(outputStreamBuffer->nAllocLen),
         encodeContextPtr,

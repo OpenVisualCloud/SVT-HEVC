@@ -9249,7 +9249,7 @@ EB_ERRORTYPE CodeDolbyVisionRpuMetadata(
 
 EB_ERRORTYPE CopyRbspBitstreamToPayload(
 	Bitstream_t *bitstreamPtr,
-	EB_BYTE      outputBuffer,
+	EB_BYTE     *outputBuffer,
 	EB_U32      *outputBufferIndex,
 	EB_U32      *outputBufferSize,
 	EncodeContext_t         *encodeContextPtr,
@@ -9257,18 +9257,17 @@ EB_ERRORTYPE CopyRbspBitstreamToPayload(
 {
 	EB_ERRORTYPE return_error = EB_ErrorNone;
 	OutputBitstreamUnit_t *outputBitstreamPtr = (OutputBitstreamUnit_t*)bitstreamPtr->outputBitstreamPtr;
+    (void)encodeContextPtr;
 
-
-	CHECK_REPORT_ERROR(
-		((outputBitstreamPtr->writtenBitsCount >> 3) + (*outputBufferIndex) < (*outputBufferSize)),
-		encodeContextPtr->appCallbackPtr,
-		EB_ENC_EC_ERROR2);
-
-
+    // To guarantee the output stream buffer is big enough.
+    if (((outputBitstreamPtr->writtenBitsCount >> 3) + (*outputBufferIndex) > (*outputBufferSize)) && *outputBuffer) {
+        free(*outputBuffer);
+        *outputBuffer = (EB_BYTE)malloc((outputBitstreamPtr->writtenBitsCount >> 3) + (*outputBufferIndex));
+    }
 
 	OutputBitstreamRBSPToPayload(
 		outputBitstreamPtr,
-		outputBuffer,
+		*outputBuffer,
 		outputBufferIndex,
 		outputBufferSize,
 		0,
