@@ -2717,7 +2717,7 @@ static EB_ERRORTYPE VerifySettings(\
     }
 
     if (config->tune != 1) {
-        SVT_LOG("SVT [WARNING]: -tune is deprecated.\n");
+        SVT_LOG("SVT [WARNING]: -tune is deprecated and will be ignored.\n");
         config->tune = 1;
     }
     if (config->bitRateReduction > 1) {
