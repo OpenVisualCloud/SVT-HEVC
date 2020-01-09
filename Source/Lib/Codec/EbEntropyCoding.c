@@ -9263,6 +9263,10 @@ EB_ERRORTYPE CopyRbspBitstreamToPayload(
     if (((outputBitstreamPtr->writtenBitsCount >> 3) + (*outputBufferIndex) > (*outputBufferSize)) && *outputBuffer) {
         free(*outputBuffer);
         *outputBuffer = (EB_BYTE)malloc((outputBitstreamPtr->writtenBitsCount >> 3) + (*outputBufferIndex));
+        if (*outputBuffer == EB_NULL) {
+            return_error = EB_ErrorInsufficientResources;
+            return return_error;
+        }
     }
 
 	OutputBitstreamRBSPToPayload(
