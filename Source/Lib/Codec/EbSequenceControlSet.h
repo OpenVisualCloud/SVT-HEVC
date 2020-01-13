@@ -181,6 +181,7 @@ typedef struct SequenceControlSet_s
     EB_U32                      modeDecisionConfigurationProcessInitCount; 
     EB_U32                      encDecProcessInitCount;
     EB_U32                      entropyCodingProcessInitCount;
+    EB_U32                      unpackProcessInitCount;
 
     EB_U32                      totalProcessInitCount;
 
