@@ -3702,7 +3702,6 @@ static EB_ERRORTYPE CopyFrameBuffer(
     }
     else { // 10bit packed
 
-        EB_U32 lumaOffset = 0, chromaOffset = 0;
         EB_U32 lumaBufferOffset = (inputPicturePtr->strideY*sequenceControlSetPtr->topPadding + sequenceControlSetPtr->leftPadding);
         EB_U32 chromaBufferOffset = (inputPicturePtr->strideCr*(sequenceControlSetPtr->topPadding >> subHeightCMinus1) + (sequenceControlSetPtr->leftPadding >> subWidthCMinus1));
         EB_U16 lumaWidth = (EB_U16)(inputPicturePtr->width - sequenceControlSetPtr->maxInputPadRight);
@@ -3711,7 +3710,7 @@ static EB_ERRORTYPE CopyFrameBuffer(
         EB_U16 chromaHeight = lumaHeight >> subHeightCMinus1;
 
         EB_U16 sourceLumaStride = (EB_U16)(inputPtr->yStride);
-        EB_U16 sourceCrStride = (EB_U16)(inputPtr->crStride);
+        //EB_U16 sourceCrStride = (EB_U16)(inputPtr->crStride);
         EB_U16 sourceCbStride = (EB_U16)(inputPtr->cbStride);
 
         if (lumaWidth > sourceLumaStride || chromaWidth > sourceCbStride) {

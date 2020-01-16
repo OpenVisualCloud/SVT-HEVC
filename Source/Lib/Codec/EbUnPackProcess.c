@@ -36,6 +36,7 @@ EB_ERRORTYPE UnPackCtor(
         EB_PTR  *Object,
         EB_PTR  data)
 {
+        (void)data;
         EB_ENC_UnPack2D_TYPE_t *unpack;
         EB_MALLOC(EB_ENC_UnPack2D_TYPE_t*,unpack,sizeof(EB_ENC_UnPack2D_TYPE_t),EB_N_PTR);
         *Object = unpack;
@@ -44,7 +45,7 @@ EB_ERRORTYPE UnPackCtor(
         EB_MALLOC(EB_U8*,unpack->out8BitBuffer,sizeof(EB_U8),EB_N_PTR);
         unpack->out8Stride = 0;
         EB_MALLOC(EB_U8*,unpack->outnBitBuffer,sizeof(EB_U8),EB_N_PTR);
-        EB_MALLOC(EB_U8*,unpack->outnStride,sizeof(EB_U8),EB_N_PTR);
+        unpack->outnStride = 0;
         unpack->width = 0;
         unpack->height = 0;
 

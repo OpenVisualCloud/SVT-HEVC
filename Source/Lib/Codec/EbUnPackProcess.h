@@ -20,7 +20,7 @@ typedef struct EB_ENC_UnPack2D_TYPE
     EB_U8  *out8BitBuffer;
     EB_U32  out8Stride;
     EB_U8  *outnBitBuffer;
-    EB_U32 *outnStride;
+    EB_U32  outnStride;
     EB_U32  width;
     EB_U32  height;
 }EB_ENC_UnPack2D_TYPE_t;
