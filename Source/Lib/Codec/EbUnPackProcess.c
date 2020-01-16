@@ -1,5 +1,5 @@
 /*
-* Copyright(c) 2018 Intel Corporation
+* Copyright(c) 2020 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
 

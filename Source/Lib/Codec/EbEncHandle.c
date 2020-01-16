@@ -2376,13 +2376,6 @@ void EbHevcCopyApiFromApp(
         }
     }
 
-    // Set number of UnPack2D threads in function of the resolution and the format
-    // for resolutions > 4K need more than 3 threads (best perf at 12 for 8K)
-    if(sequenceControlSetPtr->maxInputLumaWidth >= 3840){
-        nbLumaThreads = 8;
-        nbChromaThreads = sequenceControlSetPtr->chromaFormatIdc == EB_YUV420 ? nbLumaThreads/4 : sequenceControlSetPtr->chromaFormatIdc == EB_YUV422 ? nbLumaThreads/2 : nbLumaThreads;
-    }
-
     return;
 }
 
@@ -2581,6 +2574,13 @@ static EB_ERRORTYPE VerifySettings(\
       (inputSize < INPUT_SIZE_1080p_TH) ? INPUT_SIZE_1080i_RANGE :
       (inputSize < INPUT_SIZE_4K_TH) ? INPUT_SIZE_1080p_RANGE :
       INPUT_SIZE_4K_RANGE;
+
+    // Set number of UnPack2D threads in function of the resolution and the format
+    // for resolutions >= 4K need more than 3 threads (best perf at 12 for 8K)
+    if(inputResolution >= INPUT_SIZE_4K_RANGE){
+        nbLumaThreads = 8;
+        nbChromaThreads = sequenceControlSetPtr->chromaFormatIdc == EB_YUV420 ? nbLumaThreads/4 : sequenceControlSetPtr->chromaFormatIdc == EB_YUV422 ? nbLumaThreads/2 : nbLumaThreads;
+    }
 
     // encMode
     sequenceControlSetPtr->maxEncMode = MAX_SUPPORTED_MODES;
@@ -3549,11 +3549,11 @@ static EB_ERRORTYPE CopyUserSei(
 }
 
 #ifndef NON_AVX512_SUPPORT
-    EB_U32  unpack_CHUNK_SIZE = 64;
+    EB_U32  unpack_chunk_size = 64;
     EB_U32  unpack_offset = 32;
     EB_U32  unpack_complOffset = 32;
 #else
-    EB_U32  unpack_CHUNK_SIZE = 32;
+    EB_U32  unpack_chunk_size = 32;
     EB_U32  unpack_offset = 16;
     EB_U32  unpack_complOffset = 16;
 #endif
@@ -3718,12 +3718,12 @@ static EB_ERRORTYPE CopyFrameBuffer(
             return EB_ErrorBadParameter;
         }
 
-        EB_U32 numChunks_luma = (lumaWidth - (unpack_offset + unpack_complOffset)) / unpack_CHUNK_SIZE;
-        EB_U32 numChunks_chroma = (chromaWidth - (unpack_offset + unpack_complOffset)) / unpack_CHUNK_SIZE;
-        EB_U32 in_luma = lumaHeight * (unpack_offset + numChunks_luma * unpack_CHUNK_SIZE + unpack_complOffset);
-        EB_U32 out_luma = lumaHeight * (unpack_offset + numChunks_luma * unpack_CHUNK_SIZE + inputPicturePtr->strideY - lumaWidth + unpack_complOffset);
-        EB_U32 in_chroma = chromaHeight * (unpack_offset + numChunks_chroma * unpack_CHUNK_SIZE + unpack_complOffset);
-        EB_U32 out_chroma = chromaHeight * (unpack_offset + numChunks_chroma * unpack_CHUNK_SIZE + inputPicturePtr->strideCb - chromaWidth + unpack_complOffset);
+        EB_U32 numChunks_luma = (lumaWidth - (unpack_offset + unpack_complOffset)) / unpack_chunk_size;
+        EB_U32 numChunks_chroma = (chromaWidth - (unpack_offset + unpack_complOffset)) / unpack_chunk_size;
+        EB_U32 in_luma = lumaHeight * (unpack_offset + numChunks_luma * unpack_chunk_size + unpack_complOffset);
+        EB_U32 out_luma = lumaHeight * (unpack_offset + numChunks_luma * unpack_chunk_size + inputPicturePtr->strideY - lumaWidth + unpack_complOffset);
+        EB_U32 in_chroma = chromaHeight * (unpack_offset + numChunks_chroma * unpack_chunk_size + unpack_complOffset);
+        EB_U32 out_chroma = chromaHeight * (unpack_offset + numChunks_chroma * unpack_chunk_size + inputPicturePtr->strideCb - chromaWidth + unpack_complOffset);
         int nb_luma = context_unpack->nbLumaThreads;
         int nb_chroma = context_unpack->nbChromaThreads;
         int nb = context_unpack->nbLumaThreads + context_unpack->nbChromaThreads*2;
