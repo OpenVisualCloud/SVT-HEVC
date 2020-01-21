@@ -14,6 +14,7 @@
 #include "EbDefinitions.h"
 #include "EbPictureBufferDesc.h"
 #include "EbSequenceControlSet.h"
+#include "EbUnPackProcess.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -177,14 +178,8 @@ void Pack2D_SRC(
    EB_U32     height);
 
 void UnPack2D(
-   EB_U16      *in16BitBuffer,
-   EB_U32       inStride,
-   EB_U8       *out8BitBuffer,
-   EB_U32       out8Stride,
-   EB_U8       *outnBitBuffer,
-   EB_U32       outnStride,
-   EB_U32       width,
-   EB_U32       height);
+   UnPackContext_t *context);
+   
 void extract8Bitdata(
     EB_U16      *in16BitBuffer,
     EB_U32       inStride,

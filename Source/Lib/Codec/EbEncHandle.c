@@ -39,6 +39,7 @@
 #include "EbEncDecProcess.h"
 #include "EbEntropyCodingProcess.h"
 #include "EbPacketizationProcess.h"
+#include "EbUnPackProcess.h"
 
 #include "EbResourceCoordinationResults.h"
 #include "EbPictureAnalysisResults.h"
@@ -117,6 +118,9 @@ EB_U32                         libMallocCount = 0;
 EB_U32                         libThreadCount = 0;
 EB_U32                         libSemaphoreCount = 0;
 EB_U32                         libMutexCount = 0;
+
+EB_U32                          nbLumaThreads = 1;
+EB_U32                          nbChromaThreads = 1;
 
 EB_U8                           numGroups = 0;
 #ifdef _WIN32
@@ -519,6 +523,7 @@ static EB_ERRORTYPE EbEncHandleCtor(
     encHandlePtr->encDecThreadHandleArray                           = (EB_HANDLE*) EB_NULL;
     encHandlePtr->entropyCodingThreadHandleArray                    = (EB_HANDLE*) EB_NULL;
     encHandlePtr->packetizationThreadHandle                         = (EB_HANDLE) EB_NULL;
+    encHandlePtr->unpackThreadHandleArray                           = (EB_HANDLE*) EB_NULL;
 
     // Contexts
     encHandlePtr->resourceCoordinationContextPtr                    = (EB_PTR) EB_NULL;
@@ -533,6 +538,7 @@ static EB_ERRORTYPE EbEncHandleCtor(
     encHandlePtr->encDecContextPtrArray                             = (EB_PTR*) EB_NULL;
     encHandlePtr->entropyCodingContextPtrArray                      = (EB_PTR*) EB_NULL;
     encHandlePtr->packetizationContextPtr                           = (EB_PTR) EB_NULL;
+    encHandlePtr->unpackContextPtr                                  = (EB_PTR) EB_NULL;
 
     // System Resource Managers
     encHandlePtr->inputBufferResourcePtr                         = (EbSystemResource_t*) EB_NULL;
@@ -548,6 +554,8 @@ static EB_ERRORTYPE EbEncHandleCtor(
     encHandlePtr->encDecTasksResourcePtr                            = (EbSystemResource_t*) EB_NULL;
     encHandlePtr->encDecResultsResourcePtr                          = (EbSystemResource_t*) EB_NULL;
     encHandlePtr->entropyCodingResultsResourcePtr                   = (EbSystemResource_t*) EB_NULL;
+    encHandlePtr->unpackTasksResourcePtr                            = (EbSystemResource_t*) EB_NULL;
+    encHandlePtr->unpackSyncResourcePtr                             = (EbSystemResource_t*) EB_NULL;
 
     // Inter-Process Producer Fifos
     encHandlePtr->inputBufferProducerFifoPtrArray                         = (EbFifo_t**) EB_NULL;
@@ -560,6 +568,8 @@ static EB_ERRORTYPE EbEncHandleCtor(
     encHandlePtr->encDecTasksProducerFifoPtrArray                            = (EbFifo_t**) EB_NULL;
     encHandlePtr->encDecResultsProducerFifoPtrArray                          = (EbFifo_t**) EB_NULL;
     encHandlePtr->entropyCodingResultsProducerFifoPtrArray                   = (EbFifo_t**) EB_NULL;
+    encHandlePtr->unpackTasksProducerFifoPtrArray                   = (EbFifo_t**) EB_NULL;
+    encHandlePtr->unpackSyncProducerFifoPtrArray                    = (EbFifo_t**) EB_NULL;
 
     // Inter-Process Consumer Fifos
     encHandlePtr->inputBufferConsumerFifoPtrArray                = (EbFifo_t**) EB_NULL;
@@ -571,6 +581,8 @@ static EB_ERRORTYPE EbEncHandleCtor(
     encHandlePtr->encDecTasksConsumerFifoPtrArray                   = (EbFifo_t**) EB_NULL;
     encHandlePtr->encDecResultsConsumerFifoPtrArray                 = (EbFifo_t**) EB_NULL;
     encHandlePtr->entropyCodingResultsConsumerFifoPtrArray          = (EbFifo_t**) EB_NULL;
+    encHandlePtr->unpackTasksConsumerFifoPtrArray                   = (EbFifo_t**) EB_NULL;
+    encHandlePtr->unpackSyncConsumerFifoPtrArray                    = (EbFifo_t**) EB_NULL;
 
     // Initialize Callbacks
     EB_MALLOC(EbCallback_t**, encHandlePtr->appCallbackPtrArray, sizeof(EbCallback_t*) * encHandlePtr->encodeInstanceTotalCount, EB_N_PTR);
@@ -1283,6 +1295,40 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         }
     }
 
+    // UnPack Tasks
+    {
+        return_error = EbSystemResourceCtor(
+            &encHandlePtr->unpackTasksResourcePtr,
+            encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount,
+            encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount,
+            encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount,
+            &encHandlePtr->unpackTasksProducerFifoPtrArray,
+            &encHandlePtr->unpackTasksConsumerFifoPtrArray,
+            EB_TRUE,
+            UnPackCtor,
+            EB_NULL);
+        if (return_error == EB_ErrorInsufficientResources){
+            return EB_ErrorInsufficientResources;
+        }
+    }
+
+    // UnPack Sync
+    {
+        return_error = EbSystemResourceCtor(
+            &encHandlePtr->unpackSyncResourcePtr,
+            encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount,
+            encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount,
+            encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount,
+            &encHandlePtr->unpackSyncProducerFifoPtrArray,
+            &encHandlePtr->unpackSyncConsumerFifoPtrArray,
+            EB_TRUE,
+            UnPackCtor,
+            EB_NULL);
+        if (return_error == EB_ErrorInsufficientResources){
+            return EB_ErrorInsufficientResources;
+        }
+    }
+
     /************************************
      * App Callbacks
      ************************************/
@@ -1491,6 +1537,21 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
+
+    // UnPack Context
+    return_error = UnPackContextCtor(
+        (UnPackContext_t**) &encHandlePtr->unpackContextPtr,
+        &encHandlePtr->unpackTasksProducerFifoPtrArray[0][0],
+        &encHandlePtr->unpackTasksConsumerFifoPtrArray[0][0],
+        &encHandlePtr->unpackSyncProducerFifoPtrArray[0][0],
+        &encHandlePtr->unpackSyncConsumerFifoPtrArray[0][0],
+        nbLumaThreads,
+        nbChromaThreads);
+
+    if (return_error == EB_ErrorInsufficientResources){
+        return EB_ErrorInsufficientResources;
+    }
+
     /************************************
      * Thread Handles
      ************************************/
@@ -1558,6 +1619,13 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     // Packetization
     EB_CREATETHREAD(EB_HANDLE, encHandlePtr->packetizationThreadHandle, sizeof(EB_HANDLE), EB_THREAD, PacketizationKernel, encHandlePtr->packetizationContextPtr);
 
+    // UnPack
+    EB_MALLOC(EB_HANDLE*, encHandlePtr->unpackThreadHandleArray, sizeof(EB_HANDLE) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount, EB_N_PTR);
+
+    for(processIndex=0; processIndex < encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount; ++processIndex){
+        EB_CREATETHREAD(EB_HANDLE, encHandlePtr->unpackThreadHandleArray[processIndex], sizeof(EB_HANDLE), EB_THREAD, UnPack2D, encHandlePtr->unpackContextPtr);
+    }
+
 #if DISPLAY_MEMORY
     EB_MEMORY();
 #endif
@@ -1591,7 +1659,9 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         EB_SEND_END_OBJ(encHandlePtr->encDecTasksProducerFifoPtrArray, encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->encDecProcessInitCount)
         EB_SEND_END_OBJ(encHandlePtr->encDecResultsProducerFifoPtrArray, encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->entropyCodingProcessInitCount)
         EB_SEND_END_OBJ(encHandlePtr->entropyCodingResultsProducerFifoPtrArray, EB_PacketizationProcessInitCount)
-
+        EB_SEND_END_OBJ(encHandlePtr->unpackTasksProducerFifoPtrArray, encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount)        
+        EB_SEND_END_OBJ(encHandlePtr->unpackSyncProducerFifoPtrArray, encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount)
+        
         if (encHandlePtr->memoryMapIndex){
             // Loop through the ptr table and free all malloc'd pointers per channel
 
@@ -1914,6 +1984,8 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount = threadUnit * 2;
     sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->entropyCodingProcessInitCount             = threadUnit * 4;
     sequenceControlSetPtr->totalProcessInitCount += 6; // single processes count
+    sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->unpackProcessInitCount =
+                                                    nbLumaThreads + nbChromaThreads * 2;
     sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->encDecProcessInitCount =
                                                     totalThreadCount - sequenceControlSetPtr->totalProcessInitCount;
 
@@ -2502,6 +2574,13 @@ static EB_ERRORTYPE VerifySettings(\
       (inputSize < INPUT_SIZE_1080p_TH) ? INPUT_SIZE_1080i_RANGE :
       (inputSize < INPUT_SIZE_4K_TH) ? INPUT_SIZE_1080p_RANGE :
       INPUT_SIZE_4K_RANGE;
+
+    // Set number of UnPack2D threads in function of the resolution and the format
+    // for resolutions >= 4K need more than 3 threads (best perf at 12 for 8K)
+    if(inputResolution >= INPUT_SIZE_4K_RANGE){
+        nbLumaThreads = 8;
+        nbChromaThreads = sequenceControlSetPtr->chromaFormatIdc == EB_YUV420 ? nbLumaThreads/4 : sequenceControlSetPtr->chromaFormatIdc == EB_YUV422 ? nbLumaThreads/2 : nbLumaThreads;
+    }
 
     // encMode
     sequenceControlSetPtr->maxEncMode = MAX_SUPPORTED_MODES;
@@ -3469,6 +3548,16 @@ static EB_ERRORTYPE CopyUserSei(
     return return_error;
 }
 
+#ifndef NON_AVX512_SUPPORT
+    EB_U32  unpack_chunk_size = 64;
+    EB_U32  unpack_offset = 32;
+    EB_U32  unpack_complOffset = 32;
+#else
+    EB_U32  unpack_chunk_size = 32;
+    EB_U32  unpack_offset = 16;
+    EB_U32  unpack_complOffset = 16;
+#endif
+
 /***********************************************
 **** Copy the input buffer from the
 **** sample application to the library buffers
@@ -3476,7 +3565,8 @@ static EB_ERRORTYPE CopyUserSei(
 static EB_ERRORTYPE CopyFrameBuffer(
     SequenceControlSet_t        *sequenceControlSetPtr,
     EB_U8      			        *dst,
-    EB_U8      			        *src)
+    EB_U8      			        *src,
+    UnPackContext_t             *context_unpack)
 {
     EB_H265_ENC_CONFIGURATION   *config = &sequenceControlSetPtr->staticConfig;
     EB_ERRORTYPE   return_error = EB_ErrorNone;
@@ -3612,7 +3702,6 @@ static EB_ERRORTYPE CopyFrameBuffer(
     }
     else { // 10bit packed
 
-        EB_U32 lumaOffset = 0, chromaOffset = 0;
         EB_U32 lumaBufferOffset = (inputPicturePtr->strideY*sequenceControlSetPtr->topPadding + sequenceControlSetPtr->leftPadding);
         EB_U32 chromaBufferOffset = (inputPicturePtr->strideCr*(sequenceControlSetPtr->topPadding >> subHeightCMinus1) + (sequenceControlSetPtr->leftPadding >> subWidthCMinus1));
         EB_U16 lumaWidth = (EB_U16)(inputPicturePtr->width - sequenceControlSetPtr->maxInputPadRight);
@@ -3621,42 +3710,72 @@ static EB_ERRORTYPE CopyFrameBuffer(
         EB_U16 chromaHeight = lumaHeight >> subHeightCMinus1;
 
         EB_U16 sourceLumaStride = (EB_U16)(inputPtr->yStride);
-        EB_U16 sourceCrStride = (EB_U16)(inputPtr->crStride);
+        //EB_U16 sourceCrStride = (EB_U16)(inputPtr->crStride);
         EB_U16 sourceCbStride = (EB_U16)(inputPtr->cbStride);
 
         if (lumaWidth > sourceLumaStride || chromaWidth > sourceCbStride) {
             return EB_ErrorBadParameter;
         }
 
-        UnPack2D(
-            (EB_U16*)(inputPtr->luma + lumaOffset),
-            sourceLumaStride,
-            inputPicturePtr->bufferY + lumaBufferOffset,
-            inputPicturePtr->strideY,
-            inputPicturePtr->bufferBitIncY + lumaBufferOffset,
-            inputPicturePtr->strideBitIncY,
-            lumaWidth,
-            lumaHeight);
+        EB_U32 numChunks_luma = (lumaWidth - (unpack_offset + unpack_complOffset)) / unpack_chunk_size;
+        EB_U32 numChunks_chroma = (chromaWidth - (unpack_offset + unpack_complOffset)) / unpack_chunk_size;
+        EB_U32 in_luma = lumaHeight * (unpack_offset + numChunks_luma * unpack_chunk_size + unpack_complOffset);
+        EB_U32 out_luma = lumaHeight * (unpack_offset + numChunks_luma * unpack_chunk_size + inputPicturePtr->strideY - lumaWidth + unpack_complOffset);
+        EB_U32 in_chroma = chromaHeight * (unpack_offset + numChunks_chroma * unpack_chunk_size + unpack_complOffset);
+        EB_U32 out_chroma = chromaHeight * (unpack_offset + numChunks_chroma * unpack_chunk_size + inputPicturePtr->strideCb - chromaWidth + unpack_complOffset);
+        int nb_luma = context_unpack->nbLumaThreads;
+        int nb_chroma = context_unpack->nbChromaThreads;
+        int nb = context_unpack->nbLumaThreads + context_unpack->nbChromaThreads*2;
+        EbObjectWrapper_t *copyFrameBufferWrapperPtr;
+        EB_ENC_UnPack2D_TYPE_t *unpackDataPtr;
+ 
+         for (int i = 0; i< nb_luma; i++){
+            EbGetEmptyObject(context_unpack->copyFrameInputFifoPtr,&copyFrameBufferWrapperPtr);
+            unpackDataPtr                  = (EB_ENC_UnPack2D_TYPE_t*)copyFrameBufferWrapperPtr->objectPtr;
+            unpackDataPtr->in16BitBuffer   = (EB_U16*)(inputPtr->luma) + (EB_U32)(in_luma/nb_luma)*i; 
+            unpackDataPtr->inStride        = (EB_U16)(inputPtr->yStride);
+            unpackDataPtr->out8BitBuffer   = inputPicturePtr->bufferY + lumaBufferOffset + (EB_U32)(out_luma/nb_luma)*i;
+            unpackDataPtr->out8Stride      = inputPicturePtr->strideY;
+            unpackDataPtr->outnBitBuffer   = inputPicturePtr->bufferBitIncY + lumaBufferOffset + (EB_U32)(out_luma/nb_luma)*i;
+            unpackDataPtr->outnStride      = inputPicturePtr->strideBitIncY;
+            unpackDataPtr->width           = lumaWidth;
+            unpackDataPtr->height          = lumaHeight/nb_luma;
+            EbPostFullObject(copyFrameBufferWrapperPtr);
+        }
 
-        UnPack2D(
-            (EB_U16*)(inputPtr->cb + chromaOffset),
-            sourceCbStride,
-            inputPicturePtr->bufferCb + chromaBufferOffset,
-            inputPicturePtr->strideCb,
-            inputPicturePtr->bufferBitIncCb + chromaBufferOffset,
-            inputPicturePtr->strideBitIncCb,
-            chromaWidth,
-            chromaHeight);
+        for(int i = 0;i< nb_chroma; i++){
+            EbGetEmptyObject(context_unpack->copyFrameInputFifoPtr,&copyFrameBufferWrapperPtr);
+            unpackDataPtr                      = (EB_ENC_UnPack2D_TYPE_t*)copyFrameBufferWrapperPtr->objectPtr;
+            unpackDataPtr->in16BitBuffer       = (EB_U16*)(inputPtr->cb) + (EB_U32)(in_chroma/nb_chroma)*i;
+            unpackDataPtr->inStride            = (EB_U16)(inputPtr->cbStride);
+            unpackDataPtr->out8BitBuffer       = inputPicturePtr->bufferCb + chromaBufferOffset + (EB_U32)(out_chroma/nb_chroma)*i;
+            unpackDataPtr->out8Stride          = inputPicturePtr->strideCb;
+            unpackDataPtr->outnBitBuffer       = inputPicturePtr->bufferBitIncCb + chromaBufferOffset + (EB_U32)(out_chroma/nb_chroma)*i;
+            unpackDataPtr->outnStride          = inputPicturePtr->strideBitIncCb;
+            unpackDataPtr->width               = chromaWidth;
+            unpackDataPtr->height              = chromaHeight/nb_chroma;
+            EbPostFullObject(copyFrameBufferWrapperPtr);
+        }
 
-        UnPack2D(
-            (EB_U16*)(inputPtr->cr + chromaOffset),
-            sourceCrStride,
-            inputPicturePtr->bufferCr + chromaBufferOffset,
-            inputPicturePtr->strideCr,
-            inputPicturePtr->bufferBitIncCr + chromaBufferOffset,
-            inputPicturePtr->strideBitIncCr,
-            chromaWidth,
-            chromaHeight);
+        for(int i = 0;i< nb_chroma;i++){
+            EbGetEmptyObject(context_unpack->copyFrameInputFifoPtr,&copyFrameBufferWrapperPtr);
+            unpackDataPtr                      = (EB_ENC_UnPack2D_TYPE_t*)copyFrameBufferWrapperPtr->objectPtr;
+            unpackDataPtr->in16BitBuffer       = (EB_U16*)(inputPtr->cr) + (EB_U32)(in_chroma/nb_chroma)*i;
+            unpackDataPtr->inStride            = (EB_U16)(inputPtr->crStride);
+            unpackDataPtr->out8BitBuffer       = inputPicturePtr->bufferCr + chromaBufferOffset  + (EB_U32)(out_chroma/nb_chroma)*i;
+            unpackDataPtr->out8Stride          = inputPicturePtr->strideCr;
+            unpackDataPtr->outnBitBuffer       = inputPicturePtr->bufferBitIncCr + chromaBufferOffset  + (EB_U32)(out_chroma/nb_chroma)*i;
+            unpackDataPtr->outnStride          = inputPicturePtr->strideBitIncCr;
+            unpackDataPtr->width               = chromaWidth;
+            unpackDataPtr->height              = chromaHeight/nb_chroma;
+            EbPostFullObject(copyFrameBufferWrapperPtr);
+        }
+        
+        EbObjectWrapper_t   *unpackEndSyncWrapperPtr;
+        for(int i = 0 ; i < nb; i++){
+            EbGetFullObject(context_unpack->unPackOutPutFifoPtr,&unpackEndSyncWrapperPtr);
+            EbReleaseObject(unpackEndSyncWrapperPtr);
+        }
     }
 
     // Copy Dolby Vision RPU metadata from input
@@ -3676,7 +3795,8 @@ static EB_ERRORTYPE CopyFrameBuffer(
 static EB_ERRORTYPE  CopyInputBuffer(
     SequenceControlSet_t*    sequenceControlSet,
     EB_BUFFERHEADERTYPE*     dst,
-    EB_BUFFERHEADERTYPE*     src
+    EB_BUFFERHEADERTYPE*     src,
+    UnPackContext_t*         context_unpack
 )
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
@@ -3694,7 +3814,7 @@ static EB_ERRORTYPE  CopyInputBuffer(
 
     // Copy the picture buffer
     if(src->pBuffer != NULL)
-        return_error = CopyFrameBuffer(sequenceControlSet, dst->pBuffer, src->pBuffer);
+        return_error = CopyFrameBuffer(sequenceControlSet, dst->pBuffer, src->pBuffer, context_unpack);
 
     if (return_error != EB_ErrorNone)
         return return_error;
@@ -3737,7 +3857,8 @@ EB_API EB_ERRORTYPE EbH265EncSendPicture(
         return_error = CopyInputBuffer(
             encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr,
             (EB_BUFFERHEADERTYPE*)ebWrapperPtr->objectPtr,
-            pBuffer);
+            pBuffer,
+            (UnPackContext_t*)encHandlePtr->unpackContextPtr);
 
         if (return_error != EB_ErrorNone)
         {
