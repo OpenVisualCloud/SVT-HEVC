@@ -75,6 +75,7 @@ typedef struct EbEncHandle_s
     EB_HANDLE                              *encDecThreadHandleArray;
     EB_HANDLE                              *entropyCodingThreadHandleArray;
     EB_HANDLE                               packetizationThreadHandle;
+    EB_HANDLE                              *unpackThreadHandleArray;
         
     // Contexts
     EB_PTR                                  resourceCoordinationContextPtr;
@@ -90,6 +91,7 @@ typedef struct EbEncHandle_s
     EB_PTR                                 *encDecContextPtrArray;
     EB_PTR                                 *entropyCodingContextPtrArray;
     EB_PTR                                  packetizationContextPtr;
+    EB_PTR                                 *unpackContextPtr;
     
     // System Resource Managers
     EbSystemResource_t                     *inputBufferResourcePtr;
@@ -106,6 +108,8 @@ typedef struct EbEncHandle_s
     EbSystemResource_t                     *encDecTasksResourcePtr;
     EbSystemResource_t                     *encDecResultsResourcePtr;
     EbSystemResource_t                     *entropyCodingResultsResourcePtr;
+    EbSystemResource_t                     *unpackTasksResourcePtr;
+    EbSystemResource_t                     *unpackSyncResourcePtr;
     
     // Inter-Process Producer Fifos
     EbFifo_t                              **inputBufferProducerFifoPtrArray;
@@ -123,6 +127,8 @@ typedef struct EbEncHandle_s
     EbFifo_t                              **encDecTasksProducerFifoPtrArray;
     EbFifo_t                              **encDecResultsProducerFifoPtrArray;
     EbFifo_t                              **entropyCodingResultsProducerFifoPtrArray;
+    EbFifo_t                              **unpackTasksProducerFifoPtrArray;
+    EbFifo_t                              **unpackSyncProducerFifoPtrArray;
     
     // Inter-Process Consumer Fifos
     EbFifo_t                              **inputBufferConsumerFifoPtrArray;
@@ -139,7 +145,8 @@ typedef struct EbEncHandle_s
     EbFifo_t                              **encDecTasksConsumerFifoPtrArray;
     EbFifo_t                              **encDecResultsConsumerFifoPtrArray;
     EbFifo_t                              **entropyCodingResultsConsumerFifoPtrArray;
-                                                   
+    EbFifo_t                              **unpackTasksConsumerFifoPtrArray;
+    EbFifo_t                              **unpackSyncConsumerFifoPtrArray;                                                   
     // Callbacks
     EbCallback_t                          **appCallbackPtrArray;
         

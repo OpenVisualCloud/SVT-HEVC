@@ -22,7 +22,7 @@ EB_ERRORTYPE EncDecSegmentsCtor(
     *segmentsDblPtr = segmentsPtr;
 
     segmentsPtr->segmentMaxRowCount = segmentRowCount;
-    segmentsPtr->segmentMaxBandCount = segmentRowCount + segmentColCount;
+    segmentsPtr->segmentMaxBandCount = BAND_TOTAL_COUNT(segmentRowCount, segmentColCount);
     segmentsPtr->segmentMaxTotalCount = segmentsPtr->segmentMaxRowCount * segmentsPtr->segmentMaxBandCount;
 
     // Start Arrays
@@ -59,10 +59,10 @@ void EncDecSegmentsInit(
     unsigned x, y, yLast;
     unsigned rowIndex, bandIndex, segmentIndex;
     EB_U32 max_row_count = segmentsPtr->segmentMaxRowCount;
-    EB_U32 max_col_count = segmentsPtr->segmentMaxBandCount - segmentsPtr->segmentMaxRowCount;
+    EB_U32 max_col_count = segmentsPtr->segmentMaxBandCount + 1 - segmentsPtr->segmentMaxRowCount;
 
     segColCount = (segColCount <= picWidthLcu) ? segColCount : picWidthLcu;
-    segColCount = (segColCount <= max_col_count) ? segColCount : max_row_count;
+    segColCount = (segColCount <= max_col_count) ? segColCount : max_col_count;
     segRowCount = (segRowCount <= picHeightLcu) ? segRowCount : picHeightLcu;
     segRowCount = (segRowCount <= max_row_count) ? segRowCount : max_row_count;
 
@@ -108,7 +108,7 @@ void EncDecSegmentsInit(
     }
 
     // Initialize the per-segment dependency map
-    EB_MEMSET(segmentsPtr->depMap.dependencyMap, 0, sizeof(EB_U8) * segmentsPtr->segmentTotalCount);
+    EB_MEMSET(segmentsPtr->depMap.dependencyMap, 0, sizeof(EB_U8) * segmentsPtr->segmentMaxTotalCount);
     for(rowIndex=0; rowIndex < segmentsPtr->segmentRowCount; ++rowIndex) {
         for(segmentIndex=segmentsPtr->rowArray[rowIndex].startingSegIndex; segmentIndex <= segmentsPtr->rowArray[rowIndex].endingSegIndex; ++segmentIndex) {
 

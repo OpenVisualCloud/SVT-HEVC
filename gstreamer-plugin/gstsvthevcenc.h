@@ -24,6 +24,40 @@ G_BEGIN_DECLS
 #define GST_IS_SVTHEVCENC_CLASS(obj) \
   (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_SVTHEVCENC))
 
+typedef enum
+{
+  GST_SVTHEVC_ENC_B_PYRAMID_FLAT,
+  GST_SVTHEVC_ENC_B_PYRAMID_2LEVEL_HIERARCHY,
+  GST_SVTHEVC_ENC_B_PYRAMID_3LEVEL_HIERARCHY,
+  GST_SVTHEVC_ENC_B_PYRAMID_4LEVEL_HIERARCHY,
+} GstSvtHevcEncBPyramid;
+
+typedef enum
+{
+  GST_SVTHEVC_ENC_BASE_LAYER_MODE_BFRAME,
+  GST_SVTHEVC_ENC_BASE_LAYER_MODE_PFRAME,
+} GstSvtHevcEncBaseLayerMode;
+
+typedef enum
+{
+  GST_SVTHEVC_ENC_RC_CQP,
+  GST_SVTHEVC_ENC_RC_VBR,
+} GstSvtHevcEncRC;
+
+typedef enum
+{
+  GST_SVTHEVC_ENC_TUNE_SQ,
+  GST_SVTHEVC_ENC_TUNE_OQ,
+  GST_SVTHEVC_ENC_TUNE_VMAF,
+} GstSvtHevcEncTune;
+
+typedef enum
+{
+  GST_SVTHEVC_ENC_PRED_STRUCT_LOW_DELAY_P,
+  GST_SVTHEVC_ENC_PRED_STRUCT_LOW_DELAY_B,
+  GST_SVTHEVC_ENC_PRED_STRUCT_RANDOM_ACCESS,
+} GstSvtHevcEncPredStruct;
+
 typedef struct _GstSvtHevcEnc
 {
   GstVideoEncoder video_encoder;
@@ -33,6 +67,10 @@ typedef struct _GstSvtHevcEnc
 
   /* GStreamer Codec state */
   GstVideoCodecState *state;
+
+  /* GStreamer properties */
+  gboolean enable_open_gop;
+  guint config_interval;
 
   /* SVT-HEVC configuration */
   EB_H265_ENC_CONFIGURATION *svt_config;

@@ -92,6 +92,7 @@ set(Codec_Source
     EbTransforms.c
     EbTransQuantBuffers.c
     EbString.c
+    EbUnPackProcess.c
     EbUtility.c)
 
 if(COMPILE_AS_CPP)
@@ -189,6 +190,7 @@ add_library(SvtHevcEnc
     EbTransformUnit.h
     EbTransQuantBuffers.h
     EbString.h
+    EbUnPackProcess.h
     EbUtility.h)
 
 if(UNIX)
