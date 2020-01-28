@@ -1,4 +1,4 @@
-From 7ddcc6c50b9b70535a7109e2f67cb18b54849621 Mon Sep 17 00:00:00 2001
+From ab388b38758fcdd402bb772114a9420a8b8862ea Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -7,16 +7,17 @@ Signed-off-by: Zhengxu Huang <zhengxu.huang@intel.com>
 Signed-off-by: Hassene Tmar <hassene.tmar@intel.com>
 Signed-off-by: Jun Zhao <jun.zhao@intel.com>
 Signed-off-by: Jing Sun <jing.a.sun@intel.com>
+Signed-off-by: Austin Hu <austin.hu@intel.com>
 ---
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 518 +++++++++++++++++++++++++++++++++++++++
- 4 files changed, 524 insertions(+)
+ libavcodec/libsvt_hevc.c | 522 +++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 528 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index 34c2adb..dc5f74f 100755
+index 34c2adb4a4..dc5f74f4a9 100755
 --- a/configure
 +++ b/configure
 @@ -264,6 +264,7 @@ External library support:
@@ -52,7 +53,7 @@ index 34c2adb..dc5f74f 100755
  enabled libtesseract      && require_pkg_config libtesseract tesseract tesseract/capi.h TessBaseAPICreate
  enabled libtheora         && require libtheora theora/theoraenc.h th_info_init -ltheoraenc -ltheoradec -logg
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index 3cd73fb..d39f568 100644
+index 3cd73fbcc6..d39f568585 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
 @@ -991,6 +991,7 @@ OBJS-$(CONFIG_LIBOPUS_ENCODER)            += libopusenc.o libopus.o     \
@@ -64,7 +65,7 @@ index 3cd73fb..d39f568 100644
  OBJS-$(CONFIG_LIBTWOLAME_ENCODER)         += libtwolame.o
  OBJS-$(CONFIG_LIBVO_AMRWBENC_ENCODER)     += libvo-amrwbenc.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
-index d2f9a39..d8788a7 100644
+index d2f9a39ce5..d8788a7954 100644
 --- a/libavcodec/allcodecs.c
 +++ b/libavcodec/allcodecs.c
 @@ -707,6 +707,7 @@ extern AVCodec ff_librsvg_decoder;
@@ -77,10 +78,10 @@ index d2f9a39..d8788a7 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000..9a28836
+index 0000000000..964360b7e3
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,518 @@
+@@ -0,0 +1,522 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -449,6 +450,10 @@ index 0000000..9a28836
 +        *got_packet = 0;
 +        av_log(avctx, AV_LOG_DEBUG, "Received none\n");
 +        return 0;
++    } else if (svt_ret == EB_ErrorMax) {
++        *got_packet = 0;
++        av_log(avctx, AV_LOG_ERROR, "Received NULL packet with error code 0x%X\n", header_ptr->nFlags);
++        return AVERROR_INVALIDDATA;
 +    }
 +
 +    av_log(avctx, AV_LOG_DEBUG, "Received PTS %"PRId64" packet\n", header_ptr->pts);
