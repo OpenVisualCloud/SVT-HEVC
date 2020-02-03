@@ -19,9 +19,9 @@ extern "C" {
 
 #define NUMBER_OF_SKIP_FLAG_CONTEXT_MODELS                             3       // number of context models for skip flag
 
-#define NUMBER_OF_MERGE_FLAG_CONTEXT_MODELS                            1       // number of context models for merge flag 
+#define NUMBER_OF_MERGE_FLAG_CONTEXT_MODELS                            1       // number of context models for merge flag
 
-#define NUMBER_OF_MERGE_INDEX_CONTEXT_MODELS                           1       // number of context models for merge index 
+#define NUMBER_OF_MERGE_INDEX_CONTEXT_MODELS                           1       // number of context models for merge index
 
 #define NUMBER_OF_ALF_CTRL_FLAG_CONTEXT_MODELS                         1       // number of context models for ALF control flag
 
@@ -63,7 +63,7 @@ extern "C" {
 
 #define NUMBER_OF_LAST_SIG_XY_CONTEXT_MODELS                          15       // number of context models for last significant XY flag
 
-#define TOTAL_NUMBER_OF_LAST_SIG_XY_CONTEXT_MODELS                    30       // total number of context models for luma and chroma 
+#define TOTAL_NUMBER_OF_LAST_SIG_XY_CONTEXT_MODELS                    30       // total number of context models for luma and chroma
 
 #define NUMBER_OF_GREATER_ONE_COEFF_LUMA_CONTEXT_MODELS               16       // number of context models for coefficients greater than one for Luma
 
@@ -85,7 +85,7 @@ extern "C" {
 
 #define NUMBER_OF_ALF_SVLC_CONTEXT_MODELS                              3       // number of context models for ALF SVLC (filter coefficients)
 
-#define NUMBER_OF_SAO_MERGE_FLAG_CONTEXT_MODELS                        1       // number of context models for SAO merge flags  
+#define NUMBER_OF_SAO_MERGE_FLAG_CONTEXT_MODELS                        1       // number of context models for SAO merge flags
 
 #define NUMBER_OF_SAO_TYPE_INDEX_CONTEXT_MODELS                        1       // number of context models for AO SVLC (filter coefficients)
 
@@ -176,7 +176,7 @@ typedef struct  EpContext_s {
     EB_ContextModel  skipFlagContextModel           [NUMBER_OF_SKIP_FLAG_CONTEXT_MODELS];      //Updated in both EncPass + MD
     EB_ContextModel  mergeFlagContextModel          [NUMBER_OF_MERGE_FLAG_CONTEXT_MODELS];     //Updated in both EncPass + MD
     EB_ContextModel  mergeIndexContextModel         [NUMBER_OF_MERGE_INDEX_CONTEXT_MODELS];    //Updated in both EncPass + MD
-   
+
 } EpContextModel_t;
 
 typedef struct  SyntaxContextModelEncContext_s {

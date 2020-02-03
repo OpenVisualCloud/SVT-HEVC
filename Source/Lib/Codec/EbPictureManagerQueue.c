@@ -25,7 +25,7 @@ EB_ERRORTYPE InputQueueEntryCtor(
 
 
 
-EB_ERRORTYPE ReferenceQueueEntryCtor(   
+EB_ERRORTYPE ReferenceQueueEntryCtor(
     ReferenceQueueEntry_t  **entryDblPtr)
 {
     ReferenceQueueEntry_t *entryPtr;

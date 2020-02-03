@@ -383,7 +383,7 @@ EB_ERRORTYPE GenerateIntraReferenceSamplesEncodePass(
     }
 
     // Top Block Loop
-	reconArrayIndex = originX;
+    reconArrayIndex = originX;
     while(blockIndex < topBlockEnd && neighborAvailable == EB_FALSE) {
 
         modeArrayIndex = GetNeighborArrayUnitTopIndex(
@@ -543,7 +543,7 @@ EB_ERRORTYPE GenerateIntraReferenceSamplesEncodePass(
     }
 
     // Top Block Loop
-	reconArrayIndex = originX + (blockIndex - topLeftBlockEnd) * MIN_PU_SIZE;
+    reconArrayIndex = originX + (blockIndex - topLeftBlockEnd) * MIN_PU_SIZE;
     while(blockIndex < topBlockEnd) {
 
         modeArrayIndex = GetNeighborArrayUnitTopIndex(
@@ -562,9 +562,9 @@ EB_ERRORTYPE GenerateIntraReferenceSamplesEncodePass(
 
         if(neighborAvailable == EB_TRUE) {
 
-			EB_MEMCPY(lumaWritePtr, &topLumaReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
-			EB_MEMCPY(cbWritePtr, &topCbReconNeighborArray[reconArrayIndex >> subWidthCMinus1], MIN_PU_SIZE >> subWidthCMinus1);
-			EB_MEMCPY(crWritePtr, &topCrReconNeighborArray[reconArrayIndex >> subWidthCMinus1], MIN_PU_SIZE >> subWidthCMinus1);
+            EB_MEMCPY(lumaWritePtr, &topLumaReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
+            EB_MEMCPY(cbWritePtr, &topCbReconNeighborArray[reconArrayIndex >> subWidthCMinus1], MIN_PU_SIZE >> subWidthCMinus1);
+            EB_MEMCPY(crWritePtr, &topCrReconNeighborArray[reconArrayIndex >> subWidthCMinus1], MIN_PU_SIZE >> subWidthCMinus1);
 
             // Set pad value (end of block)
             lumaPadValue    = topLumaReconNeighborArray[reconArrayIndex + MIN_PU_SIZE - 1];
@@ -675,8 +675,8 @@ EB_ERRORTYPE GenerateIntraReferenceSamplesEncodePass(
     */
 
     //Luma
-	EB_MEMCPY(yBorderReverse     + (size<<1),  yBorder     + (size<<1),  (size<<1)+1);
-	EB_MEMCPY(yBorderFiltReverse + (size<<1),  yBorderFilt + (size<<1),  (size<<1)+1);
+    EB_MEMCPY(yBorderReverse     + (size<<1),  yBorder     + (size<<1),  (size<<1)+1);
+    EB_MEMCPY(yBorderFiltReverse + (size<<1),  yBorderFilt + (size<<1),  (size<<1)+1);
 
     sampleWriteLoc     = yBorderReverse      + (size<<1) - 1 ;
     sampleWriteLocFilt = yBorderFiltReverse  + (size<<1) - 1 ;
@@ -689,8 +689,8 @@ EB_ERRORTYPE GenerateIntraReferenceSamplesEncodePass(
     }
 
     //Chroma
-	EB_MEMCPY(cbBorderReverse + (puChromaSize<<1),  cbBorder + (puChromaSize<<1),  (puChromaSize<<1)+1);
-	EB_MEMCPY(crBorderReverse + (puChromaSize<<1),  crBorder + (puChromaSize<<1),  (puChromaSize<<1)+1);
+    EB_MEMCPY(cbBorderReverse + (puChromaSize<<1),  cbBorder + (puChromaSize<<1),  (puChromaSize<<1)+1);
+    EB_MEMCPY(crBorderReverse + (puChromaSize<<1),  crBorder + (puChromaSize<<1),  (puChromaSize<<1)+1);
 
     sampleWriteLocCb     = cbBorderReverse      + (puChromaSize<<1) - 1 ;
     sampleWriteLocCr     = crBorderReverse      + (puChromaSize<<1) - 1 ;
@@ -1051,7 +1051,7 @@ EB_ERRORTYPE GenerateLumaIntraReferenceSamplesEncodePass(
         if(neighborAvailable == EB_TRUE) {
 
             // Copy samples in reverse order
-			EB_MEMCPY(lumaWritePtr, &topLumaReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
+            EB_MEMCPY(lumaWritePtr, &topLumaReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
 
             // Set pad value (end of block)
             lumaPadValue    = topLumaReconNeighborArray[reconArrayIndex + MIN_PU_SIZE - 1];
@@ -1150,8 +1150,8 @@ EB_ERRORTYPE GenerateLumaIntraReferenceSamplesEncodePass(
                                                                junk
     */
 
-	EB_MEMCPY(yBorderReverse     + (size<<1),  yBorder     + (size<<1),  (size<<1)+1);
-	EB_MEMCPY(yBorderFiltReverse + (size<<1),  yBorderFilt + (size<<1),  (size<<1)+1);
+    EB_MEMCPY(yBorderReverse     + (size<<1),  yBorder     + (size<<1),  (size<<1)+1);
+    EB_MEMCPY(yBorderFiltReverse + (size<<1),  yBorderFilt + (size<<1),  (size<<1)+1);
 
     sampleWriteLoc     = yBorderReverse      + (size<<1) - 1 ;
     sampleWriteLocFilt = yBorderFiltReverse  + (size<<1) - 1 ;
@@ -1546,8 +1546,8 @@ EB_ERRORTYPE GenerateChromaIntraReferenceSamplesEncodePass(
 
         if(neighborAvailable == EB_TRUE) {
 
-			EB_MEMCPY(cbWritePtr, &topCbReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
-			EB_MEMCPY(crWritePtr, &topCrReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
+            EB_MEMCPY(cbWritePtr, &topCbReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
+            EB_MEMCPY(crWritePtr, &topCrReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
 
             // Set pad value (end of block)
             cbPadValue = topCbReconNeighborArray[reconArrayIndex + MIN_PU_SIZE - 1];
@@ -1615,8 +1615,8 @@ EB_ERRORTYPE GenerateChromaIntraReferenceSamplesEncodePass(
                                                                junk
     */
 
-	EB_MEMCPY(cbBorderReverse + (puChromaSize<<1),  cbBorder + (puChromaSize<<1),  (puChromaSize<<1)+1);
-	EB_MEMCPY(crBorderReverse + (puChromaSize<<1),  crBorder + (puChromaSize<<1),  (puChromaSize<<1)+1);
+    EB_MEMCPY(cbBorderReverse + (puChromaSize<<1),  cbBorder + (puChromaSize<<1),  (puChromaSize<<1)+1);
+    EB_MEMCPY(crBorderReverse + (puChromaSize<<1),  crBorder + (puChromaSize<<1),  (puChromaSize<<1)+1);
 
     sampleWriteLocCb = cbBorderReverse + (puChromaSize << 1) - 1 ;
     sampleWriteLocCr = crBorderReverse + (puChromaSize << 1) - 1 ;
@@ -2021,7 +2021,7 @@ EB_ERRORTYPE GenerateIntraReference16bitSamplesEncodePass(
     }
 
     // Top Block Loop
-	reconArrayIndex = originX + (blockIndex - topLeftBlockEnd) * MIN_PU_SIZE;
+    reconArrayIndex = originX + (blockIndex - topLeftBlockEnd) * MIN_PU_SIZE;
     while(blockIndex < topBlockEnd) {
 
         modeArrayIndex = GetNeighborArrayUnitTopIndex(
@@ -2628,8 +2628,8 @@ EB_ERRORTYPE GenerateLumaIntraReference16bitSamplesEncodePass(
                                                                junk
     */
 
-	EbHevcMemcpy16bit(yBorderReverse + (size<<1), yBorder + (size<<1), (size<<1)+1);
-	EbHevcMemcpy16bit(yBorderFiltReverse + (size<<1), yBorderFilt + (size<<1), (size<<1)+1);
+    EbHevcMemcpy16bit(yBorderReverse + (size<<1), yBorder + (size<<1), (size<<1)+1);
+    EbHevcMemcpy16bit(yBorderFiltReverse + (size<<1), yBorderFilt + (size<<1), (size<<1)+1);
 
     sampleWriteLoc = yBorderReverse + (size<<1) - 1 ;
     sampleWriteLocFilt = yBorderFiltReverse + (size<<1) - 1 ;
@@ -3030,8 +3030,8 @@ EB_ERRORTYPE GenerateChromaIntraReference16bitSamplesEncodePass(
 
         if(neighborAvailable == EB_TRUE) {
 
-			EbHevcMemcpy16bit(cbWritePtr, &topCbReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
-			EbHevcMemcpy16bit(crWritePtr, &topCrReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
+            EbHevcMemcpy16bit(cbWritePtr, &topCbReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
+            EbHevcMemcpy16bit(crWritePtr, &topCrReconNeighborArray[reconArrayIndex], MIN_PU_SIZE);
 
             // Set pad value (end of block)
             cbPadValue      = topCbReconNeighborArray[reconArrayIndex + MIN_PU_SIZE - 1];
@@ -3104,8 +3104,8 @@ EB_ERRORTYPE GenerateChromaIntraReference16bitSamplesEncodePass(
                                                                junk
     */
 
-	EbHevcMemcpy16bit(cbBorderReverse + (puChromaSize << 1), cbBorder + (puChromaSize << 1), (puChromaSize << 1) + 1);
-	EbHevcMemcpy16bit(crBorderReverse + (puChromaSize << 1), crBorder + (puChromaSize << 1), (puChromaSize << 1) + 1);
+    EbHevcMemcpy16bit(cbBorderReverse + (puChromaSize << 1), cbBorder + (puChromaSize << 1), (puChromaSize << 1) + 1);
+    EbHevcMemcpy16bit(crBorderReverse + (puChromaSize << 1), crBorder + (puChromaSize << 1), (puChromaSize << 1) + 1);
 
     sampleWriteLocCb = cbBorderReverse + (puChromaSize<<1) - 1 ;
     sampleWriteLocCr = crBorderReverse + (puChromaSize<<1) - 1 ;
@@ -3150,7 +3150,7 @@ static void IntraModeAngular_27To33(
     EB_S32           intraPredAngle = intraModeAngularTable[mode - INTRA_VERTICAL_MODE];
     refSampMain    = refSamples + (size << 1);
 
-	IntraAngVertical_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+    IntraAngVertical_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
         size,
         refSampMain,
         predictionPtr,
@@ -3206,10 +3206,10 @@ static void IntraModeAngular_19To25(
     EB_S32        idx;
     EB_U32        index;
 
-	if (INTRA_VERTICAL_MODE - mode < 9 ) { // check for index range, has to be less than size of array
-		intraPredAngle	= intraModeAngularTableNegative[INTRA_VERTICAL_MODE - mode];
-		invAngle		= invIntraModeAngularTable[INTRA_VERTICAL_MODE - mode];
-	}
+    if (INTRA_VERTICAL_MODE - mode < 9 ) { // check for index range, has to be less than size of array
+        intraPredAngle    = intraModeAngularTableNegative[INTRA_VERTICAL_MODE - mode];
+        invAngle        = invIntraModeAngularTable[INTRA_VERTICAL_MODE - mode];
+    }
 
     //We just need to copy above Reference pixels only for ONE TIME for all modes of this group
     //where Filtered or non-Filtered are always used (8x8,32x32)
@@ -3233,7 +3233,7 @@ static void IntraModeAngular_19To25(
     }
 
 
-	IntraAngVertical_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+    IntraAngVertical_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
         size,
         refSampMain,
         predictionPtr,
@@ -3268,9 +3268,9 @@ static void IntraModeAngular16bit_19To25(
     EB_U32        index;
 
     if (INTRA_VERTICAL_MODE - mode < 9) { // check for index range, has to be less than size of array
-		intraPredAngle = intraModeAngularTableNegative[INTRA_VERTICAL_MODE - mode];
-		invAngle = invIntraModeAngularTable[INTRA_VERTICAL_MODE - mode];
-	}
+        intraPredAngle = intraModeAngularTableNegative[INTRA_VERTICAL_MODE - mode];
+        invAngle = invIntraModeAngularTable[INTRA_VERTICAL_MODE - mode];
+    }
 
     //We just need to copy above Reference pixels only for ONE TIME for all modes of this group
     //where Filtered or non-Filtered are always used (8x8,32x32)
@@ -3294,7 +3294,7 @@ static void IntraModeAngular16bit_19To25(
     }
 
 
-	IntraAngVertical_16bit_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+    IntraAngVertical_16bit_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
         size,
         refSampMain,
         predictionPtr,
@@ -3351,7 +3351,7 @@ static void IntraModeAngular_11To17(
     }
 
 
-	IntraAngHorizontal_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+    IntraAngHorizontal_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
         size,
         refSampMain,
         predictionPtr,
@@ -3433,7 +3433,7 @@ static void IntraModeAngular_3To9(
 
     refSampMain = refSamples-1;
 
-	IntraAngHorizontal_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+    IntraAngHorizontal_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
         size,
         refSampMain,
         predictionPtr,
@@ -3460,7 +3460,7 @@ static void IntraModeAngular16bit_3To9(
     refSampMain = refSamples-1;
 
 
-	IntraAngHorizontal_16bit_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+    IntraAngHorizontal_16bit_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
         size,
         refSampMain,
         predictionPtr,
@@ -3642,22 +3642,22 @@ static inline void IntraModeAngular16bit_all(
         is the main function to compute intra prediction for a PU
  */
 EB_ERRORTYPE IntraPredictionCl(
-	ModeDecisionContext_t                  *mdContextPtr,
-	EB_U32                                  componentMask,
-	PictureControlSet_t                    *pictureControlSetPtr,
-    ModeDecisionCandidateBuffer_t		   *candidateBufferPtr)
+    ModeDecisionContext_t                  *mdContextPtr,
+    EB_U32                                  componentMask,
+    PictureControlSet_t                    *pictureControlSetPtr,
+    ModeDecisionCandidateBuffer_t           *candidateBufferPtr)
 {
     EB_ERRORTYPE return_error    = EB_ErrorNone;
     const EB_U32 lumaMode        = candidateBufferPtr->candidatePtr->intraLumaMode;
     EB_U32                      chromaMode;
-	const EB_U32 puOriginX = mdContextPtr->cuOriginX;
-	const EB_U32 puOriginY = mdContextPtr->cuOriginY;
-	const EB_U32 puWidth = mdContextPtr->cuStats->size;
-	const EB_U32 puHeight = mdContextPtr->cuStats->size;
+    const EB_U32 puOriginX = mdContextPtr->cuOriginX;
+    const EB_U32 puOriginY = mdContextPtr->cuOriginY;
+    const EB_U32 puWidth = mdContextPtr->cuStats->size;
+    const EB_U32 puHeight = mdContextPtr->cuStats->size;
 
 
-	IntraReferenceSamples_t * const contextPtr = (IntraReferenceSamples_t*)(mdContextPtr->intraRefPtr);
-	const EncodeContext_t * const encodeContextPtr   =   ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
+    IntraReferenceSamples_t * const contextPtr = (IntraReferenceSamples_t*)(mdContextPtr->intraRefPtr);
+    const EncodeContext_t * const encodeContextPtr   =   ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
 
     // Map the mode to the function table index
     EB_U32 funcIndex =
@@ -3682,21 +3682,21 @@ EB_ERRORTYPE IntraPredictionCl(
 
 
     CHECK_REPORT_ERROR(
-		(puWidth == puHeight),
-		encodeContextPtr->appCallbackPtr,
-		EB_ENC_INTRA_PRED_ERROR2);
+        (puWidth == puHeight),
+        encodeContextPtr->appCallbackPtr,
+        EB_ENC_INTRA_PRED_ERROR2);
 
 
-	if (componentMask & PICTURE_BUFFER_DESC_LUMA_MASK) {
+    if (componentMask & PICTURE_BUFFER_DESC_LUMA_MASK) {
 
-		if (mdContextPtr->lumaIntraRefSamplesGenDone == EB_FALSE)
-		{
-			EbPictureBufferDesc_t     *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
+        if (mdContextPtr->lumaIntraRefSamplesGenDone == EB_FALSE)
+        {
+            EbPictureBufferDesc_t     *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
 
-			GenerateIntraLumaReferenceSamplesMd(
-				mdContextPtr,
-				inputPicturePtr);
-		}
+            GenerateIntraLumaReferenceSamplesMd(
+                mdContextPtr,
+                inputPicturePtr);
+        }
         puOriginIndex = ((puOriginY & (63)) * 64) + (puOriginX & (63));
         puSize        = puWidth;
 
@@ -3714,7 +3714,7 @@ EB_ERRORTYPE IntraPredictionCl(
            yIntraReferenceArray =  (diffMode > intraLumaFilterTable[Log2f(puWidth)-2])? contextPtr->yIntraFilteredReferenceArrayReverse :
                                     contextPtr->yIntraReferenceArrayReverse;
 
-		   IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+           IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
                 puSize,
                 yIntraReferenceArray,
                 &(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
@@ -3792,15 +3792,15 @@ EB_ERRORTYPE IntraPredictionCl(
 
     if (componentMask & PICTURE_BUFFER_DESC_CHROMA_MASK) {
 
-		if (mdContextPtr->chromaIntraRefSamplesGenDone == EB_FALSE)
-		{
+        if (mdContextPtr->chromaIntraRefSamplesGenDone == EB_FALSE)
+        {
 
-			EbPictureBufferDesc_t *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
-			GenerateIntraChromaReferenceSamplesMd(
-				mdContextPtr,
-				inputPicturePtr);
+            EbPictureBufferDesc_t *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
+            GenerateIntraChromaReferenceSamplesMd(
+                mdContextPtr,
+                inputPicturePtr);
 
-		}
+        }
 
         // The chromaMode is always DM
         chromaMode = (EB_U32) lumaMode;
@@ -3818,7 +3818,7 @@ EB_ERRORTYPE IntraPredictionCl(
 
              // Cb Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-				IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+                IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
                     chromaPuSize,
                     contextPtr->cbIntraReferenceArrayReverse,
                     &(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
@@ -3828,7 +3828,7 @@ EB_ERRORTYPE IntraPredictionCl(
 
             // Cr Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-				IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+                IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
                     chromaPuSize,
                     contextPtr->crIntraReferenceArrayReverse,
                     &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
@@ -3852,7 +3852,7 @@ EB_ERRORTYPE IntraPredictionCl(
 
             // Cr Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-				IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                     chromaPuSize,
                     contextPtr->crIntraReferenceArray,
                     &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
@@ -3866,7 +3866,7 @@ EB_ERRORTYPE IntraPredictionCl(
 
             // Cb Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-				IntraHorzChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                IntraHorzChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                     chromaPuSize,
                     contextPtr->cbIntraReferenceArrayReverse,
                     &(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
@@ -3876,7 +3876,7 @@ EB_ERRORTYPE IntraPredictionCl(
 
             // Cr Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-				IntraHorzChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                IntraHorzChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                     chromaPuSize,
                     contextPtr->crIntraReferenceArrayReverse,
                     &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
@@ -3890,7 +3890,7 @@ EB_ERRORTYPE IntraPredictionCl(
 
             // Cb Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-				IntraDCChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                IntraDCChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                     chromaPuSize,
                     contextPtr->cbIntraReferenceArrayReverse,
                     &(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
@@ -3900,7 +3900,7 @@ EB_ERRORTYPE IntraPredictionCl(
 
             // Cr Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-				IntraDCChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                IntraDCChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                     chromaPuSize,
                     contextPtr->crIntraReferenceArrayReverse,
                     &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
@@ -3969,7 +3969,7 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
     EB_U32        chromaMode;
 
     IntraReferenceSamples_t *contextPtr         =   (IntraReferenceSamples_t*)(((ModeDecisionContext_t*)predictionContextPtr)->intraRefPtr);
-	EncodeContext_t         *encodeContextPtr   =   ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
+    EncodeContext_t         *encodeContextPtr   =   ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
 
     // Map the mode to the function table index
     EB_U32 funcIndex =
@@ -3994,9 +3994,9 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
     (void)pictureControlSetPtr;
 
     CHECK_REPORT_ERROR(
-		(puWidth == puHeight),
-		encodeContextPtr->appCallbackPtr,
-		EB_ENC_INTRA_PRED_ERROR2);
+        (puWidth == puHeight),
+        encodeContextPtr->appCallbackPtr,
+        EB_ENC_INTRA_PRED_ERROR2);
 
     if (componentMask & PICTURE_BUFFER_DESC_LUMA_MASK) {
 
@@ -4019,7 +4019,7 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
            yIntraReferenceArray =  (diffMode > intraLumaFilterTable[Log2f(puWidth)-2])? contextPtr->yIntraFilteredReferenceArrayReverse :
                                     contextPtr->yIntraReferenceArrayReverse;
 
-		   IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+           IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
                 puSize,
                 yIntraReferenceArray,
                 &(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
@@ -4032,7 +4032,7 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
 
             yIntraReferenceArray = contextPtr->yIntraReferenceArrayReverse;
 
-			IntraDCLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+            IntraDCLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
                 puSize,
                 yIntraReferenceArray,
                 &(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
@@ -4047,7 +4047,7 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
                                     contextPtr->yIntraReferenceArrayReverse;
 
 
-			IntraVerticalLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+            IntraVerticalLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
                 puSize,
                 yIntraReferenceArray,
                 &(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
@@ -4060,7 +4060,7 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
             yIntraReferenceArray =  (diffMode > intraLumaFilterTable[Log2f(puWidth)-2])? contextPtr->yIntraFilteredReferenceArrayReverse :
                                      contextPtr->yIntraReferenceArrayReverse;
 
-			IntraHorzLuma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+            IntraHorzLuma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                 puSize,
                 yIntraReferenceArray,
                 &(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
@@ -4114,7 +4114,7 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
 
              // Cb Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-				IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+                IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
                     chromaPuSize,
                     contextPtr->cbIntraReferenceArrayReverse,
                     &(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
@@ -4124,7 +4124,7 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
 
             // Cr Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-				IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+                IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
                     chromaPuSize,
                     contextPtr->crIntraReferenceArrayReverse,
                     &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
@@ -4138,7 +4138,7 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
 
             // Cb Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-				IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                     chromaPuSize,
                     contextPtr->cbIntraReferenceArray,
                     &(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
@@ -4148,7 +4148,7 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
 
             // Cr Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-				IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                     chromaPuSize,
                     contextPtr->crIntraReferenceArray,
                     &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
@@ -4162,7 +4162,7 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
 
             // Cb Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-				IntraHorzChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                IntraHorzChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                     chromaPuSize,
                     contextPtr->cbIntraReferenceArrayReverse,
                     &(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
@@ -4172,7 +4172,7 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
 
             // Cr Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-				IntraHorzChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                IntraHorzChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                     chromaPuSize,
                     contextPtr->crIntraReferenceArrayReverse,
                     &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
@@ -4186,7 +4186,7 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
 
             // Cb Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-				IntraDCChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                IntraDCChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                     chromaPuSize,
                     contextPtr->cbIntraReferenceArrayReverse,
                     &(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
@@ -4196,7 +4196,7 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
 
             // Cr Intra Prediction
             if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-				IntraDCChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                IntraDCChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                     chromaPuSize,
                     contextPtr->crIntraReferenceArrayReverse,
                     &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
@@ -4249,14 +4249,14 @@ EB_ERRORTYPE Intra4x4IntraPredictionCl(
 }
 
 EB_ERRORTYPE Intra4x4IntraPredictionOl(
-	EB_U32                                  puIndex,
+    EB_U32                                  puIndex,
     EB_U32                                  puOriginX,
     EB_U32                                  puOriginY,
     EB_U32                                  puWidth,
     EB_U32                                  puHeight,
     EB_U32                                  lcuSize,
-	EB_U32                                  componentMask,
-	PictureControlSet_t                    *pictureControlSetPtr,
+    EB_U32                                  componentMask,
+    PictureControlSet_t                    *pictureControlSetPtr,
     ModeDecisionCandidateBuffer_t          *candidateBufferPtr,
     EB_PTR                                  predictionContextPtr)
 {
@@ -4272,18 +4272,18 @@ EB_ERRORTYPE Intra4x4IntraPredictionOl(
         (openLoopIntraCandidateIndex == INTRA_HORIZONTAL_MODE)   ?       3 :
         4;
 
-	IntraReferenceSamples_t    *intraRefPtr =    (IntraReferenceSamples_t*)(((ModeDecisionContext_t*)predictionContextPtr)->intraRefPtr);
+    IntraReferenceSamples_t    *intraRefPtr =    (IntraReferenceSamples_t*)(((ModeDecisionContext_t*)predictionContextPtr)->intraRefPtr);
 
     (void) puHeight;
-	(void) componentMask;
-	(void) pictureControlSetPtr;
-	(void) puIndex;
+    (void) componentMask;
+    (void) pictureControlSetPtr;
+    (void) puIndex;
 
     switch(funcIndex) {
 
     case 0:
 
-		IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+        IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
             puSize,
             intraRefPtr->yIntraReferenceArrayReverse,
             &(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
@@ -4294,7 +4294,7 @@ EB_ERRORTYPE Intra4x4IntraPredictionOl(
 
     case 1:
 
-		IntraDCLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+        IntraDCLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
             puSize,
             intraRefPtr->yIntraReferenceArrayReverse,
             &(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
@@ -4305,7 +4305,7 @@ EB_ERRORTYPE Intra4x4IntraPredictionOl(
 
     case 2:
 
-		IntraVerticalLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+        IntraVerticalLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
             puSize,
             intraRefPtr->yIntraReferenceArrayReverse,
             &(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
@@ -4316,7 +4316,7 @@ EB_ERRORTYPE Intra4x4IntraPredictionOl(
 
     case 3:
 
-		IntraHorzLuma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+        IntraHorzLuma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
             puSize,
             intraRefPtr->yIntraReferenceArrayReverse,
             &(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
@@ -4407,7 +4407,7 @@ EB_ERRORTYPE EncodePassIntraPrediction(
         switch(lumaMode) {
 
         case EB_INTRA_PLANAR:
-		IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+        IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
                 puSize,
                 yIntraReferenceArrayReverse,
                 predictionPtr->bufferY + lumaOffset,
@@ -4417,7 +4417,7 @@ EB_ERRORTYPE EncodePassIntraPrediction(
             break;
 
         case EB_INTRA_DC:
-			IntraDCLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+            IntraDCLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
                 puSize,
                 yIntraReferenceArrayReverse,
                 predictionPtr->bufferY + lumaOffset,
@@ -4427,7 +4427,7 @@ EB_ERRORTYPE EncodePassIntraPrediction(
             break;
 
         case EB_INTRA_VERTICAL:
-			IntraVerticalLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+            IntraVerticalLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
                 puSize,
                 yIntraReferenceArrayReverse,
                 predictionPtr->bufferY + lumaOffset,
@@ -4437,7 +4437,7 @@ EB_ERRORTYPE EncodePassIntraPrediction(
             break;
 
         case EB_INTRA_HORIZONTAL:
-			IntraHorzLuma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+            IntraHorzLuma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                 puSize,
                 yIntraReferenceArrayReverse,
                 predictionPtr->bufferY + lumaOffset,
@@ -4510,7 +4510,7 @@ EB_ERRORTYPE EncodePassIntraPrediction(
         switch(chromaModeAdj) {
         case EB_INTRA_PLANAR:
              // Cb Intra Prediction
-			IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+            IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
                 puChromaSize,
                 cbIntraReferenceArrayReverse,
                 predictionPtr->bufferCb + chromaOffset,
@@ -4518,7 +4518,7 @@ EB_ERRORTYPE EncodePassIntraPrediction(
                 EB_FALSE);
 
             // Cr Intra Prediction
-			IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+            IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
                 puChromaSize,
                 crIntraReferenceArrayReverse,
                 predictionPtr->bufferCr + chromaOffset,
@@ -4530,7 +4530,7 @@ EB_ERRORTYPE EncodePassIntraPrediction(
         case EB_INTRA_VERTICAL:
 
             // Cb Intra Prediction
-			IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+            IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                 puChromaSize,
                 cbIntraReferenceArrayReverse,
                 predictionPtr->bufferCb + chromaOffset,
@@ -4538,7 +4538,7 @@ EB_ERRORTYPE EncodePassIntraPrediction(
                 EB_FALSE);
 
             // Cr Intra Prediction
-			IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+            IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                 puChromaSize,
                 crIntraReferenceArrayReverse,
                 predictionPtr->bufferCr + chromaOffset,
@@ -4550,7 +4550,7 @@ EB_ERRORTYPE EncodePassIntraPrediction(
         case EB_INTRA_HORIZONTAL:
 
              // Cb Intra Prediction
-			IntraHorzChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+            IntraHorzChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                 puChromaSize,
                 cbIntraReferenceArrayReverse,
                 predictionPtr->bufferCb + chromaOffset,
@@ -4559,7 +4559,7 @@ EB_ERRORTYPE EncodePassIntraPrediction(
 
 
             // Cr Intra Prediction
-			IntraHorzChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+            IntraHorzChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                 puChromaSize,
                 crIntraReferenceArrayReverse,
                 predictionPtr->bufferCr + chromaOffset,
@@ -4571,7 +4571,7 @@ EB_ERRORTYPE EncodePassIntraPrediction(
         case EB_INTRA_DC:
 
             // Cb Intra Prediction
-			IntraDCChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+            IntraDCChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                 puChromaSize,
                 cbIntraReferenceArrayReverse,
                 predictionPtr->bufferCb + chromaOffset,
@@ -4580,7 +4580,7 @@ EB_ERRORTYPE EncodePassIntraPrediction(
 
 
             // Cr Intra Prediction
-			IntraDCChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+            IntraDCChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                 puChromaSize,
                 crIntraReferenceArrayReverse,
                 predictionPtr->bufferCr + chromaOffset,
@@ -4930,14 +4930,14 @@ EB_ERRORTYPE UpdateNeighborSamplesArrayOL(
     EB_U8 *yBorderReverse   = intraRefPtr->yIntraReferenceArrayReverse;
     EB_U8 *yBorder          = intraRefPtr->yIntraReferenceArray;
     EB_U8 *yBorderLoc;
-	EB_U32 width = inputPtr->width;
-	EB_U32 height = inputPtr->height;
-	EB_U32 blockSizeHalf = blockSize << 1;
+    EB_U32 width = inputPtr->width;
+    EB_U32 height = inputPtr->height;
+    EB_U32 blockSizeHalf = blockSize << 1;
 
     const EB_BOOL pictureLeftBoundary = (lcuPtr->lcuEdgeInfoPtr->pictureLeftEdgeFlag == EB_TRUE && (srcOriginX & (lcuPtr->size - 1)) == 0) ? EB_TRUE : EB_FALSE;
     const EB_BOOL pictureTopBoundary  = (lcuPtr->lcuEdgeInfoPtr->pictureTopEdgeFlag  == EB_TRUE && (srcOriginY & (lcuPtr->size - 1)) == 0) ? EB_TRUE : EB_FALSE;
     // Adjust the Source ptr to start at the origin of the block being updated
-	srcPtr  = inputPtr->bufferY + (((srcOriginY + inputPtr->originY) * stride) + (srcOriginX + inputPtr->originX));
+    srcPtr  = inputPtr->bufferY + (((srcOriginY + inputPtr->originY) * stride) + (srcOriginX + inputPtr->originX));
 
     // Adjust the Destination ptr to start at the origin of the Intra reference array
     dstPtr  = yBorderReverse;
@@ -4983,7 +4983,7 @@ EB_ERRORTYPE UpdateNeighborSamplesArrayOL(
         readPtr = srcPtr - stride;
 
         count   = ((srcOriginX + count) > width) ? count - ((srcOriginX + count) - width) : count;
-		EB_MEMCPY(dstPtr, readPtr, count);
+        EB_MEMCPY(dstPtr, readPtr, count);
         dstPtr += (blockSizeHalf - count);
 
     } else {
@@ -5010,7 +5010,7 @@ EB_ERRORTYPE UpdateNeighborSamplesArrayOL(
                                                                junk
     */
 
-	EB_MEMCPY(yBorder + blockSizeHalf, yBorderReverse + blockSizeHalf,  blockSizeHalf + 1);
+    EB_MEMCPY(yBorder + blockSizeHalf, yBorderReverse + blockSizeHalf,  blockSizeHalf + 1);
     yBorderLoc = yBorder + blockSizeHalf - 1 ;
 
     for(count = 0; count< blockSizeHalf; count++){
@@ -5043,43 +5043,43 @@ EB_ERRORTYPE UpdateChromaNeighborSamplesArrayOL(
     EB_U8  *cbDstPtr;
     EB_U8  *cbReadPtr;
 
-	EB_U8  *crSrcPtr;
+    EB_U8  *crSrcPtr;
     EB_U8  *crDstPtr;
     EB_U8  *crReadPtr;
 
     EB_U32 count;
     EB_U8 *cbBorderReverse   = intraRefPtr->cbIntraReferenceArrayReverse;
-	EB_U8 *crBorderReverse   = intraRefPtr->crIntraReferenceArrayReverse;
+    EB_U8 *crBorderReverse   = intraRefPtr->crIntraReferenceArrayReverse;
     EB_U8 *cbBorder          = intraRefPtr->cbIntraReferenceArray;
-	EB_U8 *crBorder          = intraRefPtr->crIntraReferenceArray;
+    EB_U8 *crBorder          = intraRefPtr->crIntraReferenceArray;
     EB_U8 *cbBorderLoc;
-	EB_U8 *crBorderLoc;
-	EB_U32 width = inputPtr->width >> 1;
-	EB_U32 height = inputPtr->height >> 1;
-	EB_U32 blockSizeHalf = blockSize << 1;
+    EB_U8 *crBorderLoc;
+    EB_U32 width = inputPtr->width >> 1;
+    EB_U32 height = inputPtr->height >> 1;
+    EB_U32 blockSizeHalf = blockSize << 1;
 
     const EB_BOOL pictureLeftBoundary = (lcuPtr->lcuEdgeInfoPtr->pictureLeftEdgeFlag == EB_TRUE && (srcOriginX & (lcuPtr->size - 1)) == 0) ? EB_TRUE : EB_FALSE;
     const EB_BOOL pictureTopBoundary  = (lcuPtr->lcuEdgeInfoPtr->pictureTopEdgeFlag  == EB_TRUE && (srcOriginY & (lcuPtr->size - 1)) == 0) ? EB_TRUE : EB_FALSE;
 
     // Adjust the Source ptr to start at the origin of the block being updated
-	cbSrcPtr  = inputPtr->bufferCb + (((cuChromaOriginY + (inputPtr->originY >> 1)) * cbStride) + (cuChromaOriginX + (inputPtr->originX >> 1)));
-	crSrcPtr  = inputPtr->bufferCr + (((cuChromaOriginY + (inputPtr->originY >> 1)) * crStride) + (cuChromaOriginX + (inputPtr->originX >> 1)));
+    cbSrcPtr  = inputPtr->bufferCb + (((cuChromaOriginY + (inputPtr->originY >> 1)) * cbStride) + (cuChromaOriginX + (inputPtr->originX >> 1)));
+    crSrcPtr  = inputPtr->bufferCr + (((cuChromaOriginY + (inputPtr->originY >> 1)) * crStride) + (cuChromaOriginX + (inputPtr->originX >> 1)));
 
     // Adjust the Destination ptr to start at the origin of the Intra reference array
-	cbDstPtr  = cbBorderReverse;
+    cbDstPtr  = cbBorderReverse;
     crDstPtr  = crBorderReverse;
     //Initialise the Luma Intra Reference Array to the mid range value 128 (for CUs at the picture boundaries)
-	EB_MEMSET(cbDstPtr, MIDRANGE_VALUE_8BIT, (blockSize << 2) + 1);
-	EB_MEMSET(crDstPtr, MIDRANGE_VALUE_8BIT, (blockSize << 2) + 1);
+    EB_MEMSET(cbDstPtr, MIDRANGE_VALUE_8BIT, (blockSize << 2) + 1);
+    EB_MEMSET(crDstPtr, MIDRANGE_VALUE_8BIT, (blockSize << 2) + 1);
 
-	(void)stride;
+    (void)stride;
 
     // Get the left-column
     count = blockSizeHalf;
     if (pictureLeftBoundary == EB_FALSE) {
 
         cbReadPtr = cbSrcPtr - 1;
-		crReadPtr = crSrcPtr - 1;
+        crReadPtr = crSrcPtr - 1;
         count   = ((cuChromaOriginY + count) > height) ? count - ((cuChromaOriginY + count) - height) : count;
 
         for(idx = 0; idx < count; ++idx) {
@@ -5088,17 +5088,17 @@ EB_ERRORTYPE UpdateChromaNeighborSamplesArrayOL(
             cbReadPtr += cbStride;
             cbDstPtr  ++;
 
-			*crDstPtr = *crReadPtr;
+            *crDstPtr = *crReadPtr;
             crReadPtr += crStride;
             crDstPtr  ++;
         }
 
         cbDstPtr += (blockSizeHalf- count);
-		crDstPtr += (blockSizeHalf- count);
+        crDstPtr += (blockSizeHalf- count);
 
     } else {
 
-		cbDstPtr += count;
+        cbDstPtr += count;
         crDstPtr += count;
     }
 
@@ -5108,13 +5108,13 @@ EB_ERRORTYPE UpdateChromaNeighborSamplesArrayOL(
         *cbDstPtr = *cbReadPtr;
         cbDstPtr  ++;
 
-		crReadPtr = crSrcPtr - crStride- 1 ;
+        crReadPtr = crSrcPtr - crStride- 1 ;
         *crDstPtr = *crReadPtr;
         crDstPtr  ++;
     } else {
 
         cbDstPtr  ++;
-		crDstPtr  ++;
+        crDstPtr  ++;
     }
 
     // Get the top-row
@@ -5124,12 +5124,12 @@ EB_ERRORTYPE UpdateChromaNeighborSamplesArrayOL(
         cbReadPtr = cbSrcPtr - cbStride;
 
         count   = ((cuChromaOriginX + count) > width) ? count - ((cuChromaOriginX + count) - width) : count;
-		EB_MEMCPY(cbDstPtr, cbReadPtr, count);
+        EB_MEMCPY(cbDstPtr, cbReadPtr, count);
         cbDstPtr += (blockSizeHalf - count);
 
 
-		crReadPtr = crSrcPtr - crStride;
-		EB_MEMCPY(crDstPtr, crReadPtr, count);
+        crReadPtr = crSrcPtr - crStride;
+        EB_MEMCPY(crDstPtr, crReadPtr, count);
         crDstPtr += (blockSizeHalf - count);
 
     } else {
@@ -5142,7 +5142,7 @@ EB_ERRORTYPE UpdateChromaNeighborSamplesArrayOL(
     intraRefPtr->AboveReadyFlagCb  = EB_FALSE;
     intraRefPtr->LeftReadyFlagCb   = EB_FALSE;
 
-	intraRefPtr->AboveReadyFlagCr  = EB_FALSE;
+    intraRefPtr->AboveReadyFlagCr  = EB_FALSE;
     intraRefPtr->LeftReadyFlagCr   = EB_FALSE;
 
     //For SIMD purposes, provide a copy of the reference buffer with reverse order of Left samples
@@ -5159,17 +5159,17 @@ EB_ERRORTYPE UpdateChromaNeighborSamplesArrayOL(
                                                                junk
     */
 
-	EB_MEMCPY(cbBorder + blockSizeHalf, cbBorderReverse + blockSizeHalf,  blockSizeHalf + 1);
-	EB_MEMCPY(crBorder + blockSizeHalf, crBorderReverse + blockSizeHalf,  blockSizeHalf + 1);
+    EB_MEMCPY(cbBorder + blockSizeHalf, cbBorderReverse + blockSizeHalf,  blockSizeHalf + 1);
+    EB_MEMCPY(crBorder + blockSizeHalf, crBorderReverse + blockSizeHalf,  blockSizeHalf + 1);
     cbBorderLoc = cbBorder + blockSizeHalf - 1 ;
-	crBorderLoc = crBorder + blockSizeHalf - 1 ;
+    crBorderLoc = crBorder + blockSizeHalf - 1 ;
 
     for(count = 0; count< blockSizeHalf; count++){
 
        *cbBorderLoc     = cbBorderReverse[count];
         cbBorderLoc--;
 
-		*crBorderLoc     = crBorderReverse[count];
+        *crBorderLoc     = crBorderReverse[count];
         crBorderLoc--;
     }
 
@@ -5201,9 +5201,9 @@ EB_ERRORTYPE UpdateNeighborSamplesArrayOpenLoop(
     EB_U8 *yBorder          = intraRefPtr->yIntraReferenceArray;
     EB_U8 *yBorderLoc;
 
-	EB_U32 width = inputPtr->width;
-	EB_U32 height = inputPtr->height;
-	EB_U32 blockSizeHalf = blockSize << 1;
+    EB_U32 width = inputPtr->width;
+    EB_U32 height = inputPtr->height;
+    EB_U32 blockSizeHalf = blockSize << 1;
 
     // Adjust the Source ptr to start at the origin of the block being updated
     srcPtr  = inputPtr->bufferY + (((srcOriginY + inputPtr->originY) * stride) + (srcOriginX + inputPtr->originX));
@@ -5254,7 +5254,7 @@ EB_ERRORTYPE UpdateNeighborSamplesArrayOpenLoop(
         readPtr = srcPtr - stride;
 
         count   = ((srcOriginX + count) > width) ? count - ((srcOriginX + count) - width) : count;
-		EB_MEMCPY(dstPtr, readPtr, count);
+        EB_MEMCPY(dstPtr, readPtr, count);
         dstPtr += (blockSizeHalf - count);
 
     } else {
@@ -5281,7 +5281,7 @@ EB_ERRORTYPE UpdateNeighborSamplesArrayOpenLoop(
                                                                junk
     */
 
-	EB_MEMCPY(yBorder + blockSizeHalf,  yBorderReverse + blockSizeHalf,  blockSizeHalf + 1);
+    EB_MEMCPY(yBorder + blockSizeHalf,  yBorderReverse + blockSizeHalf,  blockSizeHalf + 1);
     yBorderLoc = yBorder + blockSizeHalf - 1 ;
 
     for(count = 0; count<blockSizeHalf; count++){
@@ -5315,7 +5315,7 @@ EB_ERRORTYPE IntraPredictionOpenLoop(
 
     case 0:
 
-		IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+        IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
             cuSize,
             contextPtr->intraRefPtr->yIntraReferenceArrayReverse,
             (&(contextPtr->meContextPtr->lcuBuffer[0])),
@@ -5326,7 +5326,7 @@ EB_ERRORTYPE IntraPredictionOpenLoop(
 
     case 1:
 
-		IntraDCLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+        IntraDCLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
             cuSize,
             contextPtr->intraRefPtr->yIntraReferenceArrayReverse,
             (&(contextPtr->meContextPtr->lcuBuffer[0])),
@@ -5337,7 +5337,7 @@ EB_ERRORTYPE IntraPredictionOpenLoop(
 
     case 2:
 
-		IntraVerticalLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+        IntraVerticalLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
             cuSize,
             contextPtr->intraRefPtr->yIntraReferenceArrayReverse,
             (&(contextPtr->meContextPtr->lcuBuffer[0])),
@@ -5348,7 +5348,7 @@ EB_ERRORTYPE IntraPredictionOpenLoop(
 
     case 3:
 
-		IntraHorzLuma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+        IntraHorzLuma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
             cuSize,
             contextPtr->intraRefPtr->yIntraReferenceArrayReverse,
             (&(contextPtr->meContextPtr->lcuBuffer[0])),
@@ -5385,19 +5385,19 @@ EB_ERRORTYPE IntraPredictionOpenLoop(
         performs Open-loop Intra candidate Search for a CU
  */
 EB_ERRORTYPE IntraPredictionOl(
-	ModeDecisionContext_t                  *mdContextPtr,
-	EB_U32                                  componentMask,
-	PictureControlSet_t                    *pictureControlSetPtr,
-	ModeDecisionCandidateBuffer_t		   *candidateBufferPtr)
+    ModeDecisionContext_t                  *mdContextPtr,
+    EB_U32                                  componentMask,
+    PictureControlSet_t                    *pictureControlSetPtr,
+    ModeDecisionCandidateBuffer_t           *candidateBufferPtr)
 {
     EB_ERRORTYPE                return_error = EB_ErrorNone;
 
 
-	EB_U32						puOriginX	= mdContextPtr->cuOriginX;
-	EB_U32						puOriginY	= mdContextPtr->cuOriginY;
-	EB_U32 						puWidth     = mdContextPtr->cuStats->size;
-	EB_U32 						puHeight    = mdContextPtr->cuStats->size;
-	const EB_U32 puOriginIndex = ((puOriginY & (63)) * 64) + (puOriginX & (63));
+    EB_U32                        puOriginX    = mdContextPtr->cuOriginX;
+    EB_U32                        puOriginY    = mdContextPtr->cuOriginY;
+    EB_U32                         puWidth     = mdContextPtr->cuStats->size;
+    EB_U32                         puHeight    = mdContextPtr->cuStats->size;
+    const EB_U32 puOriginIndex = ((puOriginY & (63)) * 64) + (puOriginX & (63));
 
     EB_U32          openLoopIntraCandidateIndex = candidateBufferPtr->candidatePtr->intraLumaMode;
 
@@ -5411,251 +5411,251 @@ EB_ERRORTYPE IntraPredictionOl(
         (openLoopIntraCandidateIndex == INTRA_HORIZONTAL_MODE)   ?       3 :
         4;
 
-	IntraReferenceSamples_t    *intraRefPtr =    (IntraReferenceSamples_t*)(mdContextPtr->intraRefPtr);
+    IntraReferenceSamples_t    *intraRefPtr =    (IntraReferenceSamples_t*)(mdContextPtr->intraRefPtr);
 
     (void) puHeight;
-	(void) pictureControlSetPtr;
-	(void) puIndex;
+    (void) pictureControlSetPtr;
+    (void) puIndex;
 
-	if (componentMask & PICTURE_BUFFER_DESC_LUMA_MASK) {
+    if (componentMask & PICTURE_BUFFER_DESC_LUMA_MASK) {
 
-		if (mdContextPtr->lumaIntraRefSamplesGenDone == EB_FALSE)
-		{
-			EbPictureBufferDesc_t     *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
+        if (mdContextPtr->lumaIntraRefSamplesGenDone == EB_FALSE)
+        {
+            EbPictureBufferDesc_t     *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
 
-			GenerateIntraLumaReferenceSamplesMd(
-				mdContextPtr,
-				inputPicturePtr);
-		}
+            GenerateIntraLumaReferenceSamplesMd(
+                mdContextPtr,
+                inputPicturePtr);
+        }
 
 
-		switch (funcIndex) {
+        switch (funcIndex) {
 
-		case 0:
+        case 0:
 
-			IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
-				puSize,
-				intraRefPtr->yIntraReferenceArrayReverse,
-				&(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
-				64,
-				EB_FALSE);
+            IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+                puSize,
+                intraRefPtr->yIntraReferenceArrayReverse,
+                &(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
+                64,
+                EB_FALSE);
 
-			break;
+            break;
 
-		case 1:
+        case 1:
 
-			IntraDCLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
-				puSize,
-				intraRefPtr->yIntraReferenceArrayReverse,
-				&(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
-				64,
-				EB_FALSE);
+            IntraDCLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+                puSize,
+                intraRefPtr->yIntraReferenceArrayReverse,
+                &(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
+                64,
+                EB_FALSE);
 
-			break;
+            break;
 
-		case 2:
+        case 2:
 
-			IntraVerticalLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
-				puSize,
-				intraRefPtr->yIntraReferenceArrayReverse,
-				&(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
-				64,
-				EB_FALSE);
+            IntraVerticalLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+                puSize,
+                intraRefPtr->yIntraReferenceArrayReverse,
+                &(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
+                64,
+                EB_FALSE);
 
-			break;
+            break;
 
-		case 3:
+        case 3:
 
-			IntraHorzLuma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
-				puSize,
-				intraRefPtr->yIntraReferenceArrayReverse,
-				&(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
-				64,
-				EB_FALSE);
+            IntraHorzLuma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                puSize,
+                intraRefPtr->yIntraReferenceArrayReverse,
+                &(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
+                64,
+                EB_FALSE);
 
-			break;
+            break;
 
-		case 4:
+        case 4:
 
-			IntraModeAngular_all(
-				openLoopIntraCandidateIndex,
-				puSize,
-				intraRefPtr->yIntraReferenceArray,
-				intraRefPtr->yIntraReferenceArrayReverse,
-				&(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
-				64,
-				intraRefPtr->ReferenceAboveLineY,
-				&intraRefPtr->AboveReadyFlagY,
-				intraRefPtr->ReferenceLeftLineY,
-				&intraRefPtr->LeftReadyFlagY);
+            IntraModeAngular_all(
+                openLoopIntraCandidateIndex,
+                puSize,
+                intraRefPtr->yIntraReferenceArray,
+                intraRefPtr->yIntraReferenceArrayReverse,
+                &(candidateBufferPtr->predictionPtr->bufferY[puOriginIndex]),
+                64,
+                intraRefPtr->ReferenceAboveLineY,
+                &intraRefPtr->AboveReadyFlagY,
+                intraRefPtr->ReferenceLeftLineY,
+                &intraRefPtr->LeftReadyFlagY);
 
-			break;
+            break;
 
-		default:
-			break;
-		}
-	}
+        default:
+            break;
+        }
+    }
 
-	if (componentMask & PICTURE_BUFFER_DESC_CHROMA_MASK) {
+    if (componentMask & PICTURE_BUFFER_DESC_CHROMA_MASK) {
 
-		if (mdContextPtr->chromaIntraRefSamplesGenDone == EB_FALSE)
-		{
+        if (mdContextPtr->chromaIntraRefSamplesGenDone == EB_FALSE)
+        {
 
-			EbPictureBufferDesc_t *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
+            EbPictureBufferDesc_t *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
 
-			GenerateIntraChromaReferenceSamplesMd(
-				mdContextPtr,
-				inputPicturePtr);
+            GenerateIntraChromaReferenceSamplesMd(
+                mdContextPtr,
+                inputPicturePtr);
 
-		}
+        }
 
-		// The chromaMode is always DM
-		EB_U32 chromaMode = (EB_U32)openLoopIntraCandidateIndex;
+        // The chromaMode is always DM
+        EB_U32 chromaMode = (EB_U32)openLoopIntraCandidateIndex;
 
         EB_U32 puChromaOriginIndex = (((puOriginY & (63)) * 32) + (puOriginX & (63)))>>1;
-		EB_U32 chromaPuSize = puWidth >> 1;
+        EB_U32 chromaPuSize = puWidth >> 1;
 
-		intraRefPtr->AboveReadyFlagCb = EB_FALSE;
-		intraRefPtr->AboveReadyFlagCr = EB_FALSE;
-		intraRefPtr->LeftReadyFlagCb = EB_FALSE;
-		intraRefPtr->LeftReadyFlagCr = EB_FALSE;
+        intraRefPtr->AboveReadyFlagCb = EB_FALSE;
+        intraRefPtr->AboveReadyFlagCr = EB_FALSE;
+        intraRefPtr->LeftReadyFlagCb = EB_FALSE;
+        intraRefPtr->LeftReadyFlagCr = EB_FALSE;
 
-		switch (funcIndex) {
+        switch (funcIndex) {
 
-		case 0:
+        case 0:
 
-			// Cb Intra Prediction
-			if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-				IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
-					chromaPuSize,
-					intraRefPtr->cbIntraReferenceArrayReverse,
-					&(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
-					32,
-					EB_FALSE);
-			}
+            // Cb Intra Prediction
+            if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
+                IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+                    chromaPuSize,
+                    intraRefPtr->cbIntraReferenceArrayReverse,
+                    &(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
+                    32,
+                    EB_FALSE);
+            }
 
-			// Cr Intra Prediction
-			if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-				IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
-					chromaPuSize,
-					intraRefPtr->crIntraReferenceArrayReverse,
-					&(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
-					32,
-					EB_FALSE);
-			}
+            // Cr Intra Prediction
+            if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
+                IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+                    chromaPuSize,
+                    intraRefPtr->crIntraReferenceArrayReverse,
+                    &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
+                    32,
+                    EB_FALSE);
+            }
 
-			break;
+            break;
 
-		case 2:
+        case 2:
 
-			// Cb Intra Prediction
-			if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-				IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
-					chromaPuSize,
-					intraRefPtr->cbIntraReferenceArray,
-					&(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
-					candidateBufferPtr->predictionPtr->strideCb,
-					EB_FALSE);
-			}
+            // Cb Intra Prediction
+            if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
+                IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                    chromaPuSize,
+                    intraRefPtr->cbIntraReferenceArray,
+                    &(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
+                    candidateBufferPtr->predictionPtr->strideCb,
+                    EB_FALSE);
+            }
 
-			// Cr Intra Prediction
-			if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-				IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
-					chromaPuSize,
-					intraRefPtr->crIntraReferenceArray,
-					&(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
-					32,
-					EB_FALSE);
-			}
+            // Cr Intra Prediction
+            if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
+                IntraVerticalChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                    chromaPuSize,
+                    intraRefPtr->crIntraReferenceArray,
+                    &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
+                    32,
+                    EB_FALSE);
+            }
 
-			break;
+            break;
 
-		case 3:
+        case 3:
 
-			// Cb Intra Prediction
-			if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-				IntraHorzChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
-					chromaPuSize,
-					intraRefPtr->cbIntraReferenceArrayReverse,
-					&(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
-					32,
-					EB_FALSE);
-			}
+            // Cb Intra Prediction
+            if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
+                IntraHorzChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                    chromaPuSize,
+                    intraRefPtr->cbIntraReferenceArrayReverse,
+                    &(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
+                    32,
+                    EB_FALSE);
+            }
 
-			// Cr Intra Prediction
-			if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-				IntraHorzChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
-					chromaPuSize,
-					intraRefPtr->crIntraReferenceArrayReverse,
-					&(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
-					32,
-					EB_FALSE);
-			}
+            // Cr Intra Prediction
+            if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
+                IntraHorzChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                    chromaPuSize,
+                    intraRefPtr->crIntraReferenceArrayReverse,
+                    &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
+                    32,
+                    EB_FALSE);
+            }
 
-			break;
+            break;
 
-		case 1:
+        case 1:
 
-			// Cb Intra Prediction
-			if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-				IntraDCChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
-					chromaPuSize,
-					intraRefPtr->cbIntraReferenceArrayReverse,
-					&(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
-					32,
-					EB_FALSE);
-			}
+            // Cb Intra Prediction
+            if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
+                IntraDCChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                    chromaPuSize,
+                    intraRefPtr->cbIntraReferenceArrayReverse,
+                    &(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
+                    32,
+                    EB_FALSE);
+            }
 
-			// Cr Intra Prediction
-			if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-				IntraDCChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
-					chromaPuSize,
-					intraRefPtr->crIntraReferenceArrayReverse,
-					&(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
-					32,
-					EB_FALSE);
-			}
+            // Cr Intra Prediction
+            if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
+                IntraDCChroma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+                    chromaPuSize,
+                    intraRefPtr->crIntraReferenceArrayReverse,
+                    &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
+                    32,
+                    EB_FALSE);
+            }
 
-			break;
+            break;
 
-		case 4:
+        case 4:
 
-			// Cb Intra Prediction
-			if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-				IntraModeAngular_all(
-					chromaMode,
-					chromaPuSize,
-					intraRefPtr->cbIntraReferenceArray,
-					intraRefPtr->cbIntraReferenceArrayReverse,
-					&(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
-					candidateBufferPtr->predictionPtr->strideCb,
-					intraRefPtr->ReferenceAboveLineCb,
-					&intraRefPtr->AboveReadyFlagCb,
-					intraRefPtr->ReferenceLeftLineCb,
-					&intraRefPtr->LeftReadyFlagCb);
-			}
+            // Cb Intra Prediction
+            if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
+                IntraModeAngular_all(
+                    chromaMode,
+                    chromaPuSize,
+                    intraRefPtr->cbIntraReferenceArray,
+                    intraRefPtr->cbIntraReferenceArrayReverse,
+                    &(candidateBufferPtr->predictionPtr->bufferCb[puChromaOriginIndex]),
+                    candidateBufferPtr->predictionPtr->strideCb,
+                    intraRefPtr->ReferenceAboveLineCb,
+                    &intraRefPtr->AboveReadyFlagCb,
+                    intraRefPtr->ReferenceLeftLineCb,
+                    &intraRefPtr->LeftReadyFlagCb);
+            }
 
-			// Cr Intra Prediction
-			if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-				IntraModeAngular_all(
-					chromaMode,
-					chromaPuSize,
-					intraRefPtr->crIntraReferenceArray,
-					intraRefPtr->crIntraReferenceArrayReverse,
-					&(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
-					candidateBufferPtr->predictionPtr->strideCr,
-					intraRefPtr->ReferenceAboveLineCr,
-					&intraRefPtr->AboveReadyFlagCr,
-					intraRefPtr->ReferenceLeftLineCr,
-					&intraRefPtr->LeftReadyFlagCr);
-			}
+            // Cr Intra Prediction
+            if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
+                IntraModeAngular_all(
+                    chromaMode,
+                    chromaPuSize,
+                    intraRefPtr->crIntraReferenceArray,
+                    intraRefPtr->crIntraReferenceArrayReverse,
+                    &(candidateBufferPtr->predictionPtr->bufferCr[puChromaOriginIndex]),
+                    candidateBufferPtr->predictionPtr->strideCr,
+                    intraRefPtr->ReferenceAboveLineCr,
+                    &intraRefPtr->AboveReadyFlagCr,
+                    intraRefPtr->ReferenceLeftLineCr,
+                    &intraRefPtr->LeftReadyFlagCr);
+            }
 
-			break;
+            break;
 
-		default:
-			break;
-		}
-	}
+        default:
+            break;
+        }
+    }
 
     return return_error;
 }
@@ -5671,10 +5671,10 @@ EB_ERRORTYPE IntraPredOnSrc(
     EB_ERRORTYPE                return_error = EB_ErrorNone;
 
 
-    EB_U32						puOriginX = mdContextPtr->cuOriginX;
-    EB_U32						puOriginY = mdContextPtr->cuOriginY;
-    EB_U32 						puWidth = mdContextPtr->cuStats->size;
-    EB_U32 						puHeight = mdContextPtr->cuStats->size;
+    EB_U32                        puOriginX = mdContextPtr->cuOriginX;
+    EB_U32                        puOriginY = mdContextPtr->cuOriginY;
+    EB_U32                         puWidth = mdContextPtr->cuStats->size;
+    EB_U32                         puHeight = mdContextPtr->cuStats->size;
     const EB_U32 puOriginIndex = ((puOriginY & (63)) * 64) + (puOriginX & (63));
 
     EB_U32          openLoopIntraCandidateIndex = intraMode;
@@ -5711,7 +5711,7 @@ EB_ERRORTYPE IntraPredOnSrc(
 
         case 0:
 
-			IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+            IntraPlanar_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
                 puSize,
                 intraRefPtr->yIntraReferenceArrayReverse,
                 &(predictionPtr->bufferY[puOriginIndex]),
@@ -5722,7 +5722,7 @@ EB_ERRORTYPE IntraPredOnSrc(
 
         case 1:
 
-			IntraDCLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+            IntraDCLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
                 puSize,
                 intraRefPtr->yIntraReferenceArrayReverse,
                 &(predictionPtr->bufferY[puOriginIndex]),
@@ -5733,7 +5733,7 @@ EB_ERRORTYPE IntraPredOnSrc(
 
         case 2:
 
-			IntraVerticalLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
+            IntraVerticalLuma_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
                 puSize,
                 intraRefPtr->yIntraReferenceArrayReverse,
                 &(predictionPtr->bufferY[puOriginIndex]),
@@ -5744,7 +5744,7 @@ EB_ERRORTYPE IntraPredOnSrc(
 
         case 3:
 
-			IntraHorzLuma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
+            IntraHorzLuma_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](
                 puSize,
                 intraRefPtr->yIntraReferenceArrayReverse,
                 &(predictionPtr->bufferY[puOriginIndex]),

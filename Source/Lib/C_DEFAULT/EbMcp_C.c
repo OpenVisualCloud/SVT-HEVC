@@ -2113,7 +2113,7 @@ void WpBiPredClipping16bit(
     }
 }
 
-// Weighted Prediction - EncoderBitDepth : 8 
+// Weighted Prediction - EncoderBitDepth : 8
 void WpLumaInterpolationCopy(
     EB_BYTE               refPic,
     EB_U32                srcStride,

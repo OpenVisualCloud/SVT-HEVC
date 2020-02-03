@@ -130,12 +130,12 @@ void PfreqTransform16x16_SSE2(
     EB_U32 addshift);
 
 void PfreqN4Transform16x16_SSE2(
-	EB_S16 *src,
-	const EB_U32 src_stride,
-	EB_S16 *dst,
-	const EB_U32 dst_stride,
-	EB_S16 *intermediate,
-	EB_U32 addshift);
+    EB_S16 *src,
+    const EB_U32 src_stride,
+    EB_S16 *dst,
+    const EB_U32 dst_stride,
+    EB_S16 *intermediate,
+    EB_U32 addshift);
 
 void EstimateInvTransform32x32_SSE2(
     EB_S16                  *transformCoefficients,

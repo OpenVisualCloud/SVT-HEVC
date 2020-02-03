@@ -187,8 +187,8 @@ void* PictureManagerKernel(void *inputPtr)
     SequenceControlSet_t            *entrySequenceControlSetPtr;
 
     // Initialization
-	PictureManagerReorderEntry_t    *queueEntryPtr;
-	EB_S32                           queueEntryIndex;
+    PictureManagerReorderEntry_t    *queueEntryPtr;
+    EB_S32                           queueEntryIndex;
 
     // Debug
     EB_U32 loopCount = 0;
@@ -218,310 +218,310 @@ void* PictureManagerKernel(void *inputPtr)
 #if DEADLOCK_DEBUG
             SVT_LOG("POC %lld PM IN \n", pictureControlSetPtr->pictureNumber);
 #endif
-		   queueEntryIndex = (EB_S32)(pictureControlSetPtr->pictureNumber - encodeContextPtr->pictureManagerReorderQueue[encodeContextPtr->pictureManagerReorderQueueHeadIndex]->pictureNumber);
-		   queueEntryIndex += encodeContextPtr->pictureManagerReorderQueueHeadIndex;
-		   queueEntryIndex = (queueEntryIndex > PICTURE_MANAGER_REORDER_QUEUE_MAX_DEPTH - 1) ? queueEntryIndex - PICTURE_MANAGER_REORDER_QUEUE_MAX_DEPTH : queueEntryIndex;
-		   queueEntryPtr = encodeContextPtr->pictureManagerReorderQueue[queueEntryIndex];
-		   if (queueEntryPtr->parentPcsWrapperPtr != NULL){
-			   CHECK_REPORT_ERROR_NC(
-				   encodeContextPtr->appCallbackPtr,
-				   EB_ENC_PD_ERROR8);
-		   }
-		   else{
-			   queueEntryPtr->parentPcsWrapperPtr = inputPictureDemuxPtr->pictureControlSetWrapperPtr;
-			   queueEntryPtr->pictureNumber = pictureControlSetPtr->pictureNumber;
-		   }
-		   // Process the head of the Picture Manager Reorder Queue
-		   queueEntryPtr = encodeContextPtr->pictureManagerReorderQueue[encodeContextPtr->pictureManagerReorderQueueHeadIndex];
+           queueEntryIndex = (EB_S32)(pictureControlSetPtr->pictureNumber - encodeContextPtr->pictureManagerReorderQueue[encodeContextPtr->pictureManagerReorderQueueHeadIndex]->pictureNumber);
+           queueEntryIndex += encodeContextPtr->pictureManagerReorderQueueHeadIndex;
+           queueEntryIndex = (queueEntryIndex > PICTURE_MANAGER_REORDER_QUEUE_MAX_DEPTH - 1) ? queueEntryIndex - PICTURE_MANAGER_REORDER_QUEUE_MAX_DEPTH : queueEntryIndex;
+           queueEntryPtr = encodeContextPtr->pictureManagerReorderQueue[queueEntryIndex];
+           if (queueEntryPtr->parentPcsWrapperPtr != NULL){
+               CHECK_REPORT_ERROR_NC(
+                   encodeContextPtr->appCallbackPtr,
+                   EB_ENC_PD_ERROR8);
+           }
+           else{
+               queueEntryPtr->parentPcsWrapperPtr = inputPictureDemuxPtr->pictureControlSetWrapperPtr;
+               queueEntryPtr->pictureNumber = pictureControlSetPtr->pictureNumber;
+           }
+           // Process the head of the Picture Manager Reorder Queue
+           queueEntryPtr = encodeContextPtr->pictureManagerReorderQueue[encodeContextPtr->pictureManagerReorderQueueHeadIndex];
 
-		   while (queueEntryPtr->parentPcsWrapperPtr != EB_NULL) {
+           while (queueEntryPtr->parentPcsWrapperPtr != EB_NULL) {
 
-			   pictureControlSetPtr = (PictureParentControlSet_t*)queueEntryPtr->parentPcsWrapperPtr->objectPtr;
+               pictureControlSetPtr = (PictureParentControlSet_t*)queueEntryPtr->parentPcsWrapperPtr->objectPtr;
 
-			   predPositionPtr = pictureControlSetPtr->predStructPtr->predStructEntryPtrArray[pictureControlSetPtr->predStructIndex];
+               predPositionPtr = pictureControlSetPtr->predStructPtr->predStructEntryPtrArray[pictureControlSetPtr->predStructIndex];
 
-			   // If there was a change in the number of temporal layers, then cleanup the Reference Queue's Dependent Counts
-			   if (pictureControlSetPtr->hierarchicalLayersDiff != 0) {
+               // If there was a change in the number of temporal layers, then cleanup the Reference Queue's Dependent Counts
+               if (pictureControlSetPtr->hierarchicalLayersDiff != 0) {
 
-				   referenceQueueIndex = encodeContextPtr->referencePictureQueueHeadIndex;
+                   referenceQueueIndex = encodeContextPtr->referencePictureQueueHeadIndex;
 
-				   while (referenceQueueIndex != encodeContextPtr->referencePictureQueueTailIndex) {
+                   while (referenceQueueIndex != encodeContextPtr->referencePictureQueueTailIndex) {
 
-					   referenceEntryPtr = encodeContextPtr->referencePictureQueue[referenceQueueIndex];
+                       referenceEntryPtr = encodeContextPtr->referencePictureQueue[referenceQueueIndex];
 
-					   if (referenceEntryPtr->pictureNumber == (pictureControlSetPtr->pictureNumber - 1)) { // Picture where the change happened
+                       if (referenceEntryPtr->pictureNumber == (pictureControlSetPtr->pictureNumber - 1)) { // Picture where the change happened
 
-						   // Get the prediction struct entry of the next GOP structure
-						   nextPredStructPtr = GetPredictionStructure(
-							   encodeContextPtr->predictionStructureGroupPtr,
-							   pictureControlSetPtr->predStructure,
-							   1,
-							   pictureControlSetPtr->hierarchicalLevels);
+                           // Get the prediction struct entry of the next GOP structure
+                           nextPredStructPtr = GetPredictionStructure(
+                               encodeContextPtr->predictionStructureGroupPtr,
+                               pictureControlSetPtr->predStructure,
+                               1,
+                               pictureControlSetPtr->hierarchicalLevels);
 
-						   // Get the prediction struct of a picture in temporal layer 0 (from the new GOP structure)
-						   nextBaseLayerPredPositionPtr = nextPredStructPtr->predStructEntryPtrArray[nextPredStructPtr->predStructEntryCount - 1];
-
-
-						   // Remove all positive entries from the dependant lists
-						   dependantListPositiveEntries = 0;
-						   for (depIdx = 0; depIdx < referenceEntryPtr->list0.listCount; ++depIdx) {
-							   if (referenceEntryPtr->list0.list[depIdx] >= 0) {
-								   dependantListPositiveEntries++;
-							   }
-						   }
-						   referenceEntryPtr->list0.listCount = referenceEntryPtr->list0.listCount - dependantListPositiveEntries;
-
-						   dependantListPositiveEntries = 0;
-						   for (depIdx = 0; depIdx < referenceEntryPtr->list1.listCount; ++depIdx) {
-							   if (referenceEntryPtr->list1.list[depIdx] >= 0) {
-								   dependantListPositiveEntries++;
-							   }
-						   }
-						   referenceEntryPtr->list1.listCount = referenceEntryPtr->list1.listCount - dependantListPositiveEntries;
-
-						   for (depIdx = 0; depIdx < nextBaseLayerPredPositionPtr->depList0.listCount; ++depIdx) {
-							   if (nextBaseLayerPredPositionPtr->depList0.list[depIdx] >= 0) {
-								   referenceEntryPtr->list0.list[referenceEntryPtr->list0.listCount++] = nextBaseLayerPredPositionPtr->depList0.list[depIdx];
-							   }
-						   }
+                           // Get the prediction struct of a picture in temporal layer 0 (from the new GOP structure)
+                           nextBaseLayerPredPositionPtr = nextPredStructPtr->predStructEntryPtrArray[nextPredStructPtr->predStructEntryCount - 1];
 
 
-						   for (depIdx = 0; depIdx < nextBaseLayerPredPositionPtr->depList1.listCount; ++depIdx) {
-							   if (nextBaseLayerPredPositionPtr->depList1.list[depIdx] >= 0) {
-								   referenceEntryPtr->list1.list[referenceEntryPtr->list1.listCount++] = nextBaseLayerPredPositionPtr->depList1.list[depIdx];
-							   }
-						   }
+                           // Remove all positive entries from the dependant lists
+                           dependantListPositiveEntries = 0;
+                           for (depIdx = 0; depIdx < referenceEntryPtr->list0.listCount; ++depIdx) {
+                               if (referenceEntryPtr->list0.list[depIdx] >= 0) {
+                                   dependantListPositiveEntries++;
+                               }
+                           }
+                           referenceEntryPtr->list0.listCount = referenceEntryPtr->list0.listCount - dependantListPositiveEntries;
 
-						   // Update the dependant count update
-						   dependantListRemovedEntries = referenceEntryPtr->depList0Count + referenceEntryPtr->depList1Count - referenceEntryPtr->dependentCount;
+                           dependantListPositiveEntries = 0;
+                           for (depIdx = 0; depIdx < referenceEntryPtr->list1.listCount; ++depIdx) {
+                               if (referenceEntryPtr->list1.list[depIdx] >= 0) {
+                                   dependantListPositiveEntries++;
+                               }
+                           }
+                           referenceEntryPtr->list1.listCount = referenceEntryPtr->list1.listCount - dependantListPositiveEntries;
 
-						   referenceEntryPtr->depList0Count = referenceEntryPtr->list0.listCount;
-						   referenceEntryPtr->depList1Count = referenceEntryPtr->list1.listCount;
-						   referenceEntryPtr->dependentCount = referenceEntryPtr->depList0Count + referenceEntryPtr->depList1Count - dependantListRemovedEntries;
-
-					   }
-					   else {
-
-						   // Modify Dependent List0
-						   depListCount = referenceEntryPtr->list0.listCount;
-						   for (depIdx = 0; depIdx < depListCount; ++depIdx) {
+                           for (depIdx = 0; depIdx < nextBaseLayerPredPositionPtr->depList0.listCount; ++depIdx) {
+                               if (nextBaseLayerPredPositionPtr->depList0.list[depIdx] >= 0) {
+                                   referenceEntryPtr->list0.list[referenceEntryPtr->list0.listCount++] = nextBaseLayerPredPositionPtr->depList0.list[depIdx];
+                               }
+                           }
 
 
-							   // Adjust the latest currentInputPoc in case we're in a POC rollover scenario
-							   // currentInputPoc += (currentInputPoc < referenceEntryPtr->pocNumber) ? (1 << sequenceControlSetPtr->bitsForPictureOrderCount) : 0;
+                           for (depIdx = 0; depIdx < nextBaseLayerPredPositionPtr->depList1.listCount; ++depIdx) {
+                               if (nextBaseLayerPredPositionPtr->depList1.list[depIdx] >= 0) {
+                                   referenceEntryPtr->list1.list[referenceEntryPtr->list1.listCount++] = nextBaseLayerPredPositionPtr->depList1.list[depIdx];
+                               }
+                           }
 
-							   depPoc = POC_CIRCULAR_ADD(
-								   referenceEntryPtr->pictureNumber, // can't use a value that gets reset
-								   referenceEntryPtr->list0.list[depIdx]/*,
-								   sequenceControlSetPtr->bitsForPictureOrderCount*/);
+                           // Update the dependant count update
+                           dependantListRemovedEntries = referenceEntryPtr->depList0Count + referenceEntryPtr->depList1Count - referenceEntryPtr->dependentCount;
 
-							   // If Dependent POC is greater or equal to the IDR POC
-							   if (depPoc >= pictureControlSetPtr->pictureNumber && referenceEntryPtr->list0.list[depIdx]) {
+                           referenceEntryPtr->depList0Count = referenceEntryPtr->list0.listCount;
+                           referenceEntryPtr->depList1Count = referenceEntryPtr->list1.listCount;
+                           referenceEntryPtr->dependentCount = referenceEntryPtr->depList0Count + referenceEntryPtr->depList1Count - dependantListRemovedEntries;
 
-								   referenceEntryPtr->list0.list[depIdx] = 0;
+                       }
+                       else {
 
-								   // Decrement the Reference's referenceCount
-								   --referenceEntryPtr->dependentCount;
+                           // Modify Dependent List0
+                           depListCount = referenceEntryPtr->list0.listCount;
+                           for (depIdx = 0; depIdx < depListCount; ++depIdx) {
 
-								   CHECK_REPORT_ERROR(
-									   (referenceEntryPtr->dependentCount != ~0u),
-									   encodeContextPtr->appCallbackPtr,
-									   EB_ENC_PD_ERROR3);
-							   }
-						   }
 
-						   // Modify Dependent List1
-						   depListCount = referenceEntryPtr->list1.listCount;
-						   for (depIdx = 0; depIdx < depListCount; ++depIdx) {
+                               // Adjust the latest currentInputPoc in case we're in a POC rollover scenario
+                               // currentInputPoc += (currentInputPoc < referenceEntryPtr->pocNumber) ? (1 << sequenceControlSetPtr->bitsForPictureOrderCount) : 0;
 
-							   // Adjust the latest currentInputPoc in case we're in a POC rollover scenario
-							   // currentInputPoc += (currentInputPoc < referenceEntryPtr->pocNumber) ? (1 << sequenceControlSetPtr->bitsForPictureOrderCount) : 0;
+                               depPoc = POC_CIRCULAR_ADD(
+                                   referenceEntryPtr->pictureNumber, // can't use a value that gets reset
+                                   referenceEntryPtr->list0.list[depIdx]/*,
+                                   sequenceControlSetPtr->bitsForPictureOrderCount*/);
 
-							   depPoc = POC_CIRCULAR_ADD(
-								   referenceEntryPtr->pictureNumber,
-								   referenceEntryPtr->list1.list[depIdx]/*,
-								   sequenceControlSetPtr->bitsForPictureOrderCount*/);
+                               // If Dependent POC is greater or equal to the IDR POC
+                               if (depPoc >= pictureControlSetPtr->pictureNumber && referenceEntryPtr->list0.list[depIdx]) {
 
-							   // If Dependent POC is greater or equal to the IDR POC
-							   if ((depPoc >= pictureControlSetPtr->pictureNumber) && referenceEntryPtr->list1.list[depIdx]) {
-								   referenceEntryPtr->list1.list[depIdx] = 0;
+                                   referenceEntryPtr->list0.list[depIdx] = 0;
 
-								   // Decrement the Reference's referenceCount
-								   --referenceEntryPtr->dependentCount;
+                                   // Decrement the Reference's referenceCount
+                                   --referenceEntryPtr->dependentCount;
 
-								   CHECK_REPORT_ERROR(
-									   (referenceEntryPtr->dependentCount != ~0u),
-									   encodeContextPtr->appCallbackPtr,
-									   EB_ENC_PD_ERROR3);
-							   }
-						   }
-					   }
+                                   CHECK_REPORT_ERROR(
+                                       (referenceEntryPtr->dependentCount != ~0u),
+                                       encodeContextPtr->appCallbackPtr,
+                                       EB_ENC_PD_ERROR3);
+                               }
+                           }
 
-					   // Increment the referenceQueueIndex Iterator
-					   referenceQueueIndex = (referenceQueueIndex == REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : referenceQueueIndex + 1;
-				   }
-			   }
+                           // Modify Dependent List1
+                           depListCount = referenceEntryPtr->list1.listCount;
+                           for (depIdx = 0; depIdx < depListCount; ++depIdx) {
 
-			   // If there was an I-frame or Scene Change, then cleanup the Reference Queue's Dependent Counts
-			   if (pictureControlSetPtr->sliceType == EB_I_PICTURE)
-			   {
+                               // Adjust the latest currentInputPoc in case we're in a POC rollover scenario
+                               // currentInputPoc += (currentInputPoc < referenceEntryPtr->pocNumber) ? (1 << sequenceControlSetPtr->bitsForPictureOrderCount) : 0;
 
-				   referenceQueueIndex = encodeContextPtr->referencePictureQueueHeadIndex;
-				   while (referenceQueueIndex != encodeContextPtr->referencePictureQueueTailIndex) {
+                               depPoc = POC_CIRCULAR_ADD(
+                                   referenceEntryPtr->pictureNumber,
+                                   referenceEntryPtr->list1.list[depIdx]/*,
+                                   sequenceControlSetPtr->bitsForPictureOrderCount*/);
 
-					   referenceEntryPtr = encodeContextPtr->referencePictureQueue[referenceQueueIndex];
+                               // If Dependent POC is greater or equal to the IDR POC
+                               if ((depPoc >= pictureControlSetPtr->pictureNumber) && referenceEntryPtr->list1.list[depIdx]) {
+                                   referenceEntryPtr->list1.list[depIdx] = 0;
 
-					   // Modify Dependent List0
-					   depListCount = referenceEntryPtr->list0.listCount;
-					   for (depIdx = 0; depIdx < depListCount; ++depIdx) {
+                                   // Decrement the Reference's referenceCount
+                                   --referenceEntryPtr->dependentCount;
 
-						   currentInputPoc = pictureControlSetPtr->pictureNumber;
+                                   CHECK_REPORT_ERROR(
+                                       (referenceEntryPtr->dependentCount != ~0u),
+                                       encodeContextPtr->appCallbackPtr,
+                                       EB_ENC_PD_ERROR3);
+                               }
+                           }
+                       }
 
-						   // Adjust the latest currentInputPoc in case we're in a POC rollover scenario
-						   // currentInputPoc += (currentInputPoc < referenceEntryPtr->pictureNumber) ? (1 << sequenceControlSetPtr->bitsForPictureOrderCount) : 0;
+                       // Increment the referenceQueueIndex Iterator
+                       referenceQueueIndex = (referenceQueueIndex == REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : referenceQueueIndex + 1;
+                   }
+               }
 
-						   depPoc = POC_CIRCULAR_ADD(
-							   referenceEntryPtr->pictureNumber, // can't use a value that gets reset
-							   referenceEntryPtr->list0.list[depIdx]/*,
-							   sequenceControlSetPtr->bitsForPictureOrderCount*/);
+               // If there was an I-frame or Scene Change, then cleanup the Reference Queue's Dependent Counts
+               if (pictureControlSetPtr->sliceType == EB_I_PICTURE)
+               {
 
-						   // If Dependent POC is greater or equal to the IDR POC
-						   if (depPoc >= currentInputPoc && referenceEntryPtr->list0.list[depIdx]) {
+                   referenceQueueIndex = encodeContextPtr->referencePictureQueueHeadIndex;
+                   while (referenceQueueIndex != encodeContextPtr->referencePictureQueueTailIndex) {
 
-							   referenceEntryPtr->list0.list[depIdx] = 0;
+                       referenceEntryPtr = encodeContextPtr->referencePictureQueue[referenceQueueIndex];
 
-							   // Decrement the Reference's referenceCount
-							   --referenceEntryPtr->dependentCount;
-							   CHECK_REPORT_ERROR(
-								   (referenceEntryPtr->dependentCount != ~0u),
-								   encodeContextPtr->appCallbackPtr,
-								   EB_ENC_PM_ERROR3);
-						   }
-					   }
+                       // Modify Dependent List0
+                       depListCount = referenceEntryPtr->list0.listCount;
+                       for (depIdx = 0; depIdx < depListCount; ++depIdx) {
 
-					   // Modify Dependent List1
-					   depListCount = referenceEntryPtr->list1.listCount;
-					   for (depIdx = 0; depIdx < depListCount; ++depIdx) {
+                           currentInputPoc = pictureControlSetPtr->pictureNumber;
 
-						   currentInputPoc = pictureControlSetPtr->pictureNumber;
+                           // Adjust the latest currentInputPoc in case we're in a POC rollover scenario
+                           // currentInputPoc += (currentInputPoc < referenceEntryPtr->pictureNumber) ? (1 << sequenceControlSetPtr->bitsForPictureOrderCount) : 0;
 
-						   // Adjust the latest currentInputPoc in case we're in a POC rollover scenario
-						   // currentInputPoc += (currentInputPoc < referenceEntryPtr->pictureNumber) ? (1 << sequenceControlSetPtr->bitsForPictureOrderCount) : 0;
+                           depPoc = POC_CIRCULAR_ADD(
+                               referenceEntryPtr->pictureNumber, // can't use a value that gets reset
+                               referenceEntryPtr->list0.list[depIdx]/*,
+                               sequenceControlSetPtr->bitsForPictureOrderCount*/);
 
-						   depPoc = POC_CIRCULAR_ADD(
-							   referenceEntryPtr->pictureNumber,
-							   referenceEntryPtr->list1.list[depIdx]/*,
-							   sequenceControlSetPtr->bitsForPictureOrderCount*/);
+                           // If Dependent POC is greater or equal to the IDR POC
+                           if (depPoc >= currentInputPoc && referenceEntryPtr->list0.list[depIdx]) {
 
-						   // If Dependent POC is greater or equal to the IDR POC or if we inserted trailing Ps
-						   if (((depPoc >= currentInputPoc) || (((pictureControlSetPtr->preAssignmentBufferCount != pictureControlSetPtr->predStructPtr->predStructPeriod) || (pictureControlSetPtr->idrFlag == EB_TRUE)) && (depPoc > (currentInputPoc - pictureControlSetPtr->preAssignmentBufferCount)))) && referenceEntryPtr->list1.list[depIdx]) {
+                               referenceEntryPtr->list0.list[depIdx] = 0;
 
-							   referenceEntryPtr->list1.list[depIdx] = 0;
+                               // Decrement the Reference's referenceCount
+                               --referenceEntryPtr->dependentCount;
+                               CHECK_REPORT_ERROR(
+                                   (referenceEntryPtr->dependentCount != ~0u),
+                                   encodeContextPtr->appCallbackPtr,
+                                   EB_ENC_PM_ERROR3);
+                           }
+                       }
 
-							   // Decrement the Reference's referenceCount
-							   --referenceEntryPtr->dependentCount;
-							   CHECK_REPORT_ERROR(
-								   (referenceEntryPtr->dependentCount != ~0u),
-								   encodeContextPtr->appCallbackPtr,
-								   EB_ENC_PM_ERROR3);
-						   }
+                       // Modify Dependent List1
+                       depListCount = referenceEntryPtr->list1.listCount;
+                       for (depIdx = 0; depIdx < depListCount; ++depIdx) {
 
-					   }
+                           currentInputPoc = pictureControlSetPtr->pictureNumber;
 
-					   // Increment the referenceQueueIndex Iterator
-					   referenceQueueIndex = (referenceQueueIndex == REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : referenceQueueIndex + 1;
-				   }
+                           // Adjust the latest currentInputPoc in case we're in a POC rollover scenario
+                           // currentInputPoc += (currentInputPoc < referenceEntryPtr->pictureNumber) ? (1 << sequenceControlSetPtr->bitsForPictureOrderCount) : 0;
 
-			   }
-			   else if (pictureControlSetPtr->idrFlag == EB_TRUE) {
+                           depPoc = POC_CIRCULAR_ADD(
+                               referenceEntryPtr->pictureNumber,
+                               referenceEntryPtr->list1.list[depIdx]/*,
+                               sequenceControlSetPtr->bitsForPictureOrderCount*/);
 
-				   // Set Reference Entry pointer
-				   referenceEntryPtr = (ReferenceQueueEntry_t*)EB_NULL;
-			   }
+                           // If Dependent POC is greater or equal to the IDR POC or if we inserted trailing Ps
+                           if (((depPoc >= currentInputPoc) || (((pictureControlSetPtr->preAssignmentBufferCount != pictureControlSetPtr->predStructPtr->predStructPeriod) || (pictureControlSetPtr->idrFlag == EB_TRUE)) && (depPoc > (currentInputPoc - pictureControlSetPtr->preAssignmentBufferCount)))) && referenceEntryPtr->list1.list[depIdx]) {
 
-			   // Check if the EnhancedPictureQueue is full.
-			   // *Note - Having the number of Enhanced Pictures less than the InputQueueSize should ensure this never gets hit
+                               referenceEntryPtr->list1.list[depIdx] = 0;
 
-			   CHECK_REPORT_ERROR(
-				   (((encodeContextPtr->inputPictureQueueHeadIndex != encodeContextPtr->inputPictureQueueTailIndex) || (encodeContextPtr->inputPictureQueue[encodeContextPtr->inputPictureQueueHeadIndex]->inputObjectPtr == EB_NULL))),
-				   encodeContextPtr->appCallbackPtr,
-				   EB_ENC_PM_ERROR4);
+                               // Decrement the Reference's referenceCount
+                               --referenceEntryPtr->dependentCount;
+                               CHECK_REPORT_ERROR(
+                                   (referenceEntryPtr->dependentCount != ~0u),
+                                   encodeContextPtr->appCallbackPtr,
+                                   EB_ENC_PM_ERROR3);
+                           }
 
-			   // Place Picture in input queue
-			   inputEntryPtr = encodeContextPtr->inputPictureQueue[encodeContextPtr->inputPictureQueueTailIndex];
-			   inputEntryPtr->inputObjectPtr = queueEntryPtr->parentPcsWrapperPtr;
-			   inputEntryPtr->referenceEntryIndex = encodeContextPtr->referencePictureQueueTailIndex;
-			   encodeContextPtr->inputPictureQueueTailIndex =
-				   (encodeContextPtr->inputPictureQueueTailIndex == INPUT_QUEUE_MAX_DEPTH - 1) ? 0 : encodeContextPtr->inputPictureQueueTailIndex + 1;
+                       }
 
-			   // Copy the reference lists into the inputEntry and
-			   // set the Reference Counts Based on Temporal Layer and how many frames are active
-			   pictureControlSetPtr->refList0Count = (pictureControlSetPtr->sliceType == EB_I_PICTURE) ? 0 : (EB_U8)predPositionPtr->refList0.referenceListCount;
-			   pictureControlSetPtr->refList1Count = (pictureControlSetPtr->sliceType == EB_I_PICTURE) ? 0 : (EB_U8)predPositionPtr->refList1.referenceListCount;
-			   inputEntryPtr->list0Ptr = &predPositionPtr->refList0;
-			   inputEntryPtr->list1Ptr = &predPositionPtr->refList1;
+                       // Increment the referenceQueueIndex Iterator
+                       referenceQueueIndex = (referenceQueueIndex == REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : referenceQueueIndex + 1;
+                   }
 
-			   // Check if the ReferencePictureQueue is full.
-			   CHECK_REPORT_ERROR(
-				   (((encodeContextPtr->referencePictureQueueHeadIndex != encodeContextPtr->referencePictureQueueTailIndex) || (encodeContextPtr->referencePictureQueue[encodeContextPtr->referencePictureQueueHeadIndex]->referenceObjectPtr == EB_NULL))),
-				   encodeContextPtr->appCallbackPtr,
-				   EB_ENC_PM_ERROR5);
+               }
+               else if (pictureControlSetPtr->idrFlag == EB_TRUE) {
 
-			   // Create Reference Queue Entry even if picture will not be referenced
-			   referenceEntryPtr = encodeContextPtr->referencePictureQueue[encodeContextPtr->referencePictureQueueTailIndex];
-			   referenceEntryPtr->pictureNumber = pictureControlSetPtr->pictureNumber;
-			   referenceEntryPtr->referenceObjectPtr = (EbObjectWrapper_t*)EB_NULL;
-			   referenceEntryPtr->releaseEnable = EB_TRUE;
-			   referenceEntryPtr->referenceAvailable = EB_FALSE;
-			   referenceEntryPtr->isUsedAsReferenceFlag = pictureControlSetPtr->isUsedAsReferenceFlag;
-			   referenceEntryPtr->feedbackArrived = EB_FALSE;
-			   encodeContextPtr->referencePictureQueueTailIndex =
-				   (encodeContextPtr->referencePictureQueueTailIndex == REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : encodeContextPtr->referencePictureQueueTailIndex + 1;
+                   // Set Reference Entry pointer
+                   referenceEntryPtr = (ReferenceQueueEntry_t*)EB_NULL;
+               }
+
+               // Check if the EnhancedPictureQueue is full.
+               // *Note - Having the number of Enhanced Pictures less than the InputQueueSize should ensure this never gets hit
+
+               CHECK_REPORT_ERROR(
+                   (((encodeContextPtr->inputPictureQueueHeadIndex != encodeContextPtr->inputPictureQueueTailIndex) || (encodeContextPtr->inputPictureQueue[encodeContextPtr->inputPictureQueueHeadIndex]->inputObjectPtr == EB_NULL))),
+                   encodeContextPtr->appCallbackPtr,
+                   EB_ENC_PM_ERROR4);
+
+               // Place Picture in input queue
+               inputEntryPtr = encodeContextPtr->inputPictureQueue[encodeContextPtr->inputPictureQueueTailIndex];
+               inputEntryPtr->inputObjectPtr = queueEntryPtr->parentPcsWrapperPtr;
+               inputEntryPtr->referenceEntryIndex = encodeContextPtr->referencePictureQueueTailIndex;
+               encodeContextPtr->inputPictureQueueTailIndex =
+                   (encodeContextPtr->inputPictureQueueTailIndex == INPUT_QUEUE_MAX_DEPTH - 1) ? 0 : encodeContextPtr->inputPictureQueueTailIndex + 1;
+
+               // Copy the reference lists into the inputEntry and
+               // set the Reference Counts Based on Temporal Layer and how many frames are active
+               pictureControlSetPtr->refList0Count = (pictureControlSetPtr->sliceType == EB_I_PICTURE) ? 0 : (EB_U8)predPositionPtr->refList0.referenceListCount;
+               pictureControlSetPtr->refList1Count = (pictureControlSetPtr->sliceType == EB_I_PICTURE) ? 0 : (EB_U8)predPositionPtr->refList1.referenceListCount;
+               inputEntryPtr->list0Ptr = &predPositionPtr->refList0;
+               inputEntryPtr->list1Ptr = &predPositionPtr->refList1;
+
+               // Check if the ReferencePictureQueue is full.
+               CHECK_REPORT_ERROR(
+                   (((encodeContextPtr->referencePictureQueueHeadIndex != encodeContextPtr->referencePictureQueueTailIndex) || (encodeContextPtr->referencePictureQueue[encodeContextPtr->referencePictureQueueHeadIndex]->referenceObjectPtr == EB_NULL))),
+                   encodeContextPtr->appCallbackPtr,
+                   EB_ENC_PM_ERROR5);
+
+               // Create Reference Queue Entry even if picture will not be referenced
+               referenceEntryPtr = encodeContextPtr->referencePictureQueue[encodeContextPtr->referencePictureQueueTailIndex];
+               referenceEntryPtr->pictureNumber = pictureControlSetPtr->pictureNumber;
+               referenceEntryPtr->referenceObjectPtr = (EbObjectWrapper_t*)EB_NULL;
+               referenceEntryPtr->releaseEnable = EB_TRUE;
+               referenceEntryPtr->referenceAvailable = EB_FALSE;
+               referenceEntryPtr->isUsedAsReferenceFlag = pictureControlSetPtr->isUsedAsReferenceFlag;
+               referenceEntryPtr->feedbackArrived = EB_FALSE;
+               encodeContextPtr->referencePictureQueueTailIndex =
+                   (encodeContextPtr->referencePictureQueueTailIndex == REFERENCE_QUEUE_MAX_DEPTH - 1) ? 0 : encodeContextPtr->referencePictureQueueTailIndex + 1;
 
                // Copy the Dependent Lists
-			   // *Note - we are removing any leading picture dependencies for now
-			   referenceEntryPtr->list0.listCount = 0;
-			   for (depIdx = 0; depIdx < predPositionPtr->depList0.listCount; ++depIdx) {
-				   if (predPositionPtr->depList0.list[depIdx] >= 0) {
-					   referenceEntryPtr->list0.list[referenceEntryPtr->list0.listCount++] = predPositionPtr->depList0.list[depIdx];
-				   }
-			   }
+               // *Note - we are removing any leading picture dependencies for now
+               referenceEntryPtr->list0.listCount = 0;
+               for (depIdx = 0; depIdx < predPositionPtr->depList0.listCount; ++depIdx) {
+                   if (predPositionPtr->depList0.list[depIdx] >= 0) {
+                       referenceEntryPtr->list0.list[referenceEntryPtr->list0.listCount++] = predPositionPtr->depList0.list[depIdx];
+                   }
+               }
 
-			   referenceEntryPtr->list1.listCount = predPositionPtr->depList1.listCount;
-			   for (depIdx = 0; depIdx < predPositionPtr->depList1.listCount; ++depIdx) {
-				   referenceEntryPtr->list1.list[depIdx] = predPositionPtr->depList1.list[depIdx];
-			   }
+               referenceEntryPtr->list1.listCount = predPositionPtr->depList1.listCount;
+               for (depIdx = 0; depIdx < predPositionPtr->depList1.listCount; ++depIdx) {
+                   referenceEntryPtr->list1.list[depIdx] = predPositionPtr->depList1.list[depIdx];
+               }
 
-			   referenceEntryPtr->depList0Count = referenceEntryPtr->list0.listCount;
-			   referenceEntryPtr->depList1Count = referenceEntryPtr->list1.listCount;
-			   referenceEntryPtr->dependentCount = referenceEntryPtr->depList0Count + referenceEntryPtr->depList1Count;
+               referenceEntryPtr->depList0Count = referenceEntryPtr->list0.listCount;
+               referenceEntryPtr->depList1Count = referenceEntryPtr->list1.listCount;
+               referenceEntryPtr->dependentCount = referenceEntryPtr->depList0Count + referenceEntryPtr->depList1Count;
 
-			   CHECK_REPORT_ERROR(
-				   (pictureControlSetPtr->predStructPtr->predStructPeriod < MAX_ELAPSED_IDR_COUNT),
-				   encodeContextPtr->appCallbackPtr,
-				   EB_ENC_PM_ERROR6);
+               CHECK_REPORT_ERROR(
+                   (pictureControlSetPtr->predStructPtr->predStructPeriod < MAX_ELAPSED_IDR_COUNT),
+                   encodeContextPtr->appCallbackPtr,
+                   EB_ENC_PM_ERROR6);
 
-			   // Release the Reference Buffer once we know it is not a reference
-			   if (pictureControlSetPtr->isUsedAsReferenceFlag == EB_FALSE){
-				   // Release the nominal liveCount value
-				   EbReleaseObject(pictureControlSetPtr->referencePictureWrapperPtr);
-				   pictureControlSetPtr->referencePictureWrapperPtr = (EbObjectWrapper_t*)EB_NULL;
-			   }
+               // Release the Reference Buffer once we know it is not a reference
+               if (pictureControlSetPtr->isUsedAsReferenceFlag == EB_FALSE){
+                   // Release the nominal liveCount value
+                   EbReleaseObject(pictureControlSetPtr->referencePictureWrapperPtr);
+                   pictureControlSetPtr->referencePictureWrapperPtr = (EbObjectWrapper_t*)EB_NULL;
+               }
 #if DEADLOCK_DEBUG
                SVT_LOG("POC %lld PM OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
-			   // Release the Picture Manager Reorder Queue
-			   queueEntryPtr->parentPcsWrapperPtr = (EbObjectWrapper_t*)EB_NULL;
-			   queueEntryPtr->pictureNumber += PICTURE_MANAGER_REORDER_QUEUE_MAX_DEPTH;
+               // Release the Picture Manager Reorder Queue
+               queueEntryPtr->parentPcsWrapperPtr = (EbObjectWrapper_t*)EB_NULL;
+               queueEntryPtr->pictureNumber += PICTURE_MANAGER_REORDER_QUEUE_MAX_DEPTH;
 
-			   // Increment the Picture Manager Reorder Queue
-			   encodeContextPtr->pictureManagerReorderQueueHeadIndex = (encodeContextPtr->pictureManagerReorderQueueHeadIndex == PICTURE_MANAGER_REORDER_QUEUE_MAX_DEPTH - 1) ? 0 : encodeContextPtr->pictureManagerReorderQueueHeadIndex + 1;
+               // Increment the Picture Manager Reorder Queue
+               encodeContextPtr->pictureManagerReorderQueueHeadIndex = (encodeContextPtr->pictureManagerReorderQueueHeadIndex == PICTURE_MANAGER_REORDER_QUEUE_MAX_DEPTH - 1) ? 0 : encodeContextPtr->pictureManagerReorderQueueHeadIndex + 1;
 
-			   // Get the next entry from the Picture Manager Reorder Queue (Entry N+1)
-			   queueEntryPtr = encodeContextPtr->pictureManagerReorderQueue[encodeContextPtr->pictureManagerReorderQueueHeadIndex];
+               // Get the next entry from the Picture Manager Reorder Queue (Entry N+1)
+               queueEntryPtr = encodeContextPtr->pictureManagerReorderQueue[encodeContextPtr->pictureManagerReorderQueueHeadIndex];
 
-		   }
-		   break;
+           }
+           break;
 
         case EB_PIC_REFERENCE:
 
@@ -623,7 +623,7 @@ void* PictureManagerKernel(void *inputPtr)
                 availabilityFlag = EB_TRUE;
 
                 // Check RefList0 Availability
-				 if (entryPictureControlSetPtr->refList0Count){
+                 if (entryPictureControlSetPtr->refList0Count){
                     referenceQueueIndex = (EB_U32) CIRCULAR_ADD(
                         ((EB_S32) inputEntryPtr->referenceEntryIndex) -     // Base
                         inputEntryPtr->list0Ptr->referenceList,     // Offset
@@ -654,7 +654,7 @@ void* PictureManagerKernel(void *inputPtr)
 
                 // Check RefList1 Availability
                 if(entryPictureControlSetPtr->sliceType == EB_B_PICTURE) {
-					if (entryPictureControlSetPtr->refList1Count){
+                    if (entryPictureControlSetPtr->refList1Count){
                         // If Reference is valid (non-zero), update the availability
                         if(inputEntryPtr->list1Ptr->referenceList != (EB_S32) INVALID_POC) {
 
@@ -724,8 +724,8 @@ void* PictureManagerKernel(void *inputPtr)
                     ChildPictureControlSetPtr->ParentPcsPtr->quantizedCoeffNumBits      = 0;
                     ChildPictureControlSetPtr->encMode                                  = entryPictureControlSetPtr->encMode;
 
-                    ChildPictureControlSetPtr->encDecCodedLcuCount 						= 0;
-                    ChildPictureControlSetPtr->resetDone 								= EB_FALSE;
+                    ChildPictureControlSetPtr->encDecCodedLcuCount                         = 0;
+                    ChildPictureControlSetPtr->resetDone                                 = EB_FALSE;
 
                    // printf("POC [%lu], use pcs %p\n", ChildPictureControlSetPtr->pictureNumber, ChildPictureControlSetPtr);
 
@@ -815,11 +815,11 @@ void* PictureManagerKernel(void *inputPtr)
                     EB_MEMSET(ChildPictureControlSetPtr->refPicQpArray, 0,  2 * sizeof(EB_U8));
 
                     EB_MEMSET(ChildPictureControlSetPtr->refSliceTypeArray, 0,  2 * sizeof(EB_PICTURE));
-                   
+
                     // Configure List0
                     if ((entryPictureControlSetPtr->sliceType == EB_P_PICTURE) || (entryPictureControlSetPtr->sliceType == EB_B_PICTURE)) {
 
-						if (entryPictureControlSetPtr->refList0Count){
+                        if (entryPictureControlSetPtr->refList0Count){
                             referenceQueueIndex = (EB_U32) CIRCULAR_ADD(
                                 ((EB_S32) inputEntryPtr->referenceEntryIndex) - inputEntryPtr->list0Ptr->referenceList,
                                 REFERENCE_QUEUE_MAX_DEPTH);                                                                                             // Max
@@ -851,7 +851,7 @@ void* PictureManagerKernel(void *inputPtr)
                     // Configure List1
                     if (entryPictureControlSetPtr->sliceType == EB_B_PICTURE) {
 
-						if (entryPictureControlSetPtr->refList1Count){
+                        if (entryPictureControlSetPtr->refList1Count){
                             referenceQueueIndex = (EB_U32) CIRCULAR_ADD(
                                 ((EB_S32) inputEntryPtr->referenceEntryIndex) - inputEntryPtr->list1Ptr->referenceList,
                                 REFERENCE_QUEUE_MAX_DEPTH);                                                                                             // Max
@@ -863,7 +863,7 @@ void* PictureManagerKernel(void *inputPtr)
 
                             ChildPictureControlSetPtr->refPicQpArray[REF_LIST_1]  = ((EbReferenceObject_t*) referenceEntryPtr->referenceObjectPtr->objectPtr)->qp;
                             ChildPictureControlSetPtr->refSliceTypeArray[REF_LIST_1] = ((EbReferenceObject_t*) referenceEntryPtr->referenceObjectPtr->objectPtr)->sliceType;
-                            
+
 
 
                             // Increment the Reference's liveCount by the number of tiles in the input picture

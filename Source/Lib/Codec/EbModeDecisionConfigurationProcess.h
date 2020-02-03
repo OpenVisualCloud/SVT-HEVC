@@ -19,16 +19,16 @@ extern "C" {
  * Defines
  **************************************/
 
-typedef struct MdcpLocalCodingUnit_s    
+typedef struct MdcpLocalCodingUnit_s
 {
     EB_U64                          earlyCost;
     EB_BOOL                         earlySplitFlag;
     EB_U32                          splitContext;
-	EB_BOOL                         slectedCu;
+    EB_BOOL                         slectedCu;
     EB_BOOL                         stopSplit;
 } MdcpLocalCodingUnit_t;
 
-typedef struct ModeDecisionConfigurationContext_s 
+typedef struct ModeDecisionConfigurationContext_s
 {
     EbFifo_t                            *rateControlInputFifoPtr;
     EbFifo_t                            *modeDecisionConfigurationOutputFifoPtr;
@@ -42,20 +42,20 @@ typedef struct ModeDecisionConfigurationContext_s
     // Inter depth decision
     EB_U8                               groupOf8x8BlocksCount;
     EB_U8                               groupOf16x16BlocksCount;
-	EB_U64                              interComplexityMinimum;
-	EB_U64                              interComplexityMaximum;
-	EB_U64                              interComplexityAverage;
-	EB_U64                              intraComplexityMinimum;
-	EB_U64                              intraComplexityMaximum;
-	EB_U64                              intraComplexityAverage;
-	EB_S16                              minDeltaQpWeight;
-	EB_S16                              maxDeltaQpWeight;
-	EB_S8                               minDeltaQp[4];
-	EB_S8                               maxDeltaQp[4];
+    EB_U64                              interComplexityMinimum;
+    EB_U64                              interComplexityMaximum;
+    EB_U64                              interComplexityAverage;
+    EB_U64                              intraComplexityMinimum;
+    EB_U64                              intraComplexityMaximum;
+    EB_U64                              intraComplexityAverage;
+    EB_S16                              minDeltaQpWeight;
+    EB_S16                              maxDeltaQpWeight;
+    EB_S8                               minDeltaQp[4];
+    EB_S8                               maxDeltaQp[4];
 
-    // Budgeting  
+    // Budgeting
     EB_U32                             *lcuScoreArray;
-    EB_U8	                            costDepthMode[LCU_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE];
+    EB_U8                                costDepthMode[LCU_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE];
     EB_U8                              *lcuCostArray;
     EB_U32                              predictedCost;
     EB_U32                              budget;
@@ -85,11 +85,11 @@ extern EB_ERRORTYPE ModeDecisionConfigurationContextCtor(
     EbFifo_t                            *rateControlInputFifoPtr,
 
     EbFifo_t                            *modeDecisionConfigurationOutputFifoPtr,
-    EB_U16						         lcuTotalCount);
+    EB_U16                                 lcuTotalCount);
 
-   
+
 extern void* ModeDecisionConfigurationKernel(void *inputPtr);
 #ifdef __cplusplus
 }
-#endif   
+#endif
 #endif // EbModeDecisionConfigurationProcess_h

@@ -16,7 +16,7 @@ void IntraModeVerticalLuma(
     EB_U8            *refSamples,             //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,          //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride, //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip                    //skip one row 
+    const EB_BOOL     skip                    //skip one row
     );
 
 void IntraModeVerticalLuma16bit(
@@ -31,7 +31,7 @@ void IntraModeVerticalChroma(
     EB_U8            *refSamples,             //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,          //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride, //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip                    //skip one row 
+    const EB_BOOL     skip                    //skip one row
     );
 
 void IntraModeVerticalChroma16bit(
@@ -46,7 +46,7 @@ void IntraModeHorizontalLuma(
     EB_U8            *refSamples,             //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,          //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride, //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip                    //skip one row 
+    const EB_BOOL     skip                    //skip one row
     );
 
 void IntraModeHorizontalLuma16bit(
@@ -61,7 +61,7 @@ void IntraModeHorizontalChroma(
     EB_U8            *refSamples,             //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,          //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride, //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip                    //skip one row 
+    const EB_BOOL     skip                    //skip one row
     );
 
 void IntraModeHorizontalChroma16bit(
@@ -76,7 +76,7 @@ void IntraModeDCLuma(
     EB_U8            *refSamples,                 //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,              //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip);                   //skip one row 
+    const EB_BOOL     skip);                   //skip one row
 
 void IntraModeDCLuma16bit(
     const EB_U32   size,                       //input parameter, denotes the size of the current PU
@@ -90,7 +90,7 @@ void IntraModeDCChroma(
     EB_U8            *refSamples,                 //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,              //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip);                    //skip one row 
+    const EB_BOOL     skip);                    //skip one row
 
 void IntraModeDCChroma16bit(
     const EB_U32   size,                       //input parameter, denotes the size of the current PU
@@ -104,7 +104,7 @@ void IntraModePlanar(
     EB_U8            *refSamples,                 //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,              //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip);                     //skip one row 
+    const EB_BOOL     skip);                     //skip one row
 
 void IntraModePlanar16bit(
     const EB_U32   size,                       //input parameter, denotes the size of the current PU
@@ -118,7 +118,7 @@ void IntraModeAngular_34(
     EB_U8            *refSamples,                 //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,              //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip);                     //skip one row 
+    const EB_BOOL     skip);                     //skip one row
 
 void IntraModeAngular16bit_34(
     const EB_U32   size,                       //input parameter, denotes the size of the current PU
@@ -132,7 +132,7 @@ void IntraModeAngular_18(
     EB_U8            *refSamples,                 //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,              //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip);                    //skip one row 
+    const EB_BOOL     skip);                    //skip one row
 
 void IntraModeAngular16bit_18(
     const EB_U32   size,                       //input parameter, denotes the size of the current PU
@@ -146,7 +146,7 @@ void IntraModeAngular_2(
     EB_U8            *refSamples,                 //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,              //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip);                      //skip one row 
+    const EB_BOOL     skip);                      //skip one row
 
 void IntraModeAngular16bit_2(
     const EB_U32    size,                       //input parameter, denotes the size of the current PU
@@ -167,9 +167,9 @@ void IntraModeAngular16bit_Vertical_Kernel(
     EB_U32          size,                       //input parameter, denotes the size of the current PU
     EB_U16         *refSampMain,                //input parameter, pointer to the reference samples
     EB_U16         *predictionPtr,              //output parameter, pointer to the prediction
-    EB_U32			predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL	skip,
-    EB_S32			intraPredAngle);
+    EB_U32            predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
+    const EB_BOOL    skip,
+    EB_S32            intraPredAngle);
 
 void IntraModeAngular_Horizontal_Kernel(
     EB_U32            size,
@@ -190,5 +190,5 @@ void IntraModeAngular16bit_Horizontal_Kernel(
 
 #ifdef __cplusplus
 }
-#endif        
+#endif
 #endif // EbCompute8x8SAD_asm_h

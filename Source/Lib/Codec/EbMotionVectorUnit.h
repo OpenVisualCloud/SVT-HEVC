@@ -13,18 +13,18 @@ extern "C" {
 #pragma pack(push, 1)
 
 typedef union {
-	struct 
-	{
-		signed short x;
-		signed short y;
-	}; 
-	EB_U32 mvUnion;
+    struct
+    {
+        signed short x;
+        signed short y;
+    };
+    EB_U32 mvUnion;
 } Mv_t;
 
 #pragma pack(pop)
 
 #pragma pack(push, 1)
-typedef struct 
+typedef struct
 {
     signed   mvdX    : 16;
     signed   mvdY    : 16;
@@ -32,14 +32,14 @@ typedef struct
     unsigned         : 7;
     unsigned predIdx : 1;
     unsigned         : 7;
-   
+
 } Mvd_t;
 #pragma pack(pop)
 
 typedef struct
 {
-	Mv_t            mv[MAX_NUM_OF_REF_PIC_LIST];
-	EB_U8           predDirection;
+    Mv_t            mv[MAX_NUM_OF_REF_PIC_LIST];
+    EB_U8           predDirection;
 } MvUnit_t;
 
 #ifdef __cplusplus

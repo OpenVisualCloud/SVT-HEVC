@@ -32,10 +32,10 @@ extern void SadCalculation_32x32_64x64(
     EB_U32   mv);
 
 extern void InitializeBuffer_32bits(
-    EB_U32*		Pointer,
-    EB_U32		Count128,
-    EB_U32		Count32,
-    EB_U32		Value);
+    EB_U32*        Pointer,
+    EB_U32        Count128,
+    EB_U32        Count32,
+    EB_U32        Value);
 
 void WeightSearchRegion(
     EB_U8                   *inputBuffer,
@@ -50,5 +50,5 @@ void WeightSearchRegion(
 
 #ifdef __cplusplus
 }
-#endif        
+#endif
 #endif // EbMeSadCalculation_C_h

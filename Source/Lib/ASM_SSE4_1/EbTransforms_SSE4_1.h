@@ -27,12 +27,12 @@ extern void PfreqTransform8x8_SSE4_1_INTRIN(
     EB_S16                  *transformInnerArrayPtr,
     EB_U32                   bitIncrement);
 extern void PfreqN4Transform8x8_SSE4_1_INTRIN(
-	EB_S16                  *residual,
-	const EB_U32             srcStride,
-	EB_S16                  *transformCoefficients,
-	const EB_U32             dstStride,
-	EB_S16                  *transformInnerArrayPtr,
-	EB_U32                   bitIncrement);
+    EB_S16                  *residual,
+    const EB_U32             srcStride,
+    EB_S16                  *transformCoefficients,
+    const EB_U32             dstStride,
+    EB_S16                  *transformInnerArrayPtr,
+    EB_U32                   bitIncrement);
 
 #ifdef __cplusplus
 }

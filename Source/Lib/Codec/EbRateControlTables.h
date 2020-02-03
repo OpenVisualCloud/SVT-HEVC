@@ -25,7 +25,7 @@ extern "C" {
 #define TOTAL_NUMBER_OF_INTERVALS                           (NUMBER_OF_SAD_INTERVALS + \
                                                              NUMBER_OF_INTRA_SAD_INTERVALS )
 
-#define TOTAL_NUMBER_OF_REF_QP_VALUES                       1      
+#define TOTAL_NUMBER_OF_REF_QP_VALUES                       1
 
 #define TOTAL_NUMBER_OF_INITIAL_RC_TABLES_ENTRY             (TOTAL_NUMBER_OF_REF_QP_VALUES * TOTAL_NUMBER_OF_INTERVALS)
 
@@ -43,10 +43,10 @@ typedef struct InitialRateControlTables_s {
 
 
 } RateControlTables_t;
-static const EB_U8 refQpListTable [] = 
+static const EB_U8 refQpListTable [] =
 
-    { 0,    1,    2,    3,    4,    5,    6,    7, 
-      8,    9,   10,   11,   12,   13,   14,   15,   
+    { 0,    1,    2,    3,    4,    5,    6,    7,
+      8,    9,   10,   11,   12,   13,   14,   15,
      16,   17,   18,   19,   20,   21,   22,   23,
      24,   25,   26,   27,   28,   29,   30,   31,
      32,   33,   34,   35,   36,   37,   38,   39,

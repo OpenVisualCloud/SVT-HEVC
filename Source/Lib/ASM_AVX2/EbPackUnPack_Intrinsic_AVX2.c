@@ -78,7 +78,7 @@ void EB_ENC_msbUnPack2D_AVX512_INTRIN(
         {
             EB_U16 inPixel2 = in16BitBuffer[y];
             out8BitBuffer[y] = (EB_U8)(inPixel2 >> 2);
-                
+
             EB_U8 tmpPixel2 = (EB_U8)(inPixel2 << 6);
             outnBitBuffer[y] = tmpPixel2;
         }

@@ -25,16 +25,16 @@ extern "C" {
 /**************************************
  * Enc Dec Context
  **************************************/
-typedef struct EntropyCodingContext_s 
+typedef struct EntropyCodingContext_s
 {
     EbFifo_t                       *encDecInputFifoPtr;
     EbFifo_t                       *entropyCodingOutputFifoPtr;  // to packetization
     EbFifo_t                       *rateControlOutputFifoPtr; // feedback to rate control
 
-    EB_U32                          lcuTotalCount; 
-	// Lambda
-	EB_U8                           qp;
-	EB_U8                           chromaQp;
+    EB_U32                          lcuTotalCount;
+    // Lambda
+    EB_U8                           qp;
+    EB_U8                           chromaQp;
     // Coding Unit Workspace---------------------------
     EbPictureBufferDesc_t          *coeffBufferTB;                              //Used to hold quantized coeff for one TB in EncPass.
 
@@ -43,13 +43,13 @@ typedef struct EntropyCodingContext_s
     CodingUnit_t                   *cuPtr;
     const CodedUnitStats_t         *cuStats;
     EB_U32                          cuIndex;
-    EB_U8                           cuDepth; 
-    EB_U32                          cuSize; 
-    EB_U32                          lcuSize;      
-    EB_U32                          lcuChromaSize;      
+    EB_U8                           cuDepth;
+    EB_U32                          cuSize;
+    EB_U32                          lcuSize;
+    EB_U32                          lcuChromaSize;
     EB_U32                          cuSizeLog2;
-    EB_U32                          cuOriginX;      
-    EB_U32                          cuOriginY;      
+    EB_U32                          cuOriginX;
+    EB_U32                          cuOriginY;
     EB_U32                          cuChromaOriginX;
     EB_U32                          cuChromaOriginY;
 
@@ -69,17 +69,17 @@ typedef struct EntropyCodingContext_s
     EB_U32                          amvpCandidateCountRefList1;
     EB_S32                          xMvAmvpCandidateArrayList1[MAX_NUM_OF_AMVP_CANDIDATES];
     EB_S32                          yMvAmvpCandidateArrayList1[MAX_NUM_OF_AMVP_CANDIDATES];
-    
+
     EB_U32                          tuItr;
     EB_U32                          tuArea;
     EB_U32                          tuTotalArea;
     TransformUnit_t                *tuPtr;
     const TransformUnitStats_t     *tuStats;
-    EB_U32                          tuOriginX;      
-    EB_U32                          tuOriginY;     
+    EB_U32                          tuOriginX;
+    EB_U32                          tuOriginY;
     EB_U32                          tuSize;
     EB_U32                          tuSizeChroma;
-    
+
     // MCP Context
     EB_BOOL                         is16bit; //enable 10 bit encode in CL
 
@@ -94,7 +94,7 @@ extern EB_ERRORTYPE EntropyCodingContextCtor(
     EbFifo_t                *packetizationOutputFifoPtr,
     EbFifo_t                *rateControlOutputFifoPtr,
     EB_BOOL                  is16bit);
-    
+
 extern void* EntropyCodingKernel(void *inputPtr);
 
 #ifdef __cplusplus

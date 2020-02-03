@@ -38,10 +38,10 @@ typedef void(*EB_SADCALCULATION32X32AND64X64_TYPE)(
     EB_U32   mv);
 
 typedef void(*EB_INIALIZEBUFFER_32BITS)(
-    EB_U32*		Pointer,
-    EB_U32		Count128,
-    EB_U32		Count32,
-    EB_U32		Value);
+    EB_U32*        Pointer,
+    EB_U32        Count128,
+    EB_U32        Count32,
+    EB_U32        Value);
 
 typedef void(*EB_RECTAMPSADCALCULATION8X8AND16X16_TYPE)(
     EB_U8   *src,
@@ -107,14 +107,14 @@ static EB_SADCALCULATION8X8AND16X16_TYPE SadCalculation_8x8_16x16_funcPtrArray[E
     // C_DEFAULT
     SadCalculation_8x8_16x16,
     // AVX2
-	SadCalculation_8x8_16x16_SSE2_INTRIN,
+    SadCalculation_8x8_16x16_SSE2_INTRIN,
 };
 
 static EB_SADCALCULATION32X32AND64X64_TYPE SadCalculation_32x32_64x64_funcPtrArray[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     SadCalculation_32x32_64x64,
-    // AVX2      
-	SadCalculation_32x32_64x64_SSE2_INTRIN,
+    // AVX2
+    SadCalculation_32x32_64x64_SSE2_INTRIN,
 };
 
 
@@ -128,5 +128,5 @@ static EB_INIALIZEBUFFER_32BITS InitializeBuffer_32bits_funcPtrArray[EB_ASM_TYPE
 
 #ifdef __cplusplus
 }
-#endif        
+#endif
 #endif // EbMeSadCalculation_h

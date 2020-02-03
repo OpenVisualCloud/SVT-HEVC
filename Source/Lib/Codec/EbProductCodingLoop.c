@@ -27,180 +27,180 @@
 
 EB_U8  MDSCAN_TO_QUADTREE_ID[] =
 {
-	1,
-	1,
-	1,
-	1,
-	2,
-	3,
-	4,
-	2,
-	1,
-	2,
-	3,
-	4,
-	3,
-	1,
-	2,
-	3,
-	4,
-	4,
-	1,
-	2,
-	3,
-	4,
-	2,
-	1,
-	1,
-	2,
-	3,
-	4,
-	2,
-	1,
-	2,
-	3,
-	4,
-	3,
-	1,
-	2,
-	3,
-	4,
-	4,
-	1,
-	2,
-	3,
-	4,
-	3,
-	1,
-	1,
-	2,
-	3,
-	4,
-	2,
-	1,
-	2,
-	3,
-	4,
-	3,
-	1,
-	2,
-	3,
-	4,
-	4,
-	1,
-	2,
-	3,
-	4,
-	4,
-	1,
-	1,
-	2,
-	3,
-	4,
-	2,
-	1,
-	2,
-	3,
-	4,
-	3,
-	1,
-	2,
-	3,
-	4,
-	4,
-	1,
-	2,
-	3,
-	4,
+    1,
+    1,
+    1,
+    1,
+    2,
+    3,
+    4,
+    2,
+    1,
+    2,
+    3,
+    4,
+    3,
+    1,
+    2,
+    3,
+    4,
+    4,
+    1,
+    2,
+    3,
+    4,
+    2,
+    1,
+    1,
+    2,
+    3,
+    4,
+    2,
+    1,
+    2,
+    3,
+    4,
+    3,
+    1,
+    2,
+    3,
+    4,
+    4,
+    1,
+    2,
+    3,
+    4,
+    3,
+    1,
+    1,
+    2,
+    3,
+    4,
+    2,
+    1,
+    2,
+    3,
+    4,
+    3,
+    1,
+    2,
+    3,
+    4,
+    4,
+    1,
+    2,
+    3,
+    4,
+    4,
+    1,
+    1,
+    2,
+    3,
+    4,
+    2,
+    1,
+    2,
+    3,
+    4,
+    3,
+    1,
+    2,
+    3,
+    4,
+    4,
+    1,
+    2,
+    3,
+    4,
 };
 
 EB_U8 CHILD_MDSCAN_TO_PARENT_MDSCAN[] =
 {
-	0,
-	0,
-	1,
-	2,
-	2,
-	2,
-	2,
-	1,
-	7,
-	7,
-	7,
-	7,
-	1,
-	12,
-	12,
-	12,
-	12,
-	1,
-	17,
-	17,
-	17,
-	17,
-	0,
-	22,
-	23,
-	23,
-	23,
-	23,
-	22,
-	28,
-	28,
-	28,
-	28,
-	22,
-	33,
-	33,
-	33,
-	33,
-	22,
-	38,
-	38,
-	38,
-	38,
-	0,
-	43,
-	44,
-	44,
-	44,
-	44,
-	43,
-	49,
-	49,
-	49,
-	49,
-	43,
-	54,
-	54,
-	54,
-	54,
-	43,
-	59,
-	59,
-	59,
-	59,
-	0,
-	64,
-	65,
-	65,
-	65,
-	65,
-	64,
-	70,
-	70,
-	70,
-	70,
-	64,
-	75,
-	75,
-	75,
-	75,
-	64,
-	80,
-	80,
-	80,
-	80,
+    0,
+    0,
+    1,
+    2,
+    2,
+    2,
+    2,
+    1,
+    7,
+    7,
+    7,
+    7,
+    1,
+    12,
+    12,
+    12,
+    12,
+    1,
+    17,
+    17,
+    17,
+    17,
+    0,
+    22,
+    23,
+    23,
+    23,
+    23,
+    22,
+    28,
+    28,
+    28,
+    28,
+    22,
+    33,
+    33,
+    33,
+    33,
+    22,
+    38,
+    38,
+    38,
+    38,
+    0,
+    43,
+    44,
+    44,
+    44,
+    44,
+    43,
+    49,
+    49,
+    49,
+    49,
+    43,
+    54,
+    54,
+    54,
+    54,
+    43,
+    59,
+    59,
+    59,
+    59,
+    0,
+    64,
+    65,
+    65,
+    65,
+    65,
+    64,
+    70,
+    70,
+    70,
+    70,
+    64,
+    75,
+    75,
+    75,
+    75,
+    64,
+    80,
+    80,
+    80,
+    80,
 };
 
 
@@ -210,9 +210,9 @@ static const EB_U8 CuOffset[4] = { 85, 21, 5, 1 };
 
 const EB_FULL_COST_FUNC   fullCostFuncTable[3][3] =
 {
-	/*      */{ NULL, NULL, NULL },
-	/*INTER */{ InterFullCost, InterFullCost, NULL },
-	/*INTRA */{ IntraFullCostPslice, IntraFullCostPslice, IntraFullCostIslice },
+    /*      */{ NULL, NULL, NULL },
+    /*INTER */{ InterFullCost, InterFullCost, NULL },
+    /*INTRA */{ IntraFullCostPslice, IntraFullCostPslice, IntraFullCostIslice },
 };
 
 const EB_PREDICTION_FUNC  PredictionFunTableOl[2][3] = {
@@ -228,15 +228,15 @@ const EB_PREDICTION_FUNC  PredictionFunTableCl[2][3] = {
 
 const EB_FAST_COST_FUNC   ProductFastCostFuncOptTable[3][3] =
 {
-	/*      */{ NULL, NULL, NULL },
-	/*INTER */{ InterFastCostBsliceOpt, InterFastCostPsliceOpt, NULL },
-	/*INTRA */{ Intra2Nx2NFastCostPsliceOpt, Intra2Nx2NFastCostPsliceOpt, Intra2Nx2NFastCostIsliceOpt },
+    /*      */{ NULL, NULL, NULL },
+    /*INTER */{ InterFastCostBsliceOpt, InterFastCostPsliceOpt, NULL },
+    /*INTRA */{ Intra2Nx2NFastCostPsliceOpt, Intra2Nx2NFastCostPsliceOpt, Intra2Nx2NFastCostIsliceOpt },
 };
 const EB_FULL_LUMA_COST_FUNC   ProductFullLumaCostFuncTable[3][3] =
 {
-	/*      */{ NULL, NULL, NULL },
-	/*INTER */{ InterFullLumaCost, InterFullLumaCost, NULL },
-	/*INTRA */{ IntraFullLumaCostPslice, IntraFullLumaCostPslice, IntraFullLumaCostIslice },
+    /*      */{ NULL, NULL, NULL },
+    /*INTER */{ InterFullLumaCost, InterFullLumaCost, NULL },
+    /*INTRA */{ IntraFullLumaCostPslice, IntraFullLumaCostPslice, IntraFullLumaCostIslice },
 };
 
 const EB_INTRA_4x4_FAST_LUMA_COST_FUNC Intra4x4FastCostFuncTable[3] =
@@ -255,27 +255,27 @@ const EB_INTRA_4x4_FULL_LUMA_COST_FUNC Intra4x4FullCostFuncTable[3] =
 
 const EB_INTRA_NxN_FAST_COST_FUNC IntraNxNFastCostFuncTable[3] =
 {
-	IntraNxNFastCostPslice,
-	IntraNxNFastCostPslice,
-	IntraNxNFastCostIslice
+    IntraNxNFastCostPslice,
+    IntraNxNFastCostPslice,
+    IntraNxNFastCostIslice
 };
 const EB_INTRA_NxN_FULL_COST_FUNC IntraNxNFullCostFuncTable[3] =
 {
-	IntraNxNFullCostPslice,
-	IntraNxNFullCostPslice,
-	IntraNxNFullCostIslice
+    IntraNxNFullCostPslice,
+    IntraNxNFullCostPslice,
+    IntraNxNFullCostIslice
 };
 
 extern void GenerateIntraLumaReferenceSamplesMd(
-	ModeDecisionContext_t      *contextPtr,
-	EbPictureBufferDesc_t      *inputPicturePtr) {
+    ModeDecisionContext_t      *contextPtr,
+    EbPictureBufferDesc_t      *inputPicturePtr) {
 
 
     EB_BOOL pictureLeftBoundary = (contextPtr->lcuPtr->lcuEdgeInfoPtr->tileLeftEdgeFlag == EB_TRUE && ((contextPtr->cuOriginX & (contextPtr->lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
     EB_BOOL pictureTopBoundary = (contextPtr->lcuPtr->lcuEdgeInfoPtr->tileTopEdgeFlag == EB_TRUE && ((contextPtr->cuOriginY & (contextPtr->lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
     EB_BOOL pictureRightBoundary = (contextPtr->lcuPtr->lcuEdgeInfoPtr->tileRightEdgeFlag == EB_TRUE && (((contextPtr->cuOriginX + contextPtr->cuStats->size) & (contextPtr->lcuPtr->size - 1)) == 0)) ? EB_TRUE : EB_FALSE;
 
-	if (contextPtr->intraMdOpenLoopFlag == EB_FALSE) {
+    if (contextPtr->intraMdOpenLoopFlag == EB_FALSE) {
 
         GenerateLumaIntraReferenceSamplesEncodePass(
             EB_FALSE,
@@ -294,110 +294,110 @@ extern void GenerateIntraLumaReferenceSamplesMd(
             pictureTopBoundary,
             pictureRightBoundary);
 
-		contextPtr->lumaIntraRefSamplesGenDone = EB_TRUE;
+        contextPtr->lumaIntraRefSamplesGenDone = EB_TRUE;
 
-	}
-	else{
-		//TODO: Change this function to take care of neighbour validity.
-		//      then create a generic function that takes recon or input frame as generic input for both open and close loop case.
-		UpdateNeighborSamplesArrayOL(
-			contextPtr->intraRefPtr,
-			inputPicturePtr,
-			inputPicturePtr->strideY,
-			contextPtr->cuOriginX,
-			contextPtr->cuOriginY,
-			contextPtr->cuStats->size,
-			contextPtr->lcuPtr);
+    }
+    else{
+        //TODO: Change this function to take care of neighbour validity.
+        //      then create a generic function that takes recon or input frame as generic input for both open and close loop case.
+        UpdateNeighborSamplesArrayOL(
+            contextPtr->intraRefPtr,
+            inputPicturePtr,
+            inputPicturePtr->strideY,
+            contextPtr->cuOriginX,
+            contextPtr->cuOriginY,
+            contextPtr->cuStats->size,
+            contextPtr->lcuPtr);
 
-		contextPtr->lumaIntraRefSamplesGenDone = EB_TRUE;
+        contextPtr->lumaIntraRefSamplesGenDone = EB_TRUE;
 
-	}
+    }
 }
 
 void ApplyMvOverBoundariesBias(
-	SequenceControlSet_t                *sequenceControlSetPtr,
-	ModeDecisionContext_t               *contextPtr,
-	EB_U32                                cuSize,
-	ModeDecisionCandidateBuffer_t       *candidateBuffer
-	) {
+    SequenceControlSet_t                *sequenceControlSetPtr,
+    ModeDecisionContext_t               *contextPtr,
+    EB_U32                                cuSize,
+    ModeDecisionCandidateBuffer_t       *candidateBuffer
+    ) {
 
-	if (candidateBuffer->candidatePtr->type == INTER_MODE) {
+    if (candidateBuffer->candidatePtr->type == INTER_MODE) {
 
-		if (candidateBuffer->candidatePtr->predictionDirection[0] == UNI_PRED_LIST_0) {
-			if (
-				((unsigned)ABS((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_x_L0 >> 2) + contextPtr->cuOriginX + cuSize)) > sequenceControlSetPtr->lumaWidth) ||
-				((unsigned)ABS((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_y_L0 >> 2) + contextPtr->cuOriginY + cuSize)) > sequenceControlSetPtr->lumaHeight) ||
-				((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_x_L0 >> 2) + contextPtr->cuOriginX) < 0) ||
-				((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_y_L0 >> 2) + contextPtr->cuOriginY) < 0)
+        if (candidateBuffer->candidatePtr->predictionDirection[0] == UNI_PRED_LIST_0) {
+            if (
+                ((unsigned)ABS((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_x_L0 >> 2) + contextPtr->cuOriginX + cuSize)) > sequenceControlSetPtr->lumaWidth) ||
+                ((unsigned)ABS((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_y_L0 >> 2) + contextPtr->cuOriginY + cuSize)) > sequenceControlSetPtr->lumaHeight) ||
+                ((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_x_L0 >> 2) + contextPtr->cuOriginX) < 0) ||
+                ((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_y_L0 >> 2) + contextPtr->cuOriginY) < 0)
 
-				){
-				*candidateBuffer->fastCostPtr = 0xFFFFFFFFFFFFFF;
+                ){
+                *candidateBuffer->fastCostPtr = 0xFFFFFFFFFFFFFF;
 
 
-			}
-		}
-		else if (candidateBuffer->candidatePtr->predictionDirection[0] == UNI_PRED_LIST_1) {
-			if (
-				((unsigned)ABS((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_x_L1 >> 2) + contextPtr->cuOriginX + cuSize)) > sequenceControlSetPtr->lumaWidth) ||
-				((unsigned)ABS((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_y_L1 >> 2) + contextPtr->cuOriginY + cuSize)) > sequenceControlSetPtr->lumaHeight) ||
-				((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_x_L1 >> 2) + contextPtr->cuOriginX) < 0) ||
-				((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_y_L1 >> 2) + contextPtr->cuOriginY) < 0)
-				){
-				//*candidateBuffer->fastCostPtr += (*candidateBuffer->fastCostPtr * 100) / 100;
-				*candidateBuffer->fastCostPtr = 0xFFFFFFFFFFFFFF;
+            }
+        }
+        else if (candidateBuffer->candidatePtr->predictionDirection[0] == UNI_PRED_LIST_1) {
+            if (
+                ((unsigned)ABS((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_x_L1 >> 2) + contextPtr->cuOriginX + cuSize)) > sequenceControlSetPtr->lumaWidth) ||
+                ((unsigned)ABS((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_y_L1 >> 2) + contextPtr->cuOriginY + cuSize)) > sequenceControlSetPtr->lumaHeight) ||
+                ((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_x_L1 >> 2) + contextPtr->cuOriginX) < 0) ||
+                ((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_y_L1 >> 2) + contextPtr->cuOriginY) < 0)
+                ){
+                //*candidateBuffer->fastCostPtr += (*candidateBuffer->fastCostPtr * 100) / 100;
+                *candidateBuffer->fastCostPtr = 0xFFFFFFFFFFFFFF;
 
-			}
-		}
-		else {
-			if (
-				((unsigned)ABS((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_x_L0 >> 2) + contextPtr->cuOriginX + cuSize)) > sequenceControlSetPtr->lumaWidth) ||
-				((unsigned)ABS((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_y_L0 >> 2) + contextPtr->cuOriginY + cuSize)) > sequenceControlSetPtr->lumaHeight) ||
-				((unsigned)ABS((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_x_L1 >> 2) + contextPtr->cuOriginX + cuSize)) > sequenceControlSetPtr->lumaWidth) ||
-				((unsigned)ABS((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_y_L1 >> 2) + contextPtr->cuOriginY + cuSize)) > sequenceControlSetPtr->lumaHeight) ||
-				((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_x_L0 >> 2) + contextPtr->cuOriginX) < 0) ||
-				((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_y_L0 >> 2) + contextPtr->cuOriginY) < 0) ||
-				((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_x_L1 >> 2) + contextPtr->cuOriginX) < 0) ||
-				((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_y_L1 >> 2) + contextPtr->cuOriginY) < 0)
-				){
-				*candidateBuffer->fastCostPtr = 0xFFFFFFFFFFFFFF;
-			}
-		}
-	}
+            }
+        }
+        else {
+            if (
+                ((unsigned)ABS((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_x_L0 >> 2) + contextPtr->cuOriginX + cuSize)) > sequenceControlSetPtr->lumaWidth) ||
+                ((unsigned)ABS((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_y_L0 >> 2) + contextPtr->cuOriginY + cuSize)) > sequenceControlSetPtr->lumaHeight) ||
+                ((unsigned)ABS((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_x_L1 >> 2) + contextPtr->cuOriginX + cuSize)) > sequenceControlSetPtr->lumaWidth) ||
+                ((unsigned)ABS((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_y_L1 >> 2) + contextPtr->cuOriginY + cuSize)) > sequenceControlSetPtr->lumaHeight) ||
+                ((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_x_L0 >> 2) + contextPtr->cuOriginX) < 0) ||
+                ((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_y_L0 >> 2) + contextPtr->cuOriginY) < 0) ||
+                ((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_x_L1 >> 2) + contextPtr->cuOriginX) < 0) ||
+                ((signed int)((signed int)(candidateBuffer->candidatePtr->motionVector_y_L1 >> 2) + contextPtr->cuOriginY) < 0)
+                ){
+                *candidateBuffer->fastCostPtr = 0xFFFFFFFFFFFFFF;
+            }
+        }
+    }
 };
 
 /***************************************************
 * Update Recon Samples Neighbor Arrays
 ***************************************************/
 void ModeDecisionUpdateNeighborArrays(
-	NeighborArrayUnit_t     *leafDepthNeighborArray,
-	NeighborArrayUnit_t     *modeTypeNeighborArray,
-	NeighborArrayUnit_t     *intraLumaModeNeighborArray,
-	NeighborArrayUnit_t     *mvNeighborArray,
-	NeighborArrayUnit_t     *skipNeighborArray,
-	NeighborArrayUnit_t     *lumaReconSampleNeighborArray,
-	NeighborArrayUnit_t     *cbReconSampleNeighborArray,
-	NeighborArrayUnit_t     *crReconSampleNeighborArray,
-	EbPictureBufferDesc_t   *reconBuffer,
-	EB_U32                   lcuSize,
-	EB_BOOL                  intraMdOpenLoop,
+    NeighborArrayUnit_t     *leafDepthNeighborArray,
+    NeighborArrayUnit_t     *modeTypeNeighborArray,
+    NeighborArrayUnit_t     *intraLumaModeNeighborArray,
+    NeighborArrayUnit_t     *mvNeighborArray,
+    NeighborArrayUnit_t     *skipNeighborArray,
+    NeighborArrayUnit_t     *lumaReconSampleNeighborArray,
+    NeighborArrayUnit_t     *cbReconSampleNeighborArray,
+    NeighborArrayUnit_t     *crReconSampleNeighborArray,
+    EbPictureBufferDesc_t   *reconBuffer,
+    EB_U32                   lcuSize,
+    EB_BOOL                  intraMdOpenLoop,
     EB_BOOL                  intra4x4Selected,
-	EB_U8                   *depth,
-	EB_U8                   *modeType,
-	EB_U8                   *lumaMode,
-	MvUnit_t                *mvUnit,
-	EB_U8                   *skipFlag,
-	EB_U32                   originX,
-	EB_U32                   originY,
-	EB_U32                   size,
-	EB_BOOL                  useIntraChromaflag)
+    EB_U8                   *depth,
+    EB_U8                   *modeType,
+    EB_U8                   *lumaMode,
+    MvUnit_t                *mvUnit,
+    EB_U8                   *skipFlag,
+    EB_U32                   originX,
+    EB_U32                   originY,
+    EB_U32                   size,
+    EB_BOOL                  useIntraChromaflag)
 {
 
-	NeighborArrayUnitDepthSkipWrite(
-		leafDepthNeighborArray,
-		(EB_U8*)depth,
-		originX,
-		originY,
-		size);
+    NeighborArrayUnitDepthSkipWrite(
+        leafDepthNeighborArray,
+        (EB_U8*)depth,
+        originX,
+        originY,
+        size);
 
     if (intra4x4Selected == EB_FALSE){
         NeighborArrayUnitModeTypeWrite(
@@ -415,20 +415,20 @@ void ModeDecisionUpdateNeighborArrays(
             size);
     }
 
-	// *Note - this has to be changed for non-square PU support -- JMJ
-	NeighborArrayUnitMvWrite(
-		mvNeighborArray,
-		(EB_U8*)mvUnit,
-		originX,
-		originY,
-		size);
+    // *Note - this has to be changed for non-square PU support -- JMJ
+    NeighborArrayUnitMvWrite(
+        mvNeighborArray,
+        (EB_U8*)mvUnit,
+        originX,
+        originY,
+        size);
 
-	NeighborArrayUnitDepthSkipWrite(
-		skipNeighborArray,
-		(EB_U8*)skipFlag,
-		originX,
-		originY,
-		size);
+    NeighborArrayUnitDepthSkipWrite(
+        skipNeighborArray,
+        (EB_U8*)skipFlag,
+        originX,
+        originY,
+        size);
 
     if (intraMdOpenLoop == EB_FALSE && intra4x4Selected == EB_FALSE) {
         // Recon Samples - Luma
@@ -474,41 +474,41 @@ void ModeDecisionUpdateNeighborArrays(
     }
 
 
-	return;
+    return;
 }
 
 void MvMergePassUpdateNeighborArrays(
     PictureControlSet_t     *pictureControlSetPtr,
-	NeighborArrayUnit_t     *leafDepthNeighborArray,
-	NeighborArrayUnit_t     *modeTypeNeighborArray,
-	NeighborArrayUnit_t     *intraLumaModeNeighborArray,
-	NeighborArrayUnit_t     *mvNeighborArray,
-	NeighborArrayUnit_t     *skipNeighborArray,
-	NeighborArrayUnit_t     *lumaReconSampleNeighborArray,
-	NeighborArrayUnit_t     *cbReconSampleNeighborArray,
-	NeighborArrayUnit_t     *crReconSampleNeighborArray,
-	EbPictureBufferDesc_t   *reconBuffer,
-	EB_U32                   lcuSize,
-	EB_BOOL                  intraMdOpenLoop,
-	EB_U8                   *depth,
-	EB_U8                   *modeType,
-	EB_U8                   *lumaMode,
-	MvUnit_t                *mvUnit,
-	EB_U8                   *skipFlag,
-	EB_U32                   originX,
-	EB_U32                   originY,
-	EB_U32                   size,
+    NeighborArrayUnit_t     *leafDepthNeighborArray,
+    NeighborArrayUnit_t     *modeTypeNeighborArray,
+    NeighborArrayUnit_t     *intraLumaModeNeighborArray,
+    NeighborArrayUnit_t     *mvNeighborArray,
+    NeighborArrayUnit_t     *skipNeighborArray,
+    NeighborArrayUnit_t     *lumaReconSampleNeighborArray,
+    NeighborArrayUnit_t     *cbReconSampleNeighborArray,
+    NeighborArrayUnit_t     *crReconSampleNeighborArray,
+    EbPictureBufferDesc_t   *reconBuffer,
+    EB_U32                   lcuSize,
+    EB_BOOL                  intraMdOpenLoop,
+    EB_U8                   *depth,
+    EB_U8                   *modeType,
+    EB_U8                   *lumaMode,
+    MvUnit_t                *mvUnit,
+    EB_U8                   *skipFlag,
+    EB_U32                   originX,
+    EB_U32                   originY,
+    EB_U32                   size,
     EB_U16                   tileIdx,
-	EB_BOOL                 useIntraChromaflag)
+    EB_BOOL                 useIntraChromaflag)
 {
 
 
-	NeighborArrayUnitDepthSkipWrite(
-		leafDepthNeighborArray,
-		(EB_U8*)depth,
-		originX,
-		originY,
-		size);
+    NeighborArrayUnitDepthSkipWrite(
+        leafDepthNeighborArray,
+        (EB_U8*)depth,
+        originX,
+        originY,
+        size);
 
     NeighborArrayUnitModeTypeWrite(
         modeTypeNeighborArray,
@@ -524,63 +524,63 @@ void MvMergePassUpdateNeighborArrays(
         originY,
         size);
 
-	// *Note - this has to be changed for non-square PU support -- JMJ
-	NeighborArrayUnitMvWrite(
-		mvNeighborArray,
-		(EB_U8*)mvUnit,
-		originX,
-		originY,
-		size);
+    // *Note - this has to be changed for non-square PU support -- JMJ
+    NeighborArrayUnitMvWrite(
+        mvNeighborArray,
+        (EB_U8*)mvUnit,
+        originX,
+        originY,
+        size);
 
-	NeighborArrayUnitDepthSkipWrite(
-		skipNeighborArray,
-		(EB_U8*)skipFlag,
-		originX,
-		originY,
-		size);
+    NeighborArrayUnitDepthSkipWrite(
+        skipNeighborArray,
+        (EB_U8*)skipFlag,
+        originX,
+        originY,
+        size);
 
     if (intraMdOpenLoop == EB_FALSE) {
-		// Recon Samples - Luma
-		NeighborArrayUnitSampleWrite(
-			lumaReconSampleNeighborArray,
-			reconBuffer->bufferY,
-			reconBuffer->strideY,
-			originX & (lcuSize - 1),
-			originY & (lcuSize - 1),
-			originX,
-			originY,
-			size,//CHKN width,
-			size,//CHKN height,
-			NEIGHBOR_ARRAY_UNIT_FULL_MASK);
+        // Recon Samples - Luma
+        NeighborArrayUnitSampleWrite(
+            lumaReconSampleNeighborArray,
+            reconBuffer->bufferY,
+            reconBuffer->strideY,
+            originX & (lcuSize - 1),
+            originY & (lcuSize - 1),
+            originX,
+            originY,
+            size,//CHKN width,
+            size,//CHKN height,
+            NEIGHBOR_ARRAY_UNIT_FULL_MASK);
 
-		if (useIntraChromaflag){
-			// Recon Samples - Cb
-			NeighborArrayUnitSampleWrite(
-				cbReconSampleNeighborArray,
-				reconBuffer->bufferCb,
-				reconBuffer->strideCb,
-				(originX & (lcuSize - 1)) >> 1,
-				(originY & (lcuSize - 1)) >> 1,
-				originX >> 1,
-				originY >> 1,
-				size >> 1,
-				size >> 1,
-				NEIGHBOR_ARRAY_UNIT_FULL_MASK);
+        if (useIntraChromaflag){
+            // Recon Samples - Cb
+            NeighborArrayUnitSampleWrite(
+                cbReconSampleNeighborArray,
+                reconBuffer->bufferCb,
+                reconBuffer->strideCb,
+                (originX & (lcuSize - 1)) >> 1,
+                (originY & (lcuSize - 1)) >> 1,
+                originX >> 1,
+                originY >> 1,
+                size >> 1,
+                size >> 1,
+                NEIGHBOR_ARRAY_UNIT_FULL_MASK);
 
-			// Recon Samples - Cr
-			NeighborArrayUnitSampleWrite(
-				crReconSampleNeighborArray,
-				reconBuffer->bufferCr,
-				reconBuffer->strideCr,
-				(originX & (lcuSize - 1)) >> 1,
-				(originY & (lcuSize - 1)) >> 1,
-				originX >> 1,
-				originY >> 1,
-				size >> 1,
-				size >> 1,
-				NEIGHBOR_ARRAY_UNIT_FULL_MASK);
-		}
-	}
+            // Recon Samples - Cr
+            NeighborArrayUnitSampleWrite(
+                crReconSampleNeighborArray,
+                reconBuffer->bufferCr,
+                reconBuffer->strideCr,
+                (originX & (lcuSize - 1)) >> 1,
+                (originY & (lcuSize - 1)) >> 1,
+                originX >> 1,
+                originY >> 1,
+                size >> 1,
+                size >> 1,
+                NEIGHBOR_ARRAY_UNIT_FULL_MASK);
+        }
+    }
 
 
 
@@ -668,7 +668,7 @@ void MvMergePassUpdateNeighborArrays(
 
     }
 
-	return;
+    return;
 }
 
 
@@ -870,34 +870,34 @@ void Bdp16x16vs8x8RefinementUpdateNeighborArrays(
 }
 
 void DeriveMpmModes(
-    ModeDecisionContext_t	*contextPtr,
-    CodingUnit_t			* const cuPtr) {
-	EB_U32 leftNeighborMode = (&cuPtr->predictionUnitArray[0])->intraLumaLeftMode;
-	EB_U32 topNeighborMode  = (&cuPtr->predictionUnitArray[0])->intraLumaTopMode;
+    ModeDecisionContext_t    *contextPtr,
+    CodingUnit_t            * const cuPtr) {
+    EB_U32 leftNeighborMode = (&cuPtr->predictionUnitArray[0])->intraLumaLeftMode;
+    EB_U32 topNeighborMode  = (&cuPtr->predictionUnitArray[0])->intraLumaTopMode;
 
-	if (leftNeighborMode == topNeighborMode) {
-		if (leftNeighborMode > 1) { // For angular modes
-			contextPtr->mostProbableModeArray[0] = leftNeighborMode;
-			contextPtr->mostProbableModeArray[1] = ((leftNeighborMode + 29) & 0x1F) + 2;
-			contextPtr->mostProbableModeArray[2] = ((leftNeighborMode - 1) & 0x1F) + 2;
-		}
-		else { // Non Angular modes
-			contextPtr->mostProbableModeArray[0] = EB_INTRA_PLANAR;
-			contextPtr->mostProbableModeArray[1] = EB_INTRA_DC;
-			contextPtr->mostProbableModeArray[2] = EB_INTRA_VERTICAL;
-		}
-	}
-	else {
-		contextPtr->mostProbableModeArray[0] = leftNeighborMode;
-		contextPtr->mostProbableModeArray[1] = topNeighborMode;
+    if (leftNeighborMode == topNeighborMode) {
+        if (leftNeighborMode > 1) { // For angular modes
+            contextPtr->mostProbableModeArray[0] = leftNeighborMode;
+            contextPtr->mostProbableModeArray[1] = ((leftNeighborMode + 29) & 0x1F) + 2;
+            contextPtr->mostProbableModeArray[2] = ((leftNeighborMode - 1) & 0x1F) + 2;
+        }
+        else { // Non Angular modes
+            contextPtr->mostProbableModeArray[0] = EB_INTRA_PLANAR;
+            contextPtr->mostProbableModeArray[1] = EB_INTRA_DC;
+            contextPtr->mostProbableModeArray[2] = EB_INTRA_VERTICAL;
+        }
+    }
+    else {
+        contextPtr->mostProbableModeArray[0] = leftNeighborMode;
+        contextPtr->mostProbableModeArray[1] = topNeighborMode;
 
-		if (leftNeighborMode && topNeighborMode) {
-			contextPtr->mostProbableModeArray[2] = EB_INTRA_PLANAR; // when both modes are non planar
-		}
-		else {
-			contextPtr->mostProbableModeArray[2] = (leftNeighborMode + topNeighborMode) < 2 ? EB_INTRA_VERTICAL : EB_INTRA_DC;
-		}
-	}
+        if (leftNeighborMode && topNeighborMode) {
+            contextPtr->mostProbableModeArray[2] = EB_INTRA_PLANAR; // when both modes are non planar
+        }
+        else {
+            contextPtr->mostProbableModeArray[2] = (leftNeighborMode + topNeighborMode) < 2 ? EB_INTRA_VERTICAL : EB_INTRA_DC;
+        }
+    }
 }
 //*************************//
 // SetNfl
@@ -905,13 +905,13 @@ void DeriveMpmModes(
 // the NFL candidates numbers are set
 //*************************//
 void SetNfl(
-	LargestCodingUnit_t     *lcuPtr,
-	ModeDecisionContext_t	*contextPtr,
-	PictureControlSet_t		*pictureControlSetPtr,
-	EB_MD_STAGE				 mdStage)
+    LargestCodingUnit_t     *lcuPtr,
+    ModeDecisionContext_t    *contextPtr,
+    PictureControlSet_t        *pictureControlSetPtr,
+    EB_MD_STAGE                 mdStage)
 {
-	switch (mdStage) {
-	case MDC_STAGE:
+    switch (mdStage) {
+    case MDC_STAGE:
         // NFL Level MD         Settings
         // 0                    4
         // 1                    3 if 32x32, 2 otherwise
@@ -960,7 +960,7 @@ void SetNfl(
         }
         break;
 
-	case BDP_PILLAR_STAGE:
+    case BDP_PILLAR_STAGE:
     case BDP_16X16_8X8_REF_STAGE:
         // NFL Level Pillar/8x8 Refinement         Settings
         // 0                                       4
@@ -1025,7 +1025,7 @@ void SetNfl(
         break;
 
     case BDP_MVMERGE_STAGE:
-	case BDP_64X64_32X32_REF_STAGE:
+    case BDP_64X64_32X32_REF_STAGE:
 
         // NFL Level MvMerge/64x64 Refinement      Settings
         // 0                                       4
@@ -1089,8 +1089,8 @@ void SetNfl(
 // the NMM candidates numbers are set
 //*************************//
 void SetNmm(
-	ModeDecisionContext_t	*contextPtr,
-	EB_MD_STAGE				 mdStage)
+    ModeDecisionContext_t    *contextPtr,
+    EB_MD_STAGE                 mdStage)
 {
 
     // NMM Level MD           Settings
@@ -1106,8 +1106,8 @@ void SetNmm(
     // 3                      2
 
 
-	switch (mdStage) {
-	case MDC_STAGE:
+    switch (mdStage) {
+    case MDC_STAGE:
         if (contextPtr->nmmLevelMd == 0) {
              contextPtr->mvMergeSkipModeCount = 5;
         }
@@ -1121,9 +1121,9 @@ void SetNmm(
             contextPtr->mvMergeSkipModeCount = 2;
         }
 
-		break;
+        break;
 
-	case BDP_PILLAR_STAGE:
+    case BDP_PILLAR_STAGE:
     case BDP_64X64_32X32_REF_STAGE:
     case BDP_16X16_8X8_REF_STAGE:
     case BDP_MVMERGE_STAGE:
@@ -1156,186 +1156,186 @@ void SetNmm(
 
         break;
 
-	default:
-		break;
-	}
+    default:
+        break;
+    }
 }
 
 void CheckHighCostPartition(
-	SequenceControlSet_t       *sequenceControlSetPtr,
-	ModeDecisionContext_t      *contextPtr,
-	LargestCodingUnit_t        *lcuPtr,
-	EB_U8                       leafIndex,
-	EB_U8                      *parentLeafIndexPtr,
+    SequenceControlSet_t       *sequenceControlSetPtr,
+    ModeDecisionContext_t      *contextPtr,
+    LargestCodingUnit_t        *lcuPtr,
+    EB_U8                       leafIndex,
+    EB_U8                      *parentLeafIndexPtr,
     EB_BOOL                     enableExitPartitioning,
-	EB_U8                      *exitPartitionPtr
-	)
+    EB_U8                      *exitPartitionPtr
+    )
 {
 
-	EB_U8  parentLeafIndex;
+    EB_U8  parentLeafIndex;
 
-	if (sequenceControlSetPtr->lcuParamsArray[lcuPtr->index].isCompleteLcu && contextPtr->cuStats->depth>0)
-	{
+    if (sequenceControlSetPtr->lcuParamsArray[lcuPtr->index].isCompleteLcu && contextPtr->cuStats->depth>0)
+    {
 
-		const EB_U8 totChildren = MDSCAN_TO_QUADTREE_ID[leafIndex];
-		EB_BOOL areGrandChildrenDone = EB_FALSE;
-		if (contextPtr->cuPtr->splitFlag == EB_FALSE)
-			areGrandChildrenDone = EB_TRUE;
+        const EB_U8 totChildren = MDSCAN_TO_QUADTREE_ID[leafIndex];
+        EB_BOOL areGrandChildrenDone = EB_FALSE;
+        if (contextPtr->cuPtr->splitFlag == EB_FALSE)
+            areGrandChildrenDone = EB_TRUE;
 
-		if (enableExitPartitioning)
+        if (enableExitPartitioning)
             areGrandChildrenDone = (lcuPtr->pictureControlSetPtr->sliceType != EB_I_PICTURE) ? EB_TRUE : areGrandChildrenDone;
 
-		if (totChildren<4 && areGrandChildrenDone)
-		{
+        if (totChildren<4 && areGrandChildrenDone)
+        {
 
-			parentLeafIndex = CHILD_MDSCAN_TO_PARENT_MDSCAN[leafIndex];
-			if (contextPtr->mdLocalCuUnit[parentLeafIndex].testedCuFlag)
+            parentLeafIndex = CHILD_MDSCAN_TO_PARENT_MDSCAN[leafIndex];
+            if (contextPtr->mdLocalCuUnit[parentLeafIndex].testedCuFlag)
 
-			{
-				//get parent cost.
-				EB_U64 depthNRate = 0;
-				SplitFlagRate(
-					contextPtr,
-					lcuPtr->codedLeafArrayPtr[parentLeafIndex],
-					0,
-					&depthNRate,
-					contextPtr->fullLambda,
-					contextPtr->mdRateEstimationPtr,
-					sequenceControlSetPtr->maxLcuDepth);
+            {
+                //get parent cost.
+                EB_U64 depthNRate = 0;
+                SplitFlagRate(
+                    contextPtr,
+                    lcuPtr->codedLeafArrayPtr[parentLeafIndex],
+                    0,
+                    &depthNRate,
+                    contextPtr->fullLambda,
+                    contextPtr->mdRateEstimationPtr,
+                    sequenceControlSetPtr->maxLcuDepth);
 
-				EB_U64 parentCost = contextPtr->mdLocalCuUnit[parentLeafIndex].cost + depthNRate;
+                EB_U64 parentCost = contextPtr->mdLocalCuUnit[parentLeafIndex].cost + depthNRate;
 
-				//get partition cost so far
-				EB_U64  totalChildrenCost = 0;
-				EB_U8   cuIt = leafIndex;
-				EB_U8   it;
-				for (it = 0; it < totChildren; it++)
-				{
-					totalChildrenCost += contextPtr->mdLocalCuUnit[cuIt].cost;
-					cuIt = cuIt - CuOffset[contextPtr->cuStats->depth];
-				}
+                //get partition cost so far
+                EB_U64  totalChildrenCost = 0;
+                EB_U8   cuIt = leafIndex;
+                EB_U8   it;
+                for (it = 0; it < totChildren; it++)
+                {
+                    totalChildrenCost += contextPtr->mdLocalCuUnit[cuIt].cost;
+                    cuIt = cuIt - CuOffset[contextPtr->cuStats->depth];
+                }
 
-				if (enableExitPartitioning)
-					totalChildrenCost = lcuPtr->pictureControlSetPtr->temporalLayerIndex == 0 || contextPtr->edgeBlockNumFlag ? totalChildrenCost : (totalChildrenCost / totChildren) * 4;
+                if (enableExitPartitioning)
+                    totalChildrenCost = lcuPtr->pictureControlSetPtr->temporalLayerIndex == 0 || contextPtr->edgeBlockNumFlag ? totalChildrenCost : (totalChildrenCost / totChildren) * 4;
 
-				if (totalChildrenCost > parentCost)
-				{
-					*exitPartitionPtr = EB_TRUE;
-					*parentLeafIndexPtr = parentLeafIndex;
-				}
+                if (totalChildrenCost > parentCost)
+                {
+                    *exitPartitionPtr = EB_TRUE;
+                    *parentLeafIndexPtr = parentLeafIndex;
+                }
 
-		}
+        }
 
-		}
-	}
+        }
+    }
 }
 
 EB_U32 BdpCalculateNextCuIndex(
-	EB_U8 *               leafDataArray,
-	EB_U32                cuIndex,
-	EB_U32                leafCount,
-	EB_U32                cuDepth
-	)
+    EB_U8 *               leafDataArray,
+    EB_U32                cuIndex,
+    EB_U32                leafCount,
+    EB_U32                cuDepth
+    )
 {
-	EB_U32 cuIdx;
-	EB_U32 stepSplitFalse = 1;
-	EB_U8 nextLeafIndex = cuDepth == 0 ? leafDataArray[leafCount - 1] + 1 : leafDataArray[cuIndex] + DepthOffset[cuDepth];
+    EB_U32 cuIdx;
+    EB_U32 stepSplitFalse = 1;
+    EB_U8 nextLeafIndex = cuDepth == 0 ? leafDataArray[leafCount - 1] + 1 : leafDataArray[cuIndex] + DepthOffset[cuDepth];
 
-	for (cuIdx = cuIndex + 1; cuIdx < leafCount; ++cuIdx){
-		// Assign CU data
-		const EB_U8 leafIndex = leafDataArray[cuIdx];
+    for (cuIdx = cuIndex + 1; cuIdx < leafCount; ++cuIdx){
+        // Assign CU data
+        const EB_U8 leafIndex = leafDataArray[cuIdx];
 
-		if (leafIndex < nextLeafIndex){
-			stepSplitFalse++;
-		}
+        if (leafIndex < nextLeafIndex){
+            stepSplitFalse++;
+        }
 
-		else{
-			break;
-		}
+        else{
+            break;
+        }
 
-	}
-	return stepSplitFalse;
+    }
+    return stepSplitFalse;
 }
 
 // Calculate the next CU index
 EB_U32 CalculateNextCuIndex(
-	const EbMdcLeafData_t *const    leafDataArray,
-	EB_U32                cuIndex,
-	EB_U32                leafCount,
-	EB_U32                cuDepth
-	)
+    const EbMdcLeafData_t *const    leafDataArray,
+    EB_U32                cuIndex,
+    EB_U32                leafCount,
+    EB_U32                cuDepth
+    )
 {
-	EB_U32 cuIdx;
-	EB_U32 stepSplitFalse = 1;
-	EB_U8 nextLeafIndex = cuDepth == 0 ? leafDataArray[leafCount - 1].leafIndex + 1 : leafDataArray[cuIndex].leafIndex + DepthOffset[cuDepth];
+    EB_U32 cuIdx;
+    EB_U32 stepSplitFalse = 1;
+    EB_U8 nextLeafIndex = cuDepth == 0 ? leafDataArray[leafCount - 1].leafIndex + 1 : leafDataArray[cuIndex].leafIndex + DepthOffset[cuDepth];
 
-	for (cuIdx = cuIndex + 1; cuIdx < leafCount; ++cuIdx){
-		// Assign CU data
+    for (cuIdx = cuIndex + 1; cuIdx < leafCount; ++cuIdx){
+        // Assign CU data
         const EB_U8 leafIndex = leafDataArray[cuIdx].leafIndex;
-		//const EB_BOOL splitFlag = leafDataArray[cuIdx].splitFlag;
-		//const CodedUnitStats_t *cuStatsPtr = GetCodedUnitStats(leafIndex);
+        //const EB_BOOL splitFlag = leafDataArray[cuIdx].splitFlag;
+        //const CodedUnitStats_t *cuStatsPtr = GetCodedUnitStats(leafIndex);
 
-		if (leafIndex < nextLeafIndex){
-			stepSplitFalse++;
-		}
+        if (leafIndex < nextLeafIndex){
+            stepSplitFalse++;
+        }
 
-		else{
-			break;
-		}
+        else{
+            break;
+        }
 
 
-	}
-	return stepSplitFalse;
+    }
+    return stepSplitFalse;
 }
 void ConstructMdCuArray(
-	ModeDecisionContext_t   *contextPtr,
-	SequenceControlSet_t    *sequenceControlSetPtr,
-	LargestCodingUnit_t		*lcuPtr,
-	const MdcLcuData_t		* const mdcResultTbPtr) {
-	EB_U32 cuIdx = 0;
-	EB_U32 maxCuIndex = 0;
+    ModeDecisionContext_t   *contextPtr,
+    SequenceControlSet_t    *sequenceControlSetPtr,
+    LargestCodingUnit_t        *lcuPtr,
+    const MdcLcuData_t        * const mdcResultTbPtr) {
+    EB_U32 cuIdx = 0;
+    EB_U32 maxCuIndex = 0;
     LcuParams_t *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuPtr->index];
-	for (cuIdx = 0; cuIdx < mdcResultTbPtr->leafCount; ++cuIdx) {
-		maxCuIndex = MAX(maxCuIndex, mdcResultTbPtr->leafDataArray[cuIdx].leafIndex);
-	}
+    for (cuIdx = 0; cuIdx < mdcResultTbPtr->leafCount; ++cuIdx) {
+        maxCuIndex = MAX(maxCuIndex, mdcResultTbPtr->leafDataArray[cuIdx].leafIndex);
+    }
     // CU Loop
-	if (lcuParams->isCompleteLcu)
+    if (lcuParams->isCompleteLcu)
 
-	{
+    {
 
         cuIdx = 0;
-		do
-		{
-			CodingUnit_t * const cuPtr = lcuPtr->codedLeafArrayPtr[cuIdx];
-			contextPtr->mdLocalCuUnit[cuIdx].testedCuFlag = EB_FALSE;
-			cuPtr->splitFlag = EB_TRUE;
+        do
+        {
+            CodingUnit_t * const cuPtr = lcuPtr->codedLeafArrayPtr[cuIdx];
+            contextPtr->mdLocalCuUnit[cuIdx].testedCuFlag = EB_FALSE;
+            cuPtr->splitFlag = EB_TRUE;
 
-			++cuIdx;
+            ++cuIdx;
         } while (cuIdx < maxCuIndex);
 
-	}
-	else {
-		// Initialize the cost & skipFlag for each CU belonging to this tree block for the future usage by inter-depth decision
-		CodingUnit_t ** const codedLeafArrayPtr = lcuPtr->codedLeafArrayPtr;
+    }
+    else {
+        // Initialize the cost & skipFlag for each CU belonging to this tree block for the future usage by inter-depth decision
+        CodingUnit_t ** const codedLeafArrayPtr = lcuPtr->codedLeafArrayPtr;
         const unsigned codedLeafCount = CU_MAX_COUNT;
-		cuIdx = 0;
-		do
-		{
-			CodingUnit_t * const cuPtr = codedLeafArrayPtr[cuIdx];
-			contextPtr->mdLocalCuUnit[cuIdx].testedCuFlag = EB_FALSE;
-			cuPtr->splitFlag = EB_TRUE;
+        cuIdx = 0;
+        do
+        {
+            CodingUnit_t * const cuPtr = codedLeafArrayPtr[cuIdx];
+            contextPtr->mdLocalCuUnit[cuIdx].testedCuFlag = EB_FALSE;
+            cuPtr->splitFlag = EB_TRUE;
 
-			++cuIdx;
+            ++cuIdx;
 
-		} while (cuIdx < codedLeafCount);
-	}
+        } while (cuIdx < codedLeafCount);
+    }
 }
 
 void PerformInverseTransformRecon(
-    ModeDecisionContext_t		   *contextPtr,
+    ModeDecisionContext_t           *contextPtr,
     ModeDecisionCandidateBuffer_t  *candidateBuffer,
     CodingUnit_t                   *cuPtr,
-    const CodedUnitStats_t		   *cuStatsPtr) {
+    const CodedUnitStats_t           *cuStatsPtr) {
 
     const TransformUnitStats_t         *tuStatPtr;
     EB_U32                              tuSize;
@@ -1345,7 +1345,7 @@ void PerformInverseTransformRecon(
     EB_U32                              tuTotalCount;
 
     EB_U32                              tuIndex;
-    EB_U32								tuItr;
+    EB_U32                                tuItr;
     TransformUnit_t                    *tuPtr;
 
     // Recon not needed if Open-Loop INTRA, or if spatialSseFullLoop ON (where T-1 performed @ Full-Loop)
@@ -1552,134 +1552,134 @@ void PerformInverseTransformRecon(
 * Coding Loop - Fast Loop Initialization
 *******************************************/
 void EbHevcProductCodingLoopInitFastLoop(
-	ModeDecisionContext_t      *contextPtr,
-	NeighborArrayUnit_t   *intraLumaNeighborArray,
-	NeighborArrayUnit_t   *skipFlagNeighborArray,
-	NeighborArrayUnit_t   *modeTypeNeighborArray,
-	NeighborArrayUnit_t   *leafDepthNeighborArray)
+    ModeDecisionContext_t      *contextPtr,
+    NeighborArrayUnit_t   *intraLumaNeighborArray,
+    NeighborArrayUnit_t   *skipFlagNeighborArray,
+    NeighborArrayUnit_t   *modeTypeNeighborArray,
+    NeighborArrayUnit_t   *leafDepthNeighborArray)
  {
-	// Keep track of the LCU Ptr
-	contextPtr->lumaIntraRefSamplesGenDone = EB_FALSE;
-	contextPtr->chromaIntraRefSamplesGenDone = EB_FALSE;
+    // Keep track of the LCU Ptr
+    contextPtr->lumaIntraRefSamplesGenDone = EB_FALSE;
+    contextPtr->chromaIntraRefSamplesGenDone = EB_FALSE;
 
-	// Generate Split, Skip and intra mode contexts for the rate estimation
-	CodingLoopContextGeneration(
-		contextPtr,
-		contextPtr->cuPtr,
-		contextPtr->cuOriginX,
-		contextPtr->cuOriginY,
+    // Generate Split, Skip and intra mode contexts for the rate estimation
+    CodingLoopContextGeneration(
+        contextPtr,
+        contextPtr->cuPtr,
+        contextPtr->cuOriginX,
+        contextPtr->cuOriginY,
         MAX_LCU_SIZE,
         intraLumaNeighborArray,
         skipFlagNeighborArray,
         modeTypeNeighborArray,
         leafDepthNeighborArray);
 
-	// *Notes
-	// -Instead of creating function pointers in a static array, put the func pointers in a queue
-	// -This function should also do the SAD calc for each mode
-	// -The best independent intra chroma mode should be determined here
-	// -Modify PictureBufferDesc to be able to create Luma, Cb, and/or Cr only buffers via flags
-	// -Have one PictureBufferDesc that points to the intra chroma buffer to be used.
-	// -Properly signal the DM mode at this point
+    // *Notes
+    // -Instead of creating function pointers in a static array, put the func pointers in a queue
+    // -This function should also do the SAD calc for each mode
+    // -The best independent intra chroma mode should be determined here
+    // -Modify PictureBufferDesc to be able to create Luma, Cb, and/or Cr only buffers via flags
+    // -Have one PictureBufferDesc that points to the intra chroma buffer to be used.
+    // -Properly signal the DM mode at this point
 
-	// Initialize the candidate buffer costs
-	{
+    // Initialize the candidate buffer costs
+    {
        EB_U32 bufferDepthIndexStart = contextPtr->bufferDepthIndexStart[contextPtr->cuStats->depth];
-	   EB_U32 bufferDepthIndexWidth = contextPtr->bufferDepthIndexWidth[contextPtr->cuStats->depth];
-		EB_U32 index = 0;
+       EB_U32 bufferDepthIndexWidth = contextPtr->bufferDepthIndexWidth[contextPtr->cuStats->depth];
+        EB_U32 index = 0;
 
-		for (index = 0; index < bufferDepthIndexWidth; ++index){
-			contextPtr->fastCostArray[bufferDepthIndexStart + index] = 0xFFFFFFFFFFFFFFFFull;
-			contextPtr->fullCostArray[bufferDepthIndexStart + index] = 0xFFFFFFFFFFFFFFFFull;
-		}
+        for (index = 0; index < bufferDepthIndexWidth; ++index){
+            contextPtr->fastCostArray[bufferDepthIndexStart + index] = 0xFFFFFFFFFFFFFFFFull;
+            contextPtr->fullCostArray[bufferDepthIndexStart + index] = 0xFFFFFFFFFFFFFFFFull;
+        }
 
-	}
-	return;
+    }
+    return;
 }
 
 static inline EB_ERRORTYPE ChromaPrediction(
-	PictureControlSet_t                 *pictureControlSetPtr,
-	ModeDecisionCandidateBuffer_t       *candidateBuffer,
-	EB_U32                               cuChromaOriginIndex,
-	ModeDecisionContext_t               *contextPtr)
+    PictureControlSet_t                 *pictureControlSetPtr,
+    ModeDecisionCandidateBuffer_t       *candidateBuffer,
+    EB_U32                               cuChromaOriginIndex,
+    ModeDecisionContext_t               *contextPtr)
 {
-	EB_ERRORTYPE                        return_error = EB_ErrorNone;
+    EB_ERRORTYPE                        return_error = EB_ErrorNone;
 
     (void) cuChromaOriginIndex;
 
      if (candidateBuffer->candidatePtr->predictionIsReady == EB_FALSE)
     {
-		const EB_U8 type = candidateBuffer->candidatePtr->type;
+        const EB_U8 type = candidateBuffer->candidatePtr->type;
 
-		contextPtr->puOriginX = contextPtr->cuOriginX;
+        contextPtr->puOriginX = contextPtr->cuOriginX;
 
-		contextPtr->puOriginY = contextPtr->cuOriginY;
+        contextPtr->puOriginY = contextPtr->cuOriginY;
 
-		contextPtr->puWidth = contextPtr->cuSize;
+        contextPtr->puWidth = contextPtr->cuSize;
 
-		contextPtr->puHeight = contextPtr->cuSize;
+        contextPtr->puHeight = contextPtr->cuSize;
 
-		contextPtr->puItr = 0;
+        contextPtr->puItr = 0;
 
-		if (contextPtr->intraMdOpenLoopFlag){
+        if (contextPtr->intraMdOpenLoopFlag){
 
             PredictionFunTableOl[contextPtr->interpolationMethod][type](
-				contextPtr,
-				PICTURE_BUFFER_DESC_CHROMA_MASK,
-				pictureControlSetPtr,
-				candidateBuffer);
-		}
-		else{
+                contextPtr,
+                PICTURE_BUFFER_DESC_CHROMA_MASK,
+                pictureControlSetPtr,
+                candidateBuffer);
+        }
+        else{
             PredictionFunTableCl[contextPtr->interpolationMethod][type](
-				contextPtr,
-				PICTURE_BUFFER_DESC_CHROMA_MASK,
-				pictureControlSetPtr,
-				candidateBuffer);
-		}
-	}
+                contextPtr,
+                PICTURE_BUFFER_DESC_CHROMA_MASK,
+                pictureControlSetPtr,
+                candidateBuffer);
+        }
+    }
 
-	return return_error;
+    return return_error;
 }
 
 void ProductMdFastPuPrediction(
-	PictureControlSet_t                 *pictureControlSetPtr,
-	ModeDecisionCandidateBuffer_t       *candidateBuffer,
-	ModeDecisionContext_t               *contextPtr,
-	EB_U32                               useChromaInformationInFastLoop,
-	EB_U32                               modeType,
-	ModeDecisionCandidate_t				*const candidatePtr,
-	EB_U32								 fastLoopCandidateIndex,
-	EB_U32								 bestFirstFastCostSearchCandidateIndex)
+    PictureControlSet_t                 *pictureControlSetPtr,
+    ModeDecisionCandidateBuffer_t       *candidateBuffer,
+    ModeDecisionContext_t               *contextPtr,
+    EB_U32                               useChromaInformationInFastLoop,
+    EB_U32                               modeType,
+    ModeDecisionCandidate_t                *const candidatePtr,
+    EB_U32                                 fastLoopCandidateIndex,
+    EB_U32                                 bestFirstFastCostSearchCandidateIndex)
 {
-	contextPtr->puItr = 0;
+    contextPtr->puItr = 0;
 
-	// Prediction
-	if (contextPtr->intraMdOpenLoopFlag){
+    // Prediction
+    if (contextPtr->intraMdOpenLoopFlag){
 
-		EB_U32 predMask = useChromaInformationInFastLoop ? PICTURE_BUFFER_DESC_FULL_MASK : PICTURE_BUFFER_DESC_LUMA_MASK;
-		if (fastLoopCandidateIndex == bestFirstFastCostSearchCandidateIndex && candidatePtr->type == INTRA_MODE)
-			predMask = predMask & (~PICTURE_BUFFER_DESC_Y_FLAG);
+        EB_U32 predMask = useChromaInformationInFastLoop ? PICTURE_BUFFER_DESC_FULL_MASK : PICTURE_BUFFER_DESC_LUMA_MASK;
+        if (fastLoopCandidateIndex == bestFirstFastCostSearchCandidateIndex && candidatePtr->type == INTRA_MODE)
+            predMask = predMask & (~PICTURE_BUFFER_DESC_Y_FLAG);
 
-		candidateBuffer->candidatePtr->predictionIsReadyLuma = (EB_BOOL)(predMask & PICTURE_BUFFER_DESC_Y_FLAG);
+        candidateBuffer->candidatePtr->predictionIsReadyLuma = (EB_BOOL)(predMask & PICTURE_BUFFER_DESC_Y_FLAG);
 
         PredictionFunTableOl[contextPtr->interpolationMethod][modeType](
-			contextPtr,
-			predMask,
-			pictureControlSetPtr,
-			candidateBuffer);
+            contextPtr,
+            predMask,
+            pictureControlSetPtr,
+            candidateBuffer);
 
-	}
-	else{
+    }
+    else{
 
-		candidateBuffer->candidatePtr->predictionIsReadyLuma = EB_TRUE;
+        candidateBuffer->candidatePtr->predictionIsReadyLuma = EB_TRUE;
 
         PredictionFunTableCl[contextPtr->interpolationMethod][modeType](
-			contextPtr,
-			useChromaInformationInFastLoop ? PICTURE_BUFFER_DESC_FULL_MASK : PICTURE_BUFFER_DESC_LUMA_MASK,
-			pictureControlSetPtr,
-			candidateBuffer);
+            contextPtr,
+            useChromaInformationInFastLoop ? PICTURE_BUFFER_DESC_FULL_MASK : PICTURE_BUFFER_DESC_LUMA_MASK,
+            pictureControlSetPtr,
+            candidateBuffer);
 
-	}
+    }
 
 }
 
@@ -1711,10 +1711,10 @@ void ModeDecisionPreFetchRef(
                 EbReferenceObject_t    *referenceObject;
                 EB_U32                  refList0PosX = 0;
                 EB_U32                  refList0PosY = 0;
-                EB_U32					integPosL0x;
-                EB_U32					integPosL0y;
-                EB_U8					counter;
-                EB_U16				   *src0Ptr;
+                EB_U32                    integPosL0x;
+                EB_U32                    integPosL0y;
+                EB_U8                    counter;
+                EB_U16                   *src0Ptr;
 
                 referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr;
                 refPicList0 = (EbPictureBufferDesc_t*)referenceObject->referencePicture16bit;
@@ -1756,10 +1756,10 @@ void ModeDecisionPreFetchRef(
                 EbReferenceObject_t    *referenceObject;
                 EB_U32                  refList1PosX = 0;
                 EB_U32                  refList1PosY = 0;
-                EB_U32					integPosL1x;
-                EB_U32					integPosL1y;
-                EB_U8					counter;
-                EB_U16				   *src1Ptr;
+                EB_U32                    integPosL1x;
+                EB_U32                    integPosL1y;
+                EB_U8                    counter;
+                EB_U16                   *src1Ptr;
 
                 referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr;
                 refPicList1 = (EbPictureBufferDesc_t*)referenceObject->referencePicture16bit;
@@ -1806,10 +1806,10 @@ void ModeDecisionPreFetchRef(
                 EbReferenceObject_t    *referenceObject;
                 EB_U32                  refList0PosX = 0;
                 EB_U32                  refList0PosY = 0;
-                EB_U32					integPosL0x;
-                EB_U32					integPosL0y;
-                EB_U8					counter;
-                EB_U8				   *src0Ptr;
+                EB_U32                    integPosL0x;
+                EB_U32                    integPosL0y;
+                EB_U8                    counter;
+                EB_U8                   *src0Ptr;
 
                 referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr;
                 refPicList0 = (EbPictureBufferDesc_t*)referenceObject->referencePicture;
@@ -1858,10 +1858,10 @@ void ModeDecisionPreFetchRef(
                 EbReferenceObject_t    *referenceObject;
                 EB_U32                  refList1PosX = 0;
                 EB_U32                  refList1PosY = 0;
-                EB_U32					integPosL1x;
-                EB_U32					integPosL1y;
-                EB_U8					counter;
-                EB_U8				   *src1Ptr;
+                EB_U32                    integPosL1x;
+                EB_U32                    integPosL1y;
+                EB_U8                    counter;
+                EB_U8                   *src1Ptr;
 
                 // List1
                 referenceObject = (EbReferenceObject_t *)pictureControlSetPtr->refPicPtrArray[REF_LIST_1]->objectPtr;
@@ -1909,60 +1909,60 @@ void ModeDecisionPreFetchRef(
 }
 
 void ProductPerformFastLoop(
-	PictureControlSet_t			   *pictureControlSetPtr,
-	LargestCodingUnit_t            *lcuPtr,
-	ModeDecisionContext_t		   *contextPtr,
-	ModeDecisionCandidateBuffer_t **candidateBufferPtrArrayBase,
-	ModeDecisionCandidate_t		   *fastCandidateArray,
-	EB_U32							fastCandidateTotalCount,
-	EbPictureBufferDesc_t          *inputPicturePtr,
-	EB_U32							inputOriginIndex,
-	EB_U32							inputCbOriginIndex,
-	EB_U32							inputCrOriginIndex,
-	CodingUnit_t                   *cuPtr,
-	EB_U32							cuOriginIndex,
-	EB_U32							cuChromaOriginIndex,
-	EB_U32							maxBuffers,
-	EB_U32                         *secondFastCostSearchCandidateTotalCount) {
+    PictureControlSet_t               *pictureControlSetPtr,
+    LargestCodingUnit_t            *lcuPtr,
+    ModeDecisionContext_t           *contextPtr,
+    ModeDecisionCandidateBuffer_t **candidateBufferPtrArrayBase,
+    ModeDecisionCandidate_t           *fastCandidateArray,
+    EB_U32                            fastCandidateTotalCount,
+    EbPictureBufferDesc_t          *inputPicturePtr,
+    EB_U32                            inputOriginIndex,
+    EB_U32                            inputCbOriginIndex,
+    EB_U32                            inputCrOriginIndex,
+    CodingUnit_t                   *cuPtr,
+    EB_U32                            cuOriginIndex,
+    EB_U32                            cuChromaOriginIndex,
+    EB_U32                            maxBuffers,
+    EB_U32                         *secondFastCostSearchCandidateTotalCount) {
 
-	EB_S32                          fastLoopCandidateIndex;
-	EB_U64                          lumaFastDistortion;
-	EB_U64                          chromaFastDistortion;
-	ModeDecisionCandidateBuffer_t  *candidateBuffer;
-	const EB_PICTURE                  sliceType = pictureControlSetPtr->sliceType;
-	EB_U32                          highestCostIndex;
-	EB_U64                          highestCost;
-	EB_U32							isCandzz = 0;
-	const EB_U32 cuDepth = contextPtr->cuStats->depth;
-	const EB_U32 cuSize = contextPtr->cuStats->size;
-	EB_U32 firstFastCandidateTotalCount;
-	// Initialize first fast cost loop variables
-	EB_U64 bestFirstFastCostSearchCandidateCost = 0xFFFFFFFFFFFFFFFFull;
-	EB_S32 bestFirstFastCostSearchCandidateIndex = INVALID_FAST_CANDIDATE_INDEX;
-	SequenceControlSet_t           *sequenceControlSetPtr = ((SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr);
-	LcuBasedDetectors_t* mdPicLcuDetect = contextPtr->mdPicLcuDetect;
+    EB_S32                          fastLoopCandidateIndex;
+    EB_U64                          lumaFastDistortion;
+    EB_U64                          chromaFastDistortion;
+    ModeDecisionCandidateBuffer_t  *candidateBuffer;
+    const EB_PICTURE                  sliceType = pictureControlSetPtr->sliceType;
+    EB_U32                          highestCostIndex;
+    EB_U64                          highestCost;
+    EB_U32                            isCandzz = 0;
+    const EB_U32 cuDepth = contextPtr->cuStats->depth;
+    const EB_U32 cuSize = contextPtr->cuStats->size;
+    EB_U32 firstFastCandidateTotalCount;
+    // Initialize first fast cost loop variables
+    EB_U64 bestFirstFastCostSearchCandidateCost = 0xFFFFFFFFFFFFFFFFull;
+    EB_S32 bestFirstFastCostSearchCandidateIndex = INVALID_FAST_CANDIDATE_INDEX;
+    SequenceControlSet_t           *sequenceControlSetPtr = ((SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr);
+    LcuBasedDetectors_t* mdPicLcuDetect = contextPtr->mdPicLcuDetect;
 
-	if (contextPtr->singleFastLoopFlag == EB_FALSE) {
+    if (contextPtr->singleFastLoopFlag == EB_FALSE) {
 
-		firstFastCandidateTotalCount = 0;
-		// First Fast-Cost Search Candidate Loop
-		fastLoopCandidateIndex = fastCandidateTotalCount - 1;
-		do
-		{
-			lumaFastDistortion = 0;
+        firstFastCandidateTotalCount = 0;
+        // First Fast-Cost Search Candidate Loop
+        fastLoopCandidateIndex = fastCandidateTotalCount - 1;
+        do
+        {
+            lumaFastDistortion = 0;
 
-			// Set the Candidate Buffer
-			candidateBuffer = candidateBufferPtrArrayBase[0];
-			ModeDecisionCandidate_t *const candidatePtr = candidateBuffer->candidatePtr = &fastCandidateArray[fastLoopCandidateIndex];
-			const unsigned distortionReady = candidatePtr->distortionReady;
+            // Set the Candidate Buffer
+            candidateBuffer = candidateBufferPtrArrayBase[0];
+            ModeDecisionCandidate_t *const candidatePtr = candidateBuffer->candidatePtr = &fastCandidateArray[fastLoopCandidateIndex];
+            const unsigned distortionReady = candidatePtr->distortionReady;
 
-			// Only check (src - src) candidates (Tier0 candidates)
-			if (!!distortionReady)
-			{
-				const EB_U32 type = candidatePtr->type;
+            // Only check (src - src) candidates (Tier0 candidates)
+            if (!!distortionReady)
+            {
+                const EB_U32 type = candidatePtr->type;
 
-				lumaFastDistortion = candidatePtr->meDistortion;
-				firstFastCandidateTotalCount++;
+                lumaFastDistortion = candidatePtr->meDistortion;
+                firstFastCandidateTotalCount++;
 
                 // Fast Cost Calc
                 ProductFastCostFuncOptTable[type][sliceType](
@@ -1975,24 +1975,24 @@ void ProductPerformFastLoop(
                     contextPtr->fastLambda,
                     pictureControlSetPtr);
 
-				// Keep track of the candidate index of the best  (src - src) candidate
-				if (*(candidateBuffer->fastCostPtr) <= bestFirstFastCostSearchCandidateCost) {
-					bestFirstFastCostSearchCandidateIndex = fastLoopCandidateIndex;
-					bestFirstFastCostSearchCandidateCost = *(candidateBuffer->fastCostPtr);
-				}
+                // Keep track of the candidate index of the best  (src - src) candidate
+                if (*(candidateBuffer->fastCostPtr) <= bestFirstFastCostSearchCandidateCost) {
+                    bestFirstFastCostSearchCandidateIndex = fastLoopCandidateIndex;
+                    bestFirstFastCostSearchCandidateCost = *(candidateBuffer->fastCostPtr);
+                }
 
-				// Initialize Fast Cost - to do not interact with the second Fast-Cost Search
-				*(candidateBuffer->fastCostPtr) = 0xFFFFFFFFFFFFFFFFull;
-			}
-		} while (--fastLoopCandidateIndex >= 0);
-	}
+                // Initialize Fast Cost - to do not interact with the second Fast-Cost Search
+                *(candidateBuffer->fastCostPtr) = 0xFFFFFFFFFFFFFFFFull;
+            }
+        } while (--fastLoopCandidateIndex >= 0);
+    }
 
-	// Second Fast-Cost Search Candidate Loop
-	*secondFastCostSearchCandidateTotalCount = 0;
-	highestCostIndex = contextPtr->bufferDepthIndexStart[cuDepth];
-	fastLoopCandidateIndex = fastCandidateTotalCount - 1;
+    // Second Fast-Cost Search Candidate Loop
+    *secondFastCostSearchCandidateTotalCount = 0;
+    highestCostIndex = contextPtr->bufferDepthIndexStart[cuDepth];
+    fastLoopCandidateIndex = fastCandidateTotalCount - 1;
 
-	EB_U16 lcuAddr = lcuPtr->index;
+    EB_U16 lcuAddr = lcuPtr->index;
 
     do
     {
@@ -2039,17 +2039,17 @@ void ProductPerformFastLoop(
             // Skip distortion computation if the candidate is MPM
             if (candidateBuffer->candidatePtr->mpmFlag == EB_FALSE) {
 
-				if (fastLoopCandidateIndex == bestFirstFastCostSearchCandidateIndex && candidatePtr->type == INTRA_MODE)
-					lumaFastDistortion = candidatePtr->meDistortion;
-				else
-					// Y
-					lumaFastDistortion += (NxMSadKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][cuSize >> 3] (
-						inputBufferY,
-						inputStrideY,
-						predBufferY,
-						MAX_LCU_SIZE ,
-						cuSize,
-						cuSize));
+                if (fastLoopCandidateIndex == bestFirstFastCostSearchCandidateIndex && candidatePtr->type == INTRA_MODE)
+                    lumaFastDistortion = candidatePtr->meDistortion;
+                else
+                    // Y
+                    lumaFastDistortion += (NxMSadKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][cuSize >> 3] (
+                        inputBufferY,
+                        inputStrideY,
+                        predBufferY,
+                        MAX_LCU_SIZE ,
+                        cuSize,
+                        cuSize));
 
                 // Cb
                 if (!!contextPtr->useChromaInformationInFastLoop)
@@ -2057,13 +2057,13 @@ void ProductPerformFastLoop(
                     EB_U8 * const inputBufferCb = inputPicturePtr->bufferCb + inputCbOriginIndex;
                     EB_U8 *  const predBufferCb = candidateBuffer->predictionPtr->bufferCb + cuChromaOriginIndex;
 
-					chromaFastDistortion += NxMSadKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][cuSize >> 4] (
-						inputBufferCb,
-						inputPicturePtr->strideCb,
-						predBufferCb,
-						(MAX_LCU_SIZE >> 1) ,
-						(cuSize >> 1) ,
-						cuSize >> 1);
+                    chromaFastDistortion += NxMSadKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][cuSize >> 4] (
+                        inputBufferCb,
+                        inputPicturePtr->strideCb,
+                        predBufferCb,
+                        (MAX_LCU_SIZE >> 1) ,
+                        (cuSize >> 1) ,
+                        cuSize >> 1);
 
 
                     EB_U8 * const inputBufferCr = inputPicturePtr->bufferCr + inputCrOriginIndex;
@@ -2095,15 +2095,15 @@ void ProductPerformFastLoop(
                 candidateBuffer->weightChromaDistortion = EB_TRUE;
             }
 
-			ProductFastCostFuncOptTable[candidatePtr->type][sliceType](
-				contextPtr,
-				cuPtr,
-				candidateBuffer,
-				cuPtr->qp,
-				lumaFastDistortion,
-				chromaFastDistortion,
-				contextPtr->fastLambda,
-				pictureControlSetPtr);
+            ProductFastCostFuncOptTable[candidatePtr->type][sliceType](
+                contextPtr,
+                cuPtr,
+                candidateBuffer,
+                cuPtr->qp,
+                lumaFastDistortion,
+                chromaFastDistortion,
+                contextPtr->fastLambda,
+                pictureControlSetPtr);
 
             candidateBuffer->candidatePtr->fastLoopLumaDistortion = (EB_U32)lumaFastDistortion;
             if (contextPtr->useIntraInterBias){
@@ -2123,8 +2123,8 @@ void ProductPerformFastLoop(
 
                         }
                     }
-				}
-			}
+                }
+            }
 
             if (sequenceControlSetPtr->staticConfig.improveSharpness)
                 ApplyMvOverBoundariesBias(
@@ -2184,65 +2184,65 @@ void ProductPerformFastLoop(
 void  ApplyIntraInterModeBias(
     EB_BOOL                        intraInterCond1,
     EB_BOOL                        intraInterCond2,
-	EB_BOOL                        intraInterCond3,
-	EB_U64                         *fullCostPtr)
+    EB_BOOL                        intraInterCond3,
+    EB_U64                         *fullCostPtr)
 {
 
     *fullCostPtr += intraInterCond1 ? (*fullCostPtr * 30) / 100 : 0;
     *fullCostPtr += intraInterCond2 ? (*fullCostPtr * 30) / 100 : 0;
-	*fullCostPtr = intraInterCond3 ? *fullCostPtr * 3 : *fullCostPtr;
+    *fullCostPtr = intraInterCond3 ? *fullCostPtr * 3 : *fullCostPtr;
 }
 
 extern void GenerateIntraChromaReferenceSamplesMd(
-	ModeDecisionContext_t      *contextPtr,
-	EbPictureBufferDesc_t      *inputPicturePtr) {
+    ModeDecisionContext_t      *contextPtr,
+    EbPictureBufferDesc_t      *inputPicturePtr) {
 
 
     if (contextPtr->useChromaInformationInFullLoop && contextPtr->intraMdOpenLoopFlag == EB_FALSE) {
 
-		GenerateChromaIntraReferenceSamplesEncodePass(
-			EB_FALSE,
-			EB_TRUE,
-			contextPtr->cuOriginX,
-			contextPtr->cuOriginY,
-			contextPtr->cuSize,
-			contextPtr->lcuSize,
-			contextPtr->cuDepth,
-			contextPtr->modeTypeNeighborArray,
-			contextPtr->lumaReconNeighborArray,
-			contextPtr->cbReconNeighborArray,
-			contextPtr->crReconNeighborArray,
-			contextPtr->intraRefPtr,
+        GenerateChromaIntraReferenceSamplesEncodePass(
+            EB_FALSE,
+            EB_TRUE,
+            contextPtr->cuOriginX,
+            contextPtr->cuOriginY,
+            contextPtr->cuSize,
+            contextPtr->lcuSize,
+            contextPtr->cuDepth,
+            contextPtr->modeTypeNeighborArray,
+            contextPtr->lumaReconNeighborArray,
+            contextPtr->cbReconNeighborArray,
+            contextPtr->crReconNeighborArray,
+            contextPtr->intraRefPtr,
             EB_YUV420,
             EB_FALSE,
-			EB_FALSE,
-			EB_FALSE,
-			EB_FALSE);
+            EB_FALSE,
+            EB_FALSE,
+            EB_FALSE);
 
-		contextPtr->chromaIntraRefSamplesGenDone = EB_TRUE;
+        contextPtr->chromaIntraRefSamplesGenDone = EB_TRUE;
 
-	}
+    }
     else {
-		UpdateChromaNeighborSamplesArrayOL(
-			contextPtr->intraRefPtr,
-			inputPicturePtr,
-			inputPicturePtr->strideY,
-			contextPtr->cuOriginX,
-			contextPtr->cuOriginY,
-			inputPicturePtr->strideCb,
-			inputPicturePtr->strideCr,
-			contextPtr->cuChromaOriginX,
-			contextPtr->cuChromaOriginY,
-			contextPtr->cuSize >> 1,
-			contextPtr->lcuPtr);
+        UpdateChromaNeighborSamplesArrayOL(
+            contextPtr->intraRefPtr,
+            inputPicturePtr,
+            inputPicturePtr->strideY,
+            contextPtr->cuOriginX,
+            contextPtr->cuOriginY,
+            inputPicturePtr->strideCb,
+            inputPicturePtr->strideCr,
+            contextPtr->cuChromaOriginX,
+            contextPtr->cuChromaOriginY,
+            contextPtr->cuSize >> 1,
+            contextPtr->lcuPtr);
 
-		contextPtr->chromaIntraRefSamplesGenDone = EB_TRUE;
-	}
+        contextPtr->chromaIntraRefSamplesGenDone = EB_TRUE;
+    }
 }
 
 void DerivePartialFrequencyN2Flag(
-	PictureControlSet_t				*pictureControlSetPtr,
-	ModeDecisionContext_t			*contextPtr)
+    PictureControlSet_t                *pictureControlSetPtr,
+    ModeDecisionContext_t            *contextPtr)
 {
     if (contextPtr->pfMdLevel == 0) {
         contextPtr->pfMdMode = PF_OFF;
@@ -2261,9 +2261,9 @@ void DerivePartialFrequencyN2Flag(
 
 
 void PerformIntraPrediction(
-    PictureControlSet_t				*pictureControlSetPtr,
-    ModeDecisionContext_t			*contextPtr,
-    ModeDecisionCandidateBuffer_t	*candidateBuffer,
+    PictureControlSet_t                *pictureControlSetPtr,
+    ModeDecisionContext_t            *contextPtr,
+    ModeDecisionCandidateBuffer_t    *candidateBuffer,
     ModeDecisionCandidate_t         *candidatePtr) {
 
     if (contextPtr->intraMdOpenLoopFlag){
@@ -2276,10 +2276,10 @@ void PerformIntraPrediction(
             contextPtr->puPtr = &contextPtr->cuPtr->predictionUnitArray[puItr];
 
             PredictionFunTableOl[contextPtr->interpolationMethod][candidatePtr->type](
-				contextPtr,
-				PICTURE_BUFFER_DESC_LUMA_MASK,
-				pictureControlSetPtr,
-				candidateBuffer);
+                contextPtr,
+                PICTURE_BUFFER_DESC_LUMA_MASK,
+                pictureControlSetPtr,
+                candidateBuffer);
         }
     }
     else{
@@ -2298,7 +2298,7 @@ void SkipSmallCu(
     EB_U16 lcuAddr  = contextPtr->lcuPtr->index;
 
     if (pictureControlSetPtr->lcuPtrArray[lcuAddr]->auraStatus == AURA_STATUS_0 && (pictureControlSetPtr->ParentPcsPtr->lcuStatArray[lcuAddr]).stationaryEdgeOverTimeFlag == 0) {
-		if (contextPtr->mdLocalCuUnit[cuPtr->leafIndex].leftNeighborDepth == cuDepth  &&   contextPtr->mdLocalCuUnit[cuPtr->leafIndex].topNeighborDepth == cuDepth  && cuPtr->splitFlag == EB_TRUE){
+        if (contextPtr->mdLocalCuUnit[cuPtr->leafIndex].leftNeighborDepth == cuDepth  &&   contextPtr->mdLocalCuUnit[cuPtr->leafIndex].topNeighborDepth == cuDepth  && cuPtr->splitFlag == EB_TRUE){
             cuPtr->splitFlag = EB_FALSE;
         }
     }
@@ -2306,64 +2306,64 @@ void SkipSmallCu(
 }
 
 void Intra4x4CodingLoopContextGeneration(
-	ModeDecisionContext_t   *contextPtr,
-	EB_U32                   puIndex,
-	EB_U32                   puOriginX,
-	EB_U32                   puOriginY,
-	EB_U32                   lcuSize,
-	NeighborArrayUnit_t     *intraLumaNeighborArray,
-	NeighborArrayUnit_t     *modeTypeNeighborArray)
+    ModeDecisionContext_t   *contextPtr,
+    EB_U32                   puIndex,
+    EB_U32                   puOriginX,
+    EB_U32                   puOriginY,
+    EB_U32                   lcuSize,
+    NeighborArrayUnit_t     *intraLumaNeighborArray,
+    NeighborArrayUnit_t     *modeTypeNeighborArray)
 {
-	EB_U32 modeTypeLeftNeighborIndex = GetNeighborArrayUnitLeftIndex(
-		modeTypeNeighborArray,
-		puOriginY);
-	EB_U32 modeTypeTopNeighborIndex = GetNeighborArrayUnitTopIndex(
-		modeTypeNeighborArray,
-		puOriginX);
-	EB_U32 intraLumaModeLeftNeighborIndex = GetNeighborArrayUnitLeftIndex(
-		intraLumaNeighborArray,
-		puOriginY);
-	EB_U32 intraLumaModeTopNeighborIndex = GetNeighborArrayUnitTopIndex(
-		intraLumaNeighborArray,
-		puOriginX);
+    EB_U32 modeTypeLeftNeighborIndex = GetNeighborArrayUnitLeftIndex(
+        modeTypeNeighborArray,
+        puOriginY);
+    EB_U32 modeTypeTopNeighborIndex = GetNeighborArrayUnitTopIndex(
+        modeTypeNeighborArray,
+        puOriginX);
+    EB_U32 intraLumaModeLeftNeighborIndex = GetNeighborArrayUnitLeftIndex(
+        intraLumaNeighborArray,
+        puOriginY);
+    EB_U32 intraLumaModeTopNeighborIndex = GetNeighborArrayUnitTopIndex(
+        intraLumaNeighborArray,
+        puOriginX);
 
     contextPtr->intraLumaLeftModeArray[puIndex] = (EB_U32)(
-		(modeTypeNeighborArray->leftArray[modeTypeLeftNeighborIndex] != INTRA_MODE) ? EB_INTRA_DC :
-		(EB_U32)intraLumaNeighborArray->leftArray[intraLumaModeLeftNeighborIndex]);
+        (modeTypeNeighborArray->leftArray[modeTypeLeftNeighborIndex] != INTRA_MODE) ? EB_INTRA_DC :
+        (EB_U32)intraLumaNeighborArray->leftArray[intraLumaModeLeftNeighborIndex]);
 
     contextPtr->intraLumaTopModeArray[puIndex] = (EB_U32)(
-		(modeTypeNeighborArray->topArray[modeTypeTopNeighborIndex] != INTRA_MODE) ? EB_INTRA_DC :
-		((puOriginY & (lcuSize - 1)) == 0) ? EB_INTRA_DC :      // If we are at the top of the LCU boundary, then
-		(EB_U32)intraLumaNeighborArray->topArray[intraLumaModeTopNeighborIndex]);                      //   use DC. This seems like we could use a LCU-width
+        (modeTypeNeighborArray->topArray[modeTypeTopNeighborIndex] != INTRA_MODE) ? EB_INTRA_DC :
+        ((puOriginY & (lcuSize - 1)) == 0) ? EB_INTRA_DC :      // If we are at the top of the LCU boundary, then
+        (EB_U32)intraLumaNeighborArray->topArray[intraLumaModeTopNeighborIndex]);                      //   use DC. This seems like we could use a LCU-width
 
-	return;
+    return;
 }
 
 
 void Intra4x4VsIntra8x8(
-	ModeDecisionContext_t *contextPtr,
+    ModeDecisionContext_t *contextPtr,
     LargestCodingUnit_t *lcuPtr,
     EB_U8                *intra4x4LumaMode,
-    EB_U64				 *intra4x4Cost,
+    EB_U64                 *intra4x4Cost,
     EB_U64               *intra4x4FullDistortion,
     EB_BOOL              useChromaInformationInFullLoop,
-    CodingUnit_t	     *cuPtr)
+    CodingUnit_t         *cuPtr)
 {
     EB_U32                  puIndex;
 
     if(cuPtr->predictionModeFlag!=INTRA_MODE)
         SVT_LOG("SVT [WARNING]: cuPtr->costLuma needs to be filled in inter case");
 
-		if (*intra4x4Cost < contextPtr->mdLocalCuUnit[cuPtr->leafIndex].costLuma) {
+        if (*intra4x4Cost < contextPtr->mdLocalCuUnit[cuPtr->leafIndex].costLuma) {
 
-			if (useChromaInformationInFullLoop) {
-				contextPtr->mdLocalCuUnit[cuPtr->leafIndex].cost = *intra4x4Cost;
-			}
-			else {
-				contextPtr->mdLocalCuUnit[cuPtr->leafIndex].cost = contextPtr->mdLocalCuUnit[cuPtr->leafIndex].cost - (contextPtr->mdLocalCuUnit[cuPtr->leafIndex].costLuma - *intra4x4Cost);
-			}
+            if (useChromaInformationInFullLoop) {
+                contextPtr->mdLocalCuUnit[cuPtr->leafIndex].cost = *intra4x4Cost;
+            }
+            else {
+                contextPtr->mdLocalCuUnit[cuPtr->leafIndex].cost = contextPtr->mdLocalCuUnit[cuPtr->leafIndex].cost - (contextPtr->mdLocalCuUnit[cuPtr->leafIndex].costLuma - *intra4x4Cost);
+            }
 
-		    contextPtr->mdLocalCuUnit[cuPtr->leafIndex].fullDistortion = (EB_U32)*intra4x4FullDistortion;
+            contextPtr->mdLocalCuUnit[cuPtr->leafIndex].fullDistortion = (EB_U32)*intra4x4FullDistortion;
 
             cuPtr->predictionUnitArray->intraLumaMode = EB_INTRA_MODE_4x4;
             for (puIndex = 0; puIndex < 4; puIndex++) {
@@ -2419,7 +2419,7 @@ EB_ERRORTYPE Intra4x4ModeDecisionControl(
     EB_U32                         *bufferTotalCountPtr,
     EB_U32                         *candidateTotalCountPtr,
     ModeDecisionCandidate_t       **candidatePtrArray,
-    EB_U32							bestIntraMode)
+    EB_U32                            bestIntraMode)
 {
     EB_ERRORTYPE    return_error = EB_ErrorNone;
 
@@ -2485,60 +2485,60 @@ EB_ERRORTYPE Intra4x4ModeDecisionControl(
 
 
 EB_ERRORTYPE Intra4x4PreModeDecision(
-	EB_U32                          bufferTotalCount,
-	ModeDecisionCandidateBuffer_t **bufferPtrArray,
-	EB_U32                         *fullCandidateTotalCountPtr,
-	EB_U8                          *bestCandidateIndexArray)
+    EB_U32                          bufferTotalCount,
+    ModeDecisionCandidateBuffer_t **bufferPtrArray,
+    EB_U32                         *fullCandidateTotalCountPtr,
+    EB_U8                          *bestCandidateIndexArray)
 {
-	EB_ERRORTYPE return_error = EB_ErrorNone;
-	EB_U32 fullCandidateIndex;
-	EB_U32 fullReconCandidateCount;
-	EB_U32                          highestCostIndex;
-	EB_U64                          highestCost;
-	EB_U32                          candIndx = 0, i;
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    EB_U32 fullCandidateIndex;
+    EB_U32 fullReconCandidateCount;
+    EB_U32                          highestCostIndex;
+    EB_U64                          highestCost;
+    EB_U32                          candIndx = 0, i;
 
-	*fullCandidateTotalCountPtr = bufferTotalCount;
+    *fullCandidateTotalCountPtr = bufferTotalCount;
 
-	//Second,  We substract one, because with N buffers we can determine the best N-1 candidates.
-	//Note/TODO: in the case number of fast candidate is less or equal to the number of buffers, N buffers would be enough
-	fullReconCandidateCount = MAX(1, (*fullCandidateTotalCountPtr) - 1);
+    //Second,  We substract one, because with N buffers we can determine the best N-1 candidates.
+    //Note/TODO: in the case number of fast candidate is less or equal to the number of buffers, N buffers would be enough
+    fullReconCandidateCount = MAX(1, (*fullCandidateTotalCountPtr) - 1);
 
-	//With N buffers, we get here with the best N-1, plus the last candidate. We need to exclude the worst, and keep the best N-1.
-	highestCost = *(bufferPtrArray[0]->fastCostPtr);
-	highestCostIndex = 0;
+    //With N buffers, we get here with the best N-1, plus the last candidate. We need to exclude the worst, and keep the best N-1.
+    highestCost = *(bufferPtrArray[0]->fastCostPtr);
+    highestCostIndex = 0;
 
-	if (bufferTotalCount > 1){
-		for (i = 1; i < bufferTotalCount; i++) {
+    if (bufferTotalCount > 1){
+        for (i = 1; i < bufferTotalCount; i++) {
 
-			if (*(bufferPtrArray[i]->fastCostPtr) >= highestCost){
-				highestCost = *(bufferPtrArray[i]->fastCostPtr);
-				highestCostIndex = i;
-			}
-		}
-		for (i = 0; i < bufferTotalCount; i++) {
+            if (*(bufferPtrArray[i]->fastCostPtr) >= highestCost){
+                highestCost = *(bufferPtrArray[i]->fastCostPtr);
+                highestCostIndex = i;
+            }
+        }
+        for (i = 0; i < bufferTotalCount; i++) {
 
-			if (i != highestCostIndex){
-				bestCandidateIndexArray[candIndx++] = (EB_U8)i;
-			}
-		}
-	}
-	else
-		bestCandidateIndexArray[0] = 0;
+            if (i != highestCostIndex){
+                bestCandidateIndexArray[candIndx++] = (EB_U8)i;
+            }
+        }
+    }
+    else
+        bestCandidateIndexArray[0] = 0;
 
 
-	// Set (*fullCandidateTotalCountPtr) to fullReconCandidateCount
-	(*fullCandidateTotalCountPtr) = fullReconCandidateCount;
+    // Set (*fullCandidateTotalCountPtr) to fullReconCandidateCount
+    (*fullCandidateTotalCountPtr) = fullReconCandidateCount;
 
-	for (i = 0; i < fullReconCandidateCount; ++i) {
-		fullCandidateIndex = bestCandidateIndexArray[i];
+    for (i = 0; i < fullReconCandidateCount; ++i) {
+        fullCandidateIndex = bestCandidateIndexArray[i];
 
-		// Next, Set the transformSize
-		bufferPtrArray[fullCandidateIndex]->candidatePtr->transformSize = TRANSFORM_MIN_SIZE;
-		bufferPtrArray[fullCandidateIndex]->candidatePtr->transformChromaSize = TRANSFORM_MIN_SIZE;
+        // Next, Set the transformSize
+        bufferPtrArray[fullCandidateIndex]->candidatePtr->transformSize = TRANSFORM_MIN_SIZE;
+        bufferPtrArray[fullCandidateIndex]->candidatePtr->transformChromaSize = TRANSFORM_MIN_SIZE;
 
-	}
+    }
 
-	return return_error;
+    return return_error;
 }
 
 static void Intra4x4InitFastLoop(
@@ -2547,7 +2547,7 @@ static void Intra4x4InitFastLoop(
     LargestCodingUnit_t        *lcuPtr,
     EB_U32                      partitionOriginX,
     EB_U32                      partitionOriginY,
-	EB_BOOL                     useIntraChromaflag,
+    EB_BOOL                     useIntraChromaflag,
     EB_U32                      puIndex)
 {
 
@@ -2561,8 +2561,8 @@ static void Intra4x4InitFastLoop(
             MIN_PU_SIZE,
             MAX_LCU_SIZE,
             3,
-			contextPtr->modeTypeNeighborArray,
-			contextPtr->lumaReconNeighborArray,
+            contextPtr->modeTypeNeighborArray,
+            contextPtr->lumaReconNeighborArray,
             (NeighborArrayUnit_t *) EB_NULL,
             (NeighborArrayUnit_t *) EB_NULL,
             contextPtr->intraRefPtr,
@@ -2585,26 +2585,26 @@ static void Intra4x4InitFastLoop(
             lcuPtr);
     }
 
-	if (useIntraChromaflag){
-		GenerateChromaIntraReferenceSamplesEncodePass(
-			EB_FALSE,
-			EB_TRUE,
-			contextPtr->cuOriginX,
-			contextPtr->cuOriginY,
-			contextPtr->cuSize,
-			contextPtr->lcuSize,
-			contextPtr->cuDepth,
-			contextPtr->modeTypeNeighborArray,
-			contextPtr->lumaReconNeighborArray,
-			contextPtr->cbReconNeighborArray,
-			contextPtr->crReconNeighborArray,
-			contextPtr->intraRefPtr,
+    if (useIntraChromaflag){
+        GenerateChromaIntraReferenceSamplesEncodePass(
+            EB_FALSE,
+            EB_TRUE,
+            contextPtr->cuOriginX,
+            contextPtr->cuOriginY,
+            contextPtr->cuSize,
+            contextPtr->lcuSize,
+            contextPtr->cuDepth,
+            contextPtr->modeTypeNeighborArray,
+            contextPtr->lumaReconNeighborArray,
+            contextPtr->cbReconNeighborArray,
+            contextPtr->crReconNeighborArray,
+            contextPtr->intraRefPtr,
             EB_YUV420,
             EB_FALSE,
-			EB_FALSE,
-			EB_FALSE,
-			EB_FALSE);
-	}
+            EB_FALSE,
+            EB_FALSE,
+            EB_FALSE);
+    }
     // Generate Split, Skip and intra mode contexts for the rate estimation
     Intra4x4CodingLoopContextGeneration(
         contextPtr,
@@ -2671,65 +2671,65 @@ EB_EXTERN EB_ERRORTYPE PerformIntra4x4Search(
     LargestCodingUnit_t   *lcuPtr,
     CodingUnit_t          *cuPtr,
     ModeDecisionContext_t *contextPtr,
-    EB_U32				   bestIntraMode)
+    EB_U32                   bestIntraMode)
 
 {
-	EB_ERRORTYPE    return_error = EB_ErrorNone;
+    EB_ERRORTYPE    return_error = EB_ErrorNone;
 
-	// Candidate Buffer
-	ModeDecisionCandidateBuffer_t **candidateBufferPtrArray;
-	ModeDecisionCandidateBuffer_t  *candidateBuffer;
-	ModeDecisionCandidate_t        *candidatePtr;
-	EB_U32  candidateIndex = 0;
-	EB_U32  highestCostIndex;
-	EB_U32  bufferIndex;
-	EB_U32  bufferIndexEnd;
-	EB_U32  maxBuffers;
-	EB_U32  bufferTotalCount;
+    // Candidate Buffer
+    ModeDecisionCandidateBuffer_t **candidateBufferPtrArray;
+    ModeDecisionCandidateBuffer_t  *candidateBuffer;
+    ModeDecisionCandidate_t        *candidatePtr;
+    EB_U32  candidateIndex = 0;
+    EB_U32  highestCostIndex;
+    EB_U32  bufferIndex;
+    EB_U32  bufferIndexEnd;
+    EB_U32  maxBuffers;
+    EB_U32  bufferTotalCount;
 
 
-	// Fast loop
-	EB_S32  fastLoopCandidateIndex;
-	EB_U32  fastCandidateTotalCount;
-	EB_U64  lumaFastDistortion;
-	//EB_U64  chromaFastDistortion;
-	EB_U64  highestCost;
+    // Fast loop
+    EB_S32  fastLoopCandidateIndex;
+    EB_U32  fastCandidateTotalCount;
+    EB_U64  lumaFastDistortion;
+    //EB_U64  chromaFastDistortion;
+    EB_U64  highestCost;
 
-	// Full Loop
-	EB_U32  fullLoopCandidateIndex;
-	EB_U32  fullCandidateTotalCount;
-	EB_U64  yFullDistortion[DIST_CALC_TOTAL];
-	EB_U32  countNonZeroCoeffs;
-	EB_U64  yCoeffBits;
-	EB_U32  lumaShift;
+    // Full Loop
+    EB_U32  fullLoopCandidateIndex;
+    EB_U32  fullCandidateTotalCount;
+    EB_U64  yFullDistortion[DIST_CALC_TOTAL];
+    EB_U32  countNonZeroCoeffs;
+    EB_U64  yCoeffBits;
+    EB_U32  lumaShift;
 
-	EbPictureBufferDesc_t   *tuTransCoeffTmpPtr;
-	EbPictureBufferDesc_t   *tuQuantCoeffTmpPtr;
-	EbPictureBufferDesc_t   *transformBuffer;
+    EbPictureBufferDesc_t   *tuTransCoeffTmpPtr;
+    EbPictureBufferDesc_t   *tuQuantCoeffTmpPtr;
+    EbPictureBufferDesc_t   *transformBuffer;
     EbPictureBufferDesc_t   *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->chromaDownSamplePicturePtr;
 
 
     EB_U32                   inputOriginIndex;
-	EB_U32                   puOriginIndex;
+    EB_U32                   puOriginIndex;
 
-	EB_U8                    intra4x4LumaMode[4];
-	EB_U64                   intra4x4Cost = 0;
-	EB_U64                   intra4x4FullDistortion = 0;
+    EB_U8                    intra4x4LumaMode[4];
+    EB_U64                   intra4x4Cost = 0;
+    EB_U64                   intra4x4FullDistortion = 0;
 
-	EncodeContext_t         *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
+    EncodeContext_t         *encodeContextPtr = ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr;
     EB_U8 partitionIndex;
 
-	EB_BOOL                  use4x4ChromaInformation = EB_FALSE;
-	EB_U32                   inputChromaOriginIndex;
-	EB_U32                   puChromaOriginIndex;
-	EB_U64                   chromaFastDistortion;
-	EB_U64                   cbFullDistortion[DIST_CALC_TOTAL];
-	EB_U32                   cbCountNonZeroCoeffs;
-	EB_U64                   cbCoeffBits;
-	EB_U64                   crFullDistortion[DIST_CALC_TOTAL];
-	EB_U32                   crCountNonZeroCoeffs;
-	EB_U64                   crCoeffBits;
-	EB_U32                   chromaShift;
+    EB_BOOL                  use4x4ChromaInformation = EB_FALSE;
+    EB_U32                   inputChromaOriginIndex;
+    EB_U32                   puChromaOriginIndex;
+    EB_U64                   chromaFastDistortion;
+    EB_U64                   cbFullDistortion[DIST_CALC_TOTAL];
+    EB_U32                   cbCountNonZeroCoeffs;
+    EB_U64                   cbCoeffBits;
+    EB_U64                   crFullDistortion[DIST_CALC_TOTAL];
+    EB_U32                   crCountNonZeroCoeffs;
+    EB_U64                   crCoeffBits;
+    EB_U32                   chromaShift;
 
     if (contextPtr->coeffCabacUpdate)
         EB_MEMCPY(&(contextPtr->i4x4CoeffCtxModel), &(contextPtr->latestValidCoeffCtxModel), sizeof(CoeffCtxtMdl_t));
@@ -3566,23 +3566,23 @@ EB_EXTERN EB_ERRORTYPE PerformIntra4x4Search(
                 }
             }
         }
-		// Update Neighbor Arrays
-		EB_U8 predictionModeFlag = (EB_U8)candidateBuffer->candidatePtr->type;
-		EB_U8 intraLumaMode = (EB_U8)candidateBuffer->candidatePtr->intraLumaMode;
+        // Update Neighbor Arrays
+        EB_U8 predictionModeFlag = (EB_U8)candidateBuffer->candidatePtr->type;
+        EB_U8 intraLumaMode = (EB_U8)candidateBuffer->candidatePtr->intraLumaMode;
 
-		NeighborArrayUnitModeTypeWrite(
+        NeighborArrayUnitModeTypeWrite(
             contextPtr->modeTypeNeighborArray,
-			&predictionModeFlag,
-			partitionOriginX,
-			partitionOriginY,
-			MIN_PU_SIZE);
+            &predictionModeFlag,
+            partitionOriginX,
+            partitionOriginY,
+            MIN_PU_SIZE);
 
-		NeighborArrayUnitIntraWrite(
+        NeighborArrayUnitIntraWrite(
             contextPtr->intraLumaModeNeighborArray,
-			&intraLumaMode,
-			partitionOriginX,
-			partitionOriginY,
-			MIN_PU_SIZE);
+            &intraLumaMode,
+            partitionOriginX,
+            partitionOriginY,
+            MIN_PU_SIZE);
 
         if (contextPtr->intraMdOpenLoopFlag == EB_FALSE) {
 
@@ -3598,37 +3598,37 @@ EB_EXTERN EB_ERRORTYPE PerformIntra4x4Search(
                 MIN_PU_SIZE,
                 NEIGHBOR_ARRAY_UNIT_FULL_MASK);
 
-			if (use4x4ChromaInformation) {
-				// Recon Samples - Cb
-				NeighborArrayUnitSampleWrite(
-					contextPtr->cbReconNeighborArray,
-					candidateBuffer->reconPtr->bufferCb,
-					candidateBuffer->reconPtr->strideCb,
-					partitionOriginX & (MAX_LCU_SIZE - 1) >> 1,
-					partitionOriginY & (MAX_LCU_SIZE - 1) >> 1,
-					partitionOriginX >> 1,
-					partitionOriginY >> 1,
-					MIN_PU_SIZE,
-					MIN_PU_SIZE,
-					NEIGHBOR_ARRAY_UNIT_FULL_MASK);
+            if (use4x4ChromaInformation) {
+                // Recon Samples - Cb
+                NeighborArrayUnitSampleWrite(
+                    contextPtr->cbReconNeighborArray,
+                    candidateBuffer->reconPtr->bufferCb,
+                    candidateBuffer->reconPtr->strideCb,
+                    partitionOriginX & (MAX_LCU_SIZE - 1) >> 1,
+                    partitionOriginY & (MAX_LCU_SIZE - 1) >> 1,
+                    partitionOriginX >> 1,
+                    partitionOriginY >> 1,
+                    MIN_PU_SIZE,
+                    MIN_PU_SIZE,
+                    NEIGHBOR_ARRAY_UNIT_FULL_MASK);
 
-				// Recon Samples - Cr
-				NeighborArrayUnitSampleWrite(
-					contextPtr->crReconNeighborArray,
-					candidateBuffer->reconPtr->bufferCr,
-					candidateBuffer->reconPtr->strideCr,
-					partitionOriginX & (MAX_LCU_SIZE - 1) >> 1,
-					partitionOriginY & (MAX_LCU_SIZE - 1) >> 1,
-					partitionOriginX >> 1,
-					partitionOriginY >> 1,
-					MIN_PU_SIZE,
-					MIN_PU_SIZE,
-					NEIGHBOR_ARRAY_UNIT_FULL_MASK);
-			}
+                // Recon Samples - Cr
+                NeighborArrayUnitSampleWrite(
+                    contextPtr->crReconNeighborArray,
+                    candidateBuffer->reconPtr->bufferCr,
+                    candidateBuffer->reconPtr->strideCr,
+                    partitionOriginX & (MAX_LCU_SIZE - 1) >> 1,
+                    partitionOriginY & (MAX_LCU_SIZE - 1) >> 1,
+                    partitionOriginX >> 1,
+                    partitionOriginY >> 1,
+                    MIN_PU_SIZE,
+                    MIN_PU_SIZE,
+                    NEIGHBOR_ARRAY_UNIT_FULL_MASK);
+            }
 
         }
 
-	}
+    }
 
     if (contextPtr->useIntraInterBias){
         ApplyIntraInterModeBias(
@@ -3638,74 +3638,74 @@ EB_EXTERN EB_ERRORTYPE PerformIntra4x4Search(
             &intra4x4Cost);
     }
 
-	Intra4x4VsIntra8x8(
-		contextPtr,
+    Intra4x4VsIntra8x8(
+        contextPtr,
         lcuPtr,
-		&(intra4x4LumaMode[0]),
-		&intra4x4Cost,
-		&intra4x4FullDistortion,
-		contextPtr->use4x4ChromaInformationInFullLoop,
-		cuPtr);
+        &(intra4x4LumaMode[0]),
+        &intra4x4Cost,
+        &intra4x4FullDistortion,
+        contextPtr->use4x4ChromaInformationInFullLoop,
+        cuPtr);
 
-	return return_error;
+    return return_error;
 
 }
 
 void ModeDecisionRefinementUpdateNeighborArrays(
     ModeDecisionContext_t   *contextPtr,
-	NeighborArrayUnit_t     *modeTypeNeighborArray,
-	NeighborArrayUnit_t     *intraLumaModeNeighborArray,
-	NeighborArrayUnit_t     *lumaReconSampleNeighborArray,
-	EB_BOOL                  intra4x4Selected,
-	EB_U8                   *modeType,
-	EB_U8                   *lumaMode,
-	EB_U32                   originX,
-	EB_U32                   originY,
-	EB_U32                   size)
+    NeighborArrayUnit_t     *modeTypeNeighborArray,
+    NeighborArrayUnit_t     *intraLumaModeNeighborArray,
+    NeighborArrayUnit_t     *lumaReconSampleNeighborArray,
+    EB_BOOL                  intra4x4Selected,
+    EB_U8                   *modeType,
+    EB_U8                   *lumaMode,
+    EB_U32                   originX,
+    EB_U32                   originY,
+    EB_U32                   size)
 
 {
 
-	if (intra4x4Selected == EB_FALSE){
+    if (intra4x4Selected == EB_FALSE){
 
-		NeighborArrayUnitModeTypeWrite(
-			modeTypeNeighborArray,
-			(EB_U8*)modeType,
-			originX,
-			originY,
-			size);
+        NeighborArrayUnitModeTypeWrite(
+            modeTypeNeighborArray,
+            (EB_U8*)modeType,
+            originX,
+            originY,
+            size);
 
-		NeighborArrayUnitIntraWrite(
-			intraLumaModeNeighborArray,
-			(EB_U8*)lumaMode,
-			originX,
-			originY,
-			size);
+        NeighborArrayUnitIntraWrite(
+            intraLumaModeNeighborArray,
+            (EB_U8*)lumaMode,
+            originX,
+            originY,
+            size);
 
-		// Recon Samples - Luma
-		NeighborArrayUnitSampleWrite(
-			lumaReconSampleNeighborArray,
-			contextPtr->mdReconBuffer->bufferY,
-			contextPtr->mdReconBuffer->strideY,
-			originX & (MAX_LCU_SIZE - 1),
-			originY & (MAX_LCU_SIZE - 1),
-			originX,
-			originY,
-			size,
-			size,
-			NEIGHBOR_ARRAY_UNIT_FULL_MASK);
+        // Recon Samples - Luma
+        NeighborArrayUnitSampleWrite(
+            lumaReconSampleNeighborArray,
+            contextPtr->mdReconBuffer->bufferY,
+            contextPtr->mdReconBuffer->strideY,
+            originX & (MAX_LCU_SIZE - 1),
+            originY & (MAX_LCU_SIZE - 1),
+            originX,
+            originY,
+            size,
+            size,
+            NEIGHBOR_ARRAY_UNIT_FULL_MASK);
 
-	}
+    }
 
-	return;
+    return;
 }
 
 
 void UpdateMdNeighborArrays(
     PictureControlSet_t     *pictureControlSetPtr,
     ModeDecisionContext_t   *contextPtr,
-	EbPictureBufferDesc_t   *reconBuffer,
-	EB_U32                   lcuSize,
-	EB_U8                   *depth,
+    EbPictureBufferDesc_t   *reconBuffer,
+    EB_U32                   lcuSize,
+    EB_U8                   *depth,
     EB_U8                   *modeType,
     EB_U8                   *lumaMode,
     MvUnit_t                *mvUnit,
@@ -4120,39 +4120,39 @@ void UpdateMdReconBuffer(
     EbPictureBufferDesc_t           *reconSrcPtr,
     EbPictureBufferDesc_t           *reconDstPtr,
     ModeDecisionContext_t           *contextPtr,
-	LargestCodingUnit_t				*lcuPtr)
+    LargestCodingUnit_t                *lcuPtr)
 {
-	if ((contextPtr->cuStats->size >> 3) < 9) {
-		PicCopyKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][contextPtr->cuStats->size >> 3](
-			&(reconSrcPtr->bufferY[contextPtr->cuStats->originX + contextPtr->cuStats->originY * reconSrcPtr->strideY]),
-			reconSrcPtr->strideY,
-			&(reconDstPtr->bufferY[contextPtr->cuStats->originX + contextPtr->cuStats->originY * reconDstPtr->strideY]),
-			reconDstPtr->strideY,
-			contextPtr->cuStats->size,
-			contextPtr->cuStats->size);
+    if ((contextPtr->cuStats->size >> 3) < 9) {
+        PicCopyKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][contextPtr->cuStats->size >> 3](
+            &(reconSrcPtr->bufferY[contextPtr->cuStats->originX + contextPtr->cuStats->originY * reconSrcPtr->strideY]),
+            reconSrcPtr->strideY,
+            &(reconDstPtr->bufferY[contextPtr->cuStats->originX + contextPtr->cuStats->originY * reconDstPtr->strideY]),
+            reconDstPtr->strideY,
+            contextPtr->cuStats->size,
+            contextPtr->cuStats->size);
 
-		if (lcuPtr->chromaEncodeMode == CHROMA_MODE_FULL) {
-			EB_U8   chromaSize = contextPtr->cuStats->size >> 1;
-			EB_U16  chromaOriginX = contextPtr->cuStats->originX >> 1;
-			EB_U16  chromaOriginY = contextPtr->cuStats->originY >> 1;
+        if (lcuPtr->chromaEncodeMode == CHROMA_MODE_FULL) {
+            EB_U8   chromaSize = contextPtr->cuStats->size >> 1;
+            EB_U16  chromaOriginX = contextPtr->cuStats->originX >> 1;
+            EB_U16  chromaOriginY = contextPtr->cuStats->originY >> 1;
 
-			PicCopyKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][chromaSize >> 3](
-				&(reconSrcPtr->bufferCb[chromaOriginX + chromaOriginY * reconSrcPtr->strideCb]),
-				reconSrcPtr->strideCb,
-				&(reconDstPtr->bufferCb[chromaOriginX + chromaOriginY * reconDstPtr->strideCb]),
-				reconDstPtr->strideCb,
-				chromaSize,
-				chromaSize);
+            PicCopyKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][chromaSize >> 3](
+                &(reconSrcPtr->bufferCb[chromaOriginX + chromaOriginY * reconSrcPtr->strideCb]),
+                reconSrcPtr->strideCb,
+                &(reconDstPtr->bufferCb[chromaOriginX + chromaOriginY * reconDstPtr->strideCb]),
+                reconDstPtr->strideCb,
+                chromaSize,
+                chromaSize);
 
-			PicCopyKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][chromaSize >> 3](
-				&(reconSrcPtr->bufferCr[chromaOriginX + chromaOriginY * reconSrcPtr->strideCr]),
-				reconSrcPtr->strideCr,
-				&(reconDstPtr->bufferCr[chromaOriginX + chromaOriginY * reconDstPtr->strideCr]),
-				reconDstPtr->strideCr,
-				chromaSize,
-				chromaSize);
-		}
-	}
+            PicCopyKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][chromaSize >> 3](
+                &(reconSrcPtr->bufferCr[chromaOriginX + chromaOriginY * reconSrcPtr->strideCr]),
+                reconSrcPtr->strideCr,
+                &(reconDstPtr->bufferCr[chromaOriginX + chromaOriginY * reconDstPtr->strideCr]),
+                reconDstPtr->strideCr,
+                chromaSize,
+                chromaSize);
+        }
+    }
 }
 
 void AddChromaEncDec(
@@ -4163,7 +4163,7 @@ void AddChromaEncDec(
     EncDecContext_t         *contextPtrED,
     EbPictureBufferDesc_t   *inputPicturePtr,
     EB_U32                   inputCbOriginIndex,
-    EB_U32					 cuChromaOriginIndex,
+    EB_U32                     cuChromaOriginIndex,
     EB_U32                   candIdxInput)
 {
 
@@ -4174,8 +4174,8 @@ void AddChromaEncDec(
     EB_U64      crFullDistortion[DIST_CALC_TOTAL];
 
     EB_U64      yCoeffBits;
-    EB_U64	    cbCoeffBits = 0;
-    EB_U64	    crCoeffBits = 0;
+    EB_U64        cbCoeffBits = 0;
+    EB_U64        crCoeffBits = 0;
 
 
     const CodedUnitStats_t                *cuStatsPtr = contextPtrED->cuStats;
@@ -4205,31 +4205,31 @@ void AddChromaEncDec(
     if (puPtr->interPredDirectionIndex == UNI_PRED_LIST_0)
     {
          //EB_MEMCPY(&candidatePtr->MVsL0,&puPtr->mv[REF_LIST_0].x,4);
-		 candidatePtr->motionVector_x_L0 = puPtr->mv[REF_LIST_0].x;
-		 candidatePtr->motionVector_y_L0 = puPtr->mv[REF_LIST_0].y;
+         candidatePtr->motionVector_x_L0 = puPtr->mv[REF_LIST_0].x;
+         candidatePtr->motionVector_y_L0 = puPtr->mv[REF_LIST_0].y;
 
-	}
+    }
 
-	if (puPtr->interPredDirectionIndex == UNI_PRED_LIST_1)
-	{
-		//EB_MEMCPY(&candidatePtr->MVsL1,&puPtr->mv[REF_LIST_1].x,4);
-		candidatePtr->motionVector_x_L1 = puPtr->mv[REF_LIST_1].x;
-		candidatePtr->motionVector_y_L1 = puPtr->mv[REF_LIST_1].y;
-	}
+    if (puPtr->interPredDirectionIndex == UNI_PRED_LIST_1)
+    {
+        //EB_MEMCPY(&candidatePtr->MVsL1,&puPtr->mv[REF_LIST_1].x,4);
+        candidatePtr->motionVector_x_L1 = puPtr->mv[REF_LIST_1].x;
+        candidatePtr->motionVector_y_L1 = puPtr->mv[REF_LIST_1].y;
+    }
 
-	if (puPtr->interPredDirectionIndex == BI_PRED)
-	{
-		candidatePtr->motionVector_x_L0 = puPtr->mv[REF_LIST_0].x;
-		candidatePtr->motionVector_y_L0 = puPtr->mv[REF_LIST_0].y;
-		candidatePtr->motionVector_x_L1 = puPtr->mv[REF_LIST_1].x;
-		candidatePtr->motionVector_y_L1 = puPtr->mv[REF_LIST_1].y;
+    if (puPtr->interPredDirectionIndex == BI_PRED)
+    {
+        candidatePtr->motionVector_x_L0 = puPtr->mv[REF_LIST_0].x;
+        candidatePtr->motionVector_y_L0 = puPtr->mv[REF_LIST_0].y;
+        candidatePtr->motionVector_x_L1 = puPtr->mv[REF_LIST_1].x;
+        candidatePtr->motionVector_y_L1 = puPtr->mv[REF_LIST_1].y;
 
-	}
+    }
 
     // Set PF Mode - should be done per TU (and not per CU) to avoid the correction
-	DerivePartialFrequencyN2Flag(
-		pictureControlSetPtr,
-		contextPtr);
+    DerivePartialFrequencyN2Flag(
+        pictureControlSetPtr,
+        contextPtr);
 
     candidatePtr->yCbf =  contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCbf;
 
@@ -4343,8 +4343,8 @@ void AddChromaEncDec(
         transChromaformSize,
         pictureControlSetPtr);
 
-	contextPtr->mdEpPipeLcu[cuPtr->leafIndex].mergeCost = *candidateBuffer->fullCostMergePtr;
-	contextPtr->mdEpPipeLcu[cuPtr->leafIndex].skipCost = *candidateBuffer->fullCostSkipPtr;
+    contextPtr->mdEpPipeLcu[cuPtr->leafIndex].mergeCost = *candidateBuffer->fullCostMergePtr;
+    contextPtr->mdEpPipeLcu[cuPtr->leafIndex].skipCost = *candidateBuffer->fullCostSkipPtr;
 
 }
 
@@ -4356,25 +4356,25 @@ static void PerformFullLoop(
     EbPictureBufferDesc_t   *inputPicturePtr,
     EB_U32                   inputOriginIndex,
     EB_U32                   inputCbOriginIndex,
-    EB_U32					 cuOriginIndex,
-    EB_U32					 cuChromaOriginIndex,
+    EB_U32                     cuOriginIndex,
+    EB_U32                     cuChromaOriginIndex,
     EB_U32                   fullCandidateTotalCount)
 {
 
-	EB_U32      prevRootCbf;
+    EB_U32      prevRootCbf;
     EB_U64      bestfullCost;
-	EB_U32      fullLoopCandidateIndex;
+    EB_U32      fullLoopCandidateIndex;
     EB_U8       candidateIndex;
 
-	EB_U64      yFullDistortion[DIST_CALC_TOTAL];
-	EB_U32      countNonZeroCoeffs[3][MAX_NUM_OF_TU_PER_CU];
+    EB_U64      yFullDistortion[DIST_CALC_TOTAL];
+    EB_U32      countNonZeroCoeffs[3][MAX_NUM_OF_TU_PER_CU];
 
     EB_U64      cbFullDistortion[DIST_CALC_TOTAL];
-	EB_U64      crFullDistortion[DIST_CALC_TOTAL];
+    EB_U64      crFullDistortion[DIST_CALC_TOTAL];
 
-	EB_U64      yCoeffBits;
-    EB_U64	    cbCoeffBits = 0;
-	EB_U64	    crCoeffBits = 0;
+    EB_U64      yCoeffBits;
+    EB_U64        cbCoeffBits = 0;
+    EB_U64        crCoeffBits = 0;
 
     LcuStat_t  *lcuStatPtr = &(pictureControlSetPtr->ParentPcsPtr->lcuStatArray[lcuPtr->index]);
     const CodedUnitStats_t *cuStatsPtr = contextPtr->cuStats = GetCodedUnitStats(contextPtr->cuPtr->leafIndex);
@@ -4382,10 +4382,10 @@ static void PerformFullLoop(
     prevRootCbf = 1;
     bestfullCost = 0xFFFFFFFFull;
 
-	ModeDecisionCandidateBuffer_t         **candidateBufferPtrArrayBase = contextPtr->candidateBufferPtrArray;
+    ModeDecisionCandidateBuffer_t         **candidateBufferPtrArrayBase = contextPtr->candidateBufferPtrArray;
     ModeDecisionCandidateBuffer_t         **candidateBufferPtrArray     = &(candidateBufferPtrArrayBase[contextPtr->bufferDepthIndexStart[cuStatsPtr->depth]]);
     ModeDecisionCandidateBuffer_t          *candidateBuffer;
-	ModeDecisionCandidate_t                *candidatePtr;
+    ModeDecisionCandidate_t                *candidatePtr;
 
     for (fullLoopCandidateIndex = 0; fullLoopCandidateIndex < fullCandidateTotalCount; ++fullLoopCandidateIndex) {
 
@@ -4550,8 +4550,8 @@ static void PerformFullLoop(
             EB_U32 N4_TH[NUM_QPS] = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
             EB_U32 N2_TH[NUM_QPS] = { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
-            //			EB_U32 tuSize = candidatePtr->transformSize;
-            //			EB_U32 chromatTuSize = candidatePtr->transformChromaSize;
+            //            EB_U32 tuSize = candidatePtr->transformSize;
+            //            EB_U32 chromatTuSize = candidatePtr->transformChromaSize;
             EB_U32 correctedPFMode = contextPtr->pfMdMode;
 
             EB_U8 Weight;
@@ -4604,8 +4604,8 @@ static void PerformFullLoop(
                 EB_U32 N4_TH[NUM_QPS] = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
                 EB_U32 N2_TH[NUM_QPS] = { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
-                //			EB_U32 tuSize = candidatePtr->transformSize;
-                //			EB_U32 chromatTuSize = candidatePtr->transformChromaSize;
+                //            EB_U32 tuSize = candidatePtr->transformSize;
+                //            EB_U32 chromatTuSize = candidatePtr->transformChromaSize;
                 EB_U32 correctedPFMode = contextPtr->pfMdMode;
 
                 EB_U8 Weight;
@@ -4668,7 +4668,7 @@ static void PerformFullLoop(
             }
         }
 
-		if (contextPtr->fullLoopEscape)
+        if (contextPtr->fullLoopEscape)
 
             if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
                 if (candidatePtr->type == INTER_MODE) {
@@ -4689,54 +4689,54 @@ static void PerformFullLoop(
 *   performs CL (LCU)
 *******************************************/
 EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
-	SequenceControlSet_t                *sequenceControlSetPtr,
-	PictureControlSet_t                 *pictureControlSetPtr,
-	const MdcLcuData_t * const           mdcResultTbPtr,
-	LargestCodingUnit_t                 *lcuPtr,
-	EB_U16                               lcuOriginX,
-	EB_U16                               lcuOriginY,
-	EB_U32                               lcuAddr,
-	ModeDecisionContext_t               *contextPtr)
+    SequenceControlSet_t                *sequenceControlSetPtr,
+    PictureControlSet_t                 *pictureControlSetPtr,
+    const MdcLcuData_t * const           mdcResultTbPtr,
+    LargestCodingUnit_t                 *lcuPtr,
+    EB_U16                               lcuOriginX,
+    EB_U16                               lcuOriginY,
+    EB_U32                               lcuAddr,
+    ModeDecisionContext_t               *contextPtr)
 {
-	EB_ERRORTYPE                            return_error = EB_ErrorNone;
+    EB_ERRORTYPE                            return_error = EB_ErrorNone;
 
-	// CU
-	EB_U32                                  cuIdx;
+    // CU
+    EB_U32                                  cuIdx;
 
-	// Input
+    // Input
     EbPictureBufferDesc_t                  *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->chromaDownSamplePicturePtr;
 
 
     EB_U16 tileIdx = contextPtr->tileIndex;
 
-	// Mode Decision Candidate Buffers
-	EB_U32                                  bufferTotalCount;
-	ModeDecisionCandidateBuffer_t          *candidateBuffer;
-	ModeDecisionCandidateBuffer_t          *bestCandidateBuffers[EB_MAX_LCU_DEPTH];
+    // Mode Decision Candidate Buffers
+    EB_U32                                  bufferTotalCount;
+    ModeDecisionCandidateBuffer_t          *candidateBuffer;
+    ModeDecisionCandidateBuffer_t          *bestCandidateBuffers[EB_MAX_LCU_DEPTH];
 
-	// Mode Decision Search Candidates
-	EB_U8                                   candidateIndex;
-	EB_U32                                  fastCandidateTotalCount;
-	EB_U32                                  fullCandidateTotalCount;
+    // Mode Decision Search Candidates
+    EB_U8                                   candidateIndex;
+    EB_U32                                  fastCandidateTotalCount;
+    EB_U32                                  fullCandidateTotalCount;
 
-	EB_U32                                  secondFastCostSearchCandidateTotalCount;
+    EB_U32                                  secondFastCostSearchCandidateTotalCount;
 
-	// CTB merge
-	EB_U32                                  lastCuIndex;
+    // CTB merge
+    EB_U32                                  lastCuIndex;
 
-	// Pre Intra Search
-	const EB_U32                            lcuHeight = MIN(MAX_LCU_SIZE, (EB_U32)(sequenceControlSetPtr->lumaHeight - lcuOriginY));
-	const EB_PICTURE                          sliceType = pictureControlSetPtr->sliceType;
-	const EB_U32                            leafCount = mdcResultTbPtr->leafCount;
-	const EbMdcLeafData_t *const            leafDataArray = mdcResultTbPtr->leafDataArray;
-	ModeDecisionCandidate_t                *fastCandidateArray = contextPtr->fastCandidateArray;
-	ModeDecisionCandidateBuffer_t         **candidateBufferPtrArrayBase = contextPtr->candidateBufferPtrArray;
-	EB_U32							        bestIntraMode = EB_INTRA_MODE_INVALID;
-	ModeDecisionCandidateBuffer_t         **candidateBufferPtrArray;
+    // Pre Intra Search
+    const EB_U32                            lcuHeight = MIN(MAX_LCU_SIZE, (EB_U32)(sequenceControlSetPtr->lumaHeight - lcuOriginY));
+    const EB_PICTURE                          sliceType = pictureControlSetPtr->sliceType;
+    const EB_U32                            leafCount = mdcResultTbPtr->leafCount;
+    const EbMdcLeafData_t *const            leafDataArray = mdcResultTbPtr->leafDataArray;
+    ModeDecisionCandidate_t                *fastCandidateArray = contextPtr->fastCandidateArray;
+    ModeDecisionCandidateBuffer_t         **candidateBufferPtrArrayBase = contextPtr->candidateBufferPtrArray;
+    EB_U32                                    bestIntraMode = EB_INTRA_MODE_INVALID;
+    ModeDecisionCandidateBuffer_t         **candidateBufferPtrArray;
 
-	EB_U32                                  maxBuffers;
+    EB_U32                                  maxBuffers;
 
-	LcuParams_t                            *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuAddr];
+    LcuParams_t                            *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuAddr];
 
     // enableExitPartitioning derivation @ ModeDecisionLcu()
     EB_BOOL enableExitPartitioning;
@@ -4753,16 +4753,16 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
     }
 
     // Keep track of the LCU Ptr
-	contextPtr->lcuPtr                  = lcuPtr;
+    contextPtr->lcuPtr                  = lcuPtr;
 
-	contextPtr->groupOf8x8BlocksCount   = 0;
-	contextPtr->groupOf16x16BlocksCount = 0;
+    contextPtr->groupOf8x8BlocksCount   = 0;
+    contextPtr->groupOf16x16BlocksCount = 0;
 
-	ConstructMdCuArray(
-		contextPtr,
-		sequenceControlSetPtr,
-		lcuPtr,
-		mdcResultTbPtr);
+    ConstructMdCuArray(
+        contextPtr,
+        sequenceControlSetPtr,
+        lcuPtr,
+        mdcResultTbPtr);
 
     // Mode Decision Neighbor Arrays
     contextPtr->intraLumaModeNeighborArray  = pictureControlSetPtr->mdIntraLumaModeNeighborArray[MD_NEIGHBOR_ARRAY_INDEX][tileIdx];
@@ -4775,25 +4775,25 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
     contextPtr->crReconNeighborArray        = pictureControlSetPtr->mdCrReconNeighborArray[MD_NEIGHBOR_ARRAY_INDEX][tileIdx];
     contextPtr->edgeBlockNumFlag = (EB_BOOL)pictureControlSetPtr->ParentPcsPtr->edgeResultsPtr[lcuAddr].edgeBlockNum;
     // First CU Loop
-	cuIdx = 0;
-	do
-	{
-		// Assign CU data
-		const EB_U8 leafIndex = leafDataArray[cuIdx].leafIndex;
+    cuIdx = 0;
+    do
+    {
+        // Assign CU data
+        const EB_U8 leafIndex = leafDataArray[cuIdx].leafIndex;
 
-		CodingUnit_t *  cuPtr = contextPtr->cuPtr = lcuPtr->codedLeafArrayPtr[leafIndex];
+        CodingUnit_t *  cuPtr = contextPtr->cuPtr = lcuPtr->codedLeafArrayPtr[leafIndex];
 
-		const CodedUnitStats_t *cuStatsPtr = contextPtr->cuStats = GetCodedUnitStats(leafIndex);
+        const CodedUnitStats_t *cuStatsPtr = contextPtr->cuStats = GetCodedUnitStats(leafIndex);
         contextPtr->cuSizeLog2 = cuStatsPtr->sizeLog2;
 
 
         contextPtr->cuOriginX = lcuOriginX + cuStatsPtr->originX;
-		contextPtr->cuOriginY = lcuOriginY + cuStatsPtr->originY;
-		const EB_U32 inputOriginIndex = (contextPtr->cuOriginY + inputPicturePtr->originY) * inputPicturePtr->strideY + (contextPtr->cuOriginX + inputPicturePtr->originX);
-		const EB_U32 inputCbOriginIndex = ((contextPtr->cuOriginY>>1) + (inputPicturePtr->originY >> 1)) * inputPicturePtr->strideCb + ((contextPtr->cuOriginX >>1) + (inputPicturePtr->originX >> 1));
-		const EB_U32 cuOriginIndex       = ((contextPtr->cuOriginY & 63)  * 64) + (contextPtr->cuOriginX & 63);
-		const EB_U32 cuChromaOriginIndex = (((contextPtr->cuOriginY & 63) * 32) + (contextPtr->cuOriginX & 63)) >> 1;
-		const EbMdcLeafData_t * const leafDataPtr = &mdcResultTbPtr->leafDataArray[cuIdx];
+        contextPtr->cuOriginY = lcuOriginY + cuStatsPtr->originY;
+        const EB_U32 inputOriginIndex = (contextPtr->cuOriginY + inputPicturePtr->originY) * inputPicturePtr->strideY + (contextPtr->cuOriginX + inputPicturePtr->originX);
+        const EB_U32 inputCbOriginIndex = ((contextPtr->cuOriginY>>1) + (inputPicturePtr->originY >> 1)) * inputPicturePtr->strideCb + ((contextPtr->cuOriginX >>1) + (inputPicturePtr->originX >> 1));
+        const EB_U32 cuOriginIndex       = ((contextPtr->cuOriginY & 63)  * 64) + (contextPtr->cuOriginX & 63);
+        const EB_U32 cuChromaOriginIndex = (((contextPtr->cuOriginY & 63) * 32) + (contextPtr->cuOriginX & 63)) >> 1;
+        const EbMdcLeafData_t * const leafDataPtr = &mdcResultTbPtr->leafDataArray[cuIdx];
 
         //need these for L7 Chroma: TBCleaned.
         contextPtr->cuDepth = cuStatsPtr->depth;
@@ -4802,10 +4802,10 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
         contextPtr->lcuChromaSize = contextPtr->lcuSize >> 1;
         contextPtr->cuSizeLog2 = cuStatsPtr->sizeLog2;
         contextPtr->cuChromaOriginX = contextPtr->cuOriginX >> 1;
-		contextPtr->cuChromaOriginY = contextPtr->cuOriginY >> 1;
-		contextPtr->mdLocalCuUnit[leafIndex].testedCuFlag = EB_TRUE;
-		cuPtr->leafIndex = leafIndex;
-		cuPtr->splitFlag = (EB_U16)(
+        contextPtr->cuChromaOriginY = contextPtr->cuOriginY >> 1;
+        contextPtr->mdLocalCuUnit[leafIndex].testedCuFlag = EB_TRUE;
+        cuPtr->leafIndex = leafIndex;
+        cuPtr->splitFlag = (EB_U16)(
             (sliceType == EB_I_PICTURE) && (cuStatsPtr->depth == 0) ? EB_TRUE :
             leafDataPtr->splitFlag);
         cuPtr->qp = contextPtr->qp;
@@ -4813,17 +4813,17 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
         candidateBufferPtrArray = &(candidateBufferPtrArrayBase[contextPtr->bufferDepthIndexStart[cuStatsPtr->depth]]);
 
         // Set PF Mode - should be done per TU (and not per CU) to avoid the correction
-		DerivePartialFrequencyN2Flag(
-			pictureControlSetPtr,
-			contextPtr);
+        DerivePartialFrequencyN2Flag(
+            pictureControlSetPtr,
+            contextPtr);
 
-		// Initialize Fast Loop
-		EbHevcProductCodingLoopInitFastLoop( // HT to be rechecked especially for fullCostArray
-			contextPtr,
+        // Initialize Fast Loop
+        EbHevcProductCodingLoopInitFastLoop( // HT to be rechecked especially for fullCostArray
+            contextPtr,
             contextPtr->intraLumaModeNeighborArray,
-		    contextPtr->skipFlagNeighborArray,
-		    contextPtr->modeTypeNeighborArray,
-		    contextPtr->leafDepthNeighborArray);
+            contextPtr->skipFlagNeighborArray,
+            contextPtr->modeTypeNeighborArray,
+            contextPtr->leafDepthNeighborArray);
 
         if (
             (pictureControlSetPtr->ParentPcsPtr->depthMode >= PICT_OPEN_LOOP_DEPTH_MODE ||
@@ -4860,7 +4860,7 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
         ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
             lcuPtr,
             contextPtr,
-			leafIndex,
+            leafIndex,
             lcuAddr,
             &bufferTotalCount,
             &fastCandidateTotalCount,
@@ -4871,32 +4871,32 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
             contextPtr->mostProbableModeArray);
 
         //if we want to recon N candidate, we would need N+1 buffers
-		maxBuffers = MIN((bufferTotalCount + 1), contextPtr->bufferDepthIndexWidth[cuStatsPtr->depth]);
+        maxBuffers = MIN((bufferTotalCount + 1), contextPtr->bufferDepthIndexWidth[cuStatsPtr->depth]);
 
-		ProductPerformFastLoop(
-			pictureControlSetPtr,
-			lcuPtr,
-			contextPtr,
-			candidateBufferPtrArrayBase,
-			fastCandidateArray,
-			fastCandidateTotalCount,
-			inputPicturePtr,
-			inputOriginIndex,
-			inputCbOriginIndex,
+        ProductPerformFastLoop(
+            pictureControlSetPtr,
+            lcuPtr,
+            contextPtr,
+            candidateBufferPtrArrayBase,
+            fastCandidateArray,
+            fastCandidateTotalCount,
+            inputPicturePtr,
+            inputOriginIndex,
+            inputCbOriginIndex,
             inputCbOriginIndex,
             cuPtr,
-			cuOriginIndex,
-			cuChromaOriginIndex,
-			maxBuffers,
-			&secondFastCostSearchCandidateTotalCount);
+            cuOriginIndex,
+            cuChromaOriginIndex,
+            maxBuffers,
+            &secondFastCostSearchCandidateTotalCount);
 
-		// Make sure bufferTotalCount is not larger than the number of fast modes
-		bufferTotalCount = MIN(secondFastCostSearchCandidateTotalCount, bufferTotalCount);
+        // Make sure bufferTotalCount is not larger than the number of fast modes
+        bufferTotalCount = MIN(secondFastCostSearchCandidateTotalCount, bufferTotalCount);
 
-		// PreModeDecision
-		// -Input is the buffers
-		// -Output is list of buffers for full reconstruction
-		EB_U8  disableMergeIndex = 0;
+        // PreModeDecision
+        // -Input is the buffers
+        // -Output is list of buffers for full reconstruction
+        EB_U8  disableMergeIndex = 0;
 
 
         PreModeDecision(
@@ -4905,7 +4905,7 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
             candidateBufferPtrArray,
             &fullCandidateTotalCount,
             contextPtr->bestCandidateIndexArray,
-			&disableMergeIndex,
+            &disableMergeIndex,
             (EB_BOOL)(secondFastCostSearchCandidateTotalCount == bufferTotalCount)); // The fast loop bug fix is now added to 4K only
 
         PerformFullLoop(
@@ -4920,19 +4920,19 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
             cuChromaOriginIndex,
             MIN(fullCandidateTotalCount, bufferTotalCount)); // fullCandidateTotalCount to number of buffers to process
 
-		// Full Mode Decision (choose the best mode)
-		candidateIndex = ProductFullModeDecision(
+        // Full Mode Decision (choose the best mode)
+        candidateIndex = ProductFullModeDecision(
             contextPtr,
-			cuPtr,
+            cuPtr,
             contextPtr->cuStats->size,
-			candidateBufferPtrArray,
-			fullCandidateTotalCount,
-			contextPtr->bestCandidateIndexArray,
-			&bestIntraMode);
+            candidateBufferPtrArray,
+            fullCandidateTotalCount,
+            contextPtr->bestCandidateIndexArray,
+            &bestIntraMode);
 
-		// Set Candidate Buffer to the selected mode
-		// If Intra 4x4 is selected then candidateBuffer for depth 3 is not going to get used
-		// No MD-Recon: iTransform Loop + Recon, and no lumaReconSampleNeighborArray update
+        // Set Candidate Buffer to the selected mode
+        // If Intra 4x4 is selected then candidateBuffer for depth 3 is not going to get used
+        // No MD-Recon: iTransform Loop + Recon, and no lumaReconSampleNeighborArray update
 
         if (lcuPtr->intra4x4SearchMethod == INTRA4x4_INLINE_SEARCH)
         {
@@ -4952,7 +4952,7 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
         }
 
 
-		candidateBuffer = candidateBufferPtrArray[candidateIndex];
+        candidateBuffer = candidateBufferPtrArray[candidateIndex];
 
         bestCandidateBuffers[contextPtr->cuStats->depth] = candidateBuffer;
         contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCoeffBits                = candidateBuffer->yCoeffBits;
@@ -4965,7 +4965,7 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
         contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCountNonZeroCoeffs[2]    = candidateBuffer->yCountNonZeroCoeffs[2];
         contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCountNonZeroCoeffs[3]    = candidateBuffer->yCountNonZeroCoeffs[3];
 
-	   if (lcuPtr->chromaEncodeMode == CHROMA_MODE_BEST && candidateBuffer->candidatePtr->type == INTER_MODE && candidateBuffer->candidatePtr->mergeFlag == EB_TRUE)
+       if (lcuPtr->chromaEncodeMode == CHROMA_MODE_BEST && candidateBuffer->candidatePtr->type == INTER_MODE && candidateBuffer->candidatePtr->mergeFlag == EB_TRUE)
        {
              contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCoeffBits                            = candidateBuffer->yCoeffBits;
              contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yFullDistortion[DIST_CALC_RESIDUAL]   = candidateBuffer->yFullDistortion[DIST_CALC_RESIDUAL];
@@ -4975,9 +4975,9 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
        }
 
 
-	   EB_U8    parentLeafIndex;
+       EB_U8    parentLeafIndex;
 
-	   EB_BOOL  exitPartition = EB_FALSE;
+       EB_BOOL  exitPartition = EB_FALSE;
        contextPtr->mdLocalCuUnit[leafIndex].mdcArrayIndex = (EB_U8)cuIdx;
 
         CheckHighCostPartition(
@@ -4989,26 +4989,26 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
             enableExitPartitioning,
             &exitPartition);
 
-	   if (exitPartition)
-	   {
-		   //Reset the CU-Loop to the parent CU.
-		   cuStatsPtr = GetCodedUnitStats(parentLeafIndex);
-		   cuPtr = contextPtr->cuPtr = lcuPtr->codedLeafArrayPtr[parentLeafIndex];
-		   cuIdx = contextPtr->mdLocalCuUnit[parentLeafIndex].mdcArrayIndex;
-		   cuPtr->splitFlag = EB_FALSE;
+       if (exitPartition)
+       {
+           //Reset the CU-Loop to the parent CU.
+           cuStatsPtr = GetCodedUnitStats(parentLeafIndex);
+           cuPtr = contextPtr->cuPtr = lcuPtr->codedLeafArrayPtr[parentLeafIndex];
+           cuIdx = contextPtr->mdLocalCuUnit[parentLeafIndex].mdcArrayIndex;
+           cuPtr->splitFlag = EB_FALSE;
 
-		   lastCuIndex = ExitInterDepthDecision(
-			   contextPtr,
-			   parentLeafIndex,
-			   lcuPtr,
-			   lcuAddr,
-			   lcuOriginX,
-			   lcuOriginY,
-			   contextPtr->fullLambda,
-			   contextPtr->mdRateEstimationPtr,
-			   pictureControlSetPtr);
+           lastCuIndex = ExitInterDepthDecision(
+               contextPtr,
+               parentLeafIndex,
+               lcuPtr,
+               lcuAddr,
+               lcuOriginX,
+               lcuOriginY,
+               contextPtr->fullLambda,
+               contextPtr->mdRateEstimationPtr,
+               pictureControlSetPtr);
 
-	   }
+       }
        else {
 
            PerformInverseTransformRecon(
@@ -5034,83 +5034,83 @@ EB_EXTERN EB_ERRORTYPE ModeDecisionLcu(
        }
 
 
-		if (lcuPtr->codedLeafArrayPtr[lastCuIndex]->splitFlag == EB_FALSE)
-		{
-			// Update the CU Stats
-			contextPtr->cuStats = GetCodedUnitStats(lastCuIndex);
-			contextPtr->cuOriginX = lcuOriginX + contextPtr->cuStats->originX;
-			contextPtr->cuOriginY = lcuOriginY + contextPtr->cuStats->originY;
+        if (lcuPtr->codedLeafArrayPtr[lastCuIndex]->splitFlag == EB_FALSE)
+        {
+            // Update the CU Stats
+            contextPtr->cuStats = GetCodedUnitStats(lastCuIndex);
+            contextPtr->cuOriginX = lcuOriginX + contextPtr->cuStats->originX;
+            contextPtr->cuOriginY = lcuOriginY + contextPtr->cuStats->originY;
 
-			// Set the MvUnit
-			contextPtr->mvUnit.predDirection   = (EB_U8)(&lcuPtr->codedLeafArrayPtr[lastCuIndex]->predictionUnitArray[0])->interPredDirectionIndex;
-			contextPtr->mvUnit.mv[REF_LIST_0].mvUnion = (&lcuPtr->codedLeafArrayPtr[lastCuIndex]->predictionUnitArray[0])->mv[REF_LIST_0].mvUnion;
-			contextPtr->mvUnit.mv[REF_LIST_1].mvUnion = (&lcuPtr->codedLeafArrayPtr[lastCuIndex]->predictionUnitArray[0])->mv[REF_LIST_1].mvUnion;
+            // Set the MvUnit
+            contextPtr->mvUnit.predDirection   = (EB_U8)(&lcuPtr->codedLeafArrayPtr[lastCuIndex]->predictionUnitArray[0])->interPredDirectionIndex;
+            contextPtr->mvUnit.mv[REF_LIST_0].mvUnion = (&lcuPtr->codedLeafArrayPtr[lastCuIndex]->predictionUnitArray[0])->mv[REF_LIST_0].mvUnion;
+            contextPtr->mvUnit.mv[REF_LIST_1].mvUnion = (&lcuPtr->codedLeafArrayPtr[lastCuIndex]->predictionUnitArray[0])->mv[REF_LIST_1].mvUnion;
 
-			// Set the candidate buffer
-			contextPtr->cuPtr = lcuPtr->codedLeafArrayPtr[lastCuIndex];
-			candidateBuffer = bestCandidateBuffers[contextPtr->cuStats->depth];
+            // Set the candidate buffer
+            contextPtr->cuPtr = lcuPtr->codedLeafArrayPtr[lastCuIndex];
+            candidateBuffer = bestCandidateBuffers[contextPtr->cuStats->depth];
 
             if (contextPtr->coeffCabacUpdate)
                 EB_MEMCPY(&(contextPtr->latestValidCoeffCtxModel), &(candidateBuffer->candBuffCoeffCtxModel), sizeof(CoeffCtxtMdl_t));
 
-			// Update Neighbor Arrays
-			{
-				EB_U8 predictionModeFlag = (EB_U8)contextPtr->cuPtr->predictionModeFlag;
-				EB_U8 intraLumaMode = (EB_U8)(&contextPtr->cuPtr->predictionUnitArray[0])->intraLumaMode;
-				EB_U8 skipFlag = (EB_U8)contextPtr->cuPtr->skipFlag;
+            // Update Neighbor Arrays
+            {
+                EB_U8 predictionModeFlag = (EB_U8)contextPtr->cuPtr->predictionModeFlag;
+                EB_U8 intraLumaMode = (EB_U8)(&contextPtr->cuPtr->predictionUnitArray[0])->intraLumaMode;
+                EB_U8 skipFlag = (EB_U8)contextPtr->cuPtr->skipFlag;
 
-				ModeDecisionUpdateNeighborArrays(
-					contextPtr->leafDepthNeighborArray,
-					contextPtr->modeTypeNeighborArray,
-					contextPtr->intraLumaModeNeighborArray,
-					contextPtr->mvNeighborArray,
-					contextPtr->skipFlagNeighborArray,
-					contextPtr->lumaReconNeighborArray,
-					contextPtr->cbReconNeighborArray,
-					contextPtr->crReconNeighborArray,
-					candidateBuffer->reconPtr,
+                ModeDecisionUpdateNeighborArrays(
+                    contextPtr->leafDepthNeighborArray,
+                    contextPtr->modeTypeNeighborArray,
+                    contextPtr->intraLumaModeNeighborArray,
+                    contextPtr->mvNeighborArray,
+                    contextPtr->skipFlagNeighborArray,
+                    contextPtr->lumaReconNeighborArray,
+                    contextPtr->cbReconNeighborArray,
+                    contextPtr->crReconNeighborArray,
+                    candidateBuffer->reconPtr,
                     MAX_LCU_SIZE,
                     contextPtr->intraMdOpenLoopFlag,
                     (cuPtr->predictionModeFlag == INTRA_MODE && contextPtr->cuStats->size == MIN_CU_SIZE && cuPtr->predictionUnitArray->intraLumaMode == EB_INTRA_MODE_4x4),
                     (EB_U8*)&contextPtr->cuStats->depth,
-					&predictionModeFlag,
-					&intraLumaMode,
-					&contextPtr->mvUnit,
-					&skipFlag,
-					contextPtr->cuOriginX,
-					contextPtr->cuOriginY,
-					contextPtr->cuStats->size,
+                    &predictionModeFlag,
+                    &intraLumaMode,
+                    &contextPtr->mvUnit,
+                    &skipFlag,
+                    contextPtr->cuOriginX,
+                    contextPtr->cuOriginY,
+                    contextPtr->cuStats->size,
                     contextPtr->useChromaInformationInFullLoop ? EB_TRUE : EB_FALSE);
 
-			}
+            }
 
-			if (contextPtr->intraMdOpenLoopFlag == EB_FALSE)
-			{
-				UpdateMdReconBuffer(
-					candidateBuffer->reconPtr,
-					contextPtr->mdReconBuffer,
-					contextPtr,
-					lcuPtr);
-			}
+            if (contextPtr->intraMdOpenLoopFlag == EB_FALSE)
+            {
+                UpdateMdReconBuffer(
+                    candidateBuffer->reconPtr,
+                    contextPtr->mdReconBuffer,
+                    contextPtr,
+                    lcuPtr);
+            }
 
-		}
+        }
 
-		if (cuPtr->splitFlag == EB_TRUE){
-			cuIdx++;
-		}
-		else if ( lcuHeight < MAX_LCU_SIZE) {
-			cuIdx++;
-		}
-		else{
-			cuIdx += CalculateNextCuIndex(
-				leafDataArray,
-				cuIdx,
-				leafCount,
+        if (cuPtr->splitFlag == EB_TRUE){
+            cuIdx++;
+        }
+        else if ( lcuHeight < MAX_LCU_SIZE) {
+            cuIdx++;
+        }
+        else{
+            cuIdx += CalculateNextCuIndex(
+                leafDataArray,
+                cuIdx,
+                leafCount,
                 cuStatsPtr->depth);
         }
 
-	} while (cuIdx < leafCount);// End of CU loop
-	return return_error;
+    } while (cuIdx < leafCount);// End of CU loop
+    return return_error;
 }
 
 void ConstructPillarCuArray(
@@ -5132,19 +5132,19 @@ void ConstructPillarCuArray(
         splitFlag           = EB_TRUE;
         cuPtr->splitFlag    = EB_TRUE;
 
-		contextPtr->mdLocalCuUnit[cuIndex].testedCuFlag = EB_FALSE;
+        contextPtr->mdLocalCuUnit[cuIndex].testedCuFlag = EB_FALSE;
         if (lcuParamPtr->rasterScanCuValidity[MD_SCAN_TO_RASTER_SCAN[cuIndex]])
         {
 
             if (cuStatsPtr->depth == 0) {
                 splitFlag            = EB_TRUE;
-				cuPtr->splitFlag = EB_TRUE;
-				contextPtr->mdLocalCuUnit[cuIndex].testedCuFlag = EB_FALSE;
+                cuPtr->splitFlag = EB_TRUE;
+                contextPtr->mdLocalCuUnit[cuIndex].testedCuFlag = EB_FALSE;
             }
             else if (cuStatsPtr->depth == 1 && contextPtr->depthRefinment < 2 && pictureControlSetPtr->ParentPcsPtr->complexLcuArray[lcuPtr->index] != LCU_COMPLEXITY_STATUS_2) {
                     splitFlag            = EB_TRUE;
-					cuPtr->splitFlag = EB_TRUE;
-					contextPtr->mdLocalCuUnit[cuIndex].testedCuFlag = EB_FALSE;
+                    cuPtr->splitFlag = EB_TRUE;
+                    contextPtr->mdLocalCuUnit[cuIndex].testedCuFlag = EB_FALSE;
                     contextPtr->pillarCuArray.leafDataArray[contextPtr->pillarCuArray.leafCount] = cuIndex;
                     contextPtr->pillarCuArray.leafCount++;
 
@@ -5152,16 +5152,16 @@ void ConstructPillarCuArray(
             else if (cuStatsPtr->depth == 2) {
 
                 splitFlag           = EB_FALSE;
-				cuPtr->splitFlag = EB_FALSE;
-				contextPtr->mdLocalCuUnit[cuIndex].testedCuFlag = EB_FALSE;
+                cuPtr->splitFlag = EB_FALSE;
+                contextPtr->mdLocalCuUnit[cuIndex].testedCuFlag = EB_FALSE;
                 contextPtr->pillarCuArray.leafDataArray[contextPtr->pillarCuArray.leafCount] = cuIndex;
                 contextPtr->pillarCuArray.leafCount++;
 
             }
             else if (cuStatsPtr->depth == 3) {
                 splitFlag           = EB_FALSE;
-				cuPtr->splitFlag = EB_FALSE;
-				contextPtr->mdLocalCuUnit[cuIndex].testedCuFlag = EB_FALSE;
+                cuPtr->splitFlag = EB_FALSE;
+                contextPtr->mdLocalCuUnit[cuIndex].testedCuFlag = EB_FALSE;
                 contextPtr->pillarCuArray.leafDataArray[contextPtr->pillarCuArray.leafCount] = cuIndex;
                 contextPtr->pillarCuArray.leafCount++;
 
@@ -5179,43 +5179,43 @@ EB_EXTERN EB_ERRORTYPE BdpPillar(
     PictureControlSet_t                 *pictureControlSetPtr,
     LcuParams_t                         *lcuParamPtr,
     LargestCodingUnit_t                 *lcuPtr,
-	EB_U16                               lcuAddr,
+    EB_U16                               lcuAddr,
     ModeDecisionContext_t               *contextPtr)
 {
-	EB_ERRORTYPE                            return_error = EB_ErrorNone;
+    EB_ERRORTYPE                            return_error = EB_ErrorNone;
 
-	// CU
-	EB_U32                                  cuIdx;
+    // CU
+    EB_U32                                  cuIdx;
 
-	// Input
+    // Input
     EbPictureBufferDesc_t                  *inputPicturePtr = pictureControlSetPtr->ParentPcsPtr->chromaDownSamplePicturePtr;
     EB_U16                                  tileIdx = lcuPtr->lcuEdgeInfoPtr->tileIndexInRaster;
 
 
-	// Mode Decision Candidate Buffers
-	EB_U32                                  bufferTotalCount;
-	ModeDecisionCandidateBuffer_t          *candidateBuffer;
-	ModeDecisionCandidateBuffer_t          *bestCandidateBuffers[EB_MAX_LCU_DEPTH];
+    // Mode Decision Candidate Buffers
+    EB_U32                                  bufferTotalCount;
+    ModeDecisionCandidateBuffer_t          *candidateBuffer;
+    ModeDecisionCandidateBuffer_t          *bestCandidateBuffers[EB_MAX_LCU_DEPTH];
 
-	// Mode Decision Search Candidates
-	EB_U8                                   candidateIndex;
-	EB_U32                                  fastCandidateTotalCount;
-	EB_U32                                  fullCandidateTotalCount;
+    // Mode Decision Search Candidates
+    EB_U8                                   candidateIndex;
+    EB_U32                                  fastCandidateTotalCount;
+    EB_U32                                  fullCandidateTotalCount;
 
-	EB_U32                                  secondFastCostSearchCandidateTotalCount;
+    EB_U32                                  secondFastCostSearchCandidateTotalCount;
 
-	// CTB merge
-	EB_U32                                  lastCuIndex;
+    // CTB merge
+    EB_U32                                  lastCuIndex;
 
-	// Pre Intra Search
+    // Pre Intra Search
 
-	ModeDecisionCandidate_t                *fastCandidateArray          = contextPtr->fastCandidateArray;
-	ModeDecisionCandidateBuffer_t         **candidateBufferPtrArrayBase = contextPtr->candidateBufferPtrArray;
-	EB_U32							        bestIntraMode               = EB_INTRA_MODE_INVALID;
+    ModeDecisionCandidate_t                *fastCandidateArray          = contextPtr->fastCandidateArray;
+    ModeDecisionCandidateBuffer_t         **candidateBufferPtrArrayBase = contextPtr->candidateBufferPtrArray;
+    EB_U32                                    bestIntraMode               = EB_INTRA_MODE_INVALID;
 
     ModeDecisionCandidateBuffer_t         **candidateBufferPtrArray;
 
-	EB_U32                                  maxBuffers;
+    EB_U32                                  maxBuffers;
 
 
     // enableExitPartitioning derivation @ BdpPillar()
@@ -5230,10 +5230,10 @@ EB_EXTERN EB_ERRORTYPE BdpPillar(
     contextPtr->cu8x8RefinementOnFlag = EB_FALSE;
 
     // Keep track of the LCU Ptr
-	contextPtr->lcuPtr                  = lcuPtr;
+    contextPtr->lcuPtr                  = lcuPtr;
 
-	contextPtr->groupOf8x8BlocksCount   = 0;
-	contextPtr->groupOf16x16BlocksCount = 0;
+    contextPtr->groupOf8x8BlocksCount   = 0;
+    contextPtr->groupOf16x16BlocksCount = 0;
 
     // Mode Decision Neighbor Arrays
     contextPtr->intraLumaModeNeighborArray  =   pictureControlSetPtr->mdIntraLumaModeNeighborArray[PILLAR_NEIGHBOR_ARRAY_INDEX][tileIdx];
@@ -5248,25 +5248,25 @@ EB_EXTERN EB_ERRORTYPE BdpPillar(
     contextPtr->edgeBlockNumFlag = (EB_BOOL)pictureControlSetPtr->ParentPcsPtr->edgeResultsPtr[lcuAddr].edgeBlockNum;
 
     // First CU Loop
-	cuIdx = 0;
-	do
-	{
-		// Assign CU data
+    cuIdx = 0;
+    do
+    {
+        // Assign CU data
 
         const EB_U8 leafIndex = contextPtr->pillarCuArray.leafDataArray[cuIdx];
 
-		CodingUnit_t *  cuPtr = contextPtr->cuPtr = lcuPtr->codedLeafArrayPtr[leafIndex];
+        CodingUnit_t *  cuPtr = contextPtr->cuPtr = lcuPtr->codedLeafArrayPtr[leafIndex];
 
-		const CodedUnitStats_t *cuStatsPtr = contextPtr->cuStats = GetCodedUnitStats(leafIndex);
+        const CodedUnitStats_t *cuStatsPtr = contextPtr->cuStats = GetCodedUnitStats(leafIndex);
         contextPtr->cuSizeLog2 = cuStatsPtr->sizeLog2;
 
 
         contextPtr->cuOriginX = lcuParamPtr->originX + cuStatsPtr->originX;
-		contextPtr->cuOriginY = lcuParamPtr->originY + cuStatsPtr->originY;
-		const EB_U32 inputOriginIndex = (contextPtr->cuOriginY + inputPicturePtr->originY) * inputPicturePtr->strideY + (contextPtr->cuOriginX + inputPicturePtr->originX);
-		const EB_U32 inputCbOriginIndex = ((contextPtr->cuOriginY>>1) + (inputPicturePtr->originY >> 1)) * inputPicturePtr->strideCb + ((contextPtr->cuOriginX >>1) + (inputPicturePtr->originX >> 1));
-		const EB_U32 cuOriginIndex       = ((contextPtr->cuOriginY & 63)  * 64) + (contextPtr->cuOriginX & 63);
-		const EB_U32 cuChromaOriginIndex = (((contextPtr->cuOriginY & 63) * 32) + (contextPtr->cuOriginX & 63)) >> 1;
+        contextPtr->cuOriginY = lcuParamPtr->originY + cuStatsPtr->originY;
+        const EB_U32 inputOriginIndex = (contextPtr->cuOriginY + inputPicturePtr->originY) * inputPicturePtr->strideY + (contextPtr->cuOriginX + inputPicturePtr->originX);
+        const EB_U32 inputCbOriginIndex = ((contextPtr->cuOriginY>>1) + (inputPicturePtr->originY >> 1)) * inputPicturePtr->strideCb + ((contextPtr->cuOriginX >>1) + (inputPicturePtr->originX >> 1));
+        const EB_U32 cuOriginIndex       = ((contextPtr->cuOriginY & 63)  * 64) + (contextPtr->cuOriginX & 63);
+        const EB_U32 cuChromaOriginIndex = (((contextPtr->cuOriginY & 63) * 32) + (contextPtr->cuOriginX & 63)) >> 1;
 
         //need these for L7 Chroma: TBCleaned.
         contextPtr->cuDepth = cuStatsPtr->depth;
@@ -5275,32 +5275,32 @@ EB_EXTERN EB_ERRORTYPE BdpPillar(
         contextPtr->lcuChromaSize = contextPtr->lcuSize >> 1;
         contextPtr->cuSizeLog2 = cuStatsPtr->sizeLog2;
         contextPtr->cuChromaOriginX = contextPtr->cuOriginX >> 1;
-		contextPtr->cuChromaOriginY = contextPtr->cuOriginY >> 1;
-		contextPtr->mdLocalCuUnit[leafIndex].testedCuFlag = EB_TRUE;
-		cuPtr->leafIndex = leafIndex;
+        contextPtr->cuChromaOriginY = contextPtr->cuOriginY >> 1;
+        contextPtr->mdLocalCuUnit[leafIndex].testedCuFlag = EB_TRUE;
+        cuPtr->leafIndex = leafIndex;
         cuPtr->qp = contextPtr->qp;
 
         candidateBufferPtrArray = &(candidateBufferPtrArrayBase[contextPtr->bufferDepthIndexStart[cuStatsPtr->depth]]);
 
         // Set PF Mode - should be done per TU (and not per CU) to avoid the correction
-		DerivePartialFrequencyN2Flag(
-			pictureControlSetPtr,
-			contextPtr);
+        DerivePartialFrequencyN2Flag(
+            pictureControlSetPtr,
+            contextPtr);
 
-		// Initialize Fast Loop
-		EbHevcProductCodingLoopInitFastLoop( // HT to be rechecked especially for fullCostArray
-			contextPtr,
+        // Initialize Fast Loop
+        EbHevcProductCodingLoopInitFastLoop( // HT to be rechecked especially for fullCostArray
+            contextPtr,
             contextPtr->intraLumaModeNeighborArray,
-		    contextPtr->skipFlagNeighborArray,
-		    contextPtr->modeTypeNeighborArray,
-		    contextPtr->leafDepthNeighborArray);
+            contextPtr->skipFlagNeighborArray,
+            contextPtr->modeTypeNeighborArray,
+            contextPtr->leafDepthNeighborArray);
 
-		// Perform MPM search
-		if (contextPtr->mpmSearch) {
+        // Perform MPM search
+        if (contextPtr->mpmSearch) {
             DeriveMpmModes( // HT done
                 contextPtr,
                 cuPtr);
-		}
+        }
 
         SetNmm(
             contextPtr,
@@ -5314,47 +5314,47 @@ EB_EXTERN EB_ERRORTYPE BdpPillar(
 
         contextPtr->conformantMvMergeTable = EB_TRUE;
 
-		ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
-			lcuPtr,
-			contextPtr,
-			leafIndex,
-			lcuAddr,
-			&bufferTotalCount,
-			&fastCandidateTotalCount,
-			(void*)contextPtr->interPredictionContext,
-			pictureControlSetPtr,
-			contextPtr->mpmSearch,
-			contextPtr->mpmSearchCandidate,
-			contextPtr->mostProbableModeArray);
+        ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
+            lcuPtr,
+            contextPtr,
+            leafIndex,
+            lcuAddr,
+            &bufferTotalCount,
+            &fastCandidateTotalCount,
+            (void*)contextPtr->interPredictionContext,
+            pictureControlSetPtr,
+            contextPtr->mpmSearch,
+            contextPtr->mpmSearchCandidate,
+            contextPtr->mostProbableModeArray);
 
 
         //if we want to recon N candidate, we would need N+1 buffers
-		maxBuffers = MIN((bufferTotalCount + 1), contextPtr->bufferDepthIndexWidth[cuStatsPtr->depth]);
+        maxBuffers = MIN((bufferTotalCount + 1), contextPtr->bufferDepthIndexWidth[cuStatsPtr->depth]);
 
-		ProductPerformFastLoop(
-			pictureControlSetPtr,
-			lcuPtr,
-			contextPtr,
-			candidateBufferPtrArrayBase,
-			fastCandidateArray,
-			fastCandidateTotalCount,
-			inputPicturePtr,
-			inputOriginIndex,
-			inputCbOriginIndex,
+        ProductPerformFastLoop(
+            pictureControlSetPtr,
+            lcuPtr,
+            contextPtr,
+            candidateBufferPtrArrayBase,
+            fastCandidateArray,
+            fastCandidateTotalCount,
+            inputPicturePtr,
+            inputOriginIndex,
+            inputCbOriginIndex,
             inputCbOriginIndex,
             cuPtr,
-			cuOriginIndex,
-			cuChromaOriginIndex,
-			maxBuffers,
-			&secondFastCostSearchCandidateTotalCount);
+            cuOriginIndex,
+            cuChromaOriginIndex,
+            maxBuffers,
+            &secondFastCostSearchCandidateTotalCount);
 
-		// Make sure bufferTotalCount is not larger than the number of fast modes
-		bufferTotalCount = MIN(secondFastCostSearchCandidateTotalCount, bufferTotalCount);
+        // Make sure bufferTotalCount is not larger than the number of fast modes
+        bufferTotalCount = MIN(secondFastCostSearchCandidateTotalCount, bufferTotalCount);
 
-		// PreModeDecision
-		// -Input is the buffers
-		// -Output is list of buffers for full reconstruction
-		EB_U8 disableMergeIndex = 0;
+        // PreModeDecision
+        // -Input is the buffers
+        // -Output is list of buffers for full reconstruction
+        EB_U8 disableMergeIndex = 0;
 
         PreModeDecision(
             cuPtr,
@@ -5362,10 +5362,10 @@ EB_EXTERN EB_ERRORTYPE BdpPillar(
             candidateBufferPtrArray,
             &fullCandidateTotalCount,
             contextPtr->bestCandidateIndexArray,
-			&disableMergeIndex,
+            &disableMergeIndex,
             (EB_BOOL)(secondFastCostSearchCandidateTotalCount == bufferTotalCount)); // The fast loop bug fix is now added to 4K only
 
-		PerformFullLoop(
+        PerformFullLoop(
             pictureControlSetPtr,
             lcuPtr,
             cuPtr,
@@ -5377,17 +5377,17 @@ EB_EXTERN EB_ERRORTYPE BdpPillar(
             cuChromaOriginIndex,
             MIN(fullCandidateTotalCount, bufferTotalCount)); // fullCandidateTotalCount to number of buffers to process
 
-		// Full Mode Decision (choose the best mode)
-		candidateIndex = ProductFullModeDecision(
+        // Full Mode Decision (choose the best mode)
+        candidateIndex = ProductFullModeDecision(
             contextPtr,
-			cuPtr,
+            cuPtr,
             contextPtr->cuStats->size,
-			candidateBufferPtrArray,
-			fullCandidateTotalCount,
-			contextPtr->bestCandidateIndexArray,
-			&bestIntraMode);
+            candidateBufferPtrArray,
+            fullCandidateTotalCount,
+            contextPtr->bestCandidateIndexArray,
+            &bestIntraMode);
 
-		candidateBuffer = candidateBufferPtrArray[candidateIndex];
+        candidateBuffer = candidateBufferPtrArray[candidateIndex];
 
         bestCandidateBuffers[contextPtr->cuStats->depth] = candidateBuffer;
         contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCoeffBits                = candidateBuffer->yCoeffBits;
@@ -5409,11 +5409,11 @@ EB_EXTERN EB_ERRORTYPE BdpPillar(
             contextPtr->mdEpPipeLcu[cuPtr->leafIndex].fastLumaRate                          = candidateBuffer->candidatePtr->fastLumaRate;
         }
 
-		EB_U8          parentLeafIndex;
-		EB_BOOL        exitPartition = EB_FALSE;
-		contextPtr->mdLocalCuUnit[leafIndex].mdcArrayIndex = (EB_U8)cuIdx;
+        EB_U8          parentLeafIndex;
+        EB_BOOL        exitPartition = EB_FALSE;
+        contextPtr->mdLocalCuUnit[leafIndex].mdcArrayIndex = (EB_U8)cuIdx;
 
-		CheckHighCostPartition(
+        CheckHighCostPartition(
             sequenceControlSetPtr,
             contextPtr,
             lcuPtr,
@@ -5422,123 +5422,123 @@ EB_EXTERN EB_ERRORTYPE BdpPillar(
             enableExitPartitioning,
             &exitPartition);
 
-	   if (exitPartition)
-	   {
-		   //Reset the CU-Loop to the parent CU.
-		   cuStatsPtr = GetCodedUnitStats(parentLeafIndex);
-		   cuPtr = contextPtr->cuPtr = lcuPtr->codedLeafArrayPtr[parentLeafIndex];
-		   cuIdx = contextPtr->mdLocalCuUnit[parentLeafIndex].mdcArrayIndex;
-		   cuPtr->splitFlag = EB_FALSE;
+       if (exitPartition)
+       {
+           //Reset the CU-Loop to the parent CU.
+           cuStatsPtr = GetCodedUnitStats(parentLeafIndex);
+           cuPtr = contextPtr->cuPtr = lcuPtr->codedLeafArrayPtr[parentLeafIndex];
+           cuIdx = contextPtr->mdLocalCuUnit[parentLeafIndex].mdcArrayIndex;
+           cuPtr->splitFlag = EB_FALSE;
 
-		   lastCuIndex = ExitInterDepthDecision(
-			   contextPtr,
-			   parentLeafIndex,
-			   lcuPtr,
-			   lcuAddr,
-			   lcuParamPtr->originX,
-			   lcuParamPtr->originY,
-			   contextPtr->fullLambda,
-			   contextPtr->mdRateEstimationPtr,
-			   pictureControlSetPtr);
+           lastCuIndex = ExitInterDepthDecision(
+               contextPtr,
+               parentLeafIndex,
+               lcuPtr,
+               lcuAddr,
+               lcuParamPtr->originX,
+               lcuParamPtr->originY,
+               contextPtr->fullLambda,
+               contextPtr->mdRateEstimationPtr,
+               pictureControlSetPtr);
 
-	   }
-	   else{
+       }
+       else{
             PerformInverseTransformRecon(
                 contextPtr,
                 candidateBuffer,
                 cuPtr,
                 contextPtr->cuStats);
 
-		// Inter Depth Decision
-		lastCuIndex = PillarInterDepthDecision(
-			contextPtr,
-			leafIndex,
-			lcuPtr,
-			lcuParamPtr->originX,
-			lcuParamPtr->originY,
-			contextPtr->fullLambda,
-			contextPtr->mdRateEstimationPtr,
-			pictureControlSetPtr);
-	   }
+        // Inter Depth Decision
+        lastCuIndex = PillarInterDepthDecision(
+            contextPtr,
+            leafIndex,
+            lcuPtr,
+            lcuParamPtr->originX,
+            lcuParamPtr->originY,
+            contextPtr->fullLambda,
+            contextPtr->mdRateEstimationPtr,
+            pictureControlSetPtr);
+       }
 
-		if (lcuPtr->codedLeafArrayPtr[lastCuIndex]->splitFlag == EB_FALSE)
-		{
-			// Update the CU Stats
-			contextPtr->cuStats = GetCodedUnitStats(lastCuIndex);
-			contextPtr->cuOriginX = lcuParamPtr->originX + contextPtr->cuStats->originX;
-			contextPtr->cuOriginY = lcuParamPtr->originY + contextPtr->cuStats->originY;
+        if (lcuPtr->codedLeafArrayPtr[lastCuIndex]->splitFlag == EB_FALSE)
+        {
+            // Update the CU Stats
+            contextPtr->cuStats = GetCodedUnitStats(lastCuIndex);
+            contextPtr->cuOriginX = lcuParamPtr->originX + contextPtr->cuStats->originX;
+            contextPtr->cuOriginY = lcuParamPtr->originY + contextPtr->cuStats->originY;
 
-			// Set the MvUnit
-			contextPtr->mvUnit.predDirection   = (EB_U8)(&lcuPtr->codedLeafArrayPtr[lastCuIndex]->predictionUnitArray[0])->interPredDirectionIndex;
-			contextPtr->mvUnit.mv[REF_LIST_0].mvUnion = (&lcuPtr->codedLeafArrayPtr[lastCuIndex]->predictionUnitArray[0])->mv[REF_LIST_0].mvUnion;
-			contextPtr->mvUnit.mv[REF_LIST_1].mvUnion = (&lcuPtr->codedLeafArrayPtr[lastCuIndex]->predictionUnitArray[0])->mv[REF_LIST_1].mvUnion;
+            // Set the MvUnit
+            contextPtr->mvUnit.predDirection   = (EB_U8)(&lcuPtr->codedLeafArrayPtr[lastCuIndex]->predictionUnitArray[0])->interPredDirectionIndex;
+            contextPtr->mvUnit.mv[REF_LIST_0].mvUnion = (&lcuPtr->codedLeafArrayPtr[lastCuIndex]->predictionUnitArray[0])->mv[REF_LIST_0].mvUnion;
+            contextPtr->mvUnit.mv[REF_LIST_1].mvUnion = (&lcuPtr->codedLeafArrayPtr[lastCuIndex]->predictionUnitArray[0])->mv[REF_LIST_1].mvUnion;
 
-			// Set the candidate buffer
-			contextPtr->cuPtr = lcuPtr->codedLeafArrayPtr[lastCuIndex];
-			candidateBuffer = bestCandidateBuffers[contextPtr->cuStats->depth];
+            // Set the candidate buffer
+            contextPtr->cuPtr = lcuPtr->codedLeafArrayPtr[lastCuIndex];
+            candidateBuffer = bestCandidateBuffers[contextPtr->cuStats->depth];
 
-			// Update Neighbor Arrays
-			{
-				EB_U8 predictionModeFlag = (EB_U8)contextPtr->cuPtr->predictionModeFlag;
-				EB_U8 intraLumaMode = (EB_U8)(&contextPtr->cuPtr->predictionUnitArray[0])->intraLumaMode;
-				EB_U8 skipFlag = (EB_U8)contextPtr->cuPtr->skipFlag;
+            // Update Neighbor Arrays
+            {
+                EB_U8 predictionModeFlag = (EB_U8)contextPtr->cuPtr->predictionModeFlag;
+                EB_U8 intraLumaMode = (EB_U8)(&contextPtr->cuPtr->predictionUnitArray[0])->intraLumaMode;
+                EB_U8 skipFlag = (EB_U8)contextPtr->cuPtr->skipFlag;
 
-				ModeDecisionUpdateNeighborArrays(
-					contextPtr->leafDepthNeighborArray,
-					contextPtr->modeTypeNeighborArray,
-					contextPtr->intraLumaModeNeighborArray,
-					contextPtr->mvNeighborArray,
-					contextPtr->skipFlagNeighborArray,
-					contextPtr->lumaReconNeighborArray,
-					contextPtr->cbReconNeighborArray,
-					contextPtr->crReconNeighborArray,
-					candidateBuffer->reconPtr,
+                ModeDecisionUpdateNeighborArrays(
+                    contextPtr->leafDepthNeighborArray,
+                    contextPtr->modeTypeNeighborArray,
+                    contextPtr->intraLumaModeNeighborArray,
+                    contextPtr->mvNeighborArray,
+                    contextPtr->skipFlagNeighborArray,
+                    contextPtr->lumaReconNeighborArray,
+                    contextPtr->cbReconNeighborArray,
+                    contextPtr->crReconNeighborArray,
+                    candidateBuffer->reconPtr,
                     MAX_LCU_SIZE,
                     contextPtr->intraMdOpenLoopFlag,
                     EB_FALSE,
-					(EB_U8*)&contextPtr->cuStats->depth,
-					&predictionModeFlag,
-					&intraLumaMode,
-					&contextPtr->mvUnit,
-					&skipFlag,
-					contextPtr->cuOriginX,
-					contextPtr->cuOriginY,
-					contextPtr->cuStats->size,
+                    (EB_U8*)&contextPtr->cuStats->depth,
+                    &predictionModeFlag,
+                    &intraLumaMode,
+                    &contextPtr->mvUnit,
+                    &skipFlag,
+                    contextPtr->cuOriginX,
+                    contextPtr->cuOriginY,
+                    contextPtr->cuStats->size,
                     contextPtr->useChromaInformationInFullLoop ? EB_TRUE : EB_FALSE);
 
-			}
+            }
 
-			if (contextPtr->intraMdOpenLoopFlag == EB_FALSE)
-			{
-				UpdateMdReconBuffer(
-					candidateBuffer->reconPtr,
-					contextPtr->pillarReconBuffer,
-					contextPtr,
-					lcuPtr);
-			}
-		}
+            if (contextPtr->intraMdOpenLoopFlag == EB_FALSE)
+            {
+                UpdateMdReconBuffer(
+                    candidateBuffer->reconPtr,
+                    contextPtr->pillarReconBuffer,
+                    contextPtr,
+                    lcuPtr);
+            }
+        }
 
-		if (exitPartition == EB_FALSE){
-			cuIdx++;
-		}
-		else{
-			cuIdx += BdpCalculateNextCuIndex(
-				contextPtr->pillarCuArray.leafDataArray,
-				cuIdx,
-				contextPtr->pillarCuArray.leafCount,
-				cuStatsPtr->depth);
-		}
+        if (exitPartition == EB_FALSE){
+            cuIdx++;
+        }
+        else{
+            cuIdx += BdpCalculateNextCuIndex(
+                contextPtr->pillarCuArray.leafDataArray,
+                cuIdx,
+                contextPtr->pillarCuArray.leafCount,
+                cuStatsPtr->depth);
+        }
 
 
 
-	} while (cuIdx < contextPtr->pillarCuArray.leafCount);
+    } while (cuIdx < contextPtr->pillarCuArray.leafCount);
 
-	return return_error;
+    return return_error;
 }
 
 
 void SplitParentCu(
-	ModeDecisionContext_t               *contextPtr,
+    ModeDecisionContext_t               *contextPtr,
     LargestCodingUnit_t         *lcuPtr,
     EB_U8                        parentLeafIndex,
     EB_U64                       totalChildCost,
@@ -5554,13 +5554,13 @@ void SplitParentCu(
 
     // Copy the Mode & Depth of the Top-Left N+1 block to the N block for the SplitContext calculation
     //   This needs to be done in the case that the N block was initially not calculated.
-	contextPtr->mdLocalCuUnit[parentLeafIndex].leftNeighborMode = contextPtr->mdLocalCuUnit[parentLeafIndex + 1].leftNeighborMode;
-	contextPtr->mdLocalCuUnit[parentLeafIndex].leftNeighborDepth = contextPtr->mdLocalCuUnit[parentLeafIndex + 1].leftNeighborDepth;
-	contextPtr->mdLocalCuUnit[parentLeafIndex].topNeighborMode = contextPtr->mdLocalCuUnit[parentLeafIndex + 1].topNeighborMode;
-	contextPtr->mdLocalCuUnit[parentLeafIndex].topNeighborDepth = contextPtr->mdLocalCuUnit[parentLeafIndex + 1].topNeighborDepth;
+    contextPtr->mdLocalCuUnit[parentLeafIndex].leftNeighborMode = contextPtr->mdLocalCuUnit[parentLeafIndex + 1].leftNeighborMode;
+    contextPtr->mdLocalCuUnit[parentLeafIndex].leftNeighborDepth = contextPtr->mdLocalCuUnit[parentLeafIndex + 1].leftNeighborDepth;
+    contextPtr->mdLocalCuUnit[parentLeafIndex].topNeighborMode = contextPtr->mdLocalCuUnit[parentLeafIndex + 1].topNeighborMode;
+    contextPtr->mdLocalCuUnit[parentLeafIndex].topNeighborDepth = contextPtr->mdLocalCuUnit[parentLeafIndex + 1].topNeighborDepth;
     // Compute depth N cost
-	SplitFlagRate(
-		contextPtr,
+    SplitFlagRate(
+        contextPtr,
         lcuPtr->codedLeafArrayPtr[parentLeafIndex],
         0,
         &depthNRate,
@@ -5568,10 +5568,10 @@ void SplitParentCu(
         mdRateEstimationPtr,
         3); //tbMaxDepth);
 
-	*depthNCost = contextPtr->mdLocalCuUnit[parentLeafIndex].cost + depthNRate;
+    *depthNCost = contextPtr->mdLocalCuUnit[parentLeafIndex].cost + depthNRate;
     // Compute depth N+1 cost
-	SplitFlagRate(
-		contextPtr,
+    SplitFlagRate(
+        contextPtr,
         lcuPtr->codedLeafArrayPtr[parentLeafIndex],
         1,
         &depthNPlusOneRate,
@@ -5610,7 +5610,7 @@ EB_EXTERN EB_ERRORTYPE Bdp64x64vs32x32RefinementProcess(
 
     ModeDecisionCandidate_t                *fastCandidateArray = contextPtr->fastCandidateArray;
     ModeDecisionCandidateBuffer_t         **candidateBufferPtrArrayBase = contextPtr->candidateBufferPtrArray;
-    EB_U32							        bestIntraMode = EB_INTRA_MODE_INVALID;
+    EB_U32                                    bestIntraMode = EB_INTRA_MODE_INVALID;
     ModeDecisionCandidateBuffer_t         **candidateBufferPtrArray;
 
     EB_U32                                  maxBuffers;
@@ -5654,9 +5654,9 @@ EB_EXTERN EB_ERRORTYPE Bdp64x64vs32x32RefinementProcess(
     candidateBufferPtrArray = &(candidateBufferPtrArrayBase[contextPtr->bufferDepthIndexStart[cuStatsPtr->depth]]);
 
     // Set PF Mode - should be done per TU (and not per CU) to avoid the correction
-	DerivePartialFrequencyN2Flag(
-		pictureControlSetPtr,
-		contextPtr);
+    DerivePartialFrequencyN2Flag(
+        pictureControlSetPtr,
+        contextPtr);
 
     // Initialize Fast Loop
     EbHevcProductCodingLoopInitFastLoop( // HT to be rechecked especially for fullCostArray
@@ -5688,7 +5688,7 @@ EB_EXTERN EB_ERRORTYPE Bdp64x64vs32x32RefinementProcess(
     ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
         lcuPtr,
         contextPtr,
-		leafIndex,
+        leafIndex,
         lcuAddr,
         &bufferTotalCount,
         &fastCandidateTotalCount,
@@ -5724,7 +5724,7 @@ EB_EXTERN EB_ERRORTYPE Bdp64x64vs32x32RefinementProcess(
     // PreModeDecision
     // -Input is the buffers
     // -Output is list of buffers for full reconstruction
-	EB_U8 disableMergeIndex = 0;
+    EB_U8 disableMergeIndex = 0;
 
     PreModeDecision(
         cuPtr,
@@ -5732,7 +5732,7 @@ EB_EXTERN EB_ERRORTYPE Bdp64x64vs32x32RefinementProcess(
         candidateBufferPtrArray,
         &fullCandidateTotalCount,
         contextPtr->bestCandidateIndexArray,
-		&disableMergeIndex,
+        &disableMergeIndex,
         (EB_BOOL)(secondFastCostSearchCandidateTotalCount == bufferTotalCount)); // The fast loop bug fix is now added to 4K only
 
     PerformFullLoop(
@@ -5769,7 +5769,7 @@ EB_EXTERN EB_ERRORTYPE Bdp64x64vs32x32RefinementProcess(
     contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCountNonZeroCoeffs[2]    = candidateBuffer->yCountNonZeroCoeffs[2];
     contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCountNonZeroCoeffs[3]    = candidateBuffer->yCountNonZeroCoeffs[3];
 
-	if (lcuPtr->chromaEncodeMode == CHROMA_MODE_BEST && candidateBuffer->candidatePtr->type == INTER_MODE && candidateBuffer->candidatePtr->mergeFlag == EB_TRUE)
+    if (lcuPtr->chromaEncodeMode == CHROMA_MODE_BEST && candidateBuffer->candidatePtr->type == INTER_MODE && candidateBuffer->candidatePtr->mergeFlag == EB_TRUE)
     {
         contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCoeffBits                            = candidateBuffer->yCoeffBits;
         contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yFullDistortion[DIST_CALC_RESIDUAL]   = candidateBuffer->yFullDistortion[DIST_CALC_RESIDUAL];
@@ -5786,10 +5786,10 @@ EB_EXTERN EB_ERRORTYPE Bdp64x64vs32x32RefinementProcess(
 
     EB_U64 depthNCost = 0;
     EB_U64 depthNPlusOneCost = 0;
-	EB_U64 totalChildCost = contextPtr->mdLocalCuUnit[1].cost + contextPtr->mdLocalCuUnit[22].cost + contextPtr->mdLocalCuUnit[43].cost + contextPtr->mdLocalCuUnit[64].cost;
+    EB_U64 totalChildCost = contextPtr->mdLocalCuUnit[1].cost + contextPtr->mdLocalCuUnit[22].cost + contextPtr->mdLocalCuUnit[43].cost + contextPtr->mdLocalCuUnit[64].cost;
 
-	SplitParentCu(
-		contextPtr,
+    SplitParentCu(
+        contextPtr,
         lcuPtr,
         0,
         totalChildCost,
@@ -5844,15 +5844,15 @@ EB_EXTERN EB_ERRORTYPE Bdp64x64vs32x32RefinementProcess(
             contextPtr->cuStats->size,
             contextPtr->useChromaInformationInFullLoop ? EB_TRUE : EB_FALSE);
 
-		if (contextPtr->intraMdOpenLoopFlag == EB_FALSE)
-		{
-			UpdateMdReconBuffer(
-				candidateBuffer->reconPtr,
-				contextPtr->pillarReconBuffer,
-				contextPtr,
-				lcuPtr);
-		}
-	}
+        if (contextPtr->intraMdOpenLoopFlag == EB_FALSE)
+        {
+            UpdateMdReconBuffer(
+                candidateBuffer->reconPtr,
+                contextPtr->pillarReconBuffer,
+                contextPtr,
+                lcuPtr);
+        }
+    }
 
 
     return return_error;
@@ -5890,13 +5890,13 @@ EB_EXTERN EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
 
     ModeDecisionCandidate_t                *fastCandidateArray = contextPtr->fastCandidateArray;
     ModeDecisionCandidateBuffer_t         **candidateBufferPtrArrayBase = contextPtr->candidateBufferPtrArray;
-    EB_U32							        bestIntraMode = EB_INTRA_MODE_INVALID;
+    EB_U32                                    bestIntraMode = EB_INTRA_MODE_INVALID;
     ModeDecisionCandidateBuffer_t         **candidateBufferPtrArray;
 
     EB_U32                                  maxBuffers;
 
 
-	LcuParams_t *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuPtr->index];
+    LcuParams_t *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuPtr->index];
 
     // enableExitPartitioning derivation @ Bdp16x16vs8x8RefinementProcess()
     EB_BOOL enableExitPartitioning = (contextPtr->enableExitPartitioning && lcuParams->isCompleteLcu) ? EB_TRUE : EB_FALSE;
@@ -5924,7 +5924,7 @@ EB_EXTERN EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
             EB_U8  childDepthOffset = DepthOffset[GetCodedUnitStats(parentLeafIndex)->depth + 1];
             EB_BOOL cu16x16RefinementFlag;
 
-			if (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_LIGHT_BDP_DEPTH_MODE || (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_LCU_SWITCH_DEPTH_MODE  && (pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuAddr] == LCU_LIGHT_BDP_DEPTH_MODE))){
+            if (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_LIGHT_BDP_DEPTH_MODE || (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_LCU_SWITCH_DEPTH_MODE  && (pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuAddr] == LCU_LIGHT_BDP_DEPTH_MODE))){
 
                 cu16x16RefinementFlag = GetCodedUnitStats(parentLeafIndex)->size == 16 && (lcuPtr->codedLeafArrayPtr[parentLeafIndex]->predictionModeFlag == INTRA_MODE || contextPtr->depthRefinment > 0);
 
@@ -5949,22 +5949,22 @@ EB_EXTERN EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
                 leafIndexArray[3] = parentLeafIndex + 1 + childDepthOffset * 3;
 
 
-				EB_BOOL exitPartition = EB_FALSE;
-				EB_U64  cu16x16Cost = MAX_CU_COST;
-				if (enableExitPartitioning)
-				{
-					EB_U64  depth2Rate;
-					SplitFlagRate(
-						contextPtr,
-						lcuPtr->codedLeafArrayPtr[parentLeafIndex],
-						0,
-						&depth2Rate,
-						contextPtr->fullLambda,
-						contextPtr->mdRateEstimationPtr,
-						3); //tbMaxDepth);     //CHKN  THIS SHOULD BE 4 - keep 3 to be consistent with BDP usage
+                EB_BOOL exitPartition = EB_FALSE;
+                EB_U64  cu16x16Cost = MAX_CU_COST;
+                if (enableExitPartitioning)
+                {
+                    EB_U64  depth2Rate;
+                    SplitFlagRate(
+                        contextPtr,
+                        lcuPtr->codedLeafArrayPtr[parentLeafIndex],
+                        0,
+                        &depth2Rate,
+                        contextPtr->fullLambda,
+                        contextPtr->mdRateEstimationPtr,
+                        3); //tbMaxDepth);     //CHKN  THIS SHOULD BE 4 - keep 3 to be consistent with BDP usage
 
-					cu16x16Cost = contextPtr->mdLocalCuUnit[parentLeafIndex].cost + depth2Rate;
-				}
+                    cu16x16Cost = contextPtr->mdLocalCuUnit[parentLeafIndex].cost + depth2Rate;
+                }
 
 
                 for (leafCount = 0; leafCount < totalLeafCount; leafCount++) {
@@ -5992,15 +5992,15 @@ EB_EXTERN EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
                     contextPtr->cuSizeLog2 = cuStatsPtr->sizeLog2;
                     contextPtr->cuChromaOriginX = contextPtr->cuOriginX >> 1;
                     contextPtr->cuChromaOriginY = contextPtr->cuOriginY >> 1;
-					contextPtr->mdLocalCuUnit[leafIndex].testedCuFlag = EB_TRUE;
+                    contextPtr->mdLocalCuUnit[leafIndex].testedCuFlag = EB_TRUE;
                     cuPtr->leafIndex = leafIndex;
                     cuPtr->qp = contextPtr->qp;
                     candidateBufferPtrArray = &(candidateBufferPtrArrayBase[contextPtr->bufferDepthIndexStart[cuStatsPtr->depth]]);
 
-					// Set PF Mode - should be done per TU (and not per CU) to avoid the correction
-					DerivePartialFrequencyN2Flag(
-						pictureControlSetPtr,
-						contextPtr);
+                    // Set PF Mode - should be done per TU (and not per CU) to avoid the correction
+                    DerivePartialFrequencyN2Flag(
+                        pictureControlSetPtr,
+                        contextPtr);
 
                     // Initialize Fast Loop
                     EbHevcProductCodingLoopInitFastLoop( // HT to be rechecked especially for fullCostArray
@@ -6031,7 +6031,7 @@ EB_EXTERN EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
                     ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
                         lcuPtr,
                         contextPtr,
-						leafIndex,
+                        leafIndex,
                         lcuAddr,
                         &bufferTotalCount,
                         &fastCandidateTotalCount,
@@ -6068,7 +6068,7 @@ EB_EXTERN EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
                     // PreModeDecision
                     // -Input is the buffers
                     // -Output is list of buffers for full reconstruction
-					EB_U8 disableMergeIndex = 0;
+                    EB_U8 disableMergeIndex = 0;
 
                     PreModeDecision(
                         cuPtr,
@@ -6076,7 +6076,7 @@ EB_EXTERN EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
                         candidateBufferPtrArray,
                         &fullCandidateTotalCount,
                         contextPtr->bestCandidateIndexArray,
-						&disableMergeIndex,
+                        &disableMergeIndex,
                         (EB_BOOL)(secondFastCostSearchCandidateTotalCount == bufferTotalCount)); // The fast loop bug fix is now added to 4K only
 
                     PerformFullLoop(
@@ -6113,35 +6113,35 @@ EB_EXTERN EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
                     contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCountNonZeroCoeffs[2]    = candidateBuffer->yCountNonZeroCoeffs[2];
                     contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCountNonZeroCoeffs[3]    = candidateBuffer->yCountNonZeroCoeffs[3];
 
-				   if (lcuPtr->chromaEncodeMode == CHROMA_MODE_BEST && candidateBuffer->candidatePtr->type == INTER_MODE && candidateBuffer->candidatePtr->mergeFlag == EB_TRUE)
-				   {
-						 contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCoeffBits                            = candidateBuffer->yCoeffBits;
-						 contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yFullDistortion[DIST_CALC_RESIDUAL]   = candidateBuffer->yFullDistortion[DIST_CALC_RESIDUAL];
-						 contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yFullDistortion[DIST_CALC_PREDICTION] = candidateBuffer->yFullDistortion[DIST_CALC_PREDICTION];
-						 contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCbf                                  = candidateBuffer->candidatePtr->yCbf ;
-						 contextPtr->mdEpPipeLcu[cuPtr->leafIndex].fastLumaRate                          = candidateBuffer->candidatePtr->fastLumaRate;
-				   }
+                   if (lcuPtr->chromaEncodeMode == CHROMA_MODE_BEST && candidateBuffer->candidatePtr->type == INTER_MODE && candidateBuffer->candidatePtr->mergeFlag == EB_TRUE)
+                   {
+                         contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCoeffBits                            = candidateBuffer->yCoeffBits;
+                         contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yFullDistortion[DIST_CALC_RESIDUAL]   = candidateBuffer->yFullDistortion[DIST_CALC_RESIDUAL];
+                         contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yFullDistortion[DIST_CALC_PREDICTION] = candidateBuffer->yFullDistortion[DIST_CALC_PREDICTION];
+                         contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCbf                                  = candidateBuffer->candidatePtr->yCbf ;
+                         contextPtr->mdEpPipeLcu[cuPtr->leafIndex].fastLumaRate                          = candidateBuffer->candidatePtr->fastLumaRate;
+                   }
 
-					PerformInverseTransformRecon(
-						contextPtr,
-						candidateBuffer,
-						cuPtr,
-						contextPtr->cuStats);
+                    PerformInverseTransformRecon(
+                        contextPtr,
+                        candidateBuffer,
+                        cuPtr,
+                        contextPtr->cuStats);
 
                     if (leafCount < 4) {
 
-						totalChildCost += contextPtr->mdLocalCuUnit[cuPtr->leafIndex].cost;
+                        totalChildCost += contextPtr->mdLocalCuUnit[cuPtr->leafIndex].cost;
                         neighborLeafIndex = leafIndex;
                     }
 
 
-					if (enableExitPartitioning){
-						if (leafCount < 3 && totalChildCost > cu16x16Cost  && lcuParams->isCompleteLcu)
-						{
-							exitPartition = EB_TRUE;
-							neighborLeafIndex = parentLeafIndex;
-						}
-					}
+                    if (enableExitPartitioning){
+                        if (leafCount < 3 && totalChildCost > cu16x16Cost  && lcuParams->isCompleteLcu)
+                        {
+                            exitPartition = EB_TRUE;
+                            neighborLeafIndex = parentLeafIndex;
+                        }
+                    }
 
 
                     if (leafCount == (totalLeafCount - 1)){
@@ -6149,10 +6149,10 @@ EB_EXTERN EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
                         EB_U64 depthNCost = 0;
                         EB_U64 depthNPlusOneCost = 0;
 
-						parentLeafIndex = (parentLeafIndex == (CU_MAX_COUNT - 1)) ? CU_MAX_COUNT - 5 : parentLeafIndex;
+                        parentLeafIndex = (parentLeafIndex == (CU_MAX_COUNT - 1)) ? CU_MAX_COUNT - 5 : parentLeafIndex;
 
-						SplitParentCu(
-							contextPtr,
+                        SplitParentCu(
+                            contextPtr,
                             lcuPtr,
                             parentLeafIndex,
                             totalChildCost,
@@ -6226,20 +6226,20 @@ EB_EXTERN EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
                             contextPtr->cuStats->size,
                             contextPtr->useChromaInformationInFullLoop ? EB_TRUE : EB_FALSE);
 
-						if (contextPtr->intraMdOpenLoopFlag == EB_FALSE)
-						{
-							UpdateMdReconBuffer(
-								reconBuffer,
-								contextPtr->mdReconBuffer,
-								contextPtr,
-								lcuPtr);
-						}
-					}
+                        if (contextPtr->intraMdOpenLoopFlag == EB_FALSE)
+                        {
+                            UpdateMdReconBuffer(
+                                reconBuffer,
+                                contextPtr->mdReconBuffer,
+                                contextPtr,
+                                lcuPtr);
+                        }
+                    }
 
 
-					if (exitPartition == EB_TRUE){
-						break;
-					}
+                    if (exitPartition == EB_TRUE){
+                        break;
+                    }
 
 
                 }
@@ -6291,15 +6291,15 @@ EB_EXTERN EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
                     tileIdx,
                     contextPtr->useChromaInformationInFullLoop ? EB_TRUE : EB_FALSE);
 
-				if (contextPtr->intraMdOpenLoopFlag == EB_FALSE)
-				{
-					UpdateMdReconBuffer(
-						contextPtr->pillarReconBuffer,
-						contextPtr->mdReconBuffer,
-						contextPtr,
-						lcuPtr);
-				}
-			}
+                if (contextPtr->intraMdOpenLoopFlag == EB_FALSE)
+                {
+                    UpdateMdReconBuffer(
+                        contextPtr->pillarReconBuffer,
+                        contextPtr->mdReconBuffer,
+                        contextPtr,
+                        lcuPtr);
+                }
+            }
 
             parentLeafIndex += parentDepthOffset;
 
@@ -6340,7 +6340,7 @@ EB_EXTERN EB_ERRORTYPE BdpMvMergePass(
 
     ModeDecisionCandidate_t                *fastCandidateArray = contextPtr->fastCandidateArray;
     ModeDecisionCandidateBuffer_t         **candidateBufferPtrArrayBase = contextPtr->candidateBufferPtrArray;
-    EB_U32							        bestIntraMode = EB_INTRA_MODE_INVALID;
+    EB_U32                                    bestIntraMode = EB_INTRA_MODE_INVALID;
     ModeDecisionCandidateBuffer_t         **candidateBufferPtrArray;
 
     EB_U32                                  maxBuffers;
@@ -6388,15 +6388,15 @@ EB_EXTERN EB_ERRORTYPE BdpMvMergePass(
                 contextPtr->lcuChromaSize = contextPtr->lcuSize >> 1;
                 contextPtr->cuSizeLog2 = cuStatsPtr->sizeLog2;
                 contextPtr->cuChromaOriginX = contextPtr->cuOriginX >> 1;
-		        contextPtr->cuChromaOriginY = contextPtr->cuOriginY >> 1;
+                contextPtr->cuChromaOriginY = contextPtr->cuOriginY >> 1;
                 cuPtr->leafIndex = leafIndex;
                 cuPtr->qp = contextPtr->qp;
                 candidateBufferPtrArray = &(candidateBufferPtrArrayBase[contextPtr->bufferDepthIndexStart[cuStatsPtr->depth]]);
 
-				// Set PF Mode - should be done per TU (and not per CU) to avoid the correction
-				DerivePartialFrequencyN2Flag(
-					pictureControlSetPtr,
-					contextPtr);
+                // Set PF Mode - should be done per TU (and not per CU) to avoid the correction
+                DerivePartialFrequencyN2Flag(
+                    pictureControlSetPtr,
+                    contextPtr);
 
                 // Initialize Fast Loop
                 EbHevcProductCodingLoopInitFastLoop( // HT to be rechecked especially for fullCostArray
@@ -6413,8 +6413,8 @@ EB_EXTERN EB_ERRORTYPE BdpMvMergePass(
                         cuPtr);
                 }
 
-				SetNmm(
-					contextPtr,
+                SetNmm(
+                    contextPtr,
                     BDP_MVMERGE_STAGE);
 
                 SetNfl(
@@ -6428,7 +6428,7 @@ EB_EXTERN EB_ERRORTYPE BdpMvMergePass(
                 ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
                     lcuPtr,
                     contextPtr,
-					leafIndex,
+                    leafIndex,
                     lcuAddr,
                     &bufferTotalCount,
                     &fastCandidateTotalCount,
@@ -6465,7 +6465,7 @@ EB_EXTERN EB_ERRORTYPE BdpMvMergePass(
                 // PreModeDecision
                 // -Input is the buffers
                 // -Output is list of buffers for full reconstruction
-				EB_U8 disableMergeIndex = 0;
+                EB_U8 disableMergeIndex = 0;
 
                 PreModeDecision(
                     cuPtr,
@@ -6473,7 +6473,7 @@ EB_EXTERN EB_ERRORTYPE BdpMvMergePass(
                     candidateBufferPtrArray,
                     &fullCandidateTotalCount,
                     contextPtr->bestCandidateIndexArray,
-					&disableMergeIndex,
+                    &disableMergeIndex,
                     (EB_BOOL)(secondFastCostSearchCandidateTotalCount == bufferTotalCount)); // The fast loop bug fix is now added to 4K only
 
                 PerformFullLoop(
@@ -6512,14 +6512,14 @@ EB_EXTERN EB_ERRORTYPE BdpMvMergePass(
                 contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCountNonZeroCoeffs[2]    = candidateBuffer->yCountNonZeroCoeffs[2];
                 contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCountNonZeroCoeffs[3]    = candidateBuffer->yCountNonZeroCoeffs[3];
 
-				if (lcuPtr->chromaEncodeMode == CHROMA_MODE_BEST && candidateBuffer->candidatePtr->type == INTER_MODE && candidateBuffer->candidatePtr->mergeFlag == EB_TRUE)
-				{
-						contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCoeffBits                            = candidateBuffer->yCoeffBits;
-						contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yFullDistortion[DIST_CALC_RESIDUAL]   = candidateBuffer->yFullDistortion[DIST_CALC_RESIDUAL];
-						contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yFullDistortion[DIST_CALC_PREDICTION] = candidateBuffer->yFullDistortion[DIST_CALC_PREDICTION];
-						contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCbf                                  = candidateBuffer->candidatePtr->yCbf ;
-						contextPtr->mdEpPipeLcu[cuPtr->leafIndex].fastLumaRate                          = candidateBuffer->candidatePtr->fastLumaRate;
-				}
+                if (lcuPtr->chromaEncodeMode == CHROMA_MODE_BEST && candidateBuffer->candidatePtr->type == INTER_MODE && candidateBuffer->candidatePtr->mergeFlag == EB_TRUE)
+                {
+                        contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCoeffBits                            = candidateBuffer->yCoeffBits;
+                        contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yFullDistortion[DIST_CALC_RESIDUAL]   = candidateBuffer->yFullDistortion[DIST_CALC_RESIDUAL];
+                        contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yFullDistortion[DIST_CALC_PREDICTION] = candidateBuffer->yFullDistortion[DIST_CALC_PREDICTION];
+                        contextPtr->mdEpPipeLcu[cuPtr->leafIndex].yCbf                                  = candidateBuffer->candidatePtr->yCbf ;
+                        contextPtr->mdEpPipeLcu[cuPtr->leafIndex].fastLumaRate                          = candidateBuffer->candidatePtr->fastLumaRate;
+                }
 
                 PerformInverseTransformRecon(
                     contextPtr,
@@ -6570,18 +6570,18 @@ EB_EXTERN EB_ERRORTYPE BdpMvMergePass(
                     tileIdx,
                     contextPtr->useChromaInformationInFullLoop ? EB_TRUE : EB_FALSE);
 
-					if (contextPtr->intraMdOpenLoopFlag == EB_FALSE)
-					{
+                    if (contextPtr->intraMdOpenLoopFlag == EB_FALSE)
+                    {
 
-						UpdateMdReconBuffer(
-							candidateBuffer->reconPtr,
-							contextPtr->mdReconBuffer,
-							contextPtr,
-							lcuPtr);
+                        UpdateMdReconBuffer(
+                            candidateBuffer->reconPtr,
+                            contextPtr->mdReconBuffer,
+                            contextPtr,
+                            lcuPtr);
 
-					}
+                    }
 
-			}
+            }
             else {
 
                 // Update the CU Stats

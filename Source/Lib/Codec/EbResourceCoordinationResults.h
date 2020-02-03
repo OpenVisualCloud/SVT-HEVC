@@ -17,7 +17,7 @@ extern "C" {
 typedef struct ResourceCoordinationResults_s
 {
     EbObjectWrapper_t *pictureControlSetWrapperPtr;
-    
+
 } ResourceCoordinationResults_t;
 
 typedef struct ResourceCoordinationResultInitData_s
@@ -29,11 +29,11 @@ typedef struct ResourceCoordinationResultInitData_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE ResourceCoordinationResultCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
 
 
 #ifdef __cplusplus
 }
-#endif    
+#endif
 #endif //EbResourceCoordinationResults_h

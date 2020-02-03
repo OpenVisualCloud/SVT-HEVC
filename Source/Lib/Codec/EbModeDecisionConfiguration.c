@@ -108,7 +108,7 @@ EB_ERRORTYPE EbHevcMdcRefinement(
             localCuArray[cuIndex + 1 + 3 * DepthOffset[depth + 1]].slectedCu = EB_TRUE;
         }
         if (lowestLevel == REFINEMENT_Pp1){
-			if (depth < 3 && cuIndex < 81){
+            if (depth < 3 && cuIndex < 81){
                 localCuArray[cuIndex + 1].stopSplit = EB_TRUE;
                 localCuArray[cuIndex + 1 + DepthOffset[depth + 1]].stopSplit = EB_TRUE;
                 localCuArray[cuIndex + 1 + 2 * DepthOffset[depth + 1]].stopSplit = EB_TRUE;
@@ -492,14 +492,14 @@ void EbHevcRefinementPredictionLoop(
                 }
                 else
 
-				if  (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_OPEN_LOOP_DEPTH_MODE ||
+                if  (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_OPEN_LOOP_DEPTH_MODE ||
                     (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_LCU_SWITCH_DEPTH_MODE && pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_OPEN_LOOP_DEPTH_MODE))
 
                     refinementLevel =  NdpRefinementControlNREF[temporalLayerIndex][depth];
                 else
                     refinementLevel =  NdpRefinementControl_FAST[temporalLayerIndex][depth];
 
-				if (pictureControlSetPtr->ParentPcsPtr->cu8x8Mode == CU_8x8_MODE_1) {
+                if (pictureControlSetPtr->ParentPcsPtr->cu8x8Mode == CU_8x8_MODE_1) {
                     refinementLevel = ((refinementLevel & REFINEMENT_Pp1) && depth == 2) ? refinementLevel - REFINEMENT_Pp1 :
                         ((refinementLevel & REFINEMENT_Pp2) && depth == 1) ? refinementLevel - REFINEMENT_Pp2 :
                         ((refinementLevel & REFINEMENT_Pp3) && depth == 0) ? refinementLevel - REFINEMENT_Pp3 : refinementLevel;
@@ -912,7 +912,7 @@ void EbHevcPredictionPartitionLoop(
     )
 {
 
-	MdRateEstimationContext_t *mdRateEstimationPtr = contextPtr->mdRateEstimationPtr;
+    MdRateEstimationContext_t *mdRateEstimationPtr = contextPtr->mdRateEstimationPtr;
     MdcpLocalCodingUnit_t *localCuArray = contextPtr->localCuArray;
     MdcpLocalCodingUnit_t   *cuPtr;
 
@@ -962,45 +962,45 @@ void EbHevcPredictionPartitionLoop(
                         &cuIntraRate);
 
 
-					OisCu32Cu16Results_t	        *oisCu32Cu16ResultsPtr = pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex];
-					OisCu8Results_t   	            *oisCu8ResultsPtr = pictureControlSetPtr->ParentPcsPtr->oisCu8Results[lcuIndex];
-					OisCandidate_t * oisCuPtr = cuIndexInRaterScan < RASTER_SCAN_CU_INDEX_8x8_0 ?
-						oisCu32Cu16ResultsPtr->sortedOisCandidate[cuIndexInRaterScan] : oisCu8ResultsPtr->sortedOisCandidate[cuIndexInRaterScan - RASTER_SCAN_CU_INDEX_8x8_0];
+                    OisCu32Cu16Results_t            *oisCu32Cu16ResultsPtr = pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuIndex];
+                    OisCu8Results_t                   *oisCu8ResultsPtr = pictureControlSetPtr->ParentPcsPtr->oisCu8Results[lcuIndex];
+                    OisCandidate_t * oisCuPtr = cuIndexInRaterScan < RASTER_SCAN_CU_INDEX_8x8_0 ?
+                        oisCu32Cu16ResultsPtr->sortedOisCandidate[cuIndexInRaterScan] : oisCu8ResultsPtr->sortedOisCandidate[cuIndexInRaterScan - RASTER_SCAN_CU_INDEX_8x8_0];
 
 
-					if (size > 32){
-						cuIntraSad =
-							oisCu32Cu16ResultsPtr->sortedOisCandidate[1][0].distortion +
-							oisCu32Cu16ResultsPtr->sortedOisCandidate[2][0].distortion +
-							oisCu32Cu16ResultsPtr->sortedOisCandidate[3][0].distortion +
-							oisCu32Cu16ResultsPtr->sortedOisCandidate[4][0].distortion;
-					}
-					else if (size == 32) {
-						cuIntraSad = oisCu32Cu16ResultsPtr->sortedOisCandidate[cuIndexInRaterScan][0].distortion;
-					}
-					else{
-						if (size > 8){
-							cuIntraSad = oisCu32Cu16ResultsPtr->sortedOisCandidate[cuIndexInRaterScan][0].distortion;
-						}
-						else{
-							if (oisCuPtr[0].validDistortion){
-								cuIntraSad = oisCuPtr[0].distortion;
-							}
-							else{
+                    if (size > 32){
+                        cuIntraSad =
+                            oisCu32Cu16ResultsPtr->sortedOisCandidate[1][0].distortion +
+                            oisCu32Cu16ResultsPtr->sortedOisCandidate[2][0].distortion +
+                            oisCu32Cu16ResultsPtr->sortedOisCandidate[3][0].distortion +
+                            oisCu32Cu16ResultsPtr->sortedOisCandidate[4][0].distortion;
+                    }
+                    else if (size == 32) {
+                        cuIntraSad = oisCu32Cu16ResultsPtr->sortedOisCandidate[cuIndexInRaterScan][0].distortion;
+                    }
+                    else{
+                        if (size > 8){
+                            cuIntraSad = oisCu32Cu16ResultsPtr->sortedOisCandidate[cuIndexInRaterScan][0].distortion;
+                        }
+                        else{
+                            if (oisCuPtr[0].validDistortion){
+                                cuIntraSad = oisCuPtr[0].distortion;
+                            }
+                            else{
 
-								const CodedUnitStats_t  *cuStats = GetCodedUnitStats(ParentBlockIndex[cuIndex]);
-								const EB_U32 me2Nx2NTableOffset = cuStats->cuNumInDepth + me2Nx2NOffset[cuStats->depth];
+                                const CodedUnitStats_t  *cuStats = GetCodedUnitStats(ParentBlockIndex[cuIndex]);
+                                const EB_U32 me2Nx2NTableOffset = cuStats->cuNumInDepth + me2Nx2NOffset[cuStats->depth];
 
 
-								if (oisCu8ResultsPtr->sortedOisCandidate[me2Nx2NTableOffset][0].validDistortion){
-									cuIntraSad = oisCu8ResultsPtr->sortedOisCandidate[me2Nx2NTableOffset][0].distortion;
-								}
-								else {
-									cuIntraSad = 0;
-								}
-							}
-						}
-					}
+                                if (oisCu8ResultsPtr->sortedOisCandidate[me2Nx2NTableOffset][0].validDistortion){
+                                    cuIntraSad = oisCu8ResultsPtr->sortedOisCandidate[me2Nx2NTableOffset][0].distortion;
+                                }
+                                else {
+                                    cuIntraSad = 0;
+                                }
+                            }
+                        }
+                    }
 
 
                     cuIntraCost = (cuIntraSad << COST_PRECISION) + ((contextPtr->lambda * cuIntraRate + MD_OFFSET) >> MD_SHIFT);
@@ -1012,14 +1012,14 @@ void EbHevcPredictionPartitionLoop(
 
 
 
-					MeCuResults_t * mePuResult = &pictureControlSetPtr->ParentPcsPtr->meResults[lcuIndex][cuIndexInRaterScan];
-					cuInterRate = MdcInterCuRate(
-						mePuResult->distortionDirection[0].direction,
-						mePuResult->xMvL0,
-						mePuResult->yMvL0,
-						mePuResult->xMvL1,
-						mePuResult->yMvL1);
-					cuInterSad = mePuResult->distortionDirection[0].distortion;
+                    MeCuResults_t * mePuResult = &pictureControlSetPtr->ParentPcsPtr->meResults[lcuIndex][cuIndexInRaterScan];
+                    cuInterRate = MdcInterCuRate(
+                        mePuResult->distortionDirection[0].direction,
+                        mePuResult->xMvL0,
+                        mePuResult->yMvL0,
+                        mePuResult->xMvL1,
+                        mePuResult->yMvL1);
+                    cuInterSad = mePuResult->distortionDirection[0].distortion;
 
 
                     cuInterCost = (cuInterSad << COST_PRECISION) + ((contextPtr->lambda * cuInterRate + MD_OFFSET) >> MD_SHIFT);

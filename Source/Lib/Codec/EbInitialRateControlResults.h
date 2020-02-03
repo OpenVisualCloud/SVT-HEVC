@@ -28,10 +28,10 @@ typedef struct InitialRateControlResultInitData_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE InitialRateControlResultsCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
 
-   
+
 #ifdef __cplusplus
 }
 #endif

@@ -10,14 +10,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 EB_U32 FastLoop_NxMSadKernel(
     EB_U8  *src,                            // input parameter, source samples Ptr
     EB_U32  srcStride,                      // input parameter, source stride
     EB_U8  *ref,                            // input parameter, reference samples Ptr
-    EB_U32  refStride,                      // input parameter, reference stride  
+    EB_U32  refStride,                      // input parameter, reference stride
     EB_U32  height,                         // input parameter, block height (M)
-    EB_U32  width);                         // input parameter, block width (N)    
+    EB_U32  width);                         // input parameter, block width (N)
 
 EB_U32 CombinedAveragingSAD(
     EB_U8  *src,
@@ -32,22 +32,22 @@ EB_U32 CombinedAveragingSAD(
 EB_U32 Compute8x4SAD_Kernel(
     EB_U8  *src,                            // input parameter, source samples Ptr
     EB_U32  srcStride,                      // input parameter, source stride
-    EB_U8  *ref,                            // input parameter, reference samples Ptr  
+    EB_U8  *ref,                            // input parameter, reference samples Ptr
     EB_U32  refStride);                     // input parameter, reference stride
 
 void SadLoopKernel(
-	EB_U8  *src,                            // input parameter, source samples Ptr
-	EB_U32  srcStride,                      // input parameter, source stride
-	EB_U8  *ref,                            // input parameter, reference samples Ptr
-	EB_U32  refStride,                      // input parameter, reference stride
-	EB_U32  height,                         // input parameter, block height (M)
-	EB_U32  width,                          // input parameter, block width (N)
-	EB_U64 *bestSad,
-	EB_S16 *xSearchCenter,
-	EB_S16 *ySearchCenter,
-	EB_U32  srcStrideRaw,                   // input parameter, source stride (no line skipping)
-	EB_S16 searchAreaWidth,
-	EB_S16 searchAreaHeight);
+    EB_U8  *src,                            // input parameter, source samples Ptr
+    EB_U32  srcStride,                      // input parameter, source stride
+    EB_U8  *ref,                            // input parameter, reference samples Ptr
+    EB_U32  refStride,                      // input parameter, reference stride
+    EB_U32  height,                         // input parameter, block height (M)
+    EB_U32  width,                          // input parameter, block width (N)
+    EB_U64 *bestSad,
+    EB_S16 *xSearchCenter,
+    EB_S16 *ySearchCenter,
+    EB_U32  srcStrideRaw,                   // input parameter, source stride (no line skipping)
+    EB_S16 searchAreaWidth,
+    EB_S16 searchAreaHeight);
 
 
 void SadLoopKernelSparse(
@@ -86,5 +86,5 @@ void GetEightHorizontalSearchPointResults_32x32_64x64(
 
 #ifdef __cplusplus
 }
-#endif        
+#endif
 #endif // EbComputeSAD_C_h

@@ -8,8 +8,8 @@
 
 #define ONE_BIT 32768
 
-//LUT used for LPSxRange calculation 
-//8 bit unsigned is enough. 
+//LUT used for LPSxRange calculation
+//8 bit unsigned is enough.
 static const EB_U32 RangeLPSTable1D[] =
 {
     128, 176, 208, 240,
@@ -288,8 +288,8 @@ void BacEncContextTerminate(
 }
 
 void RemainingCoeffExponentialGolombCode(
-    CabacEncodeContext_t *cabacEncodeCtxPtr, 
-    EB_U32 symbolValue, 
+    CabacEncodeContext_t *cabacEncodeCtxPtr,
+    EB_U32 symbolValue,
     EB_U32 golombParam)
 {
     EB_S32 codeWord = symbolValue >> golombParam;

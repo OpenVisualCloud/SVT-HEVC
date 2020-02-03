@@ -22,23 +22,23 @@ extern EB_ERRORTYPE SaoStatsCtor(SaoStats_t **saoStatsPtr);
 
 
 extern EB_ERRORTYPE SaoGenerationDecision(
-	SaoStats_t                 *saoStats,
-	SaoParameters_t            *saoParams,
-	MdRateEstimationContext_t  *mdRateEstimationPtr,
-	EB_U64                      fullLambda,
+    SaoStats_t                 *saoStats,
+    SaoParameters_t            *saoParams,
+    MdRateEstimationContext_t  *mdRateEstimationPtr,
+    EB_U64                      fullLambda,
     EB_U64                      fullChromaLambdaSao,
     EB_BOOL                     mmSAO,
 
 struct PictureControlSet_s *pictureControlSetPtr,
-	EB_U32                      tbOriginX,
-	EB_U32                      tbOriginY,
-	EB_U32                      lcuWidth,
-	EB_U32                      lcuHeight,
-	SaoParameters_t            *saoPtr,
-	SaoParameters_t            *leftSaoPtr,
-	SaoParameters_t            *upSaoPtr,
-	EB_S64                     *saoLumaBestCost,
-	EB_S64                     *saoChromaBestCost);
+    EB_U32                      tbOriginX,
+    EB_U32                      tbOriginY,
+    EB_U32                      lcuWidth,
+    EB_U32                      lcuHeight,
+    SaoParameters_t            *saoPtr,
+    SaoParameters_t            *leftSaoPtr,
+    SaoParameters_t            *upSaoPtr,
+    EB_S64                     *saoLumaBestCost,
+    EB_S64                     *saoChromaBestCost);
 
 
 extern EB_ERRORTYPE SaoGenerationDecision16bit(
@@ -47,8 +47,8 @@ extern EB_ERRORTYPE SaoGenerationDecision16bit(
     SaoParameters_t            *saoParams,
     MdRateEstimationContext_t  *mdRateEstimationPtr,
     EB_U64                      fullLambda,
-	EB_U64                      fullChromaLambdaSao,
-	EB_BOOL                     mmSAO,
+    EB_U64                      fullChromaLambdaSao,
+    EB_BOOL                     mmSAO,
 struct PictureControlSet_s *pictureControlSetPtr,
     EB_U32                      tbOriginX,
     EB_U32                      tbOriginY,
@@ -62,16 +62,16 @@ struct PictureControlSet_s *pictureControlSetPtr,
 
 
 EB_ERRORTYPE GatherSaoStatisticsLcu16bit_SSE2(
-	EB_U16					*inputSamplePtr,        // input parameter, source Picture Ptr
-	EB_U32                   inputStride,           // input parameter, source stride
-	EB_U16                  *reconSamplePtr,        // input parameter, deblocked Picture Ptr
-	EB_U32                   reconStride,           // input parameter, deblocked stride
-	EB_U32                   lcuWidth,              // input parameter, LCU width
-	EB_U32                   lcuHeight,             // input parameter, LCU height
-	EB_S32                  *boDiff,                // output parameter, used to store Band Offset diff, boDiff[SAO_BO_INTERVALS]
-	EB_U16                  *boCount,										// output parameter, used to store Band Offset count, boCount[SAO_BO_INTERVALS]
-	EB_S32                   eoDiff[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1],     // output parameter, used to store Edge Offset diff, eoDiff[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
-	EB_U16                   eoCount[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1]);    // output parameter, used to store Edge Offset count, eoCount[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
+    EB_U16                    *inputSamplePtr,        // input parameter, source Picture Ptr
+    EB_U32                   inputStride,           // input parameter, source stride
+    EB_U16                  *reconSamplePtr,        // input parameter, deblocked Picture Ptr
+    EB_U32                   reconStride,           // input parameter, deblocked stride
+    EB_U32                   lcuWidth,              // input parameter, LCU width
+    EB_U32                   lcuHeight,             // input parameter, LCU height
+    EB_S32                  *boDiff,                // output parameter, used to store Band Offset diff, boDiff[SAO_BO_INTERVALS]
+    EB_U16                  *boCount,                                        // output parameter, used to store Band Offset count, boCount[SAO_BO_INTERVALS]
+    EB_S32                   eoDiff[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1],     // output parameter, used to store Edge Offset diff, eoDiff[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
+    EB_U16                   eoCount[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1]);    // output parameter, used to store Edge Offset count, eoCount[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
 
 
 typedef EB_ERRORTYPE(*EB_SAOGATHER_FUNC)(
@@ -158,22 +158,22 @@ typedef EB_ERRORTYPE(*EB_SAOAPPLY_EO_135_45_16bit_FUNC)(
     EB_U32                           lcuWidth);
 
 typedef EB_ERRORTYPE(*EB_SAOGATHER_16bit_FUNC)(
-	EB_U16					*inputSamplePtr,        // input parameter, source Picture Ptr
-	EB_U32                   inputStride,           // input parameter, source stride
-	EB_U16                  *reconSamplePtr,        // input parameter, deblocked Picture Ptr
-	EB_U32                   reconStride,           // input parameter, deblocked stride
-	EB_U32                   lcuWidth,              // input parameter, LCU width
-	EB_U32                   lcuHeight,             // input parameter, LCU height
-	EB_S32                  *boDiff,                // output parameter, used to store Band Offset diff, boDiff[SAO_BO_INTERVALS]
-	EB_U16                  *boCount,											// output parameter, used to store Band Offset count, boCount[SAO_BO_INTERVALS]
-	EB_S32                   eoDiff[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1],		// output parameter, used to store Edge Offset diff, eoDiff[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
-	EB_U16                   eoCount[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1]);		// output parameter, used to store Edge Offset count, eoCount[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
+    EB_U16                    *inputSamplePtr,        // input parameter, source Picture Ptr
+    EB_U32                   inputStride,           // input parameter, source stride
+    EB_U16                  *reconSamplePtr,        // input parameter, deblocked Picture Ptr
+    EB_U32                   reconStride,           // input parameter, deblocked stride
+    EB_U32                   lcuWidth,              // input parameter, LCU width
+    EB_U32                   lcuHeight,             // input parameter, LCU height
+    EB_S32                  *boDiff,                // output parameter, used to store Band Offset diff, boDiff[SAO_BO_INTERVALS]
+    EB_U16                  *boCount,                                            // output parameter, used to store Band Offset count, boCount[SAO_BO_INTERVALS]
+    EB_S32                   eoDiff[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1],        // output parameter, used to store Edge Offset diff, eoDiff[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
+    EB_U16                   eoCount[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1]);        // output parameter, used to store Edge Offset count, eoCount[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
 
 static const EB_SAOGATHER_16bit_FUNC SaoGatherFunctionTabl_16bit[EB_ASM_TYPE_TOTAL] = {
-	// C_DEFAULT
-	GatherSaoStatisticsLcu_62x62_16bit,
-	// AVX2 
-	GatherSaoStatisticsLcu16bit_SSE2,
+    // C_DEFAULT
+    GatherSaoStatisticsLcu_62x62_16bit,
+    // AVX2
+    GatherSaoStatisticsLcu16bit_SSE2,
 
 };
 
@@ -181,29 +181,29 @@ static const EB_SAOGATHER_16bit_FUNC SaoGatherFunctionTabl_16bit[EB_ASM_TYPE_TOT
 static const EB_SAOGATHER_FUNC SaoGatherFunctionTableLossy[EB_ASM_TYPE_TOTAL] = {
     // C_DEFAULT
     GatherSaoStatisticsLcuLossy_62x62,
-    // AVX2 
+    // AVX2
     GatherSaoStatisticsLcu_BT_SSE2,
 };
 
 
 static const EB_SAOGATHER_90_45_135_FUNC SaoGatherFunctionTableLossy_90_45_135[EB_ASM_TYPE_TOTAL]= {
-	// C_DEFAULT
+    // C_DEFAULT
     GatherSaoStatisticsLcu_OnlyEo_90_45_135_Lossy,
-	// AVX2 
-	GatherSaoStatisticsLcu_OnlyEo_90_45_135_BT_SSE2,
+    // AVX2
+    GatherSaoStatisticsLcu_OnlyEo_90_45_135_BT_SSE2,
 };
 
 static const EB_SAOGATHER_90_45_135_16bit_SSE2_FUNC SaoGatherFunctionTable_90_45_135_16bit_SSE2[EB_ASM_TYPE_TOTAL][2] = {
-	// C_DEFAULT
-	{
+    // C_DEFAULT
+    {
         GatherSaoStatisticsLcu_62x62_OnlyEo_90_45_135_16bit,
         GatherSaoStatisticsLcu_62x62_OnlyEo_90_45_135_16bit,
-	},
-	// AVX2
-	{
-		GatherSaoStatisticsLcu_62x62_OnlyEo_90_45_135_16bit,
-		GatherSaoStatisticsLcu_OnlyEo_90_45_135_16bit_SSE2_INTRIN,
-	},
+    },
+    // AVX2
+    {
+        GatherSaoStatisticsLcu_62x62_OnlyEo_90_45_135_16bit,
+        GatherSaoStatisticsLcu_OnlyEo_90_45_135_16bit_SSE2_INTRIN,
+    },
 };
 
 
@@ -215,13 +215,13 @@ static const EB_SAOAPPLY_BO_FUNC SaoFunctionTableBo[EB_ASM_TYPE_TOTAL][2] = {
     },
     // AVX2
     {
-		SAOApplyBO,
-		SAOApplyBO_BT_SSSE3
+        SAOApplyBO,
+        SAOApplyBO_BT_SSSE3
     },
 };
 
 static const EB_SAOAPPLY_EO_0_90_FUNC SaoFunctionTableEO_0_90[EB_ASM_TYPE_TOTAL][2][2] = {
-	// C_DEFAULT
+    // C_DEFAULT
     {
         {
             SAOApplyEO_0,
@@ -232,7 +232,7 @@ static const EB_SAOAPPLY_EO_0_90_FUNC SaoFunctionTableEO_0_90[EB_ASM_TYPE_TOTAL]
             SAOApplyEO_90
         }
     },
-	// AVX2
+    // AVX2
     {
         {
             SAOApplyEO_0,
@@ -246,70 +246,70 @@ static const EB_SAOAPPLY_EO_0_90_FUNC SaoFunctionTableEO_0_90[EB_ASM_TYPE_TOTAL]
 };
 
 static const EB_SAOAPPLY_EO_135_45_FUNC SaoFunctionTableEO_135_45[EB_ASM_TYPE_TOTAL][2][2][2] = {
-	// C_DEFAULT
-	{
+    // C_DEFAULT
+    {
         {
-			{
-			SAOApplyEO_135,
-			SAOApplyEO_135
-			},
-			{
-			SAOApplyEO_135,
-			SAOApplyEO_135
-			}
+            {
+            SAOApplyEO_135,
+            SAOApplyEO_135
+            },
+            {
+            SAOApplyEO_135,
+            SAOApplyEO_135
+            }
         },
         {
-			{
+            {
             SAOApplyEO_45,
             SAOApplyEO_45
-			},
-			{
+            },
+            {
             SAOApplyEO_45,
             SAOApplyEO_45
-			}
+            }
         }
     },
-	// AVX2
-	{
+    // AVX2
+    {
         {
-			{  
-				SAOApplyEO_135,
+            {
+                SAOApplyEO_135,
                 SAOApplyEO_135_BT_SSSE3
-			},
-			{ 
-				SAOApplyEO_135,
+            },
+            {
+                SAOApplyEO_135,
                 SAOApplyEO_135_BT_SSSE3
-			}
+            }
 
         },
         {
-			{
+            {
                 SAOApplyEO_45,
                 SAOApplyEO_45_BT_SSSE3
-			},
-			{
+            },
+            {
                 SAOApplyEO_45,
-				SAOApplyEO_45_BT_SSSE3
-			}
+                SAOApplyEO_45_BT_SSSE3
+            }
         }
     },
 };
 
-static const EB_SAOAPPLY_BO_16bit_FUNC SaoFunctionTableBo_16bit[EB_ASM_TYPE_TOTAL][2] = { 
-	// C_DEFAULT
-	{
+static const EB_SAOAPPLY_BO_16bit_FUNC SaoFunctionTableBo_16bit[EB_ASM_TYPE_TOTAL][2] = {
+    // C_DEFAULT
+    {
         SAOApplyBO16bit,
         SAOApplyBO16bit
-	},
-	// AVX2
-	{
-		SAOApplyBO16bit,
-		SAOApplyBO16bit_SSE2_INTRIN
-	},
+    },
+    // AVX2
+    {
+        SAOApplyBO16bit,
+        SAOApplyBO16bit_SSE2_INTRIN
+    },
 };
 
 static const EB_SAOAPPLY_EO_0_90_16bit_FUNC SaoFunctionTableEO_0_90_16bit[EB_ASM_TYPE_TOTAL][2][2] = {
-	// C_DEFAULT
+    // C_DEFAULT
     {
         {
          SAOApplyEO_0_16bit,
@@ -320,7 +320,7 @@ static const EB_SAOAPPLY_EO_0_90_16bit_FUNC SaoFunctionTableEO_0_90_16bit[EB_ASM
          SAOApplyEO_90_16bit
         }
     },
-	// AVX2
+    // AVX2
     {
         {
          SAOApplyEO_0_16bit,
@@ -334,26 +334,26 @@ static const EB_SAOAPPLY_EO_0_90_16bit_FUNC SaoFunctionTableEO_0_90_16bit[EB_ASM
 };
 
 static const EB_SAOAPPLY_EO_135_45_16bit_FUNC SaoFunctionTableEO_135_45_16bit[EB_ASM_TYPE_TOTAL][2][2] = {
-	// C_DEFAULT
+    // C_DEFAULT
     {
         {
-			SAOApplyEO_135_16bit,
-			SAOApplyEO_135_16bit
+            SAOApplyEO_135_16bit,
+            SAOApplyEO_135_16bit
         },
         {
             SAOApplyEO_45_16bit,
             SAOApplyEO_45_16bit
         }
     },
-	// AVX2
+    // AVX2
     {
         {
-			SAOApplyEO_135_16bit,
+            SAOApplyEO_135_16bit,
             SAOApplyEO_135_16bit_SSE2_INTRIN
         },
         {
-			SAOApplyEO_45_16bit,
-			SAOApplyEO_45_16bit_SSE2_INTRIN
+            SAOApplyEO_45_16bit,
+            SAOApplyEO_45_16bit_SSE2_INTRIN
         }
     },
 };

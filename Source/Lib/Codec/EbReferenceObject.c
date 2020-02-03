@@ -178,9 +178,9 @@ EB_ERRORTYPE EbReferenceObjectCtor(
             pictureBufferDescInitData16BitPtr.bitDepth);
     }
 
-	if (return_error == EB_ErrorInsufficientResources){
-		return EB_ErrorInsufficientResources;
-	}
+    if (return_error == EB_ErrorInsufficientResources){
+        return EB_ErrorInsufficientResources;
+    }
 
 
 
@@ -237,8 +237,8 @@ EB_ERRORTYPE EbPaReferenceObjectCtor(
         return EB_ErrorInsufficientResources;
     }
 
-	// Quarter Decim reference picture constructor
-	paReferenceObject->quarterDecimatedPicturePtr = (EbPictureBufferDesc_t*)EB_NULL;
+    // Quarter Decim reference picture constructor
+    paReferenceObject->quarterDecimatedPicturePtr = (EbPictureBufferDesc_t*)EB_NULL;
         return_error = EbPictureBufferDescCtor(
             (EB_PTR*) &(paReferenceObject->quarterDecimatedPicturePtr),
             (EB_PTR )  (pictureBufferDescInitDataPtr + 1));
@@ -247,11 +247,11 @@ EB_ERRORTYPE EbPaReferenceObjectCtor(
         }
 
     // Sixteenth Decim reference picture constructor
-	paReferenceObject->sixteenthDecimatedPicturePtr = (EbPictureBufferDesc_t*)EB_NULL;
+    paReferenceObject->sixteenthDecimatedPicturePtr = (EbPictureBufferDesc_t*)EB_NULL;
         return_error = EbPictureBufferDescCtor(
             (EB_PTR*) &(paReferenceObject->sixteenthDecimatedPicturePtr),
             (EB_PTR )  (pictureBufferDescInitDataPtr + 2));
-		if (return_error == EB_ErrorInsufficientResources){
+        if (return_error == EB_ErrorInsufficientResources){
             return EB_ErrorInsufficientResources;
         }
 

@@ -20,7 +20,7 @@ extern "C" {
 typedef struct InitialRateControlContext_s
 {
     EbFifo_t                    *motionEstimationResultsInputFifoPtr;
-	EbFifo_t                    *initialrateControlResultsOutputFifoPtr;
+    EbFifo_t                    *initialrateControlResultsOutputFifoPtr;
 
 } InitialRateControlContext_t;
 

@@ -38,13 +38,13 @@ extern "C" {
 #define HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH   2048
 #define PACKETIZATION_REORDER_QUEUE_MAX_DEPTH               2048
 
-// RC Groups: They should be a power of 2, so we can replace % by &. 
+// RC Groups: They should be a power of 2, so we can replace % by &.
 // Instead of using x % y, we use x && (y-1)
-#define PARALLEL_GOP_MAX_NUMBER                         256 
+#define PARALLEL_GOP_MAX_NUMBER                         256
 #define RC_GROUP_IN_GOP_MAX_NUMBER                      512
 #define PICTURE_IN_RC_GROUP_MAX_NUMBER                  64
 
-typedef struct EncodeContext_s 
+typedef struct EncodeContext_s
 {
     // Callback Functions
     EbCallback_t                     *appCallbackPtr;
@@ -55,19 +55,19 @@ typedef struct EncodeContext_s
     // Output Buffer Fifos
     EbFifo_t                            *streamOutputFifoPtr;
     EbFifo_t                            *reconOutputFifoPtr;
-    
+
     // Picture Buffer Fifos
     EbFifo_t                            *inputPicturePoolFifoPtr;
     EbFifo_t                            *referencePicturePoolFifoPtr;
     EbFifo_t                            *paReferencePicturePoolFifoPtr;
-    
+
     // Picture Decision Reorder Queue
     PictureDecisionReorderEntry_t      **pictureDecisionReorderQueue;
     EB_U32                               pictureDecisionReorderQueueHeadIndex;
-    
-	// Picture Manager Reorder Queue
-	PictureManagerReorderEntry_t       **pictureManagerReorderQueue;
-	EB_U32                               pictureManagerReorderQueueHeadIndex;
+
+    // Picture Manager Reorder Queue
+    PictureManagerReorderEntry_t       **pictureManagerReorderQueue;
+    EB_U32                               pictureManagerReorderQueueHeadIndex;
 
     // Picture Manager Pre-Assignment Buffer
     EB_U32                               preAssignmentBufferIntraCount;
@@ -76,7 +76,7 @@ typedef struct EncodeContext_s
     EB_U32                               preAssignmentBufferSceneChangeIndex;
     EB_U32                               preAssignmentBufferEosFlag;
     EB_U64                               decodeBaseNumber;
-    
+
     EbObjectWrapper_t                  **preAssignmentBuffer;
     EB_U32                               preAssignmentBufferCount;
     EB_U32                               numberOfActivePictures;
@@ -94,7 +94,7 @@ typedef struct EncodeContext_s
     ReferenceQueueEntry_t              **referencePictureQueue;
     EB_U32                               referencePictureQueueHeadIndex;
     EB_U32                               referencePictureQueueTailIndex;
-    
+
     // Initial Rate Control Reorder Queue
     InitialRateControlReorderEntry_t   **initialRateControlReorderQueue;
     EB_U32                               initialRateControlReorderQueueHeadIndex;
@@ -107,7 +107,7 @@ typedef struct EncodeContext_s
     // Packetization Reorder Queue
     PacketizationReorderEntry_t        **packetizationReorderQueue;
     EB_U32                               packetizationReorderQueueHeadIndex;
-    
+
     // GOP Counters
     EB_U32                               intraPeriodPosition;        // Current position in intra period
     EB_U32                               predStructPosition;         // Current position within a prediction structure
@@ -119,14 +119,14 @@ typedef struct EncodeContext_s
 
     EB_U64                               lastIdrPicture; // the most recently occured IDR picture (in decode order)
     // Sequence Termination Flags
-    EB_U64							     terminatingPictureNumber;
-	EB_BOOL                              terminatingSequenceFlagReceived;
+    EB_U64                                 terminatingPictureNumber;
+    EB_BOOL                              terminatingSequenceFlagReceived;
 
     // Prediction Structure
     PredictionStructureGroup_t          *predictionStructureGroupPtr;
-    
+
     // Cabac Context Model Array
-    ContextModelEncContext_t            *cabacContextModelArray; 
+    ContextModelEncContext_t            *cabacContextModelArray;
 
     // MD Rate Estimation Table
     MdRateEstimationContext_t           *mdRateEstimationArray;
@@ -142,7 +142,7 @@ typedef struct EncodeContext_s
     EB_S64                               scFrameOut;
     EB_HANDLE                            scBufferMutex;
 
-	EB_ENC_MODE                          encMode;
+    EB_ENC_MODE                          encMode;
 
     // Rate Control
     EB_U32                               availableTargetBitRate;
@@ -153,15 +153,15 @@ typedef struct EncodeContext_s
     EB_S64                               fillerBitError;
     EB_HANDLE                            bufferFillMutex;
 
-    EB_U32								 previousSelectedRefQp;
-    EB_U64								 maxCodedPoc;
-    EB_U32								 maxCodedPocSelectedRefQp;
+    EB_U32                                 previousSelectedRefQp;
+    EB_U64                                 maxCodedPoc;
+    EB_U32                                 maxCodedPocSelectedRefQp;
 
-	// Dynamic GOP
-	EB_U32								 previousMiniGopHierarchicalLevels;
+    // Dynamic GOP
+    EB_U32                                 previousMiniGopHierarchicalLevels;
 
-	EbObjectWrapper_t                   *previousPictureControlSetWrapperPtr;
-    EB_HANDLE						     sharedReferenceMutex;
+    EbObjectWrapper_t                   *previousPictureControlSetWrapperPtr;
+    EB_HANDLE                             sharedReferenceMutex;
 
 
 } EncodeContext_t;
@@ -174,9 +174,9 @@ typedef struct EncodeContextInitData_s {
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE EncodeContextCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
-    
+
 #ifdef __cplusplus
 }
 #endif

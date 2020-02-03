@@ -59,7 +59,7 @@ EB_ERRORTYPE MeContextCtor(
 
     EB_MEMSET((*objectDblPtr)->lcuBuffer, 0 , sizeof(EB_U8) * MAX_LCU_SIZE * (*objectDblPtr)->lcuBufferStride);
     EB_MEMSET((*objectDblPtr)->hmeLcuBuffer, 0 ,sizeof(EB_U8) * (MAX_LCU_SIZE + HME_DECIM_FILTER_TAP - 1) * (*objectDblPtr)->hmeLcuBufferStride);
-	EB_MALLOC(EB_BitFraction *, (*objectDblPtr)->mvdBitsArray, sizeof(EB_BitFraction) * NUMBER_OF_MVD_CASES, EB_N_PTR);
+    EB_MALLOC(EB_BitFraction *, (*objectDblPtr)->mvdBitsArray, sizeof(EB_BitFraction) * NUMBER_OF_MVD_CASES, EB_N_PTR);
     // 15 intermediate buffers to retain the interpolated reference samples
 
     //      0    1    2    3

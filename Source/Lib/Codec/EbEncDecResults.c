@@ -13,7 +13,7 @@ EB_ERRORTYPE EncDecResultsCtor(
 {
     EncDecResults_t *contextPtr;
     EB_MALLOC(EncDecResults_t*, contextPtr, sizeof(EncDecResults_t), EB_N_PTR);
-    
+
     *objectDblPtr = (EB_PTR) contextPtr;
 
     (void) objectInitDataPtr;

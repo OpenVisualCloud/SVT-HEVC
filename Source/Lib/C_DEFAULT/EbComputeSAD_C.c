@@ -163,56 +163,56 @@ EB_U32 FastLoop_NxMSadKernel(
 }
 
 void SadLoopKernel(
-	EB_U8  *src,                            // input parameter, source samples Ptr
-	EB_U32  srcStride,                      // input parameter, source stride
-	EB_U8  *ref,                            // input parameter, reference samples Ptr
-	EB_U32  refStride,                      // input parameter, reference stride
-	EB_U32  height,                         // input parameter, block height (M)
-	EB_U32  width,                          // input parameter, block width (N)
-	EB_U64 *bestSad,
-	EB_S16 *xSearchCenter,
-	EB_S16 *ySearchCenter,
-	EB_U32  srcStrideRaw,                   // input parameter, source stride (no line skipping)
-	EB_S16 searchAreaWidth,
-	EB_S16 searchAreaHeight)
+    EB_U8  *src,                            // input parameter, source samples Ptr
+    EB_U32  srcStride,                      // input parameter, source stride
+    EB_U8  *ref,                            // input parameter, reference samples Ptr
+    EB_U32  refStride,                      // input parameter, reference stride
+    EB_U32  height,                         // input parameter, block height (M)
+    EB_U32  width,                          // input parameter, block width (N)
+    EB_U64 *bestSad,
+    EB_S16 *xSearchCenter,
+    EB_S16 *ySearchCenter,
+    EB_U32  srcStrideRaw,                   // input parameter, source stride (no line skipping)
+    EB_S16 searchAreaWidth,
+    EB_S16 searchAreaHeight)
 {
-	EB_S16 xSearchIndex;
-	EB_S16 ySearchIndex;
+    EB_S16 xSearchIndex;
+    EB_S16 ySearchIndex;
 
-	*bestSad = 0xffffff;
+    *bestSad = 0xffffff;
 
-	for (ySearchIndex = 0; ySearchIndex < searchAreaHeight; ySearchIndex++)
-	{
-		for (xSearchIndex = 0; xSearchIndex < searchAreaWidth; xSearchIndex++)
-		{
-			EB_U32 x, y;
-			EB_U32 sad = 0;
+    for (ySearchIndex = 0; ySearchIndex < searchAreaHeight; ySearchIndex++)
+    {
+        for (xSearchIndex = 0; xSearchIndex < searchAreaWidth; xSearchIndex++)
+        {
+            EB_U32 x, y;
+            EB_U32 sad = 0;
 
-			for (y = 0; y < height; y++)
-			{
-				for (x = 0; x < width; x++)
-				{
-					sad += EB_ABS_DIFF(src[y*srcStride + x], ref[xSearchIndex + y*refStride + x]);
-				}
+            for (y = 0; y < height; y++)
+            {
+                for (x = 0; x < width; x++)
+                {
+                    sad += EB_ABS_DIFF(src[y*srcStride + x], ref[xSearchIndex + y*refStride + x]);
+                }
 
-			}
+            }
 
-			// Update results
-			if (sad < *bestSad)
-			{
-				*bestSad = sad;
-				*xSearchCenter = xSearchIndex;
-				*ySearchCenter = ySearchIndex;
-			}
-		}
+            // Update results
+            if (sad < *bestSad)
+            {
+                *bestSad = sad;
+                *xSearchCenter = xSearchIndex;
+                *ySearchCenter = ySearchIndex;
+            }
+        }
 
-		ref += srcStrideRaw;
-	}
+        ref += srcStrideRaw;
+    }
 
-	return;
+    return;
 }
 
-//compute a 8x4 SAD  
+//compute a 8x4 SAD
 static EB_U32 Subsad8x8(
     EB_U8  *src,                            // input parameter, source samples Ptr
     EB_U32  srcStride,                      // input parameter, source stride
@@ -296,7 +296,7 @@ void GetEightHorizontalSearchPointResults_8x8_16x16_PU(
     for (xSearchIndex = 0; xSearchIndex < 8; xSearchIndex++)
     {
 
-        //8x8_0        
+        //8x8_0
         sad8x8_0 = Subsad8x8(src, srcStride, ref + xSearchIndex, refStride);
         if (2 * sad8x8_0 < pBestSad8x8[0]) {
             pBestSad8x8[0] = 2 * sad8x8_0;
@@ -305,7 +305,7 @@ void GetEightHorizontalSearchPointResults_8x8_16x16_PU(
             pBestMV8x8[0] = ((EB_U16)yMv << 16) | ((EB_U16)xMv);
         }
 
-        //8x8_1        
+        //8x8_1
         sad8x8_1 = Subsad8x8(src + 8, srcStride, ref + xSearchIndex + 8, refStride);
         if (2 * sad8x8_1 < pBestSad8x8[1]) {
             pBestSad8x8[1] = 2 * sad8x8_1;
@@ -314,7 +314,7 @@ void GetEightHorizontalSearchPointResults_8x8_16x16_PU(
             pBestMV8x8[1] = ((EB_U16)yMv << 16) | ((EB_U16)xMv);
         }
 
-        //8x8_2        
+        //8x8_2
         sad8x8_2 = Subsad8x8(src + 8 * srcStride, srcStride, ref + xSearchIndex + 8 * refStride, refStride);
         if (2 * sad8x8_2 < pBestSad8x8[2]) {
             pBestSad8x8[2] = 2 * sad8x8_2;
@@ -323,7 +323,7 @@ void GetEightHorizontalSearchPointResults_8x8_16x16_PU(
             pBestMV8x8[2] = ((EB_U16)yMv << 16) | ((EB_U16)xMv);
         }
 
-        //8x8_3        
+        //8x8_3
         sad8x8_3 = Subsad8x8(src + 8 + 8 * srcStride, srcStride, ref + 8 + 8 * refStride + xSearchIndex, refStride);
         if (2 * sad8x8_3 < pBestSad8x8[3]) {
             pBestSad8x8[3] = 2 * sad8x8_3;
@@ -346,7 +346,7 @@ void GetEightHorizontalSearchPointResults_8x8_16x16_PU(
     }
 }
 
-    
+
 /*******************************************
 Calcualte SAD for 32x32,64x64 from 16x16
 and check if there is improvement, if yes keep

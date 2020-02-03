@@ -30,7 +30,7 @@ typedef struct PictureDecisionResultInitData_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE PictureDecisionResultCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
 
 #ifdef __cplusplus

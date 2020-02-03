@@ -20,10 +20,10 @@ EB_ERRORTYPE EbTransQuantBuffersCtor(
     transCoeffInitArray.bitDepth            = EB_16BIT;
     transCoeffInitArray.colorFormat         = EB_YUV420;
     transCoeffInitArray.bufferEnableMask    = PICTURE_BUFFER_DESC_FULL_MASK;
-	transCoeffInitArray.leftPadding			= 0;
-	transCoeffInitArray.rightPadding		= 0;
-	transCoeffInitArray.topPadding			= 0;
-	transCoeffInitArray.botPadding			= 0;
+    transCoeffInitArray.leftPadding            = 0;
+    transCoeffInitArray.rightPadding        = 0;
+    transCoeffInitArray.topPadding            = 0;
+    transCoeffInitArray.botPadding            = 0;
     transCoeffInitArray.splitMode           = EB_FALSE;
 
     return_error = EbPictureBufferDescCtor(

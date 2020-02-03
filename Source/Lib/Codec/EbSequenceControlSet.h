@@ -27,7 +27,7 @@ typedef struct SequenceControlSet_s
 
     // Encoding Context
     EncodeContext_t            *encodeContextPtr;
-    
+
     // Profile & ID
     EB_U32                      spsId;
     EB_U32                      vpsId;
@@ -43,7 +43,7 @@ typedef struct SequenceControlSet_s
     EB_U16                      maxInputLumaWidth;
     EB_U16                      maxInputLumaHeight;
     //EB_U16                    maxInputChromaWidth;
-    //EB_U16                    maxInputChromaHeight; 
+    //EB_U16                    maxInputChromaHeight;
     EB_U16                      maxInputPadRight;
     EB_U16                      maxInputPadBottom;
     EB_U16                      lumaWidth;
@@ -57,50 +57,50 @@ typedef struct SequenceControlSet_s
     EB_U16                      rightPadding;
     EB_U16                      botPadding;
 
-    EB_U32                      frameRate;  
+    EB_U32                      frameRate;
     EB_U32                      encoderBitDepth;
 
     // Cropping Definitions
     EB_S32                      croppingLeftOffset;
     EB_S32                      croppingRightOffset;
     EB_S32                      croppingTopOffset;
-    EB_S32                      croppingBottomOffset;    
+    EB_S32                      croppingBottomOffset;
 
     // Conformance Window flag
     EB_U32                      conformanceWindowFlag;
-    
+
     // Bitdepth
     EB_BITDEPTH                 inputBitdepth;
     EB_BITDEPTH                 outputBitdepth;
-    
+
     // Group of Pictures (GOP) Structure
     EB_U32                      maxRefCount;            // Maximum number of reference pictures, however each pred
                                                         //   entry can be less.
-    PredictionStructure_t      *predStructPtr;          
+    PredictionStructure_t      *predStructPtr;
     EB_S32                      intraPeriodLength;      // The frequency of intra pictures
     EB_S32                      intraRefreshType;       // -1: CRA, >=0: IDR
-    
+
     // LCU
     EB_U8                       lcuSize;
     EB_U8                       maxLcuDepth;
 
-    // Interlaced Video 
+    // Interlaced Video
     EB_BOOL                     interlacedVideo;
 
     EB_U32                      generalProgressiveSourceFlag;
     EB_U32                      generalInterlacedSourceFlag;
     EB_U32                      generalFrameOnlyConstraintFlag;
-    
+
     // Rate Control
     EB_U32                      rateControlMode;
     EB_U32                      targetBitrate;
-    EB_U32                      availableBandwidth;          
-    
+    EB_U32                      availableBandwidth;
+
     // Quantization
     EB_U32                      qp;
     EB_BOOL                     enableQpScalingFlag;
-    
-    // tmvp enable 
+
+    // tmvp enable
     EB_U32                      enableTmvpSps;
 
     // Strong Intra Smoothing
@@ -114,7 +114,7 @@ typedef struct SequenceControlSet_s
 
     // Video Usability Info
     AppVideoUsabilityInfo_t    *videoUsabilityInfoPtr;
-    
+
     // Picture timing sei
     AppPictureTimingSei_t       picTimingSei;
 
@@ -138,7 +138,7 @@ typedef struct SequenceControlSet_s
 
     // Maximum Decoded Picture Buffer size.
     EB_U32                      maxDpbSize;
-    
+
     // Picture Analysis
     EB_U32                      pictureAnalysisNumberOfRegionsPerWidth;
     EB_U32                      pictureAnalysisNumberOfRegionsPerHeight;
@@ -157,28 +157,28 @@ typedef struct SequenceControlSet_s
     EB_U16                     tileGroupRowCountArray[MAX_TEMPORAL_LAYERS];
 
     // Buffers
-    EB_U32                      pictureControlSetPoolInitCount;      
-    EB_U32                      pictureControlSetPoolInitCountChild; 
+    EB_U32                      pictureControlSetPoolInitCount;
+    EB_U32                      pictureControlSetPoolInitCountChild;
     EB_U32                      paReferencePictureBufferInitCount;
     EB_U32                      referencePictureBufferInitCount;
     EB_U32                      reconBufferFifoInitCount;
     EB_U32                      inputOutputBufferFifoInitCount;
-    EB_U32                      resourceCoordinationFifoInitCount;     
+    EB_U32                      resourceCoordinationFifoInitCount;
     EB_U32                      pictureAnalysisFifoInitCount;
     EB_U32                      pictureDecisionFifoInitCount;
     EB_U32                      motionEstimationFifoInitCount;
     EB_U32                      initialRateControlFifoInitCount;
-    EB_U32                      pictureDemuxFifoInitCount;             
-    EB_U32                      rateControlTasksFifoInitCount;           
-    EB_U32                      rateControlFifoInitCount;                
+    EB_U32                      pictureDemuxFifoInitCount;
+    EB_U32                      rateControlTasksFifoInitCount;
+    EB_U32                      rateControlFifoInitCount;
     EB_U32                      modeDecisionConfigurationFifoInitCount;
-    //EB_U32                    modeDecisionFifoInitCount;            
+    //EB_U32                    modeDecisionFifoInitCount;
     EB_U32                      encDecFifoInitCount;
     EB_U32                      entropyCodingFifoInitCount;
-    EB_U32                      pictureAnalysisProcessInitCount;     
-    EB_U32                      motionEstimationProcessInitCount; 
+    EB_U32                      pictureAnalysisProcessInitCount;
+    EB_U32                      motionEstimationProcessInitCount;
     EB_U32                      sourceBasedOperationsProcessInitCount;
-    EB_U32                      modeDecisionConfigurationProcessInitCount; 
+    EB_U32                      modeDecisionConfigurationProcessInitCount;
     EB_U32                      encDecProcessInitCount;
     EB_U32                      entropyCodingProcessInitCount;
     EB_U32                      unpackProcessInitCount;
@@ -209,26 +209,26 @@ typedef struct EbSequenceControlSetInitData_s
 } EbSequenceControlSetInitData_t;
 
 typedef struct EbSequenceControlSetInstance_s
-{       
+{
     EncodeContext_t            *encodeContextPtr;
     SequenceControlSet_t       *sequenceControlSetPtr;
     EB_HANDLE                   configMutex;
-      
+
 } EbSequenceControlSetInstance_t;
 
 /**************************************
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE EbSequenceControlSetCtor(
-    EB_PTR                          *objectDblPtr, 
+    EB_PTR                          *objectDblPtr,
     EB_PTR                           objectInitDataPtr);
-    
+
 
 
 extern EB_ERRORTYPE CopySequenceControlSet(
     SequenceControlSet_t            *dst,
     SequenceControlSet_t            *src);
-        
+
 extern EB_ERRORTYPE EbSequenceControlSetInstanceCtor(
     EbSequenceControlSetInstance_t **objectDblPtr);
 
@@ -240,5 +240,5 @@ extern EB_ERRORTYPE DeriveInputResolution(
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 #endif // EbSequenceControlSet_h

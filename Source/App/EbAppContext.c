@@ -13,11 +13,11 @@
 #include "EbAppConfig.h"
 
 
-#define INPUT_SIZE_576p_TH				0x90000     // 0.58 Million
-#define INPUT_SIZE_1080i_TH				0xB71B0     // 0.75 Million
-#define INPUT_SIZE_1080p_TH				0x1AB3F0    // 1.75 Million
-#define INPUT_SIZE_4K_TH				0x29F630    // 2.75 Million
-#define INPUT_SIZE_8K_TH				0xB71B00    // 12 Million
+#define INPUT_SIZE_576p_TH                0x90000     // 0.58 Million
+#define INPUT_SIZE_1080i_TH                0xB71B0     // 0.75 Million
+#define INPUT_SIZE_1080p_TH                0x1AB3F0    // 1.75 Million
+#define INPUT_SIZE_4K_TH                0x29F630    // 2.75 Million
+#define INPUT_SIZE_8K_TH                0xB71B00    // 12 Million
 
 #define SIZE_OF_ONE_FRAME_IN_BYTES(width, height,is16bit) ( ( ((width)*(height)*3)>>1 )<<is16bit)
 #define IS_16_BIT(bit_depth) (bit_depth==10?1:0)
@@ -40,7 +40,7 @@ static uint64_t                   appMemoryMallocdAllChannels[MAX_CHANNEL_NUMBER
 *  hosting all allocated pointers
 ***************************************/
 void AllocateMemoryTable(
-    uint32_t	instanceIdx)
+    uint32_t    instanceIdx)
 {
     // Malloc Memory Table for the instance @ instanceIdx
     appMemoryMapAllChannels[instanceIdx]        = (EbMemoryMapEntry*)malloc(sizeof(EbMemoryMapEntry) * MAX_APP_NUM_PTR);
@@ -150,8 +150,8 @@ void ProcessInputFieldBufferingMode(
 *  callback structure to send to the library
 ***********************************************/
 EB_ERRORTYPE CopyConfigurationParameters(
-    EbConfig_t				*config,
-    EbAppContext_t			*callbackData,
+    EbConfig_t                *config,
+    EbAppContext_t            *callbackData,
     uint32_t                 instanceIdx)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
@@ -178,8 +178,8 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.frameRate = config->frameRate;
     callbackData->ebEncParameters.frameRateDenominator = config->frameRateDenominator;
     callbackData->ebEncParameters.frameRateNumerator = config->frameRateNumerator;
-	callbackData->ebEncParameters.hierarchicalLevels = config->hierarchicalLevels;
-	callbackData->ebEncParameters.predStructure = (uint8_t)config->predStructure;
+    callbackData->ebEncParameters.hierarchicalLevels = config->hierarchicalLevels;
+    callbackData->ebEncParameters.predStructure = (uint8_t)config->predStructure;
     callbackData->ebEncParameters.sceneChangeDetection = config->sceneChangeDetection;
     callbackData->ebEncParameters.lookAheadDistance = config->lookAheadDistance;
     callbackData->ebEncParameters.framesToBeEncoded = config->framesToBeEncoded;
@@ -358,8 +358,8 @@ EB_ERRORTYPE AllocateInputBuffer(
 
 
 EB_ERRORTYPE AllocateInputBuffers(
-    EbConfig_t				*config,
-    EbAppContext_t			*callbackData)
+    EbConfig_t                *config,
+    EbAppContext_t            *callbackData)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
     {
@@ -393,8 +393,8 @@ EB_ERRORTYPE AllocateInputBuffers(
     return return_error;
 }
 EB_ERRORTYPE AllocateOutputReconBuffers(
-    EbConfig_t				*config,
-    EbAppContext_t			*callbackData)
+    EbConfig_t                *config,
+    EbAppContext_t            *callbackData)
 {
 
     EB_ERRORTYPE   return_error = EB_ErrorNone;
@@ -418,12 +418,12 @@ EB_ERRORTYPE AllocateOutputReconBuffers(
 }
 
 EB_ERRORTYPE AllocateOutputBuffers(
-    EbConfig_t				*config,
-    EbAppContext_t			*callbackData)
+    EbConfig_t                *config,
+    EbAppContext_t            *callbackData)
 {
 
     EB_ERRORTYPE   return_error = EB_ErrorNone;
-    uint32_t		   outputStreamBufferSize = (uint32_t)(EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->inputPaddedHeight * config->inputPaddedWidth));;
+    uint32_t           outputStreamBufferSize = (uint32_t)(EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->inputPaddedHeight * config->inputPaddedWidth));;
     {
         EB_APP_MALLOC(EB_BUFFERHEADERTYPE*, callbackData->streamBufferPool, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, EB_ErrorInsufficientResources);
 
@@ -440,7 +440,7 @@ EB_ERRORTYPE AllocateOutputBuffers(
 }
 
 EB_ERRORTYPE PreloadFramesIntoRam(
-    EbConfig_t				*config)
+    EbConfig_t                *config)
 {
     EB_ERRORTYPE    return_error = EB_ErrorNone;
     int32_t processedFrameCount;
@@ -612,9 +612,9 @@ EB_ERRORTYPE PreloadFramesIntoRam(
  * Initialize Core & Component
  ***********************************/
 EB_ERRORTYPE InitEncoder(
-    EbConfig_t				*config,
-    EbAppContext_t			*callbackData,
-	uint32_t				 instanceIdx)
+    EbConfig_t                *config,
+    EbAppContext_t            *callbackData,
+    uint32_t                 instanceIdx)
 {
     EB_ERRORTYPE        return_error = EB_ErrorNone;
 
@@ -683,7 +683,7 @@ EB_ERRORTYPE InitEncoder(
         return return_error;
     }
 
-	// Allocate the Sequence Buffer
+    // Allocate the Sequence Buffer
     if (config->bufferedInput != -1) {
 
         // Preload frames into the ram for a faster yuv access time

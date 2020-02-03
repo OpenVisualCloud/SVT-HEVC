@@ -25,7 +25,7 @@
 #define PAN_LCU_PERCENTAGE               75
 #define LOW_AMPLITUDE_TH                 16
 
-#define Y_MEAN_RANGE_03					 52
+#define Y_MEAN_RANGE_03                     52
 #define Y_MEAN_RANGE_02                  70
 #define Y_MEAN_RANGE_01                 130
 #define CB_MEAN_RANGE_02                115
@@ -33,13 +33,13 @@
 #define CR_MEAN_RANGE_02                135
 
 #define DARK_FRM_TH                      45
-#define CB_MEAN_RANGE_00				 80
+#define CB_MEAN_RANGE_00                 80
 
 
 #define SAD_DEVIATION_LCU_TH_0           15
 #define SAD_DEVIATION_LCU_TH_1           20
 
-#define MAX_DELTA_QP_SHAPE_TH			  4
+#define MAX_DELTA_QP_SHAPE_TH              4
 #define MIN_DELTA_QP_SHAPE_TH             1
 
 #define MIN_BLACK_AREA_PERCENTAGE        20
@@ -53,10 +53,10 @@
 const EB_U32    THRESHOLD_NOISE[MAX_TEMPORAL_LAYERS] = { 33, 28, 27, 26, 26, 26 }; // [Temporal Layer Index]  // Used ComplexityClassifier32x32
 // Outlier removal threshold per depth {2%, 2%, 4%, 4%}
 const EB_S8  EbHevcMinDeltaQPdefault[3] = {
-	-4, -3, -2
+    -4, -3, -2
 };
 const EB_U8 EbHevcMaxDeltaQPdefault[3] = {
-	4, 5, 6
+    4, 5, 6
 };
 
 /************************************************
@@ -65,17 +65,17 @@ const EB_U8 EbHevcMaxDeltaQPdefault[3] = {
 
 EB_ERRORTYPE SourceBasedOperationsContextCtor(
     SourceBasedOperationsContext_t **contextDblPtr,
-    EbFifo_t						*initialRateControlResultsInputFifoPtr,
-    EbFifo_t						*pictureDemuxResultsOutputFifoPtr)
+    EbFifo_t                        *initialRateControlResultsInputFifoPtr,
+    EbFifo_t                        *pictureDemuxResultsOutputFifoPtr)
 {
-	SourceBasedOperationsContext_t *contextPtr;
+    SourceBasedOperationsContext_t *contextPtr;
 
-	EB_MALLOC(SourceBasedOperationsContext_t*, contextPtr, sizeof(SourceBasedOperationsContext_t), EB_N_PTR);
-	*contextDblPtr = contextPtr;
-	contextPtr->initialrateControlResultsInputFifoPtr = initialRateControlResultsInputFifoPtr;
-	contextPtr->pictureDemuxResultsOutputFifoPtr = pictureDemuxResultsOutputFifoPtr;
+    EB_MALLOC(SourceBasedOperationsContext_t*, contextPtr, sizeof(SourceBasedOperationsContext_t), EB_N_PTR);
+    *contextDblPtr = contextPtr;
+    contextPtr->initialrateControlResultsInputFifoPtr = initialRateControlResultsInputFifoPtr;
+    contextPtr->pictureDemuxResultsOutputFifoPtr = pictureDemuxResultsOutputFifoPtr;
 
-	return EB_ErrorNone;
+    return EB_ErrorNone;
 }
 
 /***************************************************
@@ -83,13 +83,13 @@ EB_ERRORTYPE SourceBasedOperationsContextCtor(
 ***************************************************/
 
 static void DerivePictureActivityStatistics(
-	SequenceControlSet_t            *sequenceControlSetPtr,
-	PictureParentControlSet_t       *pictureControlSetPtr)
+    SequenceControlSet_t            *sequenceControlSetPtr,
+    PictureParentControlSet_t       *pictureControlSetPtr)
 {
 
-	EB_U64               nonMovingIndexSum      = 0;
+    EB_U64               nonMovingIndexSum      = 0;
 
-	EB_U32               lcuIndex;
+    EB_U32               lcuIndex;
 
     EB_U32 zzSum                                = 0;
     EB_U32 completeLcuCount                     = 0;
@@ -107,7 +107,7 @@ static void DerivePictureActivityStatistics(
             completeLcuCount++;
         }
 
-	}
+    }
 
     if (completeLcuCount > 0) {
         pictureControlSetPtr->nonMovingIndexAverage = (EB_U16)(nonMovingIndexSum / completeLcuCount);
@@ -115,7 +115,7 @@ static void DerivePictureActivityStatistics(
     }
     pictureControlSetPtr->lowMotionContentFlag  = pictureControlSetPtr->zzCostAverage == 0 ? EB_TRUE : EB_FALSE;
 
-	return;
+    return;
 }
 
 /***************************************************
@@ -171,9 +171,9 @@ static void ComplexityClassifier32x32(
 * Pre-MD Uncovered Area Detection
 ******************************************************/
 static void FailingMotionLcu(
-    SequenceControlSet_t			*sequenceControlSetPtr,
-    PictureParentControlSet_t		*pictureControlSetPtr,
-    EB_U32							 lcuIndex) {
+    SequenceControlSet_t            *sequenceControlSetPtr,
+    PictureParentControlSet_t        *pictureControlSetPtr,
+    EB_U32                             lcuIndex) {
 
     EB_U32 rasterScanCuIndex;
 
@@ -194,21 +194,21 @@ static void FailingMotionLcu(
 
             // Get ME SAD
 
-			cuMeSAD = pictureControlSetPtr->meResults[lcuIndex][rasterScanCuIndex].distortionDirection[0].distortion;
+            cuMeSAD = pictureControlSetPtr->meResults[lcuIndex][rasterScanCuIndex].distortionDirection[0].distortion;
 
 
 
 
-			OisCu32Cu16Results_t *oisResultsPtr = pictureControlSetPtr->oisCu32Cu16Results[lcuIndex];
-			if (RASTER_SCAN_CU_SIZE[rasterScanCuIndex] > 32){
-				sortedcuOisSAD = oisResultsPtr->sortedOisCandidate[1][0].distortion +
-					oisResultsPtr->sortedOisCandidate[2][0].distortion +
-					oisResultsPtr->sortedOisCandidate[3][0].distortion +
-					oisResultsPtr->sortedOisCandidate[4][0].distortion;
-			}
-			else { //32x32
-				sortedcuOisSAD = oisResultsPtr->sortedOisCandidate[rasterScanCuIndex][0].distortion;
-			}
+            OisCu32Cu16Results_t *oisResultsPtr = pictureControlSetPtr->oisCu32Cu16Results[lcuIndex];
+            if (RASTER_SCAN_CU_SIZE[rasterScanCuIndex] > 32){
+                sortedcuOisSAD = oisResultsPtr->sortedOisCandidate[1][0].distortion +
+                    oisResultsPtr->sortedOisCandidate[2][0].distortion +
+                    oisResultsPtr->sortedOisCandidate[3][0].distortion +
+                    oisResultsPtr->sortedOisCandidate[4][0].distortion;
+            }
+            else { //32x32
+                sortedcuOisSAD = oisResultsPtr->sortedOisCandidate[rasterScanCuIndex][0].distortion;
+            }
 
 
 
@@ -230,73 +230,73 @@ static void FailingMotionLcu(
 * Pre-MD Uncovered Area Detection
 ******************************************************/
 static void DetectUncoveredLcu(
-	SequenceControlSet_t			*sequenceControlSetPtr,
-	PictureParentControlSet_t		*pictureControlSetPtr,
-	EB_U32							 lcuIndex) {
+    SequenceControlSet_t            *sequenceControlSetPtr,
+    PictureParentControlSet_t        *pictureControlSetPtr,
+    EB_U32                             lcuIndex) {
 
-	EB_U32 rasterScanCuIndex;
+    EB_U32 rasterScanCuIndex;
 
-	// LCU Loop : Uncovered area detector -- ON only for 4k
+    // LCU Loop : Uncovered area detector -- ON only for 4k
     LcuParams_t *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
-	// Detection variables
-	EB_U64                  sortedcuOisSAD = 0;
-	EB_U64                  cuMeSAD = 0;
-	EB_S64                  meToOisSadDeviation = 0;
-	// LCU loop variables
+    // Detection variables
+    EB_U64                  sortedcuOisSAD = 0;
+    EB_U64                  cuMeSAD = 0;
+    EB_S64                  meToOisSadDeviation = 0;
+    // LCU loop variables
 
-	EB_S64 uncoveredAreaLcuFlag = 0;
+    EB_S64 uncoveredAreaLcuFlag = 0;
 
 
-	if (pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != EB_I_PICTURE){
+    if (pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != EB_I_PICTURE){
         if (lcuParams->isCompleteLcu && (!pictureControlSetPtr->similarColocatedLcuArray[lcuIndex])){
 
 
-			for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_64x64; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_32x32_3; rasterScanCuIndex++) {
+            for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_64x64; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_32x32_3; rasterScanCuIndex++) {
 
 
-				meToOisSadDeviation = 0;
+                meToOisSadDeviation = 0;
 
-				// Get ME SAD
+                // Get ME SAD
 
-				cuMeSAD = pictureControlSetPtr->meResults[lcuIndex][rasterScanCuIndex].distortionDirection[0].distortion;
-
-
-
-
-					OisCu32Cu16Results_t *oisResultsPtr = pictureControlSetPtr->oisCu32Cu16Results[lcuIndex];
-					if (RASTER_SCAN_CU_SIZE[rasterScanCuIndex] > 32){
-						sortedcuOisSAD = oisResultsPtr->sortedOisCandidate[1][0].distortion +
-							oisResultsPtr->sortedOisCandidate[2][0].distortion +
-							oisResultsPtr->sortedOisCandidate[3][0].distortion +
-							oisResultsPtr->sortedOisCandidate[4][0].distortion;
-					}
-					else if (RASTER_SCAN_CU_SIZE[rasterScanCuIndex] == 32) {
-						sortedcuOisSAD = oisResultsPtr->sortedOisCandidate[rasterScanCuIndex][0].distortion;
-					}
-					else {
-						sortedcuOisSAD = oisResultsPtr->sortedOisCandidate[rasterScanCuIndex][0].distortion;
-					}
+                cuMeSAD = pictureControlSetPtr->meResults[lcuIndex][rasterScanCuIndex].distortionDirection[0].distortion;
 
 
 
-				EB_S64  meToOisSadDiff = (EB_S32)cuMeSAD - (EB_S32)sortedcuOisSAD;
-				meToOisSadDeviation = (sortedcuOisSAD == 0) || (meToOisSadDiff < 0) ? 0 : (meToOisSadDiff * 100) / sortedcuOisSAD;
+
+                    OisCu32Cu16Results_t *oisResultsPtr = pictureControlSetPtr->oisCu32Cu16Results[lcuIndex];
+                    if (RASTER_SCAN_CU_SIZE[rasterScanCuIndex] > 32){
+                        sortedcuOisSAD = oisResultsPtr->sortedOisCandidate[1][0].distortion +
+                            oisResultsPtr->sortedOisCandidate[2][0].distortion +
+                            oisResultsPtr->sortedOisCandidate[3][0].distortion +
+                            oisResultsPtr->sortedOisCandidate[4][0].distortion;
+                    }
+                    else if (RASTER_SCAN_CU_SIZE[rasterScanCuIndex] == 32) {
+                        sortedcuOisSAD = oisResultsPtr->sortedOisCandidate[rasterScanCuIndex][0].distortion;
+                    }
+                    else {
+                        sortedcuOisSAD = oisResultsPtr->sortedOisCandidate[rasterScanCuIndex][0].distortion;
+                    }
 
 
-				if (RASTER_SCAN_CU_SIZE[rasterScanCuIndex] > 16){
+
+                EB_S64  meToOisSadDiff = (EB_S32)cuMeSAD - (EB_S32)sortedcuOisSAD;
+                meToOisSadDeviation = (sortedcuOisSAD == 0) || (meToOisSadDiff < 0) ? 0 : (meToOisSadDiff * 100) / sortedcuOisSAD;
+
+
+                if (RASTER_SCAN_CU_SIZE[rasterScanCuIndex] > 16){
 
                     if (meToOisSadDeviation > SAD_DEVIATION_LCU_TH_1){
-						uncoveredAreaLcuFlag += 1;
-					}
+                        uncoveredAreaLcuFlag += 1;
+                    }
 
-				}
-			}
+                }
+            }
 
-			// Update Uncovered area flag
-			pictureControlSetPtr->uncoveredAreaLcuFlag[lcuIndex] = uncoveredAreaLcuFlag ? EB_TRUE : EB_FALSE;
-		}
+            // Update Uncovered area flag
+            pictureControlSetPtr->uncoveredAreaLcuFlag[lcuIndex] = uncoveredAreaLcuFlag ? EB_TRUE : EB_FALSE;
+        }
 
-	}
+    }
 }
 
 
@@ -304,380 +304,380 @@ static void DetectUncoveredLcu(
 * Calculates AC Energy
 ******************************************************/
 static void CalculateAcEnergy(
-	SequenceControlSet_t	        *sequenceControlSetPtr,
-	PictureParentControlSet_t		*pictureControlSetPtr,
-	EB_U32							 lcuIndex) {
+    SequenceControlSet_t            *sequenceControlSetPtr,
+    PictureParentControlSet_t        *pictureControlSetPtr,
+    EB_U32                             lcuIndex) {
 
-	EbPictureBufferDesc_t	*inputPicturePtr = pictureControlSetPtr->enhancedPicturePtr;
-	EB_U32					 inputLumaStride = inputPicturePtr->strideY;
-	EB_U32                   inputOriginIndex;
+    EbPictureBufferDesc_t    *inputPicturePtr = pictureControlSetPtr->enhancedPicturePtr;
+    EB_U32                     inputLumaStride = inputPicturePtr->strideY;
+    EB_U32                   inputOriginIndex;
     LcuParams_t  *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
 
-	EB_U8       *meanPtr = pictureControlSetPtr->yMean[lcuIndex];
-	inputOriginIndex = (lcuParams->originY + inputPicturePtr->originY) * inputLumaStride + (lcuParams->originX + inputPicturePtr->originX);
+    EB_U8       *meanPtr = pictureControlSetPtr->yMean[lcuIndex];
+    inputOriginIndex = (lcuParams->originY + inputPicturePtr->originY) * inputLumaStride + (lcuParams->originX + inputPicturePtr->originX);
 
-	if (lcuParams->isCompleteLcu && pictureControlSetPtr->sliceType == EB_I_PICTURE &&
+    if (lcuParams->isCompleteLcu && pictureControlSetPtr->sliceType == EB_I_PICTURE &&
             pictureControlSetPtr->predStructure != EB_PRED_LOW_DELAY_P) {
 
-		EB_U32 inputCuOriginIndex;
-		EB_U32 cuNum, cuSize;
-		EB_U16 cuH, cuW;
+        EB_U32 inputCuOriginIndex;
+        EB_U32 cuNum, cuSize;
+        EB_U16 cuH, cuW;
 
 
-		pictureControlSetPtr->lcuYSrcEnergyCuArray[lcuIndex][0] = ComputeNxMSatdSadLCU(
-			&(inputPicturePtr->bufferY[inputOriginIndex]),
-			inputPicturePtr->strideY,
-			lcuParams->width,
-			lcuParams->height);
+        pictureControlSetPtr->lcuYSrcEnergyCuArray[lcuIndex][0] = ComputeNxMSatdSadLCU(
+            &(inputPicturePtr->bufferY[inputOriginIndex]),
+            inputPicturePtr->strideY,
+            lcuParams->width,
+            lcuParams->height);
 
-		//64 x 64
-		pictureControlSetPtr->lcuYSrcMeanCuArray[lcuIndex][0] = meanPtr[0];
+        //64 x 64
+        pictureControlSetPtr->lcuYSrcMeanCuArray[lcuIndex][0] = meanPtr[0];
 
-		// 32x32
-		cuSize = 32;
-		cuNum = 64 / cuSize;
-		for (cuH = 0; cuH < cuNum; cuH++){
-			for (cuW = 0; cuW < cuNum; cuW++){
-				inputCuOriginIndex = inputOriginIndex + cuH*(64 / cuNum)*inputLumaStride + cuW*(64 / cuNum);
+        // 32x32
+        cuSize = 32;
+        cuNum = 64 / cuSize;
+        for (cuH = 0; cuH < cuNum; cuH++){
+            for (cuW = 0; cuW < cuNum; cuW++){
+                inputCuOriginIndex = inputOriginIndex + cuH*(64 / cuNum)*inputLumaStride + cuW*(64 / cuNum);
 
-				pictureControlSetPtr->lcuYSrcEnergyCuArray[lcuIndex][1 + cuH*cuNum + cuW] = ComputeNxMSatdSadLCU(
-					&(inputPicturePtr->bufferY[inputCuOriginIndex]),
-					inputPicturePtr->strideY,
-					cuSize,
-					cuSize);
-				pictureControlSetPtr->lcuYSrcMeanCuArray[lcuIndex][1 + cuH*cuNum + cuW] = meanPtr[1 + cuH*cuNum + cuW];
-			}
-		}
+                pictureControlSetPtr->lcuYSrcEnergyCuArray[lcuIndex][1 + cuH*cuNum + cuW] = ComputeNxMSatdSadLCU(
+                    &(inputPicturePtr->bufferY[inputCuOriginIndex]),
+                    inputPicturePtr->strideY,
+                    cuSize,
+                    cuSize);
+                pictureControlSetPtr->lcuYSrcMeanCuArray[lcuIndex][1 + cuH*cuNum + cuW] = meanPtr[1 + cuH*cuNum + cuW];
+            }
+        }
 
 
-	}
-	else{
-		pictureControlSetPtr->lcuYSrcEnergyCuArray[lcuIndex][0] = 100000000;
-		pictureControlSetPtr->lcuYSrcEnergyCuArray[lcuIndex][1] = 100000000;
-		pictureControlSetPtr->lcuYSrcEnergyCuArray[lcuIndex][2] = 100000000;
-		pictureControlSetPtr->lcuYSrcEnergyCuArray[lcuIndex][3] = 100000000;
-		pictureControlSetPtr->lcuYSrcEnergyCuArray[lcuIndex][4] = 100000000;
-		pictureControlSetPtr->lcuYSrcMeanCuArray[lcuIndex][0] = 100000000;
-		pictureControlSetPtr->lcuYSrcMeanCuArray[lcuIndex][1] = 100000000;
-		pictureControlSetPtr->lcuYSrcMeanCuArray[lcuIndex][2] = 100000000;
-		pictureControlSetPtr->lcuYSrcMeanCuArray[lcuIndex][3] = 100000000;
-		pictureControlSetPtr->lcuYSrcMeanCuArray[lcuIndex][4] = 100000000;
-	}
+    }
+    else{
+        pictureControlSetPtr->lcuYSrcEnergyCuArray[lcuIndex][0] = 100000000;
+        pictureControlSetPtr->lcuYSrcEnergyCuArray[lcuIndex][1] = 100000000;
+        pictureControlSetPtr->lcuYSrcEnergyCuArray[lcuIndex][2] = 100000000;
+        pictureControlSetPtr->lcuYSrcEnergyCuArray[lcuIndex][3] = 100000000;
+        pictureControlSetPtr->lcuYSrcEnergyCuArray[lcuIndex][4] = 100000000;
+        pictureControlSetPtr->lcuYSrcMeanCuArray[lcuIndex][0] = 100000000;
+        pictureControlSetPtr->lcuYSrcMeanCuArray[lcuIndex][1] = 100000000;
+        pictureControlSetPtr->lcuYSrcMeanCuArray[lcuIndex][2] = 100000000;
+        pictureControlSetPtr->lcuYSrcMeanCuArray[lcuIndex][3] = 100000000;
+        pictureControlSetPtr->lcuYSrcMeanCuArray[lcuIndex][4] = 100000000;
+    }
 }
 
 static void LumaContrastDetectorLcu(
-	SourceBasedOperationsContext_t *contextPtr,
-	SequenceControlSet_t           *sequenceControlSetPtr,
-	PictureParentControlSet_t	   *pictureControlSetPtr,
-	EB_U32							lcuIndex) {
+    SourceBasedOperationsContext_t *contextPtr,
+    SequenceControlSet_t           *sequenceControlSetPtr,
+    PictureParentControlSet_t       *pictureControlSetPtr,
+    EB_U32                            lcuIndex) {
 
-	EB_U64                  cuOisSAD = 0;
-	EB_U64                  cuMeSAD = 0;
+    EB_U64                  cuOisSAD = 0;
+    EB_U64                  cuMeSAD = 0;
 
-	// Calculate Luma mean of the frame by averaging the mean of LCUs to Detect Dark Frames (On only for 4k and BQMode)
-	EB_U8  *yMeanPtr = contextPtr->yMeanPtr;
+    // Calculate Luma mean of the frame by averaging the mean of LCUs to Detect Dark Frames (On only for 4k and BQMode)
+    EB_U8  *yMeanPtr = contextPtr->yMeanPtr;
     LcuParams_t *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
-	if (lcuParams->isCompleteLcu){
-		if (pictureControlSetPtr->sliceType != EB_I_PICTURE && pictureControlSetPtr->temporalLayerIndex == 0) {
+    if (lcuParams->isCompleteLcu){
+        if (pictureControlSetPtr->sliceType != EB_I_PICTURE && pictureControlSetPtr->temporalLayerIndex == 0) {
 
 
 
 
-			OisCu32Cu16Results_t *oisResultsPtr = pictureControlSetPtr->oisCu32Cu16Results[lcuIndex];
-			cuOisSAD = oisResultsPtr->sortedOisCandidate[1][0].distortion +
-				oisResultsPtr->sortedOisCandidate[2][0].distortion +
-				oisResultsPtr->sortedOisCandidate[3][0].distortion +
-				oisResultsPtr->sortedOisCandidate[4][0].distortion;
+            OisCu32Cu16Results_t *oisResultsPtr = pictureControlSetPtr->oisCu32Cu16Results[lcuIndex];
+            cuOisSAD = oisResultsPtr->sortedOisCandidate[1][0].distortion +
+                oisResultsPtr->sortedOisCandidate[2][0].distortion +
+                oisResultsPtr->sortedOisCandidate[3][0].distortion +
+                oisResultsPtr->sortedOisCandidate[4][0].distortion;
 
 
 
-			cuMeSAD = pictureControlSetPtr->meResults[lcuIndex][0].distortionDirection[0].distortion;
+            cuMeSAD = pictureControlSetPtr->meResults[lcuIndex][0].distortionDirection[0].distortion;
 
 
-			contextPtr->toBeIntraCodedProbability += cuOisSAD < cuMeSAD ? 1 : 0;
-			contextPtr->depth1BlockNum++;
-		}
-	}
+            contextPtr->toBeIntraCodedProbability += cuOisSAD < cuMeSAD ? 1 : 0;
+            contextPtr->depth1BlockNum++;
+        }
+    }
 
-	if (pictureControlSetPtr->nonMovingIndexArray[lcuIndex] < 10)
-	{
-		contextPtr->yNonMovingMean += yMeanPtr[0];
-		contextPtr->countOfNonMovingLcus++;
-	}
-	else {
-		contextPtr->yMovingMean += yMeanPtr[0];
-		contextPtr->countOfMovingLcus++;
-	}
+    if (pictureControlSetPtr->nonMovingIndexArray[lcuIndex] < 10)
+    {
+        contextPtr->yNonMovingMean += yMeanPtr[0];
+        contextPtr->countOfNonMovingLcus++;
+    }
+    else {
+        contextPtr->yMovingMean += yMeanPtr[0];
+        contextPtr->countOfMovingLcus++;
+    }
 }
 
 static void LumaContrastDetectorPicture(
-	SourceBasedOperationsContext_t		*contextPtr,
-	PictureParentControlSet_t			*pictureControlSetPtr) {
+    SourceBasedOperationsContext_t        *contextPtr,
+    PictureParentControlSet_t            *pictureControlSetPtr) {
 
-	contextPtr->yNonMovingMean = (contextPtr->countOfNonMovingLcus != 0) ? (contextPtr->yNonMovingMean / contextPtr->countOfNonMovingLcus) : 0;
-	contextPtr->yMovingMean = (contextPtr->countOfMovingLcus != 0) ? (contextPtr->yMovingMean / contextPtr->countOfMovingLcus) : 0;
+    contextPtr->yNonMovingMean = (contextPtr->countOfNonMovingLcus != 0) ? (contextPtr->yNonMovingMean / contextPtr->countOfNonMovingLcus) : 0;
+    contextPtr->yMovingMean = (contextPtr->countOfMovingLcus != 0) ? (contextPtr->yMovingMean / contextPtr->countOfMovingLcus) : 0;
 
-	pictureControlSetPtr->darkBackGroundlightForeGround = ((contextPtr->yMovingMean > (2 * contextPtr->yNonMovingMean)) && (contextPtr->yNonMovingMean < DARK_FRM_TH)) ?
-		EB_TRUE :
-		EB_FALSE;
+    pictureControlSetPtr->darkBackGroundlightForeGround = ((contextPtr->yMovingMean > (2 * contextPtr->yNonMovingMean)) && (contextPtr->yNonMovingMean < DARK_FRM_TH)) ?
+        EB_TRUE :
+        EB_FALSE;
 
-	pictureControlSetPtr->intraCodedBlockProbability = 0;
+    pictureControlSetPtr->intraCodedBlockProbability = 0;
 
-	if (pictureControlSetPtr->sliceType != EB_I_PICTURE && pictureControlSetPtr->temporalLayerIndex == 0){
-		pictureControlSetPtr->intraCodedBlockProbability = (EB_U8)(contextPtr->depth1BlockNum != 0 ? contextPtr->toBeIntraCodedProbability * 100 / contextPtr->depth1BlockNum : 0);
-	}
+    if (pictureControlSetPtr->sliceType != EB_I_PICTURE && pictureControlSetPtr->temporalLayerIndex == 0){
+        pictureControlSetPtr->intraCodedBlockProbability = (EB_U8)(contextPtr->depth1BlockNum != 0 ? contextPtr->toBeIntraCodedProbability * 100 / contextPtr->depth1BlockNum : 0);
+    }
 }
 
 static void GrassSkinLcu(
-	SourceBasedOperationsContext_t		*contextPtr,
-	SequenceControlSet_t                *sequenceControlSetPtr,
-	PictureParentControlSet_t			*pictureControlSetPtr,
-	EB_U32								 lcuIndex) {
+    SourceBasedOperationsContext_t        *contextPtr,
+    SequenceControlSet_t                *sequenceControlSetPtr,
+    PictureParentControlSet_t            *pictureControlSetPtr,
+    EB_U32                                 lcuIndex) {
 
-	EB_U32                  childIndex;
+    EB_U32                  childIndex;
 
-	EB_BOOL                 lcuGrassFlag = EB_FALSE;
+    EB_BOOL                 lcuGrassFlag = EB_FALSE;
 
-	EB_U32 grassLcuInrange;
-	EB_U32 processedCus;
-	EB_U32  rasterScanCuIndex;
+    EB_U32 grassLcuInrange;
+    EB_U32 processedCus;
+    EB_U32  rasterScanCuIndex;
 
     LcuParams_t *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
-	LcuStat_t *lcuStatPtr = &(pictureControlSetPtr->lcuStatArray[lcuIndex]);
+    LcuStat_t *lcuStatPtr = &(pictureControlSetPtr->lcuStatArray[lcuIndex]);
 
-	_mm_prefetch((const char*)lcuStatPtr, _MM_HINT_T0);
+    _mm_prefetch((const char*)lcuStatPtr, _MM_HINT_T0);
 
-	lcuGrassFlag = EB_FALSE;
-	grassLcuInrange = 0;
-	processedCus = 0;
+    lcuGrassFlag = EB_FALSE;
+    grassLcuInrange = 0;
+    processedCus = 0;
 
 
-	for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_16x16_0; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_16x16_15; rasterScanCuIndex++) {
+    for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_16x16_0; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_16x16_15; rasterScanCuIndex++) {
         if (lcuParams->rasterScanCuValidity[rasterScanCuIndex]) {
-			const EB_U32 mdScanCuIndex = RASTER_SCAN_TO_MD_SCAN[rasterScanCuIndex];
-			const EB_U32 rasterScanParentCuIndex = RASTER_SCAN_CU_PARENT_INDEX[rasterScanCuIndex];
-			const EB_U32 mdScanParentCuIndex = RASTER_SCAN_TO_MD_SCAN[rasterScanParentCuIndex];
-			CuStat_t *cuStatPtr = &(lcuStatPtr->cuStatArray[mdScanCuIndex]);
+            const EB_U32 mdScanCuIndex = RASTER_SCAN_TO_MD_SCAN[rasterScanCuIndex];
+            const EB_U32 rasterScanParentCuIndex = RASTER_SCAN_CU_PARENT_INDEX[rasterScanCuIndex];
+            const EB_U32 mdScanParentCuIndex = RASTER_SCAN_TO_MD_SCAN[rasterScanParentCuIndex];
+            CuStat_t *cuStatPtr = &(lcuStatPtr->cuStatArray[mdScanCuIndex]);
 
 
-			const EB_U32 perfectCondition = 7;
-			const EB_U8 yMean = contextPtr->yMeanPtr[rasterScanCuIndex];
-			const EB_U8 cbMean = contextPtr->cbMeanPtr[rasterScanCuIndex];
-			const EB_U8 crMean = contextPtr->crMeanPtr[rasterScanCuIndex];
-			EB_U32 grassCondition = 0;
-			EB_U32 skinCondition = 0;
+            const EB_U32 perfectCondition = 7;
+            const EB_U8 yMean = contextPtr->yMeanPtr[rasterScanCuIndex];
+            const EB_U8 cbMean = contextPtr->cbMeanPtr[rasterScanCuIndex];
+            const EB_U8 crMean = contextPtr->crMeanPtr[rasterScanCuIndex];
+            EB_U32 grassCondition = 0;
+            EB_U32 skinCondition = 0;
 
-			EB_U32	highChromaCondition = 0;
-			EB_U32 highLumaCondition = 0;
+            EB_U32    highChromaCondition = 0;
+            EB_U32 highLumaCondition = 0;
 
-			// GRASS
-			grassCondition += (yMean > Y_MEAN_RANGE_02 && yMean < Y_MEAN_RANGE_01) ? 1 : 0;
-			grassCondition += (cbMean > CB_MEAN_RANGE_00 && cbMean < CB_MEAN_RANGE_02) ? 2 : 0;
-			grassCondition += (crMean > CR_MEAN_RANGE_00 && crMean < CR_MEAN_RANGE_02) ? 4 : 0;
-
-
-			grassLcuInrange += (grassCondition == perfectCondition) ? 1 : 0;
-			processedCus++;
-
-			lcuGrassFlag = grassCondition == perfectCondition ? EB_TRUE : lcuGrassFlag;
-
-			cuStatPtr->grassArea = (EB_BOOL)(grassCondition == perfectCondition);
-			// SKIN
-			skinCondition += (yMean > Y_MEAN_RANGE_03 && yMean < Y_MEAN_RANGE_01) ? 1 : 0;
-			skinCondition += (cbMean > 100 && cbMean < 120) ? 2 : 0;
-			skinCondition += (crMean > 135 && crMean < 160) ? 4 : 0;
-
-			cuStatPtr->skinArea = (EB_BOOL)(skinCondition == perfectCondition);
-
-			highChromaCondition = (crMean >= 127 || cbMean > 150) ? 1 : 0;
-			highLumaCondition = (crMean >= 80 && yMean > 180) ? 1 : 0;
-			cuStatPtr->highLuma = (highLumaCondition == 1) ? EB_TRUE : EB_FALSE;
-			cuStatPtr->highChroma = (highChromaCondition == 1) ? EB_TRUE : EB_FALSE;
-
-			for (childIndex = mdScanCuIndex + 1; childIndex < mdScanCuIndex + 5; ++childIndex){
-				lcuStatPtr->cuStatArray[childIndex].grassArea = cuStatPtr->grassArea;
-				lcuStatPtr->cuStatArray[childIndex].skinArea = cuStatPtr->skinArea;
-				lcuStatPtr->cuStatArray[childIndex].highChroma = cuStatPtr->highChroma;
-				lcuStatPtr->cuStatArray[childIndex].highLuma = cuStatPtr->highLuma;
-
-			}
-
-			lcuStatPtr->cuStatArray[mdScanParentCuIndex].grassArea = cuStatPtr->grassArea ? EB_TRUE :
-				lcuStatPtr->cuStatArray[mdScanParentCuIndex].grassArea;
-			lcuStatPtr->cuStatArray[0].grassArea = cuStatPtr->grassArea ? EB_TRUE :
-				lcuStatPtr->cuStatArray[0].grassArea;
-			lcuStatPtr->cuStatArray[mdScanParentCuIndex].skinArea = cuStatPtr->skinArea ? EB_TRUE :
-				lcuStatPtr->cuStatArray[mdScanParentCuIndex].skinArea;
-			lcuStatPtr->cuStatArray[0].skinArea = cuStatPtr->skinArea ? EB_TRUE :
-				lcuStatPtr->cuStatArray[0].skinArea;
-			lcuStatPtr->cuStatArray[mdScanParentCuIndex].highChroma = cuStatPtr->highChroma ? EB_TRUE :
-				lcuStatPtr->cuStatArray[mdScanParentCuIndex].highChroma;
-			lcuStatPtr->cuStatArray[0].highChroma = cuStatPtr->highChroma ? EB_TRUE :
-				lcuStatPtr->cuStatArray[0].highChroma;
-
-			lcuStatPtr->cuStatArray[mdScanParentCuIndex].highLuma = cuStatPtr->highLuma ? EB_TRUE :
-				lcuStatPtr->cuStatArray[mdScanParentCuIndex].highLuma;
-			lcuStatPtr->cuStatArray[0].highLuma = cuStatPtr->highLuma ? EB_TRUE :
-				lcuStatPtr->cuStatArray[0].highLuma;
+            // GRASS
+            grassCondition += (yMean > Y_MEAN_RANGE_02 && yMean < Y_MEAN_RANGE_01) ? 1 : 0;
+            grassCondition += (cbMean > CB_MEAN_RANGE_00 && cbMean < CB_MEAN_RANGE_02) ? 2 : 0;
+            grassCondition += (crMean > CR_MEAN_RANGE_00 && crMean < CR_MEAN_RANGE_02) ? 4 : 0;
 
 
+            grassLcuInrange += (grassCondition == perfectCondition) ? 1 : 0;
+            processedCus++;
 
-		}
-	}
+            lcuGrassFlag = grassCondition == perfectCondition ? EB_TRUE : lcuGrassFlag;
 
-	contextPtr->pictureNumGrassLcu += lcuGrassFlag ? 1 : 0;
+            cuStatPtr->grassArea = (EB_BOOL)(grassCondition == perfectCondition);
+            // SKIN
+            skinCondition += (yMean > Y_MEAN_RANGE_03 && yMean < Y_MEAN_RANGE_01) ? 1 : 0;
+            skinCondition += (cbMean > 100 && cbMean < 120) ? 2 : 0;
+            skinCondition += (crMean > 135 && crMean < 160) ? 4 : 0;
+
+            cuStatPtr->skinArea = (EB_BOOL)(skinCondition == perfectCondition);
+
+            highChromaCondition = (crMean >= 127 || cbMean > 150) ? 1 : 0;
+            highLumaCondition = (crMean >= 80 && yMean > 180) ? 1 : 0;
+            cuStatPtr->highLuma = (highLumaCondition == 1) ? EB_TRUE : EB_FALSE;
+            cuStatPtr->highChroma = (highChromaCondition == 1) ? EB_TRUE : EB_FALSE;
+
+            for (childIndex = mdScanCuIndex + 1; childIndex < mdScanCuIndex + 5; ++childIndex){
+                lcuStatPtr->cuStatArray[childIndex].grassArea = cuStatPtr->grassArea;
+                lcuStatPtr->cuStatArray[childIndex].skinArea = cuStatPtr->skinArea;
+                lcuStatPtr->cuStatArray[childIndex].highChroma = cuStatPtr->highChroma;
+                lcuStatPtr->cuStatArray[childIndex].highLuma = cuStatPtr->highLuma;
+
+            }
+
+            lcuStatPtr->cuStatArray[mdScanParentCuIndex].grassArea = cuStatPtr->grassArea ? EB_TRUE :
+                lcuStatPtr->cuStatArray[mdScanParentCuIndex].grassArea;
+            lcuStatPtr->cuStatArray[0].grassArea = cuStatPtr->grassArea ? EB_TRUE :
+                lcuStatPtr->cuStatArray[0].grassArea;
+            lcuStatPtr->cuStatArray[mdScanParentCuIndex].skinArea = cuStatPtr->skinArea ? EB_TRUE :
+                lcuStatPtr->cuStatArray[mdScanParentCuIndex].skinArea;
+            lcuStatPtr->cuStatArray[0].skinArea = cuStatPtr->skinArea ? EB_TRUE :
+                lcuStatPtr->cuStatArray[0].skinArea;
+            lcuStatPtr->cuStatArray[mdScanParentCuIndex].highChroma = cuStatPtr->highChroma ? EB_TRUE :
+                lcuStatPtr->cuStatArray[mdScanParentCuIndex].highChroma;
+            lcuStatPtr->cuStatArray[0].highChroma = cuStatPtr->highChroma ? EB_TRUE :
+                lcuStatPtr->cuStatArray[0].highChroma;
+
+            lcuStatPtr->cuStatArray[mdScanParentCuIndex].highLuma = cuStatPtr->highLuma ? EB_TRUE :
+                lcuStatPtr->cuStatArray[mdScanParentCuIndex].highLuma;
+            lcuStatPtr->cuStatArray[0].highLuma = cuStatPtr->highLuma ? EB_TRUE :
+                lcuStatPtr->cuStatArray[0].highLuma;
+
+
+
+        }
+    }
+
+    contextPtr->pictureNumGrassLcu += lcuGrassFlag ? 1 : 0;
 }
 
 static void GrassSkinPicture(
-	SourceBasedOperationsContext_t		*contextPtr,
-	PictureParentControlSet_t			*pictureControlSetPtr) {
-	pictureControlSetPtr->grassPercentageInPicture = (EB_U8)(contextPtr->pictureNumGrassLcu * 100 / pictureControlSetPtr->lcuTotalCount);
+    SourceBasedOperationsContext_t        *contextPtr,
+    PictureParentControlSet_t            *pictureControlSetPtr) {
+    pictureControlSetPtr->grassPercentageInPicture = (EB_U8)(contextPtr->pictureNumGrassLcu * 100 / pictureControlSetPtr->lcuTotalCount);
 }
 
 /******************************************************
 * Detect and mark LCU and 32x32 CUs which belong to an isolated non-homogeneous region surrounding a homogenous and flat region
 ******************************************************/
 static inline void DetermineIsolatedNonHomogeneousRegionInPicture(
-	SequenceControlSet_t            *sequenceControlSetPtr,
-	PictureParentControlSet_t       *pictureControlSetPtr)
+    SequenceControlSet_t            *sequenceControlSetPtr,
+    PictureParentControlSet_t       *pictureControlSetPtr)
 {
-	EB_U32 lcuIndex;
-	EB_U32 cuuIndex;
-	EB_S32 lcuHor, lcuVer, lcuVerOffset;
-	EB_U32 lcuTotalCount = pictureControlSetPtr->lcuTotalCount;
-	EB_U32 pictureWidthInLcu = sequenceControlSetPtr->pictureWidthInLcu;
-	EB_U32 pictureHeightInLcu = sequenceControlSetPtr->pictureHeightInLcu;
+    EB_U32 lcuIndex;
+    EB_U32 cuuIndex;
+    EB_S32 lcuHor, lcuVer, lcuVerOffset;
+    EB_U32 lcuTotalCount = pictureControlSetPtr->lcuTotalCount;
+    EB_U32 pictureWidthInLcu = sequenceControlSetPtr->pictureWidthInLcu;
+    EB_U32 pictureHeightInLcu = sequenceControlSetPtr->pictureHeightInLcu;
 
-	for (lcuIndex = 0; lcuIndex < lcuTotalCount; ++lcuIndex) {
+    for (lcuIndex = 0; lcuIndex < lcuTotalCount; ++lcuIndex) {
 
         LcuParams_t *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
-		// Initialize
-		pictureControlSetPtr->lcuIsolatedNonHomogeneousAreaArray[lcuIndex] = EB_FALSE;
+        // Initialize
+        pictureControlSetPtr->lcuIsolatedNonHomogeneousAreaArray[lcuIndex] = EB_FALSE;
         if ((lcuParams->horizontalIndex > 0) && (lcuParams->horizontalIndex < pictureWidthInLcu - 1) && (lcuParams->verticalIndex > 0) && (lcuParams->verticalIndex < pictureHeightInLcu - 1)) {
-			EB_U32 countOfMedVarianceLcu;
-			countOfMedVarianceLcu = 0;
+            EB_U32 countOfMedVarianceLcu;
+            countOfMedVarianceLcu = 0;
 
             // top neighbors
-			countOfMedVarianceLcu += ((pictureControlSetPtr->variance[lcuIndex - pictureWidthInLcu - 1][ME_TIER_ZERO_PU_64x64]) <= MEDIUM_LCU_VARIANCE) ? 1 : 0;
-			countOfMedVarianceLcu += (pictureControlSetPtr->variance[lcuIndex - pictureWidthInLcu][ME_TIER_ZERO_PU_64x64] <= MEDIUM_LCU_VARIANCE) ? 1 : 0;
-			countOfMedVarianceLcu += (pictureControlSetPtr->variance[lcuIndex - pictureWidthInLcu + 1][ME_TIER_ZERO_PU_64x64] <= MEDIUM_LCU_VARIANCE && sequenceControlSetPtr->lcuParamsArray[lcuIndex - pictureWidthInLcu + 1].isCompleteLcu) ? 1 : 0;
-			// bottom
-			countOfMedVarianceLcu += (pictureControlSetPtr->variance[lcuIndex + pictureWidthInLcu - 1][ME_TIER_ZERO_PU_64x64] <= MEDIUM_LCU_VARIANCE && sequenceControlSetPtr->lcuParamsArray[lcuIndex + pictureWidthInLcu - 1].isCompleteLcu) ? 1 : 0;
-			countOfMedVarianceLcu += (pictureControlSetPtr->variance[lcuIndex + pictureWidthInLcu][ME_TIER_ZERO_PU_64x64] <= MEDIUM_LCU_VARIANCE && sequenceControlSetPtr->lcuParamsArray[lcuIndex + pictureWidthInLcu].isCompleteLcu) ? 1 : 0;
-			countOfMedVarianceLcu += (pictureControlSetPtr->variance[lcuIndex + pictureWidthInLcu + 1][ME_TIER_ZERO_PU_64x64] <= MEDIUM_LCU_VARIANCE && sequenceControlSetPtr->lcuParamsArray[lcuIndex + pictureWidthInLcu + 1].isCompleteLcu) ? 1 : 0;
-			// left right
-			countOfMedVarianceLcu += (pictureControlSetPtr->variance[lcuIndex + 1][ME_TIER_ZERO_PU_64x64] <= MEDIUM_LCU_VARIANCE  && sequenceControlSetPtr->lcuParamsArray[lcuIndex + 1].isCompleteLcu) ? 1 : 0;
-			countOfMedVarianceLcu += (pictureControlSetPtr->variance[lcuIndex - 1][ME_TIER_ZERO_PU_64x64] <= MEDIUM_LCU_VARIANCE) ? 1 : 0;
+            countOfMedVarianceLcu += ((pictureControlSetPtr->variance[lcuIndex - pictureWidthInLcu - 1][ME_TIER_ZERO_PU_64x64]) <= MEDIUM_LCU_VARIANCE) ? 1 : 0;
+            countOfMedVarianceLcu += (pictureControlSetPtr->variance[lcuIndex - pictureWidthInLcu][ME_TIER_ZERO_PU_64x64] <= MEDIUM_LCU_VARIANCE) ? 1 : 0;
+            countOfMedVarianceLcu += (pictureControlSetPtr->variance[lcuIndex - pictureWidthInLcu + 1][ME_TIER_ZERO_PU_64x64] <= MEDIUM_LCU_VARIANCE && sequenceControlSetPtr->lcuParamsArray[lcuIndex - pictureWidthInLcu + 1].isCompleteLcu) ? 1 : 0;
+            // bottom
+            countOfMedVarianceLcu += (pictureControlSetPtr->variance[lcuIndex + pictureWidthInLcu - 1][ME_TIER_ZERO_PU_64x64] <= MEDIUM_LCU_VARIANCE && sequenceControlSetPtr->lcuParamsArray[lcuIndex + pictureWidthInLcu - 1].isCompleteLcu) ? 1 : 0;
+            countOfMedVarianceLcu += (pictureControlSetPtr->variance[lcuIndex + pictureWidthInLcu][ME_TIER_ZERO_PU_64x64] <= MEDIUM_LCU_VARIANCE && sequenceControlSetPtr->lcuParamsArray[lcuIndex + pictureWidthInLcu].isCompleteLcu) ? 1 : 0;
+            countOfMedVarianceLcu += (pictureControlSetPtr->variance[lcuIndex + pictureWidthInLcu + 1][ME_TIER_ZERO_PU_64x64] <= MEDIUM_LCU_VARIANCE && sequenceControlSetPtr->lcuParamsArray[lcuIndex + pictureWidthInLcu + 1].isCompleteLcu) ? 1 : 0;
+            // left right
+            countOfMedVarianceLcu += (pictureControlSetPtr->variance[lcuIndex + 1][ME_TIER_ZERO_PU_64x64] <= MEDIUM_LCU_VARIANCE  && sequenceControlSetPtr->lcuParamsArray[lcuIndex + 1].isCompleteLcu) ? 1 : 0;
+            countOfMedVarianceLcu += (pictureControlSetPtr->variance[lcuIndex - 1][ME_TIER_ZERO_PU_64x64] <= MEDIUM_LCU_VARIANCE) ? 1 : 0;
 
-			// At least two neighbors are flat
-			if ((countOfMedVarianceLcu > 2)|| countOfMedVarianceLcu > 1)
-			{
-				// Search within an LCU if any of the 32x32 CUs is non-homogeneous
-				EB_U32 count32x32NonhomCusInLcu = 0;
-				for (cuuIndex = 0; cuuIndex < 4; cuuIndex++)
-				{
-					if (pictureControlSetPtr->varOfVar32x32BasedLcuArray[lcuIndex][cuuIndex] > VAR_BASED_DETAIL_PRESERVATION_SELECTOR_THRSLHD)
-						count32x32NonhomCusInLcu++;
-				}
-				// If atleast one is non-homogeneous, then check all its neighbors (top left, top, top right, left, right, btm left, btm, btm right)
-				EB_U32 countOfHomogeneousNeighborLcus = 0;
-				if (count32x32NonhomCusInLcu > 0) {
-					for (lcuVer = -1; lcuVer <= 1; lcuVer++) {
-						lcuVerOffset = lcuVer * (EB_S32)pictureWidthInLcu;
-						for (lcuHor = -1; lcuHor <= 1; lcuHor++) {
-							if (lcuVer != 0 && lcuHor != 0)
-								countOfHomogeneousNeighborLcus += (pictureControlSetPtr->lcuHomogeneousAreaArray[lcuIndex + lcuVerOffset + lcuHor] == EB_TRUE);
+            // At least two neighbors are flat
+            if ((countOfMedVarianceLcu > 2)|| countOfMedVarianceLcu > 1)
+            {
+                // Search within an LCU if any of the 32x32 CUs is non-homogeneous
+                EB_U32 count32x32NonhomCusInLcu = 0;
+                for (cuuIndex = 0; cuuIndex < 4; cuuIndex++)
+                {
+                    if (pictureControlSetPtr->varOfVar32x32BasedLcuArray[lcuIndex][cuuIndex] > VAR_BASED_DETAIL_PRESERVATION_SELECTOR_THRSLHD)
+                        count32x32NonhomCusInLcu++;
+                }
+                // If atleast one is non-homogeneous, then check all its neighbors (top left, top, top right, left, right, btm left, btm, btm right)
+                EB_U32 countOfHomogeneousNeighborLcus = 0;
+                if (count32x32NonhomCusInLcu > 0) {
+                    for (lcuVer = -1; lcuVer <= 1; lcuVer++) {
+                        lcuVerOffset = lcuVer * (EB_S32)pictureWidthInLcu;
+                        for (lcuHor = -1; lcuHor <= 1; lcuHor++) {
+                            if (lcuVer != 0 && lcuHor != 0)
+                                countOfHomogeneousNeighborLcus += (pictureControlSetPtr->lcuHomogeneousAreaArray[lcuIndex + lcuVerOffset + lcuHor] == EB_TRUE);
 
-						}
-					}
-				}
+                        }
+                    }
+                }
 
-				// To determine current lcu is isolated non-homogeneous, at least 2 neighbors must be homogeneous
-				if (countOfHomogeneousNeighborLcus >= 2){
-					for (cuuIndex = 0; cuuIndex < 4; cuuIndex++)
-					{
-						if (pictureControlSetPtr->varOfVar32x32BasedLcuArray[lcuIndex][cuuIndex] > VAR_BASED_DETAIL_PRESERVATION_SELECTOR_THRSLHD)
-						{
-							pictureControlSetPtr->lcuIsolatedNonHomogeneousAreaArray[lcuIndex] = EB_TRUE;
-						}
-					}
-				}
+                // To determine current lcu is isolated non-homogeneous, at least 2 neighbors must be homogeneous
+                if (countOfHomogeneousNeighborLcus >= 2){
+                    for (cuuIndex = 0; cuuIndex < 4; cuuIndex++)
+                    {
+                        if (pictureControlSetPtr->varOfVar32x32BasedLcuArray[lcuIndex][cuuIndex] > VAR_BASED_DETAIL_PRESERVATION_SELECTOR_THRSLHD)
+                        {
+                            pictureControlSetPtr->lcuIsolatedNonHomogeneousAreaArray[lcuIndex] = EB_TRUE;
+                        }
+                    }
+                }
 
-			}
-		}
-	}
-	return;
+            }
+        }
+    }
+    return;
 }
 
 
 static void SetDefaultDeltaQpRange(
-	SourceBasedOperationsContext_t	*contextPtr,
-	PictureParentControlSet_t		*pictureControlSetPtr) {
+    SourceBasedOperationsContext_t    *contextPtr,
+    PictureParentControlSet_t        *pictureControlSetPtr) {
 
-	EB_S8	minDeltaQP;
-	EB_U8	maxDeltaQP;
-	if (pictureControlSetPtr->temporalLayerIndex == 0) {
-		minDeltaQP = EbHevcMinDeltaQPdefault[0];
-		maxDeltaQP = EbHevcMaxDeltaQPdefault[0];
-	}
-	else if (pictureControlSetPtr->isUsedAsReferenceFlag) {
-		minDeltaQP = EbHevcMinDeltaQPdefault[1];
-		maxDeltaQP = EbHevcMaxDeltaQPdefault[1];
-	}
-	else {
-		minDeltaQP = EbHevcMinDeltaQPdefault[2];
-		maxDeltaQP = EbHevcMaxDeltaQPdefault[2];
-	}
+    EB_S8    minDeltaQP;
+    EB_U8    maxDeltaQP;
+    if (pictureControlSetPtr->temporalLayerIndex == 0) {
+        minDeltaQP = EbHevcMinDeltaQPdefault[0];
+        maxDeltaQP = EbHevcMaxDeltaQPdefault[0];
+    }
+    else if (pictureControlSetPtr->isUsedAsReferenceFlag) {
+        minDeltaQP = EbHevcMinDeltaQPdefault[1];
+        maxDeltaQP = EbHevcMaxDeltaQPdefault[1];
+    }
+    else {
+        minDeltaQP = EbHevcMinDeltaQPdefault[2];
+        maxDeltaQP = EbHevcMaxDeltaQPdefault[2];
+    }
 
-	// Shape the min degrade
-	minDeltaQP = (((EB_S8)(minDeltaQP + MIN_DELTA_QP_SHAPE_TH) > 0) ? 0 : (minDeltaQP + MIN_DELTA_QP_SHAPE_TH));
+    // Shape the min degrade
+    minDeltaQP = (((EB_S8)(minDeltaQP + MIN_DELTA_QP_SHAPE_TH) > 0) ? 0 : (minDeltaQP + MIN_DELTA_QP_SHAPE_TH));
 
-	// Shape the max degrade
-	maxDeltaQP = (((EB_S8)(maxDeltaQP - MAX_DELTA_QP_SHAPE_TH) < 0) ? 0 : (maxDeltaQP - MAX_DELTA_QP_SHAPE_TH));
+    // Shape the max degrade
+    maxDeltaQP = (((EB_S8)(maxDeltaQP - MAX_DELTA_QP_SHAPE_TH) < 0) ? 0 : (maxDeltaQP - MAX_DELTA_QP_SHAPE_TH));
 
-	contextPtr->minDeltaQP = minDeltaQP;
-	contextPtr->maxDeltaQP = maxDeltaQP;
+    contextPtr->minDeltaQP = minDeltaQP;
+    contextPtr->maxDeltaQP = maxDeltaQP;
 }
 
 
 static inline void DetermineMorePotentialAuraAreas(
-	SequenceControlSet_t        *sequenceControlSetPtr,
-	PictureParentControlSet_t	*pictureControlSetPtr)
+    SequenceControlSet_t        *sequenceControlSetPtr,
+    PictureParentControlSet_t    *pictureControlSetPtr)
 {
-	EB_U16 lcuIndex;
-	EB_S32 lcuHor, lcuVer, lcuVerOffset;
-	EB_U32 countOfEdgeBlocks = 0, countOfNonEdgeBlocks = 0;
+    EB_U16 lcuIndex;
+    EB_S32 lcuHor, lcuVer, lcuVerOffset;
+    EB_U32 countOfEdgeBlocks = 0, countOfNonEdgeBlocks = 0;
 
-	EB_U32 lightLumaValue = 150;
+    EB_U32 lightLumaValue = 150;
 
-	EB_U16 lcuTotalCount = pictureControlSetPtr->lcuTotalCount;
+    EB_U16 lcuTotalCount = pictureControlSetPtr->lcuTotalCount;
 
-	for (lcuIndex = 0; lcuIndex < pictureControlSetPtr->lcuTotalCount; ++lcuIndex) {
+    for (lcuIndex = 0; lcuIndex < pictureControlSetPtr->lcuTotalCount; ++lcuIndex) {
         LcuParams_t *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
 
-		// For all the internal LCUs
-		if (!lcuParams->isEdgeLcu) {
-			countOfNonEdgeBlocks = 0;
+        // For all the internal LCUs
+        if (!lcuParams->isEdgeLcu) {
+            countOfNonEdgeBlocks = 0;
             if (pictureControlSetPtr->edgeResultsPtr[lcuIndex].edgeBlockNum
-				&& pictureControlSetPtr->yMean[lcuIndex][ME_TIER_ZERO_PU_64x64] >= lightLumaValue) {
+                && pictureControlSetPtr->yMean[lcuIndex][ME_TIER_ZERO_PU_64x64] >= lightLumaValue) {
 
-				for (lcuVer = -1; lcuVer <= 1; lcuVer++) {
-					lcuVerOffset = lcuVer * (EB_S32)sequenceControlSetPtr->pictureWidthInLcu;
-					for (lcuHor = -1; lcuHor <= 1; lcuHor++) {
+                for (lcuVer = -1; lcuVer <= 1; lcuVer++) {
+                    lcuVerOffset = lcuVer * (EB_S32)sequenceControlSetPtr->pictureWidthInLcu;
+                    for (lcuHor = -1; lcuHor <= 1; lcuHor++) {
                         countOfNonEdgeBlocks += (!pictureControlSetPtr->edgeResultsPtr[lcuIndex + lcuVerOffset + lcuHor].edgeBlockNum) &&
-							(pictureControlSetPtr->nonMovingIndexArray[lcuIndex + lcuVerOffset + lcuHor] < 30);
-					}
-				}
-			}
+                            (pictureControlSetPtr->nonMovingIndexArray[lcuIndex + lcuVerOffset + lcuHor] < 30);
+                    }
+                }
+            }
 
-			if (countOfNonEdgeBlocks > 1) {
-				countOfEdgeBlocks++;
-			}
-		}
-	}
+            if (countOfNonEdgeBlocks > 1) {
+                countOfEdgeBlocks++;
+            }
+        }
+    }
 
 
-	// To check the percentage of potential aura in the picture.. If a large area is detected then this is not isolated
+    // To check the percentage of potential aura in the picture.. If a large area is detected then this is not isolated
     pictureControlSetPtr->percentageOfEdgeinLightBackground = (EB_U8)(countOfEdgeBlocks * 100 / lcuTotalCount);
 
 }
@@ -686,30 +686,30 @@ static inline void DetermineMorePotentialAuraAreas(
 * Detects the presence of dark area
 ***************************************************/
 static void DeriveHighDarkAreaDensityFlag(
-	SequenceControlSet_t                *sequenceControlSetPtr,
-	PictureParentControlSet_t           *pictureControlSetPtr) {
+    SequenceControlSet_t                *sequenceControlSetPtr,
+    PictureParentControlSet_t           *pictureControlSetPtr) {
 
 
-	EB_U32	regionInPictureWidthIndex;
-	EB_U32	regionInPictureHeightIndex;
-	EB_U32	lumaHistogramBin;
-	EB_U32	blackSamplesCount = 0;
-	EB_U32	blackAreaPercentage;
-	// Loop over regions inside the picture
-	for (regionInPictureWidthIndex = 0; regionInPictureWidthIndex < sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerWidth; regionInPictureWidthIndex++){  // loop over horizontal regions
-		for (regionInPictureHeightIndex = 0; regionInPictureHeightIndex < sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerHeight; regionInPictureHeightIndex++){ // loop over vertical regions
-			for (lumaHistogramBin = 0; lumaHistogramBin < LOW_MEAN_TH_0; lumaHistogramBin++){ // loop over the 1st LOW_MEAN_THLD bins
-				blackSamplesCount += pictureControlSetPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex][0][lumaHistogramBin];
-			}
-		}
-	}
+    EB_U32    regionInPictureWidthIndex;
+    EB_U32    regionInPictureHeightIndex;
+    EB_U32    lumaHistogramBin;
+    EB_U32    blackSamplesCount = 0;
+    EB_U32    blackAreaPercentage;
+    // Loop over regions inside the picture
+    for (regionInPictureWidthIndex = 0; regionInPictureWidthIndex < sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerWidth; regionInPictureWidthIndex++){  // loop over horizontal regions
+        for (regionInPictureHeightIndex = 0; regionInPictureHeightIndex < sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerHeight; regionInPictureHeightIndex++){ // loop over vertical regions
+            for (lumaHistogramBin = 0; lumaHistogramBin < LOW_MEAN_TH_0; lumaHistogramBin++){ // loop over the 1st LOW_MEAN_THLD bins
+                blackSamplesCount += pictureControlSetPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex][0][lumaHistogramBin];
+            }
+        }
+    }
 
-	blackAreaPercentage = (blackSamplesCount * 100) / (sequenceControlSetPtr->lumaWidth * sequenceControlSetPtr->lumaHeight);
+    blackAreaPercentage = (blackSamplesCount * 100) / (sequenceControlSetPtr->lumaWidth * sequenceControlSetPtr->lumaHeight);
     pictureControlSetPtr->highDarkAreaDensityFlag = (EB_BOOL)(blackAreaPercentage >= MIN_BLACK_AREA_PERCENTAGE);
 
     blackSamplesCount = 0;
-    EB_U32	whiteSamplesCount = 0;
-    EB_U32	whiteAreaPercentage;
+    EB_U32    whiteSamplesCount = 0;
+    EB_U32    whiteAreaPercentage;
     // Loop over regions inside the picture
     for (regionInPictureWidthIndex = 0; regionInPictureWidthIndex < sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerWidth; regionInPictureWidthIndex++){  // loop over horizontal regions
         for (regionInPictureHeightIndex = 0; regionInPictureHeightIndex < sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerHeight; regionInPictureHeightIndex++){ // loop over vertical regions
@@ -729,76 +729,76 @@ static void DeriveHighDarkAreaDensityFlag(
 
     pictureControlSetPtr->highDarkLowLightAreaDensityFlag = (EB_BOOL)(blackAreaPercentage >= MIN_BLACK_AREA_PERCENTAGE) && (whiteAreaPercentage >= MIN_WHITE_AREA_PERCENTAGE);
 }
-#define NORM_FACTOR	10
-#define VAR_MIN		10
-#define VAR_MAX		300
-#define MIN_Y		70
-#define MAX_Y		145
-#define MID_CB		140
-#define MID_CR		115
-#define TH_CB		10
-#define TH_CR		15
+#define NORM_FACTOR    10
+#define VAR_MIN        10
+#define VAR_MAX        300
+#define MIN_Y        70
+#define MAX_Y        145
+#define MID_CB        140
+#define MID_CR        115
+#define TH_CB        10
+#define TH_CR        15
 
 /******************************************************
 * High  contrast classifier
 ******************************************************/
 static void TemporalHighContrastClassifier(
-	SourceBasedOperationsContext_t	*contextPtr,
-	PictureParentControlSet_t       *pictureControlSetPtr,
-	EB_U32                           lcuIndex)
+    SourceBasedOperationsContext_t    *contextPtr,
+    PictureParentControlSet_t       *pictureControlSetPtr,
+    EB_U32                           lcuIndex)
 {
 
-	EB_U32 blkIt;
-	EB_U32 nsadTable[] = { 10, 5, 5, 5, 5, 5 };
-	EB_U32 thRes = 0;
-	EB_U32 nsad;
-	EB_U32 meDist = 0;
+    EB_U32 blkIt;
+    EB_U32 nsadTable[] = { 10, 5, 5, 5, 5, 5 };
+    EB_U32 thRes = 0;
+    EB_U32 nsad;
+    EB_U32 meDist = 0;
 
-	if (pictureControlSetPtr->sliceType == EB_B_PICTURE){
+    if (pictureControlSetPtr->sliceType == EB_B_PICTURE){
 
 
-			for (blkIt = 0; blkIt < 4; blkIt++) {
+            for (blkIt = 0; blkIt < 4; blkIt++) {
 
-				nsad = ((EB_U32)pictureControlSetPtr->meResults[lcuIndex][1 + blkIt].distortionDirection[0].distortion) >> NORM_FACTOR;
+                nsad = ((EB_U32)pictureControlSetPtr->meResults[lcuIndex][1 + blkIt].distortionDirection[0].distortion) >> NORM_FACTOR;
 
-				if (nsad >= nsadTable[pictureControlSetPtr->temporalLayerIndex] + thRes)
-					meDist++;
-			}
+                if (nsad >= nsadTable[pictureControlSetPtr->temporalLayerIndex] + thRes)
+                    meDist++;
+            }
 
-	}
-	contextPtr->highDist = meDist>0 ? EB_TRUE : EB_FALSE;
+    }
+    contextPtr->highDist = meDist>0 ? EB_TRUE : EB_FALSE;
 }
 
 static void SpatialHighContrastClassifier(
-	SourceBasedOperationsContext_t	*contextPtr,
-	PictureParentControlSet_t       *pictureControlSetPtr,
-	EB_U32                           lcuIndex)
+    SourceBasedOperationsContext_t    *contextPtr,
+    PictureParentControlSet_t       *pictureControlSetPtr,
+    EB_U32                           lcuIndex)
 {
-	EB_U32                 blkIt;
+    EB_U32                 blkIt;
 
-	contextPtr->highContrastNum = 0;
+    contextPtr->highContrastNum = 0;
 
-	//16x16 blocks
-	for (blkIt = 0; blkIt < 16; blkIt++) {
+    //16x16 blocks
+    for (blkIt = 0; blkIt < 16; blkIt++) {
 
-		EB_U8 ymean = contextPtr->yMeanPtr[5 + blkIt];
-		EB_U8 umean = contextPtr->cbMeanPtr[5 + blkIt];
-		EB_U8 vmean = contextPtr->crMeanPtr[5 + blkIt];
+        EB_U8 ymean = contextPtr->yMeanPtr[5 + blkIt];
+        EB_U8 umean = contextPtr->cbMeanPtr[5 + blkIt];
+        EB_U8 vmean = contextPtr->crMeanPtr[5 + blkIt];
 
-		EB_U16 var = pictureControlSetPtr->variance[lcuIndex][5 + blkIt];
+        EB_U16 var = pictureControlSetPtr->variance[lcuIndex][5 + blkIt];
 
 
-		if (var>VAR_MIN && var<VAR_MAX          &&  //medium texture
-			ymean>MIN_Y && ymean < MAX_Y        &&  //medium brightness(not too dark and not too bright)
-			ABS((EB_S64)umean - MID_CB) < TH_CB &&  //middle of the color plane
-			ABS((EB_S64)vmean - MID_CR) < TH_CR     //middle of the color plane
-			)
-		{
-			contextPtr->highContrastNum++;
+        if (var>VAR_MIN && var<VAR_MAX          &&  //medium texture
+            ymean>MIN_Y && ymean < MAX_Y        &&  //medium brightness(not too dark and not too bright)
+            ABS((EB_S64)umean - MID_CB) < TH_CB &&  //middle of the color plane
+            ABS((EB_S64)vmean - MID_CR) < TH_CR     //middle of the color plane
+            )
+        {
+            contextPtr->highContrastNum++;
 
-		}
+        }
 
-	}
+    }
 }
 
 /******************************************************
@@ -807,8 +807,8 @@ Output  : populate to neighbor LCUs
 ******************************************************/
 static void PopulateFromCurrentLcuToNeighborLcus(
     PictureParentControlSet_t   *pictureControlSetPtr,
-    EB_BOOL	                     inputToPopulate,
-    EB_BOOL	                    *outputBuffer,
+    EB_BOOL                         inputToPopulate,
+    EB_BOOL                        *outputBuffer,
     EB_U32                       lcuAddr,
     EB_U32                       lcuOriginX,
     EB_U32                       lcuOriginY)
@@ -862,7 +862,7 @@ Input   : variance
 Output  : true if current & neighbors are spatially complex
 ******************************************************/
 static EB_BOOL IsSpatiallyComplexArea(
-    PictureParentControlSet_t	*pictureControlSetPtr,
+    PictureParentControlSet_t    *pictureControlSetPtr,
     EB_U32                       lcuAddr,
     EB_U32                       lcuOriginX,
     EB_U32                       lcuOriginY)
@@ -1001,7 +1001,7 @@ static void DeriveBlockinessPresentFlag(
 }
 
 static void QpmGatherStatistics(
-    SequenceControlSet_t		*sequenceControlSetPtr,
+    SequenceControlSet_t        *sequenceControlSetPtr,
     PictureParentControlSet_t   *pictureControlSetPtr,
     EB_U32                       lcuIndex)
 {
@@ -1025,14 +1025,14 @@ static void QpmGatherStatistics(
             if (lcuParams->rasterScanCuValidity[rasterScanCuIndex]) {
                 mdScanCuIndex = RASTER_SCAN_TO_MD_SCAN[rasterScanCuIndex];
 
-                OisCu8Results_t   	     *oisCu8ResultsPtr = pictureControlSetPtr->oisCu8Results[lcuIndex];
+                OisCu8Results_t            *oisCu8ResultsPtr = pictureControlSetPtr->oisCu8Results[lcuIndex];
 
                 if (pictureControlSetPtr->cu8x8Mode == CU_8x8_MODE_0 && oisCu8ResultsPtr->sortedOisCandidate[rasterScanCuIndex - RASTER_SCAN_CU_INDEX_8x8_0][0].validDistortion) {
                     oisSad = oisCu8ResultsPtr->sortedOisCandidate[rasterScanCuIndex - RASTER_SCAN_CU_INDEX_8x8_0][0].distortion;
                 }
                 else {
 
-                    OisCu32Cu16Results_t	 *oisCu32Cu16ResultsPtr = pictureControlSetPtr->oisCu32Cu16Results[lcuIndex];
+                    OisCu32Cu16Results_t     *oisCu32Cu16ResultsPtr = pictureControlSetPtr->oisCu32Cu16Results[lcuIndex];
                     const CodedUnitStats_t  *cuStats = GetCodedUnitStats(ParentBlockIndex[mdScanCuIndex]);
                     const EB_U32 me2Nx2NTableOffset = cuStats->cuNumInDepth + me2Nx2NOffset[cuStats->depth];
                     if (oisCu32Cu16ResultsPtr->sortedOisCandidate[me2Nx2NTableOffset][0].validDistortion) {
@@ -1068,7 +1068,7 @@ static void QpmGatherStatistics(
         if (lcuParams->rasterScanCuValidity[rasterScanCuIndex]) {
 
 
-            OisCu32Cu16Results_t	        *oisCu32Cu16ResultsPtr = pictureControlSetPtr->oisCu32Cu16Results[lcuIndex];
+            OisCu32Cu16Results_t            *oisCu32Cu16ResultsPtr = pictureControlSetPtr->oisCu32Cu16Results[lcuIndex];
 
             oisSad = oisCu32Cu16ResultsPtr->sortedOisCandidate[rasterScanCuIndex][0].distortion;
 
@@ -1093,7 +1093,7 @@ static void QpmGatherStatistics(
 
 
 
-            OisCu32Cu16Results_t	        *oisCu32Cu16ResultsPtr = pictureControlSetPtr->oisCu32Cu16Results[lcuIndex];
+            OisCu32Cu16Results_t            *oisCu32Cu16ResultsPtr = pictureControlSetPtr->oisCu32Cu16Results[lcuIndex];
             oisSad = oisCu32Cu16ResultsPtr->sortedOisCandidate[rasterScanCuIndex][0].distortion;
 
 
@@ -1117,7 +1117,7 @@ static void QpmGatherStatistics(
     if (lcuParams->rasterScanCuValidity[RASTER_SCAN_CU_INDEX_64x64]) {
 
 
-        OisCu32Cu16Results_t	        *oisCu32Cu16ResultsPtr = pictureControlSetPtr->oisCu32Cu16Results[lcuIndex];
+        OisCu32Cu16Results_t            *oisCu32Cu16ResultsPtr = pictureControlSetPtr->oisCu32Cu16Results[lcuIndex];
 
 
 
@@ -1145,7 +1145,7 @@ static void QpmGatherStatistics(
 
 static void StationaryEdgeOverUpdateOverTimeLcu(
     SequenceControlSet_t        *sequenceControlSetPtr,
-    EB_U32						totalCheckedPictures,
+    EB_U32                        totalCheckedPictures,
     PictureParentControlSet_t   *pictureControlSetPtr,
     EB_U32                       totalLcuCount)
 {
@@ -1200,7 +1200,7 @@ static void StationaryEdgeOverUpdateOverTimeLcu(
 
         for (lcuIndex = 0; lcuIndex < pictureControlSetPtr->lcuTotalCount; ++lcuIndex) {
 
-            LcuParams_t		*lcuParams  = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
+            LcuParams_t        *lcuParams  = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
             LcuStat_t       *lcuStatPtr = &pictureControlSetPtr->lcuStatArray[lcuIndex];
 
             lcu_X = lcuParams->horizontalIndex;
@@ -1261,7 +1261,7 @@ static void StationaryEdgeOverUpdateOverTimeLcu(
 
         for (lcuIndex = 0; lcuIndex < pictureControlSetPtr->lcuTotalCount; ++lcuIndex) {
 
-            LcuParams_t		*lcuParams  = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
+            LcuParams_t        *lcuParams  = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
             LcuStat_t       *lcuStatPtr = &pictureControlSetPtr->lcuStatArray[lcuIndex];
 
             lcu_X = lcuParams->horizontalIndex;
@@ -1291,7 +1291,7 @@ static void StationaryEdgeOverUpdateOverTimeLcu(
 
         for (lcuIndex = 0; lcuIndex < pictureControlSetPtr->lcuTotalCount; ++lcuIndex) {
 
-            LcuParams_t	    *lcuParams  = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
+            LcuParams_t        *lcuParams  = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
             LcuStat_t       *lcuStatPtr = &pictureControlSetPtr->lcuStatArray[lcuIndex];
 
             lcu_X = lcuParams->horizontalIndex;
@@ -1333,7 +1333,7 @@ static void StationaryEdgeOverUpdateOverTimeLcu(
 
         for (lcuIndex = 0; lcuIndex < pictureControlSetPtr->lcuTotalCount; ++lcuIndex) {
 
-            LcuParams_t		*lcuParams  = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
+            LcuParams_t        *lcuParams  = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
             LcuStat_t       *lcuStatPtr = &pictureControlSetPtr->lcuStatArray[lcuIndex];
 
             lcu_X = lcuParams->horizontalIndex;
@@ -1363,7 +1363,7 @@ static void StationaryEdgeOverUpdateOverTimeLcu(
 
         for (lcuIndex = 0; lcuIndex < pictureControlSetPtr->lcuTotalCount; ++lcuIndex) {
 
-            LcuParams_t		*lcuParams  = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
+            LcuParams_t        *lcuParams  = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
             LcuStat_t       *lcuStatPtr = &pictureControlSetPtr->lcuStatArray[lcuIndex];
 
             lcu_X = lcuParams->horizontalIndex;
@@ -1400,13 +1400,13 @@ static void StationaryEdgeOverUpdateOverTimeLcu(
  ************************************************/
 void* SourceBasedOperationsKernel(void *inputPtr)
 {
-    SourceBasedOperationsContext_t	*contextPtr = (SourceBasedOperationsContext_t*)inputPtr;
+    SourceBasedOperationsContext_t    *contextPtr = (SourceBasedOperationsContext_t*)inputPtr;
     PictureParentControlSet_t       *pictureControlSetPtr;
-	SequenceControlSet_t            *sequenceControlSetPtr;
+    SequenceControlSet_t            *sequenceControlSetPtr;
     EbObjectWrapper_t               *inputResultsWrapperPtr;
-	InitialRateControlResults_t	    *inputResultsPtr;
+    InitialRateControlResults_t        *inputResultsPtr;
     EbObjectWrapper_t               *outputResultsWrapperPtr;
-	PictureDemuxResults_t       	*outputResultsPtr;
+    PictureDemuxResults_t           *outputResultsPtr;
 
     for (;;) {
 
@@ -1416,74 +1416,74 @@ void* SourceBasedOperationsKernel(void *inputPtr)
             &inputResultsWrapperPtr);
         EB_CHECK_END_OBJ(inputResultsWrapperPtr);
 
-		inputResultsPtr = (InitialRateControlResults_t*)inputResultsWrapperPtr->objectPtr;
+        inputResultsPtr = (InitialRateControlResults_t*)inputResultsWrapperPtr->objectPtr;
         pictureControlSetPtr = (PictureParentControlSet_t*)inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;
-		sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
+        sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 
 #if DEADLOCK_DEBUG
         SVT_LOG("POC %lld SRC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
-		pictureControlSetPtr->darkBackGroundlightForeGround = EB_FALSE;
-		contextPtr->pictureNumGrassLcu = 0;
-		contextPtr->countOfMovingLcus = 0;
-		contextPtr->countOfNonMovingLcus = 0;
-		contextPtr->yNonMovingMean = 0;
-		contextPtr->yMovingMean = 0;
-		contextPtr->toBeIntraCodedProbability = 0;
-		contextPtr->depth1BlockNum = 0;
+        pictureControlSetPtr->darkBackGroundlightForeGround = EB_FALSE;
+        contextPtr->pictureNumGrassLcu = 0;
+        contextPtr->countOfMovingLcus = 0;
+        contextPtr->countOfNonMovingLcus = 0;
+        contextPtr->yNonMovingMean = 0;
+        contextPtr->yMovingMean = 0;
+        contextPtr->toBeIntraCodedProbability = 0;
+        contextPtr->depth1BlockNum = 0;
 
-		EB_U32 lcuTotalCount = pictureControlSetPtr->lcuTotalCount;
-		EB_U32 lcuIndex;
+        EB_U32 lcuTotalCount = pictureControlSetPtr->lcuTotalCount;
+        EB_U32 lcuIndex;
 
 
-		/***********************************************LCU-based operations************************************************************/
-		for (lcuIndex = 0; lcuIndex < lcuTotalCount; ++lcuIndex) {
+        /***********************************************LCU-based operations************************************************************/
+        for (lcuIndex = 0; lcuIndex < lcuTotalCount; ++lcuIndex) {
             LcuParams_t *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
-			pictureControlSetPtr->lcuCmplxContrastArray[lcuIndex] = 0;
+            pictureControlSetPtr->lcuCmplxContrastArray[lcuIndex] = 0;
             EB_BOOL isCompleteLcu = lcuParams->isCompleteLcu;
-			EB_U8  *yMeanPtr = pictureControlSetPtr->yMean[lcuIndex];
+            EB_U8  *yMeanPtr = pictureControlSetPtr->yMean[lcuIndex];
 
-			_mm_prefetch((const char*)yMeanPtr, _MM_HINT_T0);
+            _mm_prefetch((const char*)yMeanPtr, _MM_HINT_T0);
 
-			EB_U8  *crMeanPtr = pictureControlSetPtr->crMean[lcuIndex];
-			EB_U8  *cbMeanPtr = pictureControlSetPtr->cbMean[lcuIndex];
+            EB_U8  *crMeanPtr = pictureControlSetPtr->crMean[lcuIndex];
+            EB_U8  *cbMeanPtr = pictureControlSetPtr->cbMean[lcuIndex];
 
-			_mm_prefetch((const char*)crMeanPtr, _MM_HINT_T0);
-			_mm_prefetch((const char*)cbMeanPtr, _MM_HINT_T0);
+            _mm_prefetch((const char*)crMeanPtr, _MM_HINT_T0);
+            _mm_prefetch((const char*)cbMeanPtr, _MM_HINT_T0);
 
-			contextPtr->yMeanPtr = yMeanPtr;
-			contextPtr->crMeanPtr = crMeanPtr;
-			contextPtr->cbMeanPtr = cbMeanPtr;
+            contextPtr->yMeanPtr = yMeanPtr;
+            contextPtr->crMeanPtr = crMeanPtr;
+            contextPtr->cbMeanPtr = cbMeanPtr;
 
-			// Grass & Skin detection
+            // Grass & Skin detection
             GrassSkinLcu(
-				contextPtr,
-				sequenceControlSetPtr,
-				pictureControlSetPtr,
-				lcuIndex);
+                contextPtr,
+                sequenceControlSetPtr,
+                pictureControlSetPtr,
+                lcuIndex);
 
-			// Spatial high contrast classifier
-			if (isCompleteLcu) {
-				SpatialHighContrastClassifier(
-					contextPtr,
-					pictureControlSetPtr,
-					lcuIndex);
-			}
+            // Spatial high contrast classifier
+            if (isCompleteLcu) {
+                SpatialHighContrastClassifier(
+                    contextPtr,
+                    pictureControlSetPtr,
+                    lcuIndex);
+            }
 
-			// Luma Contrast detection
-			LumaContrastDetectorLcu(
-				contextPtr,
-				sequenceControlSetPtr,
-				pictureControlSetPtr,
-				lcuIndex);
+            // Luma Contrast detection
+            LumaContrastDetectorLcu(
+                contextPtr,
+                sequenceControlSetPtr,
+                pictureControlSetPtr,
+                lcuIndex);
 
-			// AC energy computation
-			CalculateAcEnergy(
-				sequenceControlSetPtr,
-				pictureControlSetPtr,
-				lcuIndex);
+            // AC energy computation
+            CalculateAcEnergy(
+                sequenceControlSetPtr,
+                pictureControlSetPtr,
+                lcuIndex);
 
-			// Failing Motion Detection
+            // Failing Motion Detection
             pictureControlSetPtr->failingMotionLcuFlag[lcuIndex] = EB_FALSE;
 
             if (pictureControlSetPtr->sliceType != EB_I_PICTURE && isCompleteLcu){
@@ -1494,24 +1494,24 @@ void* SourceBasedOperationsKernel(void *inputPtr)
                     lcuIndex);
             }
 
-			pictureControlSetPtr->uncoveredAreaLcuFlag[lcuIndex] = EB_FALSE;
-			if (pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != EB_I_PICTURE){
+            pictureControlSetPtr->uncoveredAreaLcuFlag[lcuIndex] = EB_FALSE;
+            if (pictureControlSetPtr->temporalLayerIndex == 0 && pictureControlSetPtr->sliceType != EB_I_PICTURE){
 
-				if (isCompleteLcu && (!pictureControlSetPtr->similarColocatedLcuArray[lcuIndex])){
-					DetectUncoveredLcu(
-						sequenceControlSetPtr,
-						pictureControlSetPtr,
-						lcuIndex);
-				}
-			}
+                if (isCompleteLcu && (!pictureControlSetPtr->similarColocatedLcuArray[lcuIndex])){
+                    DetectUncoveredLcu(
+                        sequenceControlSetPtr,
+                        pictureControlSetPtr,
+                        lcuIndex);
+                }
+            }
 
-			// Uncovered area detection II
-			// Temporal high contrast classifier
-			if (isCompleteLcu) {
-				TemporalHighContrastClassifier(
-					contextPtr,
-					pictureControlSetPtr,
-					lcuIndex);
+            // Uncovered area detection II
+            // Temporal high contrast classifier
+            if (isCompleteLcu) {
+                TemporalHighContrastClassifier(
+                    contextPtr,
+                    pictureControlSetPtr,
+                    lcuIndex);
 
                 if (contextPtr->highContrastNum && contextPtr->highDist) {
                     PopulateFromCurrentLcuToNeighborLcus(
@@ -1523,50 +1523,50 @@ void* SourceBasedOperationsKernel(void *inputPtr)
                         lcuParams->originY);
                 }
 
-			}
+            }
 
-		}
+        }
 
-		/*********************************************Picture-based operations**********************************************************/
-		LumaContrastDetectorPicture(
-			contextPtr,
-			pictureControlSetPtr);
+        /*********************************************Picture-based operations**********************************************************/
+        LumaContrastDetectorPicture(
+            contextPtr,
+            pictureControlSetPtr);
 
-		// Delta QP range adjustments
-		SetDefaultDeltaQpRange(
-			contextPtr,
-			pictureControlSetPtr);
+        // Delta QP range adjustments
+        SetDefaultDeltaQpRange(
+            contextPtr,
+            pictureControlSetPtr);
 
-		// Dark density derivation (histograms not available when no SCD)
-		DeriveHighDarkAreaDensityFlag(
-			sequenceControlSetPtr,
-			pictureControlSetPtr);
+        // Dark density derivation (histograms not available when no SCD)
+        DeriveHighDarkAreaDensityFlag(
+            sequenceControlSetPtr,
+            pictureControlSetPtr);
 
 
-		// Detect and mark LCU and 32x32 CUs which belong to an isolated non-homogeneous region surrounding a homogenous and flat region.
-		DetermineIsolatedNonHomogeneousRegionInPicture(
-			sequenceControlSetPtr,
-			pictureControlSetPtr);
+        // Detect and mark LCU and 32x32 CUs which belong to an isolated non-homogeneous region surrounding a homogenous and flat region.
+        DetermineIsolatedNonHomogeneousRegionInPicture(
+            sequenceControlSetPtr,
+            pictureControlSetPtr);
 
-		// Detect aura areas in lighter background when subject is moving similar to background
-		DetermineMorePotentialAuraAreas(
-			sequenceControlSetPtr,
-			pictureControlSetPtr);
+        // Detect aura areas in lighter background when subject is moving similar to background
+        DetermineMorePotentialAuraAreas(
+            sequenceControlSetPtr,
+            pictureControlSetPtr);
 
-		// Activity statistics derivation
-		DerivePictureActivityStatistics(
-			sequenceControlSetPtr,
-			pictureControlSetPtr);
+        // Activity statistics derivation
+        DerivePictureActivityStatistics(
+            sequenceControlSetPtr,
+            pictureControlSetPtr);
 
         // Derive blockinessPresentFlag
         DeriveBlockinessPresentFlag(
             sequenceControlSetPtr,
             pictureControlSetPtr);
 
-		// Skin & Grass detection
-		GrassSkinPicture(
-			contextPtr,
-			pictureControlSetPtr);
+        // Skin & Grass detection
+        GrassSkinPicture(
+            contextPtr,
+            pictureControlSetPtr);
 
         // Complexity Classification
         ComplexityClassifier32x32(
@@ -1678,9 +1678,9 @@ void* SourceBasedOperationsKernel(void *inputPtr)
             contextPtr->pictureDemuxResultsOutputFifoPtr,
             &outputResultsWrapperPtr);
 
-		outputResultsPtr = (PictureDemuxResults_t*)outputResultsWrapperPtr->objectPtr;
+        outputResultsPtr = (PictureDemuxResults_t*)outputResultsWrapperPtr->objectPtr;
         outputResultsPtr->pictureControlSetWrapperPtr = inputResultsPtr->pictureControlSetWrapperPtr;
-		outputResultsPtr->pictureType = EB_PIC_INPUT;
+        outputResultsPtr->pictureType = EB_PIC_INPUT;
 
         // Release the Input Results
         EbReleaseObject(inputResultsWrapperPtr);

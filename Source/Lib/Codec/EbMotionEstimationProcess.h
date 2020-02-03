@@ -19,7 +19,7 @@ extern "C" {
  * Context
  **************************************/
 typedef struct MotionEstimationContext_s
-{      
+{
     EbFifo_t                        *pictureDecisionResultsInputFifoPtr;
     EbFifo_t                        *motionEstimationResultsOutputFifoPtr;
 
@@ -38,12 +38,12 @@ typedef struct MotionEstimationContext_s
  * Extern Function Declaration
  ***************************************/
 extern EB_ERRORTYPE MotionEstimationContextCtor(
-	MotionEstimationContext_t   **contextDblPtr,
-	EbFifo_t                     *pictureDecisionResultsInputFifoPtr,
-	EbFifo_t                     *motionEstimationResultsOutputFifoPtr);
+    MotionEstimationContext_t   **contextDblPtr,
+    EbFifo_t                     *pictureDecisionResultsInputFifoPtr,
+    EbFifo_t                     *motionEstimationResultsOutputFifoPtr);
 
 
-extern void* MotionEstimationKernel(void *inputPtr);  
+extern void* MotionEstimationKernel(void *inputPtr);
 
 #ifdef __cplusplus
 }

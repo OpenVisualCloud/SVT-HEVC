@@ -16,11 +16,11 @@ extern "C" {
  * Packetization Reorder Queue Entry
  ************************************************/
 typedef struct PictureDecisionReorderEntry_s {
-    EB_U64                                pictureNumber;    
+    EB_U64                                pictureNumber;
     EbObjectWrapper_t                    *parentPcsWrapperPtr;
-} PictureDecisionReorderEntry_t;   
+} PictureDecisionReorderEntry_t;
 
-extern EB_ERRORTYPE PictureDecisionReorderEntryCtor(   
+extern EB_ERRORTYPE PictureDecisionReorderEntryCtor(
     PictureDecisionReorderEntry_t       **entryDblPtr,
     EB_U32                                pictureNumber);
 

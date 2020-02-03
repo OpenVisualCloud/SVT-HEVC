@@ -11,8 +11,8 @@
 /**************************************************************************************************
     General notes on how Sequence Control Sets (SCS) are used.
 
-    SequenceControlSetInstance 
-        is the master copy that interacts with the API in real-time.  When a 
+    SequenceControlSetInstance
+        is the master copy that interacts with the API in real-time.  When a
         change happens, the changeFlag is signaled so that appropriate action can
         be taken.  There is one scsInstance per stream/encode instance.  The scsInstance
         owns the encodeContext
@@ -23,28 +23,28 @@
     SequenceControlSets
         general SCSs are controled by a system resource manager.  They are kept completely
         separate from the instances.  In general there is one active SCS at a time.  When the
-        changeFlag is signaled, the old active SCS is no longer used for new input pictures.  
+        changeFlag is signaled, the old active SCS is no longer used for new input pictures.
         A fresh copy of the scsInstance is made to a new SCS, which becomes the active SCS.  The
         old SCS will eventually be released back into the SCS pool when its current pictures are
         finished encoding.
-        
+
     Motivations
         The whole reason for this structure is due to the nature of the pipeline.  We have to
-        take great care not to have pipeline mismanagement.  Once an object enters use in the 
+        take great care not to have pipeline mismanagement.  Once an object enters use in the
         pipeline, it cannot be changed on the fly or you will have pipeline coherency problems.
  ***************************************************************************************************/
 EB_ERRORTYPE EbSequenceControlSetCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr)
 {
     EbSequenceControlSetInitData_t *scsInitData = (EbSequenceControlSetInitData_t*) objectInitDataPtr;
-    EB_U32 layerIndex; 
+    EB_U32 layerIndex;
     EB_ERRORTYPE return_error = EB_ErrorNone;
     SequenceControlSet_t *sequenceControlSetPtr;
     EB_MALLOC(SequenceControlSet_t*, sequenceControlSetPtr, sizeof(SequenceControlSet_t), EB_N_PTR);
 
     *objectDblPtr = (EB_PTR) sequenceControlSetPtr;
-    
+
     sequenceControlSetPtr->staticConfig.qp                                  = 32;
 
     // Segments
@@ -56,7 +56,7 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
         sequenceControlSetPtr->tileGroupColCountArray[layerIndex] = 1;
         sequenceControlSetPtr->tileGroupRowCountArray[layerIndex] = 1;
     }
-    
+
     // Encode Context
     if(scsInitData != EB_NULL) {
         sequenceControlSetPtr->encodeContextPtr                             = scsInitData->encodeContextPtr;
@@ -65,8 +65,8 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
         sequenceControlSetPtr->encodeContextPtr                             = (EncodeContext_t *)EB_NULL;
     }
 
-	sequenceControlSetPtr->conformanceWindowFlag                            = 0;
-    
+    sequenceControlSetPtr->conformanceWindowFlag                            = 0;
+
     // Profile & ID
     sequenceControlSetPtr->spsId                                            = 0;
     sequenceControlSetPtr->vpsId                                            = 0;
@@ -76,9 +76,9 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     sequenceControlSetPtr->tierIdc                                          = 0;
     sequenceControlSetPtr->chromaFormatIdc                                  = EB_YUV420;
     sequenceControlSetPtr->maxTemporalLayers                                = 1;
-    
+
     sequenceControlSetPtr->bitsForPictureOrderCount                         = 16;
-    
+
     // Picture Dimensions
     sequenceControlSetPtr->lumaWidth                                        = 0;
     sequenceControlSetPtr->lumaHeight                                       = 0;
@@ -87,20 +87,20 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     sequenceControlSetPtr->chromaHeight                                     = 0;
     sequenceControlSetPtr->frameRate                                        = 0;
     sequenceControlSetPtr->encoderBitDepth                                  = 8;
-    
+
     // Bitdepth
     sequenceControlSetPtr->inputBitdepth                                    = EB_8BIT;
     sequenceControlSetPtr->outputBitdepth                                   = EB_8BIT;
-    
+
     // GOP Structure
-	sequenceControlSetPtr->maxRefCount                                      = 1;
+    sequenceControlSetPtr->maxRefCount                                      = 1;
     sequenceControlSetPtr->intraPeriodLength                                = 0;
     sequenceControlSetPtr->intraRefreshType                                 = 0;
-    
+
     // LCU
     sequenceControlSetPtr->lcuSize                                          = 64;
     sequenceControlSetPtr->maxLcuDepth                                      = 3;
-      
+
     // Interlaced Video
     sequenceControlSetPtr->interlacedVideo                                  = EB_FALSE;
 
@@ -113,12 +113,12 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
 
     // Strong Intra Smoothing
     sequenceControlSetPtr->enableStrongIntraSmoothing                       = EB_TRUE;
-    
+
     // Rate Control
-    sequenceControlSetPtr->rateControlMode                                  = 0; 
-    sequenceControlSetPtr->targetBitrate                                    = 0x1000; 
+    sequenceControlSetPtr->rateControlMode                                  = 0;
+    sequenceControlSetPtr->targetBitrate                                    = 0x1000;
     sequenceControlSetPtr->availableBandwidth                               = 0x1000;
-    
+
     // Quantization
     sequenceControlSetPtr->qp                                               = 20;
 
@@ -127,7 +127,7 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
 
     // Video Usability Info
     EB_MALLOC(AppVideoUsabilityInfo_t*, sequenceControlSetPtr->videoUsabilityInfoPtr, sizeof(AppVideoUsabilityInfo_t), EB_N_PTR);
-    
+
     // Initialize vui parameters
     return_error = EbVideoUsabilityInfoCtor(
         sequenceControlSetPtr->videoUsabilityInfoPtr);
@@ -167,11 +167,11 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     EbUnRegUserDataSEICtor(
         &sequenceControlSetPtr->unRegUserDataSeiPtr);
 
-    sequenceControlSetPtr->maxDpbSize	= 0;
-    
+    sequenceControlSetPtr->maxDpbSize    = 0;
+
     return EB_ErrorNone;
 }
-     
+
 
 /************************************************
  * Sequence Control Set Copy
@@ -198,7 +198,7 @@ EB_ERRORTYPE CopySequenceControlSet(
 
     return EB_ErrorNone;
 }
-    
+
 EB_ERRORTYPE EbSequenceControlSetInstanceCtor(
     EbSequenceControlSetInstance_t **objectDblPtr)
 {
@@ -213,53 +213,53 @@ EB_ERRORTYPE EbSequenceControlSetInstanceCtor(
         return EB_ErrorInsufficientResources;
     }
     scsInitData.encodeContextPtr = (*objectDblPtr)->encodeContextPtr;
-    
+
     return_error = EbSequenceControlSetCtor(
         (void **) &(*objectDblPtr)->sequenceControlSetPtr,
         (void *) &scsInitData);
     if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
-    
+
     EB_CREATEMUTEX(EB_HANDLE*, (*objectDblPtr)->configMutex, sizeof(EB_HANDLE), EB_MUTEX);
 
-        
+
     return EB_ErrorNone;
-}    
+}
 
 extern EB_ERRORTYPE LcuParamsInit(
-	SequenceControlSet_t *sequenceControlSetPtr) {
+    SequenceControlSet_t *sequenceControlSetPtr) {
 
-	EB_ERRORTYPE return_error = EB_ErrorNone;
-	EB_U16	lcuIndex;
-	EB_U16	rasterScanCuIndex;
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+    EB_U16    lcuIndex;
+    EB_U16    rasterScanCuIndex;
 
-	EB_U8   pictureLcuWidth  = sequenceControlSetPtr->pictureWidthInLcu;
-	EB_U8	pictureLcuHeight = sequenceControlSetPtr->pictureHeightInLcu;
-	EB_MALLOC(LcuParams_t*, sequenceControlSetPtr->lcuParamsArray, sizeof(LcuParams_t) * pictureLcuWidth * pictureLcuHeight, EB_N_PTR);
+    EB_U8   pictureLcuWidth  = sequenceControlSetPtr->pictureWidthInLcu;
+    EB_U8    pictureLcuHeight = sequenceControlSetPtr->pictureHeightInLcu;
+    EB_MALLOC(LcuParams_t*, sequenceControlSetPtr->lcuParamsArray, sizeof(LcuParams_t) * pictureLcuWidth * pictureLcuHeight, EB_N_PTR);
 
-	for (lcuIndex = 0; lcuIndex < pictureLcuWidth * pictureLcuHeight; ++lcuIndex) {
-		sequenceControlSetPtr->lcuParamsArray[lcuIndex].horizontalIndex = (EB_U8)(lcuIndex % pictureLcuWidth);
-		sequenceControlSetPtr->lcuParamsArray[lcuIndex].verticalIndex   = (EB_U8)(lcuIndex / pictureLcuWidth);
+    for (lcuIndex = 0; lcuIndex < pictureLcuWidth * pictureLcuHeight; ++lcuIndex) {
+        sequenceControlSetPtr->lcuParamsArray[lcuIndex].horizontalIndex = (EB_U8)(lcuIndex % pictureLcuWidth);
+        sequenceControlSetPtr->lcuParamsArray[lcuIndex].verticalIndex   = (EB_U8)(lcuIndex / pictureLcuWidth);
         sequenceControlSetPtr->lcuParamsArray[lcuIndex].originX         = sequenceControlSetPtr->lcuParamsArray[lcuIndex].horizontalIndex * sequenceControlSetPtr->lcuSize;
-		sequenceControlSetPtr->lcuParamsArray[lcuIndex].originY         = sequenceControlSetPtr->lcuParamsArray[lcuIndex].verticalIndex * sequenceControlSetPtr->lcuSize;
+        sequenceControlSetPtr->lcuParamsArray[lcuIndex].originY         = sequenceControlSetPtr->lcuParamsArray[lcuIndex].verticalIndex * sequenceControlSetPtr->lcuSize;
 
-		sequenceControlSetPtr->lcuParamsArray[lcuIndex].width = (EB_U8)(((sequenceControlSetPtr->lumaWidth - sequenceControlSetPtr->lcuParamsArray[lcuIndex].originX)  < sequenceControlSetPtr->lcuSize) ?
-			sequenceControlSetPtr->lumaWidth - sequenceControlSetPtr->lcuParamsArray[lcuIndex].originX :
-			sequenceControlSetPtr->lcuSize);
+        sequenceControlSetPtr->lcuParamsArray[lcuIndex].width = (EB_U8)(((sequenceControlSetPtr->lumaWidth - sequenceControlSetPtr->lcuParamsArray[lcuIndex].originX)  < sequenceControlSetPtr->lcuSize) ?
+            sequenceControlSetPtr->lumaWidth - sequenceControlSetPtr->lcuParamsArray[lcuIndex].originX :
+            sequenceControlSetPtr->lcuSize);
 
-		sequenceControlSetPtr->lcuParamsArray[lcuIndex].height = (EB_U8)(((sequenceControlSetPtr->lumaHeight - sequenceControlSetPtr->lcuParamsArray[lcuIndex].originY) < sequenceControlSetPtr->lcuSize) ?
-			sequenceControlSetPtr->lumaHeight - sequenceControlSetPtr->lcuParamsArray[lcuIndex].originY :
-			sequenceControlSetPtr->lcuSize);
+        sequenceControlSetPtr->lcuParamsArray[lcuIndex].height = (EB_U8)(((sequenceControlSetPtr->lumaHeight - sequenceControlSetPtr->lcuParamsArray[lcuIndex].originY) < sequenceControlSetPtr->lcuSize) ?
+            sequenceControlSetPtr->lumaHeight - sequenceControlSetPtr->lcuParamsArray[lcuIndex].originY :
+            sequenceControlSetPtr->lcuSize);
 
-		sequenceControlSetPtr->lcuParamsArray[lcuIndex].isCompleteLcu = (EB_U8)(((sequenceControlSetPtr->lcuParamsArray[lcuIndex].width == sequenceControlSetPtr->lcuSize) && (sequenceControlSetPtr->lcuParamsArray[lcuIndex].height == sequenceControlSetPtr->lcuSize)) ?
-			1 :
-			0);
+        sequenceControlSetPtr->lcuParamsArray[lcuIndex].isCompleteLcu = (EB_U8)(((sequenceControlSetPtr->lcuParamsArray[lcuIndex].width == sequenceControlSetPtr->lcuSize) && (sequenceControlSetPtr->lcuParamsArray[lcuIndex].height == sequenceControlSetPtr->lcuSize)) ?
+            1 :
+            0);
 
-		sequenceControlSetPtr->lcuParamsArray[lcuIndex].isEdgeLcu = (sequenceControlSetPtr->lcuParamsArray[lcuIndex].originX < sequenceControlSetPtr->lcuSize) ||
-			(sequenceControlSetPtr->lcuParamsArray[lcuIndex].originY < sequenceControlSetPtr->lcuSize) ||
-			(sequenceControlSetPtr->lcuParamsArray[lcuIndex].originX > sequenceControlSetPtr->lumaWidth - sequenceControlSetPtr->lcuSize) ||
-			(sequenceControlSetPtr->lcuParamsArray[lcuIndex].originY > sequenceControlSetPtr->lumaHeight - sequenceControlSetPtr->lcuSize) ? 1 : 0;
+        sequenceControlSetPtr->lcuParamsArray[lcuIndex].isEdgeLcu = (sequenceControlSetPtr->lcuParamsArray[lcuIndex].originX < sequenceControlSetPtr->lcuSize) ||
+            (sequenceControlSetPtr->lcuParamsArray[lcuIndex].originY < sequenceControlSetPtr->lcuSize) ||
+            (sequenceControlSetPtr->lcuParamsArray[lcuIndex].originX > sequenceControlSetPtr->lumaWidth - sequenceControlSetPtr->lcuSize) ||
+            (sequenceControlSetPtr->lcuParamsArray[lcuIndex].originY > sequenceControlSetPtr->lumaHeight - sequenceControlSetPtr->lcuSize) ? 1 : 0;
 
 
         EB_U8 potentialLogoLcu = 0;
@@ -267,38 +267,38 @@ extern EB_ERRORTYPE LcuParamsInit(
         // 4K
         /*__ 14 __         __ 14__*/
         ///////////////////////////
-        //		 |		  |		 //
-        //		 8		  8		 //
-        //___14_ |		  |_14___//
-        //						 //
-        //						 //
+        //         |          |         //
+        //         8          8         //
+        //___14_ |          |_14___//
+        //                         //
+        //                         //
         //-----------------------// |
-        //						 // 8
-        ///////////////////////////	|		
+        //                         // 8
+        ///////////////////////////    |
 
         // 1080p/720P
         /*__ 7 __          __ 7__*/
         ///////////////////////////
-        //		 |		  |		 //
-        //		 4		  4		 //
-        //___7__ |		  |__7___//
-        //						 //
-        //						 //
+        //         |          |         //
+        //         4          4         //
+        //___7__ |          |__7___//
+        //                         //
+        //                         //
         //-----------------------// |
-        //						 // 4
-        ///////////////////////////	|	
+        //                         // 4
+        ///////////////////////////    |
 
         // 480P
         /*__ 3 __          __ 3__*/
         ///////////////////////////
-        //		 |		  |		 //
-        //		 2		  2		 //
-        //___3__ |		  |__3___//
-        //						 //
-        //						 //
+        //         |          |         //
+        //         2          2         //
+        //___3__ |          |__3___//
+        //                         //
+        //                         //
         //-----------------------// |
-        //						 // 2
-        ///////////////////////////	|	
+        //                         // 2
+        ///////////////////////////    |
         if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_576p_RANGE_OR_LOWER){
             potentialLogoLcu = (sequenceControlSetPtr->lcuParamsArray[lcuIndex].originX >= (sequenceControlSetPtr->lumaWidth - (3 * sequenceControlSetPtr->lcuSize))) && (sequenceControlSetPtr->lcuParamsArray[lcuIndex].originY < 2 * sequenceControlSetPtr->lcuSize) ? 1 : potentialLogoLcu;
             potentialLogoLcu = (sequenceControlSetPtr->lcuParamsArray[lcuIndex].originX <  ((3 * sequenceControlSetPtr->lcuSize))) && (sequenceControlSetPtr->lcuParamsArray[lcuIndex].originY < 2 * sequenceControlSetPtr->lcuSize) ? 1 : potentialLogoLcu;
@@ -321,32 +321,32 @@ extern EB_ERRORTYPE LcuParamsInit(
         }
         sequenceControlSetPtr->lcuParamsArray[lcuIndex].potentialLogoLcu = potentialLogoLcu;
 
-		for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_64x64; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_8x8_63; rasterScanCuIndex++) {
+        for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_64x64; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_8x8_63; rasterScanCuIndex++) {
 
-			sequenceControlSetPtr->lcuParamsArray[lcuIndex].rasterScanCuValidity[rasterScanCuIndex] = ((sequenceControlSetPtr->lcuParamsArray[lcuIndex].originX + RASTER_SCAN_CU_X[rasterScanCuIndex] + RASTER_SCAN_CU_SIZE[rasterScanCuIndex] > sequenceControlSetPtr->lumaWidth ) || (sequenceControlSetPtr->lcuParamsArray[lcuIndex].originY + RASTER_SCAN_CU_Y[rasterScanCuIndex] + RASTER_SCAN_CU_SIZE[rasterScanCuIndex] > sequenceControlSetPtr->lumaHeight)) ?
-				EB_FALSE :
-				EB_TRUE;
-		}
-	}
+            sequenceControlSetPtr->lcuParamsArray[lcuIndex].rasterScanCuValidity[rasterScanCuIndex] = ((sequenceControlSetPtr->lcuParamsArray[lcuIndex].originX + RASTER_SCAN_CU_X[rasterScanCuIndex] + RASTER_SCAN_CU_SIZE[rasterScanCuIndex] > sequenceControlSetPtr->lumaWidth ) || (sequenceControlSetPtr->lcuParamsArray[lcuIndex].originY + RASTER_SCAN_CU_Y[rasterScanCuIndex] + RASTER_SCAN_CU_SIZE[rasterScanCuIndex] > sequenceControlSetPtr->lumaHeight)) ?
+                EB_FALSE :
+                EB_TRUE;
+        }
+    }
 
     //ConfigureTiles(sequenceControlSetPtr);
 
-	return return_error;
+    return return_error;
 }
 
 extern EB_ERRORTYPE DeriveInputResolution(
-	SequenceControlSet_t *sequenceControlSetPtr,
-	EB_U32				  inputSize) {
-	EB_ERRORTYPE return_error = EB_ErrorNone;
+    SequenceControlSet_t *sequenceControlSetPtr,
+    EB_U32                  inputSize) {
+    EB_ERRORTYPE return_error = EB_ErrorNone;
 
-	sequenceControlSetPtr->inputResolution = (inputSize < INPUT_SIZE_1080i_TH) ?
-		INPUT_SIZE_576p_RANGE_OR_LOWER :
-		(inputSize < INPUT_SIZE_1080p_TH) ?
-			INPUT_SIZE_1080i_RANGE :
-			(inputSize < INPUT_SIZE_4K_TH) ?
-				INPUT_SIZE_1080p_RANGE :
-				INPUT_SIZE_4K_RANGE;
+    sequenceControlSetPtr->inputResolution = (inputSize < INPUT_SIZE_1080i_TH) ?
+        INPUT_SIZE_576p_RANGE_OR_LOWER :
+        (inputSize < INPUT_SIZE_1080p_TH) ?
+            INPUT_SIZE_1080i_RANGE :
+            (inputSize < INPUT_SIZE_4K_TH) ?
+                INPUT_SIZE_1080p_RANGE :
+                INPUT_SIZE_4K_RANGE;
 
-	return return_error;
+    return return_error;
 }
 

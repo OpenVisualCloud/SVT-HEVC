@@ -13,44 +13,44 @@ extern "C" {
 #endif
 
 extern void EB_ENC_msbPack2D_AVX2_INTRIN_AL(
-	EB_U8     *in8BitBuffer,
-	EB_U32     in8Stride,
-	EB_U8     *innBitBuffer,
-	EB_U16    *out16BitBuffer,
-	EB_U32     innStride,
-	EB_U32     outStride,
-	EB_U32     width,
-	EB_U32     height);
+    EB_U8     *in8BitBuffer,
+    EB_U32     in8Stride,
+    EB_U8     *innBitBuffer,
+    EB_U16    *out16BitBuffer,
+    EB_U32     innStride,
+    EB_U32     outStride,
+    EB_U32     width,
+    EB_U32     height);
 
 
 extern void CompressedPackmsb_AVX2_INTRIN(
-	EB_U8     *in8BitBuffer,
-	EB_U32     in8Stride,
-	EB_U8     *innBitBuffer,
-	EB_U16    *out16BitBuffer,
-	EB_U32     innStride,
-	EB_U32     outStride,
-	EB_U32     width,
-	EB_U32     height);
+    EB_U8     *in8BitBuffer,
+    EB_U32     in8Stride,
+    EB_U8     *innBitBuffer,
+    EB_U16    *out16BitBuffer,
+    EB_U32     innStride,
+    EB_U32     outStride,
+    EB_U32     width,
+    EB_U32     height);
 
 
 void CPack_AVX2_INTRIN(
-	const EB_U8     *innBitBuffer,
-	EB_U32     innStride,
-	EB_U8     *inCompnBitBuffer,
-	EB_U32     outStride,
-	EB_U8    *localCache,
-	EB_U32     width,
-	EB_U32     height);
+    const EB_U8     *innBitBuffer,
+    EB_U32     innStride,
+    EB_U8     *inCompnBitBuffer,
+    EB_U32     outStride,
+    EB_U8    *localCache,
+    EB_U32     width,
+    EB_U32     height);
 
 
 void UnpackAvg_AVX2_INTRIN(
-	    EB_U16 *ref16L0,
+        EB_U16 *ref16L0,
         EB_U32  refL0Stride,
         EB_U16 *ref16L1,
         EB_U32  refL1Stride,
         EB_U8  *dstPtr,
-        EB_U32  dstStride,      
+        EB_U32  dstStride,
         EB_U32  width,
         EB_U32  height);
 
@@ -67,7 +67,7 @@ void memset16bitBlock_AVX2_INTRIN (
 
 
 void UnpackAvgSafeSub_AVX2_INTRIN(
-	    EB_U16 *ref16L0,
+        EB_U16 *ref16L0,
         EB_U32  refL0Stride,
         EB_U16 *ref16L1,
         EB_U32  refL1Stride,
