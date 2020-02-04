@@ -9,6 +9,7 @@
 #include "EbDefinitions.h"
 #include "EbMdRateEstimation.h"
 #include "EbCodingUnit.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -275,7 +276,7 @@ typedef struct MeTierZero_s {
 } MeTierZero_t;
 
 typedef struct IntraReferenceSamplesOpenLoop_s {
-
+    EbDctor                 dctor;
     EB_U8                  *yIntraReferenceArray;
     EB_U8                  *yIntraReferenceArrayReverse;
 
@@ -284,7 +285,6 @@ typedef struct IntraReferenceSamplesOpenLoop_s {
     EB_U8                   ReferenceLeftLineY[MAX_INTRA_REFERENCE_SAMPLES];
     EB_BOOL                 AboveReadyFlagY;
     EB_BOOL                 LeftReadyFlagY;
-
 } IntraReferenceSamplesOpenLoop_t;
 
 typedef EB_U64 (*EB_ME_DISTORTION_FUNC)(
@@ -303,13 +303,11 @@ typedef struct MePredUnit_s {
 } MePredUnit_t;
 
 typedef struct MotionEstimationTierZero_s {
-    
     MePredUnit_t  pu[MAX_ME_PU_COUNT];
-
 } MotionEstimationTierZero_t;
 
 typedef struct MeContext_s {
-    
+    EbDctor         dctor;
     // MV offset (search center)
     EB_BOOL         updateHmeSearchCenter;
     EB_S16          xMvOffset;
@@ -466,7 +464,7 @@ typedef struct MeContext_s {
 } MeContext_t;
 
 extern EB_ERRORTYPE MeContextCtor(
-    MeContext_t     **objectDblPtr);
+    MeContext_t     *objectPtr);
     
 #ifdef __cplusplus
 }

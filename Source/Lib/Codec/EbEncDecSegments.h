@@ -8,6 +8,7 @@
 
 #include "EbDefinitions.h"
 #include "EbThreads.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -52,6 +53,7 @@ typedef struct {
  **************************************/
 typedef struct
 {
+    EbDctor                   dctor;
     EncDecSegDependencyMap_t  depMap;
     EncDecSegSegmentRow_t    *rowArray;
 
@@ -75,7 +77,7 @@ typedef struct
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE EncDecSegmentsCtor(
-    EncDecSegments_t **segmentsDblPtr,
+    EncDecSegments_t   *segmentsPtr,
     EB_U32             segmentColCount,
     EB_U32             segmentRowCount);
 

@@ -10,6 +10,13 @@
 #include "EbTransformUnit.h"
 #include "EbPictureControlSet.h"
 
+
+static void LargestCodingUnitDctor(EB_PTR p)
+{
+    LargestCodingUnit_t* obj = (LargestCodingUnit_t*)p;
+    EB_DELETE(obj->quantizedCoeff);
+    EB_FREE_PTR_ARRAY(obj->codedLeafArrayPtr, CU_MAX_COUNT);
+}
 /*
 Tasks & Questions
     -Need a GetEmptyChain function for testing sub partitions.  Tie it to an Itr?
@@ -20,7 +27,7 @@ Tasks & Questions
     -I don't see a way around doing the copies in temp memory and then copying it in...
 */
 EB_ERRORTYPE LargestCodingUnitCtor(
-    LargestCodingUnit_t        **largetCodingUnitDblPtr,
+    LargestCodingUnit_t         *largestCodingUnitPtr,
     EB_U8                        lcuSize,
     EB_U32                       pictureWidth,
     EB_U32                       pictureHeight,
@@ -30,17 +37,11 @@ EB_ERRORTYPE LargestCodingUnitCtor(
     struct PictureControlSet_s  *pictureControlSet)
 
 {
-    EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_U32 borderLargestCuSize;
-    EB_U8 codedLeafIndex;
-    EB_U32 tuIndex;
     EbPictureBufferDescInitData_t coeffInitData;
-    
-    LargestCodingUnit_t *largestCodingUnitPtr;
-    EB_MALLOC(LargestCodingUnit_t*, largestCodingUnitPtr, sizeof(LargestCodingUnit_t), EB_N_PTR);
 
-    *largetCodingUnitDblPtr = largestCodingUnitPtr;
-    
+    largestCodingUnitPtr->dctor = LargestCodingUnitDctor;
+
     // ************ LCU ***************
     if((pictureWidth - lcuOriginX) < lcuSize) {
         borderLargestCuSize = pictureWidth - lcuOriginX;
@@ -62,18 +63,16 @@ EB_ERRORTYPE LargestCodingUnitCtor(
     largestCodingUnitPtr->sizeLog2                      = (EB_U8)Log2f(lcuSize);
     largestCodingUnitPtr->originX                       = lcuOriginX;
     largestCodingUnitPtr->originY                       = lcuOriginY;
-    
-    largestCodingUnitPtr->index                         = lcuIndex; 
+    largestCodingUnitPtr->index                         = lcuIndex;
 
-    EB_MALLOC(CodingUnit_t**, largestCodingUnitPtr->codedLeafArrayPtr, sizeof(CodingUnit_t*) * CU_MAX_COUNT, EB_N_PTR);
-    for(codedLeafIndex=0; codedLeafIndex < CU_MAX_COUNT; ++codedLeafIndex) {
-        EB_MALLOC(CodingUnit_t*, largestCodingUnitPtr->codedLeafArrayPtr[codedLeafIndex], sizeof(CodingUnit_t) , EB_N_PTR);
-        for(tuIndex = 0; tuIndex < TRANSFORM_UNIT_MAX_COUNT; ++tuIndex){
+    EB_ALLOC_PTR_ARRAY(largestCodingUnitPtr->codedLeafArrayPtr, CU_MAX_COUNT);
+
+    for(EB_U8 codedLeafIndex=0; codedLeafIndex < CU_MAX_COUNT; ++codedLeafIndex) {
+        EB_MALLOC(largestCodingUnitPtr->codedLeafArrayPtr[codedLeafIndex], sizeof(CodingUnit_t));
+        for(EB_U32 tuIndex = 0; tuIndex < TRANSFORM_UNIT_MAX_COUNT; ++tuIndex){
             largestCodingUnitPtr->codedLeafArrayPtr[codedLeafIndex]->transformUnitArray[tuIndex].tuIndex = tuIndex;
         }
-
        largestCodingUnitPtr->codedLeafArrayPtr[codedLeafIndex]->leafIndex = codedLeafIndex;
-
     }
     
     coeffInitData.bufferEnableMask  = PICTURE_BUFFER_DESC_FULL_MASK;
@@ -87,13 +86,10 @@ EB_ERRORTYPE LargestCodingUnitCtor(
 	coeffInitData.botPadding		= 0;
     coeffInitData.splitMode         = EB_FALSE;
 
-
-    return_error = EbPictureBufferDescCtor(
-        (EB_PTR*) &(largestCodingUnitPtr->quantizedCoeff),
-        (EB_PTR)  &coeffInitData);
-	if (return_error == EB_ErrorInsufficientResources){
-        return EB_ErrorInsufficientResources;
-    }
+    EB_NEW(
+        largestCodingUnitPtr->quantizedCoeff,
+        EbPictureBufferDescCtor,
+        (EB_PTR)&coeffInitData);
 
     return EB_ErrorNone;
 }

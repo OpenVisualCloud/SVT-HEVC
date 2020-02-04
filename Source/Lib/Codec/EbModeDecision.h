@@ -17,6 +17,7 @@
 #include "EbAdaptiveMotionVectorPrediction.h"
 #include "EbPictureOperators.h"
 #include "EbNeighborArrays.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -182,6 +183,7 @@ typedef EB_ERRORTYPE(*EB_PREDICTION_FUNC)(
 	* Mode Decision Candidate Buffer
 	**************************************/
 	typedef struct ModeDecisionCandidateBuffer_s {
+        EbDctor                                 dctor;
 		// Candidate Ptr
 		ModeDecisionCandidate_t                *candidatePtr;
 
@@ -225,7 +227,7 @@ typedef EB_ERRORTYPE(*EB_PREDICTION_FUNC)(
 	* Extern Function Declarations
 	**************************************/
 extern EB_ERRORTYPE ModeDecisionCandidateBufferCtor(
-		ModeDecisionCandidateBuffer_t **bufferDblPtr,
+		ModeDecisionCandidateBuffer_t  *bufferPtr,
 		EB_U16                          lcuMaxSize,
 		EB_BITDEPTH                     maxBitdepth,
 		EB_U64                         *fastCostPtr,
@@ -235,28 +237,18 @@ extern EB_ERRORTYPE ModeDecisionCandidateBufferCtor(
 
 
     EB_ERRORTYPE ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
-		LargestCodingUnit_t             *lcuPtr,
-		struct ModeDecisionContext_s   *contextPtr,
+		LargestCodingUnit_t            *lcuPtr,
+        struct ModeDecisionContext_s   *contextPtr,
 		const EB_U32                    leafIndex,
-
 		const EB_U32                    lcuAddr,
 		EB_U32                         *bufferTotalCount,
 		EB_U32                         *fastCandidateTotalCount,
-		EB_PTR                           interPredContextPtr,
+		EB_PTR                          interPredContextPtr,
 		PictureControlSet_t            *pictureControlSetPtr,
 		EB_BOOL							mpmSearch,
 		EB_U8	                        mpmSearchCandidate,
 		EB_U32                         *mostProbableModeArray);
 
-	EB_U8 FullModeDecision(
-		CodingUnit_t                   *cuPtr,
-		EB_U32                          cuSize,
-		EB_U32                          cuSizeLog2,
-		ModeDecisionCandidateBuffer_t **bufferPtrArray,
-		EB_U32                          candidateTotalCount,
-		EB_U8                          *bestCandidateIndexArray,
-		EB_BOOL							syntaxCabacUpdate,
-		EB_U32                         *bestIntraMode);
 
 
 	EB_U8 ProductFullModeDecision(

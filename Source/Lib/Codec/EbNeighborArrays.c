@@ -9,11 +9,19 @@
 #include "EbNeighborArrays.h"
 #include "EbUtility.h"
 
+static void NeighborArrayUnitDctor(EB_PTR p)
+{
+    NeighborArrayUnit_t *obj = (NeighborArrayUnit_t*)p;
+    EB_FREE(obj->leftArray);
+    EB_FREE(obj->topArray);
+    EB_FREE(obj->topLeftArray);
+}
+
 /*************************************************
  * Neighbor Array Unit Ctor
  *************************************************/
 EB_ERRORTYPE NeighborArrayUnitCtor(
-    NeighborArrayUnit_t **naUnitDblPtr,
+    NeighborArrayUnit_t *naUnitPtr,
     EB_U32   maxPictureWidth,
     EB_U32   maxPictureHeight,
     EB_U32   unitSize,
@@ -21,10 +29,7 @@ EB_ERRORTYPE NeighborArrayUnitCtor(
     EB_U32   granularityTopLeft,
     EB_U32   typeMask)
 {
-    NeighborArrayUnit_t *naUnitPtr;
-    EB_MALLOC(NeighborArrayUnit_t*, naUnitPtr, sizeof(NeighborArrayUnit_t), EB_N_PTR);
-    
-    *naUnitDblPtr = naUnitPtr;
+    naUnitPtr->dctor = NeighborArrayUnitDctor;
     naUnitPtr->unitSize                 = (EB_U8)(unitSize);
     naUnitPtr->granularityNormal        = (EB_U8)(granularityNormal);
     naUnitPtr->granularityNormalLog2    = (EB_U8)(Log2f(naUnitPtr->granularityNormal));
@@ -35,21 +40,21 @@ EB_ERRORTYPE NeighborArrayUnitCtor(
     naUnitPtr->topLeftArraySize         = (EB_U16)((typeMask & NEIGHBOR_ARRAY_UNIT_TOPLEFT_MASK) ? (maxPictureWidth + maxPictureHeight) >> naUnitPtr->granularityTopLeftLog2 : 0);
 
     if(naUnitPtr->leftArraySize) {
-        EB_MALLOC(EB_U8*, naUnitPtr->leftArray, naUnitPtr->unitSize * naUnitPtr->leftArraySize, EB_N_PTR);
+        EB_MALLOC(naUnitPtr->leftArray, naUnitPtr->unitSize * naUnitPtr->leftArraySize);
     }
     else {
         naUnitPtr->leftArray = (EB_U8*) EB_NULL;
     }
 
     if(naUnitPtr->topArraySize) {
-        EB_MALLOC(EB_U8*, naUnitPtr->topArray, naUnitPtr->unitSize * naUnitPtr->topArraySize, EB_N_PTR);
+        EB_MALLOC(naUnitPtr->topArray, naUnitPtr->unitSize * naUnitPtr->topArraySize);
     }
     else {
         naUnitPtr->topArray = (EB_U8*) EB_NULL;
     }
 
     if(naUnitPtr->topLeftArraySize) {
-        EB_MALLOC(EB_U8*, naUnitPtr->topLeftArray, naUnitPtr->unitSize * naUnitPtr->topLeftArraySize, EB_N_PTR);
+        EB_MALLOC(naUnitPtr->topLeftArray, naUnitPtr->unitSize * naUnitPtr->topLeftArraySize);
     }
     else {
         naUnitPtr->topLeftArray = (EB_U8*) EB_NULL;

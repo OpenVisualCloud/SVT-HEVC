@@ -6,34 +6,31 @@
 #include <stdlib.h>
 #include "EbInitialRateControlReorderQueue.h"
 
-EB_ERRORTYPE InitialRateControlReorderEntryCtor(   
-    InitialRateControlReorderEntry_t   **entryDblPtr,
+EB_ERRORTYPE InitialRateControlReorderEntryCtor(
+    InitialRateControlReorderEntry_t   *entryPtr,
     EB_U32                          pictureNumber)
 {
-    EB_MALLOC(InitialRateControlReorderEntry_t*, *entryDblPtr, sizeof(InitialRateControlReorderEntry_t), EB_N_PTR);
-
-    (*entryDblPtr)->pictureNumber       = pictureNumber;
-    (*entryDblPtr)->parentPcsWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
-    
+    entryPtr->pictureNumber       = pictureNumber;
     return EB_ErrorNone;
 }
 
+static void HlRateControlHistogramEntryDctor(EB_PTR p)
+{
+    HlRateControlHistogramEntry_t* obj = (HlRateControlHistogramEntry_t*)p;
+    EB_FREE_ARRAY(obj->meDistortionHistogram);
+    EB_FREE_ARRAY(obj->oisDistortionHistogram);
+}
 
-EB_ERRORTYPE HlRateControlHistogramEntryCtor(   
-    HlRateControlHistogramEntry_t   **entryDblPtr,
+EB_ERRORTYPE HlRateControlHistogramEntryCtor(
+    HlRateControlHistogramEntry_t  *entryPtr,
     EB_U32                          pictureNumber)
 {
-    EB_CALLOC(HlRateControlHistogramEntry_t*, *entryDblPtr, sizeof(HlRateControlHistogramEntry_t), 1, EB_N_PTR);
+    entryPtr->dctor = HlRateControlHistogramEntryDctor;
+    entryPtr->pictureNumber       = pictureNumber;
 
-    (*entryDblPtr)->pictureNumber       = pictureNumber;
-    (*entryDblPtr)->lifeCount           = 0;
-
-    (*entryDblPtr)->parentPcsWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
-
-	// ME and OIS Distortion Histograms
-    EB_MALLOC(EB_U16*, (*entryDblPtr)->meDistortionHistogram, sizeof(EB_U16) * NUMBER_OF_SAD_INTERVALS, EB_N_PTR);
-
-    EB_MALLOC(EB_U16*, (*entryDblPtr)->oisDistortionHistogram, sizeof(EB_U16) * NUMBER_OF_INTRA_SAD_INTERVALS, EB_N_PTR);
+    // ME and OIS Distortion Histograms
+    EB_MALLOC_ARRAY(entryPtr->meDistortionHistogram, NUMBER_OF_SAD_INTERVALS);
+    EB_MALLOC_ARRAY(entryPtr->oisDistortionHistogram, NUMBER_OF_INTRA_SAD_INTERVALS);
 
     return EB_ErrorNone;
 }

@@ -14,16 +14,12 @@
  * Enc Dec Context Constructor
  ******************************************************/
 EB_ERRORTYPE EntropyCodingContextCtor(
-    EntropyCodingContext_t **contextDblPtr,
+    EntropyCodingContext_t  *contextPtr,
     EbFifo_t                *encDecInputFifoPtr,
     EbFifo_t                *packetizationOutputFifoPtr,
     EbFifo_t                *rateControlOutputFifoPtr,
     EB_BOOL                  is16bit)
 {
-    EntropyCodingContext_t *contextPtr;
-    EB_MALLOC(EntropyCodingContext_t*, contextPtr, sizeof(EntropyCodingContext_t), EB_N_PTR);
-    *contextDblPtr = contextPtr;
-
     contextPtr->is16bit = is16bit;
 
     // Input/Output System Resource Manager FIFOs

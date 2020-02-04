@@ -175,7 +175,7 @@ static const EB_U32 minInSigXYGroup[] =
 * Data Structures
 **************************************/
 typedef struct BacEncContext_s {
-    OutputBitstreamUnit_t   m_pcTComBitIf;
+    OutputBitstreamUnit_t   *m_pcTComBitIf;
     EB_U32          intervalLowValue;            //32 bits
     EB_U32          intervalRangeValue;            //10 bits
     EB_U32          tempBufferedByte;

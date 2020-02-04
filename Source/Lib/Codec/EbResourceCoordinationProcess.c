@@ -20,27 +20,28 @@
 #include "EbReferenceObject.h"
 #include "EbUtility.h"
 
+static void ResourceCoordinationContextDctor(EB_PTR p)
+{
+    ResourceCoordinationContext_t *obj = (ResourceCoordinationContext_t*)p;
+    EB_FREE_ARRAY(obj->sequenceControlSetActiveArray);
+    EB_FREE_ARRAY(obj->pictureNumberArray);
+}
+
 /************************************************
  * Resource Coordination Context Constructor
  ************************************************/
 EB_ERRORTYPE ResourceCoordinationContextCtor(
-    ResourceCoordinationContext_t  **contextDblPtr,
+    ResourceCoordinationContext_t   *contextPtr,
     EbFifo_t                        *inputBufferFifoPtr,
     EbFifo_t                        *resourceCoordinationResultsOutputFifoPtr,
     EbFifo_t                       **pictureControlSetFifoPtrArray,
     EbSequenceControlSetInstance_t **sequenceControlSetInstanceArray,
     EbFifo_t                        *sequenceControlSetEmptyFifoPtr,
-    EbCallback_t                **appCallbackPtrArray,
+    EbCallback_t                   **appCallbackPtrArray,
     EB_U32                          *computeSegmentsTotalCountArray,
     EB_U32                           encodeInstancesTotalCount)
 {
-    EB_U32 instanceIndex;
-
-    ResourceCoordinationContext_t *contextPtr;
-    EB_MALLOC(ResourceCoordinationContext_t*, contextPtr, sizeof(ResourceCoordinationContext_t), EB_N_PTR);
-
-    *contextDblPtr = contextPtr;
-
+    contextPtr->dctor = ResourceCoordinationContextDctor;
     contextPtr->inputBufferFifoPtr                       = inputBufferFifoPtr;
     contextPtr->resourceCoordinationResultsOutputFifoPtr    = resourceCoordinationResultsOutputFifoPtr;
     contextPtr->pictureControlSetFifoPtrArray               = pictureControlSetFifoPtrArray;
@@ -51,37 +52,11 @@ EB_ERRORTYPE ResourceCoordinationContextCtor(
     contextPtr->encodeInstancesTotalCount                   = encodeInstancesTotalCount;
 
     // Allocate SequenceControlSetActiveArray
-    EB_MALLOC(EbObjectWrapper_t**, contextPtr->sequenceControlSetActiveArray, sizeof(EbObjectWrapper_t*) * contextPtr->encodeInstancesTotalCount, EB_N_PTR);
-
-    for(instanceIndex=0; instanceIndex < contextPtr->encodeInstancesTotalCount; ++instanceIndex) {
-        contextPtr->sequenceControlSetActiveArray[instanceIndex] = 0;
-    }
+    EB_CALLOC_ARRAY(contextPtr->sequenceControlSetActiveArray, contextPtr->encodeInstancesTotalCount);
 
     // Picture Stats
-    EB_MALLOC(EB_U64*, contextPtr->pictureNumberArray, sizeof(EB_U64) * contextPtr->encodeInstancesTotalCount, EB_N_PTR);
+    EB_CALLOC_ARRAY(contextPtr->pictureNumberArray, contextPtr->encodeInstancesTotalCount);
 
-    for(instanceIndex=0; instanceIndex < contextPtr->encodeInstancesTotalCount; ++instanceIndex) {
-        contextPtr->pictureNumberArray[instanceIndex] = 0;
-    }
-
-	contextPtr->averageEncMod = 0;
-	contextPtr->prevEncMod = 0;
-	contextPtr->prevEncModeDelta = 0;
-	contextPtr->curSpeed = 0; // speed x 1000
-	contextPtr->previousModeChangeBuffer = 0;
-    contextPtr->firstInPicArrivedTimeSeconds = 0;
-    contextPtr->firstInPicArrivedTimeuSeconds = 0;
-	contextPtr->previousFrameInCheck1 = 0;
-	contextPtr->previousFrameInCheck2 = 0;
-	contextPtr->previousFrameInCheck3 = 0;
-	contextPtr->previousModeChangeFrameIn = 0;
-    contextPtr->prevsTimeSeconds = 0;
-    contextPtr->prevsTimeuSeconds = 0;
-	contextPtr->prevFrameOut = 0;
-	contextPtr->startFlag = EB_FALSE;
-
-	contextPtr->previousBufferCheck1 = 0;
-	contextPtr->prevChangeCond = 0;
     return EB_ErrorNone;
 }
 

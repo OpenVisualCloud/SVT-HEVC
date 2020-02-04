@@ -11,6 +11,7 @@
 #include "EbDefinitions.h"
 #include "EbRateControlProcess.h"
 #include "EbSequenceControlSet.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -28,8 +29,9 @@ typedef struct MdcpLocalCodingUnit_s
     EB_BOOL                         stopSplit;
 } MdcpLocalCodingUnit_t;
 
-typedef struct ModeDecisionConfigurationContext_s 
+typedef struct ModeDecisionConfigurationContext_s
 {
+    EbDctor                              dctor;
     EbFifo_t                            *rateControlInputFifoPtr;
     EbFifo_t                            *modeDecisionConfigurationOutputFifoPtr;
 
@@ -81,7 +83,7 @@ typedef struct ModeDecisionConfigurationContext_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE ModeDecisionConfigurationContextCtor(
-    ModeDecisionConfigurationContext_t **contextDblPtr,
+    ModeDecisionConfigurationContext_t  *contextPtr,
     EbFifo_t                            *rateControlInputFifoPtr,
 
     EbFifo_t                            *modeDecisionConfigurationOutputFifoPtr,

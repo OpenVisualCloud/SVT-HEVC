@@ -17,7 +17,7 @@
 #include "EbTransQuantBuffers.h"
 #include "EbReferenceObject.h"
 #include "EbNeighborArrays.h"
-
+#include "EbObject.h"
 
 //#include "EbEncDecProcess.h"
 
@@ -92,6 +92,7 @@ typedef struct MdCodingUnit_s
 
 typedef struct ModeDecisionContext_s
 {
+    EbDctor                         dctor;
 	EbFifo_t                       *modeDecisionConfigurationInputFifoPtr;
 	EbFifo_t                       *modeDecisionOutputFifoPtr;
 
@@ -114,6 +115,7 @@ typedef struct ModeDecisionContext_s
 	InterPredictionContext_t       *interPredictionContext;
 
 	MdRateEstimationContext_t      *mdRateEstimationPtr;
+    EB_BOOL                         isMdRateEstimationPtrOwner;
 
 	SaoStats_t                     *saoStats;
 
@@ -287,7 +289,7 @@ typedef void(*EB_LAMBDA_ASSIGN_FUNC)(
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE ModeDecisionContextCtor(
-    ModeDecisionContext_t  **contextDblPtr,
+    ModeDecisionContext_t   *contextPtr,
     EbFifo_t                *modeDecisionConfigurationInputFifoPtr,
     EbFifo_t                *modeDecisionOutputFifoPtr,
     EB_BOOL                  is16bit);

@@ -8,6 +8,7 @@
 
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -16,6 +17,7 @@ extern "C" {
  ***************************************/
 typedef struct PictureManagerContext_s
 {      
+    EbDctor                   dctor;
     EbFifo_t                 *pictureInputFifoPtr;
     EbFifo_t                 *pictureManagerOutputFifoPtr;
     EbFifo_t                **pictureControlSetFifoPtrArray;
@@ -26,7 +28,7 @@ typedef struct PictureManagerContext_s
  * Extern Function Declaration
  ***************************************/
 extern EB_ERRORTYPE PictureManagerContextCtor(
-    PictureManagerContext_t **contextDblPtr,
+    PictureManagerContext_t  *contextPtr,
     EbFifo_t                 *pictureInputFifoPtr,
     EbFifo_t                 *pictureManagerOutputFifoPtr,   
     EbFifo_t                **pictureControlSetFifoPtrArray);

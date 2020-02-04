@@ -32,16 +32,11 @@
  * Picture Manager Context Constructor
  ************************************************/
 EB_ERRORTYPE PictureManagerContextCtor(
-    PictureManagerContext_t **contextDblPtr,
+    PictureManagerContext_t  *contextPtr,
     EbFifo_t                 *pictureInputFifoPtr,
     EbFifo_t                 *pictureManagerOutputFifoPtr,
     EbFifo_t                **pictureControlSetFifoPtrArray)
 {
-    PictureManagerContext_t *contextPtr;
-    EB_MALLOC(PictureManagerContext_t*, contextPtr, sizeof(PictureManagerContext_t), EB_N_PTR);
-
-    *contextDblPtr = contextPtr;
-
     contextPtr->pictureInputFifoPtr         = pictureInputFifoPtr;
     contextPtr->pictureManagerOutputFifoPtr   = pictureManagerOutputFifoPtr;
     contextPtr->pictureControlSetFifoPtrArray = pictureControlSetFifoPtrArray;

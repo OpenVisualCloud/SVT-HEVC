@@ -8,6 +8,7 @@
 
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -16,6 +17,7 @@ extern "C" {
  **************************************/
 typedef struct MotionEstimationResults_s 
 {
+    EbDctor              dctor;
     EbObjectWrapper_t   *pictureControlSetWrapperPtr;
     EB_U32               segmentIndex;
 } MotionEstimationResults_t;
@@ -28,7 +30,7 @@ typedef struct MotionEstimationResultsInitData_s
 /**************************************
  * Extern Function Declarations
  **************************************/
-extern EB_ERRORTYPE MotionEstimationResultsCtor(
+extern EB_ERRORTYPE MotionEstimationResultsCreator(
     EB_PTR *objectDblPtr, 
     EB_PTR objectInitDataPtr);
 

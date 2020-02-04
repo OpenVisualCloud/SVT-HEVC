@@ -8,6 +8,7 @@
 
 #include "EbDefinitions.h"
 #include "EbUtility.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -20,6 +21,7 @@ extern "C" {
  * Bitstream Unit Types
  **********************************/
 typedef struct OutputBitstreamUnit_s {
+    EbDctor            dctor;
     EB_U32             size;                               // allocated buffer size
     EB_U32             byteHolder;                        // holds bytes and partial bytes
     EB_S32             validBitsCount;                     // count of valid bits in byteHolder

@@ -8,6 +8,12 @@
 #include "EbBitstreamUnit.h"
 #include "EbDefinitions.h"
 
+static void OutputBitstreamUnitDctor(EB_PTR p)
+{
+    OutputBitstreamUnit_t *obj = (OutputBitstreamUnit_t*)p;
+    EB_FREE_ARRAY(obj->bufferBegin);
+}
+
 /**********************************
  * Constructor
  **********************************/
@@ -17,10 +23,11 @@ EB_ERRORTYPE OutputBitstreamUnitCtor(
 {
 
     EB_U32       sliceIndex;
+    bitstreamPtr->dctor = OutputBitstreamUnitDctor;
 
     if(bufferSize) {
         bitstreamPtr->size             = bufferSize / sizeof(unsigned int);
-        EB_MALLOC(EB_U32*, bitstreamPtr->bufferBegin, sizeof(EB_U32) * bitstreamPtr->size, EB_N_PTR);
+        EB_MALLOC_ARRAY(bitstreamPtr->bufferBegin, bitstreamPtr->size);
         bitstreamPtr->buffer           = bitstreamPtr->bufferBegin;
     }
     else {
@@ -218,6 +225,3 @@ EB_ERRORTYPE OutputBitstreamRBSPToPayload(
 
     return return_error;
 }
-
-
-

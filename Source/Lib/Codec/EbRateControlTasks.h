@@ -9,7 +9,7 @@
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbPictureControlSet.h"
-
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -29,6 +29,7 @@ typedef enum RATE_CONTROL_TASKTYPES {
  **************************************/
 typedef struct RateControlTasks_s
 {
+    EbDctor                             dctor;
     RATE_CONTROL_TASKTYPES              taskType;
     EbObjectWrapper_t                  *pictureControlSetWrapperPtr;
     EB_U32                              segmentIndex;
@@ -49,7 +50,7 @@ typedef struct RateControlTasksInitData_s
 /**************************************
  * Extern Function Declarations
  **************************************/
-extern EB_ERRORTYPE RateControlTasksCtor(
+extern EB_ERRORTYPE RateControlTasksCreator(
     EB_PTR *objectDblPtr, 
     EB_PTR objectInitDataPtr);
 

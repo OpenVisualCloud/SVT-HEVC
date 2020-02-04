@@ -349,10 +349,6 @@ EB_ERRORTYPE AllocateInputBuffer(
         inputPtr->crExt = 0;
     }
 
-    if (config->dolbyVisionProfile == 81 && config->dolbyVisionRpuFile) {
-        EB_APP_MALLOC(uint8_t*, inputPtr->dolbyVisionRpu.payload, 1024, EB_N_PTR, EB_ErrorInsufficientResources);
-    }
-
     return return_error;
 }
 

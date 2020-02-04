@@ -128,12 +128,12 @@ extern "C" {
 
 #define EB_BUFFERFLAG_EOS 0x00000001
 
+#define EB_MAX_SEI_SIZE 1024
 typedef struct EB_SEI_MESSAGE
 {
     uint32_t  payloadSize;
-    unsigned char  *payload;
+    unsigned char payload[EB_MAX_SEI_SIZE];
     uint32_t  payloadType;
-
 }EB_SEI_MESSAGE;
 
 typedef enum EB_COLOR_FORMAT {
@@ -699,13 +699,20 @@ EB_API EB_ERRORTYPE EbInitEncoder(
 /* OPTIONAL: Get VPS / SPS / PPS headers at init time.
  *
  * Parameter:
- * @ *h265EncComponent  Encoder handler. 
+ * @ *h265EncComponent  Encoder handler.
  * @ **outputStreamPtr  Output stream. */
 EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     EB_COMPONENTTYPE           *h265EncComponent,
     EB_BUFFERHEADERTYPE       **outputStreamPtr);
 
-/* OPTIONAL: Get the end of sequence Network Abstraction Layer.
+/* OPTIONAL: Release VPS / SPS / PPS header buffer.
+ *
+ * Parameter:
+ * @ **StreamHeaderPtr  stream header buffer pointer. */
+EB_API EB_ERRORTYPE EbH265EncReleaseStreamHeader(
+    EB_BUFFERHEADERTYPE       *StreamHeaderPtr);
+
+/* OPTIONAL: Get the EOS NALU.
  *
  * Parameter:
  * @ *h265EncComponent  Encoder handler.
@@ -713,6 +720,13 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
 EB_API EB_ERRORTYPE EbH265EncEosNal(
     EB_COMPONENTTYPE           *h265EncComponent,
     EB_BUFFERHEADERTYPE       **outputStreamPtr);
+
+/* OPTIONAL: Release the EOS NALU buffer.
+ *
+ * Parameter:
+ * @ **EosNalPtr  NALU buffer pointer */
+EB_API EB_ERRORTYPE EbH265EncReleaseEosNal(
+    EB_BUFFERHEADERTYPE       *EosNalPtr);
 
 /* STEP 4: Send the picture.
  *

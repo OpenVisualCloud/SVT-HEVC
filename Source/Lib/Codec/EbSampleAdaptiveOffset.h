@@ -18,7 +18,7 @@ extern "C" {
 #endif
 struct PictureControlSet_s;
 
-extern EB_ERRORTYPE SaoStatsCtor(SaoStats_t **saoStatsPtr);
+extern EB_ERRORTYPE SaoStatsCtor(SaoStats_t *saoStatsPtr);
 
 
 extern EB_ERRORTYPE SaoGenerationDecision(
@@ -28,8 +28,7 @@ extern EB_ERRORTYPE SaoGenerationDecision(
 	EB_U64                      fullLambda,
     EB_U64                      fullChromaLambdaSao,
     EB_BOOL                     mmSAO,
-
-struct PictureControlSet_s *pictureControlSetPtr,
+    struct PictureControlSet_s *pictureControlSetPtr,
 	EB_U32                      tbOriginX,
 	EB_U32                      tbOriginY,
 	EB_U32                      lcuWidth,
@@ -49,7 +48,7 @@ extern EB_ERRORTYPE SaoGenerationDecision16bit(
     EB_U64                      fullLambda,
 	EB_U64                      fullChromaLambdaSao,
 	EB_BOOL                     mmSAO,
-struct PictureControlSet_s *pictureControlSetPtr,
+    struct PictureControlSet_s *pictureControlSetPtr,
     EB_U32                      tbOriginX,
     EB_U32                      tbOriginY,
     EB_U32                      lcuWidth,

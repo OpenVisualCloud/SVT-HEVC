@@ -14,6 +14,7 @@
 #include "EbPredictionUnit.h"
 #include "EbTransformUnit.h"
 #include "EbCabacContextModel.h"
+#include "EbObject.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -123,7 +124,7 @@ typedef struct OisCu8Results_s
 
 
 typedef struct SaoStats_s {
-
+    EbDctor                         dctor;
    	EB_S32                        **boDiff;
     EB_U16                        **boCount;
 	EB_S32                          eoDiff[3][SAO_EO_TYPES][SAO_EO_CATEGORIES+1];
@@ -183,6 +184,7 @@ typedef struct LcuTileInfo_s {
 } LcuEdgeInfo_t;
 
 typedef struct LargestCodingUnit_s {
+    EbDctor                         dctor;
     struct PictureControlSet_s     *pictureControlSetPtr;
     CodingUnit_t                  **codedLeafArrayPtr;
 
@@ -220,13 +222,8 @@ typedef struct LargestCodingUnit_s {
 } LargestCodingUnit_t;
 
 
-
-
-
-
-
 extern EB_ERRORTYPE LargestCodingUnitCtor(
-    LargestCodingUnit_t        **largetCodingUnitDblPtr,
+    LargestCodingUnit_t         *largetCodingUnitPtr,
     EB_U8                        lcuSize,
     EB_U32                       pictureWidth,
     EB_U32                       pictureHeight,

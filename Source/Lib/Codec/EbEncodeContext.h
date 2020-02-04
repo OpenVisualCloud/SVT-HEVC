@@ -21,6 +21,7 @@
 #include "EbMdRateEstimation.h"
 #include "EbPredictionStructure.h"
 #include "EbRateControlTables.h"
+#include "EbObject.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,8 +47,9 @@ extern "C" {
 
 typedef struct EncodeContext_s 
 {
+    EbDctor                              dctor;
     // Callback Functions
-    EbCallback_t                     *appCallbackPtr;
+    EbCallback_t                        *appCallbackPtr;
 
     EB_HANDLE                            terminatingConditionsMutex;
     EB_U64                               totalNumberOfReconFrames;
@@ -174,9 +176,8 @@ typedef struct EncodeContextInitData_s {
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE EncodeContextCtor(
-    EB_PTR *objectDblPtr, 
+    EncodeContext_t *encodeContextPtr,
     EB_PTR objectInitDataPtr);
-    
 #ifdef __cplusplus
 }
 #endif

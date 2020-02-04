@@ -21,6 +21,7 @@
 #include "EbModeDecision.h"
 #include "EbNeighborArrays.h"
 #include "EbMotionEstimationProcess.h"
+#include "EbObject.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,7 +31,7 @@ extern "C" {
 struct ModeDecisionContext_s;
 
 typedef struct IntraReferenceSamples_s {
-
+    EbDctor                 dctor;
     EB_U8                  *yIntraReferenceArray;
     EB_U8                  *cbIntraReferenceArray;
     EB_U8                  *crIntraReferenceArray;
@@ -64,7 +65,7 @@ typedef struct IntraReferenceSamples_s {
 } IntraReferenceSamples_t;
 
 typedef struct IntraReference16bitSamples_s {
-
+    EbDctor                  dctor;
     EB_U16                  *yIntraReferenceArray;
     EB_U16                  *cbIntraReferenceArray;
     EB_U16                  *crIntraReferenceArray;
@@ -98,13 +99,11 @@ typedef struct IntraReference16bitSamples_s {
 } IntraReference16bitSamples_t;
 
 extern EB_ERRORTYPE IntraReferenceSamplesCtor(
-        IntraReferenceSamples_t **contextDblPtr,
+        IntraReferenceSamples_t *contextPtr,
         EB_COLOR_FORMAT colorFormat);
 
-
-
 extern EB_ERRORTYPE IntraReference16bitSamplesCtor(
-    IntraReference16bitSamples_t **contextDblPtr,
+    IntraReference16bitSamples_t *contextPtr,
     EB_COLOR_FORMAT colorFormat);
 
 

@@ -8,7 +8,7 @@
 
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
-
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -17,7 +17,8 @@ extern "C" {
  * Context
  **************************************/
 typedef struct PictureDecisionContext_s
-{      
+{
+    EbDctor                       dctor;
     EbFifo_t                     *pictureAnalysisResultsInputFifoPtr;
     EbFifo_t                     *pictureDecisionResultsOutputFifoPtr;
  
@@ -53,7 +54,7 @@ typedef struct PictureDecisionContext_s
  * Extern Function Declaration
  ***************************************/
 extern EB_ERRORTYPE PictureDecisionContextCtor(
-    PictureDecisionContext_t    **contextDblPtr,
+    PictureDecisionContext_t     *contextPtr,
     EbFifo_t                     *pictureAnalysisResultsInputFifoPtr,
     EbFifo_t                     *pictureDecisionResultsOutputFifoPtr);
     

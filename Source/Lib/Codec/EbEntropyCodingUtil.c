@@ -126,12 +126,12 @@ void WriteOut(BacEncContext_t *bacEncContextPtr)
         {
             if (bacEncContextPtr->tempBufferedBytesNum > 0)
             {
-                OutputBitstreamWriteByte(&(bacEncContextPtr->m_pcTComBitIf), bacEncContextPtr->tempBufferedByte + carry);
+                OutputBitstreamWriteByte(bacEncContextPtr->m_pcTComBitIf, bacEncContextPtr->tempBufferedByte + carry);
                 bacEncContextPtr->tempBufferedByte = nextByteToWrite & 0xff;
                 while (bacEncContextPtr->tempBufferedBytesNum > 1)
                 {
                     bacEncContextPtr->tempBufferedBytesNum--;
-                    OutputBitstreamWriteByte(&(bacEncContextPtr->m_pcTComBitIf), (0xff + carry) & 0xff);
+                    OutputBitstreamWriteByte(bacEncContextPtr->m_pcTComBitIf, (0xff + carry) & 0xff);
                 }
             }
             else

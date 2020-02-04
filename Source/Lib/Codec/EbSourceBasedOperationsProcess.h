@@ -8,7 +8,7 @@
 
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
-
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -33,6 +33,7 @@ typedef struct CuComplexityInfo_s
 
 typedef struct SourceBasedOperationsContext_s
 {
+    EbDctor   dctor;
 	EbFifo_t *initialrateControlResultsInputFifoPtr;
 	EbFifo_t *pictureDemuxResultsOutputFifoPtr;
 
@@ -72,7 +73,7 @@ typedef struct SourceBasedOperationsContext_s
  ***************************************/
 
 extern EB_ERRORTYPE SourceBasedOperationsContextCtor(
-    SourceBasedOperationsContext_t **contextDblPtr,
+    SourceBasedOperationsContext_t  *contextPtr,
     EbFifo_t						*initialrateControlResultsInputFifoPtr,
     EbFifo_t					    *pictureDemuxResultsOutputFifoPtr);
 

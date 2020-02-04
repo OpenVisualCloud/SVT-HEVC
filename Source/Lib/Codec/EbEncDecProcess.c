@@ -37,11 +37,31 @@ const EB_S8  EbHevcEncMaxDeltaQpTab[4][MAX_TEMPORAL_LAYERS] = {
     { 4, 5, 5, 5, 5, 5 }
 };
 
+static void EncDecContextDctor(EB_PTR p)
+{
+    EncDecContext_t* obj = (EncDecContext_t*)p;
+    EB_DELETE(obj->saoStats);
+    EB_DELETE(obj->inputSample16bitBuffer);
+    EB_DELETE(obj->residualBuffer);
+    EB_DELETE(obj->transformBuffer);
+    EB_DELETE(obj->intraRefPtr);
+    EB_DELETE(obj->intraRefPtr16);
+    EB_DELETE(obj->mcpContext);
+    EB_DELETE(obj->mdContext);
+    if (obj->isMdRateEstimationEtrOwner)
+        EB_FREE(obj->mdRateEstimationPtr);
+    EB_FREE(obj->transformInnerArrayPtr);
+    EB_FREE(obj->saoUpBuffer[0]);
+    EB_FREE(obj->saoLeftBuffer[0]);
+    EB_FREE(obj->saoUpBuffer16[0]);
+    EB_FREE(obj->saoLeftBuffer16[0]);
+}
+
 /******************************************************
  * Enc Dec Context Constructor
  ******************************************************/
 EB_ERRORTYPE EncDecContextCtor(
-    EncDecContext_t        **contextDblPtr,
+    EncDecContext_t         *contextPtr,
     EbFifo_t                *modeDecisionConfigurationInputFifoPtr,
     EbFifo_t                *packetizationOutputFifoPtr,
     EbFifo_t                *feedbackFifoPtr,
@@ -49,11 +69,7 @@ EB_ERRORTYPE EncDecContextCtor(
     EB_BOOL                  is16bit,
     EB_COLOR_FORMAT          colorFormat)
 {
-    EB_ERRORTYPE return_error = EB_ErrorNone;
-    EncDecContext_t *contextPtr;
-    EB_MALLOC(EncDecContext_t*, contextPtr, sizeof(EncDecContext_t), EB_N_PTR);
-    *contextDblPtr = contextPtr;
-
+    contextPtr->dctor = EncDecContextDctor;
     contextPtr->is16bit = is16bit;
     contextPtr->colorFormat = colorFormat;
 
@@ -64,15 +80,15 @@ EB_ERRORTYPE EncDecContextCtor(
     contextPtr->pictureDemuxOutputFifoPtr = pictureDemuxFifoPtr;
 
     // Trasform Scratch Memory
-    EB_MALLOC(EB_S16*, contextPtr->transformInnerArrayPtr, 3152, EB_N_PTR); //refer to EbInvTransform_SSE2.as. case 32x32
+    EB_MALLOC(contextPtr->transformInnerArrayPtr, 3152); //refer to EbInvTransform_SSE2.as. case 32x32
     // MD rate Estimation tables
-    EB_MALLOC(MdRateEstimationContext_t*, contextPtr->mdRateEstimationPtr, sizeof(MdRateEstimationContext_t), EB_N_PTR);
+    EB_MALLOC(contextPtr->mdRateEstimationPtr, sizeof(MdRateEstimationContext_t));
 
+    contextPtr->isMdRateEstimationEtrOwner = EB_TRUE;
     // Sao Stats
-    return_error = SaoStatsCtor(&contextPtr->saoStats);
-    if (return_error == EB_ErrorInsufficientResources){
-        return EB_ErrorInsufficientResources;
-    }
+    EB_NEW(
+        contextPtr->saoStats,
+        SaoStatsCtor);
 
     // Prediction Buffer
     {
@@ -92,15 +108,11 @@ EB_ERRORTYPE EncDecContextCtor(
         contextPtr->inputSample16bitBuffer = (EbPictureBufferDesc_t *)EB_NULL;
         if (is16bit) {
             initData.bitDepth = EB_16BIT;
-
-            return_error = EbPictureBufferDescCtor(
-                (EB_PTR*)&contextPtr->inputSample16bitBuffer,
+            EB_NEW(
+                contextPtr->inputSample16bitBuffer,
+                EbPictureBufferDescCtor,
                 (EB_PTR)&initData);
-            if (return_error == EB_ErrorInsufficientResources){
-                return EB_ErrorInsufficientResources;
-            }
         }
-
     }
 
     // Scratch Coeff Buffer
@@ -118,54 +130,46 @@ EB_ERRORTYPE EncDecContextCtor(
         initData.botPadding = 0;
         initData.splitMode = EB_FALSE;
 
-        return_error = EbPictureBufferDescCtor(
-            (EB_PTR*)&contextPtr->residualBuffer,
+        EB_NEW(
+            contextPtr->residualBuffer,
+            EbPictureBufferDescCtor,
             (EB_PTR)&initData);
-        if (return_error == EB_ErrorInsufficientResources){
-            return EB_ErrorInsufficientResources;
-        }
 
-        return_error = EbPictureBufferDescCtor(
-            (EB_PTR*)&contextPtr->transformBuffer,
+        EB_NEW(
+            contextPtr->transformBuffer,
+            EbPictureBufferDescCtor,
             (EB_PTR)&initData);
-        if (return_error == EB_ErrorInsufficientResources){
-            return EB_ErrorInsufficientResources;
-        }
-
     }
 
     // Intra Reference Samples
-    return_error = IntraReferenceSamplesCtor(&contextPtr->intraRefPtr, colorFormat);
-    if (return_error == EB_ErrorInsufficientResources){
-        return EB_ErrorInsufficientResources;
-    }
+    EB_NEW(
+        contextPtr->intraRefPtr,
+        IntraReferenceSamplesCtor,
+        colorFormat);
+
     contextPtr->intraRefPtr16 = (IntraReference16bitSamples_t *)EB_NULL;
     if (is16bit) {
-        return_error = IntraReference16bitSamplesCtor(&contextPtr->intraRefPtr16, colorFormat);
-        if (return_error == EB_ErrorInsufficientResources){
-            return EB_ErrorInsufficientResources;
-        }
+        EB_NEW(
+            contextPtr->intraRefPtr16,
+            IntraReference16bitSamplesCtor,
+            colorFormat);
     }
 
     // MCP Context
-    return_error = MotionCompensationPredictionContextCtor(
-        &contextPtr->mcpContext,
+    EB_NEW(
+        contextPtr->mcpContext,
+        MotionCompensationPredictionContextCtor,
         MAX_LCU_SIZE,
         MAX_LCU_SIZE,
         is16bit);
-    if (return_error == EB_ErrorInsufficientResources){
-        return EB_ErrorInsufficientResources;
-    }
 
     // Mode Decision Context
-    return_error = ModeDecisionContextCtor(
-        &contextPtr->mdContext,
+    EB_NEW(
+        contextPtr->mdContext,
+        ModeDecisionContextCtor,
         0,
         0,
         is16bit);
-    if (return_error == EB_ErrorInsufficientResources){
-        return EB_ErrorInsufficientResources;
-    }
 
     contextPtr->mdContext->encDecContextPtr = contextPtr;
 
@@ -173,30 +177,26 @@ EB_ERRORTYPE EncDecContextCtor(
     //TODO: we need to allocate Up buffer using current frame Width (not MAX_PICTURE_WIDTH_SIZE)
     //Need one pixel at position(x=-1) and another at position(x=width) to accomodate SIMD optimization of SAO
     if (!is16bit) {
-        EB_MALLOC(EB_U8 *, contextPtr->saoUpBuffer[0], sizeof(EB_U8) * (MAX_PICTURE_WIDTH_SIZE + 2) * 2, EB_N_PTR);
+        EB_CALLOC(contextPtr->saoUpBuffer[0], (MAX_PICTURE_WIDTH_SIZE + 2) * 2, 1);
 
-        EB_MEMSET(contextPtr->saoUpBuffer[0], 0, (MAX_PICTURE_WIDTH_SIZE + 2) * 2);
-        contextPtr->saoUpBuffer[0] ++;
+        contextPtr->saoUpBuffer[0]++;
         contextPtr->saoUpBuffer[1] = contextPtr->saoUpBuffer[0] + (MAX_PICTURE_WIDTH_SIZE + 2);
 
-        EB_MALLOC(EB_U8 *, contextPtr->saoLeftBuffer[0], sizeof(EB_U8) *(MAX_LCU_SIZE + 2) * 2 + 14, EB_N_PTR);
+        EB_CALLOC(contextPtr->saoLeftBuffer[0], (MAX_LCU_SIZE + 2) * 2 + 14, 1);
 
-        EB_MEMSET(contextPtr->saoLeftBuffer[0], 0, (MAX_LCU_SIZE + 2) * 2 + 14);
         contextPtr->saoLeftBuffer[1] = contextPtr->saoLeftBuffer[0] + (MAX_LCU_SIZE + 2);
     }
     else{
 
         //CHKN only allocate in 16 bit mode
-        EB_MALLOC(EB_U16 *, contextPtr->saoUpBuffer16[0], sizeof(EB_U16) * (MAX_PICTURE_WIDTH_SIZE + 2) * 2, EB_N_PTR);
+        EB_CALLOC(contextPtr->saoUpBuffer16[0], (MAX_PICTURE_WIDTH_SIZE + 2) * 2, 1);
 
-        EB_MEMSET(contextPtr->saoUpBuffer16[0], 0, sizeof(EB_U16) * (MAX_PICTURE_WIDTH_SIZE + 2) * 2);
         contextPtr->saoUpBuffer16[0] ++;
         contextPtr->saoUpBuffer16[1] = contextPtr->saoUpBuffer16[0] + (MAX_PICTURE_WIDTH_SIZE + 2);
 
         //CHKN the add of 14 should be justified, also the left ping pong buffers are not symetric which is not ok
-        EB_MALLOC(EB_U16 *, contextPtr->saoLeftBuffer16[0], sizeof(EB_U16) *(MAX_LCU_SIZE + 2) * 2 + 14, EB_N_PTR);
+        EB_CALLOC(contextPtr->saoLeftBuffer16[0], (MAX_LCU_SIZE + 2) * 2 + 14, 1);
 
-        EB_MEMSET(contextPtr->saoLeftBuffer16[0], 0, sizeof(EB_U16) *(MAX_LCU_SIZE + 2) * 2 + 14);
         contextPtr->saoLeftBuffer16[1] = contextPtr->saoLeftBuffer16[0] + (MAX_LCU_SIZE + 2);
     }
 
@@ -1404,6 +1404,10 @@ static void ResetEncDec(
     mdRateEstimationArray += sliceType * TOTAL_NUMBER_OF_QP_VALUES + contextPtr->qp;
 
     // Reset MD rate Estimation table to initial values by copying from mdRateEstimationArray
+    if (contextPtr->isMdRateEstimationEtrOwner) {
+        EB_FREE(contextPtr->mdRateEstimationPtr);
+        contextPtr->isMdRateEstimationEtrOwner = EB_FALSE;
+    }
 
     contextPtr->mdRateEstimationPtr = mdRateEstimationArray;
 

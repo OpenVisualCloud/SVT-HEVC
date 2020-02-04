@@ -357,13 +357,10 @@ void EbHevcDetectGlobalMotion(
 * Initial Rate Control Context Constructor
 ************************************************/
 EB_ERRORTYPE InitialRateControlContextCtor(
-	InitialRateControlContext_t **contextDblPtr,
+	InitialRateControlContext_t  *contextPtr,
 	EbFifo_t                     *motionEstimationResultsInputFifoPtr,
 	EbFifo_t                     *initialrateControlResultsOutputFifoPtr)
 {
-	InitialRateControlContext_t *contextPtr;
-	EB_MALLOC(InitialRateControlContext_t*, contextPtr, sizeof(InitialRateControlContext_t), EB_N_PTR);
-	*contextDblPtr = contextPtr;
 	contextPtr->motionEstimationResultsInputFifoPtr = motionEstimationResultsInputFifoPtr;
 	contextPtr->initialrateControlResultsOutputFifoPtr = initialrateControlResultsOutputFifoPtr;
 

@@ -14,6 +14,7 @@
 #include "EbPictureBufferDesc.h"
 #include "EbPictureControlSet.h"
 #include "EbSequenceControlSet.h"
+#include "EbObject.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,6 +24,7 @@ extern "C" {
 
 typedef struct MotionCompensationPredictionContext_s
 {
+    EbDctor dctor;
     EB_S16 *motionCompensationIntermediateResultBuf0;            //this 64x64(Y)+32x32(U)+32x32(V) buffer is used to store the MCP intermediate result for ref0.
     EB_S16 *motionCompensationIntermediateResultBuf1;            //this 64x64(Y)+32x32(U)+32x32(V) buffer is used to store the MCP intermediate result for ref1.
 
@@ -259,7 +261,7 @@ typedef void (*chromaSampleBiPredAverage)(
     EB_U32     crDstDoubleStride);
 
 extern EB_ERRORTYPE MotionCompensationPredictionContextCtor(
-	MotionCompensationPredictionContext_t **contextDblPtr,
+	MotionCompensationPredictionContext_t  *contextPtr,
 	EB_U16                                  maxCUWidth,
     EB_U16                                  maxCUHeight,
     EB_BOOL                                 is16bit);

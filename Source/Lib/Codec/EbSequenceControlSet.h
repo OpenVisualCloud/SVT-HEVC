@@ -12,7 +12,7 @@
 #include "EbEncodeContext.h"
 #include "EbPredictionStructure.h"
 #include "EbSei.h"
-
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -23,6 +23,7 @@ extern "C" {
  ************************************/
 typedef struct SequenceControlSet_s
 {
+    EbDctor                     dctor;
     EB_H265_ENC_CONFIGURATION   staticConfig;
 
     // Encoding Context
@@ -210,6 +211,7 @@ typedef struct EbSequenceControlSetInitData_s
 
 typedef struct EbSequenceControlSetInstance_s
 {       
+    EbDctor                     dctor;
     EncodeContext_t            *encodeContextPtr;
     SequenceControlSet_t       *sequenceControlSetPtr;
     EB_HANDLE                   configMutex;
@@ -219,21 +221,20 @@ typedef struct EbSequenceControlSetInstance_s
 /**************************************
  * Extern Function Declarations
  **************************************/
-extern EB_ERRORTYPE EbSequenceControlSetCtor(
+extern EB_ERRORTYPE EbSequenceControlSetCreator(
     EB_PTR                          *objectDblPtr, 
     EB_PTR                           objectInitDataPtr);
-    
-
 
 extern EB_ERRORTYPE CopySequenceControlSet(
     SequenceControlSet_t            *dst,
     SequenceControlSet_t            *src);
-        
+
 extern EB_ERRORTYPE EbSequenceControlSetInstanceCtor(
-    EbSequenceControlSetInstance_t **objectDblPtr);
+    EbSequenceControlSetInstance_t *objectPtr);
 
 extern EB_ERRORTYPE LcuParamsInit(
     SequenceControlSet_t *sequenceControlSetPtr);
+
 extern EB_ERRORTYPE DeriveInputResolution(
     SequenceControlSet_t *sequenceControlSetPtr,
     EB_U32                inputSize);
