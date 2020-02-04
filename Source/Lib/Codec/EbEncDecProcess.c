@@ -51,9 +51,15 @@ static void EncDecContextDctor(EB_PTR p)
     if (obj->isMdRateEstimationEtrOwner)
         EB_FREE(obj->mdRateEstimationPtr);
     EB_FREE(obj->transformInnerArrayPtr);
-    EB_FREE(obj->saoUpBuffer[0]);
+    if (obj->saoUpBuffer[0]) {
+        obj->saoUpBuffer[0]--;
+        EB_FREE(obj->saoUpBuffer[0]);
+    }
     EB_FREE(obj->saoLeftBuffer[0]);
-    EB_FREE(obj->saoUpBuffer16[0]);
+    if (obj->saoUpBuffer16[0]) {
+        obj->saoUpBuffer16[0]--;
+        EB_FREE(obj->saoUpBuffer16[0]);
+    }
     EB_FREE(obj->saoLeftBuffer16[0]);
 }
 
@@ -191,7 +197,7 @@ EB_ERRORTYPE EncDecContextCtor(
         //CHKN only allocate in 16 bit mode
         EB_CALLOC(contextPtr->saoUpBuffer16[0], (MAX_PICTURE_WIDTH_SIZE + 2) * 2, 1);
 
-        contextPtr->saoUpBuffer16[0] ++;
+        contextPtr->saoUpBuffer16[0]++;
         contextPtr->saoUpBuffer16[1] = contextPtr->saoUpBuffer16[0] + (MAX_PICTURE_WIDTH_SIZE + 2);
 
         //CHKN the add of 14 should be justified, also the left ping pong buffers are not symetric which is not ok
@@ -2817,6 +2823,10 @@ void* EncDecKernel(void *inputPtr)
                     pictureControlSetPtr,
                     sequenceControlSetPtr);
 
+            if (contextPtr->mdContext->isCabacCostOwner == EB_TRUE) {
+                EB_FREE(contextPtr->mdContext->CabacCost);
+                contextPtr->mdContext->isCabacCostOwner = EB_FALSE;
+            }
             contextPtr->mdContext->CabacCost = pictureControlSetPtr->cabacCost;
 
             if (pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr != NULL) {

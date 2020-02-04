@@ -368,7 +368,7 @@ static EB_BOOL PrintLeak(MemoryEntry* e, void* param)
     if (e->ptr) {
         EB_BOOL* leaked = (EB_BOOL*)param;
         *leaked = EB_TRUE;
-        fprintf(stderr, "SVt: %s leaked at %s:L%d\r\n", MemTypeName(e->type), e->file, e->line);
+        fprintf(stderr, "SVT: %s leaked at %s:L%d\r\n", MemTypeName(e->type), e->file, e->line);
     }
     //loop through all items
     return EB_FALSE;

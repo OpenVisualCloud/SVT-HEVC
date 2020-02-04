@@ -99,11 +99,11 @@ static void PictureControlSetDctor(EB_PTR p)
 
     EB_FREE_PTR_ARRAY(obj->encDecSegmentCtrl, obj->tileGroupCntAllocation);
 
-    EB_FREE_PTR_ARRAY(obj->entropyCodingInfo, obj->totalTileCountAllocation);
     for (EB_U16 tileIdx = 0; tileIdx < obj->totalTileCountAllocation; tileIdx++) {
-        EB_FREE(obj->entropyCodingInfo[tileIdx]);
+        EB_DELETE(obj->entropyCodingInfo[tileIdx]->entropyCoderPtr);
         EB_DESTROY_MUTEX(obj->entropyCodingInfo[tileIdx]->entropyCodingMutex);
     }
+    EB_FREE_PTR_ARRAY(obj->entropyCodingInfo, obj->totalTileCountAllocation);
 
     EB_DESTROY_MUTEX(obj->entropyCodingPicMutex);
     EB_DESTROY_MUTEX(obj->intraMutex);
@@ -658,18 +658,15 @@ static void PictureParentControlSetDctor(EB_PTR p)
         EB_FREE_PTR_ARRAY(obj->pictureHistogram, MAX_NUMBER_OF_REGIONS_IN_WIDTH);
     }
 
-
+    for (EB_U16 lcuIndex = 0; lcuIndex < obj->lcuTotalCount; ++lcuIndex) {
+        EB_FREE_ARRAY(obj->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[0]);
+    }
     EB_FREE_2D(obj->oisCu32Cu16Results);
-    for (EB_U16 lcuIndex = 0; lcuIndex < obj->lcuTotalCount; ++lcuIndex) {
-        for (EB_U32 cuIdx = 0; cuIdx < 21; ++cuIdx)
-            EB_FREE_ARRAY(obj->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[cuIdx]);
-    }
 
-    EB_FREE_2D(obj->oisCu8Results);
     for (EB_U16 lcuIndex = 0; lcuIndex < obj->lcuTotalCount; ++lcuIndex) {
-        for (EB_U32 cuIdx = 0; cuIdx < 64; ++cuIdx)
-            EB_FREE_ARRAY(obj->oisCu8Results[lcuIndex]->sortedOisCandidate[cuIdx]);
+        EB_FREE_ARRAY(obj->oisCu8Results[lcuIndex]->sortedOisCandidate[0]);
     }
+    EB_FREE_2D(obj->oisCu8Results);
 
     EB_FREE_2D(obj->meResults);
     EB_FREE_ARRAY(obj->rcMEdistortion);
@@ -805,7 +802,6 @@ EB_ERRORTYPE PictureParentControlSetCtor(
     for (lcuIndex = 0; lcuIndex < objectPtr->lcuTotalCount; ++lcuIndex) {
         OisCandidate_t* contigousCand;
         EB_MALLOC_ARRAY(contigousCand, maxOisCand * 21);
-
         for (EB_U32 cuIdx = 0; cuIdx < 21; ++cuIdx) {
             objectPtr->oisCu32Cu16Results[lcuIndex]->sortedOisCandidate[cuIdx] = &contigousCand[cuIdx*maxOisCand];
         }
@@ -815,7 +811,6 @@ EB_ERRORTYPE PictureParentControlSetCtor(
     for (lcuIndex = 0; lcuIndex < objectPtr->lcuTotalCount; ++lcuIndex) {
         OisCandidate_t* contigousCand;
         EB_MALLOC_ARRAY(contigousCand, maxOisCand * 64);
-
         for (EB_U32 cuIdx = 0; cuIdx < 64; ++cuIdx) {
             objectPtr->oisCu8Results[lcuIndex]->sortedOisCandidate[cuIdx] = &contigousCand[cuIdx*maxOisCand];
         }

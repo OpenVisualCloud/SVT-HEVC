@@ -48,8 +48,6 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     EbSequenceControlSetInitData_t *scsInitData = (EbSequenceControlSetInitData_t*) objectInitDataPtr;
     sequenceControlSetPtr->staticConfig.qp = 32;
 
-    EB_MALLOC_ARRAY(sequenceControlSetPtr->lcuParamsArray, sequenceControlSetPtr->pictureWidthInLcu * sequenceControlSetPtr->pictureHeightInLcu);
-
     // Segments
     for(EB_U32 layerIndex=0; layerIndex < MAX_TEMPORAL_LAYERS; ++layerIndex) {
         sequenceControlSetPtr->meSegmentColumnCountArray[layerIndex] = 1;
@@ -167,7 +165,7 @@ EB_ERRORTYPE EbSequenceControlSetInstanceCtor(
         EncodeContextCtor,
         EB_NULL);
     scsInitData.encodeContextPtr = objectPtr->encodeContextPtr;
-    
+
     EB_NEW(
         objectPtr->sequenceControlSetPtr,
         EbSequenceControlSetCtor,
@@ -187,6 +185,8 @@ EB_ERRORTYPE LcuParamsInit(
 
 	EB_U8   pictureLcuWidth  = sequenceControlSetPtr->pictureWidthInLcu;
 	EB_U8	pictureLcuHeight = sequenceControlSetPtr->pictureHeightInLcu;
+
+    EB_MALLOC_ARRAY(sequenceControlSetPtr->lcuParamsArray, pictureLcuWidth * pictureLcuHeight);
 
 	for (lcuIndex = 0; lcuIndex < pictureLcuWidth * pictureLcuHeight; ++lcuIndex) {
 		sequenceControlSetPtr->lcuParamsArray[lcuIndex].horizontalIndex = (EB_U8)(lcuIndex % pictureLcuWidth);

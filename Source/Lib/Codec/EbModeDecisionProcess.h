@@ -207,6 +207,7 @@ typedef struct ModeDecisionContext_s
     // Entropy Coder
 	EntropyCoder_t                 *coeffEstEntropyCoderPtr;
 	CabacCost_t                    *CabacCost;
+    EB_BOOL                         isCabacCostOwner;
     SyntaxContextModelEncContext_t  syntaxCabacCtxModelArray;
 
     MDEncPassCuData_t               mdEpPipeLcu[CU_MAX_COUNT];    

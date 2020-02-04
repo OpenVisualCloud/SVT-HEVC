@@ -22,7 +22,8 @@ static void ModeDecisionContextDctor(EB_PTR p)
     EB_FREE_ARRAY(obj->fastCandidateArray);
     EB_FREE_ARRAY(obj->fastCandidatePtrArray);
     EB_DELETE(obj->transQuantBuffersPtr);
-    EB_FREE(obj->CabacCost);
+    if(obj->isCabacCostOwner)
+        EB_FREE(obj->CabacCost);
     EB_FREE_ARRAY(obj->fastCostArray);
     EB_FREE_ARRAY(obj->fullCostArray);
     EB_FREE_ARRAY(obj->fullCostSkipPtr);
@@ -77,6 +78,7 @@ EB_ERRORTYPE ModeDecisionContextCtor(
 
     // Cabac cost
     EB_MALLOC(contextPtr->CabacCost, sizeof(CabacCost_t));
+    contextPtr->isCabacCostOwner = EB_TRUE;
 
     // Cost Arrays
     EB_MALLOC_ARRAY(contextPtr->fastCostArray, MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT);
@@ -112,15 +114,15 @@ EB_ERRORTYPE ModeDecisionContextCtor(
         EbPictureBufferDescInitData_t initData;
 
         initData.bufferEnableMask = PICTURE_BUFFER_DESC_LUMA_MASK;
-        initData.maxWidth = MAX_LCU_SIZE;
-        initData.maxHeight = MAX_LCU_SIZE;
-        initData.bitDepth = EB_8BIT;
-        initData.colorFormat = EB_YUV420;
-        initData.leftPadding = 0;
-        initData.rightPadding = 0;
-        initData.topPadding = 0;
-        initData.botPadding = 0;
-        initData.splitMode = EB_FALSE;
+        initData.maxWidth          = MAX_LCU_SIZE;
+        initData.maxHeight         = MAX_LCU_SIZE;
+        initData.bitDepth          = EB_8BIT;
+        initData.colorFormat       = EB_YUV420;
+        initData.leftPadding       = 0;
+        initData.rightPadding      = 0;
+        initData.topPadding        = 0;
+        initData.botPadding        = 0;
+        initData.splitMode         = EB_FALSE;
 
         EB_NEW(
             contextPtr->predictionBuffer,
