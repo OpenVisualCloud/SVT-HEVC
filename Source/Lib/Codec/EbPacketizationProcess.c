@@ -263,7 +263,7 @@ void* PacketizationKernel(void *inputPtr)
         } else if ((pictureControlSetPtr->sliceType == EB_I_PICTURE) &&
                    (sequenceControlSetPtr->intraRefreshType >= IDR_REFRESH)) {
             if (sequenceControlSetPtr->staticConfig.rateControlMode) {
-                EB_U32 idrCount = pictureControlSetPtr->pictureNumber /
+                EB_U64 idrCount = pictureControlSetPtr->pictureNumber /
                                   (sequenceControlSetPtr->intraPeriodLength + 1);
                 if ((idrCount % (sequenceControlSetPtr->intraRefreshType + 1)) == 0)
                     toInsertHeaders = EB_TRUE;

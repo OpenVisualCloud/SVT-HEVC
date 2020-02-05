@@ -9,10 +9,10 @@
 #include "EbRateControlTasks.h"
 
 EB_ERRORTYPE RateControlTasksCtor(
-    EB_PTR *objectDblPtr,
+    RateControlTasks_t *objectPtr,
     EB_PTR objectInitDataPtr)
 {
-    (void)objectDblPtr;
+    (void)objectPtr;
     (void)objectInitDataPtr;
 
     return EB_ErrorNone;

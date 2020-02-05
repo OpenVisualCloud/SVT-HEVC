@@ -253,7 +253,6 @@ EB_ERRORTYPE RateControlContextCtor(
     EbFifo_t                *rateControlOutputResultsFifoPtr,
     EB_S32                   intraPeriodLength)
 {
-    EB_U32 temporalIndex;
     EB_U32 intervalIndex;
 
 #if OVERSHOOT_STAT_PRINT

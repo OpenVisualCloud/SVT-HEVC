@@ -2822,7 +2822,7 @@ static void PrintLibParams(
     SVT_LOG("\nSVT [config]: De-blocking Filter / SAO Filter\t\t\t\t\t\t: %d / %d ", !config->disableDlfFlag, config->enableSaoFlag);
     SVT_LOG("\nSVT [config]: HME / UseDefaultHME\t\t\t\t\t\t\t: %d / %d ", config->enableHmeFlag, config->useDefaultMeHme);
     SVT_LOG("\nSVT [config]: MV Search Area Width / Height \t\t\t\t\t\t: %d / %d ", config->searchAreaWidth, config->searchAreaHeight);
-    SVT_LOG("\nSVT [config]: HRD / VBV MaxRate / BufSize / BufInit\t\t\t\t\t: %d / %d / %d / %ld", config->hrdFlag, config->vbvMaxrate, config->vbvBufsize, config->vbvBufInit);
+    SVT_LOG("\nSVT [config]: HRD / VBV MaxRate / BufSize / BufInit\t\t\t\t\t: %d / %d / %d / %lld", config->hrdFlag, config->vbvMaxrate, config->vbvBufsize, config->vbvBufInit);
 
 #ifndef NDEBUG
     SVT_LOG("\nSVT [config]: More configurations for debugging:");

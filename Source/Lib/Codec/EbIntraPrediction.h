@@ -376,9 +376,7 @@ extern EB_ERRORTYPE UpdateChromaNeighborSamplesArrayOL(
     LargestCodingUnit_t             *lcuPtr);
 
 extern EB_ERRORTYPE IntraOpenLoopReferenceSamplesCtor(
-    IntraReferenceSamplesOpenLoop_t **contextDblPtr);
-extern void IntraOpenLoopReferenceSamplesDtor(
-    IntraReferenceSamplesOpenLoop_t  *contextPtr);
+    IntraReferenceSamplesOpenLoop_t *contextPtr);
 
 extern EB_ERRORTYPE UpdateNeighborSamplesArrayOpenLoop(
     IntraReferenceSamplesOpenLoop_t *intraRefPtr,

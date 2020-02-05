@@ -760,17 +760,17 @@ void* PictureManagerKernel(void *inputPtr)
                     }
 
                     // Configure tiles for entropy
-                    for (int r = 0; r < entryPictureControlSetPtr->tileRowCount; r++) {
+                    for (EB_U16 r = 0; r < entryPictureControlSetPtr->tileRowCount; r++) {
                         EB_U16 tileHeightInLcu = entryPictureControlSetPtr->tileRowStartLcu[r + 1] - entryPictureControlSetPtr->tileRowStartLcu[r];
-                        for (int c = 0; c < entryPictureControlSetPtr->tileColumnCount; c++) {
-                            int tileIdx = r * entryPictureControlSetPtr->tileColumnCount + c;
+                        for (EB_U16 c = 0; c < entryPictureControlSetPtr->tileColumnCount; c++) {
+                            EB_U16 tileIdx = r * entryPictureControlSetPtr->tileColumnCount + c;
                             ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingCurrentRow = 0;
                             ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingCurrentAvailableRow = 0;
                             ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingRowCount = tileHeightInLcu;
                             ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingInProgress = EB_FALSE;
                             ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingPicDone = EB_FALSE;
 
-                            for(unsigned rowIndex=0; rowIndex < MAX_LCU_ROWS; ++rowIndex) {
+                            for(EB_U8 rowIndex=0; rowIndex < MAX_LCU_ROWS; ++rowIndex) {
                                 ChildPictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingRowArray[rowIndex] = EB_FALSE;
                             }
                         }

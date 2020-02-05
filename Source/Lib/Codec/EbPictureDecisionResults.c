@@ -8,7 +8,7 @@
 #include "EbPictureDecisionResults.h"
 
 EB_ERRORTYPE PictureDecisionResultCtor(
-    EB_PTR *objectPtr, 
+    PictureDecisionResults_t *objectPtr,
     EB_PTR objectInitDataPtr)
 {
     (void)objectPtr;

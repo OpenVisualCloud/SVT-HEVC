@@ -4927,7 +4927,7 @@ EB_ERRORTYPE EncodePassIntraPrediction16bit(
     return return_error;
 }
 
-void IntraOpenLoopReferenceSamplesDctor(EB_PTR p)
+static void IntraOpenLoopReferenceSamplesDctor(EB_PTR p)
 {
     IntraReferenceSamplesOpenLoop_t *obj = (IntraReferenceSamplesOpenLoop_t*)p;
     obj->yIntraReferenceArrayReverse--;

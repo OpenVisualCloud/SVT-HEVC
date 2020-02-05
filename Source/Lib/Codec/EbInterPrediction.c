@@ -20,7 +20,7 @@
 static void InterPredictionContextDtor(EB_PTR p)
 {
     InterPredictionContext_t *obj = (InterPredictionContext_t*)p;
-    EB_FREE(obj->mcpContext);
+    EB_DELETE(obj->mcpContext);
 }
 
 EB_ERRORTYPE InterPredictionContextCtor(

@@ -58,7 +58,7 @@ typedef void * EB_PTR;
 typedef struct EbMemoryMapEntry
 {
     EB_PTR                    ptr;                       // points to a memory pointer
-    EB_PTRType                 ptrType;                   // pointer type
+    EB_PTRType                ptrType;                   // pointer type
 } EbMemoryMapEntry;
 
 // *Note - This work around is needed for the windows visual studio compiler

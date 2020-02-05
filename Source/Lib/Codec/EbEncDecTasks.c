@@ -9,7 +9,7 @@
 #include "EbEncDecTasks.h"
 
 EB_ERRORTYPE EncDecTasksCtor(
-    EB_PTR *contextPtr,
+    EncDecTasks_t *contextPtr,
     EB_PTR objectInitDataPtr)
 {
     (void)contextPtr;

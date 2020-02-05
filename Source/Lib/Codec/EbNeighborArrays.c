@@ -42,22 +42,13 @@ EB_ERRORTYPE NeighborArrayUnitCtor(
     if(naUnitPtr->leftArraySize) {
         EB_MALLOC(naUnitPtr->leftArray, naUnitPtr->unitSize * naUnitPtr->leftArraySize);
     }
-    else {
-        naUnitPtr->leftArray = (EB_U8*) EB_NULL;
-    }
 
     if(naUnitPtr->topArraySize) {
         EB_MALLOC(naUnitPtr->topArray, naUnitPtr->unitSize * naUnitPtr->topArraySize);
     }
-    else {
-        naUnitPtr->topArray = (EB_U8*) EB_NULL;
-    }
 
     if(naUnitPtr->topLeftArraySize) {
         EB_MALLOC(naUnitPtr->topLeftArray, naUnitPtr->unitSize * naUnitPtr->topLeftArraySize);
-    }
-    else {
-        naUnitPtr->topLeftArray = (EB_U8*) EB_NULL;
     }
 
     return EB_ErrorNone;

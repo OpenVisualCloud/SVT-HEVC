@@ -58,46 +58,52 @@ static void ConfigureLcuEdgeInfo(PictureParentControlSet_t *ppcsPtr)
 static void PictureControlSetDctor(EB_PTR p)
 {
     PictureControlSet_t* obj = (PictureControlSet_t*)p;
+    EB_DELETE(obj->reconPicture16bitPtr);
+    EB_DELETE(obj->reconPicturePtr);
     EB_FREE(obj->cabacCost);
+    EB_DELETE(obj->bitstreamPtr);
+    EB_DELETE(obj->coeffEstEntropyCoderPtr);
+    EB_DELETE_PTR_ARRAY(obj->lcuPtrArray, obj->lcuTotalCount);
+    EB_FREE_ARRAY(obj->mdcLcuArray);
+
     EB_FREE_2D(obj->verticalEdgeBSArray);
     EB_FREE_2D(obj->horizontalEdgeBSArray);
-    EB_FREE_ARRAY(obj->qpArray,);
+    EB_FREE_ARRAY(obj->qpArray);
     EB_FREE_ARRAY(obj->entropyQpArray);
     EB_FREE_ARRAY(obj->cbfMapArray);
-    EB_FREE_ARRAY(obj->mdcLcuArray);
-    EB_FREE_PTR_ARRAY(obj->epIntraLumaModeNeighborArray, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->epMvNeighborArray, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->epSkipFlagNeighborArray, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->epModeTypeNeighborArray, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->epLeafDepthNeighborArray, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->epLumaReconNeighborArray, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->epCbReconNeighborArray, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->epCrReconNeighborArray, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->epSaoNeighborArray, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->epLumaReconNeighborArray16bit, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->epCbReconNeighborArray16bit, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->epCrReconNeighborArray16bit, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->mdRefinementIntraLumaModeNeighborArray, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->mdRefinementModeTypeNeighborArray, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->mdRefinementLumaReconNeighborArray, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->epIntraLumaModeNeighborArray, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->epMvNeighborArray, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->epSkipFlagNeighborArray, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->epModeTypeNeighborArray, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->epLeafDepthNeighborArray, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->epLumaReconNeighborArray, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->epCbReconNeighborArray, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->epCrReconNeighborArray, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->epSaoNeighborArray, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->epLumaReconNeighborArray16bit, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->epCbReconNeighborArray16bit, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->epCrReconNeighborArray16bit, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->mdRefinementIntraLumaModeNeighborArray, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->mdRefinementModeTypeNeighborArray, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->mdRefinementLumaReconNeighborArray, obj->totalTileCountAllocation);
 
-    EB_FREE_PTR_ARRAY(obj->modeTypeNeighborArray, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->leafDepthNeighborArray, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->intraLumaModeNeighborArray, obj->totalTileCountAllocation);
-    EB_FREE_PTR_ARRAY(obj->skipFlagNeighborArray, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->modeTypeNeighborArray, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->leafDepthNeighborArray, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->skipFlagNeighborArray, obj->totalTileCountAllocation);
+    EB_DELETE_PTR_ARRAY(obj->intraLumaModeNeighborArray, obj->totalTileCountAllocation);
 
     for (EB_U8 depth = 0; depth < NEIGHBOR_ARRAY_TOTAL_COUNT; depth++) {
-        EB_FREE_PTR_ARRAY(obj->mdIntraLumaModeNeighborArray[depth], obj->totalTileCountAllocation);
-        EB_FREE_PTR_ARRAY(obj->mdMvNeighborArray[depth], obj->totalTileCountAllocation);
-        EB_FREE_PTR_ARRAY(obj->mdSkipFlagNeighborArray[depth], obj->totalTileCountAllocation);
-        EB_FREE_PTR_ARRAY(obj->mdModeTypeNeighborArray[depth], obj->totalTileCountAllocation);
-        EB_FREE_PTR_ARRAY(obj->mdLeafDepthNeighborArray[depth], obj->totalTileCountAllocation);
-        EB_FREE_PTR_ARRAY(obj->mdLumaReconNeighborArray[depth], obj->totalTileCountAllocation);
-        EB_FREE_PTR_ARRAY(obj->mdCbReconNeighborArray[depth], obj->totalTileCountAllocation);
-        EB_FREE_PTR_ARRAY(obj->mdCrReconNeighborArray[depth], obj->totalTileCountAllocation);
+        EB_DELETE_PTR_ARRAY(obj->mdIntraLumaModeNeighborArray[depth], obj->totalTileCountAllocation);
+        EB_DELETE_PTR_ARRAY(obj->mdMvNeighborArray[depth], obj->totalTileCountAllocation);
+        EB_DELETE_PTR_ARRAY(obj->mdSkipFlagNeighborArray[depth], obj->totalTileCountAllocation);
+        EB_DELETE_PTR_ARRAY(obj->mdModeTypeNeighborArray[depth], obj->totalTileCountAllocation);
+        EB_DELETE_PTR_ARRAY(obj->mdLeafDepthNeighborArray[depth], obj->totalTileCountAllocation);
+        EB_DELETE_PTR_ARRAY(obj->mdLumaReconNeighborArray[depth], obj->totalTileCountAllocation);
+        EB_DELETE_PTR_ARRAY(obj->mdCbReconNeighborArray[depth], obj->totalTileCountAllocation);
+        EB_DELETE_PTR_ARRAY(obj->mdCrReconNeighborArray[depth], obj->totalTileCountAllocation);
     }
 
-    EB_FREE_PTR_ARRAY(obj->encDecSegmentCtrl, obj->tileGroupCntAllocation);
+    EB_DELETE_PTR_ARRAY(obj->encDecSegmentCtrl, obj->tileGroupCntAllocation);
 
     for (EB_U16 tileIdx = 0; tileIdx < obj->totalTileCountAllocation; tileIdx++) {
         EB_DELETE(obj->entropyCodingInfo[tileIdx]->entropyCoderPtr);
@@ -109,17 +115,6 @@ static void PictureControlSetDctor(EB_PTR p)
     EB_DESTROY_MUTEX(obj->intraMutex);
 }
 
-EB_ERRORTYPE PictureControlSetCreator(
-    EB_PTR *objectDblPtr,
-    EB_PTR objectInitDataPtr)
-{
-    PictureControlSet_t   *objectPtr;
-
-    EB_NEW(objectPtr, PictureControlSetCtor, objectInitDataPtr);
-    *objectDblPtr = objectPtr;
-
-    return EB_ErrorNone;
-}
 
 EB_ERRORTYPE PictureControlSetCtor(
     PictureControlSet_t *objectPtr,
@@ -252,7 +247,6 @@ EB_ERRORTYPE PictureControlSetCtor(
     // Allocate memory for vertical edge bS array
     EB_MALLOC_2D(objectPtr->verticalEdgeBSArray, objectPtr->lcuTotalCount, VERTICAL_EDGE_BS_ARRAY_SIZE);
 
-
     // Allocate memory for horizontal edge bS array
     EB_MALLOC_2D(objectPtr->horizontalEdgeBSArray, objectPtr->lcuTotalCount, HORIZONTAL_EDGE_BS_ARRAY_SIZE);
 
@@ -282,8 +276,9 @@ EB_ERRORTYPE PictureControlSetCtor(
     // For entropy
     EB_ALLOC_PTR_ARRAY(objectPtr->modeTypeNeighborArray,     totalTileCount);
     EB_ALLOC_PTR_ARRAY(objectPtr->leafDepthNeighborArray,    totalTileCount);
+    EB_ALLOC_PTR_ARRAY(objectPtr->skipFlagNeighborArray, totalTileCount);
     EB_ALLOC_PTR_ARRAY(objectPtr->intraLumaModeNeighborArray,totalTileCount);
-    EB_ALLOC_PTR_ARRAY(objectPtr->skipFlagNeighborArray,     totalTileCount);
+
 
     // Mode Decision Neighbor Arrays
     for (EB_U8 depth = 0; depth < NEIGHBOR_ARRAY_TOTAL_COUNT; depth++) {
@@ -632,19 +627,31 @@ EB_ERRORTYPE PictureControlSetCtor(
 }
 
 
+EB_ERRORTYPE PictureControlSetCreator(
+    EB_PTR *objectDblPtr,
+    EB_PTR objectInitDataPtr)
+{
+    PictureControlSet_t   *objectPtr;
+
+    EB_NEW(objectPtr, PictureControlSetCtor, objectInitDataPtr);
+    *objectDblPtr = objectPtr;
+
+    return EB_ErrorNone;
+}
+
 static void PictureParentControlSetDctor(EB_PTR p)
 {
     PictureParentControlSet_t *obj = (PictureParentControlSet_t*)p;
 
-    EB_FREE_ARRAY(obj->tileInfoArray, totalTileCountAllocation);
-    EB_FREE_ARRAY(obj->tileGroupInfoArray, totalTileCountAllocation);
+    EB_FREE_ARRAY(obj->tileInfoArray);
+    EB_FREE_ARRAY(obj->tileGroupInfoArray);
 
     EB_FREE_2D(obj->variance);
     EB_FREE_2D(obj->yMean);
     EB_FREE_2D(obj->cbMean);
     EB_FREE_2D(obj->crMean);
 
-    EB_FREE_ARRAY(obj->lcuEdgeInfoArray, obj->lcuTotalCount);
+    EB_FREE_ARRAY(obj->lcuEdgeInfoArray);
 
     // Histograms
     if (obj->pictureHistogram) {
@@ -702,19 +709,7 @@ static void PictureParentControlSetDctor(EB_PTR p)
     EB_FREE_ARRAY(obj->lcuMdModeArray);
     EB_FREE_ARRAY(obj->segmentOvArray);
 
-    //EB_DESTROY_MUTEX(obj->rcDistortionHistogramMutex);
-}
-
-
-EB_ERRORTYPE PictureParentControlSetCreator(
-    EB_PTR *objectDblPtr,
-    EB_PTR objectInitDataPtr)
-{
-    PictureParentControlSet_t* objectPtr;
-    EB_NEW(objectPtr, PictureParentControlSetCtor, objectInitDataPtr);
-    *objectDblPtr = objectPtr;
-
-    return EB_ErrorNone;
+    EB_DESTROY_MUTEX(obj->rcDistortionHistogramMutex);
 }
 
 EB_ERRORTYPE PictureParentControlSetCtor(
@@ -882,3 +877,13 @@ EB_ERRORTYPE PictureParentControlSetCtor(
     return EB_ErrorNone;
 }
 
+EB_ERRORTYPE PictureParentControlSetCreator(
+    EB_PTR *objectDblPtr,
+    EB_PTR objectInitDataPtr)
+{
+    PictureParentControlSet_t* objectPtr;
+    EB_NEW(objectPtr, PictureParentControlSetCtor, objectInitDataPtr);
+    *objectDblPtr = objectPtr;
+
+    return EB_ErrorNone;
+}

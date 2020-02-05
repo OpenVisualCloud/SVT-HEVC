@@ -107,7 +107,7 @@ EB_ERRORTYPE EncodeContextCtor(
     }
 
     // High level Rate Control histogram Queue
-    EB_ALLOC_PTR_ARRAY(encodeContextPtr->hlRateControlHistorgramQueue, HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH, );
+    EB_ALLOC_PTR_ARRAY(encodeContextPtr->hlRateControlHistorgramQueue, HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH);
     for (pictureIndex = 0; pictureIndex < HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH; ++pictureIndex) {
         EB_NEW(
             encodeContextPtr->hlRateControlHistorgramQueue[pictureIndex],
