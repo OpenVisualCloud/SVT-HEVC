@@ -514,7 +514,6 @@ typedef void * EB_HANDLE;
                                             // Target rate and and max buffer size should be set properly even for fixed QP.
                                             // Disabled by default.
 #define DEADLOCK_DEBUG                   0
-#define DISPLAY_MEMORY                   0  // Display Total Memory at the end of the memory allocations
 #define LIB_PRINTF_ENABLE                1
 #if LIB_PRINTF_ENABLE
 #define SVT_LOG printf
@@ -525,13 +524,6 @@ typedef void * EB_HANDLE;
 #define SVT_LOG(s, ...) printf("",##__VA_ARGS__)
 #endif
 #endif
-
-#define EB_MEMORY() \
-    SVT_LOG("Total Number of Mallocs in Library: %d\n", libMallocCount); \
-    SVT_LOG("Total Number of Threads in Library: %d\n", libThreadCount); \
-    SVT_LOG("Total Number of Semaphore in Library: %d\n", libSemaphoreCount); \
-    SVT_LOG("Total Number of Mutex in Library: %d\n", libMutexCount); \
-    SVT_LOG("Total Library Memory: %.2lf KB\n\n",*totalLibMemory/(double)1024);
 
 #define EB_CREATE_SEMAPHORE(pointer, initialCount, maxCount) \
     do { \

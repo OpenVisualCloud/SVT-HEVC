@@ -127,11 +127,6 @@ EB_ERRORTYPE IntraReferenceSamplesCtor(IntraReferenceSamples_t *contextPtr, EB_C
         EB_MALLOC_ARRAY(contextPtr->crIntraFilteredReferenceArrayReverse, (4 * MAX_LCU_SIZE + 2));
         contextPtr->cbIntraFilteredReferenceArrayReverse++;
         contextPtr->crIntraFilteredReferenceArrayReverse++;
-    } else {
-        contextPtr->cbIntraFilteredReferenceArray = NULL;
-        contextPtr->crIntraFilteredReferenceArray = NULL;
-        contextPtr->cbIntraFilteredReferenceArrayReverse = NULL;
-        contextPtr->crIntraFilteredReferenceArrayReverse = NULL;
     }
 
     return EB_ErrorNone;
@@ -196,11 +191,6 @@ EB_ERRORTYPE IntraReference16bitSamplesCtor(
         EB_MALLOC_ARRAY(contextPtr->crIntraFilteredReferenceArrayReverse, (4 * MAX_LCU_SIZE + 2));
         contextPtr->cbIntraFilteredReferenceArrayReverse++;
         contextPtr->crIntraFilteredReferenceArrayReverse++;
-    } else {
-        contextPtr->cbIntraFilteredReferenceArray = NULL;
-        contextPtr->crIntraFilteredReferenceArray = NULL;
-        contextPtr->cbIntraFilteredReferenceArrayReverse = NULL;
-        contextPtr->crIntraFilteredReferenceArrayReverse = NULL;
     }
 
     return EB_ErrorNone;

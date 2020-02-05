@@ -1410,7 +1410,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         PacketizationContextCtor,
         encHandlePtr->entropyCodingResultsConsumerFifoPtrArray[0],
         encHandlePtr->rateControlTasksProducerFifoPtrArray[RateControlPortLookup(RATE_CONTROL_INPUT_PORT_PACKETIZATION, 0)],
-        encHandlePtr->pictureDemuxResultsProducerFifoPtrArray[encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->sourceBasedOperationsProcessInitCount + encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->encDecProcessInitCount] // Add port lookup logic here JMJ
+        encHandlePtr->pictureDemuxResultsProducerFifoPtrArray[encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->sourceBasedOperationsProcessInitCount
+        + encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->encDecProcessInitCount] // Add port lookup logic here JMJ
     );
 
     // UnPack Context
@@ -1469,13 +1470,13 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
     EB_CREATE_THREAD(encHandlePtr->rateControlThreadHandle, RateControlKernel, encHandlePtr->rateControlContextPtr);
 
     // Mode Decision Configuration Process
-    EB_CREATE_THREAD_ARRAY(encHandlePtr->modeDecisionConfigurationThreadHandleArray, 
+    EB_CREATE_THREAD_ARRAY(encHandlePtr->modeDecisionConfigurationThreadHandleArray,
         encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount,
         ModeDecisionConfigurationKernel,
         encHandlePtr->modeDecisionConfigurationContextPtrArray);
 
     // EncDec Process
-    EB_CREATE_THREAD_ARRAY(encHandlePtr->encDecThreadHandleArray, 
+    EB_CREATE_THREAD_ARRAY(encHandlePtr->encDecThreadHandleArray,
         encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->encDecProcessInitCount,
         EncDecKernel,
         encHandlePtr->encDecContextPtrArray);
@@ -1494,9 +1495,6 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount,
         UnPack2D, encHandlePtr->unpackContextPtrArray);
 
-#if DISPLAY_MEMORY
-    EB_MEMORY();
-#endif
     EbPrintMemoryUsage();
 
     return return_error;

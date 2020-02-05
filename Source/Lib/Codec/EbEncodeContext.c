@@ -98,6 +98,7 @@ EB_ERRORTYPE EncodeContextCtor(
             PaReferenceQueueEntryCtor);
     }
 
+    // Initial Rate Control Reordering Queue
     EB_ALLOC_PTR_ARRAY(encodeContextPtr->initialRateControlReorderQueue, INITIAL_RATE_CONTROL_REORDER_QUEUE_MAX_DEPTH);
     for (pictureIndex = 0; pictureIndex < INITIAL_RATE_CONTROL_REORDER_QUEUE_MAX_DEPTH; ++pictureIndex) {
         EB_NEW(

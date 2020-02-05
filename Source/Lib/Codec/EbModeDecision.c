@@ -166,9 +166,6 @@ EB_ERRORTYPE ModeDecisionCandidateBufferCtor(
     doubleWidthPictureBufferDescInitData.botPadding = 0;
     doubleWidthPictureBufferDescInitData.splitMode = EB_FALSE;
 
-    // Candidate Ptr
-    bufferPtr->candidatePtr = (ModeDecisionCandidate_t*)EB_NULL;
-
     // Video Buffers
     EB_NEW(
         bufferPtr->predictionPtr,
@@ -189,10 +186,6 @@ EB_ERRORTYPE ModeDecisionCandidateBufferCtor(
         bufferPtr->reconPtr,
         EbPictureBufferDescCtor,
         (EB_PTR)&pictureBufferDescInitData);
-
-    //Distortion
-    bufferPtr->residualLumaSad = 0;
-    bufferPtr->fullLambdaRate = 0;
 
     // Costs
     bufferPtr->fastCostPtr = fastCostPtr;

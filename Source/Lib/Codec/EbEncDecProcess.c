@@ -40,6 +40,16 @@ const EB_S8  EbHevcEncMaxDeltaQpTab[4][MAX_TEMPORAL_LAYERS] = {
 static void EncDecContextDctor(EB_PTR p)
 {
     EncDecContext_t* obj = (EncDecContext_t*)p;
+    if (obj->saoUpBuffer[0]) {
+        obj->saoUpBuffer[0]--;
+        EB_FREE(obj->saoUpBuffer[0]);
+    }
+    EB_FREE(obj->saoLeftBuffer[0]);
+    if (obj->saoUpBuffer16[0]) {
+        obj->saoUpBuffer16[0]--;
+        EB_FREE(obj->saoUpBuffer16[0]);
+    }
+    EB_FREE(obj->saoLeftBuffer16[0]);
     EB_DELETE(obj->saoStats);
     EB_DELETE(obj->inputSample16bitBuffer);
     EB_DELETE(obj->residualBuffer);
@@ -51,16 +61,6 @@ static void EncDecContextDctor(EB_PTR p)
     if (obj->isMdRateEstimationEtrOwner)
         EB_FREE(obj->mdRateEstimationPtr);
     EB_FREE(obj->transformInnerArrayPtr);
-    if (obj->saoUpBuffer[0]) {
-        obj->saoUpBuffer[0]--;
-        EB_FREE(obj->saoUpBuffer[0]);
-    }
-    EB_FREE(obj->saoLeftBuffer[0]);
-    if (obj->saoUpBuffer16[0]) {
-        obj->saoUpBuffer16[0]--;
-        EB_FREE(obj->saoUpBuffer16[0]);
-    }
-    EB_FREE(obj->saoLeftBuffer16[0]);
 }
 
 /******************************************************
@@ -153,7 +153,6 @@ EB_ERRORTYPE EncDecContextCtor(
         IntraReferenceSamplesCtor,
         colorFormat);
 
-    contextPtr->intraRefPtr16 = (IntraReference16bitSamples_t *)EB_NULL;
     if (is16bit) {
         EB_NEW(
             contextPtr->intraRefPtr16,

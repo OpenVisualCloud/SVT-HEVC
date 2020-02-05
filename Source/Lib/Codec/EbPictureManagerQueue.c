@@ -24,7 +24,7 @@ EB_ERRORTYPE ReferenceQueueEntryCtor(
     ReferenceQueueEntry_t  *entryPtr)
 {
     entryPtr->dctor = ReferenceQueueEntryDctor;
-
+    entryPtr->pictureNumber = ~0u;
     EB_MALLOC_ARRAY(entryPtr->list0.list, (1 << MAX_TEMPORAL_LAYERS));
     EB_MALLOC_ARRAY(entryPtr->list1.list, (1 << MAX_TEMPORAL_LAYERS));
 

@@ -20,7 +20,7 @@ static void EbPictureBufferDescDctor(EB_PTR p)
         EB_FREE_ALIGNED_ARRAY(obj->bufferCb);
         EB_FREE_ALIGNED_ARRAY(obj->bufferBitIncCb);
     }
-    if (obj->bufferEnableMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
+    if (obj->bufferEnableMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
         EB_FREE_ALIGNED_ARRAY(obj->bufferCr);
         EB_FREE_ALIGNED_ARRAY(obj->bufferBitIncCr);
     }
@@ -102,7 +102,7 @@ static void EbReconPictureBufferDescDctor(EB_PTR p)
         EB_FREE_ALIGNED_ARRAY(obj->bufferY);
     if (obj->bufferEnableMask & PICTURE_BUFFER_DESC_Cb_FLAG)
         EB_FREE_ALIGNED_ARRAY(obj->bufferCb);
-    if (obj->bufferEnableMask & PICTURE_BUFFER_DESC_Cb_FLAG)
+    if (obj->bufferEnableMask & PICTURE_BUFFER_DESC_Cr_FLAG)
         EB_FREE_ALIGNED_ARRAY(obj->bufferCr);
 }
 

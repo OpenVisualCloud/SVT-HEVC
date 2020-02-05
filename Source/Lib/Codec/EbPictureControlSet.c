@@ -646,6 +646,8 @@ static void PictureParentControlSetDctor(EB_PTR p)
     EB_FREE_ARRAY(obj->tileInfoArray);
     EB_FREE_ARRAY(obj->tileGroupInfoArray);
 
+    EB_DELETE(obj->chromaDownSamplePicturePtr);
+
     EB_FREE_2D(obj->variance);
     EB_FREE_2D(obj->yMean);
     EB_FREE_2D(obj->cbMean);
@@ -764,7 +766,7 @@ EB_ERRORTYPE PictureParentControlSetCtor(
             EbPictureBufferDescCtor,
             (EB_PTR)&inputPictureBufferDescInitData);
     } else if(initDataPtr->colorFormat == EB_YUV420) {
-        objectPtr->chromaDownSamplePicturePtr = NULL;
+        objectPtr->chromaDownSamplePicturePtr = EB_NULL;
     } else {
         return EB_ErrorBadParameter;
     }
