@@ -646,7 +646,8 @@ static void PictureParentControlSetDctor(EB_PTR p)
     EB_FREE_ARRAY(obj->tileInfoArray);
     EB_FREE_ARRAY(obj->tileGroupInfoArray);
 
-    EB_DELETE(obj->chromaDownSamplePicturePtr);
+    if(obj->isChromaDownSamplePictureOwner)
+        EB_DELETE(obj->chromaDownSamplePicturePtr);
 
     EB_FREE_2D(obj->variance);
     EB_FREE_2D(obj->yMean);
@@ -746,9 +747,6 @@ EB_ERRORTYPE PictureParentControlSetCtor(
     }
     ConfigureTileInfo(objectPtr, initDataPtr->lcuSize, initDataPtr->pictureWidth, initDataPtr->pictureHeight);
 
-    objectPtr->sequenceControlSetWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
-    objectPtr->inputPictureWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
-    objectPtr->referencePictureWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
     if (initDataPtr->colorFormat >= EB_YUV422) {
         EbPictureBufferDescInitData_t inputPictureBufferDescInitData;
         inputPictureBufferDescInitData.maxWidth     = initDataPtr->pictureWidth;
@@ -765,6 +763,7 @@ EB_ERRORTYPE PictureParentControlSetCtor(
             objectPtr->chromaDownSamplePicturePtr,
             EbPictureBufferDescCtor,
             (EB_PTR)&inputPictureBufferDescInitData);
+        objectPtr->isChromaDownSamplePictureOwner = EB_TRUE;
     } else if(initDataPtr->colorFormat == EB_YUV420) {
         objectPtr->chromaDownSamplePicturePtr = EB_NULL;
     } else {

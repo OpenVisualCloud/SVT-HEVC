@@ -372,6 +372,7 @@ typedef struct PictureParentControlSet_s
 
     EbPictureBufferDesc_t                *enhancedPicturePtr; 
     EbPictureBufferDesc_t                *chromaDownSamplePicturePtr;
+    EB_BOOL                               isChromaDownSamplePictureOwner;
 
     EB_PICNOISE_CLASS                     picNoiseClass;
 

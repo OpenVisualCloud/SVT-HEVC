@@ -954,7 +954,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         EB_TRUE,
         EbInputBufferHeaderCreator,
         encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr,
-        EbInputBufferHeaderDestoryer);
+        EbInputBufferHeaderDestroyer);
 
     // EB_BUFFERHEADERTYPE Output Stream
     EB_ALLOC_PTR_ARRAY(encHandlePtr->outputStreamBufferResourcePtrArray, encHandlePtr->encodeInstanceTotalCount);
@@ -973,7 +973,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
             EB_TRUE,
             EbOutputBufferHeaderCreator,
             &encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig,
-            EbOutputBufferHeaderDestoryer);
+            EbOutputBufferHeaderDestroyer);
     }
     if (encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->staticConfig.reconEnabled) {
         // EB_BUFFERHEADERTYPE Output Recon
@@ -992,7 +992,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
                 EB_TRUE,
                 EbOutputReconBufferHeaderCreator,
                 encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr,
-                EbOutputReconBufferHeaderDestoryer);
+                EbOutputReconBufferHeaderDestroyer);
         }
     }
 
@@ -3624,7 +3624,7 @@ __attribute__((visibility("default")))
 EB_API EB_ERRORTYPE EbH265GetPacket(
     EB_COMPONENTTYPE      *h265EncComponent,
     EB_BUFFERHEADERTYPE  **pBuffer,
-    unsigned char          picSendDone)
+    uint8_t                picSendDone)
 {
     EB_ERRORTYPE           return_error = EB_ErrorNone;
     EbEncHandle_t          *pEncCompData = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
@@ -3817,23 +3817,20 @@ EB_ERRORTYPE AllocateFrameBuffer(
         inputPictureBufferDescInitData.splitMode = EB_FALSE;  //do special allocation for 2bit data down below.
     }
 
+    EbPictureBufferDesc_t* buf;
     // Enhanced Picture Buffer
-    {
-        EbPictureBufferDesc_t* buf;
-        EB_NEW(
-            buf,
-            EbPictureBufferDescCtor,
-            (EB_PTR)&inputPictureBufferDescInitData);
+    EB_NEW(
+        buf,
+        EbPictureBufferDescCtor,
+        (EB_PTR)&inputPictureBufferDescInitData);
+    inputBuffer->pBuffer = (uint8_t*)buf;
 
-        inputBuffer->pBuffer = (uint8_t*)buf;
-
-        if (is16bit && config->compressedTenBitFormat == 1) {
-            const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)sequenceControlSetPtr->chromaFormatIdc;
-            //pack 4 2bit pixels into 1Byte
-            EB_MALLOC_ALIGNED_ARRAY(((EbPictureBufferDesc_t*)(inputBuffer->pBuffer))->bufferBitIncY,  (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4));
-            EB_MALLOC_ALIGNED_ARRAY(((EbPictureBufferDesc_t*)(inputBuffer->pBuffer))->bufferBitIncCb, (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4) >> (3 - colorFormat));
-            EB_MALLOC_ALIGNED_ARRAY(((EbPictureBufferDesc_t*)(inputBuffer->pBuffer))->bufferBitIncCr, (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4) >> (3 - colorFormat));
-        }
+    if (is16bit && config->compressedTenBitFormat == 1) {
+        const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)sequenceControlSetPtr->chromaFormatIdc;
+        //pack 4 2bit pixels into 1Byte
+        EB_MALLOC_ALIGNED_ARRAY(buf->bufferBitIncY, (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4));
+        EB_MALLOC_ALIGNED_ARRAY(buf->bufferBitIncCb, (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4) >> (3 - colorFormat));
+        EB_MALLOC_ALIGNED_ARRAY(buf->bufferBitIncCr, (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4) >> (3 - colorFormat));
     }
 
     return return_error;
@@ -3866,7 +3863,7 @@ EB_ERRORTYPE EbInputBufferHeaderCreator(
     return EB_ErrorNone;
 }
 
-void EbInputBufferHeaderDestoryer(EB_PTR p)
+void EbInputBufferHeaderDestroyer(EB_PTR p)
 {
     EB_BUFFERHEADERTYPE *obj = (EB_BUFFERHEADERTYPE*)p;
     EbPictureBufferDesc_t* buf = (EbPictureBufferDesc_t*)obj->pBuffer;
@@ -3911,7 +3908,7 @@ EB_ERRORTYPE EbOutputBufferHeaderCreator(
     return EB_ErrorNone;
 }
 
-void EbOutputBufferHeaderDestoryer(EB_PTR p)
+void EbOutputBufferHeaderDestroyer(EB_PTR p)
 {
     EB_BUFFERHEADERTYPE* obj = (EB_BUFFERHEADERTYPE*)p;
     EB_FREE(obj->pBuffer);
@@ -3947,7 +3944,7 @@ EB_ERRORTYPE EbOutputReconBufferHeaderCreator(
     return EB_ErrorNone;
 }
 
-void EbOutputReconBufferHeaderDestoryer(EB_PTR p)
+void EbOutputReconBufferHeaderDestroyer(EB_PTR p)
 {
     EB_BUFFERHEADERTYPE *obj = (EB_BUFFERHEADERTYPE*)p;
     EB_FREE(obj->pBuffer);

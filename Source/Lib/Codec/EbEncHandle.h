@@ -184,9 +184,9 @@ EB_ERRORTYPE EbOutputReconBufferHeaderCreator(
      EB_PTR *objectDblPtr,
      EB_PTR objectInitDataPtr);
 
-void EbInputBufferHeaderDestoryer(EB_PTR p);
-void EbOutputBufferHeaderDestoryer(EB_PTR p);
-void EbOutputReconBufferHeaderDestoryer(EB_PTR p);
+void EbInputBufferHeaderDestroyer(EB_PTR p);
+void EbOutputBufferHeaderDestroyer(EB_PTR p);
+void EbOutputReconBufferHeaderDestroyer(EB_PTR p);
 
 #ifdef __cplusplus
 }

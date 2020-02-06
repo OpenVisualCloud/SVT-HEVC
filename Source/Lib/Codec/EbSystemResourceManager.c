@@ -407,7 +407,7 @@ void EBObjectWrapperDctor(EB_PTR p)
 {
     EbObjectWrapper_t* wrapper = (EbObjectWrapper_t*)p;
     if (wrapper->objectDestroyer) {
-        //customized destoryer
+        //customized destroyer
         if (wrapper->objectPtr)
             wrapper->objectDestroyer(wrapper->objectPtr);
     }
@@ -526,7 +526,6 @@ EB_ERRORTYPE EbSystemResourceCtor(
             consumerProcessTotalCount,
             consumerFifoPtrArrayPtr);
     }
-
 
     return EB_ErrorNone;
 }
