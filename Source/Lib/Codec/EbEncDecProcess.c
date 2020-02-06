@@ -42,14 +42,14 @@ static void EncDecContextDctor(EB_PTR p)
     EncDecContext_t* obj = (EncDecContext_t*)p;
     if (obj->saoUpBuffer[0]) {
         obj->saoUpBuffer[0]--;
-        EB_FREE(obj->saoUpBuffer[0]);
+        EB_FREE_ARRAY(obj->saoUpBuffer[0]);
     }
-    EB_FREE(obj->saoLeftBuffer[0]);
+    EB_FREE_ARRAY(obj->saoLeftBuffer[0]);
     if (obj->saoUpBuffer16[0]) {
         obj->saoUpBuffer16[0]--;
-        EB_FREE(obj->saoUpBuffer16[0]);
+        EB_FREE_ARRAY(obj->saoUpBuffer16[0]);
     }
-    EB_FREE(obj->saoLeftBuffer16[0]);
+    EB_FREE_ARRAY(obj->saoLeftBuffer16[0]);
     EB_DELETE(obj->saoStats);
     EB_DELETE(obj->inputSample16bitBuffer);
     EB_DELETE(obj->residualBuffer);
@@ -182,25 +182,25 @@ EB_ERRORTYPE EncDecContextCtor(
     //TODO: we need to allocate Up buffer using current frame Width (not MAX_PICTURE_WIDTH_SIZE)
     //Need one pixel at position(x=-1) and another at position(x=width) to accomodate SIMD optimization of SAO
     if (!is16bit) {
-        EB_CALLOC(contextPtr->saoUpBuffer[0], (MAX_PICTURE_WIDTH_SIZE + 2) * 2, 1);
+        EB_CALLOC_ARRAY(contextPtr->saoUpBuffer[0], (MAX_PICTURE_WIDTH_SIZE + 2) * 2);
 
         contextPtr->saoUpBuffer[0]++;
         contextPtr->saoUpBuffer[1] = contextPtr->saoUpBuffer[0] + (MAX_PICTURE_WIDTH_SIZE + 2);
 
-        EB_CALLOC(contextPtr->saoLeftBuffer[0], (MAX_LCU_SIZE + 2) * 2 + 14, 1);
+        EB_CALLOC_ARRAY(contextPtr->saoLeftBuffer[0], (MAX_LCU_SIZE + 2) * 2 + 14);
 
         contextPtr->saoLeftBuffer[1] = contextPtr->saoLeftBuffer[0] + (MAX_LCU_SIZE + 2);
     }
     else{
 
         //CHKN only allocate in 16 bit mode
-        EB_CALLOC(contextPtr->saoUpBuffer16[0], (MAX_PICTURE_WIDTH_SIZE + 2) * 2, 1);
+        EB_CALLOC_ARRAY(contextPtr->saoUpBuffer16[0], (MAX_PICTURE_WIDTH_SIZE + 2) * 2);
 
         contextPtr->saoUpBuffer16[0]++;
         contextPtr->saoUpBuffer16[1] = contextPtr->saoUpBuffer16[0] + (MAX_PICTURE_WIDTH_SIZE + 2);
 
         //CHKN the add of 14 should be justified, also the left ping pong buffers are not symetric which is not ok
-        EB_CALLOC(contextPtr->saoLeftBuffer16[0], (MAX_LCU_SIZE + 2) * 2 + 14, 1);
+        EB_CALLOC_ARRAY(contextPtr->saoLeftBuffer16[0], (MAX_LCU_SIZE + 2) * 2 + 14);
 
         contextPtr->saoLeftBuffer16[1] = contextPtr->saoLeftBuffer16[0] + (MAX_LCU_SIZE + 2);
     }
