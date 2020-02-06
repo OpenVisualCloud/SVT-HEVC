@@ -63,7 +63,6 @@ EB_ERRORTYPE MotionCompensationPredictionContextCtor(
     if (is16bit)
     {
         EbPictureBufferDescInitData_t initData;
-
         initData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
         initData.maxWidth = maxCUWidth + 16;    // +8 needed for interpolation; the rest to accommodate MCP assembly kernels
         initData.maxHeight = maxCUHeight + 16;  // +8 needed for interpolation; the rest to accommodate MCP assembly kernels
@@ -85,7 +84,6 @@ EB_ERRORTYPE MotionCompensationPredictionContextCtor(
             (EB_PTR)&initData);
 
         initData.bitDepth = EB_8BIT;
-
         EB_NEW(
             contextPtr->localReferenceBlock8BITL0,
             EbPictureBufferDescCtor,
@@ -94,7 +92,6 @@ EB_ERRORTYPE MotionCompensationPredictionContextCtor(
             contextPtr->localReferenceBlock8BITL1,
             EbPictureBufferDescCtor,
             (EB_PTR)&initData);
-
     }
     return EB_ErrorNone;
 }

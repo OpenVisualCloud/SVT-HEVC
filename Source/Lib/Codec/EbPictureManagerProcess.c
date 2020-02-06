@@ -804,13 +804,6 @@ void* PictureManagerKernel(void *inputPtr)
                     else
                         ChildPictureControlSetPtr->difCuDeltaQpDepth = 3;
 
-                    // Reset the Reference Lists
-                    EB_MEMSET(ChildPictureControlSetPtr->refPicPtrArray, 0, 2 * sizeof(EbObjectWrapper_t*));
-
-                    EB_MEMSET(ChildPictureControlSetPtr->refPicQpArray, 0,  2 * sizeof(EB_U8));
-
-                    EB_MEMSET(ChildPictureControlSetPtr->refSliceTypeArray, 0,  2 * sizeof(EB_PICTURE));
-                   
                     // Configure List0
                     if ((entryPictureControlSetPtr->sliceType == EB_P_PICTURE) || (entryPictureControlSetPtr->sliceType == EB_B_PICTURE)) {
 

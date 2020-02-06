@@ -28,7 +28,14 @@ typedef struct EbPictureBufferDesc_s
 	// Buffer Ptrs
 	EB_BYTE         bufferY;        // Pointer to the Y luma buffer
 	EB_BYTE         bufferCb;       // Pointer to the U chroma buffer
-	EB_BYTE         bufferCr;       // Pointer to the V chroma buffer 
+	EB_BYTE         bufferCr;       // Pointer to the V chroma buffer
+
+    // Pointer of buffer can be changed in 10bit encoding which causes issue when being freed.
+    // Workaround: record the original address of the buffer.
+    EB_BYTE         bufferYAddress;        // Original Address of the Y luma buffer
+    EB_BYTE         bufferCbAddress;       // Original Address of the U chroma buffer
+    EB_BYTE         bufferCrAddress;       // Original Address of the V chroma buffer
+
 	//Bit increment 
 	EB_BYTE         bufferBitIncY;  // Pointer to the Y luma buffer Bit increment
 	EB_BYTE         bufferBitIncCb; // Pointer to the U chroma buffer Bit increment
