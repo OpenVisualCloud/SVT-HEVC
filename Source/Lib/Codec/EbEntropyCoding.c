@@ -9272,7 +9272,8 @@ EB_ERRORTYPE CopyRbspBitstreamToPayload(
 static void BitstreamDctor(EB_PTR p)
 {
     Bitstream_t *obj = (Bitstream_t*)p;
-    EB_DELETE((OutputBitstreamUnit_t*)obj->outputBitstreamPtr);
+    OutputBitstreamUnit_t* outputBitstreamPtr = obj->outputBitstreamPtr;
+    EB_DELETE(outputBitstreamPtr);
 }
 
 EB_ERRORTYPE BitstreamCtor(

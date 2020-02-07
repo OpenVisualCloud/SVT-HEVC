@@ -534,7 +534,7 @@ typedef void * EB_HANDLE;
 #define EB_DESTROY_SEMAPHORE(pointer) \
     do { \
         EbDestroySemaphore(pointer); \
-        EbRemoveMemEntry(pointer, EB_SEMAPHORE); \
+        EB_REMOVE_MEM_ENTRY(pointer, EB_SEMAPHORE); \
     } while (0)
 
 
@@ -549,7 +549,7 @@ typedef void * EB_HANDLE;
     do { \
         if (pointer) { \
             EbDestroyMutex(pointer); \
-            EbRemoveMemEntry(pointer, EB_MUTEX); \
+            EB_REMOVE_MEM_ENTRY(pointer, EB_MUTEX); \
             pointer = NULL; \
         } \
     } while (0)
