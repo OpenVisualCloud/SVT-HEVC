@@ -1,4 +1,4 @@
-From ab388b38758fcdd402bb772114a9420a8b8862ea Mon Sep 17 00:00:00 2001
+From ff73644d2138c21582d02695e4de57f6e4d778ff Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -8,12 +8,13 @@ Signed-off-by: Hassene Tmar <hassene.tmar@intel.com>
 Signed-off-by: Jun Zhao <jun.zhao@intel.com>
 Signed-off-by: Jing Sun <jing.a.sun@intel.com>
 Signed-off-by: Austin Hu <austin.hu@intel.com>
+Signed-off-by: Guo Jiansheng <jiansheng.guo@intel.com>
 ---
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 522 +++++++++++++++++++++++++++++++++++++++
- 4 files changed, 528 insertions(+)
+ libavcodec/libsvt_hevc.c | 533 +++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 539 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
@@ -78,10 +79,10 @@ index d2f9a39ce5..d8788a7954 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000000..964360b7e3
+index 0000000000..2f34ea5531
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,522 @@
+@@ -0,0 +1,533 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -145,6 +146,7 @@ index 0000000000..964360b7e3
 +    int la_depth;
 +    int thread_count;
 +    int high_dynamic_range;
++    int unrestricted_motion_vector;
 +} SvtContext;
 +
 +static int error_mapping(EB_ERRORTYPE svt_ret)
@@ -307,6 +309,14 @@ index 0000000000..964360b7e3
 +        param->codeVpsSpsPps = 1;
 +
 +    param->codeEosNal = 1;
++
++    if (svt_enc->unrestricted_motion_vector == 0 || svt_enc->unrestricted_motion_vector == 1) {
++        param->unrestrictedMotionVector = svt_enc->unrestricted_motion_vector;
++    }
++    else{
++        av_log(avctx, AV_LOG_ERROR, "Unrestricted Motion Vector should be set 0 or 1\n");
++        return EB_ErrorBadParameter;
++    }
 +
 +    return EB_ErrorNone;
 +}
@@ -564,6 +574,8 @@ index 0000000000..964360b7e3
 +        { "vmaf", "VMAF optimized mode", 0,
 +          AV_OPT_TYPE_CONST, { .i64 = 2 },  INT_MIN, INT_MAX, VE, "tune" },
 +    { "hdr", "High dynamic range input (HDR10)", OFFSET(high_dynamic_range), AV_OPT_TYPE_INT, { .i64 = 0}, 0, 1, VE, "hdr" },
++    { "umv", "Enables or disables unrestricted motion vectors", OFFSET(unrestricted_motion_vector),
++      AV_OPT_TYPE_BOOL, { .i64 = 1 }, 0, 1, VE },
 +    {NULL},
 +};
 +
