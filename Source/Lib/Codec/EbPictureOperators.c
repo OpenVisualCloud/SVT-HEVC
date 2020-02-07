@@ -538,6 +538,7 @@ void* UnPack2D(void *context)
         EbReleaseObject(copyFrameBufferWrapperPtr);
         EbPostFullObject(unpackEndSyncWrapperPtr);
     }
+    return EB_NULL;
 }
 
 void Pack2D_SRC(

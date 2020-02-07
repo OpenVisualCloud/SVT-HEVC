@@ -37,18 +37,11 @@ EB_ERRORTYPE UnPackCreator(
     EB_CALLOC(obj, 1, sizeof(EBUnPack2DType_t));
     *objectDblPtr = obj;
 
-    EB_MALLOC(obj->in16BitBuffer, sizeof(EB_U16));
-    EB_MALLOC(obj->out8BitBuffer, sizeof(EB_U8));
-    EB_MALLOC(obj->outnBitBuffer, sizeof(EB_U8));
-
     return EB_ErrorNone;
 }
 
 void UnPackDestoryer(EB_PTR p)
 {
     EBUnPack2DType_t *obj = (EBUnPack2DType_t*)p;
-    EB_FREE(obj->in16BitBuffer);
-    EB_FREE(obj->out8BitBuffer);
-    EB_FREE(obj->outnBitBuffer);
     EB_FREE(obj);
 }

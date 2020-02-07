@@ -455,6 +455,9 @@ static void EBEncHandleStopThreads(EbEncHandle_t *encHandlePtr)
 
     // Packetization
     EB_DESTROY_THREAD(encHandlePtr->packetizationThreadHandle);
+
+    // UnPack
+    EB_DESTROY_THREAD_ARRAY(encHandlePtr->unpackThreadHandleArray, controlSetPtr->unpackProcessInitCount);
 }
 
 /**********************************
@@ -485,12 +488,15 @@ static void EbEncHandleDctor(EB_PTR p)
     EB_DELETE(obj->encDecResultsResourcePtr);
     EB_DELETE(obj->entropyCodingResultsResourcePtr);
     EB_DELETE(obj->resourceCoordinationContextPtr);
+    EB_DELETE(obj->unpackTasksResourcePtr);
+    EB_DELETE(obj->unpackSyncResourcePtr);
     EB_DELETE_PTR_ARRAY(obj->pictureAnalysisContextPtrArray, obj->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->pictureAnalysisProcessInitCount);
     EB_DELETE_PTR_ARRAY(obj->motionEstimationContextPtrArray, obj->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->motionEstimationProcessInitCount);
     EB_DELETE_PTR_ARRAY(obj->sourceBasedOperationsContextPtrArray, obj->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->sourceBasedOperationsProcessInitCount);
     EB_DELETE_PTR_ARRAY(obj->modeDecisionConfigurationContextPtrArray, obj->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount);
     EB_DELETE_PTR_ARRAY(obj->encDecContextPtrArray, obj->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->encDecProcessInitCount);
     EB_DELETE_PTR_ARRAY(obj->entropyCodingContextPtrArray, obj->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->entropyCodingProcessInitCount);
+    EB_DELETE_PTR_ARRAY(obj->unpackContextPtrArray, obj->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount);
     EB_DELETE(obj->pictureDecisionContextPtr);
     EB_DELETE(obj->initialRateControlContextPtr);
     EB_DELETE(obj->pictureManagerContextPtr);
@@ -2948,14 +2954,15 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     outputStreamBuffer->nFilledLen = 0;
 
     // Intermediate buffers
+    OutputBitstreamUnit_t* outBitstreamPtr;
     EB_NEW(
-        (OutputBitstreamUnit_t*)bitstreamPtr.outputBitstreamPtr,
+        outBitstreamPtr,
         OutputBitstreamUnitCtor,
         PACKETIZATION_PROCESS_BUFFER_SIZE);
+    bitstreamPtr.outputBitstreamPtr = outBitstreamPtr;
 
     // Reset the bitstream before writing to it
-    ResetBitstream(
-        (OutputBitstreamUnit_t*)bitstreamPtr.outputBitstreamPtr);
+    ResetBitstream(outBitstreamPtr);
 
     if (sequenceControlSetPtr->staticConfig.accessUnitDelimiter) {
         EncodeAUD(
@@ -3000,20 +3007,19 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     }
 
     // Flush the Bitstream
-    FlushBitstream(
-        bitstreamPtr.outputBitstreamPtr);
+    FlushBitstream(outBitstreamPtr);
 
     // Copy SPS & PPS to the Output Bitstream
     CopyRbspBitstreamToPayload(
         &bitstreamPtr,
-        outputStreamBuffer->pBuffer,
+        &outputStreamBuffer->pBuffer,
         (EB_U32*) &(outputStreamBuffer->nFilledLen),
         (EB_U32*) &(outputStreamBuffer->nAllocLen),
         encodeContextPtr,
         NAL_UNIT_INVALID);
 
     *outputStreamPtr = outputStreamBuffer;
-    EB_DELETE((OutputBitstreamUnit_t*)bitstreamPtr.outputBitstreamPtr);
+    EB_DELETE(outBitstreamPtr);
     return return_error;
 }
 
@@ -3066,32 +3072,32 @@ EB_API EB_ERRORTYPE EbH265EncEosNal(
     outputStreamBuffer->nFilledLen = 0;
 
     // Intermediate buffers
+    OutputBitstreamUnit_t* outBitstreamPtr;
     EB_NEW(
-        (OutputBitstreamUnit_t*)bitstreamPtr.outputBitstreamPtr,
+        outBitstreamPtr,
         OutputBitstreamUnitCtor,
         EOS_NAL_BUFFER_SIZE);
+    bitstreamPtr.outputBitstreamPtr = outBitstreamPtr;
 
     // Reset the bitstream before writing to it
-    ResetBitstream(
-        (OutputBitstreamUnit_t*)bitstreamPtr.outputBitstreamPtr);
+    ResetBitstream(outBitstreamPtr);
 
     CodeEndOfSequenceNalUnit(&bitstreamPtr);
 
     // Flush the Bitstream
-    FlushBitstream(
-        bitstreamPtr.outputBitstreamPtr);
+    FlushBitstream(outBitstreamPtr);
 
     // Copy SPS & PPS to the Output Bitstream
     CopyRbspBitstreamToPayload(
         &bitstreamPtr,
-        outputStreamBuffer->pBuffer,
+        &outputStreamBuffer->pBuffer,
         (EB_U32*) &(outputStreamBuffer->nFilledLen),
         (EB_U32*) &(outputStreamBuffer->nAllocLen),
         encodeContextPtr,
         NAL_UNIT_INVALID);
 
     *outputStreamPtr = outputStreamBuffer;
-    EB_DELETE((OutputBitstreamUnit_t*)bitstreamPtr.outputBitstreamPtr);
+    EB_DELETE(outBitstreamPtr);
     return return_error;
 }
 
@@ -3667,8 +3673,10 @@ EB_API void EbH265ReleaseOutBuffer(
     EB_BUFFERHEADERTYPE  **pBuffer)
 {
 #if OUT_ALLOC
-    if ((*pBuffer)->pBuffer)
+    if ((*pBuffer)->pBuffer) {
         free((*pBuffer)->pBuffer);
+        (*pBuffer)->pBuffer = EB_NULL;
+    }
 #endif
 
     if ((*pBuffer)->wrapperPtr)
