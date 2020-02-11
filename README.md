@@ -122,6 +122,10 @@ For the binaries to operate properly, the following conditions have to be met:
   - Run the sample application to encode. `./SvtHevcEncApp -i [in.yuv] -w [width] -h [height] -b [out.265]`
   - Sample application supports reading from pipe. E.g. `ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | ./SvtHevcEncApp -i stdin -n [number_of_frames_to_encode] -w [width] -h [height]`
 
+## How to evaluate by ready-to-run executables with docker
+
+Refer to the guide [here](https://github.com/OpenVisualCloud/Dockerfiles/blob/master/doc/svt.md#Evaluate-SVT).
+
 ## Demo features and limitations
 
 - **VBR BRC mode:** \
