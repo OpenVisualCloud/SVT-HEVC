@@ -628,13 +628,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         pictureControlSetPtr->paReferencePictureWrapperPtr = referencePictureWrapperPtr;
 
         // Give the new Reference a nominal liveCount of 1
-        EbObjectIncLiveCount(
-        	pictureControlSetPtr->paReferencePictureWrapperPtr,
-            2);
-
-        EbObjectIncLiveCount(
-            pictureControlSetWrapperPtr,
-            2);
+        EbObjectIncLiveCount(pictureControlSetPtr->paReferencePictureWrapperPtr, 1);
 
 #if !PAREF_OUT
         ((EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr)->inputPaddedPicturePtr->bufferY = inputPicturePtr->bufferY;

@@ -2859,6 +2859,8 @@ void* RateControlKernel(void *inputPtr)
 			EbReleaseObject(parentPictureControlSetPtr->sequenceControlSetWrapperPtr);
             // Release the input buffer
             EbReleaseObject(parentPictureControlSetPtr->ebInputWrapperPtr);
+            // Release the PA Reference Picture
+            EbReleaseObject(parentPictureControlSetPtr->paReferencePictureWrapperPtr);
             // Release the ParentPictureControlSet
 			EbReleaseObject(rateControlTasksPtr->pictureControlSetWrapperPtr);
 

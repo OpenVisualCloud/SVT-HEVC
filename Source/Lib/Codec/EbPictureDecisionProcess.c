@@ -1171,7 +1171,8 @@ void* PictureDecisionKernel(void *inputPtr)
 
                         }
 
-						((EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr)->dependentPicturesCount = inputEntryPtr->dependentCount;
+                        // Its dependentPicturesCount should be accumulated when indeed there is any latter picture referencing it.
+                        ((EbPaReferenceObject_t *)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr)->dependentPicturesCount = 0;
 
 						/* EB_U32 depCnt = ((EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr)->dependentPicturesCount;
 						if (pictureControlSetPtr->pictureNumber>0 && pictureControlSetPtr->sliceType==EB_I_PICTURE && depCnt!=8 )
@@ -1193,9 +1194,9 @@ void* PictureDecisionKernel(void *inputPtr)
                             EB_ENC_PD_ERROR5);
 
                         // Reset the PA Reference Lists
-						EB_MEMSET(pictureControlSetPtr->refPaPicPtrArray, 0, 2 * sizeof(EbObjectWrapper_t*));
+						EB_MEMSET(pictureControlSetPtr->refPaPicPtrArray, 0, MAX_NUM_OF_REF_PIC_LIST * sizeof(EbObjectWrapper_t *));
 
-						EB_MEMSET(pictureControlSetPtr->refPaPicPtrArray, 0, 2 * sizeof(EB_U32));
+						EB_MEMSET(pictureControlSetPtr->refPicPocArray, 0, MAX_NUM_OF_REF_PIC_LIST * sizeof(EB_U64));
 
                     }
 
@@ -1223,9 +1224,9 @@ void* PictureDecisionKernel(void *inputPtr)
                             EB_ENC_PD_ERROR7);
 
                         // Reset the PA Reference Lists
-						EB_MEMSET(pictureControlSetPtr->refPaPicPtrArray, 0, 2 * sizeof(EbObjectWrapper_t*));
+						EB_MEMSET(pictureControlSetPtr->refPaPicPtrArray, 0, MAX_NUM_OF_REF_PIC_LIST * sizeof(EbObjectWrapper_t *));
 
-						EB_MEMSET(pictureControlSetPtr->refPicPocArray, 0, 2 * sizeof(EB_U64));
+						EB_MEMSET(pictureControlSetPtr->refPicPocArray, 0, MAX_NUM_OF_REF_PIC_LIST * sizeof(EB_U64));
 
 
                         // Configure List0
@@ -1254,13 +1255,14 @@ void* PictureDecisionKernel(void *inputPtr)
                                     paReferenceEntryPtr->inputObjectPtr,
                                     1);
 
-                                ((EbPaReferenceObject_t*)pictureControlSetPtr->refPaPicPtrArray[REF_LIST_0]->objectPtr)->pPcsPtr = paReferenceEntryPtr->pPcsPtr;
+                                ((EbPaReferenceObject_t *)pictureControlSetPtr->refPaPicPtrArray[REF_LIST_0]->objectPtr)->pPcsPtr = paReferenceEntryPtr->pPcsPtr;
 
                                 EbObjectIncLiveCount(
                                     paReferenceEntryPtr->pPcsPtr->pPcsWrapperPtr,
                                     1);
 
                                 --paReferenceEntryPtr->dependentCount;
+                                ((EbPaReferenceObject_t *)paReferenceEntryPtr->pPcsPtr->paReferencePictureWrapperPtr->objectPtr)->dependentPicturesCount++;
                             }
                         }
 
@@ -1296,6 +1298,7 @@ void* PictureDecisionKernel(void *inputPtr)
                                     1);
 
                                 --paReferenceEntryPtr->dependentCount;
+                                ((EbPaReferenceObject_t*)paReferenceEntryPtr->pPcsPtr->paReferencePictureWrapperPtr->objectPtr)->dependentPicturesCount++;
                             }
                         }
 
@@ -1359,10 +1362,9 @@ void* PictureDecisionKernel(void *inputPtr)
                 // Remove the entry
                 if((inputEntryPtr->dependentCount == 0) &&
                    (inputEntryPtr->inputObjectPtr)) {
-                    EbReleaseObject(inputEntryPtr->pPcsPtr->pPcsWrapperPtr);
-                       // Release the nominal liveCount value
-                       EbReleaseObject(inputEntryPtr->inputObjectPtr);
-                       inputEntryPtr->inputObjectPtr = (EbObjectWrapper_t*) EB_NULL;
+                    if (((EbPaReferenceObject_t *)inputEntryPtr->pPcsPtr->paReferencePictureWrapperPtr->objectPtr)->dependentPicturesCount == 0) {
+                        inputEntryPtr->inputObjectPtr = (EbObjectWrapper_t *)EB_NULL;
+                    }
                 }
 
                 // Increment the HeadIndex if the head is null

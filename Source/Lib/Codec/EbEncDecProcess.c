@@ -3051,6 +3051,20 @@ void* EncDecKernel(void *inputPtr)
         EbReleaseMutex(pictureControlSetPtr->intraMutex);
 
         if (lastLcuFlag) {
+            if (((pictureControlSetPtr->sliceType == EB_P_PICTURE) || (pictureControlSetPtr->sliceType == EB_B_PICTURE)) &&
+                    pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_0]) {
+                ((EbPaReferenceObject_t *)pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_0]->paReferencePictureWrapperPtr->objectPtr)->dependentPicturesCount--;
+                EbReleaseObject(pictureControlSetPtr->ParentPcsPtr->refPaPicPtrArray[REF_LIST_0]);
+                EbReleaseObject(pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_0]->pPcsWrapperPtr);
+            }
+
+            if ((pictureControlSetPtr->sliceType == EB_B_PICTURE) &&
+                    pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_1]) {
+                ((EbPaReferenceObject_t *)pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_1]->paReferencePictureWrapperPtr->objectPtr)->dependentPicturesCount--;
+                EbReleaseObject(pictureControlSetPtr->ParentPcsPtr->refPaPicPtrArray[REF_LIST_1]);
+                EbReleaseObject(pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_1]->pPcsWrapperPtr);
+            }
+
             if (pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr != NULL){
                 // copy stat to ref object (intraCodedArea, Luminance, Scene change detection flags)
                 CopyStatisticsToRefObject(
