@@ -3210,16 +3210,17 @@ void* EncDecKernel(void *inputPtr)
 
             // Release the List 0 Reference Pictures
             for (EB_U8 refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList0Count; ++refIdx) {
-                if (pictureControlSetPtr->refPicPtrArray[0] != EB_NULL) {
-
-                    EbReleaseObject(pictureControlSetPtr->refPicPtrArray[0]);
+                if (pictureControlSetPtr->refPicPtrArray[REF_LIST_0] != EB_NULL) {
+                    ((EbReferenceObject_t *)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr)->refCount--;
+                    EbReleaseObject(pictureControlSetPtr->refPicPtrArray[REF_LIST_0]);
                 }
             }
 
             // Release the List 1 Reference Pictures
             for (EB_U8 refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList1Count; ++refIdx) {
-                if (pictureControlSetPtr->refPicPtrArray[1] != EB_NULL) {
-                    EbReleaseObject(pictureControlSetPtr->refPicPtrArray[1]);
+                if (pictureControlSetPtr->refPicPtrArray[REF_LIST_1] != EB_NULL) {
+                    ((EbReferenceObject_t *)pictureControlSetPtr->refPicPtrArray[REF_LIST_1]->objectPtr)->refCount--;
+                    EbReleaseObject(pictureControlSetPtr->refPicPtrArray[REF_LIST_1]);
                 }
             }
         }

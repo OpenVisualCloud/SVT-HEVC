@@ -20,6 +20,7 @@ typedef struct EbReferenceObject_s {
     TmvpUnit_t                     *tmvpMap; 
     EB_BOOL                         tmvpEnableFlag;
     EB_U64                          refPOC;
+    EB_U8                           refCount;
 
     EB_U8                           qp;
     EB_PICTURE                        sliceType;

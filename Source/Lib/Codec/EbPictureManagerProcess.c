@@ -828,6 +828,7 @@ void* PictureManagerKernel(void *inputPtr)
 
                             // Set the Reference Object
                             ChildPictureControlSetPtr->refPicPtrArray[REF_LIST_0] = referenceEntryPtr->referenceObjectPtr;
+                            ((EbReferenceObject_t *)ChildPictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr)->refCount++;
 
                             ChildPictureControlSetPtr->refPicQpArray[REF_LIST_0]  = ((EbReferenceObject_t*) referenceEntryPtr->referenceObjectPtr->objectPtr)->qp;
                             ChildPictureControlSetPtr->refSliceTypeArray[REF_LIST_0] = ((EbReferenceObject_t*) referenceEntryPtr->referenceObjectPtr->objectPtr)->sliceType;
@@ -860,6 +861,7 @@ void* PictureManagerKernel(void *inputPtr)
 
                             // Set the Reference Object
                             ChildPictureControlSetPtr->refPicPtrArray[REF_LIST_1] = referenceEntryPtr->referenceObjectPtr;
+                            ((EbReferenceObject_t *)ChildPictureControlSetPtr->refPicPtrArray[REF_LIST_1]->objectPtr)->refCount++;
 
                             ChildPictureControlSetPtr->refPicQpArray[REF_LIST_1]  = ((EbReferenceObject_t*) referenceEntryPtr->referenceObjectPtr->objectPtr)->qp;
                             ChildPictureControlSetPtr->refSliceTypeArray[REF_LIST_1] = ((EbReferenceObject_t*) referenceEntryPtr->referenceObjectPtr->objectPtr)->sliceType;
@@ -953,8 +955,10 @@ void* PictureManagerKernel(void *inputPtr)
             if((referenceEntryPtr->dependentCount == 0) &&
                (referenceEntryPtr->referenceAvailable)  &&
                (referenceEntryPtr->releaseEnable)       &&
-               (referenceEntryPtr->referenceObjectPtr))
+               (referenceEntryPtr->referenceObjectPtr)  &&
+               (((EbReferenceObject_t *)referenceEntryPtr->referenceObjectPtr->objectPtr)->refCount == 0))
             {
+
                 // Release the nominal liveCount value
                 EbReleaseObject(referenceEntryPtr->referenceObjectPtr);
 
@@ -969,6 +973,8 @@ void* PictureManagerKernel(void *inputPtr)
                 (encodeContextPtr->referencePictureQueue[encodeContextPtr->referencePictureQueueHeadIndex]->referenceAvailable    == EB_FALSE &&
                  encodeContextPtr->referencePictureQueue[encodeContextPtr->referencePictureQueueHeadIndex]->isUsedAsReferenceFlag == EB_TRUE) ? encodeContextPtr->referencePictureQueueHeadIndex:
                 (encodeContextPtr->referencePictureQueue[encodeContextPtr->referencePictureQueueHeadIndex]->dependentCount > 0)               ? encodeContextPtr->referencePictureQueueHeadIndex:
+                (encodeContextPtr->referencePictureQueue[encodeContextPtr->referencePictureQueueHeadIndex]->referenceObjectPtr &&
+                 ((EbReferenceObject_t *)encodeContextPtr->referencePictureQueue[encodeContextPtr->referencePictureQueueHeadIndex]->referenceObjectPtr->objectPtr)->refCount > 0) ? encodeContextPtr->referencePictureQueueHeadIndex:
                 (encodeContextPtr->referencePictureQueueHeadIndex == REFERENCE_QUEUE_MAX_DEPTH - 1)                                           ? 0
                                                                                                                                               : encodeContextPtr->referencePictureQueueHeadIndex + 1;
             // Increment the referenceQueueIndex Iterator
