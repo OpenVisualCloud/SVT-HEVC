@@ -3208,6 +3208,19 @@ void* EncDecKernel(void *inputPtr)
 #endif
             }
 
+            // Note: release the PPCS and its PA reference picture in both EncDec and RateControl
+            // (after getting feedback from Packetization) due to the race condition that:
+            // 1. Normally, they will be released here, because the following EntropyCoding and
+            //    Packetization (feeding back to RateControl) stages haven't been completed yet.
+            // 2. Or occationally, they would be released unpredictably after EncDec posts it to
+            //    latter process, and before it would be used to check some of its features (such
+            //    as isUsedAsReferenceFlag, SAO, etc.);
+
+            // Release the PA Reference Picture
+            EbReleaseObject(pictureControlSetPtr->ParentPcsPtr->paReferencePictureWrapperPtr);
+            // Release the ParentPictureControlSet
+            EbReleaseObject(pictureControlSetPtr->PictureParentControlSetWrapperPtr);
+
             // Release the List 0 Reference Pictures
             for (EB_U8 refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList0Count; ++refIdx) {
                 if (pictureControlSetPtr->refPicPtrArray[REF_LIST_0] != EB_NULL) {

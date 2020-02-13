@@ -2855,16 +2855,16 @@ void* RateControlKernel(void *inputPtr)
 
             totalNumberOfFbFrames++;
 
-			// Release the SequenceControlSet
-			EbReleaseObject(parentPictureControlSetPtr->sequenceControlSetWrapperPtr);
+            // Release the SequenceControlSet
+            EbReleaseObject(parentPictureControlSetPtr->sequenceControlSetWrapperPtr);
             // Release the input buffer
             EbReleaseObject(parentPictureControlSetPtr->ebInputWrapperPtr);
             // Release the PA Reference Picture
             EbReleaseObject(parentPictureControlSetPtr->paReferencePictureWrapperPtr);
             // Release the ParentPictureControlSet
-			EbReleaseObject(rateControlTasksPtr->pictureControlSetWrapperPtr);
+            EbReleaseObject(rateControlTasksPtr->pictureControlSetWrapperPtr);
 
-			// Release Rate Control Tasks  
+            // Release Rate Control Tasks
             EbReleaseObject(rateControlTasksWrapperPtr);
             break;
 
