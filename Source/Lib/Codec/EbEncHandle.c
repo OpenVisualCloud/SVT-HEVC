@@ -538,7 +538,7 @@ static EB_ERRORTYPE EbEncHandleCtor(
     encHandlePtr->encDecContextPtrArray                             = (EB_PTR*) EB_NULL;
     encHandlePtr->entropyCodingContextPtrArray                      = (EB_PTR*) EB_NULL;
     encHandlePtr->packetizationContextPtr                           = (EB_PTR) EB_NULL;
-    encHandlePtr->unpackContextPtr                                  = (EB_PTR) EB_NULL;
+    encHandlePtr->unpackContextPtr                                  = (EB_PTR*) EB_NULL;
 
     // System Resource Managers
     encHandlePtr->inputBufferResourcePtr                         = (EbSystemResource_t*) EB_NULL;

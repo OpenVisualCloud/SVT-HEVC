@@ -67,7 +67,7 @@ COMPPack_TYPE  Convert_Unpack_CPack_funcPtrArray[EB_ASM_TYPE_TOTAL] =
 
 };
 
-typedef void(*EB_ENC_UnPack2D_TYPE)(
+typedef void(*EB_ENC_UnPack2D_FUNC_TYPE)(
     EB_U16      *in16BitBuffer,
     EB_U32       inStride,
     EB_U8       *out8BitBuffer,
@@ -77,7 +77,7 @@ typedef void(*EB_ENC_UnPack2D_TYPE)(
     EB_U32       width,
     EB_U32       height);
 
-EB_ENC_UnPack2D_TYPE UnPack2D_funcPtrArray_16Bit[2][EB_ASM_TYPE_TOTAL] =
+EB_ENC_UnPack2D_FUNC_TYPE FUNC_TABLE UnPack2D_funcPtrArray_16Bit[2][EB_ASM_TYPE_TOTAL] =
 {
     {
         // C_DEFAULT
