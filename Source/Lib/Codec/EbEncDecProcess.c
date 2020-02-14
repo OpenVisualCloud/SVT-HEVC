@@ -3051,20 +3051,6 @@ void* EncDecKernel(void *inputPtr)
         EbReleaseMutex(pictureControlSetPtr->intraMutex);
 
         if (lastLcuFlag) {
-            if (((pictureControlSetPtr->sliceType == EB_P_PICTURE) || (pictureControlSetPtr->sliceType == EB_B_PICTURE)) &&
-                    pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_0]) {
-                ((EbPaReferenceObject_t *)pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_0]->paReferencePictureWrapperPtr->objectPtr)->dependentPicturesCount--;
-                EbReleaseObject(pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_0]->paReferencePictureWrapperPtr);
-                EbReleaseObject(pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_0]->pPcsWrapperPtr);
-            }
-
-            if ((pictureControlSetPtr->sliceType == EB_B_PICTURE) &&
-                    pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_1]) {
-                ((EbPaReferenceObject_t *)pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_1]->paReferencePictureWrapperPtr->objectPtr)->dependentPicturesCount--;
-                EbReleaseObject(pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_1]->paReferencePictureWrapperPtr);
-                EbReleaseObject(pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_1]->pPcsWrapperPtr);
-            }
-
             if (pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr != NULL){
                 // copy stat to ref object (intraCodedArea, Luminance, Scene change detection flags)
                 CopyStatisticsToRefObject(
@@ -3208,6 +3194,34 @@ void* EncDecKernel(void *inputPtr)
 #endif
             }
 
+            // Release the List 0 Reference Pictures
+            for (EB_U8 refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList0Count; ++refIdx) {
+                if (pictureControlSetPtr->refPicPtrArray[REF_LIST_0] != EB_NULL) {
+                    EbReleaseObject(pictureControlSetPtr->refPicPtrArray[REF_LIST_0]);
+                }
+            }
+
+            // Release the List 1 Reference Pictures
+            for (EB_U8 refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList1Count; ++refIdx) {
+                if (pictureControlSetPtr->refPicPtrArray[REF_LIST_1] != EB_NULL) {
+                    EbReleaseObject(pictureControlSetPtr->refPicPtrArray[REF_LIST_1]);
+                }
+            }
+
+            if (((pictureControlSetPtr->sliceType == EB_P_PICTURE) || (pictureControlSetPtr->sliceType == EB_B_PICTURE)) &&
+                    pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_0]) {
+                ((EbPaReferenceObject_t *)pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_0]->paReferencePictureWrapperPtr->objectPtr)->dependentPicturesCount--;
+                EbReleaseObject(pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_0]->paReferencePictureWrapperPtr);
+                EbReleaseObject(pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_0]->pPcsWrapperPtr);
+            }
+
+            if ((pictureControlSetPtr->sliceType == EB_B_PICTURE) &&
+                    pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_1]) {
+                ((EbPaReferenceObject_t *)pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_1]->paReferencePictureWrapperPtr->objectPtr)->dependentPicturesCount--;
+                EbReleaseObject(pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_1]->paReferencePictureWrapperPtr);
+                EbReleaseObject(pictureControlSetPtr->ParentPcsPtr->refPaPcsArray[REF_LIST_1]->pPcsWrapperPtr);
+            }
+
             // Note: release the PPCS and its PA reference picture in both EncDec and RateControl
             // (after getting feedback from Packetization) due to the race condition that:
             // 1. Normally, they will be released here, because the following EntropyCoding and
@@ -3220,22 +3234,6 @@ void* EncDecKernel(void *inputPtr)
             EbReleaseObject(pictureControlSetPtr->ParentPcsPtr->paReferencePictureWrapperPtr);
             // Release the ParentPictureControlSet
             EbReleaseObject(pictureControlSetPtr->PictureParentControlSetWrapperPtr);
-
-            // Release the List 0 Reference Pictures
-            for (EB_U8 refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList0Count; ++refIdx) {
-                if (pictureControlSetPtr->refPicPtrArray[REF_LIST_0] != EB_NULL) {
-                    ((EbReferenceObject_t *)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr)->refCount--;
-                    EbReleaseObject(pictureControlSetPtr->refPicPtrArray[REF_LIST_0]);
-                }
-            }
-
-            // Release the List 1 Reference Pictures
-            for (EB_U8 refIdx = 0; refIdx < pictureControlSetPtr->ParentPcsPtr->refList1Count; ++refIdx) {
-                if (pictureControlSetPtr->refPicPtrArray[REF_LIST_1] != EB_NULL) {
-                    ((EbReferenceObject_t *)pictureControlSetPtr->refPicPtrArray[REF_LIST_1]->objectPtr)->refCount--;
-                    EbReleaseObject(pictureControlSetPtr->refPicPtrArray[REF_LIST_1]);
-                }
-            }
         }
         EbReleaseObject(encDecTasksPtr->pictureControlSetWrapperPtr);
 

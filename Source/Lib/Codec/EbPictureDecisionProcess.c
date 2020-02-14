@@ -1255,7 +1255,7 @@ void* PictureDecisionKernel(void *inputPtr)
                                     paReferenceEntryPtr->inputObjectPtr,
                                     1);
 
-                                ((EbPaReferenceObject_t *)pictureControlSetPtr->refPaPicPtrArray[REF_LIST_0]->objectPtr)->pPcsPtr = paReferenceEntryPtr->pPcsPtr;
+                                ((EbPaReferenceObject_t*)pictureControlSetPtr->refPaPicPtrArray[REF_LIST_0]->objectPtr)->pPcsPtr = paReferenceEntryPtr->pPcsPtr;
 
                                 EbObjectIncLiveCount(
                                     paReferenceEntryPtr->pPcsPtr->pPcsWrapperPtr,
