@@ -43,7 +43,7 @@ This plugin uses `meson` build tools and the dependency on SVT-HEVC library is s
 ### Linux specific instructions
 Make sure first that SVT-HEVC library is installed and can be found using pkg-config. You can do that using CMake:
 
-	cmake -P SVT-HEVC/Build/linux/release/Source/Lib/cmake_install.cmake
+	cmake -P SVT-HEVC/Build/linux/Release/Source/Lib/cmake_install.cmake
 
 Then you can compile and install the plugin the following way:
 
