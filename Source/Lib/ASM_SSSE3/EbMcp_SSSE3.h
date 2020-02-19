@@ -12,6 +12,18 @@
 extern "C" {
 #endif
 
+#define EbHevcLumaInterpolationFilterTwoDInRaw7 EbHevcLumaInterpolationFilterTwoDInRaw7_SSSE3
+#define LumaInterpolationFilterOneDOutRawHorizontal LumaInterpolationFilterOneDOutRawHorizontal_SSSE3
+#define EbHevcLumaInterpolationFilterTwoDInRawOutRaw7 EbHevcLumaInterpolationFilterTwoDInRawOutRaw7_SSSE3
+#define EbHevcLumaInterpolationFilterTwoDInRawM EbHevcLumaInterpolationFilterTwoDInRawM_SSSE3
+#ifndef NON_AVX512_SUPPORT
+#define LumaInterpolationFilterOneDOutRawHorizontal LumaInterpolationFilterOneDOutRawHorizontal_AVX512
+#define EbHevcLumaInterpolationFilterTwoDInRaw7 EbHevcLumaInterpolationFilterTwoDInRaw7_AVX512
+#define EbHevcLumaInterpolationFilterTwoDInRawOutRaw7 EbHevcLumaInterpolationFilterTwoDInRawOutRaw7_AVX512
+#define EbHevcLumaInterpolationFilterTwoDInRawM EbHevcLumaInterpolationFilterTwoDInRawM_AVX512
+#endif
+
+void PrefetchBlock(EB_U8 *src, EB_U32 srcStride, EB_U32 blkWidth, EB_U32 blkHeight);
 // SSSE3 functions
 void ChromaInterpolationCopy_SSSE3(EB_BYTE refPic, EB_U32 srcStride, EB_BYTE dst, EB_U32 dstStride, EB_U32 puWidth, EB_U32 puHeight, EB_S16 *firstPassIFDst, EB_U32 fracPosx, EB_U32 fracPosy);
 void ChromaInterpolationFilterOneDHorizontal_SSSE3(EB_BYTE refPic, EB_U32 srcStride, EB_BYTE dst, EB_U32 dstStride, EB_U32 puWidth, EB_U32 puHeight, EB_S16 *firstPassIFDst, EB_U32 fracPosx, EB_U32 fracPosy);
