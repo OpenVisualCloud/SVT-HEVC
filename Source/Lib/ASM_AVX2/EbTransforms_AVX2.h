@@ -11,6 +11,12 @@
 extern "C" {
 #endif
 
+#define EbHevcTransform32_INTRIN EbHevcTransform32_AVX2_INTRIN
+#ifndef NON_AVX512_SUPPORT
+#define EbHevcTransform32_INTRIN EbHevcTransform32_AVX512_INTRIN
+#endif
+
+
 void QuantizeInvQuantize8x8_AVX2_INTRIN(
 	EB_S16          *coeff,
 	const EB_U32     coeffStride,

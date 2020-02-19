@@ -17,6 +17,9 @@ include_directories(${PROJECT_SOURCE_DIR}/Source/API/
 set(flags_to_test
     -mssse3
     -msse4.1
+    -mavx512bw
+    -mavx512vnni
+    -mavx512vl    
     -static-intel)
 
 foreach(cflag ${flags_to_test})
@@ -52,6 +55,7 @@ set(ASM_SSSE3_SOURCE
     EbDeblockingFilter_Intrinsic_SSSE3.c
     EbIntraPrediction16bit_Intrinsic_SSSE3.c
     EbMcp_Intrinsic_SSSE3.c
+    EbMcp_Intrinsic_AVX512.c
     EbSaoApplication_Intrinsic_SSSE3.c
     EbTransforms_Intrinsic_SSSE3.c)
 
