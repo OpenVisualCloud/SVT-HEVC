@@ -1468,9 +1468,9 @@ EB_EXTERN void lowPrecisionTransform16x16_AVX2_INTRIN(EB_S16 *src, EB_U32 src_st
 // forward 32x32 transform
 EB_EXTERN void lowPrecisionTransform32x32_AVX2_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_stride, EB_S16 *intermediate, EB_U32 addshift)
 {
-    EbHevcTransform32_AVX2_INTRIN(src, src_stride, intermediate, 32, 6 + addshift);
+    EbHevcTransform32_INTRIN(src, src_stride, intermediate, 32, 6 + addshift);
     EbHevcTranspose32_AVX2_INTRIN(intermediate, 32, dst, dst_stride);
-    EbHevcTransform32_AVX2_INTRIN(dst, dst_stride, intermediate, 32, 9);
+    EbHevcTransform32_INTRIN(dst, dst_stride, intermediate, 32, 9);
     EbHevcTranspose32_AVX2_INTRIN(intermediate, 32, dst, dst_stride);
 }
 
