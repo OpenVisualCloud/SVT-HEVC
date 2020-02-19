@@ -14,7 +14,7 @@ extern "C" {
 /**************************************
  * Process Results
  **************************************/
-typedef struct EncDecResults_s 
+typedef struct EncDecResults_s
 {
     EbObjectWrapper_t      *pictureControlSetWrapperPtr;
     EB_U32                  completedLcuRowIndexStart;
@@ -32,7 +32,7 @@ typedef struct EncDecResultsInitData_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE EncDecResultsCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
 
 

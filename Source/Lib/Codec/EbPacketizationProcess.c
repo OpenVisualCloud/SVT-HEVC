@@ -111,7 +111,7 @@ EB_ERRORTYPE PacketizationContextCtor(
 
     EB_MALLOC(EbPPSConfig_t*, contextPtr->ppsConfig, sizeof(EbPPSConfig_t), EB_N_PTR);
 
-	return EB_ErrorNone;
+    return EB_ErrorNone;
 }
 
 void* PacketizationKernel(void *inputPtr)
@@ -137,7 +137,7 @@ void* PacketizationKernel(void *inputPtr)
     EbObjectWrapper_t              *rateControlTasksWrapperPtr;
     RateControlTasks_t             *rateControlTasksPtr;
     EbObjectWrapper_t               *pictureManagerResultsWrapperPtr;
-    PictureDemuxResults_t       	*pictureManagerResultPtr;
+    PictureDemuxResults_t           *pictureManagerResultPtr;
     // Bitstream copy to output buffer
     Bitstream_t                     bitstream;
 
@@ -347,7 +347,7 @@ void* PacketizationKernel(void *inputPtr)
                 (EB_U32*) &(outputStreamPtr->nFilledLen),
                 (EB_U32*) &(outputStreamPtr->nAllocLen),
                 encodeContextPtr,
-				NAL_UNIT_INVALID);
+                NAL_UNIT_INVALID);
         }
 
 
@@ -357,7 +357,7 @@ void* PacketizationKernel(void *inputPtr)
             EB_U32                       lcuTotalCount;
             LargestCodingUnit_t         *lcuPtr;
             EB_U32                       lcuCodingOrder;
-			EB_S32                       qpIndex;
+            EB_S32                       qpIndex;
 
             lcuTotalCount               = pictureControlSetPtr->lcuTotalCount;
 
@@ -368,7 +368,7 @@ void* PacketizationKernel(void *inputPtr)
 
                 sequenceControlSetPtr->encodeContextPtr->rateControlTablesArrayUpdated = EB_TRUE;
 
-		        for(lcuCodingOrder = 0; lcuCodingOrder < lcuTotalCount; ++lcuCodingOrder) {
+                for(lcuCodingOrder = 0; lcuCodingOrder < lcuTotalCount; ++lcuCodingOrder) {
 
                     lcuPtr   = pictureControlSetPtr->lcuPtrArray[lcuCodingOrder];
 
@@ -386,7 +386,7 @@ void* PacketizationKernel(void *inputPtr)
 
                             intraSadIntervalIndex = pictureControlSetPtr->ParentPcsPtr->intraSadIntervalIndex[lcuCodingOrder];
 
-							sadBits[intraSadIntervalIndex] += lcuPtr->totalBits;
+                            sadBits[intraSadIntervalIndex] += lcuPtr->totalBits;
                             count[intraSadIntervalIndex] ++;
 
                         }
@@ -397,8 +397,8 @@ void* PacketizationKernel(void *inputPtr)
                             count[sadIntervalIndex] ++;
 
                         }
-					}
-				}
+                    }
+                }
                 {
                     EB_U32 blkSize = BLKSIZE;
                     EbBlockOnMutex(sequenceControlSetPtr->encodeContextPtr->rateTableUpdateMutex);
@@ -571,7 +571,7 @@ void* PacketizationKernel(void *inputPtr)
                     EbReleaseMutex(sequenceControlSetPtr->encodeContextPtr->rateTableUpdateMutex);
                 }
 
-			}
+            }
         }
 
         // Reset the bitstream
@@ -618,7 +618,7 @@ void* PacketizationKernel(void *inputPtr)
             (EB_U32*) &(outputStreamPtr->nFilledLen),
             (EB_U32*) &(outputStreamPtr->nAllocLen),
             encodeContextPtr,
-			NAL_UNIT_INVALID);
+            NAL_UNIT_INVALID);
         queueEntryPtr->startSplicing = outputStreamPtr->nFilledLen;
         if (sequenceControlSetPtr->staticConfig.pictureTimingSEI) {
             if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
@@ -700,8 +700,8 @@ void* PacketizationKernel(void *inputPtr)
                 &outputStreamPtr->pBuffer,
                 (EB_U32*) &(outputStreamPtr->nFilledLen),
                 (EB_U32*) &(outputStreamPtr->nAllocLen),
-			    encodeContextPtr,
-			    NAL_UNIT_INVALID);
+                encodeContextPtr,
+                NAL_UNIT_INVALID);
 
             bufferRate = encodeContextPtr->vbvMaxrate / (sequenceControlSetPtr->staticConfig.frameRate >> 16);
             queueEntryPtr->fillerBitsSent = 0;
@@ -769,7 +769,7 @@ void* PacketizationKernel(void *inputPtr)
                 (EB_U32*) &(outputStreamPtr->nFilledLen),
                 (EB_U32*) &(outputStreamPtr->nAllocLen),
                 ((SequenceControlSet_t*)(pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr))->encodeContextPtr,
-				NAL_UNIT_INVALID);
+                NAL_UNIT_INVALID);
         }
 
         //Store the buffer in the Queue
@@ -868,7 +868,7 @@ void* PacketizationKernel(void *inputPtr)
                     (EB_U32*) &(queueEntryPtr->startSplicing),
                     (EB_U32*) &(outputStreamPtr->nAllocLen),
                     sequenceControlSetPtr->encodeContextPtr,
-					NAL_UNIT_INVALID);
+                    NAL_UNIT_INVALID);
                 outputStreamPtr->nFilledLen += bufferWrittenBytesCount;
             }
 

@@ -75,10 +75,10 @@ extern EB_U32 EndianSwap(EB_U32 ui);
 #ifdef _MSC_VER
 #define MULTI_LINE_MACRO_BEGIN do {
 #define MULTI_LINE_MACRO_END \
-	__pragma(warning(push)) \
-	__pragma(warning(disable:4127)) \
-	} while(0) \
-	__pragma(warning(pop))
+    __pragma(warning(push)) \
+    __pragma(warning(disable:4127)) \
+    } while(0) \
+    __pragma(warning(pop))
 #else
 #define MULTI_LINE_MACRO_BEGIN do {
 #define MULTI_LINE_MACRO_END } while(0)
@@ -112,7 +112,7 @@ extern EB_U32 EndianSwap(EB_U32 ui);
 // rounds down to the next power of two
 #define FLOOR_POW2(x)       \
     MULTI_LINE_MACRO_BEGIN  \
-		(x) |= ((x) >> 1);  \
+        (x) |= ((x) >> 1);  \
         (x) |= ((x) >> 2);  \
         (x) |= ((x) >> 4);  \
         (x) |= ((x) >> 8);  \
@@ -123,7 +123,7 @@ extern EB_U32 EndianSwap(EB_U32 ui);
 // rounds up to the next power of two
 #define CEIL_POW2(x)        \
     MULTI_LINE_MACRO_BEGIN  \
-		(x) -= 1;           \
+        (x) -= 1;           \
         (x) |= ((x) >> 1);  \
         (x) |= ((x) >> 2);  \
         (x) |= ((x) >> 4);  \
@@ -166,37 +166,37 @@ extern EB_U32 EndianSwap(EB_U32 ui);
 #define MAX_UNSIGNED_VALUE     ~0u
 #define MIN_SIGNED_VALUE       ~0 - ((signed) (~0u >> 1))
 #define MAX_SIGNED_VALUE       ((signed) (~0u >> 1))
-#define MINI_GOP_MAX_COUNT			15
-#define MINI_GOP_WINDOW_MAX_COUNT	 8	// widow subdivision: 8 x 3L
+#define MINI_GOP_MAX_COUNT            15
+#define MINI_GOP_WINDOW_MAX_COUNT     8    // widow subdivision: 8 x 3L
 
-#define MIN_HIERARCHICAL_LEVEL		 2
+#define MIN_HIERARCHICAL_LEVEL         2
 static const EB_U32 MiniGopOffset[4] = { 1, 3, 7, 31 };
 
 typedef struct MiniGopStats_s
 {
-	EB_U32  hierarchicalLevels;
-	EB_U32  startIndex;
-	EB_U32  endIndex;
-	EB_U32  lenght;
+    EB_U32  hierarchicalLevels;
+    EB_U32  startIndex;
+    EB_U32  endIndex;
+    EB_U32  lenght;
 
 } MiniGopStats_t;
 extern const MiniGopStats_t* GetMiniGopStats(const EB_U32 miniGopIndex);
 typedef enum MINI_GOP_INDEX {
-	L6_INDEX   = 0,
-	L5_0_INDEX = 1,
-	L4_0_INDEX = 2,
-	L3_0_INDEX = 3,
-	L3_1_INDEX = 4,
-	L4_1_INDEX = 5,
-	L3_2_INDEX = 6,
-	L3_3_INDEX = 7,
-	L5_1_INDEX = 8,
-	L4_2_INDEX = 9,
-	L3_4_INDEX = 10,
-	L3_5_INDEX = 11,
-	L4_3_INDEX = 12,
-	L3_6_INDEX = 13,
-	L3_7_INDEX = 14
+    L6_INDEX   = 0,
+    L5_0_INDEX = 1,
+    L4_0_INDEX = 2,
+    L3_0_INDEX = 3,
+    L3_1_INDEX = 4,
+    L4_1_INDEX = 5,
+    L3_2_INDEX = 6,
+    L3_3_INDEX = 7,
+    L5_1_INDEX = 8,
+    L4_2_INDEX = 9,
+    L3_4_INDEX = 10,
+    L3_5_INDEX = 11,
+    L4_3_INDEX = 12,
+    L3_6_INDEX = 13,
+    L3_7_INDEX = 14
 } MINI_GOP_INDEX;
 
 void EbHevcStartTime(EB_U64 *Startseconds, EB_U64 *Startuseconds);

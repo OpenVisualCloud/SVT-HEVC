@@ -14,7 +14,7 @@ EB_ERRORTYPE EncDecTasksCtor(
 {
     EncDecTasks_t *contextPtr;
     EB_MALLOC(EncDecTasks_t*, contextPtr, sizeof(EncDecTasks_t), EB_N_PTR);
-    
+
     *objectDblPtr = (EB_PTR) contextPtr;
 
     (void) objectInitDataPtr;

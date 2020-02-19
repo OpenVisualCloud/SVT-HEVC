@@ -221,7 +221,7 @@ void EbActiveParameterSetSeiCtor(
     activeParameterSetSei->noParameterSetUpdateFlag = EB_FALSE;
     activeParameterSetSei->numSpsIdsMinus1 = 0;
     activeParameterSetSei->activeSeqParameterSetId = 0;
-//	activeParameterSetSei->layerSpsIdx = 0;
+//    activeParameterSetSei->layerSpsIdx = 0;
     return;
 }
 

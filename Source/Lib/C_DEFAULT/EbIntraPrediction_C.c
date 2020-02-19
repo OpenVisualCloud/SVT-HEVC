@@ -184,7 +184,7 @@ void IntraModeHorizontalLuma(
     EB_U32 topLeftOffset = size << 1;
     EB_U32 rowStride = skip ? 2 : 1;
 
-    // --------- Reference Samples Structure ---------    
+    // --------- Reference Samples Structure ---------
     // refSamples[0]        = Left[0]
     // refSamples[1]        = Left[1]
     // ...
@@ -232,7 +232,7 @@ void IntraModeHorizontalLuma16bit(
     EB_U32 topLeftOffset = size << 1;
     EB_U32 rowStride = skip ? 2 : 1;
 
-    // --------- Reference Samples Structure ---------    
+    // --------- Reference Samples Structure ---------
     // refSamples[0]        = Left[0]
     // refSamples[1]        = Left[1]
     // ...
@@ -351,7 +351,7 @@ void IntraModeDCLuma(
     EB_U8  predictionDcValue = 128; // needs to be changed to a macro based on bit depth
     EB_U32 rowStride = skip ? 2 : 1;
 
-    // --------- Reference Samples Structure ---------   
+    // --------- Reference Samples Structure ---------
     // refSamples[0]        = Left[0]
     // refSamples[1]        = Left[1]
     // ...
@@ -422,7 +422,7 @@ void IntraModeDCLuma16bit(
     EB_U16  predictionDcValue = 128; // needs to be changed to a macro based on bit depth
     EB_U32 rowStride = skip ? 2 : 1;
 
-    // --------- Reference Samples Structure ---------   
+    // --------- Reference Samples Structure ---------
     // refSamples[0]        = Left[0]
     // refSamples[1]        = Left[1]
     // ...

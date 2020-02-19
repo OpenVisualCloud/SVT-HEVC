@@ -28,7 +28,7 @@ void PictureAddition(
     EB_U32  height)
 {
 
-	AdditionKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][width >> 3](
+    AdditionKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][width >> 3](
         predPtr,
         predStride,
         residualPtr,
@@ -74,7 +74,7 @@ EB_ERRORTYPE PictureCopy8Bit(
 
     if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
 
-		PicCopyKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][chromaAreaWidth >> 3](
+        PicCopyKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][chromaAreaWidth >> 3](
             &(src->bufferCb[srcChromaOriginIndex]),
             src->strideCb,
             &(dst->bufferCb[dstChromaOriginIndex]),
@@ -85,7 +85,7 @@ EB_ERRORTYPE PictureCopy8Bit(
 
     if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
 
-		PicCopyKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][chromaAreaWidth >> 3](
+        PicCopyKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][chromaAreaWidth >> 3](
             &(src->bufferCr[srcChromaOriginIndex]),
             src->strideCr,
             &(dst->bufferCr[dstChromaOriginIndex]),
@@ -184,47 +184,47 @@ void PictureResidual16bit(
 }
 
 EB_U64 EbHevcComputeNxMSatd8x8Units_U8(
-	EB_U8  *src,      //EB_S16 *diff,       // input parameter, diff samples Ptr
-	EB_U32  srcStride, //EB_U32  diffStride, // input parameter, source stride
-	EB_U32  width,      // input parameter, block width (N)
-	EB_U32  height,     // input parameter, block height (M)
-	EB_U64 *dcValue)
+    EB_U8  *src,      //EB_S16 *diff,       // input parameter, diff samples Ptr
+    EB_U32  srcStride, //EB_U32  diffStride, // input parameter, source stride
+    EB_U32  width,      // input parameter, block width (N)
+    EB_U32  height,     // input parameter, block height (M)
+    EB_U64 *dcValue)
 {
-	EB_U64 satd = 0;
-	EB_U32 blockIndexInWidth;
-	EB_U32 blockIndexInHeight;
-	EB_SATD_U8_TYPE Compute8x8SatdFunction = Compute8x8Satd_U8_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)];
+    EB_U64 satd = 0;
+    EB_U32 blockIndexInWidth;
+    EB_U32 blockIndexInHeight;
+    EB_SATD_U8_TYPE Compute8x8SatdFunction = Compute8x8Satd_U8_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)];
 
-	for (blockIndexInHeight = 0; blockIndexInHeight < height >> 3; ++blockIndexInHeight) {
-		for (blockIndexInWidth = 0; blockIndexInWidth < width >> 3; ++blockIndexInWidth) {
-			satd += Compute8x8SatdFunction(&(src[(blockIndexInWidth << 3) + (blockIndexInHeight << 3) * srcStride]), dcValue, srcStride);
-		}
-	}
+    for (blockIndexInHeight = 0; blockIndexInHeight < height >> 3; ++blockIndexInHeight) {
+        for (blockIndexInWidth = 0; blockIndexInWidth < width >> 3; ++blockIndexInWidth) {
+            satd += Compute8x8SatdFunction(&(src[(blockIndexInWidth << 3) + (blockIndexInHeight << 3) * srcStride]), dcValue, srcStride);
+        }
+    }
 
-	return satd;
+    return satd;
 }
 
 
 EB_U64 EbHevcComputeNxMSatd4x4Units_U8(
-	EB_U8  *src,       //EB_S16 *diff,       // input parameter, diff samples Ptr
-	EB_U32  srcStride, //EB_U32  diffStride, // input parameter, source stride
-	EB_U32  width,      // input parameter, block width (N)
-	EB_U32  height,     // input parameter, block height (M)
-	EB_U64 *dcValue)
+    EB_U8  *src,       //EB_S16 *diff,       // input parameter, diff samples Ptr
+    EB_U32  srcStride, //EB_U32  diffStride, // input parameter, source stride
+    EB_U32  width,      // input parameter, block width (N)
+    EB_U32  height,     // input parameter, block height (M)
+    EB_U64 *dcValue)
 {
 
-	EB_U64 satd = 0;
-	EB_U32 blockIndexInWidth;
-	EB_U32 blockIndexInHeight;
+    EB_U64 satd = 0;
+    EB_U32 blockIndexInWidth;
+    EB_U32 blockIndexInHeight;
 
-	for (blockIndexInHeight = 0; blockIndexInHeight < height >> 2; ++blockIndexInHeight) {
-		for (blockIndexInWidth = 0; blockIndexInWidth < width >> 2; ++blockIndexInWidth) {
-			satd += Compute4x4Satd_U8(&(src[(blockIndexInWidth << 2) + (blockIndexInHeight << 2) * srcStride]), dcValue, srcStride);
+    for (blockIndexInHeight = 0; blockIndexInHeight < height >> 2; ++blockIndexInHeight) {
+        for (blockIndexInWidth = 0; blockIndexInWidth < width >> 2; ++blockIndexInWidth) {
+            satd += Compute4x4Satd_U8(&(src[(blockIndexInWidth << 2) + (blockIndexInHeight << 2) * srcStride]), dcValue, srcStride);
 
-		}
-	}
+        }
+    }
 
-	return satd;
+    return satd;
 }
 /*******************************************
  *   returns NxM Sum of Absolute Transformed Differences using Compute4x4Satd
@@ -333,8 +333,8 @@ EB_ERRORTYPE PictureFullDistortion_R(
     EB_U64                   lumaDistortion[DIST_CALC_TOTAL],
     EB_U64                   cbDistortion[DIST_CALC_TOTAL],
     EB_U64                   crDistortion[DIST_CALC_TOTAL],
-	EB_U32                   *countNonZeroCoeffs,
-	EB_MODETYPE				 mode)
+    EB_U32                   *countNonZeroCoeffs,
+    EB_MODETYPE                 mode)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
@@ -349,7 +349,7 @@ EB_ERRORTYPE PictureFullDistortion_R(
     // Y
     if (componentMask & PICTURE_BUFFER_DESC_Y_FLAG) {
 
-		FullDistortionIntrinsic_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][countNonZeroCoeffs[0] != 0][mode == INTRA_MODE][areaSize>>3](
+        FullDistortionIntrinsic_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][countNonZeroCoeffs[0] != 0][mode == INTRA_MODE][areaSize>>3](
             &(((EB_S16*) coeff->bufferY)[coeffLumaOriginIndex]),
             coeff->strideY,
             &(((EB_S16*) reconCoeff->bufferY)[coeffLumaOriginIndex]),
@@ -362,7 +362,7 @@ EB_ERRORTYPE PictureFullDistortion_R(
     // Cb
     if (componentMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
 
-		FullDistortionIntrinsic_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][countNonZeroCoeffs[1] != 0][mode == INTRA_MODE][chromaAreaSize >> 3](
+        FullDistortionIntrinsic_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][countNonZeroCoeffs[1] != 0][mode == INTRA_MODE][chromaAreaSize >> 3](
             &(((EB_S16*) coeff->bufferCb)[coeffChromaOriginIndex]),
             coeff->strideCb,
             &(((EB_S16*) reconCoeff->bufferCb)[coeffChromaOriginIndex]),
@@ -375,7 +375,7 @@ EB_ERRORTYPE PictureFullDistortion_R(
     // Cr
     if (componentMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
 
-		FullDistortionIntrinsic_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][countNonZeroCoeffs[2] != 0][mode == INTRA_MODE][chromaAreaSize >> 3](
+        FullDistortionIntrinsic_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][countNonZeroCoeffs[2] != 0][mode == INTRA_MODE][chromaAreaSize >> 3](
             &(((EB_S16*) coeff->bufferCr)[coeffChromaOriginIndex]),
             coeff->strideCr,
             &(((EB_S16*) reconCoeff->bufferCr)[coeffChromaOriginIndex]),
@@ -401,8 +401,8 @@ EB_ERRORTYPE PictureFullDistortionLuma(
     EB_U32                   reconCoeffLumaOriginIndex,
     EB_U32                   areaSize,
     EB_U64                   lumaDistortion[DIST_CALC_TOTAL],
-	EB_U32                   countNonZeroCoeffsY,
-	EB_MODETYPE				 mode)
+    EB_U32                   countNonZeroCoeffsY,
+    EB_MODETYPE                 mode)
 {
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
@@ -411,7 +411,7 @@ EB_ERRORTYPE PictureFullDistortionLuma(
     lumaDistortion[1]   = 0;
 
     // Y
-	FullDistortionIntrinsic_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][countNonZeroCoeffsY != 0][mode == INTRA_MODE][areaSize >> 3](
+    FullDistortionIntrinsic_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][countNonZeroCoeffsY != 0][mode == INTRA_MODE][areaSize >> 3](
         &(((EB_S16*) coeff->bufferY)[coeffLumaOriginIndex]),
         coeff->strideY,
         &(((EB_S16*) reconCoeff->bufferY)[reconCoeffLumaOriginIndex]),
@@ -516,7 +516,7 @@ void UnPack2D(
     EbObjectWrapper_t   *copyFrameBufferWrapperPtr;
     EbObjectWrapper_t   *unpackEndSyncWrapperPtr;
     EB_ENC_UnPack2D_TYPE_t            *unpack;
-    
+
     for(;;){
         EbGetFullObject(context->copyFrameOutputFifoPtr,&copyFrameBufferWrapperPtr);
         EB_CHECK_END_OBJ(copyFrameBufferWrapperPtr);
@@ -534,7 +534,7 @@ void UnPack2D(
         unpack->outnStride,
         unpack->width,
         unpack->height);
-    
+
         EbGetEmptyObject(context->unPackInputFifoPtr,&unpackEndSyncWrapperPtr);
         EbReleaseObject(copyFrameBufferWrapperPtr);
         EbPostFullObject(unpackEndSyncWrapperPtr);
@@ -589,48 +589,48 @@ void CompressedPackLcu(
 
 
 void CompressedPackBlk(
-	EB_U8     *in8BitBuffer,
-	EB_U32     in8Stride,
-	EB_U8     *innBitBuffer,
-	EB_U32     innStride,
-	EB_U16    *out16BitBuffer,
-	EB_U32     outStride,
-	EB_U32     width,
-	EB_U32     height
-	)
+    EB_U8     *in8BitBuffer,
+    EB_U32     in8Stride,
+    EB_U8     *innBitBuffer,
+    EB_U32     innStride,
+    EB_U16    *out16BitBuffer,
+    EB_U32     outStride,
+    EB_U32     width,
+    EB_U32     height
+    )
 {
 
 
-	CompressedPack_funcPtrArray[((width == 64 || width == 32 || width == 16 || width == 8) ? (!!(ASM_TYPES & AVX2_MASK)) : EB_ASM_C)](
-		in8BitBuffer,
-		in8Stride,
-		innBitBuffer,
-		out16BitBuffer,
-		innStride,
-		outStride,
-		width,
-		height);
+    CompressedPack_funcPtrArray[((width == 64 || width == 32 || width == 16 || width == 8) ? (!!(ASM_TYPES & AVX2_MASK)) : EB_ASM_C)](
+        in8BitBuffer,
+        in8Stride,
+        innBitBuffer,
+        out16BitBuffer,
+        innStride,
+        outStride,
+        width,
+        height);
 
 }
 
 void Conv2bToCPackLcu(
-	const EB_U8     *innBitBuffer,
-	EB_U32     innStride,
-	EB_U8     *inCompnBitBuffer,
-	EB_U32     outStride,
-	EB_U8    *localCache,
-	EB_U32     width,
-	EB_U32     height)
+    const EB_U8     *innBitBuffer,
+    EB_U32     innStride,
+    EB_U8     *inCompnBitBuffer,
+    EB_U32     outStride,
+    EB_U8    *localCache,
+    EB_U32     width,
+    EB_U32     height)
 {
 
-	Convert_Unpack_CPack_funcPtrArray[((width == 64 || width == 32) ? (!!(ASM_TYPES & AVX2_MASK)) : EB_ASM_C)](
-		innBitBuffer,
-		innStride,
-		inCompnBitBuffer,
-		outStride,
-		localCache,
-		width,
-		height);
+    Convert_Unpack_CPack_funcPtrArray[((width == 64 || width == 32) ? (!!(ASM_TYPES & AVX2_MASK)) : EB_ASM_C)](
+        innBitBuffer,
+        innStride,
+        inCompnBitBuffer,
+        outStride,
+        localCache,
+        width,
+        height);
 
 }
 
@@ -698,6 +698,6 @@ void memset16bitBlock (
 void UnusedVariablevoidFunc_PicOper()
 {
     (void)NxMSadKernel_funcPtrArray;
-	(void)NxMSadLoopKernel_funcPtrArray;
+    (void)NxMSadLoopKernel_funcPtrArray;
     (void)NxMSadAveragingKernel_funcPtrArray;
 }

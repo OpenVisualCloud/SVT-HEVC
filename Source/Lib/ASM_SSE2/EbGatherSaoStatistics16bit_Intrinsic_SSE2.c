@@ -142,9 +142,9 @@ EB_ERRORTYPE GatherSaoStatisticsLcu_OnlyEo_90_45_135_16bit_SSE2_INTRIN(
     EB_ALIGN(16) EB_S8 rTemp[512] = { 0 };
     EB_U64 reconStrideTemp;
 
-    lcuHeight -= 2;                          
-    inputSamplePtr += inputStride + 1;       
-    reconSamplePtr++;                        
+    lcuHeight -= 2;
+    inputSamplePtr += inputStride + 1;
+    reconSamplePtr++;
 
     if (lcuWidth == 16) {
 
@@ -175,7 +175,7 @@ EB_ERRORTYPE GatherSaoStatisticsLcu_OnlyEo_90_45_135_16bit_SSE2_INTRIN(
            MACRO_CALC_EO_INDEX(reconSamplePtr+1, reconSamplePtr+2*reconStride-1)
            xmm_eoIndex = _mm_and_si128(xmm_eoIndex, xmm_skip_mask); // skip last 2 samples
            MACRO_GATHER_EO(OFFSET_EO_DIFF_3, OFFSET_EO_COUNT_3)
-           
+
            inputSamplePtr += inputStride;
            reconSamplePtr += reconStride;
         }
@@ -205,7 +205,7 @@ EB_ERRORTYPE GatherSaoStatisticsLcu_OnlyEo_90_45_135_16bit_SSE2_INTRIN(
             // EO-45
             MACRO_CALC_EO_INDEX(reconSamplePtr+1, reconSamplePtr+2*reconStride-1)
             MACRO_GATHER_EO(OFFSET_EO_DIFF_3, OFFSET_EO_COUNT_3)
-            
+
             //----------- 16-25 -----------
             xmm_temp_recon1 = _mm_loadu_si128((__m128i *)(reconSamplePtr + reconStride + 16));
             xmm_temp_recon2 = _mm_loadu_si128((__m128i *)(reconSamplePtr + reconStride + 24));
@@ -267,7 +267,7 @@ EB_ERRORTYPE GatherSaoStatisticsLcu_OnlyEo_90_45_135_16bit_SSE2_INTRIN(
                 MACRO_GATHER_EO(OFFSET_EO_DIFF_3, OFFSET_EO_COUNT_3)
 
                 inputSamplePtr += 16;
-                reconSamplePtr += 16;                 
+                reconSamplePtr += 16;
             }
             //----------- 48-53 -----------
             xmm_temp_recon1 = _mm_loadu_si128((__m128i *)(reconSamplePtr + reconStride));
@@ -366,6 +366,6 @@ EB_ERRORTYPE GatherSaoStatisticsLcu_OnlyEo_90_45_135_16bit_SSE2_INTRIN(
     MACRO_SAVE_EO(OFFSET_EO_DIFF_1, OFFSET_EO_COUNT_1, 1)
     MACRO_SAVE_EO(OFFSET_EO_DIFF_2, OFFSET_EO_COUNT_2, 2)
     MACRO_SAVE_EO(OFFSET_EO_DIFF_3, OFFSET_EO_COUNT_3, 3)
-                                    
+
     return return_error;
 }

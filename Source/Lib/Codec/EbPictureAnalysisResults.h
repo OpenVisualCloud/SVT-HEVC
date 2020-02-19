@@ -29,10 +29,10 @@ typedef struct PictureAnalysisResultInitData_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE PictureAnalysisResultCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
 
-   
+
 #ifdef __cplusplus
 }
 #endif

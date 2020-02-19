@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include "EbPictureDecisionReorderQueue.h"
 
-EB_ERRORTYPE PictureDecisionReorderEntryCtor(   
+EB_ERRORTYPE PictureDecisionReorderEntryCtor(
     PictureDecisionReorderEntry_t   **entryDblPtr,
     EB_U32                            pictureNumber)
 {
@@ -14,6 +14,6 @@ EB_ERRORTYPE PictureDecisionReorderEntryCtor(
 
     (*entryDblPtr)->pictureNumber       = pictureNumber;
     (*entryDblPtr)->parentPcsWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
-    
+
     return EB_ErrorNone;
 }

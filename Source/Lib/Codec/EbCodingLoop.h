@@ -15,23 +15,23 @@
 extern "C" {
 #endif
 /*******************************************
- * ModeDecisionLCU 
+ * ModeDecisionLCU
  *   performs CL (LCU)
  *******************************************/
 
 typedef EB_ERRORTYPE(*EB_MODE_DECISION)(
-		SequenceControlSet_t                *sequenceControlSetPtr,
-        PictureControlSet_t                 *pictureControlSetPtr, 
+        SequenceControlSet_t                *sequenceControlSetPtr,
+        PictureControlSet_t                 *pictureControlSetPtr,
         const MdcLcuData_t * const           mdcResultTbPtr,
         LargestCodingUnit_t                 *lcuPtr,
         EB_U32                               lcuOriginX,
         EB_U32                               lcuOriginY,
-		EB_U32                               lcuAddr,
+        EB_U32                               lcuAddr,
         ModeDecisionContext_t               *contextPtr);
 
 extern EB_ERRORTYPE ModeDecisionLcu(
     SequenceControlSet_t                *sequenceControlSetPtr,
-    PictureControlSet_t                 *pictureControlSetPtr, 
+    PictureControlSet_t                 *pictureControlSetPtr,
     const MdcLcuData_t * const           mdcResultTbPtr,
     LargestCodingUnit_t                 *lcuPtr,
     EB_U16                               lcuOriginX,
@@ -40,39 +40,39 @@ extern EB_ERRORTYPE ModeDecisionLcu(
     ModeDecisionContext_t               *contextPtr);
 
 extern EB_ERRORTYPE  BdpConfiguration(
-    PictureControlSet_t                 *pictureControlSetPtr, 
+    PictureControlSet_t                 *pictureControlSetPtr,
     LargestCodingUnit_t                 *lcuPtr,
     LcuParams_t                         *lcuParamPtr,
     ModeDecisionContext_t               *contextPtr);
 
 extern EB_ERRORTYPE BdpPillar(
     SequenceControlSet_t                *sequenceControlSetPtr,
-    PictureControlSet_t                 *pictureControlSetPtr, 
-    LcuParams_t                         *lcuParamPtr, 
+    PictureControlSet_t                 *pictureControlSetPtr,
+    LcuParams_t                         *lcuParamPtr,
     LargestCodingUnit_t                 *lcuPtr,
-	EB_U16                               lcuAddr,
+    EB_U16                               lcuAddr,
     ModeDecisionContext_t               *contextPtr);
 
 extern EB_ERRORTYPE Bdp64x64vs32x32RefinementProcess(
-    PictureControlSet_t                 *pictureControlSetPtr, 
-    LcuParams_t                         *lcuParamPtr, 
+    PictureControlSet_t                 *pictureControlSetPtr,
+    LcuParams_t                         *lcuParamPtr,
     LargestCodingUnit_t                 *lcuPtr,
-	EB_U16                               lcuAddr,
+    EB_U16                               lcuAddr,
     ModeDecisionContext_t               *contextPtr);
 
 extern EB_ERRORTYPE Bdp16x16vs8x8RefinementProcess(
     SequenceControlSet_t                *sequenceControlSetPtr,
-    PictureControlSet_t                 *pictureControlSetPtr, 
-    LcuParams_t                         *lcuParamPtr, 
+    PictureControlSet_t                 *pictureControlSetPtr,
+    LcuParams_t                         *lcuParamPtr,
     LargestCodingUnit_t                 *lcuPtr,
-	EB_U16                               lcuAddr,
+    EB_U16                               lcuAddr,
     ModeDecisionContext_t               *contextPtr);
 
 extern EB_ERRORTYPE BdpMvMergePass(
-    PictureControlSet_t                 *pictureControlSetPtr, 
-    LcuParams_t                         *lcuParamPtr, 
+    PictureControlSet_t                 *pictureControlSetPtr,
+    LcuParams_t                         *lcuParamPtr,
     LargestCodingUnit_t                 *lcuPtr,
-	EB_U16                               lcuAddr,
+    EB_U16                               lcuAddr,
     ModeDecisionContext_t               *contextPtr);
 
 
@@ -88,22 +88,22 @@ extern EB_ERRORTYPE LinkBdptoMd(
 
 
 extern EB_ERRORTYPE ModeDecisionRefinementLcu(
-	PictureControlSet_t                 *pictureControlSetPtr,
-	LargestCodingUnit_t                 *lcuPtr,
+    PictureControlSet_t                 *pictureControlSetPtr,
+    LargestCodingUnit_t                 *lcuPtr,
     EB_U32                               lcuOriginX,
     EB_U32                               lcuOriginY,
-	ModeDecisionContext_t               *contextPtr);
+    ModeDecisionContext_t               *contextPtr);
 
 extern EB_ERRORTYPE QpmDeriveWeightsMinAndMax(
-	PictureControlSet_t                    *pictureControlSetPtr,
-	EncDecContext_t                        *contextPtr);
+    PictureControlSet_t                    *pictureControlSetPtr,
+    EncDecContext_t                        *contextPtr);
 
 extern void EncodePass(
     SequenceControlSet_t    *sequenceControlSetPtr,
-    PictureControlSet_t     *pictureControlSetPtr, 
+    PictureControlSet_t     *pictureControlSetPtr,
     LargestCodingUnit_t     *lcuPtr,
     EB_U32                   tbAddr,
-    EB_U32                   lcuOriginX,         
+    EB_U32                   lcuOriginX,
     EB_U32                   lcuOriginY,
     EB_U32                   lcuQp,
     EB_BOOL                  enableSaoFlag,

@@ -7,7 +7,7 @@
 #include "EbPictureDecisionQueue.h"
 
 
-EB_ERRORTYPE PaReferenceQueueEntryCtor(   
+EB_ERRORTYPE PaReferenceQueueEntryCtor(
     PaReferenceQueueEntry_t   **entryDblPtr)
 {
     PaReferenceQueueEntry_t *entryPtr;
@@ -21,10 +21,10 @@ EB_ERRORTYPE PaReferenceQueueEntryCtor(
     entryPtr->list0Ptr              = (ReferenceList_t*) EB_NULL;
     entryPtr->list1Ptr              = (ReferenceList_t*) EB_NULL;
     EB_MALLOC(EB_S32*, entryPtr->list0.list, sizeof(EB_S32) * (1 << MAX_TEMPORAL_LAYERS) , EB_N_PTR);
-    
+
     EB_MALLOC(EB_S32*, entryPtr->list1.list, sizeof(EB_S32) * (1 << MAX_TEMPORAL_LAYERS) , EB_N_PTR);
 
     return EB_ErrorNone;
 }
-   
+
 

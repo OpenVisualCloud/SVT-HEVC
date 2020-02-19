@@ -1556,12 +1556,12 @@ void QuantizeInvQuantize4x4_SSE3(
         _mm_storel_epi64((__m128i *)(quantCoeff + coeffStride*row + 0), x);
         _mm_storel_epi64((__m128i *)(quantCoeff + coeffStride*row + coeffStride), _mm_srli_si128(x, 8));
 
-		__m128i zer = _mm_setzero_si128();
-		__m128i cmp = _mm_cmpeq_epi16(x, zer);
-		int msk = _mm_movemask_epi8(cmp);
+        __m128i zer = _mm_setzero_si128();
+        __m128i cmp = _mm_cmpeq_epi16(x, zer);
+        int msk = _mm_movemask_epi8(cmp);
 
-		if (msk != 0xFFFF)
-		{
+        if (msk != 0xFFFF)
+        {
         a0 = _mm_mullo_epi16(x, iq);
         a1 = _mm_mulhi_epi16(x, iq);
 
@@ -1577,11 +1577,11 @@ void QuantizeInvQuantize4x4_SSE3(
         x = _mm_packs_epi32(b0, b1);
         _mm_storel_epi64((__m128i *)(reconCoeff + coeffStride*row + 0), x);
         _mm_storel_epi64((__m128i *)(reconCoeff + coeffStride*row + coeffStride), _mm_srli_si128(x, 8));
-		}
-		else{
-			_mm_storel_epi64((__m128i *)(reconCoeff + coeffStride*row + 0), zer);
-			_mm_storel_epi64((__m128i *)(reconCoeff + coeffStride*row + coeffStride), zer);
-		}
+        }
+        else{
+            _mm_storel_epi64((__m128i *)(reconCoeff + coeffStride*row + 0), zer);
+            _mm_storel_epi64((__m128i *)(reconCoeff + coeffStride*row + coeffStride), zer);
+        }
         row += 2;
     } while (row < 4);
 

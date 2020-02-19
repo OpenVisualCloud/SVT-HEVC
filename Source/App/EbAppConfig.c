@@ -93,13 +93,13 @@
 #define HRD_TOKEN                       "-hrd"
 #define MAX_QP_TOKEN                    "-max-qp"
 #define MIN_QP_TOKEN                    "-min-qp"
-#define TEMPORAL_ID					    "-temporal-id" // no Eval
+#define TEMPORAL_ID                        "-temporal-id" // no Eval
 #define LOOK_AHEAD_DIST_TOKEN           "-lad"
 #define SCENE_CHANGE_DETECTION_TOKEN    "-scd"
 #define INJECTOR_TOKEN                  "-inj"  // no Eval
 #define INJECTOR_FRAMERATE_TOKEN        "-inj-frm-rt" // no Eval
 #define SPEED_CONTROL_TOKEN             "-speed-ctrl"
-#define ASM_TYPE_TOKEN				    "-asm" // no Eval
+#define ASM_TYPE_TOKEN                    "-asm" // no Eval
 #define THREAD_MGMNT                    "-lp"
 #define TARGET_SOCKET                   "-ss"
 #define THREAD_COUNT                    "-thread-count"
@@ -176,7 +176,7 @@ static void SetCfgSegmentOvFile(const char *value, EbConfig_t *cfg)
     else
         printf("Error segment Override file: %s does not exist, won't use\n",value);
 };
-static void SetCfgDolbyVisionRpuFile			(const char *value, EbConfig_t *cfg)
+static void SetCfgDolbyVisionRpuFile            (const char *value, EbConfig_t *cfg)
 {
     if (cfg->dolbyVisionRpuFile) { fclose(cfg->dolbyVisionRpuFile); }
     FOPEN(cfg->dolbyVisionRpuFile, value, "rb");
@@ -234,10 +234,10 @@ static void SetEnableConstrainedIntra           (const char *value, EbConfig_t *
 static void SetCfgTune                          (const char *value, EbConfig_t *cfg) {cfg->tune                             = (uint8_t)strtoul(value, NULL, 0); };
 static void SetBitRateReduction                 (const char *value, EbConfig_t *cfg) {cfg->bitRateReduction                 = (EB_BOOL)strtol(value, NULL, 0); };
 static void SetImproveSharpness                 (const char *value, EbConfig_t *cfg) {cfg->improveSharpness                 = (EB_BOOL)strtol(value,  NULL, 0);};
-static void SetVbvMaxrate                       (const char *value, EbConfig_t *cfg) { cfg->vbvMaxRate						= strtoul(value, NULL, 0);};
-static void SetVbvBufsize                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufsize						= strtoul(value, NULL, 0);};
-static void SetVbvBufInit                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufInit						= strtoul(value, NULL, 0);};
-static void SetHrdFlag                          (const char *value, EbConfig_t *cfg) { cfg->hrdFlag							= strtoul(value, NULL, 0);};
+static void SetVbvMaxrate                       (const char *value, EbConfig_t *cfg) { cfg->vbvMaxRate                        = strtoul(value, NULL, 0);};
+static void SetVbvBufsize                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufsize                        = strtoul(value, NULL, 0);};
+static void SetVbvBufInit                       (const char *value, EbConfig_t *cfg) { cfg->vbvBufInit                        = strtoul(value, NULL, 0);};
+static void SetHrdFlag                          (const char *value, EbConfig_t *cfg) { cfg->hrdFlag                            = strtoul(value, NULL, 0);};
 static void SetVideoUsabilityInfo               (const char *value, EbConfig_t *cfg) {cfg->videoUsabilityInfo               = strtol(value,  NULL, 0);};
 static void SetHighDynamicRangeInput            (const char *value, EbConfig_t *cfg) {cfg->highDynamicRangeInput            = strtol(value,  NULL, 0);};
 static void SetAccessUnitDelimiter              (const char *value, EbConfig_t *cfg) {cfg->accessUnitDelimiter              = strtol(value,  NULL, 0);};
@@ -379,7 +379,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, CONSTRAINED_INTRA_ENABLE_TOKEN, "ConstrainedIntra", SetEnableConstrainedIntra },
 
     // Rate Control
-	{ SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "RateControlMode", SetRateControlMode },
+    { SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "RateControlMode", SetRateControlMode },
     { SINGLE_INPUT, TARGET_BIT_RATE_TOKEN, "TargetBitRate", SetTargetBitRate },
     { SINGLE_INPUT, MAX_QP_TOKEN, "MaxQpAllowed", SetMaxQpAllowed },
     { SINGLE_INPUT, MIN_QP_TOKEN, "MinQpAllowed", SetMinQpAllowed },
@@ -593,7 +593,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
 
     configPtr->performanceContext.encodeStartTime[0]= 0;
     configPtr->performanceContext.encodeStartTime[1]= 0;
-    
+
     configPtr->performanceContext.totalExecutionTime= 0;
     configPtr->performanceContext.totalEncodeTime   = 0;
     configPtr->performanceContext.frameCount        = 0;
@@ -840,7 +840,7 @@ static int32_t FindToken(
 **********************************/
 static int32_t ReadConfigFile(
     EbConfig_t  *config,
-    char		*configPath,
+    char        *configPath,
     uint32_t     instanceIdx)
 {
     int32_t return_error = 0;
@@ -1217,8 +1217,8 @@ EB_ERRORTYPE ReadCommandLine(
 {
 
     EB_ERRORTYPE return_error = EB_ErrorBadParameter;
-    char		    config_string[COMMAND_LINE_MAX_SIZE];		// for one input options
-    char		   *config_strings[MAX_CHANNEL_NUMBER]; // for multiple input options
+    char            config_string[COMMAND_LINE_MAX_SIZE];        // for one input options
+    char           *config_strings[MAX_CHANNEL_NUMBER]; // for multiple input options
     char           *cmd_copy[MAX_NUM_TOKENS];                 // keep track of extra tokens
     uint32_t    index           = 0;
     int32_t             cmd_token_cnt   = 0;                        // total number of tokens

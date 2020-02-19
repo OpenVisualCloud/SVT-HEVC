@@ -1,4 +1,4 @@
-/* 
+/*
 * Copyright(c) 2018 Intel Corporation
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
@@ -820,7 +820,7 @@ void IntraModeVerticalLuma_AVX2_INTRIN(
     EB_U8            *refSamples,             //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,          //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride, //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip                    //skip one row 
+    const EB_BOOL     skip                    //skip one row
     )
 {
     EB_U32 topLeftOffset = size << 1;
@@ -834,31 +834,31 @@ void IntraModeVerticalLuma_AVX2_INTRIN(
 
         xmm0 = _mm_setzero_si128();
         xmm_mask1 = _mm_slli_si128(_mm_set1_epi8((signed char)0xFF), 1);
-        xmm_mask2 = _mm_srli_si128(xmm_mask1, 15);              
-        
+        xmm_mask2 = _mm_srli_si128(xmm_mask1, 15);
+
         xmm_topLeft = _mm_set_epi16((signed short)0xffff, (signed short)0xffff, (signed short)0xffff, (signed short)0xffff, (signed short)0xffff, (signed short)0xffff, (signed short)0xffff, *(EB_U16*)(refSamples + topLeftOffset));
-        xmm_topLeft = _mm_unpacklo_epi8(xmm_topLeft, xmm0);         
-        xmm_topLeft = _mm_unpacklo_epi16(xmm_topLeft, xmm_topLeft);        
-        xmm_topLeft = _mm_unpacklo_epi32(xmm_topLeft, xmm_topLeft);        
-        xmm_topLeft_hi = _mm_unpackhi_epi64(xmm_topLeft, xmm_topLeft);        
-        xmm_topLeft_lo = _mm_unpacklo_epi64(xmm_topLeft, xmm_topLeft);        
-       
+        xmm_topLeft = _mm_unpacklo_epi8(xmm_topLeft, xmm0);
+        xmm_topLeft = _mm_unpacklo_epi16(xmm_topLeft, xmm_topLeft);
+        xmm_topLeft = _mm_unpacklo_epi32(xmm_topLeft, xmm_topLeft);
+        xmm_topLeft_hi = _mm_unpackhi_epi64(xmm_topLeft, xmm_topLeft);
+        xmm_topLeft_lo = _mm_unpacklo_epi64(xmm_topLeft, xmm_topLeft);
+
         if (!skip) {
 
             if (size == 8) {
-                            
-                xmm_left = _mm_packus_epi16(_mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(_mm_unpacklo_epi8(_mm_loadl_epi64((__m128i *)(refSamples + leftOffset)), xmm0), xmm_topLeft_lo), 1), xmm_topLeft_hi), xmm0);      
-                xmm_top = _mm_and_si128(_mm_loadl_epi64((__m128i *)(refSamples + topOffset)), xmm_mask1);         
+
+                xmm_left = _mm_packus_epi16(_mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(_mm_unpacklo_epi8(_mm_loadl_epi64((__m128i *)(refSamples + leftOffset)), xmm0), xmm_topLeft_lo), 1), xmm_topLeft_hi), xmm0);
+                xmm_top = _mm_and_si128(_mm_loadl_epi64((__m128i *)(refSamples + topOffset)), xmm_mask1);
                 MACRO_VERTICAL_LUMA_8(xmm_left, xmm_mask2, xmm_top)
-                predictionPtr += (pStride << 2);             
+                predictionPtr += (pStride << 2);
                 MACRO_VERTICAL_LUMA_8(xmm_left, xmm_mask2, xmm_top)
             }
-            else if (size == 16) { 
-                xmm_left = _mm_loadu_si128((__m128i *)(refSamples + leftOffset));           
-                xmm_left_lo = _mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(_mm_unpacklo_epi8(xmm_left, xmm0), xmm_topLeft_lo), 1), xmm_topLeft_hi);         
-                xmm_left_hi = _mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(_mm_unpackhi_epi8(xmm_left, xmm0), xmm_topLeft_lo), 1), xmm_topLeft_hi);         
-                xmm_left = _mm_packus_epi16(xmm_left_lo, xmm_left_hi);      
-                xmm_top = _mm_and_si128(_mm_loadu_si128((__m128i *)(refSamples + topOffset)), xmm_mask1);         
+            else if (size == 16) {
+                xmm_left = _mm_loadu_si128((__m128i *)(refSamples + leftOffset));
+                xmm_left_lo = _mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(_mm_unpacklo_epi8(xmm_left, xmm0), xmm_topLeft_lo), 1), xmm_topLeft_hi);
+                xmm_left_hi = _mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(_mm_unpackhi_epi8(xmm_left, xmm0), xmm_topLeft_lo), 1), xmm_topLeft_hi);
+                xmm_left = _mm_packus_epi16(xmm_left_lo, xmm_left_hi);
+                xmm_top = _mm_and_si128(_mm_loadu_si128((__m128i *)(refSamples + topOffset)), xmm_mask1);
                 MACRO_VERTICAL_LUMA_16(xmm_left, xmm_mask2, xmm_top)
                 predictionPtr += (pStride << 2);
                 MACRO_VERTICAL_LUMA_16(xmm_left, xmm_mask2, xmm_top)
@@ -869,31 +869,31 @@ void IntraModeVerticalLuma_AVX2_INTRIN(
             }
             else {
                 xmm_left = _mm_packus_epi16(_mm_add_epi16( _mm_srai_epi16(_mm_sub_epi16(_mm_unpacklo_epi8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + leftOffset)), xmm0), xmm_topLeft_lo), 1), xmm_topLeft_hi), xmm0);
-                xmm_top = _mm_and_si128(_mm_loadl_epi64((__m128i *)(refSamples + topOffset)), xmm_mask1);         
+                xmm_top = _mm_and_si128(_mm_loadl_epi64((__m128i *)(refSamples + topOffset)), xmm_mask1);
                 MACRO_VERTICAL_LUMA_4(xmm_left, xmm_mask2, xmm_top)
-                predictionPtr += (pStride << 1);             
+                predictionPtr += (pStride << 1);
                 MACRO_VERTICAL_LUMA_4(xmm_left, xmm_mask2, xmm_top)
             }
         }
-        else{                                            
-            pStride <<= 1;            
+        else{
+            pStride <<= 1;
             xmm_mask_skip = _mm_set1_epi16(0x00FF);
 
             if (size == 8) {
                 xmm_left = _mm_packus_epi16(_mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(_mm_and_si128(_mm_loadl_epi64((__m128i *)(refSamples + leftOffset)), xmm_mask_skip), xmm_topLeft_lo), 1), xmm_topLeft_hi), xmm0);
-                xmm_top = _mm_and_si128(_mm_loadl_epi64((__m128i *)(refSamples + topOffset)), xmm_mask1);                            
+                xmm_top = _mm_and_si128(_mm_loadl_epi64((__m128i *)(refSamples + topOffset)), xmm_mask1);
                 MACRO_VERTICAL_LUMA_8(xmm_left, xmm_mask2, xmm_top);
             }
             else if (size == 16) {
                 xmm_left = _mm_packus_epi16(_mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(_mm_and_si128(_mm_loadu_si128((__m128i *)(refSamples + leftOffset)), xmm_mask_skip), xmm_topLeft_lo), 1), xmm_topLeft_hi), xmm0);
-                xmm_top = _mm_and_si128(_mm_loadu_si128((__m128i *)(refSamples + topOffset)), xmm_mask1);                              
+                xmm_top = _mm_and_si128(_mm_loadu_si128((__m128i *)(refSamples + topOffset)), xmm_mask1);
                 MACRO_VERTICAL_LUMA_16(xmm_left, xmm_mask2, xmm_top)
-                predictionPtr += (pStride << 2);                                  
+                predictionPtr += (pStride << 2);
                 MACRO_VERTICAL_LUMA_16(xmm_left, xmm_mask2, xmm_top)
             }
             else {
-                xmm_left = _mm_packus_epi16(_mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(_mm_and_si128(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + leftOffset)), xmm_mask_skip), xmm_topLeft_lo), 1), xmm_topLeft_hi), xmm0);                 
-                xmm_top = _mm_and_si128(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + topOffset)), xmm_mask1);                     
+                xmm_left = _mm_packus_epi16(_mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(_mm_and_si128(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + leftOffset)), xmm_mask_skip), xmm_topLeft_lo), 1), xmm_topLeft_hi), xmm0);
+                xmm_top = _mm_and_si128(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + topOffset)), xmm_mask1);
                 MACRO_VERTICAL_LUMA_4(xmm_left, xmm_mask2, xmm_top)
             }
         }
@@ -909,20 +909,20 @@ void IntraModeVerticalLuma_AVX2_INTRIN(
         pStride = pStride << (skip ? 1 : 0);
 
         xmm0 = _mm256_loadu_si256((__m256i *)(refSamples + topOffset));
-		
-		for (count = 0; count < size_to_write; count ++) {
-            _mm256_storeu_si256((__m256i *)(predictionPtr), xmm0);                    
-            _mm256_storeu_si256((__m256i *)(predictionPtr + pStride), xmm0);          
-            _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm0);      
-            _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm0);         
-                
-            predictionPtr += (pStride << 2);                                          
-            _mm256_storeu_si256((__m256i *)(predictionPtr), xmm0);                    
-            _mm256_storeu_si256((__m256i *)(predictionPtr + pStride), xmm0);          
-            _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm0);      
-            _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm0);         
-                
-            predictionPtr += (pStride << 2);                                          
+
+        for (count = 0; count < size_to_write; count ++) {
+            _mm256_storeu_si256((__m256i *)(predictionPtr), xmm0);
+            _mm256_storeu_si256((__m256i *)(predictionPtr + pStride), xmm0);
+            _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm0);
+
+            predictionPtr += (pStride << 2);
+            _mm256_storeu_si256((__m256i *)(predictionPtr), xmm0);
+            _mm256_storeu_si256((__m256i *)(predictionPtr + pStride), xmm0);
+            _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm0);
+
+            predictionPtr += (pStride << 2);
         }
     }
 
@@ -934,7 +934,7 @@ void IntraModeDCLuma_AVX2_INTRIN(
     EB_U8            *refSamples,                 //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,              //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip)                       //skip one row 
+    const EB_BOOL     skip)                       //skip one row
 {
     __m128i xmm0 = _mm_setzero_si128();
     EB_U32 pStride = predictionBufferStride;
@@ -943,7 +943,7 @@ void IntraModeDCLuma_AVX2_INTRIN(
 
    if (size != 32) {
 
-	    __m128i xmm_mask1 = _mm_slli_si128(_mm_set1_epi8((signed char)0xFF), 1);
+        __m128i xmm_mask1 = _mm_slli_si128(_mm_set1_epi8((signed char)0xFF), 1);
         __m128i xmm_mask2 = _mm_srli_si128(xmm_mask1, 15);
         __m128i xmm_C2 = _mm_set1_epi16(0x0002);
 
@@ -958,9 +958,9 @@ void IntraModeDCLuma_AVX2_INTRIN(
                 xmm_top_hi = _mm_unpackhi_epi8(xmm_top, xmm0);
                 xmm_left_lo = _mm_unpacklo_epi8(xmm_left, xmm0);
                 xmm_left_hi = _mm_unpackhi_epi8(xmm_left, xmm0);
-                
-                xmm_sum = _mm_add_epi32(_mm_sad_epu8(xmm_top, xmm0), _mm_sad_epu8(xmm_left, xmm0));                
-                
+
+                xmm_sum = _mm_add_epi32(_mm_sad_epu8(xmm_top, xmm0), _mm_sad_epu8(xmm_left, xmm0));
+
                 xmm_predictionDcValue = _mm_srli_epi32(_mm_add_epi32(_mm_add_epi32(_mm_srli_si128(xmm_sum, 8), xmm_sum), _mm_cvtsi32_si128(16)), 5);
                 xmm_predictionDcValue = _mm_unpacklo_epi8(xmm_predictionDcValue, xmm_predictionDcValue);
                 xmm_predictionDcValue = _mm_unpacklo_epi16(xmm_predictionDcValue, xmm_predictionDcValue);
@@ -970,12 +970,12 @@ void IntraModeDCLuma_AVX2_INTRIN(
                 xmm_predictionDcValue_16 = _mm_srli_epi16(xmm_predictionDcValue, 8);
                 xmm_predictionDcValue = _mm_and_si128(xmm_predictionDcValue, xmm_mask1);
                 xmm_predictionDcValue_16_x2 = _mm_add_epi16(xmm_predictionDcValue_16, xmm_predictionDcValue_16);
-                xmm_predictionDcValue_16_x3 = _mm_add_epi16(xmm_predictionDcValue_16_x2, xmm_predictionDcValue_16); 
+                xmm_predictionDcValue_16_x3 = _mm_add_epi16(xmm_predictionDcValue_16_x2, xmm_predictionDcValue_16);
 
-                xmm_top = _mm_packus_epi16(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2), 
+                xmm_top = _mm_packus_epi16(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2),
                                            _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_hi, xmm_predictionDcValue_16_x3), xmm_C2), 2));
 
-                xmm_left = _mm_srli_si128(_mm_packus_epi16(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_left_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2), 
+                xmm_left = _mm_srli_si128(_mm_packus_epi16(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_left_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2),
                                                            _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_left_hi, xmm_predictionDcValue_16_x3), xmm_C2), 2)), 1);
 
                 xmm_predictionPtr_0 = _mm_or_si128(_mm_and_si128(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_left_lo), xmm_predictionDcValue_16_x2), xmm_C2), 2), xmm_mask2), _mm_and_si128(xmm_top, xmm_mask1));
@@ -1011,22 +1011,22 @@ void IntraModeDCLuma_AVX2_INTRIN(
                 xmm_predictionDcValue = _mm_unpacklo_epi16(xmm_predictionDcValue, xmm_predictionDcValue);
                 xmm_predictionDcValue = _mm_unpacklo_epi32(xmm_predictionDcValue, xmm_predictionDcValue);
                 xmm_predictionDcValue = _mm_unpacklo_epi64(xmm_predictionDcValue, xmm_predictionDcValue);
-                
+
                 xmm_predictionDcValue_16 = _mm_srli_epi16(xmm_predictionDcValue, 8);
                 xmm_predictionDcValue = _mm_and_si128(xmm_predictionDcValue, xmm_mask1);
-                
+
                 xmm_predictionDcValue_16_x2 = _mm_add_epi16(xmm_predictionDcValue_16, xmm_predictionDcValue_16);
                 xmm_predictionDcValue_16_x3 = _mm_add_epi16(xmm_predictionDcValue_16_x2, xmm_predictionDcValue_16);
-                
+
                 xmm_top  = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2);
-                xmm_left = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_left_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2);                
+                xmm_left = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_left_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2);
 
                 xmm_left = _mm_srli_si128(_mm_packus_epi16(xmm_left, xmm_left), 1);
                 xmm_top  = _mm_and_si128(_mm_packus_epi16(xmm_top, xmm_top), xmm_mask1);
 
                 xmm_predictionPtr_0 = _mm_or_si128(_mm_and_si128(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_left_lo), xmm_predictionDcValue_16_x2), xmm_C2), 2), xmm_mask2), xmm_top);
                 _mm_storel_epi64((__m128i *)(predictionPtr), xmm_predictionPtr_0);
-                
+
                 _mm_storel_epi64((__m128i *)(predictionPtr+pStride), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue));
                 xmm_left = _mm_srli_si128(xmm_left, 1);
                 _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue));
@@ -1036,14 +1036,14 @@ void IntraModeDCLuma_AVX2_INTRIN(
 
                 predictionPtr += (pStride << 2);
                 MACRO_VERTICAL_LUMA_8(xmm_left, xmm_mask2, xmm_predictionDcValue)
-                
+
             } else {
                 __m128i xmm_left, xmm_top, xmm_top_lo, xmm_left_lo, xmm_predictionDcValue, xmm_predictionDcValue_16;
                 __m128i xmm_predictionDcValue_16_x2, xmm_predictionDcValue_16_x3, xmm_predictionPtr_0;
 
                 xmm_top = _mm_cvtsi32_si128(*(EB_U32*)(refSamples + topOffset));
                 xmm_left = _mm_cvtsi32_si128(*(EB_U32*)(refSamples + leftOffset));
-    
+
                 xmm_top_lo = _mm_unpacklo_epi8(xmm_top, xmm0);
                 xmm_left_lo = _mm_unpacklo_epi8(xmm_left, xmm0);
                 xmm_predictionDcValue = _mm_srli_epi32(_mm_add_epi32(_mm_add_epi32(_mm_sad_epu8(xmm_top, xmm0), _mm_sad_epu8(xmm_left, xmm0)), _mm_cvtsi32_si128(4)), 3);
@@ -1056,15 +1056,15 @@ void IntraModeDCLuma_AVX2_INTRIN(
 
                 xmm_predictionDcValue_16_x2 = _mm_add_epi16(xmm_predictionDcValue_16, xmm_predictionDcValue_16);
                 xmm_predictionDcValue_16_x3 = _mm_add_epi16(xmm_predictionDcValue_16_x2, xmm_predictionDcValue_16);
-                
+
                 xmm_top = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2);
                 xmm_left = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_left_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2);
                 xmm_top = _mm_and_si128(_mm_packus_epi16(xmm_top, xmm_top), xmm_mask1);
                 xmm_left = _mm_srli_si128(_mm_packus_epi16(xmm_left, xmm_left), 1);
-                
+
                 xmm_predictionPtr_0 = _mm_or_si128(_mm_and_si128(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_left_lo), xmm_predictionDcValue_16_x2), xmm_C2), 2), xmm_mask2), xmm_top);
                 *(EB_U32*)predictionPtr = _mm_cvtsi128_si32(xmm_predictionPtr_0);
-               
+
                 *(EB_U32*)(predictionPtr + pStride) = _mm_cvtsi128_si32(_mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue));
                 xmm_left = _mm_srli_si128(xmm_left, 1);
 
@@ -1085,7 +1085,7 @@ void IntraModeDCLuma_AVX2_INTRIN(
 
                 xmm_top_lo = _mm_unpacklo_epi8(xmm_top, xmm0);
                 xmm_top_hi = _mm_unpackhi_epi8(xmm_top, xmm0);
-                
+
                 xmm_left_skipped = _mm_and_si128(xmm_skip_mask, xmm_left);
 
                 xmm_sum = _mm_add_epi32(_mm_sad_epu8(xmm_top, xmm0), _mm_sad_epu8(xmm_left, xmm0));
@@ -1095,22 +1095,22 @@ void IntraModeDCLuma_AVX2_INTRIN(
                 xmm_predictionDcValue = _mm_unpacklo_epi16(xmm_predictionDcValue, xmm_predictionDcValue);
                 xmm_predictionDcValue = _mm_unpacklo_epi32(xmm_predictionDcValue, xmm_predictionDcValue);
                 xmm_predictionDcValue = _mm_unpacklo_epi64(xmm_predictionDcValue, xmm_predictionDcValue);
-                
+
                 xmm_predictionDcValue_16 = _mm_srli_epi16(xmm_predictionDcValue, 8);
                 xmm_predictionDcValue = _mm_and_si128(xmm_predictionDcValue, xmm_mask1);
-                
+
                 xmm_predictionDcValue_16_x2 = _mm_add_epi16(xmm_predictionDcValue_16, xmm_predictionDcValue_16);
                 xmm_predictionDcValue_16_x3 = _mm_add_epi16(xmm_predictionDcValue_16_x2, xmm_predictionDcValue_16);
 
-                xmm_left = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_left_skipped, xmm_predictionDcValue_16_x3), xmm_C2), 2);                
+                xmm_left = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_left_skipped, xmm_predictionDcValue_16_x3), xmm_C2), 2);
                 xmm_left = _mm_srli_si128(_mm_packus_epi16(xmm_left, xmm_left), 1);
-                
-                xmm_top = _mm_and_si128(_mm_packus_epi16(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2), 
+
+                xmm_top = _mm_and_si128(_mm_packus_epi16(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2),
                                                          _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_hi, xmm_predictionDcValue_16_x3), xmm_C2), 2)), xmm_mask1);
 
                 xmm_predictionPtr_0 = _mm_or_si128(_mm_and_si128(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_left_skipped), xmm_predictionDcValue_16_x2), xmm_C2), 2), xmm_mask2), xmm_top);
-                _mm_storeu_si128((__m128i *)predictionPtr, xmm_predictionPtr_0);                
-                
+                _mm_storeu_si128((__m128i *)predictionPtr, xmm_predictionPtr_0);
+
                 _mm_storeu_si128((__m128i *)(predictionPtr + pStride), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue));
                 xmm_left = _mm_srli_si128(xmm_left, 1);
 
@@ -1135,10 +1135,10 @@ void IntraModeDCLuma_AVX2_INTRIN(
                 xmm_predictionDcValue = _mm_unpacklo_epi16(xmm_predictionDcValue, xmm_predictionDcValue);
                 xmm_predictionDcValue = _mm_unpacklo_epi32(xmm_predictionDcValue, xmm_predictionDcValue);
                 xmm_predictionDcValue = _mm_unpacklo_epi64(xmm_predictionDcValue, xmm_predictionDcValue);
-                
+
                 xmm_predictionDcValue_16 = _mm_srli_epi16(xmm_predictionDcValue, 8);
                 xmm_predictionDcValue = _mm_and_si128(xmm_predictionDcValue, xmm_mask1);
-                
+
                 xmm_predictionDcValue_16_x2 = _mm_add_epi16(xmm_predictionDcValue_16, xmm_predictionDcValue_16);
                 xmm_predictionDcValue_16_x3 = _mm_add_epi16(xmm_predictionDcValue_16_x2, xmm_predictionDcValue_16);
 
@@ -1149,10 +1149,10 @@ void IntraModeDCLuma_AVX2_INTRIN(
                 xmm_left = _mm_srli_si128(_mm_packus_epi16(xmm_left, xmm_left), 1);
                 xmm_predictionPtr_0 = _mm_or_si128(_mm_and_si128(xmm_predictionPtr_0, xmm_mask2), _mm_and_si128(_mm_packus_epi16(xmm_top, xmm_top), xmm_mask1));
                 _mm_storel_epi64((__m128i *)predictionPtr, xmm_predictionPtr_0);
-                
+
                 _mm_storel_epi64((__m128i *)(predictionPtr + pStride), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue));
                 xmm_left = _mm_srli_si128(xmm_left, 1);
-                
+
                 _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue));
 
                 _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), _mm_or_si128(_mm_and_si128(_mm_srli_si128(xmm_left, 1), xmm_mask2), xmm_predictionDcValue));
@@ -1160,29 +1160,29 @@ void IntraModeDCLuma_AVX2_INTRIN(
             }
         }
     }
- 
-  
+
+
 
 /*************************************************************************************************************************************************************************************************************/
   else {
-	     __m256i xmm_sum,xmm_sadleft,xmm_sadtop,xmm_toptmp,xmm_lefttmp ,xmm_set,xmm_sum128_2,xmm_sum256,xmm_predictionDcValue;
-		 __m256i xmm1 = _mm256_setzero_si256();
+         __m256i xmm_sum,xmm_sadleft,xmm_sadtop,xmm_toptmp,xmm_lefttmp ,xmm_set,xmm_sum128_2,xmm_sum256,xmm_predictionDcValue;
+         __m256i xmm1 = _mm256_setzero_si256();
          __m128i xmm_sumhi,xmm_sumlo,xmm_sum1,xmm_sum128,xmm_sumhitmp,xmm_sumlotmp,xmm_movelotmp,xmm_movehitmp;
-       
+
          xmm_sumhi = xmm_sumlo = xmm_sum128 = xmm_sumhitmp = xmm_sumlotmp = _mm_setzero_si128();
          xmm_sum = xmm_sadleft = xmm_sadtop =  xmm_toptmp = xmm_lefttmp  = _mm256_setzero_si256();
-      
+
          xmm_toptmp  =_mm256_sad_epu8( _mm256_set_m128i ( _mm_loadu_si128( (__m128i *)(refSamples + topOffset +16) ),_mm_loadu_si128((__m128i *)(refSamples + topOffset))),xmm1);
          xmm_lefttmp =_mm256_sad_epu8( _mm256_set_m128i( _mm_loadu_si128((__m128i *)(refSamples + leftOffset+16)),_mm_loadu_si128((__m128i *)(refSamples + leftOffset))),xmm1);
-        
-	     xmm_sum = _mm256_add_epi32(xmm_toptmp, xmm_lefttmp  ) ;
-	     xmm_sum = _mm256_hadd_epi32 (xmm_sum,xmm_sum);
-		 xmm_sumlo =  _mm256_extracti128_si256(xmm_sum,0);
-		 xmm_sumhi =  _mm256_extracti128_si256(xmm_sum,1);
-      
-	     xmm_movelotmp = _mm_move_epi64 (xmm_sumlo);
+
+         xmm_sum = _mm256_add_epi32(xmm_toptmp, xmm_lefttmp  ) ;
+         xmm_sum = _mm256_hadd_epi32 (xmm_sum,xmm_sum);
+         xmm_sumlo =  _mm256_extracti128_si256(xmm_sum,0);
+         xmm_sumhi =  _mm256_extracti128_si256(xmm_sum,1);
+
+         xmm_movelotmp = _mm_move_epi64 (xmm_sumlo);
          xmm_movehitmp = _mm_move_epi64 (xmm_sumhi);
-                    
+
          xmm_sum1 =   _mm_add_epi32(xmm_movelotmp,xmm_movehitmp);
 
          xmm_sum1 = _mm_hadd_epi32(xmm_sum1,xmm_sum1);
@@ -1190,15 +1190,15 @@ void IntraModeDCLuma_AVX2_INTRIN(
          xmm_sum256 = _mm256_castsi128_si256(xmm_sum1);
 
 
-//#endif      
+//#endif
           xmm_set = _mm256_castsi128_si256(_mm_set1_epi32(32));
-      
-	      xmm_sum128_2 = _mm256_add_epi32(xmm_sum256, xmm_set); // add offset
-          xmm_predictionDcValue = _mm256_srli_epi32(xmm_sum128_2,6); //_mm256_srli_epi32
-       
 
-          __m128i dc128      = _mm256_castsi256_si128(xmm_predictionDcValue); 
-                
+          xmm_sum128_2 = _mm256_add_epi32(xmm_sum256, xmm_set); // add offset
+          xmm_predictionDcValue = _mm256_srli_epi32(xmm_sum128_2,6); //_mm256_srli_epi32
+
+
+          __m128i dc128      = _mm256_castsi256_si128(xmm_predictionDcValue);
+
             EB_U8 dc         = _mm_cvtsi128_si32 (dc128);
            xmm_predictionDcValue = _mm256_set1_epi8(dc);//_mm_broadcastb_epi8
 
@@ -1207,35 +1207,35 @@ void IntraModeDCLuma_AVX2_INTRIN(
 
             for (count = 0; count < 2; ++count) {
 
-              _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);         
+              _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);
               _mm256_storeu_si256((__m256i *)(predictionPtr + 1 * pStride), xmm_predictionDcValue);
               _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm_predictionDcValue);
               _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm_predictionDcValue);
-          
+
               predictionPtr += (pStride << 2);
 
-             _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);  
-             _mm256_storeu_si256((__m256i *)(predictionPtr + 1 * pStride), xmm_predictionDcValue);
-             _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm_predictionDcValue);
-             _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm_predictionDcValue);
-          
-              predictionPtr += (pStride << 2);
-
-              _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);         
-              _mm256_storeu_si256((__m256i *)(predictionPtr + 1 * pStride), xmm_predictionDcValue);
-              _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm_predictionDcValue);
-              _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm_predictionDcValue);
-          
-              predictionPtr += (pStride << 2);
-
-             _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);  
+             _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);
              _mm256_storeu_si256((__m256i *)(predictionPtr + 1 * pStride), xmm_predictionDcValue);
              _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm_predictionDcValue);
              _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm_predictionDcValue);
 
               predictionPtr += (pStride << 2);
 
-           
+              _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);
+              _mm256_storeu_si256((__m256i *)(predictionPtr + 1 * pStride), xmm_predictionDcValue);
+              _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm_predictionDcValue);
+              _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm_predictionDcValue);
+
+              predictionPtr += (pStride << 2);
+
+             _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);
+             _mm256_storeu_si256((__m256i *)(predictionPtr + 1 * pStride), xmm_predictionDcValue);
+             _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm_predictionDcValue);
+             _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm_predictionDcValue);
+
+              predictionPtr += (pStride << 2);
+
+
           }
 
 
@@ -1251,7 +1251,7 @@ void IntraModeAngular_2_AVX2_INTRIN(
     EB_U8            *refSamples,                 //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,              //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip)                       //skip one row 
+    const EB_BOOL     skip)                       //skip one row
 {
     EB_U32 pStride = predictionBufferStride;
     EB_U32 leftOffset = 0;
@@ -1259,13 +1259,13 @@ void IntraModeAngular_2_AVX2_INTRIN(
     if (!skip) {
 
         if (size == 32) {
-            EB_U32 count; 
+            EB_U32 count;
             for (count = 0; count < 8; ++count){
                 _mm256_storeu_si256((__m256i *)predictionPtr,                      _mm256_loadu_si256((__m256i *)(refSamples + leftOffset + 1)));
                 _mm256_storeu_si256((__m256i *)(predictionPtr + pStride),          _mm256_loadu_si256((__m256i *)(refSamples + leftOffset + 2)));
                 _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride),      _mm256_loadu_si256((__m256i *)(refSamples + leftOffset + 3)));
                 _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride),      _mm256_loadu_si256((__m256i *)(refSamples + leftOffset + 4)));
-               
+
                 refSamples += 4;
                 predictionPtr += (pStride << 2);
             }
@@ -1317,7 +1317,7 @@ void IntraModeAngular_2_AVX2_INTRIN(
                 EB_U32 count;
 
                 for (count = 0; count < 4; ++count) {
-                    
+
                     _mm256_storeu_si256((__m256i *)predictionPtr,                      _mm256_loadu_si256((__m256i *)(refSamples + leftOffset + 1)));
                     _mm256_storeu_si256((__m256i *)(predictionPtr + pStride),          _mm256_loadu_si256((__m256i *)(refSamples + leftOffset + 3)));
                     _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride),      _mm256_loadu_si256((__m256i *)(refSamples + leftOffset + 5)));
@@ -1327,7 +1327,7 @@ void IntraModeAngular_2_AVX2_INTRIN(
                 }
             }
             else if (size == 16) {
-                
+
                 _mm_storeu_si128((__m128i *)predictionPtr,                 _mm_loadu_si128((__m128i *)(refSamples + leftOffset + 1)));
                 _mm_storeu_si128((__m128i *)(predictionPtr + pStride),     _mm_loadu_si128((__m128i *)(refSamples + leftOffset + 3)));
                 _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), _mm_loadu_si128((__m128i *)(refSamples + leftOffset + 5)));
@@ -1342,7 +1342,7 @@ void IntraModeAngular_2_AVX2_INTRIN(
                 _mm_storel_epi64((__m128i *)predictionPtr,                 _mm_loadl_epi64((__m128i *)(refSamples + leftOffset + 1)));
                 _mm_storel_epi64((__m128i *)(predictionPtr + pStride),     _mm_loadl_epi64((__m128i *)(refSamples + leftOffset + 3)));
                 _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), _mm_loadl_epi64((__m128i *)(refSamples + leftOffset + 5)));
-                _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), _mm_loadl_epi64((__m128i *)(refSamples + leftOffset + 7)));                
+                _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), _mm_loadl_epi64((__m128i *)(refSamples + leftOffset + 7)));
             }
         }
         else {
@@ -1355,287 +1355,287 @@ void IntraModeAngular_2_AVX2_INTRIN(
 #define MIDRANGE_VALUE_8BIT    128
 
 EB_U32 UpdateNeighborDcIntraPred_AVX2_INTRIN(
-	EB_U8                           *yIntraReferenceArrayReverse,
+    EB_U8                           *yIntraReferenceArrayReverse,
     EB_U16                           inputHeight,
     EB_U16                           strideY,
     EB_BYTE                          bufferY,
     EB_U16                           originY,
     EB_U16                           originX,
-	EB_U32                           srcOriginX,
-	EB_U32                           srcOriginY,
-	EB_U32                           blockSize)
+    EB_U32                           srcOriginX,
+    EB_U32                           srcOriginY,
+    EB_U32                           blockSize)
 {
 
-	EB_U32 idx;
-	EB_U8  *srcPtr;
-	EB_U8  *dstPtr;
-	EB_U8  *readPtr;
+    EB_U32 idx;
+    EB_U8  *srcPtr;
+    EB_U8  *dstPtr;
+    EB_U8  *readPtr;
 
-	//EB_U32 count;
+    //EB_U32 count;
         (void) inputHeight;
-	EB_U8 *yBorderReverse = yIntraReferenceArrayReverse;
-	//EB_U32 height = inputHeight;
-	//EB_U32 blockSizeHalf = blockSize << 1;
-	EB_U32 topOffset = (blockSize << 1) + 1;
-	EB_U32 leftOffset = 0;
-	EB_U32	stride = strideY;
-	__m128i xmm0 = _mm_setzero_si128();
-	__m256i xmm1 = _mm256_setzero_si256();
-	__m256i ymm0;
+    EB_U8 *yBorderReverse = yIntraReferenceArrayReverse;
+    //EB_U32 height = inputHeight;
+    //EB_U32 blockSizeHalf = blockSize << 1;
+    EB_U32 topOffset = (blockSize << 1) + 1;
+    EB_U32 leftOffset = 0;
+    EB_U32    stride = strideY;
+    __m128i xmm0 = _mm_setzero_si128();
+    __m256i xmm1 = _mm256_setzero_si256();
+    __m256i ymm0;
 
-	__m128i xmm_sad = _mm_setzero_si128();
+    __m128i xmm_sad = _mm_setzero_si128();
 
-	// Adjust the Source ptr to start at the origin of the block being updated
-	srcPtr = bufferY + (((srcOriginY + originY) * stride) + (srcOriginX + originX));
+    // Adjust the Source ptr to start at the origin of the block being updated
+    srcPtr = bufferY + (((srcOriginY + originY) * stride) + (srcOriginX + originX));
 
-	// Adjust the Destination ptr to start at the origin of the Intra reference array
-	dstPtr = yBorderReverse;
+    // Adjust the Destination ptr to start at the origin of the Intra reference array
+    dstPtr = yBorderReverse;
 
 //CHKn here we need ref on Top+Left only. and memset is done only for border CUs
 
-	//Initialise the Luma Intra Reference Array to the mid range value 128 (for CUs at the picture boundaries)
-	memset(dstPtr, MIDRANGE_VALUE_8BIT, (blockSize << 2) + 1);
+    //Initialise the Luma Intra Reference Array to the mid range value 128 (for CUs at the picture boundaries)
+    memset(dstPtr, MIDRANGE_VALUE_8BIT, (blockSize << 2) + 1);
 
-	// Get the left-column
-	//count = blockSizeHalf;
+    // Get the left-column
+    //count = blockSizeHalf;
 
-	readPtr = srcPtr - 1;
-
-
-	if (blockSize != 32) {
-
-		__m128i xmm_mask1 = _mm_slli_si128(_mm_set1_epi8((signed char)0xFF), 1);
-		__m128i xmm_mask2 = _mm_srli_si128(xmm_mask1, 15);
-		__m128i xmm_C2 = _mm_set1_epi16(0x0002);
+    readPtr = srcPtr - 1;
 
 
-		if (blockSize == 16) {
-			__m128i xmm_predictionDcValue, xmm_top, xmm_left, xmm_sum, xmm_predictionPtr_0;
-			__m128i xmm_top_lo, xmm_top_hi, xmm_left_lo, xmm_left_hi, xmm_predictionDcValue_16, xmm_predictionDcValue_16_x2, xmm_predictionDcValue_16_x3;
-			if (srcOriginY != 0)
-			{
-				xmm_top = _mm_loadu_si128((__m128i *)(srcPtr - stride));
-			}
-			else
-			{
-				xmm_top = _mm_loadu_si128((__m128i *)(yBorderReverse + topOffset));//_mm_set1_epi8(128);
-			}
+    if (blockSize != 32) {
 
-			if (srcOriginX != 0) {
-				xmm_left = _mm_set_epi8(*(readPtr + 15 * stride), *(readPtr + 14 * stride), *(readPtr + 13 * stride), *(readPtr + 12 * stride), *(readPtr + 11 * stride), *(readPtr + 10 * stride), *(readPtr + 9 * stride), *(readPtr + 8 * stride), *(readPtr + 7 * stride), *(readPtr + 6 * stride), *(readPtr + 5 * stride), *(readPtr + 4 * stride), *(readPtr + 3 * stride), *(readPtr + 2 * stride), *(readPtr + stride), *readPtr); //_mm_loadu_si128((__m128i *)(yBorderReverse + leftOffset));
-			}
-			else
-			{
-				xmm_left = _mm_loadu_si128((__m128i *)(yBorderReverse + leftOffset));
-			}
-
-			xmm_top_lo = _mm_unpacklo_epi8(xmm_top, xmm0);
-			xmm_top_hi = _mm_unpackhi_epi8(xmm_top, xmm0);
-			xmm_left_lo = _mm_unpacklo_epi8(xmm_left, xmm0);
-			xmm_left_hi = _mm_unpackhi_epi8(xmm_left, xmm0);
-
-			xmm_sum = _mm_add_epi32(_mm_sad_epu8(xmm_top, xmm0), _mm_sad_epu8(xmm_left, xmm0));
-
-			xmm_predictionDcValue = _mm_srli_epi32(_mm_add_epi32(_mm_add_epi32(_mm_srli_si128(xmm_sum, 8), xmm_sum), _mm_cvtsi32_si128(16)), 5);
-			xmm_predictionDcValue = _mm_unpacklo_epi8(xmm_predictionDcValue, xmm_predictionDcValue);
-			xmm_predictionDcValue = _mm_unpacklo_epi16(xmm_predictionDcValue, xmm_predictionDcValue);
-			xmm_predictionDcValue = _mm_unpacklo_epi32(xmm_predictionDcValue, xmm_predictionDcValue);
-			xmm_predictionDcValue = _mm_unpacklo_epi64(xmm_predictionDcValue, xmm_predictionDcValue);
-
-			xmm_predictionDcValue_16 = _mm_srli_epi16(xmm_predictionDcValue, 8);
-			xmm_predictionDcValue = _mm_and_si128(xmm_predictionDcValue, xmm_mask1);
-			xmm_predictionDcValue_16_x2 = _mm_add_epi16(xmm_predictionDcValue_16, xmm_predictionDcValue_16);
-			xmm_predictionDcValue_16_x3 = _mm_add_epi16(xmm_predictionDcValue_16_x2, xmm_predictionDcValue_16);
-
-			xmm_top = _mm_packus_epi16(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2),
-				_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_hi, xmm_predictionDcValue_16_x3), xmm_C2), 2));
-
-			xmm_left = _mm_srli_si128(_mm_packus_epi16(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_left_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2),
-				_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_left_hi, xmm_predictionDcValue_16_x3), xmm_C2), 2)), 1);
-
-			xmm_predictionPtr_0 = _mm_or_si128(_mm_and_si128(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_left_lo), xmm_predictionDcValue_16_x2), xmm_C2), 2), xmm_mask2), _mm_and_si128(xmm_top, xmm_mask1));
+        __m128i xmm_mask1 = _mm_slli_si128(_mm_set1_epi8((signed char)0xFF), 1);
+        __m128i xmm_mask2 = _mm_srli_si128(xmm_mask1, 15);
+        __m128i xmm_C2 = _mm_set1_epi16(0x0002);
 
 
-			xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr)), xmm_predictionPtr_0));
-			xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + stride)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
-			xmm_left = _mm_srli_si128(xmm_left, 1);
-			xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + (stride << 1))), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
-			xmm_left = _mm_srli_si128(xmm_left, 1);
-			xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + 3 * stride)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
-			xmm_left = _mm_srli_si128(xmm_left, 1);
+        if (blockSize == 16) {
+            __m128i xmm_predictionDcValue, xmm_top, xmm_left, xmm_sum, xmm_predictionPtr_0;
+            __m128i xmm_top_lo, xmm_top_hi, xmm_left_lo, xmm_left_hi, xmm_predictionDcValue_16, xmm_predictionDcValue_16_x2, xmm_predictionDcValue_16_x3;
+            if (srcOriginY != 0)
+            {
+                xmm_top = _mm_loadu_si128((__m128i *)(srcPtr - stride));
+            }
+            else
+            {
+                xmm_top = _mm_loadu_si128((__m128i *)(yBorderReverse + topOffset));//_mm_set1_epi8(128);
+            }
 
-			srcPtr += (stride << 2);
+            if (srcOriginX != 0) {
+                xmm_left = _mm_set_epi8(*(readPtr + 15 * stride), *(readPtr + 14 * stride), *(readPtr + 13 * stride), *(readPtr + 12 * stride), *(readPtr + 11 * stride), *(readPtr + 10 * stride), *(readPtr + 9 * stride), *(readPtr + 8 * stride), *(readPtr + 7 * stride), *(readPtr + 6 * stride), *(readPtr + 5 * stride), *(readPtr + 4 * stride), *(readPtr + 3 * stride), *(readPtr + 2 * stride), *(readPtr + stride), *readPtr); //_mm_loadu_si128((__m128i *)(yBorderReverse + leftOffset));
+            }
+            else
+            {
+                xmm_left = _mm_loadu_si128((__m128i *)(yBorderReverse + leftOffset));
+            }
 
-			for (idx = 4; idx < blockSize; idx += 4){
-				xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
-				xmm_left = _mm_srli_si128(xmm_left, 1);
-				xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + stride)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
-				xmm_left = _mm_srli_si128(xmm_left, 1);
-				xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + (stride << 1))), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
-				xmm_left = _mm_srli_si128(xmm_left, 1);
-				xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + 3 * stride)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
-				xmm_left = _mm_srli_si128(xmm_left, 1);
+            xmm_top_lo = _mm_unpacklo_epi8(xmm_top, xmm0);
+            xmm_top_hi = _mm_unpackhi_epi8(xmm_top, xmm0);
+            xmm_left_lo = _mm_unpacklo_epi8(xmm_left, xmm0);
+            xmm_left_hi = _mm_unpackhi_epi8(xmm_left, xmm0);
 
-				srcPtr += (stride << 2);
+            xmm_sum = _mm_add_epi32(_mm_sad_epu8(xmm_top, xmm0), _mm_sad_epu8(xmm_left, xmm0));
 
-			}
+            xmm_predictionDcValue = _mm_srli_epi32(_mm_add_epi32(_mm_add_epi32(_mm_srli_si128(xmm_sum, 8), xmm_sum), _mm_cvtsi32_si128(16)), 5);
+            xmm_predictionDcValue = _mm_unpacklo_epi8(xmm_predictionDcValue, xmm_predictionDcValue);
+            xmm_predictionDcValue = _mm_unpacklo_epi16(xmm_predictionDcValue, xmm_predictionDcValue);
+            xmm_predictionDcValue = _mm_unpacklo_epi32(xmm_predictionDcValue, xmm_predictionDcValue);
+            xmm_predictionDcValue = _mm_unpacklo_epi64(xmm_predictionDcValue, xmm_predictionDcValue);
 
-			xmm_sad = _mm_add_epi32(xmm_sad, _mm_srli_si128(xmm_sad, 8));
-			return _mm_cvtsi128_si32(xmm_sad);
-		}
+            xmm_predictionDcValue_16 = _mm_srli_epi16(xmm_predictionDcValue, 8);
+            xmm_predictionDcValue = _mm_and_si128(xmm_predictionDcValue, xmm_mask1);
+            xmm_predictionDcValue_16_x2 = _mm_add_epi16(xmm_predictionDcValue_16, xmm_predictionDcValue_16);
+            xmm_predictionDcValue_16_x3 = _mm_add_epi16(xmm_predictionDcValue_16_x2, xmm_predictionDcValue_16);
+
+            xmm_top = _mm_packus_epi16(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2),
+                _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_hi, xmm_predictionDcValue_16_x3), xmm_C2), 2));
+
+            xmm_left = _mm_srli_si128(_mm_packus_epi16(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_left_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2),
+                _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_left_hi, xmm_predictionDcValue_16_x3), xmm_C2), 2)), 1);
+
+            xmm_predictionPtr_0 = _mm_or_si128(_mm_and_si128(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_left_lo), xmm_predictionDcValue_16_x2), xmm_C2), 2), xmm_mask2), _mm_and_si128(xmm_top, xmm_mask1));
+
+
+            xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr)), xmm_predictionPtr_0));
+            xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + stride)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
+            xmm_left = _mm_srli_si128(xmm_left, 1);
+            xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + (stride << 1))), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
+            xmm_left = _mm_srli_si128(xmm_left, 1);
+            xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + 3 * stride)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
+            xmm_left = _mm_srli_si128(xmm_left, 1);
+
+            srcPtr += (stride << 2);
+
+            for (idx = 4; idx < blockSize; idx += 4){
+                xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
+                xmm_left = _mm_srli_si128(xmm_left, 1);
+                xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + stride)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
+                xmm_left = _mm_srli_si128(xmm_left, 1);
+                xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + (stride << 1))), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
+                xmm_left = _mm_srli_si128(xmm_left, 1);
+                xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + 3 * stride)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
+                xmm_left = _mm_srli_si128(xmm_left, 1);
+
+                srcPtr += (stride << 2);
+
+            }
+
+            xmm_sad = _mm_add_epi32(xmm_sad, _mm_srli_si128(xmm_sad, 8));
+            return _mm_cvtsi128_si32(xmm_sad);
+        }
 
         else {
 
 
-			__m128i xmm_left, xmm_top, xmm_top_lo, xmm_left_lo, xmm_predictionDcValue, xmm_predictionDcValue_16;
-			__m128i xmm_predictionDcValue_16_x2, xmm_predictionDcValue_16_x3, xmm_predictionPtr_0;
-			if (srcOriginY != 0)
-			{
-				xmm_top = _mm_loadl_epi64((__m128i *)(srcPtr - stride));
-			}
-			else
-			{
-				xmm_top = _mm_loadl_epi64((__m128i *)(yBorderReverse + topOffset));//_mm_set1_epi8(128);//
-			}
+            __m128i xmm_left, xmm_top, xmm_top_lo, xmm_left_lo, xmm_predictionDcValue, xmm_predictionDcValue_16;
+            __m128i xmm_predictionDcValue_16_x2, xmm_predictionDcValue_16_x3, xmm_predictionPtr_0;
+            if (srcOriginY != 0)
+            {
+                xmm_top = _mm_loadl_epi64((__m128i *)(srcPtr - stride));
+            }
+            else
+            {
+                xmm_top = _mm_loadl_epi64((__m128i *)(yBorderReverse + topOffset));//_mm_set1_epi8(128);//
+            }
 
-			if (srcOriginX != 0) {
-				xmm_left = _mm_set_epi8(0, 0, 0, 0, 0, 0, 0, 0, *(readPtr + 7 * stride), *(readPtr + 6 * stride), *(readPtr + 5 * stride), *(readPtr + 4 * stride), *(readPtr + 3 * stride), *(readPtr + 2 * stride), *(readPtr + stride), *readPtr); //_mm_loadu_si128((__m128i *)(yBorderReverse + leftOffset));
-			}
-			else
-			{
-				xmm_left = _mm_loadl_epi64((__m128i *)(yBorderReverse + leftOffset));
-			}
+            if (srcOriginX != 0) {
+                xmm_left = _mm_set_epi8(0, 0, 0, 0, 0, 0, 0, 0, *(readPtr + 7 * stride), *(readPtr + 6 * stride), *(readPtr + 5 * stride), *(readPtr + 4 * stride), *(readPtr + 3 * stride), *(readPtr + 2 * stride), *(readPtr + stride), *readPtr); //_mm_loadu_si128((__m128i *)(yBorderReverse + leftOffset));
+            }
+            else
+            {
+                xmm_left = _mm_loadl_epi64((__m128i *)(yBorderReverse + leftOffset));
+            }
 
-			xmm_top_lo = _mm_unpacklo_epi8(xmm_top, xmm0);
-			xmm_left_lo = _mm_unpacklo_epi8(xmm_left, xmm0);
+            xmm_top_lo = _mm_unpacklo_epi8(xmm_top, xmm0);
+            xmm_left_lo = _mm_unpacklo_epi8(xmm_left, xmm0);
 
-			xmm_predictionDcValue = _mm_srli_epi32(_mm_add_epi32(_mm_add_epi32(_mm_sad_epu8(xmm_top, xmm0), _mm_sad_epu8(xmm_left, xmm0)), _mm_cvtsi32_si128(8)), 4);
-			xmm_predictionDcValue = _mm_unpacklo_epi8(xmm_predictionDcValue, xmm_predictionDcValue);
-			xmm_predictionDcValue = _mm_unpacklo_epi16(xmm_predictionDcValue, xmm_predictionDcValue);
-			xmm_predictionDcValue = _mm_unpacklo_epi32(xmm_predictionDcValue, xmm_predictionDcValue);
-			xmm_predictionDcValue = _mm_unpacklo_epi64(xmm_predictionDcValue, xmm_predictionDcValue);
+            xmm_predictionDcValue = _mm_srli_epi32(_mm_add_epi32(_mm_add_epi32(_mm_sad_epu8(xmm_top, xmm0), _mm_sad_epu8(xmm_left, xmm0)), _mm_cvtsi32_si128(8)), 4);
+            xmm_predictionDcValue = _mm_unpacklo_epi8(xmm_predictionDcValue, xmm_predictionDcValue);
+            xmm_predictionDcValue = _mm_unpacklo_epi16(xmm_predictionDcValue, xmm_predictionDcValue);
+            xmm_predictionDcValue = _mm_unpacklo_epi32(xmm_predictionDcValue, xmm_predictionDcValue);
+            xmm_predictionDcValue = _mm_unpacklo_epi64(xmm_predictionDcValue, xmm_predictionDcValue);
 
-			xmm_predictionDcValue_16 = _mm_srli_epi16(xmm_predictionDcValue, 8);
-			xmm_predictionDcValue = _mm_and_si128(xmm_predictionDcValue, xmm_mask1);
+            xmm_predictionDcValue_16 = _mm_srli_epi16(xmm_predictionDcValue, 8);
+            xmm_predictionDcValue = _mm_and_si128(xmm_predictionDcValue, xmm_mask1);
 
-			xmm_predictionDcValue_16_x2 = _mm_add_epi16(xmm_predictionDcValue_16, xmm_predictionDcValue_16);
-			xmm_predictionDcValue_16_x3 = _mm_add_epi16(xmm_predictionDcValue_16_x2, xmm_predictionDcValue_16);
+            xmm_predictionDcValue_16_x2 = _mm_add_epi16(xmm_predictionDcValue_16, xmm_predictionDcValue_16);
+            xmm_predictionDcValue_16_x3 = _mm_add_epi16(xmm_predictionDcValue_16_x2, xmm_predictionDcValue_16);
 
-			xmm_top = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2);
-			xmm_left = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_left_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2);
+            xmm_top = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2);
+            xmm_left = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(xmm_left_lo, xmm_predictionDcValue_16_x3), xmm_C2), 2);
 
-			xmm_left = _mm_srli_si128(_mm_packus_epi16(xmm_left, xmm_left), 1);
-			xmm_top = _mm_and_si128(_mm_packus_epi16(xmm_top, xmm_top), xmm_mask1);
+            xmm_left = _mm_srli_si128(_mm_packus_epi16(xmm_left, xmm_left), 1);
+            xmm_top = _mm_and_si128(_mm_packus_epi16(xmm_top, xmm_top), xmm_mask1);
 
-			xmm_predictionPtr_0 = _mm_or_si128(_mm_and_si128(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_left_lo), xmm_predictionDcValue_16_x2), xmm_C2), 2), xmm_mask2), xmm_top);
-
-
-
-			xmm_sad = _mm_setzero_si128();
-
-			xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr)), xmm_predictionPtr_0));
-			xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + stride)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
-			xmm_left = _mm_srli_si128(xmm_left, 1);
-			xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + (stride << 1))), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
-			xmm_left = _mm_srli_si128(xmm_left, 1);
-			xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + 3 * stride)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
-			xmm_left = _mm_srli_si128(xmm_left, 1);
-
-			srcPtr += (stride << 2);
-
-			for (idx = 4; idx < blockSize; idx += 4){
-				xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
-				xmm_left = _mm_srli_si128(xmm_left, 1);
-				xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + stride)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
-				xmm_left = _mm_srli_si128(xmm_left, 1);
-				xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + (stride << 1))), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
-				xmm_left = _mm_srli_si128(xmm_left, 1);
-				xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + 3 * stride)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
-				xmm_left = _mm_srli_si128(xmm_left, 1);
-
-				srcPtr += (stride << 2);
-
-			}
-
-			return _mm_cvtsi128_si32(xmm_sad);
-
-		}
-	}
+            xmm_predictionPtr_0 = _mm_or_si128(_mm_and_si128(_mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(xmm_top_lo, xmm_left_lo), xmm_predictionDcValue_16_x2), xmm_C2), 2), xmm_mask2), xmm_top);
 
 
 
-	/*************************************************************************************************************************************************************************************************************/
-	else {
-		__m256i xmm_sum, xmm_sadleft, xmm_sadtop, xmm_toptmp, xmm_lefttmp, xmm_set, xmm_sum128_2, xmm_sum256, xmm_predictionDcValue;
-		__m128i xmm_sumhi, xmm_sumlo, xmm_sum1, xmm_sum128, xmm_sumhitmp, xmm_sumlotmp, xmm_movelotmp, xmm_movehitmp;
+            xmm_sad = _mm_setzero_si128();
 
-		xmm_sumhi = xmm_sumlo = xmm_sum128 = xmm_sumhitmp = xmm_sumlotmp = _mm_setzero_si128();
-		xmm_sum = xmm_sadleft = xmm_sadtop = xmm_toptmp = xmm_lefttmp = _mm256_setzero_si256();
+            xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr)), xmm_predictionPtr_0));
+            xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + stride)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
+            xmm_left = _mm_srli_si128(xmm_left, 1);
+            xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + (stride << 1))), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
+            xmm_left = _mm_srli_si128(xmm_left, 1);
+            xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + 3 * stride)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
+            xmm_left = _mm_srli_si128(xmm_left, 1);
 
-		if (srcOriginY != 0)
-		{
-			xmm_toptmp = _mm256_sad_epu8(_mm256_set_m128i(_mm_loadu_si128((__m128i *)(srcPtr - stride + 16)), _mm_loadu_si128((__m128i *)(srcPtr - stride))), xmm1);
+            srcPtr += (stride << 2);
 
-		}
-		else
-		{
-			xmm_toptmp = _mm256_sad_epu8(_mm256_set_m128i(_mm_loadu_si128((__m128i *)(yBorderReverse + topOffset + 16)), _mm_loadu_si128((__m128i *)(yBorderReverse + topOffset))), xmm1);
+            for (idx = 4; idx < blockSize; idx += 4){
+                xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
+                xmm_left = _mm_srli_si128(xmm_left, 1);
+                xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + stride)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
+                xmm_left = _mm_srli_si128(xmm_left, 1);
+                xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + (stride << 1))), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
+                xmm_left = _mm_srli_si128(xmm_left, 1);
+                xmm_sad = _mm_add_epi32(xmm_sad, _mm_sad_epu8(_mm_loadu_si128((__m128i*)(srcPtr + 3 * stride)), _mm_or_si128(_mm_and_si128(xmm_left, xmm_mask2), xmm_predictionDcValue)));
+                xmm_left = _mm_srli_si128(xmm_left, 1);
 
-		}
-		if (srcOriginX != 0) {
-			xmm_lefttmp = _mm256_sad_epu8(_mm256_set_epi8(*(readPtr + 31 * stride), *(readPtr + 30 * stride), *(readPtr + 29 * stride), *(readPtr + 28 * stride), *(readPtr + 27 * stride), *(readPtr + 26 * stride), *(readPtr + 25 * stride), *(readPtr + 24 * stride), *(readPtr + 23 * stride), *(readPtr + 22 * stride), *(readPtr + 21 * stride), *(readPtr + 20 * stride),
-				*(readPtr + 19 * stride), *(readPtr + 18 * stride), *(readPtr + 17 * stride), *(readPtr + 16 * stride), *(readPtr + 15 * stride), *(readPtr + 14 * stride), *(readPtr + 13 * stride), *(readPtr + 12 * stride), *(readPtr + 11 * stride), *(readPtr + 10 * stride), *(readPtr + 9 * stride), *(readPtr + 8 * stride), *(readPtr + 7 * stride), *(readPtr + 6 * stride), *(readPtr + 5 * stride), *(readPtr + 4 * stride), *(readPtr + 3 * stride), *(readPtr + 2 * stride), *(readPtr + stride), *readPtr)
-				, xmm1);
+                srcPtr += (stride << 2);
 
-		}
-		else
-		{
-			xmm_lefttmp = _mm256_sad_epu8(_mm256_set_m128i(_mm_loadu_si128((__m128i *)(yBorderReverse + leftOffset + 16)), _mm_loadu_si128((__m128i *)(yBorderReverse + leftOffset))), xmm1);
+            }
 
-		}
+            return _mm_cvtsi128_si32(xmm_sad);
 
-		xmm_sum = _mm256_add_epi32(xmm_toptmp, xmm_lefttmp);
-		xmm_sum = _mm256_hadd_epi32(xmm_sum, xmm_sum);
-
-		xmm_sumlo = _mm256_extracti128_si256(xmm_sum, 0);
-		xmm_sumhi = _mm256_extracti128_si256(xmm_sum, 1);
-
-		xmm_movelotmp = _mm_move_epi64(xmm_sumlo);
-		xmm_movehitmp = _mm_move_epi64(xmm_sumhi);
-
-		xmm_sum1 = _mm_add_epi32(xmm_movelotmp, xmm_movehitmp);
-
-		xmm_sum1 = _mm_hadd_epi32(xmm_sum1, xmm_sum1);
-
-		xmm_sum256 = _mm256_castsi128_si256(xmm_sum1);
+        }
+    }
 
 
-		xmm_set = _mm256_castsi128_si256(_mm_set1_epi32(32));
 
-		xmm_sum128_2 = _mm256_add_epi32(xmm_sum256, xmm_set); // add offset
-		xmm_predictionDcValue = _mm256_srli_epi32(xmm_sum128_2, 6); //_mm256_srli_epi32
+    /*************************************************************************************************************************************************************************************************************/
+    else {
+        __m256i xmm_sum, xmm_sadleft, xmm_sadtop, xmm_toptmp, xmm_lefttmp, xmm_set, xmm_sum128_2, xmm_sum256, xmm_predictionDcValue;
+        __m128i xmm_sumhi, xmm_sumlo, xmm_sum1, xmm_sum128, xmm_sumhitmp, xmm_sumlotmp, xmm_movelotmp, xmm_movehitmp;
+
+        xmm_sumhi = xmm_sumlo = xmm_sum128 = xmm_sumhitmp = xmm_sumlotmp = _mm_setzero_si128();
+        xmm_sum = xmm_sadleft = xmm_sadtop = xmm_toptmp = xmm_lefttmp = _mm256_setzero_si256();
+
+        if (srcOriginY != 0)
+        {
+            xmm_toptmp = _mm256_sad_epu8(_mm256_set_m128i(_mm_loadu_si128((__m128i *)(srcPtr - stride + 16)), _mm_loadu_si128((__m128i *)(srcPtr - stride))), xmm1);
+
+        }
+        else
+        {
+            xmm_toptmp = _mm256_sad_epu8(_mm256_set_m128i(_mm_loadu_si128((__m128i *)(yBorderReverse + topOffset + 16)), _mm_loadu_si128((__m128i *)(yBorderReverse + topOffset))), xmm1);
+
+        }
+        if (srcOriginX != 0) {
+            xmm_lefttmp = _mm256_sad_epu8(_mm256_set_epi8(*(readPtr + 31 * stride), *(readPtr + 30 * stride), *(readPtr + 29 * stride), *(readPtr + 28 * stride), *(readPtr + 27 * stride), *(readPtr + 26 * stride), *(readPtr + 25 * stride), *(readPtr + 24 * stride), *(readPtr + 23 * stride), *(readPtr + 22 * stride), *(readPtr + 21 * stride), *(readPtr + 20 * stride),
+                *(readPtr + 19 * stride), *(readPtr + 18 * stride), *(readPtr + 17 * stride), *(readPtr + 16 * stride), *(readPtr + 15 * stride), *(readPtr + 14 * stride), *(readPtr + 13 * stride), *(readPtr + 12 * stride), *(readPtr + 11 * stride), *(readPtr + 10 * stride), *(readPtr + 9 * stride), *(readPtr + 8 * stride), *(readPtr + 7 * stride), *(readPtr + 6 * stride), *(readPtr + 5 * stride), *(readPtr + 4 * stride), *(readPtr + 3 * stride), *(readPtr + 2 * stride), *(readPtr + stride), *readPtr)
+                , xmm1);
+
+        }
+        else
+        {
+            xmm_lefttmp = _mm256_sad_epu8(_mm256_set_m128i(_mm_loadu_si128((__m128i *)(yBorderReverse + leftOffset + 16)), _mm_loadu_si128((__m128i *)(yBorderReverse + leftOffset))), xmm1);
+
+        }
+
+        xmm_sum = _mm256_add_epi32(xmm_toptmp, xmm_lefttmp);
+        xmm_sum = _mm256_hadd_epi32(xmm_sum, xmm_sum);
+
+        xmm_sumlo = _mm256_extracti128_si256(xmm_sum, 0);
+        xmm_sumhi = _mm256_extracti128_si256(xmm_sum, 1);
+
+        xmm_movelotmp = _mm_move_epi64(xmm_sumlo);
+        xmm_movehitmp = _mm_move_epi64(xmm_sumhi);
+
+        xmm_sum1 = _mm_add_epi32(xmm_movelotmp, xmm_movehitmp);
+
+        xmm_sum1 = _mm_hadd_epi32(xmm_sum1, xmm_sum1);
+
+        xmm_sum256 = _mm256_castsi128_si256(xmm_sum1);
 
 
-		__m128i dc128 = _mm256_castsi256_si128(xmm_predictionDcValue);
+        xmm_set = _mm256_castsi128_si256(_mm_set1_epi32(32));
 
-		EB_U8 dc = _mm_cvtsi128_si32(dc128);
-		xmm_predictionDcValue = _mm256_set1_epi8(dc);//_mm_broadcastb_epi8
-
-
-		// SAD
-		ymm0 = _mm256_setzero_si256();
-		for (idx = 0; idx < blockSize; idx += 2) {
-			ymm0 = _mm256_add_epi32(ymm0, _mm256_sad_epu8(_mm256_loadu_si256((__m256i*)srcPtr), xmm_predictionDcValue));
-			xmm1 = _mm256_add_epi32(xmm1, _mm256_sad_epu8(_mm256_loadu_si256((__m256i*)(srcPtr + stride)), xmm_predictionDcValue));
-			srcPtr += stride << 1;
-		}
-		ymm0 = _mm256_add_epi32(ymm0, xmm1);
-		xmm0 = _mm_add_epi32(_mm256_extracti128_si256(ymm0, 0), _mm256_extracti128_si256(ymm0, 1));
-		xmm0 = _mm_add_epi32(xmm0, _mm_srli_si128(xmm0, 8));
-		return (EB_U32)_mm_cvtsi128_si32(xmm0);
+        xmm_sum128_2 = _mm256_add_epi32(xmm_sum256, xmm_set); // add offset
+        xmm_predictionDcValue = _mm256_srli_epi32(xmm_sum128_2, 6); //_mm256_srli_epi32
 
 
-	}
+        __m128i dc128 = _mm256_castsi256_si128(xmm_predictionDcValue);
+
+        EB_U8 dc = _mm_cvtsi128_si32(dc128);
+        xmm_predictionDcValue = _mm256_set1_epi8(dc);//_mm_broadcastb_epi8
+
+
+        // SAD
+        ymm0 = _mm256_setzero_si256();
+        for (idx = 0; idx < blockSize; idx += 2) {
+            ymm0 = _mm256_add_epi32(ymm0, _mm256_sad_epu8(_mm256_loadu_si256((__m256i*)srcPtr), xmm_predictionDcValue));
+            xmm1 = _mm256_add_epi32(xmm1, _mm256_sad_epu8(_mm256_loadu_si256((__m256i*)(srcPtr + stride)), xmm_predictionDcValue));
+            srcPtr += stride << 1;
+        }
+        ymm0 = _mm256_add_epi32(ymm0, xmm1);
+        xmm0 = _mm_add_epi32(_mm256_extracti128_si256(ymm0, 0), _mm256_extracti128_si256(ymm0, 1));
+        xmm0 = _mm_add_epi32(xmm0, _mm_srli_si128(xmm0, 8));
+        return (EB_U32)_mm_cvtsi128_si32(xmm0);
+
+
+    }
 }
 
 /***********************************************************************************************************************************************************************************************
@@ -1646,7 +1646,7 @@ void IntraModeAngular_18_AVX2_INTRIN(
     EB_U8            *refSamples,                 //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,              //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip)                    //skip one row 
+    const EB_BOOL     skip)                    //skip one row
 {
     EB_U32 pStride = predictionBufferStride;
     EB_U32 topLeftOffset = (size << 1);
@@ -1655,7 +1655,7 @@ void IntraModeAngular_18_AVX2_INTRIN(
 
         if (size == 32) {
 
-            EB_U32 count; 
+            EB_U32 count;
             for (count = 0; count < 8; ++count){
 
                 _mm256_storeu_si256((__m256i *)predictionPtr,                      _mm256_loadu_si256((__m256i *)(refSamples + topLeftOffset)));
@@ -1714,10 +1714,10 @@ void IntraModeAngular_18_AVX2_INTRIN(
                 EB_U32 count;
 
                 for (count = 0; count < 4; ++count) {
-                    
+
                     _mm256_storeu_si256((__m256i *)predictionPtr,                      _mm256_loadu_si256((__m256i *)(refSamples + topLeftOffset )));
-                    _mm256_storeu_si256((__m256i *)(predictionPtr + pStride),          _mm256_loadu_si256((__m256i *)(refSamples + topLeftOffset - 2)));                    
-                    _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride),      _mm256_loadu_si256((__m256i *)(refSamples + topLeftOffset - 4)));                    
+                    _mm256_storeu_si256((__m256i *)(predictionPtr + pStride),          _mm256_loadu_si256((__m256i *)(refSamples + topLeftOffset - 2)));
+                    _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride),      _mm256_loadu_si256((__m256i *)(refSamples + topLeftOffset - 4)));
                     _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride),      _mm256_loadu_si256((__m256i *)(refSamples + topLeftOffset - 6)));
 
                     refSamples -= 8;
@@ -1739,7 +1739,7 @@ void IntraModeAngular_18_AVX2_INTRIN(
                 _mm_storel_epi64((__m128i *)predictionPtr,                 _mm_loadl_epi64((__m128i *)(refSamples + topLeftOffset )));
                 _mm_storel_epi64((__m128i *)(predictionPtr + pStride),     _mm_loadl_epi64((__m128i *)(refSamples + topLeftOffset - 2)));
                 _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), _mm_loadl_epi64((__m128i *)(refSamples + topLeftOffset - 4)));
-                _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), _mm_loadl_epi64((__m128i *)(refSamples + topLeftOffset - 6)));                
+                _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), _mm_loadl_epi64((__m128i *)(refSamples + topLeftOffset - 6)));
             }
         }
         else {
@@ -1758,7 +1758,7 @@ void IntraModeAngular_34_AVX2_INTRIN(
     EB_U8            *refSamples,                 //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,              //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip)                       //skip one row 
+    const EB_BOOL     skip)                       //skip one row
 {
     EB_U32 pStride = predictionBufferStride;
     EB_U32 topOffset = ((size << 1) + 1);
@@ -1766,13 +1766,13 @@ void IntraModeAngular_34_AVX2_INTRIN(
     if (!skip) {
 
         if (size == 32) {
-            
-            EB_U32 count; 
+
+            EB_U32 count;
             for (count = 0; count < 8; ++count){
-                
-                _mm256_storeu_si256((__m256i *)predictionPtr,                      _mm256_loadu_si256((__m256i *)(refSamples + topOffset + 1)));                
-                _mm256_storeu_si256((__m256i *)(predictionPtr + pStride),          _mm256_loadu_si256((__m256i *)(refSamples + topOffset + 2)));                
-                _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride),      _mm256_loadu_si256((__m256i *)(refSamples + topOffset + 3)));             
+
+                _mm256_storeu_si256((__m256i *)predictionPtr,                      _mm256_loadu_si256((__m256i *)(refSamples + topOffset + 1)));
+                _mm256_storeu_si256((__m256i *)(predictionPtr + pStride),          _mm256_loadu_si256((__m256i *)(refSamples + topOffset + 2)));
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride),      _mm256_loadu_si256((__m256i *)(refSamples + topOffset + 3)));
                 _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride),      _mm256_loadu_si256((__m256i *)(refSamples + topOffset + 4)));
 
                 refSamples += 4;
@@ -1851,7 +1851,7 @@ void IntraModeAngular_34_AVX2_INTRIN(
                 _mm_storel_epi64((__m128i *)predictionPtr,                 _mm_loadl_epi64((__m128i *)(refSamples + topOffset + 1)));
                 _mm_storel_epi64((__m128i *)(predictionPtr + pStride),     _mm_loadl_epi64((__m128i *)(refSamples + topOffset + 3)));
                 _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), _mm_loadl_epi64((__m128i *)(refSamples + topOffset + 5)));
-                _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), _mm_loadl_epi64((__m128i *)(refSamples + topOffset + 7)));                
+                _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), _mm_loadl_epi64((__m128i *)(refSamples + topOffset + 7)));
             }
         }
         else {
@@ -1866,12 +1866,12 @@ void IntraModeVerticalChroma_AVX2_INTRIN(
     EB_U8            *refSamples,             //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,          //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride, //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip)                    //skip one row 
+    const EB_BOOL     skip)                    //skip one row
 {
     EB_U32 pStride = predictionBufferStride;
     EB_U32 topOffset = (size << 1) + 1;
 
-    // Jing: 
+    // Jing:
     // TODO: add size == 32 for 444
     if (!skip) {
         if (size == 32) {
@@ -1887,55 +1887,55 @@ void IntraModeVerticalChroma_AVX2_INTRIN(
             xmm0 = _mm256_loadu_si256((__m256i *)(refSamples + topOffset));
 
             for (count = 0; count < size_to_write; count ++) {
-                _mm256_storeu_si256((__m256i *)(predictionPtr), xmm0);                    
-                _mm256_storeu_si256((__m256i *)(predictionPtr + pStride), xmm0);          
-                _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm0);      
-                _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm0);         
+                _mm256_storeu_si256((__m256i *)(predictionPtr), xmm0);
+                _mm256_storeu_si256((__m256i *)(predictionPtr + pStride), xmm0);
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm0);
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm0);
 
-                predictionPtr += (pStride << 2);                                          
-                _mm256_storeu_si256((__m256i *)(predictionPtr), xmm0);                    
-                _mm256_storeu_si256((__m256i *)(predictionPtr + pStride), xmm0);          
-                _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm0);      
-                _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm0);         
+                predictionPtr += (pStride << 2);
+                _mm256_storeu_si256((__m256i *)(predictionPtr), xmm0);
+                _mm256_storeu_si256((__m256i *)(predictionPtr + pStride), xmm0);
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm0);
+                _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm0);
 
-                predictionPtr += (pStride << 2);                                          
+                predictionPtr += (pStride << 2);
             }
         } else if (size == 16) {
-            __m128i xmm0 = _mm_loadu_si128((__m128i *)(refSamples + topOffset)); 
-            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);                    
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
-            predictionPtr = predictionPtr + (pStride << 2);                         
-            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);                    
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
-            predictionPtr = predictionPtr + (pStride << 2);                         
-            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);                    
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
-            predictionPtr = predictionPtr + (pStride << 2);                         
-            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);                    
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
+            __m128i xmm0 = _mm_loadu_si128((__m128i *)(refSamples + topOffset));
+            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);
+            predictionPtr = predictionPtr + (pStride << 2);
+            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);
+            predictionPtr = predictionPtr + (pStride << 2);
+            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);
+            predictionPtr = predictionPtr + (pStride << 2);
+            _mm_storeu_si128((__m128i *)predictionPtr, xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);
         }
         else if (size == 8) {
-            __m128i xmm0 = _mm_loadl_epi64((__m128i *)(refSamples + topOffset)); 
-            _mm_storel_epi64((__m128i *)(predictionPtr), xmm0);                  
-            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
-            predictionPtr = predictionPtr + (pStride << 2);                         
-            _mm_storel_epi64((__m128i *)predictionPtr, xmm0);                    
-            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
+            __m128i xmm0 = _mm_loadl_epi64((__m128i *)(refSamples + topOffset));
+            _mm_storel_epi64((__m128i *)(predictionPtr), xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), xmm0);
+            predictionPtr = predictionPtr + (pStride << 2);
+            _mm_storel_epi64((__m128i *)predictionPtr, xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), xmm0);
         }
         else {
-            EB_U32 top = *(EB_U32*)(refSamples + topOffset);         
+            EB_U32 top = *(EB_U32*)(refSamples + topOffset);
             *(EB_U32*)(predictionPtr) = top;
             *(EB_U32*)(predictionPtr + pStride) = top;
             *(EB_U32*)(predictionPtr + 2 * pStride) = top;
@@ -1958,28 +1958,28 @@ void IntraModeVerticalChroma_AVX2_INTRIN(
                 }
             }
         } else if (size == 16) {
-            
-            __m128i xmm0 = _mm_loadu_si128((__m128i *)(refSamples + topOffset)); 
-            _mm_storeu_si128((__m128i *)(predictionPtr), xmm0);                  
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
-            predictionPtr = predictionPtr + (pStride << 2);                         
-            _mm_storeu_si128((__m128i *)(predictionPtr), xmm0);                  
-            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
+
+            __m128i xmm0 = _mm_loadu_si128((__m128i *)(refSamples + topOffset));
+            _mm_storeu_si128((__m128i *)(predictionPtr), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);
+            predictionPtr = predictionPtr + (pStride << 2);
+            _mm_storeu_si128((__m128i *)(predictionPtr), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), xmm0);
         }
         else if (size == 8) {
-            
-            __m128i xmm0 = _mm_loadl_epi64((__m128i *)(refSamples + topOffset)); 
-            _mm_storel_epi64((__m128i *)predictionPtr, xmm0);                    
-            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), xmm0);        
-            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), xmm0);    
-            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), xmm0);       
+
+            __m128i xmm0 = _mm_loadl_epi64((__m128i *)(refSamples + topOffset));
+            _mm_storel_epi64((__m128i *)predictionPtr, xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + pStride), xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), xmm0);
+            _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), xmm0);
         }
         else {
-            EB_U32 top = *(EB_U32*)(refSamples + topOffset); 
+            EB_U32 top = *(EB_U32*)(refSamples + topOffset);
             *(EB_U32*)(predictionPtr) = top;
             *(EB_U32*)(predictionPtr + pStride) = top;
         }
@@ -1991,13 +1991,13 @@ void IntraModeDCChroma_AVX2_INTRIN(
     EB_U8            *refSamples,                 //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,              //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride,     //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip)                       //skip one row 
+    const EB_BOOL     skip)                       //skip one row
 {
     __m128i xmm0 = _mm_setzero_si128();
     EB_U32 pStride = predictionBufferStride;
     EB_U32 topOffset = (size << 1) + 1;
     EB_U32 leftOffset = 0;
-    
+
     //Jing:
     //TODO: add size == 32 for 444
     if (!skip) {
@@ -2032,7 +2032,7 @@ void IntraModeDCChroma_AVX2_INTRIN(
             xmm_predictionDcValue = _mm256_srli_epi32(xmm_sum128_2,6); //_mm256_srli_epi32
 
 
-            __m128i dc128      = _mm256_castsi256_si128(xmm_predictionDcValue); 
+            __m128i dc128      = _mm256_castsi256_si128(xmm_predictionDcValue);
 
             EB_U8 dc         = _mm_cvtsi128_si32 (dc128);
             xmm_predictionDcValue = _mm256_set1_epi8(dc);//_mm_broadcastb_epi8
@@ -2042,28 +2042,28 @@ void IntraModeDCChroma_AVX2_INTRIN(
 
             for (count = 0; count < 2; ++count) {
 
-                _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);         
+                _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);
                 _mm256_storeu_si256((__m256i *)(predictionPtr + 1 * pStride), xmm_predictionDcValue);
                 _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm_predictionDcValue);
                 _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm_predictionDcValue);
 
                 predictionPtr += (pStride << 2);
 
-                _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);  
+                _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);
                 _mm256_storeu_si256((__m256i *)(predictionPtr + 1 * pStride), xmm_predictionDcValue);
                 _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm_predictionDcValue);
                 _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm_predictionDcValue);
 
                 predictionPtr += (pStride << 2);
 
-                _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);         
+                _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);
                 _mm256_storeu_si256((__m256i *)(predictionPtr + 1 * pStride), xmm_predictionDcValue);
                 _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm_predictionDcValue);
                 _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm_predictionDcValue);
 
                 predictionPtr += (pStride << 2);
 
-                _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);  
+                _mm256_storeu_si256((__m256i *) predictionPtr, xmm_predictionDcValue);
                 _mm256_storeu_si256((__m256i *)(predictionPtr + 1 * pStride), xmm_predictionDcValue);
                 _mm256_storeu_si256((__m256i *)(predictionPtr + 2 * pStride), xmm_predictionDcValue);
                 _mm256_storeu_si256((__m256i *)(predictionPtr + 3 * pStride), xmm_predictionDcValue);
@@ -2072,7 +2072,7 @@ void IntraModeDCChroma_AVX2_INTRIN(
             }
         } else if (size == 16) {
             __m128i sum, predictionDcValue;
-            
+
             sum = _mm_add_epi32(_mm_sad_epu8(_mm_loadu_si128((__m128i *)(refSamples + topOffset)), xmm0),
                                 _mm_sad_epu8(_mm_loadu_si128((__m128i *)(refSamples + leftOffset)), xmm0));
 
@@ -2105,10 +2105,10 @@ void IntraModeDCChroma_AVX2_INTRIN(
         }
         else if (size == 8) {
             __m128i sum, predictionDcValue;
- 
-            sum = _mm_add_epi32(_mm_sad_epu8(_mm_loadl_epi64((__m128i *)(refSamples + topOffset)), xmm0), 
+
+            sum = _mm_add_epi32(_mm_sad_epu8(_mm_loadl_epi64((__m128i *)(refSamples + topOffset)), xmm0),
                                 _mm_sad_epu8(_mm_loadl_epi64((__m128i *)(refSamples + leftOffset)), xmm0));
-            
+
             predictionDcValue = _mm_srli_epi32(_mm_add_epi32(sum, _mm_cvtsi32_si128(8)), 4);
             predictionDcValue = _mm_unpacklo_epi8(predictionDcValue, predictionDcValue);
             predictionDcValue = _mm_unpacklo_epi16(predictionDcValue, predictionDcValue);
@@ -2126,10 +2126,10 @@ void IntraModeDCChroma_AVX2_INTRIN(
         }
         else {
             __m128i sum, predictionDcValue;
-            
-            sum = _mm_add_epi32(_mm_sad_epu8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + topOffset)), xmm0), 
+
+            sum = _mm_add_epi32(_mm_sad_epu8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + topOffset)), xmm0),
                                 _mm_sad_epu8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + leftOffset)), xmm0));
-           
+
             predictionDcValue = _mm_srli_epi32(_mm_add_epi32(sum, _mm_cvtsi32_si128(4)), 3);
             predictionDcValue = _mm_unpacklo_epi8(predictionDcValue, predictionDcValue);
             predictionDcValue = _mm_unpacklo_epi16(predictionDcValue, predictionDcValue);
@@ -2177,8 +2177,8 @@ void IntraModeDCChroma_AVX2_INTRIN(
         } else if (size == 16) {
 
             __m128i sum, predictionDcValue;
-            
-            sum = _mm_add_epi32(_mm_sad_epu8(_mm_loadu_si128((__m128i *)(refSamples + topOffset)), xmm0),  
+
+            sum = _mm_add_epi32(_mm_sad_epu8(_mm_loadu_si128((__m128i *)(refSamples + topOffset)), xmm0),
                                 _mm_sad_epu8(_mm_loadu_si128((__m128i *)(refSamples + leftOffset)), xmm0));
 
             predictionDcValue = _mm_srli_epi32(_mm_add_epi32(_mm_add_epi32(_mm_srli_si128(sum, 8), sum), _mm_cvtsi32_si128(16)), 5);
@@ -2199,10 +2199,10 @@ void IntraModeDCChroma_AVX2_INTRIN(
         }
         else if (size == 8) {
             __m128i sum, predictionDcValue;
-            
-            sum = _mm_add_epi32(_mm_sad_epu8(_mm_loadl_epi64((__m128i *)(refSamples + topOffset)), xmm0), 
+
+            sum = _mm_add_epi32(_mm_sad_epu8(_mm_loadl_epi64((__m128i *)(refSamples + topOffset)), xmm0),
                                 _mm_sad_epu8(_mm_loadl_epi64((__m128i *)(refSamples + leftOffset)), xmm0));
-            
+
             predictionDcValue = _mm_srli_epi32(_mm_add_epi32(sum, _mm_cvtsi32_si128(8)), 4);
             predictionDcValue = _mm_unpacklo_epi8(predictionDcValue, predictionDcValue);
             predictionDcValue = _mm_unpacklo_epi16(predictionDcValue, predictionDcValue);
@@ -2215,8 +2215,8 @@ void IntraModeDCChroma_AVX2_INTRIN(
         }
         else {
             __m128i sum, predictionDcValue;
-            
-            sum = _mm_add_epi32(_mm_sad_epu8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + topOffset)), xmm0), 
+
+            sum = _mm_add_epi32(_mm_sad_epu8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + topOffset)), xmm0),
                                 _mm_sad_epu8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + leftOffset)), xmm0));
 
             predictionDcValue = _mm_srli_epi32(_mm_add_epi32(sum, _mm_cvtsi32_si128(4)), 3);

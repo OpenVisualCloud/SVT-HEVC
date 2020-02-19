@@ -20,7 +20,7 @@
 
 EB_ERRORTYPE InterPredictionContextCtor(
     InterPredictionContext_t **interPredictionContext,
-	EB_U16                     maxCUWidth,
+    EB_U16                     maxCUWidth,
     EB_U16                     maxCUHeight,
     EB_BOOL                    is16bit)
 
@@ -45,13 +45,13 @@ EB_ERRORTYPE InterPredictionContextCtor(
 
 
 void RoundMvOnTheFly(
-	EB_S16 *motionVector_x,
-	EB_S16 *motionVector_y)
+    EB_S16 *motionVector_x,
+    EB_S16 *motionVector_y)
 {
-	*motionVector_x = (*motionVector_x + 2)&~0x03;
-	*motionVector_y = (*motionVector_y + 2)&~0x03;
+    *motionVector_x = (*motionVector_x + 2)&~0x03;
+    *motionVector_y = (*motionVector_y + 2)&~0x03;
 
-	return;
+    return;
 }
 
 
@@ -250,7 +250,7 @@ EB_ERRORTYPE Inter2Nx2NPuPredictionInterpolationFree(
                 puOriginIndex,
                 puChromaOriginIndex,
                 componentMask,
-                contextPtr->mcpContext->avcStyleMcpIntermediateResultBuf0);    
+                contextPtr->mcpContext->avcStyleMcpIntermediateResultBuf0);
 
         }
 
@@ -392,7 +392,7 @@ EB_ERRORTYPE Inter2Nx2NPuPredictionInterpolationFree(
                 componentMask,
                 contextPtr->mcpContext->avcStyleMcpIntermediateResultBuf0,
                 contextPtr->mcpContext->avcStyleMcpIntermediateResultBuf1,
-                contextPtr->mcpContext->avcStyleMcpTwoDInterpolationFirstPassFilterResultBuf); 
+                contextPtr->mcpContext->avcStyleMcpTwoDInterpolationFirstPassFilterResultBuf);
         }
 
         break;
@@ -413,57 +413,57 @@ EB_ERRORTYPE Inter2Nx2NPuPredictionInterpolationFree(
 *  PreLoad Reference Block  for 16bit mode
 ***************************************************/
 void UnPackReferenceBlock(
-	EbPictureBufferDesc_t *refFramePic,
-	EB_U32                 posX,
-	EB_U32                 posY,
-	EB_U32                 puWidth,
-	EB_U32                 puHeight,
-	EbPictureBufferDesc_t *dst,
-	EB_U32				   componentMask)
+    EbPictureBufferDesc_t *refFramePic,
+    EB_U32                 posX,
+    EB_U32                 posY,
+    EB_U32                 puWidth,
+    EB_U32                 puHeight,
+    EbPictureBufferDesc_t *dst,
+    EB_U32                   componentMask)
 {
 
-	puWidth  += 8;						// 4 + PU_WIDTH + 4 to account for 8-tap interpolation
-	puHeight += 8;						// 4 + PU_WIDTH + 4 to account for 8-tap interpolation
-	EB_U32 inPosx = (posX >> 2) - 4;	// -4 to account for 8-tap interpolation 
-	EB_U32 inPosy = (posY >> 2) - 4;	// -4 to account for 8-tap interpolation 
-	EB_U16 *ptr16;
+    puWidth  += 8;                        // 4 + PU_WIDTH + 4 to account for 8-tap interpolation
+    puHeight += 8;                        // 4 + PU_WIDTH + 4 to account for 8-tap interpolation
+    EB_U32 inPosx = (posX >> 2) - 4;    // -4 to account for 8-tap interpolation
+    EB_U32 inPosy = (posY >> 2) - 4;    // -4 to account for 8-tap interpolation
+    EB_U16 *ptr16;
 
-	if (componentMask & PICTURE_BUFFER_DESC_LUMA_MASK) {
-		ptr16 = (EB_U16 *)refFramePic->bufferY + inPosx + inPosy*refFramePic->strideY;
+    if (componentMask & PICTURE_BUFFER_DESC_LUMA_MASK) {
+        ptr16 = (EB_U16 *)refFramePic->bufferY + inPosx + inPosy*refFramePic->strideY;
 
-		Extract8BitdataSafeSub(
-			ptr16,
-			refFramePic->strideY,
-			dst->bufferY,
-			dst->strideY,
-			puWidth,
-			puHeight
-		);
-	}
+        Extract8BitdataSafeSub(
+            ptr16,
+            refFramePic->strideY,
+            dst->bufferY,
+            dst->strideY,
+            puWidth,
+            puHeight
+        );
+    }
 
-	if (componentMask & PICTURE_BUFFER_DESC_CHROMA_MASK) {
-		ptr16 = (EB_U16 *)refFramePic->bufferCb + (inPosx >> 1) + (inPosy >> 1) * refFramePic->strideCb;
+    if (componentMask & PICTURE_BUFFER_DESC_CHROMA_MASK) {
+        ptr16 = (EB_U16 *)refFramePic->bufferCb + (inPosx >> 1) + (inPosy >> 1) * refFramePic->strideCb;
 
-		Extract8BitdataSafeSub(
-			ptr16,
-			refFramePic->strideCb,
-			dst->bufferCb,
-			dst->strideCb,
-			puWidth >> 1,
-			puHeight >> 1
-		);
+        Extract8BitdataSafeSub(
+            ptr16,
+            refFramePic->strideCb,
+            dst->bufferCb,
+            dst->strideCb,
+            puWidth >> 1,
+            puHeight >> 1
+        );
 
-		ptr16 = (EB_U16 *)refFramePic->bufferCr + (inPosx >> 1) + (inPosy >> 1)  *refFramePic->strideCr;
+        ptr16 = (EB_U16 *)refFramePic->bufferCr + (inPosx >> 1) + (inPosy >> 1)  *refFramePic->strideCr;
 
-		Extract8BitdataSafeSub(
-			ptr16,
-			refFramePic->strideCr,
-			dst->bufferCr,
-			dst->strideCr,
-			puWidth >> 1,
-			puHeight >> 1
-		);
-	}
+        Extract8BitdataSafeSub(
+            ptr16,
+            refFramePic->strideCr,
+            dst->bufferCr,
+            dst->strideCr,
+            puWidth >> 1,
+            puHeight >> 1
+        );
+    }
 
 }
 
@@ -492,7 +492,7 @@ EB_ERRORTYPE Inter2Nx2NPuPredictionHevc(
 
     EB_U32                    puOriginIndex       = ((puOriginY  & (63)) * 64) + (puOriginX & (63));
     EB_U32                    puChromaOriginIndex = ((((puOriginY  & (63)) * 32) + (puOriginX & (63))) >> 1);
-    
+
 
     SequenceControlSet_t     *sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
     EncodeContext_t          *encodeContextPtr      = sequenceControlSetPtr->encodeContextPtr;
@@ -509,13 +509,13 @@ EB_ERRORTYPE Inter2Nx2NPuPredictionHevc(
 
     // Setup List 0
     if (candidateBufferPtr->candidatePtr->predictionDirection[puIndex] == UNI_PRED_LIST_0 || candidateBufferPtr->candidatePtr->predictionDirection[puIndex] == BI_PRED) {
-    
+
         referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr;
 
         if (mdContextPtr->cuUseRefSrcFlag)
             refPicList0 = referenceObject->refDenSrcPicture;
         else
-			refPicList0 = is16bit ? referenceObject->referencePicture16bit : referenceObject->referencePicture ;
+            refPicList0 = is16bit ? referenceObject->referencePicture16bit : referenceObject->referencePicture ;
 
 
         motionVector_x = candidateBufferPtr->candidatePtr->motionVector_x_L0;
@@ -552,7 +552,7 @@ EB_ERRORTYPE Inter2Nx2NPuPredictionHevc(
         if (mdContextPtr->cuUseRefSrcFlag)
             refPicList1 = referenceObject->refDenSrcPicture;
         else
-			refPicList1 = is16bit ? referenceObject->referencePicture16bit : referenceObject->referencePicture;
+            refPicList1 = is16bit ? referenceObject->referencePicture16bit : referenceObject->referencePicture;
 
 
         motionVector_x = candidateBufferPtr->candidatePtr->motionVector_x_L1;
@@ -585,30 +585,30 @@ EB_ERRORTYPE Inter2Nx2NPuPredictionHevc(
 
     case UNI_PRED_LIST_0:
 
-		if (is16bit && mdContextPtr->cuUseRefSrcFlag == EB_FALSE) {
+        if (is16bit && mdContextPtr->cuUseRefSrcFlag == EB_FALSE) {
             if (refPicList0)
-			    UnPackReferenceBlock(
-				    refPicList0,
-				    refList0PosX,
-				    refList0PosY,
-				    puWidth,
-				    puHeight,
-				    contextPtr->mcpContext->localReferenceBlock8BITL0,
-				    componentMask);
+                UnPackReferenceBlock(
+                    refPicList0,
+                    refList0PosX,
+                    refList0PosY,
+                    puWidth,
+                    puHeight,
+                    contextPtr->mcpContext->localReferenceBlock8BITL0,
+                    componentMask);
 
-			UniPredHevcInterpolationMd(
-				contextPtr->mcpContext->localReferenceBlock8BITL0,
-				refList0PosX,
-				refList0PosY,
-				puWidth,
-				puHeight,
-				candidateBufferPtr->predictionPtr,
-				puOriginIndex,
-				puChromaOriginIndex,
-				contextPtr->mcpContext->motionCompensationIntermediateResultBuf0,
-				contextPtr->mcpContext->TwoDInterpolationFirstPassFilterResultBuf,
-				EB_TRUE,
-				componentMask);
+            UniPredHevcInterpolationMd(
+                contextPtr->mcpContext->localReferenceBlock8BITL0,
+                refList0PosX,
+                refList0PosY,
+                puWidth,
+                puHeight,
+                candidateBufferPtr->predictionPtr,
+                puOriginIndex,
+                puChromaOriginIndex,
+                contextPtr->mcpContext->motionCompensationIntermediateResultBuf0,
+                contextPtr->mcpContext->TwoDInterpolationFirstPassFilterResultBuf,
+                EB_TRUE,
+                componentMask);
 
         }
         else {
@@ -633,30 +633,30 @@ EB_ERRORTYPE Inter2Nx2NPuPredictionHevc(
 
     case UNI_PRED_LIST_1:
 
-		if (is16bit && mdContextPtr->cuUseRefSrcFlag == EB_FALSE) {
+        if (is16bit && mdContextPtr->cuUseRefSrcFlag == EB_FALSE) {
             if (refPicList1)
-			    UnPackReferenceBlock(
-				    refPicList1,
-				    refList1PosX,
-				    refList1PosY,
-				    puWidth,
-				    puHeight,
-				    contextPtr->mcpContext->localReferenceBlock8BITL1,
-				    componentMask);
+                UnPackReferenceBlock(
+                    refPicList1,
+                    refList1PosX,
+                    refList1PosY,
+                    puWidth,
+                    puHeight,
+                    contextPtr->mcpContext->localReferenceBlock8BITL1,
+                    componentMask);
 
-			UniPredHevcInterpolationMd(
-				contextPtr->mcpContext->localReferenceBlock8BITL1,
-				refList1PosX,
-				refList1PosY,
-				puWidth,
-				puHeight,
-				candidateBufferPtr->predictionPtr,
-				puOriginIndex,
-				puChromaOriginIndex,
-				contextPtr->mcpContext->motionCompensationIntermediateResultBuf0,
-				contextPtr->mcpContext->TwoDInterpolationFirstPassFilterResultBuf,
-				EB_TRUE,
-				componentMask);
+            UniPredHevcInterpolationMd(
+                contextPtr->mcpContext->localReferenceBlock8BITL1,
+                refList1PosX,
+                refList1PosY,
+                puWidth,
+                puHeight,
+                candidateBufferPtr->predictionPtr,
+                puOriginIndex,
+                puChromaOriginIndex,
+                contextPtr->mcpContext->motionCompensationIntermediateResultBuf0,
+                contextPtr->mcpContext->TwoDInterpolationFirstPassFilterResultBuf,
+                EB_TRUE,
+                componentMask);
 
         }
         else {
@@ -681,44 +681,44 @@ EB_ERRORTYPE Inter2Nx2NPuPredictionHevc(
 
     case BI_PRED:
 
-		if (is16bit && mdContextPtr->cuUseRefSrcFlag == EB_FALSE) {
+        if (is16bit && mdContextPtr->cuUseRefSrcFlag == EB_FALSE) {
             if (refPicList0)
-			    UnPackReferenceBlock(
-				    refPicList0,
-				    refList0PosX,
-				    refList0PosY,
-				    puWidth,
-				    puHeight,
-				    contextPtr->mcpContext->localReferenceBlock8BITL0,
-				    componentMask);
+                UnPackReferenceBlock(
+                    refPicList0,
+                    refList0PosX,
+                    refList0PosY,
+                    puWidth,
+                    puHeight,
+                    contextPtr->mcpContext->localReferenceBlock8BITL0,
+                    componentMask);
 
             if (refPicList1)
-			    UnPackReferenceBlock(
-				    refPicList1,
-				    refList1PosX,
-				    refList1PosY,
-				    puWidth,
-				    puHeight,
-				    contextPtr->mcpContext->localReferenceBlock8BITL1,
-				    componentMask);
+                UnPackReferenceBlock(
+                    refPicList1,
+                    refList1PosX,
+                    refList1PosY,
+                    puWidth,
+                    puHeight,
+                    contextPtr->mcpContext->localReferenceBlock8BITL1,
+                    componentMask);
 
-			BiPredHevcInterpolationMd(
-				contextPtr->mcpContext->localReferenceBlock8BITL0,
-				contextPtr->mcpContext->localReferenceBlock8BITL1,
-				refList0PosX,
-				refList0PosY,
-				refList1PosX,
-				refList1PosY,
-				puWidth,
-				puHeight,
-				candidateBufferPtr->predictionPtr,
-				puOriginIndex,
-				puChromaOriginIndex,
-				contextPtr->mcpContext->motionCompensationIntermediateResultBuf0,
-				contextPtr->mcpContext->motionCompensationIntermediateResultBuf1,
-				contextPtr->mcpContext->TwoDInterpolationFirstPassFilterResultBuf,
-				EB_TRUE,
-				componentMask);
+            BiPredHevcInterpolationMd(
+                contextPtr->mcpContext->localReferenceBlock8BITL0,
+                contextPtr->mcpContext->localReferenceBlock8BITL1,
+                refList0PosX,
+                refList0PosY,
+                refList1PosX,
+                refList1PosY,
+                puWidth,
+                puHeight,
+                candidateBufferPtr->predictionPtr,
+                puOriginIndex,
+                puChromaOriginIndex,
+                contextPtr->mcpContext->motionCompensationIntermediateResultBuf0,
+                contextPtr->mcpContext->motionCompensationIntermediateResultBuf1,
+                contextPtr->mcpContext->TwoDInterpolationFirstPassFilterResultBuf,
+                EB_TRUE,
+                componentMask);
 
 
         }
@@ -760,11 +760,11 @@ EB_ERRORTYPE Inter2Nx2NPuPredictionHevc(
  * Inter Prediction used in the Encode Pass
  ***************************************************/
 EB_ERRORTYPE EncodePassInterPrediction(
-	MvUnit_t                               *mvUnit,
-	EB_U16                                  puOriginX,
-	EB_U16                                  puOriginY,
-	EB_U8                                   puWidth,
-	EB_U8                                   puHeight,
+    MvUnit_t                               *mvUnit,
+    EB_U16                                  puOriginX,
+    EB_U16                                  puOriginY,
+    EB_U8                                   puWidth,
+    EB_U8                                   puHeight,
 
     PictureControlSet_t                    *pictureControlSetPtr,
     EbPictureBufferDesc_t                  *predictionPtr,
@@ -774,10 +774,10 @@ EB_ERRORTYPE EncodePassInterPrediction(
     EbPictureBufferDesc_t  *refPicList0     =   0;
     EbPictureBufferDesc_t  *refPicList1     =   0;
     EbReferenceObject_t    *referenceObject;
-	EB_U16                  refList0PosX = 0;
-	EB_U16                  refList0PosY = 0;
-	EB_U16                  refList1PosX = 0;
-	EB_U16                  refList1PosY = 0;
+    EB_U16                  refList0PosX = 0;
+    EB_U16                  refList0PosY = 0;
+    EB_U16                  refList1PosX = 0;
+    EB_U16                  refList1PosY = 0;
 
     EB_COLOR_FORMAT colorFormat=predictionPtr->colorFormat;
     EB_U16 subWidthCMinus1  = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
@@ -786,7 +786,7 @@ EB_ERRORTYPE EncodePassInterPrediction(
     EB_U32                  puOriginIndex           = ((predictionPtr->originY +puOriginY) * predictionPtr->strideY)  + (predictionPtr->originX+puOriginX);
     EB_U32                  puChromaOriginIndex     = (((predictionPtr->originY+puOriginY) * predictionPtr->strideCb) >> subHeightCMinus1) + ((predictionPtr->originX+puOriginX) >> subWidthCMinus1);
     SequenceControlSet_t   *sequenceControlSetPtr  = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
-	EncodeContext_t        *encodeContextPtr       = sequenceControlSetPtr->encodeContextPtr;
+    EncodeContext_t        *encodeContextPtr       = sequenceControlSetPtr->encodeContextPtr;
 
     // Setup List 0
     if(mvUnit->predDirection == UNI_PRED_LIST_0 || mvUnit->predDirection == BI_PRED) {
@@ -809,12 +809,12 @@ EB_ERRORTYPE EncodePassInterPrediction(
 
         CHECK_REPORT_ERROR(
             (refList0PosX < ((refPicList0->width + (refPicList0->originX << 1)) << 2)),
-            encodeContextPtr->appCallbackPtr, 
+            encodeContextPtr->appCallbackPtr,
             EB_ENC_INTER_INVLD_MCP_ERROR);
 
         CHECK_REPORT_ERROR(
             (refList0PosY < ((refPicList0->height + (refPicList0->originY << 1)) << 2)),
-            encodeContextPtr->appCallbackPtr, 
+            encodeContextPtr->appCallbackPtr,
             EB_ENC_INTER_INVLD_MCP_ERROR);
 
     }
@@ -845,12 +845,12 @@ EB_ERRORTYPE EncodePassInterPrediction(
 
         CHECK_REPORT_ERROR(
             (refList1PosX < ((refPicList1->width + (refPicList1->originX << 1)) << 2)),
-            encodeContextPtr->appCallbackPtr, 
+            encodeContextPtr->appCallbackPtr,
             EB_ENC_INTER_INVLD_MCP_ERROR);
 
         CHECK_REPORT_ERROR(
             (refList1PosY  < ((refPicList1->height + (refPicList1->originY << 1)) << 2)),
-            encodeContextPtr->appCallbackPtr, 
+            encodeContextPtr->appCallbackPtr,
             EB_ENC_INTER_INVLD_MCP_ERROR);
 
     }
@@ -914,7 +914,7 @@ EB_ERRORTYPE EncodePassInterPrediction(
 
     default:
         CHECK_REPORT_ERROR_NC(
-            encodeContextPtr->appCallbackPtr, 
+            encodeContextPtr->appCallbackPtr,
             EB_ENC_INTER_PRED_ERROR0);
         break;
     }
@@ -928,10 +928,10 @@ EB_ERRORTYPE EncodePassInterPrediction(
  ***************************************************/
 EB_ERRORTYPE EncodePassInterPrediction16bit(
     MvUnit_t                               *mvUnit,
-	EB_U16                                  puOriginX,
-	EB_U16                                  puOriginY,
-	EB_U8                                   puWidth,
-	EB_U8                                   puHeight,
+    EB_U16                                  puOriginX,
+    EB_U16                                  puOriginY,
+    EB_U8                                   puWidth,
+    EB_U8                                   puHeight,
     PictureControlSet_t                    *pictureControlSetPtr,
     EbPictureBufferDesc_t                  *predictionPtr,
     MotionCompensationPredictionContext_t  *mcpContext)
@@ -941,10 +941,10 @@ EB_ERRORTYPE EncodePassInterPrediction16bit(
     EbPictureBufferDesc_t  *refPicList0     = 0;
     EbPictureBufferDesc_t  *refPicList1     = 0;
     EbReferenceObject_t    *referenceObject;
-	EB_U16                  refList0PosX = 0;
-	EB_U16                  refList0PosY = 0;
-	EB_U16                  refList1PosX = 0;
-	EB_U16                  refList1PosY = 0;
+    EB_U16                  refList0PosX = 0;
+    EB_U16                  refList0PosY = 0;
+    EB_U16                  refList1PosX = 0;
+    EB_U16                  refList1PosY = 0;
     const EB_COLOR_FORMAT colorFormat = predictionPtr->colorFormat;
     const EB_U16 subWidthCMinus1  = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
     const EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
@@ -955,93 +955,93 @@ EB_ERRORTYPE EncodePassInterPrediction16bit(
     EB_U32 puChromaOriginIndex = ((predictionPtr->originX + puOriginX) >> subWidthCMinus1) +
         (((predictionPtr->originY+puOriginY) * predictionPtr->strideCb) >> subHeightCMinus1);
     SequenceControlSet_t *sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
-	EncodeContext_t *encodeContextPtr = sequenceControlSetPtr->encodeContextPtr;
+    EncodeContext_t *encodeContextPtr = sequenceControlSetPtr->encodeContextPtr;
 
-	// Setup List 0
-	if (mvUnit->predDirection == UNI_PRED_LIST_0 || mvUnit->predDirection == BI_PRED) {
-		referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr;
-		refPicList0 = (EbPictureBufferDesc_t*)referenceObject->referencePicture16bit;
+    // Setup List 0
+    if (mvUnit->predDirection == UNI_PRED_LIST_0 || mvUnit->predDirection == BI_PRED) {
+        referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr;
+        refPicList0 = (EbPictureBufferDesc_t*)referenceObject->referencePicture16bit;
 
-		// minus 71 is derived from the expression -64 + 1 - 8, and plus 7 is derived from expression -1 + 8
-		//refList0PosX = (EB_U32) CLIP3((EB_S32)((refPicList0->originX-71) << 2), (EB_S32)((refPicList0->width + refPicList0->originX + 7)<<2) , (EB_S32) ((puOriginX + tbOriginX + refPicList0->originX)<<2) + candidateBufferPtr->candidatePtr->motionVector_x[REF_LIST_0][puIndex]);
-		refList0PosX = (EB_U32)CLIP3(
-			(EB_S32)((refPicList0->originX - 71) << 2),
-			(EB_S32)((refPicList0->width + refPicList0->originX + 7) << 2),
-			(EB_S32)((puOriginX + refPicList0->originX) << 2) + mvUnit->mv[REF_LIST_0].x);
-		//refList0PosY = (EB_U32) CLIP3((EB_S32)((refPicList0->originY-71) << 2),(EB_S32)((refPicList0->height + refPicList0->originY + 7)<<2) , (EB_S32) ((puOriginY + tbOriginY + refPicList0->originY)<<2) + candidateBufferPtr->candidatePtr->motionVector_y[REF_LIST_0][puIndex]);
-		refList0PosY = (EB_U32)CLIP3(
-			(EB_S32)((refPicList0->originY - 71) << 2),
-			(EB_S32)((refPicList0->height + refPicList0->originY + 7) << 2),
-			(EB_S32)((puOriginY + refPicList0->originY) << 2) + mvUnit->mv[REF_LIST_0].y);
+        // minus 71 is derived from the expression -64 + 1 - 8, and plus 7 is derived from expression -1 + 8
+        //refList0PosX = (EB_U32) CLIP3((EB_S32)((refPicList0->originX-71) << 2), (EB_S32)((refPicList0->width + refPicList0->originX + 7)<<2) , (EB_S32) ((puOriginX + tbOriginX + refPicList0->originX)<<2) + candidateBufferPtr->candidatePtr->motionVector_x[REF_LIST_0][puIndex]);
+        refList0PosX = (EB_U32)CLIP3(
+            (EB_S32)((refPicList0->originX - 71) << 2),
+            (EB_S32)((refPicList0->width + refPicList0->originX + 7) << 2),
+            (EB_S32)((puOriginX + refPicList0->originX) << 2) + mvUnit->mv[REF_LIST_0].x);
+        //refList0PosY = (EB_U32) CLIP3((EB_S32)((refPicList0->originY-71) << 2),(EB_S32)((refPicList0->height + refPicList0->originY + 7)<<2) , (EB_S32) ((puOriginY + tbOriginY + refPicList0->originY)<<2) + candidateBufferPtr->candidatePtr->motionVector_y[REF_LIST_0][puIndex]);
+        refList0PosY = (EB_U32)CLIP3(
+            (EB_S32)((refPicList0->originY - 71) << 2),
+            (EB_S32)((refPicList0->height + refPicList0->originY + 7) << 2),
+            (EB_S32)((puOriginY + refPicList0->originY) << 2) + mvUnit->mv[REF_LIST_0].y);
 
 
-		CHECK_REPORT_ERROR(
-			(refList0PosX < ((refPicList0->width + (refPicList0->originX << 1)) << 2)),
-			encodeContextPtr->appCallbackPtr,
-			EB_ENC_INTER_INVLD_MCP_ERROR);
+        CHECK_REPORT_ERROR(
+            (refList0PosX < ((refPicList0->width + (refPicList0->originX << 1)) << 2)),
+            encodeContextPtr->appCallbackPtr,
+            EB_ENC_INTER_INVLD_MCP_ERROR);
 
-		CHECK_REPORT_ERROR(
-			(refList0PosY < ((refPicList0->height + (refPicList0->originY << 1)) << 2)),
-			encodeContextPtr->appCallbackPtr,
-			EB_ENC_INTER_INVLD_MCP_ERROR);
+        CHECK_REPORT_ERROR(
+            (refList0PosY < ((refPicList0->height + (refPicList0->originY << 1)) << 2)),
+            encodeContextPtr->appCallbackPtr,
+            EB_ENC_INTER_INVLD_MCP_ERROR);
 
-		EB_U32  lumaOffSet = ((refList0PosX >> 2) - 4) * 2 + ((refList0PosY >> 2) - 4) * 2 * refPicList0->strideY; //refPicList0->originX + refPicList0->originY*refPicList0->strideY; //
-		EB_U32  cbOffset = ((refList0PosX >> (2 + subWidthCMinus1)) - 2) * 2 + ((refList0PosY >> (2 + subHeightCMinus1)) - 2) * 2 * refPicList0->strideCb; //Jing:double check for 444
-		EB_U32  crOffset = ((refList0PosX >> (2 + subWidthCMinus1)) - 2) * 2 + ((refList0PosY >> (2 + subHeightCMinus1)) - 2) * 2 * refPicList0->strideCr;
-		//EB_U8  verticalIdx;
+        EB_U32  lumaOffSet = ((refList0PosX >> 2) - 4) * 2 + ((refList0PosY >> 2) - 4) * 2 * refPicList0->strideY; //refPicList0->originX + refPicList0->originY*refPicList0->strideY; //
+        EB_U32  cbOffset = ((refList0PosX >> (2 + subWidthCMinus1)) - 2) * 2 + ((refList0PosY >> (2 + subHeightCMinus1)) - 2) * 2 * refPicList0->strideCb; //Jing:double check for 444
+        EB_U32  crOffset = ((refList0PosX >> (2 + subWidthCMinus1)) - 2) * 2 + ((refList0PosY >> (2 + subHeightCMinus1)) - 2) * 2 * refPicList0->strideCr;
+        //EB_U8  verticalIdx;
 
-		mcpContext->localReferenceBlockL0->bufferY = refPicList0->bufferY + lumaOffSet;
-		mcpContext->localReferenceBlockL0->bufferCb = refPicList0->bufferCb + cbOffset;
-		mcpContext->localReferenceBlockL0->bufferCr = refPicList0->bufferCr + crOffset;
-		mcpContext->localReferenceBlockL0->strideY = refPicList0->strideY;
-		mcpContext->localReferenceBlockL0->strideCb = refPicList0->strideCb;
-		mcpContext->localReferenceBlockL0->strideCr = refPicList0->strideCr;
-	}
+        mcpContext->localReferenceBlockL0->bufferY = refPicList0->bufferY + lumaOffSet;
+        mcpContext->localReferenceBlockL0->bufferCb = refPicList0->bufferCb + cbOffset;
+        mcpContext->localReferenceBlockL0->bufferCr = refPicList0->bufferCr + crOffset;
+        mcpContext->localReferenceBlockL0->strideY = refPicList0->strideY;
+        mcpContext->localReferenceBlockL0->strideCb = refPicList0->strideCb;
+        mcpContext->localReferenceBlockL0->strideCr = refPicList0->strideCr;
+    }
 
-	// Setup List 1
-	if (mvUnit->predDirection == UNI_PRED_LIST_1 || mvUnit->predDirection == BI_PRED) {
+    // Setup List 1
+    if (mvUnit->predDirection == UNI_PRED_LIST_1 || mvUnit->predDirection == BI_PRED) {
 
-		referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_1]->objectPtr;
-		refPicList1 = (EbPictureBufferDesc_t*)referenceObject->referencePicture16bit;
+        referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_1]->objectPtr;
+        refPicList1 = (EbPictureBufferDesc_t*)referenceObject->referencePicture16bit;
 
-		// minus 71 is derived from the expression -64 + 1 - 8, and plus 7 is derived from expression -1 + 8
-		//refList1PosX = (EB_U32) CLIP3((EB_S32)((refPicList1->originX-71) << 2), (EB_S32)((refPicList1->width + refPicList1->originX  + 7)<<2) , (EB_S32) ((puOriginX + tbOriginX + refPicList1->originX)<<2) + candidateBufferPtr->candidatePtr->motionVector_x[REF_LIST_1][puIndex]);
-		refList1PosX = (EB_U32)CLIP3(
-			(EB_S32)((refPicList1->originX - 71) << 2),
-			(EB_S32)((refPicList1->width + refPicList1->originX + 7) << 2),
-			(EB_S32)((puOriginX + refPicList1->originX) << 2) + mvUnit->mv[REF_LIST_1].x);
-		//refList1PosY = (EB_U32) CLIP3((EB_S32)((refPicList1->originY-71) << 2), (EB_S32)((refPicList1->height + refPicList1->originY + 7)<<2) , (EB_S32) ((puOriginY + tbOriginY + refPicList1->originY)<<2) + candidateBufferPtr->candidatePtr->motionVector_y[REF_LIST_1][puIndex]);
-		refList1PosY = (EB_U32)CLIP3(
-			(EB_S32)((refPicList1->originY - 71) << 2),
-			(EB_S32)((refPicList1->height + refPicList1->originY + 7) << 2),
-			(EB_S32)((puOriginY + refPicList1->originY) << 2) + mvUnit->mv[REF_LIST_1].y);
+        // minus 71 is derived from the expression -64 + 1 - 8, and plus 7 is derived from expression -1 + 8
+        //refList1PosX = (EB_U32) CLIP3((EB_S32)((refPicList1->originX-71) << 2), (EB_S32)((refPicList1->width + refPicList1->originX  + 7)<<2) , (EB_S32) ((puOriginX + tbOriginX + refPicList1->originX)<<2) + candidateBufferPtr->candidatePtr->motionVector_x[REF_LIST_1][puIndex]);
+        refList1PosX = (EB_U32)CLIP3(
+            (EB_S32)((refPicList1->originX - 71) << 2),
+            (EB_S32)((refPicList1->width + refPicList1->originX + 7) << 2),
+            (EB_S32)((puOriginX + refPicList1->originX) << 2) + mvUnit->mv[REF_LIST_1].x);
+        //refList1PosY = (EB_U32) CLIP3((EB_S32)((refPicList1->originY-71) << 2), (EB_S32)((refPicList1->height + refPicList1->originY + 7)<<2) , (EB_S32) ((puOriginY + tbOriginY + refPicList1->originY)<<2) + candidateBufferPtr->candidatePtr->motionVector_y[REF_LIST_1][puIndex]);
+        refList1PosY = (EB_U32)CLIP3(
+            (EB_S32)((refPicList1->originY - 71) << 2),
+            (EB_S32)((refPicList1->height + refPicList1->originY + 7) << 2),
+            (EB_S32)((puOriginY + refPicList1->originY) << 2) + mvUnit->mv[REF_LIST_1].y);
 
-		CHECK_REPORT_ERROR(
-			(refList1PosX < ((refPicList1->width + (refPicList1->originX << 1)) << 2)),
-			encodeContextPtr->appCallbackPtr,
-			EB_ENC_INTER_INVLD_MCP_ERROR);
+        CHECK_REPORT_ERROR(
+            (refList1PosX < ((refPicList1->width + (refPicList1->originX << 1)) << 2)),
+            encodeContextPtr->appCallbackPtr,
+            EB_ENC_INTER_INVLD_MCP_ERROR);
 
-		CHECK_REPORT_ERROR(
-			(refList1PosY  < ((refPicList1->height + (refPicList1->originY << 1)) << 2)),
-			encodeContextPtr->appCallbackPtr,
-			EB_ENC_INTER_INVLD_MCP_ERROR);
+        CHECK_REPORT_ERROR(
+            (refList1PosY  < ((refPicList1->height + (refPicList1->originY << 1)) << 2)),
+            encodeContextPtr->appCallbackPtr,
+            EB_ENC_INTER_INVLD_MCP_ERROR);
 
-		//mcpContext->localReferenceBlockL1->bufferY  = refPicList1->bufferY  + ((refList1PosX >> 2) - 4) * 2 + ((refList1PosY >> 2) - 4) * 2 * refPicList1->strideY;
-		//mcpContext->localReferenceBlockL1->bufferCb = refPicList1->bufferCb + ((refList1PosX >> 3) - 2) * 2 + ((refList1PosY >> 3) - 2) * 2 * refPicList1->strideCb;
-		//mcpContext->localReferenceBlockL1->bufferCr = refPicList1->bufferCr + ((refList1PosX >> 3) - 2) * 2 + ((refList1PosY >> 3) - 2) * 2 * refPicList1->strideCr;
-		EB_U32  lumaOffSet = ((refList1PosX >> 2) - 4) * 2 + ((refList1PosY >> 2) - 4) * 2 * refPicList1->strideY; //refPicList0->originX + refPicList0->originY*refPicList0->strideY; //
-		EB_U32  cbOffset = ((refList1PosX >> (2 + subWidthCMinus1)) - 2) * 2 + ((refList1PosY >> (2 + subHeightCMinus1)) - 2) * 2 * refPicList1->strideCb;
-		EB_U32  crOffset = ((refList1PosX >> (2 + subWidthCMinus1)) - 2) * 2 + ((refList1PosY >> (2 + subHeightCMinus1)) - 2) * 2 * refPicList1->strideCr;
-		//EB_U8  verticalIdx;
+        //mcpContext->localReferenceBlockL1->bufferY  = refPicList1->bufferY  + ((refList1PosX >> 2) - 4) * 2 + ((refList1PosY >> 2) - 4) * 2 * refPicList1->strideY;
+        //mcpContext->localReferenceBlockL1->bufferCb = refPicList1->bufferCb + ((refList1PosX >> 3) - 2) * 2 + ((refList1PosY >> 3) - 2) * 2 * refPicList1->strideCb;
+        //mcpContext->localReferenceBlockL1->bufferCr = refPicList1->bufferCr + ((refList1PosX >> 3) - 2) * 2 + ((refList1PosY >> 3) - 2) * 2 * refPicList1->strideCr;
+        EB_U32  lumaOffSet = ((refList1PosX >> 2) - 4) * 2 + ((refList1PosY >> 2) - 4) * 2 * refPicList1->strideY; //refPicList0->originX + refPicList0->originY*refPicList0->strideY; //
+        EB_U32  cbOffset = ((refList1PosX >> (2 + subWidthCMinus1)) - 2) * 2 + ((refList1PosY >> (2 + subHeightCMinus1)) - 2) * 2 * refPicList1->strideCb;
+        EB_U32  crOffset = ((refList1PosX >> (2 + subWidthCMinus1)) - 2) * 2 + ((refList1PosY >> (2 + subHeightCMinus1)) - 2) * 2 * refPicList1->strideCr;
+        //EB_U8  verticalIdx;
 
-		mcpContext->localReferenceBlockL1->bufferY = refPicList1->bufferY + lumaOffSet;
-		mcpContext->localReferenceBlockL1->bufferCb = refPicList1->bufferCb + cbOffset;
-		mcpContext->localReferenceBlockL1->bufferCr = refPicList1->bufferCr + crOffset;
+        mcpContext->localReferenceBlockL1->bufferY = refPicList1->bufferY + lumaOffSet;
+        mcpContext->localReferenceBlockL1->bufferCb = refPicList1->bufferCb + cbOffset;
+        mcpContext->localReferenceBlockL1->bufferCr = refPicList1->bufferCr + crOffset;
 
-		mcpContext->localReferenceBlockL1->strideY = refPicList1->strideY;
-		mcpContext->localReferenceBlockL1->strideCb = refPicList1->strideCb;
-		mcpContext->localReferenceBlockL1->strideCr = refPicList1->strideCr;
-	}
+        mcpContext->localReferenceBlockL1->strideY = refPicList1->strideY;
+        mcpContext->localReferenceBlockL1->strideCb = refPicList1->strideCb;
+        mcpContext->localReferenceBlockL1->strideCr = refPicList1->strideCr;
+    }
 
     switch(mvUnit->predDirection)
     {
@@ -1103,9 +1103,9 @@ EB_ERRORTYPE EncodePassInterPrediction16bit(
         break;
 
     default:
-	    CHECK_REPORT_ERROR_NC(
-		    encodeContextPtr->appCallbackPtr, 
-		    EB_ENC_INTER_PRED_ERROR0);
+        CHECK_REPORT_ERROR_NC(
+            encodeContextPtr->appCallbackPtr,
+            EB_ENC_INTER_PRED_ERROR0);
         break;
     }
 

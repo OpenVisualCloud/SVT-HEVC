@@ -24,7 +24,7 @@ extern "C" {
     } PicTimingEntry_t;
 
 typedef struct PacketizationReorderEntry_s {
-    EB_U64                          pictureNumber;    
+    EB_U64                          pictureNumber;
     EbObjectWrapper_t              *outputStreamWrapperPtr;
 
     EB_U64                          startTimeSeconds;
@@ -37,13 +37,13 @@ typedef struct PacketizationReorderEntry_s {
     EB_U64                          fillerBitsSent;
     EB_U64                          fillerBitsFinal;
     EB_BOOL                         isUsedAsReferenceFlag;
-} PacketizationReorderEntry_t;   
+} PacketizationReorderEntry_t;
 
-extern EB_ERRORTYPE PacketizationReorderEntryCtor(   
+extern EB_ERRORTYPE PacketizationReorderEntryCtor(
     PacketizationReorderEntry_t   **entryDblPtr,
     EB_U32                          pictureNumber);
 
-  
+
 #ifdef __cplusplus
 }
 #endif

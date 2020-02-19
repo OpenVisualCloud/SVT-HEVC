@@ -27,10 +27,10 @@ extern EB_ERRORTYPE MotionEstimateLcu(
     EbPictureBufferDesc_t       *inputPtr);
 
 extern EB_ERRORTYPE OpenLoopIntraCandidateSearchLcu(
-	PictureParentControlSet_t   *pictureControlSetPtr,
-	EB_U32                       lcuIndex,
-	MotionEstimationContext_t   *contextPtr,
-	EbPictureBufferDesc_t       *inputPtr);
+    PictureParentControlSet_t   *pictureControlSetPtr,
+    EB_U32                       lcuIndex,
+    MotionEstimationContext_t   *contextPtr,
+    EbPictureBufferDesc_t       *inputPtr);
 
 extern void Decimation2D(
     EB_U8                   *inputSamples,
@@ -42,20 +42,20 @@ extern void Decimation2D(
     EB_U32                   decimStep);
 
 extern EB_ERRORTYPE OpenLoopIntraSearchLcu(
-	PictureParentControlSet_t   *pictureControlSetPtr,
-	EB_U32                       lcuIndex,
-	MotionEstimationContext_t   *contextPtr,
-	EbPictureBufferDesc_t       *inputPtr);
+    PictureParentControlSet_t   *pictureControlSetPtr,
+    EB_U32                       lcuIndex,
+    MotionEstimationContext_t   *contextPtr,
+    EbPictureBufferDesc_t       *inputPtr);
 
 extern void EbHevcGetMv(
-    PictureParentControlSet_t	*pictureControlSetPtr,
-    EB_U32						 lcuIndex,
-    EB_S32						*xCurrentMv,
-    EB_S32						*yCurrentMv);
+    PictureParentControlSet_t    *pictureControlSetPtr,
+    EB_U32                         lcuIndex,
+    EB_S32                        *xCurrentMv,
+    EB_S32                        *yCurrentMv);
 
 extern void EbHevcGetMeDist(
-    PictureParentControlSet_t	*pictureControlSetPtr,
-    EB_U32						 lcuIndex,
+    PictureParentControlSet_t    *pictureControlSetPtr,
+    EB_U32                         lcuIndex,
     EB_U32                      *distortion);
 
 EB_S8 Sort3Elements(EB_U32 a, EB_U32 b, EB_U32 c);

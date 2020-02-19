@@ -56,6 +56,6 @@ extern void GetEightHorizontalSearchPointResultsAll85PUs_AVX512_INTRIN(
 
 #ifdef __cplusplus
 }
-#endif        
+#endif
 #endif // EbComputeSAD_AVX512_h
 

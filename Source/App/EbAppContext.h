@@ -30,8 +30,8 @@ typedef struct EbAppContext_s {
     EB_BUFFERHEADERTYPE                *streamBufferPool;
     EB_BUFFERHEADERTYPE                *reconBuffer;
 
-	// Instance Index
-	uint8_t								instanceIdx;
+    // Instance Index
+    uint8_t                                instanceIdx;
 
 } EbAppContext_t;
 

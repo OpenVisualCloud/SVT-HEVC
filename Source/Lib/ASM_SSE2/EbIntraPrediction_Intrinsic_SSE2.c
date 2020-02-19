@@ -101,19 +101,19 @@ void IntraModeHorizontalLuma_SSE2_INTRIN(
     EB_U8            *refSamples,             //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,          //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride, //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip)                    //skip one row 
+    const EB_BOOL     skip)                    //skip one row
 {
     EB_U32 topOffset = (size << 1) + 1;
     EB_U32 topLeftOffset = (size << 1);
     EB_U32 leftOffset = 0;
     EB_U32 pStride = predictionBufferStride;
 
-    __m128i xmm_0, top, topLeft, filter_cmpnt0_7, unclipped, clipped; 
+    __m128i xmm_0, top, topLeft, filter_cmpnt0_7, unclipped, clipped;
     __m128i left0_15, left0_7, left8_15, left0_3, left4_7, left8_11, left12_15, left01, left23, left45, left67, left89, left10_11;
     __m128i left12_13, left14_15, left0, left1, left2, left3, left4, left5, left6, left7, left8, left9, left10, left11;
     __m128i left12, left13, left14, left15;
-    
-    if (size != 32) {    
+
+    if (size != 32) {
 
         topLeft = _mm_cvtsi32_si128(*(refSamples + topLeftOffset));
         xmm_0 = _mm_setzero_si128();
@@ -126,19 +126,19 @@ void IntraModeHorizontalLuma_SSE2_INTRIN(
 
             if (size == 16) {
                 __m128i filter_cmpnt8_15;
-                
+
                 top = _mm_loadu_si128((__m128i *)(refSamples + topOffset));
-                
+
                 filter_cmpnt0_7 = _mm_srai_epi16(_mm_sub_epi16(_mm_unpacklo_epi8(top, xmm_0), topLeft), 1);
                 filter_cmpnt8_15 = _mm_srai_epi16(_mm_sub_epi16(_mm_unpackhi_epi8(top, xmm_0), topLeft), 1);
 
                 left0_15 = _mm_loadu_si128((__m128i *)(refSamples + leftOffset));
                 left0_7 = _mm_unpacklo_epi8(left0_15, left0_15);
                 left8_15 = _mm_unpackhi_epi8(left0_15, left0_15);
-                
+
                 left0_3 = _mm_unpacklo_epi16(left0_7, left0_7);
-                left4_7 = _mm_unpackhi_epi16(left0_7, left0_7); 
-                left8_11 = _mm_unpacklo_epi16(left8_15, left8_15); 
+                left4_7 = _mm_unpackhi_epi16(left0_7, left0_7);
+                left8_11 = _mm_unpacklo_epi16(left8_15, left8_15);
                 left12_15 = _mm_unpackhi_epi16(left8_15, left8_15);
 
                 left01 = _mm_unpacklo_epi32(left0_3, left0_3);
@@ -149,10 +149,10 @@ void IntraModeHorizontalLuma_SSE2_INTRIN(
                 left10_11 = _mm_unpackhi_epi32(left8_11, left8_11);
                 left12_13 = _mm_unpacklo_epi32(left12_15, left12_15);
                 left14_15 = _mm_unpackhi_epi32(left12_15, left12_15);
-                
-                left0 = _mm_unpacklo_epi8(left01, xmm_0);                
+
+                left0 = _mm_unpacklo_epi8(left01, xmm_0);
                 clipped = _mm_packus_epi16(_mm_add_epi16(left0, filter_cmpnt0_7), _mm_add_epi16(filter_cmpnt8_15, left0));
-                
+
                 left1 = _mm_unpackhi_epi64(left01, left01);
                 left2 = _mm_unpacklo_epi64(left23, left23);
                 left3 = _mm_unpackhi_epi64(left23, left23);
@@ -183,27 +183,27 @@ void IntraModeHorizontalLuma_SSE2_INTRIN(
                 _mm_storeu_si128((__m128i *)(predictionPtr + pStride), left9);
                 _mm_storeu_si128((__m128i *)(predictionPtr+2*pStride), left10);
                 _mm_storeu_si128((__m128i *)(predictionPtr+3*pStride), left11);
-                predictionPtr += (pStride << 2);                
+                predictionPtr += (pStride << 2);
                 _mm_storeu_si128((__m128i *)predictionPtr, left12);
                 _mm_storeu_si128((__m128i *)(predictionPtr + pStride), left13);
                 _mm_storeu_si128((__m128i *)(predictionPtr+2*pStride), left14);
                 _mm_storeu_si128((__m128i *)(predictionPtr+3*pStride), left15);
             }
-            else if (size == 8) {          
-                
+            else if (size == 8) {
+
                 filter_cmpnt0_7 = _mm_srai_epi16(_mm_sub_epi16(_mm_unpacklo_epi8(_mm_loadl_epi64((__m128i *)(refSamples + topOffset)), xmm_0), topLeft), 1);
 
                 left0_7 = _mm_loadl_epi64((__m128i *)(refSamples + leftOffset));
                 left0_7 = _mm_unpacklo_epi8(left0_7, left0_7);
-                
+
                 left0_3 = _mm_unpacklo_epi16(left0_7, left0_7);
                 left4_7 = _mm_unpackhi_epi16(left0_7, left0_7);
-                
+
                 left01 = _mm_unpacklo_epi32(left0_3, left0_3);
                 left23 = _mm_unpackhi_epi32(left0_3, left0_3);
                 left45 = _mm_unpacklo_epi32(left4_7, left4_7);
                 left67 = _mm_unpackhi_epi32(left4_7, left4_7);
-                
+
                 unclipped = _mm_add_epi16(_mm_unpacklo_epi8(left01, xmm_0), filter_cmpnt0_7);
                 clipped = _mm_packus_epi16(unclipped, unclipped);
 
@@ -217,55 +217,55 @@ void IntraModeHorizontalLuma_SSE2_INTRIN(
                 _mm_storel_epi64((__m128i *)(predictionPtr + 2 * pStride), left67);
                 _mm_storel_epi64((__m128i *)(predictionPtr + 3 * pStride), _mm_srli_si128(left67, 8));
 
-            } else {           
+            } else {
                 __m128i filter_cmpnt0_3;
 
-                filter_cmpnt0_3 = _mm_srai_epi16(_mm_sub_epi16(_mm_unpacklo_epi8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + topOffset)), xmm_0), topLeft), 1);          
-                 
-                left0_3 = _mm_cvtsi32_si128(*(EB_U32*)(refSamples + leftOffset)); 
+                filter_cmpnt0_3 = _mm_srai_epi16(_mm_sub_epi16(_mm_unpacklo_epi8(_mm_cvtsi32_si128(*(EB_U32*)(refSamples + topOffset)), xmm_0), topLeft), 1);
+
+                left0_3 = _mm_cvtsi32_si128(*(EB_U32*)(refSamples + leftOffset));
                 left0_3 = _mm_unpacklo_epi8(left0_3, left0_3);  //00112233
                 left0_3 = _mm_unpacklo_epi16(left0_3, left0_3); //0000111122223333
-                
-                left01 = _mm_unpacklo_epi32(left0_3, left0_3); 
-                left23 = _mm_unpackhi_epi32(left0_3, left0_3); 
 
-                unclipped = _mm_add_epi16(_mm_unpacklo_epi8(left01, xmm_0), filter_cmpnt0_3);      
-                clipped = _mm_packus_epi16(unclipped, unclipped);   
-                
+                left01 = _mm_unpacklo_epi32(left0_3, left0_3);
+                left23 = _mm_unpackhi_epi32(left0_3, left0_3);
+
+                unclipped = _mm_add_epi16(_mm_unpacklo_epi8(left01, xmm_0), filter_cmpnt0_3);
+                clipped = _mm_packus_epi16(unclipped, unclipped);
+
                 *(EB_U32*)predictionPtr = _mm_cvtsi128_si32(clipped);
-                *(EB_U32*)(predictionPtr + pStride) = _mm_cvtsi128_si32(_mm_srli_si128(left01, 8));     
-                *(EB_U32*)(predictionPtr + 2 * pStride) = _mm_cvtsi128_si32(left23); 
-                *(EB_U32*)(predictionPtr + 3 * pStride) = _mm_cvtsi128_si32(_mm_srli_si128(left23, 8));    
+                *(EB_U32*)(predictionPtr + pStride) = _mm_cvtsi128_si32(_mm_srli_si128(left01, 8));
+                *(EB_U32*)(predictionPtr + 2 * pStride) = _mm_cvtsi128_si32(left23);
+                *(EB_U32*)(predictionPtr + 3 * pStride) = _mm_cvtsi128_si32(_mm_srli_si128(left23, 8));
             }
         }
         else {
             __m128i left0_14_even, left_0_6_even, left02, left46, skip_mask;
-            
-            skip_mask = _mm_set1_epi16(0x00FF); 
-            pStride <<= 1; 
-            
+
+            skip_mask = _mm_set1_epi16(0x00FF);
+            pStride <<= 1;
+
             if (size == 16) {
                 __m128i filter_cmpnt8_15, left_8_14_even, left8_10, left12_14, left02_16wide;
 
                 top = _mm_loadu_si128((__m128i *)(refSamples + topOffset));
-                filter_cmpnt0_7 = _mm_srai_epi16(_mm_sub_epi16(_mm_unpacklo_epi8(top, xmm_0), topLeft), 1);                
+                filter_cmpnt0_7 = _mm_srai_epi16(_mm_sub_epi16(_mm_unpacklo_epi8(top, xmm_0), topLeft), 1);
                 filter_cmpnt8_15 = _mm_srai_epi16(_mm_sub_epi16(_mm_unpackhi_epi8(top, xmm_0), topLeft), 1);
-                
+
                 left0_14_even = _mm_and_si128(_mm_loadu_si128((__m128i *)(refSamples + leftOffset)), skip_mask);
                 left0_14_even = _mm_packus_epi16(left0_14_even, left0_14_even);
                 left0_14_even = _mm_unpacklo_epi8(left0_14_even, left0_14_even);
 
                 left_0_6_even = _mm_unpacklo_epi16(left0_14_even, left0_14_even);
                 left_8_14_even = _mm_unpackhi_epi16(left0_14_even, left0_14_even);
-                
+
                 left02 = _mm_unpacklo_epi32(left_0_6_even, left_0_6_even);
                 left46 = _mm_unpackhi_epi32(left_0_6_even, left_0_6_even);
                 left8_10 = _mm_unpacklo_epi32(left_8_14_even, left_8_14_even);
                 left12_14 = _mm_unpackhi_epi32(left_8_14_even, left_8_14_even);
-                
+
                 left02_16wide = _mm_unpacklo_epi8(left02, xmm_0);
                 clipped = _mm_packus_epi16(_mm_add_epi16(left02_16wide, filter_cmpnt0_7), _mm_add_epi16(filter_cmpnt8_15, left02_16wide));
-                
+
                 left2 = _mm_unpackhi_epi64(left02, left02);
                 left4 = _mm_unpacklo_epi64(left46, left46);
                 left6 = _mm_unpackhi_epi64(left46, left46);
@@ -283,16 +283,16 @@ void IntraModeHorizontalLuma_SSE2_INTRIN(
                 _mm_storeu_si128((__m128i *)(predictionPtr + pStride), left10);
                 _mm_storeu_si128((__m128i *)(predictionPtr + 2 * pStride), left12);
                 _mm_storeu_si128((__m128i *)(predictionPtr + 3 * pStride), left14);
- 
+
             }
             else {
                 filter_cmpnt0_7 = _mm_srai_epi16(_mm_sub_epi16(_mm_unpacklo_epi8(_mm_loadl_epi64((__m128i *)(refSamples + topOffset)), xmm_0), topLeft), 1);
 
                 left_0_6_even = _mm_and_si128(_mm_loadl_epi64((__m128i *)(refSamples + leftOffset)), skip_mask);
-                left_0_6_even = _mm_packus_epi16(left_0_6_even, left_0_6_even); 
+                left_0_6_even = _mm_packus_epi16(left_0_6_even, left_0_6_even);
                 left_0_6_even = _mm_unpacklo_epi8(left_0_6_even, left_0_6_even);
                 left_0_6_even = _mm_unpacklo_epi16(left_0_6_even, left_0_6_even);
-                
+
                 left02 = _mm_unpacklo_epi32(left_0_6_even, left_0_6_even);
                 left46 = _mm_unpackhi_epi32(left_0_6_even, left_0_6_even);
 
@@ -314,15 +314,15 @@ void IntraModeHorizontalLuma_SSE2_INTRIN(
             for (count = 0; count < 2; ++count) {
                 left0_15 = _mm_loadu_si128((__m128i *)(refSamples + leftOffset));
                 refSamples += 16;
-                
+
                 left0_7 = _mm_unpacklo_epi8(left0_15, left0_15);
                 left8_15 = _mm_unpackhi_epi8(left0_15, left0_15);
-                
+
                 left0_3 = _mm_unpacklo_epi16(left0_7, left0_7);
                 left4_7 = _mm_unpackhi_epi16(left0_7, left0_7);
                 left8_11 = _mm_unpacklo_epi16(left8_15, left8_15);
                 left12_15 = _mm_unpackhi_epi16(left8_15, left8_15);
-                                
+
                 left01 = _mm_unpacklo_epi32(left0_3, left0_3);
                 left23 = _mm_unpackhi_epi32(left0_3, left0_3);
                 left45 = _mm_unpacklo_epi32(left4_7, left4_7);
@@ -404,13 +404,13 @@ void IntraModeHorizontalChroma_SSE2_INTRIN(
     EB_U8            *refSamples,             //input parameter, pointer to the reference samples
     EB_U8            *predictionPtr,          //output parameter, pointer to the prediction
     const EB_U32      predictionBufferStride, //input parameter, denotes the stride for the prediction ptr
-    const EB_BOOL     skip)                    //skip one row 
+    const EB_BOOL     skip)                    //skip one row
 {
     EB_U32 pStride = predictionBufferStride;
     EB_U32 leftOffset = 0;
     //Jing:
     //Add size == 32 for 444
-    
+
     __m128i left0_15, left0_7, left8_15, left0_3, left4_7, left8_11, left12_15, left01, left23, left45, left67, left89, left10_11;
     __m128i left12_13, left14_15, left0, left1, left2, left3, left4, left5, left6, left7, left8, left9, left10, left11;
     __m128i left12, left13, left14, left15;
@@ -497,12 +497,12 @@ void IntraModeHorizontalChroma_SSE2_INTRIN(
             xmm0 = _mm_loadu_si128((__m128i *)(refSamples+leftOffset));
             xmm8 = _mm_unpackhi_epi8(xmm0, xmm0);
             xmm0 = _mm_unpacklo_epi8(xmm0, xmm0);
-            
+
             xmm4 = _mm_unpackhi_epi16(xmm0, xmm0);
             xmm0 = _mm_unpacklo_epi16(xmm0, xmm0);
             xmm12 = _mm_unpackhi_epi16(xmm8, xmm8);
             xmm8 = _mm_unpacklo_epi16(xmm8, xmm8);
-            
+
             xmm2 = _mm_unpackhi_epi32(xmm0, xmm0);
             xmm0 = _mm_unpacklo_epi32(xmm0, xmm0);
             xmm6 = _mm_unpackhi_epi32(xmm4, xmm4);
@@ -511,7 +511,7 @@ void IntraModeHorizontalChroma_SSE2_INTRIN(
             xmm8 = _mm_unpacklo_epi32(xmm8, xmm8);
             xmm14 = _mm_unpackhi_epi32(xmm12, xmm12);
             xmm12 = _mm_unpacklo_epi32(xmm12, xmm12);
-               
+
             _mm_storeu_si128((__m128i *)predictionPtr,             _mm_unpacklo_epi64(xmm0, xmm0));
             _mm_storeu_si128((__m128i *)(predictionPtr + pStride), _mm_unpackhi_epi64(xmm0, xmm0));
             _mm_storeu_si128((__m128i *)(predictionPtr+2*pStride), _mm_unpacklo_epi64(xmm2, xmm2));
@@ -526,7 +526,7 @@ void IntraModeHorizontalChroma_SSE2_INTRIN(
             _mm_storeu_si128((__m128i *)(predictionPtr + pStride), _mm_unpackhi_epi64(xmm8, xmm8));
             _mm_storeu_si128((__m128i *)(predictionPtr+2*pStride), _mm_unpacklo_epi64(xmm10, xmm10));
             _mm_storeu_si128((__m128i *)(predictionPtr+3*pStride), _mm_unpackhi_epi64(xmm10, xmm10));
-            predictionPtr += (pStride << 2);                
+            predictionPtr += (pStride << 2);
             _mm_storeu_si128((__m128i *)predictionPtr,             _mm_unpacklo_epi64(xmm12, xmm12));
             _mm_storeu_si128((__m128i *)(predictionPtr + pStride), _mm_unpackhi_epi64(xmm12, xmm12));
             _mm_storeu_si128((__m128i *)(predictionPtr+2*pStride), _mm_unpacklo_epi64(xmm14, xmm14));
@@ -538,12 +538,12 @@ void IntraModeHorizontalChroma_SSE2_INTRIN(
             xmm0 = _mm_unpacklo_epi8(xmm0, xmm0);
             xmm4 = _mm_unpackhi_epi16(xmm0, xmm0);
             xmm0 = _mm_unpacklo_epi16(xmm0, xmm0);
-            
+
             xmm2 = _mm_unpackhi_epi32(xmm0, xmm0);
             xmm0 = _mm_unpacklo_epi32(xmm0, xmm0);
             xmm6 = _mm_unpackhi_epi32(xmm4, xmm4);
             xmm4 = _mm_unpacklo_epi32(xmm4, xmm4);
-            
+
             _mm_storel_epi64((__m128i *)(predictionPtr), xmm0);
             _mm_storel_epi64((__m128i *)(predictionPtr+pStride), _mm_srli_si128(xmm0, 8));
             _mm_storel_epi64((__m128i *)(predictionPtr+2*pStride), xmm2);
@@ -576,13 +576,13 @@ void IntraModeHorizontalChroma_SSE2_INTRIN(
             MACRO_HORIZONTAL_LUMA_32X16(16)
         } else if (size == 16) {
             __m128i xmm0, xmm2, xmm4, xmm6;
-            
+
             xmm0 = _mm_and_si128(_mm_loadu_si128((__m128i *)(refSamples + leftOffset)), xmm15);
             xmm0 = _mm_packus_epi16(xmm0, xmm0);
             xmm0 = _mm_unpacklo_epi8(xmm0, xmm0);
             xmm4 = _mm_unpackhi_epi16(xmm0, xmm0);
             xmm0 = _mm_unpacklo_epi16(xmm0, xmm0);
-            
+
             xmm2 = _mm_unpackhi_epi32(xmm0, xmm0);
             xmm0 = _mm_unpacklo_epi32(xmm0, xmm0);
             xmm6 = _mm_unpackhi_epi32(xmm4, xmm4);
@@ -607,7 +607,7 @@ void IntraModeHorizontalChroma_SSE2_INTRIN(
             xmm0 = _mm_unpacklo_epi16(xmm0, xmm0);
             xmm2 = _mm_unpackhi_epi32(xmm0, xmm0);
             xmm0 = _mm_unpacklo_epi32(xmm0, xmm0);
-            
+
             _mm_storel_epi64((__m128i *)(predictionPtr), xmm0);
             _mm_storel_epi64((__m128i *)(predictionPtr + pStride), _mm_srli_si128(xmm0, 8));
             _mm_storel_epi64((__m128i *)(predictionPtr + 2*pStride), xmm2);
@@ -622,7 +622,7 @@ void IntraModeHorizontalChroma_SSE2_INTRIN(
 
             *(EB_U32*)(predictionPtr) = _mm_cvtsi128_si32(xmm0);
             *(EB_U32*)(predictionPtr + pStride) = _mm_cvtsi128_si32(_mm_srli_si128(xmm0, 4));
-        }     
+        }
     }
 }
 
@@ -645,7 +645,7 @@ void IntraModePlanar16bit_SSE2_INTRIN(
     if (size != 4) {
         __m128i xmm_TopRight, xmm_BottomLeft;
         __m128i pred_0, pred_1, pred_2, pred_3;
-        
+
         xmm_TopRight = _mm_cvtsi32_si128((EB_U32)*(refSamples + topRightOffset));
         xmm_TopRight = _mm_unpacklo_epi16(xmm_TopRight, xmm_TopRight);
         xmm_TopRight = _mm_unpacklo_epi32(xmm_TopRight, xmm_TopRight);
@@ -654,7 +654,7 @@ void IntraModePlanar16bit_SSE2_INTRIN(
         xmm_BottomLeft = _mm_unpacklo_epi16(xmm_BottomLeft, xmm_BottomLeft);
         xmm_BottomLeft = _mm_unpacklo_epi32(xmm_BottomLeft, xmm_BottomLeft);
         xmm_BottomLeft = _mm_unpacklo_epi64(xmm_BottomLeft, xmm_BottomLeft);
-        
+
         if (size == 32) {
             __m128i xmm_ref, xmm_ref16;
             __m128i xmm_topRightAddSize0, xmm_topRightAddSize1, xmm_topRightAddSize2, xmm_topRightAddSize3, xmm_top0, xmm_top1, xmm_top2, xmm_top3;
@@ -673,36 +673,36 @@ void IntraModePlanar16bit_SSE2_INTRIN(
             refSamples += leftOffset;
 
             if (!skip) {
-                EB_U32 count1; 
-                
+                EB_U32 count1;
+
                 // The coefficients will be size-1, size-2, ... so we start at 31, 30, ... and reverse towards 0
                 for (reverseCnt = 8; reverseCnt > 0; reverseCnt -= 2) {
-                
+
                     bottomLeftTotal = _mm_mullo_epi16(xmm_BottomLeft, _mm_load_si128((__m128i *)(coeffArray + 4 * reverseCnt + OFFSET_1TO8 - 32)));
-                    
+
                     xmm_ref = _mm_loadu_si128((__m128i *)(refSamples));
                     refSamples += 8;
 
                     for (count1 = 0; count1 < 8; ++count1) {
-                        
+
                         xmm_ref16 = _mm_unpacklo_epi16(xmm_ref, xmm_ref);
                         xmm_ref16 = _mm_unpacklo_epi32(xmm_ref16, xmm_ref16);
                         xmm_ref16 = _mm_unpacklo_epi64(xmm_ref16, xmm_ref16);
-                        
+
                         bottomLeftTotal16 = _mm_unpacklo_epi16(bottomLeftTotal, bottomLeftTotal);
                         bottomLeftTotal16 = _mm_unpacklo_epi32(bottomLeftTotal16, bottomLeftTotal16);
-                        bottomLeftTotal16 = _mm_unpacklo_epi64(bottomLeftTotal16, bottomLeftTotal16);                        
-                        
+                        bottomLeftTotal16 = _mm_unpacklo_epi64(bottomLeftTotal16, bottomLeftTotal16);
+
                         pred_0 =  _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(xmm_ref16, _mm_load_si128((__m128i *)(coeffArray + OFFSET_31TO24))), xmm_topRightAddSize0), bottomLeftTotal16), _mm_mullo_epi16(xmm_top0, _mm_load_si128((__m128i *)(coeffArray + coefOffset)))), 6);
                         pred_1 =  _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(xmm_ref16, _mm_load_si128((__m128i *)(coeffArray + OFFSET_23TO16))), xmm_topRightAddSize1), bottomLeftTotal16), _mm_mullo_epi16(xmm_top1, _mm_load_si128((__m128i *)(coeffArray + coefOffset)))), 6);
                         pred_2 = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(xmm_ref16, _mm_load_si128((__m128i *)(coeffArray + OFFSET_15TO8))), xmm_topRightAddSize2), bottomLeftTotal16), _mm_mullo_epi16(xmm_top2, _mm_load_si128((__m128i *)(coeffArray + coefOffset)))), 6);
                         pred_3 = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(xmm_ref16, _mm_load_si128((__m128i *)(coeffArray + OFFSET_7TO0))), xmm_topRightAddSize3), bottomLeftTotal16), _mm_mullo_epi16(xmm_top3, _mm_load_si128((__m128i *)(coeffArray + coefOffset)))), 6);
-                        
+
                         _mm_storeu_si128((__m128i *)(predictionPtr), pred_0);
                         _mm_storeu_si128((__m128i *)(predictionPtr + 8), pred_1);
                         _mm_storeu_si128((__m128i *)(predictionPtr + 16), pred_2);
                         _mm_storeu_si128((__m128i *)(predictionPtr + 24), pred_3);
-                        
+
                         // For next iteration
                         coefOffset -= 8;
                         predictionPtr += pStride;
@@ -715,25 +715,25 @@ void IntraModePlanar16bit_SSE2_INTRIN(
                 for (reverseCnt = 4; reverseCnt > 0; reverseCnt -= 2) {
 
                     bottomLeftTotal = _mm_mullo_epi16(xmm_BottomLeft, _mm_load_si128((__m128i *)(coeffArray + 4 * reverseCnt + OFFSET_1TO15 - 16)));
-                    xmm_ref = _mm_packs_epi32(_mm_srli_epi32(_mm_slli_epi32(_mm_loadu_si128((__m128i *)(refSamples)), 16), 16),           
+                    xmm_ref = _mm_packs_epi32(_mm_srli_epi32(_mm_slli_epi32(_mm_loadu_si128((__m128i *)(refSamples)), 16), 16),
                                               _mm_srli_epi32(_mm_slli_epi32(_mm_loadu_si128((__m128i *)(refSamples + 8)), 16), 16));
                     refSamples += 16;
 
                     for (count = 0; count < 8; ++count) {
-                        
+
                         xmm_ref16 = _mm_unpacklo_epi16(xmm_ref, xmm_ref);
                         xmm_ref16 = _mm_unpacklo_epi32(xmm_ref16, xmm_ref16);
                         xmm_ref16 = _mm_unpacklo_epi64(xmm_ref16, xmm_ref16);
-                        
+
                         bottomLeftTotal16 = _mm_unpacklo_epi16(bottomLeftTotal, bottomLeftTotal);
                         bottomLeftTotal16 = _mm_unpacklo_epi32(bottomLeftTotal16, bottomLeftTotal16);
                         bottomLeftTotal16 = _mm_unpacklo_epi64(bottomLeftTotal16, bottomLeftTotal16);
-                        
+
                         pred_0 =  _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(xmm_ref16, _mm_load_si128((__m128i *)(coeffArray + OFFSET_31TO24))), xmm_topRightAddSize0), bottomLeftTotal16), _mm_mullo_epi16(xmm_top0, _mm_load_si128((__m128i *)(coeffArray + coefOffset)))),6);
                         pred_1 =  _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(xmm_ref16, _mm_load_si128((__m128i *)(coeffArray + OFFSET_23TO16))), xmm_topRightAddSize1), bottomLeftTotal16), _mm_mullo_epi16(xmm_top1, _mm_load_si128((__m128i *)(coeffArray + coefOffset)))),6);
                         pred_2 = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(xmm_ref16, _mm_load_si128((__m128i *)(coeffArray + OFFSET_15TO8))), xmm_topRightAddSize2), bottomLeftTotal16), _mm_mullo_epi16(xmm_top2, _mm_load_si128((__m128i *)(coeffArray + coefOffset)))),6);
                         pred_3 = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(xmm_ref16, _mm_load_si128((__m128i *)(coeffArray + OFFSET_7TO0))), xmm_topRightAddSize3), bottomLeftTotal16), _mm_mullo_epi16(xmm_top3, _mm_load_si128((__m128i *)(coeffArray + coefOffset)))),6);
-                        
+
                         _mm_storeu_si128((__m128i *)(predictionPtr), pred_0);
                         _mm_storeu_si128((__m128i *)(predictionPtr + 8), pred_1);
                         _mm_storeu_si128((__m128i *)(predictionPtr + 16), pred_2);
@@ -752,7 +752,7 @@ void IntraModePlanar16bit_SSE2_INTRIN(
             __m128i topRightTotal0, topRightTotal1, top0, top1, left1, bottomLeftTotal1, leftCoeff0, leftCoeff1;
 
             coefOffset = OFFSET_15; // The coefficients will be size-1, size-2, ... so we start at 15, 14, ... and reverse towards 0
-            
+
             topRightTotal0 = _mm_add_epi16(_mm_mullo_epi16(xmm_TopRight, _mm_load_si128((__m128i *)(coeffArray + OFFSET_1TO8))), _mm_load_si128((__m128i *)(coeffArray + OFFSET_16)));
             topRightTotal1 = _mm_add_epi16(_mm_mullo_epi16(xmm_TopRight, _mm_load_si128((__m128i *)(coeffArray + OFFSET_9TO16))), _mm_load_si128((__m128i *)(coeffArray + OFFSET_16)));
             top0 = _mm_loadu_si128((__m128i *)(refSamples + topOffset));
@@ -776,14 +776,14 @@ void IntraModePlanar16bit_SSE2_INTRIN(
 
                         bottomLeftTotal16 = _mm_unpacklo_epi16(bottomLeftTotal, bottomLeftTotal);
                         bottomLeftTotal16 = _mm_unpacklo_epi32(bottomLeftTotal16, bottomLeftTotal16);
-                        bottomLeftTotal16 = _mm_unpacklo_epi64(bottomLeftTotal16, bottomLeftTotal16);                        
-                        
+                        bottomLeftTotal16 = _mm_unpacklo_epi64(bottomLeftTotal16, bottomLeftTotal16);
+
                         pred_0 = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(left16, leftCoeff0), topRightTotal0), bottomLeftTotal16), _mm_mullo_epi16(top0, _mm_load_si128((__m128i *)(coeffArray + coefOffset)))), 5);
                         pred_1 = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(left16, leftCoeff1), topRightTotal1), bottomLeftTotal16), _mm_mullo_epi16(top1, _mm_load_si128((__m128i *)(coeffArray + coefOffset)))), 5);
 
                         _mm_storeu_si128((__m128i *)predictionPtr, pred_0);
                         _mm_storeu_si128((__m128i *)(predictionPtr + 8), pred_1);
-                        
+
                         // Next iteration
                         coefOffset -= 8;
                         predictionPtr += pStride;
@@ -795,22 +795,22 @@ void IntraModePlanar16bit_SSE2_INTRIN(
                 }
             }
             else {
-                bottomLeftTotal = _mm_mullo_epi16(xmm_BottomLeft, _mm_load_si128((__m128i *)(coeffArray + OFFSET_1TO15)));                
+                bottomLeftTotal = _mm_mullo_epi16(xmm_BottomLeft, _mm_load_si128((__m128i *)(coeffArray + OFFSET_1TO15)));
                 left = _mm_packs_epi32(_mm_srli_epi32(_mm_slli_epi32(left, 16), 16), _mm_srli_epi32(_mm_slli_epi32(left1, 16), 16));
 
                 for (count = 0; count < 8; ++count) {
-                    
+
                     left16 = _mm_unpacklo_epi16(left, left);
                     left16 = _mm_unpacklo_epi32(left16, left16);
-                    left16 = _mm_unpacklo_epi64(left16, left16);                    
-                    
+                    left16 = _mm_unpacklo_epi64(left16, left16);
+
                     bottomLeftTotal16 = _mm_unpacklo_epi16(bottomLeftTotal, bottomLeftTotal);
                     bottomLeftTotal16 = _mm_unpacklo_epi32(bottomLeftTotal16, bottomLeftTotal16);
-                    bottomLeftTotal16 = _mm_unpacklo_epi64(bottomLeftTotal16, bottomLeftTotal16);                          
-                    
+                    bottomLeftTotal16 = _mm_unpacklo_epi64(bottomLeftTotal16, bottomLeftTotal16);
+
                     pred_0 = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(left16, leftCoeff0), topRightTotal0), bottomLeftTotal16), _mm_mullo_epi16(top0, _mm_load_si128((__m128i *)(coeffArray + coefOffset)))), 5);
                     pred_1 = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(left16, leftCoeff1), topRightTotal1), bottomLeftTotal16), _mm_mullo_epi16(top1, _mm_load_si128((__m128i *)(coeffArray + coefOffset)))), 5);
-                    
+
                     _mm_storeu_si128((__m128i *)predictionPtr, pred_0);
                     _mm_storeu_si128((__m128i *)(predictionPtr + 8), pred_1);
 
@@ -823,25 +823,25 @@ void IntraModePlanar16bit_SSE2_INTRIN(
             }
         }
         else {
-            
+
             topRightAddSize = _mm_add_epi16(_mm_mullo_epi16(xmm_TopRight, _mm_load_si128((__m128i *)(coeffArray + OFFSET_1TO8))), _mm_load_si128((__m128i *)(coeffArray + OFFSET_8)));
             top = _mm_loadu_si128((__m128i *)(refSamples + topOffset));
             left = _mm_loadu_si128((__m128i *)(refSamples + leftOffset));
             leftCoeff = _mm_load_si128((__m128i *)(coeffArray + OFFSET_7TO0));
 
             if (!skip) {
-                
+
                 bottomLeftTotal = _mm_mullo_epi16(xmm_BottomLeft, _mm_load_si128((__m128i *)(coeffArray + OFFSET_1TO8)));
                 for (count = 0; count < 8; ++count) {
-                    
+
                     left16 = _mm_unpacklo_epi16(left, left);
                     left16 = _mm_unpacklo_epi32(left16, left16);
                     left16 = _mm_unpacklo_epi64(left16, left16);
-                    
+
                     bottomLeftTotal16 = _mm_unpacklo_epi16(bottomLeftTotal, bottomLeftTotal);
                     bottomLeftTotal16 = _mm_unpacklo_epi32(bottomLeftTotal16, bottomLeftTotal16);
                     bottomLeftTotal16 = _mm_unpacklo_epi64(bottomLeftTotal16, bottomLeftTotal16);
-                    
+
                     pred = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(left16, leftCoeff), topRightAddSize), bottomLeftTotal16), _mm_mullo_epi16(top, _mm_load_si128((__m128i *)(coeffArray + OFFSET_7)))), 4);
                     _mm_storeu_si128((__m128i *)(predictionPtr), pred);
 
@@ -850,18 +850,18 @@ void IntraModePlanar16bit_SSE2_INTRIN(
                     predictionPtr += pStride;
                     left = _mm_srli_si128(left, 2);
                     bottomLeftTotal = _mm_srli_si128(bottomLeftTotal, 2);
-                } 
-            } 
+                }
+            }
             else {
                 bottomLeftTotal = _mm_mullo_epi16(xmm_BottomLeft, _mm_load_si128((__m128i *)(coeffArray + OFFSET_1TO15)));
                 left = _mm_srli_epi32(_mm_slli_epi32(left, 16), 16);
 
                 for (count = 0; count < 4; ++count) {
-                    
+
                     left16 = _mm_unpacklo_epi16(left, left);
                     left16 = _mm_unpacklo_epi32(left16, left16);
                     left16 = _mm_unpacklo_epi64(left16, left16);
-                    
+
                     bottomLeftTotal16 = _mm_unpacklo_epi16(bottomLeftTotal, bottomLeftTotal);
                     bottomLeftTotal16 = _mm_unpacklo_epi32(bottomLeftTotal16, bottomLeftTotal16);
                     bottomLeftTotal16 = _mm_unpacklo_epi64(bottomLeftTotal16, bottomLeftTotal16);
@@ -879,7 +879,7 @@ void IntraModePlanar16bit_SSE2_INTRIN(
         }
     }
     else {
-        
+
         topRight = _mm_cvtsi32_si128((EB_U32)*(refSamples + topRightOffset));
         topRight = _mm_unpacklo_epi16(topRight, topRight);
         topRight = _mm_unpacklo_epi32(topRight, topRight);
@@ -887,21 +887,21 @@ void IntraModePlanar16bit_SSE2_INTRIN(
         bottomLeft = _mm_cvtsi32_si128((EB_U32)*(refSamples + bottomLeftOffset));
         bottomLeft = _mm_unpacklo_epi16(bottomLeft, bottomLeft);
         bottomLeft = _mm_unpacklo_epi32(bottomLeft, bottomLeft);
-        
+
         topRightAddSize = _mm_add_epi16(_mm_mullo_epi16(topRight, _mm_load_si128((__m128i *)(coeffArray + OFFSET_1TO8))), _mm_load_si128((__m128i *)(coeffArray + OFFSET_4)));
-        
+
         top = _mm_loadl_epi64((__m128i *)(refSamples + topOffset));
         left = _mm_loadl_epi64((__m128i *)(refSamples + leftOffset));
         leftCoeff = _mm_loadl_epi64((__m128i *)(coeffArray + OFFSET_3TO0));
 
         if (!skip) {
             bottomLeftTotal = _mm_mullo_epi16(bottomLeft, _mm_load_si128((__m128i *)(coeffArray + OFFSET_1TO8)));
-            
+
             for (count = 0; count < 4; ++count) {
-                
+
                 left16 = _mm_unpacklo_epi16(left, left);
                 left16 = _mm_unpacklo_epi32(left16, left16);
-                
+
                 bottomLeftTotal16 = _mm_unpacklo_epi16(bottomLeftTotal, bottomLeftTotal);
                 bottomLeftTotal16 = _mm_unpacklo_epi32(bottomLeftTotal16, bottomLeftTotal16);
 
@@ -920,13 +920,13 @@ void IntraModePlanar16bit_SSE2_INTRIN(
             left = _mm_srli_epi32(_mm_slli_epi32(left, 16), 16);
 
             for (count = 0; count < 2; ++count) {
-                
+
                 left16 = _mm_unpacklo_epi16(left, left);
                 left16 = _mm_unpacklo_epi32(left16, left16);
-                
+
                 bottomLeftTotal16 = _mm_unpacklo_epi16(bottomLeftTotal, bottomLeftTotal);
                 bottomLeftTotal16 = _mm_unpacklo_epi32(bottomLeftTotal16, bottomLeftTotal16);
-                
+
                 pred = _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(left16, leftCoeff), topRightAddSize), bottomLeftTotal16), _mm_mullo_epi16(top, _mm_load_si128((__m128i *)(coeffArray + OFFSET_3)))), 3);
                 _mm_storel_epi64((__m128i *)predictionPtr, pred);
 

@@ -19,9 +19,9 @@ const sampleBiPredClipping biPredClippingFuncPtrArray[EB_ASM_TYPE_TOTAL] = {
 };
 
 const sampleBiPredClipping16bit biPredClipping16bitFuncPtrArray[EB_ASM_TYPE_TOTAL] = {
-	// C_DEFAULT
+    // C_DEFAULT
     BiPredClipping16bit,
-	BiPredClipping16bit_SSE2_INTRIN
+    BiPredClipping16bit_SSE2_INTRIN
 };
 
 // Luma
@@ -48,7 +48,7 @@ const InterpolationFilterNew uniPredLumaIFFunctionPtrArrayNew[EB_ASM_TYPE_TOTAL]
     // AVX2
     {
         LumaInterpolationCopy_SSSE3,                        //A
-        LumaInterpolationFilterPosa_SSSE3,					//a
+        LumaInterpolationFilterPosa_SSSE3,                    //a
         LumaInterpolationFilterPosb_SSSE3,                  //b
         LumaInterpolationFilterPosc_SSSE3,                  //c
         LumaInterpolationFilterPosd_SSSE3,                  //d
@@ -68,9 +68,9 @@ const InterpolationFilterNew uniPredLumaIFFunctionPtrArrayNew[EB_ASM_TYPE_TOTAL]
 
 // Luma
 const InterpolationFilterNew16bit uniPredLuma16bitIFFunctionPtrArray[EB_ASM_TYPE_TOTAL][16] = {     //[ASM type][Interpolation position]
-		// C_DEFAULT
-		{
-            LumaInterpolationCopy16bit,		                //A
+        // C_DEFAULT
+        {
+            LumaInterpolationCopy16bit,                        //A
             LumaInterpolationFilterPosaNew16bit,            //a
             LumaInterpolationFilterPosbNew16bit,            //b
             LumaInterpolationFilterPoscNew16bit,            //c
@@ -86,26 +86,26 @@ const InterpolationFilterNew16bit uniPredLuma16bitIFFunctionPtrArray[EB_ASM_TYPE
             LumaInterpolationFilterPospNew16bit,            //p
             LumaInterpolationFilterPosqNew16bit,            //q
             LumaInterpolationFilterPosrNew16bit,            //r
-		},
-		// AVX2
-		{
-			LumaInterpolationCopy16bit_SSE2,                //A
-			LumaInterpolationFilterPosa16bit_SSE2_INTRIN,	//a
-			LumaInterpolationFilterPosb16bit_SSE2_INTRIN,	//b
-			LumaInterpolationFilterPosc16bit_SSE2_INTRIN,	//c
-			LumaInterpolationFilterPosd16bit_SSE2_INTRIN,	//d
-			LumaInterpolationFilterPose16bit_SSE2_INTRIN,	//e
-			LumaInterpolationFilterPosf16bit_SSE2_INTRIN,	//f
-			LumaInterpolationFilterPosg16bit_SSE2_INTRIN,	//g
-			LumaInterpolationFilterPosh16bit_SSE2_INTRIN,	//h
-			LumaInterpolationFilterPosi16bit_SSE2_INTRIN,	//i
-			LumaInterpolationFilterPosj16bit_SSE2_INTRIN,	//j
-			LumaInterpolationFilterPosk16bit_SSE2_INTRIN,	//k
-			LumaInterpolationFilterPosn16bit_SSE2_INTRIN,	//n
-			LumaInterpolationFilterPosp16bit_SSE2_INTRIN,	//p
-			LumaInterpolationFilterPosq16bit_SSE2_INTRIN,	//q
-			LumaInterpolationFilterPosr16bit_SSE2_INTRIN,	//r
-		},
+        },
+        // AVX2
+        {
+            LumaInterpolationCopy16bit_SSE2,                //A
+            LumaInterpolationFilterPosa16bit_SSE2_INTRIN,    //a
+            LumaInterpolationFilterPosb16bit_SSE2_INTRIN,    //b
+            LumaInterpolationFilterPosc16bit_SSE2_INTRIN,    //c
+            LumaInterpolationFilterPosd16bit_SSE2_INTRIN,    //d
+            LumaInterpolationFilterPose16bit_SSE2_INTRIN,    //e
+            LumaInterpolationFilterPosf16bit_SSE2_INTRIN,    //f
+            LumaInterpolationFilterPosg16bit_SSE2_INTRIN,    //g
+            LumaInterpolationFilterPosh16bit_SSE2_INTRIN,    //h
+            LumaInterpolationFilterPosi16bit_SSE2_INTRIN,    //i
+            LumaInterpolationFilterPosj16bit_SSE2_INTRIN,    //j
+            LumaInterpolationFilterPosk16bit_SSE2_INTRIN,    //k
+            LumaInterpolationFilterPosn16bit_SSE2_INTRIN,    //n
+            LumaInterpolationFilterPosp16bit_SSE2_INTRIN,    //p
+            LumaInterpolationFilterPosq16bit_SSE2_INTRIN,    //q
+            LumaInterpolationFilterPosr16bit_SSE2_INTRIN,    //r
+        },
 };
 
 
@@ -151,8 +151,8 @@ const InterpolationFilterOutRaw biPredLumaIFFunctionPtrArrayNew[EB_ASM_TYPE_TOTA
 };
 
 const InterpolationFilterOutRaw16bit biPredLumaIFFunctionPtrArrayNew16bit[EB_ASM_TYPE_TOTAL][16] = {
-		// C_DEFAULT
-		{
+        // C_DEFAULT
+        {
             LumaInterpolationCopyOutRaw16bit,                             //A
             LumaInterpolationFilterPosaOutRaw16bit,                       //a
             LumaInterpolationFilterPosbOutRaw16bit,                       //b
@@ -169,26 +169,26 @@ const InterpolationFilterOutRaw16bit biPredLumaIFFunctionPtrArrayNew16bit[EB_ASM
             LumaInterpolationFilterPospOutRaw16bit,                       //p
             LumaInterpolationFilterPosqOutRaw16bit,                       //q
             LumaInterpolationFilterPosrOutRaw16bit,                       //r
-		},
-		// AVX2
-		{
-			LumaInterpolationCopyOutRaw16bit_SSE2_INTRIN,                  //A
-			LumaInterpolationFilterPosaOutRaw16bit_SSE2_INTRIN,            //a
-			LumaInterpolationFilterPosbOutRaw16bit_SSE2_INTRIN,            //b
-			LumaInterpolationFilterPoscOutRaw16bit_SSE2_INTRIN,            //c
-			LumaInterpolationFilterPosdOutRaw16bit_SSE2_INTRIN,            //d
-			LumaInterpolationFilterPoseOutRaw16bit_SSE2_INTRIN,            //e
-			LumaInterpolationFilterPosfOutRaw16bit_SSE2_INTRIN,            //f
-			LumaInterpolationFilterPosgOutRaw16bit_SSE2_INTRIN,            //g
-			LumaInterpolationFilterPoshOutRaw16bit_SSE2_INTRIN,            //h
-			LumaInterpolationFilterPosiOutRaw16bit_SSE2_INTRIN,            //i
-			LumaInterpolationFilterPosjOutRaw16bit_SSE2_INTRIN,            //j
-			LumaInterpolationFilterPoskOutRaw16bit_SSE2_INTRIN,            //k
-			LumaInterpolationFilterPosnOutRaw16bit_SSE2_INTRIN,            //n
-			LumaInterpolationFilterPospOutRaw16bit_SSE2_INTRIN,            //p
-			LumaInterpolationFilterPosqOutRaw16bit_SSE2_INTRIN,            //q
-			LumaInterpolationFilterPosrOutRaw16bit_SSE2_INTRIN,            //r
-		},
+        },
+        // AVX2
+        {
+            LumaInterpolationCopyOutRaw16bit_SSE2_INTRIN,                  //A
+            LumaInterpolationFilterPosaOutRaw16bit_SSE2_INTRIN,            //a
+            LumaInterpolationFilterPosbOutRaw16bit_SSE2_INTRIN,            //b
+            LumaInterpolationFilterPoscOutRaw16bit_SSE2_INTRIN,            //c
+            LumaInterpolationFilterPosdOutRaw16bit_SSE2_INTRIN,            //d
+            LumaInterpolationFilterPoseOutRaw16bit_SSE2_INTRIN,            //e
+            LumaInterpolationFilterPosfOutRaw16bit_SSE2_INTRIN,            //f
+            LumaInterpolationFilterPosgOutRaw16bit_SSE2_INTRIN,            //g
+            LumaInterpolationFilterPoshOutRaw16bit_SSE2_INTRIN,            //h
+            LumaInterpolationFilterPosiOutRaw16bit_SSE2_INTRIN,            //i
+            LumaInterpolationFilterPosjOutRaw16bit_SSE2_INTRIN,            //j
+            LumaInterpolationFilterPoskOutRaw16bit_SSE2_INTRIN,            //k
+            LumaInterpolationFilterPosnOutRaw16bit_SSE2_INTRIN,            //n
+            LumaInterpolationFilterPospOutRaw16bit_SSE2_INTRIN,            //p
+            LumaInterpolationFilterPosqOutRaw16bit_SSE2_INTRIN,            //q
+            LumaInterpolationFilterPosrOutRaw16bit_SSE2_INTRIN,            //r
+        },
 };
 
 // Chroma
@@ -264,7 +264,7 @@ const ChromaFilterNew uniPredChromaIFFunctionPtrArrayNew[EB_ASM_TYPE_TOTAL][64] 
         {
 
             ChromaInterpolationCopy_SSSE3,                       //B
-            ChromaInterpolationFilterOneDHorizontal_SSSE3,		 //ab
+            ChromaInterpolationFilterOneDHorizontal_SSSE3,         //ab
             ChromaInterpolationFilterOneDHorizontal_SSSE3,       //ac
             ChromaInterpolationFilterOneDHorizontal_SSSE3,       //ad
             ChromaInterpolationFilterOneDHorizontal_SSSE3,       //ae
@@ -548,20 +548,20 @@ const ChromaFilterOutRaw biPredChromaIFFunctionPtrArrayNew[EB_ASM_TYPE_TOTAL][64
             ChromaInterpolationFilterOneDOutRawHorizontal_SSSE3, //ah
             ChromaInterpolationFilterOneDOutRawVertical_SSSE3,   //ba
             ChromaInterpolationFilterTwoDOutRaw_SSSE3,            //bb
-            ChromaInterpolationFilterTwoDOutRaw_SSSE3,	          //bc
-            ChromaInterpolationFilterTwoDOutRaw_SSSE3,	          //bd
-            ChromaInterpolationFilterTwoDOutRaw_SSSE3,	          //be
-            ChromaInterpolationFilterTwoDOutRaw_SSSE3,	          //bf
-            ChromaInterpolationFilterTwoDOutRaw_SSSE3,	          //bg
-            ChromaInterpolationFilterTwoDOutRaw_SSSE3,	          //bh
-            ChromaInterpolationFilterOneDOutRawVertical_SSSE3,	  //ca
-            ChromaInterpolationFilterTwoDOutRaw_SSSE3,			  //cb
-            ChromaInterpolationFilterTwoDOutRaw_SSSE3,			  //cc
-            ChromaInterpolationFilterTwoDOutRaw_SSSE3,			  //cd
-            ChromaInterpolationFilterTwoDOutRaw_SSSE3,			  //ce
-            ChromaInterpolationFilterTwoDOutRaw_SSSE3,			  //cf
-            ChromaInterpolationFilterTwoDOutRaw_SSSE3,			  //cg
-            ChromaInterpolationFilterTwoDOutRaw_SSSE3,			  //ch
+            ChromaInterpolationFilterTwoDOutRaw_SSSE3,              //bc
+            ChromaInterpolationFilterTwoDOutRaw_SSSE3,              //bd
+            ChromaInterpolationFilterTwoDOutRaw_SSSE3,              //be
+            ChromaInterpolationFilterTwoDOutRaw_SSSE3,              //bf
+            ChromaInterpolationFilterTwoDOutRaw_SSSE3,              //bg
+            ChromaInterpolationFilterTwoDOutRaw_SSSE3,              //bh
+            ChromaInterpolationFilterOneDOutRawVertical_SSSE3,      //ca
+            ChromaInterpolationFilterTwoDOutRaw_SSSE3,              //cb
+            ChromaInterpolationFilterTwoDOutRaw_SSSE3,              //cc
+            ChromaInterpolationFilterTwoDOutRaw_SSSE3,              //cd
+            ChromaInterpolationFilterTwoDOutRaw_SSSE3,              //ce
+            ChromaInterpolationFilterTwoDOutRaw_SSSE3,              //cf
+            ChromaInterpolationFilterTwoDOutRaw_SSSE3,              //cg
+            ChromaInterpolationFilterTwoDOutRaw_SSSE3,              //ch
             ChromaInterpolationFilterOneDOutRawVertical_SSSE3,    //da
             ChromaInterpolationFilterTwoDOutRaw_SSSE3,            //db
             ChromaInterpolationFilterTwoDOutRaw_SSSE3,            //dc

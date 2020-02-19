@@ -15,41 +15,41 @@ extern EB_U32 Compute4xMSad_SSE2_INTRIN(
     EB_U8  *src,                            // input parameter, source samples Ptr
     EB_U32  srcStride,                      // input parameter, source stride
     EB_U8  *ref,                            // input parameter, reference samples Ptr
-    EB_U32  refStride,                      // input parameter, reference stride  
+    EB_U32  refStride,                      // input parameter, reference stride
     EB_U32  height,                         // input parameter, block height (M)
-    EB_U32  width);                         // input parameter, block width (N)    
+    EB_U32  width);                         // input parameter, block width (N)
 
 extern EB_U32 Compute8xMSad_SSE2_INTRIN(
     EB_U8  *src,                            // input parameter, source samples Ptr
     EB_U32  srcStride,                      // input parameter, source stride
     EB_U8  *ref,                            // input parameter, reference samples Ptr
-    EB_U32  refStride,                      // input parameter, reference stride  
+    EB_U32  refStride,                      // input parameter, reference stride
     EB_U32  height,                         // input parameter, block height (M)
-    EB_U32  width);                          // input parameter, block width (N) 
+    EB_U32  width);                          // input parameter, block width (N)
 
 extern EB_U32 Compute16xMSad_SSE2_INTRIN(
     EB_U8  *src,                            // input parameter, source samples Ptr
     EB_U32  srcStride,                      // input parameter, source stride
     EB_U8  *ref,                            // input parameter, reference samples Ptr
-    EB_U32  refStride,                      // input parameter, reference stride  
+    EB_U32  refStride,                      // input parameter, reference stride
     EB_U32  height,                         // input parameter, block height (M)
-    EB_U32  width);                         // input parameter, block width (N)    
+    EB_U32  width);                         // input parameter, block width (N)
 
 extern EB_U32 Compute32xMSad_SSE2_INTRIN(
-	EB_U8  *src,                            // input parameter, source samples Ptr
-	EB_U32  srcStride,                      // input parameter, source stride
-	EB_U8  *ref,                            // input parameter, reference samples Ptr
-	EB_U32  refStride,                      // input parameter, reference stride  
-	EB_U32  height,                         // input parameter, block height (M)
-	EB_U32  width);                         // input parameter, block width (N)    
+    EB_U8  *src,                            // input parameter, source samples Ptr
+    EB_U32  srcStride,                      // input parameter, source stride
+    EB_U8  *ref,                            // input parameter, reference samples Ptr
+    EB_U32  refStride,                      // input parameter, reference stride
+    EB_U32  height,                         // input parameter, block height (M)
+    EB_U32  width);                         // input parameter, block width (N)
 
 extern EB_U32 Compute64xMSad_SSE2_INTRIN(
     EB_U8  *src,                            // input parameter, source samples Ptr
     EB_U32  srcStride,                      // input parameter, source stride
     EB_U8  *ref,                            // input parameter, reference samples Ptr
-    EB_U32  refStride,                      // input parameter, reference stride  
+    EB_U32  refStride,                      // input parameter, reference stride
     EB_U32  height,                         // input parameter, block height (M)
-    EB_U32  width);                         // input parameter, block width (N)    
+    EB_U32  width);                         // input parameter, block width (N)
 
 extern EB_U32 CombinedAveraging4xMSAD_SSE2_INTRIN(
     EB_U8  *src,
@@ -123,5 +123,5 @@ extern EB_U32 CombinedAveraging64xMSAD_SSE2_INTRIN(
 
 #ifdef __cplusplus
 }
-#endif        
+#endif
 #endif // EbComputeSAD_SSE2_h

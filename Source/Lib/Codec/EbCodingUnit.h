@@ -53,7 +53,7 @@ Requirements:
 struct PictureControlSet_s;
 
 #define MAX_CU_COST (0xFFFFFFFFFFFFFFFFull >> 1)
-#define INVALID_FAST_CANDIDATE_INDEX	~0
+#define INVALID_FAST_CANDIDATE_INDEX    ~0
 
 #define MAX_OIS_0   7 // when I Slice
 #define MAX_OIS_1   9 // when P/B Slice and oisKernelLevel = 0
@@ -71,18 +71,18 @@ typedef struct CodingUnit_s
     unsigned                    qp                          : 6;
     unsigned                    refQp                       : 6;
 
-	signed 						deltaQp						: 8; // can be signed 8bits
-	signed 						orgDeltaQp					: 8;
+    signed                         deltaQp                        : 8; // can be signed 8bits
+    signed                         orgDeltaQp                    : 8;
 
 
 
         // Coded Tree
-	struct {
-		unsigned                   leafIndex : 8;
-		unsigned                   splitFlag : 1;
-		unsigned                   skipFlag  : 1;
+    struct {
+        unsigned                   leafIndex : 8;
+        unsigned                   splitFlag : 1;
+        unsigned                   skipFlag  : 1;
 
-	};
+    };
 
 } CodingUnit_t;
 
@@ -109,24 +109,24 @@ typedef struct OisLcuResults_s
 
 typedef struct OisCu32Cu16Results_s
 {
-	EB_U8            totalIntraLumaMode[21];
-	OisCandidate_t*  sortedOisCandidate[21];
+    EB_U8            totalIntraLumaMode[21];
+    OisCandidate_t*  sortedOisCandidate[21];
 
 } OisCu32Cu16Results_t;
 
 typedef struct OisCu8Results_s
 {
-	EB_U8            totalIntraLumaMode[64];
-	OisCandidate_t*  sortedOisCandidate[64];
+    EB_U8            totalIntraLumaMode[64];
+    OisCandidate_t*  sortedOisCandidate[64];
 
 } OisCu8Results_t;
 
 
 typedef struct SaoStats_s {
 
-   	EB_S32                        **boDiff;
+       EB_S32                        **boDiff;
     EB_U16                        **boCount;
-	EB_S32                          eoDiff[3][SAO_EO_TYPES][SAO_EO_CATEGORIES+1];
+    EB_S32                          eoDiff[3][SAO_EO_TYPES][SAO_EO_CATEGORIES+1];
     EB_U16                          eoCount[3][SAO_EO_TYPES][SAO_EO_CATEGORIES+1];
     EB_S32                         *eoDiff1D;
     EB_U32                         *eoCount1D;
@@ -146,17 +146,17 @@ typedef struct SaoParameters_s {
 
 typedef struct QpmLcuResults_s {
     EB_U8  cuQP;
-	EB_U8  cuIntraQP;
+    EB_U8  cuIntraQP;
     EB_U8  cuInterQP;
     EB_S8  deltaQp;
-	EB_S8  innerLcuCudeltaQp;
+    EB_S8  innerLcuCudeltaQp;
 
 } QpmLcuResults_t;
 
 
 typedef struct EdgeLcuResults_s {
     EB_U8  edgeBlockNum;
-	EB_U8  isolatedHighIntensityLcu;
+    EB_U8  isolatedHighIntensityLcu;
 
 } EdgeLcuResults_t;
 
@@ -210,7 +210,7 @@ typedef struct LargestCodingUnit_s {
     EB_U8                           intra4x4Mode[256];
     EB_U8                           preMdcRefinementLevel;
 
-	EB_U8							chromaEncodeMode;
+    EB_U8                            chromaEncodeMode;
 
     EB_INTRA4x4_SEARCH_METHOD       intra4x4SearchMethod;
 

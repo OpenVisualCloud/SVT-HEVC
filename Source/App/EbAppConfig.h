@@ -92,20 +92,20 @@ typedef struct EB_PARAM_PORTDEFINITIONTYPE {
     pointer = (type)malloc(nElements); \
     if (pointer == (type)EB_NULL){ \
         return returnType; \
-		    } \
-			    else { \
+            } \
+                else { \
         appMemoryMap[*(appMemoryMapIndex)].ptrType = pointerClass; \
         appMemoryMap[(*(appMemoryMapIndex))++].ptr = pointer; \
-		if (nElements % 8 == 0) { \
-			*totalAppMemory += (nElements); \
-						} \
-								else { \
-			*totalAppMemory += ((nElements) + (8 - ((nElements) % 8))); \
-			} \
-	    } \
+        if (nElements % 8 == 0) { \
+            *totalAppMemory += (nElements); \
+                        } \
+                                else { \
+            *totalAppMemory += ((nElements) + (8 - ((nElements) % 8))); \
+            } \
+        } \
     if (*(appMemoryMapIndex) >= MAX_APP_NUM_PTR) { \
         return returnType; \
-		        } \
+                } \
     appMallocCount++;
 
 #define EB_APP_MALLOC_NR(type, pointer, nElements, pointerClass,returnType) \
@@ -115,22 +115,22 @@ typedef struct EB_PARAM_PORTDEFINITIONTYPE {
         returnType = EB_ErrorInsufficientResources; \
         printf("Malloc has failed due to insuffucient resources"); \
         return; \
-		    } \
-			    else { \
+            } \
+                else { \
         appMemoryMap[*(appMemoryMapIndex)].ptrType = pointerClass; \
         appMemoryMap[(*(appMemoryMapIndex))++].ptr = pointer; \
-		if (nElements % 8 == 0) { \
-			*totalAppMemory += (nElements); \
-						} \
-								else { \
-			*totalAppMemory += ((nElements) + (8 - ((nElements) % 8))); \
-			} \
-	    } \
+        if (nElements % 8 == 0) { \
+            *totalAppMemory += (nElements); \
+                        } \
+                                else { \
+            *totalAppMemory += ((nElements) + (8 - ((nElements) % 8))); \
+            } \
+        } \
     if (*(appMemoryMapIndex) >= MAX_APP_NUM_PTR) { \
         returnType = EB_ErrorInsufficientResources; \
         printf("Malloc has failed due to insuffucient resources"); \
         return; \
-		        } \
+                } \
     appMallocCount++;
 
 #define EB_APP_MEMORY() \
@@ -176,7 +176,7 @@ typedef struct EbPerformanceContext_s {
     double                    totalEncodeTime;       // not including init
 
     uint64_t                  totalLatency;
-	uint32_t                  maxLatency;
+    uint32_t                  maxLatency;
 
     uint64_t                  startsTime;
     uint64_t                  startuTime;
@@ -199,7 +199,7 @@ typedef struct EbConfig_s
     FILE                   *bitstreamFile;
     FILE                   *reconFile;
     FILE                   *errorLogFile;
-	FILE                   *bufferFile;
+    FILE                   *bufferFile;
 
     FILE                   *qpFile;
 
@@ -220,7 +220,7 @@ typedef struct EbConfig_s
     uint32_t                  speedControlFlag;
     uint32_t                 encoderBitDepth;
     uint32_t                 encoderColorFormat;
-	uint32_t                 compressedTenBitFormat;
+    uint32_t                 compressedTenBitFormat;
     uint32_t                 sourceWidth;
     uint32_t                 sourceHeight;
 
@@ -247,8 +247,8 @@ typedef struct EbConfig_s
     uint8_t                  encMode;
     int32_t                  intraPeriod;
     int32_t                  intraRefreshType;
-	uint32_t                 hierarchicalLevels;
-	uint32_t                 predStructure;
+    uint32_t                 hierarchicalLevels;
+    uint32_t                 predStructure;
 
 
     /****************************************
@@ -305,7 +305,7 @@ typedef struct EbConfig_s
      * Optional Features
      ****************************************/
 
-	EB_BOOL				   bitRateReduction;
+    EB_BOOL                   bitRateReduction;
     EB_BOOL                improveSharpness;
     uint32_t                 videoUsabilityInfo;
     uint32_t                 highDynamicRangeInput;
@@ -331,13 +331,13 @@ typedef struct EbConfig_s
     /****************************************
      * On-the-fly Testing
      ****************************************/
-	uint32_t                 testUserData;
-	EB_BOOL				   eosFlag;
+    uint32_t                 testUserData;
+    EB_BOOL                   eosFlag;
 
     /****************************************
     * Optimization Type
     ****************************************/
-    uint32_t					asmType;
+    uint32_t                    asmType;
 
     /****************************************
      * Computational Performance Data
@@ -382,9 +382,9 @@ typedef struct EbConfig_s
 extern void EbConfigCtor(EbConfig_t *configPtr);
 extern void EbConfigDtor(EbConfig_t *configPtr);
 
-extern EB_ERRORTYPE	ReadCommandLine(int32_t argc, char *const argv[], EbConfig_t **config, uint32_t  numChannels,	EB_ERRORTYPE *return_errors);
+extern EB_ERRORTYPE    ReadCommandLine(int32_t argc, char *const argv[], EbConfig_t **config, uint32_t  numChannels,    EB_ERRORTYPE *return_errors);
 extern uint32_t     GetHelp(int32_t argc, char *const argv[]);
 extern uint32_t     GetSVTVersion(int32_t argc, char *const argv[]);
-extern uint32_t		GetNumberOfChannels(int32_t argc, char *const argv[]);
+extern uint32_t        GetNumberOfChannels(int32_t argc, char *const argv[]);
 
 #endif //EbAppConfig_h

@@ -23,18 +23,18 @@ typedef struct TransformUnit_s {
     unsigned                cbCbf                 : 1;
     unsigned                crCbf                 : 1;
     unsigned                lumaCbf               : 1;
-	unsigned                transCoeffShapeLuma   : 2;
-	unsigned                transCoeffShapeChroma : 2;
-	unsigned                transCoeffShapeChroma2 : 2;
+    unsigned                transCoeffShapeLuma   : 2;
+    unsigned                transCoeffShapeChroma : 2;
+    unsigned                transCoeffShapeChroma2 : 2;
 
     unsigned                cbCbf2                : 1;
     unsigned                crCbf2                : 1;
     EB_U16                  nzCoefCount[3];
-	EB_BOOL					isOnlyDc[3];
+    EB_BOOL                    isOnlyDc[3];
 
     EB_U16                  nzCoefCount2[2];
     EB_BOOL                 isOnlyDc2[3];
-} TransformUnit_t; 
+} TransformUnit_t;
 #pragma pack(pop)
 #ifdef __cplusplus
 }

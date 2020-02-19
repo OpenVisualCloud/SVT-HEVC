@@ -18,7 +18,7 @@ extern "C" {
 /**************************************
  * Process Results
  **************************************/
-typedef struct EncDecTasks_s 
+typedef struct EncDecTasks_s
 {
     EbObjectWrapper_t            *pictureControlSetWrapperPtr;
     EB_U32                        inputType;
@@ -36,7 +36,7 @@ typedef struct EncDecTasksInitData_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE EncDecTasksCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
 
 

@@ -35,12 +35,12 @@ EB_ERRORTYPE LargestCodingUnitCtor(
     EB_U8 codedLeafIndex;
     EB_U32 tuIndex;
     EbPictureBufferDescInitData_t coeffInitData;
-    
+
     LargestCodingUnit_t *largestCodingUnitPtr;
     EB_MALLOC(LargestCodingUnit_t*, largestCodingUnitPtr, sizeof(LargestCodingUnit_t), EB_N_PTR);
 
     *largetCodingUnitDblPtr = largestCodingUnitPtr;
-    
+
     // ************ LCU ***************
     if((pictureWidth - lcuOriginX) < lcuSize) {
         borderLargestCuSize = pictureWidth - lcuOriginX;
@@ -49,7 +49,7 @@ EB_ERRORTYPE LargestCodingUnitCtor(
             borderLargestCuSize -= (borderLargestCuSize & ((~0u) << Log2f(borderLargestCuSize)));
         }
     }
-    
+
     if((pictureHeight - lcuOriginY) < lcuSize) {
         borderLargestCuSize = pictureHeight - lcuOriginY;
         // Which borderLargestCuSize is not a power of two
@@ -62,8 +62,8 @@ EB_ERRORTYPE LargestCodingUnitCtor(
     largestCodingUnitPtr->sizeLog2                      = (EB_U8)Log2f(lcuSize);
     largestCodingUnitPtr->originX                       = lcuOriginX;
     largestCodingUnitPtr->originY                       = lcuOriginY;
-    
-    largestCodingUnitPtr->index                         = lcuIndex; 
+
+    largestCodingUnitPtr->index                         = lcuIndex;
 
     EB_MALLOC(CodingUnit_t**, largestCodingUnitPtr->codedLeafArrayPtr, sizeof(CodingUnit_t*) * CU_MAX_COUNT, EB_N_PTR);
     for(codedLeafIndex=0; codedLeafIndex < CU_MAX_COUNT; ++codedLeafIndex) {
@@ -75,23 +75,23 @@ EB_ERRORTYPE LargestCodingUnitCtor(
        largestCodingUnitPtr->codedLeafArrayPtr[codedLeafIndex]->leafIndex = codedLeafIndex;
 
     }
-    
+
     coeffInitData.bufferEnableMask  = PICTURE_BUFFER_DESC_FULL_MASK;
     coeffInitData.maxWidth          = lcuSize;
     coeffInitData.maxHeight         = lcuSize;
     coeffInitData.bitDepth          = EB_16BIT;
     coeffInitData.colorFormat       = largestCodingUnitPtr->pictureControlSetPtr->colorFormat;
-	coeffInitData.leftPadding		= 0;
-	coeffInitData.rightPadding		= 0;
-	coeffInitData.topPadding		= 0;
-	coeffInitData.botPadding		= 0;
+    coeffInitData.leftPadding        = 0;
+    coeffInitData.rightPadding        = 0;
+    coeffInitData.topPadding        = 0;
+    coeffInitData.botPadding        = 0;
     coeffInitData.splitMode         = EB_FALSE;
 
 
     return_error = EbPictureBufferDescCtor(
         (EB_PTR*) &(largestCodingUnitPtr->quantizedCoeff),
         (EB_PTR)  &coeffInitData);
-	if (return_error == EB_ErrorInsufficientResources){
+    if (return_error == EB_ErrorInsufficientResources){
         return EB_ErrorInsufficientResources;
     }
 

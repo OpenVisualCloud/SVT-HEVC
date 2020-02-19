@@ -26,10 +26,10 @@ typedef enum TmvpPos {
 
 // TMVP items corresponding to one LCU
 typedef struct TmvpUnit_s {
-    Mv_t	          mv[MAX_NUM_OF_REF_PIC_LIST][MAX_TMVP_CAND_PER_LCU];
+    Mv_t              mv[MAX_NUM_OF_REF_PIC_LIST][MAX_TMVP_CAND_PER_LCU];
     EB_U64            refPicPOC[MAX_NUM_OF_REF_PIC_LIST][MAX_TMVP_CAND_PER_LCU];
     EB_PREDDIRECTION  predictionDirection[MAX_TMVP_CAND_PER_LCU];
-    EB_BOOL	          availabilityFlag[MAX_TMVP_CAND_PER_LCU];
+    EB_BOOL              availabilityFlag[MAX_TMVP_CAND_PER_LCU];
 
     //*Note- list 1 motion info will be added when B-slices are ready
 
@@ -66,12 +66,12 @@ extern EB_BOOL GetTemporalMVPBPicture(
     EB_U32                 puWidth,
     EB_U32                 puHeight,
     PictureControlSet_t  *pictureControlSetPtr,
-    TmvpUnit_t			 *tmvpMapPtr,
-    EB_U64				  colocatedPuPOC,
-    EB_REFLIST			  preDefinedColocatedPuRefList,
-    EB_BOOL				  isLowDelay,
-	EB_U32                 tbSize,
-	EB_S16				 *MVPCand);	
+    TmvpUnit_t             *tmvpMapPtr,
+    EB_U64                  colocatedPuPOC,
+    EB_REFLIST              preDefinedColocatedPuRefList,
+    EB_BOOL                  isLowDelay,
+    EB_U32                 tbSize,
+    EB_S16                 *MVPCand);
 
 extern EB_ERRORTYPE FillAMVPCandidates(
     NeighborArrayUnit_t    *mvNeighborArray,
@@ -87,28 +87,28 @@ extern EB_ERRORTYPE FillAMVPCandidates(
     EB_BOOL                 tmvpEnableFlag,
     EB_U32                  tbAddr,
     EB_REFLIST              targetRefPicList,
-	EB_S16                  *xMvAmvpArray,
-	EB_S16                  *yMvAmvpArray,     
-	EB_U8					*amvpCandidateCount);
+    EB_S16                  *xMvAmvpArray,
+    EB_S16                  *yMvAmvpArray,
+    EB_U8                    *amvpCandidateCount);
 
 extern EB_ERRORTYPE GenerateL0L1AmvpMergeLists(
-	struct ModeDecisionContext_s	*contextPtr,
-	struct InterPredictionContext_s	*interPredictionPtr,
-	PictureControlSet_t				*pictureControlSetPtr,
-	EB_BOOL							 tmvpEnableFlag,
-	EB_U32							 tbAddr,
-	EB_S16							 xMvAmvpArray[2][2],
-	EB_S16							 yMvAmvpArray[2][2],
-	EB_U32							 amvpCandidateCount[2],
+    struct ModeDecisionContext_s    *contextPtr,
+    struct InterPredictionContext_s    *interPredictionPtr,
+    PictureControlSet_t                *pictureControlSetPtr,
+    EB_BOOL                             tmvpEnableFlag,
+    EB_U32                             tbAddr,
+    EB_S16                             xMvAmvpArray[2][2],
+    EB_S16                             yMvAmvpArray[2][2],
+    EB_U32                             amvpCandidateCount[2],
     EB_S16                           firstPuAMVPCandArray_x[MAX_NUM_OF_REF_PIC_LIST][2],
-	EB_S16                           firstPuAMVPCandArray_y[MAX_NUM_OF_REF_PIC_LIST][2]
+    EB_S16                           firstPuAMVPCandArray_y[MAX_NUM_OF_REF_PIC_LIST][2]
     );
 
 extern EB_ERRORTYPE NonConformantGenerateL0L1AmvpMergeLists(
-	struct ModeDecisionContext_s	*contextPtr,
-	struct InterPredictionContext_s	*interPredictionPtr,
-	PictureControlSet_t				*pictureControlSetPtr,
-	EB_U32							 tbAddr);
+    struct ModeDecisionContext_s    *contextPtr,
+    struct InterPredictionContext_s    *interPredictionPtr,
+    PictureControlSet_t                *pictureControlSetPtr,
+    EB_U32                             tbAddr);
 
 #ifdef __cplusplus
 }

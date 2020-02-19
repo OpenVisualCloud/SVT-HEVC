@@ -18,7 +18,7 @@ EB_ERRORTYPE EncDecSegmentsCtor(
     EB_U32 rowIndex;
     EncDecSegments_t *segmentsPtr;
     EB_MALLOC(EncDecSegments_t*, segmentsPtr, sizeof(EncDecSegments_t), EB_N_PTR);
-    
+
     *segmentsDblPtr = segmentsPtr;
 
     segmentsPtr->segmentMaxRowCount = segmentRowCount;
@@ -29,17 +29,17 @@ EB_ERRORTYPE EncDecSegmentsCtor(
     EB_MALLOC(EB_U16*, segmentsPtr->xStartArray, sizeof(EB_U16) * segmentsPtr->segmentMaxTotalCount, EB_N_PTR);
 
     EB_MALLOC(EB_U16*, segmentsPtr->yStartArray, sizeof(EB_U16) * segmentsPtr->segmentMaxTotalCount, EB_N_PTR);
-    
+
     EB_MALLOC(EB_U16*, segmentsPtr->validLcuCountArray, sizeof(EB_U16) * segmentsPtr->segmentMaxTotalCount, EB_N_PTR);
-    
+
     // Dependency map
     EB_MALLOC(EB_U8*, segmentsPtr->depMap.dependencyMap, sizeof(EB_U8) * segmentsPtr->segmentMaxTotalCount, EB_N_PTR);
-    
+
     EB_CREATEMUTEX(EB_HANDLE, segmentsPtr->depMap.updateMutex, sizeof(EB_HANDLE), EB_MUTEX);
-    
+
     // Segment rows
     EB_MALLOC(EncDecSegSegmentRow_t*, segmentsPtr->rowArray, sizeof(EncDecSegSegmentRow_t) * segmentsPtr->segmentMaxRowCount, EB_N_PTR)
-    
+
     for(rowIndex=0; rowIndex < segmentsPtr->segmentMaxRowCount; ++rowIndex) {
         EB_CREATEMUTEX(EB_HANDLE, segmentsPtr->rowArray[rowIndex].assignmentMutex, sizeof(EB_HANDLE), EB_MUTEX);
     }
@@ -86,12 +86,12 @@ void EncDecSegmentsInit(
 
             //++segmentsPtr->inputMap.inputDependencyMap[segmentIndex];
             ++segmentsPtr->validLcuCountArray[segmentIndex];
-            segmentsPtr->xStartArray[segmentIndex] = (segmentsPtr->xStartArray[segmentIndex] == (EB_U16) -1) ? 
-                (EB_U16) x : 
+            segmentsPtr->xStartArray[segmentIndex] = (segmentsPtr->xStartArray[segmentIndex] == (EB_U16) -1) ?
+                (EB_U16) x :
                 segmentsPtr->xStartArray[segmentIndex];
-            segmentsPtr->yStartArray[segmentIndex] = (segmentsPtr->yStartArray[segmentIndex] == (EB_U16) -1) ? 
-                (EB_U16) y : 
-                segmentsPtr->yStartArray[segmentIndex]; 
+            segmentsPtr->yStartArray[segmentIndex] = (segmentsPtr->yStartArray[segmentIndex] == (EB_U16) -1) ?
+                (EB_U16) y :
+                segmentsPtr->yStartArray[segmentIndex];
         }
     }
 

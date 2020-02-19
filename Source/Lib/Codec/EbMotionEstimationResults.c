@@ -14,7 +14,7 @@ EB_ERRORTYPE MotionEstimationResultsCtor(
 {
     MotionEstimationResults_t *contextPtr;
     EB_MALLOC(MotionEstimationResults_t*, contextPtr, sizeof(MotionEstimationResults_t), EB_N_PTR);
-    
+
     *objectDblPtr = (EB_PTR) contextPtr;
     objectInitDataPtr = 0;
 

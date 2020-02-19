@@ -8,7 +8,7 @@
 #include "EbInitialRateControlResults.h"
 
 EB_ERRORTYPE InitialRateControlResultsCtor(
-    EB_PTR *objectDblPtr, 
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr)
 {
     InitialRateControlResults_t *objectPtr;
@@ -17,7 +17,7 @@ EB_ERRORTYPE InitialRateControlResultsCtor(
     *objectDblPtr = (EB_PTR) objectPtr;
     objectInitDataPtr = 0;
     (void) objectInitDataPtr;
-    
+
     return EB_ErrorNone;
 }
 

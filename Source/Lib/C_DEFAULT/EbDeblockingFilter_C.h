@@ -38,8 +38,8 @@ void Chroma2SampleEdgeDLFCore(
     EB_U8                  crTc);
 
 void Chroma2SampleEdgeDLFCore16bit(
-    EB_U16				  *edgeStartSampleCb,
-    EB_U16				  *edgeStartSampleCr,
+    EB_U16                  *edgeStartSampleCb,
+    EB_U16                  *edgeStartSampleCr,
     EB_U32                 reconChromaPicStride,
     EB_BOOL                isVerticalEdge,
     EB_U8                  cbTc,

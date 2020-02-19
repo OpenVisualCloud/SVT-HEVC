@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-    
+
 EB_ERRORTYPE GatherSaoStatisticsLcuLossy_62x62(
     EB_U8                   *inputSamplePtr,
     EB_U32                   inputStride,
@@ -40,16 +40,16 @@ EB_ERRORTYPE GatherSaoStatisticsLcu_BT_SSE2(
 
 
 EB_ERRORTYPE GatherSaoStatisticsLcu_62x62_16bit(
-	EB_U16					*inputSamplePtr,        // input parameter, source Picture Ptr
-	EB_U32                   inputStride,           // input parameter, source stride
-	EB_U16                  *reconSamplePtr,        // input parameter, deblocked Picture Ptr
-	EB_U32                   reconStride,           // input parameter, deblocked stride
-	EB_U32                   lcuWidth,              // input parameter, LCU width
-	EB_U32                   lcuHeight,             // input parameter, LCU height
-	EB_S32                  *boDiff,                // output parameter, used to store Band Offset diff, boDiff[SAO_BO_INTERVALS]
-	EB_U16                  *boCount,											// output parameter, used to store Band Offset count, boCount[SAO_BO_INTERVALS]
-	EB_S32                   eoDiff[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1],		// output parameter, used to store Edge Offset diff, eoDiff[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
-	EB_U16                   eoCount[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1]);		// output parameter, used to store Edge Offset count, eoCount[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
+    EB_U16                    *inputSamplePtr,        // input parameter, source Picture Ptr
+    EB_U32                   inputStride,           // input parameter, source stride
+    EB_U16                  *reconSamplePtr,        // input parameter, deblocked Picture Ptr
+    EB_U32                   reconStride,           // input parameter, deblocked stride
+    EB_U32                   lcuWidth,              // input parameter, LCU width
+    EB_U32                   lcuHeight,             // input parameter, LCU height
+    EB_S32                  *boDiff,                // output parameter, used to store Band Offset diff, boDiff[SAO_BO_INTERVALS]
+    EB_U16                  *boCount,                                            // output parameter, used to store Band Offset count, boCount[SAO_BO_INTERVALS]
+    EB_S32                   eoDiff[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1],        // output parameter, used to store Edge Offset diff, eoDiff[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
+    EB_U16                   eoCount[SAO_EO_TYPES][SAO_EO_CATEGORIES + 1]);        // output parameter, used to store Edge Offset count, eoCount[SAO_EO_TYPES] [SAO_EO_CATEGORIES]
 
 
 

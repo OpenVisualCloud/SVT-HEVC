@@ -43,7 +43,7 @@ extern EB_ERRORTYPE EncodeLcu(
     NeighborArrayUnit_t     *skipFlagNeighborArray,
     EB_U16                   tileIdx,
     EB_U32                   pictureOriginX,
-	EB_U32                   pictureOriginY);
+    EB_U32                   pictureOriginY);
 
 extern EB_ERRORTYPE EncodeTileFinish(
     EntropyCoder_t        *entropyCoderPtr);
@@ -83,17 +83,17 @@ extern EB_ERRORTYPE FlushBitstream(
 extern EB_ERRORTYPE EncodeAUD(
     Bitstream_t *bitstreamPtr,
     EB_PICTURE     sliceType,
-    EB_U32       temporalId); 
+    EB_U32       temporalId);
 
 extern EB_ERRORTYPE ComputeProfileTierLevelInfo(
     SequenceControlSet_t    *scsPtr);
 
 extern EB_ERRORTYPE ComputeMaxDpbBuffer(
-	SequenceControlSet_t    *scsPtr);
+    SequenceControlSet_t    *scsPtr);
 
 extern EB_ERRORTYPE EncodeVPS(
     Bitstream_t *bitstreamPtr,
-    SequenceControlSet_t *scsPtr); 
+    SequenceControlSet_t *scsPtr);
 
 extern EB_ERRORTYPE EncodeSPS(
     Bitstream_t *bitstreamPtr,
@@ -105,41 +105,41 @@ extern EB_ERRORTYPE EncodePPS(
     EbPPSConfig_t       *ppsConfig);
 
 EB_ERRORTYPE TuEstimateCoeffBits_R(
-	EB_U32                     tuOriginIndex,
-	EB_U32                     tuChromaOriginIndex,
-	EB_U32                     componentMask,
-	EntropyCoder_t            *entropyCoderPtr,
-	EbPictureBufferDesc_t     *coeffPtr,
-	EB_U32                     yCountNonZeroCoeffs,
-	EB_U32                     cbCountNonZeroCoeffs,
-	EB_U32                     crCountNonZeroCoeffs,
-	EB_U64                    *yTuCoeffBits,
-	EB_U64                    *cbTuCoeffBits,
-	EB_U64                    *crTuCoeffBits,
-	EB_U32                     transformSize,
-	EB_U32                     transformChromaSize,
-	EB_MODETYPE                type,
-	EB_U32					   intraLumaMode,
-	EB_U32                     intraChromaMode,
-	EB_U32                     partialFrequencyN2Flag,
+    EB_U32                     tuOriginIndex,
+    EB_U32                     tuChromaOriginIndex,
+    EB_U32                     componentMask,
+    EntropyCoder_t            *entropyCoderPtr,
+    EbPictureBufferDesc_t     *coeffPtr,
+    EB_U32                     yCountNonZeroCoeffs,
+    EB_U32                     cbCountNonZeroCoeffs,
+    EB_U32                     crCountNonZeroCoeffs,
+    EB_U64                    *yTuCoeffBits,
+    EB_U64                    *cbTuCoeffBits,
+    EB_U64                    *crTuCoeffBits,
+    EB_U32                     transformSize,
+    EB_U32                     transformChromaSize,
+    EB_MODETYPE                type,
+    EB_U32                       intraLumaMode,
+    EB_U32                     intraChromaMode,
+    EB_U32                     partialFrequencyN2Flag,
     EB_BOOL                    coeffCabacUpdate,
     CoeffCtxtMdl_t            *updatedCoeffCtxModel,
-	CabacCost_t               *CabacCost);
+    CabacCost_t               *CabacCost);
 
 extern EB_ERRORTYPE TuEstimateCoeffBitsEncDec(
 
-	EB_U32                     tuOriginIndex,
-	EB_U32                     tuChromaOriginIndex,
-	EntropyCoder_t            *entropyCoderPtr,
-	EbPictureBufferDesc_t     *coeffBufferTB,
+    EB_U32                     tuOriginIndex,
+    EB_U32                     tuChromaOriginIndex,
+    EntropyCoder_t            *entropyCoderPtr,
+    EbPictureBufferDesc_t     *coeffBufferTB,
     EB_U32                     countNonZeroCoeffs[3],
-	EB_U64                    *yTuCoeffBits,
-	EB_U64                    *cbTuCoeffBits,
-	EB_U64                    *crTuCoeffBits,
-	EB_U32                     transformSize,
-	EB_U32                     transformChromaSize,
-	EB_MODETYPE                type,
-	CabacCost_t               *CabacCost);
+    EB_U64                    *yTuCoeffBits,
+    EB_U64                    *cbTuCoeffBits,
+    EB_U64                    *crTuCoeffBits,
+    EB_U32                     transformSize,
+    EB_U32                     transformChromaSize,
+    EB_MODETYPE                type,
+    CabacCost_t               *CabacCost);
 
 extern EB_ERRORTYPE TuEstimateCoeffBitsLuma(
 
@@ -150,18 +150,18 @@ extern EB_ERRORTYPE TuEstimateCoeffBitsLuma(
     EB_U64                    *yTuCoeffBits,
     EB_U32                     transformSize,
     EB_MODETYPE                type,
-    EB_U32                     intraLumaMode,   
+    EB_U32                     intraLumaMode,
     EB_U32                     partialFrequencyN2Flag,
     EB_BOOL                    coeffCabacUpdate,
     CoeffCtxtMdl_t            *updatedCoeffCtxModel,
 
-	CabacCost_t               *CabacCost);
+    CabacCost_t               *CabacCost);
 
 extern EB_ERRORTYPE EncodeBufferingPeriodSEI(
     Bitstream_t             *bitstreamPtr,
     AppBufferingPeriodSei_t *bufferingPeriodPtr,
     AppVideoUsabilityInfo_t *vuiPtr,
-    EncodeContext_t         *encodeContextPtr); 
+    EncodeContext_t         *encodeContextPtr);
 
 
 extern EB_ERRORTYPE EncodePictureTimingSEI(
@@ -228,31 +228,31 @@ void EncodeQuantizedCoefficients_SSE2(
     TransformUnit_t        *tuPtr);
 
 EB_ERRORTYPE EstimateQuantizedCoefficients_SSE2(
-	CabacCost_t                  *CabacCost,
-	CabacEncodeContext_t         *cabacEncodeCtxPtr,
-	EB_U32                        size,                 // Input: TU size
-	EB_MODETYPE                   type,                 // Input: CU type (INTRA, INTER)
-	EB_U32                        intraLumaMode,
-	EB_U32                        intraChromaMode,
-	EB_S16                       *coeffBufferPtr,
-	const EB_U32                  coeffStride,
-	EB_U32                        componentType,
-	EB_U32                        numNonZeroCoeffs,
-	EB_U64                       *coeffBitsLong);
+    CabacCost_t                  *CabacCost,
+    CabacEncodeContext_t         *cabacEncodeCtxPtr,
+    EB_U32                        size,                 // Input: TU size
+    EB_MODETYPE                   type,                 // Input: CU type (INTRA, INTER)
+    EB_U32                        intraLumaMode,
+    EB_U32                        intraChromaMode,
+    EB_S16                       *coeffBufferPtr,
+    const EB_U32                  coeffStride,
+    EB_U32                        componentType,
+    EB_U32                        numNonZeroCoeffs,
+    EB_U64                       *coeffBitsLong);
 
 
 EB_ERRORTYPE EstimateQuantizedCoefficients_Lossy_SSE2(
-	CabacCost_t                  *CabacCost,
-	CabacEncodeContext_t         *cabacEncodeCtxPtr,
-	EB_U32                        size,                 // Input: TU size
-	EB_MODETYPE                   type,                 // Input: CU type (INTRA, INTER)
-	EB_U32                        intraLumaMode,
-	EB_U32                        intraChromaMode,
-	EB_S16                       *coeffBufferPtr,
-	const EB_U32                  coeffStride,
-	EB_U32                        componentType,
-	EB_U32                        numNonZeroCoeffs,
-	EB_U64                       *coeffBitsLong);
+    CabacCost_t                  *CabacCost,
+    CabacEncodeContext_t         *cabacEncodeCtxPtr,
+    EB_U32                        size,                 // Input: TU size
+    EB_MODETYPE                   type,                 // Input: CU type (INTRA, INTER)
+    EB_U32                        intraLumaMode,
+    EB_U32                        intraChromaMode,
+    EB_S16                       *coeffBufferPtr,
+    const EB_U32                  coeffStride,
+    EB_U32                        componentType,
+    EB_U32                        numNonZeroCoeffs,
+    EB_U64                       *coeffBitsLong);
 
 EB_ERRORTYPE EstimateQuantizedCoefficients_generic_Update(
     CoeffCtxtMdl_t               *UpdatedCoeffCtxModel,
@@ -279,7 +279,7 @@ EB_ERRORTYPE EstimateQuantizedCoefficients_generic(
     const EB_U32                  coeffStride,
     EB_U32                        componentType,
     EB_U32                        numNonZeroCoeffs,
-	EB_U64                       *coeffBitsLong);
+    EB_U64                       *coeffBitsLong);
 
 EB_ERRORTYPE EstimateQuantizedCoefficients_Lossy(
     CabacCost_t                  *CabacCost,
@@ -292,7 +292,7 @@ EB_ERRORTYPE EstimateQuantizedCoefficients_Lossy(
     const EB_U32                  coeffStride,
     EB_U32                        componentType,
     EB_U32                        numNonZeroCoeffs,
-	EB_U64                       *coeffBitsLong);
+    EB_U64                       *coeffBitsLong);
 
 void EncodeQuantizedCoefficients_generic(
     CabacEncodeContext_t         *cabacEncodeCtxPtr,
@@ -309,17 +309,17 @@ void EncodeQuantizedCoefficients_generic(
 * Function Types
 **************************************/
 typedef EB_ERRORTYPE(*ESTIMATE_QUANTIZED_COEFF_TYPE)(
-	CabacCost_t                  *CabacCost,
-	CabacEncodeContext_t         *cabacEncodeCtxPtr,
-	EB_U32                        size,                 // Input: TU size
-	EB_MODETYPE                   type,                 // Input: CU type (INTRA, INTER)
-	EB_U32                        intraLumaMode,
-	EB_U32                        intraChromaMode,
-	EB_S16                       *coeffBufferPtr,
-	const EB_U32                  coeffStride,
-	EB_U32                        componentType,
-	EB_U32                        numNonZeroCoeffs,
-	EB_U64                       *coeffBitsLong);
+    CabacCost_t                  *CabacCost,
+    CabacEncodeContext_t         *cabacEncodeCtxPtr,
+    EB_U32                        size,                 // Input: TU size
+    EB_MODETYPE                   type,                 // Input: CU type (INTRA, INTER)
+    EB_U32                        intraLumaMode,
+    EB_U32                        intraChromaMode,
+    EB_S16                       *coeffBufferPtr,
+    const EB_U32                  coeffStride,
+    EB_U32                        componentType,
+    EB_U32                        numNonZeroCoeffs,
+    EB_U64                       *coeffBitsLong);
 typedef void(*ENCODE_QUANTIZED_COEFF_TYPE) (
     CabacEncodeContext_t         *cabacEncodeCtxPtr,
     EB_U32                        size,                 // Input: TU size
@@ -349,10 +349,10 @@ static ESTIMATE_QUANTIZED_COEFF_TYPE FUNC_TABLE EstimateQuantizedCoefficients[2]
 
 static ENCODE_QUANTIZED_COEFF_TYPE FUNC_TABLE EncodeQuantizedCoefficientsFuncArray[EB_ASM_TYPE_TOTAL] =
 {
-	// C_DEFAULT
+    // C_DEFAULT
     EncodeQuantizedCoefficients_generic,
-	// AVX2
-	EncodeQuantizedCoefficients_SSE2,
+    // AVX2
+    EncodeQuantizedCoefficients_SSE2,
 };
 
 

@@ -51,8 +51,8 @@ typedef enum NalRefIdc {
 #define EB_INTRA_MODE_32    32
 #define EB_INTRA_MODE_33    33
 #define EB_INTRA_MODE_34    34
-#define EB_INTRA_MODE_35    35 
-#define EB_INTRA_MODE_4x4   36 
+#define EB_INTRA_MODE_35    35
+#define EB_INTRA_MODE_4x4   36
 #define EB_INTRA_MODE_INVALID ~0u
 
 #define EB_INTRA_CHROMA_PLANAR      0

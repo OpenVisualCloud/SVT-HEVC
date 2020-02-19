@@ -14,7 +14,7 @@ extern "C" {
 
 #define SHIFT_INV_1ST          7
 #define SHIFT_INV_2ND          12
-    
+
 extern void QuantizeInvQuantize(
     EB_S16           *coeff,
     const EB_U32     coeffStride,
@@ -27,38 +27,38 @@ extern void QuantizeInvQuantize(
     const EB_S32     iq_offset,
     const EB_S32     shiftNum,
     const EB_U32     areaSize,
-    EB_U32			 *nonzerocoeff);
+    EB_U32             *nonzerocoeff);
 
 void UpdateQiQCoef_R(
-		EB_S16           *quantCoeff,
-		EB_S16           *reconCoeff,
-		const EB_U32      coeffStride,
-		const EB_S32      shiftedFFunc,
-		const EB_S32      iq_offset,
-		const EB_S32      shiftNum,
-		const EB_U32      areaSize,
-		EB_U32           *nonzerocoeff,
-		EB_U32            componentType,
-		EB_PICTURE          sliceType,
-		EB_U32            temporalLayer,
-		EB_U32            enableCbflag,
-		EB_U8             enableContouringQCUpdateFlag);
+        EB_S16           *quantCoeff,
+        EB_S16           *reconCoeff,
+        const EB_U32      coeffStride,
+        const EB_S32      shiftedFFunc,
+        const EB_S32      iq_offset,
+        const EB_S32      shiftNum,
+        const EB_U32      areaSize,
+        EB_U32           *nonzerocoeff,
+        EB_U32            componentType,
+        EB_PICTURE          sliceType,
+        EB_U32            temporalLayer,
+        EB_U32            enableCbflag,
+        EB_U8             enableContouringQCUpdateFlag);
 
 
 extern void UpdateQiQCoef(
-	EB_S16           *quantCoeff,
-	EB_S16           *reconCoeff,
-	const EB_U32      coeffStride,
-	const EB_S32      shiftedFFunc,
-	const EB_S32      iq_offset,
-	const EB_S32      shiftNum,
-	const EB_U32      areaSize,
-	EB_U32           *nonzerocoeff,
-	EB_U32            componentType,
-	EB_PICTURE          sliceType,
-	EB_U32            temporalLayer,
-	EB_U32            enableCbflag,
-	EB_U8             enableContouringQCUpdateFlag);
+    EB_S16           *quantCoeff,
+    EB_S16           *reconCoeff,
+    const EB_U32      coeffStride,
+    const EB_S32      shiftedFFunc,
+    const EB_S32      iq_offset,
+    const EB_S32      shiftNum,
+    const EB_U32      areaSize,
+    EB_U32           *nonzerocoeff,
+    EB_U32            componentType,
+    EB_PICTURE          sliceType,
+    EB_U32            temporalLayer,
+    EB_U32            enableCbflag,
+    EB_U8             enableContouringQCUpdateFlag);
 
 void Transform32x32(
     EB_S16                  *residual,

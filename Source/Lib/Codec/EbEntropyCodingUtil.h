@@ -30,10 +30,10 @@ extern "C" {
 #define NUMBER_OF_INTRA_MODES                                         36
 #define NUMBER_OF_INTRA_MODES_MINUS_TWO                               34
 #define RICE_UPDATE_LENGTH                                            24 //16
-#define GREATER_THAN1_MAX_NUMBER                                       8 // maximum number for greater than 1 
-#define GREATER_THAN2_MAX_NUMBER                                       1 // maximum number for greater than 2 
+#define GREATER_THAN1_MAX_NUMBER                                       8 // maximum number for greater than 1
+#define GREATER_THAN2_MAX_NUMBER                                       1 // maximum number for greater than 2
 #define COEF_REMAIN_BIN_REDUCTION                                      3
-#define CU_DELTA_QP_CMAX                                               5   
+#define CU_DELTA_QP_CMAX                                               5
 #define CU_DELTA_QP_EGK                                                0
 
 // These are redefined here to avoid conflict with the existing scan indices
@@ -261,7 +261,7 @@ EB_ERRORTYPE EstimateMvpIndex(
     EB_REFLIST           refList);
 
 EB_ERRORTYPE EstimatePartitionSize(
-	CodingUnit_t        *cuPtr);
+    CodingUnit_t        *cuPtr);
 
 EB_ERRORTYPE EstimatePredictionMode(
     CodingUnit_t        *cuPtr);

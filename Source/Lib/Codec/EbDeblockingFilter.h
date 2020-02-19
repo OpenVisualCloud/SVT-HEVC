@@ -38,16 +38,16 @@ extern "C" {
 
 
 #define MAX_QP_VALUE_PLUS_INTRA_TC_OFFSET 53
-#define BETA_OFFSET_VALUE				  12 // range -12 to 12
+#define BETA_OFFSET_VALUE                  12 // range -12 to 12
 
-#define TC_OFFSET_VALUE					12//12 // range -12 to 12
+#define TC_OFFSET_VALUE                    12//12 // range -12 to 12
 
 void SetQpArrayBasedOnCU(
-	PictureControlSet_t *pictureControlSetPtr,          //input parameter
-	EB_U32               cuPos_x,                       //input parameter, sample-based horizontal picture-wise locatin of the CU
-	EB_U32               cuPos_y,                       //input parameter, sample-based vertical picture-wise locatin of the CU
-	EB_U32               cuSizeInMinCuSize,             //input parameter
-	EB_U32               cuQp) ;                         //input parameter, Qp of the CU
+    PictureControlSet_t *pictureControlSetPtr,          //input parameter
+    EB_U32               cuPos_x,                       //input parameter, sample-based horizontal picture-wise locatin of the CU
+    EB_U32               cuPos_y,                       //input parameter, sample-based vertical picture-wise locatin of the CU
+    EB_U32               cuSizeInMinCuSize,             //input parameter
+    EB_U32               cuQp) ;                         //input parameter, Qp of the CU
 
 extern void entropySetQpArrayBasedOnCU(
     PictureControlSet_t *pictureControlSetPtr,
@@ -64,7 +64,7 @@ extern EB_U8 CalculateBSForPUBoundary(
     PredictionUnit_t      *neighbourPuPtr,
     EB_MODETYPE            puCodingMode,
     EB_MODETYPE            neighbourPuCodingMode,
-    EB_BOOL                isVerticalEdge, 
+    EB_BOOL                isVerticalEdge,
     PictureControlSet_t   *pictureControlSetPtr,
     SequenceControlSet_t  *sequenceControlSetPtr);
 
@@ -104,7 +104,7 @@ extern EB_U8 Intra4x4CalculateBSForPUBoundary(
     PredictionUnit_t      *neighbourPuPtr,
     EB_MODETYPE            puCodingMode,
     EB_MODETYPE            neighbourPuCodingMode,
-    EB_BOOL                isVerticalEdge, 
+    EB_BOOL                isVerticalEdge,
     EB_BOOL                isVerticalPuBoundaryAlsoTuBoundary,
     EB_BOOL                isHorizontalPuBoundaryAlsoTuBoundary,
     PictureControlSet_t   *pictureControlSetPtr,
@@ -131,7 +131,7 @@ extern void Intra4x4SetBSArrayBasedOnPUBoundary(
     PredictionUnit_t        *puPtr,
     CodingUnit_t            *cuPtr,
     const CodedUnitStats_t  *cuStatsPtr,
-	EB_U32                   puOriginX,
+    EB_U32                   puOriginX,
     EB_U32                   puOriginY,
     EB_U32                   puWidth,
     EB_U32                   puHeight,
@@ -145,7 +145,7 @@ extern void Intra4x4SetBSArrayBasedOnPUBoundary(
 
 
 extern EB_ERRORTYPE LCUInternalAreaDLFCore(
-	EbPictureBufferDesc_t *reconpicture,
+    EbPictureBufferDesc_t *reconpicture,
     EB_U32                 lcuPosx,
     EB_U32                 lcuPosy,
     EB_U32                 lcuWidth,
@@ -155,7 +155,7 @@ extern EB_ERRORTYPE LCUInternalAreaDLFCore(
     PictureControlSet_t   *reconPictureControlSet);
 
 extern EB_ERRORTYPE LCUInternalAreaDLFCore16bit(
-	EbPictureBufferDesc_t *reconpicture,
+    EbPictureBufferDesc_t *reconpicture,
     EB_U32                 lcuPosx,
     EB_U32                 lcuPosy,
     EB_U32                 lcuWidth,
@@ -165,46 +165,46 @@ extern EB_ERRORTYPE LCUInternalAreaDLFCore16bit(
     PictureControlSet_t   *reconPictureControlSet);
 
 extern void LCUBoundaryDLFCore(
-	EbPictureBufferDesc_t *reconpicture,
-    EB_U32                 lcuPos_x,                       
-    EB_U32                 lcuPos_y,                       
-    EB_U32                 lcuWidth,                       
-    EB_U32                 lcuHeight,                      
-    EB_U8                 *lcuVerticalEdgeBSArray,         
-    EB_U8                 *lcuHorizontalEdgeBSArray,       
-    EB_U8                 *topLcuVerticalEdgeBSArray,      
-    EB_U8                 *leftLcuHorizontalEdgeBSArray,   
+    EbPictureBufferDesc_t *reconpicture,
+    EB_U32                 lcuPos_x,
+    EB_U32                 lcuPos_y,
+    EB_U32                 lcuWidth,
+    EB_U32                 lcuHeight,
+    EB_U8                 *lcuVerticalEdgeBSArray,
+    EB_U8                 *lcuHorizontalEdgeBSArray,
+    EB_U8                 *topLcuVerticalEdgeBSArray,
+    EB_U8                 *leftLcuHorizontalEdgeBSArray,
     PictureControlSet_t   *pictureControlSetPtr);
 
 extern void LCUBoundaryDLFCore16bit(
-	EbPictureBufferDesc_t *reconpicture,
-    EB_U32                 lcuPos_x,                       
-    EB_U32                 lcuPos_y,                       
-    EB_U32                 lcuWidth,                       
-    EB_U32                 lcuHeight,                      
-    EB_U8                 *lcuVerticalEdgeBSArray,         
-    EB_U8                 *lcuHorizontalEdgeBSArray,       
-    EB_U8                 *topLcuVerticalEdgeBSArray,      
-    EB_U8                 *leftLcuHorizontalEdgeBSArray,   
+    EbPictureBufferDesc_t *reconpicture,
+    EB_U32                 lcuPos_x,
+    EB_U32                 lcuPos_y,
+    EB_U32                 lcuWidth,
+    EB_U32                 lcuHeight,
+    EB_U8                 *lcuVerticalEdgeBSArray,
+    EB_U8                 *lcuHorizontalEdgeBSArray,
+    EB_U8                 *topLcuVerticalEdgeBSArray,
+    EB_U8                 *leftLcuHorizontalEdgeBSArray,
     PictureControlSet_t   *pictureControlSetPtr);
 
 extern void LCUPictureEdgeDLFCore(
-    EbPictureBufferDesc_t *reconPic,                       
+    EbPictureBufferDesc_t *reconPic,
     EB_U32                 lcuIdx,
-    EB_U32                 lcuPos_x,                       
-    EB_U32                 lcuPos_y,                       
-    EB_U32                 lcuWidth,                       
-    EB_U32                 lcuHeight,                      
-    PictureControlSet_t   *pictureControlSetPtr);          
+    EB_U32                 lcuPos_x,
+    EB_U32                 lcuPos_y,
+    EB_U32                 lcuWidth,
+    EB_U32                 lcuHeight,
+    PictureControlSet_t   *pictureControlSetPtr);
 
 extern void LCUPictureEdgeDLFCore16bit(
-    EbPictureBufferDesc_t *reconPic,                       
+    EbPictureBufferDesc_t *reconPic,
     EB_U32                 lcuIdx,
-    EB_U32                 lcuPos_x,                       
-    EB_U32                 lcuPos_y,                       
-    EB_U32                 lcuWidth,                       
-    EB_U32                 lcuHeight,                      
-    PictureControlSet_t   *pictureControlSetPtr);          
+    EB_U32                 lcuPos_x,
+    EB_U32                 lcuPos_y,
+    EB_U32                 lcuWidth,
+    EB_U32                 lcuHeight,
+    PictureControlSet_t   *pictureControlSetPtr);
 
 /***************************************
 * Function Types
@@ -225,8 +225,8 @@ typedef void(*EB_CHROMA2SAMPLEDGEDLF_FUNC)(
     EB_U8                  crTc);
 
 typedef void(*EB_CHROMADLF_TYPE_16BIT)(
-    EB_U16				  *edgeStartSampleCb,
-    EB_U16				  *edgeStartSampleCr,
+    EB_U16                  *edgeStartSampleCb,
+    EB_U16                  *edgeStartSampleCr,
     EB_U32                 reconChromaPicStride,
     EB_BOOL                isVerticalEdge,
     EB_U8                  cbTc,
@@ -243,8 +243,8 @@ typedef void(*EB_LUMADLF_TYPE_16BIT)(
 * Function Ptr Types
 ***************************************/
 static EB_LUMA4SAMPLEDGEDLF_FUNC FUNC_TABLE Luma4SampleEdgeDLFCore_Table[EB_ASM_TYPE_TOTAL] =
-{  
-	// C_DEFAULT
+{
+    // C_DEFAULT
     Luma4SampleEdgeDLFCore,
     // AVX2
     Luma4SampleEdgeDLFCore_SSSE3,

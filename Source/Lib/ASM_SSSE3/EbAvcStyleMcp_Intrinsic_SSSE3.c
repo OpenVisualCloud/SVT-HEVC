@@ -22,13 +22,13 @@ EB_EXTERN EB_ALIGN(16) const EB_S8 EbHevcAvcStyleLumaIFCoeff8_SSSE3[]= {
 
 
 void PictureCopyKernel_SSSE3(
-	EB_BYTE                  src,
-	EB_U32                   srcStride,
-	EB_BYTE                  dst,
-	EB_U32                   dstStride,
-	EB_U32                   areaWidth,
-	EB_U32                   areaHeight,
-	EB_U32                   bytesPerSample);
+    EB_BYTE                  src,
+    EB_U32                   srcStride,
+    EB_BYTE                  dst,
+    EB_U32                   dstStride,
+    EB_U32                   areaWidth,
+    EB_U32                   areaHeight,
+    EB_U32                   bytesPerSample);
 
 void AvcStyleLumaInterpolationFilterHorizontal_SSSE3_INTRIN(
     EB_BYTE refPic,
