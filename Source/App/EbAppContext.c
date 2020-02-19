@@ -385,6 +385,9 @@ EB_ERRORTYPE AllocateInputBuffers(
         size_t lcuTotalCount = pictureWidthInLcu * pictureHeightInLcu;
         EB_APP_MALLOC(SegmentOverride_t*, callbackData->inputBufferPool->segmentOvPtr, sizeof(SegmentOverride_t) * lcuTotalCount, EB_N_PTR, EB_ErrorInsufficientResources);
     }
+    else {
+        callbackData->inputBufferPool->segmentOvPtr = NULL;
+    }
 
     return return_error;
 }

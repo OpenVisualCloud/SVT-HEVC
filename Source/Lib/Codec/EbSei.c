@@ -30,7 +30,7 @@ static void EbVideoUsabilityInfoDctor(EB_PTR p)
 EB_ERRORTYPE EbVideoUsabilityInfoCtor(
     AppVideoUsabilityInfo_t *vuiPtr)
 {
-    EB_MALLOC(vuiPtr->hrdParametersPtr, sizeof(AppHrdParameters_t));
+    EB_CALLOC(vuiPtr->hrdParametersPtr, 1, sizeof(AppHrdParameters_t));
     // Initialize vui variables
     vuiPtr->dctor = EbVideoUsabilityInfoDctor;
     vuiPtr->aspectRatioInfoPresentFlag = EB_TRUE;
