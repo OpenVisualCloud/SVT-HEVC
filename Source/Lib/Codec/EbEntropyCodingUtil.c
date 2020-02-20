@@ -501,3 +501,4 @@ void EstimateOneBin(
     *contextModelPtr = UPDATE_CONTEXT_MODEL(BinaryValue, contextModelPtr);
 
 }
+

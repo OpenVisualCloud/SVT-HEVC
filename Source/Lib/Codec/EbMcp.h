@@ -670,3 +670,4 @@ extern const sampleBiPredClipping16bit biPredClipping16bitFuncPtrArray[EB_ASM_TY
 }
 #endif
 #endif // EBMCP_H
+

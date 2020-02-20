@@ -238,7 +238,7 @@ extern EB_ERRORTYPE ModeDecisionCandidateBufferCtor(
 
     EB_ERRORTYPE ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
 		LargestCodingUnit_t            *lcuPtr,
-        struct ModeDecisionContext_s   *contextPtr,
+                struct ModeDecisionContext_s   *contextPtr,
 		const EB_U32                    leafIndex,
 		const EB_U32                    lcuAddr,
 		EB_U32                         *bufferTotalCount,
