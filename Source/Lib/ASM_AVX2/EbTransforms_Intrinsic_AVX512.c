@@ -52,6 +52,7 @@ extern void EbHevcTransform32_AVX512_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S
     {
         __m256i x0, x1, x2, x3,sox0,sox5,soxa,soxf,s1x0,s1x5,s1xa,s1xf;
         __m256i y0, y1, y2, y3;
+        __m256i aa4, aa5, aa6, aa7;
         __m256i a0, a1, a2, a3, a4, a5, a6, a7;
         __m256i b0, b1, b2, b3, b4, b5, b6, b7;
 
@@ -90,24 +91,25 @@ extern void EbHevcTransform32_AVX512_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S
 		s1xf = _mm256_shuffle_epi32(x1, 0xff);	
 
 		a0 = _mm256_madd_epi16(sox0, coeff32[0]);
-        a0 = _mm256_add_epi32(a0, _mm256_madd_epi16(sox5, coeff32[2]));
-        a0 = _mm256_add_epi32(a0, _mm256_madd_epi16(soxa, coeff32[4]));
-        a0 = _mm256_add_epi32(a0, _mm256_madd_epi16(soxf, coeff32[6]));
 
+		a0 = _mm256_dpwssd_epi32(a0, sox5, coeff32[2]);
+        a0 = _mm256_dpwssd_epi32(a0, soxa, coeff32[4]);
+        a0 = _mm256_dpwssd_epi32(a0, soxf, coeff32[6]);
+		
         a1 = _mm256_madd_epi16(sox0, coeff32[1]);
-        a1 = _mm256_add_epi32(a1, _mm256_madd_epi16(sox5, coeff32[3]));
-        a1 = _mm256_add_epi32(a1, _mm256_madd_epi16(soxa, coeff32[5]));
-        a1 = _mm256_add_epi32(a1, _mm256_madd_epi16(soxf, coeff32[7]));
+        a1 = _mm256_dpwssd_epi32(a1, sox5, coeff32[3]);
+        a1 = _mm256_dpwssd_epi32(a1, soxa, coeff32[5]);
+        a1 = _mm256_dpwssd_epi32(a1, soxf, coeff32[7]);
 
         a2 = _mm256_madd_epi16(s1x0, coeff32[8]);
-        a2 = _mm256_add_epi32(a2, _mm256_madd_epi16(s1x5, coeff32[10]));
-        a2 = _mm256_add_epi32(a2, _mm256_madd_epi16(s1xa, coeff32[12]));
-        a2 = _mm256_add_epi32(a2, _mm256_madd_epi16(s1xf, coeff32[14]));
+        a2 = _mm256_dpwssd_epi32(a2, s1x5, coeff32[10]);
+        a2 = _mm256_dpwssd_epi32(a2, s1xa, coeff32[12]);
+        a2 = _mm256_dpwssd_epi32(a2, s1xf, coeff32[14]);
 
         a3 = _mm256_madd_epi16(s1x0, coeff32[9]);
-        a3 = _mm256_add_epi32(a3, _mm256_madd_epi16(s1x5, coeff32[11]));
-        a3 = _mm256_add_epi32(a3, _mm256_madd_epi16(s1xa, coeff32[13]));
-        a3 = _mm256_add_epi32(a3, _mm256_madd_epi16(s1xf, coeff32[15]));
+        a3 = _mm256_dpwssd_epi32(a3, s1x5, coeff32[11]);
+        a3 = _mm256_dpwssd_epi32(a3, s1xa, coeff32[13]);
+        a3 = _mm256_dpwssd_epi32(a3, s1xf, coeff32[15]);		
 
 		sox0 = _mm256_shuffle_epi32(x2, 0x00);
 		sox5 = _mm256_shuffle_epi32(x2, 0x55);
@@ -117,42 +119,42 @@ extern void EbHevcTransform32_AVX512_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S
 		s1x5 = _mm256_shuffle_epi32(x3, 0x55);
 		s1xa = _mm256_shuffle_epi32(x3, 0xaa);
 		s1xf = _mm256_shuffle_epi32(x3, 0xff);
-
+ 
         a4 = _mm256_madd_epi16(sox0, coeff32[16]);
-        a4 = _mm256_add_epi32(a4, _mm256_madd_epi16(sox5, coeff32[20]));
-        a4 = _mm256_add_epi32(a4, _mm256_madd_epi16(soxa, coeff32[24]));
-        a4 = _mm256_add_epi32(a4, _mm256_madd_epi16(soxf, coeff32[28]));
-        a4 = _mm256_add_epi32(a4, _mm256_madd_epi16(s1x0, coeff32[32]));
-        a4 = _mm256_add_epi32(a4, _mm256_madd_epi16(s1x5, coeff32[36]));
-        a4 = _mm256_add_epi32(a4, _mm256_madd_epi16(s1xa, coeff32[40]));
-        a4 = _mm256_add_epi32(a4, _mm256_madd_epi16(s1xf, coeff32[44]));
+        a4 = _mm256_dpwssd_epi32(a4, sox5, coeff32[20]);
+        a4 = _mm256_dpwssd_epi32(a4, soxa, coeff32[24]);
+        a4 = _mm256_dpwssd_epi32(a4, soxf, coeff32[28]);
+        a4 = _mm256_dpwssd_epi32(a4, s1x0, coeff32[32]);
+        a4 = _mm256_dpwssd_epi32(a4, s1x5, coeff32[36]);
+        a4 = _mm256_dpwssd_epi32(a4, s1xa, coeff32[40]);
+        a4 = _mm256_dpwssd_epi32(a4, s1xf, coeff32[44]);
 
         a5 = _mm256_madd_epi16(sox0, coeff32[17]);
-        a5 = _mm256_add_epi32(a5, _mm256_madd_epi16(sox5, coeff32[21]));
-        a5 = _mm256_add_epi32(a5, _mm256_madd_epi16(soxa, coeff32[25]));
-        a5 = _mm256_add_epi32(a5, _mm256_madd_epi16(soxf, coeff32[29]));
-        a5 = _mm256_add_epi32(a5, _mm256_madd_epi16(s1x0, coeff32[33]));
-        a5 = _mm256_add_epi32(a5, _mm256_madd_epi16(s1x5, coeff32[37]));
-        a5 = _mm256_add_epi32(a5, _mm256_madd_epi16(s1xa, coeff32[41]));
-        a5 = _mm256_add_epi32(a5, _mm256_madd_epi16(s1xf, coeff32[45]));
+        a5 = _mm256_dpwssd_epi32(a5, sox5, coeff32[21]);
+        a5 = _mm256_dpwssd_epi32(a5, soxa, coeff32[25]);
+        a5 = _mm256_dpwssd_epi32(a5, soxf, coeff32[29]);
+        a5 = _mm256_dpwssd_epi32(a5, s1x0, coeff32[33]);
+        a5 = _mm256_dpwssd_epi32(a5, s1x5, coeff32[37]);
+        a5 = _mm256_dpwssd_epi32(a5, s1xa, coeff32[41]);
+        a5 = _mm256_dpwssd_epi32(a5, s1xf, coeff32[45]);
 
         a6 = _mm256_madd_epi16(sox0, coeff32[18]);
-        a6 = _mm256_add_epi32(a6, _mm256_madd_epi16(sox5, coeff32[22]));
-        a6 = _mm256_add_epi32(a6, _mm256_madd_epi16(soxa, coeff32[26]));
-        a6 = _mm256_add_epi32(a6, _mm256_madd_epi16(soxf, coeff32[30]));
-        a6 = _mm256_add_epi32(a6, _mm256_madd_epi16(s1x0, coeff32[34]));
-        a6 = _mm256_add_epi32(a6, _mm256_madd_epi16(s1x5, coeff32[38]));
-        a6 = _mm256_add_epi32(a6, _mm256_madd_epi16(s1xa, coeff32[42]));
-        a6 = _mm256_add_epi32(a6, _mm256_madd_epi16(s1xf, coeff32[46]));
+        a6 = _mm256_dpwssd_epi32(a6, sox5, coeff32[22]);
+        a6 = _mm256_dpwssd_epi32(a6, soxa, coeff32[26]);
+        a6 = _mm256_dpwssd_epi32(a6, soxf, coeff32[30]);
+        a6 = _mm256_dpwssd_epi32(a6, s1x0, coeff32[34]);
+        a6 = _mm256_dpwssd_epi32(a6, s1x5, coeff32[38]);
+        a6 = _mm256_dpwssd_epi32(a6, s1xa, coeff32[42]);
+        a6 = _mm256_dpwssd_epi32(a6, s1xf, coeff32[46]);
 
         a7 = _mm256_madd_epi16(sox0, coeff32[19]);
-        a7 = _mm256_add_epi32(a7, _mm256_madd_epi16(sox5, coeff32[23]));
-        a7 = _mm256_add_epi32(a7, _mm256_madd_epi16(soxa, coeff32[27]));
-        a7 = _mm256_add_epi32(a7, _mm256_madd_epi16(soxf, coeff32[31]));
-        a7 = _mm256_add_epi32(a7, _mm256_madd_epi16(s1x0, coeff32[35]));
-        a7 = _mm256_add_epi32(a7, _mm256_madd_epi16(s1x5, coeff32[39]));
-        a7 = _mm256_add_epi32(a7, _mm256_madd_epi16(s1xa, coeff32[43]));
-        a7 = _mm256_add_epi32(a7, _mm256_madd_epi16(s1xf, coeff32[47]));
+        a7 = _mm256_dpwssd_epi32(a7, sox5, coeff32[23]);
+        a7 = _mm256_dpwssd_epi32(a7, soxa, coeff32[27]);
+        a7 = _mm256_dpwssd_epi32(a7, soxf, coeff32[31]);
+        a7 = _mm256_dpwssd_epi32(a7, s1x0, coeff32[35]);
+        a7 = _mm256_dpwssd_epi32(a7, s1x5, coeff32[39]);
+        a7 = _mm256_dpwssd_epi32(a7, s1xa, coeff32[43]);
+        a7 = _mm256_dpwssd_epi32(a7, s1xf, coeff32[47]);
 
         b0 = _mm256_sra_epi32(_mm256_add_epi32(a0, o0), s0);
         b1 = _mm256_sra_epi32(_mm256_add_epi32(a1, o0), s0);
