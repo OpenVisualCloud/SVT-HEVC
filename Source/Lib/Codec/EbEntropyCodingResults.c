@@ -24,6 +24,8 @@ EB_ERRORTYPE EntropyCodingResultsCreator(
     EB_PTR objectInitDataPtr)
 {
     EntropyCodingResults_t* obj;
+
+    *objectDblPtr = NULL;
     EB_NEW(obj, EntropyCodingResultsCtor, objectInitDataPtr);
     *objectDblPtr = obj;
 

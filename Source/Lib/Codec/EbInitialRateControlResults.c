@@ -21,6 +21,8 @@ EB_ERRORTYPE InitialRateControlResultsCreator(
     EB_PTR objectInitDataPtr)
 {
     InitialRateControlResults_t* obj;
+
+    *objectDblPtr = NULL;
     EB_NEW(obj, InitialRateControlResultsCtor, objectInitDataPtr);
     *objectDblPtr = obj;
 

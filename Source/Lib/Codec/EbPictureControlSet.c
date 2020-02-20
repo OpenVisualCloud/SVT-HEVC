@@ -633,6 +633,7 @@ EB_ERRORTYPE PictureControlSetCreator(
 {
     PictureControlSet_t   *objectPtr;
 
+    *objectDblPtr = NULL;
     EB_NEW(objectPtr, PictureControlSetCtor, objectInitDataPtr);
     *objectDblPtr = objectPtr;
 
@@ -663,9 +664,8 @@ static void PictureParentControlSetDctor(EB_PTR p)
                 for (EB_U32 regionInPictureHeightIndex = 0; regionInPictureHeightIndex < MAX_NUMBER_OF_REGIONS_IN_HEIGHT; regionInPictureHeightIndex++)
                     EB_FREE_2D(obj->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex]);
             }
-            EB_FREE_PTR_ARRAY(obj->pictureHistogram[regionInPictureWidthIndex], MAX_NUMBER_OF_REGIONS_IN_HEIGHT);
         }
-        EB_FREE_PTR_ARRAY(obj->pictureHistogram, MAX_NUMBER_OF_REGIONS_IN_WIDTH);
+        EB_FREE_2D(obj->pictureHistogram);
     }
 
     for (EB_U16 lcuIndex = 0; lcuIndex < obj->lcuTotalCount; ++lcuIndex) {
@@ -783,10 +783,8 @@ EB_ERRORTYPE PictureParentControlSetCtor(
     ConfigureLcuEdgeInfo(objectPtr);
 
     // Histograms
-    EB_ALLOC_PTR_ARRAY(objectPtr->pictureHistogram, MAX_NUMBER_OF_REGIONS_IN_WIDTH);
+    EB_CALLOC_2D(objectPtr->pictureHistogram, MAX_NUMBER_OF_REGIONS_IN_WIDTH, MAX_NUMBER_OF_REGIONS_IN_HEIGHT);
     for (EB_U32 regionInPictureWidthIndex = 0; regionInPictureWidthIndex < MAX_NUMBER_OF_REGIONS_IN_WIDTH; regionInPictureWidthIndex++) {  // loop over horizontal regions
-        EB_ALLOC_PTR_ARRAY(objectPtr->pictureHistogram[regionInPictureWidthIndex], MAX_NUMBER_OF_REGIONS_IN_HEIGHT);
-
         for (EB_U32 regionInPictureHeightIndex = 0; regionInPictureHeightIndex < MAX_NUMBER_OF_REGIONS_IN_HEIGHT; regionInPictureHeightIndex++) { // loop over vertical regions
             EB_MALLOC_2D(objectPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex], 3, HISTOGRAM_NUMBER_OF_BINS);
         }
@@ -883,6 +881,8 @@ EB_ERRORTYPE PictureParentControlSetCreator(
     EB_PTR objectInitDataPtr)
 {
     PictureParentControlSet_t* objectPtr;
+
+    *objectDblPtr = NULL;
     EB_NEW(objectPtr, PictureParentControlSetCtor, objectInitDataPtr);
     *objectDblPtr = objectPtr;
 

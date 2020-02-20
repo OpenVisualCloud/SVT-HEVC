@@ -22,6 +22,8 @@ EB_ERRORTYPE MotionEstimationResultsCreator(
     EB_PTR objectInitDataPtr)
 {
     MotionEstimationResults_t *obj;
+
+    *objectDblPtr = NULL;
     EB_NEW(obj, MotionEstimationResultsCtor, objectInitDataPtr);
     *objectDblPtr = obj;
     return EB_ErrorNone;

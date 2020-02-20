@@ -24,6 +24,7 @@ EB_ERRORTYPE RateControlTasksCreator(
 {
     RateControlTasks_t* obj;
 
+    *objectDblPtr = NULL;
     EB_NEW(obj, RateControlTasksCtor, objectInitDataPtr);
     *objectDblPtr = obj;
 

@@ -25,6 +25,7 @@ EB_ERRORTYPE ResourceCoordinationResultCreator(
 {
     ResourceCoordinationResults_t* obj;
 
+    *objectDblPtr = NULL;
     EB_NEW(obj, ResourceCoordinationResultCtor, objectInitDataPtr);
     *objectDblPtr = obj;
 

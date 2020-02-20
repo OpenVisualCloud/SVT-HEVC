@@ -114,6 +114,7 @@ EB_ERRORTYPE EbSequenceControlSetCreator(
 {
     SequenceControlSet_t* obj;
 
+    *objectDblPtr = NULL;
     EB_NEW(obj, EbSequenceControlSetCtor, objectInitDataPtr);
     *objectDblPtr = obj;
 

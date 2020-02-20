@@ -211,6 +211,7 @@ EB_ERRORTYPE EbReferenceObjectCreator(
 {
     EbReferenceObject_t* obj;
 
+    *objectDblPtr = NULL;
     EB_NEW(obj, EbReferenceObjectCtor, objectInitDataPtr);
     *objectDblPtr = obj;
 
@@ -265,6 +266,7 @@ EB_ERRORTYPE EbPaReferenceObjectCreator(
 {
     EbPaReferenceObject_t* obj;
 
+    *objectDblPtr = NULL;
     EB_NEW(obj, EbPaReferenceObjectCtor, objectInitDataPtr);
     *objectDblPtr = obj;
 

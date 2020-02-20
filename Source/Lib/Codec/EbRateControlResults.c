@@ -24,6 +24,7 @@ EB_ERRORTYPE RateControlResultsCreator(
 {
     RateControlResults_t* obj;
 
+    *objectDblPtr = NULL;
     EB_NEW(obj, RateControlResultsCtor, objectInitDataPtr);
     *objectDblPtr = obj;
 

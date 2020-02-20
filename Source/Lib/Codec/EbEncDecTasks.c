@@ -24,6 +24,7 @@ EB_ERRORTYPE EncDecTasksCreator(
 {
     EncDecTasks_t *obj;
 
+    *objectDblPtr = NULL;
     EB_NEW(obj, EncDecTasksCtor, objectInitDataPtr);
     *objectDblPtr = obj;
 

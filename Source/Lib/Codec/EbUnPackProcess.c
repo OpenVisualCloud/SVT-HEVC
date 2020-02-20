@@ -34,6 +34,8 @@ EB_ERRORTYPE UnPackCreator(
     EB_PTR   objectInitDataPtr)
 {
     EBUnPack2DType_t* obj;
+
+    *objectDblPtr = NULL;
     EB_CALLOC(obj, 1, sizeof(EBUnPack2DType_t));
     *objectDblPtr = obj;
 

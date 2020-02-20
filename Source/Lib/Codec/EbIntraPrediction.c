@@ -136,22 +136,30 @@ EB_ERRORTYPE IntraReferenceSamplesCtor(IntraReferenceSamples_t *contextPtr, EB_C
 static void IntraReference16bitSamplesDctor(EB_PTR p)
 {
     IntraReference16bitSamples_t* obj = (IntraReference16bitSamples_t*)p;
-    obj->yIntraReferenceArrayReverse--;
-    obj->yIntraFilteredReferenceArrayReverse--;
-    obj->cbIntraReferenceArrayReverse--;
-    obj->crIntraReferenceArrayReverse--;
 
     EB_FREE_ARRAY(obj->yIntraReferenceArray);
     EB_FREE_ARRAY(obj->cbIntraReferenceArray);
     EB_FREE_ARRAY(obj->crIntraReferenceArray);
     EB_FREE_ARRAY(obj->yIntraFilteredReferenceArray);
-    EB_FREE_ARRAY(obj->yIntraReferenceArrayReverse);
-    EB_FREE_ARRAY(obj->yIntraFilteredReferenceArrayReverse);
-    EB_FREE_ARRAY(obj->cbIntraReferenceArrayReverse);
-    EB_FREE_ARRAY(obj->crIntraReferenceArrayReverse);
-
     EB_FREE_ARRAY(obj->cbIntraFilteredReferenceArray);
     EB_FREE_ARRAY(obj->crIntraFilteredReferenceArray);
+
+    if (obj->yIntraReferenceArrayReverse) {
+        obj->yIntraReferenceArrayReverse--;
+        EB_FREE_ARRAY(obj->yIntraReferenceArrayReverse);
+    }
+    if (obj->yIntraFilteredReferenceArrayReverse) {
+        obj->yIntraFilteredReferenceArrayReverse--;
+        EB_FREE_ARRAY(obj->yIntraFilteredReferenceArrayReverse);
+    }
+    if (obj->cbIntraReferenceArrayReverse) {
+        obj->cbIntraReferenceArrayReverse--;
+        EB_FREE_ARRAY(obj->cbIntraReferenceArrayReverse);
+    }
+    if (obj->crIntraReferenceArrayReverse) {
+        obj->crIntraReferenceArrayReverse--;
+        EB_FREE_ARRAY(obj->crIntraReferenceArrayReverse);
+    }
     if (obj->cbIntraFilteredReferenceArrayReverse) {
         obj->cbIntraFilteredReferenceArrayReverse--;
         EB_FREE_ARRAY(obj->cbIntraFilteredReferenceArrayReverse);

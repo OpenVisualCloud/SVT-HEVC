@@ -102,17 +102,17 @@ static void EbReconPictureBufferDescDctor(EB_PTR p)
 {
     EbPictureBufferDesc_t *obj = (EbPictureBufferDesc_t*)p;
     EB_U32 bytesPerPixel = (obj->bitDepth == EB_8BIT) ? 1 : 2;
-    if (obj->bufferEnableMask & PICTURE_BUFFER_DESC_Y_FLAG)
+    if (obj->bufferEnableMask & PICTURE_BUFFER_DESC_Y_FLAG && obj->bufferY != NULL)
     {
         obj->bufferY -= (obj->width + 1) * bytesPerPixel;
         EB_FREE(obj->bufferY);
     }
-    if (obj->bufferEnableMask & PICTURE_BUFFER_DESC_Cb_FLAG)
+    if (obj->bufferEnableMask & PICTURE_BUFFER_DESC_Cb_FLAG && obj->bufferCb != NULL)
     {
         obj->bufferCb -= ((obj->width >> 1) + 1) * bytesPerPixel;
         EB_FREE(obj->bufferCb);
     }
-    if (obj->bufferEnableMask & PICTURE_BUFFER_DESC_Cr_FLAG)
+    if (obj->bufferEnableMask & PICTURE_BUFFER_DESC_Cr_FLAG && obj->bufferCr != NULL)
     {
         obj->bufferCr -= ((obj->width >> 1) + 1) * bytesPerPixel;
         EB_FREE(obj->bufferCr);

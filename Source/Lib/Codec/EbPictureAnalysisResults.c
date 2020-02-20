@@ -21,8 +21,9 @@ EB_ERRORTYPE PictureAnalysisResultCreator(
     EB_PTR objectInitDataPtr)
 {
     PictureAnalysisResults_t *obj;
-    EB_NEW(obj, PictureAnalysisResultCtor, objectInitDataPtr);
 
+    *objectDblPtr = NULL;
+    EB_NEW(obj, PictureAnalysisResultCtor, objectInitDataPtr);
     *objectDblPtr = (EB_PTR)obj;
 
     return EB_ErrorNone;

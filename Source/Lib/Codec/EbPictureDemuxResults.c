@@ -21,6 +21,7 @@ EB_ERRORTYPE PictureResultsCreator(
 {
     PictureDemuxResults_t* obj;
 
+    *objectDblPtr = NULL;
     EB_NEW(obj, PictureResultsCtor, objectInitDataPtr);
     *objectDblPtr = obj;
 

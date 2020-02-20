@@ -21,6 +21,8 @@ EB_ERRORTYPE PictureDecisionResultCreator(
     EB_PTR objectInitDataPtr)
 {
     PictureDecisionResults_t* obj;
+
+    *objectDblPtr = NULL;
     EB_NEW(obj, PictureDecisionResultCtor, objectInitDataPtr);
     *objectDblPtr = obj;
 

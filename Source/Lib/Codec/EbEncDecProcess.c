@@ -49,7 +49,7 @@ static void EncDecContextDctor(EB_PTR p)
         obj->saoUpBuffer16[0]--;
         EB_FREE_ARRAY(obj->saoUpBuffer16[0]);
     }
-    EB_FREE_ARRAY(obj->saoLeftBuffer16[0]);
+    EB_FREE(obj->saoLeftBuffer16[0]);
     EB_DELETE(obj->saoStats);
     EB_DELETE(obj->inputSample16bitBuffer);
     EB_DELETE(obj->residualBuffer);
@@ -200,7 +200,7 @@ EB_ERRORTYPE EncDecContextCtor(
         contextPtr->saoUpBuffer16[1] = contextPtr->saoUpBuffer16[0] + (MAX_PICTURE_WIDTH_SIZE + 2);
 
         //CHKN the add of 14 should be justified, also the left ping pong buffers are not symetric which is not ok
-        EB_CALLOC_ARRAY(contextPtr->saoLeftBuffer16[0], (MAX_LCU_SIZE + 2) * 2 + 14);
+        EB_CALLOC(contextPtr->saoLeftBuffer16[0], 1, sizeof(EB_U16) * (MAX_LCU_SIZE + 2) * 2 + 14);
 
         contextPtr->saoLeftBuffer16[1] = contextPtr->saoLeftBuffer16[0] + (MAX_LCU_SIZE + 2);
     }

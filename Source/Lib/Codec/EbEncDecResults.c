@@ -23,6 +23,7 @@ EB_ERRORTYPE EncDecResultsCreator(
 {
     EncDecResults_t* obj;
 
+    *objectDblPtr = NULL;
     EB_NEW(obj, EncDecResultsCtor, objectInitDataPtr);
     *objectDblPtr = obj;
 
