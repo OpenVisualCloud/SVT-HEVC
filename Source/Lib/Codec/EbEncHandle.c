@@ -3575,11 +3575,11 @@ static EB_ERRORTYPE CopyFrameBuffer(
         int nb = context_unpack->nbLumaThreads + context_unpack->nbChromaThreads*2;
         EbObjectWrapper_t *copyFrameBufferWrapperPtr;
         EBUnPack2DType_t *unpackDataPtr;
- 
+
          for (int i = 0; i< nb_luma; i++){
             EbGetEmptyObject(context_unpack->copyFrameInputFifoPtr,&copyFrameBufferWrapperPtr);
             unpackDataPtr                  = (EBUnPack2DType_t*)copyFrameBufferWrapperPtr->objectPtr;
-            unpackDataPtr->in16BitBuffer   = (EB_U16*)(inputPtr->luma) + (EB_U32)(in_luma/nb_luma)*i; 
+            unpackDataPtr->in16BitBuffer   = (EB_U16*)(inputPtr->luma) + (EB_U32)(in_luma/nb_luma)*i;
             unpackDataPtr->inStride        = (EB_U16)(inputPtr->yStride);
             unpackDataPtr->out8BitBuffer   = inputPicturePtr->bufferY + lumaBufferOffset + (EB_U32)(out_luma/nb_luma)*i;
             unpackDataPtr->out8Stride      = inputPicturePtr->strideY;
@@ -3617,7 +3617,7 @@ static EB_ERRORTYPE CopyFrameBuffer(
             unpackDataPtr->height              = chromaHeight/nb_chroma;
             EbPostFullObject(copyFrameBufferWrapperPtr);
         }
-        
+
         EbObjectWrapper_t   *unpackEndSyncWrapperPtr;
         for(int i = 0 ; i < nb; i++){
             EbGetFullObject(context_unpack->unPackOutPutFifoPtr,&unpackEndSyncWrapperPtr);

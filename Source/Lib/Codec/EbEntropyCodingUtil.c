@@ -8,8 +8,8 @@
 
 #define ONE_BIT 32768
 
-//LUT used for LPSxRange calculation 
-//8 bit unsigned is enough. 
+//LUT used for LPSxRange calculation
+//8 bit unsigned is enough.
 static const EB_U32 RangeLPSTable1D[] =
 {
     128, 176, 208, 240,
@@ -101,7 +101,7 @@ static const EB_U32 ShiftNumTable[] =
 
 /************************************************
 * Bac Encoder Context:WriteOut Function
-* Write a Byte or more, which won’t change because of carry any more
+* Write a Byte or more, which wonï¿½t change because of carry any more
 *
 * input: bacEncContext pointer
 *
@@ -288,8 +288,8 @@ void BacEncContextTerminate(
 }
 
 void RemainingCoeffExponentialGolombCode(
-    CabacEncodeContext_t *cabacEncodeCtxPtr, 
-    EB_U32 symbolValue, 
+    CabacEncodeContext_t *cabacEncodeCtxPtr,
+    EB_U32 symbolValue,
     EB_U32 golombParam)
 {
     EB_S32 codeWord = symbolValue >> golombParam;
@@ -501,4 +501,3 @@ void EstimateOneBin(
     *contextModelPtr = UPDATE_CONTEXT_MODEL(BinaryValue, contextModelPtr);
 
 }
-

@@ -260,4 +260,3 @@ EB_ERRORTYPE EncodeCabacContextModelInit(
 
     return EB_ErrorNone;
 }
-

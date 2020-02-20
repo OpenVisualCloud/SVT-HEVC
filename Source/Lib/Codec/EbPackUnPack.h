@@ -163,7 +163,7 @@ typedef void(*EB_ENC_UnPack8BitDataSUB_TYPE)(
     );
 EB_ENC_UnPack8BitDataSUB_TYPE UnPack8BITSafeSub_funcPtrArray_16Bit[EB_ASM_TYPE_TOTAL] =
 {
-    // C_DEFAULT           
+    // C_DEFAULT
     UnPack8BitDataSafeSub,
     // SSE2
     EB_ENC_UnPack8BitDataSafeSub_SSE2_INTRIN

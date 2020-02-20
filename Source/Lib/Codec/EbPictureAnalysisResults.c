@@ -28,4 +28,3 @@ EB_ERRORTYPE PictureAnalysisResultCreator(
 
     return EB_ErrorNone;
 }
-
