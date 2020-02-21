@@ -28,5 +28,3 @@ EB_ERRORTYPE MotionEstimationResultsCreator(
     *objectDblPtr = obj;
     return EB_ErrorNone;
 }
-
-

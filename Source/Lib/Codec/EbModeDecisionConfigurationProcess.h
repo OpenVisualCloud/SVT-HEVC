@@ -20,7 +20,7 @@ extern "C" {
  * Defines
  **************************************/
 
-typedef struct MdcpLocalCodingUnit_s    
+typedef struct MdcpLocalCodingUnit_s
 {
     EB_U64                          earlyCost;
     EB_BOOL                         earlySplitFlag;
@@ -55,7 +55,7 @@ typedef struct ModeDecisionConfigurationContext_s
 	EB_S8                               minDeltaQp[4];
 	EB_S8                               maxDeltaQp[4];
 
-    // Budgeting  
+    // Budgeting
     EB_U32                             *lcuScoreArray;
     EB_U8	                            costDepthMode[LCU_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE];
     EB_U8                              *lcuCostArray;
@@ -89,9 +89,9 @@ extern EB_ERRORTYPE ModeDecisionConfigurationContextCtor(
     EbFifo_t                            *modeDecisionConfigurationOutputFifoPtr,
     EB_U16						         lcuTotalCount);
 
-   
+
 extern void* ModeDecisionConfigurationKernel(void *inputPtr);
 #ifdef __cplusplus
 }
-#endif   
+#endif
 #endif // EbModeDecisionConfigurationProcess_h

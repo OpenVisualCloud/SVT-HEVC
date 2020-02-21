@@ -152,7 +152,7 @@ typedef EB_ERRORTYPE(*EB_PREDICTION_FUNC)(
 		EB_FULL_LUMA_COST_FUNC                  fullLumaCostFuncPtr;
 		EB_PREDDIRECTION                        predictionDirection[MAX_NUM_OF_PU_PER_CU]; // 2 bits
 
-        
+
 		EB_S16                                  motionVectorPred_x[MAX_NUM_OF_REF_PIC_LIST]; // 16 bits
 		EB_S16                                  motionVectorPred_y[MAX_NUM_OF_REF_PIC_LIST]; // 16 bits
 		EB_U8                                   motionVectorPredIdx[MAX_NUM_OF_REF_PIC_LIST]; // 2 bits
@@ -162,7 +162,7 @@ typedef EB_ERRORTYPE(*EB_PREDICTION_FUNC)(
 		EB_U8                                   cbCbf;               // ?? bit
 		EB_U8                                   crCbf;               // ?? bit
         EB_U32                                  yCbf;                // Issue, should be less than 32
-	
+
 
 	} ModeDecisionCandidate_t;
 
@@ -217,7 +217,7 @@ typedef EB_ERRORTYPE(*EB_PREDICTION_FUNC)(
 		CoeffCtxtMdl_t                         candBuffCoeffCtxModel;
         EB_BOOL                                weightChromaDistortion;
         EB_U64                                 yFullDistortion[DIST_CALC_TOTAL];
-        EB_U64                                 yCoeffBits;     
+        EB_U64                                 yCoeffBits;
 		EB_S16                                 yDc[4];// Store the ABS of DC values per TU. If one TU, stored in 0, otherwise 4 tus stored in 0 to 3
         EB_U16                                 yCountNonZeroCoeffs[4];// Store nonzero CoeffNum, per TU. If one TU, stored in 0, otherwise 4 tus stored in 0 to 3
 

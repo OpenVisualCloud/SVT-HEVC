@@ -17,7 +17,7 @@ extern "C" {
 #define MAX_ME_CANDIDATE_PER_PU   3
 
 typedef struct MeCandidate_s {
-  
+
 	union {
 		struct {
 			signed short     xMvL0 ;  //Note: Do not change the order of these fields
