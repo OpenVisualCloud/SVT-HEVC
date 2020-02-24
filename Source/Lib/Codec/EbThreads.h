@@ -99,9 +99,11 @@ extern    cpu_set_t                   groupAffinity;
 
 #define EB_DESTROY_THREAD(pointer) \
     do { \
-        EbDestroyThread(pointer); \
-        EB_REMOVE_MEM_ENTRY(pointer, EB_THREAD); \
-        pointer = NULL; \
+        if (pointer) { \
+            EbDestroyThread(pointer); \
+            EB_REMOVE_MEM_ENTRY(pointer, EB_THREAD); \
+            pointer = NULL; \
+        } \
     } while (0);
 
 #define EB_CREATE_THREAD_ARRAY(pa, count, threadFunction, threadContext) \
