@@ -5354,15 +5354,22 @@ EB_U32 ComputeNumReorderPics(SequenceControlSet_t    *scsPtr)
     // The reorderPicsPerHierarchy values are determined by inspection of the graphs at the top of 
     // shown at the top of EbPredictionStructure.c and determining the highest observed value for 
     // NumReorderPics in any one picture within that prediction structure.
-    //                    hierarchical level    1  2  3  4  5   6
-    static EB_U32 reorderPicsPerHierarchy[] = { 0, 1, 2, 4, 6, 14 };
+    //
+    // Although hierchical level is defined up to level 6, current encoding configuration only will allow
+    // hierarchies up to level 4
+    //
+    //                   hierarchical level   1  2  3  4  5   6
+    const EB_U8 reorderPicsPerHierarchy[] = { 0, 1, 2, 4, 6, 14 };
 
     if (scsPtr->predStructPtr->predType == EB_PRED_LOW_DELAY_P || scsPtr->predStructPtr->predType == EB_PRED_LOW_DELAY_B)
         // For low delay prediction structures set num reorder pictures to 0
         return 0;
     else
         // For Random Access prediction structures set num reorder pictures according to the number of hierarchical layers
-        return MIN(scsPtr->maxDpbSize - 1, reorderPicsPerHierarchy[scsPtr->maxTemporalLayers]);
+        if (reorderPicsPerHierarchy[scsPtr->maxTemporalLayers] > (scsPtr->maxDpbSize - 1))
+            return scsPtr->maxDpbSize - 1;
+        else
+            return reorderPicsPerHierarchy[scsPtr->maxTemporalLayers];
 }
 
 /**************************************************
@@ -5434,11 +5441,11 @@ static void CodeVPS(
 	{
 		// Supports Main Profile Level 5 (Max Picture resolution 4Kx2K, up to 6 Hierarchy Levels)
 		// Max Dec Pic Buffering [i]
-	    WriteUvlc(
+		WriteUvlc(
 		    bitstreamPtr,
 			scsPtr->maxDpbSize - 1/*4*/);//(1 << (scsPtr->maxTemporalLayers-syntaxItr)));
 
-		// Max Num Reorder pics - indicates the maximum number of pictures that can precede any picture in
+		// vps_max_num_reorder_pics - indicates the maximum number of pictures that can precede any picture in
 		// decoding order and follow it in output order.
 		WriteUvlc(
 			bitstreamPtr,
@@ -6063,11 +6070,11 @@ static void CodeSPS(
 			bitstreamPtr,
 			scsPtr->maxDpbSize - 1/*4*/);//(1 << (scsPtr->maxTemporalLayers-syntaxItr)));
         
-		// Max Num Reorder pics - indicates the maximum number of pictures that can precede any picture in
+		// vps_max_num_reorder_pics - indicates the maximum number of pictures that can precede any picture in
 		// decoding order and follow it in output order.
 		WriteUvlc(
-		bitstreamPtr,
-		ComputeNumReorderPics(scsPtr));
+			bitstreamPtr,
+			ComputeNumReorderPics(scsPtr));
 
 		WriteUvlc(
 			bitstreamPtr,
