@@ -147,7 +147,7 @@ static EB_BOOL ForEachMemEntry(uint32_t start, Predicate pred, void* param)
     return ret;
 }
 
-static const char* MemTypeName(EB_PTRType type)
+static const char* ResourceTypeName(EB_PTRType type)
 {
     static const char *name[EB_PTR_TYPE_TOTAL] = {"malloced memory", "calloced memory", "aligned memory", "mutex", "semaphore", "thread"};
     return name[type];
@@ -207,7 +207,7 @@ void EbRemoveMemEntry(void* ptr, EB_PTRType type)
     if (ForEachMemEntry(hash(ptr), RemoveMemEntry, &item))
         return;
     if (gRemoveMemEntryWarning) {
-        fprintf(stderr, "SVT: something wrong. you freed a unallocated memory %p, type = %s\r\n", ptr, MemTypeName(type));
+        fprintf(stderr, "SVT: something wrong. you freed a unallocated resource %p, type = %s\r\n", ptr, ResourceTypeName(type));
         gRemoveMemEntryWarning = EB_FALSE;
     }
 }
@@ -303,7 +303,7 @@ static void PrintTop10Llocations() {
     ForEachHashEntry(gMemEntry, 0, CollectMem, &type);
     qsort(gProfileEntry, MEM_ENTRY_SIZE, sizeof(MemoryEntry), CompareCount);
 
-    printf("top 10 %s locations:\r\n", MemTypeName(type));
+    printf("top 10 %s locations:\r\n", ResourceTypeName(type));
     for (int i = 0; i < 10; i++) {
         double usage;
         char scale;
@@ -368,7 +368,7 @@ static EB_BOOL PrintLeak(MemoryEntry* e, void* param)
     if (e->ptr) {
         EB_BOOL* leaked = (EB_BOOL*)param;
         *leaked = EB_TRUE;
-        fprintf(stderr, "SVT: %s leaked at %s:L%d\r\n", MemTypeName(e->type), e->file, e->line);
+        fprintf(stderr, "SVT: %s leaked at %s:L%d\r\n", ResourceTypeName(e->type), e->file, e->line);
     }
     //loop through all items
     return EB_FALSE;

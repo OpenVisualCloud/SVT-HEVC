@@ -29,7 +29,7 @@
   }
 
   A* o;
-  EB_NEW(a_ctor, o);
+  EB_NEW(o, a_ctor);
   //...
   EB_RELEASE(o);
 

@@ -3090,11 +3090,17 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     outputStreamBuffer->nFilledLen = 0;
 
     // Intermediate buffers
-    OutputBitstreamUnit_t* outBitstreamPtr;
-    EB_NEW(
+    OutputBitstreamUnit_t* outBitstreamPtr = NULL;
+    EB_NO_THROW_NEW(
         outBitstreamPtr,
         OutputBitstreamUnitCtor,
         PACKETIZATION_PROCESS_BUFFER_SIZE);
+    if (!outBitstreamPtr) {
+        free(outputStreamBuffer->pBuffer);
+        free(outputStreamBuffer);
+        return EB_ErrorInsufficientResources;
+    }
+
     bitstreamPtr.outputBitstreamPtr = outBitstreamPtr;
 
     // Reset the bitstream before writing to it
@@ -3336,9 +3342,8 @@ static EB_ERRORTYPE ParseSeiMetaData(
     return_error = BaseDecodeFunction(base64Encode, base64EncodeLength, base64Decode, base64DecodeLength);
 
     if (return_error != EB_ErrorNone) {
-        src->naluFound = EB_FALSE;
         SVT_LOG("\nSVT [WARNING]: SEI encoded message cannot be decoded \n ");
-        return EB_ErrorBadParameter;
+        goto error;
     }
 
     if (src->naluNalType == NAL_UNIT_PREFIX_SEI && src->naluPrefix == 0) {
@@ -3350,26 +3355,29 @@ static EB_ERRORTYPE ParseSeiMetaData(
             else if (src->naluPayloadType == 5)
                 headerPtr->userSeiMsg.payloadType = USER_DATA_UNREGISTERED;
             else {
-                src->naluFound = EB_FALSE;
                 SVT_LOG("\nSVT [WARNING]: Unsupported SEI payload Type for frame %u\n ", src->naluPOC);
-                return EB_ErrorBadParameter;
+                goto error;
             }
             EB_MEMCPY(headerPtr->userSeiMsg.payload, base64Decode, headerPtr->userSeiMsg.payloadSize);
         }
         else {
-            src->naluFound = EB_FALSE;
             SVT_LOG("\nSVT [WARNING]: User SEI frame number %u doesn't match input frame number %" PRId64 "\n ", src->naluPOC, currentPOC);
-            return EB_ErrorBadParameter;
+            goto error;
         }
     }
     else {
-        src->naluFound = EB_FALSE;
         SVT_LOG("\nSVT [WARNING]: SEI message for frame %u is not inserted. Will support only PREFIX SEI message \n ", src->naluPOC);
-        return EB_ErrorBadParameter;
+        goto error;
     }
 
     free(base64Decode);
     return return_error;
+
+error:
+    src->naluFound = EB_FALSE;
+    free(base64Decode);
+    return EB_ErrorBadParameter;
+
 }
 
 static EB_ERRORTYPE CopyUserSei(
@@ -3988,6 +3996,7 @@ EB_ERRORTYPE EbInputBufferHeaderCreator(
     EB_PTR *objectDblPtr,
     EB_PTR  objectInitDataPtr)
 {
+    EB_ERRORTYPE return_error = EB_ErrorNone;
     EB_BUFFERHEADERTYPE* inputBuffer;
     SequenceControlSet_t        *sequenceControlSetPtr = (SequenceControlSet_t*)objectInitDataPtr;
 
@@ -3996,9 +4005,11 @@ EB_ERRORTYPE EbInputBufferHeaderCreator(
     // Initialize Header
     inputBuffer->nSize = sizeof(EB_BUFFERHEADERTYPE);
 
-    AllocateFrameBuffer(
+    return_error = AllocateFrameBuffer(
         sequenceControlSetPtr,
         inputBuffer);
+    if (return_error != EB_ErrorNone)
+        return return_error;
 
     if (sequenceControlSetPtr->staticConfig.segmentOvEnabled) {
         EB_MALLOC_ARRAY(inputBuffer->segmentOvPtr, sequenceControlSetPtr->lcuTotalCount);

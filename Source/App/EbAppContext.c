@@ -650,6 +650,9 @@ EB_ERRORTYPE InitEncoder(
 
     // STEP 5: Init Encoder
     return_error = EbInitEncoder(callbackData->svtEncoderHandle);
+    if (return_error != EB_ErrorNone) {
+        return return_error;
+    }
 
     ///************************* LIBRARY INIT [END] *********************///
 
