@@ -69,29 +69,29 @@ EB_ERRORTYPE EbPictureBufferDescCtor(
     pictureBufferDescPtr->bufferEnableMask = pictureBufferDescInitDataPtr->bufferEnableMask;
     // Allocate the Picture Buffers (luma & chroma)
     if(pictureBufferDescInitDataPtr->bufferEnableMask & PICTURE_BUFFER_DESC_Y_FLAG) {
-        EB_CALLOC_ALIGNED_ARRAY(pictureBufferDescPtr->bufferY, pictureBufferDescPtr->lumaSize * bytesPerPixel);
+        EB_MALLOC_ALIGNED_ARRAY(pictureBufferDescPtr->bufferY, pictureBufferDescPtr->lumaSize * bytesPerPixel);
         pictureBufferDescPtr->bufferYAddress = pictureBufferDescPtr->bufferY;
         pictureBufferDescPtr->bufferBitIncY = 0;
         if(pictureBufferDescInitDataPtr->splitMode == EB_TRUE ) {
-            EB_CALLOC_ALIGNED_ARRAY(pictureBufferDescPtr->bufferBitIncY, pictureBufferDescPtr->lumaSize * bytesPerPixel);
+            EB_MALLOC_ALIGNED_ARRAY(pictureBufferDescPtr->bufferBitIncY, pictureBufferDescPtr->lumaSize * bytesPerPixel);
         }
     }
 
     if(pictureBufferDescInitDataPtr->bufferEnableMask & PICTURE_BUFFER_DESC_Cb_FLAG) {
-        EB_CALLOC_ALIGNED_ARRAY(pictureBufferDescPtr->bufferCb, pictureBufferDescPtr->chromaSize * bytesPerPixel);
+        EB_MALLOC_ALIGNED_ARRAY(pictureBufferDescPtr->bufferCb, pictureBufferDescPtr->chromaSize * bytesPerPixel);
         pictureBufferDescPtr->bufferCbAddress = pictureBufferDescPtr->bufferCb;
         pictureBufferDescPtr->bufferBitIncCb = 0;
         if(pictureBufferDescInitDataPtr->splitMode == EB_TRUE ) {
-            EB_CALLOC_ALIGNED_ARRAY(pictureBufferDescPtr->bufferBitIncCb, pictureBufferDescPtr->chromaSize * bytesPerPixel);
+            EB_MALLOC_ALIGNED_ARRAY(pictureBufferDescPtr->bufferBitIncCb, pictureBufferDescPtr->chromaSize * bytesPerPixel);
         }
     }
 
     if(pictureBufferDescInitDataPtr->bufferEnableMask & PICTURE_BUFFER_DESC_Cr_FLAG) {
-        EB_CALLOC_ALIGNED_ARRAY(pictureBufferDescPtr->bufferCr, pictureBufferDescPtr->chromaSize * bytesPerPixel);
+        EB_MALLOC_ALIGNED_ARRAY(pictureBufferDescPtr->bufferCr, pictureBufferDescPtr->chromaSize * bytesPerPixel);
         pictureBufferDescPtr->bufferCrAddress = pictureBufferDescPtr->bufferCr;
         pictureBufferDescPtr->bufferBitIncCr = 0;
         if(pictureBufferDescInitDataPtr->splitMode == EB_TRUE ) {
-            EB_CALLOC_ALIGNED_ARRAY(pictureBufferDescPtr->bufferBitIncCr, pictureBufferDescPtr->chromaSize * bytesPerPixel);
+            EB_MALLOC_ALIGNED_ARRAY(pictureBufferDescPtr->bufferBitIncCr, pictureBufferDescPtr->chromaSize * bytesPerPixel);
         }
     }
 
