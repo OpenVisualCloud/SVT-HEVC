@@ -1516,6 +1516,25 @@ EB_API EB_ERRORTYPE EbDeinitEncoder(EB_COMPONENTTYPE *h265EncComponent)
 {
     if (h265EncComponent == NULL)
         return EB_ErrorBadParameter;
+    EbEncHandle_t *encHandlePtr = (EbEncHandle_t*)h265EncComponent->pComponentPrivate;
+    if (encHandlePtr) {
+        //Jing: Send signal to quit thread
+        EB_SEND_END_OBJ(encHandlePtr->inputBufferProducerFifoPtrArray, EB_ResourceCoordinationProcessInitCount);
+        EB_SEND_END_OBJ(encHandlePtr->resourceCoordinationResultsProducerFifoPtrArray, encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->pictureAnalysisProcessInitCount);
+        EB_SEND_END_OBJ(encHandlePtr->pictureAnalysisResultsProducerFifoPtrArray, EB_PictureDecisionProcessInitCount);
+        EB_SEND_END_OBJ(encHandlePtr->pictureDecisionResultsProducerFifoPtrArray, encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->motionEstimationProcessInitCount);
+        EB_SEND_END_OBJ(encHandlePtr->motionEstimationResultsProducerFifoPtrArray, EB_InitialRateControlProcessInitCount);
+        EB_SEND_END_OBJ(encHandlePtr->initialRateControlResultsProducerFifoPtrArray, encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->sourceBasedOperationsProcessInitCount);
+        EB_SEND_END_OBJ(encHandlePtr->pictureDemuxResultsProducerFifoPtrArray, EB_PictureManagerProcessInitCount);
+        EB_SEND_END_OBJ(encHandlePtr->rateControlTasksProducerFifoPtrArray, EB_RateControlProcessInitCount);
+        EB_SEND_END_OBJ(encHandlePtr->rateControlResultsProducerFifoPtrArray, encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount);
+        EB_SEND_END_OBJ(encHandlePtr->encDecTasksProducerFifoPtrArray, encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->encDecProcessInitCount);
+        EB_SEND_END_OBJ(encHandlePtr->encDecResultsProducerFifoPtrArray, encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->entropyCodingProcessInitCount);
+        EB_SEND_END_OBJ(encHandlePtr->entropyCodingResultsProducerFifoPtrArray, EB_PacketizationProcessInitCount);
+        EB_SEND_END_OBJ(encHandlePtr->unpackTasksProducerFifoPtrArray, encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount);
+        EB_SEND_END_OBJ(encHandlePtr->unpackSyncProducerFifoPtrArray, encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount);
+    }
+
     return EB_ErrorNone;
 }
 

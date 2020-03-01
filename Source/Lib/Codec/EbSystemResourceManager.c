@@ -428,6 +428,7 @@ static EB_ERRORTYPE EBObjectWrapperCtor(EbObjectWrapper_t* wrapper,
 
     wrapper->dctor = EBObjectWrapperDctor;
     wrapper->releaseEnable = EB_TRUE;
+    wrapper->quitSignal = EB_FALSE;
     wrapper->systemResourcePtr = resource;
     wrapper->objectDestroyer = objectDestroyer;
     ret = objectCreator(&wrapper->objectPtr, objectInitDataPtr);

@@ -562,15 +562,15 @@ typedef void * EB_HANDLE;
     strcpy_ss((char*)dst, strlen(src)+1, src);
 
 #define EB_SEND_END_OBJ(fifoPtrArray, count) \
-    for (unsigned int i = 0; i < count; i++) { \
+   for (unsigned int i = 0; i < count; i++) { \
         EbObjectWrapper_t *outputWrapperPtr; \
         EbGetEmptyObject(fifoPtrArray[0], &outputWrapperPtr); \
-        outputWrapperPtr->objectPtr = NULL; \
+        outputWrapperPtr->quitSignal = EB_TRUE; \
         EbPostFullObject(outputWrapperPtr); \
     }
 
 #define EB_CHECK_END_OBJ(wrapperPtr) \
-    if (wrapperPtr->objectPtr == NULL) { \
+    if (wrapperPtr->quitSignal == EB_TRUE) { \
         break; \
     }
 

@@ -39,6 +39,9 @@ typedef struct EbObjectWrapper_s {
     //   pictures in the encoder pipeline.
     EB_BOOL                   releaseEnable;
 
+    // quitSignal - a flag that main thread sets to break out from kernels
+    EB_BOOL                   quitSignal;
+
     // systemResourcePtr - a pointer to the SystemResourceManager
     //   that the object belongs to.
     struct EbSystemResource_s *systemResourcePtr;
