@@ -177,9 +177,8 @@ void Pack2D_SRC(
    EB_U32     width,
    EB_U32     height);
 
-void UnPack2D(
-   UnPackContext_t *context);
-   
+void* UnPack2D(void *context);
+
 void extract8Bitdata(
     EB_U16      *in16BitBuffer,
     EB_U32       inStride,

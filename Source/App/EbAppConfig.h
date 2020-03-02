@@ -38,13 +38,13 @@ typedef enum APPPORTACTIVETYPE {
     APP_PortInactive
 } APPPORTACTIVETYPE;
 
-typedef enum EbPtrType {
+typedef enum EB_PTRType {
     EB_N_PTR = 0,                                   // malloc'd pointer
     EB_A_PTR = 1,                                   // malloc'd pointer aligned
     EB_MUTEX = 2,                                   // mutex
-    EB_SEMAPHORE = 3,                                   // semaphore
-    EB_THREAD = 4                                    // thread handle
-}EbPtrType;
+    EB_SEMAPHORE = 3,                               // semaphore
+    EB_THREAD = 4                                   // thread handle
+}EB_PTRType;
 
 /** The EB_PTR type is intended to be used to pass pointers to and from the svt
 API.  This is a 32 bit pointer and is aligned on a 32 bit word boundary.
@@ -58,7 +58,7 @@ typedef void * EB_PTR;
 typedef struct EbMemoryMapEntry
 {
     EB_PTR                    ptr;                       // points to a memory pointer
-    EbPtrType                 ptrType;                   // pointer type
+    EB_PTRType                ptrType;                   // pointer type
 } EbMemoryMapEntry;
 
 // *Note - This work around is needed for the windows visual studio compiler
@@ -74,7 +74,7 @@ EB_BOOL is a 32 bit quantity and is aligned on a 32 bit word boundary.
 #define EB_FALSE  0
 #define EB_TRUE   1
 
-extern    EbMemoryMapEntry        *appMemoryMap;            // App Memory table
+extern    EbMemoryMapEntry          *appMemoryMap;            // App Memory table
 extern    uint32_t                  *appMemoryMapIndex;       // App Memory index
 extern    uint64_t                  *totalAppMemory;          // App Memory malloc'd
 extern    uint32_t                   appMallocCount;

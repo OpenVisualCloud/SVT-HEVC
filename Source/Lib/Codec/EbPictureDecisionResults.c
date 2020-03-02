@@ -8,16 +8,24 @@
 #include "EbPictureDecisionResults.h"
 
 EB_ERRORTYPE PictureDecisionResultCtor(
-    EB_PTR *objectDblPtr, 
+    PictureDecisionResults_t *objectPtr,
     EB_PTR objectInitDataPtr)
 {
-    PictureDecisionResults_t *objectPtr;
-    EB_MALLOC(PictureDecisionResults_t *, objectPtr, sizeof(PictureDecisionResults_t), EB_N_PTR);
+    (void)objectPtr;
+    (void)objectInitDataPtr;
+    return EB_ErrorNone;
+}
 
-    *objectDblPtr = (EB_PTR) objectPtr;
-    objectInitDataPtr = 0;
-    (void) objectInitDataPtr;
-    
+EB_ERRORTYPE PictureDecisionResultCreator(
+    EB_PTR *objectDblPtr,
+    EB_PTR objectInitDataPtr)
+{
+    PictureDecisionResults_t* obj;
+
+    *objectDblPtr = NULL;
+    EB_NEW(obj, PictureDecisionResultCtor, objectInitDataPtr);
+    *objectDblPtr = obj;
+
     return EB_ErrorNone;
 }
 

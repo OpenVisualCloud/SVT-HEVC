@@ -12,10 +12,23 @@
 #include "EbPictureBufferDesc.h"
 #include "EbSystemResourceManager.h"
 #include "EbSequenceControlSet.h"
-
+#include "EbResourceCoordinationProcess.h"
+#include "EbPictureAnalysisProcess.h"
 #include "EbResourceCoordinationResults.h"
 #include "EbPictureDemuxResults.h"
 #include "EbRateControlResults.h"
+#include "EbPictureDecisionProcess.h"
+#include "EbMotionEstimationProcess.h"
+#include "EbInitialRateControlProcess.h"
+#include "EbSourceBasedOperationsProcess.h"
+#include "EbPictureManagerProcess.h"
+#include "EbRateControlProcess.h"
+#include "EbModeDecisionConfigurationProcess.h"
+#include "EbEncDecProcess.h"
+#include "EbEntropyCodingProcess.h"
+#include "EbPacketizationProcess.h"
+#include "EbUnPackProcess.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -24,6 +37,7 @@ extern "C" {
  **************************************/  
 typedef struct EbEncHandle_s
 {
+    EbDctor                                 dctor;
     // Encode Instances & Compute Segments
     EB_U32                                  encodeInstanceTotalCount;
     EB_U32                                 *computeSegmentsTotalCountArray;
@@ -76,23 +90,22 @@ typedef struct EbEncHandle_s
     EB_HANDLE                              *entropyCodingThreadHandleArray;
     EB_HANDLE                               packetizationThreadHandle;
     EB_HANDLE                              *unpackThreadHandleArray;
-        
+
     // Contexts
-    EB_PTR                                  resourceCoordinationContextPtr;
-    EB_PTR                                  pictureEnhancementContextPtr;
-    EB_PTR                                 *pictureAnalysisContextPtrArray;
-    EB_PTR                                  pictureDecisionContextPtr;
-    EB_PTR                                 *motionEstimationContextPtrArray;
-    EB_PTR                                  initialRateControlContextPtr;
-	EB_PTR                                 *sourceBasedOperationsContextPtrArray;
-    EB_PTR                                  pictureManagerContextPtr;
-    EB_PTR                                  rateControlContextPtr;
-    EB_PTR                                 *modeDecisionConfigurationContextPtrArray;
-    EB_PTR                                 *encDecContextPtrArray;
-    EB_PTR                                 *entropyCodingContextPtrArray;
-    EB_PTR                                  packetizationContextPtr;
-    EB_PTR                                 *unpackContextPtr;
-    
+    ResourceCoordinationContext_t          *resourceCoordinationContextPtr;
+    PictureAnalysisContext_t              **pictureAnalysisContextPtrArray;
+    PictureDecisionContext_t               *pictureDecisionContextPtr;
+    MotionEstimationContext_t             **motionEstimationContextPtrArray;
+    InitialRateControlContext_t            *initialRateControlContextPtr;
+    SourceBasedOperationsContext_t        **sourceBasedOperationsContextPtrArray;
+    PictureManagerContext_t                *pictureManagerContextPtr;
+    RateControlContext_t                   *rateControlContextPtr;
+    ModeDecisionConfigurationContext_t    **modeDecisionConfigurationContextPtrArray;
+    EncDecContext_t                       **encDecContextPtrArray;
+    EntropyCodingContext_t                **entropyCodingContextPtrArray;
+    PacketizationContext_t                 *packetizationContextPtr;
+    UnPackContext_t                       **unpackContextPtrArray;
+
     // System Resource Managers
     EbSystemResource_t                     *inputBufferResourcePtr;
     EbSystemResource_t                    **outputStreamBufferResourcePtrArray;
@@ -146,41 +159,34 @@ typedef struct EbEncHandle_s
     EbFifo_t                              **encDecResultsConsumerFifoPtrArray;
     EbFifo_t                              **entropyCodingResultsConsumerFifoPtrArray;
     EbFifo_t                              **unpackTasksConsumerFifoPtrArray;
-    EbFifo_t                              **unpackSyncConsumerFifoPtrArray;                                                   
+    EbFifo_t                              **unpackSyncConsumerFifoPtrArray;
     // Callbacks
     EbCallback_t                          **appCallbackPtrArray;
-        
-    // Input Video Ports
-    EB_PARAM_PORTDEFINITIONTYPE           **inputVideoPortPtrArray;
-        
-    // Output Bitstream Port
-    EB_PARAM_PORTDEFINITIONTYPE           **outputStreamPortPtrArray;
-    
+
     // Output Recon Video Port
     // *Note - Recon Video buffers will have distortion data appended to 
     // the end of the buffer.  This distortion data aids in the calculation
     // of PSNR.
-    // Memory Map
-    EbMemoryMapEntry                       *memoryMap; 
-    EB_U32                                  memoryMapIndex;
-    EB_U64                                  totalLibMemory;
-
 } EbEncHandle_t;
 
 /**************************************
- * EB_BUFFERHEADERTYPE Constructor
- **************************************/  
-extern EB_ERRORTYPE EbInputBufferHeaderCtor(
-    EB_PTR *objectDblPtr, 
-    EB_PTR objectInitDataPtr);
+ * EB_BUFFERHEADERTYPE Constructor/Destoryer
+ **************************************/
+EB_ERRORTYPE EbInputBufferHeaderCreator(
+     EB_PTR *objectDblPtr,
+     EB_PTR objectInitDataPtr);
 
-extern EB_ERRORTYPE EbOutputBufferHeaderCtor(
-    EB_PTR *objectDblPtr,
-    EB_PTR objectInitDataPtr);
+EB_ERRORTYPE EbOutputBufferHeaderCreator(
+     EB_PTR *objectDblPtr,
+     EB_PTR objectInitDataPtr);
 
-extern EB_ERRORTYPE EbOutputReconBufferHeaderCtor(
-    EB_PTR *objectDblPtr,
-    EB_PTR objectInitDataPtr);
+EB_ERRORTYPE EbOutputReconBufferHeaderCreator(
+     EB_PTR *objectDblPtr,
+     EB_PTR objectInitDataPtr);
+
+void EbInputBufferHeaderDestroyer(EB_PTR p);
+void EbOutputBufferHeaderDestroyer(EB_PTR p);
+void EbOutputReconBufferHeaderDestroyer(EB_PTR p);
 
 #ifdef __cplusplus
 }

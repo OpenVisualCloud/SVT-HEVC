@@ -213,7 +213,7 @@ typedef struct  SyntaxContextModelEncContext_s {
 
     } CoeffCtxtMdl_t;
 
-    struct CabacCost_t
+    typedef struct CabacCost_s
     {
 
         EB_U32 CabacBitsLast[60 * 2 + 28 * 2];
@@ -223,14 +223,12 @@ typedef struct  SyntaxContextModelEncContext_s {
         EB_U8 CabacBitsSigMl[2 * TOTAL_NUMBER_OF_COEFF_GROUP_SIG_FLAG_CONTEXT_MODELS];
         EB_U16 CabacBitsG1x[TOTAL_NUMBER_OF_GREATER_ONE_COEFF_CONTEXT_MODELS / 4 * 16];
         EB_U8 CabacBitsSigV[32][16]; // 512 bytes
-    };
-
-    typedef struct CabacCost_t CabacCost_t;
+    } CabacCost_t;
 
     /**************************************
     * Extern Function Declarations
     **************************************/
-extern EB_ERRORTYPE EncodeCabacContextModelCtor(
+extern EB_ERRORTYPE EncodeCabacContextModelInit(
         ContextModelEncContext_t *cabacContextModelArray);
 
 

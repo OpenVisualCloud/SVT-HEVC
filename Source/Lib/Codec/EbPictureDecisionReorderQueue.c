@@ -4,16 +4,13 @@
 */
 
 #include <stdlib.h>
-#include "EbPictureManagerReorderQueue.h"
+#include "EbPictureDecisionReorderQueue.h"
 
-EB_ERRORTYPE PictureManagerReorderEntryCtor(   
-    PictureManagerReorderEntry_t   **entryDblPtr,
-    EB_U32                           pictureNumber)
+EB_ERRORTYPE PictureDecisionReorderEntryCtor(
+    PictureDecisionReorderEntry_t    *entryPtr,
+    EB_U32                            pictureNumber)
 {
-    EB_MALLOC(PictureManagerReorderEntry_t*, *entryDblPtr, sizeof(PictureManagerReorderEntry_t), EB_N_PTR);
+    entryPtr->pictureNumber = pictureNumber;
 
-    (*entryDblPtr)->pictureNumber       = pictureNumber;
-    (*entryDblPtr)->parentPcsWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
-    
     return EB_ErrorNone;
 }

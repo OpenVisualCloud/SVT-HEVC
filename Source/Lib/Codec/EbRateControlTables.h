@@ -56,7 +56,7 @@ static const EB_U8 refQpListTable [] =
 /**************************************
  * Extern Function Declarations
  **************************************/
-extern EB_ERRORTYPE RateControlTablesCtor(
+extern EB_ERRORTYPE RateControlTablesInit(
     RateControlTables_t *rateControlTablesArray
 );
 

@@ -39,25 +39,27 @@
 #define SAMPLE_THRESHOLD_PRECENT_BORDER_LINE      15
 #define SAMPLE_THRESHOLD_PRECENT_TWO_BORDER_LINES 10
 
+static void PictureAnalysisContextDctor(EB_PTR p)
+{
+    PictureAnalysisContext_t *obj = (PictureAnalysisContext_t*)p;
+    EB_DELETE(obj->noisePicturePtr);
+    EB_DELETE(obj->denoisedPicturePtr);
+    EB_FREE_PTR_ARRAY(obj->grad, obj->lcuTotalCountAllocated);
+}
 /************************************************
 * Picture Analysis Context Constructor
 ************************************************/
 EB_ERRORTYPE PictureAnalysisContextCtor(
-	EbPictureBufferDescInitData_t * inputPictureBufferDescInitData,
-	EB_BOOL                         denoiseFlag,
-    PictureAnalysisContext_t      **contextDblPtr,
+    PictureAnalysisContext_t       *contextPtr,
+    EbPictureBufferDescInitData_t  *inputPictureBufferDescInitData,
+    EB_BOOL                         denoiseFlag,
     EbFifo_t                       *resourceCoordinationResultsInputFifoPtr,
     EbFifo_t                       *pictureAnalysisResultsOutputFifoPtr,
-    EB_U16						    lcuTotalCount)
+    EB_U16                          lcuTotalCount)
 {
-	PictureAnalysisContext_t *contextPtr;
-	EB_MALLOC(PictureAnalysisContext_t*, contextPtr, sizeof(PictureAnalysisContext_t), EB_N_PTR);
-	*contextDblPtr = contextPtr;
-
+    contextPtr->dctor = PictureAnalysisContextDctor;
 	contextPtr->resourceCoordinationResultsInputFifoPtr = resourceCoordinationResultsInputFifoPtr;
 	contextPtr->pictureAnalysisResultsOutputFifoPtr = pictureAnalysisResultsOutputFifoPtr;
-
-	EB_ERRORTYPE return_error = EB_ErrorNone;
 
 	if (denoiseFlag == EB_TRUE){
 
@@ -70,13 +72,10 @@ EB_ERRORTYPE PictureAnalysisContextCtor(
 		    inputPictureBufferDescInitData->bufferEnableMask = PICTURE_BUFFER_DESC_Y_FLAG | PICTURE_BUFFER_DESC_Cb_FLAG;
         }
 
-		return_error = EbPictureBufferDescCtor(
-			(EB_PTR*)&(contextPtr->denoisedPicturePtr),
-			(EB_PTR)inputPictureBufferDescInitData);
-
-		if (return_error == EB_ErrorInsufficientResources){
-			return EB_ErrorInsufficientResources;
-		}
+        EB_NEW(
+            contextPtr->denoisedPicturePtr,
+            EbPictureBufferDescCtor,
+            inputPictureBufferDescInitData);
 
         if (inputPictureBufferDescInitData->colorFormat != EB_YUV444) {
 		contextPtr->denoisedPicturePtr->bufferCb = contextPtr->denoisedPicturePtr->bufferY;
@@ -89,21 +88,17 @@ EB_ERRORTYPE PictureAnalysisContextCtor(
 		inputPictureBufferDescInitData->maxHeight = MAX_LCU_SIZE;
 		inputPictureBufferDescInitData->bufferEnableMask = PICTURE_BUFFER_DESC_Y_FLAG;
 
-		return_error = EbPictureBufferDescCtor(
-			(EB_PTR*)&(contextPtr->noisePicturePtr),
-			(EB_PTR)inputPictureBufferDescInitData);
 
-		if (return_error == EB_ErrorInsufficientResources){
-			return EB_ErrorInsufficientResources;
-		}
+        EB_NEW(
+            contextPtr->noisePicturePtr,
+            EbPictureBufferDescCtor,
+            inputPictureBufferDescInitData);
 	}
-
-    EB_MALLOC(EB_U16**, contextPtr->grad, sizeof(EB_U16*) * lcuTotalCount, EB_N_PTR);
+    contextPtr->lcuTotalCountAllocated = lcuTotalCount;
+    EB_ALLOC_PTR_ARRAY(contextPtr->grad, lcuTotalCount);
     for (EB_U16 lcuIndex = 0; lcuIndex < lcuTotalCount; ++lcuIndex) {
-        EB_MALLOC(EB_U16*, contextPtr->grad[lcuIndex], sizeof(EB_U16) * CU_MAX_COUNT, EB_N_PTR);
+        EB_MALLOC_ARRAY(contextPtr->grad[lcuIndex], CU_MAX_COUNT);
     }
-
-
 	return EB_ErrorNone;
 }
 

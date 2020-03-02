@@ -208,7 +208,7 @@ static const EB_S16 cabacInitialProbabilityTableB[] = {
     154
 };
 
-EB_ERRORTYPE EncodeCabacContextModelCtor(
+EB_ERRORTYPE EncodeCabacContextModelInit(
     ContextModelEncContext_t *cabacContextModelArray)
 {
     EB_U32           modelIndex;

@@ -9,57 +9,67 @@
 #include "EbMotionEstimationContext.h"
 
 
-void EbHevcMotionEstimetionPredUnitCtor(
+void EbHevcMotionEstimetionPredUnitInit(
     MePredUnit_t   *pu)
 {
-
     pu->distortion = 0xFFFFFFFFull;
-
     pu->predictionDirection = UNI_PRED_LIST_0;
-
     pu->Mv[0]        =  0;
-
     pu->Mv[1]        =  0;
 
     return;
 }
 
+static void MeContextDctor(EB_PTR p)
+{
+    MeContext_t *obj = (MeContext_t*)p;
+
+    EB_FREE_ARRAY(obj->hmeLcuBuffer);
+    EB_FREE_ARRAY(obj->quarterLcuBuffer);
+    EB_FREE_ARRAY(obj->hmeBuffer);
+    EB_FREE_ARRAY(obj->mvdBitsArray);
+    EB_FREE_ALIGNED_ARRAY(obj->sixteenthLcuBuffer);
+    EB_FREE_ALIGNED_ARRAY(obj->lcuBuffer);
+
+    for (EB_U32 listIndex = 0; listIndex < MAX_NUM_OF_REF_PIC_LIST; listIndex++) {
+        for (EB_U32 refPicIndex = 0; refPicIndex < MAX_REF_IDX; refPicIndex++) {
+            EB_FREE_ARRAY(obj->integerBuffer[listIndex][refPicIndex]);
+            EB_FREE_ARRAY(obj->posbBuffer[listIndex][refPicIndex]);
+            EB_FREE_ARRAY(obj->poshBuffer[listIndex][refPicIndex]);
+            EB_FREE_ARRAY(obj->posjBuffer[listIndex][refPicIndex]);
+        }
+    }
+
+    EB_FREE_ARRAY(obj->oneDIntermediateResultsBuf0);
+    EB_FREE_ARRAY(obj->oneDIntermediateResultsBuf1);
+    EB_FREE_ARRAY(obj->avctempBuffer);
+    EB_FREE_ARRAY(obj->pEightPosSad16x16);
+}
 
 EB_ERRORTYPE MeContextCtor(
-    MeContext_t     **objectDblPtr)
+    MeContext_t     *objectPtr)
 {
-    EB_U32                   listIndex;
-    EB_U32                   refPicIndex;
-    EB_U32                   puIndex;
-    EB_U32                   meCandidateIndex;
-
-    EB_MALLOC(MeContext_t*, *objectDblPtr, sizeof(MeContext_t), EB_N_PTR);
-
-    (*objectDblPtr)->updateHmeSearchCenter = EB_FALSE;
-    (*objectDblPtr)->xMvOffset = 0;
-    (*objectDblPtr)->yMvOffset = 0;
+    objectPtr->dctor = MeContextDctor;
 
     // Intermediate LCU-sized buffer to retain the input samples
-    (*objectDblPtr)->lcuBufferStride                = MAX_LCU_SIZE;
-    EB_ALLIGN_MALLOC(EB_U8 *, (*objectDblPtr)->lcuBuffer, sizeof(EB_U8) * MAX_LCU_SIZE * (*objectDblPtr)->lcuBufferStride, EB_A_PTR);
+    objectPtr->lcuBufferStride                = MAX_LCU_SIZE;
+    EB_CALLOC_ALIGNED_ARRAY(objectPtr->lcuBuffer, MAX_LCU_SIZE * objectPtr->lcuBufferStride);
 
-    (*objectDblPtr)->hmeLcuBufferStride             = (MAX_LCU_SIZE + HME_DECIM_FILTER_TAP - 1);
-    EB_MALLOC(EB_U8 *, (*objectDblPtr)->hmeLcuBuffer, sizeof(EB_U8) * (MAX_LCU_SIZE + HME_DECIM_FILTER_TAP - 1) * (*objectDblPtr)->hmeLcuBufferStride, EB_N_PTR);
+    objectPtr->hmeLcuBufferStride             = (MAX_LCU_SIZE + HME_DECIM_FILTER_TAP - 1);
+    EB_CALLOC_ARRAY(objectPtr->hmeLcuBuffer, (MAX_LCU_SIZE + HME_DECIM_FILTER_TAP - 1) * objectPtr->hmeLcuBufferStride);
 
-    (*objectDblPtr)->quarterLcuBufferStride         = (MAX_LCU_SIZE >> 1);
-    EB_MALLOC(EB_U8 *, (*objectDblPtr)->quarterLcuBuffer, sizeof(EB_U8) * (MAX_LCU_SIZE >> 1) * (*objectDblPtr)->quarterLcuBufferStride, EB_N_PTR);
+    objectPtr->quarterLcuBufferStride         = (MAX_LCU_SIZE >> 1);
+    EB_MALLOC_ARRAY(objectPtr->quarterLcuBuffer, (MAX_LCU_SIZE >> 1) * objectPtr->quarterLcuBufferStride);
 
-    (*objectDblPtr)->sixteenthLcuBufferStride       = (MAX_LCU_SIZE >> 2);
-    EB_ALLIGN_MALLOC(EB_U8 *, (*objectDblPtr)->sixteenthLcuBuffer, sizeof(EB_U8) * (MAX_LCU_SIZE >> 2) * (*objectDblPtr)->sixteenthLcuBufferStride, EB_A_PTR);
+    objectPtr->sixteenthLcuBufferStride       = (MAX_LCU_SIZE >> 2);
+    EB_MALLOC_ALIGNED_ARRAY(objectPtr->sixteenthLcuBuffer, (MAX_LCU_SIZE >> 2) * objectPtr->sixteenthLcuBufferStride);
 
-    (*objectDblPtr)->interpolatedStride             = MAX_SEARCH_AREA_WIDTH;
-    EB_MALLOC(EB_U8 *, (*objectDblPtr)->hmeBuffer, sizeof(EB_U8) * (*objectDblPtr)->interpolatedStride * MAX_SEARCH_AREA_HEIGHT, EB_N_PTR);
+    objectPtr->interpolatedStride             = MAX_SEARCH_AREA_WIDTH;
+    EB_MALLOC_ARRAY(objectPtr->hmeBuffer, objectPtr->interpolatedStride * MAX_SEARCH_AREA_HEIGHT);
 
-    (*objectDblPtr)->hmeBufferStride                = MAX_SEARCH_AREA_WIDTH;
+    objectPtr->hmeBufferStride                = MAX_SEARCH_AREA_WIDTH;
 
-    EB_MEMSET((*objectDblPtr)->lcuBuffer, 0 , sizeof(EB_U8) * MAX_LCU_SIZE * (*objectDblPtr)->lcuBufferStride);
-    EB_MEMSET((*objectDblPtr)->hmeLcuBuffer, 0 ,sizeof(EB_U8) * (MAX_LCU_SIZE + HME_DECIM_FILTER_TAP - 1) * (*objectDblPtr)->hmeLcuBufferStride);
-	EB_MALLOC(EB_BitFraction *, (*objectDblPtr)->mvdBitsArray, sizeof(EB_BitFraction) * NUMBER_OF_MVD_CASES, EB_N_PTR);
+    EB_MALLOC_ARRAY(objectPtr->mvdBitsArray, NUMBER_OF_MVD_CASES);
     // 15 intermediate buffers to retain the interpolated reference samples
 
     //      0    1    2    3
@@ -101,35 +111,26 @@ EB_ERRORTYPE MeContextCtor(
     //   I   I
     // O   O   O
 
-    for( listIndex = 0; listIndex < MAX_NUM_OF_REF_PIC_LIST; listIndex++) {
-
-        for( refPicIndex = 0; refPicIndex < MAX_REF_IDX; refPicIndex++) {
-
-            EB_MALLOC(EB_U8 *, (*objectDblPtr)->integerBuffer[listIndex][refPicIndex], sizeof(EB_U8) * (*objectDblPtr)->interpolatedStride * MAX_SEARCH_AREA_HEIGHT, EB_N_PTR);
-
-            EB_MALLOC(EB_U8 *, (*objectDblPtr)->posbBuffer[listIndex][refPicIndex], sizeof(EB_U8) * (*objectDblPtr)->interpolatedStride * MAX_SEARCH_AREA_HEIGHT, EB_N_PTR);
-
-            EB_MALLOC(EB_U8 *, (*objectDblPtr)->poshBuffer[listIndex][refPicIndex], sizeof(EB_U8) * (*objectDblPtr)->interpolatedStride * MAX_SEARCH_AREA_HEIGHT, EB_N_PTR);
-
-            EB_MALLOC(EB_U8 *, (*objectDblPtr)->posjBuffer[listIndex][refPicIndex], sizeof(EB_U8) * (*objectDblPtr)->interpolatedStride * MAX_SEARCH_AREA_HEIGHT, EB_N_PTR);
-
-        }
-
-    }
-
-    EB_MALLOC(EB_BYTE, (*objectDblPtr)->oneDIntermediateResultsBuf0, sizeof(EB_U8)*MAX_LCU_SIZE*MAX_LCU_SIZE, EB_N_PTR);
-
-    EB_MALLOC(EB_BYTE, (*objectDblPtr)->oneDIntermediateResultsBuf1, sizeof(EB_U8)*MAX_LCU_SIZE*MAX_LCU_SIZE, EB_N_PTR);
-
-    for(puIndex= 0; puIndex < MAX_ME_PU_COUNT; puIndex++) {
-        for( meCandidateIndex = 0; meCandidateIndex < MAX_ME_CANDIDATE_PER_PU; meCandidateIndex++) {
-            EbHevcMotionEstimetionPredUnitCtor(&((*objectDblPtr)->meCandidate[meCandidateIndex]).pu[puIndex]);
+    for(EB_U32 listIndex = 0; listIndex < MAX_NUM_OF_REF_PIC_LIST; listIndex++) {
+        for(EB_U32 refPicIndex = 0; refPicIndex < MAX_REF_IDX; refPicIndex++) {
+            EB_MALLOC_ARRAY(objectPtr->integerBuffer[listIndex][refPicIndex], objectPtr->interpolatedStride * MAX_SEARCH_AREA_HEIGHT);
+            EB_MALLOC_ARRAY(objectPtr->posbBuffer[listIndex][refPicIndex], objectPtr->interpolatedStride * MAX_SEARCH_AREA_HEIGHT);
+            EB_MALLOC_ARRAY(objectPtr->poshBuffer[listIndex][refPicIndex], objectPtr->interpolatedStride * MAX_SEARCH_AREA_HEIGHT);
+            EB_MALLOC_ARRAY(objectPtr->posjBuffer[listIndex][refPicIndex], objectPtr->interpolatedStride * MAX_SEARCH_AREA_HEIGHT);
         }
     }
 
-    EB_MALLOC(EB_U8 *, (*objectDblPtr)->avctempBuffer, sizeof(EB_U8) * (*objectDblPtr)->interpolatedStride * MAX_SEARCH_AREA_HEIGHT, EB_N_PTR);
+    EB_MALLOC_ARRAY(objectPtr->oneDIntermediateResultsBuf0, MAX_LCU_SIZE*MAX_LCU_SIZE);
+    EB_MALLOC_ARRAY(objectPtr->oneDIntermediateResultsBuf1, MAX_LCU_SIZE*MAX_LCU_SIZE);
 
-    EB_MALLOC(EB_U16 *, (*objectDblPtr)->pEightPosSad16x16, sizeof(EB_U16) * 8 * 16, EB_N_PTR);//16= 16 16x16 blocks in a LCU.       8=8search points
+    for(EB_U32 puIndex= 0; puIndex < MAX_ME_PU_COUNT; puIndex++) {
+        for(EB_U32 meCandidateIndex = 0; meCandidateIndex < MAX_ME_CANDIDATE_PER_PU; meCandidateIndex++) {
+            EbHevcMotionEstimetionPredUnitInit(&(objectPtr->meCandidate[meCandidateIndex]).pu[puIndex]);
+        }
+    }
+
+    EB_MALLOC_ARRAY(objectPtr->avctempBuffer, objectPtr->interpolatedStride * MAX_SEARCH_AREA_HEIGHT);
+    EB_MALLOC_ARRAY(objectPtr->pEightPosSad16x16, 8 * 16);//16= 16 16x16 blocks in a LCU.       8=8search points
 
     return EB_ErrorNone;
 }

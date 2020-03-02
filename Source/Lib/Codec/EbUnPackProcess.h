@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-typedef struct EB_ENC_UnPack2D_TYPE
+typedef struct EBUnPack2DType_s
 {
     EB_U16 *in16BitBuffer;
     EB_U32  inStride;
@@ -23,26 +23,27 @@ typedef struct EB_ENC_UnPack2D_TYPE
     EB_U32  outnStride;
     EB_U32  width;
     EB_U32  height;
-}EB_ENC_UnPack2D_TYPE_t;
+}EBUnPack2DType_t;
 
 /***************************************
  * Context
  ***************************************/
-typedef struct context_unpack
+typedef struct UnPackContext_s
 {
-        EbFifo_t       *copyFrameInputFifoPtr;
-        EbFifo_t       *copyFrameOutputFifoPtr;
-        EbFifo_t       *unPackInputFifoPtr;
-        EbFifo_t       *unPackOutPutFifoPtr;
-        EB_U8           nbLumaThreads;
-        EB_U8           nbChromaThreads;
+    EbDctor         dctor;
+    EbFifo_t       *copyFrameInputFifoPtr;
+    EbFifo_t       *copyFrameOutputFifoPtr;
+    EbFifo_t       *unPackInputFifoPtr;
+    EbFifo_t       *unPackOutPutFifoPtr;
+    EB_U8           nbLumaThreads;
+    EB_U8           nbChromaThreads;
 }UnPackContext_t;
 
 /***************************************
  * Extern Function Declaration
  ***************************************/
 extern EB_ERRORTYPE UnPackContextCtor(
-    UnPackContext_t   **contextDblPtr,
+    UnPackContext_t    *contextPtr,
     EbFifo_t           *copyFrameInputFifoPtr,
     EbFifo_t           *copyFrameOutPutFifoPtr,
     EbFifo_t           *unPackInputFifoPtr,
@@ -50,9 +51,11 @@ extern EB_ERRORTYPE UnPackContextCtor(
     EB_U8               nbLumaThreads,
     EB_U8               nbChromaThreads);
 
-extern EB_ERRORTYPE UnPackCtor(
-    EB_PTR  *Object,
-    EB_PTR  data);
+extern EB_ERRORTYPE UnPackCreator(
+    EB_PTR  *objectDblPtr,
+    EB_PTR   objectInitDataPtr);
+
+extern void UnPackDestoryer(EB_PTR p);
 
 #ifdef __cplusplus
 }

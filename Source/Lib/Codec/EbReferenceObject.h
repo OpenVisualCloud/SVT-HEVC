@@ -7,12 +7,14 @@
 #define EbReferenceObject_h
 
 #include "EbDefinitions.h"
-#include "EbAdaptiveMotionVectorPrediction.h" 
+#include "EbAdaptiveMotionVectorPrediction.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct EbReferenceObject_s {
+    EbDctor                         dctor;
     EbPictureBufferDesc_t          *referencePicture;
 	EbPictureBufferDesc_t		   *referencePicture16bit;
     EbPictureBufferDesc_t          *refDenSrcPicture;	 
@@ -44,6 +46,7 @@ typedef struct EbReferenceObjectDescInitData_s {
 } EbReferenceObjectDescInitData_t;
 
 typedef struct EbPaReferenceObject_s {
+    EbDctor                         dctor;
     EbPictureBufferDesc_t          *inputPaddedPicturePtr;
     EbPictureBufferDesc_t          *quarterDecimatedPicturePtr; 
     EbPictureBufferDesc_t          *sixteenthDecimatedPicturePtr;
@@ -64,11 +67,11 @@ typedef struct EbPaReferenceObjectDescInitData_s {
 /**************************************
  * Extern Function Declarations
  **************************************/
-extern EB_ERRORTYPE EbReferenceObjectCtor(
+extern EB_ERRORTYPE EbReferenceObjectCreator(
     EB_PTR *objectDblPtr, 
     EB_PTR objectInitDataPtr);
 
-extern EB_ERRORTYPE EbPaReferenceObjectCtor(
+extern EB_ERRORTYPE EbPaReferenceObjectCreator(
     EB_PTR *objectDblPtr, 
     EB_PTR objectInitDataPtr);
 

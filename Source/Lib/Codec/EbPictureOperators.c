@@ -509,18 +509,17 @@ void UnpackL0L1AvgSafeSub(
 
 
  }
-void UnPack2D(
-    UnPackContext_t *context
-    )
+void* UnPack2D(void *context)
 {
+    UnPackContext_t* contextPtr = (UnPackContext_t*)context;
     EbObjectWrapper_t   *copyFrameBufferWrapperPtr;
     EbObjectWrapper_t   *unpackEndSyncWrapperPtr;
-    EB_ENC_UnPack2D_TYPE_t            *unpack;
+    EBUnPack2DType_t            *unpack;
     
     for(;;){
-        EbGetFullObject(context->copyFrameOutputFifoPtr,&copyFrameBufferWrapperPtr);
+        EbGetFullObject(contextPtr->copyFrameOutputFifoPtr,&copyFrameBufferWrapperPtr);
         EB_CHECK_END_OBJ(copyFrameBufferWrapperPtr);
-        unpack = (EB_ENC_UnPack2D_TYPE_t*)copyFrameBufferWrapperPtr->objectPtr;
+        unpack = (EBUnPack2DType_t*)copyFrameBufferWrapperPtr->objectPtr;
 #ifndef NON_AVX512_SUPPORT
     UnPack2D_funcPtrArray_16Bit[((unpack->width & 3) == 0) && ((unpack->height & 1)== 0)][!!(ASM_TYPES & AVX512_MASK)](
 #else
@@ -535,10 +534,11 @@ void UnPack2D(
         unpack->width,
         unpack->height);
     
-        EbGetEmptyObject(context->unPackInputFifoPtr,&unpackEndSyncWrapperPtr);
+        EbGetEmptyObject(contextPtr->unPackInputFifoPtr,&unpackEndSyncWrapperPtr);
         EbReleaseObject(copyFrameBufferWrapperPtr);
         EbPostFullObject(unpackEndSyncWrapperPtr);
     }
+    return EB_NULL;
 }
 
 void Pack2D_SRC(

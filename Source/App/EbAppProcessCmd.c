@@ -1388,6 +1388,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
                 fwrite(outputStreamBuffer->pBuffer, 1, outputStreamBuffer->nFilledLen, streamFile);
             }
             config->performanceContext.byteCount += outputStreamBuffer->nFilledLen;
+            EbH265EncReleaseEosNal(outputStreamBuffer);
         }
         // Update Output Port Activity State
         *portState = (headerPtr->nFlags & EB_BUFFERFLAG_EOS) ? APP_PortInactive : *portState;

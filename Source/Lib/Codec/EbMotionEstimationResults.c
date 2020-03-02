@@ -9,17 +9,22 @@
 #include "EbMotionEstimationResults.h"
 
 EB_ERRORTYPE MotionEstimationResultsCtor(
-    EB_PTR *objectDblPtr,
+    MotionEstimationResults_t *contexPtr,
     EB_PTR objectInitDataPtr)
 {
-    MotionEstimationResults_t *contextPtr;
-    EB_MALLOC(MotionEstimationResults_t*, contextPtr, sizeof(MotionEstimationResults_t), EB_N_PTR);
-    
-    *objectDblPtr = (EB_PTR) contextPtr;
-    objectInitDataPtr = 0;
-
-    (void)(objectInitDataPtr);
+    (void)contexPtr;
+    (void)objectInitDataPtr;
     return EB_ErrorNone;
 }
 
+EB_ERRORTYPE MotionEstimationResultsCreator(
+    EB_PTR *objectDblPtr,
+    EB_PTR objectInitDataPtr)
+{
+    MotionEstimationResults_t *obj;
 
+    *objectDblPtr = NULL;
+    EB_NEW(obj, MotionEstimationResultsCtor, objectInitDataPtr);
+    *objectDblPtr = obj;
+    return EB_ErrorNone;
+}

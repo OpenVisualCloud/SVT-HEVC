@@ -8,7 +8,7 @@
 
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
-
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -17,7 +17,8 @@ extern "C" {
  * Context
  **************************************/
 typedef struct PictureAnalysisContext_s
-{ 
+{
+    EbDctor                       dctor;
 	EB_ALIGN(64) EB_U8            localCache[64];  
     EbFifo_t                     *resourceCoordinationResultsInputFifoPtr;
     EbFifo_t                     *pictureAnalysisResultsOutputFifoPtr;
@@ -25,18 +26,19 @@ typedef struct PictureAnalysisContext_s
 	EbPictureBufferDesc_t        *noisePicturePtr;
 	double						  picNoiseVarianceFloat;
     EB_U16		                **grad;
+    EB_U16                        lcuTotalCountAllocated;
 } PictureAnalysisContext_t;
 
 /***************************************
  * Extern Function Declaration
  ***************************************/
 extern EB_ERRORTYPE PictureAnalysisContextCtor(
-	EbPictureBufferDescInitData_t * inputPictureBufferDescInitData,
-	EB_BOOL                         denoiseFlag,
-    PictureAnalysisContext_t      **contextDblPtr,
+    PictureAnalysisContext_t       *contextPtr,
+    EbPictureBufferDescInitData_t  *inputPictureBufferDescInitData,
+    EB_BOOL                         denoiseFlag,
     EbFifo_t                       *resourceCoordinationResultsInputFifoPtr,
     EbFifo_t                       *pictureAnalysisResultsOutputFifoPtr,
-    EB_U16						    lcuTotalCount);
+    EB_U16                          lcuTotalCount);
     
 extern void* PictureAnalysisKernel(void *inputPtr);
 

@@ -9,6 +9,7 @@
 #include "EbDefinitions.h"
 #include "EbSyntaxElements.h"
 #include "EbMotionVectorUnit.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -34,15 +35,16 @@ typedef enum NEIGHBOR_ARRAY_TYPE
 #define NEIGHBOR_ARRAY_UNIT_FULL_MASK                   (NEIGHBOR_ARRAY_UNIT_LEFT_MASK | NEIGHBOR_ARRAY_UNIT_TOP_MASK | NEIGHBOR_ARRAY_UNIT_TOPLEFT_MASK)
 #define NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK      (NEIGHBOR_ARRAY_UNIT_LEFT_MASK | NEIGHBOR_ARRAY_UNIT_TOP_MASK)
 
-typedef struct NeighborArrayUnit_s 
+typedef struct NeighborArrayUnit_s
 {
+    EbDctor  dctor;
     EB_U8   *leftArray;
     EB_U8   *topArray;
     EB_U8   *topLeftArray;
     EB_U16   leftArraySize;
     EB_U16   topArraySize;
     EB_U16   topLeftArraySize;
-    EB_U8    unitSize;          
+    EB_U8    unitSize;
     EB_U8    granularityNormal;
     EB_U8    granularityNormalLog2;
     EB_U8    granularityTopLeft;
@@ -51,15 +53,13 @@ typedef struct NeighborArrayUnit_s
 } NeighborArrayUnit_t;
 
 extern EB_ERRORTYPE NeighborArrayUnitCtor(
-    NeighborArrayUnit_t **naUnitDblPtr,
+    NeighborArrayUnit_t *naUnitPtr,
     EB_U32   maxPictureWidth,
     EB_U32   maxPictureHeight,
-    EB_U32   unitSize,          
+    EB_U32   unitSize,
     EB_U32   granularityNormal,
     EB_U32   granularityTopLeft,
     EB_U32   typeMask);
-
-extern void NeighborArrayUnitDtor(NeighborArrayUnit_t  *naUnitPtr);
 
 extern void NeighborArrayUnitReset(NeighborArrayUnit_t *naUnitPtr);
 
@@ -78,7 +78,7 @@ extern EB_U32 GetNeighborArrayUnitTopLeftIndex(
 
 extern void NeighborArrayUnitSampleWrite(
     NeighborArrayUnit_t *naUnitPtr,
-    EB_U8               *srcPtr,           
+    EB_U8               *srcPtr,
     EB_U32               stride,
     EB_U32               srcOriginX,
     EB_U32               srcOriginY,
@@ -90,7 +90,7 @@ extern void NeighborArrayUnitSampleWrite(
 
 extern void NeighborArrayUnit16bitSampleWrite(
     NeighborArrayUnit_t *naUnitPtr,
-    EB_U16               *srcPtr,           
+    EB_U16               *srcPtr,
     EB_U32               stride,
     EB_U32               srcOriginX,
     EB_U32               srcOriginY,

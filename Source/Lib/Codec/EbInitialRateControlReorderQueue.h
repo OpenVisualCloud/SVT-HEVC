@@ -10,6 +10,7 @@
 #include "EbSystemResourceManager.h"
 #include "EbRateControlTables.h"
 #include "EbPictureControlSet.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -17,12 +18,13 @@ extern "C" {
  * Initial Rate Control Reorder Queue Entry
  ************************************************/
 typedef struct InitialRateControlReorderEntry_s {
-    EB_U64                          pictureNumber;    
+    EbDctor                         dctor;
+    EB_U64                          pictureNumber;
     EbObjectWrapper_t              *parentPcsWrapperPtr;
 } InitialRateControlReorderEntry_t;   
 
-extern EB_ERRORTYPE InitialRateControlReorderEntryCtor(   
-    InitialRateControlReorderEntry_t   **entryDblPtr,
+extern EB_ERRORTYPE InitialRateControlReorderEntryCtor(
+    InitialRateControlReorderEntry_t    *entryPtr,
     EB_U32                               pictureNumber);
 
 
@@ -30,6 +32,7 @@ extern EB_ERRORTYPE InitialRateControlReorderEntryCtor(
  * High Level Rate Control Histogram Queue Entry
  ************************************************/
 typedef struct HlRateControlHistogramEntry_s {
+    EbDctor                         dctor;
     EB_U64                          pictureNumber;    
     EB_S16                          lifeCount;    
     EB_BOOL                         passedToHlrc;
@@ -49,7 +52,7 @@ typedef struct HlRateControlHistogramEntry_s {
 } HlRateControlHistogramEntry_t;   
 
 extern EB_ERRORTYPE HlRateControlHistogramEntryCtor(   
-    HlRateControlHistogramEntry_t   **entryDblPtr,
+    HlRateControlHistogramEntry_t    *entryPtr,
     EB_U32                            pictureNumber);
 
 #ifdef __cplusplus

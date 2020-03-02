@@ -9,7 +9,6 @@
 #include <time.h>
 
 #include "EbApi.h"
-
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbPictureBufferDesc.h"
@@ -21,6 +20,7 @@
 #include "EbModeDecisionSegments.h"
 #include "EbEncDecSegments.h"
 #include "EbRateControlTables.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -145,6 +145,7 @@ typedef struct EntropyTileInfo_s
 
 typedef struct PictureControlSet_s 
 {
+    EbDctor                               dctor;
     EbObjectWrapper_t                    *sequenceControlSetWrapperPtr;
     EbPictureBufferDesc_t                *reconPicturePtr;
   
@@ -286,6 +287,8 @@ typedef struct PictureControlSet_s
     EB_BOOL                               bdpPresentFlag;
     EB_BOOL                               mdPresentFlag;
 
+    EB_U32                                totalTileCountAllocation;
+    EB_U32                                tileGroupCntAllocation;
 } PictureControlSet_t;
 
 
@@ -350,8 +353,9 @@ typedef struct TileGroupInfo_s {
 // It actually holds only high level Pciture based control data:(GOP management,when to start a picture, when to release the PCS, ....).
 // The regular PictureControlSet(Child) will be dedicated to store LCU based encoding results and information.
 // Parent is created before the Child, and continue to live more. Child PCS only lives the exact time needed to encode the picture: from ME to EC/ALF.
-typedef struct PictureParentControlSet_s 
+typedef struct PictureParentControlSet_s
 {
+    EbDctor                               dctor;
     EbObjectWrapper_t                    *sequenceControlSetWrapperPtr;   
     EbObjectWrapper_t                    *inputPictureWrapperPtr;
     EbObjectWrapper_t                    *referencePictureWrapperPtr;
@@ -368,6 +372,7 @@ typedef struct PictureParentControlSet_s
 
     EbPictureBufferDesc_t                *enhancedPicturePtr; 
     EbPictureBufferDesc_t                *chromaDownSamplePicturePtr;
+    EB_BOOL                               isChromaDownSamplePictureOwner;
 
     EB_PICNOISE_CLASS                     picNoiseClass;
 
@@ -641,12 +646,12 @@ typedef struct PictureControlSetInitData_s
 /**************************************
  * Extern Function Declarations
  **************************************/
-extern EB_ERRORTYPE PictureControlSetCtor(
+extern EB_ERRORTYPE PictureControlSetCreator(
     EB_PTR *objectDblPtr, 
     EB_PTR objectInitDataPtr);
 
-extern EB_ERRORTYPE PictureParentControlSetCtor(
-    EB_PTR *objectDblPtr, 
+extern EB_ERRORTYPE PictureParentControlSetCreator(
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
 
 #ifdef __cplusplus

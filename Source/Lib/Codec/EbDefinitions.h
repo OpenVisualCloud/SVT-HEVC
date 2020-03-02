@@ -200,13 +200,6 @@ typedef enum EB_RDOQ_PMCORE_TYPE {
     EB_LIGHT,
 } EB_RDOQ_PMCORE_TYPE;
 
-typedef enum EbPtrType{
-	EB_N_PTR = 0,                                   // malloc'd pointer
-	EB_A_PTR = 1,                                   // malloc'd pointer aligned
-	EB_MUTEX = 2,                                   // mutex
-	EB_SEMAPHORE = 3,                                   // semaphore
-	EB_THREAD = 4                                    // thread handle
-}EbPtrType;
 
 /** The EB_PTR type is intended to be used to pass pointers to and from the svt
 API.  This is a 32 bit pointer and is aligned on a 32 bit word boundary.
@@ -221,11 +214,6 @@ typedef void * EB_PTR;
 #define EB_NULL ((void*) 0)
 #endif
 
-typedef struct EbMemoryMapEntry
-{
-	EB_PTR                    ptr;                       // points to a memory pointer
-	EbPtrType                 ptrType;                   // pointer type
-} EbMemoryMapEntry;
 
 typedef struct EB_PARAM_PORTDEFINITIONTYPE {
     EB_U32 nFrameWidth;
@@ -520,66 +508,12 @@ typedef void * EB_HANDLE;
 
 #define ALVALUE                     32
 
-extern    EbMemoryMapEntry        *memoryMap;               // library Memory table
-extern    EB_U32                  *memoryMapIndex;          // library memory index
-extern    EB_U64                  *totalLibMemory;          // library Memory malloc'd
-
-extern    EB_U32                   libMallocCount;
-extern    EB_U32                   libThreadCount;
-extern    EB_U32                   libSemaphoreCount;
-extern    EB_U32                   libMutexCount;
-
-
-#ifdef _WIN32
-#define EB_ALLIGN_MALLOC(type, pointer, nElements, pointerClass) \
-    pointer = (type) _aligned_malloc(nElements,ALVALUE); \
-    if (pointer == (type)EB_NULL) { \
-        return EB_ErrorInsufficientResources; \
-	    } \
-	    else { \
-        memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
-        memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-		if (nElements % 8 == 0) { \
-			*totalLibMemory += (nElements); \
-		} \
-		else { \
-			*totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
-		} \
-    } \
-    if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
-        return EB_ErrorInsufficientResources; \
-    } \
-    libMallocCount++;
-
-#else
-#define EB_ALLIGN_MALLOC(type, pointer, nElements, pointerClass) \
-    if (posix_memalign((void**)(&(pointer)), ALVALUE, nElements) != 0) { \
-        return EB_ErrorInsufficientResources; \
-    	    } \
-        	    else { \
-        pointer = (type) pointer;  \
-        memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
-        memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-		if (nElements % 8 == 0) { \
-			*totalLibMemory += (nElements); \
-        		} \
-        		else { \
-			*totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
-		} \
-    } \
-    if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
-        return EB_ErrorInsufficientResources; \
-        } \
-    libMallocCount++;
-#endif
-
 // Debug Macros
 #define OVERSHOOT_STAT_PRINT             0  // Do not remove.
                                             // For printing overshooting percentages for both RC and fixed QP.
                                             // Target rate and and max buffer size should be set properly even for fixed QP.
                                             // Disabled by default.
 #define DEADLOCK_DEBUG                   0
-#define DISPLAY_MEMORY                   0  // Display Total Memory at the end of the memory allocations
 #define LIB_PRINTF_ENABLE                1
 #if LIB_PRINTF_ENABLE
 #define SVT_LOG printf
@@ -591,107 +525,52 @@ extern    EB_U32                   libMutexCount;
 #endif
 #endif
 
-#define EB_MEMORY() \
-    SVT_LOG("Total Number of Mallocs in Library: %d\n", libMallocCount); \
-    SVT_LOG("Total Number of Threads in Library: %d\n", libThreadCount); \
-    SVT_LOG("Total Number of Semaphore in Library: %d\n", libSemaphoreCount); \
-    SVT_LOG("Total Number of Mutex in Library: %d\n", libMutexCount); \
-    SVT_LOG("Total Library Memory: %.2lf KB\n\n",*totalLibMemory/(double)1024);
+#define EB_CREATE_SEMAPHORE(pointer, initialCount, maxCount) \
+    do { \
+        pointer = EbCreateSemaphore(initialCount, maxCount); \
+        EB_ADD_MEM(pointer, 1, EB_SEMAPHORE); \
+    } while (0)
 
-#define EB_MALLOC(type, pointer, nElements, pointerClass) \
-    pointer = (type) malloc(nElements); \
-    if (pointer == (type)EB_NULL) { \
-        return EB_ErrorInsufficientResources; \
-	    } \
-	    else { \
-        memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
-        memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-		if (nElements % 8 == 0) { \
-			*totalLibMemory += (nElements); \
-		} \
-		else { \
-			*totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
-		} \
-    } \
-    if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
-        return EB_ErrorInsufficientResources; \
-    } \
-    libMallocCount++;
+#define EB_DESTROY_SEMAPHORE(pointer) \
+    do { \
+        if (pointer) { \
+            EbDestroySemaphore(pointer); \
+            EB_REMOVE_MEM_ENTRY(pointer, EB_SEMAPHORE); \
+            pointer = NULL; \
+        } \
+    } while (0)
 
-#define EB_CALLOC(type, pointer, count, size, pointerClass) \
-    pointer = (type) calloc(count, size); \
-    if (pointer == (type)EB_NULL) { \
-        return EB_ErrorInsufficientResources; \
-    } \
-    else { \
-        memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
-        memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-		if (count % 8 == 0) { \
-			*totalLibMemory += (count); \
-		} \
-		else { \
-			*totalLibMemory += ((count) + (8 - ((count) % 8))); \
-		} \
-    } \
-    if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
-        return EB_ErrorInsufficientResources; \
-    } \
-    libMallocCount++;
 
-#define EB_CREATESEMAPHORE(type, pointer, nElements, pointerClass, initialCount, maxCount) \
-    pointer = EbCreateSemaphore(initialCount, maxCount); \
-    if (pointer == (type)EB_NULL) { \
-        return EB_ErrorInsufficientResources; \
-    } \
-    else { \
-        memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
-        memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-		if (nElements % 8 == 0) { \
-			*totalLibMemory += (nElements); \
-		} \
-		else { \
-			*totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
-		} \
-    } \
-    if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
-        return EB_ErrorInsufficientResources; \
-    } \
-    libSemaphoreCount++;
+#define EB_CREATE_MUTEX(pointer) \
+    do { \
+        pointer = EbCreateMutex(); \
+        EB_ADD_MEM(pointer, 1, EB_MUTEX); \
+     } while (0)
 
-#define EB_CREATEMUTEX(type, pointer, nElements, pointerClass) \
-    pointer = EbCreateMutex(); \
-    if (pointer == (type)EB_NULL){ \
-        return EB_ErrorInsufficientResources; \
-    } \
-    else { \
-        memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
-        memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-		if (nElements % 8 == 0) { \
-			*totalLibMemory += (nElements); \
-		} \
-		else { \
-			*totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
-		} \
-    } \
-    if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
-        return EB_ErrorInsufficientResources; \
-    } \
-    libMutexCount++;
+
+#define EB_DESTROY_MUTEX(pointer) \
+    do { \
+        if (pointer) { \
+            EbDestroyMutex(pointer); \
+            EB_REMOVE_MEM_ENTRY(pointer, EB_MUTEX); \
+            pointer = NULL; \
+        } \
+    } while (0)
 
 #define EB_STRDUP(dst, src) \
     EB_MALLOC_(char*, dst, strlen(src)+1, EB_N_PTR); \
     strcpy_ss((char*)dst, strlen(src)+1, src);
 
 #define EB_SEND_END_OBJ(fifoPtrArray, count) \
-    for (unsigned int i = 0; i < count; i++) { \
+   for (unsigned int i = 0; i < count; i++) { \
         EbObjectWrapper_t *outputWrapperPtr; \
         EbGetEmptyObject(fifoPtrArray[0], &outputWrapperPtr); \
-        outputWrapperPtr->objectPtr = NULL; \
+        outputWrapperPtr->quitSignal = EB_TRUE; \
         EbPostFullObject(outputWrapperPtr); \
     }
 
 #define EB_CHECK_END_OBJ(wrapperPtr) \
-    if (wrapperPtr->objectPtr == NULL) { \
+    if (wrapperPtr->quitSignal == EB_TRUE) { \
         break; \
     }
 
@@ -713,19 +592,13 @@ extern    EB_U32                   libMutexCount;
 #define EB_STRTOK(str,delim,next) strtok_r((char*)str,(const char*)delim,(char**)next)
 #endif
 
-/** The EB_CTOR type is used to define the svt object constructors.
-objectPtr is a EB_PTR to the object being constructed.
+/** The EB_CREATOR type is used to define the svt object constructors.
+objectDblPtr is a EB_PTR to the object being constructed.
 objectInitDataPtr is a EB_PTR to a data structure used to initialize the object.
 */
-typedef EB_ERRORTYPE(*EB_CTOR)(
+typedef EB_ERRORTYPE(*EB_CREATOR)(
     EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
-
-/** The EB_DTOR type is used to define the svt object destructors.
-objectPtr is a EB_PTR to the object being constructed.
-*/
-typedef void(*EB_DTOR)(
-    EB_PTR objectPtr);
 
 /**************************************
 * Callback Functions

@@ -7,6 +7,7 @@
 #define EbPictureResults_h
 
 #include "EbSystemResourceManager.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -26,6 +27,7 @@ typedef enum EB_PIC_TYPE {
  **************************************/
 typedef struct PictureDemuxResults_s
 {
+    EbDctor                        dctor;
     EB_PIC_TYPE                    pictureType;
     
     // Only valid for input pictures
@@ -46,7 +48,7 @@ typedef struct PictureResultInitData_s
 /**************************************
  * Extern Function Declarations
  **************************************/
-extern EB_ERRORTYPE PictureResultsCtor(
+extern EB_ERRORTYPE PictureResultsCreator(
     EB_PTR *objectDblPtr, 
     EB_PTR objectInitDataPtr);
 

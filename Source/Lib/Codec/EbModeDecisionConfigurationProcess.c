@@ -250,34 +250,35 @@ static void AdaptiveDlfParameterComputation(
 
 }
 
+static void ModeDecisionConfigurationContextDctor(EB_PTR p)
+{
+    ModeDecisionConfigurationContext_t *obj = (ModeDecisionConfigurationContext_t*)p;
+
+    EB_FREE(obj->mdRateEstimationPtr);
+    EB_FREE_ARRAY(obj->lcuScoreArray);
+    EB_FREE_ARRAY(obj->lcuCostArray);
+}
 
 /******************************************************
  * Mode Decision Configuration Context Constructor
  ******************************************************/
 EB_ERRORTYPE ModeDecisionConfigurationContextCtor(
-    ModeDecisionConfigurationContext_t **contextDblPtr,
+    ModeDecisionConfigurationContext_t  *contextPtr,
     EbFifo_t                            *rateControlInputFifoPtr,
-
     EbFifo_t                            *modeDecisionConfigurationOutputFifoPtr,
-    EB_U16						         lcuTotalCount)
+    EB_U16                              lcuTotalCount)
 {
-    ModeDecisionConfigurationContext_t *contextPtr;
-
-    EB_MALLOC(ModeDecisionConfigurationContext_t*, contextPtr, sizeof(ModeDecisionConfigurationContext_t), EB_N_PTR);
-
-    *contextDblPtr = contextPtr;
+    contextPtr->dctor = ModeDecisionConfigurationContextDctor;
 
     // Input/Output System Resource Manager FIFOs
     contextPtr->rateControlInputFifoPtr                      = rateControlInputFifoPtr;
     contextPtr->modeDecisionConfigurationOutputFifoPtr       = modeDecisionConfigurationOutputFifoPtr;
     // Rate estimation
-    EB_MALLOC(MdRateEstimationContext_t*, contextPtr->mdRateEstimationPtr, sizeof(MdRateEstimationContext_t), EB_N_PTR);
-
+    EB_MALLOC(contextPtr->mdRateEstimationPtr, sizeof(MdRateEstimationContext_t));
 
     // Budgeting
-    EB_MALLOC(EB_U32*,contextPtr->lcuScoreArray,sizeof(EB_U32) * lcuTotalCount, EB_N_PTR);
-    EB_MALLOC(EB_U8 *,contextPtr->lcuCostArray ,sizeof(EB_U8 ) * lcuTotalCount, EB_N_PTR);
-
+    EB_MALLOC_ARRAY(contextPtr->lcuScoreArray, lcuTotalCount);
+    EB_MALLOC_ARRAY(contextPtr->lcuCostArray, lcuTotalCount);
 
     return EB_ErrorNone;
 }

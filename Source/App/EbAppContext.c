@@ -349,10 +349,6 @@ EB_ERRORTYPE AllocateInputBuffer(
         inputPtr->crExt = 0;
     }
 
-    if (config->dolbyVisionProfile == 81 && config->dolbyVisionRpuFile) {
-        EB_APP_MALLOC(uint8_t*, inputPtr->dolbyVisionRpu.payload, 1024, EB_N_PTR, EB_ErrorInsufficientResources);
-    }
-
     return return_error;
 }
 
@@ -388,6 +384,9 @@ EB_ERRORTYPE AllocateInputBuffers(
         size_t pictureHeightInLcu = (config->sourceHeight + EB_SEGMENT_BLOCK_SIZE - 1) / EB_SEGMENT_BLOCK_SIZE;
         size_t lcuTotalCount = pictureWidthInLcu * pictureHeightInLcu;
         EB_APP_MALLOC(SegmentOverride_t*, callbackData->inputBufferPool->segmentOvPtr, sizeof(SegmentOverride_t) * lcuTotalCount, EB_N_PTR, EB_ErrorInsufficientResources);
+    }
+    else {
+        callbackData->inputBufferPool->segmentOvPtr = NULL;
     }
 
     return return_error;
@@ -651,6 +650,9 @@ EB_ERRORTYPE InitEncoder(
 
     // STEP 5: Init Encoder
     return_error = EbInitEncoder(callbackData->svtEncoderHandle);
+    if (return_error != EB_ErrorNone) {
+        return return_error;
+    }
 
     ///************************* LIBRARY INIT [END] *********************///
 

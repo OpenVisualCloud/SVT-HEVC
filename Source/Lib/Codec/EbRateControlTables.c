@@ -1869,7 +1869,7 @@ static const EB_Bit_Number initialRateControlIntraSad64x64Tables[] = {
 /**************************************
  * Function Declarations
  **************************************/
-EB_ERRORTYPE RateControlTablesCtor(
+EB_ERRORTYPE RateControlTablesInit(
     RateControlTables_t *initialRateControlTablesArray)
 {
     int qpIndex, intervalIndex, temporalIndex;

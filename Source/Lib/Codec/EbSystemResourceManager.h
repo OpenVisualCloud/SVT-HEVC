@@ -8,7 +8,7 @@
 
 #include "EbThreads.h"
 #include "EbDefinitions.h"
-
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -24,6 +24,8 @@ extern "C" {
  *   ProcessResults, and GracefulDegradation)
  *********************************************************************/
 typedef struct EbObjectWrapper_s {
+    EbDctor                   dctor;
+    EbDctor                   objectDestroyer;
     // objectPtr - pointer to the object being managed.
     void                     *objectPtr;
 
@@ -36,6 +38,9 @@ typedef struct EbObjectWrapper_s {
     //   EbObjectWrapper for reuse in the encoding of subsequent
     //   pictures in the encoder pipeline.
     EB_BOOL                   releaseEnable;
+
+    // quitSignal - a flag that main thread sets to break out from kernels
+    EB_BOOL                   quitSignal;
 
     // systemResourcePtr - a pointer to the SystemResourceManager
     //   that the object belongs to.
@@ -56,6 +61,7 @@ typedef struct EbObjectWrapper_s {
  *   and dynamic EbObjectWrapper counting.
  *********************************************************************/
 typedef struct EbFifo_s {
+    EbDctor dctor;
     // countingSemaphore - used for OS thread-blocking & dynamically
     //   counting the number of EbObjectWrappers currently in the
     //   EbFifo.
@@ -81,6 +87,7 @@ typedef struct EbFifo_s {
  * CircularBuffer
  *********************************************************************/
 typedef struct EbCircularBuffer_s {
+    EbDctor dctor;
     EB_PTR *arrayPtr;
     EB_U32  headIndex;
     EB_U32  tailIndex;
@@ -93,6 +100,7 @@ typedef struct EbCircularBuffer_s {
  * MuxingQueue
  *********************************************************************/
 typedef struct EbMuxingQueue_s {
+    EbDctor             dctor;
     EB_HANDLE           lockoutMutex;
     EbCircularBuffer_t *objectQueue;
     EbCircularBuffer_t *processQueue;
@@ -111,6 +119,7 @@ typedef struct EbMuxingQueue_s {
  *   emptyFifo provides upstream pipeline backpressure flow control.
  *********************************************************************/
 typedef struct EbSystemResource_s {
+    EbDctor             dctor;
     // objectTotalCount - A count of the number of objects contained in the
     //   System Resoruce.
     EB_U32              objectTotalCount;
@@ -212,33 +221,16 @@ extern EB_ERRORTYPE EbObjectIncLiveCount(
  *     ObjectCtor is called.
  *********************************************************************/
 extern EB_ERRORTYPE EbSystemResourceCtor(
-    EbSystemResource_t **resourceDblPtr,
+    EbSystemResource_t  *resourcePtr,
     EB_U32               objectTotalCount,
     EB_U32               producerProcessTotalCount,
     EB_U32               consumerProcessTotalCount,
     EbFifo_t          ***producerFifoPtrArrayPtr,
     EbFifo_t          ***consumerFifoPtrArrayPtr,
     EB_BOOL              fullFifoEnabled,
-    EB_CTOR              ObjectCtor,
-    EB_PTR               objectInitDataPtr);
-
-/*********************************************************************
- * EbSystemResourceDtor
- *   Destructor for EbSystemResource.  Fully destructs all members
- *   of EbSystemResource including the object with the passed
- *   ObjectDtor function.
- *
- *   resourcePtr
- *     Pointer to the SystemResource to be destructed.
- *
- *   ObjectDtor
- *     Function pointer to the destructor of the object managed by
- *     SystemResource referenced by resourcePtr. No object level
- *     destruction is performed if ObjectDtor is NULL.
- *********************************************************************/
-extern void EbSystemResourceDtor(
-    EbSystemResource_t  *resourcePtr,
-    EB_DTOR              ObjectDtor);
+    EB_CREATOR           objectCreator,
+    EB_PTR               objectInitDataPtr,
+    EbDctor              objectDestroyer);
 
 /*********************************************************************
  * EbSystemResourceGetEmptyObject

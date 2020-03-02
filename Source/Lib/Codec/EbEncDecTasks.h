@@ -8,6 +8,7 @@
 
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -20,6 +21,7 @@ extern "C" {
  **************************************/
 typedef struct EncDecTasks_s 
 {
+    EbDctor                       dctor;
     EbObjectWrapper_t            *pictureControlSetWrapperPtr;
     EB_U32                        inputType;
     EB_S16                        encDecSegmentRow;
@@ -35,8 +37,8 @@ typedef struct EncDecTasksInitData_s
 /**************************************
  * Extern Function Declarations
  **************************************/
-extern EB_ERRORTYPE EncDecTasksCtor(
-    EB_PTR *objectDblPtr, 
+extern EB_ERRORTYPE EncDecTasksCreator(
+    EB_PTR *objectDblPtr,
     EB_PTR objectInitDataPtr);
 
 

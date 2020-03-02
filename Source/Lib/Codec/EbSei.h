@@ -7,6 +7,7 @@
 #define EBSEI_h
 
 #include "EbDefinitions.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -37,7 +38,6 @@ extern "C" {
 
     // SEI structures
     typedef struct AppHrdParameters_s {
-
         EB_BOOL                         nalHrdParametersPresentFlag;
         EB_BOOL                         vclHrdParametersPresentFlag;
         EB_BOOL                         subPicCpbParamsPresentFlag;
@@ -78,7 +78,7 @@ extern "C" {
     } AppHrdParameters_t;
 
     typedef struct AppVideoUsabilityInfo_s {
-
+        EbDctor                 dctor;
         EB_BOOL                 aspectRatioInfoPresentFlag;
         EB_U32                  aspectRatioIdc;
         EB_U32                  sarWidth;
@@ -315,29 +315,6 @@ void EbVideoUsabilityInfoCopy(
     AppVideoUsabilityInfo_t *dstVuiPtr,
     AppVideoUsabilityInfo_t *srcVuiPtr);
 
-extern void EbPictureTimeingSeiCtor(
-    AppPictureTimingSei_t   *picTimingPtr);
-
-extern void EbBufferingPeriodSeiCtor(
-    AppBufferingPeriodSei_t   *bufferingPeriodPtr);
-
-extern void EbActiveParameterSetSeiCtor(
-    AppActiveparameterSetSei_t    *activeParameterPtr);
-
-extern void EbRecoveryPointSeiCtor(
-    AppRecoveryPoint_t   *recoveryPointSeiPtr);
-
-extern void EbContentLightLevelCtor(
-    AppContentLightLevelSei_t    *contentLightLevelPtr);
-
-extern void EbMasteringDisplayColorVolumeCtor(
-    AppMasteringDisplayColorVolumeSei_t    *masteringDisplayPtr);
-
-extern void EbRegUserDataSEICtor(
-    RegistedUserData_t    *regUserDataSeiPtr);
-
-extern void EbUnRegUserDataSEICtor(
-    UnregistedUserData_t    *UnRegUserDataPtr);
 
 extern EB_U32 GetPictureTimingSEILength(
     AppPictureTimingSei_t      *picTimingSeiPtr,

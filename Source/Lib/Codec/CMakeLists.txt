@@ -75,6 +75,7 @@ set(Codec_Source
     EbHmCode.c
     EbInterPrediction.c
     EbIntraPrediction.c
+    EbMalloc.c
     EbMcp.c
     EbMcpTables.c
     EbMdRateEstimation.c
@@ -137,6 +138,8 @@ add_library(SvtHevcEnc
     EbInterPrediction.h
     EbIntraPrediction.h
     EbLambdaRateTables.h
+    EbMalloc.h
+    EbObject.h
     EbMcp.h
     EbMdRateEstimation.h
     EbMeSadCalculation.h

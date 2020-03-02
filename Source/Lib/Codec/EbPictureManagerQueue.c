@@ -7,39 +7,26 @@
 #include "EbPictureManagerQueue.h"
 
 EB_ERRORTYPE InputQueueEntryCtor(
-    InputQueueEntry_t      **entryDblPtr)
+    InputQueueEntry_t  *entryPtr)
 {
-    InputQueueEntry_t *entryPtr;
-    EB_MALLOC(InputQueueEntry_t*, entryPtr, sizeof(InputQueueEntry_t), EB_N_PTR);
-    *entryDblPtr = entryPtr;
-
-    entryPtr->inputObjectPtr      = (EbObjectWrapper_t*) EB_NULL;
-    entryPtr->referenceEntryIndex = 0;
-    entryPtr->dependentCount      = 0;
-
-    entryPtr->list0Ptr = (ReferenceList_t*) EB_NULL;
-    entryPtr->list1Ptr = (ReferenceList_t*) EB_NULL;
-
+    (void)entryPtr;
     return EB_ErrorNone;
 }
 
-
+static void ReferenceQueueEntryDctor(EB_PTR p)
+{
+    ReferenceQueueEntry_t* obj = (ReferenceQueueEntry_t*)p;
+    EB_FREE_ARRAY(obj->list0.list);
+    EB_FREE_ARRAY(obj->list1.list);
+}
 
 EB_ERRORTYPE ReferenceQueueEntryCtor(   
-    ReferenceQueueEntry_t  **entryDblPtr)
+    ReferenceQueueEntry_t  *entryPtr)
 {
-    ReferenceQueueEntry_t *entryPtr;
-    EB_MALLOC(ReferenceQueueEntry_t*, entryPtr, sizeof(ReferenceQueueEntry_t), EB_N_PTR);
-    *entryDblPtr = entryPtr;
-
-    entryPtr->referenceObjectPtr  = (EbObjectWrapper_t*) EB_NULL;
-    entryPtr->pictureNumber       = ~0u;
-    entryPtr->dependentCount      = 0;
-    entryPtr->referenceAvailable  = EB_FALSE;
-
-    EB_MALLOC(EB_S32*, entryPtr->list0.list, sizeof(EB_S32) * (1 << MAX_TEMPORAL_LAYERS) , EB_N_PTR);
-
-    EB_MALLOC(EB_S32*, entryPtr->list1.list, sizeof(EB_S32) * (1 << MAX_TEMPORAL_LAYERS) , EB_N_PTR);
+    entryPtr->dctor = ReferenceQueueEntryDctor;
+    entryPtr->pictureNumber = ~0u;
+    EB_MALLOC_ARRAY(entryPtr->list0.list, (1 << MAX_TEMPORAL_LAYERS));
+    EB_MALLOC_ARRAY(entryPtr->list1.list, (1 << MAX_TEMPORAL_LAYERS));
 
     return EB_ErrorNone;
 }

@@ -12,38 +12,59 @@
 #include "EbLambdaRateTables.h"
 #include "EbTransforms.h"
 
+static void ModeDecisionContextDctor(EB_PTR p)
+{
+    ModeDecisionContext_t* obj = (ModeDecisionContext_t*)p;
+    EB_FREE(obj->transformInnerArrayPtr);
+    if (obj->isMdRateEstimationPtrOwner) {
+        EB_FREE(obj->mdRateEstimationPtr);
+    }
+    EB_FREE_ARRAY(obj->fastCandidateArray);
+    EB_FREE_ARRAY(obj->fastCandidatePtrArray);
+    EB_DELETE(obj->transQuantBuffersPtr);
+    if(obj->isCabacCostOwner)
+        EB_FREE(obj->CabacCost);
+    EB_FREE_ARRAY(obj->fastCostArray);
+    EB_FREE_ARRAY(obj->fullCostArray);
+    EB_FREE_ARRAY(obj->fullCostSkipPtr);
+    EB_FREE_ARRAY(obj->fullCostMergePtr);
+    EB_DELETE_PTR_ARRAY(obj->candidateBufferPtrArray, MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT);
+    EB_DELETE(obj->interPredictionContext);
+    EB_DELETE(obj->predictionBuffer);
+    EB_DELETE(obj->intraRefPtr);
+    EB_DELETE(obj->mcpContext);
+    EB_DELETE(obj->pillarReconBuffer);
+    EB_DELETE(obj->mdReconBuffer);
+    EB_FREE(obj->mdPicLcuDetect);
+}
 
 /******************************************************
  * Mode Decision Context Constructor
  ******************************************************/
 EB_ERRORTYPE ModeDecisionContextCtor(
-    ModeDecisionContext_t  **contextDblPtr,
+    ModeDecisionContext_t   *contextPtr,
     EbFifo_t                *modeDecisionConfigurationInputFifoPtr,
     EbFifo_t                *modeDecisionOutputFifoPtr,
     EB_BOOL                  is16bit)
 {
     EB_U32 bufferIndex;
     EB_U32 candidateIndex;
-    EB_ERRORTYPE return_error = EB_ErrorNone;
-
-    ModeDecisionContext_t *contextPtr;
-    EB_MALLOC(ModeDecisionContext_t*, contextPtr, sizeof(ModeDecisionContext_t), EB_N_PTR);
-    *contextDblPtr = contextPtr;
+    contextPtr->dctor = ModeDecisionContextDctor;
 
     // Input/Output System Resource Manager FIFOs
     contextPtr->modeDecisionConfigurationInputFifoPtr = modeDecisionConfigurationInputFifoPtr;
     contextPtr->modeDecisionOutputFifoPtr             = modeDecisionOutputFifoPtr;
 
     // Trasform Scratch Memory
-    EB_MALLOC(EB_S16*, contextPtr->transformInnerArrayPtr, 3120, EB_N_PTR); //refer to EbInvTransform_SSE2.as. case 32x32
+    EB_MALLOC(contextPtr->transformInnerArrayPtr, 3120); //refer to EbInvTransform_SSE2.as. case 32x32
 
     // MD rate Estimation tables
-    EB_MALLOC(MdRateEstimationContext_t*, contextPtr->mdRateEstimationPtr, sizeof(MdRateEstimationContext_t), EB_N_PTR);
+    EB_MALLOC(contextPtr->mdRateEstimationPtr, sizeof(MdRateEstimationContext_t));
+    contextPtr->isMdRateEstimationPtrOwner = EB_TRUE;
 
     // Fast Candidate Array
-    EB_MALLOC(ModeDecisionCandidate_t*, contextPtr->fastCandidateArray, sizeof(ModeDecisionCandidate_t) * MODE_DECISION_CANDIDATE_MAX_COUNT, EB_N_PTR);
-
-    EB_MALLOC(ModeDecisionCandidate_t**, contextPtr->fastCandidatePtrArray, sizeof(ModeDecisionCandidate_t*) * MODE_DECISION_CANDIDATE_MAX_COUNT, EB_N_PTR);
+    EB_MALLOC_ARRAY(contextPtr->fastCandidateArray, MODE_DECISION_CANDIDATE_MAX_COUNT);
+    EB_MALLOC_ARRAY(contextPtr->fastCandidatePtrArray, MODE_DECISION_CANDIDATE_MAX_COUNT);
 
     for(candidateIndex = 0; candidateIndex < MODE_DECISION_CANDIDATE_MAX_COUNT; ++candidateIndex) {
         contextPtr->fastCandidatePtrArray[candidateIndex] = &contextPtr->fastCandidateArray[candidateIndex];
@@ -51,92 +72,77 @@ EB_ERRORTYPE ModeDecisionContextCtor(
     }
 
     // Transform and Quantization Buffers
-    EB_MALLOC(EbTransQuantBuffers_t*, contextPtr->transQuantBuffersPtr, sizeof(EbTransQuantBuffers_t), EB_N_PTR);
+    EB_NEW(
+        contextPtr->transQuantBuffersPtr,
+        EbTransQuantBuffersCtor);
 
-	// Cabac cost
-    EB_MALLOC(CabacCost_t*, contextPtr->CabacCost, sizeof(CabacCost_t), EB_N_PTR);
+    // Cabac cost
+    EB_MALLOC(contextPtr->CabacCost, sizeof(CabacCost_t));
+    contextPtr->isCabacCostOwner = EB_TRUE;
 
-    return_error = EbTransQuantBuffersCtor(
-        contextPtr->transQuantBuffersPtr);
-
-    if (return_error == EB_ErrorInsufficientResources){
-        return EB_ErrorInsufficientResources;
-    }
     // Cost Arrays
-    EB_MALLOC(EB_U64*, contextPtr->fastCostArray, sizeof(EB_U64) * MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT, EB_N_PTR);
-
-    EB_MALLOC(EB_U64*, contextPtr->fullCostArray, sizeof(EB_U64) * MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT, EB_N_PTR);
-
-    EB_MALLOC(EB_U64*, contextPtr->fullCostSkipPtr, sizeof(EB_U64) * MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT, EB_N_PTR);
-
-    EB_MALLOC(EB_U64*, contextPtr->fullCostMergePtr, sizeof(EB_U64) * MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT, EB_N_PTR);
+    EB_MALLOC_ARRAY(contextPtr->fastCostArray, MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT);
+    EB_MALLOC_ARRAY(contextPtr->fullCostArray, MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT);
+    EB_MALLOC_ARRAY(contextPtr->fullCostSkipPtr, MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT);
+    EB_MALLOC_ARRAY(contextPtr->fullCostMergePtr, MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT);
 
     // Candidate Buffers
-    EB_MALLOC(ModeDecisionCandidateBuffer_t**, contextPtr->candidateBufferPtrArray, sizeof(ModeDecisionCandidateBuffer_t*) * MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT, EB_N_PTR);
+    EB_ALLOC_PTR_ARRAY(contextPtr->candidateBufferPtrArray, MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT);
 
     for(bufferIndex = 0; bufferIndex < MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT; ++bufferIndex) {
-        return_error = ModeDecisionCandidateBufferCtor(
-            &(contextPtr->candidateBufferPtrArray[bufferIndex]),
+        EB_NEW(
+            contextPtr->candidateBufferPtrArray[bufferIndex],
+            ModeDecisionCandidateBufferCtor,
             MAX_LCU_SIZE,
             EB_8BIT,
             &(contextPtr->fastCostArray[bufferIndex]),
             &(contextPtr->fullCostArray[bufferIndex]),
             &(contextPtr->fullCostSkipPtr[bufferIndex]),
             &(contextPtr->fullCostMergePtr[bufferIndex]));
-        if (return_error == EB_ErrorInsufficientResources){
-            return EB_ErrorInsufficientResources;
-        }
     }
 
     // Inter Prediction Context
-    return_error = InterPredictionContextCtor(
-        &contextPtr->interPredictionContext,
+    EB_NEW(
+        contextPtr->interPredictionContext,
+        InterPredictionContextCtor,
         MAX_LCU_SIZE,
         MAX_LCU_SIZE,
         is16bit);
-    if (return_error == EB_ErrorInsufficientResources){
-        return EB_ErrorInsufficientResources;
-    }
 
     // Prediction Buffer
     {
         EbPictureBufferDescInitData_t initData;
 
-		initData.bufferEnableMask = PICTURE_BUFFER_DESC_LUMA_MASK;
+        initData.bufferEnableMask = PICTURE_BUFFER_DESC_LUMA_MASK;
         initData.maxWidth          = MAX_LCU_SIZE;
         initData.maxHeight         = MAX_LCU_SIZE;
         initData.bitDepth          = EB_8BIT;
         initData.colorFormat       = EB_YUV420;
-		initData.leftPadding	   = 0;
-		initData.rightPadding      = 0;
-		initData.topPadding        = 0;
-		initData.botPadding        = 0;
+        initData.leftPadding       = 0;
+        initData.rightPadding      = 0;
+        initData.topPadding        = 0;
+        initData.botPadding        = 0;
         initData.splitMode         = EB_FALSE;
 
-        return_error = EbPictureBufferDescCtor(
-            (EB_PTR*) &contextPtr->predictionBuffer,
-            (EB_PTR) &initData);
-        if (return_error == EB_ErrorInsufficientResources){
-            return EB_ErrorInsufficientResources;
-        }
-
+        EB_NEW(
+            contextPtr->predictionBuffer,
+            EbPictureBufferDescCtor,
+            (EB_PTR)&initData);
     }
 
     // Intra Reference Samples
-    return_error = IntraReferenceSamplesCtor(&contextPtr->intraRefPtr, EB_YUV420);
-    if (return_error == EB_ErrorInsufficientResources){
-        return EB_ErrorInsufficientResources;
-    }
+    EB_NEW(
+        contextPtr->intraRefPtr,
+        IntraReferenceSamplesCtor,
+        EB_YUV420);
 
     // MCP Context
-    return_error = MotionCompensationPredictionContextCtor(
-        &contextPtr->mcpContext,
+    EB_NEW(
+        contextPtr->mcpContext,
+        MotionCompensationPredictionContextCtor,
         MAX_LCU_SIZE,
         MAX_LCU_SIZE,
         is16bit);
-    if (return_error == EB_ErrorInsufficientResources){
-        return EB_ErrorInsufficientResources;
-    }
 
     {
         EbPictureBufferDescInitData_t initData;
@@ -146,32 +152,24 @@ EB_ERRORTYPE ModeDecisionContextCtor(
         initData.maxHeight         = MAX_LCU_SIZE;
         initData.bitDepth          = EB_8BIT;
         initData.colorFormat       = EB_YUV420;
-		initData.leftPadding	   = 0;
-		initData.rightPadding      = 0;
-		initData.topPadding        = 0;
-		initData.botPadding        = 0;
+        initData.leftPadding       = 0;
+        initData.rightPadding      = 0;
+        initData.topPadding        = 0;
+        initData.botPadding        = 0;
         initData.splitMode         = EB_FALSE;
 
-        return_error = EbPictureBufferDescCtor(
-            (EB_PTR*)&contextPtr->pillarReconBuffer,
+        EB_NEW(
+            contextPtr->pillarReconBuffer,
+            EbPictureBufferDescCtor,
             (EB_PTR)&initData);
 
-        if (return_error == EB_ErrorInsufficientResources){
-            return EB_ErrorInsufficientResources;
-        }
-
-        return_error = EbPictureBufferDescCtor(
-            (EB_PTR*) &contextPtr->mdReconBuffer,
-            (EB_PTR) &initData);
-
-        if (return_error == EB_ErrorInsufficientResources){
-            return EB_ErrorInsufficientResources;
-        }
+        EB_NEW(
+            contextPtr->mdReconBuffer,
+            EbPictureBufferDescCtor,
+            (EB_PTR)&initData);
     }
 
-
-    EB_MALLOC(LcuBasedDetectors_t*, contextPtr->mdPicLcuDetect, sizeof(LcuBasedDetectors_t), EB_N_PTR);
-    EB_MEMSET(contextPtr->mdPicLcuDetect,0,sizeof(LcuBasedDetectors_t));
+    EB_CALLOC(contextPtr->mdPicLcuDetect, 1, sizeof(LcuBasedDetectors_t));
 
     return EB_ErrorNone;
 }
@@ -359,6 +357,10 @@ void ProductResetModeDecision(
 	mdRateEstimationArray += sliceType * TOTAL_NUMBER_OF_QP_VALUES + contextPtr->qp;
 
 	// Reset MD rate Estimation table to initial values by copying from mdRateEstimationArray
+    if (contextPtr->isMdRateEstimationPtrOwner) {
+        contextPtr->isMdRateEstimationPtrOwner = EB_FALSE;
+        EB_FREE(contextPtr->mdRateEstimationPtr);
+    }
 	contextPtr->mdRateEstimationPtr = mdRateEstimationArray;
 
 	EB_U32  candidateIndex;

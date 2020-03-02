@@ -8,6 +8,7 @@
 
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -17,6 +18,7 @@ extern "C" {
  **************************************/
 typedef struct PictureAnalysisResults_s
 {
+    EbDctor              dctor;
     EbObjectWrapper_t   *pictureControlSetWrapperPtr;
 } PictureAnalysisResults_t;
 
@@ -28,7 +30,7 @@ typedef struct PictureAnalysisResultInitData_s
 /**************************************
  * Extern Function Declarations
  **************************************/
-extern EB_ERRORTYPE PictureAnalysisResultCtor(
+extern EB_ERRORTYPE PictureAnalysisResultCreator(
     EB_PTR *objectDblPtr, 
     EB_PTR objectInitDataPtr);
 

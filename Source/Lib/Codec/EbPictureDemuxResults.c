@@ -7,21 +7,24 @@
 #include "EbPictureDemuxResults.h"
 
 EB_ERRORTYPE PictureResultsCtor(
-    EB_PTR *objectDblPtr, 
+    PictureDemuxResults_t *objectPtr,
     EB_PTR objectInitDataPtr)
 {
-    PictureDemuxResults_t *objectPtr;
-    EB_MALLOC(PictureDemuxResults_t*, objectPtr, sizeof(PictureDemuxResults_t), EB_N_PTR);
-
-    *objectDblPtr                    = objectPtr;
-    
-    objectPtr->pictureType           = EB_PIC_INVALID;
-    objectPtr->pictureControlSetWrapperPtr = 0;
-    objectPtr->referencePictureWrapperPtr = 0;
-    objectPtr->pictureNumber = 0;
-    
+    objectPtr->pictureType = EB_PIC_INVALID;
     (void) objectInitDataPtr;
-        
+    return EB_ErrorNone;
+}
+
+EB_ERRORTYPE PictureResultsCreator(
+    EB_PTR *objectDblPtr,
+    EB_PTR objectInitDataPtr)
+{
+    PictureDemuxResults_t* obj;
+
+    *objectDblPtr = NULL;
+    EB_NEW(obj, PictureResultsCtor, objectInitDataPtr);
+    *objectDblPtr = obj;
+
     return EB_ErrorNone;
 }
 

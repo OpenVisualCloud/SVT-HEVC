@@ -11,6 +11,7 @@
 #include "EbDefinitions.h"
 #include "EbRateControlProcess.h"
 #include "EbSequenceControlSet.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,7 +20,7 @@ extern "C" {
  * Defines
  **************************************/
 
-typedef struct MdcpLocalCodingUnit_s    
+typedef struct MdcpLocalCodingUnit_s
 {
     EB_U64                          earlyCost;
     EB_BOOL                         earlySplitFlag;
@@ -28,8 +29,9 @@ typedef struct MdcpLocalCodingUnit_s
     EB_BOOL                         stopSplit;
 } MdcpLocalCodingUnit_t;
 
-typedef struct ModeDecisionConfigurationContext_s 
+typedef struct ModeDecisionConfigurationContext_s
 {
+    EbDctor                              dctor;
     EbFifo_t                            *rateControlInputFifoPtr;
     EbFifo_t                            *modeDecisionConfigurationOutputFifoPtr;
 
@@ -53,7 +55,7 @@ typedef struct ModeDecisionConfigurationContext_s
 	EB_S8                               minDeltaQp[4];
 	EB_S8                               maxDeltaQp[4];
 
-    // Budgeting  
+    // Budgeting
     EB_U32                             *lcuScoreArray;
     EB_U8	                            costDepthMode[LCU_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE];
     EB_U8                              *lcuCostArray;
@@ -81,15 +83,15 @@ typedef struct ModeDecisionConfigurationContext_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE ModeDecisionConfigurationContextCtor(
-    ModeDecisionConfigurationContext_t **contextDblPtr,
+    ModeDecisionConfigurationContext_t  *contextPtr,
     EbFifo_t                            *rateControlInputFifoPtr,
 
     EbFifo_t                            *modeDecisionConfigurationOutputFifoPtr,
     EB_U16						         lcuTotalCount);
 
-   
+
 extern void* ModeDecisionConfigurationKernel(void *inputPtr);
 #ifdef __cplusplus
 }
-#endif   
+#endif
 #endif // EbModeDecisionConfigurationProcess_h

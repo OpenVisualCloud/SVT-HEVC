@@ -138,34 +138,36 @@ static void SetMeHmeParamsFromConfig(
     meContextPtr->searchAreaHeight = (EB_U8)sequenceControlSetPtr->staticConfig.searchAreaHeight;
 }
 
+
+static void MotionEstimationContextDctor(EB_PTR p)
+{
+    MotionEstimationContext_t* obj = (MotionEstimationContext_t*)p;
+    EB_DELETE(obj->intraRefPtr);
+    EB_DELETE(obj->meContextPtr);
+}
+
 /************************************************
  * Motion Analysis Context Constructor
  ************************************************/
 
 EB_ERRORTYPE MotionEstimationContextCtor(
-	MotionEstimationContext_t   **contextDblPtr,
+	MotionEstimationContext_t    *contextPtr,
 	EbFifo_t                     *pictureDecisionResultsInputFifoPtr,
-	EbFifo_t                     *motionEstimationResultsOutputFifoPtr) {
-
-	EB_ERRORTYPE return_error = EB_ErrorNone;
-	MotionEstimationContext_t *contextPtr;
-	EB_MALLOC(MotionEstimationContext_t*, contextPtr, sizeof(MotionEstimationContext_t), EB_N_PTR);
-
-	*contextDblPtr = contextPtr;
-
+	EbFifo_t                     *motionEstimationResultsOutputFifoPtr)
+{
+    contextPtr->dctor = MotionEstimationContextDctor;
 	contextPtr->pictureDecisionResultsInputFifoPtr = pictureDecisionResultsInputFifoPtr;
 	contextPtr->motionEstimationResultsOutputFifoPtr = motionEstimationResultsOutputFifoPtr;
-	return_error = IntraOpenLoopReferenceSamplesCtor(&contextPtr->intraRefPtr);
-	if (return_error == EB_ErrorInsufficientResources){
-		return EB_ErrorInsufficientResources;
-	}
-	return_error = MeContextCtor(&(contextPtr->meContextPtr));
-	if (return_error == EB_ErrorInsufficientResources){
-		return EB_ErrorInsufficientResources;
-	}
+
+    EB_NEW(
+        contextPtr->intraRefPtr,
+        IntraOpenLoopReferenceSamplesCtor);
+
+    EB_NEW(
+        contextPtr->meContextPtr,
+        MeContextCtor);
 
 	return EB_ErrorNone;
-
 }
 
 /***************************************************************************************************

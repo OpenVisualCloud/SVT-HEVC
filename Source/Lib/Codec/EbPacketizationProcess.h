@@ -8,6 +8,7 @@
 
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -27,6 +28,7 @@ typedef struct EbPPSConfig_s
  **************************************/
 typedef struct PacketizationContext_s
 {
+    EbDctor                  dctor;
     EbFifo_t                *entropyCodingInputFifoPtr;
     EbFifo_t                *rateControlTasksOutputFifoPtr;
     EbPPSConfig_t           *ppsConfig;
@@ -38,7 +40,7 @@ typedef struct PacketizationContext_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE PacketizationContextCtor(
-    PacketizationContext_t **contextDblPtr,
+    PacketizationContext_t  *contextPtr,
     EbFifo_t                *entropyCodingInputFifoPtr,
     EbFifo_t                *rateControlTasksOutputFifoPtr,
     EbFifo_t                *pictureManagerOutputFifoPtr

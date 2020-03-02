@@ -8,6 +8,7 @@
 
 #include "EbApi.h"
 #include "EbDefinitions.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -157,7 +158,7 @@ typedef struct PredictionStructureEntry_s {
  *   data types for an entire Prediction Structure
  ************************************************/
 typedef struct PredictionStructure_s {
-
+    EbDctor                             dctor;
     EB_U32                              predStructEntryCount;
     PredictionStructureEntry_t        **predStructEntryPtrArray;
     EB_PRED                             predType;
@@ -185,6 +186,7 @@ typedef struct PredictionStructure_s {
  *   supported prediction structures. 
  ************************************************/
 typedef struct PredictionStructureGroup_s {
+    EbDctor                             dctor;
     PredictionStructure_t             **predictionStructurePtrArray;
     EB_U32                              predictionStructureCount;
 } PredictionStructureGroup_t;
@@ -193,7 +195,7 @@ typedef struct PredictionStructureGroup_s {
  * Declarations
  ************************************************/
 extern EB_ERRORTYPE PredictionStructureGroupCtor(
-    PredictionStructureGroup_t   **predictionStructureGroupDblPtr,
+    PredictionStructureGroup_t   *predictionStructureGroupPtr,
     EB_U32                        baseLayerSwitchMode);
 
 extern PredictionStructure_t* GetPredictionStructure(

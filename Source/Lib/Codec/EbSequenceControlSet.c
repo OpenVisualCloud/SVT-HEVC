@@ -8,6 +8,13 @@
 #include "EbDefinitions.h"
 #include "EbSequenceControlSet.h"
 
+static void EbSequenceControlSetDctor(EB_PTR p)
+{
+    SequenceControlSet_t *obj = (SequenceControlSet_t*)p;
+    EB_FREE_ARRAY(obj->lcuParamsArray);
+    EB_DELETE(obj->videoUsabilityInfoPtr);
+}
+
 /**************************************************************************************************
     General notes on how Sequence Control Sets (SCS) are used.
 
@@ -34,21 +41,15 @@
         pipeline, it cannot be changed on the fly or you will have pipeline coherency problems.
  ***************************************************************************************************/
 EB_ERRORTYPE EbSequenceControlSetCtor(
-    EB_PTR *objectDblPtr, 
+    SequenceControlSet_t *sequenceControlSetPtr,
     EB_PTR objectInitDataPtr)
 {
+    sequenceControlSetPtr->dctor = EbSequenceControlSetDctor;
     EbSequenceControlSetInitData_t *scsInitData = (EbSequenceControlSetInitData_t*) objectInitDataPtr;
-    EB_U32 layerIndex; 
-    EB_ERRORTYPE return_error = EB_ErrorNone;
-    SequenceControlSet_t *sequenceControlSetPtr;
-    EB_MALLOC(SequenceControlSet_t*, sequenceControlSetPtr, sizeof(SequenceControlSet_t), EB_N_PTR);
-
-    *objectDblPtr = (EB_PTR) sequenceControlSetPtr;
-    
-    sequenceControlSetPtr->staticConfig.qp                                  = 32;
+    sequenceControlSetPtr->staticConfig.qp = 32;
 
     // Segments
-    for(layerIndex=0; layerIndex < MAX_TEMPORAL_LAYERS; ++layerIndex) {
+    for(EB_U32 layerIndex=0; layerIndex < MAX_TEMPORAL_LAYERS; ++layerIndex) {
         sequenceControlSetPtr->meSegmentColumnCountArray[layerIndex] = 1;
         sequenceControlSetPtr->meSegmentRowCountArray[layerIndex]    = 1;
         sequenceControlSetPtr->encDecSegmentColCountArray[layerIndex] = 1;
@@ -61,52 +62,27 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     if(scsInitData != EB_NULL) {
         sequenceControlSetPtr->encodeContextPtr                             = scsInitData->encodeContextPtr;
     }
-    else {
-        sequenceControlSetPtr->encodeContextPtr                             = (EncodeContext_t *)EB_NULL;
-    }
 
-	sequenceControlSetPtr->conformanceWindowFlag                            = 0;
-    
     // Profile & ID
-    sequenceControlSetPtr->spsId                                            = 0;
-    sequenceControlSetPtr->vpsId                                            = 0;
-    sequenceControlSetPtr->profileSpace                                     = 0;
-    sequenceControlSetPtr->profileIdc                                       = 0;
-    sequenceControlSetPtr->levelIdc                                         = 0;
-    sequenceControlSetPtr->tierIdc                                          = 0;
     sequenceControlSetPtr->chromaFormatIdc                                  = EB_YUV420;
     sequenceControlSetPtr->maxTemporalLayers                                = 1;
-    
-    sequenceControlSetPtr->bitsForPictureOrderCount                         = 16;
-    
-    // Picture Dimensions
-    sequenceControlSetPtr->lumaWidth                                        = 0;
-    sequenceControlSetPtr->lumaHeight                                       = 0;
 
-    sequenceControlSetPtr->chromaWidth                                      = 0;
-    sequenceControlSetPtr->chromaHeight                                     = 0;
-    sequenceControlSetPtr->frameRate                                        = 0;
+    sequenceControlSetPtr->bitsForPictureOrderCount                         = 16;
+
     sequenceControlSetPtr->encoderBitDepth                                  = 8;
-    
+
     // Bitdepth
     sequenceControlSetPtr->inputBitdepth                                    = EB_8BIT;
     sequenceControlSetPtr->outputBitdepth                                   = EB_8BIT;
     
     // GOP Structure
-	sequenceControlSetPtr->maxRefCount                                      = 1;
-    sequenceControlSetPtr->intraPeriodLength                                = 0;
-    sequenceControlSetPtr->intraRefreshType                                 = 0;
-    
+    sequenceControlSetPtr->maxRefCount                                      = 1;
+
     // LCU
     sequenceControlSetPtr->lcuSize                                          = 64;
     sequenceControlSetPtr->maxLcuDepth                                      = 3;
-      
-    // Interlaced Video
-    sequenceControlSetPtr->interlacedVideo                                  = EB_FALSE;
 
     sequenceControlSetPtr->generalProgressiveSourceFlag                     = 1;
-    sequenceControlSetPtr->generalInterlacedSourceFlag                      = 0;
-    sequenceControlSetPtr->generalFrameOnlyConstraintFlag                   = 0;
 
     // temporal mvp enable flag
     sequenceControlSetPtr->enableTmvpSps                                    = 1;
@@ -115,63 +91,35 @@ EB_ERRORTYPE EbSequenceControlSetCtor(
     sequenceControlSetPtr->enableStrongIntraSmoothing                       = EB_TRUE;
     
     // Rate Control
-    sequenceControlSetPtr->rateControlMode                                  = 0; 
     sequenceControlSetPtr->targetBitrate                                    = 0x1000; 
     sequenceControlSetPtr->availableBandwidth                               = 0x1000;
-    
+
     // Quantization
     sequenceControlSetPtr->qp                                               = 20;
 
     // Mv merge
     sequenceControlSetPtr->mvMergeTotalCount                                = 5;
 
-    // Video Usability Info
-    EB_MALLOC(AppVideoUsabilityInfo_t*, sequenceControlSetPtr->videoUsabilityInfoPtr, sizeof(AppVideoUsabilityInfo_t), EB_N_PTR);
-    
     // Initialize vui parameters
-    return_error = EbVideoUsabilityInfoCtor(
-        sequenceControlSetPtr->videoUsabilityInfoPtr);
+    EB_NEW(
+        sequenceControlSetPtr->videoUsabilityInfoPtr,
+        EbVideoUsabilityInfoCtor);
 
-    if (return_error == EB_ErrorInsufficientResources){
-        return EB_ErrorInsufficientResources;
-    }
-    // Initialize picture timing SEI
-    EbPictureTimeingSeiCtor(
-       &sequenceControlSetPtr->picTimingSei);
-
-    // Initialize picture timing SEI
-    EbBufferingPeriodSeiCtor(
-        &sequenceControlSetPtr->bufferingPeriod);
-
-    //Initilaize Active Parametr Set SEI
-    EbActiveParameterSetSeiCtor(
-        &sequenceControlSetPtr->activeParameterSet);
-
-        // Initialize picture timing SEI
-    EbRecoveryPointSeiCtor(
-        &sequenceControlSetPtr->recoveryPoint);
-
-    // Initialize Content Light Level SEI
-    EbContentLightLevelCtor(
-        &sequenceControlSetPtr->contentLightLevel);
-
-    // Initialize Mastering Color Volume SEI
-    EbMasteringDisplayColorVolumeCtor(
-        &sequenceControlSetPtr->masteringDisplayColorVolume);
-
-    // Initialize Registered User Data SEI
-    EbRegUserDataSEICtor(
-        &sequenceControlSetPtr->regUserDataSeiPtr);
-
-    // Initialize Un-Registered User Data SEI
-    EbUnRegUserDataSEICtor(
-        &sequenceControlSetPtr->unRegUserDataSeiPtr);
-
-    sequenceControlSetPtr->maxDpbSize	= 0;
-    
     return EB_ErrorNone;
 }
-     
+
+EB_ERRORTYPE EbSequenceControlSetCreator(
+    EB_PTR  *objectDblPtr,
+    EB_PTR   objectInitDataPtr)
+{
+    SequenceControlSet_t* obj;
+
+    *objectDblPtr = NULL;
+    EB_NEW(obj, EbSequenceControlSetCtor, objectInitDataPtr);
+    *objectDblPtr = obj;
+
+    return EB_ErrorNone;
+}
 
 /************************************************
  * Sequence Control Set Copy
@@ -198,36 +146,38 @@ EB_ERRORTYPE CopySequenceControlSet(
 
     return EB_ErrorNone;
 }
-    
+
+static void EbSequenceControlSetInstanceDctor(EB_PTR p)
+{
+    EbSequenceControlSetInstance_t* obj = (EbSequenceControlSetInstance_t*)p;
+    EB_DELETE(obj->encodeContextPtr);
+    EB_DELETE(obj->sequenceControlSetPtr);
+    EB_DESTROY_MUTEX(obj->configMutex);
+}
+
 EB_ERRORTYPE EbSequenceControlSetInstanceCtor(
-    EbSequenceControlSetInstance_t **objectDblPtr)
+    EbSequenceControlSetInstance_t *objectPtr)
 {
     EbSequenceControlSetInitData_t scsInitData;
-    EB_ERRORTYPE return_error = EB_ErrorNone;
-    EB_MALLOC(EbSequenceControlSetInstance_t*, *objectDblPtr, sizeof(EbSequenceControlSetInstance_t), EB_N_PTR);
+    objectPtr->dctor = EbSequenceControlSetInstanceDctor;
 
-    return_error = EncodeContextCtor(
-        (void **) &(*objectDblPtr)->encodeContextPtr,
+    EB_NEW(
+        objectPtr->encodeContextPtr,
+        EncodeContextCtor,
         EB_NULL);
-    if (return_error == EB_ErrorInsufficientResources){
-        return EB_ErrorInsufficientResources;
-    }
-    scsInitData.encodeContextPtr = (*objectDblPtr)->encodeContextPtr;
-    
-    return_error = EbSequenceControlSetCtor(
-        (void **) &(*objectDblPtr)->sequenceControlSetPtr,
+    scsInitData.encodeContextPtr = objectPtr->encodeContextPtr;
+
+    EB_NEW(
+        objectPtr->sequenceControlSetPtr,
+        EbSequenceControlSetCtor,
         (void *) &scsInitData);
-    if (return_error == EB_ErrorInsufficientResources){
-        return EB_ErrorInsufficientResources;
-    }
-    
-    EB_CREATEMUTEX(EB_HANDLE*, (*objectDblPtr)->configMutex, sizeof(EB_HANDLE), EB_MUTEX);
 
-        
+    EB_CREATE_MUTEX(objectPtr->configMutex);
+
     return EB_ErrorNone;
-}    
+}
 
-extern EB_ERRORTYPE LcuParamsInit(
+EB_ERRORTYPE LcuParamsInit(
 	SequenceControlSet_t *sequenceControlSetPtr) {
 
 	EB_ERRORTYPE return_error = EB_ErrorNone;
@@ -236,7 +186,8 @@ extern EB_ERRORTYPE LcuParamsInit(
 
 	EB_U8   pictureLcuWidth  = sequenceControlSetPtr->pictureWidthInLcu;
 	EB_U8	pictureLcuHeight = sequenceControlSetPtr->pictureHeightInLcu;
-	EB_MALLOC(LcuParams_t*, sequenceControlSetPtr->lcuParamsArray, sizeof(LcuParams_t) * pictureLcuWidth * pictureLcuHeight, EB_N_PTR);
+
+    EB_MALLOC_ARRAY(sequenceControlSetPtr->lcuParamsArray, pictureLcuWidth * pictureLcuHeight);
 
 	for (lcuIndex = 0; lcuIndex < pictureLcuWidth * pictureLcuHeight; ++lcuIndex) {
 		sequenceControlSetPtr->lcuParamsArray[lcuIndex].horizontalIndex = (EB_U8)(lcuIndex % pictureLcuWidth);

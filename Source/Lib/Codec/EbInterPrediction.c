@@ -17,29 +17,28 @@
 #include "EbErrorCodes.h"
 #include "EbErrorHandling.h"
 
+static void InterPredictionContextDtor(EB_PTR p)
+{
+    InterPredictionContext_t *obj = (InterPredictionContext_t*)p;
+    EB_DELETE(obj->mcpContext);
+}
 
 EB_ERRORTYPE InterPredictionContextCtor(
-    InterPredictionContext_t **interPredictionContext,
+    InterPredictionContext_t  *contextPtr,
 	EB_U16                     maxCUWidth,
     EB_U16                     maxCUHeight,
     EB_BOOL                    is16bit)
 
 {
-    EB_ERRORTYPE              return_error = EB_ErrorNone;
-    InterPredictionContext_t *contextPtr;
-    EB_MALLOC(InterPredictionContext_t*, contextPtr, sizeof(InterPredictionContext_t), EB_N_PTR);
+    contextPtr->dctor = InterPredictionContextDtor;
 
-    (*interPredictionContext) = contextPtr;
-
-    return_error =  MotionCompensationPredictionContextCtor(
-        &contextPtr->mcpContext,
+    EB_NEW(
+        contextPtr->mcpContext,
+        MotionCompensationPredictionContextCtor,
         maxCUWidth,
         maxCUHeight,
         is16bit);
 
-    if (return_error == EB_ErrorInsufficientResources){
-        return EB_ErrorInsufficientResources;
-    }
     return EB_ErrorNone;
 }
 

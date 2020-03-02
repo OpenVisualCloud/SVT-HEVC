@@ -6,11 +6,9 @@
 #ifndef EbPictureBuffer_h
 #define EbPictureBuffer_h
 
-#include <stdio.h> 
-
+#include <stdio.h>
 #include "EbDefinitions.h"
-
-
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -25,23 +23,31 @@ extern "C" {
  * EbPictureBufferDesc 
  ************************************/
 typedef struct EbPictureBufferDesc_s
-{        
+{
+    EbDctor         dctor;
 	// Buffer Ptrs
 	EB_BYTE         bufferY;        // Pointer to the Y luma buffer
 	EB_BYTE         bufferCb;       // Pointer to the U chroma buffer
-	EB_BYTE         bufferCr;       // Pointer to the V chroma buffer 
+	EB_BYTE         bufferCr;       // Pointer to the V chroma buffer
+
+    // Pointer of buffer can be changed in 10bit encoding which causes issue when being freed.
+    // Workaround: record the original address of the buffer.
+    EB_BYTE         bufferYAddress;        // Original Address of the Y luma buffer
+    EB_BYTE         bufferCbAddress;       // Original Address of the U chroma buffer
+    EB_BYTE         bufferCrAddress;       // Original Address of the V chroma buffer
+
 	//Bit increment 
 	EB_BYTE         bufferBitIncY;  // Pointer to the Y luma buffer Bit increment
 	EB_BYTE         bufferBitIncCb; // Pointer to the U chroma buffer Bit increment
 	EB_BYTE         bufferBitIncCr; // Pointer to the V chroma buffer Bit increment
 
-	EB_U16          strideY;        // Pointer to the Y luma buffer
-	EB_U16          strideCb;       // Pointer to the U chroma buffer
-	EB_U16          strideCr;       // Pointer to the V chroma buffer 
+	EB_U16          strideY;        // stride of the Y luma buffer
+	EB_U16          strideCb;       // stride of the U chroma buffer
+	EB_U16          strideCr;       // stride of the V chroma buffer 
 
-	EB_U16          strideBitIncY;  // Pointer to the Y luma buffer Bit increment
-	EB_U16          strideBitIncCb; // Pointer to the U chroma buffer Bit increment
-	EB_U16          strideBitIncCr; // Pointer to the V chroma buffer Bit increment
+	EB_U16          strideBitIncY;  // stride of the Y luma buffer Bit increment
+	EB_U16          strideBitIncCb; // stride of the U chroma buffer Bit increment
+	EB_U16          strideBitIncCr; // stride of the V chroma buffer Bit increment
 
 	// Picture Parameters
 	EB_U16          originX;        // Horizontal padding distance
@@ -60,7 +66,7 @@ typedef struct EbPictureBufferDesc_s
 
 	EB_SEI_MESSAGE    dolbyVisionRpu;
 	EB_SEI_MESSAGE    userSeiMsg;
-
+    EB_U32            bufferEnableMask;
 } EbPictureBufferDesc_t;
 
 /************************************
@@ -85,11 +91,11 @@ typedef struct EbPictureBufferDescInitData_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE EbPictureBufferDescCtor(
-    EB_PTR *objectDblPtr, 
+    EbPictureBufferDesc_t *objectPtr,
     EB_PTR objectInitDataPtr);
 
 extern EB_ERRORTYPE EbReconPictureBufferDescCtor(
-    EB_PTR *objectDblPtr, 
+    EbPictureBufferDesc_t *objectPtr,
     EB_PTR objectInitDataPtr);
 
 #ifdef __cplusplus

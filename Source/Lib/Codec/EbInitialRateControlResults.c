@@ -8,16 +8,23 @@
 #include "EbInitialRateControlResults.h"
 
 EB_ERRORTYPE InitialRateControlResultsCtor(
-    EB_PTR *objectDblPtr, 
+    InitialRateControlResults_t *objectPtr,
     EB_PTR objectInitDataPtr)
 {
-    InitialRateControlResults_t *objectPtr;
-    EB_MALLOC(InitialRateControlResults_t *, objectPtr, sizeof(InitialRateControlResults_t), EB_N_PTR);
-
-    *objectDblPtr = (EB_PTR) objectPtr;
-    objectInitDataPtr = 0;
-    (void) objectInitDataPtr;
-    
+    (void)objectPtr;
+    (void)objectInitDataPtr;
     return EB_ErrorNone;
 }
 
+EB_ERRORTYPE InitialRateControlResultsCreator(
+    EB_PTR *objectDblPtr,
+    EB_PTR objectInitDataPtr)
+{
+    InitialRateControlResults_t* obj;
+
+    *objectDblPtr = NULL;
+    EB_NEW(obj, InitialRateControlResultsCtor, objectInitDataPtr);
+    *objectDblPtr = obj;
+
+    return EB_ErrorNone;
+}

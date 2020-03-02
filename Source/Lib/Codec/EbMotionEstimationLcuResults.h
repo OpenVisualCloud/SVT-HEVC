@@ -7,6 +7,7 @@
 #define EbMotionEstimationLcuResults_h
 
 #include "EbDefinitions.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -16,7 +17,7 @@ extern "C" {
 #define MAX_ME_CANDIDATE_PER_PU   3
 
 typedef struct MeCandidate_s {
-  
+
 	union {
 		struct {
 			signed short     xMvL0 ;  //Note: Do not change the order of these fields
@@ -35,7 +36,7 @@ typedef struct MeCandidate_s {
 
 // move this to a new file with ctor & dtor
 typedef struct MeLcuResults_s {
-
+    EbDctor         dctor;
     EB_U32          lcuDistortion;
     EB_U8          *totalMeCandidateIndex;
     EB_S16          xMvHmeSearchCenter[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];

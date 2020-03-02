@@ -118,96 +118,81 @@ void intraSearchTheseModesOutputBest(
     *bestSADOut = bestSAD;
 }
 
-
+static void ModeDecisionCandidateBufferDctor(EB_PTR p)
+{
+    ModeDecisionCandidateBuffer_t *obj = (ModeDecisionCandidateBuffer_t*)p;
+    EB_DELETE(obj->predictionPtr);
+    EB_DELETE(obj->residualQuantCoeffPtr);
+    EB_DELETE(obj->reconCoeffPtr);
+    EB_DELETE(obj->reconPtr);
+}
 
 /***************************************
 * Mode Decision Candidate Ctor
 ***************************************/
 EB_ERRORTYPE ModeDecisionCandidateBufferCtor(
-	ModeDecisionCandidateBuffer_t **bufferDblPtr,
-	EB_U16                          lcuMaxSize,
-	EB_BITDEPTH                     maxBitdepth,
-	EB_U64                         *fastCostPtr,
-	EB_U64                         *fullCostPtr,
-	EB_U64                         *fullCostSkipPtr,
-	EB_U64                         *fullCostMergePtr)
+    ModeDecisionCandidateBuffer_t  *bufferPtr,
+    EB_U16                          lcuMaxSize,
+    EB_BITDEPTH                     maxBitdepth,
+    EB_U64                         *fastCostPtr,
+    EB_U64                         *fullCostPtr,
+    EB_U64                         *fullCostSkipPtr,
+    EB_U64                         *fullCostMergePtr)
 {
-	EbPictureBufferDescInitData_t pictureBufferDescInitData;
-	EbPictureBufferDescInitData_t doubleWidthPictureBufferDescInitData;
-	EB_ERRORTYPE return_error = EB_ErrorNone;
-	// Allocate Buffer
-	ModeDecisionCandidateBuffer_t *bufferPtr;
-	EB_MALLOC(ModeDecisionCandidateBuffer_t*, bufferPtr, sizeof(ModeDecisionCandidateBuffer_t), EB_N_PTR);
-	*bufferDblPtr = bufferPtr;
+    EbPictureBufferDescInitData_t pictureBufferDescInitData;
+    EbPictureBufferDescInitData_t doubleWidthPictureBufferDescInitData;
+    bufferPtr->dctor = ModeDecisionCandidateBufferDctor;
 
-	// Init Picture Data
-	pictureBufferDescInitData.maxWidth = lcuMaxSize;
-	pictureBufferDescInitData.maxHeight = lcuMaxSize;
-	pictureBufferDescInitData.bitDepth = maxBitdepth;
-	pictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
+    // Init Picture Data
+    pictureBufferDescInitData.maxWidth = lcuMaxSize;
+    pictureBufferDescInitData.maxHeight = lcuMaxSize;
+    pictureBufferDescInitData.bitDepth = maxBitdepth;
+    pictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
     pictureBufferDescInitData.colorFormat = EB_YUV420;
-	pictureBufferDescInitData.leftPadding = 0;
-	pictureBufferDescInitData.rightPadding = 0;
-	pictureBufferDescInitData.topPadding = 0;
-	pictureBufferDescInitData.botPadding = 0;
-	pictureBufferDescInitData.splitMode = EB_FALSE;
+    pictureBufferDescInitData.leftPadding = 0;
+    pictureBufferDescInitData.rightPadding = 0;
+    pictureBufferDescInitData.topPadding = 0;
+    pictureBufferDescInitData.botPadding = 0;
+    pictureBufferDescInitData.splitMode = EB_FALSE;
 
-	doubleWidthPictureBufferDescInitData.maxWidth = lcuMaxSize;
-	doubleWidthPictureBufferDescInitData.maxHeight = lcuMaxSize;
-	doubleWidthPictureBufferDescInitData.bitDepth = EB_16BIT;
-	doubleWidthPictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
+    doubleWidthPictureBufferDescInitData.maxWidth = lcuMaxSize;
+    doubleWidthPictureBufferDescInitData.maxHeight = lcuMaxSize;
+    doubleWidthPictureBufferDescInitData.bitDepth = EB_16BIT;
+    doubleWidthPictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
     doubleWidthPictureBufferDescInitData.colorFormat = EB_YUV420;
-	doubleWidthPictureBufferDescInitData.leftPadding = 0;
-	doubleWidthPictureBufferDescInitData.rightPadding = 0;
-	doubleWidthPictureBufferDescInitData.topPadding = 0;
-	doubleWidthPictureBufferDescInitData.botPadding = 0;
-	doubleWidthPictureBufferDescInitData.splitMode = EB_FALSE;
+    doubleWidthPictureBufferDescInitData.leftPadding = 0;
+    doubleWidthPictureBufferDescInitData.rightPadding = 0;
+    doubleWidthPictureBufferDescInitData.topPadding = 0;
+    doubleWidthPictureBufferDescInitData.botPadding = 0;
+    doubleWidthPictureBufferDescInitData.splitMode = EB_FALSE;
 
-	// Candidate Ptr
-	bufferPtr->candidatePtr = (ModeDecisionCandidate_t*)EB_NULL;
+    // Video Buffers
+    EB_NEW(
+        bufferPtr->predictionPtr,
+        EbPictureBufferDescCtor,
+        (EB_PTR)&pictureBufferDescInitData);
 
-	// Video Buffers
-	return_error = EbPictureBufferDescCtor(
-		(EB_PTR*)&(bufferPtr->predictionPtr),
-		(EB_PTR)&pictureBufferDescInitData);
+    EB_NEW(
+        bufferPtr->residualQuantCoeffPtr,
+        EbPictureBufferDescCtor,
+        (EB_PTR)&doubleWidthPictureBufferDescInitData);
 
-	if (return_error == EB_ErrorInsufficientResources){
-		return EB_ErrorInsufficientResources;
-	}
-	return_error = EbPictureBufferDescCtor(
-		(EB_PTR*)&(bufferPtr->residualQuantCoeffPtr),
-		(EB_PTR)&doubleWidthPictureBufferDescInitData);
+    EB_NEW(
+        bufferPtr->reconCoeffPtr,
+        EbPictureBufferDescCtor,
+        (EB_PTR)&doubleWidthPictureBufferDescInitData);
 
-	if (return_error == EB_ErrorInsufficientResources){
-		return EB_ErrorInsufficientResources;
-	}
+    EB_NEW(
+        bufferPtr->reconPtr,
+        EbPictureBufferDescCtor,
+        (EB_PTR)&pictureBufferDescInitData);
 
-	return_error = EbPictureBufferDescCtor(
-		(EB_PTR*)&(bufferPtr->reconCoeffPtr),
-		(EB_PTR)&doubleWidthPictureBufferDescInitData);
-
-	if (return_error == EB_ErrorInsufficientResources){
-		return EB_ErrorInsufficientResources;
-	}
-	return_error = EbPictureBufferDescCtor(
-		(EB_PTR*)&(bufferPtr->reconPtr),
-		(EB_PTR)&pictureBufferDescInitData);
-
-	if (return_error == EB_ErrorInsufficientResources){
-		return EB_ErrorInsufficientResources;
-	}
-	//Distortion
-	bufferPtr->residualLumaSad = 0;
-
-	bufferPtr->fullLambdaRate = 0;
-
-
-	// Costs
-	bufferPtr->fastCostPtr = fastCostPtr;
-	bufferPtr->fullCostPtr = fullCostPtr;
-	bufferPtr->fullCostSkipPtr = fullCostSkipPtr;
-	bufferPtr->fullCostMergePtr = fullCostMergePtr;
-	return EB_ErrorNone;
+    // Costs
+    bufferPtr->fastCostPtr = fastCostPtr;
+    bufferPtr->fullCostPtr = fullCostPtr;
+    bufferPtr->fullCostSkipPtr = fullCostSkipPtr;
+    bufferPtr->fullCostMergePtr = fullCostMergePtr;
+    return EB_ErrorNone;
 }
 
 

@@ -94,22 +94,26 @@ static void InitHRD(SequenceControlSet_t *scsPtr)
 #undef MAX_DURATION
 }
 
+static void PacketizationContextDctor(EB_PTR p)
+{
+    PacketizationContext_t *obj = (PacketizationContext_t*)p;
+    EB_FREE(obj->ppsConfig);
+}
+
 EB_ERRORTYPE PacketizationContextCtor(
-    PacketizationContext_t **contextDblPtr,
+    PacketizationContext_t  *contextPtr,
     EbFifo_t                *entropyCodingInputFifoPtr,
     EbFifo_t                *rateControlTasksOutputFifoPtr,
     EbFifo_t                *pictureManagerOutputFifoPtr
 )
 {
-    PacketizationContext_t *contextPtr;
-    EB_MALLOC(PacketizationContext_t*, contextPtr, sizeof(PacketizationContext_t), EB_N_PTR);
-    *contextDblPtr = contextPtr;
+    contextPtr->dctor = PacketizationContextDctor;
 
     contextPtr->entropyCodingInputFifoPtr      = entropyCodingInputFifoPtr;
     contextPtr->rateControlTasksOutputFifoPtr  = rateControlTasksOutputFifoPtr;
     contextPtr->pictureManagerOutputFifoPtr    = pictureManagerOutputFifoPtr;
 
-    EB_MALLOC(EbPPSConfig_t*, contextPtr->ppsConfig, sizeof(EbPPSConfig_t), EB_N_PTR);
+    EB_MALLOC(contextPtr->ppsConfig, sizeof(EbPPSConfig_t));
 
 	return EB_ErrorNone;
 }
@@ -259,7 +263,7 @@ void* PacketizationKernel(void *inputPtr)
         } else if ((pictureControlSetPtr->sliceType == EB_I_PICTURE) &&
                    (sequenceControlSetPtr->intraRefreshType >= IDR_REFRESH)) {
             if (sequenceControlSetPtr->staticConfig.rateControlMode) {
-                EB_U32 idrCount = pictureControlSetPtr->pictureNumber /
+                EB_U64 idrCount = pictureControlSetPtr->pictureNumber /
                                   (sequenceControlSetPtr->intraPeriodLength + 1);
                 if ((idrCount % (sequenceControlSetPtr->intraRefreshType + 1)) == 0)
                     toInsertHeaders = EB_TRUE;
