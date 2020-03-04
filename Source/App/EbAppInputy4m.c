@@ -224,7 +224,7 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
             printf("chroma = %s, bitdepth = %d\n", chroma, bitdepth);
 #endif
             break;
-        case 'F': /* frame rate, required */
+        case 'F': /* frame rate, not required */
             tokstart = copyUntilCharacterOrNewLine(tokstart, format_str, sizeof(format_str), ':');
             fr_n = (uint32_t)strtol(format_str, (char **)NULL, 10);
             tokstart++;
@@ -251,7 +251,7 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
         }
     }
 
-    /*check if required parameters were read*/
+    /* check if required parameters were read */
     if (width == 0) {
         fprintf(cfg->errorLogFile, "width not found in y4m header\n");
         return EB_ErrorBadParameter;
@@ -260,17 +260,10 @@ int32_t read_y4m_header(EbConfig_t *cfg) {
         fprintf(cfg->errorLogFile, "height not found in y4m header\n");
         return EB_ErrorBadParameter;
     }
-    if (fr_n == 0 || fr_d == 0) {
-        fprintf(cfg->errorLogFile, "frame rate not found in y4m header\n");
-        return EB_ErrorBadParameter;
-    }
 
-    /* Assign parameters to cfg */
+    /* Assign parameters to cfg.  Note: Fps is not assigned */
     cfg->sourceWidth = width;
     cfg->sourceHeight = height;
-    cfg->frameRateNumerator = fr_n;
-    cfg->frameRateDenominator = fr_d;
-    cfg->frameRate = fr_n / fr_d;
     cfg->encoderBitDepth = bitdepth;
     cfg->interlacedVideo = interlaced;
     if (EB_STRCMP("420", chroma) == 0) {
