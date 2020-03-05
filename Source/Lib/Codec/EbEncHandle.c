@@ -1875,6 +1875,8 @@ void LoadDefaultBufferConfigurationSettings(
         (inputSize < INPUT_SIZE_4K_TH) ? INPUT_SIZE_1080p_RANGE :
         INPUT_SIZE_4K_RANGE;
 
+    const EB_U8 lowResInputFactor = 2;
+
 #if defined(_WIN32) || defined(__linux__)
     if (sequenceControlSetPtr->staticConfig.targetSocket != -1)
         coreCount /= numGroups;
@@ -1968,7 +1970,7 @@ void LoadDefaultBufferConfigurationSettings(
 
     //#====================== Data Structures and Picture Buffers ======================
     if (inputResolution <= INPUT_SIZE_1080p_RANGE)
-        sequenceControlSetPtr->pictureControlSetPoolInitCount       = inputPic * 2;
+        sequenceControlSetPtr->pictureControlSetPoolInitCount       = inputPic * lowResInputFactor;
     else
         sequenceControlSetPtr->pictureControlSetPoolInitCount       = inputPic;
 
@@ -1976,9 +1978,9 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->referencePictureBufferInitCount      = inputPic;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
 
     if (inputResolution <= INPUT_SIZE_1080p_RANGE)
-        sequenceControlSetPtr->paReferencePictureBufferInitCount    = inputPic * 2;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
+        sequenceControlSetPtr->paReferencePictureBufferInitCount    = inputPic * lowResInputFactor;
     else
-        sequenceControlSetPtr->paReferencePictureBufferInitCount    = inputPic;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
+        sequenceControlSetPtr->paReferencePictureBufferInitCount    = inputPic;
 
     sequenceControlSetPtr->reconBufferFifoInitCount             = sequenceControlSetPtr->referencePictureBufferInitCount;
 
