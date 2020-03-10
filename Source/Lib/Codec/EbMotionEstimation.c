@@ -799,7 +799,7 @@ static void PU_HalfPelRefinement(
         *pBestSsd = (EB_U32) SpatialFullDistortionKernel_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][Log2f(puWidth) - 2](
             &(contextPtr->lcuSrcPtr[puLcuBufferIndex]),
             contextPtr->lcuSrcStride,
-            refBuffer + (ySearchIndex * (EB_S32)refStride + xSearchIndex),
+            &(refBuffer[ySearchIndex * refStride + xSearchIndex]),
             refStride,
             puHeight,
             puWidth);
