@@ -4216,6 +4216,7 @@ EB_ERRORTYPE MotionEstimateLcu(
                 contextPtr->pBestSad16x16 = &(contextPtr->pLcuBestSad[listIndex][0][ME_TIER_ZERO_PU_16x16_0]);
                 contextPtr->pBestSad8x8 = &(contextPtr->pLcuBestSad[listIndex][0][ME_TIER_ZERO_PU_8x8_0]);
 
+                InitializeBuffer_32bits_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](contextPtr->pLcuBestMV[listIndex][0], 21, 1, 0);
                 contextPtr->pBestMV64x64 = &(contextPtr->pLcuBestMV[listIndex][0][ME_TIER_ZERO_PU_64x64]);
                 contextPtr->pBestMV32x32 = &(contextPtr->pLcuBestMV[listIndex][0][ME_TIER_ZERO_PU_32x32_0]);
                 contextPtr->pBestMV16x16 = &(contextPtr->pLcuBestMV[listIndex][0][ME_TIER_ZERO_PU_16x16_0]);
