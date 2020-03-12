@@ -4,7 +4,7 @@
 #include <emmintrin.h>
 #include <immintrin.h>
 
-#ifndef NON_AVX512_SUPPORT
+#ifdef VNNI_SUPPORT
 
 #ifdef __GNUC__
 __attribute__((aligned(16)))
@@ -37,13 +37,12 @@ static EB_ALIGN(32) const EB_S16 EbHevcCoeff_tbl_AVX2[48 * 16] =
     54, 67, -31, -73, 4, 78, 22, -82, 54, 67, -31, -73, 4, 78, 22, -82, -46, 85, 67, -88, -82, 90, 90, -90, -46, 85, 67, -88, -82, 90, 90, -90
 };
 
-extern void EbHevcTransform32_AVX512_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_stride, EB_U32 shift)
+extern void EbHevcTransform32_VNNI_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_stride, EB_U32 shift)
 {
     EB_U32 i;
     __m128i s0;
     __m256i o0;
     const __m256i *coeff32 = (const __m256i *)EbHevcCoeff_tbl_AVX2;
-
     shift &= 0x0000FFFF; // Redundant code to fix Visual Studio 2012 AVX2 compiler error
     s0 = _mm_cvtsi32_si128(shift);
     o0 = _mm256_set1_epi32(1 << (shift - 1));

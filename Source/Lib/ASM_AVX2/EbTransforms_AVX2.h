@@ -11,10 +11,10 @@
 extern "C" {
 #endif
 
-#ifdef NON_AVX512_SUPPORT
-#define EbHevcTransform32_INTRIN EbHevcTransform32_AVX2_INTRIN
+#ifdef VNNI_SUPPORT
+#define EbHevcTransform32_INTRIN EbHevcTransform32_VNNI_INTRIN
 #else 
-#define EbHevcTransform32_INTRIN EbHevcTransform32_AVX512_INTRIN
+#define EbHevcTransform32_INTRIN EbHevcTransform32_AVX2_INTRIN
 #endif
 
 
