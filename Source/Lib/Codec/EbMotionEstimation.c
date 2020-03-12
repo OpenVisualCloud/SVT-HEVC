@@ -4209,8 +4209,14 @@ EB_ERRORTYPE MotionEstimateLcu(
 
         {
             {
-
-                InitializeBuffer_32bits_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](contextPtr->pLcuBestSad[listIndex][0], 21, 1, MAX_SAD_VALUE);
+                // NOTE: considering the corner case that the (8-bit) Y sample value difference
+                // of source picture and (reconstructed) reference picture may be 0xFF, the
+                // calculated SAD 64x64 accumulated from SAD 8x8, 16x16 and 32x32 sequentially
+                // could be 0xFF * 64 * 64 (block 8 * 4 for SAD 8x8, * 4 for SAD 16x16,
+                // * 4 for SAD 32x32, * 4 for SAD 64x64, * 2 for best SAD checking).
+                // So initialize the best SAD of each LCU with additional 1, to make sure that
+                // the calculated best SAD and MV for each LCU can be updated correctly.
+                InitializeBuffer_32bits_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)](contextPtr->pLcuBestSad[listIndex][0], 21, 1, MAX_SAD_VALUE + 1);
                 contextPtr->pBestSad64x64 = &(contextPtr->pLcuBestSad[listIndex][0][ME_TIER_ZERO_PU_64x64]);
                 contextPtr->pBestSad32x32 = &(contextPtr->pLcuBestSad[listIndex][0][ME_TIER_ZERO_PU_32x32_0]);
                 contextPtr->pBestSad16x16 = &(contextPtr->pLcuBestSad[listIndex][0][ME_TIER_ZERO_PU_16x16_0]);
