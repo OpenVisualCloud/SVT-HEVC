@@ -568,8 +568,10 @@ void* PacketizationKernel(void *inputPtr)
 
         // Encode slice header and write it into the bitstream.
         packetizationQp = pictureControlSetPtr->pictureQp;
-     
-        if (sequenceControlSetPtr->staticConfig.accessUnitDelimiter && !(sequenceControlSetPtr->staticConfig.codeVpsSpsPps && toInsertHeaders))
+
+        // Note: If AUD is inserted with headers, avoid insertion again for smaller bitstream.
+        if (sequenceControlSetPtr->staticConfig.accessUnitDelimiter && pictureControlSetPtr->pictureNumber > 0
+                && !toInsertHeaders)
         {
             EncodeAUD(
                 pictureControlSetPtr->bitstreamPtr,
