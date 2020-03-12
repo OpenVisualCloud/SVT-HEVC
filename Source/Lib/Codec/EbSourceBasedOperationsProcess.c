@@ -1417,7 +1417,7 @@ void* SourceBasedOperationsKernel(void *inputPtr)
 		sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 
 #if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld SRC IN \n", pictureControlSetPtr->pictureNumber);
+        SVT_LOG("POC %lu SRC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 		pictureControlSetPtr->darkBackGroundlightForeGround = EB_FALSE;
 		contextPtr->pictureNumGrassLcu = 0;
@@ -1665,10 +1665,6 @@ void* SourceBasedOperationsKernel(void *inputPtr)
             }
         }
 
-#if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld SRC OUT \n", pictureControlSetPtr->pictureNumber);
-#endif
-
         // Get Empty Results Object
         EbGetEmptyObject(
             contextPtr->pictureDemuxResultsOutputFifoPtr,
@@ -1702,6 +1698,10 @@ void* SourceBasedOperationsKernel(void *inputPtr)
 
         // Post the Full Results Object
         EbPostFullObject(outputResultsWrapperPtr);
+
+#if DEADLOCK_DEBUG
+        SVT_LOG("POC %lu SRC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
 
     }
     return EB_NULL;

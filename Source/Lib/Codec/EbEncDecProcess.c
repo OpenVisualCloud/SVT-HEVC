@@ -2706,7 +2706,8 @@ void* EncDecKernel(void *inputPtr)
         lastLcuFlag = EB_FALSE;
         is16bit = (EB_BOOL)(sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
 #if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld ENCDEC IN \n", pictureControlSetPtr->pictureNumber);
+        if ((encDecTasksPtr->inputType == ENCDEC_TASKS_MDC_INPUT) && (tileGroupIdx == 0))
+            SVT_LOG("POC %lu ENCDEC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 
         // LCU Constants
@@ -3221,12 +3222,11 @@ void* EncDecKernel(void *inputPtr)
                     EbReleaseObject(pictureControlSetPtr->refPicPtrArray[1]);
                 }
             }
+#if DEADLOCK_DEBUG
+            SVT_LOG("POC %lu ENCDEC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
         }
         EbReleaseObject(encDecTasksPtr->pictureControlSetWrapperPtr);
-
-#if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld ENCDEC OUT \n", pictureControlSetPtr->pictureNumber);
-#endif
 
         // Release Mode Decision Results
         EbReleaseObject(encDecTasksWrapperPtr);

@@ -211,7 +211,7 @@ void* PictureManagerKernel(void *inputPtr)
             encodeContextPtr                = sequenceControlSetPtr->encodeContextPtr;
 
 #if DEADLOCK_DEBUG
-            SVT_LOG("POC %lld PM IN \n", pictureControlSetPtr->pictureNumber);
+            SVT_LOG("POC %lu PM IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 		   queueEntryIndex = (EB_S32)(pictureControlSetPtr->pictureNumber - encodeContextPtr->pictureManagerReorderQueue[encodeContextPtr->pictureManagerReorderQueueHeadIndex]->pictureNumber);
 		   queueEntryIndex += encodeContextPtr->pictureManagerReorderQueueHeadIndex;
@@ -503,7 +503,7 @@ void* PictureManagerKernel(void *inputPtr)
 				   pictureControlSetPtr->referencePictureWrapperPtr = (EbObjectWrapper_t*)EB_NULL;
 			   }
 #if DEADLOCK_DEBUG
-               SVT_LOG("POC %lld PM OUT \n", pictureControlSetPtr->pictureNumber);
+               SVT_LOG("POC %lu PM OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
 			   // Release the Picture Manager Reorder Queue
 			   queueEntryPtr->parentPcsWrapperPtr = (EbObjectWrapper_t*)EB_NULL;

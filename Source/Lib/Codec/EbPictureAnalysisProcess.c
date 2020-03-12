@@ -4241,7 +4241,7 @@ void* PictureAnalysisKernel(void *inputPtr)
 		sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 		inputPicturePtr = pictureControlSetPtr->enhancedPicturePtr;
 #if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld PA IN \n", pictureControlSetPtr->pictureNumber);
+        SVT_LOG("POC %lu PA IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 		paReferenceObject = (EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr;
 		inputPaddedPicturePtr = (EbPictureBufferDesc_t*)paReferenceObject->inputPaddedPicturePtr;
@@ -4334,7 +4334,7 @@ void* PictureAnalysisKernel(void *inputPtr)
 		outputResultsPtr->pictureControlSetWrapperPtr = inputResultsPtr->pictureControlSetWrapperPtr;
 
 #if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld PA OUT \n", pictureControlSetPtr->pictureNumber);
+        SVT_LOG("POC %lu PA OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
 
 		// Release the Input Results

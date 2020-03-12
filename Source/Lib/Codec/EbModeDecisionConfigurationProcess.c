@@ -1930,7 +1930,7 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
 		pictureControlSetPtr = (PictureControlSet_t*)rateControlResultsPtr->pictureControlSetWrapperPtr->objectPtr;
 		sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 #if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld MDC IN \n", pictureControlSetPtr->pictureNumber);
+        SVT_LOG("POC %lu MDC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
         SignalDerivationModeDecisionConfigKernelOq(
                 pictureControlSetPtr,
@@ -2078,9 +2078,6 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
             pictureControlSetPtr->ParentPcsPtr->averageQp = (EB_U8)pictureControlSetPtr->ParentPcsPtr->pictureQp;
         }
 
-#if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld MDC OUT \n", pictureControlSetPtr->pictureNumber);
-#endif
         // Post the results to the MD processes
         EB_U16 tileGroupRowCnt = sequenceControlSetPtr->tileGroupRowCountArray[pictureControlSetPtr->temporalLayerIndex];
         EB_U16 tileGroupColCnt = sequenceControlSetPtr->tileGroupColCountArray[pictureControlSetPtr->temporalLayerIndex];
@@ -2100,6 +2097,9 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
                 EbPostFullObject(encDecTasksWrapperPtr);
             }
         }
+#if DEADLOCK_DEBUG
+        SVT_LOG("POC %lu MDC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
 
 #if LATENCY_PROFILE
         double latency = 0.0;
