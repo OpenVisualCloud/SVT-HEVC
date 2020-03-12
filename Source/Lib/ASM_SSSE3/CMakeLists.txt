@@ -55,7 +55,7 @@ set(ASM_SSSE3_SOURCE
     EbDeblockingFilter_Intrinsic_SSSE3.c
     EbIntraPrediction16bit_Intrinsic_SSSE3.c
     EbMcp_Intrinsic_SSSE3.c
-    EbMcp_Intrinsic_AVX512.c
+    EbMcp_Intrinsic_AVX512VNNI.c
     EbSaoApplication_Intrinsic_SSSE3.c
     EbTransforms_Intrinsic_SSSE3.c)
 

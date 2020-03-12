@@ -82,7 +82,7 @@ set(ASM_AVX2_SOURCE
     EbNoiseExtractAVX2.c
     EbPackUnPack_Intrinsic_AVX2.c
     EbPictureOperators_Intrinsic_AVX2.c
-    EbTransforms_Intrinsic_AVX512.c
+    EbTransforms_Intrinsic_VNNI.c
     EbTransforms_Intrinsic_AVX2.c)
 
 if(COMPILE_AS_CPP)
