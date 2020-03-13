@@ -3065,6 +3065,10 @@ void* EncDecKernel(void *inputPtr)
         EbReleaseMutex(pictureControlSetPtr->intraMutex);
 
         if (lastLcuFlag) {
+#if DEADLOCK_DEBUG
+            SVT_LOG("POC %lu ENCDEC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
+
             if (pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr != NULL){
                 // copy stat to ref object (intraCodedArea, Luminance, Scene change detection flags)
                 CopyStatisticsToRefObject(
@@ -3222,9 +3226,6 @@ void* EncDecKernel(void *inputPtr)
                     EbReleaseObject(pictureControlSetPtr->refPicPtrArray[1]);
                 }
             }
-#if DEADLOCK_DEBUG
-            SVT_LOG("POC %lu ENCDEC OUT \n", pictureControlSetPtr->pictureNumber);
-#endif
         }
         EbReleaseObject(encDecTasksPtr->pictureControlSetWrapperPtr);
 
