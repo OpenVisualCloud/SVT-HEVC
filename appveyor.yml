@@ -25,7 +25,7 @@ install:
   - tar xf video.tar.gz
   - pacman -Syyuu --ask=20 --noconfirm --noprogressbar --needed
   - ps: if ("$env:generator" -match "Unix") { $env:packages = "mingw-w64-x86_64-ccache mingw-w64-x86_64-gcc pkg-config make" }
-  - pacman -Sy --ask=20 --noconfirm --noprogressbar --needed mingw-w64-x86_64-yasm %packages%
+  - pacman -Suu --ask=20 --noconfirm --noprogressbar --needed mingw-w64-x86_64-yasm %packages%
   - ps: |
       if ("$env:generator" -match "Visual*") {
         cmake -S . -B Build -G "Visual Studio 16 2019" -A x64 $env:BASE_CMAKE_ARGS.Split(' ')
