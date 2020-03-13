@@ -4333,10 +4333,6 @@ void* PictureAnalysisKernel(void *inputPtr)
 		outputResultsPtr = (PictureAnalysisResults_t*)outputResultsWrapperPtr->objectPtr;
 		outputResultsPtr->pictureControlSetWrapperPtr = inputResultsPtr->pictureControlSetWrapperPtr;
 
-#if DEADLOCK_DEBUG
-        SVT_LOG("POC %lu PA OUT \n", pictureControlSetPtr->pictureNumber);
-#endif
-
 		// Release the Input Results
 		EbReleaseObject(inputResultsWrapperPtr);
 
@@ -4361,6 +4357,9 @@ void* PictureAnalysisKernel(void *inputPtr)
 		// Post the Full Results Object
 		EbPostFullObject(outputResultsWrapperPtr);
 
+#if DEADLOCK_DEBUG
+        SVT_LOG("POC %lu PA OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
 	}
 	return EB_NULL;
 }
