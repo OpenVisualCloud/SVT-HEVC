@@ -570,8 +570,7 @@ void* PacketizationKernel(void *inputPtr)
         packetizationQp = pictureControlSetPtr->pictureQp;
 
         // Note: If AUD is inserted with headers, avoid insertion again for smaller bitstream.
-        if (sequenceControlSetPtr->staticConfig.accessUnitDelimiter && pictureControlSetPtr->pictureNumber > 0
-                && !toInsertHeaders)
+        if (sequenceControlSetPtr->staticConfig.accessUnitDelimiter && !toInsertHeaders)
         {
             EncodeAUD(
                 pictureControlSetPtr->bitstreamPtr,
