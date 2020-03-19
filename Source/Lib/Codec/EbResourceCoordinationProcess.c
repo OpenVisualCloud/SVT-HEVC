@@ -584,8 +584,9 @@ void* ResourceCoordinationKernel(void *inputPtr)
         pictureControlSetPtr->pictureNumber                   = contextPtr->pictureNumberArray[instanceIndex]++;
 
 #if DEADLOCK_DEBUG
-        if (!endOfSequenceFlag)
-            SVT_LOG("POC %lu RESCOOR IN \n", pictureControlSetPtr->pictureNumber);
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            if (!endOfSequenceFlag)
+                SVT_LOG("POC %lu RESCOOR IN \n", pictureControlSetPtr->pictureNumber);
 #endif
         // Set the picture structure: 0: progressive, 1: top, 2: bottom
         pictureControlSetPtr->pictStruct = sequenceControlSetPtr->interlacedVideo == EB_FALSE ?
@@ -640,7 +641,9 @@ void* ResourceCoordinationKernel(void *inputPtr)
             // Post the finished Results Object
             EbPostFullObject(outputWrapperPtr);
 #if DEADLOCK_DEBUG
-            SVT_LOG("POC %lu RESCOOR OUT \n", ((PictureParentControlSet_t *)outputResultsPtr->pictureControlSetWrapperPtr->objectPtr)->pictureNumber);
+            if ((((PictureParentControlSet_t *)outputResultsPtr->pictureControlSetWrapperPtr->objectPtr)->pictureNumber >= MIN_POC) &&
+                    (((PictureParentControlSet_t *)outputResultsPtr->pictureControlSetWrapperPtr->objectPtr)->pictureNumber <= MAX_POC))
+                SVT_LOG("POC %lu RESCOOR OUT \n", ((PictureParentControlSet_t *)outputResultsPtr->pictureControlSetWrapperPtr->objectPtr)->pictureNumber);
 #endif
         }
 

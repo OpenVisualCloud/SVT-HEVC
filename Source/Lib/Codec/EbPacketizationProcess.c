@@ -178,7 +178,8 @@ void* PacketizationKernel(void *inputPtr)
         encodeContextPtr        = (EncodeContext_t*)        sequenceControlSetPtr->encodeContextPtr;
         tileCnt = pictureControlSetPtr->ParentPcsPtr->tileRowCount * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
 #if DEADLOCK_DEBUG
-        SVT_LOG("POC %lu PK IN \n", pictureControlSetPtr->pictureNumber);
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            SVT_LOG("POC %lu PK IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 
         //****************************************************
@@ -966,7 +967,8 @@ void* PacketizationKernel(void *inputPtr)
             EbPostFullObject(outputStreamWrapperPtr);
 
 #if DEADLOCK_DEBUG
-            SVT_LOG("POC %lu PK OUT \n", queueEntryPtr->pictureNumber);
+            if ((queueEntryPtr->pictureNumber >= MIN_POC) && (queueEntryPtr->pictureNumber <= MAX_POC))
+                SVT_LOG("POC %lu PK OUT \n", queueEntryPtr->pictureNumber);
 #endif
             // Reset the Reorder Queue Entry
             queueEntryPtr->pictureNumber    += PACKETIZATION_REORDER_QUEUE_MAX_DEPTH;

@@ -615,7 +615,8 @@ void* PictureDecisionKernel(void *inputPtr)
         encodeContextPtr        = (EncodeContext_t*)            sequenceControlSetPtr->encodeContextPtr;
 
 #if DEADLOCK_DEBUG
-        SVT_LOG("POC %lu PD IN \n", pictureControlSetPtr->pictureNumber);
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            SVT_LOG("POC %lu PD IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 
         loopCount ++;
@@ -1310,7 +1311,8 @@ void* PictureDecisionKernel(void *inputPtr)
                                 EbPostFullObject(outputResultsWrapperPtr);
                             }
 #if DEADLOCK_DEBUG
-                            SVT_LOG("POC %lu PD OUT \n", pictureControlSetPtr->pictureNumber);
+                            if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+                                SVT_LOG("POC %lu PD OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
                         }
 

@@ -211,7 +211,8 @@ void* PictureManagerKernel(void *inputPtr)
             encodeContextPtr                = sequenceControlSetPtr->encodeContextPtr;
 
 #if DEADLOCK_DEBUG
-            SVT_LOG("POC %lu PM IN \n", pictureControlSetPtr->pictureNumber);
+            if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+                SVT_LOG("POC %lu PM IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 		   queueEntryIndex = (EB_S32)(pictureControlSetPtr->pictureNumber - encodeContextPtr->pictureManagerReorderQueue[encodeContextPtr->pictureManagerReorderQueueHeadIndex]->pictureNumber);
 		   queueEntryIndex += encodeContextPtr->pictureManagerReorderQueueHeadIndex;
@@ -894,7 +895,8 @@ void* PictureManagerKernel(void *inputPtr)
                     // Post the Full Results Object
                     EbPostFullObject(outputWrapperPtr);
 #if DEADLOCK_DEBUG
-                    SVT_LOG("POC %lu PM OUT \n", ChildPictureControlSetPtr->pictureNumber);
+                    if ((ChildPictureControlSetPtr->pictureNumber >= MIN_POC) && (ChildPictureControlSetPtr->pictureNumber <= MAX_POC))
+                        SVT_LOG("POC %lu PM OUT \n", ChildPictureControlSetPtr->pictureNumber);
 #endif
 
 #if LATENCY_PROFILE

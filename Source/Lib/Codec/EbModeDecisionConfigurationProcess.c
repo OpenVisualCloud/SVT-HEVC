@@ -1930,7 +1930,8 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
 		pictureControlSetPtr = (PictureControlSet_t*)rateControlResultsPtr->pictureControlSetWrapperPtr->objectPtr;
 		sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 #if DEADLOCK_DEBUG
-        SVT_LOG("POC %lu MDC IN \n", pictureControlSetPtr->pictureNumber);
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            SVT_LOG("POC %lu MDC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
         SignalDerivationModeDecisionConfigKernelOq(
                 pictureControlSetPtr,
@@ -2098,7 +2099,8 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
             }
         }
 #if DEADLOCK_DEBUG
-        SVT_LOG("POC %lu MDC OUT \n", pictureControlSetPtr->pictureNumber);
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            SVT_LOG("POC %lu MDC OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
 
 #if LATENCY_PROFILE

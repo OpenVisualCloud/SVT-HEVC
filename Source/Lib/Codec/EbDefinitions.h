@@ -514,6 +514,12 @@ typedef void * EB_HANDLE;
                                             // Target rate and and max buffer size should be set properly even for fixed QP.
                                             // Disabled by default.
 #define DEADLOCK_DEBUG                   0
+#if DEADLOCK_DEBUG
+#include <limits.h>
+#define MIN_POC 0
+#define MAX_POC UINT_MAX
+#endif
+
 #define LIB_PRINTF_ENABLE                1
 #if LIB_PRINTF_ENABLE
 #define SVT_LOG printf

@@ -919,7 +919,8 @@ void* InitialRateControlKernel(void *inputPtr)
         pictureControlSetPtr->meSegmentsCompletionMask++;
         if (pictureControlSetPtr->meSegmentsCompletionMask == pictureControlSetPtr->meSegmentsTotalCount) {
 #if DEADLOCK_DEBUG
-            SVT_LOG("POC %lu IRC IN \n", pictureControlSetPtr->pictureNumber);
+            if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+                SVT_LOG("POC %lu IRC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 			sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 			encodeContextPtr = (EncodeContext_t*)sequenceControlSetPtr->encodeContextPtr;
@@ -1129,7 +1130,8 @@ void* InitialRateControlKernel(void *inputPtr)
 					// Post the Full Results Object
 					EbPostFullObject(outputResultsWrapperPtr);
 #if DEADLOCK_DEBUG
-                    SVT_LOG("POC %lu IRC OUT \n", pictureControlSetPtr->pictureNumber);
+                    if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+                        SVT_LOG("POC %lu IRC OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
 
 #if LATENCY_PROFILE

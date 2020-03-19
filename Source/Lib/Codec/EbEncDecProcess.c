@@ -2706,8 +2706,9 @@ void* EncDecKernel(void *inputPtr)
         lastLcuFlag = EB_FALSE;
         is16bit = (EB_BOOL)(sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
 #if DEADLOCK_DEBUG
-        if ((encDecTasksPtr->inputType == ENCDEC_TASKS_MDC_INPUT) && (tileGroupIdx == 0))
-            SVT_LOG("POC %lu ENCDEC IN \n", pictureControlSetPtr->pictureNumber);
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            if ((encDecTasksPtr->inputType == ENCDEC_TASKS_MDC_INPUT) && (tileGroupIdx == 0))
+                SVT_LOG("POC %lu ENCDEC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 
         // LCU Constants
@@ -3066,7 +3067,8 @@ void* EncDecKernel(void *inputPtr)
 
         if (lastLcuFlag) {
 #if DEADLOCK_DEBUG
-            SVT_LOG("POC %lu ENCDEC OUT \n", pictureControlSetPtr->pictureNumber);
+            if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+                SVT_LOG("POC %lu ENCDEC OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
 
             if (pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr != NULL){

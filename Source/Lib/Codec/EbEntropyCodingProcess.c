@@ -365,8 +365,9 @@ void* EntropyCodingKernel(void *inputPtr)
         lastLcuFlagInTile      = EB_FALSE;
         tileCnt                = pictureControlSetPtr->ParentPcsPtr->tileRowCount * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
 #if DEADLOCK_DEBUG
-        if (pictureControlSetPtr->encDecCodedLcuCount == pictureControlSetPtr->lcuTotalCount)
-            SVT_LOG("POC %lu EC IN \n", pictureControlSetPtr->pictureNumber);
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            if (pictureControlSetPtr->encDecCodedLcuCount == pictureControlSetPtr->lcuTotalCount)
+                SVT_LOG("POC %lu EC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
         //SVT_LOG("[%lld]: POC %lld EC IN, tile %d, (%d, %d) \n",
         //        EbGetSysTimeMs(),
@@ -515,7 +516,8 @@ void* EntropyCodingKernel(void *inputPtr)
                             EbPostFullObject(entropyCodingResultsWrapperPtr);
 
 #if DEADLOCK_DEBUG
-                            SVT_LOG("POC %lu EC OUT \n", pictureControlSetPtr->pictureNumber);
+                            if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+                                SVT_LOG("POC %lu EC OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
                         }
 					} // End if(PictureCompleteFlag)

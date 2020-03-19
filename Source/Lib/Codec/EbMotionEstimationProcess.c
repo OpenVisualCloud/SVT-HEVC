@@ -670,8 +670,9 @@ void* MotionEstimationKernel(void *inputPtr)
 		// Segments
 		segmentIndex = inputResultsPtr->segmentIndex;
 #if DEADLOCK_DEBUG
-        if (segmentIndex == 0)
-            SVT_LOG("POC %lu ME IN \n", pictureControlSetPtr->pictureNumber);
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            if (segmentIndex == 0)
+                SVT_LOG("POC %lu ME IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 		pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize;
 		pictureHeightInLcu = (sequenceControlSetPtr->lumaHeight + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize;
@@ -970,8 +971,9 @@ void* MotionEstimationKernel(void *inputPtr)
 		// Post the Full Results Object
 		EbPostFullObject(outputResultsWrapperPtr);
 #if DEADLOCK_DEBUG
-        if (segmentIndex == (EB_U32)(pictureControlSetPtr->meSegmentsTotalCount - 1))
-            SVT_LOG("POC %lu ME OUT \n", pictureControlSetPtr->pictureNumber);
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            if (segmentIndex == (EB_U32)(pictureControlSetPtr->meSegmentsTotalCount - 1))
+                SVT_LOG("POC %lu ME OUT \n", pictureControlSetPtr->pictureNumber);
 #endif
 	}
 	return EB_NULL;
