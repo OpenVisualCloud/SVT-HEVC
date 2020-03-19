@@ -2139,11 +2139,11 @@ void GetEightHorizontalSearchPointResults_32x32_64x64_PU_AVX2_INTRIN(
         bestSad64x64 = temSum;
         bestMV64x64 = 7 * 4;
     }
-    if (bestSad64x64 <= pBestSad64x64[0]) {
-        pBestSad64x64[0] = bestSad64x64;
-        xMv = _MVXT(mv) + (EB_S16)bestMV64x64;  yMv = _MVYT(mv);
-        pBestMV64x64[0] = ((EB_U16)yMv << 16) | ((EB_U16)xMv);
-    }
+
+    pBestSad64x64[0] = bestSad64x64;
+    xMv = _MVXT(mv) + (EB_S16)bestMV64x64;  yMv = _MVYT(mv);
+    pBestMV64x64[0] = ((EB_U16)yMv << 16) | ((EB_U16)xMv);
+
 
     // ****CODE PAST HERE IS BUGGY FOR GCC****
 
