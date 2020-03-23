@@ -5,6 +5,7 @@
 
 #include "EbAppInputy4m.h"
 #define YFM_HEADER_MAX 80
+#define YFM_FRAME_DELIMITER_MAX 10
 
 #define CHROMA_MAX 4
 
@@ -308,19 +309,29 @@ EB_BOOL validateAlphanumeric(unsigned char* buffer)
 
 /* read next line which contains the "FRAME" delimiter */
 int32_t read_y4m_frame_delimiter(EbConfig_t *cfg) {
-    unsigned char bufferY4Mheader[10];
+    unsigned char bufferY4Mframedelimiter[YFM_FRAME_DELIMITER_MAX];
     char *fresult;
 
-    fresult = fgets((char *)bufferY4Mheader, sizeof(bufferY4Mheader), cfg->inputFile);
+    fresult = fgets((char *)bufferY4Mframedelimiter, sizeof(bufferY4Mframedelimiter), cfg->inputFile);
 
     if (fresult == NULL) {
-        assert(feof(cfg->inputFile));
-        return EB_ErrorNone;
+        // Could be at end of file
+        // Rewind file and skip over header
+        fseek(cfg->inputFile, 0, SEEK_SET);
+        char buffer[YFM_HEADER_MAX];
+        fresult = fgets(buffer, sizeof(buffer), cfg->inputFile);
+
+        // try reading delimiter again
+        fresult = fgets((char *)bufferY4Mframedelimiter, sizeof(bufferY4Mframedelimiter), cfg->inputFile);
+        if (fresult == NULL) {
+            assert(feof(cfg->inputFile));
+            return EB_ErrorNone;
+        }
     }
-    if (!validateAlphanumeric(bufferY4Mheader)){
+    if (!validateAlphanumeric(bufferY4Mframedelimiter)){
         return EB_ErrorBadParameter;
     }
-    if (EB_STRCMP((const char*)bufferY4Mheader, "FRAME\n") != 0) {
+    if (EB_STRCMP((const char*)bufferY4Mframedelimiter, "FRAME\n") != 0) {
         fprintf(cfg->errorLogFile, "Failed to read proper y4m frame delimeter. Read broken.\n");
         return EB_ErrorBadParameter;
     }
