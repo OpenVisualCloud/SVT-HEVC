@@ -314,8 +314,18 @@ int32_t read_y4m_frame_delimiter(EbConfig_t *cfg) {
     fresult = fgets((char *)bufferY4Mheader, sizeof(bufferY4Mheader), cfg->inputFile);
 
     if (fresult == NULL) {
-        assert(feof(cfg->inputFile));
-        return EB_ErrorNone;
+        // Could be at end of file
+        // Rewind file and skip over header
+        fseek(cfg->inputFile, 0, SEEK_SET);
+        char buffer[YFM_HEADER_MAX];
+        fresult = fgets(buffer, sizeof(buffer), cfg->inputFile);
+
+        // try reading delimiter again
+        fresult = fgets((char *)bufferY4Mheader, sizeof(bufferY4Mheader), cfg->inputFile);
+        if (fresult == NULL) {
+            assert(feof(cfg->inputFile));
+            return EB_ErrorNone;
+        }
     }
     if (!validateAlphanumeric(bufferY4Mheader)){
         return EB_ErrorBadParameter;
