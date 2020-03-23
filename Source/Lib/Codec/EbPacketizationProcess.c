@@ -178,7 +178,8 @@ void* PacketizationKernel(void *inputPtr)
         encodeContextPtr        = (EncodeContext_t*)        sequenceControlSetPtr->encodeContextPtr;
         tileCnt = pictureControlSetPtr->ParentPcsPtr->tileRowCount * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
 #if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld PK IN \n", pictureControlSetPtr->pictureNumber);
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            SVT_LOG("POC %lu PK IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 
         //****************************************************
@@ -192,6 +193,7 @@ void* PacketizationKernel(void *inputPtr)
         queueEntryPtr->startTimeuSeconds = pictureControlSetPtr->ParentPcsPtr->startTimeuSeconds;
         queueEntryPtr->isUsedAsReferenceFlag = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag;
         queueEntryPtr->sliceType = pictureControlSetPtr->sliceType;
+        queueEntryPtr->pictureNumber = pictureControlSetPtr->pictureNumber;
 
 #if OUT_ALLOC
         EbGetEmptyObject(sequenceControlSetPtr->encodeContextPtr->streamOutputFifoPtr,
@@ -964,6 +966,11 @@ void* PacketizationKernel(void *inputPtr)
                 EbReleaseMutex(encodeContextPtr->bufferFillMutex);
             }
             EbPostFullObject(outputStreamWrapperPtr);
+
+#if DEADLOCK_DEBUG
+            if ((queueEntryPtr->pictureNumber >= MIN_POC) && (queueEntryPtr->pictureNumber <= MAX_POC))
+                SVT_LOG("POC %lu PK OUT \n", queueEntryPtr->pictureNumber);
+#endif
             // Reset the Reorder Queue Entry
             queueEntryPtr->pictureNumber    += PACKETIZATION_REORDER_QUEUE_MAX_DEPTH;
             queueEntryPtr->outputStreamWrapperPtr = (EbObjectWrapper_t *)EB_NULL;
@@ -976,9 +983,6 @@ void* PacketizationKernel(void *inputPtr)
 
 
         }
-#if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld PK OUT \n", pictureControlSetPtr->pictureNumber);
-#endif
     }
 return EB_NULL;
 }

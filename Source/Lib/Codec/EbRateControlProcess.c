@@ -2319,7 +2319,8 @@ void* RateControlKernel(void *inputPtr)
             sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
             encodeContextPtr = (EncodeContext_t*)sequenceControlSetPtr->encodeContextPtr;
 #if DEADLOCK_DEBUG
-            SVT_LOG("POC %lld RC IN \n", pictureControlSetPtr->pictureNumber);
+            if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+                SVT_LOG("POC %lu RC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 
             // High level RC
@@ -2593,13 +2594,13 @@ void* RateControlKernel(void *inputPtr)
             rateControlResultsPtr = (RateControlResults_t*)rateControlResultsWrapperPtr->objectPtr;
             rateControlResultsPtr->pictureControlSetWrapperPtr = rateControlTasksPtr->pictureControlSetWrapperPtr;
 
-#if DEADLOCK_DEBUG
-            SVT_LOG("POC %lld RC OUT \n", pictureControlSetPtr->pictureNumber);
-#endif
-
             // Post Full Rate Control Results
             EbPostFullObject(rateControlResultsWrapperPtr);
 
+#if DEADLOCK_DEBUG
+            if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+                SVT_LOG("POC %lu RC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
             // Release Rate Control Tasks
             EbReleaseObject(rateControlTasksWrapperPtr);
 

@@ -2706,7 +2706,9 @@ void* EncDecKernel(void *inputPtr)
         lastLcuFlag = EB_FALSE;
         is16bit = (EB_BOOL)(sequenceControlSetPtr->staticConfig.encoderBitDepth > EB_8BIT);
 #if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld ENCDEC IN \n", pictureControlSetPtr->pictureNumber);
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            if ((encDecTasksPtr->inputType == ENCDEC_TASKS_MDC_INPUT) && (tileGroupIdx == 0))
+                SVT_LOG("POC %lu ENCDEC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 
         // LCU Constants
@@ -3064,6 +3066,11 @@ void* EncDecKernel(void *inputPtr)
         EbReleaseMutex(pictureControlSetPtr->intraMutex);
 
         if (lastLcuFlag) {
+#if DEADLOCK_DEBUG
+            if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+                SVT_LOG("POC %lu ENCDEC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
+
             if (pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr != NULL){
                 // copy stat to ref object (intraCodedArea, Luminance, Scene change detection flags)
                 CopyStatisticsToRefObject(
@@ -3223,10 +3230,6 @@ void* EncDecKernel(void *inputPtr)
             }
         }
         EbReleaseObject(encDecTasksPtr->pictureControlSetWrapperPtr);
-
-#if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld ENCDEC OUT \n", pictureControlSetPtr->pictureNumber);
-#endif
 
         // Release Mode Decision Results
         EbReleaseObject(encDecTasksWrapperPtr);

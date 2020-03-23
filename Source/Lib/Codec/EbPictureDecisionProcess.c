@@ -615,7 +615,8 @@ void* PictureDecisionKernel(void *inputPtr)
         encodeContextPtr        = (EncodeContext_t*)            sequenceControlSetPtr->encodeContextPtr;
 
 #if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld PD IN \n", pictureControlSetPtr->pictureNumber);
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            SVT_LOG("POC %lu PD IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 
         loopCount ++;
@@ -1309,6 +1310,10 @@ void* PictureDecisionKernel(void *inputPtr)
                                 // Post the Full Results Object
                                 EbPostFullObject(outputResultsWrapperPtr);
                             }
+#if DEADLOCK_DEBUG
+                            if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+                                SVT_LOG("POC %lu PD OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
                         }
 
 						if (pictureIndex == contextPtr->miniGopEndIndex[miniGopIndex]) {
@@ -1373,9 +1378,6 @@ void* PictureDecisionKernel(void *inputPtr)
             if(windowAvail == EB_FALSE  && framePasseThru == EB_FALSE)
                 break;
         }
-#if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld PD OUT \n", pictureControlSetPtr->pictureNumber);
-#endif
         // Release the Input Results
         EbReleaseObject(inputResultsWrapperPtr);
     }

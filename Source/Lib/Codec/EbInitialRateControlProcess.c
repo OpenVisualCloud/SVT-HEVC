@@ -916,11 +916,12 @@ void* InitialRateControlKernel(void *inputPtr)
 
 		inputResultsPtr = (MotionEstimationResults_t*)inputResultsWrapperPtr->objectPtr;
 		pictureControlSetPtr = (PictureParentControlSet_t*)inputResultsPtr->pictureControlSetWrapperPtr->objectPtr;
-#if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld IRC IN \n", pictureControlSetPtr->pictureNumber);
-#endif
         pictureControlSetPtr->meSegmentsCompletionMask++;
         if (pictureControlSetPtr->meSegmentsCompletionMask == pictureControlSetPtr->meSegmentsTotalCount) {
+#if DEADLOCK_DEBUG
+            if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+                SVT_LOG("POC %lu IRC IN \n", pictureControlSetPtr->pictureNumber);
+#endif
 			sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 			encodeContextPtr = (EncodeContext_t*)sequenceControlSetPtr->encodeContextPtr;
 
@@ -1128,6 +1129,11 @@ void* InitialRateControlKernel(void *inputPtr)
 					/////////////////////////////
 					// Post the Full Results Object
 					EbPostFullObject(outputResultsWrapperPtr);
+#if DEADLOCK_DEBUG
+                    if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+                        SVT_LOG("POC %lu IRC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
+
 #if LATENCY_PROFILE
         double latency = 0.0;
         EB_U64 finishTimeSeconds = 0;
@@ -1159,9 +1165,6 @@ void* InitialRateControlKernel(void *inputPtr)
 				}
 			}
 		}
-#if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld IRC OUT \n", pictureControlSetPtr->pictureNumber);
-#endif
 		// Release the Input Results
 		EbReleaseObject(inputResultsWrapperPtr);
 
