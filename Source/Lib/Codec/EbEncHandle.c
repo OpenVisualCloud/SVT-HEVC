@@ -1595,7 +1595,7 @@ EB_ERRORTYPE EbH265EncComponentDeInit(EB_COMPONENTTYPE  *h265EncComponent)
 
     if (h265EncComponent->pComponentPrivate) {
         EbEncHandle_t *handle;
-        handle = h265EncComponent->pComponentPrivate;
+        handle = (EbEncHandle_t*)(h265EncComponent->pComponentPrivate);
         EB_DELETE(handle);
     }
     else {
