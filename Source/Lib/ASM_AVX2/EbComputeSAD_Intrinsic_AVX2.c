@@ -2103,6 +2103,7 @@ void GetEightHorizontalSearchPointResults_32x32_64x64_PU_AVX2_INTRIN(
     temSum = _mm_extract_epi32(sad_0, 0);
     if (temSum <= pBestSad64x64[0]) {
         pBestSad64x64[0] = temSum;
+		bestMV64x64 = 0;
     }
     temSum = _mm_extract_epi32(sad_0, 1);
     if (temSum <= pBestSad64x64[0]) {
