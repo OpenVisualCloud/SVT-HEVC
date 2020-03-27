@@ -436,7 +436,7 @@ void GetEightHorizontalSearchPointResults_32x32_64x64(
 
         //64x64
         sad64x64 = sad32x32_0 + sad32x32_1 + sad32x32_2 + sad32x32_3;
-        if (2 * sad64x64 < pBestSad64x64[0]){
+        if (2 * sad64x64 <= pBestSad64x64[0]){
             pBestSad64x64[0] = 2 * sad64x64;
             xMv = _MVXT(mv) + (EB_S16)xSearchIndex * 4;
             yMv = _MVYT(mv);
