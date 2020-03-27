@@ -75,6 +75,95 @@ void AssignAppThreadGroup(uint8_t targetSocket) {
 #endif
 }
 
+void* EbAppCreateThread(
+    void *threadFunction(void*),
+    void *threadContext)
+{
+    void* threadHandle = NULL;
+
+#ifdef _WIN32
+    threadHandle = (void*)CreateThread(
+        NULL,                           // default security attributes
+        0,                              // default stack size
+        (LPTHREAD_START_ROUTINE)threadFunction, // function to be tied to the new thread
+        threadContext,                  // context to be tied to the new thread
+        0,                              // thread active when created
+        NULL);                          // new thread ID
+#else
+    pthread_attr_t attr;
+    struct sched_param param = {
+        .sched_priority = 99
+    };
+    pthread_attr_init(&attr);
+    pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
+    pthread_attr_setschedparam(&attr, &param);
+    pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+
+    threadHandle = (pthread_t*)malloc(sizeof(pthread_t));
+    if (threadHandle != NULL) {
+        int ret = pthread_create(
+            (pthread_t*)threadHandle,     // Thread handle
+            &attr,                        // attributes
+            threadFunction,               // function to be run by new thread
+            threadContext);
+
+        if (ret != 0) {
+            if (ret == EPERM) {
+                pthread_cancel(*((pthread_t*)threadHandle));
+                free(threadHandle);
+                threadHandle = (pthread_t*)malloc(sizeof(pthread_t));
+                if (threadHandle != NULL) {
+                    pthread_create(
+                        (pthread_t*)threadHandle,       // Thread handle
+                        (const pthread_attr_t*)EB_NULL, // attributes
+                        threadFunction,                 // function to be run by new thread
+                        threadContext);
+                }
+            }
+        }
+    }
+    pthread_attr_destroy(&attr);
+#endif // _WIN32
+
+    return threadHandle;
+}
+
+EB_ERRORTYPE EbAppDestroyThread(
+    void* threadHandle)
+{
+    EB_ERRORTYPE error_return = EB_ErrorNone;
+#ifdef _WIN32
+    WaitForSingleObject(threadHandle, INFINITE);
+    error_return = CloseHandle(threadHandle) ? EB_ErrorNone : EB_ErrorDestroyThreadFailed;
+#else
+    pthread_join(*((pthread_t*)threadHandle), NULL);
+    free(threadHandle);
+#endif // _WIN32
+
+    return error_return;
+}
+
+typedef struct EbAppThreadContext_s {
+    uint32_t         numChannels;
+    EbConfig_t     **configs;
+    EbAppContext_t **appCallbacks;
+} EbAppThreadContext_t;
+
+EB_BOOL inputDone = EB_FALSE;
+void* InputWorkerFunc(void *inputPtr)
+{
+    EbAppThreadContext_t *threadContext = (EbAppThreadContext_t*)inputPtr;
+    APPEXITCONDITIONTYPE    exitConditionsInput[MAX_CHANNEL_NUMBER]; // Processing loop exit condition
+    while (EB_TRUE) {
+        for (int instanceCount = 0; instanceCount < threadContext->numChannels; ++instanceCount) {
+            exitConditionsInput[instanceCount] = ProcessInputBuffer(threadContext->configs[instanceCount], threadContext->appCallbacks[instanceCount]);
+            if (exitConditionsInput[instanceCount] != APP_ExitConditionNone) {
+                inputDone = EB_TRUE;
+                return;
+            }
+        }
+    }
+}
 
 /***************************************
  * Encoder App Main
@@ -96,8 +185,10 @@ int32_t main(int32_t argc, char* argv[])
     APPEXITCONDITIONTYPE    exitConditions[MAX_CHANNEL_NUMBER];          // Processing loop exit condition
     APPEXITCONDITIONTYPE    exitConditionsOutput[MAX_CHANNEL_NUMBER];         // Processing loop exit condition
     APPEXITCONDITIONTYPE    exitConditionsRecon[MAX_CHANNEL_NUMBER];         // Processing loop exit condition
-    APPEXITCONDITIONTYPE    exitConditionsInput[MAX_CHANNEL_NUMBER];          // Processing loop exit condition
 
+    // input processing worker thread
+    void *inputWorker = EB_NULL;
+    EbAppThreadContext_t inputWorkerContext;
 
     EB_BOOL                 channelActive[MAX_CHANNEL_NUMBER];
 
@@ -135,7 +226,6 @@ int32_t main(int32_t argc, char* argv[])
         exitConditions[instanceCount] = APP_ExitConditionError;         // Processing loop exit condition
         exitConditionsOutput[instanceCount] = APP_ExitConditionError;         // Processing loop exit condition
         exitConditionsRecon[instanceCount] = APP_ExitConditionError;         // Processing loop exit condition
-        exitConditionsInput[instanceCount] = APP_ExitConditionError;         // Processing loop exit condition
         channelActive[instanceCount] = EB_FALSE;
     }
 
@@ -175,7 +265,6 @@ int32_t main(int32_t argc, char* argv[])
                     exitConditions[instanceCount] = APP_ExitConditionNone;
                     exitConditionsOutput[instanceCount] = APP_ExitConditionNone;
                     exitConditionsRecon[instanceCount] = configs[instanceCount]->reconFile ? APP_ExitConditionNone : APP_ExitConditionError;
-                    exitConditionsInput[instanceCount] = APP_ExitConditionNone;
                     channelActive[instanceCount] = EB_TRUE;
                     EbAppStartTime((uint64_t*)&configs[instanceCount]->performanceContext.encodeStartTime[0], (uint64_t*)&configs[instanceCount]->performanceContext.encodeStartTime[1]);
                 }
@@ -183,24 +272,25 @@ int32_t main(int32_t argc, char* argv[])
                     exitConditions[instanceCount] = APP_ExitConditionError;
                     exitConditionsOutput[instanceCount] = APP_ExitConditionError;
                     exitConditionsRecon[instanceCount] = APP_ExitConditionError;
-                    exitConditionsInput[instanceCount] = APP_ExitConditionError;
                 }
 
 #if DISPLAY_MEMORY
                 EB_APP_MEMORY();
 #endif
             }
+
             printf("Encoding          ");
             fflush(stdout);
+
+            inputWorkerContext.numChannels = numChannels;
+            inputWorkerContext.configs = configs;
+            inputWorkerContext.appCallbacks = appCallbacks;
+            inputWorker = EbAppCreateThread(InputWorkerFunc, &inputWorkerContext);
 
             while (exitCondition == APP_ExitConditionNone) {
                 exitCondition = APP_ExitConditionFinished;
                 for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
                     if (channelActive[instanceCount] == EB_TRUE) {
-                        if (exitConditionsInput[instanceCount] == APP_ExitConditionNone)
-                            exitConditionsInput[instanceCount] = ProcessInputBuffer(
-                                configs[instanceCount],
-                                appCallbacks[instanceCount]);
                         if (exitConditionsRecon[instanceCount] == APP_ExitConditionNone)
                             exitConditionsRecon[instanceCount] = ProcessOutputReconBuffer(
                                 configs[instanceCount],
@@ -209,14 +299,14 @@ int32_t main(int32_t argc, char* argv[])
                             exitConditionsOutput[instanceCount] = ProcessOutputStreamBuffer(
                                 configs[instanceCount],
                                 appCallbacks[instanceCount],
-                                (exitConditionsInput[instanceCount] == APP_ExitConditionNone) || (exitConditionsRecon[instanceCount] == APP_ExitConditionNone) ? 0 : 1);
-                        if (((exitConditionsRecon[instanceCount] == APP_ExitConditionFinished || !configs[instanceCount]->reconFile) && exitConditionsOutput[instanceCount] == APP_ExitConditionFinished && exitConditionsInput[instanceCount] == APP_ExitConditionFinished) ||
-                            ((exitConditionsRecon[instanceCount] == APP_ExitConditionError && configs[instanceCount]->reconFile) || exitConditionsOutput[instanceCount] == APP_ExitConditionError || exitConditionsInput[instanceCount] == APP_ExitConditionError)) {
+                                inputDone || (exitConditionsRecon[instanceCount] == APP_ExitConditionNone) ? 0 : 1);
+                        if (((exitConditionsRecon[instanceCount] == APP_ExitConditionFinished || !configs[instanceCount]->reconFile) && exitConditionsOutput[instanceCount] == APP_ExitConditionFinished) ||
+                            ((exitConditionsRecon[instanceCount] == APP_ExitConditionError && configs[instanceCount]->reconFile) || exitConditionsOutput[instanceCount] == APP_ExitConditionError)) {
                             channelActive[instanceCount] = EB_FALSE;
                             if (configs[instanceCount]->reconFile)
-                                exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsRecon[instanceCount] | exitConditionsOutput[instanceCount] | exitConditionsInput[instanceCount]);
+                                exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsRecon[instanceCount] | exitConditionsOutput[instanceCount]);
                             else
-                                exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsOutput[instanceCount] | exitConditionsInput[instanceCount]);
+                                exitConditions[instanceCount] = (APPEXITCONDITIONTYPE)(exitConditionsOutput[instanceCount]);
                         }
                     }
                 }
@@ -226,6 +316,8 @@ int32_t main(int32_t argc, char* argv[])
                         exitCondition = APP_ExitConditionNone;
                 }
             }
+
+            EbAppDestroyThread(inputWorker);
 
             for (instanceCount = 0; instanceCount < numChannels; ++instanceCount) {
                 if (exitConditions[instanceCount] == APP_ExitConditionFinished && return_errors[instanceCount] == EB_ErrorNone) {
