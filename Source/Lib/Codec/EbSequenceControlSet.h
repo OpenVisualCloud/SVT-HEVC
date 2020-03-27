@@ -176,6 +176,7 @@ typedef struct SequenceControlSet_s
     //EB_U32                    modeDecisionFifoInitCount;            
     EB_U32                      encDecFifoInitCount;
     EB_U32                      entropyCodingFifoInitCount;
+    EB_U32                      unpackFifoInitCount;
     EB_U32                      pictureAnalysisProcessInitCount;     
     EB_U32                      motionEstimationProcessInitCount; 
     EB_U32                      sourceBasedOperationsProcessInitCount;

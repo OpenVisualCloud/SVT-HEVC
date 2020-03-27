@@ -1214,7 +1214,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         EB_NEW(
             encHandlePtr->unpackTasksResourcePtr,
             EbSystemResourceCtor,
-            encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount,
+            encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackFifoInitCount,
             encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount,
             encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount,
             &encHandlePtr->unpackTasksProducerFifoPtrArray,
@@ -1230,7 +1230,7 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         EB_NEW(
             encHandlePtr->unpackSyncResourcePtr,
             EbSystemResourceCtor,
-            encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount,
+            encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackFifoInitCount,
             encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount,
             encHandlePtr->sequenceControlSetInstanceArray[0]->sequenceControlSetPtr->unpackProcessInitCount,
             &encHandlePtr->unpackSyncProducerFifoPtrArray,
@@ -1636,32 +1636,67 @@ EB_API EB_ERRORTYPE EbDeinitHandle(
 }
 
 #define SCD_LAD 6
-EB_U32 SetParentPcs(EB_H265_ENC_CONFIGURATION*   config)
+
+// Calculate the necessary number of each FIFO objects, depending on the required
+// FPS multiplied by the object consuming time (life cycle). Here is the basic
+// concept about input pictures going through an encoding kernel or pipeline:
+//
+//                                FPS
+//                          _______/\________
+//                         /_________________\_______
+//                         |                         |
+//                Input -> |-P-P-P-P-P-P-P-P-P-P-P-P-| -> Output
+//                         |_________________________|
+//                         \___________  ____________/
+//                                     \/
+//                                 life_cycle
+//
+// So in order to get the desired encoding performance, the number of (frame level)
+// objects can be calculated by:
+//
+//                      object_count = FPS * life_cycle
+//
+// where life_cycle is the time consumed by any kernel, function or procedure where
+// the object is used, and it varies depending on the frame size, type, encoding
+// arguments, tool complexity, calculation capability of a system, etc.
+//
+// Note: when the object handling bases on sub unit (such as tile, segment, LCU,
+//       etc.), the number of objects should be multiplied by the unit count within
+//       a frame.
+//
+// The calculation is also common for other pipelines, such as video decoding
+// and graphics rendering, regardless whether the processing unit is multi-thread
+// or not.
+
+// Encoding pipeline kernel count (RC->PA->PD->...->EC->PK)
+#define PIPELINE_KERNEL_CNT 12
+// The number of kernels where a result object is shared between.
+#define OBJ_SHARED_KERNEL_CNT 2
+
+EB_U32 CalculateObjCnt(EB_H265_ENC_CONFIGURATION *config)
 {
 
-    EB_U32 inputPic = 100;
-    EB_U32 fps = (EB_U32)((config->frameRate > 1000) ? config->frameRate >> 16 : config->frameRate);
+    EB_U32 objCnt = 0;
+    EB_U32 fps = (EB_U32)((config->frameRate > 1000) ? (config->frameRate >> 16) : config->frameRate);
+	// The (frame based) object count of a FIFO can be calculated by:
+	// N = FPS * object_life_cycle
+	// TODO: the life cycle of an object passing through a kernel
+	//       (or the whole encoding pipeline) should be calculated
+	//       during runtime, depending on encoding capability of
+	//       different systems.
+	const EB_U8 objLifeCyclePerKernel = 1;
 
-    fps = fps > 120 ? 120 : fps;
-    fps = fps < 24 ? 24 : fps;
+    fps = CLIP3EQ(24, 120, fps);
 
-    if (config->intraPeriodLength > 0 && ((EB_U32)(config->intraPeriodLength) > (fps << 1)) && ((config->sourceWidth * config->sourceHeight) < INPUT_SIZE_4K_TH))
-        fps = config->intraPeriodLength;
-
-    EB_U32     lowLatencyInput = (config->encMode < 6 || config->speedControlFlag == 1) ? fps :
+    EB_U32 lowLatencyInput = (config->encMode < 6 || config->speedControlFlag == 1) ? fps :
         (config->encMode < 8) ? fps >> 1 : (EB_U32)((2 << config->hierarchicalLevels) + SCD_LAD);
 
-    EB_U32     normalLatencyInput = (fps * 3) >> 1;
-
-    if ((config->sourceWidth * config->sourceHeight) > INPUT_SIZE_4K_TH)
-        normalLatencyInput = (normalLatencyInput * 3) >> 1;
-
     if (config->latencyMode == 0)
-        inputPic = (normalLatencyInput + config->lookAheadDistance);
+		objCnt = fps * objLifeCyclePerKernel;
     else
-        inputPic = (EB_U32)(lowLatencyInput + config->lookAheadDistance);
+		objCnt = (EB_U32)(lowLatencyInput + config->lookAheadDistance);
 
-    return inputPic;
+    return objCnt;
 }
 
 void LoadDefaultBufferConfigurationSettings(
@@ -1677,7 +1712,11 @@ void LoadDefaultBufferConfigurationSettings(
     EB_U16 tileColCount = sequenceControlSetPtr->staticConfig.tileColumnCount;
     EB_U16 tileRowCount = sequenceControlSetPtr->staticConfig.tileRowCount;
 
-    EB_U32 inputPic = SetParentPcs(&sequenceControlSetPtr->staticConfig);
+    EB_U32 objBaseCnt = CalculateObjCnt(&sequenceControlSetPtr->staticConfig);
+
+    EB_U32 miniGOPLengh = (1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels);
+    EB_U32 meSegmentsTotalCount = 0;
+    EB_U32 tileGroupCnt = 0;
 
     unsigned int lpCount = EbHevcGetNumProcessors();
     unsigned int coreCount = lpCount;
@@ -1723,8 +1762,6 @@ void LoadDefaultBufferConfigurationSettings(
                            / EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_MIN_CORE;
     }
     threadUnit = totalThreadCount / EB_THREAD_COUNT_MIN_CORE;
-
-    sequenceControlSetPtr->inputOutputBufferFifoInitCount = inputPic + SCD_LAD;
 
     // ME segments
     sequenceControlSetPtr->meSegmentRowCountArray[0] = meSegH;
@@ -1776,26 +1813,93 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->tileGroupRowCountArray[4] = tileGroupRowCount;
     sequenceControlSetPtr->tileGroupRowCountArray[5] = tileGroupRowCount;
 
+    // The details about required FIFO objects going through each encoding kernel:
+    // (N = FPS * life_cycle)
+    //
+    // Resource Coordination: SCS, PPCS, PA_Ref (Global); RC_Result (N)
+    //
+    // Picture Analysis: PA_Result (N)
+    //
+    // Picture Decision: handles frames in group of miniGOP size, and dequeues PD_Result
+    //                   objects based on segment level:
+    //                   PD_Result (miniGOP_size * meSegmentsTotalCount * N)
+    //
+    // Motion Estimation: dequeues ME_Result objects based on segment level:
+    //                    ME_Result (meSegmentsTotalCount * N)
+    //
+    // Initial Rate Control: handles based on frame level (after receiving all segments),
+    //                       and then handles frames in group of LookAheadDistance as
+    //                       sliding window:
+    //                       Ref_Pic, Output (Global); IRC_Result (LAD * N)
+    //
+    // Source Based Operations: PicDemux_Result (N)
+    //
+    // Picture Manager: CPCS (Global); PM_Result (N)
+    //
+    // Rate Control: RC_Result (N)
+    //
+    // Mode Decision Configuration: handles based on tile group level:
+    //                              MDC_Result (tileGroupRowCnt * tileGroupColCnt * N)
+    //
+    // EncDec: how to calculate feedback_FIFO ??
+    //         dequeues encDec_Result based on LCU line of each tile; then handles other
+    //         stuff (such as SAO) for the reconstructed frame based on frame level:
+    //         encDec_Result (picLcuInHeight * tileColCount * N), PicDemux_Result (N)
+    //
+    // Entropy Coding: dequeues RC_Result based on LCU line of each tile; dequeues
+    //                 EC_Result based on frame level:
+    //                 RC_Task (picLcuInHeight * tileColCount * N), EC_Result (N)
+    //
+    // Packetization: RC_Task (N)
+
     //#====================== Data Structures and Picture Buffers ======================
-    sequenceControlSetPtr->pictureControlSetPoolInitCount       = inputPic;
-    sequenceControlSetPtr->pictureControlSetPoolInitCountChild  = MAX(4, coreCount / 6);
-    sequenceControlSetPtr->referencePictureBufferInitCount      = inputPic;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
-    sequenceControlSetPtr->paReferencePictureBufferInitCount    = inputPic;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
-    sequenceControlSetPtr->reconBufferFifoInitCount             = sequenceControlSetPtr->referencePictureBufferInitCount;
+    // "Global" objects which are needed through the whole encoding pipeline.
+    sequenceControlSetPtr->inputOutputBufferFifoInitCount         = objBaseCnt * PIPELINE_KERNEL_CNT;
+    sequenceControlSetPtr->pictureControlSetPoolInitCount         = objBaseCnt * PIPELINE_KERNEL_CNT;
+    sequenceControlSetPtr->paReferencePictureBufferInitCount      = objBaseCnt * PIPELINE_KERNEL_CNT;
+    sequenceControlSetPtr->pictureControlSetPoolInitCountChild    = objBaseCnt * PIPELINE_KERNEL_CNT;
+    sequenceControlSetPtr->referencePictureBufferInitCount        = objBaseCnt * PIPELINE_KERNEL_CNT;
+    sequenceControlSetPtr->reconBufferFifoInitCount               = objBaseCnt * PIPELINE_KERNEL_CNT;
 
     //#====================== Inter process Fifos ======================
-    sequenceControlSetPtr->resourceCoordinationFifoInitCount = 300;
-    sequenceControlSetPtr->pictureAnalysisFifoInitCount = 301;
-    sequenceControlSetPtr->pictureDecisionFifoInitCount = 302;
-    sequenceControlSetPtr->initialRateControlFifoInitCount = 303;
-    sequenceControlSetPtr->pictureDemuxFifoInitCount = 304;
-    sequenceControlSetPtr->rateControlTasksFifoInitCount = 305;
-    sequenceControlSetPtr->rateControlFifoInitCount = 306;
-    //sequenceControlSetPtr->modeDecisionFifoInitCount = 307;
-    sequenceControlSetPtr->modeDecisionConfigurationFifoInitCount = (300 * sequenceControlSetPtr->staticConfig.tileRowCount);
-    sequenceControlSetPtr->motionEstimationFifoInitCount = 308;
-    sequenceControlSetPtr->entropyCodingFifoInitCount = 309;
-    sequenceControlSetPtr->encDecFifoInitCount = 900;
+    // Local objects which are only needed among (2) kernels, typically they're used as result objects.
+    sequenceControlSetPtr->resourceCoordinationFifoInitCount      = objBaseCnt * OBJ_SHARED_KERNEL_CNT;
+    sequenceControlSetPtr->pictureAnalysisFifoInitCount           = objBaseCnt * OBJ_SHARED_KERNEL_CNT;
+
+    meSegmentsTotalCount =
+        sequenceControlSetPtr->meSegmentRowCountArray[0] * sequenceControlSetPtr->meSegmentRowCountArray[0];
+    sequenceControlSetPtr->pictureDecisionFifoInitCount           =
+        miniGOPLengh * meSegmentsTotalCount * objBaseCnt * OBJ_SHARED_KERNEL_CNT;
+    sequenceControlSetPtr->motionEstimationFifoInitCount          =
+        meSegmentsTotalCount * objBaseCnt * OBJ_SHARED_KERNEL_CNT;
+
+    sequenceControlSetPtr->initialRateControlFifoInitCount        =
+        sequenceControlSetPtr->staticConfig.lookAheadDistance * objBaseCnt * OBJ_SHARED_KERNEL_CNT;
+    sequenceControlSetPtr->pictureDemuxFifoInitCount              = objBaseCnt * OBJ_SHARED_KERNEL_CNT;
+    sequenceControlSetPtr->rateControlTasksFifoInitCount          = objBaseCnt * OBJ_SHARED_KERNEL_CNT;
+    sequenceControlSetPtr->rateControlFifoInitCount               = objBaseCnt * OBJ_SHARED_KERNEL_CNT;
+
+    tileGroupCnt = sequenceControlSetPtr->tileGroupRowCountArray[0] * sequenceControlSetPtr->tileGroupColCountArray[0];
+    sequenceControlSetPtr->modeDecisionConfigurationFifoInitCount =
+        tileGroupCnt * objBaseCnt * OBJ_SHARED_KERNEL_CNT;
+
+    // EncDec result objects are multiplied by picLcuInHeight * tileColCount.
+    sequenceControlSetPtr->encDecFifoInitCount                    =
+        encDecSegH * sequenceControlSetPtr->staticConfig.tileColumnCount * objBaseCnt * OBJ_SHARED_KERNEL_CNT;
+    // EncDec dequeues additional feedback objects to itself.
+    sequenceControlSetPtr->encDecFifoInitCount                   *= 2;
+    sequenceControlSetPtr->pictureDemuxFifoInitCount             += objBaseCnt * OBJ_SHARED_KERNEL_CNT;
+
+    sequenceControlSetPtr->entropyCodingFifoInitCount            = objBaseCnt * OBJ_SHARED_KERNEL_CNT;
+    // EC feedback objects to RC are multiplied by picLcuInHeight * tileColCount.
+    sequenceControlSetPtr->rateControlTasksFifoInitCount         +=
+        encDecSegH * sequenceControlSetPtr->staticConfig.tileColumnCount * objBaseCnt * OBJ_SHARED_KERNEL_CNT;
+    // PK dequeues additional feedback objects to PM.
+    sequenceControlSetPtr->pictureDemuxFifoInitCount             += objBaseCnt * OBJ_SHARED_KERNEL_CNT;
+    // PK dequeues additional feedback objects to RC
+    sequenceControlSetPtr->rateControlTasksFifoInitCount         += objBaseCnt * OBJ_SHARED_KERNEL_CNT;
+
+    sequenceControlSetPtr->unpackFifoInitCount                    = objBaseCnt * OBJ_SHARED_KERNEL_CNT;
 
     //#====================== Processes number ======================
     sequenceControlSetPtr->totalProcessInitCount = 0;
@@ -1810,10 +1914,47 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->encDecProcessInitCount =
                                                     totalThreadCount - sequenceControlSetPtr->totalProcessInitCount;
 
-    SVT_LOG("Number of logical cores available: %u\nNumber of PPCS %u\n", coreCount, inputPic);
+    SVT_LOG("Number of logical cores available: %u\n\n", coreCount);
+
+    // Adjust the FIFO object counts according to their using kernel thread counts (> 1).
+    sequenceControlSetPtr->resourceCoordinationFifoInitCount =
+        MAX(sequenceControlSetPtr->resourceCoordinationFifoInitCount, sequenceControlSetPtr->pictureAnalysisProcessInitCount);
+    sequenceControlSetPtr->pictureDecisionFifoInitCount =
+        MAX(sequenceControlSetPtr->pictureDecisionFifoInitCount, sequenceControlSetPtr->motionEstimationProcessInitCount);
+    sequenceControlSetPtr->initialRateControlFifoInitCount =
+        MAX(sequenceControlSetPtr->initialRateControlFifoInitCount, sequenceControlSetPtr->sourceBasedOperationsProcessInitCount);
+    sequenceControlSetPtr->rateControlFifoInitCount =
+        MAX(sequenceControlSetPtr->rateControlFifoInitCount, sequenceControlSetPtr->modeDecisionConfigurationProcessInitCount);
+    sequenceControlSetPtr->modeDecisionConfigurationFifoInitCount =
+        MAX(sequenceControlSetPtr->modeDecisionConfigurationFifoInitCount, sequenceControlSetPtr->encDecProcessInitCount);
+    sequenceControlSetPtr->encDecFifoInitCount =
+        MAX(sequenceControlSetPtr->encDecFifoInitCount, sequenceControlSetPtr->entropyCodingProcessInitCount);
+
+    SVT_LOG("The number of FIFO objects:\n");
+    SVT_LOG("Input & Output\tPPCS\tPA Ref\tCPCS\tRefPic\tRecon\n");
+    SVT_LOG("%u\t\t%u\t%u\t%u\t%u\t%u\n\n",
+            sequenceControlSetPtr->inputOutputBufferFifoInitCount,
+            sequenceControlSetPtr->pictureControlSetPoolInitCount,
+            sequenceControlSetPtr->paReferencePictureBufferInitCount,
+            sequenceControlSetPtr->pictureControlSetPoolInitCountChild,
+            sequenceControlSetPtr->referencePictureBufferInitCount,
+            sequenceControlSetPtr->reconBufferFifoInitCount);
+
+    SVT_LOG("RC\tPA\tPD\tME\tIRC\tSBO\tPM\tRC\tMDC\tEncDec\tEC\n");
+    SVT_LOG("%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\n",
+            sequenceControlSetPtr->resourceCoordinationFifoInitCount,
+            sequenceControlSetPtr->pictureAnalysisFifoInitCount,
+            sequenceControlSetPtr->pictureDecisionFifoInitCount,
+            sequenceControlSetPtr->motionEstimationFifoInitCount,
+            sequenceControlSetPtr->initialRateControlFifoInitCount,
+            sequenceControlSetPtr->pictureDemuxFifoInitCount,
+            sequenceControlSetPtr->rateControlTasksFifoInitCount,
+            sequenceControlSetPtr->rateControlFifoInitCount,
+            sequenceControlSetPtr->modeDecisionConfigurationFifoInitCount,
+            sequenceControlSetPtr->encDecFifoInitCount,
+            sequenceControlSetPtr->entropyCodingFifoInitCount);
 
     return;
-
 }
 
 // Sets the default intra period the closest possible to 1 second without breaking the minigop
