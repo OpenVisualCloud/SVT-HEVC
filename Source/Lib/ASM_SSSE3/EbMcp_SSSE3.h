@@ -13,7 +13,15 @@ extern "C" {
 #endif
 
 #ifdef VNNI_SUPPORT
+
 #define LumaInterpolationFilterOneDOutRawHorizontal LumaInterpolationFilterOneDOutRawHorizontal_SSSE3
+
+
+
+
+
+
+
 #define EbHevcLumaInterpolationFilterTwoDInRaw7 EbHevcLumaInterpolationFilterTwoDInRaw7_VNNI
 #define EbHevcLumaInterpolationFilterTwoDInRawOutRaw7 EbHevcLumaInterpolationFilterTwoDInRawOutRaw7_VNNI
 #define EbHevcLumaInterpolationFilterTwoDInRawM EbHevcLumaInterpolationFilterTwoDInRawM_VNNI
