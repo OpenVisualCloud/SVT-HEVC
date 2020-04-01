@@ -1775,7 +1775,7 @@ void MatMultNxN_AVX2_INTRIN(
     *nonzerocoeff = _mm_cvtsi128_si32(_mm_add_epi32(_mm256_extracti128_si256(z, 0), _mm256_extracti128_si256(z, 1)));
 
 }
-
+//VNNI code
 #ifdef VNNI_SUPPORT
 void EbHevcTransform32_VNNI_INTRIN(EB_S16 *src, EB_U32 src_stride, EB_S16 *dst, EB_U32 dst_stride, EB_U32 shift)
 {

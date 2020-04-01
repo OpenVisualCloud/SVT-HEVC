@@ -20,7 +20,6 @@ extern "C" {
 // Internal Marcos
 
 #define NON_AVX512_SUPPORT
-=======
 //#define NON_AVX512_SUPPORT
 
 //#define VNNI_SUPPORT

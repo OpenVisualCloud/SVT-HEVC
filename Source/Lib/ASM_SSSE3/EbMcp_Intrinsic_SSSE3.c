@@ -2799,7 +2799,7 @@ void BiPredClippingOnTheFly_SSSE3(
 		dst += 8;
 	} while (colCount != 0);
 }
-
+//Vnni code
 #ifdef VNNI_SUPPORT
 void EbHevcLumaInterpolationFilterTwoDInRawOutRaw7_VNNI(EB_S16 *firstPassIFDst, EB_S16 *dst, EB_U32 puWidth, EB_U32 puHeight, EB_U32 fracPosy)
 {
