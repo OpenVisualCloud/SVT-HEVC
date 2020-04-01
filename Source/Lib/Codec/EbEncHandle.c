@@ -1724,7 +1724,9 @@ void LoadDefaultBufferConfigurationSettings(
     }
     threadUnit = totalThreadCount / EB_THREAD_COUNT_MIN_CORE;
 
-    sequenceControlSetPtr->inputOutputBufferFifoInitCount = inputPic + SCD_LAD;
+    sequenceControlSetPtr->inputOutputBufferFifoInitCount = inputPic + SCD_LAD +
+        sequenceControlSetPtr->staticConfig.lookAheadDistance +
+        sequenceControlSetPtr->staticConfig.intraPeriodLength;
 
     // ME segments
     sequenceControlSetPtr->meSegmentRowCountArray[0] = meSegH;
