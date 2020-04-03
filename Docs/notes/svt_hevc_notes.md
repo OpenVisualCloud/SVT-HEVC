@@ -2,27 +2,27 @@
 
 (Austin Hu <austin.hu@intel.com>)
 ## Directory
-[1. Call Stacks (as ffmpeg plugin)](#call-stacks-as-ffmpeg-plugin)
+[1. Call Stacks (as ffmpeg plugin)](#1-call-stacks-as-ffmpeg-plugin)
 
-[2. EbEncHandle_t Managed Objects](#ebEncHandle_t-managed-objects)
+[2. EbEncHandle_t Managed Objects](#2-ebenchandle_t-managed-objects)
 
-[3. System Resource Management](#system-resource-management)
+[3. System Resource Management](#3-system-resource-management)
 
-[4. Connection Between Kernel (Thread) and System Resources](#connection-between-kernel-thread-and-system-resources)
+[4. Connection Between Kernel (Thread) and System Resources](#4-connection-between-kernel-thread-and-system-resources)
 
-[5. Execution Flow of an Abstract Kernel (Thread)](#execution-flow-of-an-abstract-kernel-thread)
+[5. Execution Flow of an Abstract Kernel (Thread)](#5-execution-flow-of-an-abstract-kernel-thread)
 
-[6. Encoding Pipeline (Kernels or Threads) & Objects Lifecycle](#encoding-pipeline-kernels-or-threads-objects-lifecycle)
+[6. Encoding Pipeline (Kernels or Threads) & Objects Lifecycle](#6-encoding-pipeline-kernels-or-threads--objects-lifecycle)
 
-[7. FIFO Object Flow Through Kernels (Threads) & System Resources](#fifo-object-flow-through-kernels-threads-system-resources)
+[7. FIFO Object Flow Through Kernels (Threads) & System Resources](#7-fifo-object-flow-through-kernels-threads--system-resources)
 
-[8. Working Flow of Some Kernels (Threads)](#working-flow-of-some-kernels-threads)
+[8. Working Flow of Some Kernels (Threads)](#8-working-flow-of-some-kernels-threads)
 
-[9. FIFO Object Management of Kernels (Threads)](#fifo-object-management-of-kernels-threads)
+[9. FIFO Object Management of Kernels (Threads)](#9-fifo-object-management-of-kernels-threads)
 
-[10. Notes](#notes)
+[10. Notes](#10-notes)
 
-[11. To Summarize](#to-summarize)
+[11. To Summarize](#11-to-summarize)
 
 <br>
 
@@ -495,7 +495,7 @@ A. Update the entries of pictureManagerReorderQueue, inputPictureQueue and refer
 
 ![alt](graphs/8_4_a_2_1.png)
 
-<br>    
+<br>
 
     2.  Insert the picture into the tail entry of inputPictureQueue:
 
@@ -555,27 +555,27 @@ C.  Traverse the entries in referencePictureQueue, to try to remove any of them 
 
   | **Kernel** | **Obj Type**   |   **Obj Level** | **Count per Frame**  |  **Notes** |
   | --- | --- | --- | --- | --- |
-  | **RC**    |  SCS             |   Frame         |  1          |             
-  |           |  PPCS            |   Frame         |  1          |             
-  |           |  PA\_Ref         |   Frame         |  1          |             
-  |           |  RC\_Result      |   Frame         |  1          |             
-  | **PA**    |  PA\_Result      |   Frame         |  1          |             
+  | **RC**    |  SCS             |   Frame         |  1          |            |
+  |           |  PPCS            |   Frame         |  1          |            |
+  |           |  PA\_Ref         |   Frame         |  1          |            |
+  |           |  RC\_Result      |   Frame         |  1          |            |
+  | **PA**    |  PA\_Result      |   Frame         |  1          |            |
   | **PD**    |  PD\_Result      |   Segment       |  miniGOP\_size * meSegmentsTotalCount | Handles frames in group of miniGOP size, and dequeues PD\_Result objects based on segment level |
-  | **ME**    |  ME\_Result      |   Segment       |  meSegmentsTotalCount   | 
+  | **ME**    |  ME\_Result      |   Segment       |  meSegmentsTotalCount   |
   | **IRC**   |  Ref\_Pic        |   Frame         |  1          | Based on frame level (after receiving all segments) |
-  |           |  Output          |   Frame         |  1          | Based on frame level (after receiving all segments) |            
+  |           |  Output          |   Frame         |  1          | Based on frame level (after receiving all segments) |
   |           |  IRC\_Result     |   Frame         |  LookAheadDistance | Handles frames in group of LookAheadDistance as sliding window |
-  | **SBO**   |  PicDemux\_Result|   Frame         |  1          |             
-  | **PM**    |   CPCS           |   Frame         |  1          |             
-  |           |  PM\_Result      |   Frame         |  1          |             
-  | **RCtrl** |  RC\_Result      |   Frame         |  1          |             
-  | **MDC**   |  MDC\_Result     |   Tile Group    |  tileGroupRowCnt * tileGroupColCnt | |                 
-  | **EncDec**|  Feedback\_Task  |   ?             |  ?          |             |
+  | **SBO**   |  PicDemux\_Result|   Frame         |  1          |            |
+  | **PM**    |   CPCS           |   Frame         |  1          |            |
+  |           |  PM\_Result      |   Frame         |  1          |            |
+  | **RCtrl** |  RC\_Result      |   Frame         |  1          |            |
+  | **MDC**   |  MDC\_Result     |   Tile Group    |  tileGroupRowCnt * tileGroupColCnt | |
+  | **EncDec**|  Feedback\_Task  |   ?             |  ?          |            |
   |           |  encDec\_Result  |   LCU Line per Tile |  picLcuInHeight * tileColCount | Dequeues encDec\_Result based on LCU line of each tile |
   |           |  PicDemux\_Result|   Frame         |  1          | Handles other stuff (such as SAO) for the reconstructed frame based on frame level |
   | **EC**    |  RC\_Result      |   LCU Line per Tile |  picLcuInHeight * tileColCount | Dequeues RC\_Result based on LCU line of each tile |
   |           |  RC\_Task        |   Frame         |  1          |            |
-  | **PK**    |   RC\_Task       |   Frame         |  1          |            | 
+  | **PK**    |   RC\_Task       |   Frame         |  1          |            |
 
 **Note**: the Object Types marked with Green, are the global ones which are shared among several kernel stages, or even the whole encoding pipeline.
 
