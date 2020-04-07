@@ -71,7 +71,7 @@ typedef struct MemoryEntry{
 } MemoryEntry;
 
 //+1 to get a better hash result
-#define MEM_ENTRY_SIZE (4 * 1024 * 1024 + 1)
+#define MEM_ENTRY_SIZE (16 * 1024 * 1024 + 1)
 
 MemoryEntry gMemEntry[MEM_ENTRY_SIZE];
 
