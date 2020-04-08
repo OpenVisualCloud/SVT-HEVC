@@ -1,6 +1,6 @@
 prefix=@CMAKE_INSTALL_PREFIX@
-includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@/svt-hevc
-libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@/svt-hevc
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
 
 Name: SvtHevcEnc
 Description: SVT (Scalable Video Technology) for HEVC encoder library
