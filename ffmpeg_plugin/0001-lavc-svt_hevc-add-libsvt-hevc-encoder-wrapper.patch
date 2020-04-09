@@ -1,4 +1,4 @@
-From ff73644d2138c21582d02695e4de57f6e4d778ff Mon Sep 17 00:00:00 2001
+From 297c9a0309c8ba06f9f746d7685dceaef7c0b690 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -13,15 +13,15 @@ Signed-off-by: Guo Jiansheng <jiansheng.guo@intel.com>
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 533 +++++++++++++++++++++++++++++++++++++++
- 4 files changed, 539 insertions(+)
+ libavcodec/libsvt_hevc.c | 559 +++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 565 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index 34c2adb4a4..dc5f74f4a9 100755
+index 09bda9b408..454cf65a90 100755
 --- a/configure
 +++ b/configure
-@@ -264,6 +264,7 @@ External library support:
+@@ -267,6 +267,7 @@ External library support:
    --enable-libspeex        enable Speex de/encoding via libspeex [no]
    --enable-libsrt          enable Haivision SRT protocol via libsrt [no]
    --enable-libssh          enable SFTP protocol via libssh [no]
@@ -29,7 +29,7 @@ index 34c2adb4a4..dc5f74f4a9 100755
    --enable-libtensorflow   enable TensorFlow as a DNN module backend
                             for DNN based filters like sr [no]
    --enable-libtesseract    enable Tesseract, needed for ocr filter [no]
-@@ -1793,6 +1794,7 @@ EXTERNAL_LIBRARY_LIST="
+@@ -1801,6 +1802,7 @@ EXTERNAL_LIBRARY_LIST="
      libspeex
      libsrt
      libssh
@@ -37,7 +37,7 @@ index 34c2adb4a4..dc5f74f4a9 100755
      libtensorflow
      libtesseract
      libtheora
-@@ -3191,6 +3193,7 @@ libshine_encoder_select="audio_frame_queue"
+@@ -3229,6 +3231,7 @@ libshine_encoder_select="audio_frame_queue"
  libspeex_decoder_deps="libspeex"
  libspeex_encoder_deps="libspeex"
  libspeex_encoder_select="audio_frame_queue"
@@ -45,7 +45,7 @@ index 34c2adb4a4..dc5f74f4a9 100755
  libtheora_encoder_deps="libtheora"
  libtwolame_encoder_deps="libtwolame"
  libvo_amrwbenc_encoder_deps="libvo_amrwbenc"
-@@ -6263,6 +6266,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
+@@ -6344,6 +6347,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
  enabled libssh            && require_pkg_config libssh libssh libssh/sftp.h sftp_init
  enabled libspeex          && require_pkg_config libspeex speex speex/speex.h speex_decoder_init
  enabled libsrt            && require_pkg_config libsrt "srt >= 1.3.0" srt/srt.h srt_socket
@@ -54,10 +54,10 @@ index 34c2adb4a4..dc5f74f4a9 100755
  enabled libtesseract      && require_pkg_config libtesseract tesseract tesseract/capi.h TessBaseAPICreate
  enabled libtheora         && require libtheora theora/theoraenc.h th_info_init -ltheoraenc -ltheoradec -logg
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index 3cd73fbcc6..d39f568585 100644
+index c1c9a44f2b..dd9b930b9b 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
-@@ -991,6 +991,7 @@ OBJS-$(CONFIG_LIBOPUS_ENCODER)            += libopusenc.o libopus.o     \
+@@ -1008,6 +1008,7 @@ OBJS-$(CONFIG_LIBRAV1E_ENCODER)           += librav1e.o
  OBJS-$(CONFIG_LIBSHINE_ENCODER)           += libshine.o
  OBJS-$(CONFIG_LIBSPEEX_DECODER)           += libspeexdec.o
  OBJS-$(CONFIG_LIBSPEEX_ENCODER)           += libspeexenc.o
@@ -66,10 +66,10 @@ index 3cd73fbcc6..d39f568585 100644
  OBJS-$(CONFIG_LIBTWOLAME_ENCODER)         += libtwolame.o
  OBJS-$(CONFIG_LIBVO_AMRWBENC_ENCODER)     += libvo-amrwbenc.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
-index d2f9a39ce5..d8788a7954 100644
+index b3184af954..41994e31b3 100644
 --- a/libavcodec/allcodecs.c
 +++ b/libavcodec/allcodecs.c
-@@ -707,6 +707,7 @@ extern AVCodec ff_librsvg_decoder;
+@@ -720,6 +720,7 @@ extern AVCodec ff_librsvg_decoder;
  extern AVCodec ff_libshine_encoder;
  extern AVCodec ff_libspeex_encoder;
  extern AVCodec ff_libspeex_decoder;
@@ -79,10 +79,10 @@ index d2f9a39ce5..d8788a7954 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000000..2f34ea5531
+index 0000000000..fce27a06ea
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,533 @@
+@@ -0,0 +1,559 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -147,6 +147,9 @@ index 0000000000..2f34ea5531
 +    int thread_count;
 +    int high_dynamic_range;
 +    int unrestricted_motion_vector;
++    int tile_row_count;
++    int tile_col_count;
++    int tile_slice_mode;
 +} SvtContext;
 +
 +static int error_mapping(EB_ERRORTYPE svt_ret)
@@ -312,12 +315,31 @@ index 0000000000..2f34ea5531
 +
 +    if (svt_enc->unrestricted_motion_vector == 0 || svt_enc->unrestricted_motion_vector == 1) {
 +        param->unrestrictedMotionVector = svt_enc->unrestricted_motion_vector;
-+    }
-+    else{
++    } else {
 +        av_log(avctx, AV_LOG_ERROR, "Unrestricted Motion Vector should be set 0 or 1\n");
 +        return EB_ErrorBadParameter;
 +    }
 +
++    if(svt_enc->tile_row_count >= 1 && svt_enc->tile_row_count <= 16) {
++        param->tileRowCount = svt_enc->tile_row_count;
++    } else {
++        av_log(avctx, AV_LOG_ERROR, "Tile Row Count should between 1-16\n");
++        return EB_ErrorBadParameter;
++    }
++
++    if(svt_enc->tile_col_count >= 1 && svt_enc->tile_col_count <= 16) {
++        param->tileColumnCount = svt_enc->tile_col_count;
++    } else {
++        av_log(avctx, AV_LOG_ERROR, "Tile Column Count should between 1-16\n");
++        return EB_ErrorBadParameter;
++    }
++
++    if(svt_enc->tile_slice_mode == 0 || svt_enc->tile_slice_mode == 1) {
++        param->tileSliceMode = svt_enc->tile_slice_mode;
++    } else {
++        av_log(avctx, AV_LOG_ERROR, "Tile Slice Mode should be set 0 or 1\n");
++        return EB_ErrorBadParameter;
++    }
 +    return EB_ErrorNone;
 +}
 +
@@ -576,6 +598,10 @@ index 0000000000..2f34ea5531
 +    { "hdr", "High dynamic range input (HDR10)", OFFSET(high_dynamic_range), AV_OPT_TYPE_INT, { .i64 = 0}, 0, 1, VE, "hdr" },
 +    { "umv", "Enables or disables unrestricted motion vectors", OFFSET(unrestricted_motion_vector),
 +      AV_OPT_TYPE_BOOL, { .i64 = 1 }, 0, 1, VE },
++    { "tile_row_cnt", "tile count in the row", OFFSET(tile_row_count), AV_OPT_TYPE_INT, { .i64 = 1 }, 1, 16, VE },
++    { "tile_col_cnt", "tile count in the column", OFFSET(tile_col_count), AV_OPT_TYPE_INT, { .i64 = 1 }, 1, 16, VE },
++    { "tile_slice_mode", "per slice per tile, only valid for multi-tile", OFFSET(tile_slice_mode),
++      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
 +    {NULL},
 +};
 +
