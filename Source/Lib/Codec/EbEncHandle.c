@@ -1685,6 +1685,15 @@ void LoadDefaultBufferConfigurationSettings(
     unsigned int totalThreadCount;
     unsigned int threadUnit;
 
+    EB_U32 inputSize = (EB_U32)sequenceControlSetPtr->maxInputLumaWidth * (EB_U32)sequenceControlSetPtr->maxInputLumaHeight;
+
+    EB_U8 inputResolution = (inputSize < INPUT_SIZE_1080i_TH) ? INPUT_SIZE_576p_RANGE_OR_LOWER :
+        (inputSize < INPUT_SIZE_1080p_TH) ? INPUT_SIZE_1080i_RANGE :
+        (inputSize < INPUT_SIZE_4K_TH) ? INPUT_SIZE_1080p_RANGE :
+        INPUT_SIZE_4K_RANGE;
+
+    const EB_U8 lowResInputFactor = 2;
+
 #if defined(_WIN32) || defined(__linux__)
     if (sequenceControlSetPtr->staticConfig.targetSocket != -1)
         coreCount /= numGroups;
@@ -1777,10 +1786,19 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->tileGroupRowCountArray[5] = tileGroupRowCount;
 
     //#====================== Data Structures and Picture Buffers ======================
-    sequenceControlSetPtr->pictureControlSetPoolInitCount       = inputPic;
+    if (inputResolution <= INPUT_SIZE_1080p_RANGE)
+        sequenceControlSetPtr->pictureControlSetPoolInitCount       = inputPic * lowResInputFactor;
+    else
+        sequenceControlSetPtr->pictureControlSetPoolInitCount       = inputPic;
+
     sequenceControlSetPtr->pictureControlSetPoolInitCountChild  = MAX(4, coreCount / 6);
     sequenceControlSetPtr->referencePictureBufferInitCount      = inputPic;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
-    sequenceControlSetPtr->paReferencePictureBufferInitCount    = inputPic;//MAX((EB_U32)(sequenceControlSetPtr->inputOutputBufferFifoInitCount >> 1), (EB_U32)((1 << sequenceControlSetPtr->staticConfig.hierarchicalLevels) + 2));
+
+    if (inputResolution <= INPUT_SIZE_1080p_RANGE)
+        sequenceControlSetPtr->paReferencePictureBufferInitCount    = inputPic * lowResInputFactor;
+    else
+        sequenceControlSetPtr->paReferencePictureBufferInitCount    = inputPic;
+
     sequenceControlSetPtr->reconBufferFifoInitCount             = sequenceControlSetPtr->referencePictureBufferInitCount;
 
     //#====================== Inter process Fifos ======================

@@ -604,14 +604,16 @@ void* ResourceCoordinationKernel(void *inputPtr)
 
         pictureControlSetPtr->paReferencePictureWrapperPtr = referencePictureWrapperPtr;
 
-        // Give the new Reference a nominal liveCount of 1
+        // Note: the PPCS and its PA reference picture will be released in both EncDec and RateControl kernels.
+        // Give the new Reference a nominal liveCount of 2, meanwhile increase liveCount of PPCS with 1 as it's
+        // already 1 after dequeuing from the PPCS FIFO.
         EbObjectIncLiveCount(
-        	pictureControlSetPtr->paReferencePictureWrapperPtr,
-            2);
+                pictureControlSetPtr->paReferencePictureWrapperPtr,
+                2);
 
         EbObjectIncLiveCount(
-            pictureControlSetWrapperPtr,
-            2);
+                pictureControlSetWrapperPtr,
+                1);
 
 #if !PAREF_OUT
         ((EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr)->inputPaddedPicturePtr->bufferY = inputPicturePtr->bufferY;

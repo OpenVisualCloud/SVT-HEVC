@@ -368,42 +368,6 @@ EB_ERRORTYPE InitialRateControlContextCtor(
 }
 
 /************************************************
-* Release Pa Reference Objects
-** Check if reference pictures are needed
-** release them when appropriate
-************************************************/
-void EbHevcReleasePaReferenceObjects(
-	PictureParentControlSet_t         *pictureControlSetPtr)
-{
-	// PA Reference Pictures
-	EB_U32                             numOfListToSearch;
-	EB_U32                             listIndex;
-	if (pictureControlSetPtr->sliceType != EB_I_PICTURE) {
-
-		numOfListToSearch = (pictureControlSetPtr->sliceType == EB_P_PICTURE) ? REF_LIST_0 : REF_LIST_1;
-
-		// List Loop
-		for (listIndex = REF_LIST_0; listIndex <= numOfListToSearch; ++listIndex) {
-
-				// Release PA Reference Pictures
-				if (pictureControlSetPtr->refPaPicPtrArray[listIndex] != EB_NULL) {
-
-                    EbReleaseObject(((EbPaReferenceObject_t*)pictureControlSetPtr->refPaPicPtrArray[listIndex]->objectPtr)->pPcsPtr->pPcsWrapperPtr);
-					EbReleaseObject(pictureControlSetPtr->refPaPicPtrArray[listIndex]);
-				}
-		}
-	}
-
-	if (pictureControlSetPtr->paReferencePictureWrapperPtr != EB_NULL) {
-
-        EbReleaseObject(pictureControlSetPtr->pPcsWrapperPtr);
-		EbReleaseObject(pictureControlSetPtr->paReferencePictureWrapperPtr);
-	}
-
-	return;
-}
-
-/************************************************
 * Global Motion Detection Based on ME information
 ** Mark pictures for pan
 ** Mark pictures for tilt
@@ -930,10 +894,6 @@ void* InitialRateControlKernel(void *inputPtr)
             EbHevcMeBasedGlobalMotionDetection(
                 sequenceControlSetPtr,
                 pictureControlSetPtr);
-
-			// Release Pa Ref pictures when not needed
-			EbHevcReleasePaReferenceObjects(
-				pictureControlSetPtr);
 
 			//****************************************************
 			// Input Motion Analysis Results into Reordering Queue
