@@ -1280,6 +1280,10 @@ void* PictureDecisionKernel(void *inputPtr)
                                     1);
 
                                 --paReferenceEntryPtr->dependentCount;
+                            } else {
+                                pictureControlSetPtr->sliceType = EB_P_PICTURE;
+                                ((EbPaReferenceObject_t *)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr)->sliceType =
+                                    EB_P_PICTURE;
                             }
                         }
 

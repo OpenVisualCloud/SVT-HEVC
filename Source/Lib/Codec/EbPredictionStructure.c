@@ -1710,6 +1710,13 @@ static EB_ERRORTYPE PredictionStructureCtor(
                 }
             }
 
+            // Adjust List1 if there is no positive reference frames.
+            if (predictionStructurePtr->predStructEntryPtrArray[entryIndex]->positiveRefPicsTotalCount == 0 &&
+                predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refList1.referenceListCount > 0) {
+                predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refList1.referenceList = 0;
+                predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refList1.referenceListCount = 0;
+            }
+
             // Adjust Reference Counts if list is empty
             predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refPicsList0TotalCountMinus1  =
                 (predictionStructurePtr->predStructEntryPtrArray[entryIndex]->refPicsList0TotalCountMinus1 == ~0) ?
