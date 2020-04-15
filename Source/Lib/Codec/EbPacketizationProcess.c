@@ -195,7 +195,6 @@ void* PacketizationKernel(void *inputPtr)
         queueEntryPtr->sliceType = pictureControlSetPtr->sliceType;
         queueEntryPtr->pictureNumber = pictureControlSetPtr->pictureNumber;
 
-#if OUT_ALLOC
         EbGetEmptyObject(sequenceControlSetPtr->encodeContextPtr->streamOutputFifoPtr,
                 &pictureControlSetPtr->ParentPcsPtr->outputStreamWrapperPtr);
         outputStreamWrapperPtr   = pictureControlSetPtr->ParentPcsPtr->outputStreamWrapperPtr;
@@ -203,11 +202,6 @@ void* PacketizationKernel(void *inputPtr)
         // Not use EB_MALLOC due to lacking of EB_FREE which needs to parse all the memoryMap entries.
         outputStreamPtr->pBuffer = (EB_U8 *)malloc(outputStreamPtr->nAllocLen);
         assert(outputStreamPtr->pBuffer != EB_NULL && "bit-stream memory allocation failure");
-#else
-        // Get Output Bitstream buffer
-        outputStreamWrapperPtr   = pictureControlSetPtr->ParentPcsPtr->outputStreamWrapperPtr;
-        outputStreamPtr          = (EB_BUFFERHEADERTYPE*) outputStreamWrapperPtr->objectPtr;
-#endif
 
         outputStreamPtr->nFlags  = 0;
         EbBlockOnMutex(encodeContextPtr->terminatingConditionsMutex);
@@ -346,7 +340,7 @@ void* PacketizationKernel(void *inputPtr)
             FlushBitstream(
                 pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
 
-            // Copy SPS & PPS to the Output Bitstream
+            // Copy SPS, PPS and PPS to the Output Bitstream
             CopyRbspBitstreamToPayload(
                 pictureControlSetPtr->bitstreamPtr,
                 &outputStreamPtr->pBuffer,
@@ -612,20 +606,21 @@ void* PacketizationKernel(void *inputPtr)
                 &sequenceControlSetPtr->bufferingPeriod,
                 sequenceControlSetPtr->videoUsabilityInfoPtr,
                 sequenceControlSetPtr->encodeContextPtr);
+
+            // Flush the Bitstream
+            FlushBitstream(
+                pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
+
+            // Copy Buffering Period SEI to the Output Bitstream
+            CopyRbspBitstreamToPayload(
+                pictureControlSetPtr->bitstreamPtr,
+                &outputStreamPtr->pBuffer,
+                (EB_U32*) &(outputStreamPtr->nFilledLen),
+                (EB_U32*) &(outputStreamPtr->nAllocLen),
+                encodeContextPtr,
+                NAL_UNIT_INVALID);
         }
 
-        // Flush the Bitstream
-        FlushBitstream(
-            pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
-
-        // Copy Buffering Period SEI to the Output Bitstream
-        CopyRbspBitstreamToPayload(
-            pictureControlSetPtr->bitstreamPtr,
-            &outputStreamPtr->pBuffer,
-            (EB_U32*) &(outputStreamPtr->nFilledLen),
-            (EB_U32*) &(outputStreamPtr->nAllocLen),
-            encodeContextPtr,
-			NAL_UNIT_INVALID);
         queueEntryPtr->startSplicing = outputStreamPtr->nFilledLen;
         if (sequenceControlSetPtr->staticConfig.pictureTimingSEI) {
             if (sequenceControlSetPtr->staticConfig.hrdFlag == 1)
@@ -769,7 +764,7 @@ void* PacketizationKernel(void *inputPtr)
             // Flush the Bitstream
             FlushBitstream(pictureControlSetPtr->bitstreamPtr->outputBitstreamPtr);
 
-            // Copy SPS & PPS to the Output Bitstream
+            // Copy EOS to the Output Bitstream
             CopyRbspBitstreamToPayload(
                 pictureControlSetPtr->bitstreamPtr,
                 &outputStreamPtr->pBuffer,
