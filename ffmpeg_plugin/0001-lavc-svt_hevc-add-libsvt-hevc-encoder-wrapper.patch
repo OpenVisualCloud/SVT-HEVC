@@ -1,4 +1,4 @@
-From 297c9a0309c8ba06f9f746d7685dceaef7c0b690 Mon Sep 17 00:00:00 2001
+From 30205a046f5b437ac70ffa67ebd3732dfc490285 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -9,19 +9,20 @@ Signed-off-by: Jun Zhao <jun.zhao@intel.com>
 Signed-off-by: Jing Sun <jing.a.sun@intel.com>
 Signed-off-by: Austin Hu <austin.hu@intel.com>
 Signed-off-by: Guo Jiansheng <jiansheng.guo@intel.com>
+Signed-off-by: Austin Hu <austin.hu@intel.com>
 ---
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 559 +++++++++++++++++++++++++++++++++++++++
- 4 files changed, 565 insertions(+)
+ libavcodec/libsvt_hevc.c | 606 +++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 612 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index 09bda9b408..454cf65a90 100755
+index 34c2adb4a4..dc5f74f4a9 100755
 --- a/configure
 +++ b/configure
-@@ -267,6 +267,7 @@ External library support:
+@@ -264,6 +264,7 @@ External library support:
    --enable-libspeex        enable Speex de/encoding via libspeex [no]
    --enable-libsrt          enable Haivision SRT protocol via libsrt [no]
    --enable-libssh          enable SFTP protocol via libssh [no]
@@ -29,7 +30,7 @@ index 09bda9b408..454cf65a90 100755
    --enable-libtensorflow   enable TensorFlow as a DNN module backend
                             for DNN based filters like sr [no]
    --enable-libtesseract    enable Tesseract, needed for ocr filter [no]
-@@ -1801,6 +1802,7 @@ EXTERNAL_LIBRARY_LIST="
+@@ -1793,6 +1794,7 @@ EXTERNAL_LIBRARY_LIST="
      libspeex
      libsrt
      libssh
@@ -37,7 +38,7 @@ index 09bda9b408..454cf65a90 100755
      libtensorflow
      libtesseract
      libtheora
-@@ -3229,6 +3231,7 @@ libshine_encoder_select="audio_frame_queue"
+@@ -3191,6 +3193,7 @@ libshine_encoder_select="audio_frame_queue"
  libspeex_decoder_deps="libspeex"
  libspeex_encoder_deps="libspeex"
  libspeex_encoder_select="audio_frame_queue"
@@ -45,7 +46,7 @@ index 09bda9b408..454cf65a90 100755
  libtheora_encoder_deps="libtheora"
  libtwolame_encoder_deps="libtwolame"
  libvo_amrwbenc_encoder_deps="libvo_amrwbenc"
-@@ -6344,6 +6347,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
+@@ -6263,6 +6266,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
  enabled libssh            && require_pkg_config libssh libssh libssh/sftp.h sftp_init
  enabled libspeex          && require_pkg_config libspeex speex speex/speex.h speex_decoder_init
  enabled libsrt            && require_pkg_config libsrt "srt >= 1.3.0" srt/srt.h srt_socket
@@ -54,10 +55,10 @@ index 09bda9b408..454cf65a90 100755
  enabled libtesseract      && require_pkg_config libtesseract tesseract tesseract/capi.h TessBaseAPICreate
  enabled libtheora         && require libtheora theora/theoraenc.h th_info_init -ltheoraenc -ltheoradec -logg
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index c1c9a44f2b..dd9b930b9b 100644
+index 3cd73fbcc6..d39f568585 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
-@@ -1008,6 +1008,7 @@ OBJS-$(CONFIG_LIBRAV1E_ENCODER)           += librav1e.o
+@@ -991,6 +991,7 @@ OBJS-$(CONFIG_LIBOPUS_ENCODER)            += libopusenc.o libopus.o     \
  OBJS-$(CONFIG_LIBSHINE_ENCODER)           += libshine.o
  OBJS-$(CONFIG_LIBSPEEX_DECODER)           += libspeexdec.o
  OBJS-$(CONFIG_LIBSPEEX_ENCODER)           += libspeexenc.o
@@ -66,10 +67,10 @@ index c1c9a44f2b..dd9b930b9b 100644
  OBJS-$(CONFIG_LIBTWOLAME_ENCODER)         += libtwolame.o
  OBJS-$(CONFIG_LIBVO_AMRWBENC_ENCODER)     += libvo-amrwbenc.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
-index b3184af954..41994e31b3 100644
+index d2f9a39ce5..d8788a7954 100644
 --- a/libavcodec/allcodecs.c
 +++ b/libavcodec/allcodecs.c
-@@ -720,6 +720,7 @@ extern AVCodec ff_librsvg_decoder;
+@@ -707,6 +707,7 @@ extern AVCodec ff_librsvg_decoder;
  extern AVCodec ff_libshine_encoder;
  extern AVCodec ff_libspeex_encoder;
  extern AVCodec ff_libspeex_decoder;
@@ -79,10 +80,10 @@ index b3184af954..41994e31b3 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000000..fce27a06ea
+index 0000000000..b63b307aad
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,559 @@
+@@ -0,0 +1,606 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -114,11 +115,22 @@ index 0000000000..fce27a06ea
 +#include "internal.h"
 +#include "avcodec.h"
 +
++#include <stdbool.h>
++#include <sys/queue.h>
++
++#define HEVC_LCU_SIZE 64
++
 +typedef enum eos_status {
 +    EOS_NOT_REACHED = 0,
 +    EOS_SENT,
 +    EOS_RECEIVED
 +}EOS_STATUS;
++
++typedef struct input_frame_s
++{
++    AVFrame *ref_frame;
++    LIST_ENTRY(input_frame_s) list;
++} input_frame_t;
 +
 +typedef struct SvtContext {
 +    AVClass *class;
@@ -150,6 +162,11 @@ index 0000000000..fce27a06ea
 +    int tile_row_count;
 +    int tile_col_count;
 +    int tile_slice_mode;
++
++    // Manage the input frames with doubly linked list.
++    // But it can be replace by other ways, such as hash table.
++    LIST_HEAD(input_frame_list, input_frame_s) input_frame_list;
++    bool lcu_aligned;
 +} SvtContext;
 +
 +static int error_mapping(EB_ERRORTYPE svt_ret)
@@ -343,16 +360,28 @@ index 0000000000..fce27a06ea
 +    return EB_ErrorNone;
 +}
 +
-+static void read_in_data(EB_H265_ENC_CONFIGURATION *config,
-+                         const AVFrame *frame,
-+                         EB_BUFFERHEADERTYPE *header_ptr)
++static void read_in_data(SvtContext *svt_enc, const AVFrame *frame,
++        EB_BUFFERHEADERTYPE *header_ptr)
 +{
 +    uint8_t is16bit;
 +    uint64_t frame_size;
 +    EB_H265_ENC_INPUT *in_data = (EB_H265_ENC_INPUT *)header_ptr->pBuffer;
++    EB_H265_ENC_CONFIGURATION *config = &svt_enc->enc_params;
++    input_frame_t *input_frame = NULL;
 +
 +    is16bit = config->encoderBitDepth > 8;
 +    frame_size = (uint64_t)(config->sourceWidth * config->sourceHeight) << is16bit;
++
++    if (svt_enc->lcu_aligned) {
++        input_frame = (input_frame_t *)malloc(sizeof(*input_frame));
++
++        // Keep the inpt frame referenced, rather than copying it inside encoder.
++        input_frame->ref_frame = av_frame_clone(frame);
++
++        // Record the input referenced frame, to unreference it after getting its
++        // encoded packet.
++        LIST_INSERT_HEAD(&svt_enc->input_frame_list, input_frame, list);
++    }
 +
 +    in_data->luma = frame->data[0];
 +    in_data->cb = frame->data[1];
@@ -428,6 +457,11 @@ index 0000000000..fce27a06ea
 +        av_log(avctx, AV_LOG_ERROR, "Failed to alloc data buffer\n");
 +        goto failed_init_encoder;
 +    }
++
++    LIST_INIT(&svt_enc->input_frame_list);
++    if (!(avctx->width % HEVC_LCU_SIZE) && !(avctx->height % HEVC_LCU_SIZE))
++        svt_enc->lcu_aligned = true;
++
 +    return 0;
 +
 +failed_init_encoder:
@@ -446,6 +480,7 @@ index 0000000000..fce27a06ea
 +    EB_BUFFERHEADERTYPE *header_ptr = &svt_enc->in_buf;
 +    EB_ERRORTYPE svt_ret;
 +    int av_ret;
++    input_frame_t *input_frame_entry = NULL;
 +
 +    if (EOS_RECEIVED == svt_enc->eos_flag) {
 +        *got_packet = 0;
@@ -467,7 +502,7 @@ index 0000000000..fce27a06ea
 +            av_log(avctx, AV_LOG_DEBUG, "Sent EOS\n");
 +        }
 +    } else {
-+        read_in_data(&svt_enc->enc_params, frame, header_ptr);
++        read_in_data(svt_enc, frame, header_ptr);
 +        header_ptr->pts = frame->pts;
 +
 +        EbH265EncSendPicture(svt_enc->svt_handle, header_ptr);
@@ -509,6 +544,19 @@ index 0000000000..fce27a06ea
 +        pkt->flags |= AV_PKT_FLAG_DISPOSABLE;
 +
 +    EbH265ReleaseOutBuffer(&header_ptr);
++
++    if (svt_enc->lcu_aligned) {
++        LIST_FOREACH(input_frame_entry, &svt_enc->input_frame_list, list) {
++            if (input_frame_entry->ref_frame->pts == pkt->pts) {
++                // Unference the AVFrame oject which has been encoded completely.
++                av_frame_unref(input_frame_entry->ref_frame);
++
++                LIST_REMOVE(input_frame_entry, list);
++                free(input_frame_entry);
++                break;
++            }
++        }
++    }
 +
 +    *got_packet = 1;
 +

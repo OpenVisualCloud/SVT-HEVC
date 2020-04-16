@@ -23,6 +23,8 @@
 #define IS_16_BIT(bit_depth) (bit_depth==10?1:0)
 #define EB_OUTPUTSTREAMBUFFERSIZE_MACRO(ResolutionSize)                ((ResolutionSize) < (INPUT_SIZE_1080i_TH) ? 0x1E8480 : (ResolutionSize) < (INPUT_SIZE_1080p_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_4K_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_8K_TH) ? 0x2DC6C0:0x5B8D80)
 
+#define HEVC_LCU_SIZE 64
+
  /***************************************
  * Variables Defining a memory table
  *  hosting all allocated pointers
@@ -358,35 +360,56 @@ EB_ERRORTYPE AllocateInputBuffers(
     EbAppContext_t			*callbackData)
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
+
+    if (!(callbackData->ebEncParameters.sourceWidth % HEVC_LCU_SIZE) &&
+            !(callbackData->ebEncParameters.sourceHeight % HEVC_LCU_SIZE)) {
+        // To create the input buffer pool for direct reference, rather
+        // then memcpy to Input FIFO objects.
+        callbackData->inputBufferPoolSize = MAX(INPUT_BUFFER_POOL_SIZE, config->bufferedInput);
+    } else
+        callbackData->inputBufferPoolSize = 1;
+
+    EB_APP_MALLOC(EB_BUFFERHEADERTYPE **, callbackData->inputBufferPool, sizeof(EB_BUFFERHEADERTYPE *) * callbackData->inputBufferPoolSize,
+            EB_N_PTR, EB_ErrorInsufficientResources);
+
+    LIST_INIT(&callbackData->poolList);
+    LIST_INIT(&callbackData->encodingList);
+
+    for (uint16_t i = 0; i < callbackData->inputBufferPoolSize; i++)
     {
-        EB_APP_MALLOC(EB_BUFFERHEADERTYPE*, callbackData->inputBufferPool, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, EB_ErrorInsufficientResources);
+        EB_APP_MALLOC(EB_BUFFERHEADERTYPE*, callbackData->inputBufferPool[i], sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, EB_ErrorInsufficientResources);
 
         // Initialize Header
-        callbackData->inputBufferPool->nSize                       = sizeof(EB_BUFFERHEADERTYPE);
+        callbackData->inputBufferPool[i]->nSize                       = sizeof(EB_BUFFERHEADERTYPE);
 
-        EB_APP_MALLOC(uint8_t*, callbackData->inputBufferPool->pBuffer, sizeof(EB_H265_ENC_INPUT), EB_N_PTR, EB_ErrorInsufficientResources);
+        EB_APP_MALLOC(uint8_t*, callbackData->inputBufferPool[i]->pBuffer, sizeof(EB_H265_ENC_INPUT), EB_N_PTR, EB_ErrorInsufficientResources);
 
         if (config->bufferedInput == -1) {
 
             // Allocate frame buffer for the pBuffer
             AllocateInputBuffer(
                     config,
-                    callbackData->inputBufferPool->pBuffer);
+                    callbackData->inputBufferPool[i]->pBuffer);
         }
 
         // Assign the variables
-        callbackData->inputBufferPool->pAppPrivate = NULL;
-        callbackData->inputBufferPool->sliceType   = EB_INVALID_PICTURE;
-    }
+        callbackData->inputBufferPool[i]->pAppPrivate = NULL;
+        callbackData->inputBufferPool[i]->sliceType   = EB_INVALID_PICTURE;
 
-    if (callbackData->ebEncParameters.segmentOvEnabled) {
-        size_t pictureWidthInLcu = (config->sourceWidth + EB_SEGMENT_BLOCK_SIZE - 1) / EB_SEGMENT_BLOCK_SIZE;
-        size_t pictureHeightInLcu = (config->sourceHeight + EB_SEGMENT_BLOCK_SIZE - 1) / EB_SEGMENT_BLOCK_SIZE;
-        size_t lcuTotalCount = pictureWidthInLcu * pictureHeightInLcu;
-        EB_APP_MALLOC(SegmentOverride_t*, callbackData->inputBufferPool->segmentOvPtr, sizeof(SegmentOverride_t) * lcuTotalCount, EB_N_PTR, EB_ErrorInsufficientResources);
-    }
-    else {
-        callbackData->inputBufferPool->segmentOvPtr = NULL;
+        if (callbackData->ebEncParameters.segmentOvEnabled) {
+            size_t pictureWidthInLcu = (config->sourceWidth + EB_SEGMENT_BLOCK_SIZE - 1) / EB_SEGMENT_BLOCK_SIZE;
+            size_t pictureHeightInLcu = (config->sourceHeight + EB_SEGMENT_BLOCK_SIZE - 1) / EB_SEGMENT_BLOCK_SIZE;
+            size_t lcuTotalCount = pictureWidthInLcu * pictureHeightInLcu;
+            EB_APP_MALLOC(SegmentOverride_t*, callbackData->inputBufferPool[i]->segmentOvPtr, sizeof(SegmentOverride_t) * lcuTotalCount, EB_N_PTR, EB_ErrorInsufficientResources);
+        }
+        else {
+            callbackData->inputBufferPool[i]->segmentOvPtr = NULL;
+        }
+
+        if (callbackData->inputBufferPoolSize > 1) {
+            // Insert the created input buffer into the pool, with linked list connected.
+            LIST_INSERT_HEAD(&callbackData->poolList, callbackData->inputBufferPool[i], list);
+        }
     }
 
     return return_error;

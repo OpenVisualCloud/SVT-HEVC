@@ -1936,14 +1936,24 @@ void EbHevcSetParamBasedOnInput(
         sequenceControlSetPtr->maxInputPadBottom = 0;
     }
 
-    // Configure the padding
-    sequenceControlSetPtr->leftPadding  = MAX_LCU_SIZE + 4;
-    sequenceControlSetPtr->topPadding   = MAX_LCU_SIZE + 4;
-    sequenceControlSetPtr->rightPadding = MAX_LCU_SIZE + 4;
-    sequenceControlSetPtr->botPadding   = MAX_LCU_SIZE + 4;
-
     sequenceControlSetPtr->lumaWidth    = sequenceControlSetPtr->maxInputLumaWidth;
     sequenceControlSetPtr->lumaHeight   = sequenceControlSetPtr->maxInputLumaHeight;
+
+    if (!(sequenceControlSetPtr->lumaWidth % MAX_LCU_SIZE) && !(sequenceControlSetPtr->lumaHeight % MAX_LCU_SIZE))
+        sequenceControlSetPtr->lcuAligned = EB_TRUE;
+
+    // Configure the padding
+    if (sequenceControlSetPtr->lcuAligned) {
+        sequenceControlSetPtr->leftPadding  = 0;
+        sequenceControlSetPtr->topPadding   = 0;
+        sequenceControlSetPtr->rightPadding = 0;
+        sequenceControlSetPtr->botPadding   = 0;
+    } else {
+        sequenceControlSetPtr->leftPadding  = MAX_LCU_SIZE + 4;
+        sequenceControlSetPtr->topPadding   = MAX_LCU_SIZE + 4;
+        sequenceControlSetPtr->rightPadding = MAX_LCU_SIZE + 4;
+        sequenceControlSetPtr->botPadding   = MAX_LCU_SIZE + 4;
+    }
 
     chromaFormat = sequenceControlSetPtr->chromaFormatIdc;
     subWidthCMinus1 = (chromaFormat == EB_YUV444 ? 1 : 2) - 1;
@@ -3365,27 +3375,37 @@ static EB_ERRORTYPE CopyFrameBuffer(
 
 
         // Y
-        for (inputRowIndex = 0; inputRowIndex < lumaHeight; inputRowIndex++) {
-
-            EB_MEMCPY((inputPicturePtr->bufferY + lumaBufferOffset + lumaStride * inputRowIndex),
-                (inputPtr->luma + sourceLumaStride * inputRowIndex),
-                lumaWidth);
+        if (sequenceControlSetPtr->lcuAligned)
+            inputPicturePtr->bufferY = inputPtr->luma;
+        else {
+            for (inputRowIndex = 0; inputRowIndex < lumaHeight; inputRowIndex++) {
+                EB_MEMCPY((inputPicturePtr->bufferY + lumaBufferOffset + lumaStride * inputRowIndex),
+                        (inputPtr->luma + sourceLumaStride * inputRowIndex),
+                        lumaWidth);
+            }
         }
 
         // U
-        for (inputRowIndex = 0; inputRowIndex < chromaHeight; inputRowIndex++) {
-            EB_MEMCPY((inputPicturePtr->bufferCb + chromaBufferOffset + chromaStride * inputRowIndex),
-                (inputPtr->cb + (sourceCbStride*inputRowIndex)),
-                chromaWidth);
+        if (sequenceControlSetPtr->lcuAligned)
+            inputPicturePtr->bufferCb = inputPtr->cb;
+        else {
+            for (inputRowIndex = 0; inputRowIndex < chromaHeight; inputRowIndex++) {
+                EB_MEMCPY((inputPicturePtr->bufferCb + chromaBufferOffset + chromaStride * inputRowIndex),
+                        (inputPtr->cb + (sourceCbStride*inputRowIndex)),
+                        chromaWidth);
+            }
         }
 
         // V
-        for (inputRowIndex = 0; inputRowIndex < chromaHeight; inputRowIndex++) {
-            EB_MEMCPY((inputPicturePtr->bufferCr + chromaBufferOffset + chromaStride * inputRowIndex),
-                (inputPtr->cr + (sourceCrStride*inputRowIndex)),
-                chromaWidth);
+        if (sequenceControlSetPtr->lcuAligned)
+            inputPicturePtr->bufferCr = inputPtr->cr;
+        else {
+            for (inputRowIndex = 0; inputRowIndex < chromaHeight; inputRowIndex++) {
+                EB_MEMCPY((inputPicturePtr->bufferCr + chromaBufferOffset + chromaStride * inputRowIndex),
+                        (inputPtr->cr + (sourceCrStride*inputRowIndex)),
+                        chromaWidth);
+            }
         }
-
     }
     else if (is16BitInput && config->compressedTenBitFormat == 1)
     {
@@ -3408,35 +3428,45 @@ static EB_ERRORTYPE CopyFrameBuffer(
             }
 
             // Y 8bit
-            for (inputRowIndex = 0; inputRowIndex < lumaHeight; inputRowIndex++) {
-
-                EB_MEMCPY((inputPicturePtr->bufferY + lumaBufferOffset + lumaStride * inputRowIndex),
-                    (inputPtr->luma + sourceLumaStride * inputRowIndex),
-                    lumaWidth);
-
+            if (sequenceControlSetPtr->lcuAligned)
+                inputPicturePtr->bufferY = inputPtr->luma;
+            else {
+                for (inputRowIndex = 0; inputRowIndex < lumaHeight; inputRowIndex++) {
+                    EB_MEMCPY((inputPicturePtr->bufferY + lumaBufferOffset + lumaStride * inputRowIndex),
+                            (inputPtr->luma + sourceLumaStride * inputRowIndex),
+                            lumaWidth);
+                }
             }
 
             // U 8bit
-            for (inputRowIndex = 0; inputRowIndex < chromaHeight; inputRowIndex++) {
-
-                EB_MEMCPY((inputPicturePtr->bufferCb + chromaBufferOffset + chromaStride * inputRowIndex),
-                    (inputPtr->cb + (sourceCbStride*inputRowIndex)),
-                    chromaWidth);
-
+            if (sequenceControlSetPtr->lcuAligned)
+                inputPicturePtr->bufferCb = inputPtr->cb;
+            else {
+                for (inputRowIndex = 0; inputRowIndex < chromaHeight; inputRowIndex++) {
+                    EB_MEMCPY((inputPicturePtr->bufferCb + chromaBufferOffset + chromaStride * inputRowIndex),
+                            (inputPtr->cb + (sourceCbStride*inputRowIndex)),
+                            chromaWidth);
+                }
             }
 
             // V 8bit
-            for (inputRowIndex = 0; inputRowIndex < chromaHeight; inputRowIndex++) {
-
-                EB_MEMCPY((inputPicturePtr->bufferCr + chromaBufferOffset + chromaStride * inputRowIndex),
-                    (inputPtr->cr + (sourceCrStride*inputRowIndex)),
-                    chromaWidth);
-
+            if (sequenceControlSetPtr->lcuAligned)
+                inputPicturePtr->bufferCr = inputPtr->cr;
+            else {
+                for (inputRowIndex = 0; inputRowIndex < chromaHeight; inputRowIndex++) {
+                    EB_MEMCPY((inputPicturePtr->bufferCr + chromaBufferOffset + chromaStride * inputRowIndex),
+                            (inputPtr->cr + (sourceCrStride*inputRowIndex)),
+                            chromaWidth);
+                }
             }
 
             //efficient copy - final
             //compressed 2Bit in 1D format
-            {
+            if (sequenceControlSetPtr->lcuAligned) {
+                inputPicturePtr->bufferBitIncY = inputPtr->lumaExt;
+                inputPicturePtr->bufferBitIncCb = inputPtr->cbExt;
+                inputPicturePtr->bufferBitIncCr = inputPtr->crExt;
+            } else {
                 EB_U16 luma2BitWidth = sequenceControlSetPtr->maxInputLumaWidth / 4;
                 EB_U16 lumaHeight = sequenceControlSetPtr->maxInputLumaHeight;
 
@@ -3453,12 +3483,12 @@ static EB_ERRORTYPE CopyFrameBuffer(
                     EB_MEMCPY(inputPicturePtr->bufferBitIncCr + (luma2BitWidth >> 1)*inputRowIndex, inputPtr->crExt + sourceChroma2BitStride * inputRowIndex, luma2BitWidth >> 1);
                 }
             }
-
         }
-
     }
     else { // 10bit packed
-
+        // Note: can't directly assign the out8BitBuffer and outnBitBuffer with the referenced
+        //       input frame address for 10-bit packed format, because the 10-bit data needs to
+        //       be unpacked interleavedly into 8-bit and 2-bit buffers, separately.
         EB_U32 lumaBufferOffset = (inputPicturePtr->strideY*sequenceControlSetPtr->topPadding + sequenceControlSetPtr->leftPadding);
         EB_U32 chromaBufferOffset = (inputPicturePtr->strideCr*(sequenceControlSetPtr->topPadding >> subHeightCMinus1) + (sequenceControlSetPtr->leftPadding >> subWidthCMinus1));
         EB_U16 lumaWidth = (EB_U16)(inputPicturePtr->width - sequenceControlSetPtr->maxInputPadRight);
@@ -3865,7 +3895,8 @@ EB_ERRORTYPE AllocateFrameBuffer(
 
     inputPictureBufferDescInitData.splitMode = is16bit ? EB_TRUE : EB_FALSE;
 
-    inputPictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
+    if (!sequenceControlSetPtr->lcuAligned)
+        inputPictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
 
     if (is16bit && config->compressedTenBitFormat == 1) {
         inputPictureBufferDescInitData.splitMode = EB_FALSE;  //do special allocation for 2bit data down below.

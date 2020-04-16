@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <EbApiVersion.h>
+#include <sys/queue.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -100,6 +101,8 @@ extern "C" {
         uint8_t* naluBase64Encode;
 
         SegmentOverride_t *segmentOvPtr;
+
+        LIST_ENTRY(EB_BUFFERHEADERTYPE) list;
     } EB_BUFFERHEADERTYPE;
 
     typedef struct EB_COMPONENTTYPE

@@ -9,6 +9,12 @@
 #include "EbApi.h"
 #include "EbAppConfig.h"
 
+// Close to the Input FIFO size, and can be tuned.
+#define INPUT_BUFFER_POOL_SIZE 100
+
+#define MAX(x, y)                       ((x)>(y)?(x):(y))
+#define MIN(x, y)                       ((x)<(y)?(x):(y))
+
 /***************************************
 
  * App Callback data struct
@@ -26,7 +32,10 @@ typedef struct EbAppContext_s {
     EB_COMPONENTTYPE*                   svtEncoderHandle;
 
     // Buffer Pools
-    EB_BUFFERHEADERTYPE                *inputBufferPool;
+    EB_BUFFERHEADERTYPE                **inputBufferPool;
+    uint16_t                            inputBufferPoolSize;
+    LIST_HEAD(pool_list, EB_BUFFERHEADERTYPE)       poolList;
+    LIST_HEAD(encoding_list, EB_BUFFERHEADERTYPE)   encodingList;
     EB_BUFFERHEADERTYPE                *streamBufferPool;
     EB_BUFFERHEADERTYPE                *reconBuffer;
 

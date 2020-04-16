@@ -4269,10 +4269,12 @@ void* PictureAnalysisKernel(void *inputPtr)
 		SetPictureParametersForStatisticsGathering(
 			sequenceControlSetPtr);
 
-		// Pad pictures to multiple min cu size
-		PadPictureToMultipleOfMinCuSizeDimensions(
-			sequenceControlSetPtr,
-			inputPicturePtr);
+        if (!sequenceControlSetPtr->lcuAligned) {
+            // Pad pictures to multiple min cu size
+            PadPictureToMultipleOfMinCuSizeDimensions(
+                    sequenceControlSetPtr,
+                    inputPicturePtr);
+        }
 
 		// Pre processing operations performed on the input picture
         PicturePreProcessingOperations(
@@ -4294,10 +4296,10 @@ void* PictureAnalysisKernel(void *inputPtr)
             pictureControlSetPtr->chromaDownSamplePicturePtr = inputPicturePtr;
         }
 
-		// Pad input picture to complete border LCUs
-		PadPictureToMultipleOfLcuDimensions(
-			inputPaddedPicturePtr
-        );
+        if (!sequenceControlSetPtr->lcuAligned) {
+            // Pad input picture to complete border LCUs
+            PadPictureToMultipleOfLcuDimensions(inputPaddedPicturePtr);
+        }
 
 		// 1/4 & 1/16 input picture decimation
 		DecimateInputPicture(

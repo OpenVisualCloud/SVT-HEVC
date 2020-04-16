@@ -20,8 +20,6 @@
 /***************************************
  * Macros
  ***************************************/
-#define MAX(x, y)                       ((x)>(y)?(x):(y))
-#define MIN(x, y)                       ((x)<(y)?(x):(y))
 #define CLIP3(MinVal, MaxVal, a)        (((a)<(MinVal)) ? (MinVal) : (((a)>(MaxVal)) ? (MaxVal) :(a)))
 #define FUTURE_WINDOW_WIDTH                 4
 #define SIZE_OF_ONE_FRAME_IN_BYTES(width, height, csp, is16bit) \
@@ -1210,7 +1208,7 @@ int ParseDolbyVisionRPUMetadata(
 APPEXITCONDITIONTYPE ProcessInputBuffer(EbConfig_t *config, EbAppContext_t *appCallBack)
 {
     uint8_t            is16bit = (uint8_t)(config->encoderBitDepth > 8);
-    EB_BUFFERHEADERTYPE     *headerPtr = appCallBack->inputBufferPool;
+    EB_BUFFERHEADERTYPE     *headerPtr = EB_NULL;
     EB_COMPONENTTYPE        *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
 
     APPEXITCONDITIONTYPE    return_value = APP_ExitConditionNone;
@@ -1224,6 +1222,25 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(EbConfig_t *config, EbAppContext_t *appC
     int ret;
     uint32_t compressed10bitFrameSize = (uint32_t)((inputPaddedWidth*inputPaddedHeight) + 2 * ((inputPaddedWidth*inputPaddedHeight) >> (3 - colorFormat)));
     compressed10bitFrameSize += compressed10bitFrameSize / 4;
+
+    if (appCallBack->inputBufferPoolSize > 1) {
+        if (!LIST_EMPTY(&appCallBack->poolList)) {
+            headerPtr = LIST_FIRST(&appCallBack->poolList);
+            // Removed the 1st input buffer from buffer pool (to increase cache hit rate).
+            LIST_REMOVE(headerPtr, list);
+
+            // Insert the dequeued input buffer into the encoding list,
+            // where items are safe during encoding pipeline.
+            LIST_INSERT_HEAD(&appCallBack->encodingList, headerPtr, list);
+        } else {
+            // It assumes that all the input buffers have been sent to encoder,
+            // and to get potential available packet, so that the corresponding
+            // input buffer will be returned to poolList again.
+            // As the application is single thread, can't use event based processing.
+            return return_value;
+        }
+    } else
+        headerPtr = appCallBack->inputBufferPool[0];
 
     if (config->injector && config->processedFrameCount)
     {
@@ -1320,6 +1337,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
 {
     APPPORTACTIVETYPE      *portState       = &appCallBack->outputStreamPortActive;
     EB_BUFFERHEADERTYPE    *headerPtr;
+    EB_BUFFERHEADERTYPE    *encodingListEntry;
     EB_COMPONENTTYPE       *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
     APPEXITCONDITIONTYPE    return_value    = APP_ExitConditionNone;
     EB_ERRORTYPE            stream_status   = EB_ErrorNone;
@@ -1350,6 +1368,20 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
         ++(config->performanceContext.frameCount);
         *totalLatency += (uint64_t)headerPtr->nTickCount;
         *maxLatency = (headerPtr->nTickCount > *maxLatency) ? headerPtr->nTickCount : *maxLatency;
+
+        if ((appCallBack->inputBufferPoolSize > 1) && !LIST_EMPTY(&appCallBack->encodingList)) {
+            LIST_FOREACH(encodingListEntry, &appCallBack->encodingList, list) {
+                if (encodingListEntry->pts == headerPtr->pts) {
+                    // Removed the input buffer which has been encoded from the encoding list.
+                    LIST_REMOVE(encodingListEntry, list);
+
+                    // Return the input buffer the input buffer pool,
+                    LIST_INSERT_HEAD(&appCallBack->poolList, encodingListEntry, list);
+
+                    break;
+                }
+            }
+        }
 
         EbAppFinishTime((uint64_t*)&finishsTime, (uint64_t*)&finishuTime);
         // total execution time, inc init time
