@@ -195,7 +195,6 @@ void* PacketizationKernel(void *inputPtr)
         queueEntryPtr->sliceType = pictureControlSetPtr->sliceType;
         queueEntryPtr->pictureNumber = pictureControlSetPtr->pictureNumber;
 
-#if OUT_ALLOC
         EbGetEmptyObject(sequenceControlSetPtr->encodeContextPtr->streamOutputFifoPtr,
                 &pictureControlSetPtr->ParentPcsPtr->outputStreamWrapperPtr);
         outputStreamWrapperPtr   = pictureControlSetPtr->ParentPcsPtr->outputStreamWrapperPtr;
@@ -203,11 +202,6 @@ void* PacketizationKernel(void *inputPtr)
         // Not use EB_MALLOC due to lacking of EB_FREE which needs to parse all the memoryMap entries.
         outputStreamPtr->pBuffer = (EB_U8 *)malloc(outputStreamPtr->nAllocLen);
         assert(outputStreamPtr->pBuffer != EB_NULL && "bit-stream memory allocation failure");
-#else
-        // Get Output Bitstream buffer
-        outputStreamWrapperPtr   = pictureControlSetPtr->ParentPcsPtr->outputStreamWrapperPtr;
-        outputStreamPtr          = (EB_BUFFERHEADERTYPE*) outputStreamWrapperPtr->objectPtr;
-#endif
 
         outputStreamPtr->nFlags  = 0;
         EbBlockOnMutex(encodeContextPtr->terminatingConditionsMutex);
