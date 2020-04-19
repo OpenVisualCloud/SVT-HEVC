@@ -369,7 +369,7 @@ EB_ERRORTYPE AllocateInputBuffers(
     } else
         callbackData->inputBufferPoolSize = 1;
 
-    EB_APP_MALLOC(EB_BUFFERHEADERTYPE **, callbackData->inputBufferPool, sizeof(EB_BUFFERHEADERTYPE *) * callbackData->inputBufferPoolSize,
+    EB_APP_MALLOC(EbAppInputFrame_t **, callbackData->inputBufferPool, sizeof(EbAppInputFrame_t *) * callbackData->inputBufferPoolSize,
             EB_N_PTR, EB_ErrorInsufficientResources);
 
     LIST_INIT(&callbackData->poolList);
@@ -377,33 +377,34 @@ EB_ERRORTYPE AllocateInputBuffers(
 
     for (uint16_t i = 0; i < callbackData->inputBufferPoolSize; i++)
     {
-        EB_APP_MALLOC(EB_BUFFERHEADERTYPE*, callbackData->inputBufferPool[i], sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, EB_ErrorInsufficientResources);
+        EB_APP_MALLOC(EbAppInputFrame_t *, callbackData->inputBufferPool[i], sizeof(EbAppInputFrame_t), EB_N_PTR, EB_ErrorInsufficientResources);
+        EB_APP_MALLOC(EB_BUFFERHEADERTYPE *, callbackData->inputBufferPool[i]->inputFrame, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, EB_ErrorInsufficientResources);
 
         // Initialize Header
-        callbackData->inputBufferPool[i]->nSize                       = sizeof(EB_BUFFERHEADERTYPE);
+        callbackData->inputBufferPool[i]->inputFrame->nSize = sizeof(EB_BUFFERHEADERTYPE);
 
-        EB_APP_MALLOC(uint8_t*, callbackData->inputBufferPool[i]->pBuffer, sizeof(EB_H265_ENC_INPUT), EB_N_PTR, EB_ErrorInsufficientResources);
+        EB_APP_MALLOC(uint8_t*, callbackData->inputBufferPool[i]->inputFrame->pBuffer, sizeof(EB_H265_ENC_INPUT), EB_N_PTR, EB_ErrorInsufficientResources);
 
         if (config->bufferedInput == -1) {
 
             // Allocate frame buffer for the pBuffer
             AllocateInputBuffer(
                     config,
-                    callbackData->inputBufferPool[i]->pBuffer);
+                    callbackData->inputBufferPool[i]->inputFrame->pBuffer);
         }
 
         // Assign the variables
-        callbackData->inputBufferPool[i]->pAppPrivate = NULL;
-        callbackData->inputBufferPool[i]->sliceType   = EB_INVALID_PICTURE;
+        callbackData->inputBufferPool[i]->inputFrame->pAppPrivate = NULL;
+        callbackData->inputBufferPool[i]->inputFrame->sliceType   = EB_INVALID_PICTURE;
 
         if (callbackData->ebEncParameters.segmentOvEnabled) {
             size_t pictureWidthInLcu = (config->sourceWidth + EB_SEGMENT_BLOCK_SIZE - 1) / EB_SEGMENT_BLOCK_SIZE;
             size_t pictureHeightInLcu = (config->sourceHeight + EB_SEGMENT_BLOCK_SIZE - 1) / EB_SEGMENT_BLOCK_SIZE;
             size_t lcuTotalCount = pictureWidthInLcu * pictureHeightInLcu;
-            EB_APP_MALLOC(SegmentOverride_t*, callbackData->inputBufferPool[i]->segmentOvPtr, sizeof(SegmentOverride_t) * lcuTotalCount, EB_N_PTR, EB_ErrorInsufficientResources);
+            EB_APP_MALLOC(SegmentOverride_t*, callbackData->inputBufferPool[i]->inputFrame->segmentOvPtr, sizeof(SegmentOverride_t) * lcuTotalCount, EB_N_PTR, EB_ErrorInsufficientResources);
         }
         else {
-            callbackData->inputBufferPool[i]->segmentOvPtr = NULL;
+            callbackData->inputBufferPool[i]->inputFrame->segmentOvPtr = NULL;
         }
 
         if (callbackData->inputBufferPoolSize > 1) {
