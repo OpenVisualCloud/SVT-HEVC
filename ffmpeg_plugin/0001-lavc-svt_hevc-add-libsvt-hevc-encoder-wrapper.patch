@@ -1,4 +1,4 @@
-From 30205a046f5b437ac70ffa67ebd3732dfc490285 Mon Sep 17 00:00:00 2001
+From b964c0cf3d21d2b1488a55921a81e5a71bd0fd20 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -14,8 +14,8 @@ Signed-off-by: Austin Hu <austin.hu@intel.com>
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 606 +++++++++++++++++++++++++++++++++++++++
- 4 files changed, 612 insertions(+)
+ libavcodec/libsvt_hevc.c | 603 +++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 609 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
@@ -80,10 +80,10 @@ index d2f9a39ce5..d8788a7954 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000000..b63b307aad
+index 0000000000..58172c5616
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,606 @@
+@@ -0,0 +1,603 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -117,8 +117,6 @@ index 0000000000..b63b307aad
 +
 +#include <stdbool.h>
 +#include <sys/queue.h>
-+
-+#define HEVC_LCU_SIZE 64
 +
 +typedef enum eos_status {
 +    EOS_NOT_REACHED = 0,
@@ -166,7 +164,7 @@ index 0000000000..b63b307aad
 +    // Manage the input frames with doubly linked list.
 +    // But it can be replace by other ways, such as hash table.
 +    LIST_HEAD(input_frame_list, input_frame_s) input_frame_list;
-+    bool lcu_aligned;
++    bool ref_frame;
 +} SvtContext;
 +
 +static int error_mapping(EB_ERRORTYPE svt_ret)
@@ -372,7 +370,7 @@ index 0000000000..b63b307aad
 +    is16bit = config->encoderBitDepth > 8;
 +    frame_size = (uint64_t)(config->sourceWidth * config->sourceHeight) << is16bit;
 +
-+    if (svt_enc->lcu_aligned) {
++    if (svt_enc->ref_frame) {
 +        input_frame = (input_frame_t *)malloc(sizeof(*input_frame));
 +
 +        // Keep the inpt frame referenced, rather than copying it inside encoder.
@@ -459,8 +457,7 @@ index 0000000000..b63b307aad
 +    }
 +
 +    LIST_INIT(&svt_enc->input_frame_list);
-+    if (!(avctx->width % HEVC_LCU_SIZE) && !(avctx->height % HEVC_LCU_SIZE))
-+        svt_enc->lcu_aligned = true;
++    svt_enc->ref_frame = true;
 +
 +    return 0;
 +
@@ -545,7 +542,7 @@ index 0000000000..b63b307aad
 +
 +    EbH265ReleaseOutBuffer(&header_ptr);
 +
-+    if (svt_enc->lcu_aligned) {
++    if (svt_enc->ref_frame) {
 +        LIST_FOREACH(input_frame_entry, &svt_enc->input_frame_list, list) {
 +            if (input_frame_entry->ref_frame->pts == pkt->pts) {
 +                // Unference the AVFrame oject which has been encoded completely.

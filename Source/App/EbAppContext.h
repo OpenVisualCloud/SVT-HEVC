@@ -12,7 +12,7 @@
 #include <sys/queue.h>
 
 // Close to the Input FIFO size, and can be tuned.
-#define INPUT_BUFFER_POOL_SIZE 100
+#define INPUT_BUFFER_POOL_SIZE 120
 
 #define MAX(x, y)                       ((x)>(y)?(x):(y))
 #define MIN(x, y)                       ((x)<(y)?(x):(y))

@@ -60,6 +60,8 @@ extern EB_ERRORTYPE PictureFastDistortion(
     EB_U32                   predLumaOriginIndex,
     EB_U32                   predChromaOriginIndex,
     EB_U32                   size,
+    EB_U32                   puLumaWidth,
+    EB_U32                   puLumaHeight,
     EB_U32                   componentMask,
     EB_U64                   lumaDistortion[DIST_CALC_TOTAL],
     EB_U64                   chromaDistortion[DIST_CALC_TOTAL]);

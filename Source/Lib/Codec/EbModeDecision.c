@@ -83,7 +83,8 @@ void intraSearchTheseModesOutputBest(
     EB_U32   mode;
     EB_U32   bestSAD = 32 * 32 * 255;
     EB_U32	 sadCurr;
-
+    EB_U32   picWidth = ((SequenceControlSet_t *)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr)->lumaWidth;
+    EB_U32   picHeight = ((SequenceControlSet_t *)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr)->lumaHeight;
 
     for (candidateIndex = 0; candidateIndex < NumOfModesToTest; candidateIndex++) {
 
@@ -98,6 +99,8 @@ void intraSearchTheseModesOutputBest(
             mode);
 
         const EB_U32 puOriginIndex = (contextPtr->cuOriginY & 63) * 64 + (contextPtr->cuOriginX & 63);
+        EB_U32 cuWidth = MIN(cuSize, picWidth - contextPtr->cuOriginX);
+        EB_U32 cuHeight = MIN(cuSize, picHeight - contextPtr->cuOriginY);
 
         //Distortion
         sadCurr  = (EB_U32)NxMSadKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][cuSize >> 3](
@@ -105,8 +108,8 @@ void intraSearchTheseModesOutputBest(
             srcStride,
             &(contextPtr->predictionBuffer->bufferY[puOriginIndex]),
             MAX_LCU_SIZE,
-            cuSize,
-            cuSize);
+            cuHeight,
+            cuWidth);
 
         //keep track of best SAD
         if (sadCurr < bestSAD) {

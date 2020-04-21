@@ -219,10 +219,6 @@ static EB_ERRORTYPE ComputeDecimatedZzSad(
 			lcuOriginX = lcuParams->originX;
 			lcuOriginY = lcuParams->originY;
 
-			lcuWidth = lcuParams->width;
-			lcuHeight = lcuParams->height;
-
-
 			decimatedLcuWidth = lcuWidth >> 2;
 			decimatedLcuHeight = lcuHeight >> 2;
 
@@ -238,8 +234,8 @@ static EB_ERRORTYPE ComputeDecimatedZzSad(
 				Decimation2D(
 					&previousInputPictureFull->bufferY[blkDisplacementFull],
 					previousInputPictureFull->strideY,
-					MAX_LCU_SIZE,
-					MAX_LCU_SIZE,
+                    lcuWidth,
+                    lcuHeight,
 					contextPtr->meContextPtr->sixteenthLcuBuffer,
 					contextPtr->meContextPtr->sixteenthLcuBufferStride,
 					4);
@@ -250,7 +246,7 @@ static EB_ERRORTYPE ComputeDecimatedZzSad(
 					sixteenthDecimatedPicturePtr->strideY,
 					contextPtr->meContextPtr->sixteenthLcuBuffer,
 					contextPtr->meContextPtr->sixteenthLcuBufferStride,
-					16, 16);
+                    lcuHeight >> 2, lcuWidth >> 2);
 
 				// Background Enhancement Algorithm
 				// Classification is important to:
@@ -722,9 +718,8 @@ void* MotionEstimationKernel(void *inputPtr)
 
                     contextPtr->meContextPtr->hmeSearchType = HME_RECTANGULAR;
 
-                    for (lcuRow = 0; lcuRow < MAX_LCU_SIZE; lcuRow++) {
+                    for (lcuRow = 0; lcuRow < lcuHeight; lcuRow++) {
                         EB_MEMCPY((&(contextPtr->meContextPtr->lcuBuffer[lcuRow * MAX_LCU_SIZE])), (&(inputPicturePtr->bufferY[bufferIndex + lcuRow * inputPicturePtr->strideY])), MAX_LCU_SIZE * sizeof(EB_U8));
-
                     }
 
                     EB_U8 * srcPtr = &inputPaddedPicturePtr->bufferY[bufferIndex];

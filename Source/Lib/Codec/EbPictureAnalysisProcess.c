@@ -4269,7 +4269,7 @@ void* PictureAnalysisKernel(void *inputPtr)
 		SetPictureParametersForStatisticsGathering(
 			sequenceControlSetPtr);
 
-        if (!sequenceControlSetPtr->lcuAligned) {
+        if (!sequenceControlSetPtr->refInputFrame) {
             // Pad pictures to multiple min cu size
             PadPictureToMultipleOfMinCuSizeDimensions(
                     sequenceControlSetPtr,
@@ -4296,7 +4296,7 @@ void* PictureAnalysisKernel(void *inputPtr)
             pictureControlSetPtr->chromaDownSamplePicturePtr = inputPicturePtr;
         }
 
-        if (!sequenceControlSetPtr->lcuAligned) {
+        if (!sequenceControlSetPtr->refInputFrame) {
             // Pad input picture to complete border LCUs
             PadPictureToMultipleOfLcuDimensions(inputPaddedPicturePtr);
         }

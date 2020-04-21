@@ -1935,6 +1935,9 @@ void ProductPerformFastLoop(
 	EB_U32							isCandzz = 0;
 	const EB_U32 cuDepth = contextPtr->cuStats->depth;
 	const EB_U32 cuSize = contextPtr->cuStats->size;
+    EB_U32 cuWidth = MIN(cuSize, (EB_U32)(inputPicturePtr->width - contextPtr->cuOriginX));
+    EB_U32 cuHeight = MIN(cuSize, (EB_U32)(inputPicturePtr->height - contextPtr->cuOriginY));
+
 	EB_U32 firstFastCandidateTotalCount;
 	// Initialize first fast cost loop variables
 	EB_U64 bestFirstFastCostSearchCandidateCost = 0xFFFFFFFFFFFFFFFFull;
@@ -2048,8 +2051,8 @@ void ProductPerformFastLoop(
 						inputStrideY,
 						predBufferY,
 						MAX_LCU_SIZE ,
-						cuSize,
-						cuSize));
+                        cuHeight,
+                        cuWidth));
 
                 // Cb
                 if (!!contextPtr->useChromaInformationInFastLoop)
@@ -2062,8 +2065,8 @@ void ProductPerformFastLoop(
 						inputPicturePtr->strideCb,
 						predBufferCb,
 						(MAX_LCU_SIZE >> 1) ,
-						(cuSize >> 1) ,
-						cuSize >> 1);
+						(cuHeight >> 1) ,
+                        cuWidth >> 1);
 
 
                     EB_U8 * const inputBufferCr = inputPicturePtr->bufferCr + inputCrOriginIndex;
@@ -2074,8 +2077,8 @@ void ProductPerformFastLoop(
                         inputPicturePtr->strideCb ,
                         predBufferCr,
                         (MAX_LCU_SIZE >> 1),
-                        (cuSize >> 1),
-                        cuSize >> 1) ;
+                        (cuHeight >> 1),
+                        cuWidth >> 1) ;
                 }
             }
             if (pictureControlSetPtr->ParentPcsPtr->cmplxStatusLcu[lcuAddr] == CMPLX_NOISE) {
@@ -2741,6 +2744,9 @@ EB_EXTERN EB_ERRORTYPE PerformIntra4x4Search(
         EB_U32 partitionOriginX = contextPtr->cuOriginX + INTRA_4x4_OFFSET_X[partitionIndex];
         EB_U32 partitionOriginY = contextPtr->cuOriginY + INTRA_4x4_OFFSET_Y[partitionIndex];
 
+        EB_U32 partitionWidth = MIN(MIN_PU_SIZE, inputPicturePtr->width - partitionOriginX);
+        EB_U32 partitionHeight = MIN(MIN_PU_SIZE, inputPicturePtr->height - partitionOriginY);
+
         inputOriginIndex = (partitionOriginY + inputPicturePtr->originY) * inputPicturePtr->strideY + (partitionOriginX + inputPicturePtr->originX);
         puOriginIndex = ((partitionOriginY & (MAX_LCU_SIZE - 1)) * MAX_LCU_SIZE) + (partitionOriginX & (MAX_LCU_SIZE - 1));
 
@@ -2860,6 +2866,8 @@ EB_EXTERN EB_ERRORTYPE PerformIntra4x4Search(
                         puOriginIndex,
                         puChromaOriginIndex,
                         MIN_PU_SIZE,
+                        partitionWidth,
+                        partitionHeight,
                         PICTURE_BUFFER_DESC_FULL_MASK,
                         &lumaFastDistortion,
                         &chromaFastDistortion);
@@ -2883,6 +2891,8 @@ EB_EXTERN EB_ERRORTYPE PerformIntra4x4Search(
                         puOriginIndex,
                         0,
                         MIN_PU_SIZE,
+                        partitionWidth,
+                        partitionHeight,
                         PICTURE_BUFFER_DESC_LUMA_MASK,
                         &lumaFastDistortion,
                         NULL);

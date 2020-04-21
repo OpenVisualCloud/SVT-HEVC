@@ -1912,35 +1912,16 @@ void EbHevcSetParamBasedOnInput(
         sequenceControlSetPtr->videoUsabilityInfoPtr->frameFieldInfoPresentFlag = EB_TRUE;
     }
 
-    // Update picture width, and picture height
-    if (sequenceControlSetPtr->maxInputLumaWidth % MIN_CU_SIZE) {
-
-        sequenceControlSetPtr->maxInputPadRight = MIN_CU_SIZE - (sequenceControlSetPtr->maxInputLumaWidth % MIN_CU_SIZE);
-        sequenceControlSetPtr->maxInputLumaWidth = sequenceControlSetPtr->maxInputLumaWidth + sequenceControlSetPtr->maxInputPadRight;
-        //sequenceControlSetPtr->maxInputChromaWidth = sequenceControlSetPtr->maxInputLumaWidth >> 1; //TODO: change here
-    }
-    else {
-
-        sequenceControlSetPtr->maxInputPadRight = 0;
-    }
-    if (sequenceControlSetPtr->maxInputLumaHeight % MIN_CU_SIZE) {
-
-        sequenceControlSetPtr->maxInputPadBottom = MIN_CU_SIZE - (sequenceControlSetPtr->maxInputLumaHeight % MIN_CU_SIZE);
-        sequenceControlSetPtr->maxInputLumaHeight = sequenceControlSetPtr->maxInputLumaHeight + sequenceControlSetPtr->maxInputPadBottom;
-        //sequenceControlSetPtr->maxInputChromaHeight = sequenceControlSetPtr->maxInputLumaHeight >> 1; //ditto
-    }
-    else {
-        sequenceControlSetPtr->maxInputPadBottom = 0;
-    }
+    sequenceControlSetPtr->maxInputPadRight = 0;
+    sequenceControlSetPtr->maxInputPadBottom = 0;
 
     sequenceControlSetPtr->lumaWidth    = sequenceControlSetPtr->maxInputLumaWidth;
     sequenceControlSetPtr->lumaHeight   = sequenceControlSetPtr->maxInputLumaHeight;
 
-    if (!(sequenceControlSetPtr->lumaWidth % MAX_LCU_SIZE) && !(sequenceControlSetPtr->lumaHeight % MAX_LCU_SIZE))
-        sequenceControlSetPtr->lcuAligned = EB_TRUE;
+    sequenceControlSetPtr->refInputFrame = EB_TRUE;
 
     // Configure the padding
-    if (sequenceControlSetPtr->lcuAligned) {
+    if (sequenceControlSetPtr->refInputFrame) {
         sequenceControlSetPtr->leftPadding  = 0;
         sequenceControlSetPtr->topPadding   = 0;
         sequenceControlSetPtr->rightPadding = 0;
@@ -3372,7 +3353,7 @@ static EB_ERRORTYPE CopyFrameBuffer(
 
 
         // Y
-        if (sequenceControlSetPtr->lcuAligned)
+        if (sequenceControlSetPtr->refInputFrame)
             inputPicturePtr->bufferY = inputPtr->luma;
         else {
             for (inputRowIndex = 0; inputRowIndex < lumaHeight; inputRowIndex++) {
@@ -3383,7 +3364,7 @@ static EB_ERRORTYPE CopyFrameBuffer(
         }
 
         // U
-        if (sequenceControlSetPtr->lcuAligned)
+        if (sequenceControlSetPtr->refInputFrame)
             inputPicturePtr->bufferCb = inputPtr->cb;
         else {
             for (inputRowIndex = 0; inputRowIndex < chromaHeight; inputRowIndex++) {
@@ -3394,7 +3375,7 @@ static EB_ERRORTYPE CopyFrameBuffer(
         }
 
         // V
-        if (sequenceControlSetPtr->lcuAligned)
+        if (sequenceControlSetPtr->refInputFrame)
             inputPicturePtr->bufferCr = inputPtr->cr;
         else {
             for (inputRowIndex = 0; inputRowIndex < chromaHeight; inputRowIndex++) {
@@ -3425,7 +3406,7 @@ static EB_ERRORTYPE CopyFrameBuffer(
             }
 
             // Y 8bit
-            if (sequenceControlSetPtr->lcuAligned)
+            if (sequenceControlSetPtr->refInputFrame)
                 inputPicturePtr->bufferY = inputPtr->luma;
             else {
                 for (inputRowIndex = 0; inputRowIndex < lumaHeight; inputRowIndex++) {
@@ -3436,7 +3417,7 @@ static EB_ERRORTYPE CopyFrameBuffer(
             }
 
             // U 8bit
-            if (sequenceControlSetPtr->lcuAligned)
+            if (sequenceControlSetPtr->refInputFrame)
                 inputPicturePtr->bufferCb = inputPtr->cb;
             else {
                 for (inputRowIndex = 0; inputRowIndex < chromaHeight; inputRowIndex++) {
@@ -3447,7 +3428,7 @@ static EB_ERRORTYPE CopyFrameBuffer(
             }
 
             // V 8bit
-            if (sequenceControlSetPtr->lcuAligned)
+            if (sequenceControlSetPtr->refInputFrame)
                 inputPicturePtr->bufferCr = inputPtr->cr;
             else {
                 for (inputRowIndex = 0; inputRowIndex < chromaHeight; inputRowIndex++) {
@@ -3459,7 +3440,7 @@ static EB_ERRORTYPE CopyFrameBuffer(
 
             //efficient copy - final
             //compressed 2Bit in 1D format
-            if (sequenceControlSetPtr->lcuAligned) {
+            if (sequenceControlSetPtr->refInputFrame) {
                 inputPicturePtr->bufferBitIncY = inputPtr->lumaExt;
                 inputPicturePtr->bufferBitIncCb = inputPtr->cbExt;
                 inputPicturePtr->bufferBitIncCr = inputPtr->crExt;
@@ -3890,7 +3871,7 @@ EB_ERRORTYPE AllocateFrameBuffer(
 
     inputPictureBufferDescInitData.splitMode = is16bit ? EB_TRUE : EB_FALSE;
 
-    if (!sequenceControlSetPtr->lcuAligned)
+    if (!sequenceControlSetPtr->refInputFrame)
         inputPictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
 
     if (is16bit && config->compressedTenBitFormat == 1) {

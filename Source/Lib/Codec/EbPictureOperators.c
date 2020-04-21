@@ -275,6 +275,8 @@ EB_ERRORTYPE PictureFastDistortion(
     EB_U32                   predLumaOriginIndex,
     EB_U32                   predChromaOriginIndex,
     EB_U32                   size,
+    EB_U32                   puLumaWidth,
+    EB_U32                   puLumaHeight,
     EB_U32                   componentMask,
     EB_U64                   lumaDistortion[DIST_CALC_TOTAL],
     EB_U64                   chromaDistortion[DIST_CALC_TOTAL])
@@ -282,6 +284,8 @@ EB_ERRORTYPE PictureFastDistortion(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
     const EB_U32 chromaSize = size == 4 ? 4 : size >> 1;
+    const EB_U32 chromaLumaWidth = puLumaWidth == 4 ? 4 : puLumaWidth >> 1;
+    const EB_U32 chromaLumaHeight = puLumaHeight == 4 ? 4 : puLumaHeight >> 1;
 
     // Y
     if (componentMask & PICTURE_BUFFER_DESC_Y_FLAG) {
@@ -291,8 +295,8 @@ EB_ERRORTYPE PictureFastDistortion(
             input->strideY,
             &(pred->bufferY[predLumaOriginIndex]),
             64,
-            size,
-            size);
+            puLumaHeight,
+            puLumaWidth);
     }
 
     // Cb
@@ -303,8 +307,8 @@ EB_ERRORTYPE PictureFastDistortion(
             input->strideCb,
             &(pred->bufferCb[predChromaOriginIndex]),
             32,
-            chromaSize,
-            chromaSize);
+            chromaLumaHeight,
+            chromaLumaWidth);
     }
 
     // Cr
@@ -315,8 +319,8 @@ EB_ERRORTYPE PictureFastDistortion(
             input->strideCr,
             &(pred->bufferCr[predChromaOriginIndex]),
             32,
-            chromaSize,
-            chromaSize);
+            chromaLumaHeight,
+            chromaLumaWidth);
     }
 
     return return_error;

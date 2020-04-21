@@ -57,7 +57,8 @@ typedef struct SequenceControlSet_s
     EB_U16                      topPadding;
     EB_U16                      rightPadding;
     EB_U16                      botPadding;
-    EB_BOOL                     lcuAligned;
+    // Reference the input frame, rather than memcpy.
+    EB_BOOL                     refInputFrame;
 
     EB_U32                      frameRate;  
     EB_U32                      encoderBitDepth;

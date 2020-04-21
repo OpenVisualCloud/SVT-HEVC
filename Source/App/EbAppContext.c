@@ -23,8 +23,6 @@
 #define IS_16_BIT(bit_depth) (bit_depth==10?1:0)
 #define EB_OUTPUTSTREAMBUFFERSIZE_MACRO(ResolutionSize)                ((ResolutionSize) < (INPUT_SIZE_1080i_TH) ? 0x1E8480 : (ResolutionSize) < (INPUT_SIZE_1080p_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_4K_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_8K_TH) ? 0x2DC6C0:0x5B8D80)
 
-#define HEVC_LCU_SIZE 64
-
  /***************************************
  * Variables Defining a memory table
  *  hosting all allocated pointers
@@ -361,13 +359,9 @@ EB_ERRORTYPE AllocateInputBuffers(
 {
     EB_ERRORTYPE   return_error = EB_ErrorNone;
 
-    if (!(callbackData->ebEncParameters.sourceWidth % HEVC_LCU_SIZE) &&
-            !(callbackData->ebEncParameters.sourceHeight % HEVC_LCU_SIZE)) {
-        // To create the input buffer pool for direct reference, rather
-        // then memcpy to Input FIFO objects.
-        callbackData->inputBufferPoolSize = MAX(INPUT_BUFFER_POOL_SIZE, config->bufferedInput);
-    } else
-        callbackData->inputBufferPoolSize = 1;
+    // To create the input buffer pool for direct reference, rather
+    // then memcpy to Input FIFO objects.
+    callbackData->inputBufferPoolSize = MAX(INPUT_BUFFER_POOL_SIZE, config->bufferedInput);
 
     EB_APP_MALLOC(EbAppInputFrame_t **, callbackData->inputBufferPool, sizeof(EbAppInputFrame_t *) * callbackData->inputBufferPoolSize,
             EB_N_PTR, EB_ErrorInsufficientResources);
