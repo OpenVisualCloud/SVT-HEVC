@@ -903,10 +903,10 @@ class EB_Test(object):
             for VBR in QP_VBR_COMBINATION:
                 # Get default encoding params
                 enc_params = self.get_default_params().copy()
-                num_tests, num_passed = self.run_test(test_name, test_params, enc_params,VBR, VBR)
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params,VBR, not VBR)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
-                num_tests, num_passed = self.run_test(test_name, test_params_2, enc_params, VBR, VBR)
+                num_tests, num_passed = self.run_test(test_name, test_params_2, enc_params, VBR, not VBR)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
