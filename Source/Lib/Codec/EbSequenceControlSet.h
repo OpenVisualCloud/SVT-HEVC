@@ -164,7 +164,8 @@ typedef struct SequenceControlSet_s
     EB_U32                      paReferencePictureBufferInitCount;
     EB_U32                      referencePictureBufferInitCount;
     EB_U32                      reconBufferFifoInitCount;
-    EB_U32                      inputOutputBufferFifoInitCount;
+    EB_U32                      inputBufferFifoInitCount;
+    EB_U32                      outputBufferFifoInitCount;
     EB_U32                      resourceCoordinationFifoInitCount;     
     EB_U32                      pictureAnalysisFifoInitCount;
     EB_U32                      pictureDecisionFifoInitCount;

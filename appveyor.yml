@@ -54,25 +54,25 @@ for:
       - make -j 10
       - ffmpeg -i ../akiyo_cif.y4m -c:v libsvt_hevc akiyo.h265
       - cd ..
-    artifacts:
-      - path: bin\Release\SvtHevcEncApp.exe
-        name: $(APPVEYOR_PROJECT_NAME)
-      - path: bin\Release\libSvtHevcEnc.a
-        name: $(APPVEYOR_PROJECT_NAME)
-      - path: ffmpeg\ffmpeg.exe
-        name: $(APPVEYOR_PROJECT_NAME)_FFMPEG
+    #artifacts:
+    #  - path: bin\Release\SvtHevcEncApp.exe
+    #    name: $(APPVEYOR_PROJECT_NAME)
+    #  - path: bin\Release\libSvtHevcEnc.a
+    #    name: $(APPVEYOR_PROJECT_NAME)
+    #  - path: ffmpeg\ffmpeg.exe
+    #    name: $(APPVEYOR_PROJECT_NAME)_FFMPEG
 
-  - matrix:
-      only:
-        - generator: Visual Studio 2019
-          configuration: Release
-    build:
-      project: Build\svt-hevc.sln
-    artifacts:
-      - path: bin\Release\SvtHevcEncApp.exe
-        name: $(APPVEYOR_PROJECT_NAME)
-      - path: bin\Release\SvtHevcEnc.lib
-        name: $(APPVEYOR_PROJECT_NAME)
+  #- matrix:
+  #    only:
+  #      - generator: Visual Studio 2019
+  #        configuration: Release
+  #  build:
+  #    project: Build\svt-hevc.sln
+  #  artifacts:
+  #    - path: bin\Release\SvtHevcEncApp.exe
+  #      name: $(APPVEYOR_PROJECT_NAME)
+  #    - path: bin\Release\SvtHevcEnc.lib
+  #      name: $(APPVEYOR_PROJECT_NAME)
 
 build:
   project: Build\svt-hevc.sln

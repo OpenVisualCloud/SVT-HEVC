@@ -440,28 +440,6 @@ EB_ERRORTYPE AllocateOutputReconBuffers(
     return return_error;
 }
 
-EB_ERRORTYPE AllocateOutputBuffers(
-    EbConfig_t				*config,
-    EbAppContext_t			*callbackData)
-{
-
-    EB_ERRORTYPE   return_error = EB_ErrorNone;
-    uint32_t		   outputStreamBufferSize = (uint32_t)(EB_OUTPUTSTREAMBUFFERSIZE_MACRO(config->inputPaddedHeight * config->inputPaddedWidth));;
-    {
-        EB_APP_MALLOC(EB_BUFFERHEADERTYPE*, callbackData->streamBufferPool, sizeof(EB_BUFFERHEADERTYPE), EB_N_PTR, EB_ErrorInsufficientResources);
-
-        // Initialize Header
-        callbackData->streamBufferPool->nSize = sizeof(EB_BUFFERHEADERTYPE);
-
-        EB_APP_MALLOC(uint8_t*, callbackData->streamBufferPool->pBuffer, outputStreamBufferSize, EB_N_PTR, EB_ErrorInsufficientResources);
-
-        callbackData->streamBufferPool->nAllocLen = outputStreamBufferSize;
-        callbackData->streamBufferPool->pAppPrivate = NULL;
-        callbackData->streamBufferPool->sliceType = EB_INVALID_PICTURE;
-    }
-    return return_error;
-}
-
 EB_ERRORTYPE PreloadFramesIntoRam(
     EbConfig_t				*config)
 {
@@ -691,16 +669,7 @@ EB_ERRORTYPE InitEncoder(
         return return_error;
     }
 
-    // STEP 7: Allocate output buffers carrying the bitstream out
-    return_error = AllocateOutputBuffers(
-        config,
-        callbackData);
-
-    if (return_error != EB_ErrorNone) {
-        return return_error;
-    }
-
-    // STEP 8: Allocate output Recon Buffer
+    // STEP 7: Allocate output Recon Buffer
     return_error = AllocateOutputReconBuffers(
         config,
         callbackData);

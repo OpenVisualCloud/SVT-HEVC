@@ -44,7 +44,6 @@ typedef struct EbAppContext_s {
     uint16_t                            inputBufferPoolSize;
     LIST_HEAD(pool_list, EbAppInputFrame_s)       poolList;
     LIST_HEAD(encoding_list, EbAppInputFrame_s)   encodingList;
-    EB_BUFFERHEADERTYPE                *streamBufferPool;
     EB_BUFFERHEADERTYPE                *reconBuffer;
 
 	// Instance Index
