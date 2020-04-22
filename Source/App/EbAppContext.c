@@ -366,8 +366,14 @@ EB_ERRORTYPE AllocateInputBuffers(
     EB_APP_MALLOC(EbAppInputFrame_t **, callbackData->inputBufferPool, sizeof(EbAppInputFrame_t *) * callbackData->inputBufferPoolSize,
             EB_N_PTR, EB_ErrorInsufficientResources);
 
+#ifdef _WIN32
+    InitializeSListHead(&callbackData->poolList);
+    InitializeSListHead(&callbackData->encodingList);
+    InitializeSListHead(&callbackData->tmpEncodingList);
+#else
     LIST_INIT(&callbackData->poolList);
     LIST_INIT(&callbackData->encodingList);
+#endif
 
     for (uint16_t i = 0; i < callbackData->inputBufferPoolSize; i++)
     {
@@ -403,7 +409,11 @@ EB_ERRORTYPE AllocateInputBuffers(
 
         if (callbackData->inputBufferPoolSize > 1) {
             // Insert the created input buffer into the pool, with linked list connected.
+#ifdef _WIN32
+            InterlockedPushEntrySList(&callbackData->poolList, &callbackData->inputBufferPool[i]->list);
+#else
             LIST_INSERT_HEAD(&callbackData->poolList, callbackData->inputBufferPool[i], list);
+#endif
         }
     }
 

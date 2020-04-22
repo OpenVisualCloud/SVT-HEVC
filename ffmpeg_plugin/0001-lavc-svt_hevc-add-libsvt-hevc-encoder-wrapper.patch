@@ -1,4 +1,4 @@
-From b964c0cf3d21d2b1488a55921a81e5a71bd0fd20 Mon Sep 17 00:00:00 2001
+From 886b8ad9766f0f95f264587d1dd00b2248d19910 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -14,8 +14,8 @@ Signed-off-by: Austin Hu <austin.hu@intel.com>
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 603 +++++++++++++++++++++++++++++++++++++++
- 4 files changed, 609 insertions(+)
+ libavcodec/libsvt_hevc.c | 659 +++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 665 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
@@ -80,10 +80,10 @@ index d2f9a39ce5..d8788a7954 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000000..58172c5616
+index 0000000000..d2af410cde
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,603 @@
+@@ -0,0 +1,659 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -116,7 +116,11 @@ index 0000000000..58172c5616
 +#include "avcodec.h"
 +
 +#include <stdbool.h>
++#ifdef _WIN32
++#include <windows.h>
++#else
 +#include <sys/queue.h>
++#endif
 +
 +typedef enum eos_status {
 +    EOS_NOT_REACHED = 0,
@@ -126,8 +130,12 @@ index 0000000000..58172c5616
 +
 +typedef struct input_frame_s
 +{
-+    AVFrame *ref_frame;
++#ifdef _WIN32
++    SLIST_ENTRY list;
++#else
 +    LIST_ENTRY(input_frame_s) list;
++#endif
++    AVFrame *ref_frame;
 +} input_frame_t;
 +
 +typedef struct SvtContext {
@@ -161,9 +169,14 @@ index 0000000000..58172c5616
 +    int tile_col_count;
 +    int tile_slice_mode;
 +
-+    // Manage the input frames with doubly linked list.
++    // Manage the input frames with linked list.
 +    // But it can be replace by other ways, such as hash table.
++#ifdef _WIN32
++    SLIST_HEADER input_frame_list;
++    SLIST_HEADER tmp_input_frame_list;
++#else
 +    LIST_HEAD(input_frame_list, input_frame_s) input_frame_list;
++#endif
 +    bool ref_frame;
 +} SvtContext;
 +
@@ -378,7 +391,11 @@ index 0000000000..58172c5616
 +
 +        // Record the input referenced frame, to unreference it after getting its
 +        // encoded packet.
++#ifdef _WIN32
++        InterlockedPushEntrySList(&svt_enc->input_frame_list, &input_frame->list);
++#else
 +        LIST_INSERT_HEAD(&svt_enc->input_frame_list, input_frame, list);
++#endif
 +    }
 +
 +    in_data->luma = frame->data[0];
@@ -456,7 +473,12 @@ index 0000000000..58172c5616
 +        goto failed_init_encoder;
 +    }
 +
++#ifdef _WIN32
++    InitializeSListHead(&svt_enc->input_frame_list);
++    InitializeSListHead(&svt_enc->tmp_input_frame_list);
++#else
 +    LIST_INIT(&svt_enc->input_frame_list);
++#endif
 +    svt_enc->ref_frame = true;
 +
 +    return 0;
@@ -478,6 +500,10 @@ index 0000000000..58172c5616
 +    EB_ERRORTYPE svt_ret;
 +    int av_ret;
 +    input_frame_t *input_frame_entry = NULL;
++#ifdef _WIN32
++    SLIST_ENTRY *first_entry = NULL;
++    SLIST_ENTRY *last_entry = NULL;
++#endif
 +
 +    if (EOS_RECEIVED == svt_enc->eos_flag) {
 +        *got_packet = 0;
@@ -543,6 +569,35 @@ index 0000000000..58172c5616
 +    EbH265ReleaseOutBuffer(&header_ptr);
 +
 +    if (svt_enc->ref_frame) {
++#ifdef _WIN32
++        // To check whether the list is empty or not, and remove the input buffer
++        // which has been encoded from the encoding list.
++        first_entry = InterlockedPopEntrySList(&svt_enc->input_frame_list);
++        input_frame_entry = (input_frame_t *)first_entry;
++
++        while (input_frame_entry) {
++            if (input_frame_entry->ref_frame->pts == pkt->pts) {
++                // Unference the AVFrame oject which has been encoded completely.
++                av_frame_unref(input_frame_entry->ref_frame);
++                free(input_frame_entry);
++
++                if (QueryDepthSList(&svt_enc->tmp_input_frame_list) &&
++                        last_entry && first_entry) {
++                    // first_entry has been pushed to the last entry of tmp_input_frame_list.
++                    InterlockedPushListSListEx(&svt_enc->input_frame_list, last_entry,
++                            first_entry, QueryDepthSList(&svt_enc->input_frame_list));
++                }
++                break;
++            }
++
++            last_entry = &input_frame_entry->list;
++            InterlockedPushEntrySList(&svt_enc->tmp_input_frame_list, last_entry);
++
++            input_frame_entry = (input_frame_t *)InterlockedPopEntrySList(&svt_enc->input_frame_list);
++        }
++
++        InterlockedFlushSList(&svt_enc->tmp_input_frame_list);
++#else
 +        LIST_FOREACH(input_frame_entry, &svt_enc->input_frame_list, list) {
 +            if (input_frame_entry->ref_frame->pts == pkt->pts) {
 +                // Unference the AVFrame oject which has been encoded completely.
@@ -553,6 +608,7 @@ index 0000000000..58172c5616
 +                break;
 +            }
 +        }
++#endif
 +    }
 +
 +    *got_packet = 1;

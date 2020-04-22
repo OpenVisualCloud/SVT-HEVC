@@ -1209,6 +1209,9 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(EbConfig_t *config, EbAppContext_t *appC
 {
     uint8_t            is16bit = (uint8_t)(config->encoderBitDepth > 8);
     EbAppInputFrame_t       *inputFrame = EB_NULL;
+#ifdef _WIN32
+    SLIST_ENTRY             *firstEntry = EB_NULL;
+#endif
     EB_BUFFERHEADERTYPE     *headerPtr = EB_NULL;
     EB_COMPONENTTYPE        *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
 
@@ -1225,6 +1228,18 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(EbConfig_t *config, EbAppContext_t *appC
     compressed10bitFrameSize += compressed10bitFrameSize / 4;
 
     if (appCallBack->inputBufferPoolSize > 1) {
+#ifdef _WIN32
+        // To check whether the list is empty or not, and remove the 1st input
+        // buffer from buffer pool (to increase cache hit rate) at the same time.
+        firstEntry = InterlockedPopEntrySList(&appCallBack->poolList);
+        if (firstEntry) {
+            inputFrame = (EbAppInputFrame_t *)firstEntry;
+
+            // Insert the dequeued input buffer into the encoding list,
+            // where items are safe during encoding pipeline.
+            InterlockedPushEntrySList(&appCallBack->encodingList, &inputFrame->list);
+        }
+#else
         if (!LIST_EMPTY(&appCallBack->poolList)) {
             inputFrame = LIST_FIRST(&appCallBack->poolList);
             // Removed the 1st input buffer from buffer pool (to increase cache hit rate).
@@ -1233,7 +1248,9 @@ APPEXITCONDITIONTYPE ProcessInputBuffer(EbConfig_t *config, EbAppContext_t *appC
             // Insert the dequeued input buffer into the encoding list,
             // where items are safe during encoding pipeline.
             LIST_INSERT_HEAD(&appCallBack->encodingList, inputFrame, list);
-        } else {
+        }
+#endif
+        else {
             // It assumes that all the input buffers have been sent to encoder,
             // and to get potential available packet, so that the corresponding
             // input buffer will be returned to poolList again.
@@ -1341,6 +1358,10 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     APPPORTACTIVETYPE      *portState       = &appCallBack->outputStreamPortActive;
     EB_BUFFERHEADERTYPE    *headerPtr;
     EbAppInputFrame_t      *encodingListEntry;
+#ifdef _WIN32
+    SLIST_ENTRY            *firstEntry = EB_NULL;
+    SLIST_ENTRY            *lastEntry = EB_NULL;
+#endif
     EB_COMPONENTTYPE       *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
     APPEXITCONDITIONTYPE    return_value    = APP_ExitConditionNone;
     EB_ERRORTYPE            stream_status   = EB_ErrorNone;
@@ -1372,18 +1393,48 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
         *totalLatency += (uint64_t)headerPtr->nTickCount;
         *maxLatency = (headerPtr->nTickCount > *maxLatency) ? headerPtr->nTickCount : *maxLatency;
 
-        if ((appCallBack->inputBufferPoolSize > 1) && !LIST_EMPTY(&appCallBack->encodingList)) {
-            LIST_FOREACH(encodingListEntry, &appCallBack->encodingList, list) {
+        if (appCallBack->inputBufferPoolSize > 1) {
+#ifdef _WIN32
+            // To check whether the list is empty or not, and remove the input buffer
+            // which has been encoded from the encoding list.
+            firstEntry = InterlockedPopEntrySList(&appCallBack->encodingList);
+            encodingListEntry = (EbAppInputFrame_t *)firstEntry;
+
+            while (encodingListEntry) {
                 if (encodingListEntry->inputFrame->pts == headerPtr->pts) {
-                    // Removed the input buffer which has been encoded from the encoding list.
-                    LIST_REMOVE(encodingListEntry, list);
+                    // Return the input buffer to input buffer pool.
+                    InterlockedPushEntrySList(&appCallBack->poolList, &encodingListEntry->list);
 
-                    // Return the input buffer the input buffer pool,
-                    LIST_INSERT_HEAD(&appCallBack->poolList, encodingListEntry, list);
-
+                    if (QueryDepthSList(&appCallBack->tmpEncodingList) && lastEntry && firstEntry) {
+                        // firstEntry has been pushed to the last entry of tmpEncodingList.
+                        InterlockedPushListSListEx(&appCallBack->encodingList, lastEntry,
+                            firstEntry, QueryDepthSList(&appCallBack->tmpEncodingList));
+                    }
                     break;
                 }
+
+                lastEntry = &encodingListEntry->list;
+                InterlockedPushEntrySList(&appCallBack->tmpEncodingList, lastEntry);
+
+                encodingListEntry = (EbAppInputFrame_t *)InterlockedPopEntrySList(&appCallBack->encodingList);
             }
+
+            InterlockedFlushSList(&appCallBack->tmpEncodingList);
+#else
+            if (!LIST_EMPTY(&appCallBack->encodingList)) {
+                LIST_FOREACH(encodingListEntry, &appCallBack->encodingList, list) {
+                    if (encodingListEntry->inputFrame->pts == headerPtr->pts) {
+                        // Removed the input buffer which has been encoded from the encoding list.
+                        LIST_REMOVE(encodingListEntry, list);
+
+                        // Return the input buffer to input buffer pool.
+                        LIST_INSERT_HEAD(&appCallBack->poolList, encodingListEntry, list);
+
+                        break;
+                    }
+                }
+            }
+#endif
         }
 
         EbAppFinishTime((uint64_t*)&finishsTime, (uint64_t*)&finishuTime);
