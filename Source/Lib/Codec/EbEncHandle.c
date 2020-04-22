@@ -3886,14 +3886,6 @@ EB_ERRORTYPE AllocateFrameBuffer(
         (EB_PTR)&inputPictureBufferDescInitData);
     inputBuffer->pBuffer = (uint8_t*)buf;
 
-    if (is16bit && config->compressedTenBitFormat == 1) {
-        const EB_COLOR_FORMAT colorFormat = (EB_COLOR_FORMAT)sequenceControlSetPtr->chromaFormatIdc;
-        //pack 4 2bit pixels into 1Byte
-        EB_MALLOC_ALIGNED_ARRAY(buf->bufferBitIncY, (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4));
-        EB_MALLOC_ALIGNED_ARRAY(buf->bufferBitIncCb, (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4) >> (3 - colorFormat));
-        EB_MALLOC_ALIGNED_ARRAY(buf->bufferBitIncCr, (inputPictureBufferDescInitData.maxWidth * inputPictureBufferDescInitData.maxHeight / 4) >> (3 - colorFormat));
-    }
-
     return return_error;
 }
 
@@ -3931,11 +3923,6 @@ void EbInputBufferHeaderDestroyer(EB_PTR p)
 {
     EB_BUFFERHEADERTYPE *obj = (EB_BUFFERHEADERTYPE*)p;
     EbPictureBufferDesc_t* buf = (EbPictureBufferDesc_t*)obj->pBuffer;
-    if (buf) {
-        EB_FREE_ALIGNED_ARRAY(buf->bufferBitIncY);
-        EB_FREE_ALIGNED_ARRAY(buf->bufferBitIncCb);
-        EB_FREE_ALIGNED_ARRAY(buf->bufferBitIncCr);
-    }
 
     EB_FREE_ARRAY(obj->segmentOvPtr);
     EB_DELETE(buf);
