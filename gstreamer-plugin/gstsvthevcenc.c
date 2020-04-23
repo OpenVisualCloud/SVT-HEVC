@@ -521,6 +521,15 @@ gst_svthevcenc_init (GstSvtHevcEnc * svthevcenc)
   }
   /* setting configuration here since EbInitHandle overrides it */
   set_default_svt_configuration (svthevcenc->svt_config);
+
+#ifdef _WIN32
+  InitializeSListHead(&svthevcenc->input_frame_list);
+  InitializeSListHead(&svthevcenc->tmp_input_frame_list);
+#else
+  LIST_INIT(&svthevcenc->input_frame_list);
+#endif
+  svthevcenc->ref_frame = TRUE;
+
   GST_OBJECT_UNLOCK (svthevcenc);
 }
 
@@ -1026,6 +1035,7 @@ gst_svthevcenc_encode (GstSvtHevcEnc * svthevcenc, GstVideoCodecFrame * frame)
   EB_H265_ENC_INPUT *input_picture_buffer =
       (EB_H265_ENC_INPUT *) svthevcenc->input_buf->pBuffer;
   GstVideoFrame video_frame;
+  GstInputFrame *input_frame = NULL;
 
   GST_LOG_OBJECT (svthevcenc, "encode");
 
@@ -1033,6 +1043,23 @@ gst_svthevcenc_encode (GstSvtHevcEnc * svthevcenc, GstVideoCodecFrame * frame)
           frame->input_buffer, GST_MAP_READ)) {
     GST_ERROR_OBJECT (svthevcenc, "couldn't map input frame");
     return GST_FLOW_ERROR;
+  }
+
+  if (svthevcenc->ref_frame) {
+      input_frame = (GstInputFrame *)g_malloc(sizeof(*input_frame));
+
+      /* Keep the inpt frame referenced, rather than copying it inside encoder. */
+      input_frame->ref_frame = gst_video_codec_frame_ref(frame);
+
+      /*
+       * Record the input referenced frame, to unreference it after getting its
+       * encoded packet.
+       */
+#ifdef _WIN32
+      InterlockedPushEntrySList(&svthevcenc->input_frame_list, &input_frame->list);
+#else
+      LIST_INSERT_HEAD(&svthevcenc->input_frame_list, input_frame, list);
+#endif
   }
 
   input_picture_buffer->yStride =
@@ -1121,6 +1148,11 @@ GstFlowReturn
 gst_svthevcenc_dequeue_encoded_frames (GstSvtHevcEnc * svthevcenc,
     gboolean done_sending_pics, gboolean output_frames)
 {
+  GstInputFrame *input_frame_entry = NULL;
+#ifdef _WIN32
+  SLIST_ENTRY *tmp_entry = NULL;
+#endif
+
   if (svthevcenc->inited == FALSE)
     return GST_FLOW_OK;
 
@@ -1221,6 +1253,47 @@ gst_svthevcenc_dequeue_encoded_frames (GstSvtHevcEnc * svthevcenc,
 
       EbH265ReleaseOutBuffer (&output_buf);
       output_buf = NULL;
+
+      if (svthevcenc->ref_frame) {
+#ifdef _WIN32
+        /*
+         * To check whether the list is empty or not, and remove the input buffer
+         * which has been encoded from the encoding list.
+         */
+        while ((input_frame_entry =
+            (GstInputFrame *)InterlockedPopEntrySList(&svthevcenc->input_frame_list)) != NULL) {
+          if (input_frame_entry->ref_frame->pts == frame->pts) {
+            /* Unference the AVFrame oject which has been encoded completely. */
+            gst_video_codec_frame_unref(input_frame_entry->ref_frame);
+            free(input_frame_entry);
+
+            /* Restore the mismatched input buffers to input buffer list. */
+            if (QueryDepthSList(&svthevcenc->tmp_input_frame_list)) {
+              while ((tmp_entry = InterlockedPopEntrySList(&svthevcenc->tmp_input_frame_list)) != NULL) {
+                InterlockedPushEntrySList(&svthevcenc->input_frame_list, tmp_entry);
+              }
+            }
+            break;
+          }
+
+          /* Save the mismatched input buffers. */
+          InterlockedPushEntrySList(&svthevcenc->tmp_input_frame_list, &input_frame_entry->list);
+        }
+
+        InterlockedFlushSList(&svthevcenc->tmp_input_frame_list);
+#else
+        LIST_FOREACH(input_frame_entry, &svthevcenc->input_frame_list, list) {
+          if (input_frame_entry->ref_frame->pts == frame->pts) {
+            /* Unference the AVFrame oject which has been encoded completely. */
+            gst_video_codec_frame_unref(input_frame_entry->ref_frame);
+
+            LIST_REMOVE(input_frame_entry, list);
+            free(input_frame_entry);
+            break;
+          }
+        }
+#endif
+      }
 
       ret = gst_video_encoder_finish_frame (GST_VIDEO_ENCODER (svthevcenc),
           frame);

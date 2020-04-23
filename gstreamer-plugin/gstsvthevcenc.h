@@ -12,6 +12,12 @@
 
 #include <EbApi.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <sys/queue.h>
+#endif
+
 G_BEGIN_DECLS
 #define GST_TYPE_SVTHEVCENC \
   (gst_svthevcenc_get_type())
@@ -58,6 +64,16 @@ typedef enum
   GST_SVTHEVC_ENC_PRED_STRUCT_RANDOM_ACCESS,
 } GstSvtHevcEncPredStruct;
 
+typedef struct _GstInputFrame
+{
+#ifdef _WIN32
+    SLIST_ENTRY list;
+#else
+    LIST_ENTRY(_GstInputFrame) list;
+#endif
+    GstVideoCodecFrame *ref_frame;
+} GstInputFrame;
+
 typedef struct _GstSvtHevcEnc
 {
   GstVideoEncoder video_encoder;
@@ -81,6 +97,19 @@ typedef struct _GstSvtHevcEnc
   int dts_offset;
   const gchar *svt_version;
   gboolean inited;
+
+  /*
+   * Manage the input frames with linked list.
+   * But it can be replace by other ways, such
+   * as hash table.
+   */
+#ifdef _WIN32
+  SLIST_HEADER input_frame_list;
+  SLIST_HEADER tmp_input_frame_list;
+#else
+  LIST_HEAD(input_frame_list, _GstInputFrame) input_frame_list;
+#endif
+  gboolean ref_frame;
 } GstSvtHevcEnc;
 
 typedef struct _GstSvtHevcEncClass
