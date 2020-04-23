@@ -1359,8 +1359,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
     EB_BUFFERHEADERTYPE    *headerPtr;
     EbAppInputFrame_t      *encodingListEntry;
 #ifdef _WIN32
-    SLIST_ENTRY            *firstEntry = EB_NULL;
-    SLIST_ENTRY            *lastEntry = EB_NULL;
+    SLIST_ENTRY            *tmpEntry = EB_NULL;
 #endif
     EB_COMPONENTTYPE       *componentHandle = (EB_COMPONENTTYPE*)appCallBack->svtEncoderHandle;
     APPEXITCONDITIONTYPE    return_value    = APP_ExitConditionNone;
@@ -1397,26 +1396,22 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
 #ifdef _WIN32
             // To check whether the list is empty or not, and remove the input buffer
             // which has been encoded from the encoding list.
-            firstEntry = InterlockedPopEntrySList(&appCallBack->encodingList);
-            encodingListEntry = (EbAppInputFrame_t *)firstEntry;
-
-            while (encodingListEntry) {
+            while (encodingListEntry = (EbAppInputFrame_t *)InterlockedPopEntrySList(&appCallBack->encodingList)) {
                 if (encodingListEntry->inputFrame->pts == headerPtr->pts) {
                     // Return the input buffer to input buffer pool.
                     InterlockedPushEntrySList(&appCallBack->poolList, &encodingListEntry->list);
 
-                    if (QueryDepthSList(&appCallBack->tmpEncodingList) && lastEntry && firstEntry) {
-                        // firstEntry has been pushed to the last entry of tmpEncodingList.
-                        InterlockedPushListSList(&appCallBack->encodingList, lastEntry,
-                            firstEntry, QueryDepthSList(&appCallBack->tmpEncodingList));
+                    // Restore the mismatched input buffers to encoding buffer pool.
+                    if (QueryDepthSList(&appCallBack->tmpEncodingList)) {
+                        while (tmpEntry = InterlockedPopEntrySList(&appCallBack->tmpEncodingList)) {
+                            InterlockedPushEntrySList(&appCallBack->encodingList, tmpEntry);
+                        }
                     }
                     break;
                 }
 
-                lastEntry = &encodingListEntry->list;
-                InterlockedPushEntrySList(&appCallBack->tmpEncodingList, lastEntry);
-
-                encodingListEntry = (EbAppInputFrame_t *)InterlockedPopEntrySList(&appCallBack->encodingList);
+                // Save the mismatched input buffers.
+                InterlockedPushEntrySList(&appCallBack->tmpEncodingList, &encodingListEntry->list);
             }
 
             InterlockedFlushSList(&appCallBack->tmpEncodingList);
