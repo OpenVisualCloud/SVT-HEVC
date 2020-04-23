@@ -1407,7 +1407,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
 
                     if (QueryDepthSList(&appCallBack->tmpEncodingList) && lastEntry && firstEntry) {
                         // firstEntry has been pushed to the last entry of tmpEncodingList.
-                        InterlockedPushListSListEx(&appCallBack->encodingList, lastEntry,
+                        InterlockedPushListSList(&appCallBack->encodingList, lastEntry,
                             firstEntry, QueryDepthSList(&appCallBack->tmpEncodingList));
                     }
                     break;

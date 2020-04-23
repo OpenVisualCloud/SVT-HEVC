@@ -1,4 +1,4 @@
-From 886b8ad9766f0f95f264587d1dd00b2248d19910 Mon Sep 17 00:00:00 2001
+From 976b1d50de0b90e164d112808b11e24ca012852d Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -80,7 +80,7 @@ index d2f9a39ce5..d8788a7954 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000000..d2af410cde
+index 0000000000..d7ec22218e
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
 @@ -0,0 +1,659 @@
@@ -584,7 +584,7 @@ index 0000000000..d2af410cde
 +                if (QueryDepthSList(&svt_enc->tmp_input_frame_list) &&
 +                        last_entry && first_entry) {
 +                    // first_entry has been pushed to the last entry of tmp_input_frame_list.
-+                    InterlockedPushListSListEx(&svt_enc->input_frame_list, last_entry,
++                    InterlockedPushListSList(&svt_enc->input_frame_list, last_entry,
 +                            first_entry, QueryDepthSList(&svt_enc->input_frame_list));
 +                }
 +                break;
