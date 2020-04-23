@@ -1,4 +1,4 @@
-From 8cf640f0b955a0f02f74c9e859a48a7d0a99df46 Mon Sep 17 00:00:00 2001
+From 09fa3c18fedb61ec8efe7622a9e15eeea350aaa1 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -80,7 +80,7 @@ index d2f9a39ce5..d8788a7954 100644
  extern AVCodec ff_libvo_amrwbenc_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000000..e0a0e25bfb
+index 0000000000..a3e0ccf21a
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
 @@ -0,0 +1,654 @@
@@ -571,8 +571,8 @@ index 0000000000..e0a0e25bfb
 +#ifdef _WIN32
 +        // To check whether the list is empty or not, and remove the input buffer
 +        // which has been encoded from the encoding list.
-+        while (input_frame_entry =
-+                (input_frame_t *)InterlockedPopEntrySList(&svt_enc->input_frame_list)) {
++        while ((input_frame_entry =
++                (input_frame_t *)InterlockedPopEntrySList(&svt_enc->input_frame_list)) != NULL) {
 +            if (input_frame_entry->ref_frame->pts == pkt->pts) {
 +                // Unference the AVFrame oject which has been encoded completely.
 +                av_frame_unref(input_frame_entry->ref_frame);
@@ -580,7 +580,7 @@ index 0000000000..e0a0e25bfb
 +
 +                // Restore the mismatched input buffers to input buffer list.
 +                if (QueryDepthSList(&svt_enc->tmp_input_frame_list)) {
-+                    while (tmp_entry = InterlockedPopEntrySList(&svt_enc->tmp_input_frame_list)) {
++                    while ((tmp_entry = InterlockedPopEntrySList(&svt_enc->tmp_input_frame_list)) != NULL) {
 +                        InterlockedPushEntrySList(&svt_enc->input_frame_list, tmp_entry);
 +                    }
 +                }
