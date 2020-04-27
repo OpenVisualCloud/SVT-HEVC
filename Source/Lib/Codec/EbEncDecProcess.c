@@ -3111,13 +3111,15 @@ void* EncDecKernel(void *inputPtr)
                 //Jing: Only copy/pad refDenSrcPicture if useSrcRef flag is set(in -sharp case)
                 //      Should not use pcs->useSrcRef directly
                 if (sequenceControlSetPtr->staticConfig.improveSharpness) {
-                    EbPictureBufferDesc_t *inputPicturePtr = (EbPictureBufferDesc_t*)pictureControlSetPtr->ParentPcsPtr->enhancedPicturePtr;
-                    EB_COLOR_FORMAT colorFormat = inputPicturePtr->colorFormat;
+                    EbPictureBufferDesc_t *reconBuffer = is16bit ?
+                        ((EbReferenceObject_t *)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr)->referencePicture16bit :
+                        ((EbReferenceObject_t *)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr)->referencePicture;
+                    EB_COLOR_FORMAT colorFormat = reconBuffer->colorFormat;
                     EB_U16 subWidthCMinus1 = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
                     EB_U16 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
-                    const EB_U32  SrclumaOffSet = inputPicturePtr->originX + inputPicturePtr->originY    *inputPicturePtr->strideY;
-                    const EB_U32 SrccbOffset = (inputPicturePtr->originX >> subWidthCMinus1) + (inputPicturePtr->originY >> subHeightCMinus1) * inputPicturePtr->strideCb;
-                    const EB_U32 SrccrOffset = (inputPicturePtr->originX >> subWidthCMinus1) + (inputPicturePtr->originY >> subHeightCMinus1) * inputPicturePtr->strideCr;
+                    const EB_U32 SrclumaOffSet = reconBuffer->originX + reconBuffer->originY * reconBuffer->strideY;
+                    const EB_U32 SrccbOffset = (reconBuffer->originX >> subWidthCMinus1) + (reconBuffer->originY >> subHeightCMinus1) * reconBuffer->strideCb;
+                    const EB_U32 SrccrOffset = (reconBuffer->originX >> subWidthCMinus1) + (reconBuffer->originY >> subHeightCMinus1) * reconBuffer->strideCr;
 
                     EbReferenceObject_t   *referenceObject = (EbReferenceObject_t*)pictureControlSetPtr->ParentPcsPtr->referencePictureWrapperPtr->objectPtr;
                     EbPictureBufferDesc_t *refDenPic = referenceObject->refDenSrcPicture;
@@ -3130,19 +3132,19 @@ void* EncDecKernel(void *inputPtr)
                     for (verticalIdx = 0; verticalIdx < refDenPic->height; ++verticalIdx)
                     {
                         EB_MEMCPY(refDenPic->bufferY + ReflumaOffSet + verticalIdx*refDenPic->strideY,
-                                inputPicturePtr->bufferY + SrclumaOffSet + verticalIdx* inputPicturePtr->strideY,
-                                inputPicturePtr->width);
+                                reconBuffer->bufferY + SrclumaOffSet + verticalIdx* reconBuffer->strideY,
+                                reconBuffer->width);
                     }
 
-                    for (verticalIdx = 0; verticalIdx < inputPicturePtr->height >> subHeightCMinus1; ++verticalIdx)
+                    for (verticalIdx = 0; verticalIdx < reconBuffer->height >> subHeightCMinus1; ++verticalIdx)
                     {
                         EB_MEMCPY(refDenPic->bufferCb + RefcbOffset + verticalIdx*refDenPic->strideCb,
-                                inputPicturePtr->bufferCb + SrccbOffset + verticalIdx* inputPicturePtr->strideCb,
-                                inputPicturePtr->width >> subWidthCMinus1);
+                                reconBuffer->bufferCb + SrccbOffset + verticalIdx* reconBuffer->strideCb,
+                                reconBuffer->width >> subWidthCMinus1);
 
                         EB_MEMCPY(refDenPic->bufferCr + RefcrOffset + verticalIdx*refDenPic->strideCr,
-                                inputPicturePtr->bufferCr + SrccrOffset + verticalIdx* inputPicturePtr->strideCr,
-                                inputPicturePtr->width >> subWidthCMinus1 );
+                                reconBuffer->bufferCr + SrccrOffset + verticalIdx* reconBuffer->strideCr,
+                                reconBuffer->width >> subWidthCMinus1 );
                     }
 
                     GeneratePadding(
