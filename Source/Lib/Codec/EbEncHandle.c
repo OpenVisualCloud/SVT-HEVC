@@ -1918,7 +1918,12 @@ void EbHevcSetParamBasedOnInput(
     sequenceControlSetPtr->lumaWidth    = sequenceControlSetPtr->maxInputLumaWidth;
     sequenceControlSetPtr->lumaHeight   = sequenceControlSetPtr->maxInputLumaHeight;
 
-    sequenceControlSetPtr->refInputFrame = EB_TRUE;
+    // Temporarily not to reference the input frames directly when sharpness improvement
+    // is enabled. Because some frames have been completedly encoded and returned to
+    // application to be unreferenced, but they may be still used to generate the
+    // reconstructed picture in EncDec.
+    sequenceControlSetPtr->refInputFrame =
+        !sequenceControlSetPtr->staticConfig.improveSharpness ? EB_TRUE : EB_FALSE;
 
     // Configure the padding
     if (sequenceControlSetPtr->refInputFrame) {
