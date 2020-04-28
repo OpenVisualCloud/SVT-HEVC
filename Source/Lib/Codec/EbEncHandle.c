@@ -1912,18 +1912,42 @@ void EbHevcSetParamBasedOnInput(
         sequenceControlSetPtr->videoUsabilityInfoPtr->frameFieldInfoPresentFlag = EB_TRUE;
     }
 
-    sequenceControlSetPtr->maxInputPadRight = 0;
-    sequenceControlSetPtr->maxInputPadBottom = 0;
-
-    sequenceControlSetPtr->lumaWidth    = sequenceControlSetPtr->maxInputLumaWidth;
-    sequenceControlSetPtr->lumaHeight   = sequenceControlSetPtr->maxInputLumaHeight;
-
     // Temporarily not to reference the input frames directly when sharpness improvement
     // is enabled. Because some frames have been completedly encoded and returned to
     // application to be unreferenced, but they may be still used to generate the
     // reconstructed picture in EncDec.
     sequenceControlSetPtr->refInputFrame =
         !sequenceControlSetPtr->staticConfig.improveSharpness ? EB_TRUE : EB_FALSE;
+
+    // And not to reference the input frames directly once either width or height
+    // is not aligned to 8 samples.
+    sequenceControlSetPtr->refInputFrame =
+        ((sequenceControlSetPtr->maxInputLumaWidth % MIN_CU_SIZE) || (sequenceControlSetPtr->maxInputLumaHeight % MIN_CU_SIZE)) ?
+        EB_FALSE : sequenceControlSetPtr->refInputFrame;
+
+    // Update picture width, and picture height
+    if (sequenceControlSetPtr->maxInputLumaWidth % MIN_CU_SIZE) {
+
+        sequenceControlSetPtr->maxInputPadRight = MIN_CU_SIZE - (sequenceControlSetPtr->maxInputLumaWidth % MIN_CU_SIZE);
+        sequenceControlSetPtr->maxInputLumaWidth = sequenceControlSetPtr->maxInputLumaWidth + sequenceControlSetPtr->maxInputPadRight;
+        //sequenceControlSetPtr->maxInputChromaWidth = sequenceControlSetPtr->maxInputLumaWidth >> 1; //TODO: change here
+    }
+    else {
+
+        sequenceControlSetPtr->maxInputPadRight = 0;
+    }
+    if (sequenceControlSetPtr->maxInputLumaHeight % MIN_CU_SIZE) {
+
+        sequenceControlSetPtr->maxInputPadBottom = MIN_CU_SIZE - (sequenceControlSetPtr->maxInputLumaHeight % MIN_CU_SIZE);
+        sequenceControlSetPtr->maxInputLumaHeight = sequenceControlSetPtr->maxInputLumaHeight + sequenceControlSetPtr->maxInputPadBottom;
+        //sequenceControlSetPtr->maxInputChromaHeight = sequenceControlSetPtr->maxInputLumaHeight >> 1; //ditto
+    }
+    else {
+        sequenceControlSetPtr->maxInputPadBottom = 0;
+    }
+
+    sequenceControlSetPtr->lumaWidth    = sequenceControlSetPtr->maxInputLumaWidth;
+    sequenceControlSetPtr->lumaHeight   = sequenceControlSetPtr->maxInputLumaHeight;
 
     // Configure the padding
     if (sequenceControlSetPtr->refInputFrame) {
