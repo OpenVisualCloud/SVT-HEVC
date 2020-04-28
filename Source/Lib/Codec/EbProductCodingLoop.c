@@ -215,26 +215,91 @@ const EB_FULL_COST_FUNC   fullCostFuncTable[3][3] =
 	/*INTRA */{ IntraFullCostPslice, IntraFullCostPslice, IntraFullCostIslice },
 };
 
+static EB_ERRORTYPE PredictionOlVoidFunc(ModeDecisionContext_t *contextPtr,
+        EB_U32 componentMask,
+        PictureControlSet_t *pictureControlSetPtr,
+        ModeDecisionCandidateBuffer_t *candidateBufferPtr)
+{
+    (void)contextPtr;
+    (void)componentMask;
+    (void)pictureControlSetPtr;
+    (void)candidateBufferPtr;
+    return EB_ErrorNone;
+}
+
 const EB_PREDICTION_FUNC  PredictionFunTableOl[2][3] = {
 
-    { NULL, Inter2Nx2NPuPredictionInterpolationFree,    IntraPredictionOl },  //  Interpolation-free path
-    { NULL, Inter2Nx2NPuPredictionHevc,                 IntraPredictionOl }   //  HEVC Interpolation path
+    { PredictionOlVoidFunc, Inter2Nx2NPuPredictionInterpolationFree,    IntraPredictionOl },  //  Interpolation-free path
+    { PredictionOlVoidFunc, Inter2Nx2NPuPredictionHevc,                 IntraPredictionOl }   //  HEVC Interpolation path
 };
 
+static EB_ERRORTYPE PredictionClVoidFunc(ModeDecisionContext_t *contextPtr,
+        EB_U32 componentMask,
+        PictureControlSet_t *pictureControlSetPtr,
+        ModeDecisionCandidateBuffer_t *candidateBufferPtr)
+{
+    (void)contextPtr;
+    (void)componentMask;
+    (void)pictureControlSetPtr;
+    (void)candidateBufferPtr;
+    return EB_ErrorNone;
+}
+
 const EB_PREDICTION_FUNC  PredictionFunTableCl[2][3] = {
-    { NULL, Inter2Nx2NPuPredictionInterpolationFree ,   IntraPredictionCl }, //  Interpolation-free path
-    { NULL, Inter2Nx2NPuPredictionHevc,                 IntraPredictionCl }  //  HEVC Interpolation path
+    { PredictionClVoidFunc, Inter2Nx2NPuPredictionInterpolationFree ,   IntraPredictionCl }, //  Interpolation-free path
+    { PredictionClVoidFunc, Inter2Nx2NPuPredictionHevc,                 IntraPredictionCl }  //  HEVC Interpolation path
 };
+
+static EB_ERRORTYPE ProductFastCostVoidFunc(ModeDecisionContext_t *contextPtr,
+        CodingUnit_t *cuPtr,
+        ModeDecisionCandidateBuffer_t *candidateBufferPtr,
+        EB_U32 qp,
+        EB_U64 lumaDistortion,
+        EB_U64 chromaDistortion,
+        EB_U64 lambda,
+        PictureControlSet_t *pictureControlSetPtr)
+{
+    (void)contextPtr;
+    (void)cuPtr;
+    (void)candidateBufferPtr;
+    (void)qp;
+    (void)lumaDistortion;
+    (void)chromaDistortion;
+    (void)lambda;
+    (void)pictureControlSetPtr;
+    return EB_ErrorNone;
+}
 
 const EB_FAST_COST_FUNC   ProductFastCostFuncOptTable[3][3] =
 {
-	/*      */{ NULL, NULL, NULL },
+	/*      */{ ProductFastCostVoidFunc, ProductFastCostVoidFunc, ProductFastCostVoidFunc },
 	/*INTER */{ InterFastCostBsliceOpt, InterFastCostPsliceOpt, NULL },
 	/*INTRA */{ Intra2Nx2NFastCostPsliceOpt, Intra2Nx2NFastCostPsliceOpt, Intra2Nx2NFastCostIsliceOpt },
 };
+
+static EB_ERRORTYPE ProductFullLumaCostVoidFunc(CodingUnit_t *cuPtr,
+        EB_U32 cuSize,
+        EB_U32 cuSizeLog2,
+        ModeDecisionCandidateBuffer_t *candidateBufferPtr,
+        EB_U64 *yDistortion,
+        EB_U64 lambda,
+        EB_U64 *yCoeffBits,
+        EB_U32 transformSize)
+{
+    (void)cuPtr;
+    (void)cuSize;
+    (void)cuSizeLog2;
+    (void)candidateBufferPtr;
+    (void)yDistortion;
+    (void)lambda;
+    (void)yCoeffBits;
+    (void)transformSize;
+    return EB_ErrorNone;
+}
+
 const EB_FULL_LUMA_COST_FUNC   ProductFullLumaCostFuncTable[3][3] =
 {
-	/*      */{ NULL, NULL, NULL },
+	/*      */{ ProductFullLumaCostVoidFunc, ProductFullLumaCostVoidFunc, ProductFullLumaCostVoidFunc },
 	/*INTER */{ InterFullLumaCost, InterFullLumaCost, NULL },
 	/*INTRA */{ IntraFullLumaCostPslice, IntraFullLumaCostPslice, IntraFullLumaCostIslice },
 };
