@@ -3429,6 +3429,8 @@ static void TestSearchAreaBounds(
         ySearchCenter - ((originY + ySearchCenter) - ((EB_S16)refPicPtr->height - 1)) :
         ySearchCenter;
 
+    searchRegionIndex = (EB_S16)(refPicPtr->originX + originX) + xSearchCenter +
+        ((EB_S16)(refPicPtr->originY + originY) + ySearchCenter) * refPicPtr->strideY;
 
     EB_U64 MvASad = NxMSadKernel_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][lcuWidth >> 3](
         contextPtr->lcuSrcPtr,
