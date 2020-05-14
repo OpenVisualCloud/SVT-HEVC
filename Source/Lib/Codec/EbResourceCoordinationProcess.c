@@ -615,10 +615,6 @@ void* ResourceCoordinationKernel(void *inputPtr)
                 pictureControlSetWrapperPtr,
                 1);
 
-#if !PAREF_OUT
-        ((EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr)->inputPaddedPicturePtr->bufferY = inputPicturePtr->bufferY;
-#endif
-
         // Get Empty Output Results Object
         // Note: record the PCS object into output of the Resource Coordination process for EOS frame(s).
         //       Because EbH265GetPacket() can get the encoded bit stream only if Packetization process has

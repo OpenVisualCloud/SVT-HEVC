@@ -4254,7 +4254,11 @@ void* PictureAnalysisKernel(void *inputPtr)
 		pictureHeighInLcu = (sequenceControlSetPtr->lumaHeight + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize;
 		lcuTotalCount = pictureWidthInLcu * pictureHeighInLcu;
 
-#if PAREF_OUT
+		// Pad pictures to multiple min cu size
+		PadPictureToMultipleOfMinCuSizeDimensions(
+			sequenceControlSetPtr,
+			inputPicturePtr);
+
         // Backup the Y component data from input picture into PA reference picture, to work arond the race condition that
         // the input picture buffer pointed by PA reference picture (in ResourceCoordination) would be updated even though
         // it's still being referenced.
@@ -4263,16 +4267,11 @@ void* PictureAnalysisKernel(void *inputPtr)
         for (EB_U32 row = 0; row < inputPicturePtr->height; row++) {
             EB_MEMCPY(pa + row * inputPaddedPicturePtr->strideY, in + row * inputPicturePtr->strideY, sizeof(EB_U8) * inputPicturePtr->width);
         }
-#endif
 
         // Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
 		SetPictureParametersForStatisticsGathering(
 			sequenceControlSetPtr);
 
-		// Pad pictures to multiple min cu size
-		PadPictureToMultipleOfMinCuSizeDimensions(
-			sequenceControlSetPtr,
-			inputPicturePtr);
 
 		// Pre processing operations performed on the input picture
         PicturePreProcessingOperations(
