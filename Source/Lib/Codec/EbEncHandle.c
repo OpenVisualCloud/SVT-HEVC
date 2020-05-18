@@ -883,11 +883,8 @@ EB_API EB_ERRORTYPE EbInitEncoder(EB_COMPONENTTYPE *h265EncComponent)
         referencePictureBufferDescInitData.maxHeight              = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->maxInputLumaHeight;
         referencePictureBufferDescInitData.bitDepth               = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->inputBitdepth;
         referencePictureBufferDescInitData.colorFormat            = EB_YUV420;
-#if PAREF_OUT
         referencePictureBufferDescInitData.bufferEnableMask       = PICTURE_BUFFER_DESC_LUMA_MASK;
-#else
-        referencePictureBufferDescInitData.bufferEnableMask       = 0;
-#endif
+
         referencePictureBufferDescInitData.leftPadding            = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lcuSize + ME_FILTER_TAP;
         referencePictureBufferDescInitData.rightPadding           = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lcuSize + ME_FILTER_TAP;
         referencePictureBufferDescInitData.topPadding             = encHandlePtr->sequenceControlSetInstanceArray[instanceIndex]->sequenceControlSetPtr->lcuSize + ME_FILTER_TAP;
