@@ -655,7 +655,7 @@ class EB_Test(object):
 
                     else:
                         continue
-                    if COMPARE == 1:
+                    if COMPARE == 0:
                         total_tests = total_tests + 1
                         if exit_code == 0:
                             print('------------Passed-------------', file=open(test_name + '.txt', 'a'))
@@ -765,7 +765,7 @@ class EB_Test(object):
                     continue
                 #Get default encoding params
                 enc_params = self.get_default_params().copy()
-                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, 1)
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, 0)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
@@ -793,7 +793,7 @@ class EB_Test(object):
             # Run test
             for VBR in QP_VBR_COMBINATION:
                 enc_params = self.get_default_params().copy()
-                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, VBR)
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, not VBR)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
@@ -821,7 +821,7 @@ class EB_Test(object):
                 if VBR == 1:
                     continue
                 enc_params = self.get_default_params().copy()
-                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, 0)
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, not VBR)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
@@ -846,7 +846,7 @@ class EB_Test(object):
             # Run test
             for VBR in QP_VBR_COMBINATION:
                 enc_params = self.get_default_params().copy()
-                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, VBR)
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, not VBR)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
@@ -872,7 +872,7 @@ class EB_Test(object):
             for VBR in QP_VBR_COMBINATION:
                 # Get default encoding params
                 enc_params = self.get_default_params().copy()
-                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, VBR)
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, not VBR)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
@@ -903,10 +903,10 @@ class EB_Test(object):
             for VBR in QP_VBR_COMBINATION:
                 # Get default encoding params
                 enc_params = self.get_default_params().copy()
-                num_tests, num_passed = self.run_test(test_name, test_params, enc_params,VBR, VBR)
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params,VBR, not VBR)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
-                num_tests, num_passed = self.run_test(test_name, test_params_2, enc_params, VBR, VBR)
+                num_tests, num_passed = self.run_test(test_name, test_params_2, enc_params, VBR, not VBR)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
         print ("---------------------------------------", file=open(test_name + '.txt', 'a'))
@@ -1104,7 +1104,7 @@ class EB_Test(object):
                 test_params = [
                 [seq, {'frame_to_be_encoded': 20}],
                 ]
-                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, 1)
+                num_tests, num_passed = self.run_test(test_name, test_params, enc_params, VBR, 0)
                 total_test = total_test + num_tests
                 total_passed = total_passed + num_passed
         return total_test, total_passed
