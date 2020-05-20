@@ -1227,6 +1227,7 @@ EB_ERRORTYPE ReadCommandLine(
 
     for (index = 0; index < MAX_CHANNEL_NUMBER; ++index){
         config_strings[index] = (char*)malloc(sizeof(char)*COMMAND_LINE_MAX_SIZE);
+        memset(config_strings[index], 0, sizeof(char)*COMMAND_LINE_MAX_SIZE);
     }
 
     // Copy tokens (except for CHANNEL_NUMBER_TOKEN ) into a temp token buffer hosting all tokens that are passed through the command line
