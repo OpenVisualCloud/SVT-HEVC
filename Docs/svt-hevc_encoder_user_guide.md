@@ -497,8 +497,10 @@ If both LogicalProcessors and TargetSocket are set, threads run on 20 logical pr
 
 ### 3. Header(VPS SPS PPS) insertion
 
-In some streaming usage, header needs to be inserted repeatedly into the bitstream. Otherwise, received stream may not be decodable.
+In some streaming use cases, headers need to be inserted repeatedly into the bitstream. Otherwise the received stream may not be decodable.
+
 `-scd 0` is to disable intra frame insertion beyond `-intra-period` setting. With example below, the gop size is 2(-intra-period) + 1 = 3.
+
 With `-irefresh-type` >= 0, header can be inserted repeatedly as shown below.
 - CQP(only 0 works for -irefresh-type):
 >-rc 0 -scd 0 -intra-period 2 -irefresh-type 0
