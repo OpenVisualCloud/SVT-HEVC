@@ -499,9 +499,9 @@ If both LogicalProcessors and TargetSocket are set, threads run on 20 logical pr
 
 In some streaming use cases, headers need to be inserted repeatedly into the bitstream. Otherwise the received stream may not be decodable.
 
-`-scd 0` is to disable intra frame insertion beyond `-intra-period` setting. With example below, the gop size is 2(-intra-period) + 1 = 3.
+`-scd 0` is used to disable intra frame insertion beyond the `-intra-period` setting. In the example below, the gop size is 2 (intra-period value) + 1 = 3.
 
-With `-irefresh-type` >= 0, header can be inserted repeatedly as shown below.
+With `-irefresh-type` >= 0, headers can be inserted repeatedly as shown below.
 - CQP(only 0 works for -irefresh-type):
 >-rc 0 -scd 0 -intra-period 2 -irefresh-type 0
 
