@@ -288,7 +288,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **BaseLayerSwitchMode** | -base-layer-switch-mode | [0,1] | 0 | 0 : Use B-frames in the base layer pointing to the same past picture<br>1 : Use P-frames in the base layer<br>Refer to Appendix A.1 |
 | **PredStructure** | -pred-struct | [0 – 2] | 2 | 0: Low Delay P<br>1: Low Delay B<br>2: Random Access<br>Refer to Appendix A.1 |
 | **IntraPeriod** | -intra-period | [-2 - 255] | -2 | Distance between Intra Frame inserted. <br>-1 denotes no intra update. <br>-2 denotes auto. |
-| **IntraRefreshType** | -irefresh-type | [-1,N] | -1 | -1: CRA (Open GOP)<br>>=0: IDR (Closed GOP, N is headers insertion interval, 0 supported if CQP, >=0 supported if VBR) |
+| **IntraRefreshType** | -irefresh-type | [-1,N] | -1 | -1: CRA (Open GOP)<br>>=0: IDR (Closed GOP, N is headers insertion interval, 0 supported if CQP, >=0 supported if VBR)<br>Refer to Appendix A.3 |
 | **QP** | -q | [0 - 51] | 32 | Initial quantization parameter for the Intra pictures used when RateControlMode 0 (CQP) |
 | **LoopFilterDisable** | -dlf | [0, 1] | 0 | When set to 1 disables the Deblocking Loop Filtering |
 | **SAO** | -sao | [0,1] | 1 | When set to 0 the encoder will not use the Sample Adaptive Filter |
@@ -495,6 +495,22 @@ If only TargetSocket is set, threads run on all the logical processors of socket
 
 If both LogicalProcessors and TargetSocket are set, threads run on 20 logical processors of socket 0. Threads guaranteed to run only on socket 0 if 20 is larger than logical processor number of socket 0.
 
+### 3. Header(VPS SPS PPS) insertion
+
+In some streaming use cases, headers need to be inserted repeatedly into the bitstream. Otherwise the received stream may not be decodable.
+
+`-scd 0` is used to disable intra frame insertion beyond the `-intra-period` setting. In the example below, the gop size is 2 (intra-period value) + 1 = 3.
+
+With `-irefresh-type` >= 0, headers can be inserted repeatedly as shown below.
+- CQP(only 0 works for -irefresh-type):
+>-rc 0 -scd 0 -intra-period 2 -irefresh-type 0
+
+|Header + IDR| inter inter |Header + IDR| ...
+
+- VBR:
+>-rc 1 -scd 0 -intra-period 2 -irefresh-type 1
+
+|Header + IDR| inter inter |IDR| inter inter |Header + IDR| ...
 
 
 ## Legal Disclaimer
