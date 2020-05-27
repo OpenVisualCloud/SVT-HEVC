@@ -502,10 +502,12 @@ In some streaming usage, header needs to be inserted repeatedly into the bitstre
 With `-irefresh-type` >= 0, header can be inserted repeatedly as shown below.
 - CQP(only 0 works for -irefresh-type):
 >-rc 0 -scd 0 -intra-period 2 -irefresh-type 0
+
 |Header + IDR| inter inter |Header + IDR| ...
 
 - VBR:
 >-rc 1 -scd 0 -intra-period 2 -irefresh-type 1
+
 |Header + IDR| inter inter |IDR| inter inter |Header + IDR| ...
 
 
