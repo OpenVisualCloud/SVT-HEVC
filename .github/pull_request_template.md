@@ -8,7 +8,7 @@ Mention if the PR fixes or address an issue in this section
 https://help.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue
 Example
 Fixes #999
-If this is a bug fix that does not have an issue created for it, please create one with enough info to reproduce the issue
+If this PR involves fixing a bug that does not already have an issue created for it, please create an issue with sufficient info to reproduce the problem. Make sure to cross reference that issue within this PR.
 --->
 
 # Author(s)
@@ -16,7 +16,7 @@ If this is a bug fix that does not have an issue created for it, please create o
 
 # Performance impact
 <!--
-Type an x in the box that is relevant to your PR. Make sure to mention in what way in the description
+Type an x in the box that is relevant to your PR. Make sure to mention how it is relevant in the description section.
 Example
 - [x] memory
 --->
