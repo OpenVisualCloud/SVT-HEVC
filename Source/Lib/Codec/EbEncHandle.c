@@ -2134,7 +2134,7 @@ static EB_ERRORTYPE VerifySettings(\
 	}
 
 	// For levels below level 4 (exclusive), only the main tier is allowed
-    if(config->level < 40 && config->tier != 0){
+    if(config->level > 0 && config->level < 40 && config->tier != 0) {
         SVT_LOG("SVT [Error]: Instance %u: For levels below level 4 (exclusive), only the main tier is allowed\n",channelNumber+1);
         return_error = EB_ErrorBadParameter;
     }
@@ -2383,7 +2383,7 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
-    if (levelIdx < 13) {
+    if (levelIdx < TOTAL_LEVEL_COUNT) {
     // Check if the current input video is conformant with the Level constraint
     if(config->level != 0 && (((EB_U64)sequenceControlSetPtr->maxInputLumaWidth * (EB_U64)sequenceControlSetPtr->maxInputLumaHeight) > maxLumaPictureSize[levelIdx])){
         SVT_LOG("SVT [Error]: Instance %u: The input luma picture size exceeds the maximum luma picture size allowed for level %s\n",channelNumber+1, levelIdc);
