@@ -264,7 +264,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **ReconFile** | -o | any string | null | Output reconstructed yuv used for debug purposes. **Note:** using this feature will affect the speed of the encoder significantly. This should only be used for debugging purposes. |
 | **UseQpFile** | -use-q-file | [0, 1] | 0 | When set to 1, overwrite the picture qp assignment using qp values in QpFile |
 | **QpFile** | -qp-file | any string | null | Path to qp file |
-| **SegmentOvFile** | -segment-ov-file | any string | null | Path to segment override file, diffrence between largest and smallest value should be less or equal 25. **Note:** using this feature will disable ImproveSharpness and BitRateReduction parameters |
+| **SegmentOvFile** | -segment-ov-file | any string | null | Path to segment override file which will allow for sharpness improvement and bit rate reduction on a per segment basis. Refer to config/SVTSegmentOvFile.txt for details. |
 | **EncoderMode** | -encMode | [0 - 11] | 7 | A preset defining the quality vs density tradeoff point that the encoding is to be performed at. (e.g. 0 is the highest quality mode, 11 is the highest density mode). Section 3.4 outlines the preset availability per resolution |
 | **EncoderBitDepth** | -bit-depth | [8, 10] | 8 | Specifies the bit depth of input video |
 | **EncoderColorFormat** | -color-format | [1, 2, 3] | 1 | Specifies the chroma subsampling of input video(1: 420, 2: 422, 3: 444) |

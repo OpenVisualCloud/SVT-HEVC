@@ -8,9 +8,8 @@
 # 2. Usage:
 # For each frame in the video, the user can specify regions with better or worse quality.
 # One input frame have to be preceded by the number of regions.
-# Each region consists of 6 numbers (X1, Y1, X2, Y2, data, mode) i.e (X1,Y1)is the top left and (X2,Y2) is the bottom right corner.
+# Each region consists of 6 numbers (X1, Y1, X2, Y2, data, mode) i.e (X1,Y1) is the top left and (X2,Y2) is the bottom right corner. Regions are allowed to overlap in the same frame.
 # Each region is translated into a subset of LCU(largest coding unit) for which the user can override the default qp.
-# Regions can overlap each other, for LCU that this happen valid mode is set by the further region.
 # The mode parameter has to be in range [1..5]. This allows the user to specify what to override by the [data]
 # Mode 1   Set the qp value for each region. [data] is clipped to [0:51] .
 # Mode 2   Change the qp value (i.e increase or decrease by [data]). [data] is clipped to [-25:25] ,
