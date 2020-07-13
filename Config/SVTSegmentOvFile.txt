@@ -2,14 +2,46 @@
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #====================== Segment Override File ======================
-# One input frame have to be preceded by the number of regions
-# Each region consist of 6 numbers (X1,Y1,X2,Y2, data, mode) i.e (X1,Y1)top left and (X2,Y2)bottom right corner
-# Mode parameter have to be in range [1..5]. This allow user to specify what to override by the [data]
-#    1.   Set qp value for each region, [data] is clipped to [0:51]
-#    2.   Change qp value i.e increase or decrease by the [data] clipped to [-25:25]
-#    3.   Use this mode to modify not only quality but also blocks splitting, behaviour depends on parameter 1 and 2
-#    4.   Use this mode to modify blocks splitting i.e increase or decrease by the [data] clipped to [-25:25], negative value increase block division
-#    5.   Update first stage of quantization in range [-7;7] positive value reduce bitrate, negative increase
+# 1. Purpose/use case of this feature
+#    This feature is for very specific use-cases like surveillance systems, where dynamic objects such as pedestrians or vehicles are detected and tracked (encoded with higher quality) while the static background is encoded with worse quality.
+#    By encoding only the important/key areas with good quality, the resulting bitstream is smaller and still has high usefulness.
+# 2. Usage:
+# For each frame in the video, the user can specify regions with better or worse quality.
+# One input frame have to be preceded by the number of regions.
+# Each region consists of 6 numbers (X1, Y1, X2, Y2, data, mode) i.e (X1,Y1) is the top left and (X2,Y2) is the bottom right corner. Regions are allowed to overlap in the same frame.
+# Each region is translated into a subset of LCU(largest coding unit) for which the user can override the default qp.
+# The mode parameter has to be in range [1..5]. This allows the user to specify what to override by the [data]
+# Mode 1   Set the qp value for each region. [data] is clipped to [0:51] .
+# Mode 2   Change the qp value (i.e increase or decrease by [data]). [data] is clipped to [-25:25] ,
+# Mode 3   Modify not only the quality but also blocks splitting(LCU partition). The behaviour depends on parameter 1 and 2 and the 5th parameter is unused.
+# Mode 4   Only modify the block's splitting(LCU partition) (i.e increase or decrease by[data]). [data] is clipped to [-25:25].  Negative value increase block division.
+# Mode 5   Update first stage of quantization in range [-7;7] positive value reduce bitrate, negative increase  bitrate.
+#
+# If the number of frames > number of "rules" the application will loop to the beginning of the file
+#
+# There are several ways to use mode 3.  You can set:
+#    0 0 500 500 35 1 // Set new qp value
+#    0 0 500 500 35 3 // Also modify the block splitting.  The 5th value is skipped
+#    or
+#    0 0 500 500 -5 2 // Increase the block quality by 5
+#    0 0 500 500 -5 3 // Also modify block splitting.  The 5th value is skipped
+#
+# 3. Example:
+#    If you want to increase the quality by 10 of an object of size 100x100 which is moving from left to right on the screen, you can use:
+#    1    // one region for frame 0
+#    0 0 100 100 -10 2
+#    1    // one region for frame 1
+#    10 0 110 100 -10 2
+#    1    // one region for frame 2
+#    20 0 120 100 -10 2
+#    1    // one region for frame 3
+#    30 0 130 100 -10 2
+#    1    // one region for frame 4
+#    40 0 140 100 -10 2
+#    1    // one region for frame 5
+#    50 0 150 100 -10 2
+#    1    // one region for frame 6
+#    60 0 160 100 -10 2
 3
 0 0 500 500 50 1
 500 500 1000 0 -20 4
