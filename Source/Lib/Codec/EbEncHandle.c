@@ -10,6 +10,7 @@
 /**************************************
  * Includes
  **************************************/
+#include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
@@ -400,8 +401,10 @@ EB_ERRORTYPE EbHevcInitThreadManagmentParams(){
                 if (socket_id >= maxSize) {
                     maxSize = maxSize * 2;
                     lpGroup = (processorGroup*)realloc(lpGroup,maxSize * sizeof(processorGroup));
-                    if (lpGroup == (processorGroup*) EB_NULL)
+                    if (lpGroup == (processorGroup*) EB_NULL) {
                         return EB_ErrorInsufficientResources;
+                        fclose(fin);
+                    }
                 }
                 lpGroup[socket_id].group[lpGroup[socket_id].num++] = processor_id;
             }
@@ -2858,7 +2861,7 @@ static void PrintLibParams(
     SVT_LOG("\nSVT [config]: De-blocking Filter / SAO Filter\t\t\t\t\t\t: %d / %d ", !config->disableDlfFlag, config->enableSaoFlag);
     SVT_LOG("\nSVT [config]: HME / UseDefaultHME\t\t\t\t\t\t\t: %d / %d ", config->enableHmeFlag, config->useDefaultMeHme);
     SVT_LOG("\nSVT [config]: MV Search Area Width / Height \t\t\t\t\t\t: %d / %d ", config->searchAreaWidth, config->searchAreaHeight);
-    SVT_LOG("\nSVT [config]: HRD / VBV MaxRate / BufSize / BufInit\t\t\t\t\t: %d / %d / %d / %lld", config->hrdFlag, config->vbvMaxrate, config->vbvBufsize, config->vbvBufInit);
+    SVT_LOG("\nSVT [config]: HRD / VBV MaxRate / BufSize / BufInit\t\t\t\t\t: %d / %d / %d / %" PRIu64, config->hrdFlag, config->vbvMaxrate, config->vbvBufsize, config->vbvBufInit);
 
 #ifndef NDEBUG
     SVT_LOG("\nSVT [config]: More configurations for debugging:");
