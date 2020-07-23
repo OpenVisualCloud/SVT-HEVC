@@ -16,6 +16,7 @@
 /***************************************
  * Includes
  ***************************************/
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -252,7 +253,7 @@ int32_t main(int32_t argc, char* argv[])
                         else {
                             printf("Total Frames\t\tFrame Rate\t\tByte Count\t\tBitrate\n");
                         }
-                        printf("%12llu\t\t%4.2f fps\t\t%10llu\t\t%5.2f kbps\n",
+                        printf("%12" PRIu64 "\t\t%4.2f fps\t\t%10" PRIu64 "\t\t%5.2f kbps\n",
                             configs[instanceCount]->performanceContext.frameCount,
                             frameRate,
                             configs[instanceCount]->performanceContext.byteCount,

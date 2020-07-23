@@ -1047,7 +1047,7 @@ void fillSegmentOv(
 #ifdef _WIN32
         result = fscanf_s(config->segmentOvFile, "%u", &segmentNo);
 #else
-        result = fscanf(config->segmentOvFile, "%d", &segmentNo);
+        result = fscanf(config->segmentOvFile, "%u", &segmentNo);
 #endif
         if (result == 1) {
             for (uint32_t segment = 0; segment < segmentNo; segment++) {
