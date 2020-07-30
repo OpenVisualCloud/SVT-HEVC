@@ -52,17 +52,17 @@ This instruction will verify that the SvtHevcEnc library can be found when build
 ## For Both:
 2\. Install FFmpeg with SVT-HEVC FFmpeg plugin
 ``` bash
-- git clone https://github.com/FFmpeg/FFmpeg ffmpeg
-- cd ffmpeg
+git clone https://github.com/FFmpeg/FFmpeg ffmpeg
+cd ffmpeg
 
-  # The patch have been validated on 4.2 and 4.3 release
-- git checkout release/4.2
-  or 
-- git checkout release/4.3
+# The patch have been validated on 4.2 and 4.3 release
+git checkout release/4.2
+or 
+git checkout release/4.3
 
-- git am ../SVT-HEVC/ffmpeg_plugin/0001*.patch
-- ./configure --enable-libsvthevc
-- make -j $(nproc)
+git am ../SVT-HEVC/ffmpeg_plugin/0001*.patch
+./configure --enable-libsvthevc
+make -j $(nproc)
 ```
 3\. Verify that ffmpeg can encode media files using the SVT-HEVC plug-in
 ``` bash
