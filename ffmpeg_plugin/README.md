@@ -4,7 +4,9 @@ These instructions build a version of ffmpeg with the SVT-HEVC plugin.  The step
 on whether using a Linux or Windows build machine.
 
 ## For Linux:
-1\. Build and install SVT-HEVC 
+
+1\. Build and install SVT-HEVC
+
 ``` bash
 git clone https://github.com/OpenVisualCloud/SVT-HEVC
 cd SVT-HEVC/Build/linux
