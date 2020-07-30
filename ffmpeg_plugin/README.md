@@ -1,4 +1,4 @@
-# svt-hevc ffmpeg plugin installation
+# SVT-HEVC ffmpeg plugin installation
 
 These instructions build a version of ffmpeg with the SVT-HEVC plugin.  The steps differ depending
 on whether using a Linux or Windows build machine.
