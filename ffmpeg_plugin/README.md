@@ -19,14 +19,14 @@ export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
 ## For Windows:
 0\. Setup environment
 ``` bash
-- Install Visual Studio 2017
-- Install msys2-x86_64 to C:\msys64 following instructions found on http://www.msys2.org/
-- Run "C:\msys64\mingw64.exe" to open a msys2 mingw-w64 shell.  All subsequent build steps should be done in this shell.
-- Execute "pacman -S --needed make mingw-w64-x86_64-cmake mingw-w64-x86_64-gcc mingw-w64-x86_64-yasm mingw-w64-x86_64-SDL2 perl diffutils pkg-config git tar" in the console
+Install Visual Studio 2017
+Install msys2-x86_64 to C:\msys64 following instructions found on http://www.msys2.org/
+Run "C:\msys64\mingw64.exe" to open a msys2 mingw-w64 shell.  All subsequent build steps should be done in this shell.
+Execute "pacman -S --needed make mingw-w64-x86_64-cmake mingw-w64-x86_64-gcc mingw-w64-x86_64-yasm mingw-w64-x86_64-SDL2 perl diffutils pkg-config git tar" in the console
 ```
 1\. Build and install SVT-HEVC
 ``` bash
-- git clone https://github.com/OpenVisualCloud/SVT-HEVC
+git clone https://github.com/OpenVisualCloud/SVT-HEVC
 ```
 Option 1: use msvc compiler
 ``` bash
@@ -44,12 +44,12 @@ cd ../..
 ```
 The location c:/svt-encoders is used to store a package configuration for the SvtHevcEnc library.
 ``` bash
-- export PKG_CONFIG_PATH=/c/svt-encoders/lib/pkgconfig:$PKG_CONFIG_PATH
+export PKG_CONFIG_PATH=/c/svt-encoders/lib/pkgconfig:$PKG_CONFIG_PATH
 ```
 This instruction will verify that the SvtHevcEnc library can be found when building ffmpeg
 ``` bash
-- pkg-config --print-errors SvtHevcEnc
-- export PATH=$PATH:/c/svt-encoders/lib/
+pkg-config --print-errors SvtHevcEnc
+export PATH=$PATH:/c/svt-encoders/lib/
 ```
 ## For Both:
 2\. Install FFmpeg with SVT-HEVC FFmpeg plugin
