@@ -992,6 +992,12 @@ void fillOneSegment(
         return;
     }
 
+    if (x1 > config->sourceWidth || x2 > config->sourceWidth ||
+        y1 > config->sourceHeight || y2 > config->sourceHeight) {
+        printf("\nSVT [Warning]: provided region is invalid, cannot perform caculation");
+        return;
+    }
+
     uint32_t widthMinInLCU = MIN(x1, x2) / EB_SEGMENT_BLOCK_SIZE;
     uint32_t widthMaxInLCU = MIN((MAX(x1, x2) + EB_SEGMENT_BLOCK_SIZE - 1) / EB_SEGMENT_BLOCK_SIZE,pictureWidthInLcu);
 

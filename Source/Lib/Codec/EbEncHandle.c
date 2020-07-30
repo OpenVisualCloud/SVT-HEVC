@@ -402,8 +402,8 @@ EB_ERRORTYPE EbHevcInitThreadManagmentParams(){
                     maxSize = maxSize * 2;
                     lpGroup = (processorGroup*)realloc(lpGroup,maxSize * sizeof(processorGroup));
                     if (lpGroup == (processorGroup*) EB_NULL) {
-                        return EB_ErrorInsufficientResources;
                         fclose(fin);
+                        return EB_ErrorInsufficientResources;
                     }
                 }
                 lpGroup[socket_id].group[lpGroup[socket_id].num++] = processor_id;
