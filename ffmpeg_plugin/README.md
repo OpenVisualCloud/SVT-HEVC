@@ -34,12 +34,11 @@ Option 1: use msvc compiler
 ```
 Option 2: use mingw-w64 gcc
 ``` bash
-- mkdir release
-- cd release
-- cmake .. -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=C:/svt-encoders -DBUILD_SHARED_LIBS=off
-- make -j $(nproc)
-- make install
-- cd ../..
+mkdir release
+cd release
+cmake .. -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=C:/svt-encoders -DBUILD_SHARED_LIBS=off
+make -j $(nproc) install
+cd ../..
 ```
 The location c:/svt-encoders is used to store a package configuration for the SvtHevcEnc library.
 ``` bash
