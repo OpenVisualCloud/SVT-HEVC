@@ -68,6 +68,6 @@ make -j $(nproc)
 ```
 3\. Verify that ffmpeg can encode media files using the SVT-HEVC plug-in
 ``` bash
-- ./ffmpeg -i input.mp4 -c:v libsvt_hevc -rc 1 -b:v 10M -tune 0 -preset 9 -y test.265
-- ./ffmpeg -i input.mp4 -c:v libsvt_hevc -vframes 1000 -y test.mp4
+./ffmpeg -i input.mp4 -c:v libsvt_hevc -rc 1 -b:v 10M -tune 0 -preset 9 -y test.265
+./ffmpeg -i input.mp4 -c:v libsvt_hevc -vframes 1000 -y test.mp4
 ```
