@@ -30,9 +30,9 @@ export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
 ```
 Option 1: use msvc compiler
 ``` bash
-- cd SVT-HEVC/Build/windows
-- ./build.bat 2017 debug|release
-- cmake --install . --config Debug|Release
+cd SVT-HEVC/Build/windows
+./build.bat 2017 release
+cmake --install . --config Release
 ```
 Option 2: use mingw-w64 gcc
 ``` bash
