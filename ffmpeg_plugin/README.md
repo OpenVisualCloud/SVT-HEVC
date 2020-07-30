@@ -6,13 +6,13 @@ on whether using a Linux or Windows build machine.
 ## For Linux:
 1\. Build and install SVT-HEVC 
 ``` bash
-- git clone https://github.com/OpenVisualCloud/SVT-HEVC
-- cd SVT-HEVC/Build/linux
-- ./build.sh debug|release
-- cd debug|release
-- make install
-- export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
-- export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
+git clone https://github.com/OpenVisualCloud/SVT-HEVC
+cd SVT-HEVC/Build/linux
+./build.sh release
+cd release
+make install
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
+export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
 ```
 ## For Windows:
 0\. Setup environment
