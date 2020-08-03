@@ -57,10 +57,10 @@ export PATH=$PATH:/c/svt-encoders/lib/
 git clone https://github.com/FFmpeg/FFmpeg ffmpeg
 cd ffmpeg
 
-# The patch have been validated on 4.2 and 4.3 release
-git checkout release/4.2
+# The patch has been validated on n4.2 and n4.3 release tag
+git checkout n4.2
 or 
-git checkout release/4.3
+git checkout n4.3
 
 git am ../SVT-HEVC/ffmpeg_plugin/0001*.patch
 ./configure --enable-libsvthevc
