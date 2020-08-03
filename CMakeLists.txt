@@ -45,8 +45,8 @@ endif()
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
 set(SVT_HEVC_VERSION_MAJOR           "1")
-set(SVT_HEVC_VERSION_MINOR           "4")
-set(SVT_HEVC_VERSION_PATCHLEVEL      "3")
+set(SVT_HEVC_VERSION_MINOR           "5")
+set(SVT_HEVC_VERSION_PATCHLEVEL      "0")
 
 configure_file(${PROJECT_SOURCE_DIR}/Source/API/EbApiVersion.h.in ${PROJECT_SOURCE_DIR}/Source/API/EbApiVersion.h @ONLY)
 
