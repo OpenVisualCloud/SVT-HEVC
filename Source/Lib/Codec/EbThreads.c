@@ -69,8 +69,7 @@ EB_HANDLE EbCreateThread(
     pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
     pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
 
-    struct sched_param param = {.sched_priority = 99};
-    pthread_attr_setschedparam(&attr, &param);
+    pthread_attr_setschedparam(&attr, &(struct sched_param){.sched_priority = 99});
 
     int ret = pthread_create(
             (pthread_t*)threadHandle,      // Thread handle
