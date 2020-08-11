@@ -2399,19 +2399,22 @@ static EB_ERRORTYPE VerifySettings(\
         return_error = EB_ErrorBadParameter;
     }
 
-    if ((config->level != 0) && (config->rateControlMode) && (config->tier == 0) && ((config->targetBitRate*2) > mainTierMaxBitRate[levelIdx])){
+    uint32_t maxBitrate = config->vbvMaxrate ? config->vbvMaxrate : config->targetBitRate * 2;
+    uint32_t maxCPB = config->vbvBufsize ? config->vbvBufsize : config->targetBitRate * 3;
+
+    if ((config->level != 0) && (config->rateControlMode) && (config->tier == 0) && maxBitrate > mainTierMaxBitRate[levelIdx]) {
         SVT_LOG("SVT [Error]: Instance %u: Allowed MaxBitRate exceeded for level %s and tier 0 \n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
-    if ((config->level != 0) && (config->rateControlMode) && (config->tier == 1) && ((config->targetBitRate*2) > highTierMaxBitRate[levelIdx])){
+    if ((config->level != 0) && (config->rateControlMode) && (config->tier == 1) && maxBitrate > highTierMaxBitRate[levelIdx]) {
         SVT_LOG("SVT [Error]: Instance %u: Allowed MaxBitRate exceeded for level %s and tier 1 \n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
-    if ((config->level != 0) && (config->rateControlMode) && (config->tier == 0) && ((config->targetBitRate * 3) > mainTierCPB[levelIdx])) {
+    if ((config->level != 0) && (config->rateControlMode) && (config->tier == 0) && maxCPB > mainTierCPB[levelIdx]) {
         SVT_LOG("SVT [Error]: Instance %u: Out of bound maxBufferSize for level %s and tier 0 \n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
-    if ((config->level != 0) && (config->rateControlMode) && (config->tier == 1) && ((config->targetBitRate * 3) > highTierCPB[levelIdx])) {
+    if ((config->level != 0) && (config->rateControlMode) && (config->tier == 1) && maxCPB > highTierCPB[levelIdx]) {
         SVT_LOG("SVT [Error]: Instance %u: Out of bound maxBufferSize for level %s and tier 1 \n",channelNumber+1, levelIdc);
         return_error = EB_ErrorBadParameter;
     }
