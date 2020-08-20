@@ -1,4 +1,4 @@
-From 297c9a0309c8ba06f9f746d7685dceaef7c0b690 Mon Sep 17 00:00:00 2001
+From 9697771fa1640819c7e40703e1fde86b3e9e4e3a Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -9,6 +9,7 @@ Signed-off-by: Jun Zhao <jun.zhao@intel.com>
 Signed-off-by: Jing Sun <jing.a.sun@intel.com>
 Signed-off-by: Austin Hu <austin.hu@intel.com>
 Signed-off-by: Guo Jiansheng <jiansheng.guo@intel.com>
+Signed-off-by: Christopher Degawa <ccom@randomderp.com>
 ---
  configure                |   4 +
  libavcodec/Makefile      |   1 +
@@ -18,65 +19,65 @@ Signed-off-by: Guo Jiansheng <jiansheng.guo@intel.com>
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index 09bda9b408..454cf65a90 100755
+index 6faff9bc7b..44b00fa47b 100755
 --- a/configure
 +++ b/configure
-@@ -267,6 +267,7 @@ External library support:
-   --enable-libspeex        enable Speex de/encoding via libspeex [no]
-   --enable-libsrt          enable Haivision SRT protocol via libsrt [no]
-   --enable-libssh          enable SFTP protocol via libssh [no]
+@@ -288,6 +288,7 @@ External library support:
+   --enable-libwebp         enable WebP encoding via libwebp [no]
+   --enable-libx264         enable H.264 encoding via x264 [no]
+   --enable-libx265         enable HEVC encoding via x265 [no]
 +  --enable-libsvthevc      enable HEVC encoding via svt [no]
-   --enable-libtensorflow   enable TensorFlow as a DNN module backend
-                            for DNN based filters like sr [no]
-   --enable-libtesseract    enable Tesseract, needed for ocr filter [no]
-@@ -1801,6 +1802,7 @@ EXTERNAL_LIBRARY_LIST="
-     libspeex
-     libsrt
-     libssh
+   --enable-libxavs         enable AVS encoding via xavs [no]
+   --enable-libxavs2        enable AVS2 encoding via xavs2 [no]
+   --enable-libxcb          enable X11 grabbing using XCB [autodetect]
+@@ -1818,6 +1819,7 @@ EXTERNAL_LIBRARY_LIST="
+     libwavpack
+     libwebp
+     libxml2
 +    libsvthevc
-     libtensorflow
-     libtesseract
-     libtheora
-@@ -3229,6 +3231,7 @@ libshine_encoder_select="audio_frame_queue"
- libspeex_decoder_deps="libspeex"
- libspeex_encoder_deps="libspeex"
- libspeex_encoder_select="audio_frame_queue"
+     libzimg
+     libzmq
+     libzvbi
+@@ -3271,6 +3273,7 @@ libx264_encoder_select="atsc_a53"
+ libx264rgb_encoder_deps="libx264 x264_csp_bgr"
+ libx264rgb_encoder_select="libx264_encoder"
+ libx265_encoder_deps="libx265"
 +libsvt_hevc_encoder_deps="libsvthevc"
- libtheora_encoder_deps="libtheora"
- libtwolame_encoder_deps="libtwolame"
- libvo_amrwbenc_encoder_deps="libvo_amrwbenc"
-@@ -6344,6 +6347,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
- enabled libssh            && require_pkg_config libssh libssh libssh/sftp.h sftp_init
- enabled libspeex          && require_pkg_config libspeex speex speex/speex.h speex_decoder_init
- enabled libsrt            && require_pkg_config libsrt "srt >= 1.3.0" srt/srt.h srt_socket
+ libxavs_encoder_deps="libxavs"
+ libxavs2_encoder_deps="libxavs2"
+ libxvid_encoder_deps="libxvid"
+@@ -6477,6 +6480,7 @@ enabled mmal              && { check_lib mmal interface/mmal/mmal.h mmal_port_co
+                                  check_lib mmal interface/mmal/mmal.h mmal_port_connect -lmmal_core -lmmal_util -lmmal_vc_client -lbcm_host; } ||
+                                die "ERROR: mmal not found" &&
+                                check_func_headers interface/mmal/mmal.h "MMAL_PARAMETER_VIDEO_MAX_NUM_CALLBACKS"; }
 +enabled libsvthevc        && require_pkg_config libsvthevc SvtHevcEnc EbApi.h EbInitHandle
- enabled libtensorflow     && require libtensorflow tensorflow/c/c_api.h TF_Version -ltensorflow
- enabled libtesseract      && require_pkg_config libtesseract tesseract tesseract/capi.h TessBaseAPICreate
- enabled libtheora         && require libtheora theora/theoraenc.h th_info_init -ltheoraenc -ltheoradec -logg
+ enabled openal            && { { for al_extralibs in "${OPENAL_LIBS}" "-lopenal" "-lOpenAL32"; do
+                                check_lib openal 'AL/al.h' alGetError "${al_extralibs}" && break; done } ||
+                                die "ERROR: openal not found"; } &&
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index c1c9a44f2b..dd9b930b9b 100644
+index 3431ba2dca..8d0e7087e7 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
-@@ -1008,6 +1008,7 @@ OBJS-$(CONFIG_LIBRAV1E_ENCODER)           += librav1e.o
- OBJS-$(CONFIG_LIBSHINE_ENCODER)           += libshine.o
- OBJS-$(CONFIG_LIBSPEEX_DECODER)           += libspeexdec.o
- OBJS-$(CONFIG_LIBSPEEX_ENCODER)           += libspeexenc.o
+@@ -1046,6 +1046,7 @@ OBJS-$(CONFIG_LIBWEBP_ANIM_ENCODER)       += libwebpenc_common.o libwebpenc_anim
+ OBJS-$(CONFIG_LIBX262_ENCODER)            += libx264.o
+ OBJS-$(CONFIG_LIBX264_ENCODER)            += libx264.o
+ OBJS-$(CONFIG_LIBX265_ENCODER)            += libx265.o
 +OBJS-$(CONFIG_LIBSVT_HEVC_ENCODER)        += libsvt_hevc.o
- OBJS-$(CONFIG_LIBTHEORA_ENCODER)          += libtheoraenc.o
- OBJS-$(CONFIG_LIBTWOLAME_ENCODER)         += libtwolame.o
- OBJS-$(CONFIG_LIBVO_AMRWBENC_ENCODER)     += libvo-amrwbenc.o
+ OBJS-$(CONFIG_LIBXAVS_ENCODER)            += libxavs.o
+ OBJS-$(CONFIG_LIBXAVS2_ENCODER)           += libxavs2.o
+ OBJS-$(CONFIG_LIBXVID_ENCODER)            += libxvid.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
-index b3184af954..41994e31b3 100644
+index 4bd830e5d0..0d74a360b9 100644
 --- a/libavcodec/allcodecs.c
 +++ b/libavcodec/allcodecs.c
-@@ -720,6 +720,7 @@ extern AVCodec ff_librsvg_decoder;
- extern AVCodec ff_libshine_encoder;
- extern AVCodec ff_libspeex_encoder;
- extern AVCodec ff_libspeex_decoder;
+@@ -747,6 +747,7 @@ extern AVCodec ff_libx262_encoder;
+ extern AVCodec ff_libx264_encoder;
+ extern AVCodec ff_libx264rgb_encoder;
+ extern AVCodec ff_libx265_encoder;
 +extern AVCodec ff_libsvt_hevc_encoder;
- extern AVCodec ff_libtheora_encoder;
- extern AVCodec ff_libtwolame_encoder;
- extern AVCodec ff_libvo_amrwbenc_encoder;
+ extern AVCodec ff_libxavs_encoder;
+ extern AVCodec ff_libxavs2_encoder;
+ extern AVCodec ff_libxvid_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
 index 0000000000..fce27a06ea
@@ -642,6 +643,5 @@ index 0000000000..fce27a06ea
 +    .caps_internal  = FF_CODEC_CAP_INIT_CLEANUP,
 +    .wrapper_name   = "libsvt_hevc",
 +};
--- 
-2.17.1
-
+--
+2.25.1
