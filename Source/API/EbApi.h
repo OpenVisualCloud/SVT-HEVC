@@ -315,18 +315,15 @@ typedef struct EB_H265_ENC_CONFIGURATION
     uint64_t                framesToBeEncoded;
 
 
-    // Visual quality optimizations only applicable when tune = 1
-
     /* Enables subjective quality algorithms to reduce the output bitrate with
-     * minimal or no subjective visual quality impact. Only applicable to tune 0.
+     * minimal or no subjective visual quality impact.
      * 
      * Default is 0. */
     uint8_t                 bitRateReduction;
 
     /* The visual quality knob that allows the use of adaptive quantization
      * within the picture and enables visual quality algorithms that improve the
-     * sharpness of the background. Only available for 4k and 8k resolutions and
-     * tune 0.
+     * sharpness of the background. Only available for 4k and 8k resolutions.
      *
      * Default is 0. */
     uint8_t                 improveSharpness;
