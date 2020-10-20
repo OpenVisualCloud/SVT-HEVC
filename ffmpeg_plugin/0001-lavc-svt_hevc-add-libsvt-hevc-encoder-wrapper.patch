@@ -1,4 +1,4 @@
-From 9697771fa1640819c7e40703e1fde86b3e9e4e3a Mon Sep 17 00:00:00 2001
+From 1c6926da559941af9f555ae92a2206c734ed3c3b Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -10,16 +10,17 @@ Signed-off-by: Jing Sun <jing.a.sun@intel.com>
 Signed-off-by: Austin Hu <austin.hu@intel.com>
 Signed-off-by: Guo Jiansheng <jiansheng.guo@intel.com>
 Signed-off-by: Christopher Degawa <ccom@randomderp.com>
+Signed-off-by: Guo Jiansheng <jiansheng.guo@intel.com>
 ---
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 559 +++++++++++++++++++++++++++++++++++++++
+ libavcodec/libsvt_hevc.c | 559 +++++++++++++++++++++++++++++++++++++++++++++++
  4 files changed, 565 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index 6faff9bc7b..44b00fa47b 100755
+index 75f0a0f..ad3a5ff 100755
 --- a/configure
 +++ b/configure
 @@ -288,6 +288,7 @@ External library support:
@@ -30,15 +31,15 @@ index 6faff9bc7b..44b00fa47b 100755
    --enable-libxavs         enable AVS encoding via xavs [no]
    --enable-libxavs2        enable AVS2 encoding via xavs2 [no]
    --enable-libxcb          enable X11 grabbing using XCB [autodetect]
-@@ -1818,6 +1819,7 @@ EXTERNAL_LIBRARY_LIST="
-     libwavpack
-     libwebp
-     libxml2
+@@ -1763,6 +1764,7 @@ EXTERNAL_LIBRARY_LIST="
+     gnutls
+     jni
+     ladspa
 +    libsvthevc
-     libzimg
-     libzmq
-     libzvbi
-@@ -3271,6 +3273,7 @@ libx264_encoder_select="atsc_a53"
+     libaom
+     libass
+     libbluray
+@@ -3274,6 +3276,7 @@ libx264_encoder_select="atsc_a53"
  libx264rgb_encoder_deps="libx264 x264_csp_bgr"
  libx264rgb_encoder_select="libx264_encoder"
  libx265_encoder_deps="libx265"
@@ -46,7 +47,7 @@ index 6faff9bc7b..44b00fa47b 100755
  libxavs_encoder_deps="libxavs"
  libxavs2_encoder_deps="libxavs2"
  libxvid_encoder_deps="libxvid"
-@@ -6477,6 +6480,7 @@ enabled mmal              && { check_lib mmal interface/mmal/mmal.h mmal_port_co
+@@ -6470,6 +6473,7 @@ enabled mmal              && { check_lib mmal interface/mmal/mmal.h mmal_port_co
                                   check_lib mmal interface/mmal/mmal.h mmal_port_connect -lmmal_core -lmmal_util -lmmal_vc_client -lbcm_host; } ||
                                 die "ERROR: mmal not found" &&
                                 check_func_headers interface/mmal/mmal.h "MMAL_PARAMETER_VIDEO_MAX_NUM_CALLBACKS"; }
@@ -55,10 +56,10 @@ index 6faff9bc7b..44b00fa47b 100755
                                 check_lib openal 'AL/al.h' alGetError "${al_extralibs}" && break; done } ||
                                 die "ERROR: openal not found"; } &&
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index 3431ba2dca..8d0e7087e7 100644
+index 2af9358..c33e5d7 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
-@@ -1046,6 +1046,7 @@ OBJS-$(CONFIG_LIBWEBP_ANIM_ENCODER)       += libwebpenc_common.o libwebpenc_anim
+@@ -1055,6 +1055,7 @@ OBJS-$(CONFIG_LIBWEBP_ANIM_ENCODER)       += libwebpenc_common.o libwebpenc_anim
  OBJS-$(CONFIG_LIBX262_ENCODER)            += libx264.o
  OBJS-$(CONFIG_LIBX264_ENCODER)            += libx264.o
  OBJS-$(CONFIG_LIBX265_ENCODER)            += libx265.o
@@ -67,10 +68,10 @@ index 3431ba2dca..8d0e7087e7 100644
  OBJS-$(CONFIG_LIBXAVS2_ENCODER)           += libxavs2.o
  OBJS-$(CONFIG_LIBXVID_ENCODER)            += libxvid.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
-index 4bd830e5d0..0d74a360b9 100644
+index fb8b2ad..c02b01d 100644
 --- a/libavcodec/allcodecs.c
 +++ b/libavcodec/allcodecs.c
-@@ -747,6 +747,7 @@ extern AVCodec ff_libx262_encoder;
+@@ -755,6 +755,7 @@ extern AVCodec ff_libx262_encoder;
  extern AVCodec ff_libx264_encoder;
  extern AVCodec ff_libx264rgb_encoder;
  extern AVCodec ff_libx265_encoder;
@@ -80,7 +81,7 @@ index 4bd830e5d0..0d74a360b9 100644
  extern AVCodec ff_libxvid_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000000..fce27a06ea
+index 0000000..fce27a0
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
 @@ -0,0 +1,559 @@
@@ -643,5 +644,6 @@ index 0000000000..fce27a06ea
 +    .caps_internal  = FF_CODEC_CAP_INIT_CLEANUP,
 +    .wrapper_name   = "libsvt_hevc",
 +};
---
-2.25.1
+-- 
+2.7.4
+
