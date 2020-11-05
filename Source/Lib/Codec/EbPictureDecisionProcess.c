@@ -1234,16 +1234,7 @@ void* PictureDecisionKernel(void *inputPtr)
                                 pictureControlSetPtr->refPicPocArray[REF_LIST_0] = refPoc;
                                 pictureControlSetPtr->refPaPcsArray[REF_LIST_0] = paReferenceEntryPtr->pPcsPtr;
 
-                                // Increment the PA Reference's liveCount by the number of tiles in the input picture
-                                EbObjectIncLiveCount(
-                                    paReferenceEntryPtr->inputObjectPtr,
-                                    1);
-
                                 ((EbPaReferenceObject_t*)pictureControlSetPtr->refPaPicPtrArray[REF_LIST_0]->objectPtr)->pPcsPtr = paReferenceEntryPtr->pPcsPtr;
-
-                                EbObjectIncLiveCount(
-                                    paReferenceEntryPtr->pPcsPtr->pPcsWrapperPtr,
-                                    1);
 
                                 --paReferenceEntryPtr->dependentCount;
                                 ((EbPaReferenceObject_t *)paReferenceEntryPtr->pPcsPtr->paReferencePictureWrapperPtr->objectPtr)->dependentPicturesCount++;
@@ -1270,16 +1261,7 @@ void* PictureDecisionKernel(void *inputPtr)
                                 pictureControlSetPtr->refPaPicPtrArray[REF_LIST_1] = paReferenceEntryPtr->inputObjectPtr;
                                 pictureControlSetPtr->refPicPocArray[REF_LIST_1] = refPoc;
 
-                                // Increment the PA Reference's liveCount by the number of tiles in the input picture
-                                EbObjectIncLiveCount(
-                                    paReferenceEntryPtr->inputObjectPtr,
-                                    1);
-
                                 ((EbPaReferenceObject_t*)pictureControlSetPtr->refPaPicPtrArray[REF_LIST_1]->objectPtr)->pPcsPtr = paReferenceEntryPtr->pPcsPtr;
-
-                                EbObjectIncLiveCount(
-                                    paReferenceEntryPtr->pPcsPtr->pPcsWrapperPtr,
-                                    1);
 
                                 --paReferenceEntryPtr->dependentCount;
                                 ((EbPaReferenceObject_t*)paReferenceEntryPtr->pPcsPtr->paReferencePictureWrapperPtr->objectPtr)->dependentPicturesCount++;
@@ -1352,6 +1334,16 @@ void* PictureDecisionKernel(void *inputPtr)
                    (inputEntryPtr->inputObjectPtr)) {
                     if (((EbPaReferenceObject_t *)inputEntryPtr->pPcsPtr->paReferencePictureWrapperPtr->objectPtr)->dependentPicturesCount == 0) {
                         inputEntryPtr->inputObjectPtr = (EbObjectWrapper_t *)EB_NULL;
+                    }
+                    else {
+                        // TODO sometimes dependentPicturesCount never returns zero, due to ++/-- is NOT thread safe
+                        // Force remove the entry, if it was BLOCKED (due to dependentPicturesCount != 0) in the queue for NOT reasonable long time
+                        EB_S32 qlen = (EB_S32)encodeContextPtr->pictureDecisionPaReferenceQueueTailIndex - (EB_S32)encodeContextPtr->pictureDecisionPaReferenceQueueHeadIndex;
+                        if (qlen < 0) qlen += PICTURE_DECISION_PA_REFERENCE_QUEUE_MAX_DEPTH;
+                        if (qlen > PRE_ASSIGNMENT_MAX_DEPTH) {
+                            // SVT_LOG("Warning: force remove a blocked item from pictureDecisionPaReferenceQueue \n");
+                            inputEntryPtr->inputObjectPtr = (EbObjectWrapper_t *)EB_NULL;
+                        }
                     }
                 }
 
