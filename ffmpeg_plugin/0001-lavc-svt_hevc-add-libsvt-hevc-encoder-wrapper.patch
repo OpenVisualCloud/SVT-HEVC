@@ -1,4 +1,4 @@
-From 1c6926da559941af9f555ae92a2206c734ed3c3b Mon Sep 17 00:00:00 2001
+From a236092196e3defc5cf545eaf45d2e63dad95b45 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -15,12 +15,12 @@ Signed-off-by: Guo Jiansheng <jiansheng.guo@intel.com>
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 559 +++++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 565 insertions(+)
+ libavcodec/libsvt_hevc.c | 578 +++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 584 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index 75f0a0f..ad3a5ff 100755
+index 51e43fb..4641664 100755
 --- a/configure
 +++ b/configure
 @@ -288,6 +288,7 @@ External library support:
@@ -39,7 +39,7 @@ index 75f0a0f..ad3a5ff 100755
      libaom
      libass
      libbluray
-@@ -3274,6 +3276,7 @@ libx264_encoder_select="atsc_a53"
+@@ -3285,6 +3287,7 @@ libx264_encoder_select="atsc_a53"
  libx264rgb_encoder_deps="libx264 x264_csp_bgr"
  libx264rgb_encoder_select="libx264_encoder"
  libx265_encoder_deps="libx265"
@@ -47,7 +47,7 @@ index 75f0a0f..ad3a5ff 100755
  libxavs_encoder_deps="libxavs"
  libxavs2_encoder_deps="libxavs2"
  libxvid_encoder_deps="libxvid"
-@@ -6470,6 +6473,7 @@ enabled mmal              && { check_lib mmal interface/mmal/mmal.h mmal_port_co
+@@ -6483,6 +6486,7 @@ enabled mmal              && { check_lib mmal interface/mmal/mmal.h mmal_port_co
                                   check_lib mmal interface/mmal/mmal.h mmal_port_connect -lmmal_core -lmmal_util -lmmal_vc_client -lbcm_host; } ||
                                 die "ERROR: mmal not found" &&
                                 check_func_headers interface/mmal/mmal.h "MMAL_PARAMETER_VIDEO_MAX_NUM_CALLBACKS"; }
@@ -56,10 +56,10 @@ index 75f0a0f..ad3a5ff 100755
                                 check_lib openal 'AL/al.h' alGetError "${al_extralibs}" && break; done } ||
                                 die "ERROR: openal not found"; } &&
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index 2af9358..c33e5d7 100644
+index b4777be..d53d929 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
-@@ -1055,6 +1055,7 @@ OBJS-$(CONFIG_LIBWEBP_ANIM_ENCODER)       += libwebpenc_common.o libwebpenc_anim
+@@ -1061,6 +1061,7 @@ OBJS-$(CONFIG_LIBWEBP_ANIM_ENCODER)       += libwebpenc_common.o libwebpenc_anim
  OBJS-$(CONFIG_LIBX262_ENCODER)            += libx264.o
  OBJS-$(CONFIG_LIBX264_ENCODER)            += libx264.o
  OBJS-$(CONFIG_LIBX265_ENCODER)            += libx265.o
@@ -68,10 +68,10 @@ index 2af9358..c33e5d7 100644
  OBJS-$(CONFIG_LIBXAVS2_ENCODER)           += libxavs2.o
  OBJS-$(CONFIG_LIBXVID_ENCODER)            += libxvid.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
-index fb8b2ad..c02b01d 100644
+index 8bdc0d6..625dafb 100644
 --- a/libavcodec/allcodecs.c
 +++ b/libavcodec/allcodecs.c
-@@ -755,6 +755,7 @@ extern AVCodec ff_libx262_encoder;
+@@ -757,6 +757,7 @@ extern AVCodec ff_libx262_encoder;
  extern AVCodec ff_libx264_encoder;
  extern AVCodec ff_libx264rgb_encoder;
  extern AVCodec ff_libx265_encoder;
@@ -81,10 +81,10 @@ index fb8b2ad..c02b01d 100644
  extern AVCodec ff_libxvid_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000..fce27a0
+index 0000000..95d6c35
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,559 @@
+@@ -0,0 +1,578 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -152,6 +152,8 @@ index 0000000..fce27a0
 +    int tile_row_count;
 +    int tile_col_count;
 +    int tile_slice_mode;
++    int pred_struct;
++    int vid_info;
 +} SvtContext;
 +
 +static int error_mapping(EB_ERRORTYPE svt_ret)
@@ -340,6 +342,20 @@ index 0000000..fce27a0
 +        param->tileSliceMode = svt_enc->tile_slice_mode;
 +    } else {
 +        av_log(avctx, AV_LOG_ERROR, "Tile Slice Mode should be set 0 or 1\n");
++        return EB_ErrorBadParameter;
++    }
++
++    if(svt_enc->pred_struct >= 0 && svt_enc->pred_struct <= 2) {
++        param->predStructure = svt_enc->pred_struct;
++    } else {
++        av_log(avctx, AV_LOG_ERROR, "Pred Structure should between 0-2\n");
++        return EB_ErrorBadParameter;
++    }
++
++    if(svt_enc->vid_info == 0 || svt_enc->vid_info == 1) {
++        param->videoUsabilityInfo = svt_enc->vid_info;
++    } else {
++        av_log(avctx, AV_LOG_ERROR, "Video Usability Info should be set 0 or 1\n");
 +        return EB_ErrorBadParameter;
 +    }
 +    return EB_ErrorNone;
@@ -603,6 +619,9 @@ index 0000000..fce27a0
 +    { "tile_row_cnt", "tile count in the row", OFFSET(tile_row_count), AV_OPT_TYPE_INT, { .i64 = 1 }, 1, 16, VE },
 +    { "tile_col_cnt", "tile count in the column", OFFSET(tile_col_count), AV_OPT_TYPE_INT, { .i64 = 1 }, 1, 16, VE },
 +    { "tile_slice_mode", "per slice per tile, only valid for multi-tile", OFFSET(tile_slice_mode),
++      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
++    { "pred_struct", "The prediction structure", OFFSET(pred_struct), AV_OPT_TYPE_INT, { .i64 = 2 }, 0, 2, VE },
++    { "vid_info", "Enables or disables sending a vui structure in the HEVC Elementary bitstream.", OFFSET(vid_info),
 +      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
 +    {NULL},
 +};
