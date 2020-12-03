@@ -11,7 +11,7 @@ on whether using a Linux or Windows build machine.
 git clone https://github.com/OpenVisualCloud/SVT-HEVC
 cd SVT-HEVC/Build/linux
 ./build.sh release
-cd release
+cd Release
 make install
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
 export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
