@@ -100,11 +100,9 @@ set(flags_to_test
     -Wformat-security
     -fPIE
     -fPIC
-    -D_FORTIFY_SOURCE=2
-    /GS
-    /sdl)
+    -D_FORTIFY_SOURCE=2)
 if(MSVC)
-    list(APPEND flags_to_test /MP)
+    list(APPEND flags_to_test /MP /GS /GS)
 else()
     option(NATIVE "Build for native performance (march=native)")
     list(INSERT flags_to_test 0 -Wall)
