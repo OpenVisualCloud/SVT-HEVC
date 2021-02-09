@@ -24,7 +24,7 @@ install:
   - ps: (New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/OpenVisualCloud/SVT-AV1-Resources/master/video.tar.gz', "$PWD\video.tar.gz")
   - tar xf video.tar.gz
   - pacman -Syyuu --ask=20 --noconfirm --noprogressbar --needed
-  - ps: if ("$env:generator" -match "Unix") { $env:packages = "mingw-w64-x86_64-ccache mingw-w64-x86_64-gcc pkg-config make" }
+  - ps: if ("$env:generator" -match "Unix") { $env:packages = "mingw-w64-x86_64-ccache mingw-w64-x86_64-gcc make" }
   - pacman -Suu --ask=20 --noconfirm --noprogressbar --needed mingw-w64-x86_64-yasm %packages%
   - ps: |
       if ("$env:generator" -match "Visual*") {
