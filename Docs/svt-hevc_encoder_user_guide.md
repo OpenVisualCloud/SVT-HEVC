@@ -324,8 +324,8 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **ThreadCount** | -thread-count | [0,N] | 0 | The number of threads to get created and run, 0 = AUTO |
 | **SwitchThreadsToRtPriority** | -rt | [0,1] | 1 | Enables or disables threads to real time priority, 0 = OFF, 1 = ON (only works on Linux) |
 | **FPSInVPS** | -fpsinvps | [0,1] | 1 | Enables or disables the VPS timing info, 0 = OFF, 1 = ON |
-| **TileRowCount** | -tile_row_cnt | [1,16] | 1 | Tile count in the Row |
-| **TileColumnCount** | -tile_col_cnt | [1,16] | 1 | Tile count in the column |
+| **TileRowCount** | -tile_row_cnt | [1,22] | 1 | Tile count in the Row |
+| **TileColumnCount** | -tile_col_cnt | [1,20] | 1 | Tile count in the column |
 | **TileSliceMode** | -tile_slice_mode | [0,1] | 0 | Per slice per tile, only valid for multi-tile |
 | **UnrestrictedMotionVector** | -umv | [0,1] | 1 | Enables or disables unrestricted motion vectors<br>0 = OFF(motion vectors are constrained within frame or tile boundary)<br>1 = ON.<br>For MCTS support, set -umv 0 with valid TileRowCount and TileColumnCount |
 | **MaxCLL** | -max-cll | [0 , 2^16-1] | 0 | Maximum content light level (MaxCLL) as required by the Consumer Electronics Association 861.3 specification. Applicable for HDR content. If specified, signaled only when HighDynamicRangeInput is set to 1 |
