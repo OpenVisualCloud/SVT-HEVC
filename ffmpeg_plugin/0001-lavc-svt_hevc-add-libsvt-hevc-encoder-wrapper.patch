@@ -15,8 +15,8 @@ Signed-off-by: Guo Jiansheng <jiansheng.guo@intel.com>
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 578 +++++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 584 insertions(+)
+ libavcodec/libsvt_hevc.c | 583 +++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 589 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
@@ -84,7 +84,7 @@ new file mode 100644
 index 0000000..95d6c35
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,578 @@
+@@ -0,0 +1,583 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -147,6 +147,7 @@ index 0000000..95d6c35
 +    int forced_idr;
 +    int la_depth;
 +    int thread_count;
++    int target_socket;
 +    int high_dynamic_range;
 +    int unrestricted_motion_vector;
 +    int tile_row_count;
@@ -288,6 +289,7 @@ index 0000000..95d6c35
 +    param->asmType = svt_enc->asm_type;
 +    param->intraRefreshType =  svt_enc->forced_idr;
 +    param->highDynamicRangeInput = svt_enc->high_dynamic_range;
++    param->targetSocket = svt_enc->target_socket;
 +    if (param->rateControlMode) {
 +        param->maxQpAllowed = avctx->qmax;
 +        param->minQpAllowed = avctx->qmin;
@@ -597,6 +599,9 @@ index 0000000..95d6c35
 +
 +    { "sc_detection", "Scene change detection", OFFSET(scd),
 +      AV_OPT_TYPE_BOOL, { .i64 = 1 }, 0, 1, VE },
++
++    { "socket", "Target CPU socket to use.  -1 use all available", OFFSET(target_socket),
++      AV_OPT_TYPE_INT, {.i64 = -1 }, -1, 1, VE },
 +
 +    { "thread_count", "Number of threads [0: Auto, 96: Min]", OFFSET(thread_count),
 +      AV_OPT_TYPE_INT, {.i64 = 0}, 0, INT_MAX, VE },
