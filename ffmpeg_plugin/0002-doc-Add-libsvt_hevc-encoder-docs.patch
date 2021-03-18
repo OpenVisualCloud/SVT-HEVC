@@ -119,6 +119,9 @@ index eefd124..81debda 100644
 +Set @emph{general_tier_flag}.  This may affect the level chosen for the stream
 +if it is not explicitly specified. Can assume one of the following possible values:
 +
++@item socket
++Target CPU socket to use. 0 or 1 are supported. -1 use all available (default)
++
 +@table @samp
 +@item main
 +main tier
