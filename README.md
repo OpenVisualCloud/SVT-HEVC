@@ -3,12 +3,6 @@
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/openvisualcloud/SVT-HEVC?branch=master&svg=true)](https://ci.appveyor.com/project/openvisualcloud/SVT-HEVC)
 [![Travis Build Status](https://travis-ci.com/OpenVisualCloud/SVT-HEVC.svg?branch=master)](https://travis-ci.com/OpenVisualCloud/SVT-HEVC)
 
----
-
-### <b>Join Hackathon [Open Your Mind to Endless Possibilities](https://software.seek.intel.com/OpenVisualCloudHackathon-contest)<br>Registration: Jan 11 - March 12, 2021</b>   
-
----
-
 The Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder) is an HEVC-compliant encoder library core that achieves excellent density-quality tradeoffs, and is highly optimized for Intel® Xeon™ Scalable Processor and Xeon™ D processors.
 
 The whitepaper for SVT-HEVC can be found here: <https://01.org/svt>
