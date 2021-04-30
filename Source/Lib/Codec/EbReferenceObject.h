@@ -54,7 +54,7 @@ typedef struct EbPaReferenceObject_s {
 	EB_U8                          yMean[MAX_NUMBER_OF_TREEBLOCKS_PER_PICTURE];
 	EB_PICTURE                       sliceType;
 
-	EB_U32 dependentPicturesCount; //number of pic using this reference frame  
+	EB_S32 dependentPicturesCount; //number of pic using this reference frame
     PictureParentControlSet_t       *pPcsPtr;
 } EbPaReferenceObject_t;
 

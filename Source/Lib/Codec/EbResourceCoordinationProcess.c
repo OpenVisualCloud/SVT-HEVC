@@ -472,7 +472,7 @@ void* ResourceCoordinationKernel(void *inputPtr)
         // Parent PCS is released by the Rate Control after passing through MDC->MD->ENCDEC->Packetization
         EbObjectIncLiveCount(
             pictureControlSetWrapperPtr,
-            1);
+            2);
 
         pictureControlSetPtr        = (PictureParentControlSet_t*) pictureControlSetWrapperPtr->objectPtr;
 
@@ -605,15 +605,10 @@ void* ResourceCoordinationKernel(void *inputPtr)
         pictureControlSetPtr->paReferencePictureWrapperPtr = referencePictureWrapperPtr;
 
         // Note: the PPCS and its PA reference picture will be released in both EncDec and RateControl kernels.
-        // Give the new Reference a nominal liveCount of 2, meanwhile increase liveCount of PPCS with 1 as it's
-        // already 1 after dequeuing from the PPCS FIFO.
+        // Give the new Reference a nominal liveCount of 2
         EbObjectIncLiveCount(
                 pictureControlSetPtr->paReferencePictureWrapperPtr,
                 2);
-
-        EbObjectIncLiveCount(
-                pictureControlSetWrapperPtr,
-                1);
 
         // Get Empty Output Results Object
         // Note: record the PCS object into output of the Resource Coordination process for EOS frame(s).

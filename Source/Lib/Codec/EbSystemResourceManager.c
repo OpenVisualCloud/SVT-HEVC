@@ -388,13 +388,20 @@ EB_ERRORTYPE EbObjectIncLiveCount(
     EbObjectWrapper_t   *wrapperPtr,
     EB_U32               incrementNumber)
 {
+    EB_ERRORTYPE return_error = EB_ErrorNone;
+
     EbBlockOnMutex(wrapperPtr->systemResourcePtr->emptyQueue->lockoutMutex);
 
-    wrapperPtr->liveCount += incrementNumber;
+    if (wrapperPtr->liveCount == EB_ObjectWrapperReleasedValue) {
+        SVT_LOG("Warning: %p is already released. Ignored the EbObjectIncLiveCount(%d) call \n", wrapperPtr, incrementNumber);
+        return_error = EB_ErrorBadParameter;
+    } else {
+        wrapperPtr->liveCount += incrementNumber;
+    }
 
     EbReleaseMutex(wrapperPtr->systemResourcePtr->emptyQueue->lockoutMutex);
 
-    return EB_ErrorNone;
+    return return_error;
 }
 
 //ugly hack
@@ -429,6 +436,7 @@ static EB_ERRORTYPE EBObjectWrapperCtor(EbObjectWrapper_t* wrapper,
     wrapper->dctor = EBObjectWrapperDctor;
     wrapper->releaseEnable = EB_TRUE;
     wrapper->quitSignal = EB_FALSE;
+    wrapper->liveCount = 0;
     wrapper->systemResourcePtr = resource;
     wrapper->objectDestroyer = objectDestroyer;
     ret = objectCreator(&wrapper->objectPtr, objectInitDataPtr);
@@ -596,6 +604,12 @@ EB_ERRORTYPE EbReleaseObject(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
     EbBlockOnMutex(objectPtr->systemResourcePtr->emptyQueue->lockoutMutex);
+
+    if (objectPtr->liveCount == EB_ObjectWrapperReleasedValue) {
+        SVT_LOG("Warning: %p is already released. Ignored the double EbReleaseObject() call \n", objectPtr);
+        EbReleaseMutex(objectPtr->systemResourcePtr->emptyQueue->lockoutMutex);
+        return EB_ErrorBadParameter;
+    }
 
     // Decrement liveCount
     objectPtr->liveCount = (objectPtr->liveCount == 0) ? objectPtr->liveCount : objectPtr->liveCount - 1;
