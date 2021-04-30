@@ -57,12 +57,19 @@ export PATH=$PATH:/c/svt-encoders/lib/
 git clone https://github.com/FFmpeg/FFmpeg ffmpeg
 cd ffmpeg
 
-# The patch has been validated on n4.2 and n4.3 release tag
+# The patch n4.4-0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch has been validated on n4.2/n4.3/n4.4 release tag
 git checkout n4.2
 or 
 git checkout n4.3
+or
+git checkout n4.4
 
-git am ../SVT-HEVC/ffmpeg_plugin/0001*.patch
+git am ../SVT-HEVC/ffmpeg_plugin/n4.4-0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch
+
+# If the above patch failed when you work on master branch or newer version of FFmpeg,
+# please try the patch for master branch: master-0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch
+git am ../SVT-HEVC/ffmpeg_plugin/master-0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch
+
 ./configure --enable-libsvthevc
 make -j $(nproc)
 ```

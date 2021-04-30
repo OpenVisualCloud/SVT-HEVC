@@ -46,7 +46,7 @@ for:
       - pkg-config --debug --exists --print-errors SvtHevcEnc
       - git clone https://github.com/FFmpeg/FFmpeg.git --depth=1 --branch=master ffmpeg
       - cd ffmpeg
-      - git apply --ignore-space-change --ignore-whitespace %APPVEYOR_BUILD_FOLDER%/ffmpeg_plugin/0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch
+      - git apply --ignore-space-change --ignore-whitespace %APPVEYOR_BUILD_FOLDER%/ffmpeg_plugin/master-0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch
       - ps: |
           $path = ([System.Environment]::GetEnvironmentVariable('PATH', 'Machine').Split(';') | Where-Object { $_ -notmatch 'Git' }) -join ';'
           [System.Environment]::SetEnvironmentVariable('PATH', $path, 'Machine')

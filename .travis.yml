@@ -115,8 +115,8 @@ matrix:
         # Build and install SVT-HEVC
         - *base_script
         # Apply SVT-HEVC plugin and enable libsvthevc to FFmpeg
-        - git clone https://github.com/FFmpeg/FFmpeg --branch release/4.2 --depth=1 ffmpeg && cd ffmpeg
-        - git am $TRAVIS_BUILD_DIR/ffmpeg_plugin/0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch
+        - git clone https://github.com/FFmpeg/FFmpeg --branch release/4.4 --depth=1 ffmpeg && cd ffmpeg
+        - git am $TRAVIS_BUILD_DIR/ffmpeg_plugin/n4.4-0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch
         # Patch 2 is doc only
         #- git am $TRAVIS_BUILD_DIR/ffmpeg_plugin/0002-doc-Add-libsvt_hevc-encoder-docs.patch
         - export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
@@ -164,9 +164,9 @@ matrix:
         - *base_script
         - &coveralls_script |
           travis_wait SvtHevcEncApp -encMode 9 -i akiyo_cif.y4m -b test1.h265
-          git clone https://github.com/FFmpeg/FFmpeg ffmpeg --depth=1 --branch release/4.2
+          git clone https://github.com/FFmpeg/FFmpeg ffmpeg --depth=1 --branch release/4.4
           cd ffmpeg
-          git am $TRAVIS_BUILD_DIR/ffmpeg_plugin/0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch &&
+          git am $TRAVIS_BUILD_DIR/ffmpeg_plugin/n4.4-0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch &&
           git am $TRAVIS_BUILD_DIR/ffmpeg_plugin/0002-doc-Add-libsvt_hevc-encoder-docs.patch
           sudo chown -R travis: $HOME/.ccache
           ./configure --enable-libsvthevc || cat ffbuild/config.log
