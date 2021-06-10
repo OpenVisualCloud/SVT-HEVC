@@ -1,4 +1,4 @@
-From 84c4d781fe2d000ba5feee21cd24cfaed6dc1035 Mon Sep 17 00:00:00 2001
+From eb67d4a6ae6707740dc8403424f31409fdce5704 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -15,12 +15,12 @@ Signed-off-by: Guo Jiansheng <jiansheng.guo@intel.com>
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 583 +++++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 589 insertions(+)
+ libavcodec/libsvt_hevc.c | 584 +++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 590 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index 820f719..29aee12 100755
+index 6bfd98b..93c87cb 100755
 --- a/configure
 +++ b/configure
 @@ -288,6 +288,7 @@ External library support:
@@ -31,7 +31,7 @@ index 820f719..29aee12 100755
    --enable-libxavs         enable AVS encoding via xavs [no]
    --enable-libxavs2        enable AVS2 encoding via xavs2 [no]
    --enable-libxcb          enable X11 grabbing using XCB [autodetect]
-@@ -1763,6 +1764,7 @@ EXTERNAL_LIBRARY_LIST="
+@@ -1792,6 +1793,7 @@ EXTERNAL_LIBRARY_LIST="
      gnutls
      jni
      ladspa
@@ -39,7 +39,7 @@ index 820f719..29aee12 100755
      libaom
      libass
      libbluray
-@@ -3286,6 +3288,7 @@ libx264_encoder_select="atsc_a53"
+@@ -3315,6 +3317,7 @@ libx264_encoder_select="atsc_a53"
  libx264rgb_encoder_deps="libx264 x264_csp_bgr"
  libx264rgb_encoder_select="libx264_encoder"
  libx265_encoder_deps="libx265"
@@ -47,7 +47,7 @@ index 820f719..29aee12 100755
  libxavs_encoder_deps="libxavs"
  libxavs2_encoder_deps="libxavs2"
  libxvid_encoder_deps="libxvid"
-@@ -6491,6 +6494,7 @@ enabled mmal              && { check_lib mmal interface/mmal/mmal.h mmal_port_co
+@@ -6535,6 +6538,7 @@ enabled mmal              && { check_lib mmal interface/mmal/mmal.h mmal_port_co
                                   check_lib mmal interface/mmal/mmal.h mmal_port_connect -lmmal_core -lmmal_util -lmmal_vc_client -lbcm_host; } ||
                                 die "ERROR: mmal not found" &&
                                 check_func_headers interface/mmal/mmal.h "MMAL_PARAMETER_VIDEO_MAX_NUM_CALLBACKS"; }
@@ -56,10 +56,10 @@ index 820f719..29aee12 100755
                                 check_lib openal 'AL/al.h' alGetError "${al_extralibs}" && break; done } ||
                                 die "ERROR: openal not found"; } &&
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index 075b0ad..f730d1a 100644
+index 4fa8d7a..192ed45 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
-@@ -1063,6 +1063,7 @@ OBJS-$(CONFIG_LIBWEBP_ANIM_ENCODER)       += libwebpenc_common.o libwebpenc_anim
+@@ -1064,6 +1064,7 @@ OBJS-$(CONFIG_LIBWEBP_ANIM_ENCODER)       += libwebpenc_common.o libwebpenc_anim
  OBJS-$(CONFIG_LIBX262_ENCODER)            += libx264.o
  OBJS-$(CONFIG_LIBX264_ENCODER)            += libx264.o
  OBJS-$(CONFIG_LIBX265_ENCODER)            += libx265.o
@@ -68,10 +68,10 @@ index 075b0ad..f730d1a 100644
  OBJS-$(CONFIG_LIBXAVS2_ENCODER)           += libxavs2.o
  OBJS-$(CONFIG_LIBXVID_ENCODER)            += libxvid.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
-index 73dd3d0..26a3c2f 100644
+index 623db2a..280480f 100644
 --- a/libavcodec/allcodecs.c
 +++ b/libavcodec/allcodecs.c
-@@ -772,6 +772,7 @@ extern const AVCodec ff_libx264_encoder;
+@@ -774,6 +774,7 @@ extern LIBX264_CONST AVCodec ff_libx264_encoder;
  #endif
  extern const AVCodec ff_libx264rgb_encoder;
  extern AVCodec ff_libx265_encoder;
@@ -81,10 +81,10 @@ index 73dd3d0..26a3c2f 100644
  extern const AVCodec ff_libxvid_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000..b0e3506
+index 0000000..2c013a9
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,583 @@
+@@ -0,0 +1,584 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -115,6 +115,7 @@ index 0000000..b0e3506
 +
 +#include "internal.h"
 +#include "avcodec.h"
++#include "encode.h"
 +
 +typedef enum eos_status {
 +    EOS_NOT_REACHED = 0,
@@ -510,7 +511,7 @@ index 0000000..b0e3506
 +
 +    av_log(avctx, AV_LOG_DEBUG, "Received PTS %"PRId64" packet\n", header_ptr->pts);
 +
-+    av_ret = ff_alloc_packet2(avctx, pkt, header_ptr->nFilledLen, 0);
++    av_ret = ff_alloc_packet(avctx, pkt, header_ptr->nFilledLen);
 +    if (av_ret) {
 +        av_log(avctx, AV_LOG_ERROR, "Failed to allocate a packet\n");
 +        EbH265ReleaseOutBuffer(&header_ptr);
