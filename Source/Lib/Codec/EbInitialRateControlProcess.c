@@ -700,8 +700,13 @@ void UpdateHomogeneityOverTime(
 
 		} // PCS loop
 
-		meanSqrvariance64x64Based = meanSqrvariance64x64Based / (noFramesToCheck - 1);
-		meanvariance64x64Based = meanvariance64x64Based / (noFramesToCheck - 1);
+        if (noFramesToCheck == 1) {
+            meanSqrvariance64x64Based = 0;
+            meanvariance64x64Based = 0;
+        } else {
+            meanSqrvariance64x64Based = meanSqrvariance64x64Based / (noFramesToCheck - 1);
+            meanvariance64x64Based = meanvariance64x64Based / (noFramesToCheck - 1);
+        }
 
 		// Compute variance
 		pictureControlSetPtr->lcuVarianceOfVarianceOverTime[lcuIdx] = meanSqrvariance64x64Based - meanvariance64x64Based * meanvariance64x64Based;
