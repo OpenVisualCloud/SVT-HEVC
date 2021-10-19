@@ -1674,15 +1674,15 @@ void LoadDefaultBufferConfigurationSettings(
     EB_U16 tileRowCount = sequenceControlSetPtr->staticConfig.tileRowCount;
 
     EB_U32 inputPic = SetParentPcs(&sequenceControlSetPtr->staticConfig);
+    EB_U32 inputSize = (EB_U32)sequenceControlSetPtr->maxInputLumaWidth * (EB_U32)sequenceControlSetPtr->maxInputLumaHeight;
 
     unsigned int lpCount = EbHevcGetNumProcessors();
-    unsigned int coreCount = lpCount;
+    unsigned int coreCount = (inputSize > INPUT_SIZE_4K_TH) ? 16 : (inputSize > INPUT_SIZE_1080p_RANGE) ? 8 : lpCount;
 
     unsigned int totalThreadCount;
     unsigned int threadUnit;
 
-    EB_U32 inputSize = (EB_U32)sequenceControlSetPtr->maxInputLumaWidth * (EB_U32)sequenceControlSetPtr->maxInputLumaHeight;
-
+    
     EB_U8 inputResolution = (inputSize < INPUT_SIZE_1080i_TH) ? INPUT_SIZE_576p_RANGE_OR_LOWER :
         (inputSize < INPUT_SIZE_1080p_TH) ? INPUT_SIZE_1080i_RANGE :
         (inputSize < INPUT_SIZE_4K_TH) ? INPUT_SIZE_1080p_RANGE :
