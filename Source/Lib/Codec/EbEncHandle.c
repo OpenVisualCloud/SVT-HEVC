@@ -1647,10 +1647,10 @@ EB_U32 SetParentPcs(EB_H265_ENC_CONFIGURATION*   config)
     EB_U32     lowLatencyInput = (config->encMode < 6 || config->speedControlFlag == 1) ? fps :
         (config->encMode < 8) ? fps >> 1 : (EB_U32)((2 << config->hierarchicalLevels) + SCD_LAD);
 
-    EB_U32     normalLatencyInput = (fps * 3) >> 1;
+    EB_U32     normalLatencyInput = (fps * 3) >> 2;// 1;
 
-    if ((config->sourceWidth * config->sourceHeight) > INPUT_SIZE_4K_TH)
-        normalLatencyInput = (normalLatencyInput * 3) >> 1;
+    /*if ((config->sourceWidth * config->sourceHeight) > INPUT_SIZE_4K_TH)
+        normalLatencyInput = (normalLatencyInput * 3) >> 1;*/
 
     if (config->latencyMode == 0)
         inputPic = (normalLatencyInput + config->lookAheadDistance);
