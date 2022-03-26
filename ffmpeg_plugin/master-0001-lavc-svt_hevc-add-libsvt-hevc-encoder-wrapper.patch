@@ -1,4 +1,4 @@
-From eb67d4a6ae6707740dc8403424f31409fdce5704 Mon Sep 17 00:00:00 2001
+From 0355dd73f37768851e28b158ea6b36506c9fc0d2 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -15,15 +15,15 @@ Signed-off-by: Guo Jiansheng <jiansheng.guo@intel.com>
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 584 +++++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 590 insertions(+)
+ libavcodec/libsvt_hevc.c | 585 +++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 591 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index 6bfd98b..93c87cb 100755
+index e4d36aa639..f9b0022621 100755
 --- a/configure
 +++ b/configure
-@@ -288,6 +288,7 @@ External library support:
+@@ -289,6 +289,7 @@ External library support:
    --enable-libwebp         enable WebP encoding via libwebp [no]
    --enable-libx264         enable H.264 encoding via x264 [no]
    --enable-libx265         enable HEVC encoding via x265 [no]
@@ -31,7 +31,7 @@ index 6bfd98b..93c87cb 100755
    --enable-libxavs         enable AVS encoding via xavs [no]
    --enable-libxavs2        enable AVS2 encoding via xavs2 [no]
    --enable-libxcb          enable X11 grabbing using XCB [autodetect]
-@@ -1792,6 +1793,7 @@ EXTERNAL_LIBRARY_LIST="
+@@ -1813,6 +1814,7 @@ EXTERNAL_LIBRARY_LIST="
      gnutls
      jni
      ladspa
@@ -39,7 +39,7 @@ index 6bfd98b..93c87cb 100755
      libaom
      libass
      libbluray
-@@ -3315,6 +3317,7 @@ libx264_encoder_select="atsc_a53"
+@@ -3374,6 +3376,7 @@ libx264_encoder_select="atsc_a53"
  libx264rgb_encoder_deps="libx264"
  libx264rgb_encoder_select="libx264_encoder"
  libx265_encoder_deps="libx265"
@@ -47,7 +47,7 @@ index 6bfd98b..93c87cb 100755
  libxavs_encoder_deps="libxavs"
  libxavs2_encoder_deps="libxavs2"
  libxvid_encoder_deps="libxvid"
-@@ -6535,6 +6538,7 @@ enabled mmal              && { check_lib mmal interface/mmal/mmal.h mmal_port_co
+@@ -6668,6 +6671,7 @@ enabled mmal              && { check_lib mmal interface/mmal/mmal.h mmal_port_co
                                   check_lib mmal interface/mmal/mmal.h mmal_port_connect -lmmal_core -lmmal_util -lmmal_vc_client -lbcm_host; } ||
                                 die "ERROR: mmal not found" &&
                                 check_func_headers interface/mmal/mmal.h "MMAL_PARAMETER_VIDEO_MAX_NUM_CALLBACKS"; }
@@ -56,10 +56,10 @@ index 6bfd98b..93c87cb 100755
                                 check_lib openal 'AL/al.h' alGetError "${al_extralibs}" && break; done } ||
                                 die "ERROR: openal not found"; } &&
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index 4fa8d7a..192ed45 100644
+index fb8b0e824b..0db2413123 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
-@@ -1064,6 +1064,7 @@ OBJS-$(CONFIG_LIBWEBP_ANIM_ENCODER)       += libwebpenc_common.o libwebpenc_anim
+@@ -1093,6 +1093,7 @@ OBJS-$(CONFIG_LIBWEBP_ANIM_ENCODER)       += libwebpenc_common.o libwebpenc_anim
  OBJS-$(CONFIG_LIBX262_ENCODER)            += libx264.o
  OBJS-$(CONFIG_LIBX264_ENCODER)            += libx264.o
  OBJS-$(CONFIG_LIBX265_ENCODER)            += libx265.o
@@ -68,23 +68,23 @@ index 4fa8d7a..192ed45 100644
  OBJS-$(CONFIG_LIBXAVS2_ENCODER)           += libxavs2.o
  OBJS-$(CONFIG_LIBXVID_ENCODER)            += libxvid.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
-index 623db2a..280480f 100644
+index 22d56760ec..49d4efefc7 100644
 --- a/libavcodec/allcodecs.c
 +++ b/libavcodec/allcodecs.c
-@@ -774,6 +774,7 @@ extern LIBX264_CONST AVCodec ff_libx264_encoder;
+@@ -788,6 +788,7 @@ extern LIBX264_CONST FFCodec ff_libx264_encoder;
  #endif
- extern const AVCodec ff_libx264rgb_encoder;
- extern AVCodec ff_libx265_encoder;
-+extern AVCodec ff_libsvt_hevc_encoder;
- extern const AVCodec ff_libxavs_encoder;
- extern const AVCodec ff_libxavs2_encoder;
- extern const AVCodec ff_libxvid_encoder;
+ extern const FFCodec ff_libx264rgb_encoder;
+ extern FFCodec ff_libx265_encoder;
++extern FFCodec ff_libsvt_hevc_encoder;
+ extern const FFCodec ff_libxavs_encoder;
+ extern const FFCodec ff_libxavs2_encoder;
+ extern const FFCodec ff_libxvid_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000..2c013a9
+index 0000000000..32d20992a5
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,584 @@
+@@ -0,0 +1,585 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -113,6 +113,7 @@ index 0000000..2c013a9
 +#include "libavutil/frame.h"
 +#include "libavutil/opt.h"
 +
++#include "codec_internal.h"
 +#include "internal.h"
 +#include "avcodec.h"
 +#include "encode.h"
@@ -639,7 +640,7 @@ index 0000000..2c013a9
 +    .version    = LIBAVUTIL_VERSION_INT,
 +};
 +
-+static const AVCodecDefault eb_enc_defaults[] = {
++static const FFCodecDefault eb_enc_defaults[] = {
 +    { "b",         "7M"    },
 +    { "qmin",      "10"    },
 +    { "qmax",      "48"    },
@@ -647,28 +648,28 @@ index 0000000..2c013a9
 +    { NULL },
 +};
 +
-+AVCodec ff_libsvt_hevc_encoder = {
-+    .name           = "libsvt_hevc",
-+    .long_name      = NULL_IF_CONFIG_SMALL("SVT-HEVC(Scalable Video Technology for HEVC) encoder"),
++FFCodec ff_libsvt_hevc_encoder = {
++    .p.name         = "libsvt_hevc",
++    .p.long_name    = NULL_IF_CONFIG_SMALL("SVT-HEVC(Scalable Video Technology for HEVC) encoder"),
 +    .priv_data_size = sizeof(SvtContext),
-+    .type           = AVMEDIA_TYPE_VIDEO,
-+    .id             = AV_CODEC_ID_HEVC,
++    .p.type         = AVMEDIA_TYPE_VIDEO,
++    .p.id           = AV_CODEC_ID_HEVC,
 +    .init           = eb_enc_init,
 +    .encode2        = eb_encode_frame,
 +    .close          = eb_enc_close,
-+    .capabilities   = AV_CODEC_CAP_DELAY,
-+    .pix_fmts       = (const enum AVPixelFormat[]){ AV_PIX_FMT_YUV420P,
++    .p.capabilities = AV_CODEC_CAP_DELAY,
++    .p.pix_fmts     = (const enum AVPixelFormat[]){ AV_PIX_FMT_YUV420P,
 +                                                    AV_PIX_FMT_YUV420P10,
 +                                                    AV_PIX_FMT_YUV422P,
 +                                                    AV_PIX_FMT_YUV422P10,
 +                                                    AV_PIX_FMT_YUV444P,
 +                                                    AV_PIX_FMT_YUV444P10,
 +                                                    AV_PIX_FMT_NONE },
-+    .priv_class     = &class,
++    .p.priv_class   = &class,
 +    .defaults       = eb_enc_defaults,
 +    .caps_internal  = FF_CODEC_CAP_INIT_CLEANUP,
-+    .wrapper_name   = "libsvt_hevc",
++    .p.wrapper_name = "libsvt_hevc",
 +};
 -- 
-2.7.4
+2.17.1
 
