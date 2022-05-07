@@ -562,9 +562,9 @@ static EB_ERRORTYPE EbEncHandleCtor(
 }
 
 #ifdef _WIN32
-static EB_U64 EbHevcGetAffinityMask(EB_U32 lpnum) {
+static EB_U64 EbHevcGetAffinityMask(EB_U32 lpstart, EB_U32 lpnum) {
     EB_U64 mask = 0x1;
-    for (EB_U32 i = lpnum - 1; i > 0; i--)
+    for (EB_U32 i = lpnum + lpstart - 1; i > lpstart; i--)
         mask += (EB_U64)1 << i;
     return mask;
 }
@@ -595,10 +595,15 @@ void EbHevcSetThreadManagementParameters(
     EB_U32 numLogicProcessors = EbHevcGetNumProcessors();
     // For system with a single processor group(no more than 64 logic processors all together)
     // Affinity of the thread can be set to one or more logical processors
+    if(configPtr->firstLogicalProcessor + configPtr->logicalProcessors >= numLogicProcessors) {
+        SVT_LOG("SVT [WARNING]: wrong settings of logical processors ignored\n");
+        configPtr->firstLogicalProcessor = 0;
+        configPtr->logicalProcessors = numLogicProcessors;
+    }
     if (numGroups == 1) {
         EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
             configPtr->logicalProcessors < numLogicProcessors ? configPtr->logicalProcessors : numLogicProcessors;
-        groupAffinity.Mask = EbHevcGetAffinityMask(lps);
+        groupAffinity.Mask = EbHevcGetAffinityMask(configPtr->firstLogicalProcessor, lps);
     }
     else if (numGroups > 1) { // For system with multiple processor group
         if (configPtr->logicalProcessors == 0) {
@@ -614,25 +619,30 @@ void EbHevcSetThreadManagementParameters(
                     SVT_LOG("SVT [WARNING]: -lp(logical processors) setting is ignored. Run on both sockets. \n");
                 }
                 else {
-                    groupAffinity.Mask = EbHevcGetAffinityMask(configPtr->logicalProcessors);
+                    groupAffinity.Mask = EbHevcGetAffinityMask(configPtr->firstLogicalProcessor, configPtr->logicalProcessors);
                 }
             }
             else {
                 EB_U32 lps = configPtr->logicalProcessors == 0 ? numLpPerGroup :
                     configPtr->logicalProcessors < numLpPerGroup ? configPtr->logicalProcessors : numLpPerGroup;
-                groupAffinity.Mask = EbHevcGetAffinityMask(lps);
+                groupAffinity.Mask = EbHevcGetAffinityMask(configPtr->firstLogicalProcessor, lps);
                 groupAffinity.Group = configPtr->targetSocket;
             }
         }
     }
 #elif defined(__linux__)
     EB_U32 numLogicProcessors = EbHevcGetNumProcessors();
+    if(configPtr->firstLogicalProcessor + configPtr->logicalProcessors >= numLogicProcessors) {
+        SVT_LOG("SVT [WARNING]: wrong settings of logical processors ignored\n");
+        configPtr->firstLogicalProcessor = 0;
+        configPtr->logicalProcessors = numLogicProcessors;
+    }
     CPU_ZERO(&groupAffinity);
     if (numGroups == 1) {
         EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
             configPtr->logicalProcessors < numLogicProcessors ? configPtr->logicalProcessors : numLogicProcessors;
             if (configPtr->targetSocket != -1) {
-                for(EB_U32 i=0; i<lps; i++)
+                for(EB_U32 i=configPtr->firstLogicalProcessor; i<(lps+configPtr->firstLogicalProcessor); i++)
                     CPU_SET(lpGroup[0].group[i], &groupAffinity);
             }
     }
@@ -640,7 +650,7 @@ void EbHevcSetThreadManagementParameters(
         EB_U32 numLpPerGroup = numLogicProcessors / numGroups;
         if (configPtr->logicalProcessors == 0) {
             if (configPtr->targetSocket != -1) {
-                for(EB_U32 i=0; i<lpGroup[configPtr->targetSocket].num; i++)
+                for(EB_U32 i=configPtr->firstLogicalProcessor; i<(lpGroup[configPtr->targetSocket].num+configPtr->firstLogicalProcessor); i++)
                     CPU_SET(lpGroup[configPtr->targetSocket].group[i], &groupAffinity);
             }
         }
@@ -649,20 +659,20 @@ void EbHevcSetThreadManagementParameters(
                 EB_U32 lps = configPtr->logicalProcessors == 0 ? numLogicProcessors:
                     configPtr->logicalProcessors < numLogicProcessors ? configPtr->logicalProcessors : numLogicProcessors;
                 if(lps > numLpPerGroup) {
-                    for(EB_U32 i=0; i<lpGroup[0].num; i++)
+                    for(EB_U32 i=configPtr->firstLogicalProcessor; i<lpGroup[0].num; i++)
                         CPU_SET(lpGroup[0].group[i], &groupAffinity);
-                    for(EB_U32 i=0; i< (lps -lpGroup[0].num); i++)
+                    for(EB_U32 i=0; i<(lps+configPtr->firstLogicalProcessor-lpGroup[0].num); i++)
                         CPU_SET(lpGroup[1].group[i], &groupAffinity);
                 }
                 else {
-                    for(EB_U32 i=0; i<lps; i++)
+                    for(EB_U32 i=configPtr->firstLogicalProcessor; i<(lps+configPtr->firstLogicalProcessor); i++)
                         CPU_SET(lpGroup[0].group[i], &groupAffinity);
                 }
             }
             else {
                 EB_U32 lps = configPtr->logicalProcessors == 0 ? numLpPerGroup :
                     configPtr->logicalProcessors < numLpPerGroup ? configPtr->logicalProcessors : numLpPerGroup;
-                for(EB_U32 i=0; i<lps; i++)
+                for(EB_U32 i=configPtr->firstLogicalProcessor; i<(lps+configPtr->firstLogicalProcessor); i++)
                     CPU_SET(lpGroup[configPtr->targetSocket].group[i], &groupAffinity);
             }
         }
@@ -1717,7 +1727,7 @@ void LoadDefaultBufferConfigurationSettings(
     if (sequenceControlSetPtr->staticConfig.threadCount != 0)
         totalThreadCount = sequenceControlSetPtr->staticConfig.threadCount;
     else
-        totalThreadCount = coreCount * EB_THREAD_COUNT_FACTOR;
+        totalThreadCount = coreCount * numGroups;
 
     if (totalThreadCount < EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_FACTOR) {
         totalThreadCount = EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_FACTOR;
@@ -1825,7 +1835,7 @@ void LoadDefaultBufferConfigurationSettings(
     sequenceControlSetPtr->totalProcessInitCount += sequenceControlSetPtr->encDecProcessInitCount =
                                                     totalThreadCount - sequenceControlSetPtr->totalProcessInitCount;
 
-    SVT_LOG("Number of logical cores available: %u\nNumber of PPCS %u\n", coreCount, inputPic);
+    SVT_LOG("Number of logical cores available: %u\nNumber of PPCS %u\nNumber of threads %u\n", coreCount, inputPic, totalThreadCount);
 
     return;
 

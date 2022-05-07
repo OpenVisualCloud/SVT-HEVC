@@ -101,6 +101,7 @@
 #define SPEED_CONTROL_TOKEN             "-speed-ctrl"
 #define ASM_TYPE_TOKEN				    "-asm" // no Eval
 #define THREAD_MGMNT                    "-lp"
+#define FIRST_PROCESSOR                 "-flp"
 #define TARGET_SOCKET                   "-ss"
 #define THREAD_COUNT                    "-thread-count"
 #define SWITCHTHREADSTOREALTIME_TOKEN   "-rt"
@@ -277,6 +278,7 @@ static void SetInjectorFrameRate                (const char *value, EbConfig_t *
 //static void SetLatencyMode                      (const char *value, EbConfig_t *cfg)  {cfg->latencyMode                     = (uint8_t)strtol(value, NULL, 0);};
 static void SetAsmType                          (const char *value, EbConfig_t *cfg)  {cfg->asmType                         = (uint32_t)strtoul(value, NULL, 0); };
 static void SetLogicalProcessors                (const char *value, EbConfig_t *cfg)  {cfg->logicalProcessors               = (uint32_t)strtoul(value, NULL, 0);};
+static void SetFirstLogicalProcessor            (const char *value, EbConfig_t *cfg)  {cfg->firstLogicalProcessor               = (uint32_t)strtoul(value, NULL, 0);};
 static void SetTargetSocket                     (const char *value, EbConfig_t *cfg)  {cfg->targetSocket                    = (int32_t)strtol(value, NULL, 0);};
 static void SetSwitchThreadsToRtPriority        (const char *value, EbConfig_t *cfg)  {cfg->switchThreadsToRtPriority       = (EB_BOOL)strtol(value, NULL, 0);};
 static void SetThreadCount                      (const char *value, EbConfig_t *cfg)  {cfg->threadCount                     = (uint32_t)strtoul(value, NULL, 0); };
@@ -431,6 +433,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, ASM_TYPE_TOKEN, "AsmType", SetAsmType },
     { SINGLE_INPUT, TARGET_SOCKET, "TargetSocket", SetTargetSocket },
     { SINGLE_INPUT, THREAD_MGMNT, "LogicalProcessors", SetLogicalProcessors },
+    { SINGLE_INPUT, FIRST_PROCESSOR, "FirstLogicalProcessor", SetFirstLogicalProcessor },
     { SINGLE_INPUT, THREAD_COUNT, "ThreadCount", SetThreadCount },
 
     // Termination
@@ -575,6 +578,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->asmType                              = 1;
     configPtr->targetSocket                         = -1;
     configPtr->logicalProcessors                    = 0;
+    configPtr->firstLogicalProcessor                = 0;
     configPtr->threadCount                          = 0;
 
     // vbv
@@ -593,7 +597,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
 
     configPtr->performanceContext.encodeStartTime[0]= 0;
     configPtr->performanceContext.encodeStartTime[1]= 0;
-    
+
     configPtr->performanceContext.totalExecutionTime= 0;
     configPtr->performanceContext.totalEncodeTime   = 0;
     configPtr->performanceContext.frameCount        = 0;
