@@ -206,6 +206,7 @@ EB_ERRORTYPE CopyConfigurationParameters(
     callbackData->ebEncParameters.channelId = config->channelId;
     callbackData->ebEncParameters.activeChannelCount = config->activeChannelCount;
     callbackData->ebEncParameters.logicalProcessors = config->logicalProcessors;
+    callbackData->ebEncParameters.firstLogicalProcessor= config->firstLogicalProcessor;
     callbackData->ebEncParameters.targetSocket = config->targetSocket;
     if ((config->threadCount > 0) && (config->threadCount < EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_FACTOR)) {
         callbackData->ebEncParameters.threadCount = EB_THREAD_COUNT_MIN_CORE * EB_THREAD_COUNT_FACTOR;
