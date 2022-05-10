@@ -573,7 +573,7 @@ static void EncodePassUpdateReconSampleNeighborArrays(
 /************************************************************
 * Update Intra Luma Neighbor Modes
 ************************************************************/
-void GeneratePuIntraLumaNeighborModes(
+void EbHevcGeneratePuIntraLumaNeighborModes(
 	CodingUnit_t            *cuPtr,
 	EB_U32                   puOriginX,
 	EB_U32                   puOriginY,
@@ -1901,12 +1901,12 @@ static void EncodePassMvPrediction(
 
             xMvdIdx0 = (contextPtr->cuPtr->predictionUnitArray->mv[REF_LIST_0].x - contextPtr->xMvAmvpCandidateArrayList0[0]);
             yMvdIdx0 = (contextPtr->cuPtr->predictionUnitArray->mv[REF_LIST_0].y - contextPtr->yMvAmvpCandidateArrayList0[0]);
-            GetMvdFractionBits(xMvdIdx0, yMvdIdx0, contextPtr->mdRateEstimationPtr, &mvdBitsIdx0);
+            EbHevcGetMvdFractionBits(xMvdIdx0, yMvdIdx0, contextPtr->mdRateEstimationPtr, &mvdBitsIdx0);
 
             if (contextPtr->amvpCandidateCountRefList0 > 1) {
                 xMvdIdx1 = (contextPtr->cuPtr->predictionUnitArray->mv[REF_LIST_0].x - contextPtr->xMvAmvpCandidateArrayList0[1]);
                 yMvdIdx1 = (contextPtr->cuPtr->predictionUnitArray->mv[REF_LIST_0].y - contextPtr->yMvAmvpCandidateArrayList0[1]);
-                GetMvdFractionBits(xMvdIdx1, yMvdIdx1, contextPtr->mdRateEstimationPtr, &mvdBitsIdx1);
+                EbHevcGetMvdFractionBits(xMvdIdx1, yMvdIdx1, contextPtr->mdRateEstimationPtr, &mvdBitsIdx1);
 
                 // Assign the AMVP predictor index
                 contextPtr->cuPtr->predictionUnitArray->mvd[REF_LIST_0].predIdx = (mvdBitsIdx1 < mvdBitsIdx0);
@@ -1949,12 +1949,12 @@ static void EncodePassMvPrediction(
             // Assign the MV Predictor
             xMvdIdx0 = (contextPtr->cuPtr->predictionUnitArray->mv[REF_LIST_1].x - contextPtr->xMvAmvpCandidateArrayList1[0]);
             yMvdIdx0 = (contextPtr->cuPtr->predictionUnitArray->mv[REF_LIST_1].y - contextPtr->yMvAmvpCandidateArrayList1[0]);
-            GetMvdFractionBits(xMvdIdx0, yMvdIdx0, contextPtr->mdRateEstimationPtr, &mvdBitsIdx0);
+            EbHevcGetMvdFractionBits(xMvdIdx0, yMvdIdx0, contextPtr->mdRateEstimationPtr, &mvdBitsIdx0);
 
             if (contextPtr->amvpCandidateCountRefList1 > 1) {
                 xMvdIdx1 = (contextPtr->cuPtr->predictionUnitArray->mv[REF_LIST_1].x - contextPtr->xMvAmvpCandidateArrayList1[1]);
                 yMvdIdx1 = (contextPtr->cuPtr->predictionUnitArray->mv[REF_LIST_1].y - contextPtr->yMvAmvpCandidateArrayList1[1]);
-                GetMvdFractionBits(xMvdIdx1, yMvdIdx1, contextPtr->mdRateEstimationPtr, &mvdBitsIdx1);
+                EbHevcGetMvdFractionBits(xMvdIdx1, yMvdIdx1, contextPtr->mdRateEstimationPtr, &mvdBitsIdx1);
 
                 // Assign the AMVP predictor index
                 contextPtr->cuPtr->predictionUnitArray->mvd[REF_LIST_1].predIdx = (mvdBitsIdx1 < mvdBitsIdx0);
@@ -2272,6 +2272,13 @@ void SetPmEncDecMode(
 
         }
     }
+
+    if (pictureControlSetPtr->ParentPcsPtr->segmentOvArray != NULL && sequenceControlSetPtr->staticConfig.segmentOvEnabled) {
+        SegmentOverride_t *segmentOvPtr = pictureControlSetPtr->ParentPcsPtr->segmentOvArray;
+        if (segmentOvPtr[lcuIndex].ovFlags & EB_TU_FILTER_OV)
+            contextPtr->pmpMaskingLevelEncDec = CLIP3(0, 7, contextPtr->pmpMaskingLevelEncDec + segmentOvPtr[lcuIndex].filterOv);
+    }
+
 }
 
 
@@ -2339,12 +2346,19 @@ EB_ERRORTYPE QpmDeriveBeaAndSkipQpmFlagLcu(
 {
 
     EB_ERRORTYPE                    return_error = EB_ErrorNone;
-    EB_U8                           pictureQp = pictureControlSetPtr->pictureQp;
+    EB_S8                           pictureQp = pictureControlSetPtr->pictureQp;
     EB_U8                           minQpAllowed = (EB_U8)sequenceControlSetPtr->staticConfig.minQpAllowed;
     EB_U8                           maxQpAllowed = (EB_U8)sequenceControlSetPtr->staticConfig.maxQpAllowed;
 
 
-	contextPtr->qpmQp = pictureQp;
+    if (sequenceControlSetPtr->staticConfig.segmentOvEnabled && pictureControlSetPtr->ParentPcsPtr->segmentOvArray != NULL) {
+        SegmentOverride_t *segmentOvPtr = pictureControlSetPtr->ParentPcsPtr->segmentOvArray;
+        if (segmentOvPtr[lcuIndex].ovFlags & EB_QP_OV_DIRECT)
+            pictureQp = segmentOvPtr[lcuIndex].qpOv;
+        else if (segmentOvPtr[lcuIndex].ovFlags & EB_QP_OV_DELTA)
+            pictureQp += segmentOvPtr[lcuIndex].qpOv;
+    }
+    contextPtr->qpmQp = CLIP3(minQpAllowed, maxQpAllowed, pictureQp);
 
     LcuStat_t *lcuStatPtr = &(pictureControlSetPtr->ParentPcsPtr->lcuStatArray[lcuIndex]);
 
@@ -3144,11 +3158,11 @@ EB_EXTERN void EncodePass(
     }
 
 
-    EB_BOOL useDeltaQp = (EB_BOOL)(sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction);
+    EB_BOOL useDeltaQp = (EB_BOOL)(sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction || sequenceControlSetPtr->staticConfig.segmentOvEnabled);
 
     EB_BOOL singleSegment = (sequenceControlSetPtr->encDecSegmentColCountArray[pictureControlSetPtr->temporalLayerIndex] == 1) && (sequenceControlSetPtr->encDecSegmentRowCountArray[pictureControlSetPtr->temporalLayerIndex] == 1);
 
-    EB_BOOL useDeltaQpSegments = singleSegment ? 0 : (EB_BOOL)(sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction);
+    EB_BOOL useDeltaQpSegments = singleSegment ? 0 : (EB_BOOL)(sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction || sequenceControlSetPtr->staticConfig.segmentOvEnabled);
 
     if (is16bit) {
         EncodePassPackLcu(
@@ -3196,8 +3210,8 @@ EB_EXTERN void EncodePass(
 
             cuPtr->deltaQp = 0;
 
-			cuPtr->qp = (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction) ? contextPtr->qpmQp : pictureControlSetPtr->pictureQp;
-			lcuPtr->qp = (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction) ? contextPtr->qpmQp : pictureControlSetPtr->pictureQp;
+			cuPtr->qp = (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction || sequenceControlSetPtr->staticConfig.segmentOvEnabled) ? contextPtr->qpmQp : pictureControlSetPtr->pictureQp;
+			lcuPtr->qp = (sequenceControlSetPtr->staticConfig.improveSharpness || sequenceControlSetPtr->staticConfig.bitRateReduction || sequenceControlSetPtr->staticConfig.segmentOvEnabled) ? contextPtr->qpmQp : pictureControlSetPtr->pictureQp;
             cuPtr->orgDeltaQp = cuPtr->deltaQp;
 
 			if (!contextPtr->skipQpmFlag &&
@@ -3262,7 +3276,7 @@ EB_EXTERN void EncodePass(
                     // Set the PU Loop Variables
                     puPtr = cuPtr->predictionUnitArray;
                     // Generate Intra Luma Neighbor Modes
-                    GeneratePuIntraLumaNeighborModes( // HT done
+                    EbHevcGeneratePuIntraLumaNeighborModes( // HT done
                         cuPtr,
                         contextPtr->cuOriginX,
                         contextPtr->cuOriginY,
@@ -3362,7 +3376,7 @@ EB_EXTERN void EncodePass(
                                 lcuStatPtr->stationaryEdgeOverTimeFlag,
                                 pictureControlSetPtr->temporalLayerIndex > 0 ? lcuStatPtr->pmStationaryEdgeOverTimeFlag : lcuStatPtr->stationaryEdgeOverTimeFlag);
 
-                            // Set Fast El coef shaping method
+                            // Set Fast El coef shaping method 
                             contextPtr->transCoeffShapeLuma   = DEFAULT_SHAPE;
                             contextPtr->transCoeffShapeChroma = DEFAULT_SHAPE;
 							if (fastEl && contextPtr->pmpMaskingLevelEncDec > MASK_THSHLD_1) {
@@ -3586,7 +3600,7 @@ EB_EXTERN void EncodePass(
                     puPtr = cuPtr->predictionUnitArray;
 
                     // Generate Intra Luma Neighbor Modes
-                    GeneratePuIntraLumaNeighborModes( // HT done
+                    EbHevcGeneratePuIntraLumaNeighborModes( // HT done
                         cuPtr,
                         partitionOriginX,
                         partitionOriginY,

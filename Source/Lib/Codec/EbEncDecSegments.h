@@ -8,6 +8,7 @@
 
 #include "EbDefinitions.h"
 #include "EbThreads.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -37,14 +38,14 @@ extern "C" {
  **************************************/
 typedef struct {
     EB_U8      *dependencyMap;
-    EB_HANDLE   updateMutex; 
+    EB_HANDLE   updateMutex;
 } EncDecSegDependencyMap_t;
 
 typedef struct {
     EB_U16      startingSegIndex;
     EB_U16      endingSegIndex;
     EB_U16      currentSegIndex;
-    EB_HANDLE   assignmentMutex;  
+    EB_HANDLE   assignmentMutex;
 } EncDecSegSegmentRow_t;
 
 /**************************************
@@ -52,6 +53,7 @@ typedef struct {
  **************************************/
 typedef struct
 {
+    EbDctor                   dctor;
     EncDecSegDependencyMap_t  depMap;
     EncDecSegSegmentRow_t    *rowArray;
 
@@ -64,7 +66,7 @@ typedef struct
     EB_U32                    segmentTotalCount;
     EB_U32                    lcuBandCount;
     EB_U32                    lcuRowCount;
-                              
+
     EB_U32                    segmentMaxBandCount;
     EB_U32                    segmentMaxRowCount;
     EB_U32                    segmentMaxTotalCount;
@@ -75,7 +77,7 @@ typedef struct
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE EncDecSegmentsCtor(
-    EncDecSegments_t **segmentsDblPtr,
+    EncDecSegments_t   *segmentsPtr,
     EB_U32             segmentColCount,
     EB_U32             segmentRowCount);
 

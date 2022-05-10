@@ -264,6 +264,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **ReconFile** | -o | any string | null | Output reconstructed yuv used for debug purposes. **Note:** using this feature will affect the speed of the encoder significantly. This should only be used for debugging purposes. |
 | **UseQpFile** | -use-q-file | [0, 1] | 0 | When set to 1, overwrite the picture qp assignment using qp values in QpFile |
 | **QpFile** | -qp-file | any string | null | Path to qp file |
+| **SegmentOvFile** | -segment-ov-file | any string | null | Path to segment override file which will allow for sharpness improvement and bit rate reduction on a per segment basis. Refer to config/SVTSegmentOvFile.txt for details. |
 | **EncoderMode** | -encMode | [0 - 11] | 7 | A preset defining the quality vs density tradeoff point that the encoding is to be performed at. (e.g. 0 is the highest quality mode, 11 is the highest density mode). Section 3.4 outlines the preset availability per resolution |
 | **EncoderBitDepth** | -bit-depth | [8, 10] | 8 | Specifies the bit depth of input video |
 | **EncoderColorFormat** | -color-format | [1, 2, 3] | 1 | Specifies the chroma subsampling of input video(1: 420, 2: 422, 3: 444) |
@@ -287,7 +288,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **BaseLayerSwitchMode** | -base-layer-switch-mode | [0,1] | 0 | 0 : Use B-frames in the base layer pointing to the same past picture<br>1 : Use P-frames in the base layer<br>Refer to Appendix A.1 |
 | **PredStructure** | -pred-struct | [0 – 2] | 2 | 0: Low Delay P<br>1: Low Delay B<br>2: Random Access<br>Refer to Appendix A.1 |
 | **IntraPeriod** | -intra-period | [-2 - 255] | -2 | Distance between Intra Frame inserted. <br>-1 denotes no intra update. <br>-2 denotes auto. |
-| **IntraRefreshType** | -irefresh-type | [-1,N] | -1 | -1: CRA (Open GOP)<br>>=0: IDR (Closed GOP, N is headers insertion interval, 0 supported if CQP, >=0 supported if VBR) |
+| **IntraRefreshType** | -irefresh-type | [-1,N] | -1 | -1: CRA (Open GOP)<br>>=0: IDR (Closed GOP, N is headers insertion interval, 0 supported if CQP, >=0 supported if VBR)<br>Refer to Appendix A.3 |
 | **QP** | -q | [0 - 51] | 32 | Initial quantization parameter for the Intra pictures used when RateControlMode 0 (CQP) |
 | **LoopFilterDisable** | -dlf | [0, 1] | 0 | When set to 1 disables the Deblocking Loop Filtering |
 | **SAO** | -sao | [0,1] | 1 | When set to 0 the encoder will not use the Sample Adaptive Filter |
@@ -323,8 +324,8 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **ThreadCount** | -thread-count | [0,N] | 0 | The number of threads to get created and run, 0 = AUTO |
 | **SwitchThreadsToRtPriority** | -rt | [0,1] | 1 | Enables or disables threads to real time priority, 0 = OFF, 1 = ON (only works on Linux) |
 | **FPSInVPS** | -fpsinvps | [0,1] | 1 | Enables or disables the VPS timing info, 0 = OFF, 1 = ON |
-| **TileRowCount** | -tile_row_cnt | [1,16] | 1 | Tile count in the Row |
-| **TileColumnCount** | -tile_col_cnt | [1,16] | 1 | Tile count in the column |
+| **TileRowCount** | -tile_row_cnt | [1,22] | 1 | Tile count in the Row |
+| **TileColumnCount** | -tile_col_cnt | [1,20] | 1 | Tile count in the column |
 | **TileSliceMode** | -tile_slice_mode | [0,1] | 0 | Per slice per tile, only valid for multi-tile |
 | **UnrestrictedMotionVector** | -umv | [0,1] | 1 | Enables or disables unrestricted motion vectors<br>0 = OFF(motion vectors are constrained within frame or tile boundary)<br>1 = ON.<br>For MCTS support, set -umv 0 with valid TileRowCount and TileColumnCount |
 | **MaxCLL** | -max-cll | [0 , 2^16-1] | 0 | Maximum content light level (MaxCLL) as required by the Consumer Electronics Association 861.3 specification. Applicable for HDR content. If specified, signaled only when HighDynamicRangeInput is set to 1 |
@@ -333,7 +334,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **MasterDisplay** | -master-display | For R, G, B and whitepoint [0, 2^16-1]. For max, min luminance [0, 2^32-1] | 0 | SMPTE ST 2086 mastering display color volume SEI info, specified as a string. The string format is “G(%hu,%hu)B(%hu,%hu)R(%hu,% hu)WP(%hu,%hu)L(%u,%u)” where %hu are unsigned 16bit integers and %u are unsigned 32bit integers. The SEI includes X, Y display primaries for RGB channels and white point (WP) in units of 0.00002 and max, min luminance (L) values in units of 0.0001 candela per meter square. Applicable for HDR content. Example for a P3D65 1000-nits monitor,G(13250,34500)B(7500,3 000)R(34000,16000)WP(15635,16 450)L(10000000,1) |
 | **DolbyVisionRpuFile** | -dolby-vision-rpu | any string | null | Path to the file containing Dolby Vision RPU metadata |
 | **DolbyVisionProfile** | -dolby-vision-profile | 8.1 or 81 | 0 | Generate bitstreams confirming to the specified Dolby Vision profile 8.1. When specified, enables HighDynamicRangeInput automatically. Applicable only for 10-bit input content. MasterDisplay should be set for using dolby vision profile 81. Pass the dynamic metadata through DolbyVisionRpuFile option |
-| **NaluFile** | -nalu-file | any string | null | Path to the file containing CEA 608/708 metadata. Text file should contain the userSEI in POC order as per below format: <POC><space><PREFIX><space><NALUNITTYPE>/<SEITYPE><space><SEI Payload>. Currently only PREFIX_SEI messages are supported |
+| **NaluFile** | -nalu-file | any string | null | Path to the file containing CEA 608/708 metadata. Text file should contain the userSEI in POC order as per below format: `<POC><space><PREFIX><space><NALUNITTYPE>/<SEITYPE><space><SEI Payload>`. Currently only PREFIX_SEI messages are supported |
 
 ### Encoding presets table
 
@@ -494,6 +495,22 @@ If only TargetSocket is set, threads run on all the logical processors of socket
 
 If both LogicalProcessors and TargetSocket are set, threads run on 20 logical processors of socket 0. Threads guaranteed to run only on socket 0 if 20 is larger than logical processor number of socket 0.
 
+### 3. Header(VPS SPS PPS) insertion
+
+In some streaming use cases, headers need to be inserted repeatedly into the bitstream. Otherwise the received stream may not be decodable.
+
+`-scd 0` is used to disable intra frame insertion beyond the `-intra-period` setting. In the example below, the gop size is 2 (intra-period value) + 1 = 3.
+
+With `-irefresh-type` >= 0, headers can be inserted repeatedly as shown below.
+- CQP(only 0 works for -irefresh-type):
+>-rc 0 -scd 0 -intra-period 2 -irefresh-type 0
+
+|Header + IDR| inter inter |Header + IDR| ...
+
+- VBR:
+>-rc 1 -scd 0 -intra-period 2 -irefresh-type 1
+
+|Header + IDR| inter inter |IDR| inter inter |Header + IDR| ...
 
 
 ## Legal Disclaimer

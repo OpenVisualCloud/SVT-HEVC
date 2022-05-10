@@ -20,6 +20,7 @@
 #include "EbReferenceObject.h"
 #include "EbNeighborArrays.h"
 #include "EbCodingUnit.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -44,6 +45,7 @@ typedef struct EbPMCand_s
  **************************************/
 typedef struct EncDecContext_s
 {
+    EbDctor                         dctor;
     EbFifo_t                       *modeDecisionInputFifoPtr;
 	EbFifo_t                       *encDecOutputFifoPtr;
 	EbFifo_t                       *encDecFeedbackFifoPtr;
@@ -51,6 +53,7 @@ typedef struct EncDecContext_s
 
 	EB_S16                         *transformInnerArrayPtr;
 	MdRateEstimationContext_t      *mdRateEstimationPtr;
+    EB_BOOL                         isMdRateEstimationEtrOwner;
 	SaoStats_t                     *saoStats;
 
     ModeDecisionContext_t          *mdContext;
@@ -155,7 +158,7 @@ typedef struct EncDecContext_s
  * Extern Function Declarations
  **************************************/
 extern EB_ERRORTYPE EncDecContextCtor(
-    EncDecContext_t        **contextDblPtr,
+    EncDecContext_t         *contextPtr,
     EbFifo_t                *modeDecisionConfigurationInputFifoPtr,
     EbFifo_t                *packetizationOutputFifoPtr,
     EbFifo_t                *feedbackFifoPtr,

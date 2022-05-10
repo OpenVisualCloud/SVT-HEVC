@@ -43,19 +43,19 @@
 #define MIN_DELTA_QP_SHAPE_TH             1
 
 #define MIN_BLACK_AREA_PERCENTAGE        20
-#define LOW_MEAN_TH_0                    25 
+#define LOW_MEAN_TH_0                    25
 
 #define MIN_WHITE_AREA_PERCENTAGE         1
-#define LOW_MEAN_TH_1                    40 
+#define LOW_MEAN_TH_1                    40
 #define HIGH_MEAN_TH                    210
 #define NORM_FACTOR                      10 // Used ComplexityClassifier32x32
 
 const EB_U32    THRESHOLD_NOISE[MAX_TEMPORAL_LAYERS] = { 33, 28, 27, 26, 26, 26 }; // [Temporal Layer Index]  // Used ComplexityClassifier32x32
 // Outlier removal threshold per depth {2%, 2%, 4%, 4%}
-const EB_S8  MinDeltaQPdefault[3] = {
+const EB_S8  EbHevcMinDeltaQPdefault[3] = {
 	-4, -3, -2
 };
-const EB_U8 MaxDeltaQPdefault[3] = {
+const EB_U8 EbHevcMaxDeltaQPdefault[3] = {
 	4, 5, 6
 };
 
@@ -64,14 +64,10 @@ const EB_U8 MaxDeltaQPdefault[3] = {
 ************************************************/
 
 EB_ERRORTYPE SourceBasedOperationsContextCtor(
-    SourceBasedOperationsContext_t **contextDblPtr,
+    SourceBasedOperationsContext_t  *contextPtr,
     EbFifo_t						*initialRateControlResultsInputFifoPtr,
     EbFifo_t						*pictureDemuxResultsOutputFifoPtr)
 {
-	SourceBasedOperationsContext_t *contextPtr;
-
-	EB_MALLOC(SourceBasedOperationsContext_t*, contextPtr, sizeof(SourceBasedOperationsContext_t), EB_N_PTR);
-	*contextDblPtr = contextPtr;
 	contextPtr->initialrateControlResultsInputFifoPtr = initialRateControlResultsInputFifoPtr;
 	contextPtr->pictureDemuxResultsOutputFifoPtr = pictureDemuxResultsOutputFifoPtr;
 
@@ -88,7 +84,7 @@ static void DerivePictureActivityStatistics(
 {
 
 	EB_U64               nonMovingIndexSum      = 0;
-	
+
 	EB_U32               lcuIndex;
 
     EB_U32 zzSum                                = 0;
@@ -210,7 +206,7 @@ static void FailingMotionLcu(
 				sortedcuOisSAD = oisResultsPtr->sortedOisCandidate[rasterScanCuIndex][0].distortion;
 			}
 
-      
+
 
             EB_S64  meToOisSadDiff = (EB_S32)cuMeSAD - (EB_S32)sortedcuOisSAD;
             meToOisSadDeviation = (sortedcuOisSAD == 0) || (meToOisSadDiff < 0) ? 0 : (meToOisSadDiff * 100) / sortedcuOisSAD;
@@ -277,7 +273,7 @@ static void DetectUncoveredLcu(
 						sortedcuOisSAD = oisResultsPtr->sortedOisCandidate[rasterScanCuIndex][0].distortion;
 					}
 
-       
+
 
 				EB_S64  meToOisSadDiff = (EB_S32)cuMeSAD - (EB_S32)sortedcuOisSAD;
 				meToOisSadDeviation = (sortedcuOisSAD == 0) || (meToOisSadDiff < 0) ? 0 : (meToOisSadDiff * 100) / sortedcuOisSAD;
@@ -592,7 +588,7 @@ static inline void DetermineIsolatedNonHomogeneousRegionInPicture(
 					}
 				}
 
-				// To determine current lcu is isolated non-homogeneous, at least 2 neighbors must be homogeneous 
+				// To determine current lcu is isolated non-homogeneous, at least 2 neighbors must be homogeneous
 				if (countOfHomogeneousNeighborLcus >= 2){
 					for (cuuIndex = 0; cuuIndex < 4; cuuIndex++)
 					{
@@ -617,16 +613,16 @@ static void SetDefaultDeltaQpRange(
 	EB_S8	minDeltaQP;
 	EB_U8	maxDeltaQP;
 	if (pictureControlSetPtr->temporalLayerIndex == 0) {
-		minDeltaQP = MinDeltaQPdefault[0];
-		maxDeltaQP = MaxDeltaQPdefault[0];
+		minDeltaQP = EbHevcMinDeltaQPdefault[0];
+		maxDeltaQP = EbHevcMaxDeltaQPdefault[0];
 	}
 	else if (pictureControlSetPtr->isUsedAsReferenceFlag) {
-		minDeltaQP = MinDeltaQPdefault[1];
-		maxDeltaQP = MaxDeltaQPdefault[1];
+		minDeltaQP = EbHevcMinDeltaQPdefault[1];
+		maxDeltaQP = EbHevcMaxDeltaQPdefault[1];
 	}
 	else {
-		minDeltaQP = MinDeltaQPdefault[2];
-		maxDeltaQP = MaxDeltaQPdefault[2];
+		minDeltaQP = EbHevcMinDeltaQPdefault[2];
+		maxDeltaQP = EbHevcMaxDeltaQPdefault[2];
 	}
 
 	// Shape the min degrade
@@ -716,7 +712,7 @@ static void DeriveHighDarkAreaDensityFlag(
             for (lumaHistogramBin = 0; lumaHistogramBin < LOW_MEAN_TH_1; lumaHistogramBin++){ // loop over the 1st LOW_MEAN_THLD bins
                 blackSamplesCount += pictureControlSetPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex][0][lumaHistogramBin];
             }
-            for (lumaHistogramBin = HIGH_MEAN_TH; lumaHistogramBin < HISTOGRAM_NUMBER_OF_BINS; lumaHistogramBin++){ 
+            for (lumaHistogramBin = HIGH_MEAN_TH; lumaHistogramBin < HISTOGRAM_NUMBER_OF_BINS; lumaHistogramBin++){
                 whiteSamplesCount += pictureControlSetPtr->pictureHistogram[regionInPictureWidthIndex][regionInPictureHeightIndex][0][lumaHistogramBin];
             }
         }
@@ -754,17 +750,17 @@ static void TemporalHighContrastClassifier(
 	EB_U32 nsad;
 	EB_U32 meDist = 0;
 
-	if (pictureControlSetPtr->sliceType == EB_B_PICTURE){ 
+	if (pictureControlSetPtr->sliceType == EB_B_PICTURE){
 
-			
+
 			for (blkIt = 0; blkIt < 4; blkIt++) {
-			
+
 				nsad = ((EB_U32)pictureControlSetPtr->meResults[lcuIndex][1 + blkIt].distortionDirection[0].distortion) >> NORM_FACTOR;
 
 				if (nsad >= nsadTable[pictureControlSetPtr->temporalLayerIndex] + thRes)
 					meDist++;
 			}
-		
+
 	}
 	contextPtr->highDist = meDist>0 ? EB_TRUE : EB_FALSE;
 }
@@ -788,7 +784,7 @@ static void SpatialHighContrastClassifier(
 		EB_U16 var = pictureControlSetPtr->variance[lcuIndex][5 + blkIt];
 
 
-		if (var>VAR_MIN && var<VAR_MAX          &&  //medium texture 
+		if (var>VAR_MIN && var<VAR_MAX          &&  //medium texture
 			ymean>MIN_Y && ymean < MAX_Y        &&  //medium brightness(not too dark and not too bright)
 			ABS((EB_S64)umean - MID_CB) < TH_CB &&  //middle of the color plane
 			ABS((EB_S64)vmean - MID_CR) < TH_CR     //middle of the color plane
@@ -978,14 +974,14 @@ static void DeriveBlockinessPresentFlag(
             lcuParamPtr->originY)
             && pictureControlSetPtr->nonMovingIndexArray[lcuIndex]  != INVALID_ZZ_COST
             && pictureControlSetPtr->nonMovingIndexAverage          != INVALID_ZZ_COST
-        
+
             ) {
 
-            // Active LCU within an active scene (added a check on 4K & non-BASE to restrict the action - could be generated for all resolutions/layers) 
+            // Active LCU within an active scene (added a check on 4K & non-BASE to restrict the action - could be generated for all resolutions/layers)
             if (pictureControlSetPtr->nonMovingIndexArray[lcuIndex] == LCU_COMPLEXITY_NON_MOVING_INDEX_TH_0 && pictureControlSetPtr->nonMovingIndexAverage >= LCU_COMPLEXITY_NON_MOVING_INDEX_TH_1 && pictureControlSetPtr->temporalLayerIndex > 0 && sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) {
                 pictureControlSetPtr->complexLcuArray[lcuIndex] = LCU_COMPLEXITY_STATUS_2;
             }
-            // Active LCU within a scene with a moderate acitivity (eg. active foregroud & static background) 
+            // Active LCU within a scene with a moderate acitivity (eg. active foregroud & static background)
             else if (pictureControlSetPtr->nonMovingIndexArray[lcuIndex] == LCU_COMPLEXITY_NON_MOVING_INDEX_TH_0 && pictureControlSetPtr->nonMovingIndexAverage >= LCU_COMPLEXITY_NON_MOVING_INDEX_TH_2 && pictureControlSetPtr->nonMovingIndexAverage < LCU_COMPLEXITY_NON_MOVING_INDEX_TH_1) {
                 pictureControlSetPtr->complexLcuArray[lcuIndex] = LCU_COMPLEXITY_STATUS_1;
             }
@@ -1421,7 +1417,8 @@ void* SourceBasedOperationsKernel(void *inputPtr)
 		sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 
 #if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld SRC IN \n", pictureControlSetPtr->pictureNumber);
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            SVT_LOG("POC %lu SRC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 		pictureControlSetPtr->darkBackGroundlightForeGround = EB_FALSE;
 		contextPtr->pictureNumGrassLcu = 0;
@@ -1455,7 +1452,7 @@ void* SourceBasedOperationsKernel(void *inputPtr)
 			contextPtr->crMeanPtr = crMeanPtr;
 			contextPtr->cbMeanPtr = cbMeanPtr;
 
-			// Grass & Skin detection 
+			// Grass & Skin detection
             GrassSkinLcu(
 				contextPtr,
 				sequenceControlSetPtr,
@@ -1532,7 +1529,7 @@ void* SourceBasedOperationsKernel(void *inputPtr)
 			contextPtr,
 			pictureControlSetPtr);
 
-		// Delta QP range adjustments 
+		// Delta QP range adjustments
 		SetDefaultDeltaQpRange(
 			contextPtr,
 			pictureControlSetPtr);
@@ -1563,7 +1560,7 @@ void* SourceBasedOperationsKernel(void *inputPtr)
             sequenceControlSetPtr,
             pictureControlSetPtr);
 
-		// Skin & Grass detection 
+		// Skin & Grass detection
 		GrassSkinPicture(
 			contextPtr,
 			pictureControlSetPtr);
@@ -1574,7 +1571,7 @@ void* SourceBasedOperationsKernel(void *inputPtr)
             pictureControlSetPtr);
 
 
-        // Stationary edge over time (final stage) 
+        // Stationary edge over time (final stage)
         if (!pictureControlSetPtr->endOfSequenceFlag && sequenceControlSetPtr->staticConfig.lookAheadDistance != 0) {
             StationaryEdgeOverUpdateOverTimeLcu(
                 sequenceControlSetPtr,
@@ -1669,10 +1666,6 @@ void* SourceBasedOperationsKernel(void *inputPtr)
             }
         }
 
-#if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld SRC OUT \n", pictureControlSetPtr->pictureNumber);
-#endif
-
         // Get Empty Results Object
         EbGetEmptyObject(
             contextPtr->pictureDemuxResultsOutputFifoPtr,
@@ -1689,9 +1682,9 @@ void* SourceBasedOperationsKernel(void *inputPtr)
         double latency = 0.0;
         EB_U64 finishTimeSeconds = 0;
         EB_U64 finishTimeuSeconds = 0;
-        EbFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
+        EbHevcFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
 
-        EbComputeOverallElapsedTimeMs(
+        EbHevcComputeOverallElapsedTimeMs(
                 pictureControlSetPtr->startTimeSeconds,
                 pictureControlSetPtr->startTimeuSeconds,
                 finishTimeSeconds,
@@ -1706,6 +1699,11 @@ void* SourceBasedOperationsKernel(void *inputPtr)
 
         // Post the Full Results Object
         EbPostFullObject(outputResultsWrapperPtr);
+
+#if DEADLOCK_DEBUG
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            SVT_LOG("POC %lu SRC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
 
     }
     return EB_NULL;

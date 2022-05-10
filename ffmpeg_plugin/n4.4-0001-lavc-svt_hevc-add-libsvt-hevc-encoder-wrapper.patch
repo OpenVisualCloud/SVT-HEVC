@@ -1,4 +1,4 @@
-From a8f5eeaeebb6f3968c9b4406c648c2ca3a461387 Mon Sep 17 00:00:00 2001
+From a236092196e3defc5cf545eaf45d2e63dad95b45 Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -7,80 +7,84 @@ Signed-off-by: Zhengxu Huang <zhengxu.huang@intel.com>
 Signed-off-by: Hassene Tmar <hassene.tmar@intel.com>
 Signed-off-by: Jun Zhao <jun.zhao@intel.com>
 Signed-off-by: Jing Sun <jing.a.sun@intel.com>
+Signed-off-by: Austin Hu <austin.hu@intel.com>
+Signed-off-by: Guo Jiansheng <jiansheng.guo@intel.com>
+Signed-off-by: Christopher Degawa <ccom@randomderp.com>
+Signed-off-by: Guo Jiansheng <jiansheng.guo@intel.com>
 ---
  configure                |   4 +
  libavcodec/Makefile      |   1 +
  libavcodec/allcodecs.c   |   1 +
- libavcodec/libsvt_hevc.c | 517 +++++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 523 insertions(+)
+ libavcodec/libsvt_hevc.c | 583 +++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 589 insertions(+)
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index 34c2adb..dc5f74f 100755
+index 51e43fb..4641664 100755
 --- a/configure
 +++ b/configure
-@@ -264,6 +264,7 @@ External library support:
-   --enable-libspeex        enable Speex de/encoding via libspeex [no]
-   --enable-libsrt          enable Haivision SRT protocol via libsrt [no]
-   --enable-libssh          enable SFTP protocol via libssh [no]
+@@ -288,6 +288,7 @@ External library support:
+   --enable-libwebp         enable WebP encoding via libwebp [no]
+   --enable-libx264         enable H.264 encoding via x264 [no]
+   --enable-libx265         enable HEVC encoding via x265 [no]
 +  --enable-libsvthevc      enable HEVC encoding via svt [no]
-   --enable-libtensorflow   enable TensorFlow as a DNN module backend
-                            for DNN based filters like sr [no]
-   --enable-libtesseract    enable Tesseract, needed for ocr filter [no]
-@@ -1793,6 +1794,7 @@ EXTERNAL_LIBRARY_LIST="
-     libspeex
-     libsrt
-     libssh
+   --enable-libxavs         enable AVS encoding via xavs [no]
+   --enable-libxavs2        enable AVS2 encoding via xavs2 [no]
+   --enable-libxcb          enable X11 grabbing using XCB [autodetect]
+@@ -1763,6 +1764,7 @@ EXTERNAL_LIBRARY_LIST="
+     gnutls
+     jni
+     ladspa
 +    libsvthevc
-     libtensorflow
-     libtesseract
-     libtheora
-@@ -3191,6 +3193,7 @@ libshine_encoder_select="audio_frame_queue"
- libspeex_decoder_deps="libspeex"
- libspeex_encoder_deps="libspeex"
- libspeex_encoder_select="audio_frame_queue"
+     libaom
+     libass
+     libbluray
+@@ -3285,6 +3287,7 @@ libx264_encoder_select="atsc_a53"
+ libx264rgb_encoder_deps="libx264 x264_csp_bgr"
+ libx264rgb_encoder_select="libx264_encoder"
+ libx265_encoder_deps="libx265"
 +libsvt_hevc_encoder_deps="libsvthevc"
- libtheora_encoder_deps="libtheora"
- libtwolame_encoder_deps="libtwolame"
- libvo_amrwbenc_encoder_deps="libvo_amrwbenc"
-@@ -6263,6 +6266,7 @@ enabled libsoxr           && require libsoxr soxr.h soxr_create -lsoxr
- enabled libssh            && require_pkg_config libssh libssh libssh/sftp.h sftp_init
- enabled libspeex          && require_pkg_config libspeex speex speex/speex.h speex_decoder_init
- enabled libsrt            && require_pkg_config libsrt "srt >= 1.3.0" srt/srt.h srt_socket
+ libxavs_encoder_deps="libxavs"
+ libxavs2_encoder_deps="libxavs2"
+ libxvid_encoder_deps="libxvid"
+@@ -6483,6 +6486,7 @@ enabled mmal              && { check_lib mmal interface/mmal/mmal.h mmal_port_co
+                                  check_lib mmal interface/mmal/mmal.h mmal_port_connect -lmmal_core -lmmal_util -lmmal_vc_client -lbcm_host; } ||
+                                die "ERROR: mmal not found" &&
+                                check_func_headers interface/mmal/mmal.h "MMAL_PARAMETER_VIDEO_MAX_NUM_CALLBACKS"; }
 +enabled libsvthevc        && require_pkg_config libsvthevc SvtHevcEnc EbApi.h EbInitHandle
- enabled libtensorflow     && require libtensorflow tensorflow/c/c_api.h TF_Version -ltensorflow
- enabled libtesseract      && require_pkg_config libtesseract tesseract tesseract/capi.h TessBaseAPICreate
- enabled libtheora         && require libtheora theora/theoraenc.h th_info_init -ltheoraenc -ltheoradec -logg
+ enabled openal            && { { for al_extralibs in "${OPENAL_LIBS}" "-lopenal" "-lOpenAL32"; do
+                                check_lib openal 'AL/al.h' alGetError "${al_extralibs}" && break; done } ||
+                                die "ERROR: openal not found"; } &&
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index 3cd73fb..d39f568 100644
+index b4777be..d53d929 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
-@@ -991,6 +991,7 @@ OBJS-$(CONFIG_LIBOPUS_ENCODER)            += libopusenc.o libopus.o     \
- OBJS-$(CONFIG_LIBSHINE_ENCODER)           += libshine.o
- OBJS-$(CONFIG_LIBSPEEX_DECODER)           += libspeexdec.o
- OBJS-$(CONFIG_LIBSPEEX_ENCODER)           += libspeexenc.o
+@@ -1061,6 +1061,7 @@ OBJS-$(CONFIG_LIBWEBP_ANIM_ENCODER)       += libwebpenc_common.o libwebpenc_anim
+ OBJS-$(CONFIG_LIBX262_ENCODER)            += libx264.o
+ OBJS-$(CONFIG_LIBX264_ENCODER)            += libx264.o
+ OBJS-$(CONFIG_LIBX265_ENCODER)            += libx265.o
 +OBJS-$(CONFIG_LIBSVT_HEVC_ENCODER)        += libsvt_hevc.o
- OBJS-$(CONFIG_LIBTHEORA_ENCODER)          += libtheoraenc.o
- OBJS-$(CONFIG_LIBTWOLAME_ENCODER)         += libtwolame.o
- OBJS-$(CONFIG_LIBVO_AMRWBENC_ENCODER)     += libvo-amrwbenc.o
+ OBJS-$(CONFIG_LIBXAVS_ENCODER)            += libxavs.o
+ OBJS-$(CONFIG_LIBXAVS2_ENCODER)           += libxavs2.o
+ OBJS-$(CONFIG_LIBXVID_ENCODER)            += libxvid.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
-index d2f9a39..d8788a7 100644
+index 8bdc0d6..625dafb 100644
 --- a/libavcodec/allcodecs.c
 +++ b/libavcodec/allcodecs.c
-@@ -707,6 +707,7 @@ extern AVCodec ff_librsvg_decoder;
- extern AVCodec ff_libshine_encoder;
- extern AVCodec ff_libspeex_encoder;
- extern AVCodec ff_libspeex_decoder;
+@@ -757,6 +757,7 @@ extern AVCodec ff_libx262_encoder;
+ extern AVCodec ff_libx264_encoder;
+ extern AVCodec ff_libx264rgb_encoder;
+ extern AVCodec ff_libx265_encoder;
 +extern AVCodec ff_libsvt_hevc_encoder;
- extern AVCodec ff_libtheora_encoder;
- extern AVCodec ff_libtwolame_encoder;
- extern AVCodec ff_libvo_amrwbenc_encoder;
+ extern AVCodec ff_libxavs_encoder;
+ extern AVCodec ff_libxavs2_encoder;
+ extern AVCodec ff_libxvid_encoder;
 diff --git a/libavcodec/libsvt_hevc.c b/libavcodec/libsvt_hevc.c
 new file mode 100644
-index 0000000..61bf490
+index 0000000..95d6c35
 --- /dev/null
 +++ b/libavcodec/libsvt_hevc.c
-@@ -0,0 +1,517 @@
+@@ -0,0 +1,583 @@
 +/*
 +* Scalable Video Technology for HEVC encoder library plugin
 +*
@@ -143,6 +147,14 @@ index 0000000..61bf490
 +    int forced_idr;
 +    int la_depth;
 +    int thread_count;
++    int target_socket;
++    int high_dynamic_range;
++    int unrestricted_motion_vector;
++    int tile_row_count;
++    int tile_col_count;
++    int tile_slice_mode;
++    int pred_struct;
++    int vid_info;
 +} SvtContext;
 +
 +static int error_mapping(EB_ERRORTYPE svt_ret)
@@ -276,7 +288,8 @@ index 0000000..61bf490
 +    param->accessUnitDelimiter = svt_enc->aud;
 +    param->asmType = svt_enc->asm_type;
 +    param->intraRefreshType =  svt_enc->forced_idr;
-+
++    param->highDynamicRangeInput = svt_enc->high_dynamic_range;
++    param->targetSocket = svt_enc->target_socket;
 +    if (param->rateControlMode) {
 +        param->maxQpAllowed = avctx->qmax;
 +        param->minQpAllowed = avctx->qmin;
@@ -306,6 +319,47 @@ index 0000000..61bf490
 +
 +    param->codeEosNal = 1;
 +
++    if (svt_enc->unrestricted_motion_vector == 0 || svt_enc->unrestricted_motion_vector == 1) {
++        param->unrestrictedMotionVector = svt_enc->unrestricted_motion_vector;
++    } else {
++        av_log(avctx, AV_LOG_ERROR, "Unrestricted Motion Vector should be set 0 or 1\n");
++        return EB_ErrorBadParameter;
++    }
++
++    if(svt_enc->tile_row_count >= 1 && svt_enc->tile_row_count <= 16) {
++        param->tileRowCount = svt_enc->tile_row_count;
++    } else {
++        av_log(avctx, AV_LOG_ERROR, "Tile Row Count should between 1-16\n");
++        return EB_ErrorBadParameter;
++    }
++
++    if(svt_enc->tile_col_count >= 1 && svt_enc->tile_col_count <= 16) {
++        param->tileColumnCount = svt_enc->tile_col_count;
++    } else {
++        av_log(avctx, AV_LOG_ERROR, "Tile Column Count should between 1-16\n");
++        return EB_ErrorBadParameter;
++    }
++
++    if(svt_enc->tile_slice_mode == 0 || svt_enc->tile_slice_mode == 1) {
++        param->tileSliceMode = svt_enc->tile_slice_mode;
++    } else {
++        av_log(avctx, AV_LOG_ERROR, "Tile Slice Mode should be set 0 or 1\n");
++        return EB_ErrorBadParameter;
++    }
++
++    if(svt_enc->pred_struct >= 0 && svt_enc->pred_struct <= 2) {
++        param->predStructure = svt_enc->pred_struct;
++    } else {
++        av_log(avctx, AV_LOG_ERROR, "Pred Structure should between 0-2\n");
++        return EB_ErrorBadParameter;
++    }
++
++    if(svt_enc->vid_info == 0 || svt_enc->vid_info == 1) {
++        param->videoUsabilityInfo = svt_enc->vid_info;
++    } else {
++        av_log(avctx, AV_LOG_ERROR, "Video Usability Info should be set 0 or 1\n");
++        return EB_ErrorBadParameter;
++    }
 +    return EB_ErrorNone;
 +}
 +
@@ -448,6 +502,10 @@ index 0000000..61bf490
 +        *got_packet = 0;
 +        av_log(avctx, AV_LOG_DEBUG, "Received none\n");
 +        return 0;
++    } else if (svt_ret == EB_ErrorMax) {
++        *got_packet = 0;
++        av_log(avctx, AV_LOG_ERROR, "Received NULL packet with error code 0x%X\n", header_ptr->nFlags);
++        return AVERROR_INVALIDDATA;
 +    }
 +
 +    av_log(avctx, AV_LOG_DEBUG, "Received PTS %"PRId64" packet\n", header_ptr->pts);
@@ -542,6 +600,9 @@ index 0000000..61bf490
 +    { "sc_detection", "Scene change detection", OFFSET(scd),
 +      AV_OPT_TYPE_BOOL, { .i64 = 1 }, 0, 1, VE },
 +
++    { "socket", "Target CPU socket to use.  -1 use all available", OFFSET(target_socket),
++      AV_OPT_TYPE_INT, {.i64 = -1 }, -1, 1, VE },
++
 +    { "thread_count", "Number of threads [0: Auto, 96: Min]", OFFSET(thread_count),
 +      AV_OPT_TYPE_INT, {.i64 = 0}, 0, INT_MAX, VE },
 +
@@ -557,7 +618,16 @@ index 0000000..61bf490
 +          AV_OPT_TYPE_CONST, { .i64 = 1 },  INT_MIN, INT_MAX, VE, "tune" },
 +        { "vmaf", "VMAF optimized mode", 0,
 +          AV_OPT_TYPE_CONST, { .i64 = 2 },  INT_MIN, INT_MAX, VE, "tune" },
-+
++    { "hdr", "High dynamic range input (HDR10)", OFFSET(high_dynamic_range), AV_OPT_TYPE_INT, { .i64 = 0}, 0, 1, VE, "hdr" },
++    { "umv", "Enables or disables unrestricted motion vectors", OFFSET(unrestricted_motion_vector),
++      AV_OPT_TYPE_BOOL, { .i64 = 1 }, 0, 1, VE },
++    { "tile_row_cnt", "tile count in the row", OFFSET(tile_row_count), AV_OPT_TYPE_INT, { .i64 = 1 }, 1, 16, VE },
++    { "tile_col_cnt", "tile count in the column", OFFSET(tile_col_count), AV_OPT_TYPE_INT, { .i64 = 1 }, 1, 16, VE },
++    { "tile_slice_mode", "per slice per tile, only valid for multi-tile", OFFSET(tile_slice_mode),
++      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
++    { "pred_struct", "The prediction structure", OFFSET(pred_struct), AV_OPT_TYPE_INT, { .i64 = 2 }, 0, 2, VE },
++    { "vid_info", "Enables or disables sending a vui structure in the HEVC Elementary bitstream.", OFFSET(vid_info),
++      AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, VE },
 +    {NULL},
 +};
 +

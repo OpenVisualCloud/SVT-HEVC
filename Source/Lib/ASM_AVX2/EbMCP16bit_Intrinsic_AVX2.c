@@ -8,7 +8,7 @@
 #include "EbMcp_SSE2.h"
 #include "EbDefinitions.h"
 
-EB_EXTERN EB_ALIGN(16) const EB_S16 chromaFilterCoeffSR1_AVX[8][4] =
+EB_EXTERN EB_ALIGN(16) const EB_S16 EbHevcChromaFilterCoeffSR1_AVX[8][4] =
 {
 {  0, 32,  0,  0 },
 { -1, 29,  5, -1 },
@@ -40,7 +40,7 @@ void ChromaInterpolationFilterTwoD16bit_AVX2_INTRIN(
     ChromaInterpolationFilterOneDOutRaw16bitHorizontal_AVX2_INTRIN(refPic - ((MaxChromaFilterTag - 1) >> 1)*srcStride, srcStride, firstPassIFDst, puWidth, puHeight + MaxChromaFilterTag - 1, (EB_S16 *)EB_NULL, fracPosx, 0);
 #endif
 
-	
+
     //vertical filtering
     ChromaInterpolationFilterTwoDInRaw16bit_SSE2_INTRIN(firstPassIFDst, dst, dstStride, puWidth, puHeight, fracPosy);
 }
@@ -62,7 +62,7 @@ void ChromaInterpolationFilterTwoDOutRaw16bit_AVX2_INTRIN(
     //on-the-fly scheme
     ChromaInterpolationFilterOneDOutRaw16bitHorizontal_AVX2_INTRIN(refPic - ((MaxChromaFilterTag - 1) >> 1)*srcStride, srcStride, firstPassIFDst, puWidth, puHeight + MaxChromaFilterTag - 1, (EB_S16 *)EB_NULL, fracPosx, 0);
 #endif
-	
+
     //vertical filtering
     ChromaInterpolationFilterTwoDInRawOutRaw_SSE2_INTRIN(firstPassIFDst, dst, puWidth, puHeight, fracPosy);
 }
@@ -92,7 +92,7 @@ void ChromaInterpolationFilterOneDOutRaw16bitHorizontal_AVX2_INTRIN(
 	refPic--;
 	//PrefetchBlock(refPic, srcStride, puWidth+8, puHeight);
 
-	c0 = _mm_loadl_epi64((__m128i *)chromaFilterCoeffSR1_AVX[fracPosx]);
+	c0 = _mm_loadl_epi64((__m128i *)EbHevcChromaFilterCoeffSR1_AVX[fracPosx]);
 	c0 = _mm_unpacklo_epi16(c0, c0);
 	c3 = _mm_shuffle_epi32(c0, 0xff);
 	c2 = _mm_shuffle_epi32(c0, 0xaa);
@@ -267,4 +267,3 @@ void ChromaInterpolationFilterOneDOutRaw16bitHorizontal_AVX2_INTRIN(
 	}
 
 }
-

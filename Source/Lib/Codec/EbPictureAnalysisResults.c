@@ -8,16 +8,23 @@
 #include "EbPictureAnalysisResults.h"
 
 EB_ERRORTYPE PictureAnalysisResultCtor(
-    EB_PTR *objectDblPtr, 
+    PictureAnalysisResults_t *objectPtr,
     EB_PTR objectInitDataPtr)
 {
-    PictureAnalysisResults_t *objectPtr;
-    EB_MALLOC(PictureAnalysisResults_t *, objectPtr, sizeof(PictureAnalysisResults_t), EB_N_PTR);
-
-    *objectDblPtr = (EB_PTR) objectPtr;
-    objectInitDataPtr = 0;
-    (void) objectInitDataPtr;
-    
+    (void)objectPtr;
+    (void)objectInitDataPtr;
     return EB_ErrorNone;
 }
 
+EB_ERRORTYPE PictureAnalysisResultCreator(
+    EB_PTR *objectDblPtr,
+    EB_PTR objectInitDataPtr)
+{
+    PictureAnalysisResults_t *obj;
+
+    *objectDblPtr = NULL;
+    EB_NEW(obj, PictureAnalysisResultCtor, objectInitDataPtr);
+    *objectDblPtr = (EB_PTR)obj;
+
+    return EB_ErrorNone;
+}

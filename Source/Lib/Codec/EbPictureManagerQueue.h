@@ -11,7 +11,7 @@
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbPredictionStructure.h"
-
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -21,6 +21,7 @@ extern "C" {
 struct ReferenceQueueEntry_s;   // empty struct definition
  
 typedef struct InputQueueEntry_s {
+    EbDctor                         dctor;
     EbObjectWrapper_t              *inputObjectPtr;
     EB_U32                          dependentCount;
     EB_U32                          referenceEntryIndex; 
@@ -37,7 +38,7 @@ typedef struct InputQueueEntry_s {
  * Reference Queue Entry
  ************************************************/
 typedef struct ReferenceQueueEntry_s {
-
+    EbDctor                         dctor;
     EB_U64                          pictureNumber;
     EB_U64                          decodeOrder;
     EbObjectWrapper_t              *referenceObjectPtr;
@@ -76,7 +77,6 @@ typedef struct RcInputQueueEntry_s {
  * Rate Control FeedBack  Queue Entry
  ************************************************/
 typedef struct RcFeedbackQueueEntry_s {
-
     EB_U64                          pictureNumber;
     EbObjectWrapper_t              *feedbackObjectPtr;
 
@@ -90,12 +90,10 @@ typedef struct RcFeedbackQueueEntry_s {
 } RcFeedbackQueueEntry_t;   
 
 extern EB_ERRORTYPE InputQueueEntryCtor(   
-    InputQueueEntry_t      **entryDblPtr);
-
-   
+    InputQueueEntry_t      *entryPtr);
 
 extern EB_ERRORTYPE ReferenceQueueEntryCtor(   
-    ReferenceQueueEntry_t  **entryDblPtr);
+    ReferenceQueueEntry_t  *entryPtr);
 
 
 #ifdef __cplusplus

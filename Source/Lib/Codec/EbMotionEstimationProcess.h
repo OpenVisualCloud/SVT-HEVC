@@ -11,6 +11,7 @@
 #include "EbSequenceControlSet.h"
 #include "EbPictureControlSet.h"
 #include "EbMotionEstimationContext.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,7 +20,8 @@ extern "C" {
  * Context
  **************************************/
 typedef struct MotionEstimationContext_s
-{      
+{
+    EbDctor                          dctor;
     EbFifo_t                        *pictureDecisionResultsInputFifoPtr;
     EbFifo_t                        *motionEstimationResultsOutputFifoPtr;
 
@@ -38,7 +40,7 @@ typedef struct MotionEstimationContext_s
  * Extern Function Declaration
  ***************************************/
 extern EB_ERRORTYPE MotionEstimationContextCtor(
-	MotionEstimationContext_t   **contextDblPtr,
+	MotionEstimationContext_t    *contextPtr,
 	EbFifo_t                     *pictureDecisionResultsInputFifoPtr,
 	EbFifo_t                     *motionEstimationResultsOutputFifoPtr);
 

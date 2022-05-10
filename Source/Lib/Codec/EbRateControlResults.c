@@ -9,17 +9,24 @@
 #include "EbRateControlResults.h"
 
 EB_ERRORTYPE RateControlResultsCtor(
-    EB_PTR *objectDblPtr,
+    RateControlResults_t *objectPtr,
     EB_PTR objectInitDataPtr)
 {
-    RateControlResults_t *contextPtr;
-    EB_MALLOC(RateControlResults_t*, contextPtr, sizeof(RateControlResults_t), EB_N_PTR);
-    *objectDblPtr = (EB_PTR) contextPtr;
-
-    objectInitDataPtr = 0;
-
-    (void) objectInitDataPtr;
+    (void)objectPtr;
+    (void)objectInitDataPtr;
 
     return EB_ErrorNone;
 }
 
+EB_ERRORTYPE RateControlResultsCreator(
+    EB_PTR *objectDblPtr,
+    EB_PTR objectInitDataPtr)
+{
+    RateControlResults_t* obj;
+
+    *objectDblPtr = NULL;
+    EB_NEW(obj, RateControlResultsCtor, objectInitDataPtr);
+    *objectDblPtr = obj;
+
+    return EB_ErrorNone;
+}

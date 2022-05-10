@@ -184,12 +184,12 @@ parse_options() {
 
 # Defines
 if [ -z "$CC" ] && [ "$(uname -a | cut -c1-5)" != "MINGW" ]; then
-    if check_executable icc "/opt/intel/bin"; then
-        CC=$(check_executable -p icc "/opt/intel/bin")
-    elif check_executable gcc; then
+    if check_executable gcc; then
         CC=$(check_executable -p gcc)
     elif check_executable clang; then
         CC=$(check_executable -p clang)
+    elif check_executable icc "/opt/intel/bin"; then
+        CC=$(check_executable -p icc "/opt/intel/bin")
     else
         CC=$(check_executable -p cc)
     fi

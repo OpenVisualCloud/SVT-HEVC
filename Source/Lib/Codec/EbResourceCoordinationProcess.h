@@ -8,6 +8,7 @@
 
 #include "EbSystemResourceManager.h"
 #include "EbDefinitions.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -16,7 +17,7 @@ extern "C" {
  ***************************************/
 typedef struct ResourceCoordinationContext_s
 {      
-
+    EbDctor                              dctor;
     EbFifo_t                            *inputBufferFifoPtr;
     EbFifo_t                            *resourceCoordinationResultsOutputFifoPtr;
     EbFifo_t                           **pictureControlSetFifoPtrArray;
@@ -60,13 +61,13 @@ typedef struct ResourceCoordinationContext_s
  * Extern Function Declaration
  ***************************************/
 extern EB_ERRORTYPE ResourceCoordinationContextCtor(
-    ResourceCoordinationContext_t      **contextDblPtr,
+    ResourceCoordinationContext_t       *contextPtr,
     EbFifo_t                            *inputBufferFifoPtr,
     EbFifo_t                            *resourceCoordinationResultsOutputFifoPtr,
     EbFifo_t                           **pictureControlSetFifoPtrArray,
     EbSequenceControlSetInstance_t     **sequenceControlSetInstanceArray,
     EbFifo_t                            *sequenceControlSetEmptyFifoPtr,
-    EbCallback_t                    **appCallbackPtrArray,
+    EbCallback_t                       **appCallbackPtrArray,
     EB_U32                              *computeSegmentsTotalCountArray,
     EB_U32                               encodeInstancesTotalCount);
     

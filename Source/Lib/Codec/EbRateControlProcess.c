@@ -190,160 +190,106 @@ static void RateControlLayerResetPart2(
 }
 
 static EB_ERRORTYPE HighLevelRateControlContextCtor(
-    HighLevelRateControlContext_t   **entryDblPtr){
-
-    HighLevelRateControlContext_t *entryPtr;
-    EB_MALLOC(HighLevelRateControlContext_t*, entryPtr, sizeof(HighLevelRateControlContext_t), EB_N_PTR);
-    *entryDblPtr = entryPtr;
-
+    HighLevelRateControlContext_t  *entryPtr){
+    (void)entryPtr;
     return EB_ErrorNone;
 }
 
 
 EB_ERRORTYPE RateControlLayerContextCtor(
-    RateControlLayerContext_t   **entryDblPtr){
-
-    RateControlLayerContext_t *entryPtr;
-    EB_MALLOC(RateControlLayerContext_t*, entryPtr, sizeof(RateControlLayerContext_t), EB_N_PTR);
-
-    *entryDblPtr = entryPtr;
-
+    RateControlLayerContext_t  *entryPtr){
     entryPtr->firstFrame = 1;
     entryPtr->firstNonIntraFrame = 1;
-    entryPtr->feedbackArrived = EB_FALSE;
 
     return EB_ErrorNone;
 }
 
-
+static void RateControlIntervalParamContextDctor(EB_PTR p)
+{
+    RateControlIntervalParamContext_t* obj = (RateControlIntervalParamContext_t*)p;
+    EB_DELETE_PTR_ARRAY(obj->rateControlLayerArray, EB_MAX_TEMPORAL_LAYERS);
+}
 
 EB_ERRORTYPE RateControlIntervalParamContextCtor(
-    RateControlIntervalParamContext_t   **entryDblPtr) {
+    RateControlIntervalParamContext_t  *entryPtr) {
     EB_U32 temporalIndex;
-    EB_ERRORTYPE return_error = EB_ErrorNone;
-    RateControlIntervalParamContext_t *entryPtr;
-    EB_MALLOC(RateControlIntervalParamContext_t*, entryPtr, sizeof(RateControlIntervalParamContext_t), EB_N_PTR);
+    entryPtr->dctor = RateControlIntervalParamContextDctor;
 
-    *entryDblPtr = entryPtr;
-
-    entryPtr->inUse = EB_FALSE;
-    entryPtr->wasUsed = EB_FALSE;
-    entryPtr->lastGop = EB_FALSE;
-    entryPtr->processedFramesNumber = 0;
-    EB_MALLOC(RateControlLayerContext_t**, entryPtr->rateControlLayerArray, sizeof(RateControlLayerContext_t*)*EB_MAX_TEMPORAL_LAYERS, EB_N_PTR);
+    EB_ALLOC_PTR_ARRAY(entryPtr->rateControlLayerArray, EB_MAX_TEMPORAL_LAYERS);
 
     for (temporalIndex = 0; temporalIndex < EB_MAX_TEMPORAL_LAYERS; temporalIndex++){
-        return_error = RateControlLayerContextCtor(&entryPtr->rateControlLayerArray[temporalIndex]);
+        EB_NEW(
+            entryPtr->rateControlLayerArray[temporalIndex],
+            RateControlLayerContextCtor);
         entryPtr->rateControlLayerArray[temporalIndex]->temporalIndex = temporalIndex;
         entryPtr->rateControlLayerArray[temporalIndex]->frameRate = 1 << RC_PRECISION;
-        if (return_error == EB_ErrorInsufficientResources){
-            return EB_ErrorInsufficientResources;
-        }
     }
-
-    entryPtr->minTargetRateAssigned = EB_FALSE;
-
-    entryPtr->intraFramesQp = 0;
-    entryPtr->nextGopIntraFrameQp = 0;
-    entryPtr->firstPicPredBits   = 0;
-    entryPtr->firstPicActualBits = 0;
-    entryPtr->firstPicPredQp     = 0;
-    entryPtr->firstPicActualQp   = 0;
-    entryPtr->firstPicActualQpAssigned = EB_FALSE;
-    entryPtr->sceneChangeInGop = EB_FALSE;
-    entryPtr->extraApBitRatioI = 0;
 
     return EB_ErrorNone;
 }
 
 EB_ERRORTYPE RateControlCodedFramesStatsContextCtor(
-    CodedFramesStatsEntry_t   **entryDblPtr,
+    CodedFramesStatsEntry_t    *entryPtr,
     EB_U64                      pictureNumber) {
-
-    CodedFramesStatsEntry_t *entryPtr;
-    EB_MALLOC(CodedFramesStatsEntry_t*, entryPtr, sizeof(CodedFramesStatsEntry_t), EB_N_PTR);
-
-    *entryDblPtr = entryPtr;
-
     entryPtr->pictureNumber = pictureNumber;
     entryPtr->frameTotalBitActual = -1;
 
     return EB_ErrorNone;
 }
 
+static void RateControlContextDctor(EB_PTR p)
+{
+    RateControlContext_t* obj = (RateControlContext_t*)p;
+#if OVERSHOOT_STAT_PRINT
+    EB_DELETE_PTR_ARRAY(obj->codedFramesStatQueue, CODED_FRAMES_STAT_QUEUE_MAX_DEPTH);
+#endif
+    EB_DELETE_PTR_ARRAY(obj->rateControlParamQueue, PARALLEL_GOP_MAX_NUMBER);
+    EB_DELETE(obj->highLevelRateControlPtr);
+}
 
 EB_ERRORTYPE RateControlContextCtor(
-    RateControlContext_t   **contextDblPtr,
+    RateControlContext_t    *contextPtr,
     EbFifo_t                *rateControlInputTasksFifoPtr,
     EbFifo_t                *rateControlOutputResultsFifoPtr,
     EB_S32                   intraPeriodLength)
 {
-    EB_U32 temporalIndex;
     EB_U32 intervalIndex;
 
 #if OVERSHOOT_STAT_PRINT
     EB_U32 pictureIndex;
 #endif
-
-    EB_ERRORTYPE return_error = EB_ErrorNone;
-    RateControlContext_t *contextPtr;
-    EB_MALLOC(RateControlContext_t*, contextPtr, sizeof(RateControlContext_t), EB_N_PTR);
-
-    *contextDblPtr = contextPtr;
+    contextPtr->dctor = RateControlContextDctor;
 
     contextPtr->rateControlInputTasksFifoPtr = rateControlInputTasksFifoPtr;
     contextPtr->rateControlOutputResultsFifoPtr = rateControlOutputResultsFifoPtr;
 
     // High level RC
-    return_error = HighLevelRateControlContextCtor(
-        &contextPtr->highLevelRateControlPtr);
-    if (return_error == EB_ErrorInsufficientResources){
-        return EB_ErrorInsufficientResources;
-    }
+    EB_NEW(
+        contextPtr->highLevelRateControlPtr,
+        HighLevelRateControlContextCtor);
 
-    for (temporalIndex = 0; temporalIndex < EB_MAX_TEMPORAL_LAYERS; temporalIndex++){
-        contextPtr->framesInInterval[temporalIndex] = 0;
-    }
+    EB_ALLOC_PTR_ARRAY(contextPtr->rateControlParamQueue, PARALLEL_GOP_MAX_NUMBER);
 
-    EB_MALLOC(RateControlIntervalParamContext_t**, contextPtr->rateControlParamQueue, sizeof(RateControlIntervalParamContext_t*)*PARALLEL_GOP_MAX_NUMBER, EB_N_PTR);
-
-    contextPtr->rateControlParamQueueHeadIndex = 0;
     for (intervalIndex = 0; intervalIndex < PARALLEL_GOP_MAX_NUMBER; intervalIndex++){
-        return_error = RateControlIntervalParamContextCtor(
-            &contextPtr->rateControlParamQueue[intervalIndex]);
+        EB_NEW(
+            contextPtr->rateControlParamQueue[intervalIndex],
+            RateControlIntervalParamContextCtor);
         contextPtr->rateControlParamQueue[intervalIndex]->firstPoc = (intervalIndex*(EB_U32)(intraPeriodLength + 1));
         contextPtr->rateControlParamQueue[intervalIndex]->lastPoc = ((intervalIndex + 1)*(EB_U32)(intraPeriodLength + 1)) - 1;
-        if (return_error == EB_ErrorInsufficientResources){
-            return EB_ErrorInsufficientResources;
-        }
     }
 
 #if OVERSHOOT_STAT_PRINT
-    contextPtr->codedFramesStatQueueHeadIndex = 0;
-    contextPtr->codedFramesStatQueueTailIndex = 0;
-    EB_MALLOC(CodedFramesStatsEntry_t**, contextPtr->codedFramesStatQueue, sizeof(CodedFramesStatsEntry_t*)*CODED_FRAMES_STAT_QUEUE_MAX_DEPTH, EB_N_PTR);
+    EB_ALLOC_PTR_ARRAY(contextPtr->codedFramesStatQueue, CODED_FRAMES_STAT_QUEUE_MAX_DEPTH);
 
     for (pictureIndex = 0; pictureIndex < CODED_FRAMES_STAT_QUEUE_MAX_DEPTH; ++pictureIndex) {
-        return_error = RateControlCodedFramesStatsContextCtor(
-            &contextPtr->codedFramesStatQueue[pictureIndex],
+        EB_NEW(
+            contextPtr->codedFramesStatQueue[pictureIndex],
+            RateControlCodedFramesStatsContextCtor,
             pictureIndex);
-        if (return_error == EB_ErrorInsufficientResources){
-            return EB_ErrorInsufficientResources;
-        }
     }
-    contextPtr->maxBitActualPerSw = 0;
-    contextPtr->maxBitActualPerGop = 0;
 #endif
 
-    contextPtr->baseLayerFramesAvgQp = 0;
-    contextPtr->baseLayerIntraFramesAvgQp = 0;
-
-
     contextPtr->intraCoefRate = 4;
-    contextPtr->extraBits = 0;
-    contextPtr->extraBitsGen = 0;
-    contextPtr->maxRateAdjustDeltaQP = 0;
-
     return EB_ErrorNone;
 }
 
@@ -2373,7 +2319,8 @@ void* RateControlKernel(void *inputPtr)
             sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
             encodeContextPtr = (EncodeContext_t*)sequenceControlSetPtr->encodeContextPtr;
 #if DEADLOCK_DEBUG
-            SVT_LOG("POC %lld RC IN \n", pictureControlSetPtr->pictureNumber);
+            if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+                SVT_LOG("POC %lu RC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 
             // High level RC
@@ -2647,13 +2594,13 @@ void* RateControlKernel(void *inputPtr)
             rateControlResultsPtr = (RateControlResults_t*)rateControlResultsWrapperPtr->objectPtr;
             rateControlResultsPtr->pictureControlSetWrapperPtr = rateControlTasksPtr->pictureControlSetWrapperPtr;
 
-#if DEADLOCK_DEBUG
-            SVT_LOG("POC %lld RC OUT \n", pictureControlSetPtr->pictureNumber);
-#endif
-
             // Post Full Rate Control Results
             EbPostFullObject(rateControlResultsWrapperPtr);
 
+#if DEADLOCK_DEBUG
+            if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+                SVT_LOG("POC %lu RC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
             // Release Rate Control Tasks
             EbReleaseObject(rateControlTasksWrapperPtr);
 
@@ -2855,14 +2802,16 @@ void* RateControlKernel(void *inputPtr)
 
             totalNumberOfFbFrames++;
 
-			// Release the SequenceControlSet
-			EbReleaseObject(parentPictureControlSetPtr->sequenceControlSetWrapperPtr);
+            // Release the SequenceControlSet
+            EbReleaseObject(parentPictureControlSetPtr->sequenceControlSetWrapperPtr);
             // Release the input buffer
             EbReleaseObject(parentPictureControlSetPtr->ebInputWrapperPtr);
+            // Release the PA Reference Picture
+            EbReleaseObject(parentPictureControlSetPtr->paReferencePictureWrapperPtr);
             // Release the ParentPictureControlSet
-			EbReleaseObject(rateControlTasksPtr->pictureControlSetWrapperPtr);
+            EbReleaseObject(rateControlTasksPtr->pictureControlSetWrapperPtr);
 
-			// Release Rate Control Tasks  
+            // Release Rate Control Tasks
             EbReleaseObject(rateControlTasksWrapperPtr);
             break;
 

@@ -38,6 +38,33 @@ extern "C" {
 #define EB_NON_REF_PICTURE   4
 #define EB_INVALID_PICTURE   0xFF
 
+#define EB_SEGMENT_BLOCK_SIZE 64
+    typedef struct
+    {
+        uint8_t ovFlags;
+        int8_t  qpOv;
+        int8_t  deblockOv;
+        int8_t  filterOv;
+    } SegmentOverride_t;
+
+    typedef enum EB_OV_FLAGS
+    {
+        /* Do no ovveride default values */
+        EB_NO_OV              = 0,
+        /* Set qp value in range [0:51] */
+        EB_QP_OV_DIRECT       = 1 << 0,
+        /* Change original qp value in range [-25:25] */
+        EB_QP_OV_DELTA        = 1 << 1,
+        /* Use qpOv for deblock, behaviour depends on EB_QP_OV* flag */
+        EB_DENSITY_QP_OV      = 1 << 2,
+        /* Use deblockOv for deblock in range [-25:25];
+        * positive value decrease density, negative increase */
+        EB_DENSITY_DEBLOCK_OV = 1 << 3,
+        /* Change first stage of quantization in range [-7;7];
+        * positive value reduce bitrate, negative increase */
+        EB_TU_FILTER_OV       = 1 << 4,
+    } EB_OV_FLAGS;
+
     typedef struct EB_BUFFERHEADERTYPE
     {
         // EB_BUFFERHEADERTYPE size
@@ -72,6 +99,7 @@ extern "C" {
         uint32_t naluPayloadType;
         uint8_t* naluBase64Encode;
 
+        SegmentOverride_t *segmentOvPtr;
     } EB_BUFFERHEADERTYPE;
 
     typedef struct EB_COMPONENTTYPE
@@ -100,12 +128,12 @@ extern "C" {
 
 #define EB_BUFFERFLAG_EOS 0x00000001
 
+#define EB_MAX_SEI_SIZE 1024
 typedef struct EB_SEI_MESSAGE
 {
     uint32_t  payloadSize;
-    unsigned char  *payload;
+    unsigned char payload[EB_MAX_SEI_SIZE];
     uint32_t  payloadType;
-
 }EB_SEI_MESSAGE;
 
 typedef enum EB_COLOR_FORMAT {
@@ -287,18 +315,15 @@ typedef struct EB_H265_ENC_CONFIGURATION
     uint64_t                framesToBeEncoded;
 
 
-    // Visual quality optimizations only applicable when tune = 1
-
     /* Enables subjective quality algorithms to reduce the output bitrate with
-     * minimal or no subjective visual quality impact. Only applicable to tune 0.
+     * minimal or no subjective visual quality impact.
      * 
      * Default is 0. */
     uint8_t                 bitRateReduction;
 
     /* The visual quality knob that allows the use of adaptive quantization
      * within the picture and enables visual quality algorithms that improve the
-     * sharpness of the background. Only available for 4k and 8k resolutions and
-     * tune 0.
+     * sharpness of the background. Only available for 4k and 8k resolutions.
      *
      * Default is 0. */
     uint8_t                 improveSharpness;
@@ -630,6 +655,10 @@ typedef struct EB_H265_ENC_CONFIGURATION
     uint32_t                maxDisplayMasteringLuminance;
     uint32_t                minDisplayMasteringLuminance;
 
+    /* Flag to enable SegmentOverride overwrite per LCU
+    * Default is 0. */
+    uint32_t                segmentOvEnabled;
+
 } EB_H265_ENC_CONFIGURATION;
 
 
@@ -667,13 +696,20 @@ EB_API EB_ERRORTYPE EbInitEncoder(
 /* OPTIONAL: Get VPS / SPS / PPS headers at init time.
  *
  * Parameter:
- * @ *h265EncComponent  Encoder handler. 
+ * @ *h265EncComponent  Encoder handler.
  * @ **outputStreamPtr  Output stream. */
 EB_API EB_ERRORTYPE EbH265EncStreamHeader(
     EB_COMPONENTTYPE           *h265EncComponent,
     EB_BUFFERHEADERTYPE       **outputStreamPtr);
 
-/* OPTIONAL: Get the end of sequence Network Abstraction Layer.
+/* OPTIONAL: Release VPS / SPS / PPS header buffer.
+ *
+ * Parameter:
+ * @ **StreamHeaderPtr  stream header buffer pointer. */
+EB_API EB_ERRORTYPE EbH265EncReleaseStreamHeader(
+    EB_BUFFERHEADERTYPE       *StreamHeaderPtr);
+
+/* OPTIONAL: Get the EOS NALU.
  *
  * Parameter:
  * @ *h265EncComponent  Encoder handler.
@@ -681,6 +717,13 @@ EB_API EB_ERRORTYPE EbH265EncStreamHeader(
 EB_API EB_ERRORTYPE EbH265EncEosNal(
     EB_COMPONENTTYPE           *h265EncComponent,
     EB_BUFFERHEADERTYPE       **outputStreamPtr);
+
+/* OPTIONAL: Release the EOS NALU buffer.
+ *
+ * Parameter:
+ * @ **EosNalPtr  NALU buffer pointer */
+EB_API EB_ERRORTYPE EbH265EncReleaseEosNal(
+    EB_BUFFERHEADERTYPE       *EosNalPtr);
 
 /* STEP 4: Send the picture.
  *

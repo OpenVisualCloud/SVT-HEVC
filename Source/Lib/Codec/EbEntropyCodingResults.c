@@ -9,16 +9,25 @@
 #include "EbEntropyCodingResults.h"
 
 EB_ERRORTYPE EntropyCodingResultsCtor(
-    EB_PTR *objectDblPtr,
+    EntropyCodingResults_t *contextPtr,
     EB_PTR objectInitDataPtr)
 {
-    EntropyCodingResults_t *contextPtr;
-    EB_MALLOC(EntropyCodingResults_t*, contextPtr, sizeof(EntropyCodingResults_t), EB_N_PTR);
-
-    *objectDblPtr = (EB_PTR) contextPtr;
-
-    (void) objectInitDataPtr;
+    (void)contextPtr;
+    (void)objectInitDataPtr;
 
     return EB_ErrorNone;
 }
 
+
+EB_ERRORTYPE EntropyCodingResultsCreator(
+    EB_PTR *objectDblPtr,
+    EB_PTR objectInitDataPtr)
+{
+    EntropyCodingResults_t* obj;
+
+    *objectDblPtr = NULL;
+    EB_NEW(obj, EntropyCodingResultsCtor, objectInitDataPtr);
+    *objectDblPtr = obj;
+
+    return EB_ErrorNone;
+}

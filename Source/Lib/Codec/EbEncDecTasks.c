@@ -9,15 +9,24 @@
 #include "EbEncDecTasks.h"
 
 EB_ERRORTYPE EncDecTasksCtor(
-    EB_PTR *objectDblPtr,
+    EncDecTasks_t *contextPtr,
     EB_PTR objectInitDataPtr)
 {
-    EncDecTasks_t *contextPtr;
-    EB_MALLOC(EncDecTasks_t*, contextPtr, sizeof(EncDecTasks_t), EB_N_PTR);
-    
-    *objectDblPtr = (EB_PTR) contextPtr;
+    (void)contextPtr;
+    (void)objectInitDataPtr;
 
-    (void) objectInitDataPtr;
+    return EB_ErrorNone;
+}
+
+EB_ERRORTYPE EncDecTasksCreator(
+    EB_PTR *objectDblPtr,
+    EB_PTR  objectInitDataPtr)
+{
+    EncDecTasks_t *obj;
+
+    *objectDblPtr = NULL;
+    EB_NEW(obj, EncDecTasksCtor, objectInitDataPtr);
+    *objectDblPtr = obj;
 
     return EB_ErrorNone;
 }

@@ -39,25 +39,27 @@
 #define SAMPLE_THRESHOLD_PRECENT_BORDER_LINE      15
 #define SAMPLE_THRESHOLD_PRECENT_TWO_BORDER_LINES 10
 
+static void PictureAnalysisContextDctor(EB_PTR p)
+{
+    PictureAnalysisContext_t *obj = (PictureAnalysisContext_t*)p;
+    EB_DELETE(obj->noisePicturePtr);
+    EB_DELETE(obj->denoisedPicturePtr);
+    EB_FREE_PTR_ARRAY(obj->grad, obj->lcuTotalCountAllocated);
+}
 /************************************************
 * Picture Analysis Context Constructor
 ************************************************/
 EB_ERRORTYPE PictureAnalysisContextCtor(
-	EbPictureBufferDescInitData_t * inputPictureBufferDescInitData,
-	EB_BOOL                         denoiseFlag,
-    PictureAnalysisContext_t      **contextDblPtr,
+    PictureAnalysisContext_t       *contextPtr,
+    EbPictureBufferDescInitData_t  *inputPictureBufferDescInitData,
+    EB_BOOL                         denoiseFlag,
     EbFifo_t                       *resourceCoordinationResultsInputFifoPtr,
     EbFifo_t                       *pictureAnalysisResultsOutputFifoPtr,
-    EB_U16						    lcuTotalCount)
+    EB_U16                          lcuTotalCount)
 {
-	PictureAnalysisContext_t *contextPtr;
-	EB_MALLOC(PictureAnalysisContext_t*, contextPtr, sizeof(PictureAnalysisContext_t), EB_N_PTR);
-	*contextDblPtr = contextPtr;
-
+    contextPtr->dctor = PictureAnalysisContextDctor;
 	contextPtr->resourceCoordinationResultsInputFifoPtr = resourceCoordinationResultsInputFifoPtr;
 	contextPtr->pictureAnalysisResultsOutputFifoPtr = pictureAnalysisResultsOutputFifoPtr;
-
-	EB_ERRORTYPE return_error = EB_ErrorNone;
 
 	if (denoiseFlag == EB_TRUE){
 
@@ -70,13 +72,10 @@ EB_ERRORTYPE PictureAnalysisContextCtor(
 		    inputPictureBufferDescInitData->bufferEnableMask = PICTURE_BUFFER_DESC_Y_FLAG | PICTURE_BUFFER_DESC_Cb_FLAG;
         }
 
-		return_error = EbPictureBufferDescCtor(
-			(EB_PTR*)&(contextPtr->denoisedPicturePtr),
-			(EB_PTR)inputPictureBufferDescInitData);
-
-		if (return_error == EB_ErrorInsufficientResources){
-			return EB_ErrorInsufficientResources;
-		}
+        EB_NEW(
+            contextPtr->denoisedPicturePtr,
+            EbPictureBufferDescCtor,
+            inputPictureBufferDescInitData);
 
         if (inputPictureBufferDescInitData->colorFormat != EB_YUV444) {
 		contextPtr->denoisedPicturePtr->bufferCb = contextPtr->denoisedPicturePtr->bufferY;
@@ -89,21 +88,17 @@ EB_ERRORTYPE PictureAnalysisContextCtor(
 		inputPictureBufferDescInitData->maxHeight = MAX_LCU_SIZE;
 		inputPictureBufferDescInitData->bufferEnableMask = PICTURE_BUFFER_DESC_Y_FLAG;
 
-		return_error = EbPictureBufferDescCtor(
-			(EB_PTR*)&(contextPtr->noisePicturePtr),
-			(EB_PTR)inputPictureBufferDescInitData);
 
-		if (return_error == EB_ErrorInsufficientResources){
-			return EB_ErrorInsufficientResources;
-		}
+        EB_NEW(
+            contextPtr->noisePicturePtr,
+            EbPictureBufferDescCtor,
+            inputPictureBufferDescInitData);
 	}
-
-    EB_MALLOC(EB_U16**, contextPtr->grad, sizeof(EB_U16*) * lcuTotalCount, EB_N_PTR);
+    contextPtr->lcuTotalCountAllocated = lcuTotalCount;
+    EB_ALLOC_PTR_ARRAY(contextPtr->grad, lcuTotalCount);
     for (EB_U16 lcuIndex = 0; lcuIndex < lcuTotalCount; ++lcuIndex) {
-        EB_MALLOC(EB_U16*, contextPtr->grad[lcuIndex], sizeof(EB_U16) * CU_MAX_COUNT, EB_N_PTR);
+        EB_MALLOC_ARRAY(contextPtr->grad[lcuIndex], CU_MAX_COUNT);
     }
-
-
 	return EB_ErrorNone;
 }
 
@@ -179,10 +174,10 @@ void Decimation2D(
 	EB_U8 *  inputSamples,      // input parameter, input samples Ptr
 	EB_U32   inputStride,       // input parameter, input stride
 	EB_U32   inputAreaWidth,    // input parameter, input area width
-	EB_U32   inputAreaHeight,   // input parameter, input area height    
+	EB_U32   inputAreaHeight,   // input parameter, input area height
 	EB_U8 *  decimSamples,      // output parameter, decimated samples Ptr
 	EB_U32   decimStride,       // input parameter, output stride
-	EB_U32   decimStep)        // input parameter, area height  
+	EB_U32   decimStep)        // input parameter, area height
 {
 
 	EB_U32 horizontalIndex;
@@ -209,9 +204,9 @@ void Decimation2D(
 static void CalculateHistogram(
 	EB_U8 *  inputSamples,      // input parameter, input samples Ptr
 	EB_U32   inputAreaWidth,    // input parameter, input area width
-	EB_U32   inputAreaHeight,   // input parameter, input area height  
+	EB_U32   inputAreaHeight,   // input parameter, input area height
 	EB_U32   stride,            // input parameter, input stride
-    EB_U8    decimStep,         // input parameter, area height  
+    EB_U8    decimStep,         // input parameter, area height
 	EB_U32  *histogram,			// output parameter, output histogram
 	EB_U64  *sum)
 
@@ -234,7 +229,7 @@ static void CalculateHistogram(
 
 
 static EB_U64 ComputeVariance32x32(
-	EbPictureBufferDesc_t       *inputPaddedPicturePtr,         // input parameter, Input Padded Picture  
+	EbPictureBufferDesc_t       *inputPaddedPicturePtr,         // input parameter, Input Padded Picture
 	EB_U32                       inputLumaOriginIndex,          // input parameter, LCU index, used to point to source/reference samples
 	EB_U64						*variance8x8)
 {
@@ -271,7 +266,7 @@ static EB_U64 ComputeVariance32x32(
 	meanOf8x8Blocks[3] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 	meanOf8x8SquaredValuesBlocks[3] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
-	
+
 
 	// (1,0)
 	blockIndex = inputLumaOriginIndex + (inputPaddedPicturePtr->strideY << 3);
@@ -293,7 +288,7 @@ static EB_U64 ComputeVariance32x32(
 	meanOf8x8Blocks[7] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 	meanOf8x8SquaredValuesBlocks[7] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
-	
+
 
 	// (2,0)
 	blockIndex = inputLumaOriginIndex + (inputPaddedPicturePtr->strideY << 4);
@@ -315,7 +310,7 @@ static EB_U64 ComputeVariance32x32(
 	meanOf8x8Blocks[11] = ComputeMeanFunc[0][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 	meanOf8x8SquaredValuesBlocks[11] = ComputeMeanFunc[1][!!(ASM_TYPES & AVX2_MASK)](&(inputPaddedPicturePtr->bufferY[blockIndex]), inputPaddedPicturePtr->strideY, 8, 8);
 
-	
+
 
 	// (3,0)
 	blockIndex = inputLumaOriginIndex + (inputPaddedPicturePtr->strideY << 3) + (inputPaddedPicturePtr->strideY << 4);
@@ -363,7 +358,7 @@ static EB_U64 ComputeVariance32x32(
 	meanOf16x16Blocks[2] = (meanOf8x8Blocks[4] + meanOf8x8Blocks[5] + meanOf8x8Blocks[12] + meanOf8x8Blocks[13]) >> 2;
 	meanOf16x16Blocks[3] = (meanOf8x8Blocks[6] + meanOf8x8Blocks[7] + meanOf8x8Blocks[14] + meanOf8x8Blocks[15]) >> 2;
 
-	
+
 	meanOf16x16SquaredValuesBlocks[0] = (meanOf8x8SquaredValuesBlocks[0] + meanOf8x8SquaredValuesBlocks[1] + meanOf8x8SquaredValuesBlocks[8] + meanOf8x8SquaredValuesBlocks[9]) >> 2;
 	meanOf16x16SquaredValuesBlocks[1] = (meanOf8x8SquaredValuesBlocks[2] + meanOf8x8SquaredValuesBlocks[3] + meanOf8x8SquaredValuesBlocks[10] + meanOf8x8SquaredValuesBlocks[11]) >> 2;
 	meanOf16x16SquaredValuesBlocks[2] = (meanOf8x8SquaredValuesBlocks[4] + meanOf8x8SquaredValuesBlocks[5] + meanOf8x8SquaredValuesBlocks[12] + meanOf8x8SquaredValuesBlocks[13]) >> 2;
@@ -371,16 +366,16 @@ static EB_U64 ComputeVariance32x32(
 
 	// 32x32
 	meanOf32x32Blocks = (meanOf16x16Blocks[0] + meanOf16x16Blocks[1] + meanOf16x16Blocks[2] + meanOf16x16Blocks[3]) >> 2;
-	
+
 
 	meanOf32x32SquaredValuesBlocks = (meanOf16x16SquaredValuesBlocks[0] + meanOf16x16SquaredValuesBlocks[1] + meanOf16x16SquaredValuesBlocks[2] + meanOf16x16SquaredValuesBlocks[3]) >> 2;
-		
+
 
 	return (meanOf32x32SquaredValuesBlocks - (meanOf32x32Blocks * meanOf32x32Blocks));
 }
 
 static EB_U64 ComputeVariance16x16(
-	EbPictureBufferDesc_t       *inputPaddedPicturePtr,         // input parameter, Input Padded Picture  
+	EbPictureBufferDesc_t       *inputPaddedPicturePtr,         // input parameter, Input Padded Picture
 	EB_U32                       inputLumaOriginIndex,          // input parameter, LCU index, used to point to source/reference samples
 	EB_U64						*variance8x8)
 {
@@ -434,7 +429,7 @@ does not store data for every block,
 just returns the 64x64 data point
 *******************************************/
 static EB_U64 ComputeVariance64x64(
-    EbPictureBufferDesc_t       *inputPaddedPicturePtr,         // input parameter, Input Padded Picture  
+    EbPictureBufferDesc_t       *inputPaddedPicturePtr,         // input parameter, Input Padded Picture
 	EB_U32                       inputLumaOriginIndex,          // input parameter, LCU index, used to point to source/reference samples
 	EB_U64						*variance32x32)
 {
@@ -877,8 +872,8 @@ static EB_U64 ComputeVariance64x64(
 	    blockIndex = blockIndex + 8;
 	    meanOf8x8Blocks[63] = ComputeSubMean8x8_SSE2_INTRIN(&(inputPaddedPicturePtr->bufferY[blockIndex]),  strideY);
 	    meanOf8x8SquaredValuesBlocks[63] = ComputeSubdMeanOfSquaredValues8x8_SSE2_INTRIN(&(inputPaddedPicturePtr->bufferY[blockIndex]),  strideY);
-    
-    
+
+
     }
 
 
@@ -952,13 +947,13 @@ static EB_U64 ComputeVariance64x64(
 
 static EB_U8  getFilteredTypes(EB_U8  *ptr,
 	EB_U32  stride,
-	EB_U8   filterType)
+	EB_U8   EbHevcFilterType)
 {
 	EB_U8 *p = ptr - 1 - stride;
 
 	EB_U32 a = 0;
 
-	if (filterType == 0){
+	if (EbHevcFilterType == 0){
 
 		//Luma
 		a = (p[1] +
@@ -966,24 +961,24 @@ static EB_U8  getFilteredTypes(EB_U8  *ptr,
 			p[1 + 2 * stride]) / 8;
 
 	}
-	else if (filterType == 1){
+	else if (EbHevcFilterType == 1){
         a = (                    2 * p[1] +
 			 2 * p[0 + stride] + 4 * p[1 + stride] + 2 * p[2 + stride] +
-			                     2 * p[1 + 2 * stride]  );  
-        
+			                     2 * p[1 + 2 * stride]  );
+
         a =  (( (EB_U32)((a *2730) >> 14) + 1) >> 1) & 0xFFFF;
 
         //fixed point version of a=a/12 to mimic x86 instruction _mm256_mulhrs_epi16;
         //a= (a*2730)>>15;
 	}
-	else if (filterType == 2){
+	else if (EbHevcFilterType == 2){
 
 
 		a = (4 * p[1] +
 			4 * p[0 + stride] + 4 * p[1 + stride] + 4 * p[2 + stride] +
 			4 * p[1 + 2 * stride]) / 20;
 	}
-	else if (filterType == 3){
+	else if (EbHevcFilterType == 3){
 
 		a = (1 * p[0] + 1 * p[1] + 1 * p[2] +
 			1 * p[0 + stride] + 4 * p[1 + stride] + 1 * p[2 + stride] +
@@ -991,7 +986,7 @@ static EB_U8  getFilteredTypes(EB_U8  *ptr,
 
 
 	}
-	else if (filterType == 4){
+	else if (EbHevcFilterType == 4){
 
 		//gaussian matrix(Chroma)
 		a = (1 * p[0] + 2 * p[1] + 1 * p[2] +
@@ -999,14 +994,14 @@ static EB_U8  getFilteredTypes(EB_U8  *ptr,
 			1 * p[0 + 2 * stride] + 2 * p[1 + 2 * stride] + 1 * p[2 + 2 * stride]) / 16;
 
 	}
-	else if (filterType == 5){
+	else if (EbHevcFilterType == 5){
 
 		a = (2 * p[0] + 2 * p[1] + 2 * p[2] +
 			2 * p[0 + stride] + 4 * p[1 + stride] + 2 * p[2 + stride] +
 			2 * p[0 + 2 * stride] + 2 * p[1 + 2 * stride] + 2 * p[2 + 2 * stride]) / 20;
 
 	}
-	else if (filterType == 6){
+	else if (EbHevcFilterType == 6){
 
 		a = (4 * p[0] + 4 * p[1] + 4 * p[2] +
 			4 * p[0 + stride] + 4 * p[1 + stride] + 4 * p[2 + stride] +
@@ -1392,7 +1387,7 @@ static EB_ERRORTYPE ZeroOutChromaBlockMean(
 {
 
 	EB_ERRORTYPE return_error = EB_ErrorNone;
-	// 16x16 mean	  
+	// 16x16 mean
 	pictureControlSetPtr->cbMean[lcuCodingOrder][ME_TIER_ZERO_PU_16x16_0] = 0;
 	pictureControlSetPtr->cbMean[lcuCodingOrder][ME_TIER_ZERO_PU_16x16_1] = 0;
 	pictureControlSetPtr->cbMean[lcuCodingOrder][ME_TIER_ZERO_PU_16x16_2] = 0;
@@ -1590,7 +1585,7 @@ static EB_ERRORTYPE ComputeChromaBlockMean(
 	// 64x64
 	cbMeanOf64x64Blocks = (cbMeanOf32x32Blocks[0] + cbMeanOf32x32Blocks[1] + cbMeanOf32x32Blocks[3] + cbMeanOf32x32Blocks[3]) >> 2;
 	crMeanOf64x64Blocks = (crMeanOf32x32Blocks[0] + crMeanOf32x32Blocks[1] + crMeanOf32x32Blocks[3] + crMeanOf32x32Blocks[3]) >> 2;
-	// 16x16 mean	  
+	// 16x16 mean
 	pictureControlSetPtr->cbMean[lcuCodingOrder][ME_TIER_ZERO_PU_16x16_0] = (EB_U8) (cbMeanOf16x16Blocks[0] >> MEAN_PRECISION);
 	pictureControlSetPtr->cbMean[lcuCodingOrder][ME_TIER_ZERO_PU_16x16_1] = (EB_U8) (cbMeanOf16x16Blocks[1] >> MEAN_PRECISION);
 	pictureControlSetPtr->cbMean[lcuCodingOrder][ME_TIER_ZERO_PU_16x16_2] = (EB_U8) (cbMeanOf16x16Blocks[2] >> MEAN_PRECISION);
@@ -1787,7 +1782,7 @@ static EB_ERRORTYPE ComputeBlockMeanComputeVariance(
 
         ComputeIntermVarFour8x8_AVX2_INTRIN(&(inputPaddedPicturePtr->bufferY[blockIndex]), strideY, &meanOf8x8Blocks[60], &meanOf8x8SquaredValuesBlocks[60]);
 
-       
+
     }
     else{
         meanOf8x8Blocks[0] = ComputeSubMean8x8_SSE2_INTRIN(&(inputPaddedPicturePtr->bufferY[blockIndex]), strideY);
@@ -2232,7 +2227,7 @@ static EB_ERRORTYPE ComputeBlockMeanComputeVariance(
 	pictureControlSetPtr->yMean[lcuIndex][ME_TIER_ZERO_PU_8x8_62] = (EB_U8)(meanOf8x8Blocks[62] >> MEAN_PRECISION);
 	pictureControlSetPtr->yMean[lcuIndex][ME_TIER_ZERO_PU_8x8_63] = (EB_U8)(meanOf8x8Blocks[63] >> MEAN_PRECISION);
 
-	// 16x16 mean	  
+	// 16x16 mean
 	pictureControlSetPtr->yMean[lcuIndex][ME_TIER_ZERO_PU_16x16_0] = (EB_U8)(meanOf16x16Blocks[0] >> MEAN_PRECISION);
 	pictureControlSetPtr->yMean[lcuIndex][ME_TIER_ZERO_PU_16x16_1] = (EB_U8)(meanOf16x16Blocks[1] >> MEAN_PRECISION);
 	pictureControlSetPtr->yMean[lcuIndex][ME_TIER_ZERO_PU_16x16_2] = (EB_U8)(meanOf16x16Blocks[2] >> MEAN_PRECISION);
@@ -2371,7 +2366,7 @@ static EB_ERRORTYPE DenoiseInputPicture(
     EB_U32 		 colorFormat      = inputPicturePtr->colorFormat;
     EB_U16 		 subWidthCMinus1  = (colorFormat == EB_YUV444 ? 1 : 2) - 1;
     EB_U16 		 subHeightCMinus1 = (colorFormat >= EB_YUV422 ? 1 : 2) - 1;
-	//use denoised input if the source is extremly noisy 
+	//use denoised input if the source is extremly noisy
 	if (pictureControlSetPtr->picNoiseClass >= PIC_NOISE_CLASS_4){
 
 		EB_U32 inLumaOffSet = inputPicturePtr->originX + inputPicturePtr->originY      * inputPicturePtr->strideY;
@@ -2596,12 +2591,12 @@ static EB_ERRORTYPE DetectInputPictureNoise(
 		}
 
 		//do it only for complete 64x64 blocks
-        if (lcuParams->isCompleteLcu) 
+        if (lcuParams->isCompleteLcu)
 		{
 
 			EB_U64 noiseBlkVar32x32[4], denoiseBlkVar32x32[4];
 
-			EB_U64 noiseBlkVar = ComputeVariance64x64(           
+			EB_U64 noiseBlkVar = ComputeVariance64x64(
                 noisePicturePtr,
 				noiseOriginIndex,
 				noiseBlkVar32x32);
@@ -2616,7 +2611,7 @@ static EB_ERRORTYPE DetectInputPictureNoise(
 
 			picNoiseVariance += (noiseBlkVar >> 16);
 
-			EB_U64 denBlkVar = ComputeVariance64x64(                          
+			EB_U64 denBlkVar = ComputeVariance64x64(
                 denoisedPicturePtr,
 				inputLumaOriginIndex,
 				denoiseBlkVar32x32) >> 16;
@@ -2817,7 +2812,7 @@ static EB_ERRORTYPE SubSampleFilterNoise(
 
 		EB_U32 newTotFN = 0;
 
-		//for each LCU ,re check the FN information for only the FNdecim ones 
+		//for each LCU ,re check the FN information for only the FNdecim ones
         for (lcuIndex = 0; lcuIndex < pictureControlSetPtr->lcuTotalCount; ++lcuIndex) {
 
             LcuParams_t *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
@@ -2850,7 +2845,7 @@ static EB_ERRORTYPE SubSampleFilterNoise(
 				EB_U64 noiseBlkVar32x32[4], denoiseBlkVar32x32[4];
 				EB_U64 noiseBlkVar = ComputeVariance64x64(
                     noisePicturePtr, noiseOriginIndex, noiseBlkVar32x32);
-				EB_U64 denBlkVar = ComputeVariance64x64(                    
+				EB_U64 denBlkVar = ComputeVariance64x64(
                     denoisedPicturePtr, inputLumaOriginIndex, denoiseBlkVar32x32) >> 16;
 
                 EB_U64 noiseBlkVarTh ;
@@ -3036,9 +3031,9 @@ static EB_ERRORTYPE QuarterSampleDetectNoise(
 	//else
 	noiseTh = 0;
 
-	//look for extreme noise or big enough flat noisy area to be denoised.   
+	//look for extreme noise or big enough flat noisy area to be denoised.
 	if (picNoiseVariance > 60)
-		pictureControlSetPtr->picNoiseClass = PIC_NOISE_CLASS_3_1; //Noise+Edge information is too big, so may be this is all noise (action: frame based denoising) 
+		pictureControlSetPtr->picNoiseClass = PIC_NOISE_CLASS_3_1; //Noise+Edge information is too big, so may be this is all noise (action: frame based denoising)
 	else if (picNoiseVariance >= 10 + noiseTh)
 		pictureControlSetPtr->picNoiseClass = PIC_NOISE_CLASS_3;   //Noise+Edge information is big enough, so there is no big enough flat noisy area (action : no denoising)
 	else if (picNoiseVariance >= 5 + noiseTh)
@@ -3047,7 +3042,7 @@ static EB_ERRORTYPE QuarterSampleDetectNoise(
 		pictureControlSetPtr->picNoiseClass = PIC_NOISE_CLASS_1;   //Noise+Edge information is very small, so no noise nor edge area (action : no denoising)
 
 
-	
+
 	return return_error;
 
 }
@@ -3180,9 +3175,9 @@ static EB_ERRORTYPE SubSampleDetectNoise(
 	else
 		noiseTh = 0;
 
-	//look for extreme noise or big enough flat noisy area to be denoised.    
+	//look for extreme noise or big enough flat noisy area to be denoised.
 	if (picNoiseVariance >= 55 + noiseTh)
-		pictureControlSetPtr->picNoiseClass = PIC_NOISE_CLASS_3_1; //Noise+Edge information is too big, so may be this is all noise (action: frame based denoising) 
+		pictureControlSetPtr->picNoiseClass = PIC_NOISE_CLASS_3_1; //Noise+Edge information is too big, so may be this is all noise (action: frame based denoising)
 	else if (picNoiseVariance >= 10 + noiseTh)
 		pictureControlSetPtr->picNoiseClass = PIC_NOISE_CLASS_3;   //Noise+Edge information is big enough, so there is no big enough flat noisy area (action : no denoising)
 	else if (picNoiseVariance >= 5 + noiseTh)
@@ -3237,7 +3232,7 @@ static EB_ERRORTYPE QuarterSampleDenoise(
 		pictureWidthInLcu);
 
 	if (denoiseFlag == EB_TRUE) {
-        
+
         // Turn OFF the de-noiser for Class 2 at QP=29 and lower (for Fixed_QP) and at the target rate of 14Mbps and higher (for RC=ON)
 		if ((pictureControlSetPtr->picNoiseClass == PIC_NOISE_CLASS_3_1) || ((pictureControlSetPtr->picNoiseClass == PIC_NOISE_CLASS_2) && ((sequenceControlSetPtr->staticConfig.rateControlMode == 0 && sequenceControlSetPtr->qp > DENOISER_QP_TH) || (sequenceControlSetPtr->staticConfig.rateControlMode != 0 && sequenceControlSetPtr->staticConfig.targetBitRate < DENOISER_BITRATE_TH)))) {
 
@@ -3278,7 +3273,7 @@ static EB_ERRORTYPE HalfSampleDenoise(
 	}
 
 	pictureControlSetPtr->picNoiseClass = PIC_NOISE_CLASS_INV; //this init is for both REAL-TIME and BEST-QUALITY
-    
+
     Decimation2D(
         &inputPicturePtr->bufferY[inputPicturePtr->originX + inputPicturePtr->originY * inputPicturePtr->strideY],
         inputPicturePtr->strideY,
@@ -3369,14 +3364,14 @@ static void PicturePreProcessingOperations(
 			lcuTotalCount,
 			pictureControlSetPtr->enableDenoiseSrcFlag,
 			pictureWidthInLcu);
-	} else {	
+	} else {
 		FullSampleDenoise(
 			contextPtr,
 			sequenceControlSetPtr,
 			pictureControlSetPtr,
 			lcuTotalCount,
 			pictureControlSetPtr->enableDenoiseSrcFlag
-		);		
+		);
 	}
 	return;
 
@@ -3420,7 +3415,7 @@ static void SubSampleLumaGeneratePixelIntensityHistogramBins(
 				inputPicturePtr->height - (sequenceControlSetPtr->pictureAnalysisNumberOfRegionsPerHeight * regionHeight) :
 				0;
 
-			// Y Histogram 
+			// Y Histogram
 			CalculateHistogram(
 				&inputPicturePtr->bufferY[(inputPicturePtr->originX + regionInPictureWidthIndex * regionWidth) + ((inputPicturePtr->originY + regionInPictureHeightIndex * regionHeight) * inputPicturePtr->strideY)],
 				regionWidth + regionWidthOffset,
@@ -3595,7 +3590,7 @@ static void EdgeDetectionMeanLumaChroma16x16(
 					}
 
 					grady = grady / nbcompy;
-                    
+
                     contextPtr->grad[lcuIndex][rasterScanCuIndex] = (EB_U16) (ABS(gradx) + ABS(grady));
 					if (contextPtr->grad[lcuIndex][rasterScanCuIndex] > maxGrad){
 						maxGrad = contextPtr->grad[lcuIndex][rasterScanCuIndex];
@@ -3649,7 +3644,7 @@ static void EdgeDetection(
 	EB_U32 lcu_Y = 0;
 	EB_U32 lcuIndex;
 	EB_BOOL highVarianceLucFlag;
-    	
+
 	EB_U32 rasterScanCuIndex = 0;
 	EB_U32 numberOfEdgeLcu = 0;
 	EB_BOOL highIntensityLcuFlag;
@@ -3671,7 +3666,7 @@ static void EdgeDetection(
 
         EdgeLcuResults_t *edgeResultsPtr = pictureControlSetPtr->edgeResultsPtr;
         pictureControlSetPtr->edgeResultsPtr[lcuIndex].edgeBlockNum = 0;
-        pictureControlSetPtr->edgeResultsPtr[lcuIndex].isolatedHighIntensityLcu = 0; 
+        pictureControlSetPtr->edgeResultsPtr[lcuIndex].isolatedHighIntensityLcu = 0;
         pictureControlSetPtr->sharpEdgeLcuFlag[lcuIndex] = 0;
 
 		if (lcu_X >  0 && lcu_X < (EB_U32)(pictureWidthInLcu - 1) && lcu_Y >  0 && lcu_Y < (EB_U32)(pictureHeightInLcu - 1)){
@@ -3689,7 +3684,7 @@ static void EdgeDetection(
                 EB_U8 sharpEdge = 0;
                 for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_16x16_0; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_16x16_15; rasterScanCuIndex++) {
                     sharpEdge = (variancePtr[rasterScanCuIndex] < veryLowIntensityTh) ? sharpEdge + 1 : sharpEdge;
-                    
+
                 }
                 if (sharpEdge > 4)
                 {
@@ -3724,7 +3719,7 @@ static void EdgeDetection(
 					similarityCount3 = (neighbourLcuMean < lowIntensityTh) ? 1 : 0;
 
 					similarityCount = similarityCount0 + similarityCount1 + similarityCount2 + similarityCount3;
-									
+
 					if (similarityCount > 0){
 
 
@@ -3739,7 +3734,7 @@ static void EdgeDetection(
 			}
 
 
-            if (highVarianceLucFlag){  
+            if (highVarianceLucFlag){
                 numberOfEdgeLcu += edgeResultsPtr[lcuIndex].edgeBlockNum;
 			}
 		}
@@ -3783,7 +3778,7 @@ static inline void DetermineHomogeneousRegionInPicture(
         if (lcuParams->isCompleteLcu){
 
             nullVarCnt += (variancePtr[ME_TIER_ZERO_PU_64x64] == 0) ? 1 : 0;
-		
+
             varLcuCnt++;
 
             veryLowVarCnt += ((variancePtr[ME_TIER_ZERO_PU_64x64]) < LCU_LOW_VAR_TH) ? 1 : 0;
@@ -3988,7 +3983,7 @@ static void CalculateInputAverageIntensity(
         pictureControlSetPtr->averageIntensity[1] = (EB_U8)((sumAverageIntensityTotalRegionsCb + ((inputPicturePtr->width*inputPicturePtr->height) >> 3)) / ((inputPicturePtr->width*inputPicturePtr->height) >> 2));
         pictureControlSetPtr->averageIntensity[2] = (EB_U8)((sumAverageIntensityTotalRegionsCr + ((inputPicturePtr->width*inputPicturePtr->height) >> 3)) / ((inputPicturePtr->width*inputPicturePtr->height) >> 2));
     }
-    
+
     return;
 }
 
@@ -4013,7 +4008,7 @@ static void GatheringPictureStatistics(
 
 	// Histogram bins
    // Use 1/16 Luma for Histogram generation
-   // 1/16 input ready 
+   // 1/16 input ready
    SubSampleLumaGeneratePixelIntensityHistogramBins(
        sequenceControlSetPtr,
        pictureControlSetPtr,
@@ -4021,14 +4016,14 @@ static void GatheringPictureStatistics(
        &sumAverageIntensityTotalRegionsLuma);
 
    // Use 1/4 Chroma for Histogram generation
-   // 1/4 input not ready => perform operation on the fly 
+   // 1/4 input not ready => perform operation on the fly
    SubSampleChromaGeneratePixelIntensityHistogramBins(
        sequenceControlSetPtr,
        pictureControlSetPtr,
        inputPicturePtr,
        &sumAverageIntensityTotalRegionsCb,
        &sumAverageIntensityTotalRegionsCr);
-    
+
 	// Calculate the LUMA average intensity
     CalculateInputAverageIntensity(
         sequenceControlSetPtr,
@@ -4150,7 +4145,7 @@ static void DecimateInputPicture(
 
     // Decimate input picture for HME L1
     EB_BOOL  preformQuarterPellDecimationFlag;
-    if (sequenceControlSetPtr->staticConfig.speedControlFlag){    
+    if (sequenceControlSetPtr->staticConfig.speedControlFlag){
         preformQuarterPellDecimationFlag = EB_TRUE;
     }
     else{
@@ -4183,7 +4178,7 @@ static void DecimateInputPicture(
 	}
 
     // Decimate input picture for HME L0
-	// Sixteenth Input Picture Decimation 
+	// Sixteenth Input Picture Decimation
     Decimation2D(
 		&inputPaddedPicturePtr->bufferY[inputPaddedPicturePtr->originX + inputPaddedPicturePtr->originY * inputPaddedPicturePtr->strideY],
 		inputPaddedPicturePtr->strideY,
@@ -4228,7 +4223,7 @@ void* PictureAnalysisKernel(void *inputPtr)
 	EbPictureBufferDesc_t           *sixteenthDecimatedPicturePtr;
 	EbPictureBufferDesc_t           *inputPicturePtr;
 
-	// Variance    
+	// Variance
 	EB_U32                          pictureWidthInLcu;
 	EB_U32                          pictureHeighInLcu;
 	EB_U32                          lcuTotalCount;
@@ -4246,28 +4241,39 @@ void* PictureAnalysisKernel(void *inputPtr)
 		sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 		inputPicturePtr = pictureControlSetPtr->enhancedPicturePtr;
 #if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld PA IN \n", pictureControlSetPtr->pictureNumber);
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            SVT_LOG("POC %lu PA IN \n", pictureControlSetPtr->pictureNumber);
 #endif
 		paReferenceObject = (EbPaReferenceObject_t*)pictureControlSetPtr->paReferencePictureWrapperPtr->objectPtr;
 		inputPaddedPicturePtr = (EbPictureBufferDesc_t*)paReferenceObject->inputPaddedPicturePtr;
 		quarterDecimatedPicturePtr = (EbPictureBufferDesc_t*)paReferenceObject->quarterDecimatedPicturePtr;
 		sixteenthDecimatedPicturePtr = (EbPictureBufferDesc_t*)paReferenceObject->sixteenthDecimatedPicturePtr;
 
-		// Variance  
+		// Variance
 		pictureWidthInLcu = (sequenceControlSetPtr->lumaWidth + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize;
 		pictureHeighInLcu = (sequenceControlSetPtr->lumaHeight + sequenceControlSetPtr->lcuSize - 1) / sequenceControlSetPtr->lcuSize;
 		lcuTotalCount = pictureWidthInLcu * pictureHeighInLcu;
-
-        // Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
-		SetPictureParametersForStatisticsGathering(
-			sequenceControlSetPtr);
 
 		// Pad pictures to multiple min cu size
 		PadPictureToMultipleOfMinCuSizeDimensions(
 			sequenceControlSetPtr,
 			inputPicturePtr);
 
-		// Pre processing operations performed on the input picture 
+        // Backup the Y component data from input picture into PA reference picture, to work arond the race condition that
+        // the input picture buffer pointed by PA reference picture (in ResourceCoordination) would be updated even though
+        // it's still being referenced.
+        EB_U8 *pa = inputPaddedPicturePtr->bufferY + inputPaddedPicturePtr->originX + inputPaddedPicturePtr->originY * inputPaddedPicturePtr->strideY;
+        EB_U8 *in = inputPicturePtr->bufferY + inputPicturePtr->originX + inputPicturePtr->originY * inputPicturePtr->strideY;
+        for (EB_U32 row = 0; row < inputPicturePtr->height; row++) {
+            EB_MEMCPY(pa + row * inputPaddedPicturePtr->strideY, in + row * inputPicturePtr->strideY, sizeof(EB_U8) * inputPicturePtr->width);
+        }
+
+        // Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
+		SetPictureParametersForStatisticsGathering(
+			sequenceControlSetPtr);
+
+
+		// Pre processing operations performed on the input picture
         PicturePreProcessingOperations(
             pictureControlSetPtr,
             contextPtr,
@@ -4276,7 +4282,7 @@ void* PictureAnalysisKernel(void *inputPtr)
             sixteenthDecimatedPicturePtr,
             lcuTotalCount,
             pictureWidthInLcu);
-	
+
         if (inputPicturePtr->colorFormat >= EB_YUV422) {
             // Jing: Do the conversion of 422/444=>420 here since it's multi-threaded kernel
             //       Reuse the Y, only add cb/cr in the newly created buffer desc
@@ -4291,8 +4297,8 @@ void* PictureAnalysisKernel(void *inputPtr)
 		PadPictureToMultipleOfLcuDimensions(
 			inputPaddedPicturePtr
         );
-        
-		// 1/4 & 1/16 input picture decimation 
+
+		// 1/4 & 1/16 input picture decimation
 		DecimateInputPicture(
             sequenceControlSetPtr,
 			pictureControlSetPtr,
@@ -4311,7 +4317,7 @@ void* PictureAnalysisKernel(void *inputPtr)
 			lcuTotalCount);
 
 
-		// Hold the 64x64 variance and mean in the reference frame 
+		// Hold the 64x64 variance and mean in the reference frame
 		EB_U32 lcuIndex;
 		for (lcuIndex = 0; lcuIndex < pictureControlSetPtr->lcuTotalCount; ++lcuIndex){
 			paReferenceObject->variance[lcuIndex] = pictureControlSetPtr->variance[lcuIndex][ME_TIER_ZERO_PU_64x64];
@@ -4327,10 +4333,6 @@ void* PictureAnalysisKernel(void *inputPtr)
 		outputResultsPtr = (PictureAnalysisResults_t*)outputResultsWrapperPtr->objectPtr;
 		outputResultsPtr->pictureControlSetWrapperPtr = inputResultsPtr->pictureControlSetWrapperPtr;
 
-#if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld PA OUT \n", pictureControlSetPtr->pictureNumber);
-#endif
-
 		// Release the Input Results
 		EbReleaseObject(inputResultsWrapperPtr);
 
@@ -4338,9 +4340,9 @@ void* PictureAnalysisKernel(void *inputPtr)
         double latency = 0.0;
         EB_U64 finishTimeSeconds = 0;
         EB_U64 finishTimeuSeconds = 0;
-        EbFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
+        EbHevcFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
 
-        EbComputeOverallElapsedTimeMs(
+        EbHevcComputeOverallElapsedTimeMs(
                 pictureControlSetPtr->startTimeSeconds,
                 pictureControlSetPtr->startTimeuSeconds,
                 finishTimeSeconds,
@@ -4355,6 +4357,10 @@ void* PictureAnalysisKernel(void *inputPtr)
 		// Post the Full Results Object
 		EbPostFullObject(outputResultsWrapperPtr);
 
+#if DEADLOCK_DEBUG
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            SVT_LOG("POC %lu PA OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
 	}
 	return EB_NULL;
 }

@@ -8,12 +8,13 @@
 
 #include "EbDefinitions.h"
 #include "EbPictureBufferDesc.h"
-
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
 typedef struct EbTransQuantBuffers_s
 {
+    EbDctor                        dctor;
 	EbPictureBufferDesc_t         *tuTransCoeff2Nx2NPtr;
 	EbPictureBufferDesc_t         *tuTransCoeffNxNPtr;
 	EbPictureBufferDesc_t         *tuTransCoeffN2xN2Ptr;

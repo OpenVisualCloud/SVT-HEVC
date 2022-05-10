@@ -98,9 +98,9 @@ EB_ERRORTYPE PmEstimateQuantCoeffChroma_SSE2(
 
 
 typedef EB_ERRORTYPE(*PM_RATE_EST_TYPE)(
-	CabacCost_t                  *CabacCost,	
+	CabacCost_t                  *CabacCost,
 	CabacEncodeContext_t         *cabacEncodeCtxPtr,
-	EB_U32                        size,  
+	EB_U32                        size,
 	EB_MODETYPE                   type,                 // Input: CU type (INTRA, INTER)
 	EB_U32                        intraLumaMode,
 	EB_U32                        intraChromaMode,
@@ -121,7 +121,7 @@ static PM_RATE_EST_TYPE FUNC_TABLE CoeffRateEst4x4_funcPtrArray[EB_ASM_TYPE_TOTA
  * function header
  *****************************/
 
-EB_U64 GetPMCost(
+EB_U64 EbHevcGetPMCost(
 	EB_U64                   lambda,
 	EB_U64                   tuDistortion,
 	EB_U64                   yTuCoeffBits
@@ -180,7 +180,7 @@ const EB_U8 ChromaQpMap[] =
 };
 
 
-EB_EXTERN EB_ALIGN(16) const EB_S16 TransformAsmConst[] = {
+EB_EXTERN EB_ALIGN(16) const EB_S16 EbHevcTransformAsmConst[] = {
     2, 0, 2, 0, 2, 0, 2, 0,
     4, 0, 4, 0, 4, 0, 4, 0,
     8, 0, 8, 0, 8, 0, 8, 0,
@@ -949,7 +949,7 @@ static const EB_U16 MaskingMatrix32x32_Level2_1080p[] = {
 
 
 // Level3
-// 4K 
+// 4K
 // 4x4
 static const EB_U16 MaskingMatrix4x4_Level3_4K[] = {
     M_100, M_90, M_0, M_0,
@@ -1849,37 +1849,37 @@ static const EB_U16 MaskingMatrix32x32_4[] = {
     M_090, M_090, M_090, M_090,     M_090, M_090, M_090, M_090,     M_080, M_080, M_080, M_080,     M_080, M_080, M_080, M_080,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_090, M_090, M_090, M_090,     M_090, M_090, M_090, M_090,     M_080, M_080, M_080, M_080,     M_080, M_080, M_080, M_080,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_090, M_090, M_090, M_090,     M_090, M_090, M_090, M_090,     M_080, M_080, M_080, M_080,     M_080, M_080, M_080, M_080,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                                                                                                                   
+
     M_090, M_090, M_090, M_090,     M_090, M_090, M_090, M_090,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_090, M_090, M_090, M_090,     M_090, M_090, M_090, M_090,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_090, M_090, M_090, M_090,     M_090, M_090, M_090, M_090,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_090, M_090, M_090, M_090,     M_090, M_090, M_090, M_090,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                                                                                                                   
+
     M_080, M_080, M_080, M_080,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_080, M_080, M_080, M_080,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_080, M_080, M_080, M_080,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_080, M_080, M_080, M_080,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                                                                                                                  
+
     M_080, M_080, M_080, M_080,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_080, M_080, M_080, M_080,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_080, M_080, M_080, M_080,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_080, M_080, M_080, M_080,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_070, M_070, M_070, M_070,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                                                                                                                  
+
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                                                                                                                   
+
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                                                                                                                  
+
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                                                                                                                  
+
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
@@ -1913,17 +1913,17 @@ static const EB_U16 MaskingMatrix16x16_5[] = {
     M_100, M_100, M_100, M_100,     M_040, M_040, M_040, M_040,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_100, M_100, M_100, M_100,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_100, M_100, M_100, M_100,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                  
+
     M_040, M_040, M_025, M_025,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_040, M_040, M_025, M_025,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_040, M_040, M_025, M_025,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_040, M_040, M_025, M_025,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                  
+
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                  
+
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
@@ -1935,37 +1935,37 @@ static const EB_U16 MaskingMatrix32x32_5[] = {
     M_100, M_100, M_100, M_100,     M_060, M_060, M_060, M_060,     M_040, M_040, M_040, M_040,     M_040, M_040, M_040, M_040,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_100, M_100, M_100, M_100,     M_050, M_050, M_050, M_050,     M_040, M_040, M_040, M_040,     M_040, M_040, M_040, M_040,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_100, M_100, M_100, M_100,     M_050, M_050, M_050, M_050,     M_040, M_040, M_040, M_040,     M_040, M_040, M_040, M_040,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                  
+
     M_060, M_060, M_050, M_050,     M_050, M_050, M_050, M_050,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_060, M_060, M_050, M_050,     M_050, M_050, M_050, M_050,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_060, M_060, M_050, M_050,     M_050, M_050, M_050, M_050,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_060, M_060, M_050, M_050,     M_050, M_050, M_050, M_050,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                   
+
     M_040, M_040, M_040, M_040,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_040, M_040, M_040, M_040,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_040, M_040, M_040, M_040,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_040, M_040, M_040, M_040,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                   
+
     M_040, M_040, M_040, M_040,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_040, M_040, M_040, M_040,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_040, M_040, M_040, M_040,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_040, M_040, M_040, M_040,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_025, M_025, M_025, M_025,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                   
+
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                 
+
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                   
+
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
-                                                                                                   
+
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,     M_000, M_000, M_000, M_000,
@@ -2024,22 +2024,22 @@ static const EB_U16 MaskingMatrix32x32_6[] = {
     M_100, M_100, M_100, M_100,  M_100, M_100, M_100, M_100,  M_100, M_100, M_100, M_100,  M_025, M_025, M_025, M_025,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
     M_100, M_100, M_100, M_100,  M_100, M_100, M_100, M_100,  M_100, M_100, M_100, M_100,  M_025, M_025, M_025, M_025,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
     M_100, M_100, M_100, M_100,  M_100, M_100, M_100, M_100,  M_100, M_100, M_100, M_100,  M_025, M_025, M_025, M_025,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
-    
+
     M_100, M_100, M_100, M_100,  M_100, M_100, M_100, M_100,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
     M_100, M_100, M_100, M_100,  M_100, M_100, M_100, M_100,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
     M_100, M_100, M_100, M_100,  M_100, M_100, M_100, M_100,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
     M_100, M_100, M_100, M_100,  M_100, M_100, M_100, M_100,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
-    
+
     M_100, M_100, M_100, M_100,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
     M_100, M_100, M_100, M_100,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
     M_100, M_100, M_100, M_100,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
     M_100, M_100, M_100, M_100,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
-   
+
     M_025, M_025, M_025, M_025,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
     M_025, M_025, M_025, M_025,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
     M_025, M_025, M_025, M_025,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
-    M_025, M_025, M_025, M_025,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, 
-    
+    M_025, M_025, M_025, M_025,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
+
     M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
     M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,  M_000, M_000, M_000, M_000,   M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000, M_000,
@@ -2120,10 +2120,10 @@ static const EB_U16 *MaskingMatrixSet2[8][4] =
     { MaskingMatrix4x4_1, MaskingMatrix8x8_1, MaskingMatrix16x16_1, MaskingMatrix32x32_2 },
     { MaskingMatrix4x4_1, MaskingMatrix8x8_1, MaskingMatrix16x16_1, MaskingMatrix32x32_2 },
     /*************************  L45_SETTING *************************/
-    { MaskingMatrix4x4_5, MaskingMatrix8x8_5, MaskingMatrix16x16_5, MaskingMatrix32x32_5}, 
+    { MaskingMatrix4x4_5, MaskingMatrix8x8_5, MaskingMatrix16x16_5, MaskingMatrix32x32_5},
     { MaskingMatrix4x4_6, MaskingMatrix8x8_6, MaskingMatrix16x16_6, MaskingMatrix32x32_6 },
     /*************************  L67_SETTING *************************/
-    { MaskingMatrix4x4_5, MaskingMatrix8x8_5, MaskingMatrix16x16_5, MaskingMatrix32x32_5}, 
+    { MaskingMatrix4x4_5, MaskingMatrix8x8_5, MaskingMatrix16x16_5, MaskingMatrix32x32_5},
     { MaskingMatrix4x4_6, MaskingMatrix8x8_6, MaskingMatrix16x16_6, MaskingMatrix32x32_6 },
 
 };
@@ -2192,7 +2192,7 @@ void MaskTransformCoeffs(
     SequenceControlSet_t *sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->ParentPcsPtr->sequenceControlSetWrapperPtr->objectPtr;
     EB_U8     pmpMaskingClass = (sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE) ? 0 : 1;
     depthIndex = LOG2F(areaSize) - 2;
-	
+
 	depthIndex = depthIndex < 4 ? depthIndex : 0;
 
 	MatMul_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][activeAreaSize >> 3](
@@ -2210,11 +2210,11 @@ void MaskTransformCoeffs(
 /*********************************************************************
  * PerformTwoStagePm
  *
- * First phase (non-core): three different PM candidates are determined to be evaluated in the second phase. The PM candidates are distinct in term of VQ (i.e. the susceptibility to cause VQ artifact(s)), 
+ * First phase (non-core): three different PM candidates are determined to be evaluated in the second phase. The PM candidates are distinct in term of VQ (i.e. the susceptibility to cause VQ artifact(s)),
  * and in term of bitrate (i.e. the capability to save bits). The PM candidates are constructed among pre-defined sets of matrices that are derived offline.
- * Second stage (core), the provided PM candidates are evaluated based on the rate distortion optimization (RDO) metric and the best candidate is selected at a 4x4 block basis. 
- * In this process, each TU is divided into 4x4 blocks, and each 4x4 is evaluated with up to three masking matrices provided from the first phase. 
- * Weighting factors are used to bias the decisions based on HVS concepts like distance from DC, temporal layer and the block mode. 
+ * Second stage (core), the provided PM candidates are evaluated based on the rate distortion optimization (RDO) metric and the best candidate is selected at a 4x4 block basis.
+ * In this process, each TU is divided into 4x4 blocks, and each 4x4 is evaluated with up to three masking matrices provided from the first phase.
+ * Weighting factors are used to bias the decisions based on HVS concepts like distance from DC, temporal layer and the block mode.
   *********************************************************************/
 void PerformTwoStagePm(
     SequenceControlSet_t *sequenceControlSetPtr,
@@ -2231,7 +2231,7 @@ void PerformTwoStagePm(
     const EB_S32          iq_offset,
     const EB_S32          shiftNum,
     EB_U32                areaSize,
-    const EB_U32          activeAreaSize,                      
+    const EB_U32          activeAreaSize,
     EB_U32               *yCountNonZeroCoeffs,
     EB_U8			      pmpMaskingLevelEncDec,
     EB_MODETYPE		      type,
@@ -2311,7 +2311,7 @@ void PerformTwoStagePm(
                     EB_U32 alpha = ALPHA_1000;
                     EB_U32 matrixBlkOffset = colBlkIter * 4 + (rowBlkIter * 4 * areaSize);
 
-					if (contextPtr->pmMode == PM_MODE_0){ // 4K  
+					if (contextPtr->pmMode == PM_MODE_0){ // 4K
 						MaskingMap4x4Ptr[0] = &MaskingMatrixSet0[pmpMaskingLevelEncDec][depthIndex][matrixBlkOffset];
 						MaskingMap4x4Ptr[1] = &MaskingMatrixSet1[pmpMaskingLevelEncDec][depthIndex][matrixBlkOffset];
 						MaskingMap4x4Ptr[2] = &maskingMatrixPtr[matrixBlkOffset];
@@ -2509,7 +2509,7 @@ void PerformTwoStagePm(
                     {
 
                         EbPMCand_t  *pmCand = &pmCandBuffer[canDi];
-						
+
 						//There is Mismatch between ASM vs C !
 						MatMulOut_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)](
 							&coeff[blkOffset],
@@ -2560,22 +2560,22 @@ void PerformTwoStagePm(
                         EB_U32 shift = 2 * (7 - Log2f(areaSize));
                         sse[DIST_CALC_RESIDUAL] = (sse[DIST_CALC_RESIDUAL] + (EB_U64)(1 << (shift - 1))) >> shift;
 
-						if (pmCand->nzCoeff)						
+						if (pmCand->nzCoeff)
 							CoeffRateEst4x4_funcPtrArray[!!(ASM_TYPES & PREAVX2_MASK)][componentType != COMPONENT_LUMA](
 								pictureControlSetPtr->cabacCost,
 								NULL,
 								4,
 								type,
 								0,
-								0,							
+								0,
 								pmCand->quCoeff,
-								PM_STRIDE,	
+								PM_STRIDE,
 								componentType,
 								pmCand->nzCoeff,
 								&coeffBits
-								);	
+								);
 
-                        pmCand->cost = GetPMCost(
+                        pmCand->cost = EbHevcGetPMCost(
 
 							(EB_U64)contextPtr->fullLambda*alpha*betta / 100 / 100,
 
@@ -2632,7 +2632,7 @@ void DecoupledQuantizeInvQuantizeLoops(
 
 	EB_U32 coeffLocation = 0;
 	EB_U32 rowIndex, colIndex;
-	
+
 
 	EB_U32 adptive_qp_offset = q_offset;
 
@@ -2799,9 +2799,9 @@ void DecoupledQuantizeInvQuantizeLoops(
 
 	if (useRdoType == EB_PMCORE){
 	if (*nonzerocoeff && (componentType == COMPONENT_LUMA)){
-	
+
 #define NUM_PM_CANDIDATE 3
-		
+
 		EB_U8  canDi;
 		EB_U8  candCount = 0;
 		EB_U64 bestCost = MAX_CU_COST;
@@ -2833,7 +2833,7 @@ void DecoupledQuantizeInvQuantizeLoops(
 					candCount = 0;
 					bestCost = MAX_CU_COST;
 					bestCand = 0;
- 
+
 					MaskingMap4x4Ptr[0] = &MaskingMatrix4x4_100[0];
 					MaskingMap4x4Ptr[1] = &MaskingMatrix4x4_70[0];
 					MaskingMap4x4Ptr[2] = &MaskingMatrix4x4_50[0];
@@ -2842,7 +2842,7 @@ void DecoupledQuantizeInvQuantizeLoops(
 					pmCandBuffer[candCount++].maskingLevel = 1;
 					pmCandBuffer[candCount++].maskingLevel = 2;
 
-						
+
 
 					// Loop over candidates
 					for (canDi = 0; canDi < candCount; canDi++)
@@ -3022,7 +3022,7 @@ void UnifiedQuantizeInvQuantize(
 		//for the iQuant
 		const EB_S32 shiftedFFunc = (qpPer > 8) ? (EB_S32)FFunc[qpRem] << (qpPer - 2) : (EB_S32)FFunc[qpRem] << qpPer; // this is 6+8+TRANS_BIT_INCREMENT
 		const EB_S32 shiftNum = (qpPer > 8) ? QUANT_IQUANT_SHIFT - QUANT_SHIFT - transformShiftNum - 2 : QUANT_IQUANT_SHIFT - QUANT_SHIFT - transformShiftNum;
-		const EB_S32 iq_offset = 1 << (shiftNum - 1);	
+		const EB_S32 iq_offset = 1 << (shiftNum - 1);
 
 		DecoupledQuantizeInvQuantizeLoops(
 			coeff,
@@ -3122,7 +3122,7 @@ void UnifiedQuantizeInvQuantize(
         EB_U32 activeAreaSize = areaSize >> transCoeffShape;
 
 		if (contextPtr->pmMethod && componentType != COMPONENT_LUMA) {
-        
+
             if (pmpMaskingLevelEncDec)
             {
                 MaskTransformCoeffs(
@@ -3134,8 +3134,8 @@ void UnifiedQuantizeInvQuantize(
                     pictureControlSetPtr,
                     &(*yCountNonZeroCoeffs));
             }
-            //QiQ SSSE3 is hardcoded 
-            //QiQ   Use this for SW	
+            //QiQ SSSE3 is hardcoded
+            //QiQ   Use this for SW
 			QiQ_funcPtrArray[!!(ASM_TYPES & AVX2_MASK)][activeAreaSize >> 3](
                 coeff,
                 coeffStride,
@@ -3436,7 +3436,7 @@ EB_ERRORTYPE EncodeTransform(
 
         EB_U32 shift2nd    = Log2f(transformSize) + 6;
         EB_S32 offset2nd   = 1 << (shift2nd - 1);
-        
+
         EB_S16 dcCoeff;
         EB_S32 dcCoeffTemp;
         dcCoeffTemp = (EB_S32)((64 * sumResidual + offset1st) >> shift1st);
@@ -3519,12 +3519,12 @@ EB_ERRORTYPE EncodeInvTransform(
 
         EB_U32  shift1st            = SHIFT_INV_1ST;
         EB_U32  shift2nd            = SHIFT_INV_2ND - bitIncrement;
-        
+
         EB_S32  offset1st           = 1 << (shift1st - 1);
         EB_S32  offset2nd           = 1 << (shift2nd - 1);
 
         EB_S16  invTranformedDcCoef;
-        
+
         invTranformedDcCoef = (EB_S16) CLIP3(MIN_NEG_16BIT_NUM, MAX_POS_16BIT_NUM,((64 * dcCoef + offset1st) >> shift1st));
         invTranformedDcCoef = (EB_S16) CLIP3(MIN_NEG_16BIT_NUM, MAX_POS_16BIT_NUM,((64 * invTranformedDcCoef + offset2nd) >> shift2nd));
 
@@ -3532,7 +3532,7 @@ EB_ERRORTYPE EncodeInvTransform(
             reconBuffer,
             reconStride,
             transformSize,
-            invTranformedDcCoef); 
+            invTranformedDcCoef);
 
     }
     else
@@ -3651,5 +3651,3 @@ void PfZeroOutUselessQuadrants(
         quadrantSize);
 
 }
-
-

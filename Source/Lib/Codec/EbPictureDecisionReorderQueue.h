@@ -8,6 +8,7 @@
 
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -16,12 +17,13 @@ extern "C" {
  * Packetization Reorder Queue Entry
  ************************************************/
 typedef struct PictureDecisionReorderEntry_s {
-    EB_U64                                pictureNumber;    
+    EbDctor                               dctor;
+    EB_U64                                pictureNumber;
     EbObjectWrapper_t                    *parentPcsWrapperPtr;
 } PictureDecisionReorderEntry_t;   
 
 extern EB_ERRORTYPE PictureDecisionReorderEntryCtor(   
-    PictureDecisionReorderEntry_t       **entryDblPtr,
+    PictureDecisionReorderEntry_t        *entryPtr,
     EB_U32                                pictureNumber);
 
 #ifdef __cplusplus

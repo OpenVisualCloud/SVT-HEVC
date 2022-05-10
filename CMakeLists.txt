@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 set(project_name "svt-hevc")
 
 if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
@@ -45,7 +45,7 @@ endif()
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
 set(SVT_HEVC_VERSION_MAJOR           "1")
-set(SVT_HEVC_VERSION_MINOR           "4")
+set(SVT_HEVC_VERSION_MINOR           "5")
 set(SVT_HEVC_VERSION_PATCHLEVEL      "1")
 
 configure_file(${PROJECT_SOURCE_DIR}/Source/API/EbApiVersion.h.in ${PROJECT_SOURCE_DIR}/Source/API/EbApiVersion.h @ONLY)

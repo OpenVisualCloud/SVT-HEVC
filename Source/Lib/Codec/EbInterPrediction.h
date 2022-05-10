@@ -14,6 +14,7 @@
 #include "EbModeDecision.h"
 #include "EbMcp.h"
 #include "EbMvMerge.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -29,7 +30,7 @@ extern "C" {
 struct ModeDecisionContext_s;
 
 typedef struct InterPredictionContext_s {
-    
+    EbDctor                                 dctor;
     // mcp context
     MotionCompensationPredictionContext_t  *mcpContext;
 
@@ -40,17 +41,14 @@ typedef struct InterPredictionContext_s {
 } InterPredictionContext_t;
 
 extern EB_ERRORTYPE InterPredictionContextCtor(
-	InterPredictionContext_t **interPredictionContext,
+	InterPredictionContext_t  *contextPtr,
 	EB_U16                     maxCUWidth,
     EB_U16                     maxCUHeight,
     EB_BOOL                    is16bit);
 
 
-extern EB_ERRORTYPE InterPredictionContextDtor(
-    InterPredictionContext_t *interPredictionContext);
-
 extern EB_ERRORTYPE Inter2Nx2NPuPredictionInterpolationFree(
-	struct ModeDecisionContext_s           *contextPtr,
+    struct ModeDecisionContext_s           *contextPtr,
 	EB_U32                                  componentMask,
 	PictureControlSet_t                    *pictureControlSetPtr,
 	ModeDecisionCandidateBuffer_t          *candidateBufferPtr);

@@ -9,6 +9,7 @@
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbEntropyCodingObject.h"
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -24,6 +25,7 @@ extern "C" {
     } PicTimingEntry_t;
 
 typedef struct PacketizationReorderEntry_s {
+    EbDctor                         dctor;
     EB_U64                          pictureNumber;    
     EbObjectWrapper_t              *outputStreamWrapperPtr;
 
@@ -40,7 +42,7 @@ typedef struct PacketizationReorderEntry_s {
 } PacketizationReorderEntry_t;   
 
 extern EB_ERRORTYPE PacketizationReorderEntryCtor(   
-    PacketizationReorderEntry_t   **entryDblPtr,
+    PacketizationReorderEntry_t    *entryPtr,
     EB_U32                          pictureNumber);
 
   

@@ -1,119 +1,94 @@
 image: Visual Studio 2019
 configuration:
-  - Debug
   - Release
-  - Release ffmpeg
+  - Debug
 
 environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
+  MSYSTEM: MINGW64
+  MSYS2_PATH_TYPE: inherit
+  PKG_CONFIG_PATH: C:/msys64/mingw64/lib/pkgconfig
+  BASE_CMAKE_ARGS: -DCMAKE_INSTALL_PREFIX=C:/msys64/mingw64 -DBUILD_SHARED_LIBS=off
   matrix:
     - generator: Visual Studio 2019
-      CC: cl
     - generator: Unix Makefiles
-      CC: ccache gcc
 
 matrix:
   exclude:
-    - configuration: Release ffmpeg
-      generator: Visual Studio 2019
+    - configuration: Debug
+      generator: Unix Makefiles
 
 install:
   - '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64'
   - set "PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%"
-  - set MSYSTEM=MINGW64
-  - set MSYS2_PATH_TYPE=inherit
-  - bash -lc 'exit'
+  - ps: (New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/OpenVisualCloud/SVT-AV1-Resources/master/video.tar.gz', "$PWD\video.tar.gz")
+  - tar xf video.tar.gz
   - pacman -Syyuu --ask=20 --noconfirm --noprogressbar --needed
-  - pacman -Sy --ask=20 --noconfirm --noprogressbar --needed mingw-w64-x86_64-yasm mingw-w64-x86_64-ccache mingw-w64-x86_64-cmake mingw-w64-x86_64-gcc pkg-config make
-  - cd Build
+  - ps: if ("$env:generator" -match "Unix") { $env:packages = "mingw-w64-x86_64-ccache mingw-w64-x86_64-gcc make" }
+  - pacman -Suu --ask=20 --noconfirm --noprogressbar --needed mingw-w64-x86_64-yasm %packages%
   - ps: |
-      if ($env:APPVEYOR_JOB_NAME -match "Debug") {
-        $configuration="Debug"
-      } else {
-        $configuration="Release"
-      }
       if ("$env:generator" -match "Visual*") {
-        if ("$env:generator" -match "2019") {
-          cmake .. -G "Visual Studio 16 2019" -A x64 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=C:/msys2/mingw64 -DBUILD_SHARED_LIBS=off
-        } else {
-          cmake .. -G "$env:generator" -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=C:/msys2/mingw64 -DBUILD_SHARED_LIBS=off
-        }
+        cmake -S . -B Build -G "Visual Studio 16 2019" -A x64 $env:BASE_CMAKE_ARGS.Split(' ')
       } elseif ($null -ne $env:generator){
-        cmake .. -G "$env:generator" -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE="$configuration" -DCMAKE_INSTALL_PREFIX=C:/msys2/mingw64 -DBUILD_SHARED_LIBS=off
+        cmake -S . -B Build -G "$env:generator" -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE="$env:CONFIGURATION" $env:BASE_CMAKE_ARGS.Split(' ')
       } else {
-        cmake .. -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE="$configuration" -DCMAKE_INSTALL_PREFIX=C:/msys2/mingw64 -DBUILD_SHARED_LIBS=off
+        cmake -S . -B Build -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE="$env:CONFIGURATION" $env:BASE_CMAKE_ARGS.Split(' ')
       }
-  - ccache -s
-  - bash -lc 'ccache -s'
   - pacman -Sc --noconfirm
 
 for:
   - matrix:
       only:
-        - configuration: Release ffmpeg
+        - configuration: Release
+          generator: Unix Makefiles
     build_script:
-      - if "%APPVEYOR_JOB_NAME:~0,5%"=="Debug" (set config=Debug) else set config=Release
-      - if "%GENERATOR:~0,6%"=="Visual" set config=%config% -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-      - cmake --build . --config %config%
-      - cmake --build . --target install
-      - set "PKG_CONFIG_PATH=C:/msys2/mingw64/lib/pkgconfig"
+      - make -C Build -j install
       - pkg-config --debug --exists --print-errors SvtHevcEnc
-      - git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg
+      - git clone https://github.com/FFmpeg/FFmpeg.git --depth=1 --branch=master ffmpeg
       - cd ffmpeg
-      - curl -L https://raw.githubusercontent.com/OpenVisualCloud/SVT-HEVC/master/ffmpeg_plugin/0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch | patch --binary -sN -p1
+      - git apply --ignore-space-change --ignore-whitespace %APPVEYOR_BUILD_FOLDER%/ffmpeg_plugin/master-0001-lavc-svt_hevc-add-libsvt-hevc-encoder-wrapper.patch
       - ps: |
-          $path = [System.Environment]::GetEnvironmentVariable('PATH', 'Machine')
-          $path = ($path.Split(';') | Where-Object { $_ -notmatch 'Git' }) -join ';'
+          $path = ([System.Environment]::GetEnvironmentVariable('PATH', 'Machine').Split(';') | Where-Object { $_ -notmatch 'Git' }) -join ';'
           [System.Environment]::SetEnvironmentVariable('PATH', $path, 'Machine')
-      - bash -c 'if test "$(echo $generator | cut -c1-6)" = "Visual"; then
-        ./configure --target-os=win64 --arch=x86_64 --toolchain=msvc --cc=cl --cxx=cl --extra-cflags="-MD" --disable-everything --enable-libsvthevc --enable-encoder=libsvt_hevc;
-        else
-        ./configure --arch=x86_64 --cc="ccache gcc" --cxx="ccache g++" --enable-libsvthevc --enable-encoder=libsvt_hevc;
-        fi || cat ffbuild/config.log'
+      - bash -c './configure --arch=x86_64 --cc="ccache gcc" --cxx="ccache g++" --enable-libsvthevc --enable-encoder=libsvt_hevc || cat ffbuild/config.log'
       - make -j 10
-      - ps: (New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/OpenVisualCloud/SVT-AV1-Resources/master/video.tar.gz', "$PWD\video.tar.gz")
-      - tar xf video.tar.gz
-      - ffmpeg -i akiyo_cif.y4m -c:v libsvt_hevc akiyo.h265
+      - ffmpeg -i ../akiyo_cif.y4m -c:v libsvt_hevc akiyo.h265
       - cd ..
+    #artifacts:
+    #  - path: bin\Release\SvtHevcEncApp.exe
+    #    name: $(APPVEYOR_PROJECT_NAME)
+    #  - path: bin\Release\libSvtHevcEnc.a
+    #    name: $(APPVEYOR_PROJECT_NAME)
+    #  - path: ffmpeg\ffmpeg.exe
+    #    name: $(APPVEYOR_PROJECT_NAME)_FFMPEG
 
-  - matrix:
-      only:
-        - generator: Unix Makefiles
-    artifacts:
-      - path: bin\Release\*.*
-        name: $(APPVEYOR_PROJECT_NAME)_MINGW64
-    build_script:
-      - make -j
-  - matrix:
-      only:
-        - generator: Visual Studio 2019
-    build:
-      project: Build\svt-hevc.sln
-    artifacts:
-      - path: bin\Release\*.*
-        name: $(APPVEYOR_PROJECT_NAME)_MSVC2019
+  #- matrix:
+  #    only:
+  #      - generator: Visual Studio 2019
+  #        configuration: Release
+  #  build:
+  #    project: Build\svt-hevc.sln
+  #  artifacts:
+  #    - path: bin\Release\SvtHevcEncApp.exe
+  #      name: $(APPVEYOR_PROJECT_NAME)
+  #    - path: bin\Release\SvtHevcEnc.lib
+  #      name: $(APPVEYOR_PROJECT_NAME)
+
+build:
+  project: Build\svt-hevc.sln
 
 test_script:
-  - ps: if ($env:APPVEYOR_JOB_NAME -match "Debug") {cd ../Bin/Debug} else {cd ../Bin/Release}
-  - ps: (New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/OpenVisualCloud/SVT-AV1-Resources/master/video.tar.gz', "$PWD\video.tar.gz")
-  - tar xf video.tar.gz
-  - SvtHevcEncApp -n 50 -encMode 9 -i akiyo_cif.y4m -b test1.h265
-  - del video.tar.gz video.tar akiyo_cif.y4m bus_cif.y4m test1.h265
+  - ps: "& ./Bin/$env:CONFIGURATION/SvtHevcEncApp -n 50 -encMode 9 -i akiyo_cif.y4m -b test1.h265"
 
 cache:
-  - 'C:\Users\appveyor\AppData\Roaming\.ccache'
   - 'C:\msys64\home\appveyor\.ccache'
   - 'C:\msys64\var\cache\pacman\pkg'
-
-artifacts:
-  - path: bin\Release\*.*
-    name: $(APPVEYOR_PROJECT_NAME)
 
 deploy:
   - provider: GitHub
     artifact: $(APPVEYOR_PROJECT_NAME)
     auth_token:
-      secure: 'sf0pQXlPI+X6LoAR8QUJB74jjzNxcLGOXI3H0nbxJq8llvGPG/TAUd87hq5iHZXo'
+      secure: "sf0pQXlPI+X6LoAR8QUJB74jjzNxcLGOXI3H0nbxJq8llvGPG/TAUd87hq5iHZXo"
     prerelease: true
     on:
       appveyor_repo_tag: true

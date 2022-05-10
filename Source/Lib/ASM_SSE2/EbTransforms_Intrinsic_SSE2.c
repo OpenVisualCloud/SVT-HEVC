@@ -13,8 +13,8 @@
 *****************************/
 
 #define MACRO_TRANS_2MAC_NO_SAVE(XMM_1, XMM_2, XMM_3, XMM_4, XMM_OFFSET, OFFSET1, OFFSET2, SHIFT)\
-    XMM_3 = _mm_load_si128((__m128i *)(TransformAsmConst + OFFSET1));\
-    XMM_4 = _mm_load_si128((__m128i *)(TransformAsmConst + OFFSET2));\
+    XMM_3 = _mm_load_si128((__m128i *)(EbHevcTransformAsmConst + OFFSET1));\
+    XMM_4 = _mm_load_si128((__m128i *)(EbHevcTransformAsmConst + OFFSET2));\
     XMM_3 = _mm_madd_epi16(XMM_3, XMM_1);\
     XMM_4 = _mm_madd_epi16(XMM_4, XMM_2);\
     XMM_3 = _mm_srai_epi32(_mm_add_epi32(XMM_4, _mm_add_epi32(XMM_3, XMM_OFFSET)), SHIFT);\
@@ -337,7 +337,7 @@ EB_ALIGN(16) const EB_S16 InvDstTransformAsmConst_SSE2[] = {
 
 
 // Coefficients for inverse 32-point transform
-EB_EXTERN const EB_S16 coeff_tbl2[48 * 8] =
+EB_EXTERN const EB_S16 EbHevcCoeff_tbl2[48 * 8] =
 {
     64, 89, 64, 75, 64, 50, 64, 18, 64, -18, 64, -50, 64, -75, 64, -89,
     83, 75, 36, -18, -36, -89, -83, -50, -83, 50, -36, 89, 36, 18, 83, -75,
@@ -370,7 +370,7 @@ EB_EXTERN const EB_S16 coeff_tbl2[48 * 8] =
 __attribute__((visibility("hidden")))
 #endif
 #endif
-EB_EXTERN const EB_S16 coeff_tbl[48 * 8] =
+EB_EXTERN const EB_S16 EbHevcCoeff_tbl[48 * 8] =
 {
     64, 64, 89, 75, 83, 36, 75, -18, 64, -64, 50, -89, 36, -83, 18, -50,
     64, 64, 50, 18, -36, -83, -89, -50, -64, 64, 18, 75, 83, -36, 75, -89,
@@ -412,7 +412,7 @@ static void Transform16(short *src, int src_stride, short *dst, int dst_stride, 
     int i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
     for (i = 0; i < 16; i++)
     {
@@ -478,7 +478,7 @@ static void InvTransform16(
     int i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl2;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl2;
 
     for (i = 0; i < 16; i++)
     {
@@ -801,7 +801,7 @@ static void PfreqN4FirstTranspose32_SSE2(
 	}
 		}
 
-void PfreqTranspose32Type1_SSE2(
+void EbHevcPfreqTranspose32Type1_SSE2(
     EB_S16 *src,
     EB_U32  src_stride,
     EB_S16 *dst,
@@ -996,7 +996,7 @@ void Pfreq2DInvTransform32_SSE2(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl2;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl2;
 
     for (i = 0; i < 32; i++)
     {
@@ -1105,7 +1105,7 @@ void Pfreq1DInvTransform32_SSE2(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl2;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl2;
 
     for (i = 0; i < 16; i++)
     {
@@ -1213,7 +1213,7 @@ void PfreqEstimateInvTransform32x32_SSE2(
     EB_S16 *intermediate,
     EB_U32  addshift)
 {
-    PfreqTranspose32Type1_SSE2(src, src_stride, intermediate, 32);
+    EbHevcPfreqTranspose32Type1_SSE2(src, src_stride, intermediate, 32);
     Pfreq1DInvTransform32_SSE2(intermediate, 32, dst, dst_stride, 7);
     PfreqTranspose32Type2_SSE2(dst, dst_stride, intermediate, 32);
     Pfreq2DInvTransform32_SSE2(intermediate, 32, dst, dst_stride, 12 - addshift);
@@ -1230,7 +1230,7 @@ static void InvTransform32_SSE2(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl2;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl2;
 
     for (i = 0; i < 32; i++)
     {
@@ -1420,7 +1420,7 @@ static void Transform32_SSE2(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
     for (i = 0; i < 32; i++)
     {
@@ -1549,7 +1549,7 @@ static void Pfreq1DTransform32_SSE2(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
     for (i = 0; i < 32; i++)
     {
@@ -1685,7 +1685,7 @@ static void Pfreq2DTransform32_SSE2(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
     for (i = 0; i < 16; i++)
     {
@@ -1821,7 +1821,7 @@ static void PfreqN41DTransform32_SSE2(
 	EB_U32 i;
 	__m128i s0 = _mm_cvtsi32_si128(shift);
 	__m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-	const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+	const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
 	for (i = 0; i < 32; i++)
 	{
@@ -1958,7 +1958,7 @@ static void PfreqN42DTransform32_SSE2(
 	EB_U32 i;
 	__m128i s0 = _mm_cvtsi32_si128(shift);
 	__m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-	const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+	const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
 	for (i = 0; i < 8; i++)
 
@@ -2129,7 +2129,7 @@ static void Pfreq1DTransform16_SSE2(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
     for (i = 0; i < 16; i++)
     {
@@ -2183,7 +2183,7 @@ static void Pfreq2DTransform16_SSE2(
     EB_U32 i;
     __m128i s0 = _mm_cvtsi32_si128(shift);
     __m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-    const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+    const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
     for (i = 0; i < 8; i++)
     {
@@ -2315,7 +2315,7 @@ static void PfreqN42DTransform16_SSE2(
 	EB_U32 i;
 	__m128i s0 = _mm_cvtsi32_si128(shift);
 	__m128i o0 = _mm_set1_epi32(1 << (shift - 1));
-	const __m128i *coeff32 = (const __m128i *)coeff_tbl;
+	const __m128i *coeff32 = (const __m128i *)EbHevcCoeff_tbl;
 
 	for (i = 0; i < 4; i++)
 
@@ -2525,7 +2525,7 @@ void Transform4x4_SSE2_INTRIN(
          36, -83,  36, -83,  36, -83,  36, -83,
          83, -36,  83, -36,  83, -36,  83, -36
     };
-     EB_ALIGN(16) const EB_S16 * TransformAsmConst = transformIntrinConst_SSE2;
+     EB_ALIGN(16) const EB_S16 * EbHevcTransformAsmConst = transformIntrinConst_SSE2;
     __m128i xmm0, xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm_offset, xmm_shift;
 
     xmm_shift = _mm_cvtsi32_si128(5 - bitIncrement);
@@ -2612,7 +2612,7 @@ void DstTransform4x4_SSE2_INTRIN(
     __m128i xmm_temp;
 
     EB_U32 shift = bitIncrement + 1;
-    EB_ALIGN(16) const EB_S16 * TransformAsmConst = DstTransformAsmConst_SSE2;
+    EB_ALIGN(16) const EB_S16 * EbHevcTransformAsmConst = DstTransformAsmConst_SSE2;
 
     xmm_res0 = _mm_loadl_epi64((__m128i *)(residual));
     xmm_res1 = _mm_loadl_epi64((__m128i *)(residual + srcStride));

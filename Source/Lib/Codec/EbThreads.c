@@ -109,12 +109,10 @@ EB_ERRORTYPE EbDestroyThread(
     EB_ERRORTYPE error_return = EB_ErrorNone;
 
 #ifdef _WIN32
-    //error_return = TerminateThread((HANDLE) threadHandle, 0) ? EB_ErrorDestroyThreadFailed : EB_ErrorNone;
     WaitForSingleObject(threadHandle, INFINITE);
     error_return = CloseHandle(threadHandle) ? EB_ErrorNone : EB_ErrorDestroyThreadFailed;
 #else
-    //error_return = pthread_cancel(*((pthread_t*) threadHandle)) ? EB_ErrorDestroyThreadFailed : EB_ErrorNone;
-    pthread_join(*((pthread_t*) threadHandle), NULL);
+    pthread_join(*((pthread_t*)threadHandle), NULL);
     free(threadHandle);
 #endif // _WIN32
 

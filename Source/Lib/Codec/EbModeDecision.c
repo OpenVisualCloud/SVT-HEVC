@@ -42,7 +42,7 @@ EB_BOOL AntiContouringIntraModeValidityPerDepth[35] =
 };
 
 
-const EB_U32 parentIndex[85] = { 0, 0, 0, 2, 2, 2, 2, 0, 7, 7, 7, 7, 0, 12, 12, 12, 12, 0, 17, 17, 17, 17, 0, 0,
+const EB_U32 EbHevcParentIndex[85] = { 0, 0, 0, 2, 2, 2, 2, 0, 7, 7, 7, 7, 0, 12, 12, 12, 12, 0, 17, 17, 17, 17, 0, 0,
 23, 23, 23, 23, 0, 28, 28, 28, 28, 0, 33, 33, 33, 33, 0, 38, 38, 38, 38, 0, 0,
 44, 44, 44, 44, 0, 49, 49, 49, 49, 0, 54, 54, 54, 54, 0, 59, 59, 59, 59, 0, 0,
 65, 65, 65, 65, 0, 70, 70, 70, 70, 0, 75, 75, 75, 75, 0, 80, 80, 80, 80 };
@@ -68,13 +68,13 @@ EB_U8 GetNumOfIntraModesFromOisPoint(
 );
 extern EB_U32 stage1ModesArray[];
 
-void intraSearchTheseModesOutputBest(   
+void intraSearchTheseModesOutputBest(
     ModeDecisionContext_t                *contextPtr,
     PictureControlSet_t                 *pictureControlSetPtr,
     EB_U8                                *src,
     EB_U32                               srcStride,
-    EB_U8                                NumOfModesToTest,   
-    EB_U32                              *bestMode,  
+    EB_U8                                NumOfModesToTest,
+    EB_U32                              *bestMode,
     EB_U32                              *bestSADOut
 )
 {
@@ -84,7 +84,7 @@ void intraSearchTheseModesOutputBest(
     EB_U32   bestSAD = 32 * 32 * 255;
     EB_U32	 sadCurr;
 
-  
+
     for (candidateIndex = 0; candidateIndex < NumOfModesToTest; candidateIndex++) {
 
         mode =  stage1ModesArray[candidateIndex];
@@ -92,7 +92,7 @@ void intraSearchTheseModesOutputBest(
         // Intra Prediction
         IntraPredOnSrc(
             contextPtr,
-            PICTURE_BUFFER_DESC_LUMA_MASK,           
+            PICTURE_BUFFER_DESC_LUMA_MASK,
             pictureControlSetPtr,
             contextPtr->predictionBuffer,
             mode);
@@ -118,96 +118,81 @@ void intraSearchTheseModesOutputBest(
     *bestSADOut = bestSAD;
 }
 
-
+static void ModeDecisionCandidateBufferDctor(EB_PTR p)
+{
+    ModeDecisionCandidateBuffer_t *obj = (ModeDecisionCandidateBuffer_t*)p;
+    EB_DELETE(obj->predictionPtr);
+    EB_DELETE(obj->residualQuantCoeffPtr);
+    EB_DELETE(obj->reconCoeffPtr);
+    EB_DELETE(obj->reconPtr);
+}
 
 /***************************************
 * Mode Decision Candidate Ctor
 ***************************************/
 EB_ERRORTYPE ModeDecisionCandidateBufferCtor(
-	ModeDecisionCandidateBuffer_t **bufferDblPtr,
-	EB_U16                          lcuMaxSize,
-	EB_BITDEPTH                     maxBitdepth,
-	EB_U64                         *fastCostPtr,
-	EB_U64                         *fullCostPtr,
-	EB_U64                         *fullCostSkipPtr,
-	EB_U64                         *fullCostMergePtr)
+    ModeDecisionCandidateBuffer_t  *bufferPtr,
+    EB_U16                          lcuMaxSize,
+    EB_BITDEPTH                     maxBitdepth,
+    EB_U64                         *fastCostPtr,
+    EB_U64                         *fullCostPtr,
+    EB_U64                         *fullCostSkipPtr,
+    EB_U64                         *fullCostMergePtr)
 {
-	EbPictureBufferDescInitData_t pictureBufferDescInitData;
-	EbPictureBufferDescInitData_t doubleWidthPictureBufferDescInitData;
-	EB_ERRORTYPE return_error = EB_ErrorNone;
-	// Allocate Buffer
-	ModeDecisionCandidateBuffer_t *bufferPtr;
-	EB_MALLOC(ModeDecisionCandidateBuffer_t*, bufferPtr, sizeof(ModeDecisionCandidateBuffer_t), EB_N_PTR);
-	*bufferDblPtr = bufferPtr;
+    EbPictureBufferDescInitData_t pictureBufferDescInitData;
+    EbPictureBufferDescInitData_t doubleWidthPictureBufferDescInitData;
+    bufferPtr->dctor = ModeDecisionCandidateBufferDctor;
 
-	// Init Picture Data
-	pictureBufferDescInitData.maxWidth = lcuMaxSize;
-	pictureBufferDescInitData.maxHeight = lcuMaxSize;
-	pictureBufferDescInitData.bitDepth = maxBitdepth;
-	pictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
+    // Init Picture Data
+    pictureBufferDescInitData.maxWidth = lcuMaxSize;
+    pictureBufferDescInitData.maxHeight = lcuMaxSize;
+    pictureBufferDescInitData.bitDepth = maxBitdepth;
+    pictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
     pictureBufferDescInitData.colorFormat = EB_YUV420;
-	pictureBufferDescInitData.leftPadding = 0;
-	pictureBufferDescInitData.rightPadding = 0;
-	pictureBufferDescInitData.topPadding = 0;
-	pictureBufferDescInitData.botPadding = 0;
-	pictureBufferDescInitData.splitMode = EB_FALSE;
+    pictureBufferDescInitData.leftPadding = 0;
+    pictureBufferDescInitData.rightPadding = 0;
+    pictureBufferDescInitData.topPadding = 0;
+    pictureBufferDescInitData.botPadding = 0;
+    pictureBufferDescInitData.splitMode = EB_FALSE;
 
-	doubleWidthPictureBufferDescInitData.maxWidth = lcuMaxSize;
-	doubleWidthPictureBufferDescInitData.maxHeight = lcuMaxSize;
-	doubleWidthPictureBufferDescInitData.bitDepth = EB_16BIT;
-	doubleWidthPictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
+    doubleWidthPictureBufferDescInitData.maxWidth = lcuMaxSize;
+    doubleWidthPictureBufferDescInitData.maxHeight = lcuMaxSize;
+    doubleWidthPictureBufferDescInitData.bitDepth = EB_16BIT;
+    doubleWidthPictureBufferDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
     doubleWidthPictureBufferDescInitData.colorFormat = EB_YUV420;
-	doubleWidthPictureBufferDescInitData.leftPadding = 0;
-	doubleWidthPictureBufferDescInitData.rightPadding = 0;
-	doubleWidthPictureBufferDescInitData.topPadding = 0;
-	doubleWidthPictureBufferDescInitData.botPadding = 0;
-	doubleWidthPictureBufferDescInitData.splitMode = EB_FALSE;
+    doubleWidthPictureBufferDescInitData.leftPadding = 0;
+    doubleWidthPictureBufferDescInitData.rightPadding = 0;
+    doubleWidthPictureBufferDescInitData.topPadding = 0;
+    doubleWidthPictureBufferDescInitData.botPadding = 0;
+    doubleWidthPictureBufferDescInitData.splitMode = EB_FALSE;
 
-	// Candidate Ptr
-	bufferPtr->candidatePtr = (ModeDecisionCandidate_t*)EB_NULL;
+    // Video Buffers
+    EB_NEW(
+        bufferPtr->predictionPtr,
+        EbPictureBufferDescCtor,
+        (EB_PTR)&pictureBufferDescInitData);
 
-	// Video Buffers
-	return_error = EbPictureBufferDescCtor(
-		(EB_PTR*)&(bufferPtr->predictionPtr),
-		(EB_PTR)&pictureBufferDescInitData);
+    EB_NEW(
+        bufferPtr->residualQuantCoeffPtr,
+        EbPictureBufferDescCtor,
+        (EB_PTR)&doubleWidthPictureBufferDescInitData);
 
-	if (return_error == EB_ErrorInsufficientResources){
-		return EB_ErrorInsufficientResources;
-	}
-	return_error = EbPictureBufferDescCtor(
-		(EB_PTR*)&(bufferPtr->residualQuantCoeffPtr),
-		(EB_PTR)&doubleWidthPictureBufferDescInitData);
+    EB_NEW(
+        bufferPtr->reconCoeffPtr,
+        EbPictureBufferDescCtor,
+        (EB_PTR)&doubleWidthPictureBufferDescInitData);
 
-	if (return_error == EB_ErrorInsufficientResources){
-		return EB_ErrorInsufficientResources;
-	}
+    EB_NEW(
+        bufferPtr->reconPtr,
+        EbPictureBufferDescCtor,
+        (EB_PTR)&pictureBufferDescInitData);
 
-	return_error = EbPictureBufferDescCtor(
-		(EB_PTR*)&(bufferPtr->reconCoeffPtr),
-		(EB_PTR)&doubleWidthPictureBufferDescInitData);
-
-	if (return_error == EB_ErrorInsufficientResources){
-		return EB_ErrorInsufficientResources;
-	}
-	return_error = EbPictureBufferDescCtor(
-		(EB_PTR*)&(bufferPtr->reconPtr),
-		(EB_PTR)&pictureBufferDescInitData);
-
-	if (return_error == EB_ErrorInsufficientResources){
-		return EB_ErrorInsufficientResources;
-	}
-	//Distortion
-	bufferPtr->residualLumaSad = 0;
-
-	bufferPtr->fullLambdaRate = 0;
-
-
-	// Costs
-	bufferPtr->fastCostPtr = fastCostPtr;
-	bufferPtr->fullCostPtr = fullCostPtr;
-	bufferPtr->fullCostSkipPtr = fullCostSkipPtr;
-	bufferPtr->fullCostMergePtr = fullCostMergePtr;
-	return EB_ErrorNone;
+    // Costs
+    bufferPtr->fastCostPtr = fastCostPtr;
+    bufferPtr->fullCostPtr = fullCostPtr;
+    bufferPtr->fullCostSkipPtr = fullCostSkipPtr;
+    bufferPtr->fullCostMergePtr = fullCostMergePtr;
+    return EB_ErrorNone;
 }
 
 
@@ -340,7 +325,7 @@ EB_ERRORTYPE PreModeDecision(
         fullReconCandidateCount = MAX(1, (*fullCandidateTotalCountPtr) - 1);
     }
 
-	//With N buffers, we get here with the best N-1, plus the last candidate. We need to exclude the worst, and keep the best N-1.  
+	//With N buffers, we get here with the best N-1, plus the last candidate. We need to exclude the worst, and keep the best N-1.
 	highestCost = *(bufferPtrArray[0]->fastCostPtr);
 	highestCostIndex = 0;
 
@@ -545,7 +530,7 @@ void Me2Nx2NCandidatesInjection(
                 cuOriginX,
                 cuOriginY,
                 0,
-                sequenceControlSetPtr->lcuSize,  
+                sequenceControlSetPtr->lcuSize,
                 pictureControlSetPtr
             );
 
@@ -760,10 +745,10 @@ void Amvp2Nx2NCandidatesInjection(
 
 #define BIPRED_3x3_REFINMENT_POSITIONS 8
 
-EB_S8 BIPRED_3x3_X_POS[BIPRED_3x3_REFINMENT_POSITIONS] = {-1, -1,  0, 1, 1,  1,  0, -1};
-EB_S8 BIPRED_3x3_Y_POS[BIPRED_3x3_REFINMENT_POSITIONS] = { 0,  1,  1, 1, 0, -1, -1, -1};
+EB_S8 EbHevcBIPRED_3x3_X_POS[BIPRED_3x3_REFINMENT_POSITIONS] = {-1, -1,  0, 1, 1,  1,  0, -1};
+EB_S8 EbHevcBIPRED_3x3_Y_POS[BIPRED_3x3_REFINMENT_POSITIONS] = { 0,  1,  1, 1, 0, -1, -1, -1};
 
-void Unipred3x3CandidatesInjection(
+void EbHevcUnipred3x3CandidatesInjection(
 	PictureControlSet_t            *pictureControlSetPtr,
 	ModeDecisionContext_t          *contextPtr,
 	const SequenceControlSet_t     *sequenceControlSetPtr,
@@ -794,8 +779,8 @@ void Unipred3x3CandidatesInjection(
 		candidateArray[canTotalCnt].motionVector_x_L0 = mePuResult->xMvL0;
 		candidateArray[canTotalCnt].motionVector_y_L0 = mePuResult->yMvL0;
 
-		candidateArray[canTotalCnt].motionVector_x_L1 = mePuResult->xMvL1 + BIPRED_3x3_X_POS[bipredIndex];
-		candidateArray[canTotalCnt].motionVector_y_L1 = mePuResult->yMvL1 + BIPRED_3x3_Y_POS[bipredIndex];
+		candidateArray[canTotalCnt].motionVector_x_L1 = mePuResult->xMvL1 + EbHevcBIPRED_3x3_X_POS[bipredIndex];
+		candidateArray[canTotalCnt].motionVector_y_L1 = mePuResult->yMvL1 + EbHevcBIPRED_3x3_Y_POS[bipredIndex];
 
 		if (pictureControlSetPtr->ParentPcsPtr->useSubpelFlag == 0) {
 			RoundMv(candidateArray,
@@ -864,8 +849,8 @@ void Unipred3x3CandidatesInjection(
 	{
 
 		const EB_U32 interDirection = UNI_PRED_LIST_0;
-		candidateArray[canTotalCnt].motionVector_x_L0 = mePuResult->xMvL0 + BIPRED_3x3_X_POS[bipredIndex];
-		candidateArray[canTotalCnt].motionVector_y_L0 = mePuResult->yMvL0 + BIPRED_3x3_Y_POS[bipredIndex];
+		candidateArray[canTotalCnt].motionVector_x_L0 = mePuResult->xMvL0 + EbHevcBIPRED_3x3_X_POS[bipredIndex];
+		candidateArray[canTotalCnt].motionVector_y_L0 = mePuResult->yMvL0 + EbHevcBIPRED_3x3_Y_POS[bipredIndex];
 		candidateArray[canTotalCnt].motionVector_x_L1 = mePuResult->xMvL1;
 		candidateArray[canTotalCnt].motionVector_y_L1 = mePuResult->yMvL1;
 
@@ -938,7 +923,7 @@ void Unipred3x3CandidatesInjection(
 	return;
 }
 
-void Bipred3x3CandidatesInjection(
+void EbHevcBipred3x3CandidatesInjection(
 	PictureControlSet_t            *pictureControlSetPtr,
 	ModeDecisionContext_t          *contextPtr,
 	const SequenceControlSet_t     *sequenceControlSetPtr,
@@ -970,8 +955,8 @@ void Bipred3x3CandidatesInjection(
 		candidateArray[canTotalCnt].motionVector_x_L0 = mePuResult->xMvL0;
 		candidateArray[canTotalCnt].motionVector_y_L0 = mePuResult->yMvL0;
 
-		candidateArray[canTotalCnt].motionVector_x_L1 = mePuResult->xMvL1 + BIPRED_3x3_X_POS[bipredIndex];
-		candidateArray[canTotalCnt].motionVector_y_L1 = mePuResult->yMvL1 + BIPRED_3x3_Y_POS[bipredIndex];
+		candidateArray[canTotalCnt].motionVector_x_L1 = mePuResult->xMvL1 + EbHevcBIPRED_3x3_X_POS[bipredIndex];
+		candidateArray[canTotalCnt].motionVector_y_L1 = mePuResult->yMvL1 + EbHevcBIPRED_3x3_Y_POS[bipredIndex];
 
 
 		if (pictureControlSetPtr->ParentPcsPtr->useSubpelFlag == 0) {
@@ -1034,15 +1019,15 @@ void Bipred3x3CandidatesInjection(
 
 
 		canTotalCnt++;
-	}	
+	}
 
 	// (8 Best_L0 neighbors, Best_L1) :
 	for (bipredIndex = 0; bipredIndex < BIPRED_3x3_REFINMENT_POSITIONS; ++bipredIndex)
 	{
 
 		const EB_U32 interDirection = BI_PRED;
-		candidateArray[canTotalCnt].motionVector_x_L0 = mePuResult->xMvL0 + BIPRED_3x3_X_POS[bipredIndex];
-		candidateArray[canTotalCnt].motionVector_y_L0 = mePuResult->yMvL0 + BIPRED_3x3_Y_POS[bipredIndex];
+		candidateArray[canTotalCnt].motionVector_x_L0 = mePuResult->xMvL0 + EbHevcBIPRED_3x3_X_POS[bipredIndex];
+		candidateArray[canTotalCnt].motionVector_y_L0 = mePuResult->yMvL0 + EbHevcBIPRED_3x3_Y_POS[bipredIndex];
 		candidateArray[canTotalCnt].motionVector_x_L1 = mePuResult->xMvL1;
 		candidateArray[canTotalCnt].motionVector_y_L1 = mePuResult->yMvL1;
 
@@ -1156,7 +1141,7 @@ void  ProductIntraCandidateInjection(
         const EB_BOOL  limitIntra = contextPtr->limitIntra;
         const EB_U8    limitLeftMode = cuSize < 32 ? EB_INTRA_MODE_27 : EB_INTRA_VERTICAL;
         const EB_U8    limitTopMode = cuSize < 32 ? EB_INTRA_MODE_9 : EB_INTRA_HORIZONTAL;
-        
+
         EB_BOOL skipOis8x8 = (pictureControlSetPtr->ParentPcsPtr->skipOis8x8 && cuSize == 8);
 
         if (pictureControlSetPtr->ParentPcsPtr->complexLcuArray[lcuPtr->index] == LCU_COMPLEXITY_STATUS_2) {
@@ -1222,12 +1207,12 @@ void  ProductIntraCandidateInjection(
             }
         }
         else {
-            // No Intra 64x64            
+            // No Intra 64x64
             if (cuDepth != 0)
             {
                 //----------------------
                 // I Slice
-                //----------------------   
+                //----------------------
                 if (sliceType == EB_I_PICTURE) {
 
                     if (cuSize == 32) {
@@ -1326,11 +1311,11 @@ void  ProductIntraCandidateInjection(
 
                 //----------------------
                 // P/B Slice
-                //----------------------  
+                //----------------------
                 else {
                     if ((cuSize >= 16 && pictureControlSetPtr->ParentPcsPtr->cu16x16Mode == CU_16x16_MODE_0 &&
                         pictureControlSetPtr->encMode < ENC_MODE_11)
-                         || (cuSize == 32)) 
+                         || (cuSize == 32))
                     {
                         {
                             if (pictureControlSetPtr->ParentPcsPtr->limitOisToDcModeFlag)
@@ -1464,7 +1449,7 @@ void  ProductIntraCandidateInjection(
 
 
                             if (lcuParams->isCompleteLcu) {
-                                const CodedUnitStats_t  *cuStats = GetCodedUnitStats(parentIndex[leafIndex]);
+                                const CodedUnitStats_t  *cuStats = GetCodedUnitStats(EbHevcParentIndex[leafIndex]);
                                 const EB_U32 me2Nx2NTableOffset = cuStats->cuNumInDepth + me2Nx2NOffset[cuStats->depth];
                                 OisCu32Cu16Results_t	        *oisCu32Cu16ResultsPtr = pictureControlSetPtr->ParentPcsPtr->oisCu32Cu16Results[lcuAddr];
                                 const OisCandidate_t    *oisCandidate = oisCu32Cu16ResultsPtr->sortedOisCandidate[me2Nx2NTableOffset];
@@ -1727,7 +1712,7 @@ void ProductMpmCandidatesInjection(
 {
     const EB_U32             cuDepth            = contextPtr->cuStats->depth;
     EB_U32                   canTotalCnt        = (*candidateTotalCnt);
-    EB_U32                   fastLoopCandidate  = 0;  
+    EB_U32                   fastLoopCandidate  = 0;
 	EB_U32                   candidateIndex;
 	EB_U32			         mostProbableModeCount;
     EB_BOOL                  mpmPresentFlag;
@@ -1842,7 +1827,7 @@ EB_ERRORTYPE ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
 
 	//----------------------
 	// Intra
-	//---------------------- 
+	//----------------------
     if (cuDepth != 0 && (sliceType == EB_I_PICTURE || cuDepth == 3 || contextPtr->restrictIntraGlobalMotion == EB_FALSE)) {
 		const EB_BOOL  isLeftCu = contextPtr->cuStats->originX == 0;
 		const EB_BOOL  isTopCu = contextPtr->cuStats->originY == 0;
@@ -1891,7 +1876,7 @@ EB_ERRORTYPE ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
 
         //----------------------
         // Me2Nx2N
-        //----------------------    
+        //----------------------
         Me2Nx2NCandidatesInjection( // HT not much to do
             pictureControlSetPtr,
             contextPtr,
@@ -1907,7 +1892,7 @@ EB_ERRORTYPE ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
 
 			//----------------------
 			// Amvp2Nx2N
-			//----------------------   
+			//----------------------
 			Amvp2Nx2NCandidatesInjection(
 				pictureControlSetPtr,
 				contextPtr,
@@ -1917,14 +1902,14 @@ EB_ERRORTYPE ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
 				firstPuAMVPCandArray_y,
 				firstPuNumAvailableAMVPCand);
 		}
-         
+
         if (pictureControlSetPtr->sliceType == EB_B_PICTURE) {
             if (contextPtr->bipred3x3Injection) {
                 //----------------------
                 // Bipred2Nx2N
-                //----------------------   
+                //----------------------
 
-                Bipred3x3CandidatesInjection( // HT not much to do
+                EbHevcBipred3x3CandidatesInjection( // HT not much to do
                     pictureControlSetPtr,
                     contextPtr,
                     sequenceControlSetPtr,
@@ -1939,8 +1924,8 @@ EB_ERRORTYPE ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
             if (contextPtr->unipred3x3Injection) {
                 //----------------------
                 // Unipred2Nx2N
-                //---------------------- 
-                Unipred3x3CandidatesInjection( // HT not much to do
+                //----------------------
+                EbHevcUnipred3x3CandidatesInjection( // HT not much to do
                     pictureControlSetPtr,
                     contextPtr,
                     sequenceControlSetPtr,
@@ -1971,7 +1956,7 @@ EB_ERRORTYPE ProductGenerateAmvpMergeInterIntraMdCandidatesCU(
 	// Set BufferTotalCount: determines the number of candidates to fully reconstruct
 	*bufferTotalCountPtr = fullReconSearchCount;
 
-	// Mark MPM candidates, and update the number of full recon - MPM candidates are going to get pushed to the full, 
+	// Mark MPM candidates, and update the number of full recon - MPM candidates are going to get pushed to the full,
 	// however they still need to be tested in the fast loop where the predicted, and the fast rate are going to get computed
 #ifdef LIMITINRA_MPM_PATCH
     const EB_BOOL  isLeftCu = contextPtr->cuStats->originX == 0;
@@ -2031,8 +2016,8 @@ EB_U8 ProductFullModeDecision(
 	for (i = 0; i < candidateTotalCount; ++i) {
 
 		candidateIndex = bestCandidateIndexArray[i];
-               
-		// Compute fullCostBis 
+
+		// Compute fullCostBis
 
            if (( *(bufferPtrArray[candidateIndex]->fullCostPtr)  < lowestIntraCost) && bufferPtrArray[candidateIndex]->candidatePtr->type == INTRA_MODE){
 				*bestIntraMode = bufferPtrArray[candidateIndex]->candidatePtr->intraLumaMode;
@@ -2150,7 +2135,7 @@ EB_U8 ProductFullModeDecision(
 		// Set TU variables
         tuPtr->cbCbf2 = EB_FALSE;
         tuPtr->crCbf2 = EB_FALSE;
-			tuPtr->chromaCbfContext = 0; //at TU level 
+			tuPtr->chromaCbfContext = 0; //at TU level
 		}
 		else {
 			tuTotalCount = 1;
@@ -2175,10 +2160,10 @@ EB_U8 ProductFullModeDecision(
 		tuPtr->crCbf = (EB_BOOL)(((candidatePtr->crCbf) & (1 << (tuIndex))) > 0);
 		tuPtr->cbCbf2 = EB_FALSE;
 		tuPtr->crCbf2 = EB_FALSE;
-		
-        //CHKN tuPtr->chromaCbfContext = (tuIndex == 0 || (cuPtr->partitionMode == SIZE_NxN)) ? 0 : (cuSizeLog2 - Log2f(tuSize)); //at TU level 
-        tuPtr->chromaCbfContext = (tuIndex == 0 || (0)) ? 0 : (cuSizeLog2 - Log2f(tuSize)); //at TU level 
-		
+
+        //CHKN tuPtr->chromaCbfContext = (tuIndex == 0 || (cuPtr->partitionMode == SIZE_NxN)) ? 0 : (cuSizeLog2 - Log2f(tuSize)); //at TU level
+        tuPtr->chromaCbfContext = (tuIndex == 0 || (0)) ? 0 : (cuSizeLog2 - Log2f(tuSize)); //at TU level
+
         tuPtr->lumaCbfContext = (cuSizeLog2 - Log2f(tuSize)) == 0 ? 1 : 0;
 
 		if (tuPtr->cbCbf){
@@ -2197,9 +2182,3 @@ EB_U8 ProductFullModeDecision(
 
 	return lowestCostIndex;
 }
-
-
-
-
-
-

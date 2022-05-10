@@ -23,35 +23,35 @@
 #define UNDER_SHOOTING                        0
 #define OVER_SHOOTING                         1
 #define TBD_SHOOTING                          2
-  
+
 
 // Set a cost to each search method (could be modified)
 // EB30 @ Revision 12879
-#define PRED_OPEN_LOOP_1_NFL_COST    97 // PRED_OPEN_LOOP_1_NFL_COST is ~03% faster than PRED_OPEN_LOOP_COST  
+#define PRED_OPEN_LOOP_1_NFL_COST    97 // PRED_OPEN_LOOP_1_NFL_COST is ~03% faster than PRED_OPEN_LOOP_COST
 #define U_099                        99
-#define PRED_OPEN_LOOP_COST         100 // Let's assume PRED_OPEN_LOOP_COST costs ~100 U   
+#define PRED_OPEN_LOOP_COST         100 // Let's assume PRED_OPEN_LOOP_COST costs ~100 U
 #define U_101                       101
 #define U_102                       102
 #define U_103                       103
-#define U_104                       104  
+#define U_104                       104
 #define U_105                       105
-#define LIGHT_OPEN_LOOP_COST        106 // L_MDC is ~06% slower than PRED_OPEN_LOOP_COST       
-#define U_107                       107  
-#define U_108                       108  
+#define LIGHT_OPEN_LOOP_COST        106 // L_MDC is ~06% slower than PRED_OPEN_LOOP_COST
+#define U_107                       107
+#define U_108                       108
 #define U_109                       109
 #define OPEN_LOOP_COST              110 // F_MDC is ~10% slower than PRED_OPEN_LOOP_COST
 #define U_111                       111
 #define U_112                       112
 #define U_113                       113
 #define U_114                       114
-#define U_115                       115  
+#define U_115                       115
 #define U_116                       116
 #define U_117                       117
 #define U_119                       119
 #define U_120                       120
 #define U_121                       121
 #define U_122                       122
-#define LIGHT_AVC_COST              122      
+#define LIGHT_AVC_COST              122
 #define LIGHT_BDP_COST              123 // L_BDP is ~23% slower than PRED_OPEN_LOOP_COST
 #define U_125                       125
 #define U_127                       127
@@ -107,7 +107,7 @@ static const EB_U8 AdpLuminosityChangeThArray[MAX_HIERARCHICAL_LEVEL][MAX_TEMPOR
 
 
 /******************************************************
-* Compute picture and slice level chroma QP offsets 
+* Compute picture and slice level chroma QP offsets
 ******************************************************/
 static void SetSliceAndPictureChromaQpOffsets(
 	PictureControlSet_t                    *pictureControlSetPtr,
@@ -211,7 +211,7 @@ static void AdaptiveDlfParameterComputation(
     }
     if (pictureControlSetPtr->sliceType == EB_B_PICTURE){
 
-  
+
         refObjL0 = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_0]->objectPtr;
         refObjL1 = (EbReferenceObject_t*)pictureControlSetPtr->refPicPtrArray[REF_LIST_1]->objectPtr;
 
@@ -220,7 +220,7 @@ static void AdaptiveDlfParameterComputation(
         } else{
             highIntra = (refObjL0->penalizeSkipflag || refObjL1->penalizeSkipflag) ? 1 : 0;
         }
-        
+
     }
 
     if (tcBetaOffsetManipulation){
@@ -250,34 +250,35 @@ static void AdaptiveDlfParameterComputation(
 
 }
 
+static void ModeDecisionConfigurationContextDctor(EB_PTR p)
+{
+    ModeDecisionConfigurationContext_t *obj = (ModeDecisionConfigurationContext_t*)p;
+
+    EB_FREE(obj->mdRateEstimationPtr);
+    EB_FREE_ARRAY(obj->lcuScoreArray);
+    EB_FREE_ARRAY(obj->lcuCostArray);
+}
 
 /******************************************************
  * Mode Decision Configuration Context Constructor
  ******************************************************/
 EB_ERRORTYPE ModeDecisionConfigurationContextCtor(
-    ModeDecisionConfigurationContext_t **contextDblPtr,
+    ModeDecisionConfigurationContext_t  *contextPtr,
     EbFifo_t                            *rateControlInputFifoPtr,
-
     EbFifo_t                            *modeDecisionConfigurationOutputFifoPtr,
-    EB_U16						         lcuTotalCount)
+    EB_U16                              lcuTotalCount)
 {
-    ModeDecisionConfigurationContext_t *contextPtr;
+    contextPtr->dctor = ModeDecisionConfigurationContextDctor;
 
-    EB_MALLOC(ModeDecisionConfigurationContext_t*, contextPtr, sizeof(ModeDecisionConfigurationContext_t), EB_N_PTR);
-
-    *contextDblPtr = contextPtr;
-    
     // Input/Output System Resource Manager FIFOs
     contextPtr->rateControlInputFifoPtr                      = rateControlInputFifoPtr;
     contextPtr->modeDecisionConfigurationOutputFifoPtr       = modeDecisionConfigurationOutputFifoPtr;
     // Rate estimation
-    EB_MALLOC(MdRateEstimationContext_t*, contextPtr->mdRateEstimationPtr, sizeof(MdRateEstimationContext_t), EB_N_PTR);
+    EB_MALLOC(contextPtr->mdRateEstimationPtr, sizeof(MdRateEstimationContext_t));
 
-
-    // Budgeting  
-    EB_MALLOC(EB_U32*,contextPtr->lcuScoreArray,sizeof(EB_U32) * lcuTotalCount, EB_N_PTR);
-    EB_MALLOC(EB_U8 *,contextPtr->lcuCostArray ,sizeof(EB_U8 ) * lcuTotalCount, EB_N_PTR);
-
+    // Budgeting
+    EB_MALLOC_ARRAY(contextPtr->lcuScoreArray, lcuTotalCount);
+    EB_MALLOC_ARRAY(contextPtr->lcuCostArray, lcuTotalCount);
 
     return EB_ErrorNone;
 }
@@ -329,7 +330,7 @@ static void PerformEarlyLcuPartitionning(
 
         lcuPtr = pictureControlSetPtr->lcuPtrArray[lcuIndex];
         {
-			lcuPtr->qp = (EB_U8)pictureControlSetPtr->ParentPcsPtr->pictureQp;			
+			lcuPtr->qp = (EB_U8)pictureControlSetPtr->ParentPcsPtr->pictureQp;
 		}
 
         EarlyModeDecisionLcu(
@@ -388,7 +389,7 @@ static void Forward85CuToModeDecisionLCU(
         {
             switch (cuStatsPtr->depth){
 
-            case 0:                
+            case 0:
                 resultsPtr->leafDataArray[resultsPtr->leafCount].leafIndex = cuIndex;
                 resultsPtr->leafDataArray[resultsPtr->leafCount++].splitFlag = splitFlag = EB_TRUE;
                 break;
@@ -442,7 +443,7 @@ static void Forward84CuToModeDecisionLCU(
         {
             switch (cuStatsPtr->depth){
 
-            case 0:                
+            case 0:
                 splitFlag = EB_TRUE;
                 break;
 
@@ -702,7 +703,7 @@ static void Forward16x16CuToModeDecisionLCU(
     } // End CU Loop
 }
 
-static void PartitioningInitialization( 
+static void PartitioningInitialization(
     SequenceControlSet_t                   *sequenceControlSetPtr,
     PictureControlSet_t                    *pictureControlSetPtr,
     ModeDecisionConfigurationContext_t     *contextPtr) {
@@ -768,14 +769,14 @@ static void DetectComplexNonFlatMovingLcu(
 			if (condition){
 				EB_U32  counter = 0;
 
-                if (!lcuParams->isEdgeLcu){  
-                    // Top      
+                if (!lcuParams->isEdgeLcu){
+                    // Top
                     if (pictureControlSetPtr->ParentPcsPtr->edgeResultsPtr[lcuIndex - pictureWidthInLcu].edgeBlockNum == 0)
                         counter++;
                     // Bottom
                     if (pictureControlSetPtr->ParentPcsPtr->edgeResultsPtr[lcuIndex + pictureWidthInLcu].edgeBlockNum == 0)
                         counter++;
-                    // Left                  
+                    // Left
                     if (pictureControlSetPtr->ParentPcsPtr->edgeResultsPtr[lcuIndex - 1].edgeBlockNum == 0)
                         counter++;
                     // right
@@ -783,7 +784,7 @@ static void DetectComplexNonFlatMovingLcu(
                         counter++;
 				}
 			}
-		}    
+		}
 	}
 }
 
@@ -813,7 +814,7 @@ static EB_AURA_STATUS AuraDetection64x64(
 
     LcuParams_t           *lcuParams = &sequenceControlSetPtr->lcuParamsArray[lcuIndex];
 
-    distThresh0 = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag ||sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE ? 15 : 14; 
+    distThresh0 = pictureControlSetPtr->ParentPcsPtr->isUsedAsReferenceFlag ||sequenceControlSetPtr->inputResolution == INPUT_SIZE_4K_RANGE ? 15 : 14;
 	distThresh1 = 23;
 
 
@@ -822,13 +823,13 @@ static EB_AURA_STATUS AuraDetection64x64(
 		distThresh1 = distThresh1 << 2;
 	}
 
-    if (!lcuParams->isEdgeLcu){ 
-        
-        EB_U32 k;		
+    if (!lcuParams->isEdgeLcu){
+
+        EB_U32 k;
 
 		MeCuResults_t * mePuResult = &pictureControlSetPtr->ParentPcsPtr->meResults[lcuIndex][0];
 
-		//Curr Block  	
+		//Curr Block
 
 		for (k = 0; k < mePuResult->totalMeCandidateIndex; k++) {
 
@@ -856,30 +857,30 @@ static EB_AURA_STATUS AuraDetection64x64(
 			abs(yMv1) > GLOBAL_MOTION_THRESHOLD[pictureControlSetPtr->ParentPcsPtr->hierarchicalLevels][pictureControlSetPtr->ParentPcsPtr->temporalLayerIndex]))
 		{
 
-			//Top Distortion          
+			//Top Distortion
 			lcuOffset = -pictureWidthInLcu;
 			topDist = pictureControlSetPtr->ParentPcsPtr->meResults[lcuIndex + lcuOffset]->distortionDirection[0].distortion;
 
 
-			//TopLeft Distortion          
+			//TopLeft Distortion
 			lcuOffset = -pictureWidthInLcu - 1;
 			topLDist = pictureControlSetPtr->ParentPcsPtr->meResults[lcuIndex + lcuOffset]->distortionDirection[0].distortion;
 
 
-			//TopRightDistortion          
+			//TopRightDistortion
 			lcuOffset = -pictureWidthInLcu + 1;
 			topRDist = pictureControlSetPtr->ParentPcsPtr->meResults[lcuIndex + lcuOffset]->distortionDirection[0].distortion;
 
 
             topRDist = (lcuParams->horizontalIndex < (EB_U32)(pictureWidthInLcu - 2)) ? topRDist : currDist;
 
-			//left Distortion          
+			//left Distortion
 			lcuOffset = -1;
 			leftDist = pictureControlSetPtr->ParentPcsPtr->meResults[lcuIndex + lcuOffset]->distortionDirection[0].distortion;
 
 
 
-			//RightDistortion          
+			//RightDistortion
 			lcuOffset = 1;
 			rightDist = pictureControlSetPtr->ParentPcsPtr->meResults[lcuIndex + lcuOffset]->distortionDirection[0].distortion;
 
@@ -926,7 +927,7 @@ static void AuraDetection(
         lcu_X = lcuParams->horizontalIndex;
         lcu_Y = lcuParams->verticalIndex;
 
-        if (pictureControlSetPtr->sliceType == EB_B_PICTURE){ 
+        if (pictureControlSetPtr->sliceType == EB_B_PICTURE){
             if ((lcu_X > 0) && (lcu_X < pictureWidthInLcu - 1) && (lcu_Y < pictureHeightInLcu - 1)){
                 lcuPtr->auraStatus = AuraDetection64x64(
                     pictureControlSetPtr,
@@ -962,17 +963,17 @@ static EB_ERRORTYPE DeriveDefaultSegments(
                 contextPtr->intervalCost[1] = contextPtr->costDepthMode[LCU_BDP_DEPTH_MODE - 1];
             }
 
-        } 
-        else { 
+        }
+        else {
             if (contextPtr->budget > (EB_U32) (pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * BDP_COST)) {
-                
+
                 contextPtr->numberOfSegments = 2;
-                
+
                 contextPtr->scoreTh[0] = (EB_S8)((1 * 100) / contextPtr->numberOfSegments);
 
                 contextPtr->intervalCost[0] = contextPtr->costDepthMode[LCU_BDP_DEPTH_MODE - 1];
                 contextPtr->intervalCost[1] = contextPtr->costDepthMode[LCU_FULL84_DEPTH_MODE - 1];
-            } 
+            }
 
             else if (contextPtr->budget > (EB_U32)(pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * OPEN_LOOP_COST)) {
 
@@ -1001,7 +1002,7 @@ static EB_ERRORTYPE DeriveDefaultSegments(
                 contextPtr->intervalCost[3] = contextPtr->costDepthMode[LCU_LIGHT_BDP_DEPTH_MODE - 1];
                 contextPtr->intervalCost[4] = contextPtr->costDepthMode[LCU_BDP_DEPTH_MODE - 1];
             }
-       
+
         }
     }
     else {
@@ -1022,7 +1023,7 @@ static EB_ERRORTYPE DeriveDefaultSegments(
             contextPtr->intervalCost[3] = contextPtr->costDepthMode[LCU_LIGHT_BDP_DEPTH_MODE - 1];
             contextPtr->intervalCost[4] = contextPtr->costDepthMode[LCU_BDP_DEPTH_MODE - 1];
             contextPtr->intervalCost[5] = contextPtr->costDepthMode[LCU_FULL85_DEPTH_MODE - 1];
-        } 
+        }
         else if (contextPtr->budget > (EB_U32)(pictureControlSetPtr->ParentPcsPtr->lcuTotalCount * U_115)) {
 
                 contextPtr->numberOfSegments = 5;
@@ -1065,7 +1066,7 @@ static EB_ERRORTYPE DeriveDefaultSegments(
             contextPtr->intervalCost[3] = contextPtr->costDepthMode[LCU_OPEN_LOOP_DEPTH_MODE - 1];
         }
     }
-    
+
     return return_error;
 }
 
@@ -1081,7 +1082,7 @@ static void SetTargetBudgetOq(
 	ModeDecisionConfigurationContext_t  *contextPtr)
 {
 	EB_U32 budget;
-    
+
 	if (contextPtr->adpLevel <= ENC_MODE_3) {
 		if (sequenceControlSetPtr->inputResolution <= INPUT_SIZE_1080i_RANGE) {
 			if (pictureControlSetPtr->temporalLayerIndex == 0)
@@ -1221,8 +1222,8 @@ static void SetTargetBudgetOq(
 
 /******************************************************
  * IsAvcPartitioningMode()
- * Returns TRUE for LCUs where only Depth2 & Depth3 
- * (AVC Partitioning) are goind to be tested by MD 
+ * Returns TRUE for LCUs where only Depth2 & Depth3
+ * (AVC Partitioning) are goind to be tested by MD
  * The LCU is marked if Sharpe Edge or Potential Aura/Grass
  * or B-Logo or S-Logo or Potential Blockiness Area
  * Input: Sharpe Edge, Potential Aura/Grass, B-Logo, S-Logo, Potential Blockiness Area signals
@@ -1264,7 +1265,7 @@ static EB_BOOL IsAvcPartitioningMode(
 	if (pictureControlSetPtr->ParentPcsPtr->logoPicFlag && edgeBlockNum)
 		return EB_TRUE;
 
-	// S-Logo           
+	// S-Logo
 	if (stationaryEdgeOverTimeFlag > 0)
 		return EB_TRUE;
 
@@ -1282,7 +1283,7 @@ static EB_BOOL IsAvcPartitioningMode(
 ******************************************************/
 static void ConfigureAdp(
     PictureControlSet_t                 *pictureControlSetPtr,
-	ModeDecisionConfigurationContext_t  *contextPtr) 
+	ModeDecisionConfigurationContext_t  *contextPtr)
 {
     contextPtr->costDepthMode[LCU_FULL85_DEPTH_MODE - 1]               = FULL_SEARCH_COST;
     contextPtr->costDepthMode[LCU_FULL84_DEPTH_MODE - 1]               = FULL_SEARCH_COST;
@@ -1310,7 +1311,7 @@ static void ConfigureAdp(
 	// Initialize the predicted budget
 	contextPtr->predictedCost = (EB_U32)~0;
 
-    // Derive the sensitive picture flag 
+    // Derive the sensitive picture flag
     contextPtr->adpDepthSensitivePictureClass = DEPTH_SENSITIVE_PIC_CLASS_0;
 
     EB_BOOL luminosityChange = EB_FALSE;
@@ -1325,11 +1326,11 @@ static void ConfigureAdp(
         }
     }
 
-    if (pictureControlSetPtr->ParentPcsPtr->nonMovingIndexAverage != INVALID_ZZ_COST && pictureControlSetPtr->ParentPcsPtr->nonMovingIndexAverage < ADP_CONFIG_NON_MOVING_INDEX_TH_1) { // could not seen by the eye if very active   
+    if (pictureControlSetPtr->ParentPcsPtr->nonMovingIndexAverage != INVALID_ZZ_COST && pictureControlSetPtr->ParentPcsPtr->nonMovingIndexAverage < ADP_CONFIG_NON_MOVING_INDEX_TH_1) { // could not seen by the eye if very active
         if (pictureControlSetPtr->ParentPcsPtr->picNoiseClass > PIC_NOISE_CLASS_3 || pictureControlSetPtr->ParentPcsPtr->highDarkLowLightAreaDensityFlag ||luminosityChange) { // potential complex picture: luminosity Change (e.g. fade, light..)
             contextPtr->adpDepthSensitivePictureClass = DEPTH_SENSITIVE_PIC_CLASS_2;
-        }   
-        // potential complex picture: light foreground and dark background(e.g.flash, light..) or moderate activity and high variance (noise or a lot of edge) 
+        }
+        // potential complex picture: light foreground and dark background(e.g.flash, light..) or moderate activity and high variance (noise or a lot of edge)
         else if ( (pictureControlSetPtr->ParentPcsPtr->nonMovingIndexAverage >= ADP_CONFIG_NON_MOVING_INDEX_TH_0 && pictureControlSetPtr->ParentPcsPtr->picNoiseClass == PIC_NOISE_CLASS_3)) {
             contextPtr->adpDepthSensitivePictureClass = DEPTH_SENSITIVE_PIC_CLASS_1;
         }
@@ -1339,7 +1340,7 @@ static void ConfigureAdp(
 }
 
 /******************************************************
-* Assign a search method based on the allocated cost 
+* Assign a search method based on the allocated cost
     Input   : allocated budget per LCU
     Output  : search method per LCU
 ******************************************************/
@@ -1347,7 +1348,7 @@ static void DeriveSearchMethod(
     PictureControlSet_t                 *pictureControlSetPtr,
     ModeDecisionConfigurationContext_t  *contextPtr)
 {
-    
+
     EB_U32 lcuIndex;
 
 
@@ -1481,16 +1482,16 @@ static void  DeriveOptimalBudgetPerLcu(
 {
 
     EB_U32 lcuIndex;
-    // Initialize the deviation between the picture predicted cost & the target budget to 100, 
-    EB_U32 deviationToTarget    = 1000;    
-    
-    // Set the adjustment step to 1 (could be increased for faster convergence), 
+    // Initialize the deviation between the picture predicted cost & the target budget to 100,
+    EB_U32 deviationToTarget    = 1000;
+
+    // Set the adjustment step to 1 (could be increased for faster convergence),
     EB_S8  adjustementStep      =  1;
-       
+
     // Set the initial shooting state & the final shooting state to TBD
     EB_U32 initialShooting  = TBD_SHOOTING;
     EB_U32 finalShooting    = TBD_SHOOTING;
-   
+
     EB_U8 maxAdjustementIteration   = 100;
     EB_U8 adjustementIteration      =   0;
 
@@ -1517,7 +1518,7 @@ static void  DeriveOptimalBudgetPerLcu(
                 contextPtr);
         }
 
-        // Compute the deviation between the predicted budget & the target budget 
+        // Compute the deviation between the predicted budget & the target budget
         deviationToTarget = (ABS((EB_S32)(contextPtr->predictedCost - contextPtr->budget)) * 1000) / contextPtr->budget;
         // Derive shooting status
         if (contextPtr->predictedCost < contextPtr->budget) {
@@ -1548,14 +1549,14 @@ static void  DeriveOptimalBudgetPerLcu(
 /******************************************************
 * Compute the refinment cost
     Input   : budget per picture, and the cost of the refinment
-    Output  : the refinment flag 
+    Output  : the refinment flag
 ******************************************************/
 static void ComputeRefinementCost(
     SequenceControlSet_t                *sequenceControlSetPtr,
     PictureControlSet_t                 *pictureControlSetPtr,
     ModeDecisionConfigurationContext_t  *contextPtr)
 {
-    
+
     EB_U32  lcuIndex;
     EB_U32  avcRefinementCost = 0;
     EB_U32  lightAvcRefinementCost = 0;
@@ -1656,7 +1657,7 @@ static void DeriveLcuScore(
 
                 lcuScore = distortion;
 
-                // Use uncovered area 
+                // Use uncovered area
                 if (pictureControlSetPtr->ParentPcsPtr->failingMotionLcuFlag[lcuIndex]) {
                     lcuScore = pictureControlSetPtr->ParentPcsPtr->interComplexityMaxPre;
 
@@ -1665,7 +1666,7 @@ static void DeriveLcuScore(
                 else if (
                     // LCU @ a picture boundary
                     lcuParams->isEdgeLcu
-                    && pictureControlSetPtr->ParentPcsPtr->nonMovingIndexArray[lcuIndex] != INVALID_ZZ_COST 
+                    && pictureControlSetPtr->ParentPcsPtr->nonMovingIndexArray[lcuIndex] != INVALID_ZZ_COST
                     && pictureControlSetPtr->ParentPcsPtr->nonMovingIndexAverage         != INVALID_ZZ_COST
                     // Active LCU
                     && pictureControlSetPtr->ParentPcsPtr->nonMovingIndexArray[lcuIndex] >= ADP_CLASS_NON_MOVING_INDEX_TH_0
@@ -1679,7 +1680,7 @@ static void DeriveLcuScore(
                 }
                 else {
 
-                    // Use LCU variance & activity    
+                    // Use LCU variance & activity
                     if (pictureControlSetPtr->ParentPcsPtr->nonMovingIndexArray[lcuIndex] == ADP_CLASS_NON_MOVING_INDEX_TH_2 && pictureControlSetPtr->ParentPcsPtr->variance[lcuIndex][RASTER_SCAN_CU_INDEX_64x64] > IS_COMPLEX_LCU_VARIANCE_TH && (sequenceControlSetPtr->staticConfig.frameRate >> 16) > 30)
 
                         lcuScore -= (((lcuScore - pictureControlSetPtr->ParentPcsPtr->interComplexityMinPre) * ADP_CLASS_SHIFT_DIST_0) / 100);
@@ -1697,7 +1698,7 @@ static void DeriveLcuScore(
                         if (pictureControlSetPtr->ParentPcsPtr->yMean[lcuIndex][RASTER_SCAN_CU_INDEX_64x64] < ADP_DARK_LCU_TH )
                             lcuScore -= (((lcuScore - pictureControlSetPtr->ParentPcsPtr->interComplexityMinPre) * ADP_CLASS_SHIFT_DIST_0) / 100);
                         else
-                            lcuScore += (((pictureControlSetPtr->ParentPcsPtr->interComplexityMaxPre - lcuScore) * ADP_CLASS_SHIFT_DIST_0) / 100);                        
+                            lcuScore += (((pictureControlSetPtr->ParentPcsPtr->interComplexityMaxPre - lcuScore) * ADP_CLASS_SHIFT_DIST_0) / 100);
                     }
 
                 }
@@ -1713,7 +1714,7 @@ static void DeriveLcuScore(
     }
 
 
-   
+
 }
 
 /******************************************************
@@ -1792,7 +1793,7 @@ static void PerformOutlierRemoval(
             }
 		}
 	}
-	
+
     // Zero-out the bin if percentage lower than VALID_SLOT_TH
 	for (slot = 0; slot < 10; slot++){
         if (processedlcuCount > 0) {
@@ -1818,7 +1819,7 @@ static void PerformOutlierRemoval(
 	}
 }
 /******************************************************
-* Assign a search method for each LCU 
+* Assign a search method for each LCU
     Input   : LCU score, detection signals
     Output  : search method for each LCU
 ******************************************************/
@@ -1827,7 +1828,7 @@ static void DeriveLcuMdMode(
 	PictureControlSet_t                 *pictureControlSetPtr,
     ModeDecisionConfigurationContext_t  *contextPtr) {
 
-    // Configure ADP 
+    // Configure ADP
     ConfigureAdp(
         pictureControlSetPtr,
         contextPtr);
@@ -1843,7 +1844,7 @@ static void DeriveLcuMdMode(
         pictureControlSetPtr,
         contextPtr);
 
-    // Compute the cost of the refinements 
+    // Compute the cost of the refinements
     ComputeRefinementCost(
         sequenceControlSetPtr,
         pictureControlSetPtr,
@@ -1855,7 +1856,7 @@ static void DeriveLcuMdMode(
 		pictureControlSetPtr,
         contextPtr);
 
-    // Remove the outliers 
+    // Remove the outliers
 	PerformOutlierRemoval(
 		sequenceControlSetPtr,
 		pictureControlSetPtr->ParentPcsPtr,
@@ -1888,12 +1889,12 @@ static EB_ERRORTYPE SignalDerivationModeDecisionConfigKernelOq(
     EB_ERRORTYPE return_error = EB_ErrorNone;
 
     contextPtr->adpLevel = pictureControlSetPtr->ParentPcsPtr->encMode;
-    
+
     // Derive chroma Qp Offset
-    // 0 : 2 Layer1 0 OW 
+    // 0 : 2 Layer1 0 OW
     // 1 : MOD_QP_OFFSET -3
     contextPtr->chromaQpOffsetLevel  = 1;
-    
+
     return return_error;
 }
 
@@ -1929,7 +1930,8 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
 		pictureControlSetPtr = (PictureControlSet_t*)rateControlResultsPtr->pictureControlSetWrapperPtr->objectPtr;
 		sequenceControlSetPtr = (SequenceControlSet_t*)pictureControlSetPtr->sequenceControlSetWrapperPtr->objectPtr;
 #if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld MDC IN \n", pictureControlSetPtr->pictureNumber);
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            SVT_LOG("POC %lu MDC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
         SignalDerivationModeDecisionConfigKernelOq(
                 pictureControlSetPtr,
@@ -1955,7 +1957,7 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
             (pictureControlSetPtr->ParentPcsPtr->grassPercentageInPicture <= 35) &&
             (pictureControlSetPtr->ParentPcsPtr->picNoiseClass >= picNoiseClassTH) &&
             (pictureControlSetPtr->ParentPcsPtr->picHomogenousOverTimeLcuPercentage < 50)) ? EB_FRAME_CARAC_1 : pictureControlSetPtr->sceneCaracteristicId;
-        
+
         pictureControlSetPtr->sceneCaracteristicId = (
 			(pictureControlSetPtr->ParentPcsPtr->isPan) &&
 			(!pictureControlSetPtr->ParentPcsPtr->isTilt) &&
@@ -1975,7 +1977,7 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
 
 		// Aura Detection
 		// Still is using the picture QP to derive aura thresholds, there fore it could not move to the open loop
-		AuraDetection(  // HT done 
+		AuraDetection(  // HT done
 			sequenceControlSetPtr,
 			pictureControlSetPtr,
 			pictureWidthInLcu,
@@ -1987,13 +1989,13 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
 			pictureControlSetPtr,
 			pictureWidthInLcu);
 
-		// Compute picture and slice level chroma QP offsets 
-        SetSliceAndPictureChromaQpOffsets( // HT done 
+		// Compute picture and slice level chroma QP offsets
+        SetSliceAndPictureChromaQpOffsets( // HT done
             pictureControlSetPtr,
             contextPtr);
 
 		// Compute Tc, and Beta offsets for a given picture
-		AdaptiveDlfParameterComputation( // HT done 
+		AdaptiveDlfParameterComputation( // HT done
 			contextPtr,
 			pictureControlSetPtr);
 
@@ -2045,17 +2047,17 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
                 else if (pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_OPEN_LOOP_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_LIGHT_OPEN_LOOP_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_PRED_OPEN_LOOP_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->lcuMdModeArray[lcuIndex] == LCU_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE) {
 
                     // Predict the LCU partitionning
-                    PerformEarlyLcuPartitionningLcu( // HT done 
+                    PerformEarlyLcuPartitionningLcu( // HT done
                         contextPtr,
                         sequenceControlSetPtr,
                         pictureControlSetPtr,
-                        lcuIndex);                 
+                        lcuIndex);
                 }
             }
         }
         else  if (pictureControlSetPtr->ParentPcsPtr->depthMode == PICT_FULL85_DEPTH_MODE){
 
-            Forward85CuToModeDecision( 
+            Forward85CuToModeDecision(
                 sequenceControlSetPtr,
                 pictureControlSetPtr);
         }
@@ -2068,21 +2070,18 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
         else if (pictureControlSetPtr->ParentPcsPtr->depthMode >= PICT_OPEN_LOOP_DEPTH_MODE){
 
                 // Predict the LCU partitionning
-                PerformEarlyLcuPartitionning( // HT done 
+                PerformEarlyLcuPartitionning( // HT done
                     contextPtr,
                     sequenceControlSetPtr,
-                    pictureControlSetPtr);  
+                    pictureControlSetPtr);
         }
         else {   // (pictureControlSetPtr->ParentPcsPtr->mdMode == PICT_BDP_DEPTH_MODE || pictureControlSetPtr->ParentPcsPtr->mdMode == PICT_LIGHT_BDP_DEPTH_MODE )
-            pictureControlSetPtr->ParentPcsPtr->averageQp = (EB_U8)pictureControlSetPtr->ParentPcsPtr->pictureQp; 
+            pictureControlSetPtr->ParentPcsPtr->averageQp = (EB_U8)pictureControlSetPtr->ParentPcsPtr->pictureQp;
         }
 
-#if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld MDC OUT \n", pictureControlSetPtr->pictureNumber);
-#endif
         // Post the results to the MD processes
         EB_U16 tileGroupRowCnt = sequenceControlSetPtr->tileGroupRowCountArray[pictureControlSetPtr->temporalLayerIndex];
-        EB_U16 tileGroupColCnt = sequenceControlSetPtr->tileGroupColCountArray[pictureControlSetPtr->temporalLayerIndex]; 
+        EB_U16 tileGroupColCnt = sequenceControlSetPtr->tileGroupColCountArray[pictureControlSetPtr->temporalLayerIndex];
 
         for (EB_U16 r = 0; r < tileGroupRowCnt; r++) {
             for (EB_U16 c = 0; c < tileGroupColCnt; c++) {
@@ -2099,14 +2098,18 @@ void* ModeDecisionConfigurationKernel(void *inputPtr)
                 EbPostFullObject(encDecTasksWrapperPtr);
             }
         }
+#if DEADLOCK_DEBUG
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            SVT_LOG("POC %lu MDC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
 
 #if LATENCY_PROFILE
         double latency = 0.0;
         EB_U64 finishTimeSeconds = 0;
         EB_U64 finishTimeuSeconds = 0;
-        EbFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
+        EbHevcFinishTime((uint64_t*)&finishTimeSeconds, (uint64_t*)&finishTimeuSeconds);
 
-        EbComputeOverallElapsedTimeMs(
+        EbHevcComputeOverallElapsedTimeMs(
                 pictureControlSetPtr->ParentPcsPtr->startTimeSeconds,
                 pictureControlSetPtr->ParentPcsPtr->startTimeuSeconds,
                 finishTimeSeconds,

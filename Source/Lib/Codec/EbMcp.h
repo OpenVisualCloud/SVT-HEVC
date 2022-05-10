@@ -14,6 +14,7 @@
 #include "EbPictureBufferDesc.h"
 #include "EbPictureControlSet.h"
 #include "EbSequenceControlSet.h"
+#include "EbObject.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,6 +24,7 @@ extern "C" {
 
 typedef struct MotionCompensationPredictionContext_s
 {
+    EbDctor dctor;
     EB_S16 *motionCompensationIntermediateResultBuf0;            //this 64x64(Y)+32x32(U)+32x32(V) buffer is used to store the MCP intermediate result for ref0.
     EB_S16 *motionCompensationIntermediateResultBuf1;            //this 64x64(Y)+32x32(U)+32x32(V) buffer is used to store the MCP intermediate result for ref1.
 
@@ -30,7 +32,7 @@ typedef struct MotionCompensationPredictionContext_s
     EB_BYTE avcStyleMcpIntermediateResultBuf1;                    // For short filter in MD
 
 #if !USE_PRE_COMPUTE
-    EB_S16 *TwoDInterpolationFirstPassFilterResultBuf;           //this (64+MaxLumaFliterTag-1)x(64+MaxLumaFliterTag-1) buffer is used to store the result of 1st pass filtering of 2D interpolation filter. 
+    EB_S16 *TwoDInterpolationFirstPassFilterResultBuf;           //this (64+MaxLumaFliterTag-1)x(64+MaxLumaFliterTag-1) buffer is used to store the result of 1st pass filtering of 2D interpolation filter.
     EB_BYTE avcStyleMcpTwoDInterpolationFirstPassFilterResultBuf; // For short filter in MD
 #endif
 
@@ -41,31 +43,31 @@ typedef struct MotionCompensationPredictionContext_s
 
 }MotionCompensationPredictionContext_t;
 
-/** InterpolationFilter() 
-        is generally defined interpolation filter function. 
-        There is a whole group of these functions, each of which corresponds to a particular 
-        integer/fractional sample, and the function is indexed in a function pointer array 
+/** InterpolationFilter()
+        is generally defined interpolation filter function.
+        There is a whole group of these functions, each of which corresponds to a particular
+        integer/fractional sample, and the function is indexed in a function pointer array
         in terms of the fracPosx and fracPosy.
-    
+
     @param *refPic (8-bits input)
-        refPic is the pointer to the reference picture data that was chosen by 
+        refPic is the pointer to the reference picture data that was chosen by
         the integer pixel precision MV.
     @param srcStride (input)
     @param fracPosx (input)
         fracPosx is the horizontal fractional position of the predicted sample
     @param fracPosy (input)
-        fracPosy is the veritcal fractional position of the predicted sample 
+        fracPosy is the veritcal fractional position of the predicted sample
     @param puWidth (input)
     @param puHeight (input)
     @param *dst (16-bits output)
-        dst is the pointer to the destination where the prediction result will 
+        dst is the pointer to the destination where the prediction result will
         be stored.
     @param dstStride (input)
     @param *firstPassIFDst (16-bits input)
-        firstPassIFDst is the pointer to the buffer where the result of the first 
+        firstPassIFDst is the pointer to the buffer where the result of the first
         pass filtering of the 2D interpolation filter will be stored.
     @param isLast (input)
-        isLast indicates if there is any further filtering (interpolation filtering) 
+        isLast indicates if there is any further filtering (interpolation filtering)
 		afterwards.
  */
 typedef void (*InterpolationFilter)(
@@ -128,12 +130,12 @@ typedef void (*InterpolationFilterOutRaw)(
     EB_S16               *firstPassIFDst);      //input parameter, please refer to the detailed explanation above.
 
 typedef void (*InterpolationFilterOutRaw16bit)(
-    EB_U16               *refPic,              
-    EB_U32                srcStride,           
-    EB_S16               *dst,                  
-    EB_U32                puWidth,              
-    EB_U32                puHeight,             
-    EB_S16               *firstPassIFDst); 
+    EB_U16               *refPic,
+    EB_U32                srcStride,
+    EB_S16               *dst,
+    EB_U32                puWidth,
+    EB_U32                puHeight,
+    EB_S16               *firstPassIFDst);
 
 typedef void (*ChromaFilterNew)(
     EB_BYTE               refPic,
@@ -259,7 +261,7 @@ typedef void (*chromaSampleBiPredAverage)(
     EB_U32     crDstDoubleStride);
 
 extern EB_ERRORTYPE MotionCompensationPredictionContextCtor(
-	MotionCompensationPredictionContext_t **contextDblPtr,
+	MotionCompensationPredictionContext_t  *contextPtr,
 	EB_U16                                  maxCUWidth,
     EB_U16                                  maxCUHeight,
     EB_BOOL                                 is16bit);
@@ -278,7 +280,7 @@ extern void UniPredHevcInterpolationMd(
 	EB_BOOL				   is16bit,
 	EB_U32				   componentMask);
 
-extern void EncodeUniPredInterpolation(              
+extern void EncodeUniPredInterpolation(
     EbPictureBufferDesc_t *refPic,
     EB_U32                 posX,
     EB_U32                 posY,
@@ -300,7 +302,7 @@ void UniPredInterpolation16bit(
     EbPictureBufferDesc_t *dst,                     //output parameter, please refer to the detailed explanation above.
     EB_U32                 dstLumaIndex,            //input parameter, please refer to the detailed explanation above.
     EB_U32                 dstChromaIndex,          //input parameter, please refer to the detailed explanation above.
-    EB_S16                *tempBuf0);                //input parameter, please refer to the detailed explanation above.   
+    EB_S16                *tempBuf0);                //input parameter, please refer to the detailed explanation above.
 
 extern void BiPredHevcInterpolationMd(
 	EbPictureBufferDesc_t *refPicList0,
@@ -338,7 +340,7 @@ extern void EncodeBiPredInterpolation(
 
 void BiPredInterpolation16bit(
     EbPictureBufferDesc_t *fullPelBlockL0,
-    EbPictureBufferDesc_t *fullPelBlockL1,  
+    EbPictureBufferDesc_t *fullPelBlockL1,
     EB_U32                 refList0PosX,
     EB_U32                 refList0PosY,
     EB_U32                 refList1PosX,

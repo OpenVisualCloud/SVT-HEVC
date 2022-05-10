@@ -32,6 +32,7 @@
 #define ERROR_FILE_TOKEN                "-errlog"
 #define STAT_FILE_TOKEN                 "-stat-file"
 #define QP_FILE_TOKEN                   "-qp-file"
+#define SEGMENT_OV_FILE_TOKEN           "-segment-ov-file"
 #define WIDTH_TOKEN                     "-w"
 #define HEIGHT_TOKEN                    "-h"
 #define NUMBER_OF_PICTURES_TOKEN        "-n"
@@ -166,6 +167,15 @@ static void SetCfgQpFile                        (const char *value, EbConfig_t *
     if (cfg->qpFile) { fclose(cfg->qpFile); }
     FOPEN(cfg->qpFile,value, "r");
 };
+static void SetCfgSegmentOvFile(const char *value, EbConfig_t *cfg)
+{
+    if (cfg->segmentOvFile) { fclose(cfg->segmentOvFile); }
+    FOPEN(cfg->segmentOvFile, value, "r");
+    if (cfg->segmentOvFile)
+        cfg->segmentOvEnabled = EB_TRUE;
+    else
+        printf("Error segment Override file: %s does not exist, won't use\n",value);
+};
 static void SetCfgDolbyVisionRpuFile			(const char *value, EbConfig_t *cfg)
 {
     if (cfg->dolbyVisionRpuFile) { fclose(cfg->dolbyVisionRpuFile); }
@@ -299,6 +309,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, OUTPUT_RECON_TOKEN, "ReconFile", SetCfgReconFile },
     { SINGLE_INPUT, USE_QP_FILE_TOKEN, "UseQpFile", SetCfgUseQpFile },
     { SINGLE_INPUT, QP_FILE_TOKEN, "QpFile", SetCfgQpFile },
+    { SINGLE_INPUT, SEGMENT_OV_FILE_TOKEN, "SegmentOvFile", SetCfgSegmentOvFile},
 
     // Interlaced Video
     { SINGLE_INPUT, INTERLACED_VIDEO_TOKEN, "InterlacedVideo", SetInterlacedVideo },
@@ -440,6 +451,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->bufferFile                           = NULL;
     configPtr->useQpFile                            = EB_FALSE;
     configPtr->qpFile                               = NULL;
+    configPtr->segmentOvFile                        = NULL;
 
     configPtr->y4m_input                            = EB_FALSE;
 
@@ -508,7 +520,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->baseLayerSwitchMode                  = 0;
     configPtr->predStructure                        = 2;
     configPtr->intraPeriod                          = -2;
-    configPtr->intraRefreshType                     = 0;
+    configPtr->intraRefreshType                     = -1;
 
     // DLF
     configPtr->disableDlfFlag                       = EB_FALSE;
@@ -598,6 +610,7 @@ void EbConfigCtor(EbConfig_t *configPtr)
     configPtr->processedFrameCount                  = 0;
     configPtr->processedByteCount                   = 0;
 
+    configPtr->segmentOvEnabled                     = EB_FALSE;
     return;
 }
 
@@ -646,6 +659,11 @@ void EbConfigDtor(EbConfig_t *configPtr)
     if (configPtr->dolbyVisionRpuFile) {
         fclose(configPtr->dolbyVisionRpuFile);
         configPtr->dolbyVisionRpuFile = (FILE *)NULL;
+    }
+
+    if (configPtr->segmentOvFile) {
+        fclose(configPtr->segmentOvFile);
+        configPtr->segmentOvFile = (FILE*)NULL;
     }
 
     return;
@@ -1209,6 +1227,7 @@ EB_ERRORTYPE ReadCommandLine(
 
     for (index = 0; index < MAX_CHANNEL_NUMBER; ++index){
         config_strings[index] = (char*)malloc(sizeof(char)*COMMAND_LINE_MAX_SIZE);
+        memset(config_strings[index], 0, sizeof(char)*COMMAND_LINE_MAX_SIZE);
     }
 
     // Copy tokens (except for CHANNEL_NUMBER_TOKEN ) into a temp token buffer hosting all tokens that are passed through the command line

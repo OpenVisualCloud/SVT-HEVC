@@ -10,38 +10,48 @@
 #include "EbThreads.h"
 #include "EbDefinitions.h"
 
+
+static void EncDecSegmentsDctor(EB_PTR p)
+{
+    EncDecSegments_t* obj = (EncDecSegments_t*)p;
+    for (EB_U32 rowIndex = 0; rowIndex < obj->segmentMaxRowCount; ++rowIndex) {
+        EB_DESTROY_MUTEX(obj->rowArray[rowIndex].assignmentMutex);
+    }
+    EB_DESTROY_MUTEX(obj->depMap.updateMutex);
+    EB_FREE_ARRAY(obj->xStartArray);
+    EB_FREE_ARRAY(obj->yStartArray);
+    EB_FREE_ARRAY(obj->validLcuCountArray);
+    EB_FREE_ARRAY(obj->depMap.dependencyMap);
+    EB_FREE_ARRAY(obj->rowArray);
+}
+
 EB_ERRORTYPE EncDecSegmentsCtor(
-    EncDecSegments_t **segmentsDblPtr,
+    EncDecSegments_t  *segmentsPtr,
     EB_U32             segmentColCount,
     EB_U32             segmentRowCount)
 {
-    EB_U32 rowIndex;
-    EncDecSegments_t *segmentsPtr;
-    EB_MALLOC(EncDecSegments_t*, segmentsPtr, sizeof(EncDecSegments_t), EB_N_PTR);
-    
-    *segmentsDblPtr = segmentsPtr;
-
+    segmentsPtr->dctor = EncDecSegmentsDctor;
     segmentsPtr->segmentMaxRowCount = segmentRowCount;
-    segmentsPtr->segmentMaxBandCount = segmentRowCount + segmentColCount;
+    segmentsPtr->segmentMaxBandCount = BAND_TOTAL_COUNT(segmentRowCount, segmentColCount);
     segmentsPtr->segmentMaxTotalCount = segmentsPtr->segmentMaxRowCount * segmentsPtr->segmentMaxBandCount;
 
     // Start Arrays
-    EB_MALLOC(EB_U16*, segmentsPtr->xStartArray, sizeof(EB_U16) * segmentsPtr->segmentMaxTotalCount, EB_N_PTR);
+    EB_MALLOC_ARRAY(segmentsPtr->xStartArray, segmentsPtr->segmentMaxTotalCount);
 
-    EB_MALLOC(EB_U16*, segmentsPtr->yStartArray, sizeof(EB_U16) * segmentsPtr->segmentMaxTotalCount, EB_N_PTR);
-    
-    EB_MALLOC(EB_U16*, segmentsPtr->validLcuCountArray, sizeof(EB_U16) * segmentsPtr->segmentMaxTotalCount, EB_N_PTR);
-    
+    EB_MALLOC_ARRAY(segmentsPtr->yStartArray, segmentsPtr->segmentMaxTotalCount);
+
+    EB_MALLOC_ARRAY(segmentsPtr->validLcuCountArray, segmentsPtr->segmentMaxTotalCount);
+
     // Dependency map
-    EB_MALLOC(EB_U8*, segmentsPtr->depMap.dependencyMap, sizeof(EB_U8) * segmentsPtr->segmentMaxTotalCount, EB_N_PTR);
-    
-    EB_CREATEMUTEX(EB_HANDLE, segmentsPtr->depMap.updateMutex, sizeof(EB_HANDLE), EB_MUTEX);
-    
+    EB_MALLOC_ARRAY(segmentsPtr->depMap.dependencyMap, segmentsPtr->segmentMaxTotalCount);
+
+    EB_CREATE_MUTEX(segmentsPtr->depMap.updateMutex);
+
     // Segment rows
-    EB_MALLOC(EncDecSegSegmentRow_t*, segmentsPtr->rowArray, sizeof(EncDecSegSegmentRow_t) * segmentsPtr->segmentMaxRowCount, EB_N_PTR)
-    
-    for(rowIndex=0; rowIndex < segmentsPtr->segmentMaxRowCount; ++rowIndex) {
-        EB_CREATEMUTEX(EB_HANDLE, segmentsPtr->rowArray[rowIndex].assignmentMutex, sizeof(EB_HANDLE), EB_MUTEX);
+    EB_MALLOC_ARRAY(segmentsPtr->rowArray, segmentsPtr->segmentMaxRowCount);
+
+    for (EB_U32 rowIndex = 0; rowIndex < segmentsPtr->segmentMaxRowCount; ++rowIndex) {
+        EB_CREATE_MUTEX(segmentsPtr->rowArray[rowIndex].assignmentMutex);
     }
 
     return EB_ErrorNone;
@@ -59,10 +69,10 @@ void EncDecSegmentsInit(
     unsigned x, y, yLast;
     unsigned rowIndex, bandIndex, segmentIndex;
     EB_U32 max_row_count = segmentsPtr->segmentMaxRowCount;
-    EB_U32 max_col_count = segmentsPtr->segmentMaxBandCount - segmentsPtr->segmentMaxRowCount;
+    EB_U32 max_col_count = segmentsPtr->segmentMaxBandCount + 1 - segmentsPtr->segmentMaxRowCount;
 
     segColCount = (segColCount <= picWidthLcu) ? segColCount : picWidthLcu;
-    segColCount = (segColCount <= max_col_count) ? segColCount : max_row_count;
+    segColCount = (segColCount <= max_col_count) ? segColCount : max_col_count;
     segRowCount = (segRowCount <= picHeightLcu) ? segRowCount : picHeightLcu;
     segRowCount = (segRowCount <= max_row_count) ? segRowCount : max_row_count;
 
@@ -108,7 +118,7 @@ void EncDecSegmentsInit(
     }
 
     // Initialize the per-segment dependency map
-    EB_MEMSET(segmentsPtr->depMap.dependencyMap, 0, sizeof(EB_U8) * segmentsPtr->segmentTotalCount);
+    EB_MEMSET(segmentsPtr->depMap.dependencyMap, 0, sizeof(EB_U8) * segmentsPtr->segmentMaxTotalCount);
     for(rowIndex=0; rowIndex < segmentsPtr->segmentRowCount; ++rowIndex) {
         for(segmentIndex=segmentsPtr->rowArray[rowIndex].startingSegIndex; segmentIndex <= segmentsPtr->rowArray[rowIndex].endingSegIndex; ++segmentIndex) {
 

@@ -1979,7 +1979,7 @@ void GetEightHorizontalSearchPointResults_32x32_64x64_PU_AVX2_INTRIN(
 	EB_U32   mv)
 {
 	EB_S16 xMv, yMv;
-	EB_U32 temSum, bestSad64x64, bestMV64x64;
+	EB_U32 temSum, bestMV64x64;
 	__m128i s0, s1, s2, s3, s4, s5, s6, s7, sad_0, sad_1;
 	__m128i sad_00, sad_01, sad_10, sad_11, sad_20, sad_21, sad_30, sad_31;
 	__m256i ss0, ss1, ss2, ss3, ss4, ss5, ss6, ss7;
@@ -2136,55 +2136,57 @@ void GetEightHorizontalSearchPointResults_32x32_64x64_PU_AVX2_INTRIN(
 	sad_0 = _mm_slli_epi32(sad_0, 1);
 	sad_1 = _mm_slli_epi32(sad_1, 1);
 
-	bestSad64x64 = pBestSad64x64[0];
-	bestMV64x64 = 0;
+	bestMV64x64 = 0xff;
+
 	//sad_0
 	temSum = _mm_extract_epi32(sad_0, 0);
-	if (temSum < bestSad64x64){
-		bestSad64x64 = temSum;
+	if (temSum <= pBestSad64x64[0]){
+		pBestSad64x64[0] = temSum;
+		bestMV64x64 = 0;
 	}
 	temSum = _mm_extract_epi32(sad_0, 1);
-	if (temSum < bestSad64x64){
-		bestSad64x64 = temSum;
+	if (temSum <= pBestSad64x64[0]){
+		pBestSad64x64[0] = temSum;
 		bestMV64x64 = 1 * 4;
 	}
 	temSum = _mm_extract_epi32(sad_0, 2);
-	if (temSum < bestSad64x64){
-		bestSad64x64 = temSum;
+	if (temSum <= pBestSad64x64[0]){
+		pBestSad64x64[0] = temSum;
 		bestMV64x64 = 2 * 4;
 	}
 	temSum = _mm_extract_epi32(sad_0, 3);
-	if (temSum < bestSad64x64){
-		bestSad64x64 = temSum;
+	if (temSum <= pBestSad64x64[0]){
+		pBestSad64x64[0] = temSum;
 		bestMV64x64 = 3 * 4;
 	}
 
 	//sad_1
 	temSum = _mm_extract_epi32(sad_1, 0);
-	if (temSum < bestSad64x64){
-		bestSad64x64 = temSum;
+	if (temSum <= pBestSad64x64[0]){
+		pBestSad64x64[0] = temSum;
 		bestMV64x64 = 4 * 4;
 	}
 	temSum = _mm_extract_epi32(sad_1, 1);
-	if (temSum < bestSad64x64){
-		bestSad64x64 = temSum;
+	if (temSum <= pBestSad64x64[0]){
+		pBestSad64x64[0] = temSum;
 		bestMV64x64 = 5 * 4;
 	}
 	temSum = _mm_extract_epi32(sad_1, 2);
-	if (temSum < bestSad64x64){
-		bestSad64x64 = temSum;
+	if (temSum <= pBestSad64x64[0]){
+		pBestSad64x64[0] = temSum;
 		bestMV64x64 = 6 * 4;
 	}
 	temSum = _mm_extract_epi32(sad_1, 3);
-	if (temSum < bestSad64x64){
-		bestSad64x64 = temSum;
+	if (temSum <= pBestSad64x64[0]){
+		pBestSad64x64[0] = temSum;
 		bestMV64x64 = 7 * 4;
 	}
-	if (pBestSad64x64[0] != bestSad64x64) {
-		pBestSad64x64[0] = bestSad64x64;
-		xMv = _MVXT(mv) + (EB_S16) bestMV64x64;  yMv = _MVYT(mv);
-		pBestMV64x64[0] = ((EB_U16)yMv << 16) | ((EB_U16)xMv);
-	}
+
+    if (bestMV64x64 != 0xff)
+    {
+        xMv = _MVXT(mv) + (EB_S16)bestMV64x64;  yMv = _MVYT(mv);
+        pBestMV64x64[0] = ((EB_U16)yMv << 16) | ((EB_U16)xMv);
+    }
 
 	// ****CODE PAST HERE IS BUGGY FOR GCC****
 

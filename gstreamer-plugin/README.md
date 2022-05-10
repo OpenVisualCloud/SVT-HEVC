@@ -43,7 +43,7 @@ This plugin uses `meson` build tools and the dependency on SVT-HEVC library is s
 ### Linux specific instructions
 Make sure first that SVT-HEVC library is installed and can be found using pkg-config. You can do that using CMake:
 
-	cmake -P SVT-HEVC/Build/linux/release/Source/Lib/cmake_install.cmake
+	cmake -P SVT-HEVC/Build/linux/Release/cmake_install.cmake
 
 Then you can compile and install the plugin the following way:
 
@@ -52,7 +52,7 @@ Then you can compile and install the plugin the following way:
 ### Windows specific instructions
 Make sure first that SVT-HEVC library is installed and can be found using pkg-config. You can do that using CMake:
 
-	cmake -P SVT-HEVC\Build\Windows\Source\Lib\cmake_install.cmake
+	cmake -P SVT-HEVC\Build\Windows\cmake_install.cmake
 
 The following commands should be run from a Visual Studio command prompt or another build environment like MinGW, not Windows built-in command prompt.
 

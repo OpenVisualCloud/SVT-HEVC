@@ -9,6 +9,7 @@
 #include "EbDefinitions.h"
 #include "EbSystemResourceManager.h"
 #include "EbRateControlProcess.h"
+#include "EbObject.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,9 +19,10 @@ extern "C" {
  * Context
  **************************************/
 typedef struct InitialRateControlContext_s
-{      
+{
+    EbDctor                      dctor;
     EbFifo_t                    *motionEstimationResultsInputFifoPtr;
-	EbFifo_t                    *initialrateControlResultsOutputFifoPtr;
+    EbFifo_t                    *initialrateControlResultsOutputFifoPtr;
 
 } InitialRateControlContext_t;
 
@@ -28,13 +30,13 @@ typedef struct InitialRateControlContext_s
  * Extern Function Declaration
  ***************************************/
 extern EB_ERRORTYPE InitialRateControlContextCtor(
-    InitialRateControlContext_t **contextDblPtr,
+    InitialRateControlContext_t  *contextPtr,
     EbFifo_t                     *motionEstimationResultsInputFifoPtr,
     EbFifo_t                     *pictureDemuxResultsOutputFifoPtr);
-    
+
 extern void* InitialRateControlKernel(void *inputPtr);
 
-extern void MeBasedGlobalMotionDetection(
+extern void EbHevcMeBasedGlobalMotionDetection(
     SequenceControlSet_t         *sequenceControlSetPtr,
     PictureParentControlSet_t    *pictureControlSetPtr);
 

@@ -11,6 +11,7 @@
 #include "EbSystemResourceManager.h"
 #include "EbPredictionStructure.h"
 #include"EbPictureControlSet.h"  
+#include "EbObject.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,6 +20,7 @@ extern "C" {
  * PA Reference Queue Entry
  ************************************************/
 typedef struct PaReferenceQueueEntry_s {
+    EbDctor                         dctor;
     EbObjectWrapper_t              *inputObjectPtr;
     EB_U64                          pictureNumber;
     EB_U32                          dependentCount;
@@ -34,7 +36,7 @@ typedef struct PaReferenceQueueEntry_s {
 } PaReferenceQueueEntry_t;
 
 extern EB_ERRORTYPE PaReferenceQueueEntryCtor(   
-    PaReferenceQueueEntry_t  **entryDblPtr);
+    PaReferenceQueueEntry_t  *entryPtr);
 
 #ifdef __cplusplus
 }

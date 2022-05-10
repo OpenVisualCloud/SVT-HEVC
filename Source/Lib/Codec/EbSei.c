@@ -13,7 +13,7 @@ void EbVideoUsabilityInfoCopy(
     AppVideoUsabilityInfo_t *srcVuiPtr)
 {
     size_t sizeCopy = (size_t)((EB_U64)(&dstVuiPtr->hrdParametersPtr) -
-                               (EB_U64)(&dstVuiPtr->aspectRatioInfoPresentFlag));
+        (EB_U64)(&dstVuiPtr->aspectRatioInfoPresentFlag));
 
     EB_MEMCPY(dstVuiPtr, srcVuiPtr, sizeCopy);
     EB_MEMCPY(dstVuiPtr->hrdParametersPtr, srcVuiPtr->hrdParametersPtr, sizeof(AppHrdParameters_t));
@@ -21,266 +21,25 @@ void EbVideoUsabilityInfoCopy(
     return;
 }
 
+static void EbVideoUsabilityInfoDctor(EB_PTR p)
+{
+    AppVideoUsabilityInfo_t *obj = (AppVideoUsabilityInfo_t*)p;
+    EB_FREE(obj->hrdParametersPtr);
+}
+
 EB_ERRORTYPE EbVideoUsabilityInfoCtor(
     AppVideoUsabilityInfo_t *vuiPtr)
 {
-    AppHrdParameters_t* hrdParamPtr;
-    EB_MALLOC(AppHrdParameters_t*, vuiPtr->hrdParametersPtr, sizeof(AppHrdParameters_t), EB_N_PTR);
-
-    hrdParamPtr = vuiPtr->hrdParametersPtr;
-
+    EB_CALLOC(vuiPtr->hrdParametersPtr, 1, sizeof(AppHrdParameters_t));
     // Initialize vui variables
-
+    vuiPtr->dctor = EbVideoUsabilityInfoDctor;
     vuiPtr->aspectRatioInfoPresentFlag = EB_TRUE;
-    vuiPtr->aspectRatioIdc = 0;
-    vuiPtr->sarWidth = 0;
-    vuiPtr->sarHeight = 0;
-
-    vuiPtr->overscanInfoPresentFlag = EB_FALSE;
-    vuiPtr->overscanApproriateFlag = EB_FALSE;
-    vuiPtr->videoSignalTypePresentFlag = EB_FALSE;
-
-    vuiPtr->videoFormat = 0;
-    vuiPtr->videoFullRangeFlag = EB_FALSE;
-
-    vuiPtr->colorDescriptionPresentFlag = EB_FALSE;
-    vuiPtr->colorPrimaries = 0;
-    vuiPtr->transferCharacteristics = 0;
-    vuiPtr->matrixCoeffs = 0;
-
-    vuiPtr->chromaLocInfoPresentFlag = EB_FALSE;
-    vuiPtr->chromaSampleLocTypeTopField = 0;
-    vuiPtr->chromaSampleLocTypeBottomField = 0;
-
-    vuiPtr->neutralChromaIndicationFlag = EB_FALSE;
-    vuiPtr->fieldSeqFlag = EB_FALSE;
-    vuiPtr->frameFieldInfoPresentFlag = EB_FALSE;//EB_TRUE;
-
     vuiPtr->defaultDisplayWindowFlag = EB_TRUE;
-    vuiPtr->defaultDisplayWinLeftOffset = 0;
-    vuiPtr->defaultDisplayWinRightOffset = 0;
-    vuiPtr->defaultDisplayWinTopOffset = 0;
-    vuiPtr->defaultDisplayWinBottomOffset = 0;
-
-    vuiPtr->vuiTimingInfoPresentFlag = EB_FALSE;//EB_TRUE;
-    vuiPtr->vuiNumUnitsInTick = 0;
-    vuiPtr->vuiTimeScale = 0;
-
-    vuiPtr->vuiPocPropotionalTimingFlag = EB_FALSE;
-    vuiPtr->vuiNumTicksPocDiffOneMinus1 = 0;
-
-    vuiPtr->vuiHrdParametersPresentFlag = EB_FALSE;//EB_TRUE;
-
-    vuiPtr->bitstreamRestrictionFlag = EB_FALSE;
-
-    vuiPtr->motionVectorsOverPicBoundariesFlag = EB_FALSE;
-    vuiPtr->restrictedRefPicListsFlag = EB_FALSE;
-
-    vuiPtr->minSpatialSegmentationIdc = 0;
-    vuiPtr->maxBytesPerPicDenom = 0;
-    vuiPtr->maxBitsPerMinCuDenom = 0;
-    vuiPtr->log2MaxMvLengthHorizontal = 0;
-    vuiPtr->log2MaxMvLengthVertical = 0;
-
-    // Initialize HRD parameters
-    hrdParamPtr->nalHrdParametersPresentFlag = EB_FALSE;//EB_TRUE;
-    hrdParamPtr->vclHrdParametersPresentFlag = EB_FALSE;
-    hrdParamPtr->subPicCpbParamsPresentFlag = EB_FALSE;//EB_TRUE;
-
-    hrdParamPtr->tickDivisorMinus2 = 0;
-    hrdParamPtr->duCpbRemovalDelayLengthMinus1 = 0;
-
-    hrdParamPtr->subPicCpbParamsPicTimingSeiFlag = EB_FALSE;//EB_TRUE;
-
-    hrdParamPtr->dpbOutputDelayDuLengthMinus1 = 0;
-
-    hrdParamPtr->bitRateScale = 0;
-    hrdParamPtr->cpbSizeScale = 0;
-    hrdParamPtr->duCpbSizeScale = 0;
-
-    hrdParamPtr->initialCpbRemovalDelayLengthMinus1 = 0;
-    hrdParamPtr->auCpbRemovalDelayLengthMinus1 = 0;
-    hrdParamPtr->dpbOutputDelayLengthMinus1 = 0;
-
-    EB_MEMSET(
-        hrdParamPtr->fixedPicRateGeneralFlag,
-        EB_FALSE,
-        sizeof(EB_BOOL)*MAX_TEMPORAL_LAYERS);
-
-    EB_MEMSET(
-        hrdParamPtr->fixedPicRateWithinCvsFlag,
-        EB_FALSE,
-        sizeof(EB_BOOL)*MAX_TEMPORAL_LAYERS);
-
-    EB_MEMSET(
-        hrdParamPtr->elementalDurationTcMinus1,
-        EB_FALSE,
-        sizeof(EB_U32)*MAX_TEMPORAL_LAYERS);
-
-    EB_MEMSET(
-        hrdParamPtr->lowDelayHrdFlag,
-        EB_FALSE,
-        sizeof(EB_BOOL)*MAX_TEMPORAL_LAYERS);
-
-    EB_MEMSET(
-        hrdParamPtr->cpbCountMinus1,
-        0,
-        sizeof(EB_U32)*MAX_TEMPORAL_LAYERS);
-    //hrdParamPtr->cpbCountMinus1[0] = 2;
-
-    EB_MEMSET(
-        hrdParamPtr->bitRateValueMinus1,
-        EB_FALSE,
-        sizeof(EB_U32)*MAX_TEMPORAL_LAYERS*2*MAX_CPB_COUNT);
-
-    EB_MEMSET(
-        hrdParamPtr->cpbSizeValueMinus1,
-        EB_FALSE,
-        sizeof(EB_U32)*MAX_TEMPORAL_LAYERS*2*MAX_CPB_COUNT);
-
-    EB_MEMSET(
-        hrdParamPtr->bitRateDuValueMinus1,
-        EB_FALSE,
-        sizeof(EB_U32)*MAX_TEMPORAL_LAYERS*2*MAX_CPB_COUNT);
-
-    EB_MEMSET(
-        hrdParamPtr->cpbSizeDuValueMinus1,
-        EB_FALSE,
-        sizeof(EB_U32)*MAX_TEMPORAL_LAYERS*2*MAX_CPB_COUNT);
-
-    EB_MEMSET(
-        hrdParamPtr->cbrFlag,
-        EB_FALSE,
-        sizeof(EB_BOOL)*MAX_TEMPORAL_LAYERS*2*MAX_CPB_COUNT);
-
-    hrdParamPtr->cpbDpbDelaysPresentFlag = (EB_BOOL)((hrdParamPtr->nalHrdParametersPresentFlag || hrdParamPtr->vclHrdParametersPresentFlag) && vuiPtr->vuiHrdParametersPresentFlag);
+    vuiPtr->hrdParametersPtr->cpbDpbDelaysPresentFlag = (EB_BOOL)((vuiPtr->hrdParametersPtr->nalHrdParametersPresentFlag || vuiPtr->hrdParametersPtr->vclHrdParametersPresentFlag)
+                                                                   && vuiPtr->vuiHrdParametersPresentFlag);
 
     return EB_ErrorNone;
 }
-
-
-
-
-void EbPictureTimeingSeiCtor(
-    AppPictureTimingSei_t   *picTimingPtr)
-{
-    picTimingPtr->picStruct = 0;
-    picTimingPtr->sourceScanType = 0;
-    picTimingPtr->duplicateFlag = EB_FALSE;
-    picTimingPtr->auCpbRemovalDelayMinus1 = 0;
-    picTimingPtr->picDpbOutputDelay = 0;
-    picTimingPtr->picDpbOutputDuDelay = 0;
-    picTimingPtr->numDecodingUnitsMinus1 = 0;//3;
-    picTimingPtr->duCommonCpbRemovalDelayFlag = EB_FALSE;
-    picTimingPtr->duCommonCpbRemovalDelayMinus1 = 0;
-    picTimingPtr->numNalusInDuMinus1 = 0;
-
-    EB_MEMSET(
-        picTimingPtr->duCpbRemovalDelayMinus1,
-        0,
-        sizeof(EB_U32) * MAX_DECODING_UNIT_COUNT);
-
-    return;
-}
-
-void EbBufferingPeriodSeiCtor(
-    AppBufferingPeriodSei_t   *bufferingPeriodPtr)
-{
-    bufferingPeriodPtr->bpSeqParameterSetId = 0;
-    bufferingPeriodPtr->rapCpbParamsPresentFlag = EB_FALSE;
-    bufferingPeriodPtr->concatenationFlag = EB_FALSE;
-    bufferingPeriodPtr->auCpbRemovalDelayDeltaMinus1 = 0;
-    bufferingPeriodPtr->cpbDelayOffset = 0;
-    bufferingPeriodPtr->dpbDelayOffset = 0;
-
-    EB_MEMSET(
-        bufferingPeriodPtr->initialCpbRemovalDelay,
-        0,
-        sizeof(EB_U32) * 2 * MAX_CPB_COUNT);
-    EB_MEMSET(
-        bufferingPeriodPtr->initialCpbRemovalDelayOffset,
-        0,
-        sizeof(EB_U32) * 2 * MAX_CPB_COUNT);
-    EB_MEMSET(
-        bufferingPeriodPtr->initialAltCpbRemovalDelay,
-        0,
-        sizeof(EB_U32) * 2 * MAX_CPB_COUNT);
-    EB_MEMSET(
-        bufferingPeriodPtr->initialAltCpbRemovalDelayOffset,
-        0,
-        sizeof(EB_U32) * 2 * MAX_CPB_COUNT);
-
-    return;
-}
-
-void EbActiveParameterSetSeiCtor(
-    AppActiveparameterSetSei_t  *activeParameterSetSei)
-{
-    activeParameterSetSei->activeVideoParameterSetid = 0;
-    activeParameterSetSei->selfContainedCvsFlag = EB_FALSE;
-    activeParameterSetSei->noParameterSetUpdateFlag = EB_FALSE;
-    activeParameterSetSei->numSpsIdsMinus1 = 0;
-    activeParameterSetSei->activeSeqParameterSetId = 0;
-//	activeParameterSetSei->layerSpsIdx = 0;
-    return;
-}
-
-void EbRecoveryPointSeiCtor(
-    AppRecoveryPoint_t   *recoveryPointSeiPtr)
-{
-    recoveryPointSeiPtr->recoveryPocCnt = 0;
-
-    recoveryPointSeiPtr->exactMatchingFlag = EB_FALSE;
-
-    recoveryPointSeiPtr->brokenLinkFlag = EB_FALSE;
-
-    return;
-}
-
-void EbContentLightLevelCtor(
-    AppContentLightLevelSei_t    *contentLightLevelPtr)
-{
-    contentLightLevelPtr->maxContentLightLevel = 0;
-    contentLightLevelPtr->maxPicAverageLightLevel = 0;
-}
-
-void EbMasteringDisplayColorVolumeCtor(
-    AppMasteringDisplayColorVolumeSei_t    *masteringDisplayPtr)
-{
-
-    EB_MEMSET(
-        masteringDisplayPtr->displayPrimaryX,
-        0,
-        sizeof(EB_U16) * 3);
-    EB_MEMSET(
-        masteringDisplayPtr->displayPrimaryY,
-        0,
-        sizeof(EB_U16) * 3);
-
-    masteringDisplayPtr->whitePointX = 0;
-    masteringDisplayPtr->whitePointY= 0 ;
-    masteringDisplayPtr->maxDisplayMasteringLuminance = 0;
-    masteringDisplayPtr->minDisplayMasteringLuminance = 0;
-}
-
-void EbRegUserDataSEICtor(
-    RegistedUserData_t* regUserDataSeiPtr) {
-
-    regUserDataSeiPtr->userData = NULL;
-    regUserDataSeiPtr->userDataSize = 0;
-}
-
-void EbUnRegUserDataSEICtor(
-    UnregistedUserData_t* UnRegUserDataPtr) {
-
-    UnRegUserDataPtr->userData = NULL;
-    UnRegUserDataPtr->userDataSize = 0;
-    EB_MEMSET(
-        UnRegUserDataPtr->uuidIsoIec_11578,
-        0,
-        sizeof(EB_U8) * 16);
-}
-
 
 /**************************************************
  * GetUvlcCodeLength

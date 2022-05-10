@@ -14,16 +14,12 @@
  * Enc Dec Context Constructor
  ******************************************************/
 EB_ERRORTYPE EntropyCodingContextCtor(
-    EntropyCodingContext_t **contextDblPtr,
+    EntropyCodingContext_t  *contextPtr,
     EbFifo_t                *encDecInputFifoPtr,
     EbFifo_t                *packetizationOutputFifoPtr,
     EbFifo_t                *rateControlOutputFifoPtr,
     EB_BOOL                  is16bit)
 {
-    EntropyCodingContext_t *contextPtr;
-    EB_MALLOC(EntropyCodingContext_t*, contextPtr, sizeof(EntropyCodingContext_t), EB_N_PTR);
-    *contextDblPtr = contextPtr;
-
     contextPtr->is16bit = is16bit;
 
     // Input/Output System Resource Manager FIFOs
@@ -369,7 +365,9 @@ void* EntropyCodingKernel(void *inputPtr)
         lastLcuFlagInTile      = EB_FALSE;
         tileCnt                = pictureControlSetPtr->ParentPcsPtr->tileRowCount * pictureControlSetPtr->ParentPcsPtr->tileColumnCount;
 #if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld EC IN \n", pictureControlSetPtr->pictureNumber);
+        if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+            if (pictureControlSetPtr->encDecCodedLcuCount == pictureControlSetPtr->lcuTotalCount)
+                SVT_LOG("POC %lu EC IN \n", pictureControlSetPtr->pictureNumber);
 #endif
         //SVT_LOG("[%lld]: POC %lld EC IN, tile %d, (%d, %d) \n",
         //        EbGetSysTimeMs(),
@@ -516,16 +514,17 @@ void* EntropyCodingKernel(void *inputPtr)
                             //SVT_LOG("[%lld]: Entropy post result, POC %d\n", EbGetSysTimeMs(), pictureControlSetPtr->pictureNumber);
                             // Post EntropyCoding Results
                             EbPostFullObject(entropyCodingResultsWrapperPtr);
+
+#if DEADLOCK_DEBUG
+                            if ((pictureControlSetPtr->pictureNumber >= MIN_POC) && (pictureControlSetPtr->pictureNumber <= MAX_POC))
+                                SVT_LOG("POC %lu EC OUT \n", pictureControlSetPtr->pictureNumber);
+#endif
                         }
 					} // End if(PictureCompleteFlag)
 				}
 				EbReleaseMutex(pictureControlSetPtr->entropyCodingInfo[tileIdx]->entropyCodingMutex);
 			}
         }
-
-#if DEADLOCK_DEBUG
-        SVT_LOG("POC %lld EC OUT \n", pictureControlSetPtr->pictureNumber);
-#endif
         // Release Mode Decision Results
         EbReleaseObject(encDecResultsWrapperPtr);
 

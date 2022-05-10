@@ -210,7 +210,7 @@ extern EB_ERRORTYPE CodeEndOfSequenceNalUnit(
 
 extern EB_ERRORTYPE CopyRbspBitstreamToPayload(
     Bitstream_t *bitstreamPtr,
-    EB_BYTE      outputBuffer,
+    EB_BYTE     *outputBuffer,
     EB_U32      *outputBufferIndex,
     EB_U32      *outputBufferSize,
     EncodeContext_t         *encodeContextPtr,

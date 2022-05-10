@@ -65,7 +65,7 @@ EB_ERRORTYPE GetRefIndexFractionBits(
     return return_error;
 }
 /*********************************************************************
- * GetMvdFractionBits
+ * EbHevcGetMvdFractionBits
  *   Gets the motion vector difference Fraction Bits
  *
  *  mvdX
@@ -80,7 +80,7 @@ EB_ERRORTYPE GetRefIndexFractionBits(
  *  fractionBitNum
  *   output for the fraction number of bits needed for motion vector difference
  *********************************************************************/
-EB_ERRORTYPE GetMvdFractionBits(
+EB_ERRORTYPE EbHevcGetMvdFractionBits(
     EB_S32                      mvdX,
     EB_S32                      mvdY,
     MdRateEstimationContext_t  *mdRateEstimationArray,
@@ -154,7 +154,7 @@ EB_ERRORTYPE GetMvdFractionBits(
     return return_error;
 }
 /*********************************************************************
- * MeGetMvdFractionBits
+ * MeEbHevcGetMvdFractionBits
  *   Gets the motion vector difference Fraction Bits for ME
  *
  *  mvdX
@@ -169,7 +169,7 @@ EB_ERRORTYPE GetMvdFractionBits(
  *  fractionBitNum
  *   output for the fraction number of bits needed for motion vector difference
  *********************************************************************/
-EB_ERRORTYPE MeGetMvdFractionBits(
+EB_ERRORTYPE MeEbHevcGetMvdFractionBits(
     EB_S32                      mvdX,
     EB_S32                      mvdY,
     EB_BitFraction             *mvdBitsPtr,
@@ -293,7 +293,7 @@ EB_ERRORTYPE GetSaoOffsetsFractionBits(
     return return_error;
 }
 
-EB_ERRORTYPE MdRateEstimationContextCtor(MdRateEstimationContext_t *mdRateEstimationArray,
+EB_ERRORTYPE MdRateEstimationContextInit(MdRateEstimationContext_t *mdRateEstimationArray,
                                  ContextModelEncContext_t  *cabacContextModelArray)
 {
     EB_U32                      caseIndex1;
@@ -305,8 +305,7 @@ EB_ERRORTYPE MdRateEstimationContextCtor(MdRateEstimationContext_t *mdRateEstima
     EB_U32                      cabacContextModelArrayOffset1=0;
     EB_U32                      cabacContextModelArrayOffset2;
     ContextModelEncContext_t   *cabacContextModelPtr;
-    EB_ContextModel            *contextModelPtr;
-    EB_MALLOC(EB_ContextModel*, contextModelPtr, sizeof(EB_ContextModel), EB_N_PTR);
+    EB_ContextModel             contextModel;
 
     // Loop over all slice types
     for(sliceIndex = 0; sliceIndex < TOTAL_NUMBER_OF_SLICE_TYPES; sliceIndex++) {
@@ -481,29 +480,29 @@ EB_ERRORTYPE MdRateEstimationContextCtor(MdRateEstimationContext_t *mdRateEstima
             mdRateEstimationTemp->mvdBits[0]  = CabacEstimatedBits[cabacContextModelPtr->mvdContextModel[0] ^ 0];
             mdRateEstimationTemp->mvdBits[1]  = CabacEstimatedBits[cabacContextModelPtr->mvdContextModel[0] ^ 1];
 
-            *contextModelPtr                  = cabacContextModelPtr->mvdContextModel[0];
-            *contextModelPtr                  = UPDATE_CONTEXT_MODEL(0, contextModelPtr);
-            mdRateEstimationTemp->mvdBits[2]  = CabacEstimatedBits[*contextModelPtr ^ 0];
-            mdRateEstimationTemp->mvdBits[3]  = CabacEstimatedBits[*contextModelPtr ^ 1];
+            contextModel                      = cabacContextModelPtr->mvdContextModel[0];
+            contextModel                      = UPDATE_CONTEXT_MODEL(0, &contextModel);
+            mdRateEstimationTemp->mvdBits[2]  = CabacEstimatedBits[contextModel ^ 0];
+            mdRateEstimationTemp->mvdBits[3]  = CabacEstimatedBits[contextModel ^ 1];
 
-            *contextModelPtr                  = cabacContextModelPtr->mvdContextModel[0];
-            *contextModelPtr                  = UPDATE_CONTEXT_MODEL(1, contextModelPtr);
-            mdRateEstimationTemp->mvdBits[4]  = CabacEstimatedBits[*contextModelPtr ^ 0];
-            mdRateEstimationTemp->mvdBits[5]  = CabacEstimatedBits[*contextModelPtr ^ 1];
+            contextModel                      = cabacContextModelPtr->mvdContextModel[0];
+            contextModel                      = UPDATE_CONTEXT_MODEL(1, &contextModel);
+            mdRateEstimationTemp->mvdBits[4]  = CabacEstimatedBits[contextModel ^ 0];
+            mdRateEstimationTemp->mvdBits[5]  = CabacEstimatedBits[contextModel ^ 1];
 
-            *contextModelPtr                  = cabacContextModelPtr->mvdContextModel[1];
-            mdRateEstimationTemp->mvdBits[6]  = CabacEstimatedBits[*contextModelPtr ^ 0];
-            mdRateEstimationTemp->mvdBits[7]  = CabacEstimatedBits[*contextModelPtr ^ 1];
+            contextModel                      = cabacContextModelPtr->mvdContextModel[1];
+            mdRateEstimationTemp->mvdBits[6]  = CabacEstimatedBits[contextModel ^ 0];
+            mdRateEstimationTemp->mvdBits[7]  = CabacEstimatedBits[contextModel ^ 1];
 
-            *contextModelPtr                  = cabacContextModelPtr->mvdContextModel[1];
-            *contextModelPtr                  = UPDATE_CONTEXT_MODEL(0, contextModelPtr);
-            mdRateEstimationTemp->mvdBits[8]  = CabacEstimatedBits[*contextModelPtr ^ 0];
-            mdRateEstimationTemp->mvdBits[9]  = CabacEstimatedBits[*contextModelPtr ^ 1];
+            contextModel                      = cabacContextModelPtr->mvdContextModel[1];
+            contextModel                      = UPDATE_CONTEXT_MODEL(0, &contextModel);
+            mdRateEstimationTemp->mvdBits[8]  = CabacEstimatedBits[contextModel ^ 0];
+            mdRateEstimationTemp->mvdBits[9]  = CabacEstimatedBits[contextModel ^ 1];
 
-            *contextModelPtr                  = cabacContextModelPtr->mvdContextModel[1];
-            *contextModelPtr                  = UPDATE_CONTEXT_MODEL(1, contextModelPtr);
-            mdRateEstimationTemp->mvdBits[10] = CabacEstimatedBits[*contextModelPtr ^ 0];
-            mdRateEstimationTemp->mvdBits[11] = CabacEstimatedBits[*contextModelPtr ^ 1];
+            contextModel                      = cabacContextModelPtr->mvdContextModel[1];
+            contextModel                      = UPDATE_CONTEXT_MODEL(1, &contextModel);
+            mdRateEstimationTemp->mvdBits[10] = CabacEstimatedBits[contextModel ^ 0];
+            mdRateEstimationTemp->mvdBits[11] = CabacEstimatedBits[contextModel ^ 1];
 
             // Merge Flag Bits Table
             // 0: Symbol = 0 & Ctx = 0
@@ -600,6 +599,5 @@ EB_ERRORTYPE MdRateEstimationContextCtor(MdRateEstimationContext_t *mdRateEstima
         }
     }
 
-    //free(contextModelPtr);
     return EB_ErrorNone;
 }

@@ -18,25 +18,22 @@ static EB_S32 MaxSaoOffsetvalueEO[2 /*8bit+10bit*/][SAO_EO_CATEGORIES] = { {7, 7
 static EB_S32 MaxSaoOffsetvalueBO[2 /*8bit+10bit*/] = { 7 , 31 };
 static EB_S32 MinSaoOffsetvalueBO[2 /*8bit+10bit*/] = { -7 ,-31 };
 
+static void SaoStatsDctor(EB_PTR p)
+{
+    SaoStats_t *obj = (SaoStats_t *)p;
+    EB_FREE_2D(obj->boDiff);
+    EB_FREE_2D(obj->boCount);
+}
+
 /********************************************
  * Sao Stats Ctor
  ********************************************/
-EB_ERRORTYPE SaoStatsCtor(SaoStats_t **saoStatsPtr)
+EB_ERRORTYPE SaoStatsCtor(SaoStats_t *saoStatsPtr)
 {
-    EB_U32 videoComponent; 
+    saoStatsPtr->dctor = SaoStatsDctor;
+    EB_MALLOC_2D(saoStatsPtr->boDiff, 3, SAO_BO_INTERVALS);
+    EB_MALLOC_2D(saoStatsPtr->boCount, 3, SAO_BO_INTERVALS);
 
-    SaoStats_t *saoStats;
-    EB_MALLOC(SaoStats_t*, saoStats, sizeof(SaoStats_t), EB_N_PTR);
-    *saoStatsPtr = saoStats;
-
-    EB_MALLOC(EB_S32**, saoStats->boDiff, sizeof(EB_S32*) * 3, EB_N_PTR);
-
-    EB_MALLOC(EB_U16**, saoStats->boCount, sizeof(EB_U32*) * 3, EB_N_PTR);
-
-    for(videoComponent = 0; videoComponent < 3; ++videoComponent) {
-        EB_MALLOC(EB_S32*, saoStats->boDiff[videoComponent], sizeof(EB_S32) * SAO_BO_INTERVALS, EB_N_PTR);
-        EB_MALLOC(EB_U16*, saoStats->boCount[videoComponent], sizeof(EB_U32) * SAO_BO_INTERVALS, EB_N_PTR);
-    }
     return EB_ErrorNone;
 }
 

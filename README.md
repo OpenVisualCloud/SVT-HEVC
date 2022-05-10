@@ -2,7 +2,6 @@
 
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/openvisualcloud/SVT-HEVC?branch=master&svg=true)](https://ci.appveyor.com/project/openvisualcloud/SVT-HEVC)
 [![Travis Build Status](https://travis-ci.com/OpenVisualCloud/SVT-HEVC.svg?branch=master)](https://travis-ci.com/OpenVisualCloud/SVT-HEVC)
-[![Coverage Status](https://coveralls.io/repos/github/openvisualcloud/SVT-HEVC/badge.svg?branch=master)](https://coveralls.io/github/openvisualcloud/SVT-HEVC?branch=master)
 
 The Scalable Video Technology for HEVC Encoder (SVT-HEVC Encoder) is an HEVC-compliant encoder library core that achieves excellent density-quality tradeoffs, and is highly optimized for Intel® Xeon™ Scalable Processor and Xeon™ D processors.
 
@@ -121,6 +120,10 @@ For the binaries to operate properly, the following conditions have to be met:
   - cd into your chosen location
   - Run the sample application to encode. `./SvtHevcEncApp -i [in.yuv] -w [width] -h [height] -b [out.265]`
   - Sample application supports reading from pipe. E.g. `ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | ./SvtHevcEncApp -i stdin -n [number_of_frames_to_encode] -w [width] -h [height]`
+
+## How to evaluate by ready-to-run executables with docker
+
+Refer to the guide [here](https://github.com/OpenVisualCloud/Dockerfiles/blob/master/doc/svt.md#Evaluate-SVT).
 
 ## Demo features and limitations
 
