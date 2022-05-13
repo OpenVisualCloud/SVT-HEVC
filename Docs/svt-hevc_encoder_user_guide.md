@@ -231,6 +231,10 @@ This token sets the encoder to automatically choose the best quality encoding mo
 
 This token sets the number of logical processors which the encoder threads run on.
 
+>-flp integer **[Optional]**
+
+This token sets the index of first logical processor which the encoder threads run on.
+
 >-ss integer **[Optional]**
 
 For dual socket systems, this token specific which socket the encoder runs on.
@@ -320,6 +324,7 @@ The encoder parameters present in the Sample.cfg file are listed in this table b
 | **TemporalId** | -temporal-id | [0,1] | 1 | 0 = OFF<br>1 = Insert temporal ID in NAL units |
 | **AsmType** | -asm | [0,1] | 1 | Assembly instruction set <br>(0: C Only, 1: Automatically select highest assembly instruction set supported) |
 | **LogicalProcessors** | -lp | [0, total number of logical processor] | 0 | The number of logical processor which encoder threads run on.Refer to Appendix A.2 |
+| **FirstLogicalProcessor** | -flp | [0, the index of last logical processor] | 0 | The index of first logical processor which encoder threads run on.Refer to Appendix A.2 |
 | **TargetSocket** | -ss | [-1,1] | -1 | For dual socket systems, this can specify which socket the encoder runs on.  Refer to Appendix A.2 |
 | **ThreadCount** | -thread-count | [0,N] | 0 | The number of threads to get created and run, 0 = AUTO |
 | **SwitchThreadsToRtPriority** | -rt | [0,1] | 1 | Enables or disables threads to real time priority, 0 = OFF, 1 = ON (only works on Linux) |
@@ -388,7 +393,7 @@ The above section is not needed for Windows\* as it does not perform the CPU uti
 
 The SVT-HEVC encoder achieves the best performance when restricting each channel to only one socket on either Windows\* or Linux\* operating systems. For example, when running four channels on a dual socket system, it&#39;s best to pin two channels to each socket and not split every channel on both sockets.
 
-LogicalProcessors (-lp) and TargetSocket (-ss) parameters can be used to management the threads. Or you can use OS commands like below.
+LogicalProcessors (-lp), FirstLogicalProcessor (-flp) and TargetSocket (-ss) parameters can be used to management the threads. Or you can use OS commands like below.
 
 For example, in order to run a 6-stream 4kp60 simultaneous encode on a Xeon Platinum 8180 system the following command lines should be used:
 
@@ -477,7 +482,7 @@ In the SVT-HEVC code, the GOP structure is constructed in the Picture Decision p
 
 ### 2. Thread management parameters
 
-LogicalProcessors (-lp) and TargetSocket (-ss) parameters are used to management thread affinity on Windows and Ubuntu OS. These are some examples how you use them together.
+LogicalProcessors (-lp), FirstLogicalProcessor (-flp) and TargetSocket (-ss) parameters are used to management thread affinity on Windows and Ubuntu OS. These are some examples how you use them together.
 
 If LogicalProcessors and TargetSocket are not set, threads are managed by OS thread scheduler.
 
@@ -494,6 +499,10 @@ If only TargetSocket is set, threads run on all the logical processors of socket
 >SvtHevcEncApp.exe -i in.yuv -w 3840 -h 2160 –lp 20 –ss 0
 
 If both LogicalProcessors and TargetSocket are set, threads run on 20 logical processors of socket 0. Threads guaranteed to run only on socket 0 if 20 is larger than logical processor number of socket 0.
+
+>SvtHevcEncApp.exe -i in.yuv -w 3840 -h 2160 –lp 20 –flp 8
+
+If both FirstLogicalProcessor and LogicalProcessors are set, threads run on 20 logical processors, from Core 8 to 27 inclusively.
 
 ### 3. Header(VPS SPS PPS) insertion
 

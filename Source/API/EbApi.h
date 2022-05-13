@@ -19,7 +19,9 @@ extern "C" {
 #define EB_HME_SEARCH_AREA_ROW_MAX_COUNT        2
 
 #define EB_THREAD_COUNT_MIN_CORE               48
-#define EB_THREAD_COUNT_FACTOR                  2
+#define EB_THREAD_COUNT_FACTOR                  1
+/* Default ratio between cores and threads */
+#define EB_THREAD_COUNT_MULTIPLIER              2
 
 #ifdef _WIN32
 #define EB_API __declspec(dllexport)
@@ -578,6 +580,11 @@ typedef struct EB_H265_ENC_CONFIGURATION
      * LogicalProcessorNumber and TargetSocket are not set, threads are managed by
      * OS thread scheduler. */
     uint32_t                logicalProcessors;
+
+    /* The first logical processor which encoder threads run on.
+     *
+     * Default is 0. */
+    uint32_t                firstLogicalProcessor;
 
     /* Target socket to run on. For dual socket systems, this can specify which
      * socket the encoder runs on.
