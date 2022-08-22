@@ -1,0 +1,281 @@
+name: General CI
+on:
+  push:
+    paths-ignore:
+      - "Docs/*"
+      - .travis.yml
+      - appveyor.yml
+      - .gitignore
+      - "*.md"
+  pull_request:
+    paths-ignore:
+      - "Docs/*"
+      - .travis.yml
+      - appveyor.yml
+      - "*.md"
+      - .gitignore
+
+jobs:
+  build:
+    name: build (${{ matrix.os }}, ${{ matrix.CC }}${{ matrix.additional_name != '' && format(', {0}', matrix.additional_name) || '' }})
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: ${{ matrix.os == 'windows-latest' && 'msys2 -l {0}' || 'bash' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        CC:
+          - gcc
+          - clang
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        exclude:
+          # gcc on macOS is just clang
+          - os: macos-latest
+            CC: gcc
+    env:
+      CC: ccache ${{ matrix.CC }}
+      CXX: ccache ${{ matrix.CXX }}
+      CFLAGS: -Wshadow ${{ matrix.CFLAGS }}
+      CXXFLAGS: -Wshadow ${{ matrix.CXXFLAGS }}
+      LDFLAGS: ${{ matrix.LDFLAGS }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ matrix.ref }}
+      - name: Cache ccache files
+        uses: actions/cache@v3
+        with:
+          path: ~/.ccache
+          key: ${{ runner.os }}-${{ matrix.CC }}-${{ hashFiles('**/*.c') }}
+          restore-keys: ${{ runner.os }}-${{ matrix.CC }}-
+      - name: Install dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ccache cmake clang gcc g++ git nasm ninja-build
+          curl -Ls "https://aomedia.googlesource.com/aom/+/refs/heads/master/build/cmake/toolchains/arm64-linux-gcc.cmake?format=TEXT" |
+            base64 -d > aarch64-linux-gnu.cmake
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install ccache cmake nasm ninja
+      - name: Setup MSYS2 (Windows)
+        uses: msys2/setup-msys2@v2
+        if: matrix.os == 'windows-latest'
+        with:
+          msystem: UCRT64
+          pacboy: >-
+            ccache:p
+            cmake:p
+            clang:p
+            gcc:p
+            git
+            nasm:p
+            ninja:p
+          update: true
+
+      - name: Setup ccache and profile
+        run: |
+          cat >> .sudo <<'EOF'
+          type sudo > /dev/null 2>&1 ||
+          sudo() {
+            while [ $# -gt 0 ]; do
+              case $1 in
+              -*)
+                shift
+                ;;
+              *)
+                break
+                ;;
+              esac
+            done
+            "$@"
+          }
+          EOF
+          . .sudo
+          sudo mkdir -p "$HOME/.ccache"
+          sudo chown -R "$USER": "$HOME/.ccache"
+          printf '%s\n' "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
+
+      - name: Configure SVT-HEVC
+        run: >-
+          cmake
+          -GNinja
+          -S "$GITHUB_WORKSPACE"
+          -B Build
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_SHARED_LIBS=OFF
+          ${{ matrix.CMAKE_EFLAGS }}
+
+      - name: Build and install SVT-HEVC
+        run: . .sudo && sudo -E cmake --build Build --parallel 4 --target install
+
+      - name: Upload binaries SVT-HEVC
+        uses: actions/upload-artifact@v3
+        with:
+          name: svthevc-${{ matrix.os }}-${{ matrix.cc }}${{ matrix.additional_name != '' && format('-{0}', matrix.additional_name) || '' }}-binaries
+          path: Bin/Release
+
+      - name: Download videos
+        run: |
+          curl -LO https://randomderp.com/video.tar.gz
+          tar xf video.tar.gz
+      - name: Upload videos
+        if: matrix.os == 'ubuntu-latest' && matrix.CC == 'gcc'
+        uses: actions/upload-artifact@v3
+        with:
+          name: svthevc-videos
+          path: "*.y4m"
+
+  bit-depth-tests:
+    name: ${{ matrix.os}} ${{ matrix.bit }} tests${{ matrix.additional_name != '' && format(' ({0})', matrix.additional_name) || '' }}
+    runs-on: ${{ matrix.os }}
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          # macOS has a sigill atm
+          # - macos-latest
+          - windows-latest
+        bit:
+          - 8
+          - 10
+    steps:
+      - name: Download binaries SVT-HEVC (ubuntu)
+        uses: actions/download-artifact@v3
+        with:
+          name: svthevc-${{ matrix.os }}-${{ matrix.os == 'macos-latest' && 'clang' || 'gcc' }}${{ matrix.additional_name != '' && format('-{0}', matrix.additional_name) || '' }}-binaries
+      - name: Download videos
+        uses: actions/download-artifact@v3
+        with:
+          name: svthevc-videos
+      - name: Print system info
+        run: |
+          sort -u /proc/cpuinfo || {
+            sysctl -n machdep.cpu.brand_string
+            sysctl -n machdep.cpu.features machdep.cpu.leaf7_features | sort -u
+          }
+      - name: Chmod binaries
+        run: file SvtHevcEncApp*; chmod +x SvtHevcEncApp${{ matrix.os == 'windows-latest' && '.exe' || '' }}
+
+      - name: Preset 0 ${{ matrix.bit }} bit tests
+        run: ./SvtHevcEncApp${{ matrix.os == 'windows-latest' && '.exe' || '' }}
+          -encMode 0
+          -i ${{ matrix.bit == 8 && 'akiyo_cif.y4m' || 'Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m' }}
+          -n 3
+          -b test-${{ matrix.additional_name != '' && matrix.additional_name || 'pr' }}-${{ matrix.os }}-${{ matrix.bit }}bit-m0.hevc
+      - name: Preset 8 ${{ matrix.bit }} bit tests
+        run: ./SvtHevcEncApp${{ matrix.os == 'windows-latest' && '.exe' || '' }}
+          -encMode 8
+          -i ${{ matrix.bit == 8 && 'akiyo_cif.y4m' || 'Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m' }}
+          -n 120
+          -b test-${{ matrix.additional_name != '' && matrix.additional_name || 'pr' }}-${{ matrix.os }}-${{ matrix.bit }}bit-m8.hevc
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: svthevc-${{ matrix.os }}-${{ matrix.bit }}bit-${{ matrix.additional_name != '' && matrix.additional_name || 'pr' }}-tests
+          path: "*.hevc"
+
+  binary-identical-test:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - bit-depth-tests
+    steps:
+      - name: Cache ccache files
+        uses: actions/cache@v3
+        with:
+          path: ~/.ccache
+          key: ${{ runner.os }}-binary-test-${{ hashFiles('**/*.c') }}
+          restore-keys: ${{ runner.os }}-binary-test-
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v3
+      - name: list all artifacts
+        run: ls -l && ls -l */
+      - name: Binary compare
+        id: binary_compare
+        continue-on-error: true
+        run: |
+          mv ./**/*.hevc ./
+          ret=0
+          for file in ./*.hevc; do
+            filename=$(basename -- "$file")
+            case $filename in
+              *-master-*|*-ubuntu-*)
+                continue
+                ;;
+              test-pr-*-*bit-m*.hevc)
+                bitmode=$(awk -F '-' '{ print $(NF-1); print $NF }' <<< $file | tr -Cd '\n[[:digit:]]')
+                bit=$(head -n1 <<< $bitmode)
+                mode=$(tail -n1 <<< $bitmode)
+                ref=./test-pr-ubuntu-latest-${bit}bit-m${mode}.hevc
+                if [[ $(basename -- "$ref") == $file ]]; then
+                  continue
+                fi
+                if ! diff -q "$file" "$ref"; then
+                  printf '::error::Binary compare failed for %s against %s\n' "$file" "$ref"
+                  ret=1
+                fi
+                ;;
+            esac
+          done
+          exit $ret
+      - name: On fail, upload video artifacts SVT-HEVC
+        if: steps.binary_compare.outcome != 'success'
+        uses: actions/upload-artifact@v3
+        with:
+          name: svthevc-video-artifacts
+          path: "*.hevc"
+
+  # Compile and run tests in shards
+  # unit-tests:
+  #   name: Unit Tests (Ubuntu latest, GCC 9.x) Shard ${{ matrix.index }}
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       index: [0, 1, 2, 3, 4, 5, 6, 7]
+  #   env:
+  #     GTEST_SHARD_INDEX: ${{ matrix.index }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Download binaries SVT-HEVC (ubuntu)
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: svthevc-ubuntu-binaries
+  #         path: Bin/Release
+  #     - name: Run unit tests shard
+  #       run: chmod +x ./Bin/Release/svthevcUnitTests; ./Bin/Release/svthevcUnitTests
+
+  # e2e-tests:
+  #   name: E2E Tests (Ubuntu latest, GCC 9.x) Shard ${{ matrix.index }}
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       index: [0, 1, 2, 3, 4, 5, 6, 7]
+  #   env:
+  #     GTEST_SHARD_INDEX: ${{ matrix.index }}
+  #     SVT_AV1_TEST_VECTOR_PATH: ${{ github.workspace }}/test/vectors
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Download binaries SVT-HEVC (ubuntu)
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: svthevc-ubuntu-binaries
+  #         path: Bin/Release
+  #     - name: Download vectors
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: svthevc-vectors-${{ hashFiles('test/e2e_test/test_vector_list.txt') }}
+  #         path: test/vectors
+  #     - name: Run unit tests shard
+  #       run: chmod +x ./Bin/Release/svthevcE2ETests; ./Bin/Release/svthevcE2ETests --gtest_filter=-*DummySrcTest*
