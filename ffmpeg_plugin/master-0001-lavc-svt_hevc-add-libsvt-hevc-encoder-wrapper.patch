@@ -1,4 +1,4 @@
-From 8f34ed57e9e80007faea1eb72c0d11307e611b8c Mon Sep 17 00:00:00 2001
+From 20d8a694d7ea7bba69e3db5f773903ae2ecd4d0f Mon Sep 17 00:00:00 2001
 From: Jing Sun <jing.a.sun@intel.com>
 Date: Wed, 21 Nov 2018 11:33:04 +0800
 Subject: [PATCH] lavc/svt_hevc: add libsvt hevc encoder wrapper
@@ -19,7 +19,7 @@ Signed-off-by: Guo Jiansheng <jiansheng.guo@intel.com>
  create mode 100644 libavcodec/libsvt_hevc.c
 
 diff --git a/configure b/configure
-index 5a167613a4..9897fcaf4d 100755
+index 0f3042b8a7..655eaf6848 100755
 --- a/configure
 +++ b/configure
 @@ -291,6 +291,7 @@ External library support:
@@ -30,7 +30,7 @@ index 5a167613a4..9897fcaf4d 100755
    --enable-libxavs         enable AVS encoding via xavs [no]
    --enable-libxavs2        enable AVS2 encoding via xavs2 [no]
    --enable-libxcb          enable X11 grabbing using XCB [autodetect]
-@@ -1864,6 +1865,7 @@ EXTERNAL_LIBRARY_LIST="
+@@ -1866,6 +1867,7 @@ EXTERNAL_LIBRARY_LIST="
      libsrt
      libssh
      libsvtav1
@@ -38,7 +38,7 @@ index 5a167613a4..9897fcaf4d 100755
      libtensorflow
      libtesseract
      libtheora
-@@ -3381,6 +3383,7 @@ libx264_encoder_select="atsc_a53"
+@@ -3399,6 +3401,7 @@ libx264_encoder_select="atsc_a53"
  libx264rgb_encoder_deps="libx264"
  libx264rgb_encoder_select="libx264_encoder"
  libx265_encoder_deps="libx265"
@@ -46,19 +46,19 @@ index 5a167613a4..9897fcaf4d 100755
  libxavs_encoder_deps="libxavs"
  libxavs2_encoder_deps="libxavs2"
  libxvid_encoder_deps="libxvid"
-@@ -6686,6 +6689,7 @@ enabled mmal              && { check_lib mmal interface/mmal/mmal.h mmal_port_co
-                                  check_lib mmal interface/mmal/mmal.h mmal_port_connect -lmmal_core -lmmal_util -lmmal_vc_client -lbcm_host; } ||
-                                die "ERROR: mmal not found" &&
-                                check_func_headers interface/mmal/mmal.h "MMAL_PARAMETER_VIDEO_MAX_NUM_CALLBACKS"; }
+@@ -6680,6 +6683,7 @@ enabled libssh            && require_pkg_config libssh libssh libssh/sftp.h sftp
+ enabled libspeex          && require_pkg_config libspeex speex speex/speex.h speex_decoder_init
+ enabled libsrt            && require_pkg_config libsrt "srt >= 1.3.0" srt/srt.h srt_socket
+ enabled libsvtav1         && require_pkg_config libsvtav1 "SvtAv1Enc >= 0.9.0" EbSvtAv1Enc.h svt_av1_enc_init_handle
 +enabled libsvthevc        && require_pkg_config libsvthevc SvtHevcEnc EbApi.h EbInitHandle
- enabled openal            && { { for al_extralibs in "${OPENAL_LIBS}" "-lopenal" "-lOpenAL32"; do
-                                check_lib openal 'AL/al.h' alGetError "${al_extralibs}" && break; done } ||
-                                die "ERROR: openal not found"; } &&
+ enabled libtensorflow     && require libtensorflow tensorflow/c/c_api.h TF_Version -ltensorflow
+ enabled libtesseract      && require_pkg_config libtesseract tesseract tesseract/capi.h TessBaseAPICreate
+ enabled libtheora         && require libtheora theora/theoraenc.h th_info_init -ltheoraenc -ltheoradec -logg
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index 3b8f7b5e01..bfd6535345 100644
+index 94dc75a1b2..4df3686f57 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
-@@ -1101,6 +1101,7 @@ OBJS-$(CONFIG_LIBWEBP_ANIM_ENCODER)       += libwebpenc_common.o libwebpenc_anim
+@@ -1109,6 +1109,7 @@ OBJS-$(CONFIG_LIBWEBP_ANIM_ENCODER)       += libwebpenc_common.o libwebpenc_anim
  OBJS-$(CONFIG_LIBX262_ENCODER)            += libx264.o
  OBJS-$(CONFIG_LIBX264_ENCODER)            += libx264.o
  OBJS-$(CONFIG_LIBX265_ENCODER)            += libx265.o
@@ -67,10 +67,10 @@ index 3b8f7b5e01..bfd6535345 100644
  OBJS-$(CONFIG_LIBXAVS2_ENCODER)           += libxavs2.o
  OBJS-$(CONFIG_LIBXVID_ENCODER)            += libxvid.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
-index f0b01051b0..b3f0579a4b 100644
+index f5ec3bc6e1..b82bae5ed9 100644
 --- a/libavcodec/allcodecs.c
 +++ b/libavcodec/allcodecs.c
-@@ -794,6 +794,7 @@ extern LIBX264_CONST FFCodec ff_libx264_encoder;
+@@ -808,6 +808,7 @@ extern LIBX264_CONST FFCodec ff_libx264_encoder;
  #endif
  extern const FFCodec ff_libx264rgb_encoder;
  extern FFCodec ff_libx265_encoder;
@@ -670,5 +670,5 @@ index 0000000000..739144ca0c
 +    .p.wrapper_name = "libsvt_hevc",
 +};
 -- 
-2.17.1
+2.38.1
 
