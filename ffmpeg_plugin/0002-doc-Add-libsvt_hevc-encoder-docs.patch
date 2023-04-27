@@ -10,15 +10,15 @@ Signed-off-by: Zhengxu Huang <zhengxu.huang@intel.com>
 Signed-off-by: Hassene Tmar <hassene.tmar@intel.com>
 Signed-off-by: Jing Sun <jing.a.sun@intel.com>
 ---
- doc/encoders.texi | 149 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- doc/general.texi  |   8 +++
- 2 files changed, 157 insertions(+)
+ doc/encoders.texi         | 152 ++++++++++++++++++++++++++++++++++++++
+ doc/general_contents.texi |   8 ++
+ 2 files changed, 160 insertions(+)
 
 diff --git a/doc/encoders.texi b/doc/encoders.texi
-index eefd124..81debda 100644
+index a92eb0eb2f..535e15764b 100644
 --- a/doc/encoders.texi
 +++ b/doc/encoders.texi
-@@ -1640,6 +1640,155 @@ Set maximum NAL size in bytes.
+@@ -1884,6 +1884,158 @@ Set maximum NAL size in bytes.
  Allow skipping frames to hit the target bitrate if set to 1.
  @end table
  
@@ -177,13 +177,13 @@ index eefd124..81debda 100644
  @section libtheora
  
  libtheora Theora encoder wrapper.
-diff --git a/doc/general.texi b/doc/general.texi
-index 3c0c803..fa9cd31 100644
---- a/doc/general.texi
-+++ b/doc/general.texi
-@@ -243,6 +243,14 @@ FFmpeg can use the OpenJPEG libraries for decoding/encoding J2K videos.  Go to
- instructions.  To enable using OpenJPEG in FFmpeg, pass @code{--enable-libopenjpeg} to
- @file{./configure}.
+diff --git a/doc/general_contents.texi b/doc/general_contents.texi
+index 33ece6e884..cd46332fc4 100644
+--- a/doc/general_contents.texi
++++ b/doc/general_contents.texi
+@@ -267,6 +267,14 @@ Go to @url{https://github.com/OpenVisualCloud/SVT-AV1/} and follow the instructi
+ for installing the library. Then pass @code{--enable-libsvtav1} to configure to
+ enable it.
  
 +@section Scalable Video Technology for HEVC
 +
