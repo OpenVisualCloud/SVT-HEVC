@@ -209,6 +209,8 @@ void SadLoopKernel_AVX512_HmeL0_INTRIN(
 
 	case 16:
 	{
+				__m512i x = _mm512_setr_epi64(0x0000000000000000, 0x0001000100010001, 0x0004000400040004, 0x0005000500050005, 0x0001000100010001, 0x0002000200020002, 0x0005000500050005, 0x0006000600060006);
+				__m512i x1 = _mm512_setr_epi64(0x0001000100010001, 0x0002000200020002, 0x0005000500050005, 0x0006000600060006, 0x0002000200020002, 0x0003000300030003, 0x0006000600060006, 0x0007000700070007);			
 				if (height <= 16 && searchAreaWidth <= 128)
 				{
 					for (i = 0; i<searchAreaHeight; i++) 
@@ -243,17 +245,18 @@ void SadLoopKernel_AVX512_HmeL0_INTRIN(
 
 							for (j = 0, pRef = pRef1; j < n; j++, pRef += 16) 
 							{
-								__m256i ss0 = _mm256_inserti128_si256(_mm256_castsi128_si256(_mm_loadu_si128((__m128i*)(pRef     ))), _mm_loadu_si128((__m128i*)(pRef + refStride     )), 0x1);
-								__m256i ss1 = _mm256_inserti128_si256(_mm256_castsi128_si256(_mm_loadu_si128((__m128i*)(pRef + 8 ))), _mm_loadu_si128((__m128i*)(pRef + refStride + 8 )), 0x1);
-										ss2 = _mm256_inserti128_si256(_mm256_castsi128_si256(_mm_loadu_si128((__m128i*)(pRef + 16))), _mm_loadu_si128((__m128i*)(pRef + refStride + 16)), 0x1);
+								__m512i ss0 = _mm512_inserti64x4(_mm512_castsi256_si512(_mm256_loadu_si256((__m256i*)(pRef))), _mm256_loadu_si256((__m256i*)(pRef + refStride )), 0x1);
+								__m512i ss1ftemp = _mm512_permutexvar_epi64(x, ss0);
+								__m512i ss2ftemp = _mm512_permutexvar_epi64(x1, ss0);
+								__m512i temp = ss3sum1_aaray[j];
+								__m512i temp1 = ss7sum1_aaray[j];
 
-								__m512i ss1ftemp = _mm512_inserti64x4(_mm512_castsi256_si512(ss0), ss1, 0x1);
-								__m512i ss2ftemp = _mm512_inserti64x4(_mm512_castsi256_si512(ss1), ss2, 0x1);
-
-								ss3sum1_aaray[j] = _mm512_adds_epu16(ss3sum1_aaray[j], _mm512_dbsad_epu8(ref1ftemp, ss1ftemp, 0x94));
-								ss3sum1_aaray[j] = _mm512_adds_epu16(ss3sum1_aaray[j], _mm512_dbsad_epu8(ref2ftemp, ss1ftemp, 0xE9));
-								ss7sum1_aaray[j] = _mm512_adds_epu16(ss7sum1_aaray[j], _mm512_dbsad_epu8(ref3ftemp, ss2ftemp, 0x94));
-								ss7sum1_aaray[j] = _mm512_adds_epu16(ss7sum1_aaray[j], _mm512_dbsad_epu8(ref4ftemp, ss2ftemp, 0xE9));
+								temp = _mm512_adds_epu16(temp, _mm512_dbsad_epu8(ref1ftemp, ss1ftemp, 0x94));
+								temp = _mm512_adds_epu16(temp, _mm512_dbsad_epu8(ref2ftemp, ss1ftemp, 0xE9));
+								temp1 = _mm512_adds_epu16(temp1, _mm512_dbsad_epu8(ref3ftemp, ss2ftemp, 0x94));
+								temp1 = _mm512_adds_epu16(temp1, _mm512_dbsad_epu8(ref4ftemp, ss2ftemp, 0xE9));
+								ss3sum1_aaray[j] = temp;
+								ss7sum1_aaray[j] = temp1;								
 
 							}
 
