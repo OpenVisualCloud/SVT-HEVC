@@ -2355,7 +2355,8 @@ void* RateControlKernel(void *inputPtr)
                         contextPtr->framesInInterval[5] ++;
                     totalFrameInInterval--;
                 }
-                contextPtr->virtualBufferSize               = (((EB_U64)sequenceControlSetPtr->staticConfig.targetBitRate*3) << RC_PRECISION) / (contextPtr->frameRate);
+                EB_U64 bufferSize = sequenceControlSetPtr->staticConfig.vbvBufsize ? sequenceControlSetPtr->staticConfig.vbvBufsize : (EB_U64)sequenceControlSetPtr->staticConfig.targetBitRate * 3;
+                contextPtr->virtualBufferSize               = bufferSize << RC_PRECISION / (contextPtr->frameRate);
                 contextPtr->rateAveragePeriodinFrames       = (EB_U64)sequenceControlSetPtr->staticConfig.intraPeriodLength + 1;
                 contextPtr->virtualBufferLevelInitialValue  = contextPtr->virtualBufferSize >> 1;
                 contextPtr->virtualBufferLevel              = contextPtr->virtualBufferSize >> 1;
