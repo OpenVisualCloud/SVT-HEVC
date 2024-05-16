@@ -60,42 +60,35 @@ EB_HANDLE EbCreateThread(
                        0,                              // thread active when created
                        NULL);                          // new thread ID
 #else
+    threadHandle = (pthread_t*) malloc(sizeof(pthread_t));
+    if (threadHandle == NULL)
+        return NULL;
+
     pthread_attr_t attr;
-    struct sched_param param = {
-        .sched_priority = 99
-    };
     pthread_attr_init(&attr);
     pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
-    pthread_attr_setschedparam(&attr, &param);
-
     pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
 
-    threadHandle = (pthread_t*) malloc(sizeof(pthread_t));
-    if (threadHandle != NULL) {
-        int ret = pthread_create(
+    pthread_attr_setschedparam(&attr, &(struct sched_param){.sched_priority = 99});
+
+    int ret = pthread_create(
             (pthread_t*)threadHandle,      // Thread handle
-            &attr,                       // attributes
-            threadFunction,                 // function to be run by new thread
+            &attr,                         // attributes
+            threadFunction,                // function to be run by new thread
             threadContext);
-
-        if (ret != 0) {
-            if (ret == EPERM) {
-
-                pthread_cancel(*((pthread_t*)threadHandle));
-                free(threadHandle);
-
-                threadHandle = (pthread_t*)malloc(sizeof(pthread_t));
-                if (threadHandle != NULL) {
-                    pthread_create(
-                        (pthread_t*)threadHandle,      // Thread handle
-                        (const pthread_attr_t*)EB_NULL,                        // attributes
-                        threadFunction,                 // function to be run by new thread
-                        threadContext);
-                }
-            }
-        }
-    }
     pthread_attr_destroy(&attr);
+
+    if (ret == EPERM) {
+        ret = pthread_create(
+                (pthread_t*)threadHandle,       // Thread handle
+                (const pthread_attr_t*)EB_NULL, // attributes
+                threadFunction,                 // function to be run by new thread
+                threadContext);
+    }
+    if(ret != 0) {
+        free(threadHandle);
+        return NULL;
+    }
 #endif // _WIN32
 
     return threadHandle;
