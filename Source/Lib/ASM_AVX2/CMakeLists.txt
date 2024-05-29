@@ -17,7 +17,10 @@ link_directories(${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
 
 set(flags_to_test
     -mavx2
-    -static-intel
+    -mavx512bw
+    -mavx512vnni
+    -mavx512vl   
+    -static-intel 
     /Qwd10148
     /Qwd10010
     /Qwd10157)

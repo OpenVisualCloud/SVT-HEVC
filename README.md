@@ -68,6 +68,7 @@ In order to run the highest resolution supported by the encoder, at least 64GB o
     - Download the yasm exe from the following [link](http://www.tortall.net/projects/yasm/releases/yasm-1.3.0-win64.exe)
     - Rename yasm-1.3.0-win64.exe to yasm.exe
     - Copy yasm.exe into a location that is in the PATH environment variable
+    - Vnni requires gcc version >= 9.2.
 
 - __Build Instructions__
   - Build the project by following the steps below in a windows command prompt:

@@ -16,6 +16,9 @@ include_directories(${PROJECT_SOURCE_DIR}/Source/API/
 
 set(flags_to_test
     -mssse3
+    -mavx512bw
+    -mavx512vnni
+    -mavx512vl
     -msse4.1
     -static-intel)
 
@@ -40,9 +43,9 @@ foreach(cflag ${flags_to_test})
 endforeach()
 
 if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w ")
     if(COMPILE_AS_CPP)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w ")
     endif()
 endif()
 
@@ -52,6 +55,7 @@ set(ASM_SSSE3_SOURCE
     EbDeblockingFilter_Intrinsic_SSSE3.c
     EbIntraPrediction16bit_Intrinsic_SSSE3.c
     EbMcp_Intrinsic_SSSE3.c
+    EbMcp_Intrinsic_AVX512VNNI.c
     EbSaoApplication_Intrinsic_SSSE3.c
     EbTransforms_Intrinsic_SSSE3.c)
 
