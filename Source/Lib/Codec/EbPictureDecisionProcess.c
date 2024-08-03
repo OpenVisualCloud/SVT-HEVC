@@ -1001,9 +1001,15 @@ void* PictureDecisionKernel(void *inputPtr)
 
                         pictureControlSetPtr->disableTmvpFlag = sequenceControlSetPtr->staticConfig.unrestrictedMotionVector == 0 ? EB_TRUE : EB_FALSE;
 
+                        // FIXME: work around the increased BDBR regression issue induced by the
+                        // tile group implementation (PR #348), when ImproveSharpness is used.
+#if USE_SOURCE_REFERENCE
                         pictureControlSetPtr->useSrcRef = (sequenceControlSetPtr->staticConfig.improveSharpness && pictureControlSetPtr->temporalLayerIndex > 0) ?
                             EB_TRUE :
                             EB_FALSE;
+#else
+                        pictureControlSetPtr->useSrcRef = EB_FALSE;
+#endif
 
                         SignalDerivationMultiProcessesOq(
                                 sequenceControlSetPtr,

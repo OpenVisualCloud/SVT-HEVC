@@ -54,8 +54,8 @@ extern "C" {
     typedef int errno_t;
 #endif  /* _ERRNO_T_DEFINED */
 
-
-
+// To sharpen frame background.
+#define USE_SOURCE_REFERENCE 0
 
 //Maximum 8192x4320
 #define EB_TILE_COLUMN_MAX_COUNT                    20u
