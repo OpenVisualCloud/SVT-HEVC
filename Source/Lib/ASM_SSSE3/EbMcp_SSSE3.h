@@ -12,6 +12,18 @@
 extern "C" {
 #endif
 
+#ifdef VNNI_SUPPORT
+#define LumaInterpolationFilterOneDOutRawHorizontal LumaInterpolationFilterOneDOutRawHorizontal_SSSE3
+#define EbHevcLumaInterpolationFilterTwoDInRaw7 EbHevcLumaInterpolationFilterTwoDInRaw7_VNNI
+#define EbHevcLumaInterpolationFilterTwoDInRawOutRaw7 EbHevcLumaInterpolationFilterTwoDInRawOutRaw7_VNNI
+#define EbHevcLumaInterpolationFilterTwoDInRawM EbHevcLumaInterpolationFilterTwoDInRawM_VNNI
+#else
+#define EbHevcLumaInterpolationFilterTwoDInRaw7 EbHevcLumaInterpolationFilterTwoDInRaw7_SSSE3
+#define LumaInterpolationFilterOneDOutRawHorizontal LumaInterpolationFilterOneDOutRawHorizontal_SSSE3
+#define EbHevcLumaInterpolationFilterTwoDInRawOutRaw7 EbHevcLumaInterpolationFilterTwoDInRawOutRaw7_SSSE3
+#define EbHevcLumaInterpolationFilterTwoDInRawM EbHevcLumaInterpolationFilterTwoDInRawM_SSSE3
+#endif
+
 // SSSE3 functions
 void ChromaInterpolationCopy_SSSE3(EB_BYTE refPic, EB_U32 srcStride, EB_BYTE dst, EB_U32 dstStride, EB_U32 puWidth, EB_U32 puHeight, EB_S16 *firstPassIFDst, EB_U32 fracPosx, EB_U32 fracPosy);
 void ChromaInterpolationFilterOneDHorizontal_SSSE3(EB_BYTE refPic, EB_U32 srcStride, EB_BYTE dst, EB_U32 dstStride, EB_U32 puWidth, EB_U32 puHeight, EB_S16 *firstPassIFDst, EB_U32 fracPosx, EB_U32 fracPosy);

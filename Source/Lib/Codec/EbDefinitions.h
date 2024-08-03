@@ -15,7 +15,11 @@ extern "C" {
 #define LATENCY_PROFILE 0
 //#define DEBUG_LIFE_CYCLE 0
 // Internal Marcos
+
 #define NON_AVX512_SUPPORT
+//#define NON_AVX512_SUPPORT
+
+//#define VNNI_SUPPORT
 
 #ifdef __cplusplus
 #define EB_EXTERN extern "C"
