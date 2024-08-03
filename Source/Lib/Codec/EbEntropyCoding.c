@@ -5079,119 +5079,122 @@ EB_ERRORTYPE ComputeProfileTierLevelInfo(
 	}
 	else{
 		// level calculation
+		uint32_t maxBitrate = scsPtr->staticConfig.vbvMaxrate? scsPtr->staticConfig.vbvMaxrate : scsPtr->staticConfig.targetBitRate * 2;
+		uint32_t maxCPB = scsPtr->staticConfig.vbvBufsize? scsPtr->staticConfig.vbvBufsize : scsPtr->staticConfig.targetBitRate * 3;
+
 		if ((lumaSampleRate <= maxLumaSampleRate[0]) && (lumaPictureSize <= maxLumaPictureSize[0]) && (lumaWidthSquare <= maxLumaPictureSize[0] * 8) && (lumaHeightSquare <= maxLumaPictureSize[0] * 8)
-			&& ((scsPtr->staticConfig.targetBitRate*2) <= highTierMaxBitrate[0]) && ((scsPtr->staticConfig.targetBitRate * 3) <= highTierMaxCPBsize[0])){
+			&& (maxBitrate <= highTierMaxBitrate[0]) && (maxCPB <= highTierMaxCPBsize[0])){
 			scsPtr->levelIdc = 30; //1*30
 
-			if (((scsPtr->staticConfig.targetBitRate * 2) <= mainTierMaxBitrate[0]) && ((scsPtr->staticConfig.targetBitRate * 3) <= mainTierMaxCPBsize[0]))
+			if ((maxBitrate <= mainTierMaxBitrate[0]) && (maxCPB <= mainTierMaxCPBsize[0]))
 				scsPtr->tierIdc = 0;
 			else
 				scsPtr->tierIdc = 1;
 		}
 		else if ((lumaSampleRate <= maxLumaSampleRate[1]) && (lumaPictureSize <= maxLumaPictureSize[1]) && (lumaWidthSquare <= maxLumaPictureSize[1] * 8) && (lumaHeightSquare <= maxLumaPictureSize[1] * 8)
-			&& ((scsPtr->staticConfig.targetBitRate * 2) <= highTierMaxBitrate[1]) && ((scsPtr->staticConfig.targetBitRate * 3) <= highTierMaxCPBsize[1])){
+			&& (maxBitrate <= highTierMaxBitrate[1]) && (maxCPB <= highTierMaxCPBsize[1])){
 			scsPtr->levelIdc = 60;//2*30
 
-			if (((scsPtr->staticConfig.targetBitRate * 2) <= mainTierMaxBitrate[1]) && ((scsPtr->staticConfig.targetBitRate * 3) <= mainTierMaxCPBsize[1]))
+			if ((maxBitrate <= mainTierMaxBitrate[1]) && (maxCPB <= mainTierMaxCPBsize[1]))
 				scsPtr->tierIdc = 0;
 			else
 				scsPtr->tierIdc = 1;
 		}
 		else if ((lumaSampleRate <= maxLumaSampleRate[2]) && (lumaPictureSize <= maxLumaPictureSize[2]) && (lumaWidthSquare <= maxLumaPictureSize[2] * 8) && (lumaHeightSquare <= maxLumaPictureSize[2] * 8)
-			&& ((scsPtr->staticConfig.targetBitRate * 2) <= highTierMaxBitrate[2]) && ((scsPtr->staticConfig.targetBitRate * 3) <= highTierMaxCPBsize[2])){
+			&& (maxBitrate <= highTierMaxBitrate[2]) && (maxCPB <= highTierMaxCPBsize[2])){
 			scsPtr->levelIdc = 63;//2.1*30
 
-			if (((scsPtr->staticConfig.targetBitRate * 2) <= mainTierMaxBitrate[2]) && ((scsPtr->staticConfig.targetBitRate * 3) <= mainTierMaxCPBsize[2]))
+			if ((maxBitrate <= mainTierMaxBitrate[2]) && (maxCPB <= mainTierMaxCPBsize[2]))
 				scsPtr->tierIdc = 0;
 			else
 				scsPtr->tierIdc = 1;
 		}
 		else if ((lumaSampleRate <= maxLumaSampleRate[3]) && (lumaPictureSize <= maxLumaPictureSize[3]) && (lumaWidthSquare <= maxLumaPictureSize[3] * 8) && (lumaHeightSquare <= maxLumaPictureSize[3] * 8)
-			&& ((scsPtr->staticConfig.targetBitRate * 2) <= highTierMaxBitrate[3]) && ((scsPtr->staticConfig.targetBitRate * 3) <= highTierMaxCPBsize[3])){
+			&& (maxBitrate <= highTierMaxBitrate[3]) && (maxCPB <= highTierMaxCPBsize[3])){
 			scsPtr->levelIdc = 90;//3*30
 
-			if (((scsPtr->staticConfig.targetBitRate * 2) <= mainTierMaxBitrate[3]) && ((scsPtr->staticConfig.targetBitRate * 3) <= mainTierMaxCPBsize[3]))
+			if ((maxBitrate <= mainTierMaxBitrate[3]) && (maxCPB <= mainTierMaxCPBsize[3]))
 				scsPtr->tierIdc = 0;
 			else
 				scsPtr->tierIdc = 1;
 		}
 		else if ((lumaSampleRate <= maxLumaSampleRate[4]) && (lumaPictureSize <= maxLumaPictureSize[4]) && (lumaWidthSquare <= maxLumaPictureSize[4] * 8) && (lumaHeightSquare <= maxLumaPictureSize[4] * 8)
-			&& ((scsPtr->staticConfig.targetBitRate * 2) <= highTierMaxBitrate[4]) && ((scsPtr->staticConfig.targetBitRate * 3) <= highTierMaxCPBsize[4])){
+			&& (maxBitrate <= highTierMaxBitrate[4]) && (maxCPB <= highTierMaxCPBsize[4])){
 			scsPtr->levelIdc = 93;//3.1*30
 
-			if (((scsPtr->staticConfig.targetBitRate * 2) <= mainTierMaxBitrate[4]) && ((scsPtr->staticConfig.targetBitRate * 3) <= mainTierMaxCPBsize[4]))
+			if ((maxBitrate <= mainTierMaxBitrate[4]) && (maxCPB <= mainTierMaxCPBsize[4]))
 				scsPtr->tierIdc = 0;
 			else
 				scsPtr->tierIdc = 1;
 		}
 		else if ((lumaSampleRate <= maxLumaSampleRate[5]) && (lumaPictureSize <= maxLumaPictureSize[5]) && (lumaWidthSquare <= maxLumaPictureSize[5] * 8) && (lumaHeightSquare <= maxLumaPictureSize[5] * 8)
-			&& ((scsPtr->staticConfig.targetBitRate * 2) <= highTierMaxBitrate[5]) && ((scsPtr->staticConfig.targetBitRate * 3) <= highTierMaxCPBsize[5])){
+			&& (maxBitrate <= highTierMaxBitrate[5]) && (maxCPB <= highTierMaxCPBsize[5])){
 			scsPtr->levelIdc = 120;//4*30
 
-			if (((scsPtr->staticConfig.targetBitRate * 2) <= mainTierMaxBitrate[5]) && ((scsPtr->staticConfig.targetBitRate * 3) <= mainTierMaxCPBsize[5]))
+			if ((maxBitrate <= mainTierMaxBitrate[5]) && (maxCPB <= mainTierMaxCPBsize[5]))
 				scsPtr->tierIdc = 0;
 			else
 				scsPtr->tierIdc = 1;
 		}
 		else if ((lumaSampleRate <= maxLumaSampleRate[6]) && (lumaPictureSize <= maxLumaPictureSize[6]) && (lumaWidthSquare <= maxLumaPictureSize[6] * 8) && (lumaHeightSquare <= maxLumaPictureSize[6] * 8)
-			&& ((scsPtr->staticConfig.targetBitRate * 2) <= highTierMaxBitrate[6]) && ((scsPtr->staticConfig.targetBitRate * 3) <= highTierMaxCPBsize[6])){
+			&& (maxBitrate <= highTierMaxBitrate[6]) && (maxCPB <= highTierMaxCPBsize[6])){
 			scsPtr->levelIdc = 123;//4.1*30
 
-			if (((scsPtr->staticConfig.targetBitRate * 2) <= mainTierMaxBitrate[6]) && ((scsPtr->staticConfig.targetBitRate * 3) <= mainTierMaxCPBsize[6]))
+			if ((maxBitrate <= mainTierMaxBitrate[6]) && (maxCPB <= mainTierMaxCPBsize[6]))
 				scsPtr->tierIdc = 0;
 			else
 				scsPtr->tierIdc = 1;
 		}
 		else if ((lumaSampleRate <= maxLumaSampleRate[7]) && (lumaPictureSize <= maxLumaPictureSize[7]) && (lumaWidthSquare <= maxLumaPictureSize[7] * 8) && (lumaHeightSquare <= maxLumaPictureSize[7] * 8)
-			&& ((scsPtr->staticConfig.targetBitRate * 2) <= highTierMaxBitrate[7]) && ((scsPtr->staticConfig.targetBitRate * 3) <= highTierMaxCPBsize[7])){
+			&& (maxBitrate <= highTierMaxBitrate[7]) && (maxCPB <= highTierMaxCPBsize[7])){
 			scsPtr->levelIdc = 150;//5*30
 
-			if (((scsPtr->staticConfig.targetBitRate * 2) <= mainTierMaxBitrate[7]) && ((scsPtr->staticConfig.targetBitRate * 3) <= mainTierMaxCPBsize[7]))
+			if ((maxBitrate <= mainTierMaxBitrate[7]) && (maxCPB <= mainTierMaxCPBsize[7]))
 				scsPtr->tierIdc = 0;
 			else
 				scsPtr->tierIdc = 1;
 		}
 		else if ((lumaSampleRate <= maxLumaSampleRate[8]) && (lumaPictureSize <= maxLumaPictureSize[8]) && (lumaWidthSquare <= maxLumaPictureSize[8] * 8) && (lumaHeightSquare <= maxLumaPictureSize[8] * 8)
-			&& ((scsPtr->staticConfig.targetBitRate * 2) <= highTierMaxBitrate[8]) && ((scsPtr->staticConfig.targetBitRate * 3) <= highTierMaxCPBsize[8])){
+			&& (maxBitrate <= highTierMaxBitrate[8]) && (maxCPB <= highTierMaxCPBsize[8])){
 			scsPtr->levelIdc = 153;//5.1*30
 
-			if (((scsPtr->staticConfig.targetBitRate * 2) <= mainTierMaxBitrate[8]) && ((scsPtr->staticConfig.targetBitRate * 3) <= mainTierMaxCPBsize[8]))
+			if ((maxBitrate <= mainTierMaxBitrate[8]) && (maxCPB <= mainTierMaxCPBsize[8]))
 				scsPtr->tierIdc = 0;
 			else
 				scsPtr->tierIdc = 1;
 		}
 		else if ((lumaSampleRate <= maxLumaSampleRate[9]) && (lumaPictureSize <= maxLumaPictureSize[9]) && (lumaWidthSquare <= maxLumaPictureSize[9] * 8) && (lumaHeightSquare <= maxLumaPictureSize[9] * 8)
-			&& ((scsPtr->staticConfig.targetBitRate * 2) <= highTierMaxBitrate[9]) && ((scsPtr->staticConfig.targetBitRate * 3) <= highTierMaxCPBsize[9])){
+			&& (maxBitrate <= highTierMaxBitrate[9]) && (maxCPB <= highTierMaxCPBsize[9])){
 			scsPtr->levelIdc = 156;//5.2*30
 
-			if (((scsPtr->staticConfig.targetBitRate * 2) <= mainTierMaxBitrate[9]) && ((scsPtr->staticConfig.targetBitRate * 3) <= mainTierMaxCPBsize[9]))
+			if ((maxBitrate <= mainTierMaxBitrate[9]) && (maxCPB <= mainTierMaxCPBsize[9]))
 				scsPtr->tierIdc = 0;
 			else
 				scsPtr->tierIdc = 1;
 		}
 		else if ((lumaSampleRate <= maxLumaSampleRate[10]) && (lumaPictureSize <= maxLumaPictureSize[10]) && (lumaWidthSquare <= maxLumaPictureSize[10] * 8) && (lumaHeightSquare <= maxLumaPictureSize[10] * 8)
-			&& ((scsPtr->staticConfig.targetBitRate * 2) <= highTierMaxBitrate[10]) && ((scsPtr->staticConfig.targetBitRate * 3) <= highTierMaxCPBsize[10])){
+			&& (maxBitrate <= highTierMaxBitrate[10]) && (maxCPB <= highTierMaxCPBsize[10])){
 			scsPtr->levelIdc = 180;//6*30
 
-			if (((scsPtr->staticConfig.targetBitRate * 2) <= mainTierMaxBitrate[10]) && ((scsPtr->staticConfig.targetBitRate * 3) <= mainTierMaxCPBsize[10]))
+			if ((maxBitrate <= mainTierMaxBitrate[10]) && (maxCPB <= mainTierMaxCPBsize[10]))
 				scsPtr->tierIdc = 0;
 			else
 				scsPtr->tierIdc = 1;
 		}
 		else if ((lumaSampleRate <= maxLumaSampleRate[11]) && (lumaPictureSize <= maxLumaPictureSize[11]) && (lumaWidthSquare <= maxLumaPictureSize[11] * 8) && (lumaHeightSquare <= maxLumaPictureSize[11] * 8)
-			&& ((scsPtr->staticConfig.targetBitRate * 2) <= highTierMaxBitrate[11]) && ((scsPtr->staticConfig.targetBitRate * 3) <= highTierMaxCPBsize[11])){
+			&& (maxBitrate <= highTierMaxBitrate[11]) && (maxCPB <= highTierMaxCPBsize[11])){
 			scsPtr->levelIdc = 183;//6.1*30
 
-			if (((scsPtr->staticConfig.targetBitRate * 2) <= mainTierMaxBitrate[11]) && ((scsPtr->staticConfig.targetBitRate * 3) <= mainTierMaxCPBsize[11]))
+			if ((maxBitrate <= mainTierMaxBitrate[11]) && (maxCPB <= mainTierMaxCPBsize[11]))
 				scsPtr->tierIdc = 0;
 			else
 				scsPtr->tierIdc = 1;
 		}
 		else if ((lumaSampleRate <= maxLumaSampleRate[12]) && (lumaPictureSize <= maxLumaPictureSize[12]) && (lumaWidthSquare <= maxLumaPictureSize[12] * 8) && (lumaHeightSquare <= maxLumaPictureSize[12] * 8)
-			&& ((scsPtr->staticConfig.targetBitRate * 2) <= highTierMaxBitrate[12]) && ((scsPtr->staticConfig.targetBitRate * 3) <= highTierMaxCPBsize[12])){
+			&& (maxBitrate <= highTierMaxBitrate[12]) && (maxCPB <= highTierMaxCPBsize[12])){
 			scsPtr->levelIdc = 186;///6.2*30
 
-			if (((scsPtr->staticConfig.targetBitRate * 2) <= mainTierMaxBitrate[12]) && ((scsPtr->staticConfig.targetBitRate * 3) <= mainTierMaxCPBsize[12]))
+			if ((maxBitrate <= mainTierMaxBitrate[12]) && (maxCPB <= mainTierMaxCPBsize[12]))
 				scsPtr->tierIdc = 0;
 			else
 				scsPtr->tierIdc = 1;
